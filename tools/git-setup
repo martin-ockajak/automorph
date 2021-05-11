@@ -8,6 +8,8 @@ import os.path
 import platform
 import subprocess
 
+# Settings
+main_branch = 'main'
 
 # Parse command-line arguments
 def parseArguments(defaults: Dict[str, str] = {}) -> Any:
@@ -64,7 +66,7 @@ def configureAliases(scriptDirectory: str) -> None:
   subprocess.check_call(['git', 'config', 'alias.glog', 'log --all --graph --stat --pretty=format:\'%C(ul red)%h%C(reset) -%C(yellow)%d%C(reset) %C(cyan)%s%C(reset) %C(bold blue)<%an>%C(reset) %C(magenta)(%cr)%C(reset)\' --abbrev-commit'], stdout = subprocess.PIPE)
   print('* glog - Commit log for all branches as a graph.')
 
-  subprocess.check_call(['git', 'config', 'alias.blog', '!git log $(git merge-base master $(git rev-parse --abbrev-ref HEAD))..HEAD $@'], stdout = subprocess.PIPE)
+  subprocess.check_call(['git', 'config', 'alias.blog', f'!git log $(git merge-base {main_branch} $(git rev-parse --abbrev-ref HEAD))..HEAD $@'], stdout = subprocess.PIPE)
   print('* blog - Commit log for specified branch only.')
   print('')
 
