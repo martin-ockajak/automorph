@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 import jsonrpc.spi.{EffectContext, JsonContext}
 import scala.collection.immutable.ArraySeq
 
-final case class CommonJsonRpcServer[Effect[_]](jsonContext: JsonContext, effectContext: EffectContext[Effect]):
+final case class JsonRpcServer[Effect[_]](jsonContext: JsonContext, effectContext: EffectContext[Effect]):
   def bind[T <: AnyRef](api: T): Unit =
     ()
 

@@ -8,7 +8,7 @@ class TestSpec extends BaseSpec:
   "" - {
     "Category" - {
       "Test" in {
-        val x = new CommonJsonRpcServer(DummyJsonContext(), PlainEffectContext())
+        val x = new JsonRpcServer(DummyJsonContext(), PlainEffectContext())
         (0 == 0).shouldBe(true)
       }
     }
