@@ -1,0 +1,13 @@
+# Build
+target
+dist/*
+
+# Tools
+*.swp
+.idea
+.bsp
+*.iml
+.vscode
+.project
+.settings
+out
