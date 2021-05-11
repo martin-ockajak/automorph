@@ -4,7 +4,7 @@ import java.io.{InputStream, OutputStream}
 import java.nio.ByteBuffer
 import scala.collection.immutable.ArraySeq
 
-trait BaseJsonRpcServer[Effect[_]]:
+trait JsonRpcServer[Effect[_]](jsonContext: JsonContext, effectContext: EffectContext[Effect]):
   def bind[T <: AnyRef](api: T): Unit
 
   def process(request: ArraySeq[Byte]): Effect[ArraySeq[Byte]]
