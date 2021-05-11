@@ -6,6 +6,8 @@ lazy val root = project.in(file(".")).settings(
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.2.8" % Test,
     "com.lihaoyi" %% "upickle" % "1.3.12",
+    "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.12.3",
+    "dev.zio" %% "zio" % "1.0.7"
   )
 )
 
