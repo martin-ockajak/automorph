@@ -2,6 +2,7 @@ package jsonrpc
 
 import java.io.{InputStream, OutputStream}
 import java.nio.ByteBuffer
+import jsonrpc.spi.{EffectContext, JsonContext}
 import scala.collection.immutable.ArraySeq
 
 final case class CommonJsonRpcServer[Effect[_]](jsonContext: JsonContext, effectContext: EffectContext[Effect]):

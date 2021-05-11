@@ -1,6 +1,8 @@
 package jsonrpc
 
 import jsonrpc.BaseSpec
+import jsonrpc.effect.PlainEffectContext
+import jsonrpc.json.DummyJsonContext
 
 class TestSpec extends BaseSpec:
   "" - {

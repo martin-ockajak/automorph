@@ -1,7 +1,8 @@
-package jsonrpc
+package jsonrpc.effect
 
 import java.io.{ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
+import jsonrpc.spi.EffectContext
 import scala.collection.immutable.ArraySeq
 import scala.util.{Success, Try}
 

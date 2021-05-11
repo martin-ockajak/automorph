@@ -1,4 +1,4 @@
-package jsonrpc
+package jsonrpc.spi
 
 import java.io.{InputStream, OutputStream}
 import java.nio.ByteBuffer
