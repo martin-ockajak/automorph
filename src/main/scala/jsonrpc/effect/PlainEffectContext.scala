@@ -6,7 +6,9 @@ import jsonrpc.spi.EffectContext
 import scala.collection.immutable.ArraySeq
 import scala.util.{Success, Try}
 
-final case class PlainEffectContext() extends EffectContext[PlainEffectContext.Id]:
+final case class PlainEffectContext() 
+  extends EffectContext[PlainEffectContext.Id]:
+  
   def unit[T](value: T): T = value
 
 object PlainEffectContext:

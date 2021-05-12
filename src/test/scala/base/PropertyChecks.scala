@@ -4,7 +4,8 @@ import org.scalacheck.{Gen, Prop}
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
 
-trait PropertyChecks extends Matchers:
+trait PropertyChecks 
+  extends Matchers:
 
   def check(property: Prop): Assertion =
     val result = property.apply(Gen.Parameters.default)

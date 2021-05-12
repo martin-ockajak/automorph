@@ -6,11 +6,13 @@ import jsonrpc.server.ServerMacros
 import jsonrpc.spi.{EffectContext, JsonContext}
 import scala.collection.immutable.ArraySeq
 
-final case class JsonRpcServer[Effect[_]](jsonContext: JsonContext, effectContext: EffectContext[Effect]):
-  def bind[T <: AnyRef](api: T): Unit = {
+final case class JsonRpcServer[Effect[_]](
+  jsonContext: JsonContext, 
+  effectContext: EffectContext[Effect]):
+  
+  def bind[T <: AnyRef](api: T): Unit =
     ServerMacros.print(api.toString)
     ()
-  }
 
   def process(request: ArraySeq[Byte]): Effect[ArraySeq[Byte]] =
     effectContext.unit(request)

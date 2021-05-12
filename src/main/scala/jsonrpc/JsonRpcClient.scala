@@ -5,7 +5,10 @@ import java.nio.ByteBuffer
 import jsonrpc.spi.{EffectContext, JsonContext}
 import scala.collection.immutable.ArraySeq
 
-final case class JsonRpcClient[Effect[_]](jsonContext: JsonContext, effectContext: EffectContext[Effect]):
+final case class JsonRpcClient[Effect[_]](
+  jsonContext: JsonContext, 
+  effectContext: EffectContext[Effect]):
+  
   def call[Result](method: String, arguments: Seq[Any]): Effect[Result] = ???
 
   def call[Result](method: String, arguments: Map[String, Any]): Effect[Result] = ???

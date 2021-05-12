@@ -7,7 +7,9 @@ import jsonrpc.server.ServerMacros
 import scala.concurrent.Future
 import scala.quoted.Quotes
 
-class ServerSpec extends BaseSpec:
+class ServerSpec
+  extends BaseSpec:
+
   "" - {
     "Bind" - {
       "Default" in {
