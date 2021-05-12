@@ -1,0 +1,19 @@
+[
+  {
+    "string": "x",
+    "boolean": true,
+    "byte": 0,
+    "short": 1,
+    "int": 2,
+    "long": 3,
+    "float": 4.5,
+    "double": 6.7,
+    "enumeration": 0,
+    "list": [ 8, 9 ],
+    "map": {
+      "foo": "y",
+      "bar": "z"
+    }
+  }
+]
+
