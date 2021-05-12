@@ -9,6 +9,7 @@ lazy val root = project.in(file(".")).settings(
     "dev.zio" %% "zio" % "1.0.7",
     "org.scalatest" %% "scalatest" % "3.2.8" % Test,
     "org.scalacheck" %% "scalacheck" % "1.15.4" % Test,
+    "org.scala-lang" %% "scala3-tasty-inspector" % scalaVersion.value
   )
 )
 
