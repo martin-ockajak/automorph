@@ -14,7 +14,7 @@ class ServerSpec
     "Bind" - {
       "Default" in {
         val server = JsonRpcServer(DummyJsonContext(), PlainEffectContext())
-        val api = new Api
+        val api = Api()
         server.bind(api)
         (0 == 0).shouldBe(true)
       }

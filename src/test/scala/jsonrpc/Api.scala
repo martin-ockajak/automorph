@@ -2,7 +2,7 @@ package jsonrpc
 
 import scala.concurrent.Future
 
-class Api:
+final case class Api():
 
   def method0(): Double = 1.2d
 
