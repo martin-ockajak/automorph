@@ -1,4 +1,4 @@
-package jsonrpc
+package base
 
 import org.scalatest.freespec.AnyFreeSpecLike
 import org.scalatest.matchers.should.Matchers
@@ -10,5 +10,6 @@ trait BaseSpec extends AnyFreeSpecLike
   with BeforeAndAfterAll
   with Matchers
   with AppendedClues
+  with PropertyChecks
   with Fixtures
   with Await

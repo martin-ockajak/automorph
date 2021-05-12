@@ -4,10 +4,11 @@ lazy val root = project.in(file(".")).settings(
   version := "0.1.0",
   scalaVersion := "3.0.0-RC3",
   libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.2.8" % Test,
     "com.lihaoyi" %% "upickle" % "1.3.12",
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.12.3",
-    "dev.zio" %% "zio" % "1.0.7"
+    "dev.zio" %% "zio" % "1.0.7",
+    "org.scalatest" %% "scalatest" % "3.2.8" % Test,
+    "org.scalacheck" %% "scalacheck" % "1.15.4" % Test,
   )
 )
 

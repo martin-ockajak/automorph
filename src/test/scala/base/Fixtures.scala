@@ -1,4 +1,4 @@
-package jsonrpc
+package base
 
 import scala.util.Using
 import scala.util.Using.Releasable
