@@ -2,7 +2,24 @@ package jsonrpc
 
 import scala.concurrent.Future
 
-final case class Api():
+trait Api:
+
+  def method0(): Double
+
+  def method1(a0: Record): Future[Int]
+
+  def method2(a0: Record, a1: String): Record
+
+  def method3(a0: Option[Boolean], a1: Float, a2: List[Int]): Map[String, String]
+
+  def method4(): Future[Unit]
+
+  def method5(a0: Option[String]): Unit
+
+  def method6(a0: String): Unit
+
+
+final case class ApiImpl() extends Api:
 
   def method0(): Double = 1.2d
 
@@ -30,7 +47,6 @@ final case class Api():
 
   def method6(a0: String): Unit = throw new IllegalArgumentException(a0)
 
-end Api
 
 enum Enum:
   case Zero

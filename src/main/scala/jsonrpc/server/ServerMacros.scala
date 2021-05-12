@@ -11,14 +11,11 @@ object ServerMacros:
 
   private def bindMeta[T: Type](api: Expr[T])(using q: Quotes): Expr[Unit] =
     import quotes.reflect.*
-    // summon[Type[T]]
-    // Type.of[T]
-    // TypeTree.of[T].symbol
     val apiType = TypeRepr.of[T]
-    apiType.classSymbol.foreach { symbol =>
-      println(symbol.name)
-      println(symbol.declaredMethods)
-    }
+    val apiTypeSymbol = apiType.typeSymbol
+    println(apiTypeSymbol.getClass.getName)
+    println(apiTypeSymbol.name)
+    println(apiTypeSymbol.declaredMethods)
     '{
       println($api) // the name of the Api, which now is a case class (with toString)
     }
