@@ -19,9 +19,8 @@ object ServerMacros:
       val documentation = method.documentation.map(_ + "\n").getOrElse("")
       s"$documentation${method.name}($arguments)\n"
     }.mkString("\n")
-    println(result)
     '{
-      println($api) // the name of the Api, which now is a case class (with toString)
+      println(${Expr(result)})
     }
 
   private def publicApiMethods(using Quotes)(classSymbol: quotes.reflect.Symbol): Seq[Method] = {
