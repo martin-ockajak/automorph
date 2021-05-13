@@ -18,12 +18,12 @@ object ServerMacros:
     val typedCall = Select.unique('{List}.asTerm, "apply").appliedToType(typeParam).appliedTo('{List.empty[List[String]]}.asTerm)
     println(call.show)
     println(typedCall.show)
-    val r = '{
-      println(${Expr(result)})
+    '{
       println(${call.asExpr})
       println(${typedCall.asExpr})
+      println()
+      println(${Expr(result)})
     }
-    r
 
   private def methodDescription(method: Method): String =
     val argumentLists = method.arguments.map { arguments =>
