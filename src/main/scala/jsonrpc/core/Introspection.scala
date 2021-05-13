@@ -6,9 +6,6 @@ object Introspection:
 
   def publicApiMethods(using Quotes)(classSymbol: quotes.reflect.Symbol, concrete: Boolean): Seq[Method] =
     val validMethods = publicMethods(classSymbol).filter(validApiMethod(_, concrete))
-    validMethods.foreach { methodSymbol =>
-      println(methodSymbol.signature)
-    }
     validMethods.map { methodSymbol =>
       val argumentTypes = methodArgumentTypes(methodSymbol)
       Method(
