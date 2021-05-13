@@ -18,8 +18,10 @@ trait Api:
 
   def method6(a0: String): Unit
 
+  protected def protectedMethod: Unit
 
-final case class ApiImpl() extends Api:
+
+final case class ApiImpl(test: String) extends Api:
 
   def method0(): Double = 1.2d
 
@@ -47,6 +49,9 @@ final case class ApiImpl() extends Api:
 
   def method6(a0: String): Unit = throw new IllegalArgumentException(a0)
 
+  protected def protectedMethod = ()
+
+  private def privateMethod = ()
 
 enum Enum:
   case Zero
