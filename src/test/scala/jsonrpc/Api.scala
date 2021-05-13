@@ -23,6 +23,11 @@ trait Api:
 
 final case class ApiImpl(test: String) extends Api:
 
+  /**
+   * Test method.
+   *
+   * @return test
+   */
   def method0(): Double = 1.2d
 
   def method1(a0: Record): Future[Int] = a0.int match

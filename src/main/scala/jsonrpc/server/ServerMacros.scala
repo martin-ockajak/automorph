@@ -12,17 +12,28 @@ object ServerMacros:
 
   private def bind[T <: AnyRef: Type](api: Expr[T])(using q: Quotes): Expr[Unit] =
     import quotes.reflect.*
-    val apiType = TypeRepr.of[T]
-    val apiTypeSymbol = apiType.typeSymbol
+    val apiTypeSymbol = TypeRepr.of[T].typeSymbol
     val apiMethods = publicApiMethods(apiTypeSymbol)
-    val apiMethodNames = apiMethods.map(_.name)
-    println(apiMethodNames)
+    val result = apiMethods.map { method =>
+      val arguments = method.arguments.flatten.map(_.name).mkString(", ")
+      val documentation = method.documentation.map(_ + "\n").getOrElse("")
+      s"$documentation${method.name}($arguments)\n"
+    }.mkString("\n")
+    println(result)
     '{
       println($api) // the name of the Api, which now is a case class (with toString)
     }
 
-  private def publicApiMethods(using Quotes)(classSymbol: quotes.reflect.Symbol): Seq[quotes.reflect.Symbol] = {
-    publicMethods(classSymbol).filter(validApiMethod)
+  private def publicApiMethods(using Quotes)(classSymbol: quotes.reflect.Symbol): Seq[Method] = {
+    val validMethods = publicMethods(classSymbol).filter(validApiMethod)
+    validMethods.map(methodSymbol => Method(
+      methodSymbol.name,
+      methodSymbol.name,
+      methodSymbol.paramSymss.map(_.map { paramSymbol =>
+        Value(paramSymbol.name, paramSymbol.name)
+      }),
+      methodSymbol.docstring
+    ))
   }
 
   private def publicMethods(using Quotes)(classSymbol: quotes.reflect.Symbol): Seq[quotes.reflect.Symbol] =
@@ -69,3 +80,15 @@ object ServerMacros:
     val productMethods = publicMethods(TypeRepr.of[Product].typeSymbol)
     (anyRefMethods ++ productMethods).map(_.name).toSet
   }
+
+  private final case class Value(
+    name: String,
+    dataType: String,
+  )
+
+  private final case class Method(
+    name: String,
+    returnType: String,
+    arguments: Seq[Seq[Value]],
+    documentation: Option[String],
+  )
