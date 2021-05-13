@@ -1,5 +1,6 @@
 package jsonrpc.server
 
+import jsonrpc.core.{Introspection, Method}
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
 object ServerMacros:

@@ -1,4 +1,4 @@
-package jsonrpc.server
+package jsonrpc.core
 
 import scala.quoted.{Quotes, quotes}
 
@@ -35,7 +35,7 @@ object Introspection:
   private def publicMethods(using Quotes)(classSymbol: quotes.reflect.Symbol): Seq[quotes.reflect.Symbol] =
     classSymbol.memberMethods.filter(methodSymbol => !matchesFlags(methodSymbol.flags, omittedApiMethodFlags))
 
-  private def validApiMethod(using Quotes)(methodSymbol: quotes.reflect.Symbol, concrete: Boolean): Boolean =
+  private def validApiMethod(using Quotes)(methodSymbol: quotes.reflect.Symbol, concrete: Boolean): Boolean = {
     import quotes.reflect.Flags
     methodSymbol.flags.is(Flags.Method) &&
       !baseMethodNames.contains(methodSymbol.name) && (
@@ -44,6 +44,7 @@ object Introspection:
       else
         true
       )
+  }
 
   private def abstractApiMethodFlags(using Quotes): Seq[quotes.reflect.Flags] = {
     import quotes.reflect.Flags
