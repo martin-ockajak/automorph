@@ -15,7 +15,7 @@ object ServerMacros:
     val typeParam = TypeRepr.of[List[List[String]]]
     val methodName = apiMethods.find(_.arguments.flatten.size == 0).map(_.name).getOrElse("")
     val call = Select.unique(api.asTerm, methodName).appliedToNone
-    val typedCall = Select.unique('{List}.asTerm, "apply").appliedToType(typeParam).appliedTo('{List.empty[List[String]]}.asTerm)
+    val typedCall = Select.unique('{List}.asTerm, "apply").appliedToType(typeParam).appliedTo('{List.empty}.asTerm)
     println(call.show)
     println(typedCall.show)
     '{
