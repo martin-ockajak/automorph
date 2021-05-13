@@ -9,7 +9,7 @@ object ServerMacros:
   private def bind[T <: AnyRef: Type](api: Expr[T])(using q: Quotes): Expr[Unit] =
     import quotes.reflect.*
     val apiTypeSymbol = TypeRepr.of[T].typeSymbol
-    val apiMethods = Introspection.publicApiMethods(apiTypeSymbol)
+    val apiMethods = Introspection.publicApiMethods(apiTypeSymbol, concrete = true)
     val result = apiMethods.map(methodDescription).mkString("\n")
     '{
       println(${Expr(result)})

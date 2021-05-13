@@ -4,8 +4,8 @@ import scala.quoted.{Quotes, quotes}
 
 object Introspection:
 
-  def publicApiMethods(using Quotes)(classSymbol: quotes.reflect.Symbol): Seq[Method] =
-    val validMethods = publicMethods(classSymbol).filter(validApiMethod)
+  def publicApiMethods(using Quotes)(classSymbol: quotes.reflect.Symbol, concrete: Boolean): Seq[Method] =
+    val validMethods = publicMethods(classSymbol).filter(validApiMethod(_, concrete))
     validMethods.foreach { methodSymbol =>
       println(methodSymbol.signature)
     }
@@ -35,17 +35,17 @@ object Introspection:
   private def publicMethods(using Quotes)(classSymbol: quotes.reflect.Symbol): Seq[quotes.reflect.Symbol] =
     classSymbol.memberMethods.filter(methodSymbol => !matchesFlags(methodSymbol.flags, omittedApiMethodFlags))
 
-  private def validApiMethod(using Quotes)(methodSymbol: quotes.reflect.Symbol): Boolean =
+  private def validApiMethod(using Quotes)(methodSymbol: quotes.reflect.Symbol, concrete: Boolean): Boolean =
     import quotes.reflect.Flags
     methodSymbol.flags.is(Flags.Method) &&
       !baseMethodNames.contains(methodSymbol.name) && (
-      if matchesFlags(methodSymbol.flags, invalidApiMethodFlags) then
+      if concrete && matchesFlags(methodSymbol.flags, abstractApiMethodFlags) then
         throw new IllegalStateException(s"Invalid API method: ${methodSymbol.fullName}")
       else
         true
       )
 
-  private def invalidApiMethodFlags(using Quotes): Seq[quotes.reflect.Flags] = {
+  private def abstractApiMethodFlags(using Quotes): Seq[quotes.reflect.Flags] = {
     import quotes.reflect.Flags
     Seq(
       Flags.Deferred,
