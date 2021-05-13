@@ -10,7 +10,7 @@ trait Api:
 
   def method2(a0: Record, a1: String): Record
 
-  def method3(a0: Option[Boolean], a1: Float, a2: List[Int]): Map[String, String]
+  def method3(a0: Option[Boolean], a1: Float)(a2: List[Int]): Map[String, String]
 
   def method4(): Future[Unit]
 
@@ -41,7 +41,7 @@ final case class ApiImpl(test: String) extends Api:
       enumeration = Enum.One
     )
 
-  def method3(a0: Option[Boolean], a1: Float, a2: List[Int]): Map[String, String] =
+  def method3(a0: Option[Boolean], a1: Float)(a2: List[Int]): Map[String, String] =
     Map(
       "boolean" -> a0.getOrElse(false).toString,
       "float"   -> a1.toString,

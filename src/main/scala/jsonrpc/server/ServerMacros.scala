@@ -4,6 +4,7 @@ import java.lang.reflect.{Field, Method}
 import scala.quoted.{Expr, Quotes, Type, quotes}
 import deriving.Mirror
 import scala.reflect.ClassTag
+import scala.language.unsafeNulls
 
 object ServerMacros:
 
@@ -13,26 +14,38 @@ object ServerMacros:
     import quotes.reflect.*
     val apiTypeSymbol = TypeRepr.of[T].typeSymbol
     val apiMethods = publicApiMethods(apiTypeSymbol)
-    val result = apiMethods.map { method =>
-      val arguments = method.arguments.flatten.map(_.name).mkString(", ")
-      val documentation = method.documentation.map(_ + "\n").getOrElse("")
-      s"$documentation${method.name}($arguments)\n"
-    }.mkString("\n")
+    val result = apiMethods.map(methodDescription).mkString("\n")
     '{
       println(${Expr(result)})
     }
 
-  private def publicApiMethods(using Quotes)(classSymbol: quotes.reflect.Symbol): Seq[Method] = {
+  private def publicApiMethods(using Quotes)(classSymbol: quotes.reflect.Symbol): Seq[Method] =
     val validMethods = publicMethods(classSymbol).filter(validApiMethod)
-    validMethods.map(methodSymbol => Method(
-      methodSymbol.name,
-      methodSymbol.name,
-      methodSymbol.paramSymss.map(_.map { paramSymbol =>
-        Value(paramSymbol.name, paramSymbol.name)
-      }),
-      methodSymbol.docstring
-    ))
-  }
+    validMethods.foreach { methodSymbol =>
+      println(methodSymbol.signature)
+    }
+    validMethods.map { methodSymbol =>
+      val argumentTypes = methodArgumentTypes(methodSymbol)
+      Method(
+        methodSymbol.name,
+        methodSymbol.signature.resultSig,
+        methodSymbol.paramSymss.zip(argumentTypes).map((symbols, types) => (symbols.zip(types)).map { (symbol, dataType) =>
+          Argument(symbol.name, dataType)
+        }),
+        methodSymbol.docstring
+      )
+    }
+
+  private def methodArgumentTypes(using Quotes)(methodSymbol: quotes.reflect.Symbol): Seq[Seq[String]] =
+    val argumentListSizes = methodSymbol.paramSymss.map(_.size)
+    val flatArgumentTypes = methodSymbol.signature.paramSigs.flatMap {
+      case dataType: String => Seq(dataType)
+      case _: Int => Seq.empty[String]
+    }
+    argumentListSizes.iterator.foldLeft((List.empty[List[String]], flatArgumentTypes)) { (result, size) =>
+      val (init, tail) = result(1).splitAt(size)
+      (result(0) :+ init, tail)
+    }.head
 
   private def publicMethods(using Quotes)(classSymbol: quotes.reflect.Symbol): Seq[quotes.reflect.Symbol] =
     classSymbol.memberMethods.filter(methodSymbol => !matchesFlags(methodSymbol.flags, omittedApiMethodFlags))
@@ -72,21 +85,34 @@ object ServerMacros:
       result | flags.is(currentFlags)
     }
 
-  private def baseMethodNames(using Quotes): Set[String] = {
+  private def baseMethodNames(using Quotes): Set[String] =
     import quotes.reflect.*
     val anyRefMethods = publicMethods(TypeRepr.of[AnyRef].typeSymbol)
     val productMethods = publicMethods(TypeRepr.of[Product].typeSymbol)
     (anyRefMethods ++ productMethods).map(_.name).toSet
+
+  private def methodDescription(method: Method): String =
+    val argumentLists = method.arguments.map { arguments =>
+      s"(${arguments.map { argument =>
+        s"${argument.name}: ${simpleTypeName(argument.dataType)}"
+      }.mkString(", ")})"
+    }.mkString
+    val documentation = method.documentation.map(_ + "\n").getOrElse("")
+    val resultType = simpleTypeName(method.resultType)
+    s"$documentation${method.name}$argumentLists: $resultType\n"
+
+  private def simpleTypeName(typeName: String): String = {
+    typeName.split("\\.").asInstanceOf[Array[String]].lastOption.getOrElse("")
   }
 
-  private final case class Value(
+  private final case class Argument(
     name: String,
     dataType: String,
   )
 
   private final case class Method(
     name: String,
-    returnType: String,
-    arguments: Seq[Seq[Value]],
+    resultType: String,
+    arguments: Seq[Seq[Argument]],
     documentation: Option[String],
   )
