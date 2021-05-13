@@ -7,8 +7,7 @@ import scala.reflect.ClassTag
 
 object ServerMacros:
 
-  inline def bind[T <: AnyRef](inline api: T): Unit =
-    ${ bind('api) }
+  inline def bind[T <: AnyRef](inline api: T): Unit = ${bind('api)}
 
   private def bind[T <: AnyRef: Type](api: Expr[T])(using q: Quotes): Expr[Unit] =
     import quotes.reflect.*
