@@ -13,7 +13,7 @@ object ServerMacros:
     val apiMethods = Introspection.publicApiMethods(apiTypeSymbol, concrete = true)
     val result = apiMethods.map(methodDescription).mkString("\n")
     val typeParam = TypeRepr.of[List[List[String]]]
-    val methodName = apiMethods.find(_.arguments.flatten.size == 0).map(_.name).getOrElse("")
+    val methodName = apiMethods.find(_.arguments.flatten.isEmpty).map(_.name).getOrElse("")
     val call = Select.unique(api.asTerm, methodName).appliedToNone
     val typedCall = Select.unique('{List}.asTerm, "apply").appliedToType(typeParam).appliedTo('{List.empty}.asTerm)
     println(call.show)
