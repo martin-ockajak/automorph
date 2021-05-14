@@ -9,11 +9,12 @@ object ServerMacros:
 
   private def bind[T <: AnyRef: Type](api: Expr[T])(using Quotes): Expr[Unit] =
     import quotes.reflect.*
+    val apiTypeTree = TypeTree.of[T]
     val apiTypeSymbol = TypeRepr.of[T].typeSymbol
-    val apiMethods = Introspection.publicApiMethods(apiTypeSymbol, concrete = true)
+    val apiMethods = Introspection.publicApiMethods(apiTypeTree, concrete = true)
     val result = apiMethods.map(methodDescription).mkString("\n")
     val typeParam = TypeRepr.of[List[List[String]]]
-    val methodName = apiMethods.find(_.arguments.flatten.isEmpty).map(_.name).getOrElse("")
+    val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
     val call = Select.unique(api.asTerm, methodName).appliedToNone
     val typedCall = Select.unique('{List}.asTerm, "apply").appliedToType(typeParam).appliedTo('{List.empty}.asTerm)
     println(call.show)
@@ -26,15 +27,14 @@ object ServerMacros:
     }
 
   private def methodDescription(method: Method): String =
-    val argumentLists = method.arguments.map { arguments =>
-      s"(${arguments.map { argument =>
-        s"${argument.name}: ${simpleTypeName(argument.dataType)}"
+    val paramLists = method.params.map { params =>
+      s"(${params.map { param =>
+        s"${param.name}: ${simpleTypeName(param.dataType)}"
       }.mkString(", ")})"
     }.mkString
     val documentation = method.documentation.map(_ + "\n").getOrElse("")
     val resultType = simpleTypeName(method.resultType)
-    s"$documentation${method.name}$argumentLists: $resultType\n"
+    s"$documentation${method.name}$paramLists: $resultType\n"
 
-  private def simpleTypeName(typeName: String): String = {
-    typeName.split("\\.").asInstanceOf[Array[String]].lastOption.getOrElse("")
-  }
+  private def simpleTypeName(typeName: String): String =
+    typeName.replaceAll("[^\\[\\], ]+\\.", "").nn
