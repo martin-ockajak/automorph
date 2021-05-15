@@ -1,8 +1,8 @@
 package jsonrpc
 
 import base.BaseSpec
-import jsonrpc.effect.PlainEffectContext
-import jsonrpc.json.DummyJsonContext
+import jsonrpc.effect.native.PlainEffectContext
+import jsonrpc.json.dummy.DummyJsonContext
 import jsonrpc.server.ServerMacros
 import scala.concurrent.Future
 import scala.quoted.Quotes
