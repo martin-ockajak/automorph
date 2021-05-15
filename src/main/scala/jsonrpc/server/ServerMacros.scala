@@ -11,20 +11,34 @@ object ServerMacros:
     import quotes.reflect.*
     val introspection = Introspection()
     val apiTypeTree = TypeTree.of[T]
-    val apiTypeSymbol = TypeRepr.of[T].typeSymbol
     val apiMethods = introspection.publicApiMethods[T](concrete = true)
-    val result = apiMethods.map(methodDescription).mkString("\n")
+    val apiDescription = apiMethods.map(methodDescription).mkString("\n")
     val typeParam = TypeRepr.of[List[List[String]]]
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
     val call = Select.unique(api.asTerm, methodName).appliedToNone
     val typedCall = Select.unique('{List}.asTerm, "apply").appliedToType(typeParam).appliedTo('{List.empty}.asTerm)
-    println(call.show)
-    println(typedCall.show)
+    val classDef = '{
+      class Test(
+        a: String,
+        b: Int
+      )
+    }
+    println(
+      s"""
+        |Call:
+        |  ${call}
+        |
+        |Typed call:
+        |  ${typedCall}
+        |
+        |Class definition:
+        |  ${classDef.asTerm}
+        |""".stripMargin)
     '{
       println(${call.asExpr})
       println(${typedCall.asExpr})
       println()
-      println(${Expr(result)})
+      println(${Expr(apiDescription)})
     }
 
   private def methodDescription(method: Introspection.Method): String =
