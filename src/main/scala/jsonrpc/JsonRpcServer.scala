@@ -16,10 +16,10 @@ final case class JsonRpcServer[JsonValue, Effect[_]](
   }
 
   def process(request: ArraySeq[Byte]): Effect[ArraySeq[Byte]] =
-    effectContext.unit(request)
+    effectContext.pure(request)
 
   def process(request: InputStream): Effect[InputStream] =
-    effectContext.unit(request)
+    effectContext.pure(request)
 
   def process(request: ByteBuffer): Effect[ByteBuffer] =
-    effectContext.unit(request)
+    effectContext.pure(request)

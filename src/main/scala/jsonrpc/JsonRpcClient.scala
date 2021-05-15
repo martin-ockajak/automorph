@@ -14,9 +14,9 @@ final case class JsonRpcClient[JsonValue, Effect[_]](
   def call[Result](method: String, arguments: Map[String, Any]): Effect[Result] = ???
 
   def notify(method: String, arguments: Seq[Any]): Effect[Unit] =
-    effectContext.unit(())
+    effectContext.pure(())
 
   def notify(method: String, arguments: Map[String, Any]): Effect[Unit] =
-    effectContext.unit(())
+    effectContext.pure(())
 
   def api[T]: T = ???

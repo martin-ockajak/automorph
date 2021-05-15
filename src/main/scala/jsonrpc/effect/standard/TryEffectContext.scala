@@ -9,7 +9,7 @@ import scala.util.{Success, Failure, Try}
 final case class TryEffectContext() 
   extends EffectContext[Try]:
   
-  def unit[T](value: T): Try[T] = Success(value)
+  def pure[T](value: T): Try[T] = Success(value)
 
   def map[T, R](value: Try[T], function: T => R): Try[R] = value.map(function)
 

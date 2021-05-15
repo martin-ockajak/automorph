@@ -11,7 +11,7 @@ final case class FutureEffectContext(executionContext: ExecutionContext)
   extends EffectContext[Future]:
   given ExecutionContext = executionContext
 
-  def unit[T](value: T): Future[T] = Future.successful(value)
+  def pure[T](value: T): Future[T] = Future.successful(value)
 
   def map[T, R](value: Future[T], function: T => R): Future[R] = value.map(function)
 

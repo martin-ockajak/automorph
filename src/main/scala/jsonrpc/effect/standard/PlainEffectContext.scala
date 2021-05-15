@@ -10,7 +10,7 @@ import scala.util.{Success, Try}
 final case class PlainEffectContext() 
   extends EffectContext[PlainEffectContext.Id]:
   
-  def unit[T](value: T): T = value
+  def pure[T](value: T): T = value
 
   def map[T, R](value: T, function: T => R): R = function(value)
 
