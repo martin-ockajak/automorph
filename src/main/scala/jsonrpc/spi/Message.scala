@@ -1,26 +1,16 @@
 package jsonrpc.spi
 
-import java.io.IOException
+final case class Message[JsonValue](
+  jsonrpc: Option[String],
+  id: Option[Either[BigDecimal, String]],
+  method: Option[String],
+  params: Option[Either[List[JsonValue], Map[String, JsonValue]]],
+  result: Option[JsonValue],
+  error: Option[CallError[JsonValue]]
+)
 
-object Message:
-  type Id = Either[BigDecimal, String]
-
-  case class Request[JsonValue](
-    jsonrpc: Option[String],
-    id: Option[Id],
-    method: Option[String],
-    params: Option[Either[List[JsonValue], Map[String, JsonValue]]]
-  )
-
-  case class Response[JsonValue](
-    jsonrpc: String,
-    id: Id,
-    result: Option[JsonValue],
-    error: Option[CallError[JsonValue]]
-  )
-
-  case class CallError[JsonValue](
-    code: Int,
-    message: String,
-    data: Option[JsonValue]
-  )
+final case class CallError[JsonValue](
+  code: Option[Int],
+  message: Option[String],
+  data: Option[JsonValue]
+)

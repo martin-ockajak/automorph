@@ -1,17 +1,16 @@
 package jsonrpc.json.dummy
 
-import java.io.{InputStream, OutputStream}
-import java.nio.ByteBuffer
-import jsonrpc.spi.Message.{Request, Response}
+import java.nio.charset.StandardCharsets
+import jsonrpc.spi.Message
 import jsonrpc.spi.{JsonContext, Message}
-import scala.collection.immutable.ArraySeq
 
 final case class DummyJsonContext()
   extends JsonContext[String]:
-  
-  def serialize(response: Response[String]): String = ""
+  private val charset = StandardCharsets.UTF_8.nn
 
-  def derialize(json: String): Request[String] = Request(None, None, None, None)
+  def serialize(response: Message[String]): Array[Byte] = "".getBytes(charset).nn
+
+  def derialize(json: Array[Byte]): Message[String] = Message(None, None, None, None, None, None)
 
   def encode[T](value: T): String = value.toString
 

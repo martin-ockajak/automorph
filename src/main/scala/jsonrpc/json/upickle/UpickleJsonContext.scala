@@ -1,18 +1,26 @@
 package jsonrpc.json.upickle
 
-import java.io.{InputStream, OutputStream}
-import java.nio.ByteBuffer
-import jsonrpc.spi.Message.{Request, Response}
+import java.nio.charset.StandardCharsets
+import jsonrpc.spi.Message
 import jsonrpc.spi.{JsonContext, Message}
-import scala.collection.immutable.ArraySeq
+import upickle.default.*
+import ujson.Value
 
 final case class UpickleJsonContext()
-  extends JsonContext[String]:
+  extends JsonContext[Value]:
+  private val charset = StandardCharsets.UTF_8.nn
+  def serialize(response: Message[Value]): Array[Byte] = ???
 
-  def serialize(response: Response[String]): String = ""
+  def derialize(json: Array[Byte]): Message[Value] = ???
 
-  def derialize(json: String): Request[String] = Request(None, None, None, None)
+  def encode[T](value: T): Value = ???
 
-  def encode[T](value: T): String = value.toString
+  def decode[T](json: Value): T = ???
 
-  def decode[T](json: String): T = ???
+//  def serialize(response: Message[Value]): Array[Byte] = upickle.default.writeBinary(response)
+
+//  def derialize(json: Array[Byte]): Message[Value] = upickle.default.readBinary(json)
+
+//  def encode[T](value: T): Value = upickle.default.writeJs(value)
+
+//  def decode[T](json: Value): T = upickle.default.read[T](json)
