@@ -7,8 +7,8 @@ import jsonrpc.server.ServerMacros
 import jsonrpc.spi.{EffectContext, JsonContext}
 import scala.collection.immutable.ArraySeq
 
-final case class JsonRpcServer[JsonValue, Effect[_]](
-  jsonContext: JsonContext[JsonValue],
+final case class JsonRpcServer[Json, Effect[_]](
+  jsonContext: JsonContext[Json],
   effectContext: EffectContext[Effect]):
   private val charset = StandardCharsets.UTF_8.nn
   private val bufferSize = 4096

@@ -1,16 +1,24 @@
 package jsonrpc.spi
 
-final case class Message[JsonValue](
-  jsonrpc: Option[String],
-  id: Option[Either[BigDecimal, String]],
-  method: Option[String],
-  params: Option[Either[List[JsonValue], Map[String, JsonValue]]],
-  result: Option[JsonValue],
-  error: Option[CallError[JsonValue]]
-)
+trait Message[Json]:
 
-final case class CallError[JsonValue](
-  code: Option[Int],
-  message: Option[String],
-  data: Option[JsonValue]
-)
+  def jsonrpc: Option[String]
+
+  def id: Option[Either[BigDecimal, String]]
+
+  def method: Option[String]
+
+  def params: Option[Either[List[Json], Map[String, Json]]]
+
+  def result: Option[Json]
+
+  def error: Option[CallError[Json]]
+
+
+trait CallError[JsonValue]:
+
+  def code: Option[Int]
+
+  def message: Option[String]
+
+  def data: Option[JsonValue]

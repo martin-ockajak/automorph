@@ -3,16 +3,14 @@ package jsonrpc
 import base.BaseSpec
 import jsonrpc.effect.native.PlainEffectContext
 import jsonrpc.json.dummy.DummyJsonContext
-import jsonrpc.spi.Message
-import jsonrpc.spi.CallError
-//import upickle.default.*
-//import ujson.Value
-//import ujson.Str
-import io.circe.syntax.*
-import io.circe.parser.decode
-import io.circe.*
-import io.circe.generic.semiauto.*
-//import io.circe.generic.auto.*
+import jsonrpc.json.upickle.UpickleJsonContext
+import jsonrpc.spi.{CallError, Message}
+import ujson.{Bool, Num, Str, Value}
+import upickle.default.*
+//import io.circe.syntax.*
+//import io.circe.parser.decode
+//import io.circe.*
+//import io.circe.generic.semiauto.*
 
 class ServerSpec
   extends BaseSpec:
@@ -37,38 +35,46 @@ class ServerSpec
     Some(structure),
     None
   )
-  private val message = Message[String](
+  private val dummyMessage = DummyJsonContext.Message(
     Some("2.0"),
     None,
     None,
-    None,
+    Some(Right(Map(
+      "x" -> "foo",
+      "y" -> "1",
+      "z" -> "true"
+    ))),
     Some("test"),
     None
   )
-//  private val upickleTest = UpickleTest(
+  private val upickleMessage = UpickleJsonContext.Message(
+    Some("2.0"),
+    None,
+    None,
+    Some(Right(Map(
+      "x" -> Str("foo"),
+      "y" -> Num(1),
+      "z" -> Bool(true)
+    ))),
+    Some(Str("test")),
+    None
+  )
+//  private val circeTest = CirceTest(
 //    Some("2.0"),
 //    None,
 //    None,
 //    None,
-//    Some(Str("test"))
+//    Some(Json.fromString("test"))
 //  )
-  private val circeTest = CirceTest(
-    Some("2.0"),
-    None,
-    None,
-    None,
-    Some(Json.fromString("test"))
+  private given enumRw: ReadWriter[Enum] = upickle.default.readwriter[Int].bimap[Enum](
+    value => value.ordinal,
+    number => Enum.fromOrdinal(number)
   )
-//  private given enumRw: ReadWriter[Enum] = upickle.default.readwriter[Int].bimap[Enum](
-//    value => value.ordinal,
-//    number => Enum.fromOrdinal(number)
-//  )
-//  private given ReadWriter[Structure] = macroRW
-//  private given ReadWriter[Record] = macroRW
-//  private given ReadWriter[CallError[Value]] = macroRW
-//  private given ReadWriter[Message[Value]] = macroRW
-//  private given ReadWriter[UpickleTest] = macroRW
-  given Encoder[Thing] = deriveEncoder[Thing]
+  private given ReadWriter[Structure] = macroRW
+  private given ReadWriter[Record] = macroRW
+  private given ReadWriter[UpickleJsonContext.CallError] = macroRW
+  private given ReadWriter[UpickleJsonContext.Message] = macroRW
+//  given Encoder[Thing] = deriveEncoder[Thing]
 //  given Decoder[Thing] = deriveDecoder[Thing]
 //  private given Encoder[Enum] = Encoder.encodeInt.contramap[Enum](_.ordinal)
 //  private given Decoder[Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
@@ -76,8 +82,6 @@ class ServerSpec
 //  private given Decoder[Structure] = deriveDecoder[Structure]
 //  private given Encoder[Record] = deriveEncoder[Record]
 //  private given Decoder[Record] = deriveDecoder[Record]
-//  private given Encoder[CirceTest] = deriveEncoder[CirceTest]
-//  private given Decoder[CirceTest] = deriveDecoder[CirceTest]
 
   "" - {
     "Bind" - {
@@ -89,17 +93,16 @@ class ServerSpec
       }
     }
     "JSON" - {
-//      "Upickle" in {
-//        val recordJson = upickle.default.write(record)
-//        println(upickle.default.read[Record](recordJson))
-//        val upickleTestJson = upickle.default.write(upickleTest)
-//        println(upickle.default.read[UpickleTest](upickleTestJson))
-//        println(upickle.default.write(message))
-//      }
+      "Upickle" in {
+        val recordJson = upickle.default.write(record)
+        println(upickle.default.read[Record](recordJson))
+        val messageJson = upickle.default.write(upickleMessage)
+        println(upickle.default.read[UpickleJsonContext.Message](messageJson))
+      }
       "Circe" in {
-        val thing = Thing("test")
-        val thingJson = thing.asJson.spaces2
-        println(thingJson)
+//        val thing = Thing("test")
+//        val thingJson = thing.asJson.spaces2
+//        println(thingJson)
 //        println(decode[Thing](thingJson))
 //        val structureJson = structure.asJson.spaces2
 //        println(structureJson)
@@ -107,28 +110,9 @@ class ServerSpec
 //        val recordJson = record.asJson.spaces2
 //        println(recordJson)
 //        println(decode[Record](recordJson))
-//        val circeTestJson = circeTest.asJson.spaces2
-//        println(circeTestJson)
-//        println(decode[CirceTest](circeTestJson))
       }
     }
   }
-
-//  final case class UpickleTest(
-//    jsonrpc: Option[String],
-//    id: Option[Either[BigDecimal, String]],
-//    method: Option[String],
-//    params: Option[Either[List[Value], Map[String, Value]]],
-//    result: Option[Value]
-//  )
-
-final case class CirceTest(
-  jsonrpc: Option[String],
-  id: Option[Either[BigDecimal, String]],
-  method: Option[String],
-  params: Option[Either[List[Json], Map[String, Json]]],
-  result: Option[Json]
-)
 
 final case class Thing(
   value: String

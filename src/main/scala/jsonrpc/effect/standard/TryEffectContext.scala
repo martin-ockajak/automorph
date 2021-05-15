@@ -6,8 +6,7 @@ import jsonrpc.spi.EffectContext
 import scala.collection.immutable.ArraySeq
 import scala.util.{Success, Failure, Try}
 
-final case class TryEffectContext() 
-  extends EffectContext[Try]:
+final case class TryEffectContext() extends EffectContext[Try]:
   
   def pure[T](value: T): Try[T] = Success(value)
 

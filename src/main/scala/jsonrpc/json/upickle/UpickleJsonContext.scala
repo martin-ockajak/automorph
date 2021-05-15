@@ -1,26 +1,66 @@
 package jsonrpc.json.upickle
 
 import java.nio.charset.StandardCharsets
-import jsonrpc.spi.Message
-import jsonrpc.spi.{JsonContext, Message}
-import upickle.default.*
+import jsonrpc.spi
+import jsonrpc.spi.JsonContext
+import UpickleJsonContext.CallError
+import UpickleJsonContext.Message
+import upickle.default.ReadWriter
+import upickle.default.macroRW
 import ujson.Value
 
-final case class UpickleJsonContext()
-  extends JsonContext[Value]:
+final case class UpickleJsonContext() extends JsonContext[Value]:
+  type Json = Value
+
   private val charset = StandardCharsets.UTF_8.nn
-  def serialize(response: Message[Value]): Array[Byte] = ???
+  private given ReadWriter[CallError] = macroRW
+  private given ReadWriter[Message] = macroRW
 
-  def derialize(json: Array[Byte]): Message[Value] = ???
+  def encode[T](value: T): Json = ???
 
-  def encode[T](value: T): Value = ???
+  def decode[T](json: Json): T = ???
 
-  def decode[T](json: Value): T = ???
+  def serialize(response: spi.Message[Json]): Array[Byte] =
+    upickle.default.write(Message(response)).getBytes(charset).nn
 
-//  def serialize(response: Message[Value]): Array[Byte] = upickle.default.writeBinary(response)
+  def derialize(json: Array[Byte]): spi.Message[Json] =
+    upickle.default.read[Message](String(json, charset))
 
-//  def derialize(json: Array[Byte]): Message[Value] = upickle.default.readBinary(json)
+//  def encode[T](value: T): Json = upickle.default.writeJs(value)
 
-//  def encode[T](value: T): Value = upickle.default.writeJs(value)
+//  def decode[T](json: Json): T = upickle.default.read[T](json)
 
-//  def decode[T](json: Value): T = upickle.default.read[T](json)
+object UpickleJsonContext:
+  type Json = Value
+
+  final case class Message(
+    jsonrpc: Option[String],
+    id: Option[Either[BigDecimal, String]],
+    method: Option[String],
+    params: Option[Either[List[Json], Map[String, Json]]],
+    result: Option[Json],
+    error: Option[CallError]
+  ) extends spi.Message[Json]
+
+  object Message:
+    def apply(v: spi.Message[Json]): Message = Message(
+      v.jsonrpc,
+      v.id,
+      v.method,
+      v.params,
+      v.result,
+      v.error.map(CallError.apply)
+    )
+
+  final case class CallError(
+    code: Option[Int],
+    message: Option[String],
+    data: Option[Json]
+  ) extends spi.CallError[Json]
+
+  object CallError:
+    def apply(v: spi.CallError[Json]): CallError = CallError(
+      v.code,
+      v.message,
+      v.data
+    )

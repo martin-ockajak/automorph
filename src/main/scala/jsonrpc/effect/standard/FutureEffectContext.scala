@@ -7,8 +7,7 @@ import scala.collection.immutable.ArraySeq
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try, Failure}
 
-final case class FutureEffectContext(executionContext: ExecutionContext)
-  extends EffectContext[Future]:
+final case class FutureEffectContext(executionContext: ExecutionContext) extends EffectContext[Future]:
   given ExecutionContext = executionContext
 
   def pure[T](value: T): Future[T] = Future.successful(value)
