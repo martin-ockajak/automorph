@@ -8,6 +8,10 @@ import scala.collection.immutable.ArraySeq
 final case class DummyJsonContext()
   extends JsonContext[String]:
   
-  def serialize[T](value: T): String = ""
+  def serialize(response: Response[String]): String = ""
 
-  def derialize(json: String): Any = ""
+  def derialize(json: String): Request[String] = Request("", None, "", Left(List.empty))
+
+  def encode[T](value: T): String = ""
+
+  def decode[T](json: String): T = ???
