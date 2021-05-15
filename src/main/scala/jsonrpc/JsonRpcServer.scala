@@ -7,8 +7,8 @@ import jsonrpc.spi.{EffectContext, JsonContext}
 import scala.collection.immutable.ArraySeq
 import scala.reflect.ClassTag
 
-final case class JsonRpcServer[Effect[_]](
-  jsonContext: JsonContext,
+final case class JsonRpcServer[JsonValue, Effect[_]](
+  jsonContext: JsonContext[JsonValue],
   effectContext: EffectContext[Effect]):
 
   inline def bind[T <: AnyRef](api: T): Unit = {
