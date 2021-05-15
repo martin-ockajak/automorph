@@ -11,8 +11,6 @@ final case class TryEffectContext()
   
   def unit[T](value: T): Try[T] = Success(value)
 
-  def transform[T](result: Try[T], success: (T) => Unit, failure: (Throwable) => Unit): Try[Unit] =
-    result match
-      case Success(value) => success(value)
-      case Failure(exception) => failure(exception)
-    Success(())
+  def map[T, R](value: Try[T], function: T => R): Try[R] = value.map(function)
+
+  def either[T](value: Try[T]): Try[Either[Throwable, T]] = Success(value.toEither)

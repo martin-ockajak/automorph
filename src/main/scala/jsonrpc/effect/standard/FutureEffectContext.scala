@@ -9,13 +9,11 @@ import scala.util.{Success, Try, Failure}
 
 final case class FutureEffectContext(executionContext: ExecutionContext)
   extends EffectContext[Future]:
+  given ExecutionContext = executionContext
 
   def unit[T](value: T): Future[T] = Future.successful(value)
 
-  def transform[T](result: Future[T], success: (T) => Unit, failure: (Throwable) => Unit): Future[Unit] =
-    given ExecutionContext = executionContext
-    result.onComplete {
-      case Success(value) => success(value)
-      case Failure(exception) => failure(exception)
-    }
-    Future.successful(())
+  def map[T, R](value: Future[T], function: T => R): Future[R] = value.map(function)
+
+  def either[T](value: Future[T]): Future[Either[Throwable, T]] =
+    value.transform(value => Success(value.toEither))

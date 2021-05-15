@@ -3,7 +3,7 @@ package jsonrpc.spi
 import java.io.IOException
 
 object Message:
-  type Id = Either[String, BigDecimal]
+  type Id = Either[BigDecimal, String]
 
   case class Request[JsonValue](
     jsonrpc: Option[String],

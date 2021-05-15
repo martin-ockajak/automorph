@@ -3,4 +3,6 @@ package jsonrpc.spi
 trait EffectContext[Effect[_]]:
   def unit[T](value: T): Effect[T]
 
-  def transform[T](result: Effect[T], success: (T) => Unit, failure: (Throwable) => Unit): Effect[Unit]
+  def map[T, R](value: Effect[T], function: T => R): Effect[R]
+
+  def either[T](value: Effect[T]): Effect[Either[Throwable, T]]

@@ -12,11 +12,9 @@ final case class PlainEffectContext()
   
   def unit[T](value: T): T = value
 
-  def transform[T](result: T, success: (T) => Unit, failure: (Throwable) => Unit): Unit =
-    try
-      success(result)
-    catch
-      case NonFatal(e) => failure(e)
+  def map[T, R](value: T, function: T => R): R = function(value)
+
+  def either[T](value: T): Either[Throwable, T] = Right(value)
 
 object PlainEffectContext:
   type Id[T] = T
