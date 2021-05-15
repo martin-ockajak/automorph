@@ -2,7 +2,8 @@ package jsonrpc.json
 
 import java.io.{InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.spi.JsonContext
+import jsonrpc.spi.Message.{Request, Response}
+import jsonrpc.spi.{JsonContext, Message}
 import scala.collection.immutable.ArraySeq
 
 final case class DummyJsonContext()

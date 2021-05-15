@@ -2,7 +2,7 @@ package jsonrpc.spi
 
 import java.io.IOException
 
-trait Messages[JsonValue]:
+object Message:
   type Id = Either[String, BigDecimal]
 
   case class Request[JsonValue](
