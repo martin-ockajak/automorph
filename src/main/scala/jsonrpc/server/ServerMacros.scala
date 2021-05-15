@@ -17,12 +17,6 @@ object ServerMacros:
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
     val call = Select.unique(api.asTerm, methodName).appliedToNone
     val typedCall = Select.unique('{List}.asTerm, "apply").appliedToType(typeParam).appliedTo('{List.empty}.asTerm)
-    val classDef = '{
-      class Test(
-        a: String,
-        b: Int
-      )
-    }
     println(
       s"""
         |Call:
@@ -30,9 +24,6 @@ object ServerMacros:
         |
         |Typed call:
         |  ${typedCall}
-        |
-        |Class definition:
-        |  ${classDef.asTerm}
         |""".stripMargin)
     '{
       println(${call.asExpr})
