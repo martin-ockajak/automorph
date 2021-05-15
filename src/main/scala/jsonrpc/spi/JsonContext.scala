@@ -2,11 +2,10 @@ package jsonrpc.spi
 
 import java.io.{InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.core.Protocol
 import scala.collection.immutable.ArraySeq
 
 trait JsonContext[JsonValue]
-  extends Protocol[JsonValue]:
+  extends Messages[JsonValue]:
   
   def serialize(response: Response[JsonValue]): String
 
