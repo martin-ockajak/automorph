@@ -4,7 +4,7 @@ import java.io.{InputStream, OutputStream}
 import java.nio.ByteBuffer
 import scala.collection.immutable.ArraySeq
 
-trait JsonContext:
+trait JsonContext[JsonValue]:
   def serialize[T](value: T): String
 
   def derialize(json: String): Any

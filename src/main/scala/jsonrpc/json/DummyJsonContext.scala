@@ -6,7 +6,7 @@ import jsonrpc.spi.JsonContext
 import scala.collection.immutable.ArraySeq
 
 final case class DummyJsonContext()
-  extends JsonContext:
+  extends JsonContext[String]:
   
   def serialize[T](value: T): String = ""
 
