@@ -38,7 +38,7 @@ final case class ApiImpl(test: String) extends Api:
     p0.copy(
       string = s"${p0.string} - $p1",
       long = p0.long + 1,
-      enumeration = Enum.One
+      enumeration = Some(Enum.One)
     )
 
   def method3(p0: Option[Boolean], p1: Float)(p2: List[Int]): Map[String, String] =
@@ -72,9 +72,13 @@ final case class Record(
   long: Long,
   float: Float,
   double: Double,
-  enumeration: Enum,
-  list: List[Number],
-  map: Map[String, String],
-  none: Option[String],
-  record: Option[Record]
+  enumeration: Option[Enum],
+  list: List[String],
+  map: Map[String, Int],
+  structure: Option[Structure],
+  none: Option[String]
+)
+
+final case class Structure(
+  value: String
 )
