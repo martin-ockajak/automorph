@@ -3,7 +3,7 @@ package jsonrpc.core
 import scala.quoted.{Quotes, Type, quotes}
 
 final class Introspection(using Quotes):
-  import quotes.reflect.{Flags, MethodType, TypeRepr, TypeTree}
+  import quotes.reflect.{Flags, MethodType, Symbol, TypeRepr, TypeTree}
 
   private val abstractApiMethodFlags = Seq(
     Flags.Deferred,
@@ -29,7 +29,7 @@ final class Introspection(using Quotes):
     val validMethods = publicMethods(classTypeTree).filter(validApiMethod(_, concrete))
     validMethods.flatMap(methodSymbol => methodDescriptor(classTypeTree, methodSymbol))
 
-  private def methodDescriptor(classTypeTree: quotes.reflect.TypeTree, methodSymbol: quotes.reflect.Symbol): Option[Introspection.Method] =
+  private def methodDescriptor(classTypeTree: TypeTree, methodSymbol: Symbol): Option[Introspection.Method] =
     classTypeTree.tpe.memberType(methodSymbol) match
       case methodType: MethodType =>
         val methodTypes = LazyList.iterate(Option(methodType)) {
@@ -51,11 +51,11 @@ final class Introspection(using Quotes):
         ))
       case _ => None
 
-  private def publicMethods(classTypeTree: quotes.reflect.TypeTree): Seq[quotes.reflect.Symbol] =
+  private def publicMethods(classTypeTree: TypeTree): Seq[Symbol] =
     val classSymbol = classTypeTree.tpe.typeSymbol
     classSymbol.memberMethods.filter(methodSymbol => !matchesFlags(methodSymbol.flags, omittedApiMethodFlags))
 
-  private def validApiMethod(methodSymbol: quotes.reflect.Symbol, concrete: Boolean): Boolean =
+  private def validApiMethod(methodSymbol: Symbol, concrete: Boolean): Boolean =
     methodSymbol.flags.is(Flags.Method) &&
       !baseMethodNames.contains(methodSymbol.name) && (
       if concrete && matchesFlags(methodSymbol.flags, abstractApiMethodFlags) then
@@ -64,10 +64,8 @@ final class Introspection(using Quotes):
         true
       )
 
-  private def matchesFlags(flags: quotes.reflect.Flags, matchingFlags: Seq[quotes.reflect.Flags]): Boolean =
-    matchingFlags.foldLeft(false) { (result, currentFlags) =>
-      result | flags.is(currentFlags)
-    }
+  private def matchesFlags(flags: Flags, matchingFlags: Seq[Flags]): Boolean =
+    matchingFlags.foldLeft(false)((result, current) => result | flags.is(current))
 
 object Introspection:
   final case class Param(
