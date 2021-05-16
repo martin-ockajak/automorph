@@ -5,13 +5,13 @@ import java.nio.ByteBuffer
 import jsonrpc.spi.Message
 import scala.collection.immutable.ArraySeq
 
-trait JsonContext[Json]:
+trait JsonContext[Json, Encoder[_], Decoder[_]]:
   def serialize(message: Message[Json]): Array[Byte]
 
   def derialize(json: Array[Byte]): Message[Json]
 
   def format(message: Message[Json]): String
 
-  def encode[T](value: T): Json
+  def encode[T: Encoder](value: T): Json
 
-  def decode[T](json: Json): T
+  def decode[T: Decoder](json: Json): T

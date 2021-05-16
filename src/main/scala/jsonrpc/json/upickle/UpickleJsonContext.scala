@@ -6,14 +6,12 @@ import jsonrpc.spi
 import ujson.Value
 import upickle.default.{Writer, Reader, ReadWriter, macroRW}
 
-final case class UpickleJsonContext() extends JsonContext[Value]:
+final case class UpickleJsonContext() extends JsonContext[Value, Writer, Reader]:
   type Json = Value
+  type Encoder[T] = Writer[T]
+  type Decoder[T] = Reader[T]
 
   private val indent = 2
-
-  def encode[T](value: T): Json = ???
-
-  def decode[T](json: Json): T = ???
 
   def serialize(message: Message[Json]): Array[Byte] = {
     upickle.default.writeToByteArray(UpickleJsonContext.Message(message))
@@ -26,12 +24,10 @@ final case class UpickleJsonContext() extends JsonContext[Value]:
   def format(message: Message[Json]): String =
     upickle.default.write(UpickleJsonContext.Message(message), indent)
 
-  def encode[T:Writer](value: T): Json =
-    summon[Writer[T]]
+  def encode[T: Encoder](value: T): Json =
     upickle.default.writeJs(value)
 
-  def decode[T:Reader](json: Json): T =
-    summon[Reader[T]]
+  def decode[T: Decoder](json: Json): T =
     upickle.default.read[T](json)
 
 object UpickleJsonContext:
