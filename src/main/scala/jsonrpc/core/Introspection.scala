@@ -2,8 +2,10 @@ package jsonrpc.core
 
 import scala.quoted.{Quotes, Type, quotes}
 
-final class Introspection(using Quotes):
-  import quotes.reflect.{Flags, MethodType, Symbol, TypeRepr, TypeTree}
+final class Introspection(val quotes: Quotes):
+  val reflect = quotes.reflect
+  given Quotes = quotes
+  import reflect.{Flags, MethodType, Symbol, TypeRepr, TypeTree}
 
   private val abstractApiMethodFlags = Seq(
     Flags.Deferred,
@@ -24,12 +26,12 @@ final class Introspection(using Quotes):
     val productMethods = publicMethods(TypeTree.of[Product])
     (anyRefMethods ++ productMethods).map(_.name).toSet
 
-  def publicApiMethods[T <: AnyRef: Type](concrete: Boolean): Seq[Introspection.Method] =
+  def publicApiMethods[T <: AnyRef: Type](concrete: Boolean): Seq[Introspection.Method[TypeRepr]] =
     val classTypeTree = TypeTree.of[T]
     val validMethods = publicMethods(classTypeTree).filter(validApiMethod(_, concrete))
     validMethods.flatMap(methodSymbol => methodDescriptor(classTypeTree, methodSymbol))
 
-  private def methodDescriptor(classTypeTree: TypeTree, methodSymbol: Symbol): Option[Introspection.Method] =
+  private def methodDescriptor(classTypeTree: TypeTree, methodSymbol: Symbol): Option[Introspection.Method[TypeRepr]] =
     classTypeTree.tpe.memberType(methodSymbol) match
       case methodType: MethodType =>
         val methodTypes = LazyList.iterate(Option(methodType)) {
@@ -41,11 +43,11 @@ final class Introspection(using Quotes):
         val (_, _, resultType) = MethodType.unapply(methodTypes.last)
         val params = methodTypes.map { currentType =>
           val (paramNames, paramTypes, resultType) = MethodType.unapply(currentType)
-          paramNames.zip(paramTypes).map((paramName, paramType) => Introspection.Param(paramName, paramType.show))
+          paramNames.zip(paramTypes).map((paramName, paramType) => Introspection.Param(paramName, paramType))
         }
-        Some(Introspection.Method(
+        Some(Introspection.Method[TypeRepr](
           methodSymbol.name,
-          resultType.show,
+          resultType,
           params,
           methodSymbol.docstring
         ))
@@ -68,14 +70,14 @@ final class Introspection(using Quotes):
     matchingFlags.foldLeft(false)((result, current) => result | flags.is(current))
 
 object Introspection:
-  final case class Param(
+  final case class Param[T](
     name: String,
-    dataType: String,
+    dataType: T,
   )
 
-  final case class Method(
+  final case class Method[T](
     name: String,
-    resultType: String,
-    params: Seq[Seq[Param]],
+    resultType: T,
+    params: Seq[Seq[Param[T]]],
     documentation: Option[String],
   )

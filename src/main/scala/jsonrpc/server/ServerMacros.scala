@@ -1,15 +1,27 @@
 package jsonrpc.server
 
 import jsonrpc.core.Introspection
+import jsonrpc.core.Introspection.Method
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
 object ServerMacros:
 
   inline def bind[T <: AnyRef](inline api: T): Unit = ${bind('api)}
 
-  private def bind[T <: AnyRef: Type](api: Expr[T])(using Quotes): Expr[Unit] =
+  private def bind[T <: AnyRef: Type](api: Expr[T])(using quotes: Quotes): Expr[Unit] =
     import quotes.reflect.*
-    val introspection = Introspection()
+
+    val introspection = Introspection(quotes)
+
+    def methodDescription(method: Method[introspection.reflect.TypeRepr]): String =
+      val paramLists = method.params.map { params =>
+        s"(${params.map { param =>
+          s"${param.name}: ${simpleTypeName(param.dataType.show)}"
+        }.mkString(", ")})"
+      }.mkString
+      val documentation = method.documentation.map(_ + "\n").getOrElse("")
+      val resultType = simpleTypeName(method.resultType.show)
+      s"$documentation${method.name}$paramLists: $resultType\n"
     val apiTypeTree = TypeTree.of[T]
     val apiMethods = introspection.publicApiMethods[T](concrete = true)
     val apiDescription = apiMethods.map(methodDescription).mkString("\n")
@@ -31,16 +43,6 @@ object ServerMacros:
       println()
       println(${Expr(apiDescription)})
     }
-
-  private def methodDescription(method: Introspection.Method): String =
-    val paramLists = method.params.map { params =>
-      s"(${params.map { param =>
-        s"${param.name}: ${simpleTypeName(param.dataType)}"
-      }.mkString(", ")})"
-    }.mkString
-    val documentation = method.documentation.map(_ + "\n").getOrElse("")
-    val resultType = simpleTypeName(method.resultType)
-    s"$documentation${method.name}$paramLists: $resultType\n"
 
   private def simpleTypeName(typeName: String): String =
     typeName.replaceAll("[^\\[\\], ]+\\.", "").nn

@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets
 import jsonrpc.spi.{CallError, JsonContext, Message}
 import jsonrpc.spi
 import ujson.Value
-import upickle.default.{ReadWriter, macroRW}
+import upickle.default.{Writer, Reader, ReadWriter, macroRW}
 
 final case class UpickleJsonContext() extends JsonContext[Value]:
   type Json = Value
@@ -15,18 +15,24 @@ final case class UpickleJsonContext() extends JsonContext[Value]:
 
   def decode[T](json: Json): T = ???
 
-  def serialize(message: Message[Json]): Array[Byte] =
+  def serialize(message: Message[Json]): Array[Byte] = {
     upickle.default.writeToByteArray(UpickleJsonContext.Message(message))
+  }
 
-  def derialize(json: Array[Byte]): Message[Json] =
+  def derialize(json: Array[Byte]): Message[Json] = {
     upickle.default.read[UpickleJsonContext.Message](json).toSpi
+  }
 
   def format(message: Message[Json]): String =
     upickle.default.write(UpickleJsonContext.Message(message), indent)
 
-//  def encode[T](value: T): Json = upickle.default.writeJs(value)
-
-//  def decode[T](json: Json): T = upickle.default.read[T](json)
+//  def encode[T](value: T): Json =
+//    summon[Writer[T]]
+//    upickle.default.writeJs(value)
+//
+//  def decode[T](json: Json): T =
+//    summon[Reader[T]]
+//    upickle.default.read[T](json)
 
 object UpickleJsonContext:
   type Json = Value
