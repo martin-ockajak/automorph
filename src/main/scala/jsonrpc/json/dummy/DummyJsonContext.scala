@@ -3,10 +3,10 @@ package jsonrpc.json.dummy
 import java.nio.charset.StandardCharsets
 import jsonrpc.spi.{JsonContext, Message}
 
-final case class DummyJsonContext() extends JsonContext[String, Option, Option]:
+final case class DummyJsonContext() extends JsonContext[String, [_] =>> Unit, [_] =>> Unit]:
   type Json = String
-  type Encoder[T] = Option[T]
-  type Decoder[T] = Option[T]
+  type Encoder = [_] =>> Unit
+  type Decoder = [_] =>> Unit
 
   private val charset = StandardCharsets.UTF_8.nn
 
