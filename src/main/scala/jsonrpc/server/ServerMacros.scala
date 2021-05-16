@@ -22,13 +22,21 @@ object ServerMacros:
       val documentation = method.documentation.map(_ + "\n").getOrElse("")
       val resultType = simpleTypeName(method.resultType.show)
       s"$documentation${method.name}$paramLists: $resultType\n"
+
+    // Introspect the API instance & generate its description
     val apiTypeTree = TypeTree.of[T]
     val apiMethods = introspection.publicApiMethods[T](concrete = true)
     val apiDescription = apiMethods.map(methodDescription).mkString("\n")
+
+    // Generate method call code
     val typeParam = TypeRepr.of[List[List[String]]]
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
     val call = Select.unique(api.asTerm, methodName).appliedToNone
+
+    // Generate function call using a type parameter
     val typedCall = Select.unique('{List}.asTerm, "apply").appliedToType(typeParam).appliedTo('{List.empty}.asTerm)
+
+    // Debug printounts
     println(
       s"""
         |Call:
@@ -37,6 +45,8 @@ object ServerMacros:
         |Typed call:
         |  ${typedCall}
         |""".stripMargin)
+
+    // Generate printouts code using the previously generated code
     '{
       println(${call.asExpr})
       println(${typedCall.asExpr})
