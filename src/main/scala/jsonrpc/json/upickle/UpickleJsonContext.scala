@@ -1,30 +1,27 @@
 package jsonrpc.json.upickle
 
 import java.nio.charset.StandardCharsets
+import jsonrpc.spi.{CallError, JsonContext, Message}
 import jsonrpc.spi
-import jsonrpc.spi.JsonContext
-import UpickleJsonContext.CallError
-import UpickleJsonContext.Message
-import upickle.default.ReadWriter
-import upickle.default.macroRW
 import ujson.Value
+import upickle.default.{ReadWriter, macroRW}
 
 final case class UpickleJsonContext() extends JsonContext[Value]:
   type Json = Value
 
   private val charset = StandardCharsets.UTF_8.nn
-  private given ReadWriter[CallError] = macroRW
-  private given ReadWriter[Message] = macroRW
+  private given ReadWriter[UpickleJsonContext.CallError] = macroRW
+  private given ReadWriter[UpickleJsonContext.Message] = macroRW
 
   def encode[T](value: T): Json = ???
 
   def decode[T](json: Json): T = ???
 
-  def serialize(response: spi.Message[Json]): Array[Byte] =
-    upickle.default.write(Message(response)).getBytes(charset).nn
+  def serialize(response: Message[Json]): Array[Byte] =
+    upickle.default.write(UpickleJsonContext.Message(response)).getBytes(charset).nn
 
-  def derialize(json: Array[Byte]): spi.Message[Json] =
-    upickle.default.read[Message](String(json, charset))
+  def derialize(json: Array[Byte]): Message[Json] =
+    upickle.default.read[UpickleJsonContext.Message](String(json, charset)).toSpi
 
 //  def encode[T](value: T): Json = upickle.default.writeJs(value)
 
@@ -40,7 +37,16 @@ object UpickleJsonContext:
     params: Option[Either[List[Json], Map[String, Json]]],
     result: Option[Json],
     error: Option[CallError]
-  ) extends spi.Message[Json]
+  ):
+    def toSpi: spi.Message[Json] =
+      spi.Message[Json](
+        jsonrpc,
+        id,
+        method,
+        params,
+        result,
+        error.map(_.toSpi)
+      )
 
   object Message:
     def apply(v: spi.Message[Json]): Message = Message(
@@ -56,7 +62,13 @@ object UpickleJsonContext:
     code: Option[Int],
     message: Option[String],
     data: Option[Json]
-  ) extends spi.CallError[Json]
+  ):
+    def toSpi: spi.CallError[Json] =
+      spi.CallError[Json](
+        code,
+        message,
+        data
+      )
 
   object CallError:
     def apply(v: spi.CallError[Json]): CallError = CallError(

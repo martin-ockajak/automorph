@@ -35,19 +35,7 @@ class ServerSpec
     Some(structure),
     None
   )
-  private val dummyMessage = DummyJsonContext.Message(
-    Some("2.0"),
-    None,
-    None,
-    Some(Right(Map(
-      "x" -> "foo",
-      "y" -> "1",
-      "z" -> "true"
-    ))),
-    Some("test"),
-    None
-  )
-  private val upickleMessage = UpickleJsonContext.Message(
+  private val upickleMessage = Message(
     Some("2.0"),
     None,
     None,
@@ -70,10 +58,6 @@ class ServerSpec
     value => value.ordinal,
     number => Enum.fromOrdinal(number)
   )
-  private given ReadWriter[Structure] = macroRW
-  private given ReadWriter[Record] = macroRW
-  private given ReadWriter[UpickleJsonContext.CallError] = macroRW
-  private given ReadWriter[UpickleJsonContext.Message] = macroRW
 //  given Encoder[Thing] = deriveEncoder[Thing]
 //  given Decoder[Thing] = deriveDecoder[Thing]
 //  private given Encoder[Enum] = Encoder.encodeInt.contramap[Enum](_.ordinal)
@@ -94,10 +78,9 @@ class ServerSpec
     }
     "JSON" - {
       "Upickle" in {
-        val recordJson = upickle.default.write(record)
-        println(upickle.default.read[Record](recordJson))
-        val messageJson = upickle.default.write(upickleMessage)
-        println(upickle.default.read[UpickleJsonContext.Message](messageJson))
+        val jsonContext = UpickleJsonContext()
+        val messageJson = jsonContext.serialize(upickleMessage)
+        println(jsonContext.derialize(messageJson))
       }
       "Circe" in {
 //        val thing = Thing("test")
