@@ -18,10 +18,10 @@ final case class UpickleJsonContext() extends JsonContext[Value]:
   def decode[T](json: Json): T = ???
 
   def serialize(response: Message[Json]): Array[Byte] =
-    upickle.default.write(UpickleJsonContext.Message(response)).getBytes(charset).nn
+    upickle.default.writeToByteArray(UpickleJsonContext.Message(response))
 
   def derialize(json: Array[Byte]): Message[Json] =
-    upickle.default.read[UpickleJsonContext.Message](String(json, charset)).toSpi
+    upickle.default.read[UpickleJsonContext.Message](json).toSpi
 
 //  def encode[T](value: T): Json = upickle.default.writeJs(value)
 
