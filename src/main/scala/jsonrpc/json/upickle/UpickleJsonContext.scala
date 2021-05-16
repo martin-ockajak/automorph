@@ -10,8 +10,6 @@ final case class UpickleJsonContext() extends JsonContext[Value]:
   type Json = Value
 
   private val indent = 2
-  private given ReadWriter[UpickleJsonContext.CallError] = macroRW
-  private given ReadWriter[UpickleJsonContext.Message] = macroRW
 
   def encode[T](value: T): Json = ???
 
@@ -52,6 +50,8 @@ object UpickleJsonContext:
       )
 
   object Message:
+    given ReadWriter[Message] = macroRW
+
     def apply(v: spi.Message[Json]): Message = Message(
       v.jsonrpc,
       v.id,
@@ -74,6 +74,8 @@ object UpickleJsonContext:
       )
 
   object CallError:
+    given ReadWriter[CallError] = macroRW
+
     def apply(v: spi.CallError[Json]): CallError = CallError(
       v.code,
       v.message,
