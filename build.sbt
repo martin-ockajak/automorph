@@ -10,7 +10,7 @@ lazy val root = project.in(file(".")).settings(
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.12.3",
     "dev.zio" %% "zio" % "1.0.7",
     "org.scalatest" %% "scalatest" % "3.2.8" % Test,
-    "org.scalacheck" %% "scalacheck" % "1.15.4" % Test,
+    "org.scalatestplus" %% "scalacheck-1-15" % "3.2.8.0" % Test,
     "org.scala-lang" %% "scala3-tasty-inspector" % scalaVersion.value
   )
 )
