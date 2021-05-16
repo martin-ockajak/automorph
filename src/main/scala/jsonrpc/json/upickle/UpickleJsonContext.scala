@@ -26,13 +26,13 @@ final case class UpickleJsonContext() extends JsonContext[Value]:
   def format(message: Message[Json]): String =
     upickle.default.write(UpickleJsonContext.Message(message), indent)
 
-//  def encode[T](value: T): Json =
-//    summon[Writer[T]]
-//    upickle.default.writeJs(value)
-//
-//  def decode[T](json: Json): T =
-//    summon[Reader[T]]
-//    upickle.default.read[T](json)
+  def encode[T:Writer](value: T): Json =
+    summon[Writer[T]]
+    upickle.default.writeJs(value)
+
+  def decode[T:Reader](json: Json): T =
+    summon[Reader[T]]
+    upickle.default.read[T](json)
 
 object UpickleJsonContext:
   type Json = Value
