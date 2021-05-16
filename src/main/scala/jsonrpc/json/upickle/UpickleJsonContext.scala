@@ -13,13 +13,11 @@ final case class UpickleJsonContext() extends JsonContext[Value, Writer, Reader]
 
   private val indent = 2
 
-  def serialize(message: Message[Json]): Array[Byte] = {
+  def serialize(message: Message[Json]): Array[Byte] =
     upickle.default.writeToByteArray(UpickleJsonContext.Message(message))
-  }
 
-  def derialize(json: Array[Byte]): Message[Json] = {
+  def derialize(json: Array[Byte]): Message[Json] =
     upickle.default.read[UpickleJsonContext.Message](json).toSpi
-  }
 
   def format(message: Message[Json]): String =
     upickle.default.write(UpickleJsonContext.Message(message), indent)
