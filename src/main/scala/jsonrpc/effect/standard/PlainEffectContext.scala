@@ -1,11 +1,6 @@
 package jsonrpc.effect.native
 
-import java.io.{ByteArrayOutputStream, InputStream, OutputStream}
-import java.nio.ByteBuffer
 import jsonrpc.spi.EffectContext
-import scala.collection.immutable.ArraySeq
-import scala.util.control.NonFatal
-import scala.util.{Success, Try}
 
 final case class PlainEffectContext() extends EffectContext[PlainEffectContext.Id]:
   

@@ -10,6 +10,7 @@ lazy val root = project.in(file(".")).settings(
 
     // Effect
 //    "dev.zio" % "zio" % "1.0.7",
+    "io.monix" %% "monix-eval" % "3.4.0",
 
     // Test
     "org.scalatest" %% "scalatest" % "3.2.9" % Test,
