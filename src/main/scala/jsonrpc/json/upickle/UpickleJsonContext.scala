@@ -9,7 +9,6 @@ import upickle.default.{ReadWriter, macroRW}
 final case class UpickleJsonContext() extends JsonContext[Value]:
   type Json = Value
 
-  private val charset = StandardCharsets.UTF_8.nn
   private given ReadWriter[UpickleJsonContext.CallError] = macroRW
   private given ReadWriter[UpickleJsonContext.Message] = macroRW
 
