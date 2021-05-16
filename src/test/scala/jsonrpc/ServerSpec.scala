@@ -81,8 +81,9 @@ class ServerSpec
         val jsonContext = UpickleJsonContext()
         val messageJson = jsonContext.serialize(upickleMessage)
         println(jsonContext.derialize(messageJson))
+        println(jsonContext.format(upickleMessage))
       }
-      "Circe" in {
+//      "Circe" in {
 //        val thing = Thing("test")
 //        val thingJson = thing.asJson.spaces2
 //        println(thingJson)
@@ -93,7 +94,7 @@ class ServerSpec
 //        val recordJson = record.asJson.spaces2
 //        println(recordJson)
 //        println(decode[Record](recordJson))
-      }
+//      }
     }
   }
 

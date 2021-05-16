@@ -9,6 +9,7 @@ import upickle.default.{ReadWriter, macroRW}
 final case class UpickleJsonContext() extends JsonContext[Value]:
   type Json = Value
 
+  private val indent = 2
   private given ReadWriter[UpickleJsonContext.CallError] = macroRW
   private given ReadWriter[UpickleJsonContext.Message] = macroRW
 
@@ -16,11 +17,14 @@ final case class UpickleJsonContext() extends JsonContext[Value]:
 
   def decode[T](json: Json): T = ???
 
-  def serialize(response: Message[Json]): Array[Byte] =
-    upickle.default.writeToByteArray(UpickleJsonContext.Message(response))
+  def serialize(message: Message[Json]): Array[Byte] =
+    upickle.default.writeToByteArray(UpickleJsonContext.Message(message))
 
   def derialize(json: Array[Byte]): Message[Json] =
     upickle.default.read[UpickleJsonContext.Message](json).toSpi
+
+  def format(message: Message[Json]): String =
+    upickle.default.write(UpickleJsonContext.Message(message), indent)
 
 //  def encode[T](value: T): Json = upickle.default.writeJs(value)
 
