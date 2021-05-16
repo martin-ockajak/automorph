@@ -6,7 +6,7 @@ import jsonrpc.json.dummy.DummyJsonContext
 import jsonrpc.json.upickle.UpickleJsonContext
 import jsonrpc.spi.{CallError, Message}
 import ujson.{Bool, Num, Str, Value}
-import upickle.default.*
+import upickle.default.{ReadWriter, Writer}
 //import io.circe.syntax.*
 //import io.circe.parser.decode
 //import io.circe.*
@@ -84,6 +84,8 @@ class ServerSpec
       }
       "Upickle" in {
         val jsonContext = UpickleJsonContext()
+        given Writer[String] = upickle.default.StringWriter
+        jsonContext.encode("test")
         val messageJson = jsonContext.serialize(upickleMessage)
         println(jsonContext.derialize(messageJson))
         println(jsonContext.format(upickleMessage))
