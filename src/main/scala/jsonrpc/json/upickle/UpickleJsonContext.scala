@@ -5,6 +5,7 @@ import jsonrpc.spi.{CallError, JsonContext, Message}
 import jsonrpc.spi
 import ujson.Value
 import upickle.default.{Writer, Reader, ReadWriter, macroRW}
+import scala.collection.immutable.ArraySeq
 
 final case class UpickleJsonContext()
   extends JsonContext[Value, Writer, Reader]:
@@ -15,11 +16,18 @@ final case class UpickleJsonContext()
 
   private val indent = 2
 
-  def serialize(message: Message[Json]): Array[Byte] =
-    upickle.default.writeToByteArray(UpickleJsonContext.Message(message))
+  def serialize(message: Message[Json]): ArraySeq.ofByte =
+    val array = upickle.default.writeToByteArray(UpickleJsonContext.Message(message))
 
-  def derialize(json: Array[Byte]): Message[Json] =
-    upickle.default.read[UpickleJsonContext.Message](json).toSpi
+    // TODO: delete me
+    //       semantics looked somewhat unclear in API
+    //       inspection of stdlib sources suggests this does not copy the array
+    //       test in REPL confermed the array is NOT copied, but unsafely wrapped
+    //       (which is what we want for performance)
+    ArraySeq.ofByte(array)
+
+  def derialize(json: ArraySeq.ofByte): Message[Json] =
+    upickle.default.read[UpickleJsonContext.Message](json.unsafeArray).toSpi
 
   def format(message: Message[Json]): String =
     upickle.default.write(UpickleJsonContext.Message(message), indent)

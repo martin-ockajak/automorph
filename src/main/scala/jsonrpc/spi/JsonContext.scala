@@ -6,10 +6,10 @@ import jsonrpc.spi.Message
 import scala.collection.immutable.ArraySeq
 
 trait JsonContext[Json, Encoder[_], Decoder[_]]:
-  
-  def serialize(message: Message[Json]): Array[Byte]
 
-  def derialize(json: Array[Byte]): Message[Json]
+  def serialize(message: Message[Json]): ArraySeq.ofByte
+
+  def derialize(json: ArraySeq.ofByte): Message[Json]
 
   def format(message: Message[Json]): String
 
