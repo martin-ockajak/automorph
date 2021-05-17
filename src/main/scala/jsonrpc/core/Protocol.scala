@@ -28,12 +28,12 @@ object Protocol:
   ) extends RuntimeException(message, cause)
 
   enum ErrorType(val code: Int):
-    case ParseError extends ErrorType(-32700)
-    case InvalidRequest extends ErrorType(-32600)
-    case MethodNotFound extends ErrorType(-32601)
-    case InvalidParams extends ErrorType(-32602)
-    case InternalError extends ErrorType(-32603)
-    case IOError extends ErrorType(-32000)
+    case ParseError       extends ErrorType(-32700)
+    case InvalidRequest   extends ErrorType(-32600)
+    case MethodNotFound   extends ErrorType(-32601)
+    case InvalidParams    extends ErrorType(-32602)
+    case InternalError    extends ErrorType(-32603)
+    case IOError          extends ErrorType(-32000)
     case ApplicationError extends ErrorType(0)
 
   object Request:
@@ -50,21 +50,26 @@ object Protocol:
       val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
       require(jsonrpc == version, s"Invalid JSON-RPC protocol version: $jsonrpc")
       val id = mandatory(message.id, "id")
-      message.result.map { result =>
-        Response(id, Right(result))
+      message.result.map {
+        result => Response(id, Right(result))
       }.getOrElse {
         val error = mandatory(message.error, "error")
         Response(id, Left(error))
       }
 
-  lazy val exceptionErrorTypes: Map[Class[?], ErrorType] = Map(
-    classOf[ParseError] -> ErrorType.ParseError,
-    classOf[InvalidRequest] -> ErrorType.InvalidRequest,
-    classOf[IllegalArgumentException] -> ErrorType.InvalidParams,
-    classOf[IOException] -> ErrorType.IOError,
-  )
+  lazy val exceptionErrorTypes: Map[Class[?], ErrorType] =
+    Map(
+      classOf[ParseError]               -> ErrorType.ParseError,
+      classOf[InvalidRequest]           -> ErrorType.InvalidRequest,
+      classOf[IllegalArgumentException] -> ErrorType.InvalidParams,
+      classOf[IOException]              -> ErrorType.IOError
+    )
 
   private val version = "2.0"
 
   private def mandatory[T](value: Option[T], name: String): T =
-    value.getOrElse(throw IllegalArgumentException(s"Missing message property: $name"))
+    require(
+      value.isDefined,
+      s"missing message property: $name"
+    )
+    value.get

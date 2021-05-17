@@ -3,7 +3,9 @@ package jsonrpc.json.dummy
 import java.nio.charset.StandardCharsets
 import jsonrpc.spi.{JsonContext, Message}
 
-final case class DummyJsonContext() extends JsonContext[String, [_] =>> Unit, [_] =>> Unit]:
+final case class DummyJsonContext()
+  extends JsonContext[String, [_] =>> Unit, [_] =>> Unit]:
+
   type Json = String
   type Encoder = [_] =>> Unit
   type Decoder = [_] =>> Unit

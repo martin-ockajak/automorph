@@ -6,7 +6,9 @@ import jsonrpc.spi
 import ujson.Value
 import upickle.default.{Writer, Reader, ReadWriter, macroRW}
 
-final case class UpickleJsonContext() extends JsonContext[Value, Writer, Reader]:
+final case class UpickleJsonContext()
+  extends JsonContext[Value, Writer, Reader]:
+
   type Json = Value
   type Encoder[T] = Writer[T]
   type Decoder[T] = Reader[T]
@@ -52,14 +54,16 @@ object UpickleJsonContext:
   object Message:
     given ReadWriter[Message] = macroRW
 
-    def apply(v: spi.Message[Json]): Message = Message(
-      v.jsonrpc,
-      v.id,
-      v.method,
-      v.params,
-      v.result,
-      v.error.map(CallError.apply)
-    )
+    def apply(v: spi.Message[Json]): Message =
+      Message(
+        v.jsonrpc,
+        v.id,
+        v.method,
+        v.params,
+        v.result,
+        v.error.map(CallError.apply)
+      )
+  end Message
 
   final case class CallError(
     code: Option[Int],
@@ -81,3 +85,6 @@ object UpickleJsonContext:
       v.message,
       v.data
     )
+  end CallError
+
+end UpickleJsonContext
