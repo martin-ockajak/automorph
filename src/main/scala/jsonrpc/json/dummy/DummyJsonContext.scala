@@ -6,18 +6,31 @@ import scala.collection.immutable.ArraySeq
 import DummyJsonContext.*
 
 case object DummyJsonContext:
-  type Json = String
-  case class DummyEncoder[T]()
-  case class DummyDecoder[T]()
+  private type Json = String
 
-  // this automatically causes any call to
-  // .encode() and .decode() to work (without local givens),
-  // because givens defined in a companion object are implicitely available
-  given [T]: DummyEncoder[T] = DummyEncoder[T]()
-  given [T]: DummyDecoder[T] = DummyDecoder[T]()
+  abstract class Encoder[T]:
+    def encode(t:T):String
+
+  abstract class Decoder[T]:
+    def decode(json:String):T
+
+  // this automatically causes
+  // .encode[_]()
+  // .decode[String]()
+  // to type check (without local givens)
+  // because givens defined in companion objects are implicitely available
+  given [T]: Encoder[T] =
+    new Encoder[T]:
+      def encode(t:T):String = t.toString
+
+  // for test purposes, strings are decoded, only
+  given Decoder[String] =
+    new Decoder[String]:
+      def decode(json:Json):String = json
+
 
 final case class DummyJsonContext()
-  extends JsonContext[Json, DummyEncoder, DummyDecoder]:
+  extends JsonContext[Json, Encoder, Decoder]:
 
   private val charset = StandardCharsets.UTF_8.nn
 
@@ -29,6 +42,6 @@ final case class DummyJsonContext()
 
   def format(message: Message[Json]): String = message.toString
 
-  def encode[T: DummyEncoder](value: T): Json = value.toString
+  def encode[T: Encoder](value: T): Json = summon[Encoder[T]].encode(value)
 
-  def decode[T: DummyDecoder](json: Json): T = json.asInstanceOf[T]
+  def decode[T: Decoder](json: Json): T = summon[Decoder[T]].decode(json)
