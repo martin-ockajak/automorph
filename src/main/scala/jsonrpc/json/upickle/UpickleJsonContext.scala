@@ -32,7 +32,7 @@ final case class UpickleJsonContext()
   def format(message: Message[Json]): String =
     write(UpickleJsonContext.Message(message), indent)
 
-  def encode[T](value: T): Json = ???
+  def encode[T](value: T): Json = UpickleMacros.xencode(this, value)
 //    writeJs[T](value)
 
   def decode[T](json: Json): T = ???
@@ -45,31 +45,6 @@ final case class UpickleJsonContext()
 
 object UpickleJsonContext:
   type Json = Value
-
-  inline def xencode[T](inline api: AttributeTagged, inline value: T): Value = ${xencode[T]('api, 'value)}
-
-  private def xencode[T: Type](api: Expr[AttributeTagged], value: Expr[T])(using quotes: Quotes): Expr[Value] =
-    val ref = Reflection(quotes)
-    val apiTypeTree = ref.ast.TypeTree.of[AttributeTagged]
-    val apiMethods = ref.publicApiMethods(apiTypeTree, concrete = false)
-    val apiDescription = apiMethods.map(method => s"${method.name}: ${method.resultType.show}\n").mkString("\n")
-
-//    apiMethods.filter(_.resultType.show.contains("Writer")).foreach { method =>
-//      println(s"${method.name}: ${method.resultType.show}")
-//    }
-//    val publicMethods = introspection.publicMethods(introspection.ref.TypeTree.of[AttributeTagged])
-//    val publicDescription = publicMethods.map(method => s"${method.name} - ${method.flags}\n").mkString("\n")
-//    println(publicDescription)
-
-    val valueType = ref.ast.TypeTree.of[T]
-//    val call = ref.call(ref.term(api), "writeJs", List(valueType), List(List(ref.term(value))))
-//    println(call)
-    '{
-//      ${call.asExpr}
-//      ${api}.writeJs[String]("test")(using ${api}.StringWriter)
-//      ${api}.writeJs[T](${value})
-      Str("test")
-    }
 
   final case class Message(
     jsonrpc: Option[String],

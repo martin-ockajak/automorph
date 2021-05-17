@@ -4,6 +4,7 @@ import base.BaseSpec
 import jsonrpc.effect.native.PlainEffectContext
 import jsonrpc.json.dummy.DummyJsonContext
 import jsonrpc.json.upickle.UpickleJsonContext
+import jsonrpc.json.upickle.UpickleMacros
 import jsonrpc.spi.{CallError, Message}
 import ujson.{Bool, Num, Str, Value}
 import upickle.default.{Writer, ReadWriter}
@@ -84,13 +85,16 @@ class ServerSpec
       "Upickle" in {
         val jsonContext = UpickleJsonContext()
 //        given Writer[String] = upickle.default.StringWriter
-        UpickleJsonContext.xencode[String](jsonContext, "test")
+        println("----------------")
+        println(UpickleMacros.xencode[String](jsonContext, "test"))
+        println("----------------")
 
         val api = jsonContext
         api.writeJs[String]("test")
 
 //        given UpickleJsonContext = jsonContext
         jsonContext.yencode("test")
+        println(jsonContext.encode("test"))
 //        val messageJson = jsonContext.serialize(upickleMessage)
 //        println(jsonContext.derialize(messageJson))
 //        println(jsonContext.format(upickleMessage))
