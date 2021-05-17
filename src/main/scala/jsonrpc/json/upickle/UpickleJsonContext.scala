@@ -1,45 +1,73 @@
 package jsonrpc.json.upickle
 
-import java.nio.charset.StandardCharsets
+import jsonrpc.core.Introspection
 import jsonrpc.spi.{CallError, JsonContext, Message}
 import jsonrpc.spi
 import ujson.Value
+import ujson.Str
 import upickle.default.{Writer, Reader, ReadWriter, macroRW}
+import upickle.{Api, AttributeTagged}
 import scala.collection.immutable.ArraySeq
+import scala.quoted.{Expr, Quotes, Type, quotes}
 
 final case class UpickleJsonContext()
-  extends JsonContext[Value, Writer, Reader]:
-
+  extends JsonContext[Value] with AttributeTagged:
   type Json = Value
-  type Encoder[T] = Writer[T]
-  type Decoder[T] = Reader[T]
 
   private val indent = 2
+  private given ReadWriter[UpickleJsonContext.Message] = macroRW
+  private given ReadWriter[UpickleJsonContext.CallError] = macroRW
 
   def serialize(message: Message[Json]): ArraySeq.ofByte =
-    val array = upickle.default.writeToByteArray(UpickleJsonContext.Message(message))
-
     // TODO: delete me
-    //       semantics looked somewhat unclear in API
+    //       semantics of ArraySeq.ofByte looked somewhat unclear in API
     //       inspection of stdlib sources suggests this does not copy the array
     //       test in REPL confermed the array is NOT copied, but unsafely wrapped
     //       (which is what we want for performance)
-    ArraySeq.ofByte(array)
+    ArraySeq.ofByte(writeToByteArray(UpickleJsonContext.Message(message)))
 
   def derialize(json: ArraySeq.ofByte): Message[Json] =
-    upickle.default.read[UpickleJsonContext.Message](json.unsafeArray).toSpi
+    read[UpickleJsonContext.Message](json.unsafeArray).toSpi
 
   def format(message: Message[Json]): String =
-    upickle.default.write(UpickleJsonContext.Message(message), indent)
+    write(UpickleJsonContext.Message(message), indent)
 
-  def encode[T: Encoder](value: T): Json =
-    upickle.default.writeJs(value)
+  def encode[T](value: T): Json = ???
+//    writeJs(value)(writer[T])
 
-  def decode[T: Decoder](json: Json): T =
-    upickle.default.read[T](json)
+  def decode[T](json: Json): T = ???
+//    read[T](json)(reader[T])
+
+  def xencode[T](value: T): Value = ???
 
 object UpickleJsonContext:
   type Json = Value
+
+  inline def xencode[T](inline api: AttributeTagged, inline value: T): Value = ${xencode[T]('api, 'value)}
+
+  private def xencode[T: Type](api: Expr[AttributeTagged], value: Expr[T])(using quotes: Quotes): Expr[Value] =
+    import quotes.reflect.*
+
+    val introspection = Introspection(quotes)
+    val apiTypeTree = introspection.reflect.TypeTree.of[AttributeTagged]
+    val apiMethods = introspection.publicApiMethods(apiTypeTree, concrete = false)
+    val apiDescription = apiMethods.map(method => s"${method.name}: ${method.resultType.show}\n").mkString("\n")
+
+//    apiMethods.filter(_.resultType.show.contains("Writer")).foreach { method =>
+//      println(s"${method.name}: ${method.resultType.show}")
+//    }
+//    val publicMethods = introspection.publicMethods(introspection.reflect.TypeTree.of[AttributeTagged])
+//    val publicDescription = publicMethods.map(method => s"${method.name} - ${method.flags}\n").mkString("\n")
+//    println(publicDescription)
+
+    val valueType = introspection.reflect.TypeTree.of[T]
+    val call = introspection.call(introspection.term(api), "writeJs", List(valueType), List(List(introspection.term(value))))
+    println(call)
+    '{
+//      ${call.asExpr}
+//      ${api}.writeJs[T](${value})
+      Str("test")
+    }
 
   final case class Message(
     jsonrpc: Option[String],
@@ -60,7 +88,6 @@ object UpickleJsonContext:
       )
 
   object Message:
-    given ReadWriter[Message] = macroRW
 
     def apply(v: spi.Message[Json]): Message =
       Message(
@@ -86,7 +113,6 @@ object UpickleJsonContext:
       )
 
   object CallError:
-    given ReadWriter[CallError] = macroRW
 
     def apply(v: spi.CallError[Json]): CallError = CallError(
       v.code,
