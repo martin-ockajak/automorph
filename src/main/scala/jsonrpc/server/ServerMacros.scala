@@ -47,8 +47,8 @@ object ServerMacros:
 
     // Generate printouts code using the previously generated code
     '{
-      println(${call.asExpr})
-      println(${typedCall.asExpr})
+//      println(${call.asExpr})
+//      println(${typedCall.asExpr})
       println()
       println(${Expr(apiDescription)})
     }

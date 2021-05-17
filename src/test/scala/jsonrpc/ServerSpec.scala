@@ -85,6 +85,12 @@ class ServerSpec
         val jsonContext = UpickleJsonContext()
 //        given Writer[String] = upickle.default.StringWriter
         UpickleJsonContext.xencode[String](jsonContext, "test")
+
+        val api = jsonContext
+        api.writeJs[String]("test")
+
+//        given UpickleJsonContext = jsonContext
+        jsonContext.yencode("test")
 //        val messageJson = jsonContext.serialize(upickleMessage)
 //        println(jsonContext.derialize(messageJson))
 //        println(jsonContext.format(upickleMessage))

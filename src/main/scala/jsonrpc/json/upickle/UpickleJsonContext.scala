@@ -33,10 +33,13 @@ final case class UpickleJsonContext()
     write(UpickleJsonContext.Message(message), indent)
 
   def encode[T](value: T): Json = ???
-//    writeJs(value)(writer[T])
+//    writeJs[T](value)
 
   def decode[T](json: Json): T = ???
 //    read[T](json)(reader[T])
+
+  inline def yencode[T: Writer](value: T): Json =
+    this.writeJs[T](value)
 
   def xencode[T](value: T): Value = ???
 
@@ -59,10 +62,11 @@ object UpickleJsonContext:
 //    println(publicDescription)
 
     val valueType = ref.ast.TypeTree.of[T]
-    val call = ref.call(ref.term(api), "writeJs", List(valueType), List(List(ref.term(value))))
-    println(call)
+//    val call = ref.call(ref.term(api), "writeJs", List(valueType), List(List(ref.term(value))))
+//    println(call)
     '{
 //      ${call.asExpr}
+//      ${api}.writeJs[String]("test")(using ${api}.StringWriter)
 //      ${api}.writeJs[T](${value})
       Str("test")
     }
