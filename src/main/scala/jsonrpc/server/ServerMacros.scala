@@ -28,12 +28,12 @@ object ServerMacros:
     val apiDescription = apiMethods.map(methodDescription).mkString("\n")
 
     // Generate method call code
-    val typeParam = TypeRepr.of[List[List[String]]]
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
-    val call = Select.unique(api.asTerm, methodName).appliedToNone
+    val call = ref.call(ref.term(api), methodName, List.empty, List.empty)
 
     // Generate function call using a type parameter
-    val typedCall = Select.unique('{List}.asTerm, "apply").appliedToType(typeParam).appliedTo('{List.empty}.asTerm)
+    val typeParam = ref.ast.TypeTree.of[List[List[String]]]
+    val typedCall = ref.call(ref.term('{List}), "apply", List(typeParam), List.empty)
 
     // Debug printounts
     println(
