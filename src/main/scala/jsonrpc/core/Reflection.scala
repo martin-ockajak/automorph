@@ -2,7 +2,7 @@ package jsonrpc.core
 
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
-final class Reflect(val quotes: Quotes):
+final class Reflection(val quotes: Quotes):
   import ast.{asTerm, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
 
   final case class Param(

@@ -1,6 +1,6 @@
 package jsonrpc.server
 
-import jsonrpc.core.Introspection
+import jsonrpc.core.Reflection
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
 object ServerMacros:
@@ -10,9 +10,9 @@ object ServerMacros:
   private def bind[T <: AnyRef: Type](api: Expr[T])(using quotes: Quotes): Expr[Unit] =
     import quotes.reflect.*
 
-    val introspection = Introspection(quotes)
+    val ref = Reflection(quotes)
 
-    def methodDescription(method: introspection.Method): String =
+    def methodDescription(method: ref.Method): String =
       val paramLists = method.params.map { params =>
         s"(${params.map { param =>
           s"${param.name}: ${simpleTypeName(param.dataType.show)}"
@@ -23,8 +23,8 @@ object ServerMacros:
       s"$documentation${method.name}$paramLists: $resultType\n"
 
     // Introspect the API instance & generate its description
-    val apiTypeTree = introspection.reflect.TypeTree.of[T]
-    val apiMethods = introspection.publicApiMethods(apiTypeTree, concrete = true)
+    val apiTypeTree = ref.ast.TypeTree.of[T]
+    val apiMethods = ref.publicApiMethods(apiTypeTree, concrete = true)
     val apiDescription = apiMethods.map(methodDescription).mkString("\n")
 
     // Generate method call code
