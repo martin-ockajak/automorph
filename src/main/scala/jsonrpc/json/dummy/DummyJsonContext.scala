@@ -14,8 +14,8 @@ case object DummyJsonContext:
   // .encode() and .decode() to work,
   // because givens defined in a companion object are implicitely available
   // that is, no more 'given Unit = ()'
-  given DummyEncoder[String] = DummyEncoder[String]()
-  given DummyDecoder[String] = DummyDecoder[String]()
+  given [T]: DummyEncoder[T] = DummyEncoder[T]()
+  given [T]: DummyDecoder[T] = DummyDecoder[T]()
 
 final case class DummyJsonContext()
   extends JsonContext[Json, DummyEncoder, DummyDecoder]:
