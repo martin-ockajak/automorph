@@ -2,8 +2,8 @@ package jsonrpc.core
 
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
-final class Introspection(val quotes: Quotes):
-  import reflect.{asTerm, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
+final class Reflect(val quotes: Quotes):
+  import ast.{asTerm, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
 
   final case class Param(
     name: String,
@@ -23,7 +23,7 @@ final class Introspection(val quotes: Quotes):
     symbol: Symbol
   )
 
-  val reflect = quotes.reflect
+  val ast = quotes.reflect
   private given Quotes = quotes
 
   private val abstractApiMethodFlags:Seq[Flags] =
