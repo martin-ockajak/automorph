@@ -11,9 +11,8 @@ case object DummyJsonContext:
   case class DummyDecoder[T]()
 
   // this automatically causes any call to
-  // .encode() and .decode() to work,
+  // .encode() and .decode() to work (without local givens),
   // because givens defined in a companion object are implicitely available
-  // that is, no more 'given Unit = ()'
   given [T]: DummyEncoder[T] = DummyEncoder[T]()
   given [T]: DummyDecoder[T] = DummyDecoder[T]()
 
