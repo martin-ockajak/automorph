@@ -8,25 +8,22 @@ import DummyJsonContext.*
 case object DummyJsonContext:
   private type Json = String
 
-  abstract class Encoder[T]:
-    def encode(t:T):String
+  final case class Encoder[T]():
+    def encode(t:T):String = t.toString
 
+  @FunctionalInterface
   abstract class Decoder[T]:
     def decode(json:String):T
 
-  // this automatically causes
+  // this 2 givens automatically causes
   // .encode[_]()
   // .decode[String]()
   // to type check (without local givens)
   // because givens defined in companion objects are implicitely available
-  given [T]: Encoder[T] =
-    new Encoder[T]:
-      def encode(t:T):String = t.toString
+  given [T]: Encoder[T] = Encoder[T]()
 
-  // for test purposes, strings are decoded, only
-  given Decoder[String] =
-    new Decoder[String]:
-      def decode(json:Json):String = json
+  // for test purposes, only strings are decoded
+  given Decoder[String] = identity
 
 
 final case class DummyJsonContext()
