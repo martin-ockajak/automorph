@@ -79,7 +79,6 @@ class ServerSpec
     "JSON" - {
       "Dummy" in {
         val jsonContext = DummyJsonContext()
-        given Unit = ()
         jsonContext.encode("test")
       }
       "Upickle" in {

@@ -3,13 +3,22 @@ package jsonrpc.json.dummy
 import java.nio.charset.StandardCharsets
 import jsonrpc.spi.{JsonContext, Message}
 import scala.collection.immutable.ArraySeq
+import DummyJsonContext.*
+
+case object DummyJsonContext:
+  type Json = String
+  case class DummyEncoder[T]()
+  case class DummyDecoder[T]()
+
+  // this automatically causes any call to
+  // .encode() and .decode() to work,
+  // because givens defined in a companion object are implicitely available
+  // that is, no more 'given Unit = ()'
+  given DummyEncoder[String] = DummyEncoder[String]()
+  given DummyDecoder[String] = DummyDecoder[String]()
 
 final case class DummyJsonContext()
-  extends JsonContext[String, [_] =>> Unit, [_] =>> Unit]:
-
-  type Json = String
-  type Encoder = [_] =>> Unit
-  type Decoder = [_] =>> Unit
+  extends JsonContext[Json, DummyEncoder, DummyDecoder]:
 
   private val charset = StandardCharsets.UTF_8.nn
 
@@ -21,6 +30,6 @@ final case class DummyJsonContext()
 
   def format(message: Message[Json]): String = message.toString
 
-  def encode[T: Encoder](value: T): Json = value.toString
+  def encode[T: DummyEncoder](value: T): Json = value.toString
 
-  def decode[T: Decoder](json: Json): T = json.asInstanceOf[T]
+  def decode[T: DummyDecoder](json: Json): T = json.asInstanceOf[T]
