@@ -1,8 +1,8 @@
 package bugreport
 
-import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.quoted.{Expr, Quotes}
 
-inline def foo(inline x:Int, a:A): Int = ${foo('x, 'a)}
+inline def foo(x:Int, a:A): Int = ${foo('x, 'a)}
 
 private def foo(x: Expr[Int], a:Expr[A])(using quotes: Quotes): Expr[Int] = '{$a.increment($x)}
 
