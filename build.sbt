@@ -2,7 +2,7 @@ lazy val root = project.in(file(".")).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server",
   version := "0.1.0",
-  scalaVersion := "3.0.1-RC1-bin-20210515-83e17f1-NIGHTLY",
+  scalaVersion := "3.0.0",
   libraryDependencies ++= Seq(
     // JSON
     "com.lihaoyi" %% "upickle" % "1.3.13",

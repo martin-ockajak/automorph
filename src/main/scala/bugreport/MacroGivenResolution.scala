@@ -1,21 +1,32 @@
 package bugreport
 
 import scala.quoted.{Expr, Quotes}
-// does NOT work if you move the next two lines inside class A
-final case class Context()
-given context:Context = Context()
+
+/**** uncomment for macro compilation error
 
 class A:
+  given context:Context = Context()
+  final case class Context()
   def increment(i:Int)(using Context):Int = i+1
 
-inline def foo(inline x:Int, inline a:A): Int = ${foo('x, 'a)}
+// regular code (no macro)
+inline def bar(inline x:Int, a:A): Int =
+  // works
+  a.increment(x)
 
+  // works
+  a.increment(x)(using a.context)
+
+
+inline def foo(x:Int, a:A): Int = ${foo('x, 'a)}
+
+// macro
 private def foo(x: Expr[Int], a:Expr[A])(using quotes: Quotes): Expr[Int] =
   '{$a.increment($x)}
-//  '{$a.increment($x)(using $a.context)}
+  // no implicit argument of type Nothing was found for parameter x$2 of method increment in class A
 
-inline def bar(inline x:Int, a:A): Int =
-  a.increment(x)
-//  a.increment(x)(using a.context)
+  '{$a.increment($x)(using $a.context)}
+  // Found: (bugreport.A#context : bugreport.A#Context) Required: Nothing
 
 
+**/
