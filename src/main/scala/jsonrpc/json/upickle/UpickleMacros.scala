@@ -11,7 +11,7 @@ import scala.quoted.{Expr, Quotes, Type, quotes}
 object UpickleMacros:
   inline def xencode[T](inline parser: AttributeTagged, inline value: T): Value = ${xencode[T]('parser, 'value)}
 
-  private def xencode[T: Type](parser: Expr[AttributeTagged], value: Expr[T])(using quotes: Quotes): Expr[Value] =
+  private def xencode[T](parser: Expr[AttributeTagged], value: Expr[T])(using t: Type[T])(using quotes: Quotes): Expr[Value] =
     import ref.quotes.reflect.*
 
     val ref = Reflection(quotes)
@@ -33,7 +33,6 @@ object UpickleMacros:
     //    println(publicDescription)
 
     val valueType = TypeTree.of[T]
-    val typeParameter = Type.of[T]
     //    val call = reflection.callTerm(ref.term(api), "writeJs", List(valueType), List(List(ref.term(value))))
     val writer = '{${parser}.StringWriter}
     val callString = ref.callTerm(ref.term(parser), "writeJs",
@@ -41,9 +40,10 @@ object UpickleMacros:
     //    println(call)
     '{
       val realParser = $parser
+      type X = t.Underlying
       ${callString.asExpr}.asInstanceOf[Value]
 //      ${call.asExpr}
 //      realParser.writeJs("test")
-//      realParser.writeJs[${typeParameter}](${value})
+//      realParser.writeJs[X](${value})
 //  Str("test")
     }
