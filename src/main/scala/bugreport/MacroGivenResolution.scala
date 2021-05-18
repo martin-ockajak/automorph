@@ -2,7 +2,6 @@ package bugreport
 
 import scala.quoted.{Expr, Quotes}
 
-/**** uncomment for macro compilation error
 
 class A:
   final case class Context()
@@ -18,18 +17,17 @@ inline def foo(a:A, i:Int): Int =
   a.increment(i)(using a.context)
 
 
-inline def bar(a:A, i:Int): Int = ${bar('a, 'i)}
+inline def bar(inline a:A, inline i:Int): Int = ${bar('a, 'i)}
 
 // macro
 private def bar(a:Expr[A], i: Expr[Int])(using quotes: Quotes): Expr[Int] =
   '{
-    $a.increment($i)
+    val aa = $a
+    aa.increment($i)
     // no implicit argument of type Nothing was found for parameter x$2 of method increment in class A
 
-    $a.increment($i)(using $a.context)
+    aa.increment($i)(using aa.context)
     // Found: (bugreport.A#context : bugreport.A#Context)
     // Required: Nothing
   }
 
-
-**/
