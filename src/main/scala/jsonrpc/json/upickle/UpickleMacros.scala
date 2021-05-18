@@ -39,9 +39,10 @@ object UpickleMacros:
       List(TypeTree.of[String]), List(List(ref.term('{"test"})), List(ref.term(writer))))
     //    println(call)
     '{
-            ${callString.asExpr}.asInstanceOf[Value]
-    //      ${call.asExpr}
-    //      ${api}.writeJs[String]("test")(using ${api}.StringWriter)
-    //      ${api}.writeJs[T](${value})
-    //  Str("test")
+      val realParser = $parser
+      ${callString.asExpr}.asInstanceOf[Value]
+//      ${call.asExpr}
+//      realParser.writeJs("test")
+//      realParser.writeJs[T](${value})
+//  Str("test")
     }
