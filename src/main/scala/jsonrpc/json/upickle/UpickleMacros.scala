@@ -33,6 +33,7 @@ object UpickleMacros:
     //    println(publicDescription)
 
     val valueType = TypeTree.of[T]
+    val typeParameter = Type.of[T]
     //    val call = reflection.callTerm(ref.term(api), "writeJs", List(valueType), List(List(ref.term(value))))
     val writer = '{${parser}.StringWriter}
     val callString = ref.callTerm(ref.term(parser), "writeJs",
@@ -43,6 +44,6 @@ object UpickleMacros:
       ${callString.asExpr}.asInstanceOf[Value]
 //      ${call.asExpr}
 //      realParser.writeJs("test")
-//      realParser.writeJs[T](${value})
+//      realParser.writeJs[${typeParameter}](${value})
 //  Str("test")
     }
