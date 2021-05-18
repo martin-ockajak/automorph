@@ -3,7 +3,7 @@ package jsonrpc.core
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
 final class Reflection(val quotes: Quotes):
-  import quotes.reflect.{asTerm, AppliedType, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
+  import quotes.reflect.{asTerm, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
 
   final case class Param(
     name: String,
@@ -28,7 +28,6 @@ final class Reflection(val quotes: Quotes):
   final case class Field(
     name: String,
     dataType: TypeRepr,
-    typeArguments: Seq[TypeRepr],
     public: Boolean,
     concrete: Boolean,
     symbol: Symbol
@@ -63,13 +62,13 @@ final class Reflection(val quotes: Quotes):
     classSymbol.memberFields.flatMap(field(classTypeTree, _))
 
   def baseTypes(dataType: TypeRepr): Seq[TypeRepr] =
-    dataType.baseClasses.map(dataType.baseType).flatMap {
-      case appliedType: AppliedType => Some(appliedType)
-      case _ => None
-    }
+    dataType.baseClasses.map(dataType.baseType)
 
-  def callTerm(value: Term, methodName: String, typeArguments: List[TypeTree], arguments: List[List[Term]]): Term =
-    Select.unique(value, methodName).appliedToTypeTrees(typeArguments).appliedToArgss(arguments)
+  def accessTerm(value: Term, name: String): Term =
+    Select.unique(value, name)
+
+  def callTerm(value: Term, name: String, typeArguments: List[TypeTree], arguments: List[List[Term]]): Term =
+    accessTerm(value, name).appliedToTypeTrees(typeArguments).appliedToArgss(arguments)
 
   def term[T](value: Expr[T]): Term =
     value.asTerm
@@ -108,17 +107,14 @@ final class Reflection(val quotes: Quotes):
     (params, resultType)
 
   private def field(classTypeTree: TypeTree, fieldSymbol: Symbol): Option[Field] =
-    classTypeTree.tpe.memberType(fieldSymbol) match
-      case appliedType: AppliedType =>
-        Some(Field(
-          fieldSymbol.name,
-          appliedType.tycon,
-          appliedType.args,
-          publicSymbol(fieldSymbol),
-          concreteSymbol(fieldSymbol),
-          fieldSymbol
-        ))
-      case _ => None
+    val fieldType = classTypeTree.tpe.memberType(fieldSymbol)
+    Some(Field(
+      fieldSymbol.name,
+      fieldType,
+      publicSymbol(fieldSymbol),
+      concreteSymbol(fieldSymbol),
+      fieldSymbol
+    ))
 
   private def publicSymbol(symbol: Symbol): Boolean =
     !matchesFlags(symbol.flags, hiddenMemberFlags)

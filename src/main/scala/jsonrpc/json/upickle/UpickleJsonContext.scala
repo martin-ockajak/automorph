@@ -5,10 +5,10 @@ import jsonrpc.spi.{CallError, JsonContext, Message}
 import jsonrpc.spi
 import ujson.Value
 import ujson.Str
-import upickle.default.{Writer, Reader, ReadWriter, macroRW}
 import upickle.{Api, AttributeTagged}
 import scala.collection.immutable.ArraySeq
 import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.compiletime.{erasedValue, error, summonInline}
 
 final case class UpickleJsonContext()
   extends JsonContext[Value] with AttributeTagged:
@@ -33,16 +33,13 @@ final case class UpickleJsonContext()
     write(UpickleJsonContext.Message(message), indent)
 
 //  def encode[T](value: T): Json = UpickleMacros.xencode(this, value)
-  def encode[T](value: T): Json =
-//    val x = summon[this.Writer[T]]
+  inline def encode[T](value: T): Json =
+//    val x = summonInline[Writer[T]]
     UpickleMacros.xencode(this, value)
   //    writeJs[T](value)
 
   def decode[T](json: Json): T = ???
 //    read[T](json)(reader[T])
-
-  inline def yencode[T: Writer](value: T): Json =
-    this.writeJs[T](value)
 
   def xencode[T](value: T): Value = ???
 
