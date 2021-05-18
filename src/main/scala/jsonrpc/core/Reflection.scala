@@ -3,7 +3,7 @@ package jsonrpc.core
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
 final class Reflection(val quotes: Quotes):
-  import ast.{asTerm, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
+  import quotes.reflect.{asTerm, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
 
   final case class Param(
     name: String,
@@ -20,13 +20,22 @@ final class Reflection(val quotes: Quotes):
     resultType: TypeRepr,
     params: Seq[Seq[Param]],
     typeParams: Seq[TypeParam],
+    public: Boolean,
+    concrete: Boolean,
     symbol: Symbol
   )
 
-  val ast = quotes.reflect
+  final case class Field(
+    name: String,
+    dataType: TypeRepr,
+    public: Boolean,
+    concrete: Boolean,
+    symbol: Symbol
+  )
+
   private given Quotes = quotes
 
-  private val abstractApiMethodFlags:Seq[Flags] =
+  private val abstractMemberFlags:Seq[Flags] =
     Seq(
       Flags.Deferred,
       Flags.Erased,
@@ -36,7 +45,7 @@ final class Reflection(val quotes: Quotes):
       Flags.Transparent,
     )
 
-  private val omittedApiMethodFlags:Seq[Flags] =
+  private val hiddenMemberFlags:Seq[Flags] =
     Seq(
       Flags.Private,
       Flags.PrivateLocal,
@@ -44,23 +53,21 @@ final class Reflection(val quotes: Quotes):
       Flags.Synthetic,
     )
 
-  private val baseMethodNames: Set[String] =
-    val anyRefMethods = publicMethods(TypeTree.of[AnyRef])
-    val productMethods = publicMethods(TypeTree.of[Product])
-    (anyRefMethods ++ productMethods).map(_.name).toSet
-
-  def publicApiMethods(classTypeTree: TypeTree, concrete: Boolean): Seq[Method] =
+  def methods(classTypeTree: TypeTree): Seq[Method] =
     val classSymbol = classTypeTree.tpe.typeSymbol
-    val methods = classSymbol.memberMethods.flatMap(symbol => methodDescriptor(classTypeTree, symbol))
-    methods.filter(validMethod(_, public = true, concrete))
+    classSymbol.memberMethods.flatMap(method(classTypeTree, _))
 
-  def call(value: Term, methodName: String, typeArguments: List[TypeTree], arguments: List[List[Term]]): Term =
+  def fields(classTypeTree: TypeTree): Seq[Method] =
+    val classSymbol = classTypeTree.tpe.typeSymbol
+    classSymbol.memberFields.flatMap(field(classTypeTree, _))
+
+  def callTerm(value: Term, methodName: String, typeArguments: List[TypeTree], arguments: List[List[Term]]): Term =
     Select.unique(value, methodName).appliedToTypeTrees(typeArguments).appliedToArgss(arguments)
 
   def term[T](value: Expr[T]): Term =
     value.asTerm
 
-  private def methodDescriptor(classTypeTree: TypeTree, methodSymbol: Symbol): Option[Method] =
+  private def method(classTypeTree: TypeTree, methodSymbol: Symbol): Option[Method] =
     classTypeTree.tpe.memberType(methodSymbol) match
       case methodType: MethodType =>
         val (params, resultType) = methodSignature(methodType)
@@ -69,6 +76,8 @@ final class Reflection(val quotes: Quotes):
           resultType,
           params,
           Seq.empty,
+          publicSymbol(methodSymbol),
+          concreteSymbol(methodSymbol),
           methodSymbol
         ))
       case polyType: PolyType =>
@@ -83,6 +92,8 @@ final class Reflection(val quotes: Quotes):
               resultType,
               params,
               typeParams,
+              publicSymbol(methodSymbol),
+              concreteSymbol(methodSymbol),
               methodSymbol
             ))
           case _ => None
@@ -104,21 +115,46 @@ final class Reflection(val quotes: Quotes):
     }
     (params, resultType)
 
-  private def publicMethods(classTypeTree: TypeTree): Seq[Symbol] =
-    val classSymbol = classTypeTree.tpe.typeSymbol
-    classSymbol.memberMethods.filter{
-      methodSymbol => !matchesFlags(methodSymbol.flags, omittedApiMethodFlags)
-    }
+  private def field(classTypeTree: TypeTree, fieldSymbol: Symbol): Option[Method] =
+    classTypeTree.tpe.memberType(fieldSymbol) match
+//      case methodType: MethodType =>
+//        val (params, resultType) = methodSignature(methodType)
+//        Some(Method(
+//          fieldSymbol.name,
+//          resultType,
+//          params,
+//          Seq.empty,
+//          publicSymbol(methodSymbol),
+//          concreteSymbol(methodSymbol),
+//          fieldSymbol
+//        ))
+//      case polyType: PolyType =>
+//        // TODO: remove .unapply when PolyType will be declared/fixed as Matchable
+//        val (typeParamNames, typeBounds, resultType) = PolyType.unapply(polyType)
+//        resultType match
+//          case actualMethodType: MethodType =>
+//            val (params, resultType) = methodSignature(actualMethodType)
+//            val typeParams = typeParamNames.zip(typeBounds).map((name, bounds) => TypeParam(name, bounds))
+//            Some(Method(
+//              fieldSymbol.name,
+//              resultType,
+//              params,
+//              typeParams,
+//              publicSymbol(methodSymbol),
+//              concreteSymbol(methodSymbol),
+//              fieldSymbol
+//            ))
+//          case _ => None
+      case _ =>
+        println(fieldSymbol.name)
+        println(fieldSymbol.getClass.getName)
+        None
 
-  private def validMethod(method: Method, public: Boolean, concrete: Boolean): Boolean =
-    method.symbol.flags.is(Flags.Method) &&
-      !(public && matchesFlags(method.symbol.flags, omittedApiMethodFlags)) &&
-        !baseMethodNames.contains(method.symbol.name) && (
-          if concrete && matchesFlags(method.symbol.flags, abstractApiMethodFlags) then
-            throw new IllegalStateException(s"Invalid API method: ${method.symbol.fullName}")
-          else
-            true
-        )
+  private def publicSymbol(symbol: Symbol): Boolean =
+    !matchesFlags(symbol.flags, hiddenMemberFlags)
+
+  private def concreteSymbol(symbol: Symbol): Boolean =
+    !matchesFlags(symbol.flags, abstractMemberFlags)
 
   private def matchesFlags(flags: Flags, matchingFlags: Seq[Flags]): Boolean =
     matchingFlags.foldLeft(false)((result, current) => result | flags.is(current))
