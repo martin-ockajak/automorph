@@ -10,23 +10,26 @@ class A:
   def increment(i:Int)(using Context):Int = i+1
 
 // regular code (no macro)
-inline def bar(inline x:Int, a:A): Int =
+inline def foo(a:A, i:Int): Int =
   // works
-  a.increment(x)
+  a.increment(i)
 
   // works
-  a.increment(x)(using a.context)
+  a.increment(i)(using a.context)
 
 
-inline def foo(x:Int, a:A): Int = ${foo('x, 'a)}
+inline def bar(a:A, i:Int): Int = ${bar('a, 'i)}
 
 // macro
-private def foo(x: Expr[Int], a:Expr[A])(using quotes: Quotes): Expr[Int] =
-  '{$a.increment($x)}
-  // no implicit argument of type Nothing was found for parameter x$2 of method increment in class A
+private def bar(a:Expr[A], i: Expr[Int])(using quotes: Quotes): Expr[Int] =
+  '{
+    $a.increment($i)
+    // no implicit argument of type Nothing was found for parameter x$2 of method increment in class A
 
-  '{$a.increment($x)(using $a.context)}
-  // Found: (bugreport.A#context : bugreport.A#Context) Required: Nothing
+    $a.increment($i)(using $a.context)
+    // Found: (bugreport.A#context : bugreport.A#Context)
+    // Required: Nothing
+  }
 
 
 **/
