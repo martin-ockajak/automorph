@@ -5,8 +5,8 @@ import scala.quoted.{Expr, Quotes}
 /**** uncomment for macro compilation error
 
 class A:
-  given context:Context = Context()
   final case class Context()
+  given context:Context = Context()
   def increment(i:Int)(using Context):Int = i+1
 
 // regular code (no macro)
