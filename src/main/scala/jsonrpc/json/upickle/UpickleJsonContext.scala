@@ -33,10 +33,9 @@ final case class UpickleJsonContext()
     write(UpickleJsonContext.Message(message), indent)
 
 //  def encode[T](value: T): Json = UpickleMacros.xencode(this, value)
-  inline def encode[T](value: T): Json = {
-    val x = summon[AttributeTagged#Writer[T]]
-    UpickleMacros.xencode(this, value)(x)
-  }
+  def encode[T](value: T): Json =
+//    val x = summon[this.Writer[T]]
+    UpickleMacros.xencode(this, value)
   //    writeJs[T](value)
 
   def decode[T](json: Json): T = ???
