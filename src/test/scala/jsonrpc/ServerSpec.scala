@@ -94,7 +94,7 @@ class ServerSpec
 
 //        given UpickleJsonContext = jsonContext
         jsonContext.yencode("test")
-        println(jsonContext.encode("test"))
+//        println(jsonContext.encode("test"))
 //        val messageJson = jsonContext.serialize(upickleMessage)
 //        println(jsonContext.derialize(messageJson))
 //        println(jsonContext.format(upickleMessage))

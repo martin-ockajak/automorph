@@ -9,9 +9,9 @@ import upickle.{Api, AttributeTagged}
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
 object UpickleMacros:
-  inline def xencode[T](inline parser: AttributeTagged, inline value: T): Value = ${xencode[T]('parser, 'value)}
+  inline def xencode[T](inline parser: AttributeTagged, inline value: T)(using writer: AttributeTagged#Writer[T]): Value = ${xencode[T]('parser, 'value)(writer)}
 
-  private def xencode[T](parser: Expr[AttributeTagged], value: Expr[T])(using t: Type[T])(using quotes: Quotes): Expr[Value] =
+  private def xencode[T: Type](parser: Expr[AttributeTagged], value: Expr[T], writer: AttributeTagged#Writer[T])(using quotes: Quotes): Expr[Value] =
     import ref.quotes.reflect.*
 
     val ref = Reflection(quotes)
@@ -34,16 +34,18 @@ object UpickleMacros:
 
     val valueType = TypeTree.of[T]
     //    val call = reflection.callTerm(ref.term(api), "writeJs", List(valueType), List(List(ref.term(value))))
-    val writer = '{${parser}.StringWriter}
-    val callString = ref.callTerm(ref.term(parser), "writeJs",
-      List(TypeTree.of[String]), List(List(ref.term('{"test"})), List(ref.term(writer))))
+//    val writer = '{${parser}.StringWriter}
+//    val callString = ref.callTerm(ref.term(parser), "writeJs",
+//      List(TypeTree.of[String]), List(List(ref.term('{"test"})), List(ref.term(writer))))
+//    val typedCall = ref.callTerm(ref.term(parser), "witeJs",
+//      List(TypeTree.of[String]), List(List(ref.term('{"test"})), List(ref.term(writer))))
     //    println(call)
     '{
       val realParser = $parser
-      type X = t.Underlying
-      ${callString.asExpr}.asInstanceOf[Value]
+//      type X = t.Underlying
+    //      ${callString.asExpr}.asInstanceOf[Value]
 //      ${call.asExpr}
 //      realParser.writeJs("test")
-//      realParser.writeJs[X](${value})
+      realParser.writeJs(${value})
 //  Str("test")
     }
