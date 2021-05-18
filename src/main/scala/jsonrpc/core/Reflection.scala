@@ -3,7 +3,7 @@ package jsonrpc.core
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
 final class Reflection(val quotes: Quotes):
-  import quotes.reflect.{asTerm, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
+  import quotes.reflect.{asTerm, AppliedType, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
 
   final case class Param(
     name: String,
@@ -57,7 +57,7 @@ final class Reflection(val quotes: Quotes):
     val classSymbol = classTypeTree.tpe.typeSymbol
     classSymbol.memberMethods.flatMap(method(classTypeTree, _))
 
-  def fields(classTypeTree: TypeTree): Seq[Method] =
+  def fields(classTypeTree: TypeTree): Seq[Field] =
     val classSymbol = classTypeTree.tpe.typeSymbol
     classSymbol.memberFields.flatMap(field(classTypeTree, _))
 
@@ -68,87 +68,49 @@ final class Reflection(val quotes: Quotes):
     value.asTerm
 
   private def method(classTypeTree: TypeTree, methodSymbol: Symbol): Option[Method] =
-    classTypeTree.tpe.memberType(methodSymbol) match
+    val (symbolType, typeParams) = classTypeTree.tpe.memberType(methodSymbol) match
+      case polyType: PolyType =>
+        val typeParams = polyType.paramNames.zip(polyType.paramBounds).map((name, bounds) => TypeParam(name, bounds))
+        (polyType.resType, typeParams)
+      case otherType => (otherType, Seq.empty)
+    symbolType match
       case methodType: MethodType =>
         val (params, resultType) = methodSignature(methodType)
         Some(Method(
           methodSymbol.name,
           resultType,
           params,
-          Seq.empty,
+          typeParams,
           publicSymbol(methodSymbol),
           concreteSymbol(methodSymbol),
           methodSymbol
         ))
-      case polyType: PolyType =>
-        // TODO: remove .unapply when PolyType will be declared/fixed as Matchable
-        val (typeParamNames, typeBounds, resultType) = PolyType.unapply(polyType)
-        resultType match
-          case actualMethodType: MethodType =>
-            val (params, resultType) = methodSignature(actualMethodType)
-            val typeParams = typeParamNames.zip(typeBounds).map((name, bounds) => TypeParam(name, bounds))
-            Some(Method(
-              methodSymbol.name,
-              resultType,
-              params,
-              typeParams,
-              publicSymbol(methodSymbol),
-              concreteSymbol(methodSymbol),
-              methodSymbol
-            ))
-          case _ => None
       case _ => None
 
   private def methodSignature(methodType: MethodType): (Seq[Seq[Param]], TypeRepr) =
     val methodTypes = LazyList.iterate(Option(methodType)) {
-      // TODO: remove .unapply when MethodType will be declared/fixed as Matchable
-      case Some(currentType) => MethodType.unapply(currentType) match
-        case (_, _, resultType: MethodType) => Some(resultType)
+      case Some(currentType) => currentType.resType match
+        case resultType: MethodType => Some(resultType)
         case _ => None
       case _ => None
     }.takeWhile(_.isDefined).flatten
-    // TODO: remove .unapply when MethodType will be declared/fixed as Matchable
-    val (_, _, resultType) = MethodType.unapply(methodTypes.last)
     val params = methodTypes.map { currentType =>
-      val (paramNames, paramTypes, resultType) = MethodType.unapply(currentType)
-      paramNames.zip(paramTypes).map((name, dataType) => Param(name, dataType))
+      currentType.paramNames.zip(currentType.paramTypes).map((name, dataType) => Param(name, dataType))
     }
+    val resultType = methodTypes.last.resType
     (params, resultType)
 
-  private def field(classTypeTree: TypeTree, fieldSymbol: Symbol): Option[Method] =
+  private def field(classTypeTree: TypeTree, fieldSymbol: Symbol): Option[Field] =
     classTypeTree.tpe.memberType(fieldSymbol) match
-//      case methodType: MethodType =>
-//        val (params, resultType) = methodSignature(methodType)
-//        Some(Method(
-//          fieldSymbol.name,
-//          resultType,
-//          params,
-//          Seq.empty,
-//          publicSymbol(methodSymbol),
-//          concreteSymbol(methodSymbol),
-//          fieldSymbol
-//        ))
-//      case polyType: PolyType =>
-//        // TODO: remove .unapply when PolyType will be declared/fixed as Matchable
-//        val (typeParamNames, typeBounds, resultType) = PolyType.unapply(polyType)
-//        resultType match
-//          case actualMethodType: MethodType =>
-//            val (params, resultType) = methodSignature(actualMethodType)
-//            val typeParams = typeParamNames.zip(typeBounds).map((name, bounds) => TypeParam(name, bounds))
-//            Some(Method(
-//              fieldSymbol.name,
-//              resultType,
-//              params,
-//              typeParams,
-//              publicSymbol(methodSymbol),
-//              concreteSymbol(methodSymbol),
-//              fieldSymbol
-//            ))
-//          case _ => None
-      case _ =>
-        println(fieldSymbol.name)
-        println(fieldSymbol.getClass.getName)
-        None
+      case appliedType: AppliedType =>
+        Some(Field(
+          fieldSymbol.name,
+          appliedType.tycon,
+          publicSymbol(fieldSymbol),
+          concreteSymbol(fieldSymbol),
+          fieldSymbol
+        ))
+      case _ => None
 
   private def publicSymbol(symbol: Symbol): Boolean =
     !matchesFlags(symbol.flags, hiddenMemberFlags)
