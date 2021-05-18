@@ -28,6 +28,7 @@ final class Reflection(val quotes: Quotes):
   final case class Field(
     name: String,
     dataType: TypeRepr,
+    typeArguments: Seq[TypeRepr],
     public: Boolean,
     concrete: Boolean,
     symbol: Symbol
@@ -60,6 +61,12 @@ final class Reflection(val quotes: Quotes):
   def fields(classTypeTree: TypeTree): Seq[Field] =
     val classSymbol = classTypeTree.tpe.typeSymbol
     classSymbol.memberFields.flatMap(field(classTypeTree, _))
+
+  def baseTypes(dataType: TypeRepr): Seq[TypeRepr] =
+    dataType.baseClasses.map(dataType.baseType).flatMap {
+      case appliedType: AppliedType => Some(appliedType)
+      case _ => None
+    }
 
   def callTerm(value: Term, methodName: String, typeArguments: List[TypeTree], arguments: List[List[Term]]): Term =
     Select.unique(value, methodName).appliedToTypeTrees(typeArguments).appliedToArgss(arguments)
@@ -106,6 +113,7 @@ final class Reflection(val quotes: Quotes):
         Some(Field(
           fieldSymbol.name,
           appliedType.tycon,
+          appliedType.args,
           publicSymbol(fieldSymbol),
           concreteSymbol(fieldSymbol),
           fieldSymbol

@@ -17,10 +17,13 @@ object UpickleMacros:
     val ref = Reflection(quotes)
     val parserTypeTree = TypeTree.of[AttributeTagged]
     val parserMethods = ref.methods(parserTypeTree).filter(_.public)
-    ref.fields(parserTypeTree).foreach { field =>
-      println(field.name)
+//    ref.fields(parserTypeTree).foreach { field =>
+//      println(field.name)
 //      println(field.dataType.show)
-    }
+//      println(field.typeArguments.map(_.show).mkString(", "))
+//      println(ref.baseTypes(field.dataType).map(_.show).mkString(", "))
+//    }
+
 
 //    parserMethods.filter(_.resultType.show.contains("Writer")).foreach { method =>
 //      println(s"${method.name}: ${method.resultType.show}")
