@@ -61,9 +61,6 @@ final class Reflection(val quotes: Quotes):
     val classSymbol = classTypeTree.tpe.typeSymbol
     classSymbol.memberFields.flatMap(field(classTypeTree, _))
 
-  def baseTypes(dataType: TypeRepr): Seq[TypeRepr] =
-    dataType.baseClasses.map(dataType.baseType)
-
   def accessTerm(value: Term, name: String): Term =
     Select.unique(value, name)
 
