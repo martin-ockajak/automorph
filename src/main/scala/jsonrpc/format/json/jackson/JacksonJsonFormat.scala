@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import jsonrpc.spi.{FormatContext, Message}
 import scala.collection.immutable.ArraySeq
-import io.github.gaeljw.typetrees.TypeTreeTagMacros.typeTreeTag
+import scala.compiletime.summonInline
+import scala.reflect.ClassTag
 
 final case class JacksonJsonFormat(mapper: ObjectMapper = JacksonJsonFormat.defaultMapper)
   extends FormatContext[JsonNode]:
@@ -25,8 +26,8 @@ final case class JacksonJsonFormat(mapper: ObjectMapper = JacksonJsonFormat.defa
     mapper.valueToTree(value).asInstanceOf[Json]
 
   inline def decode[T](json: Json): T =
-    val typeTag = typeTreeTag[T]
-    val valueClass = typeTag.self.runtimeClass.asInstanceOf[Class[T]]
+    val classTag = summonInline[ClassTag[T]]
+    val valueClass = classTag.runtimeClass.asInstanceOf[Class[T]]
     mapper.treeToValue(json, valueClass).nn
 
 object JacksonJsonFormat:
