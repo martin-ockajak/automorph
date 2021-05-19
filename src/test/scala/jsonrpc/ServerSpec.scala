@@ -89,7 +89,7 @@ class ServerSpec
       }
       "Upickle" in {
         val jsonContext = UpickleJsonFormat(upickle.default)
-        println(UpickleMacros.xencode(upickle.default, jsonContext.parser.StringWriter, "test"))
+        println(UpickleMacros.encode(upickle.default, jsonContext.parser.StringWriter, "test"))
         println(jsonContext.encode("test"))
 //        val messageJson = jsonContext.serialize(upickleMessage)
 //        println(messageJson)
