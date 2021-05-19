@@ -19,5 +19,5 @@ object UpickleMacros:
   )(using quotes: Quotes): Expr[Value] =
     '{
       val realParser = $parser
-      realParser.writeJs(${value})(using ${writer}.asInstanceOf[realParser.Writer[T]])
+      realParser.writeJs($value)(using $writer.asInstanceOf[realParser.Writer[T]])
     }
