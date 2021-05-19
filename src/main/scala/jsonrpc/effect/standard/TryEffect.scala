@@ -4,6 +4,13 @@ import jsonrpc.spi.Effect
 import scala.util.{Success, Try}
 import jsonrpc.core.ScalaSupport.*
 
+/**
+ * Try effect system plugin.
+ *
+ * Documentation: https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html
+ * Effect type: Try
+ * Effect type API: https://www.scala-lang.org/api/2.13.6/scala/util/Try.html
+ */
 final case class TryEffect()
   extends Effect[Try]:
   

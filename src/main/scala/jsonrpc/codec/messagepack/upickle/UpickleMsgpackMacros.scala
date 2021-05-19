@@ -1,23 +1,23 @@
-package jsonrpc.codec.json.upickle
+package jsonrpc.codec.messagepack.upickle
 
-import ujson.Value
+import upack.Msg
 import upickle.Api
 import scala.quoted.{Expr, Quotes, Type}
 
-object UpickleMacros:
+object UpickleMsgpackMacros:
   inline def encode[Parser <: Api, T](
     parser: Parser,
     writer: Api#Writer[T],
     value: T
-  ): Value = 
+  ): Msg =
     ${encode('parser, 'writer, 'value)}
 
   private def encode[Parser <: Api: Type, T: Type](
     parser: Expr[Parser],
     writer: Expr[Api#Writer[T]],
     value: Expr[T]
-  )(using quotes: Quotes): Expr[Value] =
+  )(using quotes: Quotes): Expr[Msg] =
     '{
       val realParser = $parser
-      realParser.writeJs($value)(using $writer.asInstanceOf[realParser.Writer[T]])
+      realParser.writeMsg($value)(using $writer.asInstanceOf[realParser.Writer[T]])
     }

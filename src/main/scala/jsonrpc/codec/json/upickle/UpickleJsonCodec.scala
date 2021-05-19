@@ -8,6 +8,13 @@ import scala.collection.immutable.ArraySeq
 import scala.compiletime.summonInline
 import jsonrpc.core.ScalaSupport.*
 
+/**
+ * UPickle JSON codec plugin.
+ *
+ * Documentation: https://github.com/com-lihaoyi/upickle
+ * Effect type: Value
+ * Effect type API: http://com-lihaoyi.github.io/upickle/#uJson
+ */
 final case class UpickleJsonCodec(parser: Api)
   extends Codec[Value]:
 
@@ -35,7 +42,7 @@ final case class UpickleJsonCodec(parser: Api)
 
   inline def encode[T](value: T): Value =
     val writer = summonInline[Writer[T]]
-    UpickleMacros.encode(parser, writer, value)
+    UpickleJsonMacros.encode(parser, writer, value)
 
   inline def decode[T](node: Value): T =
     node.asInstanceOf[T]

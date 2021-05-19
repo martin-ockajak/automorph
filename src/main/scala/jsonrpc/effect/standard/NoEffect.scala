@@ -4,6 +4,12 @@ import jsonrpc.spi.Effect
 import jsonrpc.core.ScalaSupport.*
 import NoEffect.*
 
+/**
+ * No effect system plugin.
+ * Represents direct use of plain values without wrapping them in an effect.
+ *
+ * Effect type: Identity
+ */
 final case class NoEffect()
   extends Effect[Identity]:
 

@@ -9,6 +9,13 @@ import scala.collection.immutable.ArraySeq
 import scala.compiletime.summonInline
 import scala.reflect.ClassTag
 
+/**
+ * Jackson JSON codec plugin.
+ *
+ * Documentation: https://github.com/FasterXML/jackson
+ * Effect type: JsonNode
+ * Effect type API: https://fasterxml.github.io/jackson-databind/javadoc/2.12/com/fasterxml/jackson/databind/JsonNode.html
+ */
 final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaultMapper)
   extends Codec[JsonNode]:
 

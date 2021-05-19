@@ -4,7 +4,7 @@ import cats.effect.IO
 import jsonrpc.spi.Effect
 
 /**
- * Cats effect system plugin.
+ * Cats Effect effect system plugin.
  *
  * Documentation: https://typelevel.org/cats-effect/
  * Effect type: IO
