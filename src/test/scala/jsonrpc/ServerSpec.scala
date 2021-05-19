@@ -1,7 +1,7 @@
 package jsonrpc
 
 import base.BaseSpec
-import jsonrpc.effect.native.PlainEffect
+import jsonrpc.effect.native.NoEffect
 import jsonrpc.codec.json.jackson.JacksonJsonCodec
 import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
@@ -65,7 +65,7 @@ class ServerSpec
   "" - {
     "Bind" - {
       "Default" in {
-        val server = JsonRpcServer(DummyJsonCodec(), PlainEffect())
+        val server = JsonRpcServer(DummyJsonCodec(), NoEffect())
         val api = ApiImpl("")
         server.bind(api)
         (0 == 0).shouldBe(true)

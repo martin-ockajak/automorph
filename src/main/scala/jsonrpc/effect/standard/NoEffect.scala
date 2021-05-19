@@ -2,8 +2,8 @@ package jsonrpc.effect.native
 
 import jsonrpc.spi.Effect
 
-final case class PlainEffect()
-  extends Effect[PlainEffect.Plain]:
+final case class NoEffect()
+  extends Effect[NoEffect.Identity]:
 
   def pure[T](value: T): T = value
 
@@ -13,5 +13,5 @@ final case class PlainEffect()
   def either[T](value: T): Either[Throwable, T] =
     Right(value)
 
-object PlainEffect:
-  type Plain[T] = T
+object NoEffect:
+  type Identity[T] = T

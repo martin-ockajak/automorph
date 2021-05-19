@@ -1,16 +1,16 @@
 package jsonrpc.effect.zio
 
 import jsonrpc.spi.Effect
-import zio.{RIO, Task}
+import zio.{RIO as E, Task}
 
 final case class ZioEffect[Environment]()
-  extends Effect[[T] =>> RIO[Environment, T]]:
+  extends Effect[[T] =>> E[Environment, T]]:
 
-  def pure[T](value: T): RIO[Environment, T] =
-    RIO.succeed(value)
+  def pure[T](value: T): E[Environment, T] =
+    E.succeed(value)
 
-  def map[T, R](value: RIO[Environment, T], function: T => R): RIO[Environment, R] =
+  def map[T, R](value: E[Environment, T], function: T => R): E[Environment, R] =
     value.map(function)
 
-  def either[T](value: RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] =
+  def either[T](value: E[Environment, T]): E[Environment, Either[Throwable, T]] =
     value.either

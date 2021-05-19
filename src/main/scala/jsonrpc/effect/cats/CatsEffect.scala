@@ -1,16 +1,16 @@
 package jsonrpc.effect.cats
 
-import cats.effect.IO
+import cats.effect.{IO as E}
 import jsonrpc.spi.Effect
 
 final case class CatsEffect[Environment]()
-  extends Effect[IO]:
+  extends Effect[E]:
 
-  def pure[T](value: T): IO[T] =
-    IO.pure(value)
+  def pure[T](value: T): E[T] =
+    E.pure(value)
 
-  def map[T, R](value: IO[T], function: T => R): IO[R] =
+  def map[T, R](value: E[T], function: T => R): E[R] =
     value.map(function)
 
-  def either[T](value: IO[T]): IO[Either[Throwable, T]] =
+  def either[T](value: E[T]): E[Either[Throwable, T]] =
     value.attempt
