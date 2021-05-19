@@ -5,7 +5,7 @@ lazy val root = project.in(file(".")).settings(
   scalaVersion := "3.0.0",
   libraryDependencies ++= Seq(
     // Format
-    "com.lihaoyi" %% "upickle" % "1.3.13",
+    "com.lihaoyi" %% "upickle" % "1.3.15",
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.12.3",
     "io.github.gaeljw" %% "typetrees" % "0.5.0",
 
