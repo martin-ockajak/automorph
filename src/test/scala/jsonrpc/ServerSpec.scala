@@ -7,6 +7,9 @@ import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
 import jsonrpc.spi.{CallError, Message}
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.TextNode
+import com.fasterxml.jackson.databind.node.IntNode
+import com.fasterxml.jackson.databind.node.BooleanNode
 import ujson.{Bool, Num, Str}
 import upickle.default.{ReadWriter, Writer}
 import jsonrpc.core.ScalaSupport.*
@@ -54,8 +57,12 @@ class ServerSpec
     "2.0".some,
     None,
     None,
-    None,
-    None,
+    Some(Right(Map(
+      "x" -> TextNode("foo"),
+      "y" -> IntNode(1),
+      "z" -> BooleanNode.TRUE.nn
+    ))),
+    Some(TextNode("test")),
     None
   )
   private given enumRw: ReadWriter[Enum] = 
@@ -84,7 +91,7 @@ class ServerSpec
         println(valueJson)
         println(jsonContext.decode[String](valueJson))
         val messageJson = jsonContext.serialize(jacksonMessage)
-        println(jsonContext.derialize(messageJson))
+        println(jsonContext.deserialize(messageJson))
         println(jsonContext.format(jacksonMessage))
       }
       "Upickle" in {

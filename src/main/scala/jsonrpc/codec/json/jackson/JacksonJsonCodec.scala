@@ -15,7 +15,7 @@ final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaul
   def serialize(message: Message[JsonNode]): ArraySeq.ofByte =
     ArraySeq.ofByte(mapper.writeValueAsBytes(message).nn)
 
-  def derialize(json: ArraySeq.ofByte): Message[JsonNode] =
+  def deserialize(json: ArraySeq.ofByte): Message[JsonNode] =
     mapper.readValue(json.unsafeArray, classOf[Message[JsonNode]]).nn
 
   def format(message: Message[JsonNode]): String =

@@ -6,6 +6,7 @@ lazy val root = project.in(file(".")).settings(
   libraryDependencies ++= Seq(
     // Format
     "com.lihaoyi" %% "upickle" % "1.3.15",
+    "io.circe" %% "circe-parser" % "0.14.0-M7",
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.12.3",
 
     // Effect
@@ -24,25 +25,16 @@ scalacOptions ++= Seq(
   "-new-syntax",
   "-indent",
   "-feature",
+  "-explain-types",
   "-Xcheck-macros",
   "-Yexplicit-nulls",
   "-Ysafe-init",
-//  "-Werror",
-//  "-Wextra-implicit",
-//  "-Wnumeric-widen",
-//  "-Xlint",
-//  "-Vimplicits",
-//  "-Vfree-terms",
-//  "-Vfree-types",
+  "-Xfatal-warnings",
   "-deprecation",
   "-unchecked",
   "-language:strictEquality",
   "-language:higherKinds",
-  "-release", "9",
-//  "-target:12",
-//  "-opt:l:method,inline",
-//  "-opt-inline-from:<sources>",
-//  "-Ybackend-parallelism", "4",
+  "-release", "12",
   "-encoding", "utf8",
-  "-pagewidth", "160",
+  "-pagewidth", "120",
 )

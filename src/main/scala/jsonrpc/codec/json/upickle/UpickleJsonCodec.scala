@@ -12,7 +12,7 @@ final case class UpickleJsonCodec(parser: Api)
   extends Codec[Value]:
 
   import parser.*
-  
+
   private val indent = 2
   private given ReadWriter[UpickleJsonCodec.Message] = macroRW
   private given ReadWriter[UpickleJsonCodec.CallError] = macroRW
@@ -22,14 +22,14 @@ final case class UpickleJsonCodec(parser: Api)
       UpickleJsonCodec.Message(message)
     ).asArraySeq
 
-  def derialize(json: ArraySeq.ofByte): Message[Value] =
+  def deserialize(json: ArraySeq.ofByte): Message[Value] =
     read[UpickleJsonCodec.Message](
       json.unsafeArray
     ).toSpi
 
   def format(message: Message[Value]): String =
     write(
-      UpickleJsonCodec.Message(message), 
+      UpickleJsonCodec.Message(message),
       indent
     )
 
