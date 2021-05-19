@@ -9,6 +9,7 @@ import jsonrpc.format.json.upickle.UpickleMacros
 import jsonrpc.spi.{CallError, Message}
 import ujson.{Bool, Num, Str, Value}
 import upickle.default.{Writer, ReadWriter}
+import com.fasterxml.jackson.databind.{JsonNode}
 //import io.circe.syntax.*
 //import io.circe.parser.decode
 //import io.circe.*
@@ -49,25 +50,18 @@ class ServerSpec
     Some(Str("test")),
     None
   )
-//  private val circeTest = CirceTest(
-//    Some("2.0"),
-//    None,
-//    None,
-//    None,
-//    Some(Json.fromString("test"))
-//  )
+  private val jacksonMessage = Message[JsonNode](
+    Some("2.0"),
+    None,
+    None,
+    None,
+    None,
+    None
+  )
   private given enumRw: ReadWriter[Enum] = upickle.default.readwriter[Int].bimap[Enum](
     value => value.ordinal,
     number => Enum.fromOrdinal(number)
   )
-//  given Encoder[Thing] = deriveEncoder[Thing]
-//  given Decoder[Thing] = deriveDecoder[Thing]
-//  private given Encoder[Enum] = Encoder.encodeInt.contramap[Enum](_.ordinal)
-//  private given Decoder[Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
-//  private given Encoder[Structure] = deriveEncoder[Structure]
-//  private given Decoder[Structure] = deriveDecoder[Structure]
-//  private given Encoder[Record] = deriveEncoder[Record]
-//  private given Decoder[Record] = deriveDecoder[Record]
 
   "" - {
     "Bind" - {
@@ -85,15 +79,20 @@ class ServerSpec
       }
       "Jackson" in {
         val jsonContext = JacksonJsonFormat()
-        val test = jsonContext.encode[String]("test")
-        println(test)
-        println(jsonContext.decode[String](test))
+        val valueJson = jsonContext.encode("test")
+        println(valueJson)
+        println(jsonContext.decode[String](valueJson))
+        val messageJson = jsonContext.serialize(jacksonMessage)
+        println(messageJson)
+        println(jsonContext.derialize(messageJson))
+        println(jsonContext.format(jacksonMessage))
       }
       "Upickle" in {
         val jsonContext = UpickleJsonFormat()
         println(UpickleMacros.xencode(jsonContext, "test"))
 //        println(jsonContext.encode("test"))
 //        val messageJson = jsonContext.serialize(upickleMessage)
+//        println(messageJson)
 //        println(jsonContext.derialize(messageJson))
 //        println(jsonContext.format(upickleMessage))
       }
