@@ -36,5 +36,5 @@ scalacOptions ++= Seq(
   "-language:higherKinds",
   "-release", "12",
   "-encoding", "utf8",
-  "-pagewidth", "160",
+  "-pagewidth", "120",
 )
