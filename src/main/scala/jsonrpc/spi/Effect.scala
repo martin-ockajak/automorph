@@ -3,9 +3,9 @@ package jsonrpc.spi
 /**
  * Effect system plugin for specific computation model.
  *
- * @tparam E computation result effect type
+ * @tparam Outcome computation outcome effect type
  */
-trait Effect[E[_]]:
+trait Effect[Outcome[_]]:
   /**
    * Lift a value into a new effect.
    *
@@ -13,7 +13,7 @@ trait Effect[E[_]]:
    * @tparam T value type
    * @return effect containing the value
    */
-  def pure[T](value: T): E[T]
+  def pure[T](value: T): Outcome[T]
 
   /**
    * Transform an effect by applying a function to its value.
@@ -24,7 +24,7 @@ trait Effect[E[_]]:
    * @tparam R function result type
    * @return effect containing the transformed value
    */
-  def map[T, R](effect: E[T], function: T => R): E[R]
+  def map[T, R](effect: Outcome[T], function: T => R): Outcome[R]
 
   /**
    * Transform an effect by lifting any errors into its value.
@@ -34,4 +34,4 @@ trait Effect[E[_]]:
    * @tparam T effect value type
    * @return effect containing an error or the original effect value
    */
-  def either[T](value: E[T]): E[Either[Throwable, T]]
+  def either[T](value: Outcome[T]): Outcome[Either[Throwable, T]]
