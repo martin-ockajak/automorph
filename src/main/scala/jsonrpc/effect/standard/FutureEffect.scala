@@ -14,8 +14,8 @@ final case class FutureEffect()(using ExecutionContext)
   def pure[T](value: T): Future[T] =
     value.asCompletedFuture
 
-  def map[T, R](value: Future[T], function: T => R): Future[R] =
-    value.map(function)
+  def map[T, R](effect: Future[T], function: T => R): Future[R] =
+    effect.map(function)
 
   def either[T](value: Future[T]): Future[Either[Throwable, T]] =
     value.transform {

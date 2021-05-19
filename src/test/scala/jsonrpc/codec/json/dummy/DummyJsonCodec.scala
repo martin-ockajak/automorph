@@ -11,7 +11,7 @@ final case class DummyJsonCodec()
   def serialize(message: Message[String]): ArraySeq.ofByte =
     message.toString.encodeToBytes.asArraySeq
 
-  def deserialize(json: ArraySeq.ofByte): Message[String] =
+  def deserialize(data: ArraySeq.ofByte): Message[String] =
     Message(None, None, None, None, None, None)
 
   def format(message: Message[String]): String =
@@ -20,5 +20,5 @@ final case class DummyJsonCodec()
   inline def encode[T](value: T): String =
     value.toString
 
-  inline def decode[T](json: String): T =
-    json.asInstanceOf[T]
+  inline def decode[T](node: String): T =
+    node.asInstanceOf[T]

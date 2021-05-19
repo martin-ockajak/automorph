@@ -15,8 +15,8 @@ final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaul
   def serialize(message: Message[JsonNode]): ArraySeq.ofByte =
     ArraySeq.ofByte(mapper.writeValueAsBytes(message).nn)
 
-  def deserialize(json: ArraySeq.ofByte): Message[JsonNode] =
-    mapper.readValue(json.unsafeArray, classOf[Message[JsonNode]]).nn
+  def deserialize(data: ArraySeq.ofByte): Message[JsonNode] =
+    mapper.readValue(data.unsafeArray, classOf[Message[JsonNode]]).nn
 
   def format(message: Message[JsonNode]): String =
     mapper.writerWithDefaultPrettyPrinter.nn.writeValueAsString(message).nn
@@ -24,10 +24,10 @@ final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaul
   inline def encode[T](value: T): JsonNode =
     mapper.valueToTree(value).asInstanceOf[JsonNode]
 
-  inline def decode[T](json: JsonNode): T =
+  inline def decode[T](node: JsonNode): T =
     val classTag = summonInline[ClassTag[T]]
     val valueClass = classTag.runtimeClass.asInstanceOf[Class[T]]
-    mapper.treeToValue(json, valueClass).nn
+    mapper.treeToValue(node, valueClass).nn
 
 object JacksonJsonCodec:
   def defaultMapper: ObjectMapper =

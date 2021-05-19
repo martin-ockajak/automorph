@@ -9,8 +9,8 @@ final case class MonixEffect[Environment]()
   def pure[T](value: T): Task[T] =
     Task.pure(value)
 
-  def map[T, R](value: Task[T], function: T => R): Task[R] =
-    value.map(function)
+  def map[T, R](effect: Task[T], function: T => R): Task[R] =
+    effect.map(function)
 
   def either[T](value: Task[T]): Task[Either[Throwable, T]] =
     value.attempt

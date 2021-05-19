@@ -1,8 +1,37 @@
 package jsonrpc.spi
 
+/**
+ * Effect system plugin for specific computation model.
+ *
+ * @tparam E computation result effect type
+ */
 trait Effect[E[_]]:
+  /**
+   * Lift a value into a new effect.
+   *
+   * @param value already computed value
+   * @tparam T value type
+   * @return effect containing the value
+   */
   def pure[T](value: T): E[T]
 
-  def map[T, R](value: E[T], function: T => R): E[R]
+  /**
+   * Transform an effect by applying a function to its value.
+   *
+   * @param effect effect containing a value
+   * @param function function applied to the effect value
+   * @tparam T effect value type
+   * @tparam R function result type
+   * @return effect containing the transformed value
+   */
+  def map[T, R](effect: E[T], function: T => R): E[R]
 
+  /**
+   * Transform an effect by lifting any errors into its value.
+   * The resulting effect cannot fail.
+   *
+   * @param value effect containing a value
+   * @tparam T effect value type
+   * @return effect containing an error or the original effect value
+   */
   def either[T](value: E[T]): E[Either[Throwable, T]]

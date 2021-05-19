@@ -3,6 +3,13 @@ package jsonrpc.effect.cats
 import cats.effect.IO
 import jsonrpc.spi.Effect
 
+/**
+ * Cats effect system plugin.
+ *
+ * Documentation: https://typelevel.org/cats-effect/
+ * Effect type: IO
+ * Effect type API: https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html
+ */
 final case class CatsEffect[Environment]()
   extends Effect[IO]:
 
