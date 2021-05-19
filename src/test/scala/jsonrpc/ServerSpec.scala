@@ -4,6 +4,7 @@ import base.BaseSpec
 import jsonrpc.effect.native.PlainEffect
 import jsonrpc.format.json.dummy.DummyJsonFormat
 import jsonrpc.format.json.upickle.UpickleJsonFormat
+import jsonrpc.format.json.jackson.JacksonJsonFormat
 import jsonrpc.format.json.upickle.UpickleMacros
 import jsonrpc.spi.{CallError, Message}
 import ujson.{Bool, Num, Str, Value}
@@ -82,34 +83,20 @@ class ServerSpec
         val jsonContext = DummyJsonFormat()
         jsonContext.encode("test")
       }
+      "Jackson" in {
+        val jsonContext = JacksonJsonFormat()
+        val test = jsonContext.encode[String]("test")
+        println(test)
+        println(jsonContext.decode[String](test))
+      }
       "Upickle" in {
         val jsonContext = UpickleJsonFormat()
-//        given Writer[String] = upickle.default.StringWriter
-        println("----------------")
         println(UpickleMacros.xencode(jsonContext, "test"))
-        println("----------------")
-
-        val api = jsonContext
-        api.writeJs[String]("test")
-
-//        given UpickleJsonContext = jsonContext
 //        println(jsonContext.encode("test"))
 //        val messageJson = jsonContext.serialize(upickleMessage)
 //        println(jsonContext.derialize(messageJson))
 //        println(jsonContext.format(upickleMessage))
       }
-//      "Circe" in {
-//        val thing = Thing("test")
-//        val thingJson = thing.asJson.spaces2
-//        println(thingJson)
-//        println(decode[Thing](thingJson))
-//        val structureJson = structure.asJson.spaces2
-//        println(structureJson)
-//        println(decode[Structure](structureJson))
-//        val recordJson = record.asJson.spaces2
-//        println(recordJson)
-//        println(decode[Record](recordJson))
-//      }
     }
   }
 

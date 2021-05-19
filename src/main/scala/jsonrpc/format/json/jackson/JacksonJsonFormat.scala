@@ -22,7 +22,7 @@ final case class JacksonJsonFormat(mapper: ObjectMapper = JacksonJsonFormat.defa
     mapper.writerWithDefaultPrettyPrinter.nn.writeValueAsString(message).nn
 
   inline def encode[T](value: T): Json =
-    mapper.valueToTree(value).nn
+    mapper.valueToTree(value).asInstanceOf[Json]
 
   inline def decode[T](json: Json): T =
     val typeTag = typeTreeTag[T]
