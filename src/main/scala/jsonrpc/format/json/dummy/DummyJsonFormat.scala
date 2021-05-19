@@ -1,11 +1,11 @@
-package jsonrpc.json.dummy
+package jsonrpc.format.json.dummy
 
 import java.nio.charset.StandardCharsets
-import jsonrpc.spi.{JsonContext, Message}
+import jsonrpc.spi.{FormatContext, Message}
 import scala.collection.immutable.ArraySeq
 
-final case class DummyJsonContext()
-  extends JsonContext[String]:
+final case class DummyJsonFormat()
+  extends FormatContext[String]:
   type Json = String
 
   private val charset = StandardCharsets.UTF_8.nn

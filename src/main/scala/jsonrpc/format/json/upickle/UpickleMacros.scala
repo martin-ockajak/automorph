@@ -1,7 +1,7 @@
-package jsonrpc.json.upickle
+package jsonrpc.format.json.upickle
 
 import jsonrpc.core.Reflection
-import jsonrpc.spi.{CallError, JsonContext, Message}
+import jsonrpc.spi.{CallError, FormatContext, Message}
 import ujson.Value
 import ujson.Str
 import upickle.default.{Writer, Reader}

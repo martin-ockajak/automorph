@@ -1,7 +1,7 @@
-package jsonrpc.json.upickle
+package jsonrpc.format.json.upickle
 
 import jsonrpc.core.Reflection
-import jsonrpc.spi.{CallError, JsonContext, Message}
+import jsonrpc.spi.{CallError, FormatContext, Message}
 import jsonrpc.spi
 import ujson.Value
 import ujson.Str
@@ -10,13 +10,13 @@ import scala.collection.immutable.ArraySeq
 import scala.quoted.{Expr, Quotes, Type, quotes}
 import scala.compiletime.{erasedValue, error, summonInline}
 
-final case class UpickleJsonContext()
-  extends JsonContext[Value] with AttributeTagged:
+final case class UpickleJsonFormat()
+  extends FormatContext[Value] with AttributeTagged:
   type Json = Value
 
   private val indent = 2
-  private given ReadWriter[UpickleJsonContext.Message] = macroRW
-  private given ReadWriter[UpickleJsonContext.CallError] = macroRW
+  private given ReadWriter[UpickleJsonFormat.Message] = macroRW
+  private given ReadWriter[UpickleJsonFormat.CallError] = macroRW
 
   def serialize(message: Message[Json]): ArraySeq.ofByte =
     // TODO: delete me
@@ -24,13 +24,13 @@ final case class UpickleJsonContext()
     //       inspection of stdlib sources suggests this does not copy the array
     //       test in REPL confermed the array is NOT copied, but unsafely wrapped
     //       (which is what we want for performance)
-    ArraySeq.ofByte(writeToByteArray(UpickleJsonContext.Message(message)))
+    ArraySeq.ofByte(writeToByteArray(UpickleJsonFormat.Message(message)))
 
   def derialize(json: ArraySeq.ofByte): Message[Json] =
-    read[UpickleJsonContext.Message](json.unsafeArray).toSpi
+    read[UpickleJsonFormat.Message](json.unsafeArray).toSpi
 
   def format(message: Message[Json]): String =
-    write(UpickleJsonContext.Message(message), indent)
+    write(UpickleJsonFormat.Message(message), indent)
 
 //  def encode[T](value: T): Json = UpickleMacros.xencode(this, value)
   inline def encode[T](value: T): Json =
@@ -43,7 +43,7 @@ final case class UpickleJsonContext()
 
   def xencode[T](value: T): Value = ???
 
-object UpickleJsonContext:
+object UpickleJsonFormat:
   type Json = Value
 
   final case class Message(
@@ -97,5 +97,3 @@ object UpickleJsonContext:
       v.data
     )
   end CallError
-
-end UpickleJsonContext

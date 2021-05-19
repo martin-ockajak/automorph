@@ -3,7 +3,7 @@
 //import jsonrpc.spi.EffectContext
 //import zio.{RIO, Task}
 //
-//final case class ZioEffectContext[Environment]() extends EffectContext[[T] =>> RIO[Environment, T]]:
+//final case class ZioEffect[Environment]() extends EffectContext[[T] =>> RIO[Environment, T]]:
 //
 //  def pure[T](value: T): RIO[Environment, T] = RIO.succeed(value)
 //

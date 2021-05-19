@@ -3,7 +3,7 @@ package jsonrpc.effect.cats
 import cats.effect.IO
 import jsonrpc.spi.EffectContext
 
-final case class CatsEffectContext[Environment]() 
+final case class CatsEffect[Environment]()
   extends EffectContext[IO]:
 
   def pure[T](value: T): IO[T] = IO.pure(value)

@@ -2,11 +2,11 @@ package jsonrpc
 
 import java.io.{InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.spi.{EffectContext, JsonContext}
+import jsonrpc.spi.{EffectContext, FormatContext}
 import scala.collection.immutable.ArraySeq
 
-final case class JsonRpcClient[JsonValue, Effect[_]](
-  jsonContext: JsonContext[JsonValue],
+final case class JsonRpcClient[Format, Effect[_]](
+  jsonContext: FormatContext[Format],
   effectContext: EffectContext[Effect]):
 
   def call[Result](method: String, arguments: Seq[Any]): Effect[Result] = ???

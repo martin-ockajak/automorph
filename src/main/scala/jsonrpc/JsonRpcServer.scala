@@ -4,11 +4,11 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, Output
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import jsonrpc.server.ServerMacros
-import jsonrpc.spi.{EffectContext, JsonContext}
+import jsonrpc.spi.{EffectContext, FormatContext}
 import scala.collection.immutable.ArraySeq
 
-final case class JsonRpcServer[Json, Effect[_]](
-  jsonContext: JsonContext[Json],
+final case class JsonRpcServer[Format, Effect[_]](
+  jsonContext: FormatContext[Format],
   effectContext: EffectContext[Effect]):
 
   private val charset = StandardCharsets.UTF_8.nn

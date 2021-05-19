@@ -3,7 +3,7 @@ package jsonrpc.effect.monix
 import jsonrpc.spi.EffectContext
 import monix.eval.Task
 
-final case class MonixEffectContext[Environment]() 
+final case class MonixEffect[Environment]()
   extends EffectContext[Task]:
 
   def pure[T](value: T): Task[T] = Task.pure(value)

@@ -1,4 +1,4 @@
-package jsonrpc.json.jackson
+package jsonrpc.format.json.jackson
 
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
@@ -6,11 +6,11 @@ import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import io.github.gaeljw.typetrees.TypeTreeTag
 import io.github.gaeljw.typetrees.TypeTreeTagMacros.typeTreeTag
-import jsonrpc.spi.{JsonContext, Message}
+import jsonrpc.spi.{FormatContext, Message}
 import scala.collection.immutable.ArraySeq
 
-final case class JacksonJsonContext(mapper: ObjectMapper = JacksonJsonContext.defaultMapper)
-  extends JsonContext[JsonNode]:
+final case class JacksonJsonFormat(mapper: ObjectMapper = JacksonJsonFormat.defaultMapper)
+  extends FormatContext[JsonNode]:
   type Json = JsonNode
 
   def serialize(message: Message[Json]): ArraySeq.ofByte =
@@ -30,6 +30,6 @@ final case class JacksonJsonContext(mapper: ObjectMapper = JacksonJsonContext.de
 //    val valueClass = tag.self.runtimeClass.asInstanceOf[Class[T]]
 //    mapper.treeToValue(json, valueClass).nn
 
-object JacksonJsonContext:
+object JacksonJsonFormat:
   def defaultMapper: ObjectMapper =
     JsonMapper.builder.nn.addModule(DefaultScalaModule).nn.build.nn
