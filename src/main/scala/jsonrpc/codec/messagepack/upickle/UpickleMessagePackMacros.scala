@@ -4,7 +4,7 @@ import upack.Msg
 import upickle.Api
 import scala.quoted.{Expr, Quotes, Type}
 
-object UpickleMsgpackMacros:
+object UpickleMessagePackMacros:
   inline def encode[Parser <: Api, T](
     parser: Parser,
     writer: Api#Writer[T],

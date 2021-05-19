@@ -31,7 +31,3 @@ case object ScalaSupport:
 
   extension (os: ByteArrayOutputStream)
     def decodeToString: String = os.toString(charset.name)
-
-end ScalaSupport
-
-

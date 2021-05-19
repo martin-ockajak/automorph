@@ -1,12 +1,12 @@
 package jsonrpc.codec.json.upickle
 
-import jsonrpc.spi.{Codec, Message}
+import jsonrpc.core.ScalaSupport.asArraySeq
 import jsonrpc.spi
-import ujson.Value
-import upickle.Api
+import jsonrpc.spi.{Codec, Message}
 import scala.collection.immutable.ArraySeq
 import scala.compiletime.summonInline
-import jsonrpc.core.ScalaSupport.*
+import ujson.Value
+import upickle.Api
 
 /**
  * UPickle JSON codec plugin.
@@ -18,30 +18,28 @@ import jsonrpc.core.ScalaSupport.*
 final case class UpickleJsonCodec(parser: Api)
   extends Codec[Value]:
 
-  import parser.*
-
   private val indent = 2
-  private given ReadWriter[UpickleJsonCodec.Message] = macroRW
-  private given ReadWriter[UpickleJsonCodec.CallError] = macroRW
+  private given parser.ReadWriter[UpickleJsonCodec.Message] = parser.macroRW
+  private given parser.ReadWriter[UpickleJsonCodec.CallError] = parser.macroRW
 
   def serialize(message: Message[Value]): ArraySeq.ofByte =
-    writeToByteArray(
+    parser.writeToByteArray(
       UpickleJsonCodec.Message(message)
     ).asArraySeq
 
   def deserialize(data: ArraySeq.ofByte): Message[Value] =
-    read[UpickleJsonCodec.Message](
+    parser.read[UpickleJsonCodec.Message](
       data.unsafeArray
     ).toSpi
 
   def format(message: Message[Value]): String =
-    write(
+    parser.write(
       UpickleJsonCodec.Message(message),
       indent
     )
 
   inline def encode[T](value: T): Value =
-    val writer = summonInline[Writer[T]]
+    val writer = summonInline[parser.Writer[T]]
     UpickleJsonMacros.encode(parser, writer, value)
 
   inline def decode[T](node: Value): T =
@@ -67,7 +65,6 @@ object UpickleJsonCodec:
       )
 
   object Message:
-
     def apply(v: spi.Message[Value]): Message =
       Message(
         v.jsonrpc,
@@ -77,7 +74,6 @@ object UpickleJsonCodec:
         v.result,
         v.error.map(CallError.apply)
       )
-  end Message
 
   final case class CallError(
     code: Option[Int],
@@ -92,10 +88,8 @@ object UpickleJsonCodec:
       )
 
   object CallError:
-
     def apply(v: spi.CallError[Value]): CallError = CallError(
       v.code,
       v.message,
       v.data
     )
-  end CallError
