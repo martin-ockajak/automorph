@@ -13,10 +13,14 @@ final case class DummyJsonFormat()
   def serialize(message: Message[Json]): ArraySeq.ofByte =
     ArraySeq.ofByte(message.toString.getBytes(charset).nn)
 
-  def derialize(json: ArraySeq.ofByte): Message[Json] = Message(None, None, None, None, None, None)
+  def derialize(json: ArraySeq.ofByte): Message[Json] =
+    Message(None, None, None, None, None, None)
 
-  def format(message: Message[Json]): String = message.toString
+  def format(message: Message[Json]): String =
+    message.toString
 
-  def encode[T](value: T): Json = value.toString
+  def encode[T](value: T): Json =
+    value.toString
 
-  def decode[T](json: Json): T = json.asInstanceOf[T]
+  def decode[T](json: Json): T =
+    json.asInstanceOf[T]

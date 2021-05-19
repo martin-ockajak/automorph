@@ -10,7 +10,7 @@ lazy val root = project.in(file(".")).settings(
     "io.github.gaeljw" %% "typetrees" % "0.5.0",
 
     // Effect
-//    "dev.zio" % "zio" % "1.0.7",
+    "dev.zio" %% "zio" % "1.0.8",
     "io.monix" %% "monix-eval" % "3.4.0",
 //    "org.typelevel" %% "cats-effect" % "3.1.1",
 
