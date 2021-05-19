@@ -2,14 +2,13 @@ package jsonrpc.codec.json.upickle
 
 import jsonrpc.spi.{Codec, Message}
 import jsonrpc.spi
-import ujson.Value
+import ujson.{Value => DOM}
 import upickle.Api
 import scala.collection.immutable.ArraySeq
 import scala.compiletime.summonInline
 
 final case class UpickleJsonCodec(parser: Api)
-  extends Codec[Value]:
-  type DOM = Value
+  extends Codec[DOM]:
 
   private val indent = 2
   private given parser.ReadWriter[UpickleJsonCodec.Message] = parser.macroRW
@@ -32,18 +31,16 @@ final case class UpickleJsonCodec(parser: Api)
     json.asInstanceOf[T]
 
 object UpickleJsonCodec:
-  type Json = Value
-
   final case class Message(
     jsonrpc: Option[String],
     id: Option[Either[BigDecimal, String]],
     method: Option[String],
-    params: Option[Either[List[Json], Map[String, Json]]],
-    result: Option[Json],
+    params: Option[Either[List[DOM], Map[String, DOM]]],
+    result: Option[DOM],
     error: Option[CallError]
   ):
-    def toSpi: spi.Message[Json] =
-      spi.Message[Json](
+    def toSpi: spi.Message[DOM] =
+      spi.Message[DOM](
         jsonrpc,
         id,
         method,
@@ -54,7 +51,7 @@ object UpickleJsonCodec:
 
   object Message:
 
-    def apply(v: spi.Message[Json]): Message =
+    def apply(v: spi.Message[DOM]): Message =
       Message(
         v.jsonrpc,
         v.id,
@@ -68,10 +65,10 @@ object UpickleJsonCodec:
   final case class CallError(
     code: Option[Int],
     message: Option[String],
-    data: Option[Json]
+    data: Option[DOM]
   ):
-    def toSpi: spi.CallError[Json] =
-      spi.CallError[Json](
+    def toSpi: spi.CallError[DOM] =
+      spi.CallError[DOM](
         code,
         message,
         data
@@ -79,7 +76,7 @@ object UpickleJsonCodec:
 
   object CallError:
 
-    def apply(v: spi.CallError[Json]): CallError = CallError(
+    def apply(v: spi.CallError[DOM]): CallError = CallError(
       v.code,
       v.message,
       v.data
