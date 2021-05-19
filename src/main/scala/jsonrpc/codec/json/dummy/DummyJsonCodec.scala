@@ -12,7 +12,7 @@ final case class DummyJsonCodec()
   def serialize(message: Message[String]): ArraySeq.ofByte =
     ArraySeq.ofByte(message.toString.getBytes(charset).nn)
 
-  def derialize(json: ArraySeq.ofByte): Message[String] =
+  def deserialize(json: ArraySeq.ofByte): Message[String] =
     Message(None, None, None, None, None, None)
 
   def format(message: Message[String]): String =

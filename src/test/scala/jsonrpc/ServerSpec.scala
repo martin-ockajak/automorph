@@ -89,7 +89,7 @@ class ServerSpec
         println(valueJson)
         println(jsonContext.decode[String](valueJson))
         val messageJson = jsonContext.serialize(jacksonMessage)
-        println(jsonContext.derialize(messageJson))
+        println(jsonContext.deserialize(messageJson))
         println(jsonContext.format(jacksonMessage))
       }
       "Upickle" in {

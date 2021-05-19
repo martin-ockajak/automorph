@@ -8,7 +8,7 @@ import scala.collection.immutable.ArraySeq
 trait Codec[DOM]:
   def serialize(message: Message[DOM]): ArraySeq.ofByte
 
-  def derialize(json: ArraySeq.ofByte): Message[DOM]
+  def deserialize(json: ArraySeq.ofByte): Message[DOM]
 
   def format(message: Message[DOM]): String
 

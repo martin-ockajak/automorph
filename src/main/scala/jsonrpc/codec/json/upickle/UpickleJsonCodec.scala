@@ -17,7 +17,7 @@ final case class UpickleJsonCodec(parser: Api)
   def serialize(message: Message[DOM]): ArraySeq.ofByte =
     ArraySeq.ofByte(parser.writeToByteArray(UpickleJsonCodec.Message(message)))
 
-  def derialize(json: ArraySeq.ofByte): Message[DOM] =
+  def deserialize(json: ArraySeq.ofByte): Message[DOM] =
     parser.read[UpickleJsonCodec.Message](json.unsafeArray).toSpi
 
   def format(message: Message[DOM]): String =
