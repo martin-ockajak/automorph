@@ -9,7 +9,7 @@ object UpickleMacros:
     parser: Parser,
     writer: Api#Writer[T],
     value: T
-  ): Value =
+  ): Value = 
     ${encode('parser, 'writer, 'value)}
 
   private def encode[Parser <: Api: Type, T: Type](

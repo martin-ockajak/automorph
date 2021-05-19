@@ -1,9 +1,11 @@
 package jsonrpc.effect.native
 
 import jsonrpc.spi.Effect
+import jsonrpc.core.ScalaSupport.*
+import NoEffect.*
 
 final case class NoEffect()
-  extends Effect[NoEffect.Identity]:
+  extends Effect[Identity]:
 
   def pure[T](value: T): T = value
 
@@ -11,7 +13,7 @@ final case class NoEffect()
     function(value)
 
   def either[T](value: T): Either[Throwable, T] =
-    Right(value)
+    value.asRight
 
 object NoEffect:
   type Identity[T] = T

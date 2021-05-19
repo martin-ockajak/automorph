@@ -3,20 +3,21 @@ package jsonrpc.effect.standard
 import java.io.{ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.spi.Effect
+import jsonrpc.core.ScalaSupport.*
 import scala.collection.immutable.ArraySeq
-import scala.concurrent.{ExecutionContext, Future as E}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try, Failure}
 
-final case class EEffect(executionContext: ExecutionContext)
-  extends Effect[E]:
-  
-  private given ExecutionContext = executionContext
+final case class FutureEffect()(using ExecutionContext)
+  extends Effect[Future]:
 
-  def pure[T](value: T): E[T] =
-    E.successful(value)
+  def pure[T](value: T): Future[T] =
+    value.asCompletedFuture
 
-  def map[T, R](value: E[T], function: T => R): E[R] =
+  def map[T, R](value: Future[T], function: T => R): Future[R] =
     value.map(function)
 
-  def either[T](value: E[T]): E[Either[Throwable, T]] =
-    value.transform(value => Success(value.toEither))
+  def either[T](value: Future[T]): Future[Either[Throwable, T]] =
+    value.transform {
+      (value: Try[T]) => value.toEither.asSuccess
+    }

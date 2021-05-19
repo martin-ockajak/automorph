@@ -8,7 +8,8 @@ import jsonrpc.codec.json.upickle.UpickleJsonCodec
 import jsonrpc.spi.{CallError, Message}
 import com.fasterxml.jackson.databind.JsonNode
 import ujson.{Bool, Num, Str}
-import upickle.default.{Writer, ReadWriter}
+import upickle.default.{ReadWriter, Writer}
+import jsonrpc.core.ScalaSupport.*
 //import io.circe.syntax.*
 //import io.circe.parser.decode
 //import io.circe.*
@@ -24,43 +25,44 @@ class ServerSpec
     boolean = true,
     0,
     1,
-    Some(2),
+    2.some,
     3,
     4.5,
     6.7,
-    Some(Enum.One),
+    Enum.One.some,
     List("x", "y", "z"),
     Map(
       "foo" -> 0,
       "bar" -> 1
     ),
-    Some(structure),
+    structure.some,
     None
   )
   private val upickleMessage = Message(
-    Some("2.0"),
+    "2.0".some,
     None,
     None,
-    Some(Right(Map(
+    Map(
       "x" -> Str("foo"),
       "y" -> Num(1),
       "z" -> Bool(true)
-    ))),
-    Some(Str("test")),
+    ).asRight.some,
+    Str("test").some,
     None
   )
   private val jacksonMessage = Message[JsonNode](
-    Some("2.0"),
+    "2.0".some,
     None,
     None,
     None,
     None,
     None
   )
-  private given enumRw: ReadWriter[Enum] = upickle.default.readwriter[Int].bimap[Enum](
-    value => value.ordinal,
-    number => Enum.fromOrdinal(number)
-  )
+  private given enumRw: ReadWriter[Enum] = 
+    upickle.default.readwriter[Int].bimap[Enum](
+      value => value.ordinal,
+      number => Enum.fromOrdinal(number)
+    )
 
   "" - {
     "Bind" - {

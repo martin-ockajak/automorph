@@ -1,10 +1,12 @@
 package jsonrpc.core
 
 import scala.quoted.{Expr, Quotes, Type, quotes}
+import jsonrpc.core.ScalaSupport.*
 
 final class Reflection(val quotes: Quotes):
   import quotes.reflect.{asTerm, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
 
+  // TODO: those case classes need to be path-dependent?
   final case class Param(
     name: String,
     dataType: TypeRepr,
@@ -73,13 +75,15 @@ final class Reflection(val quotes: Quotes):
   private def method(classTypeTree: TypeTree, methodSymbol: Symbol): Option[Method] =
     val (symbolType, typeParams) = classTypeTree.tpe.memberType(methodSymbol) match
       case polyType: PolyType =>
-        val typeParams = polyType.paramNames.zip(polyType.paramBounds).map((name, bounds) => TypeParam(name, bounds))
+        val typeParams = polyType.paramNames.zip(polyType.paramBounds).map{
+          (name, bounds) => TypeParam(name, bounds)
+        }
         (polyType.resType, typeParams)
       case otherType => (otherType, Seq.empty)
     symbolType match
       case methodType: MethodType =>
         val (params, resultType) = methodSignature(methodType)
-        Some(Method(
+        Method(
           methodSymbol.name,
           resultType,
           params,
@@ -87,31 +91,34 @@ final class Reflection(val quotes: Quotes):
           publicSymbol(methodSymbol),
           concreteSymbol(methodSymbol),
           methodSymbol
-        ))
+        ).some
       case _ => None
 
   private def methodSignature(methodType: MethodType): (Seq[Seq[Param]], TypeRepr) =
     val methodTypes = LazyList.iterate(Option(methodType)) {
       case Some(currentType) => currentType.resType match
-        case resultType: MethodType => Some(resultType)
+        case resultType: MethodType => resultType.some
         case _ => None
       case _ => None
     }.takeWhile(_.isDefined).flatten
-    val params = methodTypes.map { currentType =>
-      currentType.paramNames.zip(currentType.paramTypes).map((name, dataType) => Param(name, dataType))
+    val params = methodTypes.map {
+      currentType =>
+        currentType.paramNames.zip(currentType.paramTypes).map{
+          (name, dataType) => Param(name, dataType)
+        }
     }
     val resultType = methodTypes.last.resType
     (params, resultType)
 
   private def field(classTypeTree: TypeTree, fieldSymbol: Symbol): Option[Field] =
     val fieldType = classTypeTree.tpe.memberType(fieldSymbol)
-    Some(Field(
+    Field(
       fieldSymbol.name,
       fieldType,
       publicSymbol(fieldSymbol),
       concreteSymbol(fieldSymbol),
       fieldSymbol
-    ))
+    ).some
 
   private def publicSymbol(symbol: Symbol): Boolean =
     !matchesFlags(symbol.flags, hiddenMemberFlags)
@@ -120,4 +127,6 @@ final class Reflection(val quotes: Quotes):
     !matchesFlags(symbol.flags, abstractMemberFlags)
 
   private def matchesFlags(flags: Flags, matchingFlags: Seq[Flags]): Boolean =
-    matchingFlags.foldLeft(false)((result, current) => result | flags.is(current))
+    matchingFlags.foldLeft(false){
+      (result, current) => result | flags.is(current)
+    }

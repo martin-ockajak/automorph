@@ -39,7 +39,10 @@ object Protocol:
   object Request:
     def apply[DOM](message: Message[DOM]): Request[DOM] =
       val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
-      require(jsonrpc == version, s"Invalid JSON-RPC protocol version: $jsonrpc")
+      require(
+        jsonrpc == version, 
+        s"Invalid JSON-RPC protocol version: $jsonrpc"
+      )
       val id = message.id
       val method = mandatory(message.method, "method")
       val params = message.params.getOrElse(Right(Map.empty))
@@ -48,7 +51,10 @@ object Protocol:
   object Response:
     def apply[DOM](message: Message[DOM]): Response[DOM] =
       val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
-      require(jsonrpc == version, s"Invalid JSON-RPC protocol version: $jsonrpc")
+      require(
+        jsonrpc == version, 
+        s"Invalid JSON-RPC protocol version: $jsonrpc"
+      )
       val id = mandatory(message.id, "id")
       message.result.map {
         result => Response(id, Right(result))

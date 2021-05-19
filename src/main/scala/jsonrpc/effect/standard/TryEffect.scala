@@ -1,16 +1,17 @@
 package jsonrpc.effect.native
 
 import jsonrpc.spi.Effect
-import scala.util.{Success, Try as E}
+import scala.util.{Success, Try}
+import jsonrpc.core.ScalaSupport.*
 
-final case class EEffect()
-  extends Effect[E]:
+final case class TryEffect()
+  extends Effect[Try]:
   
-  def pure[T](value: T): E[T] =
-    Success(value)
+  def pure[T](value: T): Try[T] =
+    value.asSuccess
 
-  def map[T, R](value: E[T], function: T => R): E[R] =
+  def map[T, R](value: Try[T], function: T => R): Try[R] =
     value.map(function)
 
-  def either[T](value: E[T]): E[Either[Throwable, T]] =
-    Success(value.toEither)
+  def either[T](value: Try[T]): Try[Either[Throwable, T]] =
+    value.toEither.asSuccess
