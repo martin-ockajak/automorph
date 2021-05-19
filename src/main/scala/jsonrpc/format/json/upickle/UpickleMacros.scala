@@ -5,7 +5,11 @@ import upickle.Api
 import scala.quoted.{Expr, Quotes, Type}
 
 object UpickleMacros:
-  inline def encode[Parser <: Api, T](inline parser: Parser, inline writer: Api#Writer[T], inline value: T): Value =
+  inline def encode[Parser <: Api, T](
+    parser: Parser,
+    writer: Api#Writer[T],
+    value: T
+  ): Value =
     ${encode('parser, 'writer, 'value)}
 
   private def encode[Parser <: Api: Type, T: Type](
