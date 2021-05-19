@@ -63,10 +63,14 @@ object UpickleMacros:
 
 //    type Y = Type.of[List[summon[Type[T]]]]
 //    type Z = Type.of[List[String]]
+//      type X = ClassTag[T]
       type X = ClassTag[T]
       Expr.summon[X] match
         case Some(tag) => tag
-        case _ => '{()}
+        case _ => '{
+//          type A = Type.of[List[summon[Type[T]].Underlying]]
+          ()
+        }
 //      Expr.summon[parser.Writer[T]] match
 //        case Some(writer) => '{
 //          val realParser = $parser

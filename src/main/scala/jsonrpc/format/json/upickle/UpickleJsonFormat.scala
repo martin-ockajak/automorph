@@ -34,7 +34,7 @@ final case class UpickleJsonFormat()
 
 //  def encode[T](value: T): Json = UpickleMacros.xencode(this, value)
   inline def encode[T](value: T): Json =
-//    val x = summonInline[Writer[T]]
+    val writer = summonInline[Writer[T]]
     UpickleMacros.xencode(this, value)
   //    writeJs[T](value)
 
