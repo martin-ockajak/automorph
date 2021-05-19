@@ -7,6 +7,9 @@ import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
 import jsonrpc.spi.{CallError, Message}
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.TextNode
+import com.fasterxml.jackson.databind.node.IntNode
+import com.fasterxml.jackson.databind.node.BooleanNode
 import ujson.{Bool, Num, Str}
 import upickle.default.{Writer, ReadWriter}
 //import io.circe.syntax.*
@@ -53,8 +56,12 @@ class ServerSpec
     Some("2.0"),
     None,
     None,
-    None,
-    None,
+    Some(Right(Map(
+      "x" -> TextNode("foo"),
+      "y" -> IntNode(1),
+      "z" -> BooleanNode.TRUE.nn
+    ))),
+    Some(TextNode("test")),
     None
   )
   private given enumRw: ReadWriter[Enum] = upickle.default.readwriter[Int].bimap[Enum](
