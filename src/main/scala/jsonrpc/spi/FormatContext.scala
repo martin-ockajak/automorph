@@ -12,6 +12,6 @@ trait FormatContext[Json]:
 
   def format(message: Message[Json]): String
 
-  def encode[T](value: T): Json
+  inline def encode[T](value: T): Json
 
-  def decode[T](json: Json): T
+  inline def decode[T](json: Json): T

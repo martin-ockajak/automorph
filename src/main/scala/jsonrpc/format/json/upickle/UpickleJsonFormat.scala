@@ -38,7 +38,8 @@ final case class UpickleJsonFormat()
     UpickleMacros.xencode(this, value)
   //    writeJs[T](value)
 
-  def decode[T](json: Json): T = ???
+  inline def decode[T](json: Json): T =
+    json.asInstanceOf[T]
 //    read[T](json)(reader[T])
 
   def xencode[T](value: T): Value = ???

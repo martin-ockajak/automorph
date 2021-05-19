@@ -19,8 +19,8 @@ final case class DummyJsonFormat()
   def format(message: Message[Json]): String =
     message.toString
 
-  def encode[T](value: T): Json =
+  inline def encode[T](value: T): Json =
     value.toString
 
-  def decode[T](json: Json): T =
+  inline def decode[T](json: Json): T =
     json.asInstanceOf[T]
