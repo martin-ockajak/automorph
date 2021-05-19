@@ -70,6 +70,6 @@ object Protocol:
   private def mandatory[T](value: Option[T], name: String): T =
     require(
       value.isDefined,
-      s"missing message property: $name"
+      s"Missing message property: $name"
     )
     value.get
