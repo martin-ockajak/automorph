@@ -1,4 +1,4 @@
-package jsonrpc.format.json.upickle
+package jsonrpc.codec.json.upickle
 
 import ujson.Value
 import upickle.Api

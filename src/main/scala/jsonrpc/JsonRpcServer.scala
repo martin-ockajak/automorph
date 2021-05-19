@@ -4,11 +4,11 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, Output
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import jsonrpc.server.ServerMacros
-import jsonrpc.spi.{EffectContext, FormatContext}
+import jsonrpc.spi.{EffectContext, Codec}
 import scala.collection.immutable.ArraySeq
 
 final case class JsonRpcServer[Format, Effect[_]](
-  jsonContext: FormatContext[Format],
+  jsonContext: Codec[Format],
   effectContext: EffectContext[Effect]):
 
   private val charset = StandardCharsets.UTF_8.nn
@@ -23,12 +23,6 @@ final case class JsonRpcServer[Format, Effect[_]](
       process(text),
       response =>
         val array:Array[Byte] = response.getBytes(charset).nn
-
-        // TODO: delete me
-        //       semantics looked somewhat unclear in API        
-        //       inspection of stdlib sources suggests this does not copy the array
-        //       test in REPL confermed the array is NOT copied, but unsafely wrapped
-        //       (which is what we want for performance)  
         ArraySeq.ofByte(array)
     )
 

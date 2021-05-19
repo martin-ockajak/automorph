@@ -1,6 +1,6 @@
-package jsonrpc.format.json.upickle
+package jsonrpc.codec.json.upickle
 
-import jsonrpc.spi.{FormatContext, Message}
+import jsonrpc.spi.{Codec, Message}
 import jsonrpc.spi
 import ujson.Value
 import upickle.Api
@@ -8,27 +8,27 @@ import scala.collection.immutable.ArraySeq
 import scala.compiletime.summonInline
 
 final case class UpickleJsonFormat(parser: Api)
-  extends FormatContext[Value]:
-  type Json = Value
+  extends Codec[Value]:
+  type DOM = Value
 
   private val indent = 2
   private given parser.ReadWriter[UpickleJsonFormat.Message] = parser.macroRW
   private given parser.ReadWriter[UpickleJsonFormat.CallError] = parser.macroRW
 
-  def serialize(message: Message[Json]): ArraySeq.ofByte =
+  def serialize(message: Message[DOM]): ArraySeq.ofByte =
     ArraySeq.ofByte(parser.writeToByteArray(UpickleJsonFormat.Message(message)))
 
-  def derialize(json: ArraySeq.ofByte): Message[Json] =
+  def derialize(json: ArraySeq.ofByte): Message[DOM] =
     parser.read[UpickleJsonFormat.Message](json.unsafeArray).toSpi
 
-  def format(message: Message[Json]): String =
+  def format(message: Message[DOM]): String =
     parser.write(UpickleJsonFormat.Message(message), indent)
 
-  inline def encode[T](value: T): Json =
+  inline def encode[T](value: T): DOM =
     val writer = summonInline[parser.Writer[T]]
     UpickleMacros.encode(parser, writer, value)
 
-  inline def decode[T](json: Json): T =
+  inline def decode[T](json: DOM): T =
     json.asInstanceOf[T]
 
 object UpickleJsonFormat:

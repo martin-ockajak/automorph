@@ -2,15 +2,13 @@ package jsonrpc
 
 import base.BaseSpec
 import jsonrpc.effect.native.PlainEffect
-import jsonrpc.format.json.dummy.DummyJsonFormat
-import jsonrpc.format.json.upickle.UpickleJsonFormat
-import jsonrpc.format.json.jackson.JacksonJsonFormat
-import jsonrpc.format.json.upickle.UpickleMacros
+import jsonrpc.codec.json.jackson.JacksonJsonFormat
+import jsonrpc.codec.json.dummy.DummyJsonFormat
+import jsonrpc.codec.json.upickle.UpickleJsonFormat
 import jsonrpc.spi.{CallError, Message}
-import ujson.{Bool, Num, Str, Value}
-import upickle.default
+import com.fasterxml.jackson.databind.JsonNode
+import ujson.{Bool, Num, Str}
 import upickle.default.{Writer, ReadWriter}
-import com.fasterxml.jackson.databind.{JsonNode}
 //import io.circe.syntax.*
 //import io.circe.parser.decode
 //import io.circe.*
@@ -89,7 +87,6 @@ class ServerSpec
       }
       "Upickle" in {
         val jsonContext = UpickleJsonFormat(upickle.default)
-        println(UpickleMacros.encode(upickle.default, jsonContext.parser.StringWriter, "test"))
         println(jsonContext.encode("test"))
 //        val messageJson = jsonContext.serialize(upickleMessage)
 //        println(messageJson)
