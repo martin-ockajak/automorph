@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets
 import jsonrpc.spi.{Codec, Message}
 import scala.collection.immutable.ArraySeq
 
-final case class DummyJsonFormat()
+final case class DummyJsonCodec()
   extends Codec[String]:
   type DOM = String
 

@@ -1,10 +1,10 @@
 package jsonrpc.effect.native
 
-import jsonrpc.spi.EffectContext
+import jsonrpc.spi.Effect
 import scala.util.{Success, Try}
 
 final case class TryEffect()
-  extends EffectContext[Try]:
+  extends Effect[Try]:
   
   def pure[T](value: T): Try[T] =
     Success(value)

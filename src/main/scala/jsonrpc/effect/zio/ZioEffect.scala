@@ -1,10 +1,10 @@
 package jsonrpc.effect.zio
 
-import jsonrpc.spi.EffectContext
+import jsonrpc.spi.Effect
 import zio.{RIO, Task}
 
 final case class ZioEffect[Environment]()
-  extends EffectContext[[T] =>> RIO[Environment, T]]:
+  extends Effect[[T] =>> RIO[Environment, T]]:
 
   def pure[T](value: T): RIO[Environment, T] =
     RIO.succeed(value)

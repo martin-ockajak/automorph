@@ -1,10 +1,10 @@
 package jsonrpc.effect.cats
 
 import cats.effect.IO
-import jsonrpc.spi.EffectContext
+import jsonrpc.spi.Effect
 
 final case class CatsEffect[Environment]()
-  extends EffectContext[IO]:
+  extends Effect[IO]:
 
   def pure[T](value: T): IO[T] =
     IO.pure(value)

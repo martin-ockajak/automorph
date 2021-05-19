@@ -1,9 +1,9 @@
 package jsonrpc.effect.native
 
-import jsonrpc.spi.EffectContext
+import jsonrpc.spi.Effect
 
 final case class PlainEffect()
-  extends EffectContext[PlainEffect.Plain]:
+  extends Effect[PlainEffect.Plain]:
 
   def pure[T](value: T): T = value
 

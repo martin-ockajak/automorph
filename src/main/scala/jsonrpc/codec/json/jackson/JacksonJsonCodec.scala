@@ -9,7 +9,7 @@ import scala.collection.immutable.ArraySeq
 import scala.compiletime.summonInline
 import scala.reflect.ClassTag
 
-final case class JacksonJsonFormat(mapper: ObjectMapper = JacksonJsonFormat.defaultMapper)
+final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaultMapper)
   extends Codec[JsonNode]:
   type DOM = JsonNode
 
@@ -30,6 +30,6 @@ final case class JacksonJsonFormat(mapper: ObjectMapper = JacksonJsonFormat.defa
     val valueClass = classTag.runtimeClass.asInstanceOf[Class[T]]
     mapper.treeToValue(json, valueClass).nn
 
-object JacksonJsonFormat:
+object JacksonJsonCodec:
   def defaultMapper: ObjectMapper =
     JsonMapper.builder.nn.addModule(DefaultScalaModule).nn.build.nn

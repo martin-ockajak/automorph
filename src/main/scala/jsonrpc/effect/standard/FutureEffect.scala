@@ -2,13 +2,13 @@ package jsonrpc.effect.standard
 
 import java.io.{ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.spi.EffectContext
+import jsonrpc.spi.Effect
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try, Failure}
 
 final case class FutureEffect(executionContext: ExecutionContext)
-  extends EffectContext[Future]:
+  extends Effect[Future]:
   
   private given ExecutionContext = executionContext
 

@@ -4,12 +4,12 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, Output
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import jsonrpc.server.ServerMacros
-import jsonrpc.spi.{EffectContext, Codec}
+import jsonrpc.spi.{Effect, Codec}
 import scala.collection.immutable.ArraySeq
 
-final case class JsonRpcServer[Format, Effect[_]](
-  jsonContext: Codec[Format],
-  effectContext: EffectContext[Effect]):
+final case class JsonRpcServer[DOM, E[_]](
+  jsonContext: Codec[DOM],
+  effectContext: Effect[E]):
 
   private val charset = StandardCharsets.UTF_8.nn
   private val bufferSize = 4096
@@ -17,7 +17,7 @@ final case class JsonRpcServer[Format, Effect[_]](
   inline def bind[T <: AnyRef](api: T): Unit =
     ServerMacros.bind(api)
 
-  def process(request: ArraySeq.ofByte): Effect[ArraySeq.ofByte] =
+  def process(request: ArraySeq.ofByte): E[ArraySeq.ofByte] =
     val text = new String(request.unsafeArray, charset)
     effectContext.map(
       process(text),
@@ -27,7 +27,7 @@ final case class JsonRpcServer[Format, Effect[_]](
     )
 
 
-  def process(request: ByteBuffer): Effect[ByteBuffer] =
+  def process(request: ByteBuffer): E[ByteBuffer] =
     val text = charset.decode(request).toString
     effectContext.map(
       process(text),
@@ -35,7 +35,7 @@ final case class JsonRpcServer[Format, Effect[_]](
     )
     effectContext.pure(request)
 
-  def process(request: InputStream): Effect[InputStream] =
+  def process(request: InputStream): E[InputStream] =
     val outputStream = new ByteArrayOutputStream
     val buffer = Array.ofDim[Byte](bufferSize)
     while
@@ -52,5 +52,5 @@ final case class JsonRpcServer[Format, Effect[_]](
       response => new ByteArrayInputStream(response.getBytes(charset).nn)
     )
 
-  private def process(request: String): Effect[String] =
+  private def process(request: String): E[String] =
     effectContext.pure(request)

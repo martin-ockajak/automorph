@@ -2,8 +2,8 @@ package jsonrpc
 
 import base.BaseSpec
 import jsonrpc.effect.native.PlainEffect
-import jsonrpc.codec.json.jackson.JacksonJsonFormat
-import jsonrpc.codec.json.dummy.DummyJsonFormat
+import jsonrpc.codec.json.jackson.JacksonJsonCodec
+import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.codec.json.upickle.UpickleJsonFormat
 import jsonrpc.spi.{CallError, Message}
 import com.fasterxml.jackson.databind.JsonNode
@@ -65,7 +65,7 @@ class ServerSpec
   "" - {
     "Bind" - {
       "Default" in {
-        val server = JsonRpcServer(DummyJsonFormat(), PlainEffect())
+        val server = JsonRpcServer(DummyJsonCodec(), PlainEffect())
         val api = ApiImpl("")
         server.bind(api)
         (0 == 0).shouldBe(true)
@@ -73,11 +73,11 @@ class ServerSpec
     }
     "JSON" - {
       "Dummy" in {
-        val jsonContext = DummyJsonFormat()
+        val jsonContext = DummyJsonCodec()
         jsonContext.encode("test")
       }
       "Jackson" in {
-        val jsonContext = JacksonJsonFormat()
+        val jsonContext = JacksonJsonCodec()
         val valueJson = jsonContext.encode("test")
         println(valueJson)
         println(jsonContext.decode[String](valueJson))
