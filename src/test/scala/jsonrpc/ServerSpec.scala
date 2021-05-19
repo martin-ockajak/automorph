@@ -8,6 +8,7 @@ import jsonrpc.format.json.jackson.JacksonJsonFormat
 import jsonrpc.format.json.upickle.UpickleMacros
 import jsonrpc.spi.{CallError, Message}
 import ujson.{Bool, Num, Str, Value}
+import upickle.default
 import upickle.default.{Writer, ReadWriter}
 import com.fasterxml.jackson.databind.{JsonNode}
 //import io.circe.syntax.*
@@ -87,8 +88,8 @@ class ServerSpec
         println(jsonContext.format(jacksonMessage))
       }
       "Upickle" in {
-        val jsonContext = UpickleJsonFormat()
-        println(UpickleMacros.xencode(jsonContext, "test"))
+        val jsonContext = UpickleJsonFormat(upickle.default)
+        println(UpickleMacros.xencode(upickle.default, jsonContext.parser.StringWriter, "test"))
         println(jsonContext.encode("test"))
 //        val messageJson = jsonContext.serialize(upickleMessage)
 //        println(messageJson)

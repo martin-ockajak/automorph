@@ -10,13 +10,13 @@ import scala.collection.immutable.ArraySeq
 import scala.quoted.{Expr, Quotes, Type, quotes}
 import scala.compiletime.{erasedValue, error, summonInline}
 
-final case class UpickleJsonFormat()
-  extends FormatContext[Value] with AttributeTagged:
+final case class UpickleJsonFormat(parser: AttributeTagged)
+  extends FormatContext[Value]:
   type Json = Value
 
   private val indent = 2
-  private given ReadWriter[UpickleJsonFormat.Message] = macroRW
-  private given ReadWriter[UpickleJsonFormat.CallError] = macroRW
+  private given parser.ReadWriter[UpickleJsonFormat.Message] = parser.macroRW
+  private given parser.ReadWriter[UpickleJsonFormat.CallError] = parser.macroRW
 
   def serialize(message: Message[Json]): ArraySeq.ofByte =
     // TODO: delete me
@@ -24,18 +24,18 @@ final case class UpickleJsonFormat()
     //       inspection of stdlib sources suggests this does not copy the array
     //       test in REPL confermed the array is NOT copied, but unsafely wrapped
     //       (which is what we want for performance)
-    ArraySeq.ofByte(writeToByteArray(UpickleJsonFormat.Message(message)))
+    ArraySeq.ofByte(parser.writeToByteArray(UpickleJsonFormat.Message(message)))
 
   def derialize(json: ArraySeq.ofByte): Message[Json] =
-    read[UpickleJsonFormat.Message](json.unsafeArray).toSpi
+    parser.read[UpickleJsonFormat.Message](json.unsafeArray).toSpi
 
   def format(message: Message[Json]): String =
-    write(UpickleJsonFormat.Message(message), indent)
+    parser.write(UpickleJsonFormat.Message(message), indent)
 
 //  def encode[T](value: T): Json = UpickleMacros.xencode(this, value)
   inline def encode[T](value: T): Json =
-    val writer = summonInline[Writer[T]]
-    UpickleMacros.xencode(this, value)
+    val writer = summonInline[parser.Writer[T]]
+    UpickleMacros.xencode(parser, writer, value)
   //    writeJs[T](value)
 
   inline def decode[T](json: Json): T =
