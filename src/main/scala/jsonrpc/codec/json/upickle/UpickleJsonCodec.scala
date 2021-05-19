@@ -2,7 +2,7 @@ package jsonrpc.codec.json.upickle
 
 import jsonrpc.spi.{Codec, Message}
 import jsonrpc.spi
-import ujson.{Value => DOM}
+import ujson.{Value as DOM}
 import upickle.Api
 import scala.collection.immutable.ArraySeq
 import scala.compiletime.summonInline

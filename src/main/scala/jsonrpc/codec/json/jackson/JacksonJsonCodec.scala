@@ -2,7 +2,7 @@ package jsonrpc.codec.json.jackson
 
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.json.JsonMapper
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import com.fasterxml.jackson.databind.{JsonNode as DOM, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import jsonrpc.spi.{Codec, Message}
 import scala.collection.immutable.ArraySeq
@@ -10,8 +10,7 @@ import scala.compiletime.summonInline
 import scala.reflect.ClassTag
 
 final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaultMapper)
-  extends Codec[JsonNode]:
-  type DOM = JsonNode
+  extends Codec[DOM]:
 
   def serialize(message: Message[DOM]): ArraySeq.ofByte =
     ArraySeq.ofByte(mapper.writeValueAsBytes(message).nn)
