@@ -8,6 +8,7 @@ import upickle.default.{Writer, Reader}
 import upickle.{Api, AttributeTagged}
 import scala.quoted.{Expr, Quotes, Type, quotes}
 import scala.compiletime.{erasedValue, error, summonInline}
+import scala.reflect.ClassTag
 
 object UpickleMacros:
   inline def xencode[A <: Api, T](inline parser: A, inline value: T): Value = ${xencode[A, T]('parser, 'value)}
@@ -45,7 +46,8 @@ object UpickleMacros:
     }.toMap
     val valueType = TypeRepr.of[T]
     val valueWriter = writeMembers.get(typeName(valueType)).getOrElse {
-      throw new IllegalStateException(s"Missing JSON writer: ${valueType.show}")
+      report.error(s"Cannot find given JSON writer for type ${valueType.show}", Position.ofMacroExpansion)
+      throw new IllegalStateException(s"Cannot find given JSON writer for type ${valueType.show}")
     }
     val writer = ref.accessTerm(ref.term(parser), valueWriter)
     println(typeName(valueType))
@@ -61,10 +63,15 @@ object UpickleMacros:
 
 //    type Y = Type.of[List[summon[Type[T]]]]
 //    type Z = Type.of[List[String]]
+      type X = ClassTag[T]
+      Expr.summon[X] match
+        case Some(tag) => tag
+        case _ => '{()}
 //      Expr.summon[parser.Writer[T]] match
 //        case Some(writer) => '{
 //          val realParser = $parser
 //          realParser.writeJs(${value})(${writer})
+//          ()
 //        }
 //        case _ => '{
 //          ()
