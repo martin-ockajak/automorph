@@ -6,15 +6,15 @@ import jsonrpc.spi.{CallError, Message}
 object Protocol:
   type Id = Either[BigDecimal, String]
 
-  final case class Request[JsonValue](
+  final case class Request[DOM](
     id: Option[Id],
     method: String,
-    params: Either[List[JsonValue], Map[String, JsonValue]]
+    params: Either[List[DOM], Map[String, DOM]]
   )
 
-  final case class Response[JsonValue](
+  final case class Response[DOM](
     id: Id,
-    value: Either[CallError[JsonValue], JsonValue]
+    value: Either[CallError[DOM], DOM]
   )
 
   final case class ParseError(
@@ -37,7 +37,7 @@ object Protocol:
     case ApplicationError extends ErrorType(0)
 
   object Request:
-    def apply[JsonValue](message: Message[JsonValue]): Request[JsonValue] =
+    def apply[DOM](message: Message[DOM]): Request[DOM] =
       val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
       require(jsonrpc == version, s"Invalid JSON-RPC protocol version: $jsonrpc")
       val id = message.id
@@ -46,7 +46,7 @@ object Protocol:
       Request(id, method, params)
 
   object Response:
-    def apply[JsonValue](message: Message[JsonValue]): Response[JsonValue] =
+    def apply[DOM](message: Message[DOM]): Response[DOM] =
       val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
       require(jsonrpc == version, s"Invalid JSON-RPC protocol version: $jsonrpc")
       val id = mandatory(message.id, "id")
