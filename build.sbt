@@ -7,6 +7,7 @@ lazy val root = project.in(file(".")).settings(
     // JSON
     "com.lihaoyi" %% "upickle" % "1.3.13",
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.12.3",
+    "io.github.gaeljw" %% "typetrees" % "0.5.0",
 
     // Effect
 //    "dev.zio" % "zio" % "1.0.7",
