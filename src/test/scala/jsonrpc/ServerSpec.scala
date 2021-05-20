@@ -5,7 +5,7 @@ import jsonrpc.effect.native.NoEffect
 import jsonrpc.codec.json.jackson.JacksonJsonCodec
 import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
-import jsonrpc.core.ValueOps.{asRight, some}
+import jsonrpc.core.ValueOps.{asRight, asSome}
 import jsonrpc.spi.{CallError, Message}
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.TextNode
@@ -28,40 +28,40 @@ class ServerSpec
     boolean = true,
     0,
     1,
-    2.some,
+    2.asSome,
     3,
     4.5,
     6.7,
-    Enum.One.some,
+    Enum.One.asSome,
     List("x", "y", "z"),
     Map(
       "foo" -> 0,
       "bar" -> 1
     ),
-    structure.some,
+    structure.asSome,
     None
   )
   private val upickleMessage = Message(
-    "2.0".some,
+    "2.0".asSome,
     None,
     None,
     Map(
       "x" -> Str("foo"),
       "y" -> Num(1),
       "z" -> Bool(true)
-    ).asRight.some,
-    Str("test").some,
+    ).asRight.asSome,
+    Str("test").asSome,
     None
   )
   private val jacksonMessage = Message[JsonNode](
-    "2.0".some,
+    "2.0".asSome,
     None,
     None,
     Map(
       "x" -> TextNode("foo"),
       "y" -> IntNode(1),
       "z" -> BooleanNode.TRUE.nn
-    ).asRight.some,
+    ).asRight.asSome,
     Some(TextNode("test")),
     None
   )

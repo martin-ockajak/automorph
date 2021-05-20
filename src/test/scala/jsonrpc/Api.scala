@@ -1,6 +1,6 @@
 package jsonrpc
 
-import jsonrpc.core.ValueOps.some
+import jsonrpc.core.ValueOps.asSome
 import scala.concurrent.Future
 
 trait Api:
@@ -39,7 +39,7 @@ final case class ApiImpl(test: String) extends Api:
     p0.copy(
       string = s"${p0.string} - $p1",
       long = p0.long + 1,
-      enumeration = Enum.One.some
+      enumeration = Enum.One.asSome
     )
 
   def method3(p0: Option[Boolean], p1: Float)(p2: List[Int]): Map[String, String] =
