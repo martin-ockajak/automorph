@@ -1,12 +1,22 @@
 package jsonrpc.server
 
 import jsonrpc.core.Reflection
+import jsonrpc.spi.Codec
+import jsonrpc.spi.Effect
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
 object ServerMacros:
-  inline def bind[T <: AnyRef, Node](inline api: T): Map[String, Node => Node] = ${bind('api)}
+  inline def bind[T <: AnyRef, Node, Outcome[_]](
+    codec: Codec[Node],
+    effect: Effect[Outcome],
+    api: T
+  ): Map[String, Node => Node] = ${bind('codec, 'effect, 'api)}
 
-  private def bind[T <: AnyRef: Type, Node](api: Expr[T])(using quotes: Quotes): Expr[Map[String, Node => Node]] =
+  private def bind[T <: AnyRef: Type, Node, Outcome[_]](
+    codec: Expr[Codec[Node]],
+    effect: Expr[Effect[Outcome]],
+    api: Expr[T]
+  )(using quotes: Quotes): Expr[Map[String, Node => Node]] =
     import ref.quotes.reflect.*
 
     val ref = Reflection(quotes)

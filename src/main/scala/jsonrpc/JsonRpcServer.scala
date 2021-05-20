@@ -22,7 +22,7 @@ final case class JsonRpcServer[Node, Outcome[_]](
   private val bufferSize = 4096
 
   inline def bind[T <: AnyRef](api: T): Unit =
-    ServerMacros.bind(api)
+    ServerMacros.bind(codec, effect, api)
 
   def process(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte] =
     effect.pure(request)
