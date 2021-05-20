@@ -25,7 +25,6 @@ scalacOptions ++= Seq(
   "-new-syntax",
   "-indent",
   "-feature",
-  "-explain-types",
   "-Xcheck-macros",
   "-Yexplicit-nulls",
   "-Ysafe-init",
