@@ -21,10 +21,8 @@ final case class JsonRpcClient[Node, Outcome[_]](
 
   def call[R](method: String, arguments: Map[String, Any]): Outcome[R] = ???
 
-  def notify(method: String, arguments: Seq[Any]): Outcome[Unit] =
-    effect.pure(())
+  def notify(method: String, arguments: Seq[Any]): Outcome[Unit] = ???
 
-  def notify(method: String, arguments: Map[String, Any]): Outcome[Unit] =
-    effect.pure(())
+  def notify(method: String, arguments: Map[String, Any]): Outcome[Unit] = ???
 
   def api[T]: T = ???
