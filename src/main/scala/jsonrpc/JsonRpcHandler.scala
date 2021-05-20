@@ -5,6 +5,7 @@ import java.nio.ByteBuffer
 import jsonrpc.core.EncodingOps.toArraySeq
 import jsonrpc.core.ValueOps.asSome
 import jsonrpc.server.HandlerMacros
+import jsonrpc.server.FunctionHandle
 import jsonrpc.spi.{Codec, Effect}
 import scala.collection.immutable.ArraySeq
 
@@ -20,7 +21,7 @@ final case class JsonRpcHandler[Node, Outcome[_]] private (
   codec: Codec[Node],
   effect: Effect[Outcome]
 )(
-  private val methodBindings: Map[String, Node => Outcome[Node]] = Map.empty
+  private val methodBindings: Map[String, FunctionHandle[Node, Outcome]] = Map.empty
 ):
 
   private val bufferSize = 4096

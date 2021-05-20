@@ -5,19 +5,25 @@ import jsonrpc.spi.Codec
 import jsonrpc.spi.Effect
 import scala.quoted.{quotes, Expr, Quotes, Type}
 
+
+final case class FunctionHandle[Node, Outcome[_]](
+  function: Node => Outcome[Node],
+  prototype: String
+)
+
 object HandlerMacros:
 
   inline def bind[T <: AnyRef, Node, Outcome[_]](
     codec: Codec[Node],
     effect: Effect[Outcome],
     api: T
-  ): Map[String, Node => Outcome[Node]] = ${ bind('codec, 'effect, 'api) }
+  ): Map[String, FunctionHandle[Node, Outcome]] = ${ bind('codec, 'effect, 'api) }
 
   private def bind[T <: AnyRef: Type, Node, Outcome[_]](
     codec: Expr[Codec[Node]],
     effect: Expr[Effect[Outcome]],
     api: Expr[T]
-  )(using quotes: Quotes): Expr[Map[String, Node => Outcome[Node]]] =
+  )(using quotes: Quotes): Expr[Map[String, FunctionHandle[Node, Outcome]]] =
     import ref.quotes.reflect.*
 
     val ref = Reflection(quotes)
