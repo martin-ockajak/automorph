@@ -12,8 +12,6 @@ case object EncodingOps:
   private lazy val charset = StandardCharsets.UTF_8.nn
 
   extension (bytes: Array[Byte])
-    def decodeToString: String = String(bytes, charset)
-
     def asArraySeq: ArraySeq.ofByte = ArraySeq.ofByte(bytes)
 
   extension (string: String)
@@ -27,8 +25,6 @@ case object EncodingOps:
         val array = Array.ofDim[Byte](buffer.remaining)
         buffer.get(array, 0, array.size)
         ArraySeq.ofByte(array)
-
-    def decodeToString: String = charset.decode(buffer).toString
 
   extension (inputStream: InputStream)
 
