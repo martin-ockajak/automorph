@@ -3,6 +3,7 @@ package jsonrpc
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.core.EncodingOps.toArraySeq
+import jsonrpc.core.ValueOps.asSome
 import jsonrpc.server.HandlerMacros
 import jsonrpc.spi.{Codec, Effect}
 import scala.collection.immutable.ArraySeq
@@ -27,12 +28,18 @@ final case class JsonRpcHandler[Node, Outcome[_]] private (
   inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, Outcome] = bind(api, Seq(_))
 
   inline def bind[T <: AnyRef](api: T, mapMethod: String => Seq[String]): JsonRpcHandler[Node, Outcome] =
+    bind(api, Function.unlift(mapMethod.andThen(asSome)))
+
+  inline def bind[T <: AnyRef](api: T, mapMethod: PartialFunction[String, Seq[String]]): JsonRpcHandler[Node, Outcome] =
     val bindings = HandlerMacros.bind(codec, effect, api).flatMap { (apiMethodName, method) =>
-      mapMethod(apiMethodName).map(_ -> method)
+      mapMethod.applyOrElse(
+        apiMethodName,
+        throw new IllegalArgumentException(s"Bound API does not contain the specified public method: ${api.getClass.getName}.$apiMethodName")
+      ).map(_ -> method)
     }
     JsonRpcHandler(codec, effect)(methodBindings ++ bindings)
 
-  inline def bind[T, R](method: String, function: Tuple => R): JsonRpcHandler[Node, Outcome] =
+  def bind[T, R](method: String, function: Tuple => R): JsonRpcHandler[Node, Outcome] =
     ???
 
   def process(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte] =
