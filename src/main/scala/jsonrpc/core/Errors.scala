@@ -8,10 +8,7 @@ object Errors:
   extension( throwable: Throwable)
     private def cause: Option[Throwable] = throwable.getCause.asOptionFromNullable
     private def suppressedCauses: Seq[Throwable] = throwable.getSuppressed.toSeq
-    private def message: Option[String] = throwable.getMessage.asOptionFromNullable.map(_.trim).flatMap{
-      case "" => None
-      case x => Some(x)
-    }
+    private def message: Option[String] = throwable.getMessage.asOptionFromNullable.map(_.trim).filter(_.nonEmpty)
 
   /**
    * Assemble concise error descriptions from specified throwable and specified number of its causes.
