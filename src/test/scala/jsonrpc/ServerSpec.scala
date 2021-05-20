@@ -5,6 +5,7 @@ import jsonrpc.effect.native.NoEffect
 import jsonrpc.codec.json.jackson.JacksonJsonCodec
 import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
+import jsonrpc.core.ValueOps.{asRight, some}
 import jsonrpc.spi.{CallError, Message}
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.TextNode
@@ -12,7 +13,6 @@ import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.BooleanNode
 import ujson.{Bool, Num, Str}
 import upickle.default.{ReadWriter, Writer}
-import jsonrpc.core.ScalaSupport.{asRight, some}
 //import io.circe.syntax.*
 //import io.circe.parser.decode
 //import io.circe.*

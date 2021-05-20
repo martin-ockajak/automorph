@@ -1,6 +1,6 @@
 package jsonrpc.codec.json.upickle
 
-import jsonrpc.core.ScalaSupport.asArraySeq
+import jsonrpc.core.EncodingOps.asArraySeq
 import jsonrpc.spi
 import jsonrpc.spi.{Codec, Message}
 import scala.collection.immutable.ArraySeq

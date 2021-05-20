@@ -1,9 +1,9 @@
 package jsonrpc.codec.json.dummy
 
+import jsonrpc.core.EncodingOps.{asArraySeq, encodeToBytes}
 import jsonrpc.spi.{Codec, Message}
 
 import scala.collection.immutable.ArraySeq
-import jsonrpc.core.ScalaSupport.*
 
 final case class DummyJsonCodec()
   extends Codec[String] :

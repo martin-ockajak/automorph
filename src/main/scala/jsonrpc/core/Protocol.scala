@@ -1,6 +1,7 @@
 package jsonrpc.core
 
 import java.io.IOException
+import jsonrpc.core.ValueOps.{asRight, some}
 import jsonrpc.spi.{CallError, Message}
 
 /**
@@ -94,7 +95,7 @@ object Protocol:
       )
       val id = message.id
       val method = mandatory(message.method, "method")
-      val params = message.params.getOrElse(Right(Map.empty))
+      val params = message.params.getOrElse(Map.empty.asRight[List[Node]])
       Request(id, method, params)
 
   object Response:
@@ -106,7 +107,7 @@ object Protocol:
       )
       val id = mandatory(message.id, "id")
       message.result.map {
-        result => Response(id, Right(result))
+        result => Response(id, result.asRight)
       }.getOrElse {
         val error = mandatory(message.error, "error")
         Response(id, Left(error))

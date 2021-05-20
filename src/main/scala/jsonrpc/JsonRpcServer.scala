@@ -2,7 +2,7 @@ package jsonrpc
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.core.ScalaSupport.asArraySeq
+import jsonrpc.core.EncodingOps.asArraySeq
 import jsonrpc.server.ServerMacros
 import jsonrpc.spi.{Codec, Effect}
 import scala.collection.immutable.ArraySeq

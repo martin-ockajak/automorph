@@ -1,7 +1,7 @@
 package jsonrpc
 
+import jsonrpc.core.ValueOps.some
 import scala.concurrent.Future
-import jsonrpc.core.ScalaSupport.*
 
 trait Api:
 
@@ -32,8 +32,8 @@ final case class ApiImpl(test: String) extends Api:
   def method0(): Double = 1.2d
 
   def method1(p0: Record): Future[Int] = p0.int match
-    case Some(int) => (int + 1).asCompletedFuture
-    case _         => 0.asCompletedFuture
+    case Some(int) => Future.successful(int + 1)
+    case _         => Future.successful(0)
 
   def method2(p0: Record, p1: String): Record =
     p0.copy(

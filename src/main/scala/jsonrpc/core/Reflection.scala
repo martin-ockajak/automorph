@@ -1,7 +1,7 @@
 package jsonrpc.core
 
+import jsonrpc.core.ValueOps.some
 import scala.quoted.{Expr, Quotes, Type, quotes}
-import jsonrpc.core.ScalaSupport.*
 
 /**
  * Data type reflection tools.
