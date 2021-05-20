@@ -6,8 +6,7 @@ import scala.quoted.{quotes, Expr, Quotes, Type}
 /**
  * Data type reflection tools.
  *
- * @param quotes
- *   quotation context
+ * @param quotes quotation context
  */
 final class Reflection(val quotes: Quotes):
   // All meta-programming data types must are path-dependent on the compiler-generated quotation context
@@ -43,9 +42,7 @@ final class Reflection(val quotes: Quotes):
 
   private given Quotes = quotes
 
-  /**
-   * Non-concrete class member flags.
-   */
+  /** Non-concrete class member flags. */
   private val abstractMemberFlags = Seq(
     Flags.Deferred,
     Flags.Erased,
@@ -55,9 +52,7 @@ final class Reflection(val quotes: Quotes):
     Flags.Transparent
   )
 
-  /**
-   * Non-public class member flags.
-   */
+  /** Non-public class member flags. */
   private val hiddenMemberFlags = Seq(
     Flags.Private,
     Flags.PrivateLocal,
@@ -68,10 +63,8 @@ final class Reflection(val quotes: Quotes):
   /**
    * Describe class methods.
    *
-   * @param classTypeTree
-   *   class type tree
-   * @return
-   *   class method descriptors
+   * @param classTypeTree class type tree
+   * @return class method descriptors
    */
   def methods(classTypeTree: TypeTree): Seq[Method] =
     val classSymbol = classTypeTree.tpe.typeSymbol
@@ -80,10 +73,8 @@ final class Reflection(val quotes: Quotes):
   /**
    * Describe class fields.
    *
-   * @param classTypeTree
-   *   class type tree
-   * @return
-   *   class field descriptors
+   * @param classTypeTree class type tree
+   * @return class field descriptors
    */
   def fields(classTypeTree: TypeTree): Seq[Field] =
     val classSymbol = classTypeTree.tpe.typeSymbol
@@ -92,28 +83,20 @@ final class Reflection(val quotes: Quotes):
   /**
    * Create instance member access term.
    *
-   * @param instance
-   *   instance term
-   * @param name
-   *   member name
-   * @return
-   *   instance member access term
+   * @param instance instance term
+   * @param name member name
+   * @return instance member access term
    */
   def accessTerm(instance: Term, name: String): Term = Select.unique(instance, name)
 
   /**
    * Create instance method call term.
    *
-   * @param instance
-   *   instance term
-   * @param name
-   *   method name
-   * @param typeArguments
-   *   method type argument type trees
-   * @param arguments
-   *   method argument terms
-   * @return
-   *   instance method call term
+   * @param instance instance term
+   * @param name method name
+   * @param typeArguments method type argument type trees
+   * @param arguments method argument terms
+   * @return instance method call term
    */
   def callTerm(instance: Term, name: String, typeArguments: List[TypeTree], arguments: List[List[Term]]): Term =
     accessTerm(instance, name).appliedToTypeTrees(typeArguments).appliedToArgss(arguments)
@@ -121,12 +104,9 @@ final class Reflection(val quotes: Quotes):
   /**
    * Create typed expression term.
    *
-   * @param expression
-   *   expression
-   * @tparam T
-   *   expression type
-   * @return
-   *   typed expression term
+   * @param expression expression
+   * @tparam T expression type
+   * @return typed expression term
    */
   def term[T](expression: Expr[T]): Term =
     expression.asTerm
