@@ -57,11 +57,11 @@ class ServerSpec
     "2.0".some,
     None,
     None,
-    Some(Right(Map(
+    Map(
       "x" -> TextNode("foo"),
       "y" -> IntNode(1),
       "z" -> BooleanNode.TRUE.nn
-    ))),
+    ).asRight.some,
     Some(TextNode("test")),
     None
   )
