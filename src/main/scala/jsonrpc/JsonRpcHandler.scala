@@ -15,9 +15,10 @@ import scala.collection.immutable.ArraySeq
  * @tparam Node data format node representation type
  * @tparam Outcome computation outcome effect type
  */
-final case class JsonRpcHandler[Node, Outcome[_]](
+final case class JsonRpcHandler[Node, Outcome[_]] private (
   codec: Codec[Node],
   effect: Effect[Outcome],
+)(
   private val methodBindings: Map[String, Node => Node] = Map.empty
 ):
   private val bufferSize = 4096
@@ -29,7 +30,7 @@ final case class JsonRpcHandler[Node, Outcome[_]](
     val bindings = ServerMacros.bind(codec, effect, api).flatMap { (apiMethodName, method) =>
       mapMethod(apiMethodName).map(_ -> method)
     }
-    JsonRpcHandler(codec, effect, methodBindings ++ bindings)
+    JsonRpcHandler(codec, effect)(methodBindings ++ bindings)
 
   inline def bind[T, R](method: String, function: Tuple => R): JsonRpcHandler[Node, Outcome] =
     ???
@@ -42,3 +43,7 @@ final case class JsonRpcHandler[Node, Outcome[_]](
 
   def process(request: InputStream): Outcome[InputStream] =
     effect.map(process(request.toArraySeq(bufferSize)), response => ByteArrayInputStream(response.unsafeArray))
+
+case object JsonRpcHandler:
+  def apply[Node, Outcome[_]](codec: Codec[Node], effect: Effect[Outcome]): JsonRpcHandler[Node, Outcome] =
+    new JsonRpcHandler(codec, effect)(Map.empty)
