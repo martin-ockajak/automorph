@@ -10,8 +10,7 @@ import zio.{RIO, Task}
  * Effect type: RIO
  * Effect type API: https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html
  */
-final case class ZioEffect[Environment]()
-  extends Effect[[T] =>> RIO[Environment, T]]:
+final case class ZioEffect[Environment]() extends Effect[[T] =>> RIO[Environment, T]]:
 
   def pure[T](value: T): RIO[Environment, T] = RIO.succeed(value)
 

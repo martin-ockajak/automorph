@@ -5,8 +5,7 @@ import jsonrpc.spi.{Codec, Message}
 
 import scala.collection.immutable.ArraySeq
 
-final case class DummyJsonCodec()
-  extends Codec[String] :
+final case class DummyJsonCodec() extends Codec[String]:
 
   def serialize(message: Message[String]): ArraySeq.ofByte =
     message.toString.toArraySeq

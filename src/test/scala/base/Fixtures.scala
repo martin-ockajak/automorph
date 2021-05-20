@@ -4,6 +4,7 @@ import scala.util.Using
 import scala.util.Using.Releasable
 
 trait Fixtures:
+
   /**
    * Fixture type.
    *
@@ -19,8 +20,7 @@ trait Fixtures:
    * @return loan fixture function
    */
   def loanFixture[T: Releasable](createFixture: => T): Fixture[T] =
-    test =>
-      Using(createFixture)(fixture => test(fixture)).get
+    test => Using(createFixture)(fixture => test(fixture)).get
 
   /**
    * Create loan fixture function using specified fixture creation and release functions.

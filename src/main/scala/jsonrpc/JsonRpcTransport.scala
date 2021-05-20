@@ -9,6 +9,7 @@ import scala.collection.immutable.ArraySeq
  * @tparam Outcome computation outcome effect type
  */
 trait JsonRpcTransport[Outcome[_]]:
+
   def call(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte]
 
   def notify(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte]

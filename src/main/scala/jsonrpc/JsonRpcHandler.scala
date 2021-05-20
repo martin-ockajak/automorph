@@ -17,10 +17,11 @@ import scala.collection.immutable.ArraySeq
  */
 final case class JsonRpcHandler[Node, Outcome[_]] private (
   codec: Codec[Node],
-  effect: Effect[Outcome],
+  effect: Effect[Outcome]
 )(
   private val methodBindings: Map[String, Node => Node] = Map.empty
 ):
+
   private val bufferSize = 4096
 
   inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, Outcome] = bind(api, Seq(_))
@@ -44,5 +45,6 @@ final case class JsonRpcHandler[Node, Outcome[_]] private (
     effect.map(process(request.toArraySeq(bufferSize)), response => ByteArrayInputStream(response.unsafeArray))
 
 case object JsonRpcHandler:
+
   def apply[Node, Outcome[_]](codec: Codec[Node], effect: Effect[Outcome]): JsonRpcHandler[Node, Outcome] =
     new JsonRpcHandler(codec, effect)(Map.empty)

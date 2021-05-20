@@ -10,9 +10,8 @@ import scala.util.{Success, Try}
  * Effect type: Try
  * Effect type API: https://www.scala-lang.org/api/2.13.6/scala/util/Try.html
  */
-final case class TryEffect()
-  extends Effect[Try]:
-  
+final case class TryEffect() extends Effect[Try]:
+
   def pure[T](value: T): Try[T] = Success(value)
 
   def map[T, R](effect: Try[T], function: T => R): Try[R] = effect.map(function)

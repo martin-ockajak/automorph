@@ -6,6 +6,7 @@ package jsonrpc.spi
  * @tparam Outcome computation outcome effect type
  */
 trait Effect[Outcome[_]]:
+
   /**
    * Lift a value into a new effect.
    *

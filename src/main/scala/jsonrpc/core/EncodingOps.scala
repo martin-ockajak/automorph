@@ -9,6 +9,7 @@ import scala.util.{Success, Try}
 import scala.annotation.tailrec
 
 case object EncodingOps:
+
   private lazy val charset = StandardCharsets.UTF_8
   private val maxReadIterations = 1000_000
 

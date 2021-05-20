@@ -18,6 +18,7 @@ final case class JsonRpcClient[Node, Outcome[_]](
   effect: Effect[Outcome],
   transport: JsonRpcTransport[Outcome]
 ):
+
   def call[R](method: String, arguments: Seq[Any]): Outcome[R] = call(method, encodeArguments(arguments))
 
   def call[R](method: String, arguments: Map[String, Any]): Outcome[R] = call(method, encodeArguments(arguments))

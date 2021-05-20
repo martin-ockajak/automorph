@@ -10,6 +10,7 @@ import jsonrpc.spi.{CallError, Message}
  * Specification: https://www.jsonrpc.org/specification
  */
 object Protocol:
+
   /** Message identifier type. */
   type Id = Either[BigDecimal, String]
 
@@ -64,6 +65,7 @@ object Protocol:
 
   /** JSON-RPC error types with codes. */
   enum ErrorType(val code: Int):
+
     case ParseError extends ErrorType(-32700)
     case InvalidRequest extends ErrorType(-32600)
     case MethodNotFound extends ErrorType(-32601)

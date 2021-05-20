@@ -9,8 +9,7 @@ import NoEffect.Identity
  *
  * Effect type: Identity
  */
-final case class NoEffect()
-  extends Effect[Identity]:
+final case class NoEffect() extends Effect[Identity]:
 
   def pure[T](value: T): T = value
 

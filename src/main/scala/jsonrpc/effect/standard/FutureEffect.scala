@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 import jsonrpc.spi.Effect
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Success, Try, Failure}
+import scala.util.{Failure, Success, Try}
 
 /**
  * Future effect system plugin.
@@ -14,8 +14,7 @@ import scala.util.{Success, Try, Failure}
  * Effect type: Future
  * Effect type API: https://www.scala-lang.org/api/2.13.6/scala/concurrent/Future.html
  */
-final case class FutureEffect()(using ExecutionContext)
-  extends Effect[Future]:
+final case class FutureEffect()(using ExecutionContext) extends Effect[Future]:
 
   def pure[T](value: T): Future[T] = Future.successful(value)
 

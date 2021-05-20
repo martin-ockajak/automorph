@@ -3,14 +3,15 @@ package jsonrpc.server
 import jsonrpc.core.Reflection
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Effect
-import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, Type}
 
 object ServerMacros:
+
   inline def bind[T <: AnyRef, Node, Outcome[_]](
     codec: Codec[Node],
     effect: Effect[Outcome],
     api: T
-  ): Map[String, Node => Node] = ${bind('codec, 'effect, 'api)}
+  ): Map[String, Node => Node] = ${ bind('codec, 'effect, 'api) }
 
   private def bind[T <: AnyRef: Type, Node, Outcome[_]](
     codec: Expr[Codec[Node]],
@@ -27,20 +28,20 @@ object ServerMacros:
     def methodDescription(method: ref.Method): String =
       val paramLists = method.params.map { params =>
         s"(${params.map { param =>
-            s"${param.name}: ${simpleTypeName(param.dataType.show)}"
+          s"${param.name}: ${simpleTypeName(param.dataType.show)}"
         }.mkString(", ")})"
       }.mkString
-      
+
       val documentation = method.symbol.docstring.map(_ + "\n").getOrElse("")
       val resultType = simpleTypeName(method.resultType.show)
       s"$documentation${method.name}$paramLists: $resultType\n"
 
     // Introspect the API instance & generate its description
     val apiTypeTree = TypeTree.of[T]
-    val apiMethods = ref.methods(apiTypeTree).filter(_.public).filter { 
+    val apiMethods = ref.methods(apiTypeTree).filter(_.public).filter {
       method => !baseMethodNames.contains(method.symbol.name)
     }
-    apiMethods.filterNot(_.concrete).foreach { 
+    apiMethods.filterNot(_.concrete).foreach {
       method => throw new IllegalStateException(s"Invalid API method: ${method.symbol.fullName}")
     }
     val apiDescription = apiMethods.map(methodDescription).mkString("\n")
@@ -51,24 +52,25 @@ object ServerMacros:
 
     // Generate function call using a type parameter
     val typeParam = TypeTree.of[List[List[String]]]
-    val typedCall = ref.callTerm(ref.term('{List}), "apply", List(typeParam), List.empty)
+    val typedCall = ref.callTerm(ref.term('{ List }), "apply", List(typeParam), List.empty)
 
     // Debug printounts
     println(
       s"""
         |Call:
-        |  ${call}
+        |  $call
         |
         |Typed call:
-        |  ${typedCall}
-        |""".stripMargin)
+        |  $typedCall
+        |""".stripMargin
+    )
 
     // Generate printouts code using the previously generated code
     '{
 //      println(${call.asExpr})
 //      println(${typedCall.asExpr})
       println()
-      println(${Expr(apiDescription)})
+      println(${ Expr(apiDescription) })
       Map.empty
     }
 

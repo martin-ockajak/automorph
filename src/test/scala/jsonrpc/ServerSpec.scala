@@ -13,16 +13,18 @@ import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.BooleanNode
 import ujson.{Bool, Num, Str}
 import upickle.default.{ReadWriter, Writer}
+
 //import io.circe.syntax.*
 //import io.circe.parser.decode
 //import io.circe.*
 //import io.circe.generic.semiauto.*
 
-class ServerSpec
-  extends BaseSpec:
+class ServerSpec extends BaseSpec:
+
   private val structure = Structure(
     "test"
   )
+
   private val record = Record(
     "test",
     boolean = true,
@@ -41,6 +43,7 @@ class ServerSpec
     structure.asSome,
     None
   )
+
   private val upickleMessage = Message(
     "2.0".asSome,
     None,
@@ -53,6 +56,7 @@ class ServerSpec
     Str("test").asSome,
     None
   )
+
   private val jacksonMessage = Message[JsonNode](
     "2.0".asSome,
     None,
@@ -65,7 +69,8 @@ class ServerSpec
     Some(TextNode("test")),
     None
   )
-  private given enumRw: ReadWriter[Enum] = 
+
+  private given enumRw: ReadWriter[Enum] =
     upickle.default.readwriter[Int].bimap[Enum](
       value => value.ordinal,
       number => Enum.fromOrdinal(number)

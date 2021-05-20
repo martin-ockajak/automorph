@@ -11,6 +11,7 @@ import scala.collection.immutable.ArraySeq
  * @tparam Node data format node representation type
  */
 trait Codec[Node]:
+
   /**
    * Serialize a message as binary data.
    *

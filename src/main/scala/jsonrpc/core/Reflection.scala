@@ -9,6 +9,7 @@ import scala.quoted.{quotes, Expr, Quotes, Type}
  * @param quotes quotation context
  */
 final class Reflection(val quotes: Quotes):
+
   // All meta-programming data types must are path-dependent on the compiler-generated quotation context
   import quotes.reflect.{asTerm, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
 
@@ -138,7 +139,7 @@ final class Reflection(val quotes: Quotes):
       case Some(currentType) =>
         currentType.resType match
           case resultType: MethodType => resultType.asSome
-          case _ => None
+          case _                      => None
       case _ => None
     }.takeWhile(_.isDefined).flatten
     val params = methodTypes.map {

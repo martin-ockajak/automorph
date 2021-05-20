@@ -21,7 +21,6 @@ trait Api:
 
   protected def protectedMethod: Unit
 
-
 final case class ApiImpl(test: String) extends Api:
 
   /**
@@ -45,8 +44,8 @@ final case class ApiImpl(test: String) extends Api:
   def method3(p0: Option[Boolean], p1: Float)(p2: List[Int]): Map[String, String] =
     Map(
       "boolean" -> p0.getOrElse(false).toString,
-      "float"   -> p1.toString,
-      "list"    -> p2.mkString(", ")
+      "float" -> p1.toString,
+      "list" -> p2.mkString(", ")
     )
 
   def method4(): Future[Unit] = Future.unit
@@ -60,9 +59,9 @@ final case class ApiImpl(test: String) extends Api:
   private def privateMethod = ()
 
 enum Enum:
+
   case Zero
   case One
-
 
 final case class Record(
   string: String,
