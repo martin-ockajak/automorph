@@ -3,10 +3,15 @@ package jsonrpc.core
 import scala.quoted.{Expr, Quotes, Type, quotes}
 import jsonrpc.core.ScalaSupport.*
 
+/**
+ * Data type reflection tools.
+ *
+ * @param quotes quotation context
+ */
 final class Reflection(val quotes: Quotes):
+  // All meta-programming data types must are path-dependent on the compiler-generated quotation context
   import quotes.reflect.{asTerm, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
 
-  // TODO: those case classes need to be path-dependent?
   final case class Param(
     name: String,
     dataType: TypeRepr,
@@ -37,7 +42,10 @@ final class Reflection(val quotes: Quotes):
 
   private given Quotes = quotes
 
-  private val abstractMemberFlags:Seq[Flags] =
+  /**
+   * Non-concrete class member flags.
+   */
+  private val abstractMemberFlags =
     Seq(
       Flags.Deferred,
       Flags.Erased,
@@ -47,7 +55,10 @@ final class Reflection(val quotes: Quotes):
       Flags.Transparent,
     )
 
-  private val hiddenMemberFlags:Seq[Flags] =
+  /**
+   * Non-public class member flags.
+   */
+  private val hiddenMemberFlags =
     Seq(
       Flags.Private,
       Flags.PrivateLocal,
@@ -55,22 +66,57 @@ final class Reflection(val quotes: Quotes):
       Flags.Synthetic,
     )
 
+  /**
+   * Describe class methods.
+   *
+   * @param classTypeTree class type tree
+   * @return class method descriptors
+   */
   def methods(classTypeTree: TypeTree): Seq[Method] =
     val classSymbol = classTypeTree.tpe.typeSymbol
     classSymbol.memberMethods.flatMap(method(classTypeTree, _))
 
+  /**
+   * Describe class fields.
+   *
+   * @param classTypeTree class type tree
+   * @return class field descriptors
+   */
   def fields(classTypeTree: TypeTree): Seq[Field] =
     val classSymbol = classTypeTree.tpe.typeSymbol
     classSymbol.memberFields.flatMap(field(classTypeTree, _))
 
-  def accessTerm(value: Term, name: String): Term =
-    Select.unique(value, name)
+  /**
+   * Create instance member access term.
+   *
+   * @param instance instance term
+   * @param name member name
+   * @return instance member access term
+   */
+  def accessTerm(instance: Term, name: String): Term =
+    Select.unique(instance, name)
 
-  def callTerm(value: Term, name: String, typeArguments: List[TypeTree], arguments: List[List[Term]]): Term =
-    accessTerm(value, name).appliedToTypeTrees(typeArguments).appliedToArgss(arguments)
+  /**
+   * Create instance method call term.
+   *
+   * @param instance instance term
+   * @param name method name
+   * @param typeArguments method type argument type trees
+   * @param arguments method argument terms
+   * @return instance method call term
+   */
+  def callTerm(instance: Term, name: String, typeArguments: List[TypeTree], arguments: List[List[Term]]): Term =
+    accessTerm(instance, name).appliedToTypeTrees(typeArguments).appliedToArgss(arguments)
 
-  def term[T](value: Expr[T]): Term =
-    value.asTerm
+  /**
+   * Create typed expression term.
+   *
+   * @param expression expression
+   * @tparam T expression type
+   * @return typed expression term
+   */
+  def term[T](expression: Expr[T]): Term =
+    expression.asTerm
 
   private def method(classTypeTree: TypeTree, methodSymbol: Symbol): Option[Method] =
     val (symbolType, typeParams) = classTypeTree.tpe.memberType(methodSymbol) match
