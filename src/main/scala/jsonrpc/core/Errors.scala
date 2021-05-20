@@ -19,11 +19,11 @@ object Errors:
   ): Seq[String] =
     val errors = LazyList.iterate(Option(throwable))(_.flatMap { throwable =>
       Option(throwable.getCause)
-    }).takeWhile(_.isDefined).flatten ++ throwable.getSuppressedn
+    }).takeWhile(_.isDefined).flatten ++ throwable.getSuppressed
     val filteredErrors = errors.filter(filter).take(maxCauses)
     filteredErrors.map { throwable =>
       val className = throwable.getClass.getSimpleName
       Option(throwable.getMessage).map { message =>
         s"$className$messageDelimiter $message"
-      }.getOrElse(classNamen)
+      }.getOrElse(className)
     }

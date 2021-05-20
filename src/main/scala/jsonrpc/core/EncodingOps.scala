@@ -9,18 +9,18 @@ import scala.util.{Success, Try}
 import scala.annotation.tailrec
 
 case object EncodingOps:
-  private lazy val charset = StandardCharsets.UTF_8.nn
+  private lazy val charset = StandardCharsets.UTF_8
   private val maxReadIterations = 1000_000
 
   extension (bytes: Array[Byte]) def asArraySeq: ArraySeq.ofByte = ArraySeq.ofByte(bytes)
 
-  extension (string: String) def toArraySeq: ArraySeq.ofByte = string.getBytes(charset).nn.asArraySeq
+  extension (string: String) def toArraySeq: ArraySeq.ofByte = string.getBytes(charset).asArraySeq
 
   extension (buffer: ByteBuffer)
 
     def toArraySeq: ArraySeq.ofByte =
       if buffer.hasArray then
-        buffer.array.nn.asArraySeq
+        buffer.array.asArraySeq
       else
         val array = Array.ofDim[Byte](buffer.remaining)
         buffer.get(array, 0, array.size)
