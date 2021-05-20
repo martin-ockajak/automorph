@@ -25,26 +25,26 @@ object HandlerMacros:
       typeTree => ref.methods(typeTree).filter(_.public).map(_.name)
     }.toSet
 
-    def methodDescription(method: ref.Method): String =
-      val paramLists = method.params.map { params =>
-        s"(${params.map { param =>
-          s"${param.name}: ${simpleTypeName(param.dataType.show)}"
-        }.mkString(", ")})"
-      }.mkString
-
-      val documentation = method.symbol.docstring.map(_ + "\n").getOrElse("")
-      val resultType = simpleTypeName(method.resultType.show)
-      s"$documentation${method.name}$paramLists: $resultType\n"
+//    def methodDescription(method: ref.Method): String =
+//      val paramLists = method.params.map { params =>
+//        s"(${params.map { param =>
+//          s"${param.name}: ${simpleTypeName(param.dataType.show)}"
+//        }.mkString(", ")})"
+//      }.mkString
+//
+//      val documentation = method.symbol.docstring.map(_ + "\n").getOrElse("")
+//      val resultType = simpleTypeName(method.resultType.show)
+//      s"$documentation${method.name}$paramLists: $resultType\n"
 
     // Introspect the API instance & generate its description
     val apiTypeTree = TypeTree.of[T]
     val apiMethods = ref.methods(apiTypeTree).filter(_.public).filter {
       method => !baseMethodNames.contains(method.symbol.name)
     }
-    apiMethods.filterNot(_.concrete).foreach {
+    apiMethods.filterNot(_.available).foreach {
       method => throw new IllegalStateException(s"Invalid API method: ${method.symbol.fullName}")
     }
-    val apiDescription = apiMethods.map(methodDescription).mkString("\n")
+//    val apiDescription = apiMethods.map(methodDescription).mkString("\n")
 
     // Generate method call code
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
@@ -70,7 +70,7 @@ object HandlerMacros:
 //      println(${call.asExpr})
 //      println(${typedCall.asExpr})
       println()
-      println(${ Expr(apiDescription) })
+//      println(${ Expr(apiDescription) })
       Map.empty
     }
 

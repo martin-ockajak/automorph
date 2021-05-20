@@ -29,7 +29,7 @@ final class Reflection(val quotes: Quotes):
     params: Seq[Seq[Param]],
     typeParams: Seq[TypeParam],
     public: Boolean,
-    concrete: Boolean,
+    available: Boolean,
     symbol: Symbol
   )
 
@@ -44,8 +44,7 @@ final class Reflection(val quotes: Quotes):
   private given Quotes = quotes
 
   /** Non-concrete class member flags. */
-  private val abstractMemberFlags = Seq(
-    Flags.Deferred,
+  private val unavailableMemberFlags = Seq(
     Flags.Erased,
     Flags.Inline,
     Flags.Invisible,
@@ -129,7 +128,7 @@ final class Reflection(val quotes: Quotes):
           params,
           typeParams,
           publicSymbol(methodSymbol),
-          concreteSymbol(methodSymbol),
+          availableSymbol(methodSymbol),
           methodSymbol
         ).asSome
       case _ => None
@@ -157,13 +156,13 @@ final class Reflection(val quotes: Quotes):
       fieldSymbol.name,
       fieldType,
       publicSymbol(fieldSymbol),
-      concreteSymbol(fieldSymbol),
+      availableSymbol(fieldSymbol),
       fieldSymbol
     ).asSome
 
   private def publicSymbol(symbol: Symbol): Boolean = !matchesFlags(symbol.flags, hiddenMemberFlags)
 
-  private def concreteSymbol(symbol: Symbol): Boolean = !matchesFlags(symbol.flags, abstractMemberFlags)
+  private def availableSymbol(symbol: Symbol): Boolean = !matchesFlags(symbol.flags, unavailableMemberFlags)
 
   private def matchesFlags(flags: Flags, matchingFlags: Seq[Flags]): Boolean =
     matchingFlags.foldLeft(false) { (result, current) =>
