@@ -13,7 +13,7 @@ case object EncodingOps:
 
   extension (bytes: Array[Byte]) def asArraySeq: ArraySeq.ofByte = ArraySeq.ofByte(bytes)
 
-  extension (string: String) def toArray: Array[Byte] = string.getBytes(charset).nn
+  extension (string: String) def toArraySeq: ArraySeq.ofByte = string.getBytes(charset).nn.asArraySeq
 
   extension (buffer: ByteBuffer)
 
