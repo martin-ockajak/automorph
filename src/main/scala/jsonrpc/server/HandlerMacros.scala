@@ -37,8 +37,7 @@ object HandlerMacros:
 //      s"$documentation${method.name}$paramLists: $resultType\n"
 
     // Introspect the API instance & generate its description
-    val apiTypeTree = TypeTree.of[T]
-    val apiMethods = ref.methods(apiTypeTree).filter(_.public).filter {
+    val apiMethods = ref.methods(TypeTree.of[T]).filter(_.public).filter {
       method => !baseMethodNames.contains(method.symbol.name)
     }
     apiMethods.filterNot(_.available).foreach {
