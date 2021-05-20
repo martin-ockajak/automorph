@@ -74,7 +74,7 @@ class ServerSpec
   "" - {
     "Bind" - {
       "Default" in {
-        val server = JsonRpcServer(DummyJsonCodec(), NoEffect())
+        val server = JsonRpcHandler(DummyJsonCodec(), NoEffect())
         val api = ApiImpl("")
         server.bind(api)
         (0 == 0).shouldBe(true)

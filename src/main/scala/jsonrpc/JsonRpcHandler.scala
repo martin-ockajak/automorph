@@ -8,23 +8,23 @@ import jsonrpc.spi.{Codec, Effect}
 import scala.collection.immutable.ArraySeq
 
 /**
- * JSON-RPC server.
+ * JSON-RPC handler.
  *
  * @param codec hierarchical data format codec plugin
  * @param effect computation effect system plugin
  * @tparam Node data format node representation type
  * @tparam Outcome computation outcome effect type
  */
-final case class JsonRpcServer[Node, Outcome[_]](
+final case class JsonRpcHandler[Node, Outcome[_]](
   codec: Codec[Node],
   effect: Effect[Outcome],
   private val bindings: Map[String, Node => Node] = Map.empty
 ):
   private val bufferSize = 4096
 
-  inline def bind[T <: AnyRef](api: T): JsonRpcServer[Node, Outcome] =
+  inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, Outcome] =
     val newBindings = ServerMacros.bind(codec, effect, api)
-    JsonRpcServer(codec, effect, bindings ++ newBindings)
+    JsonRpcHandler(codec, effect, bindings ++ newBindings)
 
   def process(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte] =
     effect.pure(request)
