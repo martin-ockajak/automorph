@@ -2,7 +2,7 @@ package jsonrpc
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.core.EncodingOps.asArraySeq
+import jsonrpc.core.EncodingOps.toArraySeq
 import jsonrpc.server.ServerMacros
 import jsonrpc.spi.{Codec, Effect}
 import scala.collection.immutable.ArraySeq
@@ -30,7 +30,7 @@ final case class JsonRpcServer[Node, Outcome[_]](
     effect.pure(request)
 
   def process(request: ByteBuffer): Outcome[ByteBuffer] =
-    effect.map(process(request.asArraySeq), response => ByteBuffer.wrap(response.unsafeArray).nn)
+    effect.map(process(request.toArraySeq), response => ByteBuffer.wrap(response.unsafeArray).nn)
 
   def process(request: InputStream): Outcome[InputStream] =
-    effect.map(process(request.asArraySeq(bufferSize)), response => ByteArrayInputStream(response.unsafeArray))
+    effect.map(process(request.toArraySeq(bufferSize)), response => ByteArrayInputStream(response.unsafeArray))

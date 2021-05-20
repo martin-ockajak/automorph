@@ -20,9 +20,9 @@ case object EncodingOps:
     def toBytes: Array[Byte] = string.getBytes(charset).nn
 
   extension (buffer: ByteBuffer)
-    def asArraySeq: ArraySeq.ofByte =
+    def toArraySeq: ArraySeq.ofByte =
       if buffer.hasArray then
-        ArraySeq.ofByte(buffer.array.nn)
+        buffer.array.nn.asArraySeq
       else
         val array = Array.ofDim[Byte](buffer.remaining)
         buffer.get(array, 0, array.size)
@@ -32,7 +32,7 @@ case object EncodingOps:
 
   extension (inputStream: InputStream)
 
-    def asArraySeq(bufferSize: Int): ArraySeq.ofByte =
+    def toArraySeq(bufferSize: Int): ArraySeq.ofByte =
       val outputStream = ByteArrayOutputStream()
       val buffer = Array.ofDim[Byte](bufferSize)
 
