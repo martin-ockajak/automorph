@@ -1,33 +1,32 @@
 package jsonrpc.core
 
 import java.io.ByteArrayOutputStream
-import java.nio.charset.StandardCharsets.UTF_8
+import java.nio.charset.StandardCharsets
 import java.nio.ByteBuffer
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.Future
 import scala.util.{Try, Success}
 
 case object ScalaSupport:
+  private lazy val charset = StandardCharsets.UTF_8.nn
 
-  private lazy val charset = UTF_8.nn
+  extension [T](value:T)
+    def some: Option[T] = Some(value)
+    def asCompletedFuture: Future[T] = Future.successful(value)
+    def asSuccess: Try[T] = Success(value)
+    def asLeft[R] :Either[T, R] = Left(value)
+    def asRight[L] :Either[L, T] = Right(value)
 
-  extension [X](value:X)
-    def some:Option[X] = Some(value)
-    def asCompletedFuture:Future[X] = Future.successful(value)
-    def asSuccess:Try[X] = Success(value)
-    def asLeft[R]  :Either[X, R]  = Left(value)
-    def asRight[L] :Either[L, X]  = Right(value)
+  extension (bytes: Array[Byte])
+    def decodeToString: String = new String(bytes, charset)
+    def asArraySeq: ArraySeq.ofByte = ArraySeq.ofByte(bytes)
 
-  extension (bytes:Array[Byte])
-    def decodeToString:String = new String(bytes, charset)
-    def asArraySeq:ArraySeq.ofByte = ArraySeq.ofByte(bytes)
-
-  extension (str:String)
-    def encodeToBytes: Array[Byte] = str.getBytes(charset).nn
-    def encodeToByteBuffer: ByteBuffer = charset.encode(str).nn
+  extension (string: String)
+    def encodeToBytes: Array[Byte] = string.getBytes(charset).nn
+    def encodeToByteBuffer: ByteBuffer = charset.encode(string).nn
 
   extension (buffer: ByteBuffer)
     def decodeToString: String = charset.decode(buffer).toString
 
-  extension (os: ByteArrayOutputStream)
-    def decodeToString: String = os.toString(charset.name)
+  extension (outputStream: ByteArrayOutputStream)
+    def decodeToString: String = outputStream.toString(charset.name)
