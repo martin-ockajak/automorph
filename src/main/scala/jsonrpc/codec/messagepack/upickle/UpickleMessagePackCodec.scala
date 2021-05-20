@@ -23,20 +23,13 @@ final case class UpickleMessagePackCodec(parser: Api)
   private given parser.ReadWriter[UpickleMessagePackCodec.CallError] = parser.macroRW
 
   def serialize(message: Message[Msg]): ArraySeq.ofByte =
-    parser.writeToByteArray(
-      UpickleMessagePackCodec.Message(message)
-    ).asArraySeq
+    parser.writeToByteArray(UpickleMessagePackCodec.Message(message)).asArraySeq
 
   def deserialize(data: ArraySeq.ofByte): Message[Msg] =
-    parser.read[UpickleMessagePackCodec.Message](
-      data.unsafeArray
-    ).toSpi
+    parser.read[UpickleMessagePackCodec.Message](data.unsafeArray).toSpi
 
   def format(message: Message[Msg]): String =
-    parser.write(
-      UpickleMessagePackCodec.Message(message),
-      indent
-    )
+    parser.write(UpickleMessagePackCodec.Message(message), indent)
 
   inline def encode[T](value: T): Msg =
     val writer = summonInline[parser.Writer[T]]
@@ -54,38 +47,35 @@ object UpickleMessagePackCodec:
     result: Option[Msg],
     error: Option[CallError]
   ):
-    def toSpi: spi.Message[Msg] =
-      spi.Message[Msg](
-        jsonrpc,
-        id,
-        method,
-        params,
-        result,
-        error.map(_.toSpi)
-      )
+    def toSpi: spi.Message[Msg] = spi.Message[Msg](
+      jsonrpc,
+      id,
+      method,
+      params,
+      result,
+      error.map(_.toSpi)
+    )
 
   object Message:
-    def apply(v: spi.Message[Msg]): Message =
-      Message(
-        v.jsonrpc,
-        v.id,
-        v.method,
-        v.params,
-        v.result,
-        v.error.map(CallError.apply)
-      )
+    def apply(v: spi.Message[Msg]): Message = Message(
+      v.jsonrpc,
+      v.id,
+      v.method,
+      v.params,
+      v.result,
+      v.error.map(CallError.apply)
+    )
 
   final case class CallError(
     code: Option[Int],
     message: Option[String],
     data: Option[Msg]
   ):
-    def toSpi: spi.CallError[Msg] =
-      spi.CallError[Msg](
-        code,
-        message,
-        data
-      )
+    def toSpi: spi.CallError[Msg] = spi.CallError[Msg](
+      code,
+      message,
+      data
+    )
 
   object CallError:
     def apply(v: spi.CallError[Msg]): CallError = CallError(

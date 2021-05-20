@@ -2,9 +2,9 @@ package jsonrpc
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
+import jsonrpc.core.ScalaSupport.*
 import jsonrpc.server.ServerMacros
 import jsonrpc.spi.{Effect, Codec}
-import jsonrpc.core.ScalaSupport.*
 import scala.collection.immutable.ArraySeq
 
 final case class JsonRpcServer[DOM, E[_]](
