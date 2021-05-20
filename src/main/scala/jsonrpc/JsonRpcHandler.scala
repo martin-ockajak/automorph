@@ -23,8 +23,7 @@ final case class JsonRpcHandler[Node, Outcome[_]] private (
 ):
   private val bufferSize = 4096
 
-  inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, Outcome] =
-    bind(api, Seq(_))
+  inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, Outcome] = bind(api, Seq(_))
 
   inline def bind[T <: AnyRef](api: T, mapMethod: String => Seq[String]): JsonRpcHandler[Node, Outcome] =
     val bindings = ServerMacros.bind(codec, effect, api).flatMap { (apiMethodName, method) =>
