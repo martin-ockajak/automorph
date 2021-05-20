@@ -28,9 +28,7 @@ final case class UpickleMessagePackCodec(parser: Api) extends Codec[Msg]:
 
   def format(message: Message[Msg]): String = parser.write(UpickleMessagePackCodec.Message(message), indent)
 
-  inline def encode[T](value: T): Msg =
-    val writer = summonInline[parser.Writer[T]]
-    UpickleMessagePackMacros.encode(parser, writer, value)
+  inline def encode[T](value: T): Msg = UpickleMessagePackMacros.encode(parser, value)
 
   inline def decode[T](node: Msg): T = node.asInstanceOf[T]
 
