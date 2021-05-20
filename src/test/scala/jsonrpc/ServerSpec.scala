@@ -60,7 +60,7 @@ class ServerSpec
     Map(
       "x" -> TextNode("foo"),
       "y" -> IntNode(1),
-      "z" -> BooleanNode.TRUE.nn
+      "z" -> BooleanNode.TRUE
     ).asRight.asSome,
     Some(TextNode("test")),
     None

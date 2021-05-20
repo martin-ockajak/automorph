@@ -73,4 +73,4 @@ object ServerMacros:
     }
 
   private def simpleTypeName(typeName: String): String =
-    typeName.replaceAll("[^\\[\\], ]+\\.", "").nn
+    typeName.replaceAll("[^\\[\\], ]+\\.", "")

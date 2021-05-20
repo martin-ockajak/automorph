@@ -30,7 +30,7 @@ final case class JsonRpcServer[Node, Outcome[_]](
     effect.pure(request)
 
   def process(request: ByteBuffer): Outcome[ByteBuffer] =
-    effect.map(process(request.toArraySeq), response => ByteBuffer.wrap(response.unsafeArray).nn)
+    effect.map(process(request.toArraySeq), response => ByteBuffer.wrap(response.unsafeArray))
 
   def process(request: InputStream): Outcome[InputStream] =
     effect.map(process(request.toArraySeq(bufferSize)), response => ByteArrayInputStream(response.unsafeArray))

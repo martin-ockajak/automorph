@@ -17,21 +17,21 @@ import scala.reflect.ClassTag
  */
 final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaultMapper) extends Codec[JsonNode]:
 
-  def serialize(message: Message[JsonNode]): ArraySeq.ofByte = ArraySeq.ofByte(mapper.writeValueAsBytes(message).nn)
+  def serialize(message: Message[JsonNode]): ArraySeq.ofByte = ArraySeq.ofByte(mapper.writeValueAsBytes(message))
 
   def deserialize(data: ArraySeq.ofByte): Message[JsonNode] =
-    mapper.readValue(data.unsafeArray, classOf[Message[JsonNode]]).nn
+    mapper.readValue(data.unsafeArray, classOf[Message[JsonNode]])
 
   def format(message: Message[JsonNode]): String =
-    mapper.writerWithDefaultPrettyPrinter.nn.writeValueAsString(message).nn
+    mapper.writerWithDefaultPrettyPrinter.writeValueAsString(message)
 
   inline def encode[T](value: T): JsonNode = mapper.valueToTree(value).asInstanceOf[JsonNode]
 
   inline def decode[T](node: JsonNode): T =
     val classTag = summonInline[ClassTag[T]]
     val valueClass = classTag.runtimeClass.asInstanceOf[Class[T]]
-    mapper.treeToValue(node, valueClass).nn
+    mapper.treeToValue(node, valueClass)
 
 object JacksonJsonCodec:
 
-  def defaultMapper: ObjectMapper = JsonMapper.builder.nn.addModule(DefaultScalaModule).nn.build.nn
+  def defaultMapper: ObjectMapper = JsonMapper.builder.addModule(DefaultScalaModule).build
