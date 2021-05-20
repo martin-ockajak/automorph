@@ -21,7 +21,8 @@ lazy val root = project.in(file(".")).settings(
 )
 
 scalacOptions ++= Seq(
-  "-source", "future-migration",
+  "-source",
+  "future-migration",
   "-new-syntax",
   "-indent",
   "-feature",
@@ -32,7 +33,10 @@ scalacOptions ++= Seq(
   "-unchecked",
   "-language:strictEquality",
   "-language:higherKinds",
-  "-release", "12",
-  "-encoding", "utf8",
-  "-pagewidth", "120",
+  "-release",
+  "12",
+  "-encoding",
+  "utf8",
+  "-pagewidth",
+  "120"
 )
