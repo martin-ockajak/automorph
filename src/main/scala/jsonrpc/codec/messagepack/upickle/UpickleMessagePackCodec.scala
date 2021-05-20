@@ -30,7 +30,7 @@ final case class UpickleMessagePackCodec(parser: Api) extends Codec[Msg]:
 
   inline def encode[T](value: T): Msg = UpickleMessagePackMacros.encode(parser, value)
 
-  inline def decode[T](node: Msg): T = node.asInstanceOf[T]
+  inline def decode[T](node: Msg): T = UpickleMessagePackMacros.decode[Api, T](parser, node)
 
 object UpickleMessagePackCodec:
 

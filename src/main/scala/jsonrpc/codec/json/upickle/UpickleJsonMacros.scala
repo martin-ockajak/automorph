@@ -16,3 +16,13 @@ object UpickleJsonMacros:
     val realWriter = summonInline[realParser.Writer[T]]
     realParser.writeJs($value)(using realWriter)
   }
+
+  inline def decode[Parser <: Api, T](parser: Parser, node: Value): T = ${ decode[Parser, T]('parser, 'node) }
+
+  private def decode[Parser <: Api: Type, T: Type](parser: Expr[Parser], node: Expr[Value])(using
+    quotes: Quotes
+  ): Expr[T] = '{
+    val realParser = $parser
+    val realReader = summonInline[realParser.Reader[T]]
+    realParser.read[T]($node)(using realReader)
+  }

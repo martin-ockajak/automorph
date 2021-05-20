@@ -16,3 +16,13 @@ object UpickleMessagePackMacros:
     val realWriter = summonInline[realParser.Writer[T]]
     realParser.writeMsg($value)(using realWriter)
   }
+
+  inline def decode[Parser <: Api, T](parser: Parser, node: Msg): T = ${ decode[Parser, T]('parser, 'node) }
+
+  private def decode[Parser <: Api: Type, T: Type](parser: Expr[Parser], node: Expr[Msg])(using
+    quotes: Quotes
+  ): Expr[T] = '{
+    val realParser = $parser
+    val realReader = summonInline[realParser.Reader[T]]
+    realParser.readBinary[T]($node)(using realReader)
+  }
