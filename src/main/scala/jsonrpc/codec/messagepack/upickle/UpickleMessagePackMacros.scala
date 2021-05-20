@@ -9,15 +9,13 @@ object UpickleMessagePackMacros:
     parser: Parser,
     writer: Api#Writer[T],
     value: T
-  ): Msg =
-    ${encode('parser, 'writer, 'value)}
+  ): Msg = ${encode('parser, 'writer, 'value)}
 
   private def encode[Parser <: Api: Type, T: Type](
     parser: Expr[Parser],
     writer: Expr[Api#Writer[T]],
     value: Expr[T]
-  )(using quotes: Quotes): Expr[Msg] =
-    '{
-      val realParser = $parser
-      realParser.writeMsg($value)(using $writer.asInstanceOf[realParser.Writer[T]])
-    }
+  )(using quotes: Quotes): Expr[Msg] = '{
+    val realParser = $parser
+    realParser.writeMsg($value)(using $writer.asInstanceOf[realParser.Writer[T]])
+  }

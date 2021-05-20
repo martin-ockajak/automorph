@@ -9,15 +9,13 @@ object UpickleJsonMacros:
     parser: Parser,
     writer: Api#Writer[T],
     value: T
-  ): Value = 
-    ${encode('parser, 'writer, 'value)}
+  ): Value = ${encode('parser, 'writer, 'value)}
 
   private def encode[Parser <: Api: Type, T: Type](
     parser: Expr[Parser],
     writer: Expr[Api#Writer[T]],
     value: Expr[T]
-  )(using quotes: Quotes): Expr[Value] =
-    '{
-      val realParser = $parser
-      realParser.writeJs($value)(using $writer.asInstanceOf[realParser.Writer[T]])
-    }
+  )(using quotes: Quotes): Expr[Value] = '{
+    val realParser = $parser
+    realParser.writeJs($value)(using $writer.asInstanceOf[realParser.Writer[T]])
+  }

@@ -5,27 +5,21 @@ import scala.quoted.{Expr, Quotes, Type, quotes}
 
 object ServerMacros:
 
-  inline def bind[T <: AnyRef](inline api: T): Unit = 
-    ${
-      bind('api)
-    }
+  inline def bind[T <: AnyRef](inline api: T): Unit = ${bind('api)}
 
   private def bind[T <: AnyRef: Type](api: Expr[T])(using quotes: Quotes): Expr[Unit] =
     import ref.quotes.reflect.*
 
     val ref = Reflection(quotes)
-    val baseMethodNames =
-      Seq(TypeTree.of[AnyRef], TypeTree.of[Product]).flatMap { 
-        typeTree => ref.methods(typeTree).filter(_.public).map(_.name)
-      }.toSet
+    val baseMethodNames = Seq(TypeTree.of[AnyRef], TypeTree.of[Product]).flatMap {
+      typeTree => ref.methods(typeTree).filter(_.public).map(_.name)
+    }.toSet
 
     def methodDescription(method: ref.Method): String =
-      val paramLists = method.params.map { 
-        params =>
-          s"(${params.map { 
-            param =>
-              s"${param.name}: ${simpleTypeName(param.dataType.show)}"
-          }.mkString(", ")})"
+      val paramLists = method.params.map { params =>
+        s"(${params.map { param =>
+            s"${param.name}: ${simpleTypeName(param.dataType.show)}"
+        }.mkString(", ")})"
       }.mkString
       
       val documentation = method.symbol.docstring.map(_ + "\n").getOrElse("")
