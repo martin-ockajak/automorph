@@ -42,12 +42,11 @@ final case class JsonRpcClient[Node, Outcome[_]](
     val request = requestMessage(id = true, method, arguments)
     effect.map(
       transport.call(request),
-      response => {
+      response =>
         val message = responseMessage(response)
         decodeResult(message.value) match
           case Left(error) => throw error
           case Right(result) => result
-      }
     )
 
   private def notify[R](method: String, arguments: Node): Outcome[Unit] =
