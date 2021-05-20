@@ -4,6 +4,7 @@ import java.io.{InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.spi.{Effect, Codec}
 import scala.collection.immutable.ArraySeq
+import scala.util.Try
 
 /**
  * JSON-RPC client.
@@ -26,3 +27,9 @@ final case class JsonRpcClient[Node, Outcome[_]](
   def notify(method: String, arguments: Map[String, Any]): Outcome[Unit] = ???
 
   def api[T]: T = ???
+
+  def callRequest(method: String, arguments: Seq[Any]): ArraySeq.ofByte = ???
+
+  def notifyRequest(method: String, arguments: Seq[Any]): ArraySeq.ofByte = ???
+
+  def responseResult[R](response: ArraySeq.ofByte): Try[R] = ???

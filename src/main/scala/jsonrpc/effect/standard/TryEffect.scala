@@ -2,7 +2,7 @@ package jsonrpc.effect.native
 
 import jsonrpc.spi.Effect
 import scala.util.{Success, Try}
-import jsonrpc.core.ScalaSupport.*
+import jsonrpc.core.ScalaSupport.asSuccess
 
 /**
  * Try effect system plugin.
