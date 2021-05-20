@@ -18,9 +18,9 @@ case object ScalaSupport:
 
     def asSuccess: Try[T] = Success(value)
 
-    def asLeft[R] :Either[T, R] = Left(value)
+    def asLeft[R]: Either[T, R] = Left(value)
 
-    def asRight[L] :Either[L, T] = Right(value)
+    def asRight[L]: Either[L, T] = Right(value)
 
   extension (bytes: Array[Byte])
     def decodeToString: String = String(bytes, charset)
