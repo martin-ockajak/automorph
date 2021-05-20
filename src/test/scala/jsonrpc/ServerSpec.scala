@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.node.IntNode
 import com.fasterxml.jackson.databind.node.BooleanNode
 import ujson.{Bool, Num, Str}
 import upickle.default.{ReadWriter, Writer}
-import jsonrpc.core.ScalaSupport.*
+import jsonrpc.core.ScalaSupport.{asRight, some}
 //import io.circe.syntax.*
 //import io.circe.parser.decode
 //import io.circe.*
