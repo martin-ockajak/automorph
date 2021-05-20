@@ -7,8 +7,8 @@ import scala.collection.immutable.ArraySeq
 
 final case class JsonRpcClient[Node, Outcome[_]](
   jsonContext: Codec[Node],
-  effectContext: Effect[Outcome]):
-
+  effectContext: Effect[Outcome]
+):
   def call[Result](method: String, arguments: Seq[Any]): Outcome[Result] = ???
 
   def call[Result](method: String, arguments: Map[String, Any]): Outcome[Result] = ???

@@ -9,8 +9,8 @@ import scala.collection.immutable.ArraySeq
 
 final case class JsonRpcServer[Node, Outcome[_]](
   jsonContext: Codec[Node],
-  effectContext: Effect[Outcome]):
-
+  effectContext: Effect[Outcome]
+):
   private val bufferSize = 4096
 
   inline def bind[T <: AnyRef](api: T): Unit =
