@@ -11,13 +11,12 @@ import scala.annotation.tailrec
 case object EncodingOps:
   private lazy val charset = StandardCharsets.UTF_8.nn
 
-  extension (bytes: Array[Byte])
-    def asArraySeq: ArraySeq.ofByte = ArraySeq.ofByte(bytes)
+  extension (bytes: Array[Byte]) def asArraySeq: ArraySeq.ofByte = ArraySeq.ofByte(bytes)
 
-  extension (string: String)
-    def toBytes: Array[Byte] = string.getBytes(charset).nn
+  extension (string: String) def toArray: Array[Byte] = string.getBytes(charset).nn
 
   extension (buffer: ByteBuffer)
+
     def toArraySeq: ArraySeq.ofByte =
       if buffer.hasArray then
         buffer.array.nn.asArraySeq
