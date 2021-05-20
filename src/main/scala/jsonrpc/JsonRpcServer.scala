@@ -2,7 +2,7 @@ package jsonrpc
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.core.ScalaSupport.{asArraySeq, decodeToString, encodeToBytes, encodeToByteBuffer}
+import jsonrpc.core.ScalaSupport.asArraySeq
 import jsonrpc.server.ServerMacros
 import jsonrpc.spi.{Codec, Effect}
 import scala.collection.immutable.ArraySeq
@@ -17,16 +17,15 @@ final case class JsonRpcServer[Node, Outcome[_]](
     ServerMacros.bind(api)
 
   def process(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte] =
-    val text = request.unsafeArray.decodeToString
-    effectContext.map(process(text), _.encodeToBytes.asArraySeq)
-
-  def process(request: ByteBuffer): Outcome[ByteBuffer] =
-    val text = request.decodeToString
-    effectContext.map(process(text), _.encodeToByteBuffer)
     effectContext.pure(request)
 
+  def process(request: ByteBuffer): Outcome[ByteBuffer] =
+    effectContext.map(process(request.asArraySeq), response => {
+      ByteBuffer.wrap(response.unsafeArray).nn
+    })
+
   def process(request: InputStream): Outcome[InputStream] =
-    val outputStream = new ByteArrayOutputStream
+    val outputStream = ByteArrayOutputStream()
     val buffer = Array.ofDim[Byte](bufferSize)
 
     while
@@ -38,11 +37,6 @@ final case class JsonRpcServer[Node, Outcome[_]](
         false
     do ()
 
-    val text = outputStream.decodeToString
-    effectContext.map(
-      process(text),
-      response => new ByteArrayInputStream(response.encodeToBytes)
-    )
-
-  private def process(request: String): Outcome[String] =
-    effectContext.pure(request)
+    effectContext.map(process(buffer.asArraySeq), response => {
+      ByteArrayInputStream(response.unsafeArray)
+    })
