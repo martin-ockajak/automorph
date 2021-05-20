@@ -3,30 +3,69 @@ package jsonrpc.core
 import java.io.IOException
 import jsonrpc.spi.{CallError, Message}
 
+/**
+ * JSON-RPC protocol data structures.
+ *
+ * Specification: https://www.jsonrpc.org/specification
+ */
 object Protocol:
+  /**
+   * Message identifier type.
+   */
   type Id = Either[BigDecimal, String]
 
-  final case class Request[DOM](
+  /**
+   * JSON-RPC request.
+   *
+   * @param jsonrpc protocol version (must be 2.0)
+   * @param id call identifier, a request without and identifier is considered to be a notification
+   * @param method invoked method name
+   * @param params invoked method argument values by position or by name
+   * @tparam Node message node representation type
+   */
+  final case class Request[Node](
     id: Option[Id],
     method: String,
-    params: Either[List[DOM], Map[String, DOM]]
+    params: Either[List[Node], Map[String, Node]]
   )
 
-  final case class Response[DOM](
+  /**
+   * JSON-RPC call response.
+   *
+   * @param id call identifier
+   * @param value response value, either a result or an error
+   * @tparam Node message node representation type
+   */
+  final case class Response[Node](
     id: Id,
-    value: Either[CallError[DOM], DOM]
+    value: Either[CallError[Node], Node]
   )
 
+  /**
+   * JSON-RPC parse error.
+   *
+   * @param message error message
+   * @param cause error cause
+   */
   final case class ParseError(
     message: String,
     cause: Throwable
   ) extends RuntimeException(message, cause)
 
+  /**
+   * JSON-RPC invalid request error.
+   *
+   * @param message error message
+   * @param cause error cause
+   */
   final case class InvalidRequest(
     message: String,
     cause: Throwable
   ) extends RuntimeException(message, cause)
 
+  /**
+   * JSON-RPC error types with codes.
+   */
   enum ErrorType(val code: Int):
     case ParseError       extends ErrorType(-32700)
     case InvalidRequest   extends ErrorType(-32600)
@@ -36,8 +75,18 @@ object Protocol:
     case IOError          extends ErrorType(-32000)
     case ApplicationError extends ErrorType(0)
 
+  /**
+   * Mapping of standard exception types to JSON-RPC errors.
+   */
+  lazy val exceptionErrorTypes: Map[Class[?], ErrorType] = Map(
+    classOf[ParseError]               -> ErrorType.ParseError,
+    classOf[InvalidRequest]           -> ErrorType.InvalidRequest,
+    classOf[IllegalArgumentException] -> ErrorType.InvalidParams,
+    classOf[IOException]              -> ErrorType.IOError
+  )
+
   object Request:
-    def apply[DOM](message: Message[DOM]): Request[DOM] =
+    def apply[Node](message: Message[Node]): Request[Node] =
       val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
       require(
         jsonrpc == version, 
@@ -49,7 +98,7 @@ object Protocol:
       Request(id, method, params)
 
   object Response:
-    def apply[DOM](message: Message[DOM]): Response[DOM] =
+    def apply[Node](message: Message[Node]): Response[Node] =
       val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
       require(
         jsonrpc == version, 
@@ -63,14 +112,9 @@ object Protocol:
         Response(id, Left(error))
       }
 
-  lazy val exceptionErrorTypes: Map[Class[?], ErrorType] =
-    Map(
-      classOf[ParseError]               -> ErrorType.ParseError,
-      classOf[InvalidRequest]           -> ErrorType.InvalidRequest,
-      classOf[IllegalArgumentException] -> ErrorType.InvalidParams,
-      classOf[IOException]              -> ErrorType.IOError
-    )
-
+  /**
+   * Supported JSON-RPC protocol version.
+   */
   private val version = "2.0"
 
   private def mandatory[T](value: Option[T], name: String): T =

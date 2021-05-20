@@ -45,26 +45,24 @@ final class Reflection(val quotes: Quotes):
   /**
    * Non-concrete class member flags.
    */
-  private val abstractMemberFlags =
-    Seq(
-      Flags.Deferred,
-      Flags.Erased,
-      Flags.Inline,
-      Flags.Invisible,
-      Flags.Macro,
-      Flags.Transparent,
-    )
+  private val abstractMemberFlags = Seq(
+    Flags.Deferred,
+    Flags.Erased,
+    Flags.Inline,
+    Flags.Invisible,
+    Flags.Macro,
+    Flags.Transparent,
+  )
 
   /**
    * Non-public class member flags.
    */
-  private val hiddenMemberFlags =
-    Seq(
-      Flags.Private,
-      Flags.PrivateLocal,
-      Flags.Protected,
-      Flags.Synthetic,
-    )
+  private val hiddenMemberFlags = Seq(
+    Flags.Private,
+    Flags.PrivateLocal,
+    Flags.Protected,
+    Flags.Synthetic,
+  )
 
   /**
    * Describe class methods.

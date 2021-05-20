@@ -6,7 +6,7 @@ package jsonrpc
  *
  * @param message error description
  * @param data additional error information
- * @param cause the cause of this exception
+ * @param cause error cause
  * @tparam Node data format node representation type
  */
 final case class JsonRpcError[Node](
