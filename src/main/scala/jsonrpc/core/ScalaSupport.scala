@@ -1,5 +1,6 @@
 package jsonrpc.core
 
+import java.io.InputStream
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import java.nio.ByteBuffer
@@ -44,3 +45,18 @@ case object ScalaSupport:
 
   extension (outputStream: ByteArrayOutputStream)
     def decodeToString: String = outputStream.toString(charset.name)
+
+  extension (inputStream: InputStream)
+    def asArraySeq(bufferSize: Int): ArraySeq.ofByte =
+      val outputStream = ByteArrayOutputStream()
+      val buffer = Array.ofDim[Byte](bufferSize)
+
+      while
+        val length = inputStream.read(buffer)
+        if length >= 0 then
+          outputStream.write(buffer, 0, length)
+          true
+        else
+          false
+      do ()
+      buffer.asArraySeq

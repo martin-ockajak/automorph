@@ -25,18 +25,6 @@ final case class JsonRpcServer[Node, Outcome[_]](
     })
 
   def process(request: InputStream): Outcome[InputStream] =
-    val outputStream = ByteArrayOutputStream()
-    val buffer = Array.ofDim[Byte](bufferSize)
-
-    while
-      val length = request.read(buffer)
-      if length >= 0 then
-        outputStream.write(buffer, 0, length)
-        true
-      else
-        false
-    do ()
-
-    effectContext.map(process(buffer.asArraySeq), response => {
+    effectContext.map(process(request.asArraySeq(bufferSize)), response => {
       ByteArrayInputStream(response.unsafeArray)
     })
