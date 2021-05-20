@@ -11,12 +11,10 @@ import upickle.Api
 /**
  * UPickle JSON codec plugin.
  *
- * Documentation: https://github.com/com-lihaoyi/upickle
- * Effect type: Value
- * Effect type API: http://com-lihaoyi.github.io/upickle/#uJson
+ * Documentation: https://github.com/com-lihaoyi/upickle Effect type: Value Effect type API:
+ * http://com-lihaoyi.github.io/upickle/#uJson
  */
-final case class UpickleJsonCodec(parser: Api)
-  extends Codec[Value]:
+final case class UpickleJsonCodec(parser: Api) extends Codec[Value]:
 
   private val indent = 2
   private given parser.ReadWriter[UpickleJsonCodec.Message] = parser.macroRW
@@ -39,6 +37,7 @@ final case class UpickleJsonCodec(parser: Api)
     node.asInstanceOf[T]
 
 object UpickleJsonCodec:
+
   final case class Message(
     jsonrpc: Option[String],
     id: Option[Either[BigDecimal, String]],
@@ -47,6 +46,7 @@ object UpickleJsonCodec:
     result: Option[Value],
     error: Option[CallError]
   ):
+
     def toSpi: spi.Message[Value] = spi.Message[Value](
       jsonrpc,
       id,
@@ -57,6 +57,7 @@ object UpickleJsonCodec:
     )
 
   object Message:
+
     def apply(v: spi.Message[Value]): Message = Message(
       v.jsonrpc,
       v.id,
@@ -71,6 +72,7 @@ object UpickleJsonCodec:
     message: Option[String],
     data: Option[Value]
   ):
+
     def toSpi: spi.CallError[Value] = spi.CallError[Value](
       code,
       message,
@@ -78,6 +80,7 @@ object UpickleJsonCodec:
     )
 
   object CallError:
+
     def apply(v: spi.CallError[Value]): CallError = CallError(
       v.code,
       v.message,
