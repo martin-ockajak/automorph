@@ -3,7 +3,6 @@ package jsonrpc.core
 import jsonrpc.core.ValueOps.*
 
 object Errors:
-  private val defaultMaxCauses: Int = 100
 
   // private extensions to make Throwable more scala-like
   extension (throwable: Throwable)
@@ -21,7 +20,7 @@ object Errors:
   def descriptions(
     throwable: Throwable,
     filter: Throwable => Boolean = _ => true,
-    maxCauses: Int = defaultMaxCauses
+    maxCauses: Int = 100
   ): Seq[String] =
     LazyList.iterate(throwable.asSome)(_.flatMap(_.cause))
       .takeWhile(_.isDefined).flatten.filter(filter).take(maxCauses).map { throwable =>
