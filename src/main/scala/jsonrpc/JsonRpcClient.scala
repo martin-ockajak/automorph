@@ -45,7 +45,7 @@ final case class JsonRpcClient[Node, Outcome[_]](
       response =>
         val message = responseMessage(response)
         decodeResult(message.value) match
-          case Left(error) => throw error
+          case Left(error)   => throw error
           case Right(result) => result
     )
 
