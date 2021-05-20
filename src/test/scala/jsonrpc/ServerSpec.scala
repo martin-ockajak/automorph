@@ -79,9 +79,8 @@ class ServerSpec extends BaseSpec:
   "" - {
     "Bind" - {
       "Default" in {
-        val server = JsonRpcHandler(DummyJsonCodec(), NoEffect())
         val api = ApiImpl("")
-        server.bind(api)
+        val handler = JsonRpcHandler(DummyJsonCodec(), NoEffect()).bind(api)
         (0 == 0).shouldBe(true)
       }
     }

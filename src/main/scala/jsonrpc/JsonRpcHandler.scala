@@ -40,7 +40,7 @@ final case class JsonRpcHandler[Node, Outcome[_]] private (
     }
     JsonRpcHandler(codec, effect)(methodBindings ++ bindings)
 
-  def bind[T, R](method: String, function: Tuple => R): JsonRpcHandler[Node, Outcome] =
+  inline def bind[T, R](method: String, function: Tuple => R): JsonRpcHandler[Node, Outcome] =
     ???
 
   def process(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte] =

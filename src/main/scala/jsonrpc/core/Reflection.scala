@@ -1,7 +1,7 @@
 package jsonrpc.core
 
 import jsonrpc.core.ValueOps.asSome
-import scala.quoted.{quotes, Expr, Quotes, Type}
+import scala.quoted.{Expr, Quotes, Type, quotes}
 
 /**
  * Data type reflection tools.
@@ -13,37 +13,55 @@ final class Reflection(val quotes: Quotes):
   // All meta-programming data types must are path-dependent on the compiler-generated quotation context
   import quotes.reflect.{asTerm, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
 
-  final case class Param(
+  final case class QuotedParam(
     name: String,
     dataType: TypeRepr
-  )
+  ):
+    def lift: Param = Param(name, dataType.show)
 
-  final case class TypeParam(
+  final case class QuotedTypeParam(
     name: String,
-    typeBounds: TypeBounds
-  )
+    bounds: TypeBounds
+  ):
+    def lift: TypeParam = TypeParam(name, bounds.show)
 
-  final case class Method(
+  final case class QuotedMethod(
     name: String,
     resultType: TypeRepr,
-    params: Seq[Seq[Param]],
-    typeParams: Seq[TypeParam],
+    params: Seq[Seq[QuotedParam]],
+    typeParams: Seq[QuotedTypeParam],
     public: Boolean,
     available: Boolean,
     symbol: Symbol
-  )
+  ):
+    def lift: Method = Method(
+      name,
+      resultType.show,
+      params.map(_.map(_.lift)),
+      typeParams.map(_.lift),
+      public = public,
+      available = available,
+      symbol.docstring
+    )
 
-  final case class Field(
+  final case class QuotedField(
     name: String,
     dataType: TypeRepr,
     public: Boolean,
-    concrete: Boolean,
+    available: Boolean,
     symbol: Symbol
-  )
+  ):
+    def lift: Field = Field(
+      name,
+      dataType.show,
+      public = public,
+      available = available,
+      documentation = symbol.docstring
+    )
 
   private given Quotes = quotes
 
-  /** Non-concrete class member flags. */
+  /** Unavailable class member flags. */
   private val unavailableMemberFlags = Seq(
     Flags.Erased,
     Flags.Inline,
@@ -61,22 +79,22 @@ final class Reflection(val quotes: Quotes):
   )
 
   /**
-   * Describe class methods.
+   * Describe class methods within quoted context.
    *
    * @param classTypeTree class type tree
-   * @return class method descriptors
+   * @return quoted class method descriptors
    */
-  def methods(classTypeTree: TypeTree): Seq[Method] =
+  def methods(classTypeTree: TypeTree): Seq[QuotedMethod] =
     val classSymbol = classTypeTree.tpe.typeSymbol
     classSymbol.memberMethods.flatMap(method(classTypeTree, _))
 
   /**
-   * Describe class fields.
+   * Describe class fields within quoted context.
    *
    * @param classTypeTree class type tree
-   * @return class field descriptors
+   * @return quoted class field descriptors
    */
-  def fields(classTypeTree: TypeTree): Seq[Field] =
+  def fields(classTypeTree: TypeTree): Seq[QuotedField] =
     val classSymbol = classTypeTree.tpe.typeSymbol
     classSymbol.memberFields.flatMap(field(classTypeTree, _))
 
@@ -111,18 +129,18 @@ final class Reflection(val quotes: Quotes):
   def term[T](expression: Expr[T]): Term =
     expression.asTerm
 
-  private def method(classTypeTree: TypeTree, methodSymbol: Symbol): Option[Method] =
+  private def method(classTypeTree: TypeTree, methodSymbol: Symbol): Option[QuotedMethod] =
     val (symbolType, typeParams) = classTypeTree.tpe.memberType(methodSymbol) match
       case polyType: PolyType =>
         val typeParams = polyType.paramNames.zip(polyType.paramBounds).map {
-          (name, bounds) => TypeParam(name, bounds)
+          (name, bounds) => QuotedTypeParam(name, bounds)
         }
         (polyType.resType, typeParams)
       case otherType => (otherType, Seq.empty)
     symbolType match
       case methodType: MethodType =>
         val (params, resultType) = methodSignature(methodType)
-        Method(
+        QuotedMethod(
           methodSymbol.name,
           resultType,
           params,
@@ -133,7 +151,7 @@ final class Reflection(val quotes: Quotes):
         ).asSome
       case _ => None
 
-  private def methodSignature(methodType: MethodType): (Seq[Seq[Param]], TypeRepr) =
+  private def methodSignature(methodType: MethodType): (Seq[Seq[QuotedParam]], TypeRepr) =
     val methodTypes = LazyList.iterate(Option(methodType)) {
       case Some(currentType) =>
         currentType.resType match
@@ -144,15 +162,15 @@ final class Reflection(val quotes: Quotes):
     val params = methodTypes.map {
       currentType =>
         currentType.paramNames.zip(currentType.paramTypes).map {
-          (name, dataType) => Param(name, dataType)
+          (name, dataType) => QuotedParam(name, dataType)
         }
     }
     val resultType = methodTypes.last.resType
     (params, resultType)
 
-  private def field(classTypeTree: TypeTree, fieldSymbol: Symbol): Option[Field] =
+  private def field(classTypeTree: TypeTree, fieldSymbol: Symbol): Option[QuotedField] =
     val fieldType = classTypeTree.tpe.memberType(fieldSymbol)
-    Field(
+    QuotedField(
       fieldSymbol.name,
       fieldType,
       publicSymbol(fieldSymbol),
@@ -168,3 +186,31 @@ final class Reflection(val quotes: Quotes):
     matchingFlags.foldLeft(false) { (result, current) =>
       result | flags.is(current)
     }
+
+final case class Param(
+  name: String,
+  dataType: String
+)
+
+final case class TypeParam(
+  name: String,
+  bounds: String
+)
+
+final case class Method(
+  name: String,
+  resultType: String,
+  params: Seq[Seq[Param]],
+  typeParams: Seq[TypeParam],
+  public: Boolean,
+  available: Boolean,
+  documentation: Option[String]
+)
+
+final case class Field(
+  name: String,
+  dataType: String,
+  public: Boolean,
+  available: Boolean,
+  documentation: Option[String]
+)

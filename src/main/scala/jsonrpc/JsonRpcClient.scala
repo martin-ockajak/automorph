@@ -27,7 +27,7 @@ final case class JsonRpcClient[Node, Outcome[_]](
 
   def notify(method: String, arguments: Map[String, Any]): Outcome[Unit] = notify(method, encodeArguments(arguments))
 
-  def api[T]: T = ???
+  def proxy[T]: T = ???
 
   private def encodeArguments(arguments: Seq[Any]): Node = ???
 
