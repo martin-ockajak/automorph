@@ -23,18 +23,15 @@ final case class UpickleJsonCodec(parser: Api) extends Codec[Value]:
   def serialize(message: Message[Value]): ArraySeq.ofByte =
     parser.writeToByteArray(UpickleJsonCodec.Message(message)).asArraySeq
 
-  def deserialize(data: ArraySeq.ofByte): Message[Value] =
-    parser.read[UpickleJsonCodec.Message](data.unsafeArray).toSpi
+  def deserialize(data: ArraySeq.ofByte): Message[Value] = parser.read[UpickleJsonCodec.Message](data.unsafeArray).toSpi
 
-  def format(message: Message[Value]): String =
-    parser.write(UpickleJsonCodec.Message(message), indent)
+  def format(message: Message[Value]): String = parser.write(UpickleJsonCodec.Message(message), indent)
 
   inline def encode[T](value: T): Value =
     val writer = summonInline[parser.Writer[T]]
     UpickleJsonMacros.encode(parser, writer, value)
 
-  inline def decode[T](node: Value): T =
-    node.asInstanceOf[T]
+  inline def decode[T](node: Value): T = node.asInstanceOf[T]
 
 object UpickleJsonCodec:
 

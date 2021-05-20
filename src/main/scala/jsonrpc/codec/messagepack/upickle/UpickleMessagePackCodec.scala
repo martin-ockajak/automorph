@@ -11,12 +11,10 @@ import upickle.Api
 /**
  * UPickle MessagePack codec plugin.
  *
- * Documentation: https://github.com/com-lihaoyi/upickle
- * Effect type: Msg
- * Effect type API: http://com-lihaoyi.github.io/upickle/#uPack
+ * Documentation: https://github.com/com-lihaoyi/upickle Effect type: Msg Effect type API:
+ * http://com-lihaoyi.github.io/upickle/#uPack
  */
-final case class UpickleMessagePackCodec(parser: Api)
-  extends Codec[Msg]:
+final case class UpickleMessagePackCodec(parser: Api) extends Codec[Msg]:
 
   private val indent = 2
   private given parser.ReadWriter[UpickleMessagePackCodec.Message] = parser.macroRW
@@ -28,17 +26,16 @@ final case class UpickleMessagePackCodec(parser: Api)
   def deserialize(data: ArraySeq.ofByte): Message[Msg] =
     parser.read[UpickleMessagePackCodec.Message](data.unsafeArray).toSpi
 
-  def format(message: Message[Msg]): String =
-    parser.write(UpickleMessagePackCodec.Message(message), indent)
+  def format(message: Message[Msg]): String = parser.write(UpickleMessagePackCodec.Message(message), indent)
 
   inline def encode[T](value: T): Msg =
     val writer = summonInline[parser.Writer[T]]
     UpickleMessagePackMacros.encode(parser, writer, value)
 
-  inline def decode[T](node: Msg): T =
-    node.asInstanceOf[T]
+  inline def decode[T](node: Msg): T = node.asInstanceOf[T]
 
 object UpickleMessagePackCodec:
+
   final case class Message(
     jsonrpc: Option[String],
     id: Option[Either[BigDecimal, String]],
@@ -47,6 +44,7 @@ object UpickleMessagePackCodec:
     result: Option[Msg],
     error: Option[CallError]
   ):
+
     def toSpi: spi.Message[Msg] = spi.Message[Msg](
       jsonrpc,
       id,
@@ -57,6 +55,7 @@ object UpickleMessagePackCodec:
     )
 
   object Message:
+
     def apply(v: spi.Message[Msg]): Message = Message(
       v.jsonrpc,
       v.id,
@@ -71,6 +70,7 @@ object UpickleMessagePackCodec:
     message: Option[String],
     data: Option[Msg]
   ):
+
     def toSpi: spi.CallError[Msg] = spi.CallError[Msg](
       code,
       message,
@@ -78,6 +78,7 @@ object UpickleMessagePackCodec:
     )
 
   object CallError:
+
     def apply(v: spi.CallError[Msg]): CallError = CallError(
       v.code,
       v.message,

@@ -31,10 +31,10 @@ case object EncodingOps:
 
     def decodeToString: String = charset.decode(buffer).toString
 
-  extension (outputStream: ByteArrayOutputStream)
-    def decodeToString: String = outputStream.toString(charset.name)
+  extension (outputStream: ByteArrayOutputStream) def decodeToString: String = outputStream.toString(charset.name)
 
   extension (inputStream: InputStream)
+
     def asArraySeq(bufferSize: Int): ArraySeq.ofByte =
       val outputStream = ByteArrayOutputStream()
       val buffer = Array.ofDim[Byte](bufferSize)

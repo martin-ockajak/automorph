@@ -12,15 +12,12 @@ import scala.reflect.ClassTag
 /**
  * Jackson JSON codec plugin.
  *
- * Documentation: https://github.com/FasterXML/jackson
- * Effect type: JsonNode
- * Effect type API: https://fasterxml.github.io/jackson-databind/javadoc/2.12/com/fasterxml/jackson/databind/JsonNode.html
+ * Documentation: https://github.com/FasterXML/jackson Effect type: JsonNode Effect type API:
+ * https://fasterxml.github.io/jackson-databind/javadoc/2.12/com/fasterxml/jackson/databind/JsonNode.html
  */
-final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaultMapper)
-  extends Codec[JsonNode]:
+final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaultMapper) extends Codec[JsonNode]:
 
-  def serialize(message: Message[JsonNode]): ArraySeq.ofByte =
-    ArraySeq.ofByte(mapper.writeValueAsBytes(message).nn)
+  def serialize(message: Message[JsonNode]): ArraySeq.ofByte = ArraySeq.ofByte(mapper.writeValueAsBytes(message).nn)
 
   def deserialize(data: ArraySeq.ofByte): Message[JsonNode] =
     mapper.readValue(data.unsafeArray, classOf[Message[JsonNode]]).nn
@@ -28,8 +25,7 @@ final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaul
   def format(message: Message[JsonNode]): String =
     mapper.writerWithDefaultPrettyPrinter.nn.writeValueAsString(message).nn
 
-  inline def encode[T](value: T): JsonNode =
-    mapper.valueToTree(value).asInstanceOf[JsonNode]
+  inline def encode[T](value: T): JsonNode = mapper.valueToTree(value).asInstanceOf[JsonNode]
 
   inline def decode[T](node: JsonNode): T =
     val classTag = summonInline[ClassTag[T]]
@@ -37,5 +33,5 @@ final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaul
     mapper.treeToValue(node, valueClass).nn
 
 object JacksonJsonCodec:
-  def defaultMapper: ObjectMapper =
-    JsonMapper.builder.nn.addModule(DefaultScalaModule).nn.build.nn
+
+  def defaultMapper: ObjectMapper = JsonMapper.builder.nn.addModule(DefaultScalaModule).nn.build.nn

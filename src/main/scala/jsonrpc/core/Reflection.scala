@@ -1,12 +1,13 @@
 package jsonrpc.core
 
 import jsonrpc.core.ValueOps.asSome
-import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, Type}
 
 /**
  * Data type reflection tools.
  *
- * @param quotes quotation context
+ * @param quotes
+ *   quotation context
  */
 final class Reflection(val quotes: Quotes):
   // All meta-programming data types must are path-dependent on the compiler-generated quotation context
@@ -14,12 +15,12 @@ final class Reflection(val quotes: Quotes):
 
   final case class Param(
     name: String,
-    dataType: TypeRepr,
+    dataType: TypeRepr
   )
 
   final case class TypeParam(
     name: String,
-    typeBounds: TypeBounds,
+    typeBounds: TypeBounds
   )
 
   final case class Method(
@@ -51,7 +52,7 @@ final class Reflection(val quotes: Quotes):
     Flags.Inline,
     Flags.Invisible,
     Flags.Macro,
-    Flags.Transparent,
+    Flags.Transparent
   )
 
   /**
@@ -61,14 +62,16 @@ final class Reflection(val quotes: Quotes):
     Flags.Private,
     Flags.PrivateLocal,
     Flags.Protected,
-    Flags.Synthetic,
+    Flags.Synthetic
   )
 
   /**
    * Describe class methods.
    *
-   * @param classTypeTree class type tree
-   * @return class method descriptors
+   * @param classTypeTree
+   *   class type tree
+   * @return
+   *   class method descriptors
    */
   def methods(classTypeTree: TypeTree): Seq[Method] =
     val classSymbol = classTypeTree.tpe.typeSymbol
@@ -77,8 +80,10 @@ final class Reflection(val quotes: Quotes):
   /**
    * Describe class fields.
    *
-   * @param classTypeTree class type tree
-   * @return class field descriptors
+   * @param classTypeTree
+   *   class type tree
+   * @return
+   *   class field descriptors
    */
   def fields(classTypeTree: TypeTree): Seq[Field] =
     val classSymbol = classTypeTree.tpe.typeSymbol
@@ -87,21 +92,28 @@ final class Reflection(val quotes: Quotes):
   /**
    * Create instance member access term.
    *
-   * @param instance instance term
-   * @param name member name
-   * @return instance member access term
+   * @param instance
+   *   instance term
+   * @param name
+   *   member name
+   * @return
+   *   instance member access term
    */
-  def accessTerm(instance: Term, name: String): Term =
-    Select.unique(instance, name)
+  def accessTerm(instance: Term, name: String): Term = Select.unique(instance, name)
 
   /**
    * Create instance method call term.
    *
-   * @param instance instance term
-   * @param name method name
-   * @param typeArguments method type argument type trees
-   * @param arguments method argument terms
-   * @return instance method call term
+   * @param instance
+   *   instance term
+   * @param name
+   *   method name
+   * @param typeArguments
+   *   method type argument type trees
+   * @param arguments
+   *   method argument terms
+   * @return
+   *   instance method call term
    */
   def callTerm(instance: Term, name: String, typeArguments: List[TypeTree], arguments: List[List[Term]]): Term =
     accessTerm(instance, name).appliedToTypeTrees(typeArguments).appliedToArgss(arguments)
@@ -109,9 +121,12 @@ final class Reflection(val quotes: Quotes):
   /**
    * Create typed expression term.
    *
-   * @param expression expression
-   * @tparam T expression type
-   * @return typed expression term
+   * @param expression
+   *   expression
+   * @tparam T
+   *   expression type
+   * @return
+   *   typed expression term
    */
   def term[T](expression: Expr[T]): Term =
     expression.asTerm
@@ -119,7 +134,7 @@ final class Reflection(val quotes: Quotes):
   private def method(classTypeTree: TypeTree, methodSymbol: Symbol): Option[Method] =
     val (symbolType, typeParams) = classTypeTree.tpe.memberType(methodSymbol) match
       case polyType: PolyType =>
-        val typeParams = polyType.paramNames.zip(polyType.paramBounds).map{
+        val typeParams = polyType.paramNames.zip(polyType.paramBounds).map {
           (name, bounds) => TypeParam(name, bounds)
         }
         (polyType.resType, typeParams)
@@ -140,14 +155,15 @@ final class Reflection(val quotes: Quotes):
 
   private def methodSignature(methodType: MethodType): (Seq[Seq[Param]], TypeRepr) =
     val methodTypes = LazyList.iterate(Option(methodType)) {
-      case Some(currentType) => currentType.resType match
-        case resultType: MethodType => resultType.asSome
-        case _ => None
+      case Some(currentType) =>
+        currentType.resType match
+          case resultType: MethodType => resultType.asSome
+          case _ => None
       case _ => None
     }.takeWhile(_.isDefined).flatten
     val params = methodTypes.map {
       currentType =>
-        currentType.paramNames.zip(currentType.paramTypes).map{
+        currentType.paramNames.zip(currentType.paramTypes).map {
           (name, dataType) => Param(name, dataType)
         }
     }
@@ -164,13 +180,11 @@ final class Reflection(val quotes: Quotes):
       fieldSymbol
     ).asSome
 
-  private def publicSymbol(symbol: Symbol): Boolean =
-    !matchesFlags(symbol.flags, hiddenMemberFlags)
+  private def publicSymbol(symbol: Symbol): Boolean = !matchesFlags(symbol.flags, hiddenMemberFlags)
 
-  private def concreteSymbol(symbol: Symbol): Boolean =
-    !matchesFlags(symbol.flags, abstractMemberFlags)
+  private def concreteSymbol(symbol: Symbol): Boolean = !matchesFlags(symbol.flags, abstractMemberFlags)
 
   private def matchesFlags(flags: Flags, matchingFlags: Seq[Flags]): Boolean =
-    matchingFlags.foldLeft(false){
-      (result, current) => result | flags.is(current)
+    matchingFlags.foldLeft(false) { (result, current) =>
+      result | flags.is(current)
     }
