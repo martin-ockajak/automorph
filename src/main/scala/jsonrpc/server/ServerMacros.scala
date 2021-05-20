@@ -4,10 +4,9 @@ import jsonrpc.core.Reflection
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
 object ServerMacros:
+  inline def bind[T <: AnyRef, Node](inline api: T): Map[String, Node => Node] = ${bind('api)}
 
-  inline def bind[T <: AnyRef](inline api: T): Unit = ${bind('api)}
-
-  private def bind[T <: AnyRef: Type](api: Expr[T])(using quotes: Quotes): Expr[Unit] =
+  private def bind[T <: AnyRef: Type, Node](api: Expr[T])(using quotes: Quotes): Expr[Map[String, Node => Node]] =
     import ref.quotes.reflect.*
 
     val ref = Reflection(quotes)
@@ -60,6 +59,7 @@ object ServerMacros:
 //      println(${typedCall.asExpr})
       println()
       println(${Expr(apiDescription)})
+      Map.empty
     }
 
   private def simpleTypeName(typeName: String): String =
