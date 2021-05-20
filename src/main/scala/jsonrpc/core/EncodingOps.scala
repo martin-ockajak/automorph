@@ -10,6 +10,7 @@ import scala.annotation.tailrec
 
 case object EncodingOps:
   private lazy val charset = StandardCharsets.UTF_8.nn
+  private val maxReadIterations = 1000_000
 
   extension (bytes: Array[Byte]) def asArraySeq: ArraySeq.ofByte = ArraySeq.ofByte(bytes)
 
@@ -30,12 +31,8 @@ case object EncodingOps:
     def toArraySeq(bufferSize: Int): ArraySeq.ofByte =
       val outputStream = ByteArrayOutputStream()
       val buffer = Array.ofDim[Byte](bufferSize)
-
-      @tailrec def copyData(): Unit =
-        val length = inputStream.read(buffer)
-        if length >= 0 then
-          outputStream.write(buffer, 0, length)
-          copyData()
-
-      copyData()
+      LazyList.iterate(inputStream.read(buffer))(length =>
+        outputStream.write(buffer, 0, length)
+        inputStream.read(buffer)
+      ).takeWhile(_ >= 0).take(maxReadIterations)
       buffer.asArraySeq
