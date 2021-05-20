@@ -6,9 +6,9 @@ object Errors:
 
   // private extensions to make Throwable more scala-like
   extension( throwable: Throwable)
-    private def cause: Option[Throwable] = throwable.getCause.asOptionFromNullable
+    private def cause: Option[Throwable] = throwable.getCause.asOption
     private def suppressedCauses: Seq[Throwable] = throwable.getSuppressed.toSeq
-    private def message: Option[String] = throwable.getMessage.asOptionFromNullable.map(_.trim).filter(_.nonEmpty)
+    private def message: Option[String] = throwable.getMessage.asOption.map(_.trim).filter(_.nonEmpty)
 
   /**
    * Assemble concise error descriptions from specified throwable and specified number of its causes.
@@ -28,7 +28,7 @@ object Errors:
     val filteredErrors = errors.filter(filter).take(maxCauses)
     filteredErrors.map { throwable =>
       val className = throwable.getClass.getSimpleName
-      throwable.message.map { msg =>
-        s"$className: $msg"
+      throwable.message.map { message =>
+        s"$className: $message"
       }.getOrElse(className)
     }
