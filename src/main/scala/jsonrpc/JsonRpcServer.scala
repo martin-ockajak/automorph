@@ -7,6 +7,14 @@ import jsonrpc.server.ServerMacros
 import jsonrpc.spi.{Codec, Effect}
 import scala.collection.immutable.ArraySeq
 
+/**
+ * JSON-RPC server.
+ *
+ * @param codec hierarchical data format codec plugin
+ * @param effect computation effect system plugin
+ * @tparam Node data format node representation type
+ * @tparam Outcome computation outcome effect type
+ */
 final case class JsonRpcServer[Node, Outcome[_]](
   codec: Codec[Node],
   effect: Effect[Outcome]

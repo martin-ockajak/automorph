@@ -6,7 +6,7 @@ import jsonrpc.spi.Message
 import scala.collection.immutable.ArraySeq
 
 /**
- * Codec plugin for specific hierarchical data format.
+ * Hierarchical data format codec plugin.
  *
  * @tparam Node data format node representation type
  */

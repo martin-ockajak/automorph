@@ -1,7 +1,7 @@
 package jsonrpc.spi
 
 /**
- * Effect system plugin for specific computation model.
+ * Computation effect system plugin.
  *
  * @tparam Outcome computation outcome effect type
  */
