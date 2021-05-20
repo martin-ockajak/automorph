@@ -17,12 +17,14 @@ import scala.collection.immutable.ArraySeq
  */
 final case class JsonRpcServer[Node, Outcome[_]](
   codec: Codec[Node],
-  effect: Effect[Outcome]
+  effect: Effect[Outcome],
+  private val bindings: Map[String, Node => Node] = Map.empty
 ):
   private val bufferSize = 4096
 
-  inline def bind[T <: AnyRef](api: T): Unit =
-    ServerMacros.bind(codec, effect, api)
+  inline def bind[T <: AnyRef](api: T): JsonRpcServer[Node, Outcome] =
+    val newBindings = ServerMacros.bind(codec, effect, api)
+    JsonRpcServer(codec, effect, bindings ++ newBindings)
 
   def process(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte] =
     effect.pure(request)
