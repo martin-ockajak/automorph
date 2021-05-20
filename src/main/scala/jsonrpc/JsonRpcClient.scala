@@ -1,7 +1,7 @@
 package jsonrpc
 
 import jsonrpc.core.Protocol
-import jsonrpc.spi.{Effect, CallError, Codec}
+import jsonrpc.spi.{CallError, Codec, Effect}
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -18,17 +18,13 @@ final case class JsonRpcClient[Node, Outcome[_]](
   effect: Effect[Outcome],
   transport: JsonRpcTransport[Outcome]
 ):
-  def call[R](method: String, arguments: Seq[Any]): Outcome[R] =
-    call(method, encodeArguments(arguments))
+  def call[R](method: String, arguments: Seq[Any]): Outcome[R] = call(method, encodeArguments(arguments))
 
-  def call[R](method: String, arguments: Map[String, Any]): Outcome[R] =
-    call(method, encodeArguments(arguments))
+  def call[R](method: String, arguments: Map[String, Any]): Outcome[R] = call(method, encodeArguments(arguments))
 
-  def notify(method: String, arguments: Seq[Any]): Outcome[Unit] =
-    notify(method, encodeArguments(arguments))
+  def notify(method: String, arguments: Seq[Any]): Outcome[Unit] = notify(method, encodeArguments(arguments))
 
-  def notify(method: String, arguments: Map[String, Any]): Outcome[Unit] =
-    notify(method, encodeArguments(arguments))
+  def notify(method: String, arguments: Map[String, Any]): Outcome[Unit] = notify(method, encodeArguments(arguments))
 
   def api[T]: T = ???
 
@@ -44,12 +40,15 @@ final case class JsonRpcClient[Node, Outcome[_]](
 
   private def call[R](method: String, arguments: Node): Outcome[R] =
     val request = requestMessage(id = true, method, arguments)
-    effect.map(transport.call(request), response => {
-      val message = responseMessage(response)
-      decodeResult(message.value) match
-        case Left(error) => throw error
-        case Right(result) => result
-    })
+    effect.map(
+      transport.call(request),
+      response => {
+        val message = responseMessage(response)
+        decodeResult(message.value) match
+          case Left(error) => throw error
+          case Right(result) => result
+      }
+    )
 
   private def notify[R](method: String, arguments: Node): Outcome[Unit] =
     val request = requestMessage(id = false, method, arguments)
