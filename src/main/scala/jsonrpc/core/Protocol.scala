@@ -10,9 +10,7 @@ import jsonrpc.spi.{CallError, Message}
  * Specification: https://www.jsonrpc.org/specification
  */
 object Protocol:
-  /**
-   * Message identifier type.
-   */
+  /** Message identifier type. */
   type Id = Either[BigDecimal, String]
 
   /**
@@ -64,33 +62,30 @@ object Protocol:
     cause: Throwable
   ) extends RuntimeException(message, cause)
 
-  /**
-   * JSON-RPC error types with codes.
-   */
+  /** JSON-RPC error types with codes. */
   enum ErrorType(val code: Int):
-    case ParseError       extends ErrorType(-32700)
-    case InvalidRequest   extends ErrorType(-32600)
-    case MethodNotFound   extends ErrorType(-32601)
-    case InvalidParams    extends ErrorType(-32602)
-    case InternalError    extends ErrorType(-32603)
-    case IOError          extends ErrorType(-32000)
+    case ParseError extends ErrorType(-32700)
+    case InvalidRequest extends ErrorType(-32600)
+    case MethodNotFound extends ErrorType(-32601)
+    case InvalidParams extends ErrorType(-32602)
+    case InternalError extends ErrorType(-32603)
+    case IOError extends ErrorType(-32000)
     case ApplicationError extends ErrorType(0)
 
-  /**
-   * Mapping of standard exception types to JSON-RPC errors.
-   */
+  /** Mapping of standard exception types to JSON-RPC errors. */
   lazy val exceptionErrorTypes: Map[Class[?], ErrorType] = Map(
-    classOf[ParseError]               -> ErrorType.ParseError,
-    classOf[InvalidRequest]           -> ErrorType.InvalidRequest,
+    classOf[ParseError] -> ErrorType.ParseError,
+    classOf[InvalidRequest] -> ErrorType.InvalidRequest,
     classOf[IllegalArgumentException] -> ErrorType.InvalidParams,
-    classOf[IOException]              -> ErrorType.IOError
+    classOf[IOException] -> ErrorType.IOError
   )
 
   object Request:
+
     def apply[Node](message: Message[Node]): Request[Node] =
       val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
       require(
-        jsonrpc == version, 
+        jsonrpc == version,
         s"Invalid JSON-RPC protocol version: $jsonrpc"
       )
       val id = message.id
@@ -99,10 +94,11 @@ object Protocol:
       Request(id, method, params)
 
   object Response:
+
     def apply[Node](message: Message[Node]): Response[Node] =
       val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
       require(
-        jsonrpc == version, 
+        jsonrpc == version,
         s"Invalid JSON-RPC protocol version: $jsonrpc"
       )
       val id = mandatory(message.id, "id")
@@ -113,9 +109,7 @@ object Protocol:
         Response(id, Left(error))
       }
 
-  /**
-   * Supported JSON-RPC protocol version.
-   */
+  /** Supported JSON-RPC protocol version. */
   private val version = "2.0"
 
   private def mandatory[T](value: Option[T], name: String): T =
