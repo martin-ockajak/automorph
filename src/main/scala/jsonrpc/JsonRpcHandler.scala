@@ -18,7 +18,7 @@ import scala.collection.immutable.ArraySeq
 final case class JsonRpcHandler[Node, Outcome[_]](
   codec: Codec[Node],
   effect: Effect[Outcome],
-  private val bindings: Map[String, Node => Node] = Map.empty
+  private val methodBindings: Map[String, Node => Node] = Map.empty
 ):
   private val bufferSize = 4096
 
@@ -26,10 +26,10 @@ final case class JsonRpcHandler[Node, Outcome[_]](
     bind(api, Seq(_))
 
   inline def bind[T <: AnyRef](api: T, mapMethod: String => Seq[String]): JsonRpcHandler[Node, Outcome] =
-    val newBindings = ServerMacros.bind(codec, effect, api).flatMap { (apiMethodName, method) =>
+    val bindings = ServerMacros.bind(codec, effect, api).flatMap { (apiMethodName, method) =>
       mapMethod(apiMethodName).map(_ -> method)
     }
-    JsonRpcHandler(codec, effect, bindings ++ newBindings)
+    JsonRpcHandler(codec, effect, methodBindings ++ bindings)
 
   inline def bind[T, R](method: String, function: Tuple => R): JsonRpcHandler[Node, Outcome] =
     ???
