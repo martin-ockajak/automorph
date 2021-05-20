@@ -2,36 +2,30 @@ package jsonrpc
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.core.ScalaSupport.*
+import jsonrpc.core.ScalaSupport.{asArraySeq, decodeToString, encodeToBytes, encodeToByteBuffer}
 import jsonrpc.server.ServerMacros
-import jsonrpc.spi.{Effect, Codec}
+import jsonrpc.spi.{Codec, Effect}
 import scala.collection.immutable.ArraySeq
 
-final case class JsonRpcServer[DOM, E[_]](
-  jsonContext: Codec[DOM],
-  effectContext: Effect[E]):
+final case class JsonRpcServer[Node, Outcome[_]](
+  jsonContext: Codec[Node],
+  effectContext: Effect[Outcome]):
 
   private val bufferSize = 4096
 
   inline def bind[T <: AnyRef](api: T): Unit =
     ServerMacros.bind(api)
 
-  def process(request: ArraySeq.ofByte): E[ArraySeq.ofByte] =
+  def process(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte] =
     val text = request.unsafeArray.decodeToString
-    effectContext.map(
-      process(text),
-      response => response.encodeToBytes.asArraySeq
-    )
+    effectContext.map(process(text), _.encodeToBytes.asArraySeq)
 
-  def process(request: ByteBuffer): E[ByteBuffer] =
+  def process(request: ByteBuffer): Outcome[ByteBuffer] =
     val text = request.decodeToString
-    effectContext.map(
-      process(text),
-      response => response.encodeToByteBuffer
-    )
+    effectContext.map(process(text), _.encodeToByteBuffer)
     effectContext.pure(request)
 
-  def process(request: InputStream): E[InputStream] =
+  def process(request: InputStream): Outcome[InputStream] =
     val outputStream = new ByteArrayOutputStream
     val buffer = Array.ofDim[Byte](bufferSize)
 
@@ -50,5 +44,5 @@ final case class JsonRpcServer[DOM, E[_]](
       response => new ByteArrayInputStream(response.encodeToBytes)
     )
 
-  private def process(request: String): E[String] =
+  private def process(request: String): Outcome[String] =
     effectContext.pure(request)
