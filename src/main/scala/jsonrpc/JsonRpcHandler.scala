@@ -3,7 +3,7 @@ package jsonrpc
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.core.EncodingOps.toArraySeq
-import jsonrpc.server.ServerMacros
+import jsonrpc.server.HandlerMacros
 import jsonrpc.spi.{Codec, Effect}
 import scala.collection.immutable.ArraySeq
 
@@ -19,7 +19,7 @@ final case class JsonRpcHandler[Node, Outcome[_]] private (
   codec: Codec[Node],
   effect: Effect[Outcome]
 )(
-  private val methodBindings: Map[String, Node => Node] = Map.empty
+  private val methodBindings: Map[String, Node => Outcome[Node]] = Map.empty
 ):
 
   private val bufferSize = 4096
@@ -27,7 +27,7 @@ final case class JsonRpcHandler[Node, Outcome[_]] private (
   inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, Outcome] = bind(api, Seq(_))
 
   inline def bind[T <: AnyRef](api: T, mapMethod: String => Seq[String]): JsonRpcHandler[Node, Outcome] =
-    val bindings = ServerMacros.bind(codec, effect, api).flatMap { (apiMethodName, method) =>
+    val bindings = HandlerMacros.bind(codec, effect, api).flatMap { (apiMethodName, method) =>
       mapMethod(apiMethodName).map(_ -> method)
     }
     JsonRpcHandler(codec, effect)(methodBindings ++ bindings)
