@@ -3,45 +3,67 @@ package jsonrpc.server
 import jsonrpc.core.{Method, Reflection}
 import jsonrpc.spi.{Codec, Effect}
 import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.compiletime.error
 
 
 final case class FunctionHandle[Node, Outcome[_]](
   function: Node => Outcome[Node],
   name: String,
-  prototype: String
+  signature: String
 )
 
 object HandlerMacros:
 
-  inline def bind[T <: AnyRef, Node, Outcome[_]](
+  /**
+   * Generate JSON-RPC bindings for all valid public methods of an API type.
+   * Throw an exception if an invalid public method is found
+   * Methods are considered invalid if they satisfy one of these conditions:
+   * * have type parameters
+   * * cannot be called at runtime
+   *
+   * @param codec data format codec
+   * @param effect effect system
+   * @param api API instance
+   * @tparam ApiType API type
+   * @tparam Node data format node representation type
+   * @tparam Outcome computation outcome effect type
+   * @return mapping of method names to their JSON-RPC wrapper functions
+   * @throws IllegalArgumentException if invalid public methods are found in the API type
+   */
+  inline def bind[ApiType <: AnyRef, Node, Outcome[_]](
     codec: Codec[Node],
     effect: Effect[Outcome],
-    api: T
+    api: ApiType
   ): Map[String, FunctionHandle[Node, Outcome]] = ${ bind('codec, 'effect, 'api) }
 
-  private def bind[T <: AnyRef: Type, Node: Type, Outcome[_]: Type](
+  private def bind[ApiType <: AnyRef: Type, Node: Type, Outcome[_]: Type](
     codec: Expr[Codec[Node]],
     effect: Expr[Effect[Outcome]],
-    api: Expr[T]
+    api: Expr[ApiType]
   )(using quotes: Quotes): Expr[Map[String, FunctionHandle[Node, Outcome]]] =
     import ref.quotes.reflect.TypeTree
 
     val ref = Reflection(quotes)
 
-    // Detect the API type public methods
+    def validateApiMethods(methods: Seq[ref.QuotedMethod]): Unit =
+      methods.foreach { method =>
+        val signature = s"${TypeTree.of[ApiType].show}.${method.lift.signature}"
+        if method.typeParams.nonEmpty then
+          throw IllegalArgumentException(s"Bound API method must not have type parameters: $signature")
+        else if !method.available then
+          throw IllegalArgumentException(s"Bound API method must be callable at runtime: $signature")
+      }
+
+    // Detect and validate public methods in the API type
     val baseMethodNames = Seq(TypeTree.of[AnyRef], TypeTree.of[Product]).flatMap {
       typeTree => ref.methods(typeTree).filter(_.public).map(_.name)
     }.toSet
-    val apiMethods = ref.methods(TypeTree.of[T]).filter(_.public).filter {
+    val apiMethods = ref.methods(TypeTree.of[ApiType]).filter(_.public).filter {
       method => !baseMethodNames.contains(method.symbol.name)
     }
+    validateApiMethods(apiMethods)
 
-    // Disallow API types unavailable methods which cannot be invoke at runtime
-    apiMethods.filterNot(_.available).foreach {
-      method => throw new IllegalStateException(s"Invalid API method: ${method.symbol.fullName}")
-    }
-
-    // Generate method call code
+    // Generate JSON-RPC wrapper functions for the API methods
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
     val call = ref.callTerm(ref.term(api), methodName, List.empty, List.empty)
 
@@ -73,10 +95,5 @@ object HandlerMacros:
     }
 
   private def methodDescription(method: Method): String =
-    val paramLists = method.params.map { params =>
-      s"(${params.map { param =>
-        s"${param.name}: ${param.dataType}"
-      }.mkString(", ")})"
-    }.mkString
     val documentation = method.documentation.map(_ + "\n").getOrElse("")
-    s"$documentation${method.name}$paramLists: ${method.resultType}\n"
+    s"$documentation${method.signature}\n"

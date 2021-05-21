@@ -205,7 +205,19 @@ final case class Method(
   public: Boolean,
   available: Boolean,
   documentation: Option[String]
-)
+):
+  def signature: String =
+    val typeParamsText = typeParams.map { typeParam =>
+      s"${typeParam.name}"
+    } match
+      case Seq() => ""
+      case values => s"[${values.mkString(", ")}]"
+    val paramsText = params.map { params =>
+      s"(${params.map { param =>
+        s"${param.name}: ${param.dataType}"
+      }.mkString(", ")})"
+    }.mkString
+    s"$name$typeParamsText$paramsText: $resultType"
 
 final case class Field(
   name: String,
