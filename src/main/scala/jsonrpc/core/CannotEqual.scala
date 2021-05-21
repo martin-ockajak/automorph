@@ -3,12 +3,12 @@ package jsonrpc.core
 import jsonrpc.core.ValueOps.classNameSimple
 
 /**
- * This is a marker trait for classes containing members for which equality is buggy
- * (typically functions: they implement equality as identity [operator eq], which yields wrong results).
- * Scala at some point will introduce automatic CanEqual type class derivation for case classes, case objects and enums:
- * with that, some opt-out annotation @CannotEqual will follow, to prevent synthetic type class derivation of CanEqual.
- * This trait is a temporary placeholder for the (yet to come) @CannotEqual annotation.
- * At the same time, it prevents comparison at runtime, if universal equality is applied.
+ * This prevents comparison for case classes containing members with faulty equality.
+ * (such members typically are functions: functions implement equality as identity [operator eq], which yields wrong results).
+ * In case universalEquality applies, this prevents comparison at runtime (better than wrong results).
+ * In case strictEquality one day becomes the default, following can apply:
+ *   - if the compiler automatically infers CanEqual derivation only when all members derive from CanEqual (functions will not), this trait can be removed.
+ *   - if they introduce some @CannotEqual annotation, to manually disable CanEqual derivation for case classes, this trait can be replaced with @CannotEqual.
  */
 trait CannotEqual:
   override def equals(that:Any):Boolean =
