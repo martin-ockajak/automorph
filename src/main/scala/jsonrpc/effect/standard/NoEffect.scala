@@ -17,5 +17,5 @@ final case class NoEffect() extends Effect[Identity]:
 
   def either[T](value: T): Either[Throwable, T] = Right(value)
 
-object NoEffect:
+case object NoEffect:
   type Identity[T] = T

@@ -2,7 +2,7 @@ package jsonrpc.core
 
 import jsonrpc.core.ValueOps.*
 
-object Errors:
+case object Errors:
 
   // private extensions to make Throwable more scala-like
   extension (throwable: Throwable)

@@ -32,6 +32,6 @@ final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaul
     val valueClass = classTag.runtimeClass.asInstanceOf[Class[T]]
     mapper.treeToValue(node, valueClass)
 
-object JacksonJsonCodec:
+case object JacksonJsonCodec:
 
   def defaultMapper: ObjectMapper = JsonMapper.builder.addModule(DefaultScalaModule).build

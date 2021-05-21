@@ -5,7 +5,7 @@ import scala.quoted.{Expr, Quotes, Type}
 import ujson.Value
 import upickle.Api
 
-object UpickleJsonMacros:
+case object UpickleJsonMacros:
 
   inline def encode[Parser <: Api, T](parser: Parser, value: T): Value = ${ encode('parser, 'value) }
 

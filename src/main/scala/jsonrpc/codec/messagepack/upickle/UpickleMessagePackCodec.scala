@@ -32,7 +32,7 @@ final case class UpickleMessagePackCodec(parser: Api) extends Codec[Msg]:
 
   inline def decode[T](node: Msg): T = UpickleMessagePackMacros.decode[Api, T](parser, node)
 
-object UpickleMessagePackCodec:
+case object UpickleMessagePackCodec:
 
   final case class Message(
     jsonrpc: Option[String],
@@ -52,7 +52,7 @@ object UpickleMessagePackCodec:
       error.map(_.toSpi)
     )
 
-  object Message:
+  case object Message:
 
     def apply(v: spi.Message[Msg]): Message = Message(
       v.jsonrpc,
@@ -75,7 +75,7 @@ object UpickleMessagePackCodec:
       data
     )
 
-  object CallError:
+  case object CallError:
 
     def apply(v: spi.CallError[Msg]): CallError = CallError(
       v.code,

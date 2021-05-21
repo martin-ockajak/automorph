@@ -9,7 +9,7 @@ import jsonrpc.spi.{CallError, Message}
  *
  * Specification: https://www.jsonrpc.org/specification
  */
-object Protocol:
+case object Protocol:
 
   /** Message identifier type. */
   type Id = Either[BigDecimal, String]
@@ -82,7 +82,7 @@ object Protocol:
     classOf[IOException] -> ErrorType.IOError
   )
 
-  object Request:
+  case object Request:
 
     def apply[Node](message: Message[Node]): Request[Node] =
       val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
@@ -95,7 +95,7 @@ object Protocol:
       val params = message.params.getOrElse(Map.empty.asRight[List[Node]])
       Request(id, method, params)
 
-  object Response:
+  case object Response:
 
     def apply[Node](message: Message[Node]): Response[Node] =
       val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
