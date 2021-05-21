@@ -55,6 +55,15 @@ object HandlerMacros:
           throw IllegalArgumentException(s"Bound API method must be callable at runtime: $signature")
       }
 
+//    def methodArgument[T](node: Node, param: ref.QuotedParam): Expr[T] =
+//      '{
+//        $codec.decode[T](node)
+//      }
+
+//    def methodFunction(method: ref.QuoteDMethod): Expr[Node => Outcome[Node]] =
+//      '{
+//      }
+
     // Detect and validate public methods in the API type
     val baseMethodNames = Seq(TypeTree.of[AnyRef], TypeTree.of[Product]).flatMap {
       typeTree => ref.methods(typeTree).filter(_.public).map(_.name)
