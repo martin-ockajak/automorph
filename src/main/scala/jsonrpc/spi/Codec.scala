@@ -53,3 +53,12 @@ trait Codec[Node]:
    * @return value of given type
    */
   inline def decode[T](node: Node): T
+
+  /**
+   * Decodes a value from a node.
+   *
+   * @param node data format node
+   * @tparam T value type
+   * @return value of given type
+   */
+//  def xdecode[T](node: Node): T

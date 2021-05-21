@@ -4,6 +4,7 @@ import jsonrpc.core.{Method, Reflection}
 import jsonrpc.spi.{Codec, Effect}
 import scala.quoted.{Expr, Quotes, Type, quotes}
 import scala.compiletime.error
+import scala.collection.immutable.ArraySeq
 
 
 final case class MethodHandle[Node, Outcome[_]](
@@ -31,14 +32,14 @@ object HandlerMacros:
    * @return mapping of method names to their JSON-RPC wrapper functions
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[ApiType <: AnyRef, Node, Outcome[_]](
-    codec: Codec[Node],
+  inline def bind[ApiType <: AnyRef, Node, Outcome[_], CodecType <: Codec[Node]](
+    codec: CodecType,
     effect: Effect[Outcome],
     api: ApiType
   ): Map[String, MethodHandle[Node, Outcome]] = ${ bind('codec, 'effect, 'api) }
 
-  private def bind[ApiType <: AnyRef: Type, Node: Type, Outcome[_]: Type](
-    codec: Expr[Codec[Node]],
+  private def bind[ApiType <: AnyRef: Type, Node: Type, Outcome[_]: Type, CodecType <: Codec[Node]: Type](
+    codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
   )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Outcome]]] =
@@ -55,10 +56,11 @@ object HandlerMacros:
           throw IllegalArgumentException(s"Bound API method must be callable at runtime: $signature")
       }
 
-//    def methodArgument[T](node: Node, param: ref.QuotedParam): Expr[T] =
-//      '{
+    def methodArgument[T: Type](node: Node, param: ref.QuotedParam): Expr[T] =
+      '{
+        $codec.deserialize(ArraySeq.ofByte("".getBytes("UTF-8"))).asInstanceOf[T]
 //        $codec.decode[T](node)
-//      }
+      }
 
 //    def methodFunction(method: ref.QuoteDMethod): Expr[Node => Outcome[Node]] =
 //      '{
