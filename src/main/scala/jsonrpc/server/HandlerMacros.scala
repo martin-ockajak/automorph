@@ -1,16 +1,15 @@
 package jsonrpc.server
 
-import jsonrpc.core.{Method, Reflection}
+import jsonrpc.core.{CannotEqual, Method, Reflection}
 import jsonrpc.spi.{Codec, Effect}
 import scala.quoted.{Expr, Quotes, Type, quotes}
 import scala.compiletime.error
-
 
 final case class MethodHandle[Node, Outcome[_]](
   function: Node => Outcome[Node],
   name: String,
   signature: String
-)
+) extends CannotEqual
 
 object HandlerMacros:
 

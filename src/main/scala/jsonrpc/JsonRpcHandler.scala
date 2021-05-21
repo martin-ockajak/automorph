@@ -2,6 +2,8 @@ package jsonrpc
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
+import jsonrpc.core.ValueOps.classNameSimple
+import jsonrpc.core.CannotEqual
 import jsonrpc.core.EncodingOps.toArraySeq
 import jsonrpc.core.ValueOps.asSome
 import jsonrpc.server.HandlerMacros
@@ -19,10 +21,9 @@ import scala.collection.immutable.ArraySeq
  */
 final case class JsonRpcHandler[Node, Outcome[_]] private (
   codec: Codec[Node],
-  effect: Effect[Outcome]
-)(
-  private val methodBindings: Map[String, MethodHandle[Node, Outcome]] = Map.empty
-):
+  effect: Effect[Outcome],
+  private val methodBindings: Map[String, MethodHandle[Node, Outcome]]
+) extends CannotEqual:
 
   private val bufferSize = 4096
 
@@ -86,7 +87,7 @@ final case class JsonRpcHandler[Node, Outcome[_]] private (
         throw new IllegalArgumentException(s"Bound API does not contain the specified public method: ${api.getClass.getName}.$apiMethodName")
       ).map(_ -> method)
     }
-    JsonRpcHandler(codec, effect)(methodBindings ++ bindings)
+    copy( methodBindings = methodBindings ++ bindings)
 
   /**
    * Creates a new JSON-RPC request handler by adding a binding for the specified function.
@@ -128,7 +129,15 @@ final case class JsonRpcHandler[Node, Outcome[_]] private (
   def process(request: InputStream): Outcome[InputStream] =
     effect.map(process(request.toArraySeq(bufferSize)), response => ByteArrayInputStream(response.unsafeArray))
 
+
+  override def toString =
+    val codecName = codec.classNameSimple
+    val effectName = effect.classNameSimple
+    val endpointCount = methodBindings.size
+    s"$JsonRpcHandler($codecName, $effectName, registered endpoints: $endpointCount"
+
+
 case object JsonRpcHandler:
 
   def apply[Node, Outcome[_]](codec: Codec[Node], effect: Effect[Outcome]): JsonRpcHandler[Node, Outcome] =
-    new JsonRpcHandler(codec, effect)(Map.empty)
+    new JsonRpcHandler(codec, effect, Map.empty)

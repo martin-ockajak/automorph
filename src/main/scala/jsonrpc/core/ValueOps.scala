@@ -10,3 +10,6 @@ case object ValueOps:
     def asLeft[R]: Either[T, R] = Left(value.nn)
 
     def asRight[L]: Either[L, T] = Right(value.nn)
+
+    def classNameSimple:String = value.getClass.getSimpleName
+  

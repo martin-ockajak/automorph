@@ -24,8 +24,8 @@ object Errors:
   ): Seq[String] =
     LazyList.iterate(throwable.asSome)(_.flatMap(_.cause))
       .takeWhile(_.isDefined).flatten.filter(filter).take(maxCauses).map { throwable =>
-        val className = throwable.getClass.getSimpleName
+        val exceptionName = throwable.classNameSimple
         throwable.message.map { message =>
-          s"$className: $message"
-        }.getOrElse(className)
+          s"$exceptionName: $message"
+        }.getOrElse(exceptionName)
       }
