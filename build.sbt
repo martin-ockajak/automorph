@@ -1,4 +1,4 @@
-lazy val root = project.in(file(".")).settings(
+/azy val root = project.in(file(".")).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server",
   version := "0.1.0",
@@ -34,7 +34,7 @@ scalacOptions ++= Seq(
   "-language:strictEquality",
   "-language:higherKinds",
   "-release",
-  "9",
+  "11",
   "-encoding",
   "utf8",
   "-pagewidth",
