@@ -1,4 +1,4 @@
-/azy val root = project.in(file(".")).settings(
+lazy val root = project.in(file(".")).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server",
   version := "0.1.0",
