@@ -84,10 +84,12 @@ final case class JsonRpcHandler[Node, Outcome[_]] private (
     val bindings = HandlerMacros.bind(codec, effect, api).flatMap { (apiMethodName, method) =>
       exposedNames.applyOrElse(
         apiMethodName,
-        throw new IllegalArgumentException(s"Bound API does not contain the specified public method: ${api.getClass.getName}.$apiMethodName")
+        throw new IllegalArgumentException(
+          s"Bound API does not contain the specified public method: ${api.getClass.getName}.$apiMethodName"
+        )
       ).map(_ -> method)
     }
-    copy( methodBindings = methodBindings ++ bindings)
+    copy(methodBindings = methodBindings ++ bindings)
 
   /**
    * Creates a new JSON-RPC request handler by adding a binding for the specified function.
@@ -109,7 +111,7 @@ final case class JsonRpcHandler[Node, Outcome[_]] private (
    * @return JSON-RPC response message
    */
   def process(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte] =
-    effect.pure(request)
+    ???
 
   /**
    * Invokes a bound method specified in a JSON-RPC request and creates a JSON-RPC response.
@@ -129,13 +131,11 @@ final case class JsonRpcHandler[Node, Outcome[_]] private (
   def process(request: InputStream): Outcome[InputStream] =
     effect.map(process(request.toArraySeq(bufferSize)), response => ByteArrayInputStream(response.unsafeArray))
 
-
   override def toString =
     val codecName = codec.classNameSimple
     val effectName = effect.classNameSimple
     val endpointCount = methodBindings.size
     s"$JsonRpcHandler($codecName, $effectName, registered endpoints: $endpointCount)"
-
 
 case object JsonRpcHandler:
 
