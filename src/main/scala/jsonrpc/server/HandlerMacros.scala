@@ -6,7 +6,7 @@ import scala.quoted.{Expr, Quotes, Type, quotes}
 import scala.compiletime.error
 
 
-final case class FunctionHandle[Node, Outcome[_]](
+final case class MethodHandle[Node, Outcome[_]](
   function: Node => Outcome[Node],
   name: String,
   signature: String
@@ -16,7 +16,7 @@ object HandlerMacros:
 
   /**
    * Generates JSON-RPC bindings for all valid public methods of an API type.
-   * 
+   *
    * Throws an exception if an invalid public method is found.
    * Methods are considered invalid if they satisfy one of these conditions:
    * * have type parameters
@@ -35,13 +35,13 @@ object HandlerMacros:
     codec: Codec[Node],
     effect: Effect[Outcome],
     api: ApiType
-  ): Map[String, FunctionHandle[Node, Outcome]] = ${ bind('codec, 'effect, 'api) }
+  ): Map[String, MethodHandle[Node, Outcome]] = ${ bind('codec, 'effect, 'api) }
 
   private def bind[ApiType <: AnyRef: Type, Node: Type, Outcome[_]: Type](
     codec: Expr[Codec[Node]],
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
-  )(using quotes: Quotes): Expr[Map[String, FunctionHandle[Node, Outcome]]] =
+  )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Outcome]]] =
     import ref.quotes.reflect.TypeTree
 
     val ref = Reflection(quotes)
@@ -72,7 +72,7 @@ object HandlerMacros:
     val typeParam = TypeTree.of[List[List[String]]]
     val typedCall = ref.callTerm(ref.term('{ List }), "apply", List(typeParam), List.empty)
 
-    val handles = Expr.ofSeq(Seq.empty[Expr[(String, FunctionHandle[Node, Outcome])]])
+    val handles = Expr.ofSeq(Seq.empty[Expr[(String, MethodHandle[Node, Outcome])]])
 
     // Debug printounts
     println(
