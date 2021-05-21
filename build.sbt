@@ -34,7 +34,7 @@ scalacOptions ++= Seq(
   "-language:strictEquality",
   "-language:higherKinds",
   "-release",
-  "12",
+  "9",
   "-encoding",
   "utf8",
   "-pagewidth",
