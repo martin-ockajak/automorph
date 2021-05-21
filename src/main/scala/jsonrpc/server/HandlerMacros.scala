@@ -16,6 +16,7 @@ object HandlerMacros:
 
   /**
    * Generates JSON-RPC bindings for all valid public methods of an API type.
+   * 
    * Throws an exception if an invalid public method is found.
    * Methods are considered invalid if they satisfy one of these conditions:
    * * have type parameters
