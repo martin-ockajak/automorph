@@ -6,7 +6,6 @@ import scala.quoted.{Expr, Quotes, Type, quotes}
 import scala.compiletime.error
 import scala.collection.immutable.ArraySeq
 
-
 final case class MethodHandle[Node, Outcome[_]](
   function: Node => Outcome[Node],
   name: String,

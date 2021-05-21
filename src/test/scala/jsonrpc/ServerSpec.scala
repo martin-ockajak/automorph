@@ -83,8 +83,6 @@ class ServerSpec extends BaseSpec:
         val handler = JsonRpcHandler(DummyJsonCodec(), NoEffect()).bind(api)
         (0 == 0).shouldBe(true)
 
-
-
       }
     }
     "JSON" - {
