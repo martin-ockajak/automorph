@@ -12,4 +12,4 @@ import jsonrpc.core.ValueOps.classNameSimple
  */
 trait CannotEqual:
   override def equals(that:Any):Boolean =
-    sys.error(s"instance of $classNameSimple cannot be compared with == or !=, because the class contains members with faulty equality")
+    sys.error(s"instance of $classNameSimple cannot be compared with == or !=")

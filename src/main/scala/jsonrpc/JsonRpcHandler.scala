@@ -134,7 +134,7 @@ final case class JsonRpcHandler[Node, Outcome[_]] private (
     val codecName = codec.classNameSimple
     val effectName = effect.classNameSimple
     val endpointCount = methodBindings.size
-    s"$JsonRpcHandler($codecName, $effectName, registered endpoints: $endpointCount"
+    s"$JsonRpcHandler($codecName, $effectName, registered endpoints: $endpointCount)"
 
 
 case object JsonRpcHandler:
