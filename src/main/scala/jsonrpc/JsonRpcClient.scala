@@ -20,7 +20,7 @@ final case class JsonRpcClient[Node, Outcome[_]](
 ):
 
   /**
-   * Peform a remote JSON-RPC method call supplying the arguments by position.
+   * Performs a remote JSON-RPC method call supplying the arguments by position.
    *
    * @param method method name
    * @param arguments arguments by position
@@ -30,7 +30,7 @@ final case class JsonRpcClient[Node, Outcome[_]](
   def call[R](method: String, arguments: Seq[Any]): Outcome[R] = call(method, encodeArguments(arguments))
 
   /**
-   * Peform a remote JSON-RPC method call supplying the arguments by name.
+   * Performs a remote JSON-RPC method call supplying the arguments by name.
    *
    * @param method method name
    * @param arguments arguments by position
@@ -40,7 +40,7 @@ final case class JsonRpcClient[Node, Outcome[_]](
   def call[R](method: String, arguments: Map[String, Any]): Outcome[R] = call(method, encodeArguments(arguments))
 
   /**
-   * Peform a remote JSON-RPC method notification supplying the arguments by position.
+   * Performs a remote JSON-RPC method notification supplying the arguments by position.
    *
    * @param method method name
    * @param arguments arguments by position
@@ -50,7 +50,7 @@ final case class JsonRpcClient[Node, Outcome[_]](
   def notify(method: String, arguments: Seq[Any]): Outcome[Unit] = notify(method, encodeArguments(arguments))
 
   /**
-   * Peform a remote JSON-RPC method notification supplying the arguments by name.
+   * Performs a remote JSON-RPC method notification supplying the arguments by name.
    *
    * @param method method name
    * @param arguments arguments by position
@@ -60,7 +60,7 @@ final case class JsonRpcClient[Node, Outcome[_]](
   def notify(method: String, arguments: Map[String, Any]): Outcome[Unit] = notify(method, encodeArguments(arguments))
 
   /**
-   * Create a transparent local proxy for a remote JSON-RPC API.
+   * Creates a transparent local proxy for a remote JSON-RPC API.
    * Invocations of local proxy methods are translated into remote JSON-API calls.
    *
    * @tparam T remote API type
