@@ -9,7 +9,7 @@ import scala.collection.immutable.ArraySeq
  *
  * @param codec hierarchical data format codec plugin
  * @param effect computation effect system plugin
- * @param transport message transport
+ * @param transport message transport layer
  * @tparam Node data format node representation type
  * @tparam Outcome computation outcome effect type
  */
@@ -19,14 +19,53 @@ final case class JsonRpcClient[Node, Outcome[_]](
   transport: JsonRpcTransport[Outcome]
 ):
 
+  /**
+   * Peform a remote JSON-RPC method call supplying the arguments by position.
+   *
+   * @param method method name
+   * @param arguments arguments by position
+   * @tparam R result type
+   * @return result value
+   */
   def call[R](method: String, arguments: Seq[Any]): Outcome[R] = call(method, encodeArguments(arguments))
 
+  /**
+   * Peform a remote JSON-RPC method call supplying the arguments by name.
+   *
+   * @param method method name
+   * @param arguments arguments by position
+   * @tparam R result type
+   * @return result value
+   */
   def call[R](method: String, arguments: Map[String, Any]): Outcome[R] = call(method, encodeArguments(arguments))
 
+  /**
+   * Peform a remote JSON-RPC method notification supplying the arguments by position.
+   *
+   * @param method method name
+   * @param arguments arguments by position
+   * @tparam R result type
+   * @return nothing
+   */
   def notify(method: String, arguments: Seq[Any]): Outcome[Unit] = notify(method, encodeArguments(arguments))
 
+  /**
+   * Peform a remote JSON-RPC method notification supplying the arguments by name.
+   *
+   * @param method method name
+   * @param arguments arguments by position
+   * @tparam R result type
+   * @return nothing
+   */
   def notify(method: String, arguments: Map[String, Any]): Outcome[Unit] = notify(method, encodeArguments(arguments))
 
+  /**
+   * Create a transparent local proxy for a remote JSON-RPC API.
+   * Invocations of local proxy methods are translated into remote JSON-API calls.
+   *
+   * @tparam T remote API type
+   * @return local API proxy
+   */
   def proxy[T]: T = ???
 
   private def encodeArguments(arguments: Seq[Any]): Node = ???

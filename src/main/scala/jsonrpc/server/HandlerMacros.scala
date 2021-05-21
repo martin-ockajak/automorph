@@ -15,8 +15,8 @@ final case class FunctionHandle[Node, Outcome[_]](
 object HandlerMacros:
 
   /**
-   * Generate JSON-RPC bindings for all valid public methods of an API type.
-   * Throw an exception if an invalid public method is found
+   * Generates JSON-RPC bindings for all valid public methods of an API type.
+   * Throws an exception if an invalid public method is found.
    * Methods are considered invalid if they satisfy one of these conditions:
    * * have type parameters
    * * cannot be called at runtime

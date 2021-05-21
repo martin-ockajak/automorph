@@ -13,7 +13,7 @@ import scala.collection.immutable.ArraySeq
 trait Codec[Node]:
 
   /**
-   * Serialize a message as binary data.
+   * Serializes a message as binary data.
    *
    * @param message message
    * @return binary data in the specific format
@@ -21,7 +21,7 @@ trait Codec[Node]:
   def serialize(message: Message[Node]): ArraySeq.ofByte
 
   /**
-   * Deserialize a message from binary data.
+   * Deserializes a message from binary data.
    *
    * @param data binary data in the specific format
    * @return message
@@ -29,7 +29,7 @@ trait Codec[Node]:
   def deserialize(data: ArraySeq.ofByte): Message[Node]
 
   /**
-   * Format a message as text.
+   * Formats a message as text.
    *
    * @param message message
    * @return message in textual form
@@ -37,7 +37,7 @@ trait Codec[Node]:
   def format(message: Message[Node]): String
 
   /**
-   * Encode a value as a node.
+   * Encodes a value as a node.
    *
    * @param value value of given type
    * @tparam T value type
@@ -46,7 +46,7 @@ trait Codec[Node]:
   inline def encode[T](value: T): Node
 
   /**
-   * Decode a value from a node.
+   * Decodes a value from a node.
    *
    * @param node data format node
    * @tparam T value type

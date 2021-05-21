@@ -8,7 +8,7 @@ package jsonrpc.spi
 trait Effect[Outcome[_]]:
 
   /**
-   * Lift a value into a new effect.
+   * Lifts a value into a new effect.
    *
    * @param value already computed value
    * @tparam T value type
@@ -17,7 +17,7 @@ trait Effect[Outcome[_]]:
   def pure[T](value: T): Outcome[T]
 
   /**
-   * Transform an effect by applying a function to its value.
+   * Transforms an effect by applying a function to its value.
    *
    * @param effect effect containing a value
    * @param function function applied to the effect value
@@ -28,7 +28,7 @@ trait Effect[Outcome[_]]:
   def map[T, R](effect: Outcome[T], function: T => R): Outcome[R]
 
   /**
-   * Transform an effect by lifting any errors into its value.
+   * Transforms an effect by lifting any errors into its value.
    * The resulting effect cannot fail.
    *
    * @param value effect containing a value
