@@ -20,10 +20,9 @@ import scala.collection.immutable.ArraySeq
 final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] private (
   codec: CodecType,
   effect: Effect[Outcome],
+  bufferSize: Int,
   private val methodBindings: Map[String, MethodHandle[Node, Outcome]]
 ) extends CannotEqual:
-
-  private val bufferSize = 4096
 
   /**
    * Create a new JSON-RPC request handler by adding method bindings for member methods of the specified API.
@@ -142,6 +141,7 @@ case object JsonRpcHandler:
 
   def apply[Node, Outcome[_], CodecType <: Codec[Node]](
     codec: CodecType,
-    effect: Effect[Outcome]
+    effect: Effect[Outcome],
+    bufferSize: Int = 4096
   ): JsonRpcHandler[Node, Outcome, CodecType] =
-    new JsonRpcHandler(codec, effect, Map.empty)
+    new JsonRpcHandler(codec, effect, bufferSize, Map.empty)
