@@ -80,7 +80,10 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef](api: T, exposedNames: PartialFunction[String, Seq[String]]): JsonRpcHandler[Node, Outcome, CodecType] =
+  inline def bind[T <: AnyRef](
+    api: T,
+    exposedNames: PartialFunction[String, Seq[String]]
+  ): JsonRpcHandler[Node, Outcome, CodecType] =
     val bindings = HandlerMacros.bind(codec, effect, api).flatMap { (apiMethodName, method) =>
       exposedNames.applyOrElse(
         apiMethodName,
@@ -139,5 +142,8 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
 
 case object JsonRpcHandler:
 
-  def apply[Node, Outcome[_], CodecType <: Codec[Node]](codec: CodecType, effect: Effect[Outcome]): JsonRpcHandler[Node, Outcome, CodecType] =
+  def apply[Node, Outcome[_], CodecType <: Codec[Node]](
+    codec: CodecType,
+    effect: Effect[Outcome]
+  ): JsonRpcHandler[Node, Outcome, CodecType] =
     new JsonRpcHandler(codec, effect, Map.empty)

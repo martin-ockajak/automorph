@@ -21,7 +21,8 @@ case object UpickleJsonMacros:
 //      realParser.writeJs($value)(using $writer.asInstanceOf[realParser.Writer[T]])
     }
 
-  inline def decode[Parser <: Api, T](inline parser: Parser, inline node: Value): T = ${ decode[Parser, T]('parser, 'node) }
+  inline def decode[Parser <: Api, T](inline parser: Parser, inline node: Value): T =
+    ${ decode[Parser, T]('parser, 'node) }
 
   private def decode[Parser <: Api: Type, T: Type](parser: Expr[Parser], node: Expr[Value])(using
     quotes: Quotes
@@ -35,13 +36,14 @@ case object UpickleJsonMacros:
     val readerType = ref.methods(parserType).filter(_.name == "reader").headOption.getOrElse(
       throw IllegalStateException(s"Upickle JSON parser API method not found: reader")
     ).resultType
-    val valueReaderType = readerType match
-      case appliedType: AppliedType => appliedType.tycon.appliedTo(TypeRepr.of[T])
-      case _ => readerType
+    val valueReaderType =
+      readerType match
+        case appliedType: AppliedType => appliedType.tycon.appliedTo(TypeRepr.of[T])
+        case _                        => readerType
     val reader = valueReaderType.asType match
       case '[tpe] => Expr.summon[tpe].getOrElse {
-        throw IllegalStateException(s"Given value not found: ${valueReaderType.show}")
-      }
+          throw IllegalStateException(s"Given value not found: ${valueReaderType.show}")
+        }
     '{
       val realParser = $parser
 //      val realReader = summonInline[realParser.Reader[T]]

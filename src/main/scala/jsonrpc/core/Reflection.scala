@@ -1,7 +1,7 @@
 package jsonrpc.core
 
 import jsonrpc.core.ValueOps.asSome
-import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, Type}
 
 /**
  * Data type reflection tools.
@@ -34,6 +34,7 @@ final class Reflection(val quotes: Quotes):
     available: Boolean,
     symbol: Symbol
   ):
+
     def lift: Method = Method(
       name,
       resultType.show,
@@ -51,6 +52,7 @@ final class Reflection(val quotes: Quotes):
     available: Boolean,
     symbol: Symbol
   ):
+
     def lift: Field = Field(
       name,
       dataType.show,
@@ -204,11 +206,12 @@ final case class Method(
   available: Boolean,
   documentation: Option[String]
 ):
+
   def signature: String =
     val typeParamsText = typeParams.map { typeParam =>
       s"${typeParam.name}"
     } match
-      case Seq() => ""
+      case Seq()  => ""
       case values => s"[${values.mkString(", ")}]"
     val paramsText = params.map { params =>
       s"(${params.map { param =>

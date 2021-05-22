@@ -2,7 +2,7 @@ package jsonrpc.server
 
 import jsonrpc.core.{Method, Reflection}
 import jsonrpc.spi.{Codec, Effect}
-import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, Type}
 import scala.compiletime.error
 import scala.collection.immutable.ArraySeq
 

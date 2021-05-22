@@ -11,5 +11,6 @@ import jsonrpc.core.ValueOps.classNameSimple
  *   - if they introduce some @CannotEqual annotation, to manually disable CanEqual derivation for case classes, this trait can be replaced with @CannotEqual.
  */
 trait CannotEqual:
-  override def equals(that:Any):Boolean =
+
+  override def equals(that: Any): Boolean =
     sys.error(s"instance of $classNameSimple cannot be compared with == or !=")
