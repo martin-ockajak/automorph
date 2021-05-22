@@ -1,4 +1,4 @@
-package jsonrpc.util
+package jsonrpc.log
 
 import org.slf4j.LoggerFactory
 
@@ -14,3 +14,9 @@ import org.slf4j.LoggerFactory
  */
 trait Logging:
   protected val logger = Logger(LoggerFactory.getLogger(getClass))
+
+trait StrictLogging:
+  protected val logger = Logger(LoggerFactory.getLogger(getClass))
+
+trait LazyLogging:
+  protected lazy val logger = Logger(LoggerFactory.getLogger(getClass))
