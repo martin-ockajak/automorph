@@ -50,9 +50,9 @@ object HandlerMacros:
       methods.foreach { method =>
         val signature = s"${TypeTree.of[ApiType].show}.${method.lift.signature}"
         if method.typeParams.nonEmpty then
-          throw IllegalArgumentException(s"Bound API method must not have type parameters: $signature")
+          sys.error(s"Bound API method must not have type parameters: $signature")
         else if !method.available then
-          throw IllegalArgumentException(s"Bound API method must be callable at runtime: $signature")
+          sys.error(s"Bound API method must be callable at runtime: $signature")
       }
 
     def methodArgument[T: Type](node: Node, param: ref.QuotedParam): Expr[T] =

@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, Output
 import java.nio.ByteBuffer
 import jsonrpc.core.CannotEqual
 import jsonrpc.core.EncodingOps.toArraySeq
-import jsonrpc.core.ValueOps.{asSome, simpleName}
+import jsonrpc.core.ValueOps.{asSome, className}
 import jsonrpc.server.{HandlerMacros, MethodHandle}
 import jsonrpc.spi.{Codec, Effect}
 import scala.collection.immutable.ArraySeq
@@ -31,8 +31,8 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
    * Generates JSON-RPC bindings for all valid public methods of the API type.
    * Throws an exception if an invalid public method is found.
    * Methods are considered invalid if they satisfy one of these conditions:
-   * * have type parameters
-   * * cannot be called at runtime
+   * - have type parameters
+   * - cannot be called at runtime
    *
    * API methods are exposed using their actual names.
    *
@@ -133,8 +133,8 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
     effect.map(process(request.toArraySeq(bufferSize)), response => ByteArrayInputStream(response.unsafeArray))
 
   override def toString =
-    val codecName = codec.simpleName
-    val effectName = effect.simpleName
+    val codecName = codec.className
+    val effectName = effect.className
     val endpointCount = methodBindings.size
     s"$JsonRpcHandler($codecName, $effectName, registered endpoints: $endpointCount)"
 

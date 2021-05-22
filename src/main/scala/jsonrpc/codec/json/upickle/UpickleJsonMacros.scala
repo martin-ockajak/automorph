@@ -34,7 +34,7 @@ case object UpickleJsonMacros:
     val parserType = parser match
       case '{ $value: tpe } => TypeRepr.of[tpe]
     val readerType = ref.methods(parserType).filter(_.name == "reader").headOption.getOrElse(
-      throw IllegalStateException(s"Upickle JSON parser API method not found: reader")
+      sys.error(s"Upickle JSON parser API method not found: reader")
     ).resultType
     val valueReaderType =
       readerType match
@@ -42,7 +42,7 @@ case object UpickleJsonMacros:
         case _                        => readerType
     val reader = valueReaderType.asType match
       case '[tpe] => Expr.summon[tpe].getOrElse {
-          throw IllegalStateException(s"Given value not found: ${valueReaderType.show}")
+          sys.error(s"Given value of specified type not found: ${valueReaderType.show}")
         }
     '{
       val realParser = $parser

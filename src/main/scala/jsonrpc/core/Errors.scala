@@ -24,7 +24,7 @@ case object Errors:
   ): Seq[String] =
     LazyList.iterate(throwable.asSome)(_.flatMap(_.cause))
       .takeWhile(_.isDefined).flatten.filter(filter).take(maxCauses).map { throwable =>
-        val exceptionName = throwable.simpleName
+        val exceptionName = throwable.getClass.getSimpleName
         throwable.message.map { message =>
           s"$exceptionName: $message"
         }.getOrElse(exceptionName)

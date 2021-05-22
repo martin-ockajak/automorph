@@ -11,4 +11,4 @@ case object ValueOps:
 
     def asRight[L]: Either[L, T] = Right(value.nn)
 
-    def simpleName: String = value.getClass.getSimpleName
+    def className: String = value.getClass.getName

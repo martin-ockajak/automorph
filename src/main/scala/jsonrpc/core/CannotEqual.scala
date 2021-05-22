@@ -1,16 +1,15 @@
 package jsonrpc.core
 
-import jsonrpc.core.ValueOps.simpleName
-
 /**
- * This prevents comparison for case classes containing members with faulty equality.
- * (such members typically are functions: functions implement equality as identity [operator eq], which yields wrong results).
- * In case universalEquality applies, this prevents comparison at runtime (better than wrong results).
- * In case strictEquality one day becomes the default, following can apply:
- *   - if the compiler automatically infers CanEqual derivation only when all members derive from CanEqual (functions will not), this trait can be removed.
- *   - if they introduce some @CannotEqual annotation, to manually disable CanEqual derivation for case classes, this trait can be replaced with @CannotEqual.
+ * Prevents comparison for case classes containing members with incorrect equality.
+ *
+ * Such members are typically which implement equality as identity via eq method yielding incorrect results.
+ * With universalEquality compiler feature enabled the comparisons are prevented at runtime.
+ * With strictEquality compiler feature enabled the comparison are prevented at compile time and the following may apply:
+ * - if the compiler automatically derives CanEqual only if all type members implement CanEqual (functions will not), this trait can be removed.
+ * - if a new mechanism is provided to selectively disable CanEqual derivation, this trait can be replaced with that mechanism.
  */
 trait CannotEqual:
 
   override def equals(that: Any): Boolean =
-    sys.error(s"Instance of $simpleName cannot be compared with == or !=")
+    sys.error(s"Instances of ${this.getClass.getName} cannot be compared with == or !=")
