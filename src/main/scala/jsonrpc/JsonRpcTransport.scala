@@ -6,24 +6,31 @@ import scala.collection.immutable.ArraySeq
 /**
  * JSON-RPC message transport layer.
  *
- * Used by JSON-RPC client to send requests and receive responses to and from a remote JSON-RPC endpoint.
+ * Used by JSON-RPC client to send requests and receive responses to and from a remot endpoint.
  *
  * @tparam Outcome computation outcome effect type
+ * @tparam Context JSON-RPC request context type
  */
-trait JsonRpcTransport[Outcome[_]]:
+trait JsonRpcTransport[Outcome[_], Context]:
 
   /**
-   * Send a request to a remote JSON-RPC endpoint and retrieves the response.
+   * Send a ''request'' to a remote JSON-RPC endpoint and retrieve the ''response''.
+   *
+   * The specified ''context'' may be used to supply additional information needed to send the request.
    *
    * @param request request message
+   * @param context request context
    * @return response
    */
-  def call(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte]
+  def call(request: ArraySeq.ofByte, context: Option[Context]): Outcome[ArraySeq.ofByte]
 
   /**
-   * Send a request to a remote JSON-RPC endpoint without retrieving a response.
+   * Send a ''request'' to a remote JSON-RPC endpoint without retrieving a response.
+   *
+   * The specified ''context'' may be used to supply additional information needed to send the request.
    *
    * @param request request message
+   * @param context request context
    * @return nothing
    */
-  def notify(request: ArraySeq.ofByte): Outcome[Unit]
+  def notify(request: ArraySeq.ofByte, context: Option[Context]): Outcome[Unit]

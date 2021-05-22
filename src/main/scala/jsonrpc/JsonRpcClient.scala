@@ -14,52 +14,109 @@ import scala.collection.immutable.ArraySeq
  * @param transport message transport layer
  * @tparam Node data format node representation type
  * @tparam Outcome computation outcome effect type
+ * @tparam Context JSON-RPC request context type
  */
-final case class JsonRpcClient[Node, Outcome[_]](
+final case class JsonRpcClient[Node, Outcome[_], Context](
   codec: Codec[Node],
   effect: Effect[Outcome],
-  transport: JsonRpcTransport[Outcome]
+  transport: JsonRpcTransport[Outcome, Context]
 ):
 
   /**
-   * Perform a remote JSON-RPC `method` ''call'' supplying the `arguments` by position.
+   * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
    *
    * @param method method name
    * @param arguments arguments by position
    * @tparam R result type
    * @return result value
    */
-  def call[R](method: String, arguments: Seq[Any]): Outcome[R] = call(method, encodeArguments(arguments))
+  def call[R](method: String, arguments: Seq[Any]): Outcome[R] = call(method, arguments)(using None)
 
   /**
-   * Perform a remote JSON-RPC `method` ''call'' supplying the `arguments` by name.
+   * Perform a remote JSON-RPC method ''call'' supplying the ''arguments by name''.
    *
    * @param method method name
    * @param arguments arguments by position
    * @tparam R result type
    * @return result value
    */
-  def call[R](method: String, arguments: Map[String, Any]): Outcome[R] = call(method, encodeArguments(arguments))
+  def call[R](method: String, arguments: Map[String, Any]): Outcome[R] = call(method, arguments)(using None)
 
   /**
-   * Perform a remote JSON-RPC `method` ''notification'' supplying the `arguments` by position.
+   * Perform a remote JSON-RPC method call'' supplying the ''arguments by position''.
+   *
+   * The specified ''context'' may be used to supply additional information needed to send the request.
+   *
+   * @param method method name
+   * @param arguments arguments by position
+   * @param context JSON-RPC request context
+   * @tparam R result type
+   * @return result value
+   */
+  def call[R](method: String, arguments: Seq[Any])(using context: Option[Context]): Outcome[R] =
+    rpcCall(method, encodeArguments(arguments), context)
+
+  /**
+   * Perform a remote JSON-RPC method ''call'' supplying the ''arguments by name''.
+   *
+   * The specified ''context'' may be used to supply additional information needed to send the request.
+   *
+   * @param method method name
+   * @param arguments arguments by position
+   * @param context JSON-RPC request context
+   * @tparam R result type
+   * @return result value
+   */
+  def call[R](method: String, arguments: Map[String, Any])(using context: Option[Context]): Outcome[R] =
+    rpcCall(method, encodeArguments(arguments), context)
+
+  /**
+   * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by position''.
    *
    * @param method method name
    * @param arguments arguments by position
    * @tparam R result type
    * @return nothing
    */
-  def notify(method: String, arguments: Seq[Any]): Outcome[Unit] = notify(method, encodeArguments(arguments))
+  def notify(method: String, arguments: Seq[Any]): Outcome[Unit] = notify(method, arguments)(using None)
 
   /**
-   * Perform a remote JSON-RPC `method` ''notification'' supplying the `arguments` by name.
+   * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by name''.
    *
    * @param method method name
    * @param arguments arguments by position
    * @tparam R result type
    * @return nothing
    */
-  def notify(method: String, arguments: Map[String, Any]): Outcome[Unit] = notify(method, encodeArguments(arguments))
+  def notify(method: String, arguments: Map[String, Any]): Outcome[Unit] = notify(method, arguments)(using None)
+
+  /**
+   * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by position''.
+   *
+   * The specified ''context'' may be used to supply additional information needed to send the request.
+   *
+   * @param method method name
+   * @param arguments arguments by position
+   * @param context JSON-RPC request context
+   * @tparam R result type
+   * @return nothing
+   */
+  def notify(method: String, arguments: Seq[Any])(using context: Option[Context]): Outcome[Unit] =
+    rpcNotify(method, encodeArguments(arguments), context)
+
+  /**
+   * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by name''.
+   *
+   * The specified ''context'' may be used to supply additional information needed to send the request.
+   *
+   * @param method method name
+   * @param arguments arguments by position
+   * @param context JSON-RPC request context
+   * @tparam R result type
+   * @return nothing
+   */
+  def notify(method: String, arguments: Map[String, Any])(using context: Option[Context]): Outcome[Unit] =
+    rpcNotify(method, encodeArguments(arguments), context)
 
   /**
    * Create a ''transparent proxy instance'' of a remote JSON-RPC API.
@@ -80,10 +137,10 @@ final case class JsonRpcClient[Node, Outcome[_]](
 
   private def responseMessage(response: ArraySeq.ofByte): Protocol.Response[Node] = ???
 
-  private def call[R](method: String, arguments: Node): Outcome[R] =
+  private def rpcCall[R](method: String, arguments: Node, context: Option[Context]): Outcome[R] =
     val request = requestMessage(id = true, method, arguments)
     effect.map(
-      transport.call(request),
+      transport.call(request, context),
       response =>
         val message = responseMessage(response)
         decodeResult(message.value) match
@@ -91,6 +148,6 @@ final case class JsonRpcClient[Node, Outcome[_]](
           case Right(result) => result
     )
 
-  private def notify[R](method: String, arguments: Node): Outcome[Unit] =
+  private def rpcNotify[R](method: String, arguments: Node, context: Option[Context]): Outcome[Unit] =
     val request = requestMessage(id = false, method, arguments)
-    effect.map(transport.call(request), _ => ())
+    effect.map(transport.call(request, context), _ => ())
