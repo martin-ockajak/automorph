@@ -41,8 +41,8 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * - have type parameters
    * - cannot be called at runtime
    *
-   * A bound method definition may contain an `using` clause defining a single ''context parameter'' of `Context` type.
-   * Context value supplied by the JSON-RPC server during request processing is then passed to the bound method as the 'context parameter' argument.
+   * A bound method definition may include a single ''context parameter'' of `Context` type or return a context fuction consuming one.
+   * Server-supplied ''request context'' is then passed to the bound method or the returned context function as the 'context parameter' argument.
    *
    * API methods are exposed using their actual names.
    *
@@ -62,8 +62,8 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * - have type parameters
    * - cannot be called at runtime
    *
-   * A bound method definition may contain an `using` clause defining a single ''context parameter'' of `Context` type.
-   * Context value supplied by the JSON-RPC server during request processing is then passed to the bound method as the ''context parameter'' argument.
+   * A bound method definition may include a single ''context parameter'' of `Context` type or return a context fuction consuming one.
+   * Server-supplied ''request context'' is then passed to the bound method or the returned context function as the ''context parameter'' argument.
    *
    * API methods are exposed using names their local names transformed by the .
    *
@@ -85,8 +85,8 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * - have type parameters
    * - cannot be called at runtime
    *
-   * A bound method definition may contain an `using` clause defining a single ''context parameter'' of `Context` type.
-   * Context value supplied by the JSON-RPC server during request processing is then passed to the bound method as the ''context parameter'' argument.
+   * A bound method definition may include a single ''context parameter'' of `Context` type or return a context fuction consuming one.
+   * Server-supplied ''request context'' is then passed to the bound method or the returned context function as the ''context parameter'' argument.
    *
    * @param api API instance
    * @param exposedNames create exposed method names from its name (empty result causes the method not to be exposed)
@@ -112,7 +112,8 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * Create a new JSON-RPC request handler by adding a binding for the specified function.
    *
    * The bound function definition may contain an `using` clause defining a single ''context parameter'' of `Context` type.
-   * Context value supplied by the JSON-RPC server during request processing is then passed to the bound function as the ''context parameter'' argument.
+   * The bound function may return a context fuction consuming a single ''context parameter'' of `Context` type.
+   * Server-supplied ''request context'' is then passed to the returned context function as the ''context parameter'' argument.
    *
    * @param method JSON-RPC method name
    * @param api API instance
@@ -149,7 +150,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   def process(request: InputStream): Outcome[InputStream] = process(request, None)
 
   /**
-   * Invoke a bound ''method'' based on a JSON-RPC ''request'' supplying an additional ''context value'' and return a JSON-RPC ''response''.
+   * Invoke a bound ''method'' based on a JSON-RPC ''request'' plus an additional ''request context'' and return a JSON-RPC ''response''.
    *
    * @param request JSON-RPC request message
    * @param context request context
@@ -159,7 +160,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     ???
 
   /**
-   * Invoke a bound ''method'' based on a JSON-RPC ''request'' supplying an additional ''context'' value and return a JSON-RPC ''response''.
+   * Invoke a bound ''method'' based on a JSON-RPC ''request'' plus an additional ''request context'' and return a JSON-RPC ''response''.
    *
    * @param request JSON-RPC request message
    * @param context request context
@@ -169,7 +170,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     effect.map(process(request.toArraySeq), response => ByteBuffer.wrap(response.unsafeArray))
 
   /**
-   * Invoke a bound ''method'' based on a JSON-RPC ''request'' supplying an additional ''context'' value and return a JSON-RPC ''response''.
+   * Invoke a bound ''method'' based on a JSON-RPC ''request'' plus an additional ''request context'' and return a JSON-RPC ''response''.
    *
    * @param request JSON-RPC request message
    * @param context request context
