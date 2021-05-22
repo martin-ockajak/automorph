@@ -140,6 +140,7 @@ final case class Logger private (private val underlying: Underlying):
     val iterableProperties = properties match
       case product: Product                        => productProperties(product)
       case iterable: Iterable[?] => iterable
+    // FIXME - find a way to avoid Matchable type coercion
     iterableProperties.asInstanceOf[Iterable[(String, Matchable)]]
 
   private def productProperties(product: Product): Map[String, Any] =
