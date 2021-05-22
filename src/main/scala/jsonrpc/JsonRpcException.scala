@@ -12,7 +12,7 @@ package jsonrpc
  * @param cause error cause
  * @tparam Node data format node representation type
  */
-final case class JsonRpcError[Node](
+final case class JsonRpcException[Node](
   message: String,
   data: Node,
   cause: Throwable

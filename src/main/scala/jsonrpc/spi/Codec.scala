@@ -43,7 +43,7 @@ trait Codec[Node]:
    * @tparam T value type
    * @return data format node
    */
-  inline def encode[T](value: T): Node
+  def encode[T](value: T): Node
 
   /**
    * Decode a value from a node.
@@ -52,13 +52,4 @@ trait Codec[Node]:
    * @tparam T value type
    * @return value of given type
    */
-  inline def decode[T](node: Node): T
-
-  /**
-   * Decode a value from a node.
-   *
-   * @param node data format node
-   * @tparam T value type
-   * @return value of given type
-   */
-  def newdecode[T](node: Node): T
+  def decode[T](node: Node): T

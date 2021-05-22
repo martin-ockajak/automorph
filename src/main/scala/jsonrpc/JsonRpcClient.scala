@@ -1,6 +1,6 @@
 package jsonrpc
 
-import jsonrpc.core.Protocol
+import jsonrpc.core.{Protocol, Response}
 import jsonrpc.spi.{CallError, Codec, Effect}
 import scala.collection.immutable.ArraySeq
 
@@ -135,7 +135,7 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
 
   private def requestMessage(id: Boolean, method: String, arguments: Node): ArraySeq.ofByte = ???
 
-  private def responseMessage(response: ArraySeq.ofByte): Protocol.Response[Node] = ???
+  private def responseMessage(response: ArraySeq.ofByte): Response[Node] = ???
 
   private def rpcCall[R](method: String, arguments: Node, context: Option[Context]): Outcome[R] =
     val request = requestMessage(id = true, method, arguments)

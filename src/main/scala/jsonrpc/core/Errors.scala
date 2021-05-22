@@ -10,7 +10,7 @@ case object Errors:
     private def message: Option[String] = throwable.getMessage.asOption.map(_.trim).filter(_.nonEmpty)
 
   /**
-   * Assemble concise error descriptions from specified throwable and specified number of its causes.
+   * Assemble concise error descriptions from specified throwable and specified number of its filtered causes.
    *
    * @param throwable exception
    * @param filter only include throwables satisfying this condition

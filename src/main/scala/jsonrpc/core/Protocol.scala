@@ -1,8 +1,8 @@
 package jsonrpc.core
 
 import java.io.IOException
-import jsonrpc.util.ValueOps.{asRight, asSome}
 import jsonrpc.spi.{CallError, Message}
+import jsonrpc.util.ValueOps.{asRight, asSome}
 
 /**
  * JSON-RPC protocol data structures.
@@ -14,51 +14,26 @@ case object Protocol:
   /** Message identifier type. */
   type Id = Either[BigDecimal, String]
 
-  /**
-   * JSON-RPC request.
-   *
-   * @param jsonrpc protocol version (must be 2.0)
-   * @param id call identifier, a request without and identifier is considered to be a notification
-   * @param method invoked method name
-   * @param params invoked method argument values by position or by name
-   * @tparam Node message node representation type
-   */
-  final case class Request[Node](
-    id: Option[Id],
-    method: String,
-    params: Either[List[Node], Map[String, Node]]
-  )
-
-  /**
-   * JSON-RPC call response.
-   *
-   * @param id call identifier
-   * @param value response value, either a result or an error
-   * @tparam Node message node representation type
-   */
-  final case class Response[Node](
-    id: Id,
-    value: Either[CallError[Node], Node]
-  )
-
-  /**
-   * JSON-RPC parse error.
-   *
-   * @param message error message
-   * @param cause error cause
-   */
-  final case class ParseError(
+  /** JSON-RPC parse error. */
+  final case class ParseErrorException(
     message: String,
     cause: Throwable
   ) extends RuntimeException(message, cause)
 
-  /**
-   * JSON-RPC invalid request error.
-   *
-   * @param message error message
-   * @param cause error cause
-   */
-  final case class InvalidRequest(
+  /** JSON-RPC invalid request error. */
+  final case class InvalidRequestException(
+    message: String,
+    cause: Throwable
+  ) extends RuntimeException(message, cause)
+
+  /** JSON-RPC method not found error. */
+  final case class MethodNotFoundException(
+    message: String,
+    cause: Throwable
+  ) extends RuntimeException(message, cause)
+
+  /** JSON-RPC internal error. */
+  final case class InternalErrorException(
     message: String,
     cause: Throwable
   ) extends RuntimeException(message, cause)
@@ -75,48 +50,29 @@ case object Protocol:
     case ApplicationError extends ErrorType(0)
 
   /** Mapping of standard exception types to JSON-RPC errors. */
-  lazy val exceptionErrorTypes: Map[Class[?], ErrorType] = Map(
-    classOf[ParseError] -> ErrorType.ParseError,
-    classOf[InvalidRequest] -> ErrorType.InvalidRequest,
+  lazy val exceptionError: Map[Class[? <: Throwable], ErrorType] = Map(
+    classOf[ParseErrorException] -> ErrorType.ParseError,
+    classOf[InvalidRequestException] -> ErrorType.InvalidRequest,
+    classOf[MethodNotFoundException] -> ErrorType.MethodNotFound,
     classOf[IllegalArgumentException] -> ErrorType.InvalidParams,
+    classOf[InternalErrorException] -> ErrorType.InternalError,
     classOf[IOException] -> ErrorType.IOError
-  )
+  ).withDefaultValue(ErrorType.ApplicationError)
 
-  case object Request:
-
-    def apply[Node](message: Message[Node]): Request[Node] =
-      val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
-      require(
-        jsonrpc == version,
-        s"Invalid JSON-RPC protocol version: $jsonrpc"
-      )
-      val id = message.id
-      val method = mandatory(message.method, "method")
-      val params = message.params.getOrElse(Map.empty.asRight[List[Node]])
-      Request(id, method, params)
-
-  case object Response:
-
-    def apply[Node](message: Message[Node]): Response[Node] =
-      val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
-      require(
-        jsonrpc == version,
-        s"Invalid JSON-RPC protocol version: $jsonrpc"
-      )
-      val id = mandatory(message.id, "id")
-      message.result.map {
-        result => Response(id, result.asRight)
-      }.getOrElse {
-        val error = mandatory(message.error, "error")
-        Response(id, Left(error))
-      }
+  /** Mapping of JSON-RPC errors to standard exception types. */
+  def errorException(code: Int, message: String): Throwable = code match
+    case ErrorType.ParseError.code                   => ParseErrorException(message, None.orNull)
+    case ErrorType.InvalidRequest.code               => InvalidRequestException(message, None.orNull)
+    case ErrorType.MethodNotFound.code               => MethodNotFoundException(message, None.orNull)
+    case ErrorType.InvalidParams.code                => IllegalArgumentException(message, None.orNull)
+    case ErrorType.InternalError.code                => InternalErrorException(message, None.orNull)
+    case ErrorType.IOError.code                      => IOException(message, None.orNull)
+    case _ if code < ErrorType.ApplicationError.code => InternalErrorException(message, None.orNull)
+    case _                                           => RuntimeException(message, None.orNull)
 
   /** Supported JSON-RPC protocol version. */
-  private val version = "2.0"
+  val version = "2.0"
 
-  private def mandatory[T](value: Option[T], name: String): T =
-    require(
-      value.isDefined,
-      s"Missing message property: $name"
-    )
-    value.get
+  def mandatory[T](value: Option[T], name: String): T = value.getOrElse(
+    throw InvalidRequestException(s"Missing message property: $name", None.orNull)
+  )

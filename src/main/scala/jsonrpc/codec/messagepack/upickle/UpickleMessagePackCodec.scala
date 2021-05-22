@@ -28,11 +28,11 @@ final case class UpickleMessagePackCodec(parser: Api) extends Codec[Msg]:
 
   def format(message: Message[Msg]): String = parser.write(UpickleMessagePackCodec.Message(message), indent)
 
-  inline def encode[T](value: T): Msg = UpickleMessagePackMacros.encode(parser, value)
+  def encode[T](value: T): Msg = ???
+  // UpickleMessagePackMacros.encode(parser, value)
 
-  inline def decode[T](node: Msg): T = UpickleMessagePackMacros.decode[Api, T](parser, node)
-
-  def newdecode[T](node: Msg): T = ???
+  def decode[T](node: Msg): T = ???
+  // UpickleMessagePackMacros.decode[Api, T](parser, node)
 
 case object UpickleMessagePackCodec:
 

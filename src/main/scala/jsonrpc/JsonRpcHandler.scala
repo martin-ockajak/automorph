@@ -3,11 +3,21 @@ package jsonrpc
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.core.EncodingOps.toArraySeq
-import jsonrpc.util.ValueOps.{asSome, className}
+import jsonrpc.core.Errors
+import jsonrpc.core.Protocol.Id
+import jsonrpc.core.Protocol.ParseErrorException
+import jsonrpc.core.Protocol.MethodNotFoundException
+import jsonrpc.core.Protocol
+import jsonrpc.core.Response
+import jsonrpc.core.Request
+import jsonrpc.spi.Message
+import jsonrpc.spi.CallError
+import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import jsonrpc.server.{HandlerMacros, MethodHandle}
 import jsonrpc.spi.{Codec, Effect}
 import jsonrpc.util.CannotEqual
 import scala.collection.immutable.ArraySeq
+import scala.util.{Failure, Success, Try}
 
 /**
  * JSON-RPC request handler.
@@ -30,6 +40,8 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   private val methodBindings: Map[String, MethodHandle[Node, Outcome, Context]]
 ) extends CannotEqual:
 
+  private val unknownId = "[unknown]".asRight
+
   /**
    * Create a new JSON-RPC request handler by adding method bindings for member methods of the specified API.
    *
@@ -41,7 +53,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * - have type parameters
    * - cannot be called at runtime
    *
-   * A bound method definition may include a single ''context parameter'' of `Context` type or return a context fuction consuming one.
+   * A bound method definition may include a last ''context parameter'' of `Context` type or return a context fuction consuming one.
    * Server-supplied ''request context'' is then passed to the bound method or the returned context function as the 'context parameter' argument.
    *
    * API methods are exposed using their actual names.
@@ -62,7 +74,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * - have type parameters
    * - cannot be called at runtime
    *
-   * A bound method definition may include a single ''context parameter'' of `Context` type or return a context fuction consuming one.
+   * A bound method definition may include a last ''context parameter'' of `Context` type or return a context fuction consuming one.
    * Server-supplied ''request context'' is then passed to the bound method or the returned context function as the ''context parameter'' argument.
    *
    * API methods are exposed using names their local names transformed by the .
@@ -73,7 +85,10 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef](api: T, exposedNames: String => Seq[String]): JsonRpcHandler[Node, CodecType, Outcome, Context] =
+  inline def bind[T <: AnyRef](
+    api: T,
+    exposedNames: String => Seq[String]
+  ): JsonRpcHandler[Node, CodecType, Outcome, Context] =
     bind(api, Function.unlift(exposedNames.andThen(asSome)))
 
   /**
@@ -85,7 +100,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * - have type parameters
    * - cannot be called at runtime
    *
-   * A bound method definition may include a single ''context parameter'' of `Context` type or return a context fuction consuming one.
+   * A bound method definition may include a last ''context parameter'' of `Context` type or return a context fuction consuming one.
    * Server-supplied ''request context'' is then passed to the bound method or the returned context function as the ''context parameter'' argument.
    *
    * @param api API instance
@@ -98,14 +113,15 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     api: T,
     exposedNames: PartialFunction[String, Seq[String]]
   ): JsonRpcHandler[Node, CodecType, Outcome, Context] =
-    val bindings = HandlerMacros.bind[T, Node, Outcome, codec.type, Context](codec, effect, api).flatMap { (apiMethodName, method) =>
-      exposedNames.applyOrElse(
-        apiMethodName,
-        throw new IllegalArgumentException(
-          s"Bound API does not contain the specified public method: ${api.getClass.getName}.$apiMethodName"
-        )
-      ).map(_ -> method)
-    }
+    val bindings =
+      HandlerMacros.bind[T, Node, Outcome, codec.type, Context](codec, effect, api).flatMap { (apiMethodName, method) =>
+        exposedNames.applyOrElse(
+          apiMethodName,
+          throw new IllegalArgumentException(
+            s"Bound API does not contain the specified public method: ${api.getClass.getName}.$apiMethodName"
+          )
+        ).map(_ -> method)
+      }
     copy(methodBindings = methodBindings ++ bindings)
 
   /**
@@ -129,34 +145,34 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * Invoke a ''bound method'' specified in a JSON-RPC ''request'' and return a JSON-RPC ''response''.
    *
    * @param request JSON-RPC request message
-   * @return JSON-RPC response message
+   * @return optional JSON-RPC response message and context
    */
-  def process(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte] = process(request, None)
+  def process(request: ArraySeq.ofByte): Outcome[Option[ArraySeq.ofByte]] = process(request, None)
 
   /**
    * Invokes a ''bound method'' specified in a JSON-RPC ''request'' and return a JSON-RPC ''response''.
    *
    * @param request JSON-RPC request message
-   * @return JSON-RPC response message
+   * @return optional JSON-RPC response message
    */
-  def process(request: ByteBuffer): Outcome[ByteBuffer] = process(request, None)
+  def process(request: ByteBuffer): Outcome[Option[ByteBuffer]] = process(request, None)
 
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' and return a JSON-RPC ''response''.
    *
    * @param request JSON-RPC request message
-   * @return JSON-RPC response message
+   * @return optional JSON-RPC response message
    */
-  def process(request: InputStream): Outcome[InputStream] = process(request, None)
+  def process(request: InputStream): Outcome[Option[InputStream]] = process(request, None)
 
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' plus an additional ''request context'' and return a JSON-RPC ''response''.
    *
    * @param request JSON-RPC request message
    * @param context request context
-   * @return JSON-RPC response message
+   * @return optional JSON-RPC response message
    */
-  def process(request: ArraySeq.ofByte, context: Option[Context]): Outcome[ArraySeq.ofByte] =
+  def process(request: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
     handle(request, context)
 
   /**
@@ -164,23 +180,91 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    *
    * @param request JSON-RPC request message
    * @param context request context
-   * @return JSON-RPC response message
+   * @return optional JSON-RPC response message
    */
-  def process(request: ByteBuffer, context: Option[Context]): Outcome[ByteBuffer] =
-    effect.map(process(request.toArraySeq), response => ByteBuffer.wrap(response.unsafeArray))
+  def process(request: ByteBuffer, context: Option[Context]): Outcome[Option[ByteBuffer]] =
+    effect.map(process(request.toArraySeq), _.map(response => ByteBuffer.wrap(response.unsafeArray)))
 
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' plus an additional ''request context'' and return a JSON-RPC ''response''.
    *
    * @param request JSON-RPC request message
    * @param context request context
-   * @return JSON-RPC response message
+   * @return optional JSON-RPC response message
    */
-  def process(request: InputStream, context: Option[Context]): Outcome[InputStream] =
-    effect.map(process(request.toArraySeq(bufferSize)), response => ByteArrayInputStream(response.unsafeArray))
+  def process(request: InputStream, context: Option[Context]): Outcome[Option[InputStream]] =
+    effect.map(process(request.toArraySeq(bufferSize)), _.map(response => ByteArrayInputStream(response.unsafeArray)))
 
-  private def handle(request: ArraySeq.ofByte, context: Option[Context]): Outcome[ArraySeq.ofByte] =
-    ???
+  private def handle(message: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
+    Try(codec.deserialize(message)) match
+      case Success(validMessage) => Try(Request(validMessage)) match
+          case Success(request) => invoke(request, context)
+          case Failure(error)   => effect.pure(errorResponse(error, validMessage.id))
+      case Failure(error) =>
+        effect.pure(errorResponse(ParseErrorException("Invalid request format", error), unknownId.asSome))
+
+  private def invoke(request: Request[Node], context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
+    methodBindings.get(request.method).map { methodHandle =>
+      val arguments = extractArguments(request, methodHandle)
+      Try(effect.either(methodHandle.function(arguments, None))) match
+        case Success(outcome) => effect.map(outcome, _ match
+          case Right(result) => request.id.flatMap { id =>
+            val response = Response(id, result.asRight)
+            serialize(response)
+          }
+          case Left(error) => errorResponse(error, request.id)
+        )
+        case Failure(error) => effect.pure(errorResponse(error, request.id))
+    }.getOrElse {
+      effect.pure(errorResponse(MethodNotFoundException(s"Method not found: ${request.method}", None.orNull), request.id))
+    }
+
+  private def extractArguments(request: Request[Node], methodHandle: MethodHandle[Node, Outcome, Context]): Seq[Node] =
+    val params = methodHandle.paramNames
+    request.params match
+      case Left(arguments) =>
+        if arguments.size < params.size then
+          throw IllegalArgumentException(s"Missing arguments: ${params.drop(arguments.size)}")
+        else if arguments.size > params.size then
+          throw IllegalArgumentException(s"Redundant arguments: ${params.size - arguments.size}")
+        arguments
+      case Right(namedArguments) =>
+        val arguments = params.flatMap(namedArguments.get)
+        if arguments.size < params.size then
+          throw IllegalArgumentException(s"Missing arguments: ${params.filterNot(namedArguments.contains)}")
+        else if arguments.size > params.size then
+          throw IllegalArgumentException(s"Redundant arguments: ${namedArguments.keys.filterNot(params.contains)}")
+        arguments
+
+  /**
+   * Create JSON-RPC error response.
+   *
+   * @param error exception
+   * @param requestId request identifier
+   * @return error response if applicable
+   */
+  private def errorResponse(error: Throwable, requestId: Option[Id]): Option[ArraySeq.ofByte] =
+    requestId.flatMap { id =>
+      val code = Protocol.exceptionError(error.getClass).code
+      val (message, data) = Errors.descriptions(error) match
+        case Seq(message, details*) => message -> codec.encode(details).asSome
+        case Seq()                  => "Unknown error" -> Option.empty[Node]
+      val response = Response[Node](id, CallError[Node](code.asSome, message.asSome, data).asLeft)
+      serialize(response)
+    }
+
+  /**
+   * Serialize JSON-RPC response.
+   *
+   * @param response response
+   * @return serialized response
+   */
+  private def serialize(response: Response[Node]): Option[ArraySeq.ofByte] =
+    Try(codec.serialize(response.message)) match
+      case Success(message) => message.asSome
+      case Failure(error) =>
+        // FIXME - log and escalate the error here
+        None
 
   override def toString =
     val codecName = codec.className

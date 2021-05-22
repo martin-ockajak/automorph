@@ -16,11 +16,8 @@ final case class DummyJsonCodec() extends Codec[String]:
   def format(message: Message[String]): String =
     message.toString
 
-  inline def encode[T](value: T): String =
+  def encode[T](value: T): String =
     value.toString
 
-  inline def decode[T](node: String): T =
-    node.asInstanceOf[T]
-
-  def newdecode[T](node: String): T =
+  def decode[T](node: String): T =
     node.asInstanceOf[T]

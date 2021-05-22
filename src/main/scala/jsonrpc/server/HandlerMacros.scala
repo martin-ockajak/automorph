@@ -7,9 +7,11 @@ import scala.compiletime.error
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
 final case class MethodHandle[Node, Outcome[_], Context](
-  function: (Node, Option[Context]) => Outcome[Node],
+  function: (Seq[Node], Option[Context]) => Outcome[Node],
   name: String,
-  signature: String
+  resultType: String,
+  paramNames: Seq[String],
+  paramTypes: Seq[String]
 )
 
 object HandlerMacros:
