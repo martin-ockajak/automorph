@@ -2,7 +2,7 @@ package jsonrpc
 
 import base.BaseSpec
 import jsonrpc.effect.native.NoEffect
-//import jsonrpc.codec.json.jackson.JacksonJsonCodec
+import jsonrpc.codec.json.jackson.JacksonJsonCodec
 import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
 import jsonrpc.util.ValueOps.{asRight, asSome}
@@ -90,15 +90,15 @@ class ServerSpec extends BaseSpec:
         val jsonContext = DummyJsonCodec()
         jsonContext.encode("test")
       }
-//      "Jackson" in {
-//        val jsonContext = JacksonJsonCodec()
-//        val valueJson = jsonContext.encode("test")
-//        println(valueJson)
-//        println(jsonContext.decode[String](valueJson))
-//        val messageJson = jsonContext.serialize(jacksonMessage)
-//        println(jsonContext.deserialize(messageJson))
-//        println(jsonContext.format(jacksonMessage))
-//      }
+      "Jackson" in {
+        val jsonContext = JacksonJsonCodec()
+        val valueJson = jsonContext.encode("test")
+        println(valueJson)
+        println(jsonContext.decode[String](valueJson))
+        val messageJson = jsonContext.serialize(jacksonMessage)
+        println(jsonContext.deserialize(messageJson))
+        println(jsonContext.format(jacksonMessage))
+      }
       "Upickle" in {
         val jsonContext = UpickleJsonCodec(upickle.default)
         println(jsonContext.encode("test"))
