@@ -21,7 +21,7 @@ import scala.collection.immutable.ArraySeq
  * @param bufferSize input stream reading buffer size
  * @tparam Node data format node representation type
  * @tparam Outcome computation outcome effect type
- * @tparam Context JSON-RPC call context type
+ * @tparam Context JSON-RPC request context type
  */
 final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Context] private (
   codec: CodecType,
@@ -136,7 +136,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * Invoke a bound method specified in a JSON-RPC request and creates a JSON-RPC response.
    *
    * @param request JSON-RPC request message
-   * @param context JSOn-RPC request context
+   * @param context JSON-RPC request context
    * @return JSON-RPC response message
    */
   def process(request: ArraySeq.ofByte, context: Option[Context]): Outcome[ArraySeq.ofByte] =
@@ -154,7 +154,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * Invokes a bound method specified in a JSON-RPC request and creates a JSON-RPC response.
    *
    * @param request JSON-RPC request message
-   * @param context JSOn-RPC request context
+   * @param context JSON-RPC request context
    * @return JSON-RPC response message
    */
   def process(request: ByteBuffer, context: Option[Context]): Outcome[ByteBuffer] =
@@ -172,7 +172,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * Invoke a bound method specified in a JSON-RPC request and creates a JSON-RPC response.
    *
    * @param request JSON-RPC request message
-   * @param context JSOn-RPC request context
+   * @param context JSON-RPC request context
    * @return JSON-RPC response message
    */
   def process(request: InputStream, context: Option[Context]): Outcome[InputStream] =
