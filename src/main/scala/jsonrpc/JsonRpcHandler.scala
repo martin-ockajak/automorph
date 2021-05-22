@@ -21,13 +21,13 @@ import scala.collection.immutable.ArraySeq
  * @param bufferSize input stream reading buffer size
  * @tparam Node data format node representation type
  * @tparam Outcome computation outcome effect type
- * @tparam Context JSON-RPC request context type
+ * @tparam Context request context type
  */
 final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Context] private (
   codec: CodecType,
   effect: Effect[Outcome],
   bufferSize: Int,
-  private val methodBindings: Map[String, MethodHandle[Node, Outcome]]
+  private val methodBindings: Map[String, MethodHandle[Node, Outcome, Context]]
 ) extends CannotEqual:
 
   /**
@@ -98,7 +98,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     api: T,
     exposedNames: PartialFunction[String, Seq[String]]
   ): JsonRpcHandler[Node, CodecType, Outcome, Context] =
-    val bindings = HandlerMacros.bind(codec, effect, api).flatMap { (apiMethodName, method) =>
+    val bindings = HandlerMacros.bind[T, Node, Outcome, codec.type, Context](codec, effect, api).flatMap { (apiMethodName, method) =>
       exposedNames.applyOrElse(
         apiMethodName,
         throw new IllegalArgumentException(
@@ -157,7 +157,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @return JSON-RPC response message
    */
   def process(request: ArraySeq.ofByte, context: Option[Context]): Outcome[ArraySeq.ofByte] =
-    ???
+    handle(request, context)
 
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' plus an additional ''request context'' and return a JSON-RPC ''response''.
@@ -178,6 +178,9 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    */
   def process(request: InputStream, context: Option[Context]): Outcome[InputStream] =
     effect.map(process(request.toArraySeq(bufferSize)), response => ByteArrayInputStream(response.unsafeArray))
+
+  private def handle(request: ArraySeq.ofByte, context: Option[Context]): Outcome[ArraySeq.ofByte] =
+    ???
 
   override def toString =
     val codecName = codec.className

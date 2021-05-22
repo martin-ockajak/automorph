@@ -14,7 +14,7 @@ import scala.collection.immutable.ArraySeq
  * @param transport message transport layer
  * @tparam Node data format node representation type
  * @tparam Outcome computation outcome effect type
- * @tparam Context JSON-RPC request context type
+ * @tparam Context request context type
  */
 final case class JsonRpcClient[Node, Outcome[_], Context](
   codec: Codec[Node],

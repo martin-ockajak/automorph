@@ -6,14 +6,13 @@ import scala.collection.immutable.ArraySeq
 import scala.compiletime.error
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
-final case class MethodHandle[Node, Outcome[_]](
-  function: Node => Outcome[Node],
+final case class MethodHandle[Node, Outcome[_], Context](
+  function: (Node, Option[Context]) => Outcome[Node],
   name: String,
   signature: String
 )
 
 object HandlerMacros:
-
   /**
    * Generates JSON-RPC bindings for all valid public methods of an API type.
    *
@@ -28,20 +27,21 @@ object HandlerMacros:
    * @tparam ApiType API type
    * @tparam Node data format node representation type
    * @tparam Outcome computation outcome effect type
+   * @tparam Context request context type
    * @return mapping of method names to their JSON-RPC wrapper functions
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[ApiType <: AnyRef, Node, Outcome[_], CodecType <: Codec[Node]](
+  inline def bind[ApiType <: AnyRef, Node, Outcome[_], CodecType <: Codec[Node], Context](
     codec: CodecType,
     effect: Effect[Outcome],
     api: ApiType
-  ): Map[String, MethodHandle[Node, Outcome]] = ${ bind('codec, 'effect, 'api) }
+  ): Map[String, MethodHandle[Node, Outcome, Context]] = ${ bind('codec, 'effect, 'api) }
 
-  private def bind[ApiType <: AnyRef: Type, Node: Type, Outcome[_]: Type, CodecType <: Codec[Node]: Type](
+  private def bind[ApiType <: AnyRef: Type, Node: Type, Outcome[_]: Type, CodecType <: Codec[Node]: Type, Context: Type](
     codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
-  )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Outcome]]] =
+  )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Outcome, Context]]] =
     import ref.quotes.reflect.{TypeRepr, TypeTree}
 
     val ref = Reflection(quotes)
@@ -82,7 +82,7 @@ object HandlerMacros:
     val typeParam = TypeTree.of[List[List[String]]]
     val typedCall = ref.callTerm(ref.term('{ List }), "apply", List(typeParam), List.empty)
 
-    val handles = Expr.ofSeq(Seq.empty[Expr[(String, MethodHandle[Node, Outcome])]])
+    val handles = Expr.ofSeq(Seq.empty[Expr[(String, MethodHandle[Node, Outcome, Context])]])
 
     // Debug printounts
     println(
