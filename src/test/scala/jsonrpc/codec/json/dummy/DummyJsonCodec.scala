@@ -21,3 +21,6 @@ final case class DummyJsonCodec() extends Codec[String]:
 
   inline def decode[T](node: String): T =
     node.asInstanceOf[T]
+
+  def newdecode[T](node: String): T =
+    node.asInstanceOf[T]

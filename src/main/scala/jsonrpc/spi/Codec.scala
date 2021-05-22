@@ -61,4 +61,4 @@ trait Codec[Node]:
    * @tparam T value type
    * @return value of given type
    */
-//  def xdecode[T](node: Node): T
+  def newdecode[T](node: Node): T

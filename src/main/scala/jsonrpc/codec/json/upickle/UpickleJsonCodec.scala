@@ -31,7 +31,8 @@ final case class UpickleJsonCodec(parser: Api) extends Codec[Value]:
 
   inline def decode[T](node: Value): T = UpickleJsonMacros.decode[Api, T](parser, node)
 
-//  def xdecode[T](node: Value): T = decode[T](node)
+  inline def newdecode[T](node: Value): T = ???
+    // UpickleJsonMacros.decode[Api, T](parser, node)
 
 case object UpickleJsonCodec:
 
