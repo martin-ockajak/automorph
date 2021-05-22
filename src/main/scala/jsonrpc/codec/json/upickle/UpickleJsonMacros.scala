@@ -31,7 +31,7 @@ case object UpickleJsonMacros:
     val ref = Reflection(quotes)
 
     val parserType = parser match
-      case '{ $value: tpe } => TypeTree.of[tpe]
+      case '{ $value: tpe } => TypeRepr.of[tpe]
     val readerType = ref.methods(parserType).filter(_.name == "reader").headOption.getOrElse(
       throw IllegalStateException(s"Upickle JSON parser API method not found: reader")
     ).resultType

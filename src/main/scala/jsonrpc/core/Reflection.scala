@@ -81,22 +81,20 @@ final class Reflection(val quotes: Quotes):
   /**
    * Describe class methods within quoted context.
    *
-   * @param classTypeTree class type tree
+   * @param classType class type representation
    * @return quoted class method descriptors
    */
-  def methods(classTypeTree: TypeTree): Seq[QuotedMethod] =
-    val classSymbol = classTypeTree.tpe.typeSymbol
-    classSymbol.memberMethods.flatMap(method(classTypeTree, _))
+  def methods(classType: TypeRepr): Seq[QuotedMethod] =
+    classType.typeSymbol.memberMethods.flatMap(method(classType, _))
 
   /**
    * Describe class fields within quoted context.
    *
-   * @param classTypeTree class type tree
+   * @param classType class type representation
    * @return quoted class field descriptors
    */
-  def fields(classTypeTree: TypeTree): Seq[QuotedField] =
-    val classSymbol = classTypeTree.tpe.typeSymbol
-    classSymbol.memberFields.flatMap(field(classTypeTree, _))
+  def fields(classType: TypeRepr): Seq[QuotedField] =
+    classType.typeSymbol.memberFields.flatMap(field(classType, _))
 
   /**
    * Create instance member access term.
@@ -129,8 +127,8 @@ final class Reflection(val quotes: Quotes):
   def term[T](expression: Expr[T]): Term =
     expression.asTerm
 
-  private def method(classTypeTree: TypeTree, methodSymbol: Symbol): Option[QuotedMethod] =
-    val (symbolType, typeParams) = classTypeTree.tpe.memberType(methodSymbol) match
+  private def method(classType: TypeRepr, methodSymbol: Symbol): Option[QuotedMethod] =
+    val (symbolType, typeParams) = classType.memberType(methodSymbol) match
       case polyType: PolyType =>
         val typeParams = polyType.paramNames.zip(polyType.paramBounds).map {
           (name, bounds) => QuotedTypeParam(name, bounds)
@@ -168,8 +166,8 @@ final class Reflection(val quotes: Quotes):
     val resultType = methodTypes.last.resType
     (params, resultType)
 
-  private def field(classTypeTree: TypeTree, fieldSymbol: Symbol): Option[QuotedField] =
-    val fieldType = classTypeTree.tpe.memberType(fieldSymbol)
+  private def field(classType: TypeRepr, fieldSymbol: Symbol): Option[QuotedField] =
+    val fieldType = classType.memberType(fieldSymbol)
     QuotedField(
       fieldSymbol.name,
       fieldType,

@@ -42,7 +42,7 @@ object HandlerMacros:
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
   )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Outcome]]] =
-    import ref.quotes.reflect.TypeTree
+    import ref.quotes.reflect.{TypeRepr, TypeTree}
 
     val ref = Reflection(quotes)
 
@@ -66,10 +66,10 @@ object HandlerMacros:
 //      }
 
     // Detect and validate public methods in the API type
-    val baseMethodNames = Seq(TypeTree.of[AnyRef], TypeTree.of[Product]).flatMap {
-      typeTree => ref.methods(typeTree).filter(_.public).map(_.name)
+    val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap {
+      baseType => ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
-    val apiMethods = ref.methods(TypeTree.of[ApiType]).filter(_.public).filter {
+    val apiMethods = ref.methods(TypeRepr.of[ApiType]).filter(_.public).filter {
       method => !baseMethodNames.contains(method.symbol.name)
     }
     validateApiMethods(apiMethods)
