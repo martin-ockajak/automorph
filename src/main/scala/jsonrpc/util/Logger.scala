@@ -9,11 +9,11 @@ import org.slf4j.{LoggerFactory, Logger as Underlying}
  *
  * Can be used as a drop-in replacement for Logger class in Scala Logging.
  *
- * Scala Logging documentation: https://github.com/lightbend/scala-logging
- * MDC concept description: http://logback.qos.ch/manual/mdc.html
+ * @see [[https://github.com/lightbend/scala-logging Scala Logging documentation]]
+ * @see [[http://logback.qos.ch/manual/mdc.html MDC concept description]]
+ * @param underlying underlying [[https://www.javadoc.io/doc/org.slf4j/slf4j-api/1.7.30/org/slf4j/Logger.html SLF4J logger]]
  */
 
-/** @param underlying */
 @SerialVersionUID(782158461L)
 final case class Logger private (private val underlying: Underlying):
 
@@ -167,7 +167,7 @@ case object Logger:
   /**
    * Create a [[Logger]] using the underlying `org.slf4j.Logger`.
    *
-   * @param underlying underlying `org.slf4j.Logger`
+   * @param underlying underlying [[https://www.javadoc.io/doc/org.slf4j/slf4j-api/1.7.30/org/slf4j/Logger.html SLF4J logger]]
    * @return logger
    */
   def apply(underlying: Underlying): Logger = new Logger(underlying)
