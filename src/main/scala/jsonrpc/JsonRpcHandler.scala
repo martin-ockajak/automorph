@@ -2,12 +2,10 @@ package jsonrpc
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.core.ValueOps.classNameSimple
 import jsonrpc.core.CannotEqual
 import jsonrpc.core.EncodingOps.toArraySeq
-import jsonrpc.core.ValueOps.asSome
-import jsonrpc.server.HandlerMacros
-import jsonrpc.server.MethodHandle
+import jsonrpc.core.ValueOps.{asSome, simpleName}
+import jsonrpc.server.{HandlerMacros, MethodHandle}
 import jsonrpc.spi.{Codec, Effect}
 import scala.collection.immutable.ArraySeq
 
@@ -135,8 +133,8 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
     effect.map(process(request.toArraySeq(bufferSize)), response => ByteArrayInputStream(response.unsafeArray))
 
   override def toString =
-    val codecName = codec.classNameSimple
-    val effectName = effect.classNameSimple
+    val codecName = codec.simpleName
+    val effectName = effect.simpleName
     val endpointCount = methodBindings.size
     s"$JsonRpcHandler($codecName, $effectName, registered endpoints: $endpointCount)"
 

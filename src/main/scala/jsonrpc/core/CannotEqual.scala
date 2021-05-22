@@ -1,6 +1,6 @@
 package jsonrpc.core
 
-import jsonrpc.core.ValueOps.classNameSimple
+import jsonrpc.core.ValueOps.simpleName
 
 /**
  * This prevents comparison for case classes containing members with faulty equality.
@@ -13,4 +13,4 @@ import jsonrpc.core.ValueOps.classNameSimple
 trait CannotEqual:
 
   override def equals(that: Any): Boolean =
-    sys.error(s"instance of $classNameSimple cannot be compared with == or !=")
+    sys.error(s"Instance of $simpleName cannot be compared with == or !=")
