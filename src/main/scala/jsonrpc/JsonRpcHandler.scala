@@ -14,6 +14,7 @@ import scala.collection.immutable.ArraySeq
  *
  * @param codec hierarchical data format codec plugin
  * @param effect computation effect system plugin
+ * @param bufferSize input stream reading buffer size
  * @tparam Node data format node representation type
  * @tparam Outcome computation outcome effect type
  */
@@ -139,6 +140,15 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
 
 case object JsonRpcHandler:
 
+  /**
+   * JSON-RPC request handler.
+   *
+   * @param codec hierarchical data format codec plugin
+   * @param effect computation effect system plugin
+   * @param bufferSize input stream reading buffer size
+   * @tparam Node data format node representation type
+   * @tparam Outcome computation outcome effect type
+   */
   def apply[Node, Outcome[_], CodecType <: Codec[Node]](
     codec: CodecType,
     effect: Effect[Outcome],
