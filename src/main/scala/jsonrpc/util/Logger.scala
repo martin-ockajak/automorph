@@ -24,12 +24,12 @@ final case class Logger private (private val underlying: Underlying):
 
   def error[T](message: => String, cause: => Throwable): Unit = underlying.error(message, cause)
 
-  def error[T <: Matchable](message: => String, properties: => T)(implicit
+  def error[T <: Matchable](message: => String, properties: => T)(using
     evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
   ): Unit =
     log(message, properties, underlying.isErrorEnabled, message => underlying.error(message))
 
-  def error[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(implicit
+  def error[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(using
     evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
   ): Unit =
     log(message, cause, properties, underlying.isErrorEnabled, (message, cause) => underlying.error(message, cause))
@@ -43,12 +43,12 @@ final case class Logger private (private val underlying: Underlying):
 
   def warn[T](message: => String, cause: => Throwable): Unit = underlying.warn(message, cause)
 
-  def warn[T <: Matchable](message: => String, properties: => T)(implicit
+  def warn[T <: Matchable](message: => String, properties: => T)(using
     evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
   ): Unit =
     log(message, properties, underlying.isWarnEnabled, message => underlying.warn(message))
 
-  def warn[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(implicit
+  def warn[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(using
     evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
   ): Unit =
     log(message, cause, properties, underlying.isWarnEnabled, (message, cause) => underlying.warn(message, cause))
@@ -62,12 +62,12 @@ final case class Logger private (private val underlying: Underlying):
 
   def info[T](message: => String, cause: => Throwable): Unit = underlying.info(message, cause)
 
-  def info[T <: Matchable](message: => String, properties: => T)(implicit
+  def info[T <: Matchable](message: => String, properties: => T)(using
     evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
   ): Unit =
     log(message, properties, underlying.isInfoEnabled, message => underlying.info(message))
 
-  def info[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(implicit
+  def info[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(using
     evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
   ): Unit =
     log(message, cause, properties, underlying.isInfoEnabled, (message, cause) => underlying.info(message, cause))
@@ -81,12 +81,12 @@ final case class Logger private (private val underlying: Underlying):
 
   def debug[T](message: => String, cause: => Throwable): Unit = underlying.debug(message, cause)
 
-  def debug[T <: Matchable](message: => String, properties: => T)(implicit
+  def debug[T <: Matchable](message: => String, properties: => T)(using
     evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
   ): Unit =
     log(message, properties, underlying.isDebugEnabled, message => underlying.debug(message))
 
-  def debug[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(implicit
+  def debug[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(using
     evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
   ): Unit =
     log(message, cause, properties, underlying.isDebugEnabled, (message, cause) => underlying.debug(message, cause))
@@ -100,12 +100,12 @@ final case class Logger private (private val underlying: Underlying):
 
   def trace[T](message: => String, cause: => Throwable): Unit = underlying.trace(message, cause)
 
-  def trace[T <: Matchable](message: => String, properties: => T)(implicit
+  def trace[T <: Matchable](message: => String, properties: => T)(using
     evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
   ): Unit =
     log(message, properties, underlying.isTraceEnabled, message => underlying.trace(message))
 
-  def trace[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(implicit
+  def trace[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(using
     evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
   ): Unit =
     log(message, cause, properties, underlying.isTraceEnabled, (message, cause) => underlying.trace(message, cause))
@@ -116,7 +116,7 @@ final case class Logger private (private val underlying: Underlying):
     trace(message, cause, properties)
 
   private def log[T <: Matchable](message: => String, properties: => T, enabled: Boolean, logMessage: String => Unit)(
-    implicit evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
+    using evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
   ): Unit =
     if enabled then
       val iterableProperties = unpackProperties(properties)
@@ -130,7 +130,7 @@ final case class Logger private (private val underlying: Underlying):
     properties: => T,
     enabled: Boolean,
     logMessage: (String, Throwable) => Unit
-  )(implicit evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)): Unit =
+  )(using evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)): Unit =
     if enabled then
       val iterableProperties = unpackProperties(properties)
       addDiagnosticContext(iterableProperties)
