@@ -135,8 +135,8 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
   override def toString =
     val codecName = codec.className
     val effectName = effect.className
-    val endpointCount = methodBindings.size
-    s"$JsonRpcHandler($codecName, $effectName, registered endpoints: $endpointCount)"
+    val boundMethods = methodBindings.size
+    s"$JsonRpcHandler(Codec: $codecName, Effect: $effectName, Bound methods: $boundMethods)"
 
 case object JsonRpcHandler:
 
