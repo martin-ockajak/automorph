@@ -49,8 +49,8 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
    * Generates JSON-RPC bindings for all valid public methods of the API type.
    * Throws an exception if an invalid public method is found.
    * Methods are considered invalid if they satisfy one of these conditions:
-   * * have type parameters
-   * * cannot be called at runtime
+   * - have type parameters
+   * - cannot be called at runtime
    *
    * API methods are exposed using names their local names transformed by the .
    *
@@ -69,8 +69,8 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
    * Generates JSON-RPC bindings for all valid public methods of the API type.
    * Throws an exception if an invalid public method is found.
    * Methods are considered invalid if they satisfy one of these conditions:
-   * * have type parameters
-   * * cannot be called at runtime
+   * - have type parameters
+   * - cannot be called at runtime
    *
    * @param api API instance
    * @param exposedNames creates exposed method names from its name (empty result causes the method not to be exposed)
