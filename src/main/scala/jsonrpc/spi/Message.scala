@@ -2,6 +2,7 @@ package jsonrpc.spi
 
 /**
  * JSON-RPC protocol message structure.
+ *
  * Specification: https://www.jsonrpc.org/specification
  *
  * @param jsonrpc protocol version (must be 2.0)
@@ -23,6 +24,7 @@ final case class Message[Node](
 
 /**
  * JSON-RPC protocol error details structure.
+ *
  * Specification: https://www.jsonrpc.org/specification
  *
  * @param code error code

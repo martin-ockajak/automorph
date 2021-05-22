@@ -72,7 +72,7 @@ final class Reflection(val quotes: Quotes):
     Flags.Transparent
   )
 
-  /** Non-public class member flags. */
+  /** Hidden class member flags. */
   private val hiddenMemberFlags = Seq(
     Flags.Private,
     Flags.PrivateLocal,

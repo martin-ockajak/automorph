@@ -95,7 +95,7 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
     copy(methodBindings = methodBindings ++ bindings)
 
   /**
-   * Creates a new JSON-RPC request handler by adding a binding for the specified function.
+   * Create a new JSON-RPC request handler by adding a binding for the specified function.
    *
    * @param method JSON-RPC method name
    * @param api API instance
@@ -108,7 +108,7 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
     ???
 
   /**
-   * Invokes a bound method specified in a JSON-RPC request and creates a JSON-RPC response.
+   * Invoke a bound method specified in a JSON-RPC request and creates a JSON-RPC response.
    *
    * @param request JSON-RPC request message
    * @return JSON-RPC response message
@@ -126,7 +126,7 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
     effect.map(process(request.toArraySeq), response => ByteBuffer.wrap(response.unsafeArray))
 
   /**
-   * Invokes a bound method specified in a JSON-RPC request and creates a JSON-RPC response.
+   * Invoke a bound method specified in a JSON-RPC request and creates a JSON-RPC response.
    *
    * @param request JSON-RPC request message
    * @return JSON-RPC response message
@@ -143,7 +143,7 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
 case object JsonRpcHandler:
 
   /**
-   * Creates JSON-RPC request handler.
+   * Create a JSON-RPC request handler.
    *
    * The handler can be used to process incoming JSON-RPC requests and create JSON-RPC responses.
    *

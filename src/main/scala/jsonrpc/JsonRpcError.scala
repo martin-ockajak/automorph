@@ -2,7 +2,8 @@ package jsonrpc
 
 /**
  * JSON-RPC error.
- * An API call resulting in this exception translates into the specific JSON-RPC error details.
+ *
+ * An API method implementation exposed via JSON-RPC can throw this error to return specific JSON-RPC error details.
  *
  * @param message error description
  * @param data additional error information

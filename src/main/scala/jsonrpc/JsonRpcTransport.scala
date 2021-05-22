@@ -11,7 +11,7 @@ import scala.collection.immutable.ArraySeq
 trait JsonRpcTransport[Outcome[_]]:
 
   /**
-   * Sends a request to a remote JSON-RPC endpoint and retrieves the response.
+   * Send a request to a remote JSON-RPC endpoint and retrieves the response.
    *
    * @param request request message
    * @return response
@@ -19,7 +19,7 @@ trait JsonRpcTransport[Outcome[_]]:
   def call(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte]
 
   /**
-   * Sends a request to a remote JSON-RPC endpoint without retrieving a response.
+   * Send a request to a remote JSON-RPC endpoint without retrieving a response.
    *
    * @param request request message
    * @return nothing
