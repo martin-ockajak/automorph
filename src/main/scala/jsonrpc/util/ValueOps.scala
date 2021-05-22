@@ -1,4 +1,4 @@
-package jsonrpc.core
+package jsonrpc.util
 
 case object ValueOps:
 

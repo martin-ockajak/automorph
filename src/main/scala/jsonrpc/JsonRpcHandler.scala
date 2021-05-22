@@ -2,11 +2,11 @@ package jsonrpc
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.core.CannotEqual
 import jsonrpc.core.EncodingOps.toArraySeq
-import jsonrpc.core.ValueOps.{asSome, className}
+import jsonrpc.util.ValueOps.{asSome, className}
 import jsonrpc.server.{HandlerMacros, MethodHandle}
 import jsonrpc.spi.{Codec, Effect}
+import jsonrpc.util.CannotEqual
 import scala.collection.immutable.ArraySeq
 
 /**

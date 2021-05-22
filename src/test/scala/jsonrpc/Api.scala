@@ -1,6 +1,6 @@
 package jsonrpc
 
-import jsonrpc.core.ValueOps.asSome
+import jsonrpc.util.ValueOps.asSome
 import scala.concurrent.Future
 
 trait Api:

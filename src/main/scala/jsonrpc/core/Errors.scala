@@ -1,6 +1,6 @@
 package jsonrpc.core
 
-import jsonrpc.core.ValueOps.*
+import jsonrpc.util.ValueOps.{asOption, asSome}
 
 case object Errors:
 

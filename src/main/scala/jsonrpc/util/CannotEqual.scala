@@ -1,4 +1,4 @@
-package jsonrpc.core
+package jsonrpc.util
 
 /**
  * Prevents comparison for case classes containing members with incorrect equality.

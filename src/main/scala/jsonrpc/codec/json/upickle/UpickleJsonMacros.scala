@@ -2,7 +2,7 @@ package jsonrpc.codec.json.upickle
 
 import scala.compiletime.summonInline
 import scala.quoted.{Expr, Quotes, Type}
-import jsonrpc.core.{Method, Reflection}
+import jsonrpc.util.{Method, Reflection}
 import ujson.Value
 import upickle.Api
 

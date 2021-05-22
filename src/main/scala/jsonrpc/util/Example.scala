@@ -1,4 +1,4 @@
-//package jsonrpc
+//package jsonrpc.util
 //
 //import scala.quoted.{Expr, Quotes, Type}
 //
