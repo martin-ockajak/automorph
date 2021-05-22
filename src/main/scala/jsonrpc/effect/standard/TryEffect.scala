@@ -6,9 +6,8 @@ import scala.util.{Success, Try}
 /**
  * Try effect system plugin.
  *
- * Documentation: https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html
- * Effect type: Try
- * Effect type API: https://www.scala-lang.org/api/2.13.6/scala/util/Try.html
+ * @see [[https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html Documentation]]
+ * @see Effect type: [[scala.util.Try]]
  */
 final case class TryEffect() extends Effect[Try]:
 

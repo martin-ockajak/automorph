@@ -14,6 +14,8 @@ import scala.collection.immutable.ArraySeq
  *
  * The handler can be used by to process incoming JSON-RPC requests and create JSON-RPC responses.
  *
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+ * @constructor Create a new JSON-RPC handler using the specified `codec` and `effect` implementations.
  * @param codec hierarchical data format codec plugin
  * @param effect computation effect system plugin
  * @param bufferSize input stream reading buffer size

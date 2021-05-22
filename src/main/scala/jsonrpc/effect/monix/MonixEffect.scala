@@ -6,9 +6,8 @@ import monix.eval.Task
 /**
  * Monix effect system plugin.
  *
- * Documentation: https://monix.io/
- * Effect type: Task
- * Effect type API: https://monix.io/api/current/monix/eval/Task.html
+ * @see [[https://monix.io/ Documentation]]
+ * @see [[https://monix.io/api/current/monix/eval/Task.html Effect type]]
  */
 final case class MonixEffect[Environment]() extends Effect[Task]:
 

@@ -12,8 +12,8 @@ import scala.reflect.ClassTag
 /**
  * Jackson JSON codec plugin.
  *
- * Documentation: https://github.com/FasterXML/jackson Effect type: JsonNode Effect type API:
- * https://fasterxml.github.io/jackson-databind/javadoc/2.12/com/fasterxml/jackson/databind/JsonNode.html
+ * @see [[https://github.com/FasterXML/jackson Documentation]]
+ * @see [[https://fasterxml.github.io/jackson-databind/javadoc/2.12/com/fasterxml/jackson/databind/JsonNode.html Node type]]
  */
 final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaultMapper) extends Codec[JsonNode]:
 

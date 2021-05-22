@@ -7,7 +7,7 @@ import jsonrpc.spi.{CallError, Message}
 /**
  * JSON-RPC protocol data structures.
  *
- * Specification: https://www.jsonrpc.org/specification
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  */
 case object Protocol:
 

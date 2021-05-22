@@ -11,8 +11,8 @@ import upickle.Api
 /**
  * UPickle JSON codec plugin.
  *
- * Documentation: https://github.com/com-lihaoyi/upickle Effect type: Value Effect type API:
- * http://com-lihaoyi.github.io/upickle/#uJson
+ * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
+ * @see [[http://com-lihaoyi.github.io/upickle/#uJson Node type]]
  */
 final case class UpickleJsonCodec(parser: Api) extends Codec[Value]:
 

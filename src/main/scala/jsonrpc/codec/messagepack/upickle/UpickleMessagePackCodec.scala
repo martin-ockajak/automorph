@@ -11,8 +11,8 @@ import upickle.Api
 /**
  * UPickle MessagePack codec plugin.
  *
- * Documentation: https://github.com/com-lihaoyi/upickle Effect type: Msg Effect type API:
- * http://com-lihaoyi.github.io/upickle/#uPack
+ * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
+ * @see [[http://com-lihaoyi.github.io/upickle/#uPack Node type]]
  */
 final case class UpickleMessagePackCodec(parser: Api) extends Codec[Msg]:
 

@@ -7,6 +7,8 @@ import scala.collection.immutable.ArraySeq
 /**
  * JSON-RPC client.
  *
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+ * @constructor Create a new JSON-RPC client using the specified `codec` and `effect` implementations.
  * @param codec hierarchical data format codec plugin
  * @param effect computation effect system plugin
  * @param transport message transport layer
@@ -20,7 +22,7 @@ final case class JsonRpcClient[Node, Outcome[_]](
 ):
 
   /**
-   * Perform a remote JSON-RPC method call supplying the arguments by position.
+   * Perform a remote JSON-RPC `method` ''call'' supplying the `arguments` by position.
    *
    * @param method method name
    * @param arguments arguments by position
@@ -30,7 +32,7 @@ final case class JsonRpcClient[Node, Outcome[_]](
   def call[R](method: String, arguments: Seq[Any]): Outcome[R] = call(method, encodeArguments(arguments))
 
   /**
-   * Perform a remote JSON-RPC method call supplying the arguments by name.
+   * Perform a remote JSON-RPC `method` ''call'' supplying the `arguments` by name.
    *
    * @param method method name
    * @param arguments arguments by position
@@ -40,7 +42,7 @@ final case class JsonRpcClient[Node, Outcome[_]](
   def call[R](method: String, arguments: Map[String, Any]): Outcome[R] = call(method, encodeArguments(arguments))
 
   /**
-   * Perform a remote JSON-RPC method notification supplying the arguments by position.
+   * Perform a remote JSON-RPC `method` ''notification'' supplying the `arguments` by position.
    *
    * @param method method name
    * @param arguments arguments by position
@@ -50,7 +52,7 @@ final case class JsonRpcClient[Node, Outcome[_]](
   def notify(method: String, arguments: Seq[Any]): Outcome[Unit] = notify(method, encodeArguments(arguments))
 
   /**
-   * Perform a remote JSON-RPC method notification supplying the arguments by name.
+   * Perform a remote JSON-RPC `method` ''notification'' supplying the `arguments` by name.
    *
    * @param method method name
    * @param arguments arguments by position
@@ -60,11 +62,11 @@ final case class JsonRpcClient[Node, Outcome[_]](
   def notify(method: String, arguments: Map[String, Any]): Outcome[Unit] = notify(method, encodeArguments(arguments))
 
   /**
-   * Create a transparent local proxy for a remote JSON-RPC API.
+   * Create a ''transparent proxy instance'' of a remote JSON-RPC API.
    * Invocations of local proxy methods are translated into remote JSON-API calls.
    *
    * @tparam T remote API type
-   * @return local API proxy
+   * @return remote API proxy instance
    */
   def proxy[T]: T = ???
 

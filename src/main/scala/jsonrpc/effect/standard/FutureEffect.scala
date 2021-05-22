@@ -10,9 +10,8 @@ import scala.util.{Failure, Success, Try}
 /**
  * Future effect system plugin.
  *
- * Documentation: https://docs.scala-lang.org/overviews/core/futures.html
- * Effect type: Future
- * Effect type API: https://www.scala-lang.org/api/2.13.6/scala/concurrent/Future.html
+ * @see [[https://docs.scala-lang.org/overviews/core/futures.html Documentation]]
+ * @see Effect type: [[scala.concurrent.Future]]
  */
 final case class FutureEffect()(using ExecutionContext) extends Effect[Future]:
 

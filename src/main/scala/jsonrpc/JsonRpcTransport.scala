@@ -6,6 +6,8 @@ import scala.collection.immutable.ArraySeq
 /**
  * JSON-RPC message transport layer.
  *
+ * Used to send and receive messages to and from a remote JSON-RPC endpoint.
+ *
  * @tparam Outcome computation outcome effect type
  */
 trait JsonRpcTransport[Outcome[_]]:

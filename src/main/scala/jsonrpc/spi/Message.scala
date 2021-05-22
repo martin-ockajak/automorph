@@ -3,8 +3,7 @@ package jsonrpc.spi
 /**
  * JSON-RPC protocol message structure.
  *
- * Specification: https://www.jsonrpc.org/specification
- *
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param jsonrpc protocol version (must be 2.0)
  * @param id call identifier, a request without and identifier is considered to be a notification
  * @param method invoked method name

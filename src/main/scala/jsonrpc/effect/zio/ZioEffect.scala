@@ -6,9 +6,8 @@ import zio.{RIO, Task}
 /**
  * ZIO effect system plugin.
  *
- * Documentation: https://zio.dev/
- * Effect type: RIO
- * Effect type API: https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html
+ * @see [[https://zio.dev/ Documentation]]
+ * @see [[https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html Effect type]]
  */
 final case class ZioEffect[Environment]() extends Effect[[T] =>> RIO[Environment, T]]:
 
