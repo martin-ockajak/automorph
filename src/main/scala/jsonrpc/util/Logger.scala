@@ -1,8 +1,7 @@
 package jsonrpc.util
 
 import java.nio.file.{Files, Path, Paths}
-import org.slf4j.MDC
-import org.slf4j.{LoggerFactory, Logger as Underlying}
+import org.slf4j.{LoggerFactory, MDC, Logger as Underlying}
 
 /**
  * Scala Logging compatible structured logger using SLF4J Mapped Diagnostic Context.
