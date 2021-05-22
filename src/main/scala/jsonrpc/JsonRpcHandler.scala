@@ -21,8 +21,9 @@ import scala.collection.immutable.ArraySeq
  * @param bufferSize input stream reading buffer size
  * @tparam Node data format node representation type
  * @tparam Outcome computation outcome effect type
+ * @tparam Context JSON-RPC call context type
  */
-final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] private (
+final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Context] private (
   codec: CodecType,
   effect: Effect[Outcome],
   bufferSize: Int,
@@ -32,11 +33,16 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
   /**
    * Create a new JSON-RPC request handler by adding method bindings for member methods of the specified API.
    *
+   * Used by JSON-RPC server implementations to process JSON-RPC requests into JSON-RPC responses.
+   *
    * Generates JSON-RPC bindings for all valid public methods of the API type.
    * Throws an exception if an invalid public method is found.
    * Methods are considered invalid if they satisfy one of these conditions:
    * - have type parameters
    * - cannot be called at runtime
+   *
+   * A bound method may contain an `using` clause defining a single `context parameter` of `Context` type.
+   * Optional contextual value provided by the JSON-RPC server is used as the 'context parameter' argument.
    *
    * API methods are exposed using their actual names.
    *
@@ -45,7 +51,7 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, Outcome, CodecType] = bind(api, Seq(_))
+  inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, CodecType, Outcome, Context] = bind(api, Seq(_))
 
   /**
    * Create a new JSON-RPC request handler by adding method bindings for member methods of the specified API.
@@ -56,6 +62,9 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
    * - have type parameters
    * - cannot be called at runtime
    *
+   * A bound method may contain an `using` clause defining a single `context parameter` of `Context` type.
+   * Optional contextual value provided by the JSON-RPC server is used as the 'context parameter' argument.
+   *
    * API methods are exposed using names their local names transformed by the .
    *
    * @param api API instance
@@ -64,7 +73,7 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef](api: T, exposedNames: String => Seq[String]): JsonRpcHandler[Node, Outcome, CodecType] =
+  inline def bind[T <: AnyRef](api: T, exposedNames: String => Seq[String]): JsonRpcHandler[Node, CodecType, Outcome, Context] =
     bind(api, Function.unlift(exposedNames.andThen(asSome)))
 
   /**
@@ -76,6 +85,9 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
    * - have type parameters
    * - cannot be called at runtime
    *
+   * A bound method may contain an `using` clause defining a single `context parameter` of `Context` type.
+   * Optional contextual value provided by the JSON-RPC server is used as the 'context parameter' argument.
+   *
    * @param api API instance
    * @param exposedNames creates exposed method names from its name (empty result causes the method not to be exposed)
    * @tparam T API type (only its member methds are exposed)
@@ -85,7 +97,7 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
   inline def bind[T <: AnyRef](
     api: T,
     exposedNames: PartialFunction[String, Seq[String]]
-  ): JsonRpcHandler[Node, Outcome, CodecType] =
+  ): JsonRpcHandler[Node, CodecType, Outcome, Context] =
     val bindings = HandlerMacros.bind(codec, effect, api).flatMap { (apiMethodName, method) =>
       exposedNames.applyOrElse(
         apiMethodName,
@@ -99,6 +111,9 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
   /**
    * Create a new JSON-RPC request handler by adding a binding for the specified function.
    *
+   * The bound function may contain an `using` clause defining a single `context parameter` of `Context` type.
+   * Optional contextual value provided by the JSON-RPC server is used as the 'context parameter' argument.
+   *
    * @param method JSON-RPC method name
    * @param api API instance
    * @param exposedNames transform API type method name to its exposed JSON-RPC method names
@@ -106,7 +121,7 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T, R](method: String, function: Tuple => R): JsonRpcHandler[Node, Outcome, CodecType] =
+  inline def bind[T, R](method: String, function: Tuple => R): JsonRpcHandler[Node, CodecType, Outcome, Context] =
     ???
 
   /**
@@ -115,7 +130,16 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
    * @param request JSON-RPC request message
    * @return JSON-RPC response message
    */
-  def process(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte] =
+  def process(request: ArraySeq.ofByte): Outcome[ArraySeq.ofByte] = process(request, None)
+
+  /**
+   * Invoke a bound method specified in a JSON-RPC request and creates a JSON-RPC response.
+   *
+   * @param request JSON-RPC request message
+   * @param context JSOn-RPC request context
+   * @return JSON-RPC response message
+   */
+  def process(request: ArraySeq.ofByte, context: Option[Context]): Outcome[ArraySeq.ofByte] =
     ???
 
   /**
@@ -124,7 +148,16 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
    * @param request JSON-RPC request message
    * @return JSON-RPC response message
    */
-  def process(request: ByteBuffer): Outcome[ByteBuffer] =
+  def process(request: ByteBuffer): Outcome[ByteBuffer] = process(request, None)
+
+  /**
+   * Invokes a bound method specified in a JSON-RPC request and creates a JSON-RPC response.
+   *
+   * @param request JSON-RPC request message
+   * @param context JSOn-RPC request context
+   * @return JSON-RPC response message
+   */
+  def process(request: ByteBuffer, context: Option[Context]): Outcome[ByteBuffer] =
     effect.map(process(request.toArraySeq), response => ByteBuffer.wrap(response.unsafeArray))
 
   /**
@@ -133,7 +166,16 @@ final case class JsonRpcHandler[Node, Outcome[_], CodecType <: Codec[Node]] priv
    * @param request JSON-RPC request message
    * @return JSON-RPC response message
    */
-  def process(request: InputStream): Outcome[InputStream] =
+  def process(request: InputStream): Outcome[InputStream] = process(request, None)
+
+  /**
+   * Invoke a bound method specified in a JSON-RPC request and creates a JSON-RPC response.
+   *
+   * @param request JSON-RPC request message
+   * @param context JSOn-RPC request context
+   * @return JSON-RPC response message
+   */
+  def process(request: InputStream, context: Option[Context]): Outcome[InputStream] =
     effect.map(process(request.toArraySeq(bufferSize)), response => ByteArrayInputStream(response.unsafeArray))
 
   override def toString =
@@ -154,10 +196,11 @@ case object JsonRpcHandler:
    * @param bufferSize input stream reading buffer size
    * @tparam Node data format node representation type
    * @tparam Outcome computation outcome effect type
+   * @tparam Context JSON-RPC call context type
    */
-  def apply[Node, Outcome[_], CodecType <: Codec[Node]](
+  def apply[Node, CodecType <: Codec[Node], Outcome[_], Context](
     codec: CodecType,
     effect: Effect[Outcome],
     bufferSize: Int = 4096
-  ): JsonRpcHandler[Node, Outcome, CodecType] =
+  ): JsonRpcHandler[Node, CodecType, Outcome, Context] =
     new JsonRpcHandler(codec, effect, bufferSize, Map.empty)
