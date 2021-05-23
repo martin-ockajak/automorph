@@ -207,28 +207,41 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
         val virtualMessage = Message[Node](None, unknownId.asSome, None, None, None, None)
         effect.pure(errorResponse(ParseErrorException("Invalid request format", error), virtualMessage))
 
-  private def invoke(requestMessage: Message[Node], request: Request[Node], context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
+  private def invoke(
+    requestMessage: Message[Node],
+    request: Request[Node],
+    context: Option[Context]
+  ): Outcome[Option[ArraySeq.ofByte]] =
     logger.debug(s"Processing JSON-RPC request", requestMessage.properties)
     methodBindings.get(request.method).map { methodHandle =>
-      val arguments = extractArguments(request, methodHandle)
+      val arguments = extractArguments(request, context, methodHandle)
       Try(effect.either(methodHandle.function(arguments, None))) match
-        case Success(outcome) => effect.map(outcome, _ match
-          case Right(result) => request.id.flatMap { id =>
-            val response = Response(id, result.asRight)
-            logger.info(s"Processed JSON-RPC request", requestMessage.properties)
-            val responseMessage = response.message
-            logger.trace(s"Sending JSON-RPC message:\n${codec.format(responseMessage)}")
-            serialize(responseMessage)
-          }
-          case Left(error) => errorResponse(error, requestMessage)
-        )
+        case Success(outcome) => effect.map(
+            outcome,
+            _ match
+              case Right(result) => request.id.flatMap { id =>
+                  val response = Response(id, result.asRight)
+                  logger.info(s"Processed JSON-RPC request", requestMessage.properties)
+                  val responseMessage = response.message
+                  logger.trace(s"Sending JSON-RPC message:\n${codec.format(responseMessage)}")
+                  serialize(responseMessage)
+                }
+              case Left(error) => errorResponse(error, requestMessage)
+          )
         case Failure(error) => effect.pure(errorResponse(error, requestMessage))
     }.getOrElse {
-      effect.pure(errorResponse(MethodNotFoundException(s"Method not found: ${request.method}", None.orNull), requestMessage))
+      effect.pure(errorResponse(
+        MethodNotFoundException(s"Method not found: ${request.method}", None.orNull),
+        requestMessage
+      ))
     }
 
-  private def extractArguments(request: Request[Node], methodHandle: MethodHandle[Node, Outcome, Context]): Seq[Node] =
-    val params = methodHandle.paramNames
+  private def extractArguments(
+    request: Request[Node],
+    context: Option[Context],
+    methodHandle: MethodHandle[Node, Outcome, Context]
+  ): Seq[Node] =
+    val params = methodHandle.paramNames.dropRight(context.iterator.size)
     request.params match
       case Left(arguments) =>
         if arguments.size < params.size then
@@ -272,7 +285,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   private def serialize(message: Message[Node]): Option[ArraySeq.ofByte] =
     Try(codec.serialize(message)) match
       case Success(message) => message.asSome
-      case Failure(error) =>
+      case Failure(error)   =>
         // FIXME - log and escalate the error here
         None
 
