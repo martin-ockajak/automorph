@@ -199,17 +199,17 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   /**
    * Handle a JSON-RPC request message.
    *
-   * @param message request message
+   * @param rawRequest raw request
    * @param context request context
    * @return response message
    */
-  private def handle(message: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
-    Try(codec.deserialize(message)) match
-      case Success(requestMessage) =>
-        logger.trace(s"Received JSON-RPC message:\n${codec.format(requestMessage)}")
-        Try(Request(requestMessage)) match
-          case Success(request) => invoke(requestMessage, request, context)
-          case Failure(error)   => errorResponse(error, requestMessage)
+  private def handle(rawRequest: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
+    Try(codec.deserialize(rawRequest)) match
+      case Success(formalRequest) =>
+        logger.trace(s"Received JSON-RPC message:\n${codec.format(formalRequest)}")
+        Try(Request(formalRequest)) match
+          case Success(validRequest) => invoke(formalRequest, validRequest, context)
+          case Failure(error)   => errorResponse(error, formalRequest)
       case Failure(error) =>
         val virtualMessage = Message[Node](None, unknownId.asSome, None, None, None, None)
         errorResponse(ParseErrorException("Invalid request format", error), virtualMessage)
@@ -219,36 +219,36 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    *
    * Optional request context is used as a last method argument.
    *
-   * @param requestMessage request message
-   * @param request request
+   * @param formalRequest formal request
+   * @param validRequest valid request
    * @param context request context
    * @return bound method invocation outcome
    */
   private def invoke(
-    requestMessage: Message[Node],
-    request: Request[Node],
+    formalRequest: Message[Node],
+    validRequest: Request[Node],
     context: Option[Context]
   ): Outcome[Option[ArraySeq.ofByte]] =
-    logger.debug(s"Processing JSON-RPC request", requestMessage.properties)
-    methodBindings.get(request.method).map { methodHandle =>
-      val arguments = extractArguments(request, context, methodHandle)
+    logger.debug(s"Processing JSON-RPC request", formalRequest.properties)
+    methodBindings.get(validRequest.method).map { methodHandle =>
+      val arguments = extractArguments(validRequest, context, methodHandle)
       Try(effect.either(methodHandle.function(arguments, context))) match
         case Success(outcome) => effect.flatMap(
             outcome,
             _ match
-              case Right(result) => request.id.map { id =>
-                  val response = Response(id, result.asRight)
-                  logger.info(s"Processed JSON-RPC request", requestMessage.properties)
-                  val responseMessage = response.message
-                  serialize(responseMessage)
+              case Right(result) => validRequest.id.map { id =>
+                  val validResponse = Response(id, result.asRight)
+                  logger.info(s"Processed JSON-RPC request", formalRequest.properties)
+                  val formalResponse = validResponse.message
+                  serialize(formalResponse)
                 }.getOrElse(effect.pure(None))
-              case Left(error) => errorResponse(error, requestMessage)
+              case Left(error) => errorResponse(error, formalRequest)
           )
-        case Failure(error) => errorResponse(error, requestMessage)
+        case Failure(error) => errorResponse(error, formalRequest)
     }.getOrElse {
       errorResponse(
-        MethodNotFoundException(s"Method not found: ${request.method}", None.orNull),
-        requestMessage
+        MethodNotFoundException(s"Method not found: ${validRequest.method}", None.orNull),
+        formalRequest
       )
     }
 
@@ -257,18 +257,18 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    *
    * Optional request context is used as a last method argument.
    *
-   * @param request request
+   * @param validRequest valid request
    * @param context request context
    * @param methodHandle bound method handle
    * @return bound method arguments
    */
   private def extractArguments(
-    request: Request[Node],
+    validRequest: Request[Node],
     context: Option[Context],
     methodHandle: MethodHandle[Node, Outcome, Context]
   ): Seq[Node] =
     val params = methodHandle.paramNames.dropRight(context.iterator.size)
-    request.params match
+    validRequest.params match
       case Left(arguments) =>
         if arguments.size < params.size then
           throw IllegalArgumentException(s"Missing arguments: ${params.drop(arguments.size)}")
@@ -287,30 +287,30 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * Create an error response for a request.
    *
    * @param error exception
-   * @param requestMessage request message
+   * @param formalRequest formal request
    * @param requestId request identifier
    * @return error response if applicable
    */
-  private def errorResponse(error: Throwable, requestMessage: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
-    logger.error(s"Failed to process JSON-RPC request", error, requestMessage.properties)
-    requestMessage.id.map { id =>
+  private def errorResponse(error: Throwable, formalRequest: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
+    logger.error(s"Failed to process JSON-RPC request", error, formalRequest.properties)
+    formalRequest.id.map { id =>
       val code = Protocol.exceptionError(error.getClass).code
       val (message, data) = Errors.descriptions(error) match
         case Seq(message, details*) => message -> codec.encode(details).asSome
         case Seq()                  => "Unknown error" -> Option.empty[Node]
-      val response = Response[Node](id, CallError[Node](code.asSome, message.asSome, data).asLeft)
-      serialize(response.message)
+      val validResponse = Response[Node](id, CallError[Node](code.asSome, message.asSome, data).asLeft)
+      serialize(validResponse.message)
     }.getOrElse(effect.pure(None))
 
   /**
    * Serialize JSON-RPC message.
    *
-   * @param message message
+   * @param formalMessage JSON-RPC message
    * @return serialized response
    */
-  private def serialize(message: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
-    logger.trace(s"Sending JSON-RPC message:\n${codec.format(message)}")
-    Try(codec.serialize(message)) match
+  private def serialize(formalMessage: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
+    logger.trace(s"Sending JSON-RPC message:\n${codec.format(formalMessage)}")
+    Try(codec.serialize(formalMessage)) match
       case Success(message) => effect.pure(message.asSome)
       case Failure(error)   => effect.failed(ParseErrorException("Invalid message format", error))
 

@@ -157,28 +157,28 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
    */
   private def rpcCall[R](method: String, arguments: Request.Params[Node], context: Option[Context]): Outcome[R] =
     val id = Math.abs(random.nextLong()).toString.asRight[BigDecimal].asSome
-    val requestMessage = Request(id, method, arguments).message
-    logger.debug(s"Performing JSON-RPC request", requestMessage.properties)
+    val formalRequest = Request(id, method, arguments).message
+    logger.debug(s"Performing JSON-RPC request", formalRequest.properties)
     effect.flatMap(
-      serialize(requestMessage),
-      message =>
+      serialize(formalRequest),
+      rawRequest =>
         effect.flatMap(
-          transport.call(message, context),
-          receivedMessage =>
-            Try(codec.deserialize(receivedMessage)) match
-              case Success(responseMessage) =>
-                logger.trace(s"Received JSON-RPC message:\n${codec.format(responseMessage)}")
-                Try(Response(responseMessage)) match
-                  case Success(response) => response.value match
-                      case Left(errorNode) => raiseError(decodeError(errorNode), requestMessage)
+          transport.call(rawRequest, context),
+          rawResponse =>
+            Try(codec.deserialize(rawResponse)) match
+              case Success(formalResponse) =>
+                logger.trace(s"Received JSON-RPC message:\n${codec.format(formalResponse)}")
+                Try(Response(formalResponse)) match
+                  case Success(validResponse) => validResponse.value match
+                      case Left(errorNode) => raiseError(decodeError(errorNode), formalRequest)
                       case Right(resultNode) =>
                         Try(decodeResult(resultNode)) match
                           case Success(result) =>
-                            logger.info(s"Performed JSON-RPC request", requestMessage.properties)
+                            logger.info(s"Performed JSON-RPC request", formalRequest.properties)
                             effect.pure(result)
-                          case Failure(error) => raiseError(error, requestMessage)
-                  case Failure(error) => raiseError(error, requestMessage)
-              case Failure(error) => raiseError(ParseErrorException("Invalid response format", error), requestMessage)
+                          case Failure(error) => raiseError(error, formalRequest)
+                  case Failure(error) => raiseError(error, formalRequest)
+              case Failure(error) => raiseError(ParseErrorException("Invalid response format", error), formalRequest)
         )
     )
 
@@ -194,23 +194,23 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
    * @return nothing
    */
   private def rpcNotify(methodName: String, arguments: Request.Params[Node], context: Option[Context]): Outcome[Unit] =
-    val requestMessage = Request(None, methodName, arguments).message
+    val formalRequest = Request(None, methodName, arguments).message
     effect.map(
-      serialize(requestMessage),
+      serialize(formalRequest),
       message => transport.notify(message, context)
     )
 
   /**
    * Serialize JSON-RPC message.
    *
-   * @param message message
+   * @param formalMessage JSON-RPC message
    * @return serialized response
    */
-  private def serialize(message: Message[Node]): Outcome[ArraySeq.ofByte] =
-    logger.trace(s"Sending JSON-RPC message:\n${codec.format(message)}")
-    Try(codec.serialize(message)) match
+  private def serialize(formalMessage: Message[Node]): Outcome[ArraySeq.ofByte] =
+    logger.trace(s"Sending JSON-RPC message:\n${codec.format(formalMessage)}")
+    Try(codec.serialize(formalMessage)) match
       case Success(message) => effect.pure(message)
-      case Failure(error)   => raiseError(ParseErrorException("Invalid message format", error), message)
+      case Failure(error)   => raiseError(ParseErrorException("Invalid message format", error), formalMessage)
 
   /**
    * Create an error effect for a request.
