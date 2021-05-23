@@ -15,6 +15,6 @@ final case class MonixEffect[Environment]() extends Effect[Task]:
 
   def failed[T](exception: Throwable): Task[T] = Task.raiseError(exception)
 
-  def map[T, R](effect: Task[T], function: T => R): Task[R] = effect.map(function)
+  def flatMap[T, R](effect: Task[T], function: T => Task[R]): Task[R] = effect.flatMap(function)
 
   def either[T](value: Task[T]): Task[Either[Throwable, T]] = value.attempt

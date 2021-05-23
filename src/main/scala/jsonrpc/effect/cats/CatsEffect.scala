@@ -15,6 +15,6 @@ final case class CatsEffect[Environment]() extends Effect[IO]:
 
   def failed[T](exception: Throwable): IO[T] = IO.raiseError(exception)
 
-  def map[T, R](value: IO[T], function: T => R): IO[R] = value.map(function)
+  def flatMap[T, R](value: IO[T], function: T => IO[R]): IO[R] = value.flatMap(function)
 
   def either[T](value: IO[T]): IO[Either[Throwable, T]] = value.attempt

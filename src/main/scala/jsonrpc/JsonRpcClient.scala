@@ -28,6 +28,7 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
   effect: Effect[Outcome],
   transport: JsonRpcTransport[Outcome, Context]
 ) extends CannotEqual with Logging:
+
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   /**
@@ -147,34 +148,49 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
     val id = Math.abs(random.nextLong()).toString.asRight[BigDecimal].asSome
     val requestMessage = Request(id, method, arguments).message
     logger.debug(s"Performing JSON-RPC request", requestMessage.properties)
-    Try(codec.serialize(requestMessage)) match
-      case Success(message) => effect.map(
-        transport.call(message, context),
-        message =>
-          Try(codec.deserialize(message)) match
-          case Success(responseMessage) =>
-            logger.trace(s"Received JSON-RPC message:\n${codec.format(responseMessage)}")
-            Try(Response(responseMessage)) match
-              case Success(response) => response.value match
-                case Left(error)   => throw decodeError(error)
-                case Right(result) =>
-                  logger.info(s"Performing JSON-RPC request", requestMessage.properties)
-                  decodeResult(result)
-              case Failure(error) => throw error
-          case Failure(error) => throw ParseErrorException("Invalid response format", error)
-      )
-      case Failure(error) =>
-        logger.error(s"Failed to perform JSON-RPC request", error, requestMessage.properties)
-        effect.failed(error)
+    effect.flatMap(
+      serialize(requestMessage),
+      message =>
+        effect.flatMap(
+          transport.call(message, context),
+          receivedMessage =>
+            Try(codec.deserialize(receivedMessage)) match
+              case Success(responseMessage) =>
+                logger.trace(s"Received JSON-RPC message:\n${codec.format(responseMessage)}")
+                Try(Response(responseMessage)) match
+                  case Success(response) => response.value match
+                      case Left(errorNode) => raiseError(decodeError(errorNode), requestMessage)
+                      case Right(resultNode) =>
+                        Try(decodeResult(resultNode)) match
+                          case Success(result) =>
+                            logger.info(s"Performed JSON-RPC request", requestMessage.properties)
+                            effect.pure(result)
+                          case Failure(error) => raiseError(error, requestMessage)
+                  case Failure(error) => raiseError(error, requestMessage)
+              case Failure(error) => raiseError(ParseErrorException("Invalid response format", error), requestMessage)
+        )
+    )
 
   private def rpcNotify[R](method: String, arguments: Request.Params[Node], context: Option[Context]): Outcome[Unit] =
     val requestMessage = Request(None, method, arguments).message
-    serialize(requestMessage) match
-      case Success(message) => transport.notify(message, context)
-      case Failure(error) => effect.failed(error)
+    effect.map(
+      serialize(requestMessage),
+      message =>
+        transport.notify(message, context)
+    )
 
-  private def serialize(requestMessage: Message[Node]): Try[ArraySeq.ofByte] =
-    logger.trace(s"Sending JSON-RPC message:\n${codec.format(requestMessage)}")
-    Try(codec.serialize(requestMessage)) match
-      case Success(message) => Success(message)
-      case Failure(error) => Failure(ParseErrorException("Invalid request format", error))
+  /**
+   * Serialize JSON-RPC message.
+   *
+   * @param message message
+   * @return serialized response
+   */
+  private def serialize(message: Message[Node]): Outcome[ArraySeq.ofByte] =
+    logger.trace(s"Sending JSON-RPC message:\n${codec.format(message)}")
+    Try(codec.serialize(message)) match
+      case Success(message) => effect.pure(message)
+      case Failure(error)   => raiseError(ParseErrorException("Invalid message format", error), message)
+
+  private def raiseError[T](error: Throwable, requestMessage: Message[Node]): Outcome[T] =
+    logger.error(s"Failed to perform JSON-RPC request", error, requestMessage.properties)
+    effect.failed(error)

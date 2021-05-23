@@ -202,10 +202,10 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
         logger.trace(s"Received JSON-RPC message:\n${codec.format(requestMessage)}")
         Try(Request(requestMessage)) match
           case Success(request) => invoke(requestMessage, request, context)
-          case Failure(error)   => effect.pure(errorResponse(error, requestMessage))
+          case Failure(error)   => errorResponse(error, requestMessage)
       case Failure(error) =>
         val virtualMessage = Message[Node](None, unknownId.asSome, None, None, None, None)
-        effect.pure(errorResponse(ParseErrorException("Invalid request format", error), virtualMessage))
+        errorResponse(ParseErrorException("Invalid request format", error), virtualMessage)
 
   private def invoke(
     requestMessage: Message[Node],
@@ -216,24 +216,23 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     methodBindings.get(request.method).map { methodHandle =>
       val arguments = extractArguments(request, context, methodHandle)
       Try(effect.either(methodHandle.function(arguments, context))) match
-        case Success(outcome) => effect.map(
+        case Success(outcome) => effect.flatMap(
             outcome,
             _ match
-              case Right(result) => request.id.flatMap { id =>
+              case Right(result) => request.id.map { id =>
                   val response = Response(id, result.asRight)
                   logger.info(s"Processed JSON-RPC request", requestMessage.properties)
                   val responseMessage = response.message
-                  logger.trace(s"Sending JSON-RPC message:\n${codec.format(responseMessage)}")
                   serialize(responseMessage)
-                }
+                }.getOrElse(effect.pure(None))
               case Left(error) => errorResponse(error, requestMessage)
           )
-        case Failure(error) => effect.pure(errorResponse(error, requestMessage))
+        case Failure(error) => errorResponse(error, requestMessage)
     }.getOrElse {
-      effect.pure(errorResponse(
+      errorResponse(
         MethodNotFoundException(s"Method not found: ${request.method}", None.orNull),
         requestMessage
-      ))
+      )
     }
 
   private def extractArguments(
@@ -265,16 +264,16 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param requestId request identifier
    * @return error response if applicable
    */
-  private def errorResponse(error: Throwable, requestMessage: Message[Node]): Option[ArraySeq.ofByte] =
+  private def errorResponse(error: Throwable, requestMessage: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
     logger.error(s"Failed to process JSON-RPC request", error, requestMessage.properties)
-    requestMessage.id.flatMap { id =>
+    requestMessage.id.map { id =>
       val code = Protocol.exceptionError(error.getClass).code
       val (message, data) = Errors.descriptions(error) match
         case Seq(message, details*) => message -> codec.encode(details).asSome
         case Seq()                  => "Unknown error" -> Option.empty[Node]
       val response = Response[Node](id, CallError[Node](code.asSome, message.asSome, data).asLeft)
       serialize(response.message)
-    }
+    }.getOrElse(effect.pure(None))
 
   /**
    * Serialize JSON-RPC message.
@@ -282,12 +281,11 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param message message
    * @return serialized response
    */
-  private def serialize(message: Message[Node]): Option[ArraySeq.ofByte] =
+  private def serialize(message: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
+    logger.trace(s"Sending JSON-RPC message:\n${codec.format(message)}")
     Try(codec.serialize(message)) match
-      case Success(message) => message.asSome
-      case Failure(error)   =>
-        // FIXME - log and escalate the error here
-        None
+      case Success(message) => effect.pure(message.asSome)
+      case Failure(error)   => effect.failed(ParseErrorException("Invalid message format", error))
 
   override def toString =
     val codecName = codec.className

@@ -15,6 +15,6 @@ final case class ZioEffect[Environment]() extends Effect[[T] =>> RIO[Environment
 
   def failed[T](exception: Throwable): RIO[Environment, T] = RIO.fail(exception)
 
-  def map[T, R](value: RIO[Environment, T], function: T => R): RIO[Environment, R] = value.map(function)
+  def flatMap[T, R](value: RIO[Environment, T], function: T => RIO[Environment, R]): RIO[Environment, R] = value.flatMap(function)
 
   def either[T](value: RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] = value.either

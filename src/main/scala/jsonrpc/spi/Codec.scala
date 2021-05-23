@@ -8,6 +8,8 @@ import scala.collection.immutable.ArraySeq
 /**
  * Hierarchical data format codec plugin.
  *
+ * The underlying format must support storing arbitrarily nested structures of basic data types.
+ *
  * @tparam Node data format node representation type
  */
 trait Codec[Node]:

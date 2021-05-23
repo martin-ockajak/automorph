@@ -15,7 +15,7 @@ final case class NoEffect() extends Effect[Identity]:
 
   def failed[T](exception: Throwable): T = throw exception
 
-  def map[T, R](value: T, function: T => R): R = function(value)
+  def flatMap[T, R](value: T, function: T => R): R = function(value)
 
   def either[T](value: T): Either[Throwable, T] = Right(value)
 

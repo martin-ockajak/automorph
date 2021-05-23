@@ -19,6 +19,6 @@ final case class FutureEffect()(using ExecutionContext) extends Effect[Future]:
 
   def failed[T](exception: Throwable): Future[T] = Future.failed(exception)
 
-  def map[T, R](effect: Future[T], function: T => R): Future[R] = effect.map(function)
+  def flatMap[T, R](effect: Future[T], function: T => Future[R]): Future[R] = effect.flatMap(function)
 
   def either[T](effect: Future[T]): Future[Either[Throwable, T]] = effect.transform(value => Success(value.toEither))

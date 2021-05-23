@@ -1,9 +1,11 @@
 package jsonrpc.spi
 
 /**
- * Computation effect system plugin.
+ * Effectful computation system plugin.
  *
- * @tparam Outcome computation outcome effect type
+ * The underlying runtime must support monadic composition of effectful operations.
+ *
+ * @tparam Outcome monadic effectful computation outcome type
  */
 trait Effect[Outcome[_]]:
 
@@ -26,15 +28,15 @@ trait Effect[Outcome[_]]:
   def failed[T](exception: Throwable): Outcome[T]
 
   /**
-   * Transform an effect by applying a function to its value.
+   * Transform an effect by applying an effectful function to its value.
    *
    * @param effect effect containing a value
-   * @param function function applied to the effect value
+   * @param function function applied to the effect value returning an effect
    * @tparam T effect value type
-   * @tparam R function result type
+   * @tparam R effectful function result type
    * @return effect containing the transformed value
    */
-  def map[T, R](effect: Outcome[T], function: T => R): Outcome[R]
+  def flatMap[T, R](effect: Outcome[T], function: T => Outcome[R]): Outcome[R]
 
   /**
    * Transform an effect by lifting any errors into its value.
@@ -45,3 +47,14 @@ trait Effect[Outcome[_]]:
    * @return effect containing an error or the original effect value
    */
   def either[T](value: Outcome[T]): Outcome[Either[Throwable, T]]
+
+  /**
+   * Transform an effect by applying a function to its value.
+   *
+   * @param effect effect containing a value
+   * @param function function applied to the effect value
+   * @tparam T effect value type
+   * @tparam R function result type
+   * @return effect containing the transformed value
+   */
+  def map[T, R](effect: Outcome[T], function: T => R): Outcome[R] = flatMap(effect, value => pure(function(value)))
