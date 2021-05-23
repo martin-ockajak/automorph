@@ -28,6 +28,11 @@ final case class Response[Node](
     error = value.swap.toOption
   )
 
+  lazy val details: Map[String, String] = Map(
+    "Type" -> value.fold(_ => ResponseType.Error, _ => ResponseType.Result).toString,
+    "Id" -> id.fold(_.toString, identity)
+  )
+
 case object Response:
 
   def apply[Node](message: Message[Node]): Response[Node] =
@@ -40,3 +45,7 @@ case object Response:
     }.getOrElse {
       Response(id, Protocol.mandatory(message.error, "error").asLeft)
     }
+
+/** JSON-RPC response types. */
+enum ResponseType:
+  case Result, Error
