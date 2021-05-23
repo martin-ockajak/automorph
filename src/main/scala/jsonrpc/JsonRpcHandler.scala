@@ -235,6 +235,14 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
       )
     }
 
+  /**
+   * Extract the correct amount of arguments from a request for the specified bound method.
+   *
+   * @param request request
+   * @param context request context
+   * @param methodHandle bound method handle
+   * @return bound method arguments
+   */
   private def extractArguments(
     request: Request[Node],
     context: Option[Context],
@@ -257,7 +265,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
         arguments
 
   /**
-   * Create JSON-RPC error response.
+   * Create an error response for a request.
    *
    * @param error exception
    * @param requestMessage request message

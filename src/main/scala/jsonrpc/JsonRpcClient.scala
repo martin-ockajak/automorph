@@ -175,8 +175,7 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
     val requestMessage = Request(None, method, arguments).message
     effect.map(
       serialize(requestMessage),
-      message =>
-        transport.notify(message, context)
+      message => transport.notify(message, context)
     )
 
   /**
@@ -191,6 +190,14 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
       case Success(message) => effect.pure(message)
       case Failure(error)   => raiseError(ParseErrorException("Invalid message format", error), message)
 
+  /**
+   * Create an error effect for a request.
+   *
+   * @param error exception
+   * @param requestMessage request message
+   * @tparam T effectful value type
+   * @return error effect
+   */
   private def raiseError[T](error: Throwable, requestMessage: Message[Node]): Outcome[T] =
     logger.error(s"Failed to perform JSON-RPC request", error, requestMessage.properties)
     effect.failed(error)

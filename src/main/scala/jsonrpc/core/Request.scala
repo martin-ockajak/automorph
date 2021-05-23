@@ -17,7 +17,7 @@ import jsonrpc.util.ValueOps.{asRight, asSome}
 final case class Request[Node](
   id: Option[Protocol.Id],
   method: String,
-  params: Either[List[Node], Map[String, Node]]
+  params: Request.Params[Node]
 ):
   def message: Message[Node] = Message[Node](
     jsonrpc = Protocol.version.asSome,
