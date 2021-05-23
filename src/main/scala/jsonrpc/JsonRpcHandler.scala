@@ -196,6 +196,13 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   def process(request: InputStream, context: Option[Context]): Outcome[Option[InputStream]] =
     effect.map(process(request.toArraySeq(bufferSize)), _.map(response => ByteArrayInputStream(response.unsafeArray)))
 
+  /**
+   * Handle a JSON-RPC request message.
+   *
+   * @param message request message
+   * @param context request context
+   * @return response message
+   */
   private def handle(message: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
     Try(codec.deserialize(message)) match
       case Success(requestMessage) =>
@@ -207,6 +214,16 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
         val virtualMessage = Message[Node](None, unknownId.asSome, None, None, None, None)
         errorResponse(ParseErrorException("Invalid request format", error), virtualMessage)
 
+  /**
+   * Invoke bound method specified in a request.
+   *
+   * Optional request context is used as a last method argument.
+   *
+   * @param requestMessage request message
+   * @param request request
+   * @param context request context
+   * @return bound method invocation outcome
+   */
   private def invoke(
     requestMessage: Message[Node],
     request: Request[Node],
@@ -236,7 +253,9 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     }
 
   /**
-   * Extract the correct amount of arguments from a request for the specified bound method.
+   * Validata and extract specified bound method arguments from a request.
+   *
+   * Optional request context is used as a last method argument.
    *
    * @param request request
    * @param context request context
