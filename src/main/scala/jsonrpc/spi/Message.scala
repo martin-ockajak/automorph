@@ -20,15 +20,15 @@ final case class Message[Node](
   result: Option[Node],
   error: Option[CallError[Node]]
 ):
+  lazy val objectType: MessageType = error.map(_ => MessageType.Error).getOrElse {
+    result.map(_ => MessageType.Result).getOrElse {
+      id.map(_ => MessageType.Call).getOrElse(MessageType.Notification)
+    }
+  }
 
   lazy val details: Map[String, String] =
-    val messgeType = error.map(_ => MessageType.Error).getOrElse {
-      result.map(_ => MessageType.Result).getOrElse {
-        id.map(_ => MessageType.Call).getOrElse(MessageType.Notification)
-      }
-    }
     Map(
-      "Type" -> messgeType.toString
+      "Type" -> objectType.toString
     ) ++
       id.map(value => "Id" -> value.fold(_.toString, identity)) ++
       method.map(value => "Method" -> value) ++
