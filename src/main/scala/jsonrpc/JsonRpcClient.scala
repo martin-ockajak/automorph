@@ -160,18 +160,23 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
     val formedRequest = Request(id, method, arguments).message
     logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
     effect.flatMap(
+      // Serialize request
       serialize(formedRequest),
       rawRequest =>
         effect.flatMap(
+          // Send request
           transport.call(rawRequest, context),
           rawResponse =>
+            // Deserialize response
             Try(codec.deserialize(rawResponse)) match
               case Success(formedResponse) =>
+                // Validate response
                 logger.trace(s"Received JSON-RPC message:\n${codec.format(formedResponse)}")
                 Try(Response(formedResponse)) match
                   case Success(validResponse) => validResponse.value match
                       case Left(errorNode) => raiseError(decodeError(errorNode), formedRequest)
                       case Right(resultNode) =>
+                        // Decode result
                         Try(decodeResult(resultNode)) match
                           case Success(result) =>
                             logger.info(s"Performed JSON-RPC request", formedRequest.properties)
@@ -196,8 +201,11 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
   private def rpcNotify(methodName: String, arguments: Request.Params[Node], context: Option[Context]): Outcome[Unit] =
     val formedRequest = Request(None, methodName, arguments).message
     effect.map(
+      // Serialize request
       serialize(formedRequest),
-      message => transport.notify(message, context)
+      message =>
+        // Send request
+        transport.notify(message, context)
     )
 
   /**
