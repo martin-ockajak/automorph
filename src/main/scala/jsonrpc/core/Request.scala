@@ -28,12 +28,6 @@ final case class Request[Node](
     error = None
   )
 
-  lazy val details: Map[String, String] = Map(
-    "Type" -> id.map(_ => RequestType.Call).getOrElse(RequestType.Notification).toString,
-    "Method" -> method,
-    "Arguments" -> params.fold(_.size, _.size).toString
-  ) ++ id.map(value => "Id" -> value.fold(_.toString, identity))
-
 case object Request:
   def apply[Node](message: Message[Node]): Request[Node] =
     val jsonrpc = Protocol.mandatory(message.jsonrpc, "jsonrpc")
@@ -43,7 +37,3 @@ case object Request:
     val method = Protocol.mandatory(message.method, "method")
     val params = message.params.getOrElse(Map.empty.asRight[List[Node]])
     Request(id, method, params)
-
-/** JSON-RPC request types. */
-enum RequestType:
-  case Call, Notification

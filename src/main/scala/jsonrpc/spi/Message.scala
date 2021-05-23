@@ -19,7 +19,23 @@ final case class Message[Node](
   params: Option[Either[List[Node], Map[String, Node]]],
   result: Option[Node],
   error: Option[CallError[Node]]
-)
+):
+
+  lazy val details: Map[String, String] =
+    val messgeType = error.map(_ => MessageType.Error).getOrElse {
+      result.map(_ => MessageType.Result).getOrElse {
+        id.map(_ => MessageType.Call).getOrElse(MessageType.Notification)
+      }
+    }
+    Map(
+      "Type" -> messgeType.toString
+    ) ++
+      id.map(value => "Id" -> value.fold(_.toString, identity)) ++
+      method.map(value => "Method" -> value) ++
+      params.map(value => "Arguments" -> value.fold(_.size, _.size).toString) ++
+      error.toSeq.flatMap { value =>
+        value.code.map(code => "ErrorCode" -> code.toString) ++ value.message.map(message => "ErrorMessage" -> message)
+      }
 
 /**
  * JSON-RPC protocol error details structure.
@@ -36,3 +52,7 @@ final case class CallError[Node](
   message: Option[String],
   data: Option[Node]
 )
+
+/** JSON-RPC message types. */
+enum MessageType:
+  case Call, Notification, Result, Error
