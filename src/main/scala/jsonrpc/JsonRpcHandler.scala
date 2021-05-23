@@ -215,7 +215,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     logger.debug(s"Processing JSON-RPC request", requestMessage.properties)
     methodBindings.get(request.method).map { methodHandle =>
       val arguments = extractArguments(request, context, methodHandle)
-      Try(effect.either(methodHandle.function(arguments, None))) match
+      Try(effect.either(methodHandle.function(arguments, context))) match
         case Success(outcome) => effect.map(
             outcome,
             _ match
