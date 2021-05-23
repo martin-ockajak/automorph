@@ -57,10 +57,9 @@ object HandlerMacros:
           sys.error(s"Bound API method must be callable at runtime: $signature")
       }
 
-    def methodArgument[T: Type](node: Node, param: ref.QuotedParam): Expr[T] =
+    def methodArgument[T: Type](node: Expr[Node], param: ref.QuotedParam): Expr[T] =
       '{
-        $codec.deserialize(ArraySeq.ofByte("".getBytes("UTF-8"))).asInstanceOf[T]
-//        $codec.decode[T](node)
+        $codec.decode[T]($node)
       }
 
 //    def methodFunction(method: ref.QuoteDMethod): Expr[Node => Outcome[Node]] =
