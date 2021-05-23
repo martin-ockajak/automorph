@@ -29,6 +29,9 @@ final case class Request[Node](
   )
 
 case object Request:
+  /** Request parameters type. */
+  type Params[Node] = Either[List[Node], Map[String, Node]]
+
   def apply[Node](message: Message[Node]): Request[Node] =
     val jsonrpc = Protocol.mandatory(message.jsonrpc, "jsonrpc")
     if jsonrpc != Protocol.version then

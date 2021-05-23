@@ -13,6 +13,8 @@ final case class NoEffect() extends Effect[Identity]:
 
   def pure[T](value: T): T = value
 
+  def failed[T](exception: Throwable): T = throw exception
+
   def map[T, R](value: T, function: T => R): R = function(value)
 
   def either[T](value: T): Either[Throwable, T] = Right(value)

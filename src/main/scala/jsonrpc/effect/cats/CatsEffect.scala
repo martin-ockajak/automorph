@@ -13,6 +13,8 @@ final case class CatsEffect[Environment]() extends Effect[IO]:
 
   def pure[T](value: T): IO[T] = IO.pure(value)
 
+  def failed[T](exception: Throwable): IO[T] = IO.raiseError(exception)
+
   def map[T, R](value: IO[T], function: T => R): IO[R] = value.map(function)
 
   def either[T](value: IO[T]): IO[Either[Throwable, T]] = value.attempt

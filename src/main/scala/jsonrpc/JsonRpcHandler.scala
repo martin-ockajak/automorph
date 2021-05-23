@@ -198,11 +198,11 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
 
   private def handle(message: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
     Try(codec.deserialize(message)) match
-      case Success(validMessage) =>
-        logger.trace(s"Received JSON-RPC message:\n${codec.format(validMessage)}")
-        Try(Request(validMessage)) match
-          case Success(request) => invoke(validMessage, request, context)
-          case Failure(error)   => effect.pure(errorResponse(error, validMessage))
+      case Success(requestMessage) =>
+        logger.trace(s"Received JSON-RPC message:\n${codec.format(requestMessage)}")
+        Try(Request(requestMessage)) match
+          case Success(request) => invoke(requestMessage, request, context)
+          case Failure(error)   => effect.pure(errorResponse(error, requestMessage))
       case Failure(error) =>
         val virtualMessage = Message[Node](None, unknownId.asSome, None, None, None, None)
         effect.pure(errorResponse(ParseErrorException("Invalid request format", error), virtualMessage))
@@ -261,13 +261,13 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * Create JSON-RPC error response.
    *
    * @param error exception
-   * @param request request message
+   * @param requestMessage request message
    * @param requestId request identifier
    * @return error response if applicable
    */
-  private def errorResponse(error: Throwable, request: Message[Node]): Option[ArraySeq.ofByte] =
-    logger.error(s"Failed to process JSON-RPC request", error, request.properties)
-    request.id.flatMap { id =>
+  private def errorResponse(error: Throwable, requestMessage: Message[Node]): Option[ArraySeq.ofByte] =
+    logger.error(s"Failed to process JSON-RPC request", error, requestMessage.properties)
+    requestMessage.id.flatMap { id =>
       val code = Protocol.exceptionError(error.getClass).code
       val (message, data) = Errors.descriptions(error) match
         case Seq(message, details*) => message -> codec.encode(details).asSome

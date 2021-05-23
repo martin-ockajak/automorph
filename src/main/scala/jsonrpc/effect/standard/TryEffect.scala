@@ -1,7 +1,7 @@
 package jsonrpc.effect.native
 
 import jsonrpc.spi.Effect
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 /**
  * Try effect system plugin.
@@ -12,6 +12,8 @@ import scala.util.{Success, Try}
 final case class TryEffect() extends Effect[Try]:
 
   def pure[T](value: T): Try[T] = Success(value)
+
+  def failed[T](exception: Throwable): Try[T] = Failure(exception)
 
   def map[T, R](effect: Try[T], function: T => R): Try[R] = effect.map(function)
 

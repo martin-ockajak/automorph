@@ -8,13 +8,22 @@ package jsonrpc.spi
 trait Effect[Outcome[_]]:
 
   /**
-   * Lift a value into a new effect.
+   * Lift a value into a new effect of given type.
    *
-   * @param value already computed value
-   * @tparam T value type
+   * @param value an existing value
+   * @tparam T effect value type
    * @return effect containing the value
    */
   def pure[T](value: T): Outcome[T]
+
+  /**
+   * Lift an exception into a new effect of given type.
+   *
+   * @param exception exception
+   * @tparam T effect value type
+   * @return effect containing the exception
+   */
+  def failed[T](exception: Throwable): Outcome[T]
 
   /**
    * Transform an effect by applying a function to its value.
