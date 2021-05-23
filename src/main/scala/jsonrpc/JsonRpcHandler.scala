@@ -205,7 +205,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
         effect.pure(errorResponse(ParseErrorException("Invalid request format", error), None, unknownId.asSome))
 
   private def invoke(request: Request[Node], context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
-    logger.info(s"Processing JSON-RPC request", request.details)
+    logger.debug(s"Processing JSON-RPC request", request.details)
     methodBindings.get(request.method).map { methodHandle =>
       val arguments = extractArguments(request, methodHandle)
       Try(effect.either(methodHandle.function(arguments, None))) match
