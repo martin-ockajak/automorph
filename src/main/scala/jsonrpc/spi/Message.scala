@@ -20,13 +20,16 @@ final case class Message[Node](
   result: Option[Node],
   error: Option[CallError[Node]]
 ):
+
+  /** Message type. */
   lazy val objectType: MessageType = error.map(_ => MessageType.Error).getOrElse {
     result.map(_ => MessageType.Result).getOrElse {
       id.map(_ => MessageType.Call).getOrElse(MessageType.Notification)
     }
   }
 
-  lazy val details: Map[String, String] =
+  /** Message properties. */
+  lazy val properties: Map[String, String] =
     Map(
       "Type" -> objectType.toString
     ) ++

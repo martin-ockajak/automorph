@@ -208,14 +208,14 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
         effect.pure(errorResponse(ParseErrorException("Invalid request format", error), virtualMessage))
 
   private def invoke(requestMessage: Message[Node], request: Request[Node], context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
-    logger.debug(s"Processing JSON-RPC request", requestMessage.details)
+    logger.debug(s"Processing JSON-RPC request", requestMessage.properties)
     methodBindings.get(request.method).map { methodHandle =>
       val arguments = extractArguments(request, methodHandle)
       Try(effect.either(methodHandle.function(arguments, None))) match
         case Success(outcome) => effect.map(outcome, _ match
           case Right(result) => request.id.flatMap { id =>
             val response = Response(id, result.asRight)
-            logger.info(s"Processed JSON-RPC request", requestMessage.details)
+            logger.info(s"Processed JSON-RPC request", requestMessage.properties)
             val responseMessage = response.message
             logger.trace(s"Sending JSON-RPC message:\n${codec.format(responseMessage)}")
             serialize(responseMessage)
@@ -253,7 +253,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @return error response if applicable
    */
   private def errorResponse(error: Throwable, request: Message[Node]): Option[ArraySeq.ofByte] =
-    logger.error(s"Failed to process JSON-RPC request", error, request.details)
+    logger.error(s"Failed to process JSON-RPC request", error, request.properties)
     request.id.flatMap { id =>
       val code = Protocol.exceptionError(error.getClass).code
       val (message, data) = Errors.descriptions(error) match
