@@ -144,6 +144,17 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
 
   private def decodeError(error: CallError[Node]): Throwable = ???
 
+  /**
+   * Perform a method call using specified arguments.
+   *
+   * Optional request context is used as a last method argument.
+   *
+   * @param methodName method name
+   * @param arguments method arguments
+   * @param context request context
+   * @tparam R result type
+   * @return result value
+   */
   private def rpcCall[R](method: String, arguments: Request.Params[Node], context: Option[Context]): Outcome[R] =
     val id = Math.abs(random.nextLong()).toString.asRight[BigDecimal].asSome
     val requestMessage = Request(id, method, arguments).message
@@ -171,8 +182,19 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
         )
     )
 
-  private def rpcNotify[R](method: String, arguments: Request.Params[Node], context: Option[Context]): Outcome[Unit] =
-    val requestMessage = Request(None, method, arguments).message
+  /**
+   * Perform a method notification using specified arguments.
+   *
+   * Optional request context is used as a last method argument.
+   *
+   * @param methodName method name
+   * @param arguments method arguments
+   * @param context request context
+   * @tparam R result type
+   * @return nothing
+   */
+  private def rpcNotify(methodName: String, arguments: Request.Params[Node], context: Option[Context]): Outcome[Unit] =
+    val requestMessage = Request(None, methodName, arguments).message
     effect.map(
       serialize(requestMessage),
       message => transport.notify(message, context)

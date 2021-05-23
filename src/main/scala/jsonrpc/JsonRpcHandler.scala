@@ -132,14 +132,14 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * The bound function may return a context fuction consuming a single ''context parameter'' of `Context` type.
    * Server-supplied ''request context'' is then passed to the returned context function as the ''context parameter'' argument.
    *
-   * @param method JSON-RPC method name
+   * @param methodName JSON-RPC method name
    * @param api API instance
    * @param exposedNames transform API type method name to its exposed JSON-RPC method names
    * @tparam T API type
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T, R](method: String, function: Tuple => R): JsonRpcHandler[Node, CodecType, Outcome, Context] =
+  inline def bind[T, R](methodName: String, function: Tuple => R): JsonRpcHandler[Node, CodecType, Outcome, Context] =
     ???
 
   /**
