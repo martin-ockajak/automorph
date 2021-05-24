@@ -8,7 +8,7 @@ import jsonrpc.core.Protocol.{Id, MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Errors, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.handler.{HandlerMacros, MethodHandle}
-import jsonrpc.spi.{MessageError, Codec, Effect, Message}
+import jsonrpc.spi.{Codec, Effect, Message, MessageError}
 import jsonrpc.util.CannotEqual
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import scala.collection.immutable.ArraySeq
@@ -112,9 +112,10 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
       HandlerMacros.bind[T, Node, Outcome, CodecType, Context](codec, effect, api).flatMap { (apiMethodName, method) =>
         exposedNames.applyOrElse(
           apiMethodName,
-          _ => throw new IllegalArgumentException(
-            s"Bound API does not contain the specified public method: ${api.getClass.getName}.$apiMethodName"
-          )
+          _ =>
+            throw new IllegalArgumentException(
+              s"Bound API does not contain the specified public method: ${api.getClass.getName}.$apiMethodName"
+            )
         ).map(_ -> method)
       }
     copy(methodBindings = methodBindings ++ bindings)
@@ -171,7 +172,10 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @return optional JSON-RPC response message
    */
   def processRequest(request: InputStream, context: Option[Context]): Outcome[Option[InputStream]] =
-    effect.map(processRequest(request.toArraySeq(bufferSize)), _.map(response => ByteArrayInputStream(response.unsafeArray)))
+    effect.map(
+      processRequest(request.toArraySeq(bufferSize)),
+      _.map(response => ByteArrayInputStream(response.unsafeArray))
+    )
 
   /**
    * Handle a JSON-RPC request.
@@ -180,7 +184,10 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param context request context
    * @return response message
    */
-  inline private def handleRequest(rawRequest: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
+  private inline def handleRequest(
+    rawRequest: ArraySeq.ofByte,
+    context: Option[Context]
+  ): Outcome[Option[ArraySeq.ofByte]] =
     // Deserialize request
     Try(codec.deserialize(rawRequest)) match
       case Success(formedRequest) =>
@@ -273,15 +280,15 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param requestId request identifier
    * @return error response if applicable
    */
-  inline private def errorResponse(error: Throwable, formedRequest: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
+  private inline def errorResponse(error: Throwable, formedRequest: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
     formedRequest.id.map { id =>
       // Assemble error details
       val code = Protocol.exceptionError(error.getClass).code
-      val (message, data) = Errors.descriptions(error) match
-//        case Seq(message, details*) => message -> CodecMacros.encode(codec, details).asSome
-        case Seq(message, details*) => message -> codec.encode(details).asSome
-        case Seq()                  => "Unknown error" -> Option.empty[Node]
+      val descriptions = Errors.descriptions(error)
+      val message = descriptions.headOption.getOrElse("Unknown error")
+//      val data = CodecMacros.encode(codec, descriptions.drop(1)).asSome
+      val data = codec.encode(descriptions.drop(1)).asSome
 
       // Serialize response
       val validResponse = Response[Node](id, ResponseError(code, message, data).asLeft)
