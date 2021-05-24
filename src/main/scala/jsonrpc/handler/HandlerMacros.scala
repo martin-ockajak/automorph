@@ -45,11 +45,11 @@ object HandlerMacros:
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
   )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Outcome, Context]]] =
-    import ref.quotes.reflect.{TypeRepr, TypeTree}
+    import ref.quotes.reflect.{TypeRepr, TypeTree, asTerm}
 
     val ref = Reflection(quotes)
 
-    val decodeCall = ref.callTerm(ref.term(codec), "decode", List(TypeTree.of[String]), List(List(ref.term(Expr("TEST"))))).asExpr
+    val decodeCall = ref.callTerm(codec.asTerm, "decode", List(TypeTree.of[String]), List(List(Expr("TEST").asTerm))).asExpr
     //    '{
     //      $codec.decode[String](().asInstanceOf[Node])
     //    }
@@ -71,16 +71,16 @@ object HandlerMacros:
     val apiMethods = detectApiMethods(ref, TypeTree.of[ApiType])
 
     // Generate method handles including wrapper functions consuming and product Node values
-    val methodHandles = Expr.ofSeq(apiMethods.map(method => methodHandle[Node, Outcome, Context](ref, method)))
+    val methodHandles = Expr.ofSeq(apiMethods.map(method => generateMethodHandle[Node, Outcome, Context](ref, method, effect)))
     println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
 
     // Generate JSON-RPC wrapper functions for the API methods
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
-    val call = ref.callTerm(ref.term(api), methodName, List.empty, List.empty)
+    val call = ref.callTerm(api.asTerm, methodName, List.empty, List.empty)
 
     // Generate function call using a type parameter
     val typeParam = TypeTree.of[List[List[String]]]
-    val typedCall = ref.callTerm(ref.term('{ List }), "apply", List(typeParam), List.empty)
+    val typedCall = ref.callTerm('{ List }.asTerm, "apply", List(typeParam), List.empty)
 
     // Debug printounts
     println(
@@ -121,9 +121,10 @@ object HandlerMacros:
     }
     methods
 
-  private def methodHandle[Node: Type, Outcome[_]: Type, Context: Type](
+  private def generateMethodHandle[Node: Type, Outcome[_]: Type, Context: Type](
     ref: Reflection,
-    method: ref.QuotedMethod
+    method: ref.QuotedMethod,
+    effect: Expr[Effect[Outcome]]
   ): Expr[(String, MethodHandle[Node, Outcome, Context])] =
     given Quotes = ref.quotes
     val liftedMethod = method.lift

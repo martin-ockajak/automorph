@@ -1,15 +1,15 @@
-package jsonrpc.client
+package jsonrpc.codec
 
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
-object ClientMacros:
+object CodecMacros:
 
-  inline def decode[Node, CodecType <: Codec[Node], T](node: Node, codec: CodecType): T =
-    ${ decode('node, 'codec) }
+  inline def decode[Node, CodecType <: Codec[Node], T]( node: Node, codec: CodecType ): T =
+    ${decode('node, 'codec)}
 
-  private def decode[Node: Type, CodecType <: Codec[Node]: Type, T: Type](
+  private def decode[Node: Type, CodecType <: Codec[Node] : Type, T: Type](
     node: Expr[Node],
     codec: Expr[CodecType]
   )(using quotes: Quotes): Expr[T] =

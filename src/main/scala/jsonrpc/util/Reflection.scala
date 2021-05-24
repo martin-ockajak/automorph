@@ -99,15 +99,6 @@ final class Reflection(val quotes: Quotes):
     classType.typeSymbol.memberFields.flatMap(field(classType, _))
 
   /**
-   * Create instance member access term.
-   *
-   * @param instance instance term
-   * @param name member name
-   * @return instance member access term
-   */
-  def accessTerm(instance: Term, name: String): Term = Select.unique(instance, name)
-
-  /**
    * Create instance method call term.
    *
    * @param instance instance term
@@ -117,17 +108,7 @@ final class Reflection(val quotes: Quotes):
    * @return instance method call term
    */
   def callTerm(instance: Term, name: String, typeArguments: List[TypeTree], arguments: List[List[Term]]): Term =
-    accessTerm(instance, name).appliedToTypeTrees(typeArguments).appliedToArgss(arguments)
-
-  /**
-   * Create typed expression term.
-   *
-   * @param expression expression
-   * @tparam T expression type
-   * @return typed expression term
-   */
-  def term[T](expression: Expr[T]): Term =
-    expression.asTerm
+    Select.unique(instance, name).appliedToTypeTrees(typeArguments).appliedToArgss(arguments)
 
   private def method(classType: TypeRepr, methodSymbol: Symbol): Option[QuotedMethod] =
     val (symbolType, typeParams) = classType.memberType(methodSymbol) match
