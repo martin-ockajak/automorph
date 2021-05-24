@@ -61,7 +61,7 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
    * @return result value
    */
   def call[R](method: String, arguments: Seq[Any])(using context: Option[Context]): Outcome[R] =
-    rpcCall(method, encodeArguments(arguments), context)
+    performCall(method, encodeArguments(arguments), context)
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the ''arguments by name''.
@@ -75,7 +75,7 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
    * @return result value
    */
   def call[R](method: String, arguments: Map[String, Any])(using context: Option[Context]): Outcome[R] =
-    rpcCall(method, encodeArguments(arguments), context)
+    performCall(method, encodeArguments(arguments), context)
 
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by position''.
@@ -109,7 +109,7 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
    * @return nothing
    */
   def notify(method: String, arguments: Seq[Any])(using context: Option[Context]): Outcome[Unit] =
-    rpcNotify(method, encodeArguments(arguments), context)
+    performNotify(method, encodeArguments(arguments), context)
 
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by name''.
@@ -123,7 +123,7 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
    * @return nothing
    */
   def notify(method: String, arguments: Map[String, Any])(using context: Option[Context]): Outcome[Unit] =
-    rpcNotify(method, encodeArguments(arguments), context)
+    performNotify(method, encodeArguments(arguments), context)
 
   /**
    * Create a ''transparent proxy instance'' of a remote JSON-RPC API.
@@ -149,7 +149,7 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
    * @tparam R result type
    * @return result value
    */
-  private def rpcCall[R](method: String, arguments: Request.Params[Node], context: Option[Context]): Outcome[R] =
+  private def performCall[R](method: String, arguments: Request.Params[Node], context: Option[Context]): Outcome[R] =
     val id = Math.abs(random.nextLong()).toString.asRight[BigDecimal].asSome
     val formedRequest = Request(id, method, arguments).formed
     logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
@@ -163,6 +163,27 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
           // Process response
           rawResponse => processResponse(rawResponse, formedRequest)
         )
+    )
+
+  /**
+   * Perform a method notification using specified arguments.
+   *
+   * Optional request context is used as a last method argument.
+   *
+   * @param methodName method name
+   * @param arguments method arguments
+   * @param context request context
+   * @tparam R result type
+   * @return nothing
+   */
+  private def performNotify(methodName: String, arguments: Request.Params[Node], context: Option[Context]): Outcome[Unit] =
+    val formedRequest = Request(None, methodName, arguments).formed
+    effect.map(
+      // Serialize request
+      serialize(formedRequest),
+      rawRequest =>
+        // Send request
+        transport.notify(rawRequest, context)
     )
 
   private def processResponse[R](rawResponse: ArraySeq.ofByte, formedRequest: Message[Node]): Outcome[R] =
@@ -185,27 +206,6 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
                 raiseError(Protocol.errorException(error.code, error.message), formedRequest)
           case Failure(error) => raiseError(error, formedRequest)
       case Failure(error) => raiseError(ParseErrorException("Invalid response format", error), formedRequest)
-
-  /**
-   * Perform a method notification using specified arguments.
-   *
-   * Optional request context is used as a last method argument.
-   *
-   * @param methodName method name
-   * @param arguments method arguments
-   * @param context request context
-   * @tparam R result type
-   * @return nothing
-   */
-  private def rpcNotify(methodName: String, arguments: Request.Params[Node], context: Option[Context]): Outcome[Unit] =
-    val formedRequest = Request(None, methodName, arguments).formed
-    effect.map(
-      // Serialize request
-      serialize(formedRequest),
-      rawRequest =>
-        // Send request
-        transport.notify(rawRequest, context)
-    )
 
   /**
    * Serialize JSON-RPC message.
