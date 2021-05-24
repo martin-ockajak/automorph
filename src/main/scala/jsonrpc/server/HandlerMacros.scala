@@ -60,6 +60,7 @@ object HandlerMacros:
 
     // Detect and validate public methods in the API type
     val apiMethods = detectApiMethods(ref, TypeTree.of[ApiType])
+    val methodHandles = Expr.ofSeq(apiMethods.map(method => methodHandle[Node, Outcome, Context](ref, method)))
 
     // Generate JSON-RPC wrapper functions for the API methods
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
@@ -69,7 +70,6 @@ object HandlerMacros:
     val typeParam = TypeTree.of[List[List[String]]]
     val typedCall = ref.callTerm(ref.term('{ List }), "apply", List(typeParam), List.empty)
 
-    val handles = Expr.ofSeq(Seq.empty[Expr[(String, MethodHandle[Node, Outcome, Context])]])
 
     // Debug printounts
     println(
@@ -89,7 +89,7 @@ object HandlerMacros:
 //      println(${call.asExpr})
 //      println(${typedCall.asExpr})
       println()
-      $handles.toMap
+      $methodHandles.toMap[String, MethodHandle[Node, Outcome, Context]]
     }
 
   private def detectApiMethods(ref: Reflection, apiTypeTree: ref.quotes.reflect.TypeTree): Seq[ref.QuotedMethod] =
@@ -110,6 +110,11 @@ object HandlerMacros:
         sys.error(s"Bound API method must be callable at runtime: $signature")
     }
     methods
+
+  private def methodHandle[Node, Outcome[_], Context](
+    ref: Reflection,
+    method: ref.QuotedMethod
+  ): Expr[(String, MethodHandle[Node, Outcome, Context])] = ???
 
   private def methodDescription(method: Method): String =
     val documentation = method.documentation.map(_ + "\n").getOrElse("")
