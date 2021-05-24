@@ -168,7 +168,7 @@ object HandlerMacros:
       (arguments: Seq[Node], context: Option[Context]) =>
         $effect.pure(arguments.head)
     }
-    println(function)
+    println(function.asTerm)
     function
 
   private def methodDescription(method: Method): String =
