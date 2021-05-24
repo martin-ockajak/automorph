@@ -92,11 +92,10 @@ object HandlerMacros:
       $handles.toMap
     }
 
-  private def detectApiMethods(ref: Reflection, apiTypeTree: ref.quotes.reflect.TypeTree)(using
-    quotes: Quotes
-  ): Seq[ref.QuotedMethod] =
+  private def detectApiMethods(ref: Reflection, apiTypeTree: ref.quotes.reflect.TypeTree): Seq[ref.QuotedMethod] =
     import ref.quotes.reflect.{TypeRepr, TypeTree}
 
+    given Quotes = ref.quotes
     val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap {
       baseType => ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
