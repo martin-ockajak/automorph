@@ -103,12 +103,12 @@ final class Reflection(val quotes: Quotes):
    *
    * @param instance instance term
    * @param name method name
-   * @param typeArguments method type argument type trees
+   * @param typeArguments method type argument types
    * @param arguments method argument terms
    * @return instance method call term
    */
-  def callTerm(instance: Term, name: String, typeArguments: List[TypeTree], arguments: List[List[Term]]): Term =
-    Select.unique(instance, name).appliedToTypeTrees(typeArguments).appliedToArgss(arguments)
+  def callTerm(instance: Term, name: String, typeArguments: List[TypeRepr], arguments: List[List[Term]]): Term =
+    Select.unique(instance, name).appliedToTypes(typeArguments).appliedToArgss(arguments)
 
   private def method(classType: TypeRepr, methodSymbol: Symbol): Option[QuotedMethod] =
     val (symbolType, typeParams) = classType.memberType(methodSymbol) match

@@ -12,10 +12,10 @@ object CodecMacros:
   private def encode[Node: Type, CodecType <: Codec[Node]: Type, T: Type](codec: Expr[CodecType], value: Expr[T])(using
     quotes: Quotes
   ): Expr[Node] =
-    import ref.quotes.reflect.{asTerm, TypeTree}
+    import ref.quotes.reflect.{asTerm, TypeRepr}
 
     val ref = Reflection(quotes)
-    ref.callTerm(codec.asTerm, "encode", List(TypeTree.of[T]), List(List(value.asTerm))).asExprOf[Node]
+    ref.callTerm(codec.asTerm, "encode", List(TypeRepr.of[T]), List(List(value.asTerm))).asExprOf[Node]
 
   inline def decode[Node, CodecType <: Codec[Node], T](codec: CodecType, node: Node): T =
     ${ decode('codec, 'node) }
@@ -24,7 +24,7 @@ object CodecMacros:
     codec: Expr[CodecType],
     node: Expr[Node]
   )(using quotes: Quotes): Expr[T] =
-    import ref.quotes.reflect.{asTerm, TypeTree}
+    import ref.quotes.reflect.{asTerm, TypeRepr}
 
     val ref = Reflection(quotes)
-    ref.callTerm(codec.asTerm, "decode", List(TypeTree.of[T]), List(List(node.asTerm))).asExprOf[T]
+    ref.callTerm(codec.asTerm, "decode", List(TypeRepr.of[T]), List(List(node.asTerm))).asExprOf[T]

@@ -2,7 +2,7 @@ package jsonrpc.client
 
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
-import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, Type}
 
 object ClientMacros:
 
@@ -13,7 +13,7 @@ object ClientMacros:
     node: Expr[Node],
     codec: Expr[CodecType]
   )(using quotes: Quotes): Expr[T] =
-    import ref.quotes.reflect.{TypeTree, asTerm}
+    import ref.quotes.reflect.{asTerm, TypeRepr}
 
     val ref = Reflection(quotes)
-    ref.callTerm(codec.asTerm, "decode", List(TypeTree.of[T]), List(List(node.asTerm))).asExprOf[T]
+    ref.callTerm(codec.asTerm, "decode", List(TypeRepr.of[T]), List(List(node.asTerm))).asExprOf[T]

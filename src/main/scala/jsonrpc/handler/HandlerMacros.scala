@@ -57,11 +57,12 @@ object HandlerMacros:
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
   )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Outcome, Context]]] =
-    import ref.quotes.reflect.{TypeRepr, TypeTree, asTerm}
+    import ref.quotes.reflect.{asTerm, TypeRepr, TypeTree}
 
     val ref = Reflection(quotes)
 
-    val decodeCall = ref.callTerm(codec.asTerm, "decode", List(TypeTree.of[String]), List(List(Expr("TEST").asTerm))).asExpr
+    val decodeCall =
+      ref.callTerm(codec.asTerm, "decode", List(TypeRepr.of[String]), List(List(Expr("TEST").asTerm))).asExpr
     //    '{
     //      $codec.decode[String](().asInstanceOf[Node])
     //    }
@@ -83,7 +84,8 @@ object HandlerMacros:
     val apiMethods = detectApiMethods(ref, TypeTree.of[ApiType])
 
     // Generate method handles including wrapper functions consuming and product Node values
-    val methodHandles = Expr.ofSeq(apiMethods.map(method => generateMethodHandle[Node, Outcome, Context](ref, method, effect)))
+    val methodHandles =
+      Expr.ofSeq(apiMethods.map(method => generateMethodHandle[Node, Outcome, CodecType, Context](ref, method, codec, effect)))
     println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
 
     // Generate JSON-RPC wrapper functions for the API methods
@@ -91,7 +93,7 @@ object HandlerMacros:
     val call = ref.callTerm(api.asTerm, methodName, List.empty, List.empty)
 
     // Generate function call using a type parameter
-    val typeParam = TypeTree.of[List[List[String]]]
+    val typeParam = TypeRepr.of[List[List[String]]]
     val typedCall = ref.callTerm('{ List }.asTerm, "apply", List(typeParam), List.empty)
 
     // Debug printounts
@@ -133,14 +135,15 @@ object HandlerMacros:
     }
     methods
 
-  private def generateMethodHandle[Node: Type, Outcome[_]: Type, Context: Type](
+  private def generateMethodHandle[Node: Type, Outcome[_]: Type, CodecType <: Codec[Node]: Type, Context: Type](
     ref: Reflection,
     method: ref.QuotedMethod,
+    codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]]
   ): Expr[(String, MethodHandle[Node, Outcome, Context])] =
     given Quotes = ref.quotes
     val liftedMethod = method.lift
-    val function = generateFunction[Node, Outcome, Context](ref, method, effect)
+    val function = generateFunction[Node, Outcome, CodecType, Context](ref, method, codec, effect)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
     val paramNames = Expr(liftedMethod.params.flatMap(_.map(_.name)))
@@ -149,12 +152,18 @@ object HandlerMacros:
       $name -> MethodHandle($function, $name, $resultType, $paramNames, $paramTypes)
     }
 
-  private def generateFunction[Node: Type, Outcome[_]: Type, Context: Type](
+  private def generateFunction[Node: Type, Outcome[_]: Type, CodecType <: Codec[Node]: Type, Context: Type](
     ref: Reflection,
     method: ref.QuotedMethod,
+    codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]]
   ): Expr[(Seq[Node], Option[Context]) => Outcome[Node]] =
+    import ref.quotes.reflect.{asTerm, TypeRepr}
     given Quotes = ref.quotes
+
+    method.params.map { param =>
+//      val decodeCall = ref.callTerm(codec.asTerm, "decode", List(param.dataType), List(List(Expr("TEST").asTerm))).asExpr
+    }
     '{
       (arguments, context) =>
         $effect.pure(arguments.head)
