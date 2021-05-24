@@ -48,15 +48,6 @@ object HandlerMacros:
 
     val ref = Reflection(quotes)
 
-    def validateApiMethods(methods: Seq[ref.QuotedMethod]): Unit =
-      methods.foreach { method =>
-        val signature = s"${TypeTree.of[ApiType].show}.${method.lift.signature}"
-        if method.typeParams.nonEmpty then
-          sys.error(s"Bound API method must not have type parameters: $signature")
-        else if !method.available then
-          sys.error(s"Bound API method must be callable at runtime: $signature")
-      }
-
     def methodArgument[T: Type](node: Expr[Node], param: ref.QuotedParam): Expr[T] =
       '{
         $codec.decode[T]($node)
@@ -73,7 +64,7 @@ object HandlerMacros:
     val apiMethods = ref.methods(TypeRepr.of[ApiType]).filter(_.public).filter {
       method => !baseMethodNames.contains(method.symbol.name)
     }
-    validateApiMethods(apiMethods)
+    validateApiMethods(ref, apiMethods, TypeTree.of[ApiType].show)
 
     // Generate JSON-RPC wrapper functions for the API methods
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
@@ -104,6 +95,17 @@ object HandlerMacros:
 //      println(${typedCall.asExpr})
       println()
       $handles.toMap
+    }
+
+  private def validateApiMethods(ref: Reflection, methods: Seq[ref.QuotedMethod], apiType: String): Unit =
+    import ref.quotes.reflect.{TypeRepr, TypeTree}
+
+    methods.foreach { method =>
+      val signature = s"${apiType}.${method.lift.signature}"
+      if method.typeParams.nonEmpty then
+        sys.error(s"Bound API method must not have type parameters: $signature")
+      else if !method.available then
+        sys.error(s"Bound API method must be callable at runtime: $signature")
     }
 
   private def methodDescription(method: Method): String =
