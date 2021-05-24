@@ -109,10 +109,19 @@ object HandlerMacros:
     }
     methods
 
-  private def methodHandle[Node, Outcome[_], Context](
+  private def methodHandle[Node: Type, Outcome[_]: Type, Context: Type](
     ref: Reflection,
     method: ref.QuotedMethod
-  ): Expr[(String, MethodHandle[Node, Outcome, Context])] = ???
+  ): Expr[(String, MethodHandle[Node, Outcome, Context])] =
+    given Quotes = ref.quotes
+    val liftedMethod = method.lift
+    val name = Expr(liftedMethod.name)
+    val resultType = Expr(liftedMethod.resultType)
+    val paramNames = Expr(liftedMethod.params.flatMap(_.map(_.name)))
+    val paramTypes = Expr(liftedMethod.params.flatMap(_.map(_.dataType)))
+    '{
+      $name -> MethodHandle(null, $name, $resultType, $paramNames, $paramTypes)
+    }
 
   private def methodDescription(method: Method): String =
     val documentation = method.documentation.map(_ + "\n").getOrElse("")
