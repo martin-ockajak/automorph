@@ -1,4 +1,4 @@
-package jsonrpc.server
+package jsonrpc.handler
 
 import jsonrpc.spi.{Codec, Effect}
 import jsonrpc.util.{Method, Reflection}

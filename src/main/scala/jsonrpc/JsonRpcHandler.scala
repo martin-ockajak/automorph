@@ -6,7 +6,7 @@ import jsonrpc.core.EncodingOps.toArraySeq
 import jsonrpc.core.Protocol.{Id, MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Errors, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
-import jsonrpc.server.{HandlerMacros, MethodHandle}
+import jsonrpc.handler.{HandlerMacros, MethodHandle}
 import jsonrpc.spi.{MessageError, Codec, Effect, Message}
 import jsonrpc.util.CannotEqual
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
