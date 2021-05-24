@@ -164,10 +164,12 @@ object HandlerMacros:
     method.params.map { param =>
 //      val decodeCall = ref.callTerm(codec.asTerm, "decode", List(param.dataType), List(List(Expr("TEST").asTerm))).asExpr
     }
-    '{
-      (arguments, context) =>
+    val function = '{
+      (arguments: Seq[Node], context: Option[Context]) =>
         $effect.pure(arguments.head)
     }
+    println(function)
+    function
 
   private def methodDescription(method: Method): String =
     val documentation = method.documentation.map(_ + "\n").getOrElse("")
