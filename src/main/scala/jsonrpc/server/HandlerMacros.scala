@@ -4,7 +4,7 @@ import jsonrpc.spi.{Codec, Effect}
 import jsonrpc.util.{Method, Reflection}
 import scala.collection.immutable.ArraySeq
 import scala.compiletime.error
-import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, Type}
 
 final case class MethodHandle[Node, Outcome[_], Context](
   function: (Seq[Node], Option[Context]) => Outcome[Node],
@@ -15,6 +15,7 @@ final case class MethodHandle[Node, Outcome[_], Context](
 )
 
 object HandlerMacros:
+
   /**
    * Generates JSON-RPC bindings for all valid public methods of an API type.
    *
@@ -58,13 +59,7 @@ object HandlerMacros:
 //      }
 
     // Detect and validate public methods in the API type
-    val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap {
-      baseType => ref.methods(baseType).filter(_.public).map(_.name)
-    }.toSet
-    val apiMethods = ref.methods(TypeRepr.of[ApiType]).filter(_.public).filter {
-      method => !baseMethodNames.contains(method.symbol.name)
-    }
-    validateApiMethods(ref, apiMethods, TypeTree.of[ApiType].show)
+    val apiMethods = detectApiMethods(ref, TypeTree.of[ApiType])
 
     // Generate JSON-RPC wrapper functions for the API methods
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
@@ -97,16 +92,25 @@ object HandlerMacros:
       $handles.toMap
     }
 
-  private def validateApiMethods(ref: Reflection, methods: Seq[ref.QuotedMethod], apiType: String): Unit =
+  private def detectApiMethods(ref: Reflection, apiTypeTree: ref.quotes.reflect.TypeTree)(using
+    quotes: Quotes
+  ): Seq[ref.QuotedMethod] =
     import ref.quotes.reflect.{TypeRepr, TypeTree}
 
+    val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap {
+      baseType => ref.methods(baseType).filter(_.public).map(_.name)
+    }.toSet
+    val methods = ref.methods(apiTypeTree.tpe).filter(_.public).filter {
+      method => !baseMethodNames.contains(method.symbol.name)
+    }
     methods.foreach { method =>
-      val signature = s"${apiType}.${method.lift.signature}"
+      val signature = s"${apiTypeTree.show}.${method.lift.signature}"
       if method.typeParams.nonEmpty then
         sys.error(s"Bound API method must not have type parameters: $signature")
       else if !method.available then
         sys.error(s"Bound API method must be callable at runtime: $signature")
     }
+    methods
 
   private def methodDescription(method: Method): String =
     val documentation = method.documentation.map(_ + "\n").getOrElse("")
