@@ -46,7 +46,8 @@ case object UpickleJsonMacros:
         }
     '{
       val realParser = $parser
-//      val realReader = summonInline[realParser.Reader[T]]
-      realParser.read[T]($node)(using $reader.asInstanceOf[realParser.Reader[T]])
+      val realReader = summonInline[realParser.Reader[T]]
+      realParser.read[T]($node)(using realReader)
+//      realParser.read[T]($node)(using $reader.asInstanceOf[realParser.Reader[T]])
 //      realParser.read[T]($node)(using realReader.asInstanceOf[realParser.Reader[T]])
     }

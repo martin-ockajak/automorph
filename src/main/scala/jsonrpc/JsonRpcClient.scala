@@ -1,5 +1,6 @@
 package jsonrpc
 
+import jsonrpc.client.ClientMacros
 import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
@@ -21,8 +22,8 @@ import scala.util.{Failure, Random, Success, Try}
  * @tparam Outcome computation outcome effect type
  * @tparam Context request context type
  */
-final case class JsonRpcClient[Node, Outcome[_], Context](
-  codec: Codec[Node],
+final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Context](
+  codec: CodecType,
   effect: Effect[Outcome],
   transport: JsonRpcTransport[Outcome, Context]
 ) extends CannotEqual with Logging:
@@ -161,7 +162,7 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
         effect.flatMap(
           transport.call(rawRequest, context),
           // Process response
-          rawResponse => processResponse(rawResponse, formedRequest)
+          rawResponse => processResponse[R](rawResponse, formedRequest)
         )
     )
 
@@ -196,7 +197,8 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
           case Success(validResponse) => validResponse.value match
               case Right(result) =>
                 // Decode result
-                Try(codec.decode(result)) match
+//                Try(ClientMacros.decode(result, codec)) match
+                Failure.apply[R](IllegalStateException("FIXME")): Try[R] match
                   case Success(result) =>
                     logger.info(s"Performed JSON-RPC request", formedRequest.properties)
                     effect.pure(result)
