@@ -3,20 +3,13 @@ package jsonrpc
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.core.EncodingOps.toArraySeq
-import jsonrpc.core.Errors
-import jsonrpc.core.Protocol.Id
-import jsonrpc.core.Protocol.ParseErrorException
-import jsonrpc.core.Protocol.MethodNotFoundException
-import jsonrpc.core.Protocol
-import jsonrpc.core.Response
-import jsonrpc.core.Request
+import jsonrpc.core.Protocol.{Id, MethodNotFoundException, ParseErrorException}
+import jsonrpc.core.{Errors, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
-import jsonrpc.spi.Message
-import jsonrpc.spi.CallError
-import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import jsonrpc.server.{HandlerMacros, MethodHandle}
-import jsonrpc.spi.{Codec, Effect}
+import jsonrpc.spi.{MessageError, Codec, Effect, Message}
 import jsonrpc.util.CannotEqual
+import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
 
@@ -226,8 +219,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
                   // Serialize response
                   val validResponse = Response(id, result.asRight)
                   logger.info(s"Processed JSON-RPC request", formedRequest.properties)
-                  val formedResponse = validResponse.message
-                  serialize(formedResponse)
+                  serialize(validResponse.formed)
                 }.getOrElse(effect.pure(None))
               case Left(error) => errorResponse(error, formedRequest)
           )
@@ -290,8 +282,8 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
         case Seq()                  => "Unknown error" -> Option.empty[Node]
 
       // Serialize response
-      val validResponse = Response[Node](id, CallError[Node](code.asSome, message.asSome, data).asLeft)
-      serialize(validResponse.message)
+      val validResponse = Response[Node](id, ResponseError(code, message, data).asLeft)
+      serialize(validResponse.formed)
     }.getOrElse(effect.pure(None))
 
   /**

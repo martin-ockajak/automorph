@@ -1,7 +1,7 @@
 package jsonrpc.core
 
 import java.io.IOException
-import jsonrpc.spi.{CallError, Message}
+import jsonrpc.spi.{MessageError, Message}
 import jsonrpc.util.ValueOps.{asRight, asSome}
 
 /**

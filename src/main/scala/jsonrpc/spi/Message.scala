@@ -18,7 +18,7 @@ final case class Message[Node](
   method: Option[String],
   params: Option[Either[List[Node], Map[String, Node]]],
   result: Option[Node],
-  error: Option[CallError[Node]]
+  error: Option[MessageError[Node]]
 ):
 
   /** Message type. */
@@ -41,16 +41,15 @@ final case class Message[Node](
       }
 
 /**
- * JSON-RPC protocol error details structure.
+ * JSON-RPC protocol message error structure.
  *
- * Specification: https://www.jsonrpc.org/specification
- *
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param code error code
  * @param message error description
  * @param data additional error information
  * @tparam Node message node representation type
  */
-final case class CallError[Node](
+final case class MessageError[Node](
   code: Option[Int],
   message: Option[String],
   data: Option[Node]

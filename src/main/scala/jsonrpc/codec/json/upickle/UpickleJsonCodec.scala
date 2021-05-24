@@ -70,7 +70,7 @@ case object UpickleJsonCodec:
     data: Option[Value]
   ):
 
-    def toSpi: spi.CallError[Value] = spi.CallError[Value](
+    def toSpi: spi.MessageError[Value] = spi.MessageError[Value](
       code,
       message,
       data
@@ -78,7 +78,7 @@ case object UpickleJsonCodec:
 
   case object CallError:
 
-    def apply(v: spi.CallError[Value]): CallError = CallError(
+    def apply(v: spi.MessageError[Value]): CallError = CallError(
       v.code,
       v.message,
       v.data

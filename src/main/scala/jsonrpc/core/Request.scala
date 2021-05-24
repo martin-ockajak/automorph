@@ -19,7 +19,7 @@ final case class Request[Node](
   method: String,
   params: Request.Params[Node]
 ):
-  def message: Message[Node] = Message[Node](
+  def formed: Message[Node] = Message[Node](
     jsonrpc = Protocol.version.asSome,
     id = id,
     method = method.asSome,

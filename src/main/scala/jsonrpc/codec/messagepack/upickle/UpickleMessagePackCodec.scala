@@ -71,7 +71,7 @@ case object UpickleMessagePackCodec:
     data: Option[Msg]
   ):
 
-    def toSpi: spi.CallError[Msg] = spi.CallError[Msg](
+    def toSpi: spi.MessageError[Msg] = spi.MessageError[Msg](
       code,
       message,
       data
@@ -79,7 +79,7 @@ case object UpickleMessagePackCodec:
 
   case object CallError:
 
-    def apply(v: spi.CallError[Msg]): CallError = CallError(
+    def apply(v: spi.MessageError[Msg]): CallError = CallError(
       v.code,
       v.message,
       v.data

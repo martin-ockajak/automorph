@@ -3,7 +3,7 @@ package jsonrpc.core
 import java.io.IOException
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.{ErrorType, InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
-import jsonrpc.spi.{CallError, Message}
+import jsonrpc.spi.{MessageError, Message}
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
 
 /**
@@ -16,16 +16,16 @@ import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
  */
 final case class Response[Node](
   id: Protocol.Id,
-  value: Either[CallError[Node], Node]
+  value: Either[ResponseError[Node], Node]
 ):
 
-  def message: Message[Node] = Message[Node](
+  def formed: Message[Node] = Message[Node](
     jsonrpc = Protocol.version.asSome,
     id = id.asSome,
     method = None,
     params = None,
     result = value.toOption,
-    error = value.swap.toOption
+    error = value.swap.toOption.map(_.formed)
   )
 
 case object Response:
@@ -38,5 +38,34 @@ case object Response:
     message.result.map { result =>
       Response(id, result.asRight)
     }.getOrElse {
-      Response(id, Protocol.mandatory(message.error, "error").asLeft)
+      val error = Protocol.mandatory(message.error, "error")
+      Response(id, ResponseError(error).asLeft)
     }
+
+/**
+ * JSON-RPC call response error.
+ *
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+ * @param code error code
+ * @param message error description
+ * @param data additional error information
+ * @tparam Node message node representation type
+ */
+final case class ResponseError[Node](
+  code: Int,
+  message: String,
+  data: Option[Node]
+):
+
+  def formed: MessageError[Node] = MessageError[Node](
+    code = code.asSome,
+    message = message.asSome,
+    data = data
+  )
+
+case object ResponseError:
+
+  def apply[Node](error: MessageError[Node]): ResponseError[Node] =
+    val code = Protocol.mandatory(error.code, "code")
+    val message = Protocol.mandatory(error.message, "message")
+    ResponseError(code, message, error.data)
