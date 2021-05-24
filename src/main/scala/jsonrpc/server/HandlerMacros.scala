@@ -61,6 +61,7 @@ object HandlerMacros:
     // Detect and validate public methods in the API type
     val apiMethods = detectApiMethods(ref, TypeTree.of[ApiType])
     val methodHandles = Expr.ofSeq(apiMethods.map(method => methodHandle[Node, Outcome, Context](ref, method)))
+    println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
 
     // Generate JSON-RPC wrapper functions for the API methods
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
@@ -69,7 +70,6 @@ object HandlerMacros:
     // Generate function call using a type parameter
     val typeParam = TypeTree.of[List[List[String]]]
     val typedCall = ref.callTerm(ref.term('{ List }), "apply", List(typeParam), List.empty)
-
 
     // Debug printounts
     println(
@@ -81,8 +81,6 @@ object HandlerMacros:
         |  $typedCall
         |""".stripMargin
     )
-    val apiDescription = apiMethods.map(_.lift).map(methodDescription).mkString("\n")
-    println(apiDescription)
 
     // Generate printouts code using the previously generated code
     '{
