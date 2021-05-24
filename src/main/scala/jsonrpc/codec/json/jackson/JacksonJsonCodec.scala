@@ -26,10 +26,10 @@ final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaul
   def format(message: Message[JsonNode]): String =
     mapper.writerWithDefaultPrettyPrinter.writeValueAsString(message)
 
-  def encode[T](value: T): JsonNode = ???
+  inline def encode[T](value: T): JsonNode = ???
   // mapper.valueToTree(value).asInstanceOf[JsonNode]
 
-  def decode[T](node: JsonNode): T = ???
+  inline def decode[T](node: JsonNode): T = ???
   // val valueClass = typeTreeTag[T].self.runtimeClass.asInstanceOf[Class[T]]
   // mapper.treeToValue(node, valueClass)
 

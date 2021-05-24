@@ -186,7 +186,7 @@ final case class JsonRpcClient[Node, Outcome[_], Context](
         transport.notify(rawRequest, context)
     )
 
-  private def processResponse[R](rawResponse: ArraySeq.ofByte, formedRequest: Message[Node]): Outcome[R] =
+  inline private def processResponse[R](rawResponse: ArraySeq.ofByte, formedRequest: Message[Node]): Outcome[R] =
     // Deserialize response
     Try(codec.deserialize(rawResponse)) match
       case Success(formedResponse) =>

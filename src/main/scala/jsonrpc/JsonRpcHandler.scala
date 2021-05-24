@@ -179,7 +179,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param context request context
    * @return response message
    */
-  private def handleRequest(rawRequest: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
+  inline private def handleRequest(rawRequest: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
     // Deserialize request
     Try(codec.deserialize(rawRequest)) match
       case Success(formedRequest) =>
@@ -272,7 +272,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param requestId request identifier
    * @return error response if applicable
    */
-  private def errorResponse(error: Throwable, formedRequest: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
+  inline private def errorResponse(error: Throwable, formedRequest: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
     formedRequest.id.map { id =>
       // Assemble error details

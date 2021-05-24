@@ -47,12 +47,16 @@ object HandlerMacros:
   )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Outcome, Context]]] =
     import ref.quotes.reflect.{TypeRepr, TypeTree}
 
+//    '{
+//      $codec.decode[String](().asInstanceOf[Node])
+//    }
+
     val ref = Reflection(quotes)
 
-    def methodArgument[T: Type](node: Expr[Node], param: ref.QuotedParam): Expr[T] =
-      '{
-        $codec.decode[T]($node)
-      }
+//    def methodArgument[T: Type](node: Expr[Node], param: ref.QuotedParam): Expr[T] =
+//      '{
+//        $codec.decode[T]($node)
+//      }
 
 //    def methodFunction(method: ref.QuoteDMethod): Expr[Node => Outcome[Node]] =
 //      '{
