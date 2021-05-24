@@ -124,7 +124,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param request JSON-RPC request message
    * @return optional JSON-RPC response message and context
    */
-  def process(request: ArraySeq.ofByte): Outcome[Option[ArraySeq.ofByte]] = process(request, None)
+  def processRequest(request: ArraySeq.ofByte): Outcome[Option[ArraySeq.ofByte]] = processRequest(request, None)
 
   /**
    * Invokes a ''bound method'' specified in a JSON-RPC ''request'' and return a JSON-RPC ''response''.
@@ -132,7 +132,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param request JSON-RPC request message
    * @return optional JSON-RPC response message
    */
-  def process(request: ByteBuffer): Outcome[Option[ByteBuffer]] = process(request, None)
+  def processRequest(request: ByteBuffer): Outcome[Option[ByteBuffer]] = processRequest(request, None)
 
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' and return a JSON-RPC ''response''.
@@ -140,7 +140,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param request JSON-RPC request message
    * @return optional JSON-RPC response message
    */
-  def process(request: InputStream): Outcome[Option[InputStream]] = process(request, None)
+  def processRequest(request: InputStream): Outcome[Option[InputStream]] = processRequest(request, None)
 
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' plus an additional ''request context'' and return a JSON-RPC ''response''.
@@ -149,8 +149,8 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param context request context
    * @return optional JSON-RPC response message
    */
-  def process(request: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
-    handle(request, context)
+  def processRequest(request: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
+    handleRequest(request, context)
 
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' plus an additional ''request context'' and return a JSON-RPC ''response''.
@@ -159,8 +159,8 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param context request context
    * @return optional JSON-RPC response message
    */
-  def process(request: ByteBuffer, context: Option[Context]): Outcome[Option[ByteBuffer]] =
-    effect.map(process(request.toArraySeq), _.map(response => ByteBuffer.wrap(response.unsafeArray)))
+  def processRequest(request: ByteBuffer, context: Option[Context]): Outcome[Option[ByteBuffer]] =
+    effect.map(processRequest(request.toArraySeq), _.map(response => ByteBuffer.wrap(response.unsafeArray)))
 
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' plus an additional ''request context'' and return a JSON-RPC ''response''.
@@ -169,17 +169,17 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param context request context
    * @return optional JSON-RPC response message
    */
-  def process(request: InputStream, context: Option[Context]): Outcome[Option[InputStream]] =
-    effect.map(process(request.toArraySeq(bufferSize)), _.map(response => ByteArrayInputStream(response.unsafeArray)))
+  def processRequest(request: InputStream, context: Option[Context]): Outcome[Option[InputStream]] =
+    effect.map(processRequest(request.toArraySeq(bufferSize)), _.map(response => ByteArrayInputStream(response.unsafeArray)))
 
   /**
-   * Handle a JSON-RPC request message.
+   * Handle a JSON-RPC request.
    *
    * @param rawRequest raw request
    * @param context request context
    * @return response message
    */
-  private def handle(rawRequest: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
+  private def handleRequest(rawRequest: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
     // Deserialize request
     Try(codec.deserialize(rawRequest)) match
       case Success(formedRequest) =>
