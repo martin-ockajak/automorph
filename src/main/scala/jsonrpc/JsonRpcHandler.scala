@@ -57,7 +57,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, CodecType, Outcome, Context] = bind(api, Seq(_))
+  inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, CodecType, Outcome, Context] = bind(api, name => Seq(name))
 
   /**
    * Create a new JSON-RPC request handler by adding method bindings for member methods of the specified API.
@@ -83,7 +83,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     api: T,
     exposedNames: String => Seq[String]
   ): JsonRpcHandler[Node, CodecType, Outcome, Context] =
-    bind(api, Function.unlift(exposedNames.andThen(asSome)))
+    bind(api, Function.unlift(name => Some(exposedNames(name))))
 
   /**
    * Create a new JSON-RPC request handler by adding method bindings for member methods of the specified API.
@@ -108,10 +108,10 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     exposedNames: PartialFunction[String, Seq[String]]
   ): JsonRpcHandler[Node, CodecType, Outcome, Context] =
     val bindings =
-      HandlerMacros.bind[T, Node, Outcome, codec.type, Context](codec, effect, api).flatMap { (apiMethodName, method) =>
+      HandlerMacros.bind[T, Node, Outcome, CodecType, Context](codec, effect, api).flatMap { (apiMethodName, method) =>
         exposedNames.applyOrElse(
           apiMethodName,
-          throw new IllegalArgumentException(
+          _ => throw new IllegalArgumentException(
             s"Bound API does not contain the specified public method: ${api.getClass.getName}.$apiMethodName"
           )
         ).map(_ -> method)
