@@ -60,6 +60,8 @@ object HandlerMacros:
 
     // Detect and validate public methods in the API type
     val apiMethods = detectApiMethods(ref, TypeTree.of[ApiType])
+
+    // Generate method handles including wrapper functions consuming and product Node values
     val methodHandles = Expr.ofSeq(apiMethods.map(method => methodHandle[Node, Outcome, Context](ref, method)))
     println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
 
