@@ -1,6 +1,6 @@
 package jsonrpc
 
-import jsonrpc.client.ClientMacros
+import jsonrpc.codec.CodecMacros
 import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
@@ -197,7 +197,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
           case Success(validResponse) => validResponse.value match
               case Right(result) =>
                 // Decode result
-//                Try(ClientMacros.decode(result, codec)) match
+//                Try(CodecMacros.decode(codec, result)) match
                 Failure.apply[R](IllegalStateException("FIXME")): Try[R] match
                   case Success(result) =>
                     logger.info(s"Performed JSON-RPC request", formedRequest.properties)

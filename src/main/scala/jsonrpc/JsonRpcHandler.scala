@@ -2,6 +2,7 @@ package jsonrpc
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
+import jsonrpc.codec.CodecMacros
 import jsonrpc.core.EncodingOps.toArraySeq
 import jsonrpc.core.Protocol.{Id, MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Errors, Protocol, Request, Response, ResponseError}
@@ -278,6 +279,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
       // Assemble error details
       val code = Protocol.exceptionError(error.getClass).code
       val (message, data) = Errors.descriptions(error) match
+//        case Seq(message, details*) => message -> CodecMacros.encode(codec, details).asSome
         case Seq(message, details*) => message -> codec.encode(details).asSome
         case Seq()                  => "Unknown error" -> Option.empty[Node]
 

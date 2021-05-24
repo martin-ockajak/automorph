@@ -6,6 +6,18 @@ import scala.collection.immutable.ArraySeq
 import scala.compiletime.error
 import scala.quoted.{quotes, Expr, Quotes, Type}
 
+/**
+ * Bound API method handle.
+ *
+ * @param function binding function wrapping the bound method
+ * @param name method name
+ * @param resultType result type
+ * @param paramNames parameter names
+ * @param paramTypes paramter types
+ * @tparam Node data format node representation type
+ * @tparam Outcome computation outcome effect type
+ * @tparam Context request context type
+ */
 final case class MethodHandle[Node, Outcome[_], Context](
   function: (Seq[Node], Option[Context]) => Outcome[Node],
   name: String,
@@ -128,12 +140,24 @@ object HandlerMacros:
   ): Expr[(String, MethodHandle[Node, Outcome, Context])] =
     given Quotes = ref.quotes
     val liftedMethod = method.lift
+    val function = generateFunction[Node, Outcome, Context](ref, method, effect)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
     val paramNames = Expr(liftedMethod.params.flatMap(_.map(_.name)))
     val paramTypes = Expr(liftedMethod.params.flatMap(_.map(_.dataType)))
     '{
-      $name -> MethodHandle(null, $name, $resultType, $paramNames, $paramTypes)
+      $name -> MethodHandle($function, $name, $resultType, $paramNames, $paramTypes)
+    }
+
+  private def generateFunction[Node: Type, Outcome[_]: Type, Context: Type](
+    ref: Reflection,
+    method: ref.QuotedMethod,
+    effect: Expr[Effect[Outcome]]
+  ): Expr[(Seq[Node], Option[Context]) => Outcome[Node]] =
+    given Quotes = ref.quotes
+    '{
+      (arguments, context) =>
+        $effect.pure(arguments.head)
     }
 
   private def methodDescription(method: Method): String =
