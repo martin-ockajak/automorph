@@ -1,8 +1,9 @@
 package jsonrpc.codec.messagepack.upickle
 
+import jsonrpc.codec.messagepack.upickle.UpickleMessagePackCodec.{Message, MessageError, fromSpi}
 import jsonrpc.core.EncodingOps.asArraySeq
 import jsonrpc.spi
-import jsonrpc.spi.{Codec, Message}
+import jsonrpc.spi.Codec
 import scala.collection.immutable.ArraySeq
 import scala.compiletime.summonInline
 import upack.Msg
@@ -17,16 +18,16 @@ import upickle.Api
 final case class UpickleMessagePackCodec(parser: Api) extends Codec[Msg]:
 
   private val indent = 2
-  private given parser.ReadWriter[UpickleMessagePackCodec.Message] = parser.macroRW
-  private given parser.ReadWriter[UpickleMessagePackCodec.CallError] = parser.macroRW
+  private given parser.ReadWriter[Message] = parser.macroRW
+  private given parser.ReadWriter[MessageError] = parser.macroRW
 
-  def serialize(message: Message[Msg]): ArraySeq.ofByte =
-    parser.writeToByteArray(UpickleMessagePackCodec.Message(message)).asArraySeq
+  def serialize(message: spi.Message[Msg]): ArraySeq.ofByte =
+    parser.writeToByteArray(fromSpi(message)).asArraySeq
 
-  def deserialize(data: ArraySeq.ofByte): Message[Msg] =
-    parser.read[UpickleMessagePackCodec.Message](data.unsafeArray).toSpi
+  def deserialize(data: ArraySeq.ofByte): spi.Message[Msg] =
+    parser.read[Message](data.unsafeArray).toSpi
 
-  def format(message: Message[Msg]): String = parser.write(UpickleMessagePackCodec.Message(message), indent)
+  def format(message: spi.Message[Msg]): String = parser.write(fromSpi(message), indent)
 
   inline def encode[T](value: T): Msg = UpickleMessagePackMacros.encode(parser, value)
 
@@ -40,7 +41,7 @@ case object UpickleMessagePackCodec:
     method: Option[String],
     params: Option[Either[List[Msg], Map[String, Msg]]],
     result: Option[Msg],
-    error: Option[CallError]
+    error: Option[MessageError]
   ):
 
     def toSpi: spi.Message[Msg] = spi.Message[Msg](
@@ -52,18 +53,16 @@ case object UpickleMessagePackCodec:
       error.map(_.toSpi)
     )
 
-  case object Message:
+  def fromSpi(v: spi.Message[Msg]): Message = Message(
+    v.jsonrpc,
+    v.id,
+    v.method,
+    v.params,
+    v.result,
+    v.error.map(fromSpi)
+  )
 
-    def apply(v: spi.Message[Msg]): Message = Message(
-      v.jsonrpc,
-      v.id,
-      v.method,
-      v.params,
-      v.result,
-      v.error.map(CallError.apply)
-    )
-
-  final case class CallError(
+  final case class MessageError(
     code: Option[Int],
     message: Option[String],
     data: Option[Msg]
@@ -75,10 +74,8 @@ case object UpickleMessagePackCodec:
       data
     )
 
-  case object CallError:
-
-    def apply(v: spi.MessageError[Msg]): CallError = CallError(
-      v.code,
-      v.message,
-      v.data
-    )
+  def fromSpi(v: spi.MessageError[Msg]): MessageError = MessageError(
+    v.code,
+    v.message,
+    v.data
+  )

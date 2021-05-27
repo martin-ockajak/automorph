@@ -1,5 +1,6 @@
 package jsonrpc.codec.json.upickle
 
+import jsonrpc.codec.json.upickle.UpickleJsonCodec.{Message, MessageError, fromSpi}
 import jsonrpc.core.EncodingOps.asArraySeq
 import jsonrpc.spi
 import jsonrpc.spi.Codec
@@ -17,15 +18,15 @@ import upickle.Api
 final case class UpickleJsonCodec(parser: Api) extends Codec[Value]:
 
   private val indent = 2
-  private given parser.ReadWriter[UpickleJsonCodec.Message] = parser.macroRW
-  private given parser.ReadWriter[UpickleJsonCodec.MessageError] = parser.macroRW
+  private given parser.ReadWriter[Message] = parser.macroRW
+  private given parser.ReadWriter[MessageError] = parser.macroRW
 
   def serialize(message: spi.Message[Value]): ArraySeq.ofByte =
-    parser.writeToByteArray(UpickleJsonCodec.Message(message)).asArraySeq
+    parser.writeToByteArray(fromSpi(message)).asArraySeq
 
-  def deserialize(data: ArraySeq.ofByte): spi.Message[Value] = parser.read[UpickleJsonCodec.Message](data.unsafeArray).toSpi
+  def deserialize(data: ArraySeq.ofByte): spi.Message[Value] = parser.read[Message](data.unsafeArray).toSpi
 
-  def format(message: spi.Message[Value]): String = parser.write(UpickleJsonCodec.Message(message), indent)
+  def format(message: spi.Message[Value]): String = parser.write(fromSpi(message), indent)
 
   inline def encode[T](value: T): Value = UpickleJsonMacros.encode(parser, value)
 
@@ -51,16 +52,14 @@ case object UpickleJsonCodec:
       error.map(_.toSpi)
     )
 
-  case object Message:
-
-    def apply(v: spi.Message[Value]): Message = Message(
-      v.jsonrpc,
-      v.id,
-      v.method,
-      v.params,
-      v.result,
-      v.error.map(MessageError.apply)
-    )
+  def fromSpi(v: spi.Message[Value]): Message = Message(
+    v.jsonrpc,
+    v.id,
+    v.method,
+    v.params,
+    v.result,
+    v.error.map(fromSpi)
+  )
 
   final case class MessageError(
     code: Option[Int],
@@ -74,10 +73,8 @@ case object UpickleJsonCodec:
       data
     )
 
-  case object MessageError:
-
-    def apply(v: spi.MessageError[Value]): MessageError = MessageError(
-      v.code,
-      v.message,
-      v.data
-    )
+  def fromSpi(v: spi.MessageError[Value]): MessageError = MessageError(
+    v.code,
+    v.message,
+    v.data
+  )
