@@ -15,7 +15,7 @@ import upickle.Api
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[http://com-lihaoyi.github.io/upickle/#uJson Node type]]
  */
-final case class UpickleJsonCodec(parser: Api) extends Codec[Value]:
+final case class UpickleJsonCodec[Parser <: Api](parser: Parser) extends Codec[Value]:
 
   private val indent = 2
   private given parser.ReadWriter[Message] = parser.macroRW

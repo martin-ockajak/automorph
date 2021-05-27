@@ -11,11 +11,11 @@ import upickle.AttributeTagged
 
 class UpickleJsonSpec extends CodecSpec[Value]:
 
-  private val specificCodec = UpickleJsonCodec(Parser)
+  private lazy val specificCodec = UpickleJsonCodec(Parser)
 
-  override def codec: Codec[Value] = specificCodec
+  def codec: Codec[Value] = specificCodec
 
-  override def messageArguments: Seq[Params[Value]] = Seq(
+  def messageArguments: Seq[Params[Value]] = Seq(
     Map(
       "x" -> Str("foo"),
       "y" -> Num(1),
@@ -23,7 +23,7 @@ class UpickleJsonSpec extends CodecSpec[Value]:
     ).asRight
   )
 
-  override def messageResults: Seq[Value] = Seq(
+  def messageResults: Seq[Value] = Seq(
     Str("test")
   )
 
