@@ -15,7 +15,13 @@ object CodecMacros:
     import ref.quotes.reflect.{asTerm, TypeRepr}
 
     val ref = Reflection(quotes)
-    ref.callTerm(codec.asTerm, "encode", List(TypeRepr.of[T]), List(List(value.asTerm))).asExprOf[Node]
+    val codecType = codec match
+      case '{ $value: tpe } => TypeRepr.of[tpe]
+    println(codecType.show)
+    println()
+//    val codecInstance = '{ $codec.asInstanceOf[parserType] }
+    val codecInstance = codec
+    ref.callTerm(codecInstance.asTerm, "encode", List(TypeRepr.of[T]), List(List(value.asTerm))).asExprOf[Node]
 
   inline def decode[Node, CodecType <: Codec[Node], T](codec: CodecType, node: Node): T =
     ${ decode('codec, 'node) }
