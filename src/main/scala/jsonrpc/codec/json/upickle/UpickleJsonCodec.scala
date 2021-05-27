@@ -2,7 +2,7 @@ package jsonrpc.codec.json.upickle
 
 import jsonrpc.core.EncodingOps.asArraySeq
 import jsonrpc.spi
-import jsonrpc.spi.{Codec, Message}
+import jsonrpc.spi.Codec
 import scala.collection.immutable.ArraySeq
 import scala.compiletime.summonInline
 import ujson.Value
@@ -18,14 +18,14 @@ final case class UpickleJsonCodec(parser: Api) extends Codec[Value]:
 
   private val indent = 2
   private given parser.ReadWriter[UpickleJsonCodec.Message] = parser.macroRW
-  private given parser.ReadWriter[UpickleJsonCodec.CallError] = parser.macroRW
+  private given parser.ReadWriter[UpickleJsonCodec.MessageError] = parser.macroRW
 
-  def serialize(message: Message[Value]): ArraySeq.ofByte =
+  def serialize(message: spi.Message[Value]): ArraySeq.ofByte =
     parser.writeToByteArray(UpickleJsonCodec.Message(message)).asArraySeq
 
-  def deserialize(data: ArraySeq.ofByte): Message[Value] = parser.read[UpickleJsonCodec.Message](data.unsafeArray).toSpi
+  def deserialize(data: ArraySeq.ofByte): spi.Message[Value] = parser.read[UpickleJsonCodec.Message](data.unsafeArray).toSpi
 
-  def format(message: Message[Value]): String = parser.write(UpickleJsonCodec.Message(message), indent)
+  def format(message: spi.Message[Value]): String = parser.write(UpickleJsonCodec.Message(message), indent)
 
   inline def encode[T](value: T): Value = UpickleJsonMacros.encode(parser, value)
 
@@ -39,7 +39,7 @@ case object UpickleJsonCodec:
     method: Option[String],
     params: Option[Either[List[Value], Map[String, Value]]],
     result: Option[Value],
-    error: Option[CallError]
+    error: Option[MessageError]
   ):
 
     def toSpi: spi.Message[Value] = spi.Message[Value](
@@ -59,10 +59,10 @@ case object UpickleJsonCodec:
       v.method,
       v.params,
       v.result,
-      v.error.map(CallError.apply)
+      v.error.map(MessageError.apply)
     )
 
-  final case class CallError(
+  final case class MessageError(
     code: Option[Int],
     message: Option[String],
     data: Option[Value]
@@ -74,9 +74,9 @@ case object UpickleJsonCodec:
       data
     )
 
-  case object CallError:
+  case object MessageError:
 
-    def apply(v: spi.MessageError[Value]): CallError = CallError(
+    def apply(v: spi.MessageError[Value]): MessageError = MessageError(
       v.code,
       v.message,
       v.data

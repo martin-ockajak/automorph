@@ -100,13 +100,13 @@ class ServerSpec extends BaseSpec:
 //        println(jsonContext.format(jacksonMessage))
       }
       "Upickle" in {
-//        val jsonContext = UpickleJsonCodec(upickle.default)
-//        println(jsonContext.encode("test"))
-//        println(jsonContext.decode[String](jsonContext.encode("test")))
-//        val messageJson = jsonContext.serialize(upickleMessage)
-//        println(messageJson)
+        val jsonContext = UpickleJsonCodec(upickle.default)
+        println(jsonContext.encode("test"))
+        println(jsonContext.decode[String](jsonContext.encode("test")))
+        val messageJson = jsonContext.serialize(upickleMessage)
+        println(messageJson)
 //        println(jsonContext.deserialize(messageJson))
-//        println(jsonContext.format(upickleMessage))
+        println(jsonContext.format(upickleMessage))
       }
     }
   }
