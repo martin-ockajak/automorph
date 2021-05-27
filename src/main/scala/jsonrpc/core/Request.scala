@@ -2,6 +2,7 @@ package jsonrpc.core
 
 import jsonrpc.core.Protocol.{ErrorType, InvalidRequestException}
 import jsonrpc.spi.Message
+import jsonrpc.spi.Message.Params
 import jsonrpc.util.ValueOps.{asRight, asSome}
 
 /**
@@ -17,7 +18,7 @@ import jsonrpc.util.ValueOps.{asRight, asSome}
 final case class Request[Node](
   id: Option[Protocol.Id],
   method: String,
-  params: Request.Params[Node]
+  params: Params[Node]
 ):
   def formed: Message[Node] = Message[Node](
     jsonrpc = Protocol.version.asSome,
@@ -29,9 +30,6 @@ final case class Request[Node](
   )
 
 case object Request:
-  /** Request parameters type. */
-  type Params[Node] = Either[List[Node], Map[String, Node]]
-
   def apply[Node](message: Message[Node]): Request[Node] =
     val jsonrpc = Protocol.mandatory(message.jsonrpc, "jsonrpc")
     if jsonrpc != Protocol.version then

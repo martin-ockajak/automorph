@@ -4,6 +4,7 @@ import jsonrpc.codec.CodecMacros
 import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
+import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Codec, Effect, Message, MessageError}
 import jsonrpc.util.CannotEqual
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
@@ -135,9 +136,9 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    */
   def proxy[T]: T = ???
 
-  private def encodeArguments(arguments: Seq[Any]): Request.Params[Node] = ???
+  private def encodeArguments(arguments: Seq[Any]): Params[Node] = ???
 
-  private def encodeArguments(arguments: Map[String, Any]): Request.Params[Node] = ???
+  private def encodeArguments(arguments: Map[String, Any]): Params[Node] = ???
 
   /**
    * Perform a method call using specified arguments.
@@ -150,7 +151,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return result value
    */
-  private def performCall[R](method: String, arguments: Request.Params[Node], context: Option[Context]): Outcome[R] =
+  private def performCall[R](method: String, arguments: Params[Node], context: Option[Context]): Outcome[R] =
     val id = Math.abs(random.nextLong()).toString.asRight[BigDecimal].asSome
     val formedRequest = Request(id, method, arguments).formed
     logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
@@ -177,7 +178,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return nothing
    */
-  private def performNotify(methodName: String, arguments: Request.Params[Node], context: Option[Context]): Outcome[Unit] =
+  private def performNotify(methodName: String, arguments: Params[Node], context: Option[Context]): Outcome[Unit] =
     val formedRequest = Request(None, methodName, arguments).formed
     effect.map(
       // Serialize request

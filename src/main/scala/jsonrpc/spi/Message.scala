@@ -16,10 +16,10 @@ final case class Message[Node](
   jsonrpc: Option[String],
   id: Option[Either[BigDecimal, String]],
   method: Option[String],
-  params: Option[Either[List[Node], Map[String, Node]]],
+  params: Option[Message.Params[Node]],
   result: Option[Node],
   error: Option[MessageError[Node]]
-):
+) derives CanEqual:
 
   /** Message type. */
   lazy val objectType: MessageType = error.map(_ => MessageType.Error).getOrElse {
@@ -39,6 +39,10 @@ final case class Message[Node](
       error.toSeq.flatMap { value =>
         value.code.map(code => "ErrorCode" -> code.toString) ++ value.message.map(message => "ErrorMessage" -> message)
       }
+
+object Message:
+  /** Request parameters type. */
+  type Params[Node] = Either[List[Node], Map[String, Node]]
 
 /**
  * JSON-RPC protocol message error structure.
