@@ -2,9 +2,9 @@ package jsonrpc.codec.json.jackson
 
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import io.github.gaeljw.typetrees.TypeTreeTagMacros.typeTreeTag
 import jsonrpc.spi.{Codec, Message}
 import scala.collection.immutable.ArraySeq
 import scala.compiletime.summonInline
@@ -29,7 +29,8 @@ final case class JacksonJsonCodec(mapper: ObjectMapper = JacksonJsonCodec.defaul
   inline def encode[T](value: T): JsonNode = mapper.valueToTree(value).asInstanceOf[JsonNode]
 
   inline def decode[T](node: JsonNode): T =
-    val valueClass = typeTreeTag[T].self.runtimeClass.asInstanceOf[Class[T]]
+    val classTag = summonInline[ClassTag[T]]
+    val valueClass = classTag.runtimeClass.asInstanceOf[Class[T]]
     mapper.treeToValue(node, valueClass)
 
 case object JacksonJsonCodec:

@@ -10,6 +10,7 @@
 //import jsonrpc.util.ValueOps.{asRight, asSome}
 //
 //class JacksonJsonSpec extends CodecSpec[JsonNode]:
+//  private given CanEqual[TextNode, String] = CanEqual.derived
 //
 //  override def codec: Codec[JsonNode] = JacksonJsonCodec()
 //
@@ -17,10 +18,21 @@
 //    Map(
 //      "x" -> TextNode("foo"),
 //      "y" -> IntNode(1),
-//      "z" -> BooleanNode.TRUE.nn
+//      "z" -> BooleanNode.TRUE
 //    ).asRight
 //  )
 //
 //  override def messageResults: Seq[JsonNode] = Seq(
 //    TextNode("test")
 //  )
+//
+//  "" - {
+//    "Deserialize" in {
+//      val x = codec.deserialize(codec.serialize(messages.head))
+//      println(messages.head)
+//      println(x)
+//      println(messages.head.result.get.getClass.getName)
+//      println(x.result.get.getClass.getName)
+//      codec.serialize(x)
+//    }
+//  }
