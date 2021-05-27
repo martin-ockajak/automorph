@@ -21,7 +21,8 @@ lazy val root = project.in(file(".")).settings(
 
     // Test
     "org.scalatest" %% "scalatest" % "3.2.9" % Test,
-    "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0" % Test
+    "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0" % Test,
+    "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
   )
 )
 
