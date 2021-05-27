@@ -31,11 +31,7 @@ trait CodecSpec[Node] extends BaseSpec:
       ).asSome
     )
 
-  private val structure = Structure(
-    "test"
-  )
-
-  private val record = Record(
+  val record = Record(
     "test",
     boolean = true,
     0,
@@ -50,16 +46,18 @@ trait CodecSpec[Node] extends BaseSpec:
       "foo" -> 0,
       "bar" -> 1
     ),
-    structure.asSome,
+    Structure(
+      "test"
+    ).asSome,
     None
   )
 
   "" - {
-    "Encode / Decode" in {
+//    "Encode / Decode" in {
 //      val encodedValue = codec.encode(record)
 //      val decodedValue = codec.decode[Record](record)
 //      decodedValue.should(equal(record))
-    }
+//    }
     "Serialize / Deserialize" in {
       messages.foreach { message =>
         val rawMessage = codec.serialize(message)

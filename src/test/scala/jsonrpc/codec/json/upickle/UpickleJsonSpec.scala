@@ -1,17 +1,27 @@
 package jsonrpc.codec.json.upickle
 
-import jsonrpc.Enum
+import jsonrpc.{Enum, Record, Structure}
 import jsonrpc.codec.CodecSpec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
-import jsonrpc.spi.Message.Params
 import jsonrpc.spi.Codec
+import jsonrpc.spi.Message.Params
 import jsonrpc.util.ValueOps.{asRight, asSome}
 import ujson.{Bool, Num, Str, Value}
-import upickle.default.ReadWriter
+import upickle.AttributeTagged
 
 class UpickleJsonSpec extends CodecSpec[Value]:
+  private val parser = new AttributeTagged:
+    given enumRw: ReadWriter[Enum] =
+      readwriter[Int].bimap[Enum](
+        value => value.ordinal,
+        number => Enum.fromOrdinal(number)
+      )
+    given structureRw: ReadWriter[Structure] = macroRW
+    given recordRw: ReadWriter[Record] = macroRW
 
-  override def codec: Codec[Value] = UpickleJsonCodec(upickle.default)
+  private val specificCodec = UpickleJsonCodec(parser)
+
+  override def codec: Codec[Value] = specificCodec
 
   override def messageArguments: Seq[Params[Value]] = Seq(
     Map(
@@ -25,8 +35,10 @@ class UpickleJsonSpec extends CodecSpec[Value]:
     Str("test")
   )
 
-  private given enumRw: ReadWriter[Enum] =
-    upickle.default.readwriter[Int].bimap[Enum](
-      value => value.ordinal,
-      number => Enum.fromOrdinal(number)
-    )
+  "" - {
+//    "Encode / Decode" in {
+//      val encodedValue = specificCodec.encode(record)
+//      val decodedValue = specificCodec.decode[Record](encodedValue)
+//      decodedValue.should(equal(record))
+//    }
+  }
