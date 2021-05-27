@@ -10,6 +10,7 @@ import ujson.{Bool, Num, Str, Value}
 import upickle.AttributeTagged
 
 class UpickleJsonSpec extends CodecSpec[Value]:
+
   private val specificCodec = UpickleJsonCodec(Parser)
 
   override def codec: Codec[Value] = specificCodec
@@ -35,10 +36,10 @@ class UpickleJsonSpec extends CodecSpec[Value]:
   }
 
 object Parser extends AttributeTagged:
-  given enumRw: ReadWriter[Enum] =
-    readwriter[Int].bimap[Enum](
-      value => value.ordinal,
-      number => Enum.fromOrdinal(number)
-    )
+
+  given enumRw: ReadWriter[Enum] = readwriter[Int].bimap[Enum](
+    value => value.ordinal,
+    number => Enum.fromOrdinal(number)
+  )
   given structureRw: ReadWriter[Structure] = macroRW
   given recordRw: ReadWriter[Record] = macroRW
