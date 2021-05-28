@@ -2,7 +2,6 @@ package jsonrpc.codec.json.upickle
 
 import scala.compiletime.summonInline
 import scala.quoted.{Expr, Quotes, Type}
-import jsonrpc.util.{Method, Reflection}
 import ujson.Value
 import upickle.Api
 
@@ -13,41 +12,19 @@ case object UpickleJsonMacros:
   private def encode[Parser <: Api: Type, T: Type](parser: Expr[Parser], value: Expr[T])(using
     quotes: Quotes
   ): Expr[Value] =
-//    val writer = Expr.summon[Api#Writer[T]].getOrElse(throw IllegalStateException("ERROR"))
     '{
       val realParser = $parser
       val realWriter = summonInline[realParser.Writer[T]]
       realParser.writeJs($value)(using realWriter)
-//      realParser.writeJs($value)(using $writer.asInstanceOf[realParser.Writer[T]])
     }
 
-  inline def decode[Parser <: Api, T](inline parser: Parser, inline node: Value): T =
-    ${ decode[Parser, T]('parser, 'node) }
+  inline def decode[Parser <: Api, Reader[T] <: Api#Reader[T], T](parser: Parser, reader: Reader[T], node: Value): T =
+    ${ decode[Parser, Reader, T]('parser, 'reader, 'node) }
 
-  private def decode[Parser <: Api: Type, T: Type](parser: Expr[Parser], node: Expr[Value])(using
+  private def decode[Parser <: Api: Type, Reader[T] <: Api#Reader[T]: Type, T: Type](parser: Expr[Parser], reader: Expr[Reader[T]], node: Expr[Value])(using
     quotes: Quotes
   ): Expr[T] =
-    import ref.quotes.reflect.{AppliedType, TypeRepr, TypeTree}
-
-    val ref = Reflection(quotes)
-
-//    val parserType = parser match
-//      case '{ $value: tpe } => TypeRepr.of[tpe]
-//    val readerType = ref.methods(parserType).filter(_.name == "reader").headOption.getOrElse(
-//      sys.error(s"Upickle JSON parser API method not found: reader")
-//    ).resultType
-//    val valueReaderType =
-//      readerType match
-//        case appliedType: AppliedType => appliedType.tycon.appliedTo(TypeRepr.of[T])
-//        case _                        => readerType
-//    val reader = valueReaderType.asType match
-//      case '[tpe] => Expr.summon[tpe].getOrElse {
-//          sys.error(s"Given value of specified type not found: ${valueReaderType.show}")
-//        }
     '{
       val realParser = $parser
-      val realReader = summonInline[realParser.Reader[T]]
-      realParser.read[T]($node)(using realReader)
-//      realParser.read[T]($node)(using $reader.asInstanceOf[realParser.Reader[T]])
-//      realParser.read[T]($node)(using realReader.asInstanceOf[realParser.Reader[T]])
+      realParser.read[T]($node)(using $reader.asInstanceOf[realParser.Reader[T]])
     }
