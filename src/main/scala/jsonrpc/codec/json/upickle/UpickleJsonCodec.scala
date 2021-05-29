@@ -15,21 +15,21 @@ import upickle.Api
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[http://com-lihaoyi.github.io/upickle/#uJson Node type]]
  */
-final case class UpickleJsonCodec[Parser <: Api](parser: Parser) extends Codec[Value]:
+final case class UpickleJsonCodec[Pickler <: Api](pickler: Pickler) extends Codec[Value]:
 
   private val indent = 2
-  private given parser.ReadWriter[Message] = parser.macroRW
-  private given parser.ReadWriter[MessageError] = parser.macroRW
+  private given pickler.ReadWriter[Message] = pickler.macroRW
+  private given pickler.ReadWriter[MessageError] = pickler.macroRW
 
-  def serialize(message: spi.Message[Value]): ArraySeq.ofByte = parser.writeToByteArray(fromSpi(message)).asArraySeq
+  def serialize(message: spi.Message[Value]): ArraySeq.ofByte = pickler.writeToByteArray(fromSpi(message)).asArraySeq
 
-  def deserialize(data: ArraySeq.ofByte): spi.Message[Value] = parser.read[Message](data.unsafeArray).toSpi
+  def deserialize(data: ArraySeq.ofByte): spi.Message[Value] = pickler.read[Message](data.unsafeArray).toSpi
 
-  def format(message: spi.Message[Value]): String = parser.write(fromSpi(message), indent)
+  def format(message: spi.Message[Value]): String = pickler.write(fromSpi(message), indent)
 
-  inline def encode[T](value: T): Value = UpickleJsonMacros.encode(parser, value)
+  inline def encode[T](value: T): Value = UpickleJsonMacros.encode(pickler, value)
 
-  inline def decode[T](node: Value): T = UpickleJsonMacros.decode[Parser, T](parser, node)
+  inline def decode[T](node: Value): T = UpickleJsonMacros.decode[Pickler, T](pickler, node)
 
 case object UpickleJsonCodec:
 

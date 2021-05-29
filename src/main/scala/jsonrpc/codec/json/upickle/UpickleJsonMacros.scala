@@ -7,23 +7,23 @@ import upickle.Api
 
 case object UpickleJsonMacros:
 
-  inline def encode[Parser <: Api, T](parser: Parser, value: T): Value = ${ encode('parser, 'value) }
+  inline def encode[Pickler <: Api, T](pickler: Pickler, value: T): Value = ${ encode('pickler, 'value) }
 
-  private def encode[Parser <: Api: Type, T: Type](parser: Expr[Parser], value: Expr[T])(using
+  private def encode[Pickler <: Api: Type, T: Type](pickler: Expr[Pickler], value: Expr[T])(using
     quotes: Quotes
   ): Expr[Value] = '{
-    val realParser = $parser
-    val realWriter = summonInline[realParser.Writer[T]]
-    realParser.writeJs($value)(using realWriter)
+    val realPickler = $pickler
+    val writer = summonInline[realPickler.Writer[T]]
+    realPickler.writeJs($value)(using writer)
   }
 
-  inline def decode[Parser <: Api, T](parser: Parser, node: Value): T =
-    ${ decode[Parser, T]('parser, 'node) }
+  inline def decode[Pickler <: Api, T](pickler: Pickler, node: Value): T =
+    ${ decode[Pickler, T]('pickler, 'node) }
 
-  private def decode[Parser <: Api: Type, T: Type](parser: Expr[Parser], node: Expr[Value])(using
+  private def decode[Pickler <: Api: Type, T: Type](pickler: Expr[Pickler], node: Expr[Value])(using
     quotes: Quotes
   ): Expr[T] = '{
-    val realParser = $parser
-    val realReader = summonInline[realParser.Reader[T]]
-    realParser.read[T]($node)(using realReader)
+    val realPickler = $pickler
+    val reader = summonInline[realPickler.Reader[T]]
+    realPickler.read[T]($node)(using reader)
   }
