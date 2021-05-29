@@ -1,6 +1,5 @@
 package jsonrpc
 
-import jsonrpc.codec.CodecMacros
 import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
