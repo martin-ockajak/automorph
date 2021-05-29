@@ -7,8 +7,12 @@ import jsonrpc.spi.{Codec, Message, MessageError}
 import jsonrpc.util.ValueOps.{asRight, asSome}
 import jsonrpc.{Enum, Record, Structure}
 
-trait CodecSpec[Node] extends BaseSpec:
-  def codec: Codec[Node]
+trait CodecSpec extends BaseSpec:
+
+  type Node
+  type CodecType <: Codec[Node]
+
+  def codec: CodecType
 
   def messageArguments: Seq[Params[Node]]
 

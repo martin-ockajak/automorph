@@ -1,21 +1,22 @@
 package jsonrpc.codec.json.upickle
 
-import jsonrpc.{Enum, Record, Structure}
 import jsonrpc.codec.CodecSpec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
-import jsonrpc.util.ValueOps.{asRight, asSome}
+import jsonrpc.util.ValueOps.asRight
+import jsonrpc.{Enum, Record, Structure}
 import ujson.{Bool, Num, Str, Value}
 import upickle.AttributeTagged
 
-class UpickleJsonSpec extends CodecSpec[Value]:
+class UpickleJsonSpec extends CodecSpec:
 
-  private lazy val specificCodec = UpickleJsonCodec(JsonParser)
+  type Node = Value
+  type CodecType = UpickleJsonCodec[JsonPickler.type]
 
-  def codec: Codec[Value] = specificCodec
+  def codec: CodecType = UpickleJsonCodec(JsonPickler)
 
-  def messageArguments: Seq[Params[Value]] = Seq(
+  def messageArguments: Seq[Params[Node]] = Seq(
     Map(
       "x" -> Str("foo"),
       "y" -> Num(1),
@@ -29,13 +30,13 @@ class UpickleJsonSpec extends CodecSpec[Value]:
 
   "" - {
     "Encode / Decode" in {
-      val encodedValue = specificCodec.encode(record)
-      val decodedValue = specificCodec.decode[Record](encodedValue)
+      val encodedValue = codec.encode(record)
+      val decodedValue = codec.decode[Record](encodedValue)
       decodedValue.should(equal(record))
     }
   }
 
-object JsonParser extends AttributeTagged:
+object JsonPickler extends AttributeTagged:
 
   given ReadWriter[Enum] = readwriter[Int].bimap[Enum](
     value => value.ordinal,

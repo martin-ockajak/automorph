@@ -2,19 +2,20 @@
 //
 //import com.fasterxml.jackson.databind.JsonNode
 //import com.fasterxml.jackson.databind.node.{BooleanNode, IntNode, TextNode}
-//import jsonrpc.Enum
 //import jsonrpc.codec.CodecSpec
 //import jsonrpc.codec.json.jackson.JacksonJsonCodec
-//import jsonrpc.spi.Message.Params
 //import jsonrpc.spi.Codec
-//import jsonrpc.util.ValueOps.{asRight, asSome}
+//import jsonrpc.spi.Message.Params
+//import jsonrpc.util.ValueOps.asRight
 //
-//class JacksonJsonSpec extends CodecSpec[JsonNode]:
-//  private given CanEqual[TextNode, String] = CanEqual.derived
+//class JacksonJsonSpec extends CodecSpec:
 //
-//  override def codec: Codec[JsonNode] = JacksonJsonCodec()
+//  type Node = JsonNode
+//  type CodecType = JacksonJsonCodec
 //
-//  override def messageArguments: Seq[Params[JsonNode]] = Seq(
+//  def codec: CodecType = JacksonJsonCodec()
+//
+//  def messageArguments: Seq[Params[JsonNode]] = Seq(
 //    Map(
 //      "x" -> TextNode("foo"),
 //      "y" -> IntNode(1),
@@ -22,7 +23,7 @@
 //    ).asRight
 //  )
 //
-//  override def messageResults: Seq[JsonNode] = Seq(
+//  def messageResults: Seq[JsonNode] = Seq(
 //    TextNode("test")
 //  )
 //
