@@ -39,20 +39,21 @@ object HandlerMacros:
    * @param codec data format codec
    * @param effect effect system
    * @param api API instance
-   * @tparam ApiType API type
    * @tparam Node data format node representation type
+   * @tparam CodecType data format codec type
    * @tparam Outcome computation outcome effect type
    * @tparam Context request context type
+   * @tparam ApiType API type
    * @return mapping of method names to their JSON-RPC wrapper functions
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[ApiType <: AnyRef, Node, Outcome[_], CodecType <: Codec[Node], Context](
+  inline def bind[Node, CodecType <: Codec[Node], Outcome[_], Context, ApiType <: AnyRef](
     codec: CodecType,
     effect: Effect[Outcome],
     api: ApiType
   ): Map[String, MethodHandle[Node, Outcome, Context]] = ${ bind('codec, 'effect, 'api) }
 
-  private def bind[ApiType <: AnyRef: Type, Node: Type, Outcome[_]: Type, CodecType <: Codec[Node]: Type, Context: Type](
+  private def bind[Node: Type, CodecType <: Codec[Node]: Type, Outcome[_]: Type, Context: Type, ApiType <: AnyRef: Type](
     codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]

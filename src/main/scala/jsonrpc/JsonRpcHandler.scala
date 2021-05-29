@@ -108,7 +108,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     exposedNames: PartialFunction[String, Seq[String]]
   ): JsonRpcHandler[Node, CodecType, Outcome, Context] =
     val bindings =
-      HandlerMacros.bind[T, Node, Outcome, CodecType, Context](codec, effect, api).flatMap { (apiMethodName, method) =>
+      HandlerMacros.bind[Node, CodecType, Outcome, Context, T](codec, effect, api).flatMap { (apiMethodName, method) =>
         exposedNames.applyOrElse(
           apiMethodName,
           _ =>
