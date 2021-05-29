@@ -37,9 +37,9 @@ class UpickleJsonSpec extends CodecSpec[Value]:
 
 object JsonParser extends AttributeTagged:
 
-  given enumRw: ReadWriter[Enum] = readwriter[Int].bimap[Enum](
+  given ReadWriter[Enum] = readwriter[Int].bimap[Enum](
     value => value.ordinal,
     number => Enum.fromOrdinal(number)
   )
-  given structureRw: ReadWriter[Structure] = macroRW
-  given recordRw: ReadWriter[Record] = macroRW
+  given ReadWriter[Structure] = macroRW
+  given ReadWriter[Record] = macroRW
