@@ -17,12 +17,16 @@ case object UpickleMessagePackMacros:
     realParser.writeMsg($value)(using realWriter)
   }
 
-  inline def decode[Parser <: Api, T](parser: Parser, node: Msg): T = ${ decode[Parser, T]('parser, 'node) }
+  inline def decode[Parser <: Api, Reader[T] <: Api#Reader[T], T](parser: Parser, reader: Reader[T], node: Msg): T =
+    ${ decode[Parser, Reader, T]('parser, 'reader, 'node) }
 
-  private def decode[Parser <: Api: Type, T: Type](parser: Expr[Parser], node: Expr[Msg])(using
+  private def decode[Parser <: Api: Type, Reader[T] <: Api#Reader[T]: Type, T: Type](
+    parser: Expr[Parser],
+    reader: Expr[Reader[T]],
+    node: Expr[Msg]
+  )(using
     quotes: Quotes
   ): Expr[T] = '{
     val realParser = $parser
-    val realReader = summonInline[realParser.Reader[T]]
-    realParser.readBinary[T]($node)(using realReader)
+    realParser.readBinary[T]($node)(using $reader.asInstanceOf[realParser.Reader[T]])
   }

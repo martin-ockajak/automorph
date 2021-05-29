@@ -1,6 +1,6 @@
 package jsonrpc.codec.messagepack.upickle
 
-import jsonrpc.codec.messagepack.upickle.UpickleMessagePackCodec.{Message, MessageError, fromSpi}
+import jsonrpc.codec.messagepack.upickle.UpickleMessagePackCodec.{fromSpi, Message, MessageError}
 import jsonrpc.core.EncodingOps.asArraySeq
 import jsonrpc.spi
 import jsonrpc.spi.Codec
@@ -21,17 +21,17 @@ final case class UpickleMessagePackCodec(parser: Api) extends Codec[Msg]:
   private given parser.ReadWriter[Message] = parser.macroRW
   private given parser.ReadWriter[MessageError] = parser.macroRW
 
-  def serialize(message: spi.Message[Msg]): ArraySeq.ofByte =
-    parser.writeToByteArray(fromSpi(message)).asArraySeq
+  def serialize(message: spi.Message[Msg]): ArraySeq.ofByte = parser.writeToByteArray(fromSpi(message)).asArraySeq
 
-  def deserialize(data: ArraySeq.ofByte): spi.Message[Msg] =
-    parser.read[Message](data.unsafeArray).toSpi
+  def deserialize(data: ArraySeq.ofByte): spi.Message[Msg] = parser.read[Message](data.unsafeArray).toSpi
 
   def format(message: spi.Message[Msg]): String = parser.write(fromSpi(message), indent)
 
   inline def encode[T](value: T): Msg = UpickleMessagePackMacros.encode(parser, value)
 
-  inline def decode[T](node: Msg): T = UpickleMessagePackMacros.decode[Api, T](parser, node)
+  inline def decode[T](node: Msg): T =
+    val reader = summonInline[parser.Reader[T]]
+    UpickleMessagePackMacros.decode[Api, parser.Reader, T](parser, reader, node)
 
 case object UpickleMessagePackCodec:
 

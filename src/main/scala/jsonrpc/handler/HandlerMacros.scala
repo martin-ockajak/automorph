@@ -86,7 +86,6 @@ object HandlerMacros:
     // Generate method handles including wrapper functions consuming and product Node values
     val methodHandles =
       Expr.ofSeq(apiMethods.map(method => generateMethodHandle[Node, Outcome, CodecType, Context](ref, method, codec, effect)))
-    println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
 
     // Generate JSON-RPC wrapper functions for the API methods
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
@@ -97,15 +96,16 @@ object HandlerMacros:
     val typedCall = ref.callTerm('{ List }.asTerm, "apply", List(typeParam), List.empty)
 
     // Debug printounts
-    println(
-      s"""
-        |Call:
-        |  $call
-        |
-        |Typed call:
-        |  $typedCall
-        |""".stripMargin
-    )
+//    println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
+//    println(
+//      s"""
+//        |Call:
+//        |  $call
+//        |
+//        |Typed call:
+//        |  $typedCall
+//        |""".stripMargin
+//    )
 
     // Generate printouts code using the previously generated code
     '{
@@ -168,7 +168,7 @@ object HandlerMacros:
       (arguments: Seq[Node], context: Option[Context]) =>
         $effect.pure(arguments.head)
     }
-    println(function.asTerm)
+//    println(function.asTerm)
     function
 
   private def methodDescription(method: Method): String =

@@ -1,6 +1,6 @@
 package jsonrpc.codec.json.upickle
 
-import jsonrpc.codec.json.upickle.UpickleJsonCodec.{Message, MessageError, fromSpi}
+import jsonrpc.codec.json.upickle.UpickleJsonCodec.{fromSpi, Message, MessageError}
 import jsonrpc.core.EncodingOps.asArraySeq
 import jsonrpc.spi
 import jsonrpc.spi.Codec
@@ -21,16 +21,13 @@ final case class UpickleJsonCodec[Parser <: Api](parser: Parser) extends Codec[V
   private given parser.ReadWriter[Message] = parser.macroRW
   private given parser.ReadWriter[MessageError] = parser.macroRW
 
-  def serialize(message: spi.Message[Value]): ArraySeq.ofByte =
-    parser.writeToByteArray(fromSpi(message)).asArraySeq
+  def serialize(message: spi.Message[Value]): ArraySeq.ofByte = parser.writeToByteArray(fromSpi(message)).asArraySeq
 
   def deserialize(data: ArraySeq.ofByte): spi.Message[Value] = parser.read[Message](data.unsafeArray).toSpi
 
   def format(message: spi.Message[Value]): String = parser.write(fromSpi(message), indent)
 
-  inline def encode[T](value: T): Value =
-//    val writer = summonInline(parser.Writer[T])
-    UpickleJsonMacros.encode(parser, value)
+  inline def encode[T](value: T): Value = UpickleJsonMacros.encode(parser, value)
 
   inline def decode[T](node: Value): T =
     val reader = summonInline[parser.Reader[T]]

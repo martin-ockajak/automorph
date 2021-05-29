@@ -11,7 +11,7 @@ import upickle.AttributeTagged
 
 class UpickleJsonSpec extends CodecSpec[Value]:
 
-  private lazy val specificCodec = UpickleJsonCodec(Parser)
+  private lazy val specificCodec = UpickleJsonCodec(JsonParser)
 
   def codec: Codec[Value] = specificCodec
 
@@ -35,7 +35,7 @@ class UpickleJsonSpec extends CodecSpec[Value]:
     }
   }
 
-object Parser extends AttributeTagged:
+object JsonParser extends AttributeTagged:
 
   given enumRw: ReadWriter[Enum] = readwriter[Int].bimap[Enum](
     value => value.ordinal,
