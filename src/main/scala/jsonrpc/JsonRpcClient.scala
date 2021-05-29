@@ -135,9 +135,11 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    */
   inline def proxy[T]: T = ???
 
-  inline private def encodeArguments(arguments: Seq[Any]): Params[Node] = ???
+  private inline def encodeArguments(arguments: Seq[Any]): Params[Node] =
+    arguments.map(argument => codec.encode(argument)).toList.asLeft
 
-  inline private def encodeArguments(arguments: Map[String, Any]): Params[Node] = ???
+  private inline def encodeArguments(arguments: Map[String, Any]): Params[Node] =
+    arguments.view.mapValues(argument => codec.encode(argument)).toMap.asRight
 
   /**
    * Perform a method call using specified arguments.
@@ -150,7 +152,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return result value
    */
-  inline private def performCall[R](method: String, arguments: Params[Node], context: Option[Context]): Outcome[R] =
+  private inline def performCall[R](method: String, arguments: Params[Node], context: Option[Context]): Outcome[R] =
     val id = Math.abs(random.nextLong()).toString.asRight[BigDecimal].asSome
     val formedRequest = Request(id, method, arguments).formed
     logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
@@ -177,7 +179,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return nothing
    */
-  inline private def performNotify(methodName: String, arguments: Params[Node], context: Option[Context]): Outcome[Unit] =
+  private inline def performNotify(methodName: String, arguments: Params[Node], context: Option[Context]): Outcome[Unit] =
     val formedRequest = Request(None, methodName, arguments).formed
     effect.map(
       // Serialize request
@@ -187,7 +189,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
         transport.notify(rawRequest, context)
     )
 
-  inline private def processResponse[R](rawResponse: ArraySeq.ofByte, formedRequest: Message[Node]): Outcome[R] =
+  private inline def processResponse[R](rawResponse: ArraySeq.ofByte, formedRequest: Message[Node]): Outcome[R] =
     // Deserialize response
     Try(codec.deserialize(rawResponse)) match
       case Success(formedResponse) =>
