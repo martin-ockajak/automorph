@@ -12,9 +12,9 @@ case object UpickleMessagePackMacros:
   private def encode[Pickler <: Api: Type, T: Type](pickler: Expr[Pickler], value: Expr[T])(using
     quotes: Quotes
   ): Expr[Msg] = '{
-    val realPickler = $pickler
-    val writer = summonInline[realPickler.Writer[T]]
-    realPickler.writeMsg($value)(using writer)
+    val typedPickler = $pickler
+    val writer = summonInline[typedPickler.Writer[T]]
+    typedPickler.writeMsg($value)(using writer)
   }
 
   inline def decode[Pickler <: Api, T](pickler: Pickler, node: Msg): T =
@@ -23,7 +23,7 @@ case object UpickleMessagePackMacros:
   private def decode[Pickler <: Api: Type, T: Type](pickler: Expr[Pickler], node: Expr[Msg])(using
     quotes: Quotes
   ): Expr[T] = '{
-    val realPickler = $pickler
-    val reader = summonInline[realPickler.Reader[T]]
-    realPickler.readBinary[T]($node)(using reader)
+    val typedPickler = $pickler
+    val reader = summonInline[typedPickler.Reader[T]]
+    typedPickler.readBinary[T]($node)(using reader)
   }
