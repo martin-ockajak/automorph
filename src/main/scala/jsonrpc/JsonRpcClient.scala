@@ -135,9 +135,21 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    */
   inline def proxy[T]: T = ???
 
+  /**
+   * Encode request arguments by position.
+   *
+   * @param arguments request arguments
+   * @return encoded request arguments
+   */
   private inline def encodeArguments(arguments: Seq[Any]): Params[Node] =
     arguments.map(argument => codec.encode(argument)).toList.asLeft
 
+  /**
+   * Encode request arguments by name.
+   *
+   * @param arguments request arguments
+   * @return encoded request arguments
+   */
   private inline def encodeArguments(arguments: Map[String, Any]): Params[Node] =
     arguments.view.mapValues(argument => codec.encode(argument)).toMap.asRight
 
