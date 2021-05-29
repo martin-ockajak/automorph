@@ -85,8 +85,9 @@ object HandlerMacros:
     val apiMethods = detectApiMethods(ref, TypeTree.of[ApiType])
 
     // Generate method handles including wrapper functions consuming and product Node values
-    val methodHandles =
-      Expr.ofSeq(apiMethods.map(method => generateMethodHandle[Node, Outcome, CodecType, Context](ref, method, codec, effect)))
+    val methodHandles = Expr.ofSeq(apiMethods.map { method =>
+      generateMethodHandle[Node, Outcome, CodecType, Context](ref, method, codec, effect)
+    })
 
     // Generate JSON-RPC wrapper functions for the API methods
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
