@@ -84,16 +84,14 @@ object HandlerMacros:
     // Detect and validate public methods in the API type
     val apiMethods = detectApiMethods(ref, TypeTree.of[ApiType])
 
-    // Generate method handles including wrapper functions consuming and product Node values
+    // Generate API method handles including wrapper functions consuming and product Node values
     val methodHandles = Expr.ofSeq(apiMethods.map { method =>
       generateMethodHandle[Node, Outcome, CodecType, Context](ref, method, codec, effect)
     })
 
-    // Generate JSON-RPC wrapper functions for the API methods
+    // Generate function call using a type parameter
     val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
     val call = ref.callTerm(api.asTerm, methodName, List.empty, List.empty)
-
-    // Generate function call using a type parameter
     val typeParam = TypeRepr.of[List[List[String]]]
     val typedCall = ref.callTerm('{ List }.asTerm, "apply", List(typeParam), List.empty)
 
