@@ -28,11 +28,11 @@ class UpickleMessagePackSpec extends CodecSpec[Msg]:
   )
 
   "" - {
-//    "Encode / Decode" in {
-//      val encodedValue = specificCodec.encode(record)
-//      val decodedValue = specificCodec.decode[Record](encodedValue)
-//      decodedValue.should(equal(record))
-//    }
+    "Encode / Decode" in {
+      val encodedValue = specificCodec.encode(record)
+      val decodedValue = specificCodec.decode[Record](encodedValue)
+      decodedValue.should(equal(record))
+    }
   }
 
 object MessagePackParser extends AttributeTagged:

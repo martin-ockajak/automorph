@@ -15,7 +15,7 @@ import upickle.Api
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[http://com-lihaoyi.github.io/upickle/#uPack Node type]]
  */
-final case class UpickleMessagePackCodec(parser: Api) extends Codec[Msg]:
+final case class UpickleMessagePackCodec[Parser <: Api](parser: Parser) extends Codec[Msg]:
 
   private val indent = 2
   private given parser.ReadWriter[Message] = parser.macroRW

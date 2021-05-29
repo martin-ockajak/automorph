@@ -70,7 +70,7 @@ final case class Record(
   short: Short,
   int: Option[Int],
   long: Long,
-  float: Float,
+  float: Option[Float],
   double: Double,
   enumeration: Option[Enum],
   list: List[String],

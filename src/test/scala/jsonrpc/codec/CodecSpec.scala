@@ -38,7 +38,7 @@ trait CodecSpec[Node] extends BaseSpec:
     1,
     2.asSome,
     3,
-    4.5,
+    None,
     6.7,
     Enum.One.asSome,
     List("x", "y", "z"),
