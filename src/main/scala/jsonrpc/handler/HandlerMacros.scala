@@ -59,7 +59,6 @@ object HandlerMacros:
     api: Expr[ApiType]
   )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Outcome, Context]]] =
     import ref.quotes.reflect.{asTerm, TypeRepr, TypeTree}
-
     val ref = Reflection(quotes)
 
     val decodeCall =
@@ -86,7 +85,7 @@ object HandlerMacros:
 
     // Generate API method handles including wrapper functions consuming and product Node values
     val methodHandles = Expr.ofSeq(apiMethods.map { method =>
-      generateMethodHandle[Node, Outcome, CodecType, Context](ref, method, codec, effect)
+      generateMethodHandle[Node, CodecType, Outcome, Context](ref, method, codec, effect)
     })
 
     // Generate function call using a type parameter
@@ -135,7 +134,7 @@ object HandlerMacros:
     }
     methods
 
-  private def generateMethodHandle[Node: Type, Outcome[_]: Type, CodecType <: Codec[Node]: Type, Context: Type](
+  private def generateMethodHandle[Node: Type, CodecType <: Codec[Node]: Type, Outcome[_]: Type, Context: Type](
     ref: Reflection,
     method: ref.QuotedMethod,
     codec: Expr[CodecType],
@@ -143,7 +142,7 @@ object HandlerMacros:
   ): Expr[(String, MethodHandle[Node, Outcome, Context])] =
     given Quotes = ref.quotes
     val liftedMethod = method.lift
-    val function = generateFunction[Node, Outcome, CodecType, Context](ref, method, codec, effect)
+    val function = generateFunction[Node, CodecType, Outcome, Context](ref, method, codec, effect)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
     val paramNames = Expr(liftedMethod.params.flatMap(_.map(_.name)))
@@ -152,7 +151,7 @@ object HandlerMacros:
       $name -> MethodHandle($function, $name, $resultType, $paramNames, $paramTypes)
     }
 
-  private def generateFunction[Node: Type, Outcome[_]: Type, CodecType <: Codec[Node]: Type, Context: Type](
+  private def generateFunction[Node: Type, CodecType <: Codec[Node]: Type, Outcome[_]: Type, Context: Type](
     ref: Reflection,
     method: ref.QuotedMethod,
     codec: Expr[CodecType],
