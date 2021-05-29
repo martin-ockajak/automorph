@@ -17,16 +17,13 @@ case object UpickleJsonMacros:
     realParser.writeJs($value)(using realWriter)
   }
 
-  inline def decode[Parser <: Api, Reader[T] <: Api#Reader[T], T](parser: Parser, reader: Reader[T], node: Value): T =
-    ${ decode[Parser, Reader, T]('parser, 'reader, 'node) }
+  inline def decode[Parser <: Api, T](parser: Parser, node: Value): T =
+    ${ decode[Parser, T]('parser, 'node) }
 
-  private def decode[Parser <: Api: Type, Reader[T] <: Api#Reader[T]: Type, T: Type](
-    parser: Expr[Parser],
-    reader: Expr[Reader[T]],
-    node: Expr[Value]
-  )(using
+  private def decode[Parser <: Api: Type, T: Type](parser: Expr[Parser], node: Expr[Value])(using
     quotes: Quotes
   ): Expr[T] = '{
     val realParser = $parser
-    realParser.read[T]($node)(using $reader.asInstanceOf[realParser.Reader[T]])
+    val realReader = summonInline[realParser.Reader[T]]
+    realParser.read[T]($node)(using realReader)
   }

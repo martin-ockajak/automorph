@@ -29,9 +29,7 @@ final case class UpickleMessagePackCodec[Parser <: Api](parser: Parser) extends 
 
   inline def encode[T](value: T): Msg = UpickleMessagePackMacros.encode(parser, value)
 
-  inline def decode[T](node: Msg): T =
-    val reader = summonInline[parser.Reader[T]]
-    UpickleMessagePackMacros.decode[Api, parser.Reader, T](parser, reader, node)
+  inline def decode[T](node: Msg): T = UpickleMessagePackMacros.decode[Parser, T](parser, node)
 
 case object UpickleMessagePackCodec:
 
