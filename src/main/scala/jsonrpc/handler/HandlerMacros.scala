@@ -157,20 +157,21 @@ object HandlerMacros:
     codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]]
   ): Expr[(Seq[Node], Option[Context]) => Outcome[Node]] =
-    import ref.quotes.reflect.{asTerm, Lambda, MethodType, Printer, Symbol, TypeRepr}
+    import ref.quotes.reflect.{asTerm, Lambda, MethodType, Printer, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
-    method.params.map(_.map { param =>
-//      val decodeCall = ref.callTerm(codec.asTerm, "decode", List(param.dataType), List(List(Expr("TEST").asTerm))).asExpr
+    method.params.flatMap(_.map { param =>
       param.dataType.asType match
         case '[paramType] =>
-          val methodType = MethodType(List("argument"))(_ => List(TypeRepr.of[Node]), _ => TypeRepr.of[String])
-          val lambda = Lambda(Symbol.spliceOwner, methodType, (symbol, args) => Expr("test").asTerm)
-//      (argument: Node) => $codec.deserialize(argument.asInstanceOf[ArraySeq.ofByte])
+          val methodType = MethodType(List("argument"))(_ => List(TypeRepr.of[Node]), _ => param.dataType)
+          val lambda = Lambda(Symbol.spliceOwner, methodType, (symbol, args) =>
+            ref.callTerm(codec.asTerm, "decode", List(param.dataType), List(args.asInstanceOf[List[Term]]))
+          )
           println(lambda)
           println(lambda.show(using Printer.TreeStructure))
           lambda
     })
+    println()
     val function = '{
     (arguments: Seq[Node], context: Option[Context]) =>
         $effect.pure(arguments.head)

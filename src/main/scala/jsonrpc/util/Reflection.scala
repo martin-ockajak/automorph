@@ -147,7 +147,7 @@ final class Reflection(val quotes: Quotes):
         }
     }
     val resultType = methodTypes.last.resType
-    (params, resultType)
+    (Seq(params*), resultType)
 
   private def field(classType: TypeRepr, fieldSymbol: Symbol): Option[QuotedField] =
     val fieldType = classType.memberType(fieldSymbol)
