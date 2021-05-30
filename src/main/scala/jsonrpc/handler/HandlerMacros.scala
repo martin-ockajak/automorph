@@ -251,7 +251,3 @@ object HandlerMacros:
   ): quotes.reflect.Term =
     import quotes.reflect.Select
     Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(arguments)
-
-  private def methodDescription(method: Method): String =
-    val documentation = method.documentation.map(_ + "\n").getOrElse("")
-    s"$documentation${method.signature}\n"
