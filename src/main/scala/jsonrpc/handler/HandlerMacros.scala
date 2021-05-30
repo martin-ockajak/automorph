@@ -160,6 +160,7 @@ object HandlerMacros:
     import ref.quotes.reflect.{asTerm, Lambda, MethodType, Printer, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
+    println(method.name)
     method.params.flatMap(_.map { param =>
       param.dataType.asType match
         case '[paramType] =>
@@ -167,8 +168,8 @@ object HandlerMacros:
           val lambda = Lambda(Symbol.spliceOwner, methodType, (symbol, args) =>
             ref.callTerm(codec.asTerm, "decode", List(param.dataType), List(args.asInstanceOf[List[Term]]))
           )
-          println(lambda.show(using Printer.TreeCode))
-          println(lambda)
+          println(s"  ${lambda.show(using Printer.TreeCode)}")
+//          println(s"  $lambda")
           lambda
     })
     println()
