@@ -167,8 +167,8 @@ object HandlerMacros:
           val lambda = Lambda(Symbol.spliceOwner, methodType, (symbol, args) =>
             ref.callTerm(codec.asTerm, "decode", List(param.dataType), List(args.asInstanceOf[List[Term]]))
           )
+          println(lambda.show(using Printer.TreeCode))
           println(lambda)
-          println(lambda.show(using Printer.TreeStructure))
           lambda
     })
     println()
