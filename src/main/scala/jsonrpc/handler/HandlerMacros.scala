@@ -157,17 +157,28 @@ object HandlerMacros:
     codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]]
   ): Expr[(Seq[Node], Option[Context]) => Outcome[Node]] =
-    import ref.quotes.reflect.{asTerm, TypeRepr}
+    import ref.quotes.reflect.{asTerm, Lambda, MethodType, Printer, Symbol, TypeRepr}
     given Quotes = ref.quotes
 
-    method.params.map { param =>
+    method.params.map(_.map { param =>
 //      val decodeCall = ref.callTerm(codec.asTerm, "decode", List(param.dataType), List(List(Expr("TEST").asTerm))).asExpr
-    }
+      param.dataType.asType match
+        case '[paramType] =>
+          val methodType = MethodType(List("argument"))(_ => List(TypeRepr.of[Node]), _ => TypeRepr.of[String])
+          val lambda = Lambda(Symbol.spliceOwner, methodType, (symbol, args) => Expr("test").asTerm)
+//      (argument: Node) => $codec.deserialize(argument.asInstanceOf[ArraySeq.ofByte])
+          println(lambda)
+          println(lambda.show(using Printer.TreeStructure))
+          lambda
+    })
     val function = '{
-      (arguments: Seq[Node], context: Option[Context]) =>
+    (arguments: Seq[Node], context: Option[Context]) =>
         $effect.pure(arguments.head)
     }
 //    println(function.asTerm)
+//  Inlined(List(DefDef($anonfun,List(List(ValDef(argument,TypeTree - argument,EmptyTree))),TypeTree - Node,Block(List(), callTerm(codec.asTerm, "decode", List(param.dataType), List(Select(Ident(argument))))))
+//  Block(List(DefDef("$anonfun", List(TermParamClause(List(ValDef("argument", Inferred(), None)))), Inferred(), Some(Block(Nil, Apply(Select(Inlined(None, Nil, Inlined(None, Nil, Select(Ident("JsonRpcHandler_this"), "codec"))), "deserialize"), List(TypeApply(Select(Ident("argument"), "asInstanceOf"), List(TypeSelect(Ident("ArraySeq"), "ofByte"))))))))), Closure(Ident("$anonfun"), None))
+//  Lambda(Symbol.spliceOwner, MethodType()(_ => List[TypeRepr], _ => TypeRepr), (symbol, args) => Tree)
     function
 
   private def methodDescription(method: Method): String =
