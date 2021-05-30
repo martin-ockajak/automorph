@@ -94,7 +94,7 @@ object HandlerMacros:
     val typeParam = TypeRepr.of[List[List[String]]]
     val typedCall = ref.callTerm('{ List }.asTerm, "apply", List(typeParam), List.empty)
 
-    // Debug printounts
+    // Debug prints
 //    println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
 //    println(
 //      s"""
@@ -160,21 +160,29 @@ object HandlerMacros:
     import ref.quotes.reflect.{asTerm, Lambda, MethodType, Printer, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
-    println(method.name)
-    method.params.flatMap(_.map { param =>
-      param.dataType.asType match
-        case '[paramType] =>
-          val methodType = MethodType(List("argument"))(_ => List(TypeRepr.of[Node]), _ => param.dataType)
-          val lambda = Lambda(Symbol.spliceOwner, methodType, (symbol, args) =>
-            ref.callTerm(codec.asTerm, "decode", List(param.dataType), List(args.asInstanceOf[List[Term]]))
-          )
-          println(s"  ${lambda.show(using Printer.TreeCode)}")
-//          println(s"  $lambda")
-          lambda
+    val argumentConverters = method.params.flatMap(_.map { param =>
+      Lambda(
+        Symbol.spliceOwner,
+        MethodType(List("argument"))(_ => List(TypeRepr.of[Node]), _ => param.dataType),
+        (symbol, args) => ref.callTerm(codec.asTerm, "decode", List(param.dataType), List(args.asInstanceOf[List[Term]]))
+      )
     })
+    val resultConverter = Lambda(
+      Symbol.spliceOwner,
+      MethodType(List("result"))(_ => List(method.resultType), _ => TypeRepr.of[Node]),
+      (symbol, args) => ref.callTerm(codec.asTerm, "encode", List(method.resultType), List(args.asInstanceOf[List[Term]]))
+    )
+
+    // Debug prints
+    println(method.name)
+    argumentConverters.foreach { converter =>
+      println(s"  ${converter.show(using Printer.TreeCode)}")
+    }
+    println(s"  ${resultConverter.show(using Printer.TreeCode)}")
     println()
+
     val function = '{
-    (arguments: Seq[Node], context: Option[Context]) =>
+      (arguments: Seq[Node], context: Option[Context]) =>
         $effect.pure(arguments.head)
     }
 //    println(function.asTerm)
