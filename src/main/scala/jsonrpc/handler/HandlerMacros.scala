@@ -183,7 +183,7 @@ object HandlerMacros:
     // Binding function expression
     val function = '{
       (argumentNodes: Seq[Node], context: Option[Context]) =>
-        val decodeAndCallMethod = $methodCaller.asInstanceOf[Any => Outcome[Any]]
+        val decodeAndCallMethod = $methodCaller.asInstanceOf[Seq[Node] => Outcome[Any]]
         val convertResult = $resultConverter.asInstanceOf[Any => Node]
         val outcome = decodeAndCallMethod(argumentNodes)
         $effect.map(outcome, convertResult)
