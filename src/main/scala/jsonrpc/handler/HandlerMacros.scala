@@ -105,16 +105,17 @@ object HandlerMacros:
       sys.error(s"Bound API method '$signature' must not have type parameters")
     else if !method.available then
       sys.error(s"Bound API method '$signature' must be callable at runtime")
-    val outcomeType = TypeRepr.of[Outcome]
-    outcomeType match
-      case lambdaType: LambdaType =>
-        val resultTypeMatch =
-          method.resultType match
-            case appliedType: AppliedType => appliedType.tycon =:= outcomeType
-            case _                        => false
-        if !resultTypeMatch then
-          sys.error(s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'")
-      case _ => ()
+    else
+      val outcomeType = TypeRepr.of[Outcome]
+      outcomeType match
+        case lambdaType: LambdaType =>
+          val resultTypeMatch =
+            method.resultType match
+              case appliedType: AppliedType => appliedType.tycon =:= outcomeType
+              case _                        => false
+          if !resultTypeMatch then
+            sys.error(s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'")
+        case _ => ()
 
   private def generateMethodHandle[
     Node: Type,
