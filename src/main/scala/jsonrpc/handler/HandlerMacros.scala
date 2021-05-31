@@ -180,12 +180,6 @@ object HandlerMacros:
     // Result conversion function expression consuming the method result and returning a node
     val resultConverter = convertResultExpr[Node, CodecType](ref, method, codec)
 
-    // Debug prints
-    println(method.name)
-    println(s"  ${methodCaller.asTerm.show(using Printer.TreeCode)}")
-    println(s"  ${resultConverter.asTerm.show(using Printer.TreeCode)}")
-    println()
-
     // Binding function expression
     val function = '{
       (argumentNodes: Seq[Node], context: Option[Context]) =>
@@ -195,7 +189,12 @@ object HandlerMacros:
         $effect.map(outcome, convertResult)
     }
 
+    // Debug prints
+    println(method.name)
+    println(s"  ${methodCaller.asTerm.show(using Printer.TreeCode)}")
+    println(s"  ${resultConverter.asTerm.show(using Printer.TreeCode)}")
     println(function.asTerm.show(using Printer.TreeCode))
+    println()
     function
 
   private def decodeAndCallMethodExpr[
