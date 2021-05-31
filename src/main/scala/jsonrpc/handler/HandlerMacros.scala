@@ -223,7 +223,7 @@ object HandlerMacros:
           indices :+ (indices.last + size)
         }
 
-        // Create method argument lists by decoding corresponding argument nodes into required data types
+        // Create method argument lists by decoding corresponding argument nodes into required types
         val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentNodes = arguments.head.asInstanceOf[Term]
