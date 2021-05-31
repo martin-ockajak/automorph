@@ -71,7 +71,7 @@ object HandlerMacros:
     println(TypeTree.of[CodecType].show)
     println()
 
-//    def methodArgument[T: Type](node: Expr[Node], param: ref.QuotedParam): Expr[T] =
+//    def methodArgument[T: Type](node: Expr[Node], param: ref.QuotedParameter): Expr[T] =
 //      '{
 //        $codec.decode[T]($node)
 //      }
@@ -89,10 +89,10 @@ object HandlerMacros:
     })
 
     // Generate function call using a type parameter
-    val methodName = apiMethods.find(_.params.flatten.isEmpty).map(_.name).getOrElse("")
+    val methodName = apiMethods.find(_.parameters.flatten.isEmpty).map(_.name).getOrElse("")
     val call = callTerm(ref.quotes, api.asTerm, methodName, List.empty, List.empty)
-    val typeParam = TypeRepr.of[List[List[String]]]
-    val typedCall = callTerm(ref.quotes, '{ List }.asTerm, "apply", List(typeParam), List.empty)
+    val typeParameter = TypeRepr.of[List[List[String]]]
+    val typedCall = callTerm(ref.quotes, '{ List }.asTerm, "apply", List(typeParameter), List.empty)
 
     // Debug prints
 //    println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
@@ -127,7 +127,7 @@ object HandlerMacros:
     }
     methods.foreach { method =>
       val signature = s"${apiTypeTree.show}.${method.lift.signature}"
-      if method.typeParams.nonEmpty then
+      if method.typeParameters.nonEmpty then
         sys.error(s"Bound API method must not have type parameters: $signature")
       else if !method.available then
         sys.error(s"Bound API method must be callable at runtime: $signature")
@@ -152,10 +152,10 @@ object HandlerMacros:
     val function = generateFunction[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
-    val paramNames = Expr(liftedMethod.params.flatMap(_.map(_.name)))
-    val paramTypes = Expr(liftedMethod.params.flatMap(_.map(_.dataType)))
+    val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
+    val parameterTypes = Expr(liftedMethod.parameters.flatMap(_.map(_.dataType)))
     '{
-      $name -> MethodHandle($function, $name, $resultType, $paramNames, $paramTypes)
+      $name -> MethodHandle($function, $name, $resultType, $parameterNames, $parameterTypes)
     }
 
   private def generateFunction[
@@ -174,8 +174,8 @@ object HandlerMacros:
     import ref.quotes.reflect.{asTerm, Lambda, MethodType, Printer, Symbol, Term, Tree, TypeRepr}
     given Quotes = ref.quotes
 
-    val argumentConverters = method.params.flatMap(_.map { param =>
-      lambdaExpr(ref.quotes, codec.asTerm, "decode", List(param.dataType), List(List(TypeRepr.of[Node])), param.dataType)
+    val argumentConverters = method.parameters.flatMap(_.map { parameter =>
+      lambdaExpr(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(TypeRepr.of[Node])), parameter.dataType)
     })
     val resultConverter =
       lambdaExpr(
@@ -186,8 +186,8 @@ object HandlerMacros:
         List(List(method.resultType)),
         TypeRepr.of[Node]
       )
-    val paramTypes = method.params.map(params => List.fill(params.size)(TypeRepr.of[Any])).toList
-    val methodCaller = lambdaExpr(ref.quotes, api.asTerm, method.name, List.empty, paramTypes, method.resultType)
+    val parameterTypes = method.parameters.map(params => List.fill(params.size)(TypeRepr.of[Any])).toList
+    val methodCaller = lambdaExpr(ref.quotes, api.asTerm, method.name, List.empty, parameterTypes, method.resultType)
 
     // Debug prints
     println(method.name)
@@ -200,10 +200,10 @@ object HandlerMacros:
 
     val function = '{
       (nodeArguments: Seq[Node], context: Option[Context]) =>
-        val convertResults = $resultConverter.asInstanceOf[Any => Node]
         val arguments = nodeArguments.zip(${ Expr.ofSeq(argumentConverters) }).map { (argument, converter) =>
           converter.asInstanceOf[Node => Any](argument)
         }
+        val convertResults = $resultConverter.asInstanceOf[Any => Node]
 //        val callMethod = $methodCaller.asInstanceOf[Any => Outcome[Any]]
 //        val outcome = callMethod(arguments)
 //        $effect.map(outcome, convertResults)
@@ -227,9 +227,9 @@ object HandlerMacros:
     Lambda(
       Symbol.spliceOwner,
       methodType,
-      (symbol, args) =>
-        val argLists = paramIndices.zip(paramIndices.tail).map(args.slice).asInstanceOf[List[List[Term]]]
-        callTerm(quotes, instance, methodName, typeArguments, argLists)
+      (symbol, arguments) =>
+        val argumentLists = paramIndices.zip(paramIndices.tail).map(arguments.slice).asInstanceOf[List[List[Term]]]
+        callTerm(quotes, instance, methodName, typeArguments, argumentLists)
     ).asExpr
 
   /**

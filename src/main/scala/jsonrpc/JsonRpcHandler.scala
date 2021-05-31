@@ -253,22 +253,22 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     context: Option[Context],
     methodHandle: MethodHandle[Node, Outcome, Context]
   ): Seq[Node] =
-    val params = methodHandle.paramNames.dropRight(context.iterator.size)
+    val parameters = methodHandle.paramNames.dropRight(context.iterator.size)
     validRequest.params match
       case Left(arguments) =>
         // Arguments by position
-        if arguments.size < params.size then
-          throw IllegalArgumentException(s"Missing arguments: ${params.drop(arguments.size)}")
-        else if arguments.size > params.size then
-          throw IllegalArgumentException(s"Redundant arguments: ${params.size - arguments.size}")
+        if arguments.size < parameters.size then
+          throw IllegalArgumentException(s"Missing arguments: ${parameters.drop(arguments.size)}")
+        else if arguments.size > parameters.size then
+          throw IllegalArgumentException(s"Redundant arguments: ${parameters.size - arguments.size}")
         arguments
       case Right(namedArguments) =>
         // Arguments by name
-        val arguments = params.flatMap(namedArguments.get)
-        if arguments.size < params.size then
-          throw IllegalArgumentException(s"Missing arguments: ${params.filterNot(namedArguments.contains)}")
-        else if arguments.size > params.size then
-          throw IllegalArgumentException(s"Redundant arguments: ${namedArguments.keys.filterNot(params.contains)}")
+        val arguments = parameters.flatMap(namedArguments.get)
+        if arguments.size < parameters.size then
+          throw IllegalArgumentException(s"Missing arguments: ${parameters.filterNot(namedArguments.contains)}")
+        else if arguments.size > parameters.size then
+          throw IllegalArgumentException(s"Redundant arguments: ${namedArguments.keys.filterNot(parameters.contains)}")
         arguments
 
   /**

@@ -13,23 +13,23 @@ final class Reflection(val quotes: Quotes):
   // All meta-programming data types must are path-dependent on the compiler-generated quotation context
   import quotes.reflect.{Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree, asTerm}
 
-  final case class QuotedParam(
+  final case class QuotedParameter(
     name: String,
     dataType: TypeRepr
   ):
-    def lift: Param = Param(name, dataType.show)
+    def lift: Parameter = Parameter(name, dataType.show)
 
   final case class QuotedTypeParam(
     name: String,
     bounds: TypeBounds
   ):
-    def lift: TypeParam = TypeParam(name, bounds.show)
+    def lift: TypeParameter = TypeParameter(name, bounds.show)
 
   final case class QuotedMethod(
     name: String,
     resultType: TypeRepr,
-    params: Seq[Seq[QuotedParam]],
-    typeParams: Seq[QuotedTypeParam],
+    parameters: Seq[Seq[QuotedParameter]],
+    typeParameters: Seq[QuotedTypeParam],
     public: Boolean,
     available: Boolean,
     symbol: Symbol
@@ -38,8 +38,8 @@ final class Reflection(val quotes: Quotes):
     def lift: Method = Method(
       name,
       resultType.show,
-      params.map(_.map(_.lift)),
-      typeParams.map(_.lift),
+      parameters.map(_.map(_.lift)),
+      typeParameters.map(_.lift),
       public = public,
       available = available,
       symbol.docstring
@@ -99,28 +99,28 @@ final class Reflection(val quotes: Quotes):
     classType.typeSymbol.memberFields.flatMap(field(classType, _))
 
   private def method(classType: TypeRepr, methodSymbol: Symbol): Option[QuotedMethod] =
-    val (symbolType, typeParams) = classType.memberType(methodSymbol) match
+    val (symbolType, typeParameters) = classType.memberType(methodSymbol) match
       case polyType: PolyType =>
-        val typeParams = polyType.paramNames.zip(polyType.paramBounds).map {
+        val typeParameters = polyType.paramNames.zip(polyType.paramBounds).map {
           (name, bounds) => QuotedTypeParam(name, bounds)
         }
-        (polyType.resType, typeParams)
+        (polyType.resType, typeParameters)
       case otherType => (otherType, Seq.empty)
     symbolType match
       case methodType: MethodType =>
-        val (params, resultType) = methodSignature(methodType)
+        val (parameters, resultType) = methodSignature(methodType)
         QuotedMethod(
           methodSymbol.name,
           resultType,
-          params,
-          typeParams,
+          parameters,
+          typeParameters,
           publicSymbol(methodSymbol),
           availableSymbol(methodSymbol),
           methodSymbol
         ).asSome
       case _ => None
 
-  private def methodSignature(methodType: MethodType): (Seq[Seq[QuotedParam]], TypeRepr) =
+  private def methodSignature(methodType: MethodType): (Seq[Seq[QuotedParameter]], TypeRepr) =
     val methodTypes = LazyList.iterate(Option(methodType)) {
       case Some(currentType) =>
         currentType.resType match
@@ -128,14 +128,14 @@ final class Reflection(val quotes: Quotes):
           case _                      => None
       case _ => None
     }.takeWhile(_.isDefined).flatten
-    val params = methodTypes.map {
+    val parameters = methodTypes.map {
       currentType =>
         currentType.paramNames.zip(currentType.paramTypes).map {
-          (name, dataType) => QuotedParam(name, dataType)
+          (name, dataType) => QuotedParameter(name, dataType)
         }
     }
     val resultType = methodTypes.last.resType
-    (Seq(params*), resultType)
+    (Seq(parameters*), resultType)
 
   private def field(classType: TypeRepr, fieldSymbol: Symbol): Option[QuotedField] =
     val fieldType = classType.memberType(fieldSymbol)
@@ -156,12 +156,12 @@ final class Reflection(val quotes: Quotes):
       result | flags.is(current)
     }
 
-final case class Param(
+final case class Parameter(
   name: String,
   dataType: String
 )
 
-final case class TypeParam(
+final case class TypeParameter(
   name: String,
   bounds: String
 )
@@ -169,25 +169,25 @@ final case class TypeParam(
 final case class Method(
   name: String,
   resultType: String,
-  params: Seq[Seq[Param]],
-  typeParams: Seq[TypeParam],
+  parameters: Seq[Seq[Parameter]],
+  typeParameters: Seq[TypeParameter],
   public: Boolean,
   available: Boolean,
   documentation: Option[String]
 ):
 
   def signature: String =
-    val typeParamsText = typeParams.map { typeParam =>
-      s"${typeParam.name}"
+    val typeParametersText = typeParameters.map { typeParameter =>
+      s"${typeParameter.name}"
     } match
       case Seq()  => ""
       case values => s"[${values.mkString(", ")}]"
-    val paramsText = params.map { params =>
-      s"(${params.map { param =>
-        s"${param.name}: ${param.dataType}"
+    val parametersText = parameters.map { parameters =>
+      s"(${parameters.map { parameter =>
+        s"${parameter.name}: ${parameter.dataType}"
       }.mkString(", ")})"
     }.mkString
-    s"$name$typeParamsText$paramsText: $resultType"
+    s"$name$typeParametersText$parametersText: $resultType"
 
 final case class Field(
   name: String,
