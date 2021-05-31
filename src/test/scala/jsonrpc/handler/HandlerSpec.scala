@@ -17,11 +17,9 @@ class HandlerSpec extends BaseSpec:
         val api = ApiImpl("")
         val simpleApi = SimpleApi()
         JsonRpcHandler[String, DummyJsonCodec, NoEffect.Identity, String](DummyJsonCodec(), NoEffect()).bind(simpleApi)
-        val handler = JsonRpcHandler[String, DummyJsonCodec, Future, String](DummyJsonCodec(), FutureEffect()).bind(api)
+        val handler = JsonRpcHandler(DummyJsonCodec(), FutureEffect()).bind(api)
 //        val handler = JsonRpcHandler[String, UpickleJsonCodec, Future, String](UpickleJsonCodec(), FutureEffect()).bind(api)
         (0 == 0).shouldBe(true)
-
-
 
       }
     }

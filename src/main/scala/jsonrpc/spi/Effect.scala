@@ -3,9 +3,9 @@ package jsonrpc.spi
 /**
  * Effectful computation system plugin.
  *
- * The underlying runtime must support monadic composition of effectful operations.
+ * The underlying runtime must support monadic composition of effectful computations.
  *
- * @tparam Outcome monadic effectful computation outcome type
+ * @tparam Outcome effectful computation outcome type
  */
 trait Effect[Outcome[_]]:
 

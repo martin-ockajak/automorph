@@ -63,7 +63,7 @@ object HandlerMacros:
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = detectApiMethods[Outcome](ref, TypeTree.of[ApiType])
+    val apiMethods = detectApiMethods[Outcome, Context](ref, TypeTree.of[ApiType])
 
     // Debug prints
     println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
@@ -78,7 +78,7 @@ object HandlerMacros:
       $methodHandles.toMap[String, MethodHandle[Node, Outcome, Context]]
     }
 
-  private def detectApiMethods[Outcome[_]: Type](
+  private def detectApiMethods[Outcome[_]: Type, Context: Type](
     ref: Reflection,
     apiType: ref.quotes.reflect.TypeTree
   ): Seq[ref.QuotedMethod] =
@@ -94,7 +94,7 @@ object HandlerMacros:
     methods.foreach(method => validateApiMethod(ref, apiType, method))
     methods
 
-  private def validateApiMethod[Outcome[_]: Type](
+  private def validateApiMethod[Outcome[_]: Type, Context: Type](
     ref: Reflection,
     apiType: ref.quotes.reflect.TypeTree,
     method: ref.QuotedMethod
@@ -106,15 +106,32 @@ object HandlerMacros:
       throw IntrospectionException(s"Bound API method '$signature' must not have type parameters")
     else if !method.available then
       throw IntrospectionException(s"Bound API method '$signature' must be callable at runtime")
+    else if contextSupplied[Context](ref.quotes) && method.parameters.lastOption.map { parameters =>
+        !(parameters.last.dataType =:= TypeRepr.of[Context])
+      }.getOrElse(true)
+    then
+      throw IntrospectionException(
+        s"Bound API method '$signature' must accept last parameter of the specified request context type '${TypeRepr.of[Context].show}'"
+      )
     else
       TypeRepr.of[Outcome] match
         case lambdaType: LambdaType =>
           if method.resultType match
               case appliedType: AppliedType => !(appliedType.tycon =:= lambdaType)
-              case _                        => true
+              case _                        => false
           then
-            throw IntrospectionException(s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'")
+            throw IntrospectionException(
+              s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'"
+            )
         case _ => ()
+
+  private def contextSupplied[Context: Type](quotes: Quotes): Boolean =
+    import quotes.reflect.TypeRepr
+    given Quotes = quotes
+
+    !(TypeRepr.of[Context] =:= TypeRepr.of[Any] ||
+      TypeRepr.of[Context] =:= TypeRepr.of[Nothing] ||
+      TypeRepr.of[Context] =:= TypeRepr.of[Unit])
 
   private def generateMethodHandle[
     Node: Type,
@@ -166,7 +183,7 @@ object HandlerMacros:
     // Binding function expression
     val bindingFunction = '{
       (argumentNodes: Seq[Node], context: Option[Context]) =>
-        val outcome = $decodeAndCallMethod(argumentNodes)
+        val outcome = $decodeAndCallMethod(argumentNodes, context)
         $effect.map(outcome, $encodeResult.asInstanceOf[Any => Node])
 //        val decodeAndCallMethod = $methodCaller.asInstanceOf[Seq[Node] => Outcome[Node]]
 //        decodeAndCallMethod(argumentNodes)
@@ -192,24 +209,22 @@ object HandlerMacros:
     codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
-  ): Expr[Seq[Node] => Outcome[Any]] =
+  ): Expr[(Seq[Node], Option[Context]) => Outcome[Any]] =
     import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
     Lambda(
       Symbol.spliceOwner,
-      MethodType(List("argumentNodes"))(_ => List(TypeRepr.of[Seq[Node]]), _ => method.resultType),
+      MethodType(List("argumentNodes", "context"))(
+        _ => List(TypeRepr.of[Seq[Node]], TypeRepr.of[Option[Context]]),
+        _ => method.resultType
+      ),
       (symbol, arguments) =>
+        // Map multiple parameter lists to flat argument node list offsets
         val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
           indices :+ (indices.last + size)
         }
-
-        // api.method3(
-        //   codec.decode[Option[Boolean]](argumentNodes.apply(0)),
-        //   codec.decode[Float](argumentNodes.apply(1))
-        // )(
-        //   codec.decode[List[Int]](argumentNodes.apply(2))
-        // )
+        val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
         // Create method argument lists by decoding corresponding argument nodes into required types
         val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
@@ -217,7 +232,13 @@ object HandlerMacros:
             val argumentNodes = arguments.head.asInstanceOf[Term]
             val argumentIndex = Literal(IntConstant(offset + index))
             val argumentNode = callTerm(ref.quotes, argumentNodes, "apply", List.empty, List(List(argumentIndex)))
-            callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
+            if contextSupplied[Context](ref.quotes) && (offset + index) == lastArgumentIndex then
+              val context = arguments.last.asExpr.asInstanceOf[Expr[Option[Context]]]
+              '{
+                $context.getOrElse(throw new IllegalArgumentException("Missing request context"))
+              }.asTerm
+            else
+              callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
           }
         ).asInstanceOf[List[List[Term]]]
 
@@ -228,7 +249,7 @@ object HandlerMacros:
 //        // Encode the method call result into a node
 //        val convertResult = convertResultExpr[Node, CodecType](ref, method, codec)
 //        callTerm(ref.quotes, effect.asTerm, "map", List(method.resultType, TypeRepr.of[Node]), List(List(methodCall, convertResult.asTerm)))
-    ).asExpr.asInstanceOf[Expr[Seq[Node] => Outcome[Any]]]
+    ).asExpr.asInstanceOf[Expr[(Seq[Node], Option[Context]) => Outcome[Any]]]
 
   private def encodeResultExpr[Node: Type, CodecType <: Codec[Node]: Type](
     ref: Reflection,
@@ -261,8 +282,7 @@ object HandlerMacros:
     typeArguments: List[quotes.reflect.TypeRepr],
     arguments: List[List[quotes.reflect.Term]]
   ): quotes.reflect.Term =
-    import quotes.reflect.Select
-    Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(arguments)
+    quotes.reflect.Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(arguments)
 
   private def methodDescription(method: Method): String =
     val documentation = method.documentation.map(_ + "\n").getOrElse("")

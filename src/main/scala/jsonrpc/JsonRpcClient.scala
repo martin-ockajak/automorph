@@ -19,7 +19,8 @@ import scala.util.{Failure, Random, Success, Try}
  * @param effect computation effect system plugin
  * @param transport message transport layer
  * @tparam Node data format node representation type
- * @tparam Outcome computation outcome effect type
+ * @tparam CodecType data format codec plugin type
+ * @tparam Outcome effectful computation outcome type
  * @tparam Context request context type
  */
 final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Context](

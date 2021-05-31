@@ -5,7 +5,7 @@ import scala.concurrent.Future
 
 final case class SimpleApi():
 
-  def method(): String = "test"
+  def method(test: String): String = test
 
 
 trait Api:
