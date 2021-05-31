@@ -13,7 +13,7 @@ import scala.quoted.{quotes, Expr, Quotes, Type}
  * @param name method name
  * @param resultType result type
  * @param paramNames parameter names
- * @param paramTypes paramter types
+ * @param parameterTypes paramter types
  * @tparam Node data format node representation type
  * @tparam Outcome computation outcome effect type
  * @tparam Context request context type
@@ -23,7 +23,7 @@ final case class MethodHandle[Node, Outcome[_], Context](
   name: String,
   resultType: String,
   paramNames: Seq[String],
-  paramTypes: Seq[String]
+  parameterTypes: Seq[String]
 )
 
 object HandlerMacros:
@@ -175,19 +175,13 @@ object HandlerMacros:
     given Quotes = ref.quotes
 
     val argumentConverters = method.parameters.flatMap(_.map { parameter =>
-      lambdaExpr(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(TypeRepr.of[Node])), parameter.dataType)
+      val parameterTypes = List(List(TypeRepr.of[Node]))
+      lambdaExpr(ref.quotes, codec, "decode", List(parameter.dataType), parameterTypes, parameter.dataType)
     })
     val resultConverter =
-      lambdaExpr(
-        ref.quotes,
-        codec.asTerm,
-        "encode",
-        List(method.resultType),
-        List(List(method.resultType)),
-        TypeRepr.of[Node]
-      )
+      lambdaExpr(ref.quotes, codec, "encode", List(method.resultType), List(List(method.resultType)), TypeRepr.of[Node])
     val parameterTypes = method.parameters.map(params => List.fill(params.size)(TypeRepr.of[Any])).toList
-    val methodCaller = lambdaExpr(ref.quotes, api.asTerm, method.name, List.empty, parameterTypes, method.resultType)
+    val methodCaller = lambdaExpr(ref.quotes, api, method.name, List.empty, parameterTypes, method.resultType)
 
     // Debug prints
     println(method.name)
@@ -203,10 +197,10 @@ object HandlerMacros:
         val arguments = nodeArguments.zip(${ Expr.ofSeq(argumentConverters) }).map { (argument, converter) =>
           converter.asInstanceOf[Node => Any](argument)
         }
-        val convertResults = $resultConverter.asInstanceOf[Any => Node]
+        val convertResult = $resultConverter.asInstanceOf[Any => Node]
 //        val callMethod = $methodCaller.asInstanceOf[Any => Outcome[Any]]
 //        val outcome = callMethod(arguments)
-//        $effect.map(outcome, convertResults)
+//        $effect.map(outcome, convertResult)
         $effect.pure(nodeArguments.head)
     }
     println(function.asTerm.show(using Printer.TreeCode))
@@ -214,22 +208,22 @@ object HandlerMacros:
 
   private def lambdaExpr(
     quotes: Quotes,
-    instance: quotes.reflect.Term,
+    instance: Expr[?],
     methodName: String,
     typeArguments: List[quotes.reflect.TypeRepr],
-    paramTypes: List[List[quotes.reflect.TypeRepr]],
+    parameterTypes: List[List[quotes.reflect.TypeRepr]],
     resultType: quotes.reflect.TypeRepr
   ): Expr[Any] =
-    import quotes.reflect.{Lambda, MethodType, Symbol, Term}
-    val paramNames = paramTypes.flatten.indices.map(index => s"p$index").toList
-    val methodType = MethodType(paramNames)(_ => paramTypes.flatten, _ => resultType)
-    val paramIndices = paramTypes.foldLeft(Seq(0))((indices, params) => indices :+ (indices.last + params.size))
+    import quotes.reflect.{asTerm, Lambda, MethodType, Symbol, Term}
+    val paramNames = parameterTypes.flatten.indices.map(index => s"p$index").toList
+    val methodType = MethodType(paramNames)(_ => parameterTypes.flatten, _ => resultType)
+    val paramIndices = parameterTypes.foldLeft(Seq(0))((indices, params) => indices :+ (indices.last + params.size))
     Lambda(
       Symbol.spliceOwner,
       methodType,
       (symbol, arguments) =>
         val argumentLists = paramIndices.zip(paramIndices.tail).map(arguments.slice).asInstanceOf[List[List[Term]]]
-        callTerm(quotes, instance, methodName, typeArguments, argumentLists)
+        callTerm(quotes, instance.asTerm, methodName, typeArguments, argumentLists)
     ).asExpr
 
   /**
