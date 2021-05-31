@@ -137,7 +137,8 @@ object HandlerMacros:
     given Quotes = ref.quotes
 
     // Method call function expression consuming argument nodes and returning the method call result
-    val decodeAndCallMethod = decodeAndCallMethodExpr[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
+    val decodeAndCallMethod =
+      decodeAndCallMethodExpr[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
 
     // Result conversion function expression consuming the method result and returning a node
     val encodeResult = encodeResultExpr[Node, CodecType](ref, method, codec)
@@ -183,6 +184,13 @@ object HandlerMacros:
           indices :+ (indices.last + size)
         }
 
+        // api.method3(
+        //   codec.decode[Option[Boolean]](argumentNodes.apply(0)),
+        //   codec.decode[Float](argumentNodes.apply(1))
+        // )(
+        //   codec.decode[List[Int]](argumentNodes.apply(2))
+        // )
+
         // Create method argument lists by decoding corresponding argument nodes into required types
         val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
@@ -202,10 +210,7 @@ object HandlerMacros:
 //        callTerm(ref.quotes, effect.asTerm, "map", List(method.resultType, TypeRepr.of[Node]), List(List(methodCall, convertResult.asTerm)))
     ).asExpr.asInstanceOf[Expr[Seq[Node] => Outcome[Any]]]
 
-  private def encodeResultExpr[
-    Node: Type,
-    CodecType <: Codec[Node]: Type
-  ](
+  private def encodeResultExpr[Node: Type, CodecType <: Codec[Node]: Type](
     ref: Reflection,
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
