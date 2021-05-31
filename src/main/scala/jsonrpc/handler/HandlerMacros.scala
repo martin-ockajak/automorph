@@ -171,60 +171,60 @@ object HandlerMacros:
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
   ): Expr[(Seq[Node], Option[Context]) => Outcome[Node]] =
-    import ref.quotes.reflect.{asTerm, Lambda, MethodType, Printer, Symbol, Term, Tree, TypeRepr}
+    import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Printer, Symbol, Term, Tree, TypeRepr}
     given Quotes = ref.quotes
 
-    val argumentConverters = method.parameters.flatMap(_.map { parameter =>
-      val parameterTypes = List(List(TypeRepr.of[Node]))
-      lambdaExpr(ref.quotes, codec, "decode", List(parameter.dataType), parameterTypes, parameter.dataType)
-    })
-    val resultConverter =
-      lambdaExpr(ref.quotes, codec, "encode", List(method.resultType), List(List(method.resultType)), TypeRepr.of[Node])
-    val parameterTypes = method.parameters.map(params => List.fill(params.size)(TypeRepr.of[Any])).toList
-    val methodCaller = lambdaExpr(ref.quotes, api, method.name, List.empty, parameterTypes, method.resultType)
+    // Method call function consuming argument nodes and returning the method call result
+    val methodCaller = Lambda(
+      Symbol.spliceOwner,
+      MethodType(List("argumentNodes"))(_ => List(TypeRepr.of[Seq[Node]]), _ => method.resultType),
+      (symbol, arguments) =>
+        val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
+          indices :+ (indices.last + size)
+        }
+
+        // Create method argument lists by decoding corresponding argument nodes into required data types
+        val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
+          parameters.toList.zipWithIndex.map { (parameter, index) =>
+            val argumentNodes = arguments.head.asInstanceOf[Term]
+            val argumentIndex = Literal(IntConstant(offset + index))
+            val argumentNode = callTerm(ref.quotes, argumentNodes, "apply", List.empty, List(List(argumentIndex)))
+            callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
+          }
+        ).asInstanceOf[List[List[Term]]]
+
+        // Invoke the method using the decoded arguments
+        callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
+    ).asExpr
+
+    // Result conversion function consuming the method result and returning a node
+    val resultConverter = Lambda(
+      Symbol.spliceOwner,
+      MethodType(List("result"))(_ => List(method.resultType), _ => TypeRepr.of[Node]),
+      (symbol, arguments) =>
+        callTerm(ref.quotes, codec.asTerm, "encode", List(method.resultType), List(arguments.asInstanceOf[List[Term]]))
+    ).asExpr
 
     // Debug prints
     println(method.name)
-    argumentConverters.foreach { converter =>
-      println(s"  ${converter.asTerm.show(using Printer.TreeCode)}")
-    }
+    println(s"  ${methodCaller.asTerm.show(using Printer.TreeCode)}")
     println(s"  ${resultConverter.asTerm.show(using Printer.TreeCode)}")
-    println(methodCaller.asTerm.show(using Printer.TreeCode))
     println()
 
     val function = '{
       (nodeArguments: Seq[Node], context: Option[Context]) =>
-        val arguments = nodeArguments.zip(${ Expr.ofSeq(argumentConverters) }).map { (argument, converter) =>
-          converter.asInstanceOf[Node => Any](argument)
-        }
-        val convertResult = $resultConverter.asInstanceOf[Any => Node]
-//        val callMethod = $methodCaller.asInstanceOf[Any => Outcome[Any]]
-//        val outcome = callMethod(arguments)
-//        $effect.map(outcome, convertResult)
+        //        val arguments = nodeArguments.zip(${ Expr.ofSeq(argumentConverters) }).map { (argument, converter) =>
+        //          converter.asInstanceOf[Node => Any](argument)
+        //        }
+        //        val convertResult = $resultConverter.asInstanceOf[Any => Node]
+        //        val callMethod = $methodCaller.asInstanceOf[Any => Outcome[Any]]
+        //        val outcome = callMethod(arguments)
+        //        $effect.map(outcome, convertResult)
         $effect.pure(nodeArguments.head)
     }
+
     println(function.asTerm.show(using Printer.TreeCode))
     function
-
-  private def lambdaExpr(
-    quotes: Quotes,
-    instance: Expr[?],
-    methodName: String,
-    typeArguments: List[quotes.reflect.TypeRepr],
-    parameterTypes: List[List[quotes.reflect.TypeRepr]],
-    resultType: quotes.reflect.TypeRepr
-  ): Expr[Any] =
-    import quotes.reflect.{asTerm, Lambda, MethodType, Symbol, Term}
-    val paramNames = parameterTypes.flatten.indices.map(index => s"p$index").toList
-    val methodType = MethodType(paramNames)(_ => parameterTypes.flatten, _ => resultType)
-    val paramIndices = parameterTypes.foldLeft(Seq(0))((indices, params) => indices :+ (indices.last + params.size))
-    Lambda(
-      Symbol.spliceOwner,
-      methodType,
-      (symbol, arguments) =>
-        val argumentLists = paramIndices.zip(paramIndices.tail).map(arguments.slice).asInstanceOf[List[List[Term]]]
-        callTerm(quotes, instance.asTerm, methodName, typeArguments, argumentLists)
-    ).asExpr
 
   /**
    * Create instance method call term.
