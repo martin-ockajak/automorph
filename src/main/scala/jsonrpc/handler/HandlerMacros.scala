@@ -175,7 +175,7 @@ object HandlerMacros:
     given Quotes = ref.quotes
 
     // Method call function expression consuming argument nodes and returning the method call result
-    val methodCaller = decodeAndCallMethodExpr[Node, CodecType, Context, ApiType](ref, method, codec, api)
+    val methodCaller = decodeAndCallMethodExpr[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
 
     // Result conversion function expression consuming the method result and returning a node
     val resultConverter = convertResultExpr[Node, CodecType](ref, method, codec)
@@ -187,6 +187,8 @@ object HandlerMacros:
         val convertResult = $resultConverter.asInstanceOf[Any => Node]
         val outcome = decodeAndCallMethod(argumentNodes)
         $effect.map(outcome, convertResult)
+//        val decodeAndCallMethod = $methodCaller.asInstanceOf[Seq[Node] => Outcome[Node]]
+//        decodeAndCallMethod(argumentNodes)
     }
 
     // Debug prints
@@ -200,12 +202,14 @@ object HandlerMacros:
   private def decodeAndCallMethodExpr[
     Node: Type,
     CodecType <: Codec[Node]: Type,
+    Outcome[_]: Type,
     Context: Type,
     ApiType: Type
   ](
     ref: Reflection,
     method: ref.QuotedMethod,
     codec: Expr[CodecType],
+    effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
   ): Expr[Any] =
     import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
@@ -229,8 +233,13 @@ object HandlerMacros:
           }
         ).asInstanceOf[List[List[Term]]]
 
-          // Invoke the method using the decoded arguments
-          callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
+        // Call the method using the decoded arguments
+        callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
+//        val methodCall = callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
+//
+//        // Encode the method call result into a node
+//        val convertResult = convertResultExpr[Node, CodecType](ref, method, codec)
+//        callTerm(ref.quotes, effect.asTerm, "map", List(method.resultType, TypeRepr.of[Node]), List(List(methodCall, convertResult.asTerm)))
     ).asExpr
 
   private def convertResultExpr[
