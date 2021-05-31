@@ -106,14 +106,12 @@ object HandlerMacros:
     else if !method.available then
       sys.error(s"Bound API method '$signature' must be callable at runtime")
     else
-      val outcomeType = TypeRepr.of[Outcome]
-      outcomeType match
+      TypeRepr.of[Outcome] match
         case lambdaType: LambdaType =>
-          val resultTypeMatch =
-            method.resultType match
-              case appliedType: AppliedType => appliedType.tycon =:= outcomeType
-              case _                        => false
-          if !resultTypeMatch then
+          if method.resultType match
+              case appliedType: AppliedType => !(appliedType.tycon =:= lambdaType)
+              case _                        => true
+          then
             sys.error(s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'")
         case _ => ()
 
