@@ -195,8 +195,8 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     methodBindings.get(validRequest.method).map { methodHandle =>
       // Invoke method
       val contextSupplied = (context.isInstanceOf[AnyVal] || context.isInstanceOf[AnyRef]) &&
-        !context.isInstanceOf[Unit] &&
-        !context.isInstanceOf[Nothing]
+        !context.isInstanceOf[Nothing] &&
+        !context.isInstanceOf[Unit]
       val arguments = extractArguments(validRequest, contextSupplied, methodHandle)
       Try(effect.either(methodHandle.function(arguments, context))) match
         case Success(outcome) => effect.flatMap(
