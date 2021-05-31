@@ -57,11 +57,6 @@ trait CodecSpec extends BaseSpec:
   )
 
   "" - {
-//    "Encode / Decode" in {
-//      val encodedValue = codec.encode(record)
-//      val decodedValue = codec.decode[Record](record)
-//      decodedValue.should(equal(record))
-//    }
     "Serialize / Deserialize" in {
       messages.foreach { message =>
         val rawMessage = codec.serialize(message)
