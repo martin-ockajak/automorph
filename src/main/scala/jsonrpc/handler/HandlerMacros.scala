@@ -147,7 +147,7 @@ object HandlerMacros:
     val bindingFunction = '{
       (argumentNodes: Seq[Node], context: Option[Context]) =>
         val outcome = $decodeAndCallMethod(argumentNodes)
-        $effect.map(outcome, $encodeResult)
+        $effect.map(outcome, $encodeResult.asInstanceOf[Any => Node])
 //        val decodeAndCallMethod = $methodCaller.asInstanceOf[Seq[Node] => Outcome[Node]]
 //        decodeAndCallMethod(argumentNodes)
     }
