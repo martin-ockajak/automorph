@@ -72,12 +72,6 @@ object HandlerMacros:
       generateMethodHandle[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
     })
 
-    // Generate function call using a type parameter
-    val methodName = apiMethods.find(_.parameters.flatten.isEmpty).map(_.name).getOrElse("")
-    val call = callTerm(ref.quotes, api.asTerm, methodName, List.empty, List.empty)
-    val typeParameter = TypeRepr.of[List[List[String]]]
-    val typedCall = callTerm(ref.quotes, '{ List }.asTerm, "apply", List(typeParameter), List.empty)
-
     // Generate printouts code using the previously generated code
     '{
       $methodHandles.toMap[String, MethodHandle[Node, Outcome, Context]]
