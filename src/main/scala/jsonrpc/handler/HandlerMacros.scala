@@ -174,8 +174,45 @@ object HandlerMacros:
     import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Printer, Symbol, Term, Tree, TypeRepr}
     given Quotes = ref.quotes
 
-    // Method call function consuming argument nodes and returning the method call result
-    val methodCaller = Lambda(
+    // Method call function expression consuming argument nodes and returning the method call result
+    val methodCaller = decodeAndCallMethodExpr[Node, CodecType, Context, ApiType](ref, method, codec, api)
+
+    // Result conversion function expression consuming the method result and returning a node
+    val resultConverter = convertResultExpr[Node, CodecType](ref, method, codec)
+
+    // Debug prints
+    println(method.name)
+    println(s"  ${methodCaller.asTerm.show(using Printer.TreeCode)}")
+    println(s"  ${resultConverter.asTerm.show(using Printer.TreeCode)}")
+    println()
+
+    // Binding function expression
+    val function = '{
+      (argumentNodes: Seq[Node], context: Option[Context]) =>
+        val decodeAndCallMethod = $methodCaller.asInstanceOf[Any => Outcome[Any]]
+        val convertResult = $resultConverter.asInstanceOf[Any => Node]
+        val outcome = decodeAndCallMethod(argumentNodes)
+        $effect.map(outcome, convertResult)
+    }
+
+    println(function.asTerm.show(using Printer.TreeCode))
+    function
+
+  private def decodeAndCallMethodExpr[
+    Node: Type,
+    CodecType <: Codec[Node]: Type,
+    Context: Type,
+    ApiType: Type
+  ](
+    ref: Reflection,
+    method: ref.QuotedMethod,
+    codec: Expr[CodecType],
+    api: Expr[ApiType]
+  ): Expr[Any] =
+    import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
+    given Quotes = ref.quotes
+
+    Lambda(
       Symbol.spliceOwner,
       MethodType(List("argumentNodes"))(_ => List(TypeRepr.of[Seq[Node]]), _ => method.resultType),
       (symbol, arguments) =>
@@ -193,38 +230,26 @@ object HandlerMacros:
           }
         ).asInstanceOf[List[List[Term]]]
 
-        // Invoke the method using the decoded arguments
-        callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
+          // Invoke the method using the decoded arguments
+          callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
     ).asExpr
 
-    // Result conversion function consuming the method result and returning a node
-    val resultConverter = Lambda(
+  private def convertResultExpr[
+    Node: Type,
+    CodecType <: Codec[Node]: Type
+  ](
+    ref: Reflection,
+    method: ref.QuotedMethod,
+    codec: Expr[CodecType]
+  ): Expr[Any] =
+    import ref.quotes.reflect.{asTerm, Lambda, MethodType, Symbol, Term, TypeRepr}
+
+    Lambda(
       Symbol.spliceOwner,
       MethodType(List("result"))(_ => List(method.resultType), _ => TypeRepr.of[Node]),
       (symbol, arguments) =>
         callTerm(ref.quotes, codec.asTerm, "encode", List(method.resultType), List(arguments.asInstanceOf[List[Term]]))
     ).asExpr
-
-    // Debug prints
-    println(method.name)
-    println(s"  ${methodCaller.asTerm.show(using Printer.TreeCode)}")
-    println(s"  ${resultConverter.asTerm.show(using Printer.TreeCode)}")
-    println()
-
-    val function = '{
-      (nodeArguments: Seq[Node], context: Option[Context]) =>
-        //        val arguments = nodeArguments.zip(${ Expr.ofSeq(argumentConverters) }).map { (argument, converter) =>
-        //          converter.asInstanceOf[Node => Any](argument)
-        //        }
-        //        val convertResult = $resultConverter.asInstanceOf[Any => Node]
-        //        val callMethod = $methodCaller.asInstanceOf[Any => Outcome[Any]]
-        //        val outcome = callMethod(arguments)
-        //        $effect.map(outcome, convertResult)
-        $effect.pure(nodeArguments.head)
-    }
-
-    println(function.asTerm.show(using Printer.TreeCode))
-    function
 
   /**
    * Create instance method call term.
