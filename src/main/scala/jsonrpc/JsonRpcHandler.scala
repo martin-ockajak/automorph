@@ -121,59 +121,35 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     copy(methodBindings = methodBindings ++ bindings)
 
   /**
-   * Invoke a ''bound method'' specified in a JSON-RPC ''request'' and return a JSON-RPC ''response''.
-   *
-   * @param request JSON-RPC request message
-   * @return optional JSON-RPC response message and context
-   */
-  inline def processRequest(request: ArraySeq.ofByte): Outcome[Option[ArraySeq.ofByte]] = processRequest(request, None)
-
-  /**
-   * Invokes a ''bound method'' specified in a JSON-RPC ''request'' and return a JSON-RPC ''response''.
-   *
-   * @param request JSON-RPC request message
-   * @return optional JSON-RPC response message
-   */
-  inline def processRequest(request: ByteBuffer): Outcome[Option[ByteBuffer]] = processRequest(request, None)
-
-  /**
-   * Invoke a bound ''method'' based on a JSON-RPC ''request'' and return a JSON-RPC ''response''.
-   *
-   * @param request JSON-RPC request message
-   * @return optional JSON-RPC response message
-   */
-  inline def processRequest(request: InputStream): Outcome[Option[InputStream]] = processRequest(request, None)
-
-  /**
-   * Invoke a bound ''method'' based on a JSON-RPC ''request'' plus an additional ''request context'' and return a JSON-RPC ''response''.
+   * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.
    *
    * @param request JSON-RPC request message
    * @param context request context
    * @return optional JSON-RPC response message
    */
-  inline def processRequest(request: ArraySeq.ofByte, context: Option[Context]): Outcome[Option[ArraySeq.ofByte]] =
+  inline def processRequest(request: ArraySeq.ofByte, context: Context): Outcome[Option[ArraySeq.ofByte]] =
     handleRequest(request, context)
 
   /**
-   * Invoke a bound ''method'' based on a JSON-RPC ''request'' plus an additional ''request context'' and return a JSON-RPC ''response''.
+   * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.
    *
    * @param request JSON-RPC request message
    * @param context request context
    * @return optional JSON-RPC response message
    */
-  inline def processRequest(request: ByteBuffer, context: Option[Context]): Outcome[Option[ByteBuffer]] =
-    effect.map(processRequest(request.toArraySeq), _.map(response => ByteBuffer.wrap(response.unsafeArray)))
+  inline def processRequest(request: ByteBuffer, context: Context): Outcome[Option[ByteBuffer]] =
+    effect.map(processRequest(request.toArraySeq, context), _.map(response => ByteBuffer.wrap(response.unsafeArray)))
 
   /**
-   * Invoke a bound ''method'' based on a JSON-RPC ''request'' plus an additional ''request context'' and return a JSON-RPC ''response''.
+   * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.
    *
    * @param request JSON-RPC request message
    * @param context request context
    * @return optional JSON-RPC response message
    */
-  inline def processRequest(request: InputStream, context: Option[Context]): Outcome[Option[InputStream]] =
+  inline def processRequest(request: InputStream, context: Context): Outcome[Option[InputStream]] =
     effect.map(
-      processRequest(request.toArraySeq(bufferSize)),
+      processRequest(request.toArraySeq(bufferSize), context),
       _.map(response => ByteArrayInputStream(response.unsafeArray))
     )
 
@@ -186,7 +162,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    */
   private inline def handleRequest(
     rawRequest: ArraySeq.ofByte,
-    context: Option[Context]
+    context: Context
   ): Outcome[Option[ArraySeq.ofByte]] =
     // Deserialize request
     Try(codec.deserialize(rawRequest)) match
@@ -213,12 +189,15 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   private inline def invoke(
     formedRequest: Message[Node],
     validRequest: Request[Node],
-    context: Option[Context]
+    context: Context
   ): Outcome[Option[ArraySeq.ofByte]] =
     logger.debug(s"Processing JSON-RPC request", formedRequest.properties)
     methodBindings.get(validRequest.method).map { methodHandle =>
       // Invoke method
-      val arguments = extractArguments(validRequest, context, methodHandle)
+      val contextSupplied = (context.isInstanceOf[AnyVal] || context.isInstanceOf[AnyRef]) &&
+        !context.isInstanceOf[Unit] &&
+        !context.isInstanceOf[Nothing]
+      val arguments = extractArguments(validRequest, contextSupplied, methodHandle)
       Try(effect.either(methodHandle.function(arguments, context))) match
         case Success(outcome) => effect.flatMap(
             outcome,
@@ -245,16 +224,16 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * Optional request context is used as a last method argument.
    *
    * @param validRequest valid request
-   * @param context request context
+   * @param contextSupplied request context supplied
    * @param methodHandle bound method handle
    * @return bound method arguments
    */
   private def extractArguments(
     validRequest: Request[Node],
-    context: Option[Context],
+    contextSupplied: Boolean,
     methodHandle: MethodHandle[Node, Outcome, Context]
   ): Seq[Node] =
-    val parameters = methodHandle.paramNames.dropRight(context.iterator.size)
+    val parameters = methodHandle.paramNames.dropRight(if contextSupplied then 1 else 0)
     validRequest.params match
       case Left(arguments) =>
         // Arguments by position

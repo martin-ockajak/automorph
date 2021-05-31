@@ -20,7 +20,7 @@ import scala.quoted.{quotes, Expr, Quotes, Type}
  * @tparam Context request context type
  */
 final case class MethodHandle[Node, Outcome[_], Context](
-  function: (Seq[Node], Option[Context]) => Outcome[Node],
+  function: (Seq[Node], Context) => Outcome[Node],
   name: String,
   resultType: String,
   paramNames: Seq[String],
@@ -169,7 +169,7 @@ object HandlerMacros:
     codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
-  ): Expr[(Seq[Node], Option[Context]) => Outcome[Node]] =
+  ): Expr[(Seq[Node], Context) => Outcome[Node]] =
     import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Printer, Symbol, Term, Tree, TypeRepr}
     given Quotes = ref.quotes
 
@@ -182,7 +182,7 @@ object HandlerMacros:
 
     // Binding function expression
     val bindingFunction = '{
-      (argumentNodes: Seq[Node], context: Option[Context]) =>
+      (argumentNodes: Seq[Node], context: Context) =>
         val outcome = $decodeAndCallMethod(argumentNodes, context)
         $effect.map(outcome, $encodeResult.asInstanceOf[Any => Node])
 //        val decodeAndCallMethod = $methodCaller.asInstanceOf[Seq[Node] => Outcome[Node]]
@@ -209,14 +209,14 @@ object HandlerMacros:
     codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
-  ): Expr[(Seq[Node], Option[Context]) => Outcome[Any]] =
+  ): Expr[(Seq[Node], Context) => Outcome[Any]] =
     import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
     Lambda(
       Symbol.spliceOwner,
       MethodType(List("argumentNodes", "context"))(
-        _ => List(TypeRepr.of[Seq[Node]], TypeRepr.of[Option[Context]]),
+        _ => List(TypeRepr.of[Seq[Node]], TypeRepr.of[Context]),
         _ => method.resultType
       ),
       (symbol, arguments) =>
@@ -233,10 +233,7 @@ object HandlerMacros:
             val argumentIndex = Literal(IntConstant(offset + index))
             val argumentNode = callTerm(ref.quotes, argumentNodes, "apply", List.empty, List(List(argumentIndex)))
             if contextSupplied[Context](ref.quotes) && (offset + index) == lastArgumentIndex then
-              val context = arguments.last.asExpr.asInstanceOf[Expr[Option[Context]]]
-              '{
-                $context.getOrElse(throw new IllegalArgumentException("Missing request context"))
-              }.asTerm
+              arguments.last.asInstanceOf[Term]
             else
               callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
           }
@@ -249,7 +246,7 @@ object HandlerMacros:
 //        // Encode the method call result into a node
 //        val convertResult = convertResultExpr[Node, CodecType](ref, method, codec)
 //        callTerm(ref.quotes, effect.asTerm, "map", List(method.resultType, TypeRepr.of[Node]), List(List(methodCall, convertResult.asTerm)))
-    ).asExpr.asInstanceOf[Expr[(Seq[Node], Option[Context]) => Outcome[Any]]]
+    ).asExpr.asInstanceOf[Expr[(Seq[Node], Context) => Outcome[Any]]]
 
   private def encodeResultExpr[Node: Type, CodecType <: Codec[Node]: Type](
     ref: Reflection,
