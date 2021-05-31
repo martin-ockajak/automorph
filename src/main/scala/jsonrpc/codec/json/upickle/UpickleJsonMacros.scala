@@ -17,8 +17,7 @@ case object UpickleJsonMacros:
     typedPickler.writeJs($value)(using writer)
   }
 
-  inline def decode[Pickler <: Api, T](pickler: Pickler, node: Value): T =
-    ${ decode[Pickler, T]('pickler, 'node) }
+  inline def decode[Pickler <: Api, T](pickler: Pickler, node: Value): T = ${ decode[Pickler, T]('pickler, 'node) }
 
   private def decode[Pickler <: Api: Type, T: Type](pickler: Expr[Pickler], node: Expr[Value])(using
     quotes: Quotes
