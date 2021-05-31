@@ -140,13 +140,13 @@ object HandlerMacros:
     val decodeAndCallMethod = decodeAndCallMethodExpr[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
 
     // Result conversion function expression consuming the method result and returning a node
-    val convertResult = convertResultExpr[Node, CodecType](ref, method, codec)
+    val encodeResult = encodeResultExpr[Node, CodecType](ref, method, codec)
 
     // Binding function expression
     val bindingFunction = '{
       (argumentNodes: Seq[Node], context: Option[Context]) =>
         val outcome = $decodeAndCallMethod(argumentNodes)
-        $effect.map(outcome, $convertResult)
+        $effect.map(outcome, $encodeResult)
 //        val decodeAndCallMethod = $methodCaller.asInstanceOf[Seq[Node] => Outcome[Node]]
 //        decodeAndCallMethod(argumentNodes)
     }
@@ -202,7 +202,7 @@ object HandlerMacros:
 //        callTerm(ref.quotes, effect.asTerm, "map", List(method.resultType, TypeRepr.of[Node]), List(List(methodCall, convertResult.asTerm)))
     ).asExpr.asInstanceOf[Expr[Seq[Node] => Outcome[Any]]]
 
-  private def convertResultExpr[
+  private def encodeResultExpr[
     Node: Type,
     CodecType <: Codec[Node]: Type
   ](
