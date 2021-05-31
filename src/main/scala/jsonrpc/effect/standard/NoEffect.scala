@@ -1,4 +1,4 @@
-package jsonrpc.effect.native
+package jsonrpc.effect.standard
 
 import jsonrpc.spi.Effect
 import NoEffect.Identity

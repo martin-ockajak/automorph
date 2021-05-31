@@ -1,7 +1,7 @@
 package jsonrpc.effect.standard
 
 import jsonrpc.effect.EffectSpec
-import jsonrpc.effect.native.TryEffect
+import jsonrpc.effect.standard.TryEffect
 import jsonrpc.spi.Effect
 import scala.util.{Failure, Success, Try}
 

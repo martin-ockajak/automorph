@@ -62,7 +62,7 @@ object HandlerMacros:
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = detectApiMethods(ref, TypeTree.of[ApiType])
+    val apiMethods = detectApiMethods[Outcome](ref, TypeTree.of[ApiType])
 
     // Debug prints
     println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
@@ -77,24 +77,44 @@ object HandlerMacros:
       $methodHandles.toMap[String, MethodHandle[Node, Outcome, Context]]
     }
 
-  private def detectApiMethods(ref: Reflection, apiTypeTree: ref.quotes.reflect.TypeTree): Seq[ref.QuotedMethod] =
+  private def detectApiMethods[Outcome[_]: Type](
+    ref: Reflection,
+    apiType: ref.quotes.reflect.TypeTree
+  ): Seq[ref.QuotedMethod] =
     import ref.quotes.reflect.{TypeRepr, TypeTree}
-
     given Quotes = ref.quotes
+
     val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap {
       baseType => ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
-    val methods = ref.methods(apiTypeTree.tpe).filter(_.public).filter {
+    val methods = ref.methods(apiType.tpe).filter(_.public).filter {
       method => !baseMethodNames.contains(method.symbol.name)
     }
-    methods.foreach { method =>
-      val signature = s"${apiTypeTree.show}.${method.lift.signature}"
-      if method.typeParameters.nonEmpty then
-        sys.error(s"Bound API method must not have type parameters: $signature")
-      else if !method.available then
-        sys.error(s"Bound API method must be callable at runtime: $signature")
-    }
+    methods.foreach(method => validateApiMethod(ref, apiType, method))
     methods
+
+  private def validateApiMethod[Outcome[_]: Type](
+    ref: Reflection,
+    apiType: ref.quotes.reflect.TypeTree,
+    method: ref.QuotedMethod
+  ): Unit =
+    import ref.quotes.reflect.{AppliedType, LambdaType, NamedType, TypeRepr}
+
+    val signature = s"${apiType.show}.${method.lift.signature}"
+    if method.typeParameters.nonEmpty then
+      sys.error(s"Bound API method '$signature' must not have type parameters")
+    else if !method.available then
+      sys.error(s"Bound API method '$signature' must be callable at runtime")
+    val outcomeType = TypeRepr.of[Outcome]
+    outcomeType match
+      case lambdaType: LambdaType =>
+        val resultTypeMatch =
+          method.resultType match
+            case appliedType: AppliedType => appliedType.tycon =:= outcomeType
+            case _                        => false
+        if !resultTypeMatch then
+          sys.error(s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'")
+      case _ => ()
 
   private def generateMethodHandle[
     Node: Type,

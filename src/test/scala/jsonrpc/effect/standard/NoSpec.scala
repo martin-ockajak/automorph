@@ -1,8 +1,8 @@
 package jsonrpc.effect.standard
 
 import jsonrpc.effect.EffectSpec
-import jsonrpc.effect.native.NoEffect
-import jsonrpc.effect.native.NoEffect.Identity
+import jsonrpc.effect.standard.NoEffect
+import jsonrpc.effect.standard.NoEffect.Identity
 import jsonrpc.spi.Effect
 import scala.util.{Failure, Success, Try}
 

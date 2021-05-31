@@ -3,8 +3,12 @@ package jsonrpc
 import jsonrpc.util.ValueOps.asSome
 import scala.concurrent.Future
 
-trait Api:
+final case class SimpleApi():
 
+  def method(): String = "test"
+
+
+trait Api:
   def method0(): Future[Double]
 
   def method1(p0: Record): Future[Int]
@@ -20,6 +24,7 @@ trait Api:
   def method6(p0: String): Future[Unit]
 
   protected def protectedMethod: Unit
+
 
 final case class ApiImpl(test: String) extends Api:
 
