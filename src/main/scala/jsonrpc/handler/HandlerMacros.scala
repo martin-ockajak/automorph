@@ -190,9 +190,9 @@ object HandlerMacros:
     }
 
     // Debug prints
-    println(method.name)
-    println(s"  ${methodCaller.asTerm.show(using Printer.TreeCode)}")
-    println(s"  ${resultConverter.asTerm.show(using Printer.TreeCode)}")
+//    println(method.name)
+//    println(s"  ${methodCaller.asTerm.show(using Printer.TreeCode)}")
+//    println(s"  ${resultConverter.asTerm.show(using Printer.TreeCode)}")
     println(function.asTerm.show(using Printer.TreeCode))
     println()
     function
