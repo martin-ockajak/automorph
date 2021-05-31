@@ -1,6 +1,7 @@
 package jsonrpc
 
 import compiletime.erasedValue
+import java.beans.IntrospectionException
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.core.EncodingOps.toArraySeq
@@ -120,7 +121,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
         exposedNames.applyOrElse(
           apiMethodName,
           _ =>
-            throw new IllegalArgumentException(
+            throw new IntrospectionException(
               s"Bound API does not contain the specified public method: ${api.getClass.getName}.$apiMethodName"
             )
         ).map(_ -> method)
