@@ -32,11 +32,6 @@ object HandlerMacros:
   /**
    * Generate JSON-RPC bindings for all valid public methods of an API type.
    *
-   * Throws an exception if an invalid public method is found.
-   * Methods are considered invalid if they satisfy one of these conditions:
-   * * have type parameters
-   * * cannot be called at runtime
-   *
    * @param codec data format codec
    * @param effect effect system
    * @param api API instance
@@ -111,7 +106,7 @@ object HandlerMacros:
       }.getOrElse(true)
     then
       throw IntrospectionException(
-        s"Bound API method '$signature' must accept last parameter of the specified request context type '${TypeRepr.of[Context].show}'"
+        s"Bound API method '$signature' must accept the specified request context type '${TypeRepr.of[Context].show}' as its last parameter"
       )
     else
       TypeRepr.of[Outcome] match
@@ -129,9 +124,7 @@ object HandlerMacros:
     import quotes.reflect.TypeRepr
     given Quotes = quotes
 
-    !(TypeRepr.of[Context] =:= TypeRepr.of[Any] ||
-      TypeRepr.of[Context] =:= TypeRepr.of[Nothing] ||
-      TypeRepr.of[Context] =:= TypeRepr.of[Unit])
+    !(TypeRepr.of[Context] =:= TypeRepr.of[Unit])
 
   private def generateMethodHandle[
     Node: Type,

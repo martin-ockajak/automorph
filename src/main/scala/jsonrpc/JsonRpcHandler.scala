@@ -29,7 +29,7 @@ import scala.util.{Failure, Success, Try}
  * @tparam Outcome effectful computation outcome type
  * @tparam Context request context type
  */
-final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Context] private (
+final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Context <: Matchable] private (
   codec: CodecType,
   effect: Effect[Outcome],
   bufferSize: Int,
@@ -39,45 +39,47 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   private val unknownId = "[unknown]".asRight
 
   /**
-   * Create a new JSON-RPC request handler by adding method bindings for member methods of the specified API.
+   * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
    *
    * Used by JSON-RPC server implementations to process JSON-RPC requests into JSON-RPC responses.
    *
-   * Generates JSON-RPC bindings for all valid public methods of the API type.
-   * Throws an exception if an invalid public method is found.
-   * Methods are considered invalid if they satisfy one of these conditions:
-   * - have type parameters
-   * - cannot be called at runtime
+   * A method is considered valid if it satisfied all of these conditions:
+   * - can be called at runtime
+   * - has no type parameters
+   * - returns the specified effect type
+   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
    *
-   * A bound method definition may include a last ''context parameter'' of `Context` type or return a context fuction consuming one.
-   * Server-supplied ''request context'' is then passed to the bound method or the returned context function as the 'context parameter' argument.
+   * If a bound method definition contains a last parameter of `Context` type or returns a context fuction accepting one
+   * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
    * API methods are exposed using their actual names.
    *
    * @param api API instance
-   * @tparam T API type (only its member methds are exposed)
+   * @tparam T API type (only member methods of this types are exposed)
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, CodecType, Outcome, Context] = bind(api, name => Seq(name))
 
   /**
-   * Create a new JSON-RPC request handler by adding method bindings for member methods of the specified API.
+   * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
    *
-   * Generates JSON-RPC bindings for all valid public methods of the API type.
-   * Throws an exception if an invalid public method is found.
-   * Methods are considered invalid if they satisfy one of these conditions:
-   * - have type parameters
-   * - cannot be called at runtime
+   * Used by JSON-RPC server implementations to process JSON-RPC requests into JSON-RPC responses.
    *
-   * A bound method definition may include a last ''context parameter'' of `Context` type or return a context fuction consuming one.
-   * Server-supplied ''request context'' is then passed to the bound method or the returned context function as the ''context parameter'' argument.
+   * A method is considered valid if it satisfied all of these conditions:
+   * - can be called at runtime
+   * - has no type parameters
+   * - returns the specified effect type
+   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
    *
-   * API methods are exposed using names their local names transformed by the .
+   * If a bound method definition contains a last parameter of `Context` type or returns a context fuction accepting one
+   * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
+   *
+   * API methods are exposed using names resulting from a transformation of their actual names via the `exposedNames` function.
    *
    * @param api API instance
-   * @param exposedNames create exposed method names from its name (empty result causes the method not to be exposed)
-   * @tparam T API type (only its member methds are exposed)
+   * @param exposedNames create exposed method names from its actual name (empty result causes the method not to be exposed)
+   * @tparam T API type (only member methods of this types are exposed)
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
@@ -88,20 +90,24 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     bind(api, Function.unlift(name => Some(exposedNames(name))))
 
   /**
-   * Create a new JSON-RPC request handler by adding method bindings for member methods of the specified API.
+   * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
    *
-   * Generates JSON-RPC bindings for all valid public methods of the API type.
-   * Throws an exception if an invalid public method is found.
-   * Methods are considered invalid if they satisfy one of these conditions:
-   * - have type parameters
-   * - cannot be called at runtime
+   * Used by JSON-RPC server implementations to process JSON-RPC requests into JSON-RPC responses.
    *
-   * A bound method definition may include a last ''context parameter'' of `Context` type or return a context fuction consuming one.
-   * Server-supplied ''request context'' is then passed to the bound method or the returned context function as the ''context parameter'' argument.
+   * A method is considered valid if it satisfied all of these conditions:
+   * - can be called at runtime
+   * - has no type parameters
+   * - returns the specified effect type
+   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
+   *
+   * If a bound method definition contains a last parameter of `Context` type or returns a context fuction accepting one
+   * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
+   *
+   * API methods are exposed using names resulting from a transformation of their actual names via the `exposedNames` function.
    *
    * @param api API instance
-   * @param exposedNames create exposed method names from its name (empty result causes the method not to be exposed)
-   * @tparam T API type (only its member methds are exposed)
+   * @param exposedNames create exposed method names from its actual name (empty result causes the method not to be exposed)
+   * @tparam T API type (only member methods of this types are exposed)
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
@@ -196,8 +202,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     methodBindings.get(validRequest.method).map { methodHandle =>
       // Invoke method
       val contextSupplied = inline erasedValue[Context].asInstanceOf[Matchable] match
-        case _: AnyVal | _: AnyRef => true
-        case _: Unit | _: Nothing => false
+        case _: Unit => false
         case _ => true
       val arguments = extractArguments(validRequest, contextSupplied, methodHandle)
       Try(effect.either(methodHandle.function(arguments, context))) match
@@ -325,7 +330,7 @@ case object JsonRpcHandler:
    * @tparam Outcome computation outcome effect type
    * @tparam Context JSON-RPC call context type
    */
-  def withContext[Node, CodecType <: Codec[Node], Outcome[_], Context](
+  def withContext[Node, CodecType <: Codec[Node], Outcome[_], Context <: Matchable](
     codec: CodecType,
     effect: Effect[Outcome],
     bufferSize: Int = 4096
