@@ -8,7 +8,7 @@ import scala.collection.immutable.ArraySeq
  *
  * Used by JSON-RPC client to send requests and receive responses to and from a remot endpoint.
  *
- * @tparam Outcome computation outcome effect type
+ * @tparam Outcome effectful computation outcome type
  * @tparam Context request context type
  */
 trait JsonRpcTransport[Outcome[_], Context]:
