@@ -61,27 +61,11 @@ object HandlerMacros:
     import ref.quotes.reflect.{asTerm, TypeRepr, TypeTree}
     val ref = Reflection(quotes)
 
-    val decodeCall =
-      callTerm(ref.quotes, codec.asTerm, "decode", List(TypeRepr.of[String]), List(List(Expr("TEST").asTerm))).asExpr
-    //    '{
-    //      $codec.decode[String](().asInstanceOf[Node])
-    //    }
-
-    println("--- CODEC TYPE ---")
-    println(TypeTree.of[CodecType].show)
-    println()
-
-//    def methodArgument[T: Type](node: Expr[Node], param: ref.QuotedParameter): Expr[T] =
-//      '{
-//        $codec.decode[T]($node)
-//      }
-
-//    def methodFunction(method: ref.QuoteDMethod): Expr[Node => Outcome[Node]] =
-//      '{
-//      }
-
     // Detect and validate public methods in the API type
     val apiMethods = detectApiMethods(ref, TypeTree.of[ApiType])
+
+    // Debug prints
+    println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
 
     // Generate API method handles including wrapper functions consuming and product Node values
     val methodHandles = Expr.ofSeq(apiMethods.map { method =>
@@ -94,24 +78,8 @@ object HandlerMacros:
     val typeParameter = TypeRepr.of[List[List[String]]]
     val typedCall = callTerm(ref.quotes, '{ List }.asTerm, "apply", List(typeParameter), List.empty)
 
-    // Debug prints
-//    println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
-//    println(
-//      s"""
-//        |Call:
-//        |  $call
-//        |
-//        |Typed call:
-//        |  $typedCall
-//        |""".stripMargin
-//    )
-
     // Generate printouts code using the previously generated code
     '{
-//      println(${call.asExpr})
-//      println(${typedCall.asExpr})
-      println("--- DECODED ---")
-      println($decodeCall)
       $methodHandles.toMap[String, MethodHandle[Node, Outcome, Context]]
     }
 
@@ -278,3 +246,7 @@ object HandlerMacros:
   ): quotes.reflect.Term =
     import quotes.reflect.Select
     Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(arguments)
+
+  private def methodDescription(method: Method): String =
+    val documentation = method.documentation.map(_ + "\n").getOrElse("")
+    s"$documentation${method.signature}\n"
