@@ -2,6 +2,7 @@ package jsonrpc.handler
 
 import jsonrpc.spi.{Codec, Effect}
 import jsonrpc.util.{Method, Reflection}
+import java.beans.IntrospectionException
 import scala.collection.immutable.ArraySeq
 import scala.compiletime.error
 import scala.quoted.{quotes, Expr, Quotes, Type}
@@ -102,9 +103,9 @@ object HandlerMacros:
 
     val signature = s"${apiType.show}.${method.lift.signature}"
     if method.typeParameters.nonEmpty then
-      sys.error(s"Bound API method '$signature' must not have type parameters")
+      throw IntrospectionException(s"Bound API method '$signature' must not have type parameters")
     else if !method.available then
-      sys.error(s"Bound API method '$signature' must be callable at runtime")
+      throw IntrospectionException(s"Bound API method '$signature' must be callable at runtime")
     else
       TypeRepr.of[Outcome] match
         case lambdaType: LambdaType =>
@@ -112,7 +113,7 @@ object HandlerMacros:
               case appliedType: AppliedType => !(appliedType.tycon =:= lambdaType)
               case _                        => true
           then
-            sys.error(s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'")
+            throw IntrospectionException(s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'")
         case _ => ()
 
   private def generateMethodHandle[
