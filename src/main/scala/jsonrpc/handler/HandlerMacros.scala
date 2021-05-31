@@ -111,7 +111,7 @@ object HandlerMacros:
   ): Expr[(String, MethodHandle[Node, Outcome, Context])] =
     given Quotes = ref.quotes
     val liftedMethod = method.lift
-    val function = generateFunction[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
+    val function = generateBindingFunction[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
     val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
@@ -120,7 +120,7 @@ object HandlerMacros:
       $name -> MethodHandle($function, $name, $resultType, $parameterNames, $parameterTypes)
     }
 
-  private def generateFunction[
+  private def generateBindingFunction[
     Node: Type,
     CodecType <: Codec[Node]: Type,
     Outcome[_]: Type,
@@ -137,18 +137,16 @@ object HandlerMacros:
     given Quotes = ref.quotes
 
     // Method call function expression consuming argument nodes and returning the method call result
-    val methodCaller = decodeAndCallMethodExpr[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
+    val decodeAndCallMethod = decodeAndCallMethodExpr[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
 
     // Result conversion function expression consuming the method result and returning a node
-    val resultConverter = convertResultExpr[Node, CodecType](ref, method, codec)
+    val convertResult = convertResultExpr[Node, CodecType](ref, method, codec)
 
     // Binding function expression
-    val function = '{
+    val bindingFunction = '{
       (argumentNodes: Seq[Node], context: Option[Context]) =>
-        val decodeAndCallMethod = $methodCaller.asInstanceOf[Seq[Node] => Outcome[Any]]
-        val convertResult = $resultConverter.asInstanceOf[Any => Node]
-        val outcome = decodeAndCallMethod(argumentNodes)
-        $effect.map(outcome, convertResult)
+        val outcome = $decodeAndCallMethod(argumentNodes)
+        $effect.map(outcome, $convertResult)
 //        val decodeAndCallMethod = $methodCaller.asInstanceOf[Seq[Node] => Outcome[Node]]
 //        decodeAndCallMethod(argumentNodes)
     }
@@ -157,9 +155,9 @@ object HandlerMacros:
 //    println(method.name)
 //    println(s"  ${methodCaller.asTerm.show(using Printer.TreeCode)}")
 //    println(s"  ${resultConverter.asTerm.show(using Printer.TreeCode)}")
-    println(function.asTerm.show(using Printer.TreeCode))
+    println(bindingFunction.asTerm.show(using Printer.TreeCode))
     println()
-    function
+    bindingFunction
 
   private def decodeAndCallMethodExpr[
     Node: Type,
@@ -173,7 +171,7 @@ object HandlerMacros:
     codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
-  ): Expr[Any] =
+  ): Expr[Seq[Node] => Outcome[Any]] =
     import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
@@ -202,7 +200,7 @@ object HandlerMacros:
 //        // Encode the method call result into a node
 //        val convertResult = convertResultExpr[Node, CodecType](ref, method, codec)
 //        callTerm(ref.quotes, effect.asTerm, "map", List(method.resultType, TypeRepr.of[Node]), List(List(methodCall, convertResult.asTerm)))
-    ).asExpr
+    ).asExpr.asInstanceOf[Expr[Seq[Node] => Outcome[Any]]]
 
   private def convertResultExpr[
     Node: Type,
@@ -211,7 +209,7 @@ object HandlerMacros:
     ref: Reflection,
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
-  ): Expr[Any] =
+  ): Expr[Any => Node] =
     import ref.quotes.reflect.{asTerm, Lambda, MethodType, Symbol, Term, TypeRepr}
 
     Lambda(
@@ -219,7 +217,7 @@ object HandlerMacros:
       MethodType(List("result"))(_ => List(method.resultType), _ => TypeRepr.of[Node]),
       (symbol, arguments) =>
         callTerm(ref.quotes, codec.asTerm, "encode", List(method.resultType), List(arguments.asInstanceOf[List[Term]]))
-    ).asExpr
+    ).asExpr.asInstanceOf[Expr[Any => Node]]
 
   /**
    * Create instance method call term.
