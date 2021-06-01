@@ -3,6 +3,7 @@ package jsonrpc.handler
 import jsonrpc.spi.{Codec, Effect}
 import jsonrpc.util.{Method, Reflection}
 import java.beans.IntrospectionException
+import jsonrpc.util.ValueOps.{asLeft, asRight}
 import scala.collection.immutable.ArraySeq
 import scala.compiletime.error
 import scala.quoted.{quotes, Expr, Quotes, Type}
@@ -58,7 +59,11 @@ object HandlerMacros:
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = detectApiMethods[Outcome, Context](ref, TypeTree.of[ApiType])
+    val detectedMethods = detectApiMethods[Outcome, Context](ref, TypeTree.of[ApiType])
+    val apiMethods = detectedMethods.flatMap(_.toOption)
+    val invalidMethods = detectedMethods.flatMap(_.swap.toOption)
+    if invalidMethods.nonEmpty then
+      throw new IntrospectionException(s"Failed to bind API methods:\n${invalidMethods.map((_, error) => s"  $error").mkString("\n")}")
 
     // Debug prints
     println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
@@ -76,7 +81,7 @@ object HandlerMacros:
   private def detectApiMethods[Outcome[_]: Type, Context: Type](
     ref: Reflection,
     apiType: ref.quotes.reflect.TypeTree
-  ): Seq[ref.QuotedMethod] =
+  ): Seq[Either[(String, String), ref.QuotedMethod]] =
     import ref.quotes.reflect.{TypeRepr, TypeTree}
     given Quotes = ref.quotes
 
@@ -86,28 +91,25 @@ object HandlerMacros:
     val methods = ref.methods(apiType.tpe).filter(_.public).filter {
       method => !baseMethodNames.contains(method.symbol.name)
     }
-    methods.foreach(method => validateApiMethod(ref, apiType, method))
-    methods
+    methods.map(method => validateApiMethod(ref, apiType, method))
 
   private def validateApiMethod[Outcome[_]: Type, Context: Type](
     ref: Reflection,
     apiType: ref.quotes.reflect.TypeTree,
     method: ref.QuotedMethod
-  ): Unit =
+  ): Either[(String, String), ref.QuotedMethod] =
     import ref.quotes.reflect.{AppliedType, LambdaType, NamedType, TypeRepr}
 
     val signature = s"${apiType.show}.${method.lift.signature}"
     if method.typeParameters.nonEmpty then
-      throw IntrospectionException(s"Bound API method '$signature' must not have type parameters")
+      (method.name -> s"Bound API method '$signature' must not have type parameters").asLeft
     else if !method.available then
-      throw IntrospectionException(s"Bound API method '$signature' must be callable at runtime")
+      (method.name -> s"Bound API method '$signature' must be callable at runtime").asLeft
     else if contextSupplied[Context](ref.quotes) && method.parameters.lastOption.map { parameters =>
         !(parameters.last.dataType =:= TypeRepr.of[Context])
       }.getOrElse(true)
     then
-      throw IntrospectionException(
-        s"Bound API method '$signature' must accept the specified request context type '${TypeRepr.of[Context].show}' as its last parameter"
-      )
+      (method.name -> s"Bound API method '$signature' must accept the specified request context type '${TypeRepr.of[Context].show}' as its last parameter").asLeft
     else
       TypeRepr.of[Outcome] match
         case lambdaType: LambdaType =>
@@ -115,10 +117,10 @@ object HandlerMacros:
               case appliedType: AppliedType => !(appliedType.tycon =:= lambdaType)
               case _                        => false
           then
-            throw IntrospectionException(
-              s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'"
-            )
-        case _ => ()
+            (method.name -> s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'").asLeft
+          else
+            method.asRight
+        case _ => method.asRight
 
   private def contextSupplied[Context: Type](quotes: Quotes): Boolean =
     import quotes.reflect.TypeRepr
