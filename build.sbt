@@ -14,6 +14,9 @@ lazy val root = project.in(file(".")).settings(
     "io.monix" %% "monix-eval" % "3.4.0",
 //    "org.typelevel" %% "cats-effect" % "3.1.1",
 
+    // Transport
+    "com.softwaremill.sttp.client3" %% "core" % "3.3.5",
+
     // Utilities
     "org.slf4j" % "slf4j-api" % "1.7.30",
     "com.lihaoyi" %% "pprint" % "0.6.6",
