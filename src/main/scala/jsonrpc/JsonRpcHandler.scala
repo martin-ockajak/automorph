@@ -1,18 +1,18 @@
 package jsonrpc
 
-import compiletime.erasedValue
 import java.beans.IntrospectionException
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.core.EncodingOps.toArraySeq
 import jsonrpc.core.Protocol.{Id, MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Errors, Protocol, Request, Response, ResponseError}
-import jsonrpc.log.Logging
 import jsonrpc.handler.{HandlerMacros, MethodHandle}
+import jsonrpc.log.Logging
 import jsonrpc.spi.{Codec, Effect, Message, MessageError}
 import jsonrpc.util.CannotEqual
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import scala.collection.immutable.ArraySeq
+import scala.compiletime.erasedValue
 import scala.util.{Failure, Success, Try}
 
 /**
