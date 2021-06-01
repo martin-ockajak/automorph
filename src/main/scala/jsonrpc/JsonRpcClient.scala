@@ -13,6 +13,8 @@ import scala.util.{Failure, Random, Success, Try}
 /**
  * JSON-RPC client.
  *
+ * The transport can be used by an application to perform JSON-RPC calls and notifications.
+ *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Create a new JSON-RPC client using the specified `codec` and `effect` implementations.
  * @param codec hierarchical data format codec plugin

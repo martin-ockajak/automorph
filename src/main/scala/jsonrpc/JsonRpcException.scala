@@ -1,9 +1,9 @@
 package jsonrpc
 
 /**
- * JSON-RPC error.
+ * JSON-RPC exception.
  *
- * An API method implementation exposed via JSON-RPC can throw this error to return specific JSON-RPC error details.
+ * API methods bound via a JSON-RPC handler can throw this exception to customize JSON-RPC error response content.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Create a new JSON-RPC error.

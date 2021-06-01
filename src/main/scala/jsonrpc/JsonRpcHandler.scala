@@ -16,9 +16,9 @@ import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
 
 /**
- * JSON-RPC request handler.
+ * JSON-RPC request handler layer.
  *
- * The handler can be used by to process incoming JSON-RPC requests and create JSON-RPC responses.
+ * The handler can be used by a JSON-RPC server to process incoming JSON-RPC requests, invoke the requested API methods and return JSON-RPC responses.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Create a new JSON-RPC handler using the specified `codec` and `effect` implementations.
@@ -42,8 +42,6 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   /**
    * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
    *
-   * Used by JSON-RPC server implementations to process JSON-RPC requests into JSON-RPC responses.
-   *
    * A method is considered valid if it satisfied all of these conditions:
    * - can be called at runtime
    * - has no type parameters
@@ -64,8 +62,6 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
 
   /**
    * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
-   *
-   * Used by JSON-RPC server implementations to process JSON-RPC requests into JSON-RPC responses.
    *
    * A method is considered valid if it satisfied all of these conditions:
    * - can be called at runtime
@@ -92,8 +88,6 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
 
   /**
    * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
-   *
-   * Used by JSON-RPC server implementations to process JSON-RPC requests into JSON-RPC responses.
    *
    * A method is considered valid if it satisfied all of these conditions:
    * - can be called at runtime
@@ -304,7 +298,7 @@ case object JsonRpcHandler:
   /**
    * Create a JSON-RPC request handler.
    *
-   * The handler can be used to process incoming JSON-RPC requests and create JSON-RPC responses.
+   * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
    *
    * @param codec hierarchical data format codec plugin
    * @param effect computation effect system plugin
@@ -320,9 +314,9 @@ case object JsonRpcHandler:
     new JsonRpcHandler(codec, effect, bufferSize, Map.empty)
 
   /**
-   * Create a JSON-RPC request handler.
+   * Create a JSON-RPC request handler with specified request context type.
    *
-   * The handler can be used to process incoming JSON-RPC requests and create JSON-RPC responses.
+   * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
    *
    * @param codec hierarchical data format codec plugin
    * @param effect computation effect system plugin

@@ -6,7 +6,7 @@ import scala.collection.immutable.ArraySeq
 /**
  * JSON-RPC message transport layer.
  *
- * Used by JSON-RPC client to send requests and receive responses to and from a remot endpoint.
+ * The transport can be used by a JSON-RPC client to send JSON-RPC requests and receive JSON-RPC responses to and from a remote endpoint.
  *
  * @tparam Outcome effectful computation outcome type
  * @tparam Context request context type
