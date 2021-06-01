@@ -23,8 +23,7 @@ case class HandlerTransport[Node, CodecType <: Codec[Node], Outcome[_], Context]
     val contextValue = context.getOrElse(throw IllegalStateException("Missing request context"))
     effect.map(
       handler.processRequest(request, contextValue),
-      response =>
-        response.getOrElse(throw IllegalStateException("Missing call response"))
+      response => response.getOrElse(throw IllegalStateException("Missing call response"))
     )
 
   def notify(request: ArraySeq.ofByte, context: Option[Context]): Outcome[Unit] =
