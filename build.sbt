@@ -15,7 +15,7 @@ lazy val root = project.in(file(".")).settings(
 //    "org.typelevel" %% "cats-effect" % "3.1.1",
 
     // Transport
-    "com.softwaremill.sttp.client3" %% "core" % "3.3.5",
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.5",
 
     // Utilities
     "org.slf4j" % "slf4j-api" % "1.7.30",
