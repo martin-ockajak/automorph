@@ -60,7 +60,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    *
    * @param method method name
    * @param arguments arguments by position
-   * @param context JSON-RPC request context
+   * @param context request context
    * @tparam R result type
    * @return result value
    */
@@ -74,7 +74,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    *
    * @param method method name
    * @param arguments arguments by position
-   * @param context JSON-RPC request context
+   * @param context request context
    * @tparam R result type
    * @return result value
    */
