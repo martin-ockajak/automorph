@@ -34,26 +34,6 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   /**
-   * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
-   *
-   * @param method method name
-   * @param arguments arguments by position
-   * @tparam R result type
-   * @return result value
-   */
-  inline def call[R](method: String, arguments: Seq[Any]): Outcome[R] = call(method, arguments)(using None)
-
-  /**
-   * Perform a remote JSON-RPC method ''call'' supplying the ''arguments by name''.
-   *
-   * @param method method name
-   * @param arguments arguments by position
-   * @tparam R result type
-   * @return result value
-   */
-  inline def call[R](method: String, arguments: Map[String, Any]): Outcome[R] = call(method, arguments)(using None)
-
-  /**
    * Perform a remote JSON-RPC method call'' supplying the ''arguments by position''.
    *
    * The specified ''context'' may be used to supply additional information needed to send the request.
@@ -64,7 +44,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return result value
    */
-  inline def call[R](method: String, arguments: Seq[Any])(using context: Option[Context]): Outcome[R] =
+  inline def call[R](method: String, arguments: Seq[Any])(using context: Context): Outcome[R] =
     performCall(method, encodeArguments(arguments), context, decodeResult[R])
 
   /**
@@ -78,28 +58,8 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return result value
    */
-  inline def call[R](method: String, arguments: Map[String, Any])(using context: Option[Context]): Outcome[R] =
+  inline def call[R](method: String, arguments: Map[String, Any])(using context: Context): Outcome[R] =
     performCall(method, encodeArguments(arguments), context, decodeResult[R])
-
-  /**
-   * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by position''.
-   *
-   * @param method method name
-   * @param arguments arguments by position
-   * @tparam R result type
-   * @return nothing
-   */
-  inline def notify(method: String, arguments: Seq[Any]): Outcome[Unit] = notify(method, arguments)(using None)
-
-  /**
-   * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by name''.
-   *
-   * @param method method name
-   * @param arguments arguments by position
-   * @tparam R result type
-   * @return nothing
-   */
-  inline def notify(method: String, arguments: Map[String, Any]): Outcome[Unit] = notify(method, arguments)(using None)
 
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by position''.
@@ -112,7 +72,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return nothing
    */
-  inline def notify(method: String, arguments: Seq[Any])(using context: Option[Context]): Outcome[Unit] =
+  inline def notify(method: String, arguments: Seq[Any])(using context: Context): Outcome[Unit] =
     performNotify(method, encodeArguments(arguments), context)
 
   /**
@@ -126,7 +86,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return nothing
    */
-  inline def notify(method: String, arguments: Map[String, Any])(using context: Option[Context]): Outcome[Unit] =
+  inline def notify(method: String, arguments: Map[String, Any])(using context: Context): Outcome[Unit] =
     performNotify(method, encodeArguments(arguments), context)
 
   /**
@@ -177,7 +137,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return result value
    */
-  private def performCall[R](method: String, arguments: Params[Node], context: Option[Context], decodeResult: Node => R): Outcome[R] =
+  private def performCall[R](method: String, arguments: Params[Node], context: Context, decodeResult: Node => R): Outcome[R] =
     val id = Math.abs(random.nextLong()).toString.asRight[BigDecimal].asSome
     val formedRequest = Request(id, method, arguments).formed
     logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
@@ -204,7 +164,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return nothing
    */
-  private def performNotify(methodName: String, arguments: Params[Node], context: Option[Context]): Outcome[Unit] =
+  private def performNotify(methodName: String, arguments: Params[Node], context: Context): Outcome[Unit] =
     val formedRequest = Request(None, methodName, arguments).formed
     effect.map(
       // Serialize request

@@ -22,7 +22,7 @@ trait Transport[Outcome[_], Context]:
    * @param context request context
    * @return response message
    */
-  def call(request: ArraySeq.ofByte, context: Option[Context]): Outcome[ArraySeq.ofByte]
+  def call(request: ArraySeq.ofByte, context: Context): Outcome[ArraySeq.ofByte]
 
   /**
    * Send a ''request'' to a remote endpoint without retrieving a response.
@@ -33,4 +33,4 @@ trait Transport[Outcome[_], Context]:
    * @param context request context
    * @return nothing
    */
-  def notify(request: ArraySeq.ofByte, context: Option[Context]): Outcome[Unit]
+  def notify(request: ArraySeq.ofByte, context: Context): Outcome[Unit]

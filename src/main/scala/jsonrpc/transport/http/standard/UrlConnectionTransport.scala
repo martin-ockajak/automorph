@@ -25,7 +25,7 @@ case class UrlConnectionTransport(
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   private val connection = connect()
 
-  override def call(request: ArraySeq.ofByte, context: Option[HttpProperties]): Identity[ArraySeq.ofByte] =
+  override def call(request: ArraySeq.ofByte, context: HttpProperties): Identity[ArraySeq.ofByte] =
     send(request, context)
     val inputStream = connection.getInputStream
     try
@@ -33,11 +33,11 @@ case class UrlConnectionTransport(
     finally
       inputStream.close()
 
-  override def notify(request: ArraySeq.ofByte, context: Option[HttpProperties]): Identity[Unit] =
+  override def notify(request: ArraySeq.ofByte, context: HttpProperties): Identity[Unit] =
     send(request, context)
     ()
 
-  private def send(request: ArraySeq.ofByte, context: Option[HttpProperties]): Unit =
+  private def send(request: ArraySeq.ofByte, context: HttpProperties): Unit =
     val outputStream = connection.getOutputStream
     try
       setProperties(request, context)
@@ -46,23 +46,21 @@ case class UrlConnectionTransport(
       clearProperties(context)
       outputStream.close()
 
-  private def setProperties(request: ArraySeq.ofByte, context: Option[HttpProperties]): Unit =
+  private def setProperties(request: ArraySeq.ofByte, context: HttpProperties): Unit =
     // Validate HTTP request properties
-    val properties = context.getOrElse(HttpProperties())
-    require(httpMethods.contains(properties.method), s"Invalid HTTP method: ${properties.method}")
+    require(httpMethods.contains(context.method), s"Invalid HTTP method: ${context.method}")
 
-    // Set HTTP request properties
+    // Set HTTP request context
     connection.setRequestProperty(contentLengthHeader, request.size.toString)
     connection.setRequestProperty(contentTypeHeader, contentType)
     connection.setRequestProperty(acceptHeader, contentType)
-    connection.setRequestMethod(properties.method)
-    connection.setConnectTimeout(properties.connectTimeout)
-    connection.setReadTimeout(properties.readTimeout)
-    properties.headers.foreach((key, value) => connection.setRequestProperty(key, value))
+    connection.setRequestMethod(context.method)
+    connection.setConnectTimeout(context.connectTimeout)
+    connection.setReadTimeout(context.readTimeout)
+    context.headers.foreach((key, value) => connection.setRequestProperty(key, value))
 
-  private def clearProperties(context: Option[HttpProperties]): Unit =
-    val properties = context.getOrElse(HttpProperties())
-    properties.headers.foreach((key, _) => connection.setRequestProperty(key, null))
+  private def clearProperties(context: HttpProperties): Unit =
+    context.headers.foreach((key, _) => connection.setRequestProperty(key, null))
 
   private def connect(): HttpURLConnection =
     // Open new HTTP connection

@@ -36,23 +36,22 @@ case class SttpFutureTransport[Outcome[_], Capabilities](
   private val contentType = "application/json"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
 
-  override def call(request: ArraySeq.ofByte, context: Option[HttpProperties]): Outcome[ArraySeq.ofByte] =
+  override def call(request: ArraySeq.ofByte, context: HttpProperties): Outcome[ArraySeq.ofByte] =
     val httpRequest = createHttpRequest(request, context)
     effect.flatMap(httpRequest.send(backend), _.body.fold(
       error => effect.failed(IllegalStateException(error)),
       response => effect.pure(response.asArraySeq)
     ))
 
-  override def notify(request: ArraySeq.ofByte, context: Option[HttpProperties]): Outcome[Unit] =
+  override def notify(request: ArraySeq.ofByte, context: HttpProperties): Outcome[Unit] =
     val httpRequest = createHttpRequest(request, context)
     effect.flatMap(httpRequest.send(backend), _.body.fold(
       error => effect.failed(IllegalStateException(error)),
       response => effect.pure(())
     ))
 
-  private def createHttpRequest(request: ArraySeq.ofByte, context: Option[HttpProperties]): RequestT[Identity, Either[String, Array[Byte]], Any] =
-    val properties = context.getOrElse(HttpProperties())
-    basicRequest.copy[Identity, Either[String, String], Any](uri = url, method = properties.method).body(request.unsafeArray).response(asByteArray)
+  private def createHttpRequest(request: ArraySeq.ofByte, context: HttpProperties): RequestT[Identity, Either[String, Array[Byte]], Any] =
+    basicRequest.copy[Identity, Either[String, String], Any](uri = url, method = context.method).body(request.unsafeArray).response(asByteArray)
 
 //  private def setProperties(request: ArraySeq.ofByte, context: Option[HttpProperties]): Unit =
 //    // Validate HTTP request properties
