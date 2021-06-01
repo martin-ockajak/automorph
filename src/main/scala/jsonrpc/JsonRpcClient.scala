@@ -65,7 +65,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @return result value
    */
   inline def call[R](method: String, arguments: Seq[Any])(using context: Option[Context]): Outcome[R] =
-    performCall(method, encodeArguments(arguments), context)
+    performCall(method, encodeArguments(arguments), context, decodeResult[R])
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the ''arguments by name''.
@@ -79,7 +79,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @return result value
    */
   inline def call[R](method: String, arguments: Map[String, Any])(using context: Option[Context]): Outcome[R] =
-    performCall(method, encodeArguments(arguments), context)
+    performCall(method, encodeArguments(arguments), context, decodeResult[R])
 
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by position''.
@@ -157,6 +157,15 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
     arguments.view.mapValues(argument => codec.encode(argument)).toMap.asRight
 
   /**
+   * Create response result decoding function.
+   *
+   * @tparam R result type
+   * @return result decoding function
+   */
+  inline def decodeResult[R]: Node => R =
+    resultNode => codec.decode(resultNode)
+
+  /**
    * Perform a method call using specified arguments.
    *
    * Optional request context is used as a last method argument.
@@ -164,10 +173,11 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @param methodName method name
    * @param arguments method arguments
    * @param context request context
+   * @param decodeResult result decoding function
    * @tparam R result type
    * @return result value
    */
-  inline def performCall[R](method: String, arguments: Params[Node], context: Option[Context]): Outcome[R] =
+  private def performCall[R](method: String, arguments: Params[Node], context: Option[Context], decodeResult: Node => R): Outcome[R] =
     val id = Math.abs(random.nextLong()).toString.asRight[BigDecimal].asSome
     val formedRequest = Request(id, method, arguments).formed
     logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
@@ -179,7 +189,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
         effect.flatMap(
           transport.call(rawRequest, context),
           // Process response
-          rawResponse => processResponse[R](rawResponse, formedRequest)
+          rawResponse => processResponse[R](rawResponse, formedRequest, decodeResult)
         )
     )
 
@@ -194,7 +204,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return nothing
    */
-  inline def performNotify(methodName: String, arguments: Params[Node], context: Option[Context]): Outcome[Unit] =
+  private def performNotify(methodName: String, arguments: Params[Node], context: Option[Context]): Outcome[Unit] =
     val formedRequest = Request(None, methodName, arguments).formed
     effect.map(
       // Serialize request
@@ -204,7 +214,16 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
         transport.notify(rawRequest, context)
     )
 
-  inline def processResponse[R](rawResponse: ArraySeq.ofByte, formedRequest: Message[Node]): Outcome[R] =
+  /**
+   * Process a method call response.
+   *
+   * @param rawResponse raw response
+   * @param formedRequest formed request
+   * @param decodeResult result decoding function
+   * @tparam R result type
+   * @return result value
+   */
+  private def processResponse[R](rawResponse: ArraySeq.ofByte, formedRequest: Message[Node], decodeResult: Node => R): Outcome[R] =
     // Deserialize response
     Try(codec.deserialize(rawResponse)) match
       case Success(formedResponse) =>
@@ -214,7 +233,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
           case Success(validResponse) => validResponse.value match
               case Right(result) =>
                 // Decode result
-                Try(codec.decode(result)) match
+                Try(decodeResult(result)) match
                   case Success(result) =>
                     logger.info(s"Performed JSON-RPC request", formedRequest.properties)
                     effect.pure(result)

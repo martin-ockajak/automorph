@@ -163,7 +163,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param context request context
    * @return response message
    */
-  def handleRequest(
+  private def handleRequest(
     rawRequest: ArraySeq.ofByte,
     context: Context
   ): Outcome[Option[ArraySeq.ofByte]] =
@@ -173,7 +173,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
         // Validate request
         logger.trace(s"Received JSON-RPC message:\n${codec.format(formedRequest)}")
         Try(Request(formedRequest)) match
-          case Success(validRequest) => invoke(formedRequest, validRequest, context)
+          case Success(validRequest) => invokeMethod(formedRequest, validRequest, context)
           case Failure(error)        => errorResponse(error, formedRequest)
       case Failure(error) =>
         val virtualMessage = Message[Node](None, unknownId.asSome, None, None, None, None)
@@ -189,7 +189,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param context request context
    * @return bound method invocation outcome
    */
-  def invoke(
+  private def invokeMethod(
     formedRequest: Message[Node],
     validRequest: Request[Node],
     context: Context
@@ -229,7 +229,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param methodHandle bound method handle
    * @return bound method arguments
    */
-  def extractArguments(
+  private def extractArguments(
     validRequest: Request[Node],
     contextSupplied: Boolean,
     methodHandle: MethodHandle[Node, Outcome, Context]
@@ -260,7 +260,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param requestId request identifier
    * @return error response if applicable
    */
-  def errorResponse(error: Throwable, formedRequest: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
+  private def errorResponse(error: Throwable, formedRequest: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
     formedRequest.id.map { id =>
       // Assemble error details
