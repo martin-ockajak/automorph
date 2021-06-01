@@ -173,19 +173,19 @@ object HandlerMacros:
     given Quotes = ref.quotes
 
     // Method call function expression consuming argument nodes and returning the method call result
-    val decodeAndCallMethod =
-      decodeAndCallMethodExpr[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
+    val decodeArgumentsAndCallMethod =
+      decodeArgumentsAndCallMethodExpr[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
 
     // Result conversion function expression consuming the method result and returning a node
     val encodeResult = encodeResultExpr[Node, CodecType](ref, method, codec)
 
     // Binding function expression
     val bindingFunction = '{
-      (argumentNodes: Seq[Node], context: Context) =>
-        val outcome = $decodeAndCallMethod(argumentNodes, context)
-        $effect.map(outcome, $encodeResult.asInstanceOf[Any => Node])
-//        val decodeAndCallMethod = $methodCaller.asInstanceOf[Seq[Node] => Outcome[Node]]
-//        decodeAndCallMethod(argumentNodes)
+      (argumentNodes: Seq[Node], context: Context) => $effect.map(
+        $decodeArgumentsAndCallMethod(argumentNodes, context),
+        $encodeResult.asInstanceOf[Any => Node]
+      )
+//        $decodeAndCallMethod(argumentNodes, context)
     }
 
     // Debug prints
@@ -196,7 +196,7 @@ object HandlerMacros:
     println()
     bindingFunction
 
-  private def decodeAndCallMethodExpr[
+  private def decodeArgumentsAndCallMethodExpr[
     Node: Type,
     CodecType <: Codec[Node]: Type,
     Outcome[_]: Type,
@@ -243,7 +243,7 @@ object HandlerMacros:
 //        val methodCall = callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
 //
 //        // Encode the method call result into a node
-//        val convertResult = convertResultExpr[Node, CodecType](ref, method, codec)
+//        val encodeResult = encodeResultExpr[Node, CodecType](ref, method, codec)
 //        callTerm(ref.quotes, effect.asTerm, "map", List(method.resultType, TypeRepr.of[Node]), List(List(methodCall, convertResult.asTerm)))
     ).asExpr.asInstanceOf[Expr[(Seq[Node], Context) => Outcome[Any]]]
 
@@ -252,13 +252,18 @@ object HandlerMacros:
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
   ): Expr[Any => Node] =
-    import ref.quotes.reflect.{asTerm, Lambda, MethodType, Symbol, Term, TypeRepr}
+    import ref.quotes.reflect.{asTerm, AppliedType, Lambda, MethodType, Symbol, Term, TypeRepr}
+    given Quotes = ref.quotes
 
+    val resultType =
+      method.resultType match
+        case appliedType: AppliedType => appliedType.args.head
+        case _                        => method.resultType
     Lambda(
       Symbol.spliceOwner,
-      MethodType(List("result"))(_ => List(method.resultType), _ => TypeRepr.of[Node]),
+      MethodType(List("result"))(_ => List(resultType), _ => TypeRepr.of[Node]),
       (symbol, arguments) =>
-        callTerm(ref.quotes, codec.asTerm, "encode", List(method.resultType), List(arguments.asInstanceOf[List[Term]]))
+        callTerm(ref.quotes, codec.asTerm, "encode", List(resultType), List(arguments.asInstanceOf[List[Term]]))
     ).asExpr.asInstanceOf[Expr[Any => Node]]
 
   /**
