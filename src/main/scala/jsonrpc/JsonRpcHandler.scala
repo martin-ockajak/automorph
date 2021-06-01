@@ -197,7 +197,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     logger.debug(s"Processing JSON-RPC request", formedRequest.properties)
     methodBindings.get(validRequest.method).map { methodHandle =>
       // Invoke method
-      val contextSupplied = context.isInstanceOf[Unit]
+      val contextSupplied = context.isInstanceOf[None.type] || context.isInstanceOf[Unit]
       val arguments = extractArguments(validRequest, contextSupplied, methodHandle)
       Try(effect.either(methodHandle.function(arguments, context))) match
         case Success(outcome) => effect.flatMap(
@@ -309,7 +309,7 @@ case object JsonRpcHandler:
     codec: CodecType,
     effect: Effect[Outcome],
     bufferSize: Int = 4096
-  ): JsonRpcHandler[Node, CodecType, Outcome, Unit] =
+  ): JsonRpcHandler[Node, CodecType, Outcome, None.type] =
     new JsonRpcHandler(codec, effect, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
 
   /**
