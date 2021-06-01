@@ -1,13 +1,11 @@
 package jsonrpc.transport.http.standard
 
-import jsonrpc.JsonRpcHandler
-import jsonrpc.spi.{Codec, Effect, Transport}
-import scala.collection.immutable.ArraySeq
 import java.net.{HttpURLConnection, URL, URLConnection}
 import jsonrpc.core.EncodingOps.toArraySeq
-import jsonrpc.core.Request
-import jsonrpc.transport.http.standard.UrlConnection.HttpProperties
 import jsonrpc.effect.standard.NoEffect.Identity
+import jsonrpc.spi.{Effect, Transport}
+import jsonrpc.transport.http.standard.UrlConnectionTransport.HttpProperties
+import scala.collection.immutable.ArraySeq
 
 /**
  * URL connection HTTP transport.
@@ -72,7 +70,7 @@ case class UrlConnectionTransport(
     connection.setDoOutput(true)
     connection
 
-object UrlConnection:
+object UrlConnectionTransport:
 
   /**
    * HTTP properties.

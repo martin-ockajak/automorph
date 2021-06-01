@@ -1,12 +1,11 @@
 package jsonrpc.handler
 
-import jsonrpc.spi.{Codec, Effect}
-import jsonrpc.util.{Method, Reflection}
 import java.beans.IntrospectionException
+import jsonrpc.spi.{Codec, Effect}
 import jsonrpc.util.ValueOps.{asLeft, asRight}
+import jsonrpc.util.{Method, Reflection}
 import scala.collection.immutable.ArraySeq
-import scala.compiletime.error
-import scala.quoted.{quotes, Expr, Quotes, Type}
+import scala.quoted.{Expr, Quotes, Type, quotes}
 
 /**
  * Bound API method handle.
@@ -55,7 +54,7 @@ object HandlerMacros:
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
   )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Outcome, Context]]] =
-    import ref.quotes.reflect.{asTerm, TypeRepr, TypeTree}
+    import ref.quotes.reflect.{TypeRepr, TypeTree, asTerm}
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -169,7 +168,7 @@ object HandlerMacros:
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
   ): Expr[(Seq[Node], Context) => Outcome[Node]] =
-    import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Printer, Symbol, Term, Tree, TypeRepr}
+    import ref.quotes.reflect.{IntConstant, Lambda, Literal, MethodType, Printer, Symbol, Term, Tree, TypeRepr, asTerm}
     given Quotes = ref.quotes
 
     // Method call function expression consuming argument nodes and returning the method call result
@@ -209,7 +208,7 @@ object HandlerMacros:
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
   ): Expr[(Seq[Node], Context) => Outcome[Any]] =
-    import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
+    import ref.quotes.reflect.{IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr, asTerm}
     given Quotes = ref.quotes
 
     Lambda(
@@ -252,7 +251,7 @@ object HandlerMacros:
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
   ): Expr[Any => Node] =
-    import ref.quotes.reflect.{asTerm, AppliedType, Lambda, MethodType, Symbol, Term, TypeRepr}
+    import ref.quotes.reflect.{AppliedType, Lambda, MethodType, Symbol, Term, TypeRepr, asTerm}
     given Quotes = ref.quotes
 
     val resultType =
