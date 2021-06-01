@@ -24,6 +24,7 @@ class HandlerSpec extends BaseSpec:
 //        val handler = JsonRpcHandler(UpickleJsonCodec(), FutureEffect()).bind(api)
         (0 == 0).shouldBe(true)
 
+
       }
     }
   }
