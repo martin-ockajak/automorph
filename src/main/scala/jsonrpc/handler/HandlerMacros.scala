@@ -63,7 +63,9 @@ object HandlerMacros:
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethods = apiMethods.flatMap(_.swap.toOption)
     if invalidMethods.nonEmpty then
-      throw new IntrospectionException(s"Failed to bind API methods:\n${invalidMethods.map((_, error) => s"  $error").mkString("\n")}")
+      throw new IntrospectionException(
+        s"Failed to bind API methods:\n${invalidMethods.map((_, error) => s"  $error").mkString("\n")}"
+      )
 
     // Debug prints
     println(validMethods.map(_.lift).map(methodDescription).mkString("\n"))
@@ -101,26 +103,28 @@ object HandlerMacros:
     import ref.quotes.reflect.{AppliedType, LambdaType, NamedType, TypeRepr}
 
     val signature = s"${apiType.show}.${method.lift.signature}"
-    if method.typeParameters.nonEmpty then
-      (method.name -> s"Bound API method '$signature' must not have type parameters").asLeft
-    else if !method.available then
-      (method.name -> s"Bound API method '$signature' must be callable at runtime").asLeft
-    else if contextSupplied[Context](ref.quotes) && method.parameters.lastOption.map { parameters =>
-        !(parameters.last.dataType =:= TypeRepr.of[Context])
-      }.getOrElse(true)
-    then
-      (method.name -> s"Bound API method '$signature' must accept the specified request context type '${TypeRepr.of[Context].show}' as its last parameter").asLeft
-    else
-      TypeRepr.of[Outcome] match
-        case lambdaType: LambdaType =>
-          if method.resultType match
-              case appliedType: AppliedType => !(appliedType.tycon =:= lambdaType)
-              case _                        => false
-          then
-            (method.name -> s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'").asLeft
-          else
-            method.asRight
-        case _ => method.asRight
+    val validatedMethod =
+      if method.typeParameters.nonEmpty then
+        s"Bound API method '$signature' must not have type parameters".asLeft
+      else if !method.available then
+        s"Bound API method '$signature' must be callable at runtime".asLeft
+      else if contextSupplied[Context](ref.quotes) && method.parameters.lastOption.map { parameters =>
+          !(parameters.last.dataType =:= TypeRepr.of[Context])
+        }.getOrElse(true)
+      then
+        s"Bound API method '$signature' must accept the specified request context type '${TypeRepr.of[Context].show}' as its last parameter".asLeft
+      else
+        TypeRepr.of[Outcome] match
+          case lambdaType: LambdaType =>
+            if method.resultType match
+                case appliedType: AppliedType => !(appliedType.tycon =:= lambdaType)
+                case _                        => false
+            then
+              s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'".asLeft
+            else
+              method.asRight
+          case _ => method.asRight
+    validatedMethod.swap.map(error => method.name -> error).swap
 
   private def contextSupplied[Context: Type](quotes: Quotes): Boolean =
     import quotes.reflect.TypeRepr
