@@ -59,17 +59,17 @@ object HandlerMacros:
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val detectedMethods = detectApiMethods[Outcome, Context](ref, TypeTree.of[ApiType])
-    val apiMethods = detectedMethods.flatMap(_.toOption)
-    val invalidMethods = detectedMethods.flatMap(_.swap.toOption)
+    val apiMethods = detectApiMethods[Outcome, Context](ref, TypeTree.of[ApiType])
+    val validMethods = apiMethods.flatMap(_.toOption)
+    val invalidMethods = apiMethods.flatMap(_.swap.toOption)
     if invalidMethods.nonEmpty then
       throw new IntrospectionException(s"Failed to bind API methods:\n${invalidMethods.map((_, error) => s"  $error").mkString("\n")}")
 
     // Debug prints
-    println(apiMethods.map(_.lift).map(methodDescription).mkString("\n"))
+    println(validMethods.map(_.lift).map(methodDescription).mkString("\n"))
 
     // Generate API method handles including wrapper functions consuming and product Node values
-    val methodHandles = Expr.ofSeq(apiMethods.map { method =>
+    val methodHandles = Expr.ofSeq(validMethods.map { method =>
       generateMethodHandle[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
     })
 
