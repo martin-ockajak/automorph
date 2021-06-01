@@ -22,15 +22,15 @@ import scala.util.{Failure, Success, Try}
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Create a new JSON-RPC handler using the specified `codec` and `effect` implementations.
- * @param codec hierarchical data format codec plugin
- * @param effect computation effect system plugin
+ * @param codec data format codec plugin
+ * @param effect effect system plugin
  * @param bufferSize input stream reading buffer size
  * @tparam Node data format node representation type
  * @tparam CodecType data format codec plugin type
  * @tparam Outcome effectful computation outcome type
  * @tparam Context request context type
  */
-final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Context <: Matchable] (
+final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Context] (
   codec: CodecType,
   effect: Effect[Outcome],
   bufferSize: Int,
@@ -126,9 +126,9 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.
    *
-   * @param request JSON-RPC request message
+   * @param request request message
    * @param context request context
-   * @return optional JSON-RPC response message
+   * @return optional response message
    */
   def processRequest(request: ArraySeq.ofByte, context: Context): Outcome[Option[ArraySeq.ofByte]] =
     handleRequest(request, context)
@@ -136,9 +136,9 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.
    *
-   * @param request JSON-RPC request message
+   * @param request request message
    * @param context request context
-   * @return optional JSON-RPC response message
+   * @return optional response message
    */
   def processRequest(request: ByteBuffer, context: Context): Outcome[Option[ByteBuffer]] =
     effect.map(processRequest(request.toArraySeq, context), _.map(response => ByteBuffer.wrap(response.unsafeArray)))
@@ -146,9 +146,9 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.
    *
-   * @param request JSON-RPC request message
+   * @param request request message
    * @param context request context
-   * @return optional JSON-RPC response message
+   * @return optional response message
    */
   def processRequest(request: InputStream, context: Context): Outcome[Option[InputStream]] =
     effect.map(
@@ -324,7 +324,7 @@ case object JsonRpcHandler:
    * @tparam Outcome computation outcome effect type
    * @tparam Context JSON-RPC call context type
    */
-  inline def withContext[Node, CodecType <: Codec[Node], Outcome[_], Context <: Matchable](
+  inline def withContext[Node, CodecType <: Codec[Node], Outcome[_], Context](
     codec: CodecType,
     effect: Effect[Outcome],
     bufferSize: Int = 4096

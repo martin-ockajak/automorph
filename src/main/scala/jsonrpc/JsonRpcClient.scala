@@ -4,22 +4,22 @@ import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
-import jsonrpc.spi.{Codec, Effect, Message, MessageError}
+import jsonrpc.spi.{Codec, Effect, Message, MessageError, Transport}
 import jsonrpc.util.CannotEqual
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Random, Success, Try}
 
 /**
- * JSON-RPC client.
+ * JSON-RPC client layer.
  *
- * The transport can be used by an application to perform JSON-RPC calls and notifications.
+ * The client can be used by an application to perform JSON-RPC calls and notifications.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Create a new JSON-RPC client using the specified `codec` and `effect` implementations.
- * @param codec hierarchical data format codec plugin
- * @param effect computation effect system plugin
- * @param transport message transport layer
+ * @param codec data format codec plugin
+ * @param effect effect system plugin
+ * @param transport message transport plugin
  * @tparam Node data format node representation type
  * @tparam CodecType data format codec plugin type
  * @tparam Outcome effectful computation outcome type
@@ -28,7 +28,7 @@ import scala.util.{Failure, Random, Success, Try}
 final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Context](
   codec: CodecType,
   effect: Effect[Outcome],
-  transport: JsonRpcTransport[Outcome, Context]
+  transport: Transport[Outcome, Context]
 ) extends CannotEqual with Logging:
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
