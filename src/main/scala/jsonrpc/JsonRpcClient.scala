@@ -16,7 +16,7 @@ import scala.util.{Failure, Random, Success, Try}
  * The client can be used by an application to perform JSON-RPC calls and notifications.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @constructor Create a new JSON-RPC client using the specified `codec` and `effect` implementations.
+ * @constructor Create a new JSON-RPC client using the specified `codec`, `effect` and 'transport' plugins with defined request 'Context' type.
  * @param codec data format codec plugin
  * @param effect effect system plugin
  * @param transport message transport plugin
@@ -227,3 +227,27 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
   private def raiseError[T](error: Throwable, requestMessage: Message[Node]): Outcome[T] =
     logger.error(s"Failed to perform JSON-RPC request", error, requestMessage.properties)
     effect.failed(error)
+
+case object JsonRpcClient:
+
+  given None.type = None
+
+  /**
+   * Create a new JSON-RPC client using the specified `codec`, `effect` and 'transport' plugins without request 'Context' type.
+   *
+   * The client can be used by an application to perform JSON-RPC calls and notifications.
+   *
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+   * @param codec hierarchical data format codec plugin
+   * @param effect computation effect system plugin
+   * @param bufferSize input stream reading buffer size
+   * @tparam Node data format node representation type
+   * @tparam Outcome computation outcome effect type
+   * @return JSON-RPC request client
+   */
+  inline def basic[Node, CodecType <: Codec[Node], Outcome[_]](
+    codec: CodecType,
+    effect: Effect[Outcome],
+    transport: Transport[Outcome, None.type]
+  ): JsonRpcClient[Node, CodecType, Outcome, None.type] =
+    new JsonRpcClient(codec, effect, transport)

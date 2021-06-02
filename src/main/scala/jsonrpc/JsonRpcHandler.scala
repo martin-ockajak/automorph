@@ -21,7 +21,7 @@ import scala.util.{Failure, Success, Try}
  * The handler can be used by a JSON-RPC server to process incoming JSON-RPC requests, invoke the requested API methods and return JSON-RPC responses.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @constructor Create a new JSON-RPC handler using the specified `codec` and `effect` implementations.
+ * @constructor Create a new JSON-RPC request handler using the specified `codec` and `effect` plugins with defined request 'Context' type.
  * @param codec data format codec plugin
  * @param effect effect system plugin
  * @param bufferSize input stream reading buffer size
@@ -297,17 +297,19 @@ case object JsonRpcHandler:
   given None.type = None
 
   /**
-   * Create a JSON-RPC request handler.
+   * Create a new JSON-RPC request handler using the specified `codec` and `effect` plugins without request 'Context' type.
    *
    * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
    *
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec hierarchical data format codec plugin
    * @param effect computation effect system plugin
    * @param bufferSize input stream reading buffer size
    * @tparam Node data format node representation type
    * @tparam Outcome computation outcome effect type
+   * @return JSON-RPC request handler
    */
-  inline def apply[Node, CodecType <: Codec[Node], Outcome[_]](
+  inline def basic[Node, CodecType <: Codec[Node], Outcome[_]](
     codec: CodecType,
     effect: Effect[Outcome],
     bufferSize: Int = 4096
@@ -315,18 +317,19 @@ case object JsonRpcHandler:
     new JsonRpcHandler(codec, effect, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
 
   /**
-   * Create a JSON-RPC request handler with specified request context type.
+   * Create a new JSON-RPC request handler using the specified `codec` and `effect` plugins with defined request 'Context' type.
    *
    * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
    *
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec hierarchical data format codec plugin
    * @param effect computation effect system plugin
    * @param bufferSize input stream reading buffer size
    * @tparam Node data format node representation type
    * @tparam Outcome computation outcome effect type
-   * @tparam Context JSON-RPC call context type
+   * @return JSON-RPC request handler
    */
-  inline def withContext[Node, CodecType <: Codec[Node], Outcome[_], Context](
+  inline def apply[Node, CodecType <: Codec[Node], Outcome[_], Context](
     codec: CodecType,
     effect: Effect[Outcome],
     bufferSize: Int = 4096
