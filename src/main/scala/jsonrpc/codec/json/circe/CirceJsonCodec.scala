@@ -13,7 +13,7 @@ import scala.compiletime.summonInline
  *
  * @see [[https://circe.github.io/circe Documentation]]
  * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
- * @param encodeDecoders Circe encoders and decoders implicits instance
+ * @param codecs Circe encoders and decoders implicits instance
  * @tparam Codecs Circe encoders and decoders implicits instance type
  */
 final case class CirceJsonCodec[Codecs <: CirceCodecs](codecs: Codecs) extends Codec[Json]:
@@ -31,16 +31,16 @@ final case class CirceJsonCodec[Codecs <: CirceCodecs](codecs: Codecs) extends C
     message.asJson.spaces2
 
   inline def encode[T](value: T): Json =
-    val encoder = summonInline[codecs.CirceEncoder[T]].underlying
+    val encoder = summonInline[codecs.CirceEncoder[T]].encoder
     value.asJson(using encoder)
 
   inline def decode[T](node: Json): T =
-    val decoder = summonInline[codecs.CirceDecoder[T]].underlying
+    val decoder = summonInline[codecs.CirceDecoder[T]].decoder
     node.as[T](using decoder).toTry.get
 
 trait CirceCodecs:
-  final case class CirceEncoder[T](underlying: Encoder[T])
-  final case class CirceDecoder[T](underlying: Decoder[T])
+  final case class CirceEncoder[T](encoder: Encoder[T])
+  final case class CirceDecoder[T](decoder: Decoder[T])
 
   given [T]: Conversion[Encoder[T], CirceEncoder[T]] = CirceEncoder(_)
   given [T]: Conversion[Decoder[T], CirceDecoder[T]] = CirceDecoder(_)
