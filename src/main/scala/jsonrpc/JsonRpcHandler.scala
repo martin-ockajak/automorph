@@ -316,7 +316,7 @@ case object JsonRpcHandler:
     codec: CodecType,
     effect: Effect[Outcome],
     bufferSize: Int = 4096
-  ): JsonRpcHandler[Node, CodecType, Outcome, None.type] =
+  ): JsonRpcHandler[Node, CodecType, Outcome, NoContext] =
     new JsonRpcHandler(codec, effect, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
 
   /**
