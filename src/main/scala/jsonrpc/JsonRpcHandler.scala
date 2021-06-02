@@ -293,8 +293,11 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     s"$JsonRpcHandler(Codec: $codecName, Effect: $effectName, Bound methods: $boundMethods)"
 
 case object JsonRpcHandler:
+  final case class NoContextFor[T]()
+  type AnyJsonRpcHandler = JsonRpcHandler[?, ?, ?, ?]
 
-  given None.type = None
+  type NoContext = NoContextFor[AnyJsonRpcHandler]
+  given NoContext = NoContextFor[AnyJsonRpcHandler]()
 
   /**
    * Create a new JSON-RPC request handler using the specified `codec` and `effect` plugins without request 'Context' type.

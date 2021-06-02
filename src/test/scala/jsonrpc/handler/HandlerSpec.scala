@@ -3,6 +3,7 @@ package jsonrpc.handler
 import base.BaseSpec
 import jsonrpc.{ApiImpl, JsonRpcHandler, SimpleApi}
 import jsonrpc.JsonRpcHandler.given
+import jsonrpc.JsonRpcHandler.NoContext
 import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
 import jsonrpc.effect.standard.FutureEffect
@@ -19,7 +20,7 @@ class HandlerSpec extends BaseSpec:
         val api = ApiImpl("")
         val simpleApi = SimpleApi()
         JsonRpcHandler[String, DummyJsonCodec, NoEffect.Identity, String](DummyJsonCodec(), NoEffect()).bind(simpleApi)
-//        JsonRpcHandler(DummyJsonCodec(), NoEffect()).bind(simpleApi)
+        JsonRpcHandler[String, DummyJsonCodec, NoEffect.Identity, NoContext](DummyJsonCodec(), NoEffect())
         val handler = JsonRpcHandler.basic(DummyJsonCodec(), FutureEffect()).bind(api)
 //        handler.processRequest(ArraySeq.ofByte(Array.empty[Byte]))
 //        handler.processRequest(ArraySeq.ofByte("".getBytes), ())

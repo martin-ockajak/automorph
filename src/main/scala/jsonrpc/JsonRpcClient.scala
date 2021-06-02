@@ -230,7 +230,11 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
 
 case object JsonRpcClient:
 
-  given None.type = None
+  final case class NoContextFor[T]()
+  type AnyJsonRpcClient = JsonRpcClient[?, ?, ?, ?]
+
+  type NoContext = NoContextFor[AnyJsonRpcClient]
+  given NoContext = NoContextFor[AnyJsonRpcClient]()
 
   /**
    * Create a new JSON-RPC client using the specified `codec`, `effect` and 'transport' plugins without request 'Context' type.
