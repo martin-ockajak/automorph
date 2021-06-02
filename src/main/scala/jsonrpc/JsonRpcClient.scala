@@ -34,26 +34,12 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   /**
-   * Perform a remote JSON-RPC method call'' supplying the ''arguments by position''.
-   *
-   * The specified ''context'' may be used to supply additional information needed to send the request.
-   *
-   * @param method method name
-   * @param arguments arguments by position
-   * @param context request context
-   * @tparam R result type
-   * @return result value
-   */
-  inline def call[R](method: String, arguments: Seq[Any])(using context: Context): Outcome[R] =
-    performCall(method, encodeArguments(arguments), context, decodeResult[R])
-
-  /**
    * Perform a remote JSON-RPC method ''call'' supplying the ''arguments by name''.
    *
    * The specified ''context'' may be used to supply additional information needed to send the request.
    *
    * @param method method name
-   * @param arguments arguments by position
+   * @param arguments arguments by by name
    * @param context request context
    * @tparam R result type
    * @return result value
@@ -62,26 +48,12 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
     performCall(method, encodeArguments(arguments), context, decodeResult[R])
 
   /**
-   * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by position''.
-   *
-   * The specified ''context'' may be used to supply additional information needed to send the request.
-   *
-   * @param method method name
-   * @param arguments arguments by position
-   * @param context JSON-RPC request context
-   * @tparam R result type
-   * @return nothing
-   */
-  inline def notify(method: String, arguments: Seq[Any])(using context: Context): Outcome[Unit] =
-    performNotify(method, encodeArguments(arguments), context)
-
-  /**
    * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by name''.
    *
    * The specified ''context'' may be used to supply additional information needed to send the request.
    *
    * @param method method name
-   * @param arguments arguments by position
+   * @param arguments arguments by name
    * @param context JSON-RPC request context
    * @tparam R result type
    * @return nothing
@@ -97,15 +69,6 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @return remote API proxy instance
    */
   inline def proxy[T]: T = ???
-
-  /**
-   * Encode request arguments by position.
-   *
-   * @param arguments request arguments
-   * @return encoded request arguments
-   */
-  inline def encodeArguments(arguments: Seq[Any]): Params[Node] =
-    arguments.map(argument => codec.encode(argument)).toList.asLeft
 
   /**
    * Encode request arguments by name.
