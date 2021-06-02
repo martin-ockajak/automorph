@@ -32,13 +32,11 @@ final case class CirceJsonCodec[EncodeDecoders](encodeDecoders: EncodeDecoders) 
     message.asJson.spaces2
 
   inline def encode[T](value: T): Json =
-    import encodeDecoders.given
     val encoder = summonInline[Encoder[T]]
     value.asJson(using encoder)
 //    CirceJsonMacros.encode[EncodeDecoders, T](encodeDecoders, value)
 
   inline def decode[T](node: Json): T =
-    import encodeDecoders.given
     val decoder = summonInline[Decoder[T]]
     node.as[T](using decoder).toTry.get
 //    CirceJsonMacros.decode[EncodeDecoders, T](encodeDecoders, node)
