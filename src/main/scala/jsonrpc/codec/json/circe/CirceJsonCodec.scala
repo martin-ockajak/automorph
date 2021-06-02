@@ -14,8 +14,8 @@ import scala.compiletime.summonInline
  * @see [[https://circe.github.io/circe Documentation]]
  * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
  */
-final case class CirceJsonCodec[EncodersDecoders](encodersDecoders: EncodersDecoders) extends Codec[Json]:
-  import encodersDecoders.given
+final case class CirceJsonCodec[EncodeDecoders](encodeDecoders: EncodeDecoders) extends Codec[Json]:
+  import encodeDecoders.given
 
   private given Encoder[Message[Json]] = deriveEncoder[Message[Json]]
   private given Decoder[Message[Json]] = deriveDecoder[Message[Json]]
@@ -30,13 +30,13 @@ final case class CirceJsonCodec[EncodersDecoders](encodersDecoders: EncodersDeco
     message.asJson.spaces2
 
   inline def encode[T](value: T): Json =
-    import encodersDecoders.given
+    import encodeDecoders.given
     val encoder = summonInline[Encoder[T]]
     value.asJson(using encoder)
 //    CirceJsonMacros.encode[EncodersDecoders, T](encodersDecoders, value)
 
   inline def decode[T](node: Json): T =
-    import encodersDecoders.given
+    import encodeDecoders.given
     val decoder = summonInline[Decoder[T]]
     node.as[T](using decoder).toTry.get
 //    CirceJsonMacros.decode[EncodersDecoders, T](encodersDecoders, node)
