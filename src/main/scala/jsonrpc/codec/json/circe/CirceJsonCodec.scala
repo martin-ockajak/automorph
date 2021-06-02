@@ -28,12 +28,12 @@ final case class CirceJsonCodec[EncodersDecoders](encodersDecoders: EncodersDeco
 
   inline def encode[T](value: T): Json =
     import encodersDecoders.given
-    CirceJsonMacros.encode[EncodersDecoders, T](encodersDecoders, value)
-//    val encoder = summonInline[Encoder[T]]
-//    value.asJson(using encoder)
+    val encoder = summonInline[Encoder[T]]
+    value.asJson(using encoder)
+//    CirceJsonMacros.encode[EncodersDecoders, T](encodersDecoders, value)
 
   inline def decode[T](node: Json): T =
     import encodersDecoders.given
-    CirceJsonMacros.decode[EncodersDecoders, T](encodersDecoders, node)
-//    val decoder = summonInline[Decoder[T]]
-//    node.as[T](using decoder).toTry.get
+    val decoder = summonInline[Decoder[T]]
+    node.as[T](using decoder).toTry.get
+//    CirceJsonMacros.decode[EncodersDecoders, T](encodersDecoders, node)
