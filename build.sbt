@@ -7,6 +7,7 @@ lazy val root = project.in(file(".")).settings(
     // Format
     "com.lihaoyi" %% "upickle" % "1.3.15",
     "io.circe" %% "circe-parser" % "0.14.1",
+    "io.circe" %% "circe-generic" % "0.14.1",
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.12.3",
 
     // Effect
