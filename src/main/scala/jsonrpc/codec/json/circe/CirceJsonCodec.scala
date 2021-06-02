@@ -1,8 +1,8 @@
 package jsonrpc.codec.json.circe
 
-import io.circe.generic.semiauto
-import io.circe.{Decoder, Encoder, Json, parser}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Encoder, Json, parser}
 import jsonrpc.core.EncodingOps.{asArraySeq, asString, toArraySeq}
 import jsonrpc.spi.{Codec, Message, MessageError}
 import scala.collection.immutable.ArraySeq
@@ -15,12 +15,10 @@ import scala.compiletime.summonInline
  * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
  */
 final case class CirceJsonCodec[EncodersDecoders](encodersDecoders: EncodersDecoders) extends Codec[Json]:
+  import encodersDecoders.given
 
-  given Encoder[Message[Json]] = semiauto.deriveEncoder[Message[Json]]
-  given Decoder[Message[Json]] = semiauto.deriveDecoder[Message[Json]]
-
-//  private given pickler.ReadWriter[Message] = pickler.macroRW
-//  private given pickler.ReadWriter[MessageError] = pickler.macroRW
+  private given Encoder[Message[Json]] = deriveEncoder[Message[Json]]
+  private given Decoder[Message[Json]] = deriveDecoder[Message[Json]]
 
   def serialize(message: Message[Json]): ArraySeq.ofByte = message.asJson.noSpaces.toArraySeq
 
