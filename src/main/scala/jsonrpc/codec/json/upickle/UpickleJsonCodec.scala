@@ -15,25 +15,25 @@ import upickle.Api
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[http://com-lihaoyi.github.io/upickle/#uJson Node type]]
  */
-final case class UpickleJsonCodec[Pickler <: Api](pickler: Pickler) extends Codec[Value]:
+final case class UpickleJsonCodec[ReadWriters <: Api](readWriters: ReadWriters) extends Codec[Value]:
 
   private val indent = 2
-  private given pickler.ReadWriter[Message] = pickler.macroRW
-  private given pickler.ReadWriter[MessageError] = pickler.macroRW
+  private given readWriters.ReadWriter[Message] = readWriters.macroRW
+  private given readWriters.ReadWriter[MessageError] = readWriters.macroRW
 
-  def serialize(message: spi.Message[Value]): ArraySeq.ofByte = pickler.writeToByteArray(fromSpi(message)).asArraySeq
+  def serialize(message: spi.Message[Value]): ArraySeq.ofByte = readWriters.writeToByteArray(fromSpi(message)).asArraySeq
 
-  def deserialize(data: ArraySeq.ofByte): spi.Message[Value] = pickler.read[Message](data.unsafeArray).toSpi
+  def deserialize(data: ArraySeq.ofByte): spi.Message[Value] = readWriters.read[Message](data.unsafeArray).toSpi
 
-  def format(message: spi.Message[Value]): String = pickler.write(fromSpi(message), indent)
+  def format(message: spi.Message[Value]): String = readWriters.write(fromSpi(message), indent)
 
   inline def encode[T](value: T): Value =
-    val writer = summonInline[pickler.Writer[T]]
-    pickler.writeJs(value)(using writer)
+    val writer = summonInline[readWriters.Writer[T]]
+    readWriters.writeJs(value)(using writer)
 
   inline def decode[T](node: Value): T =
-    val reader = summonInline[pickler.Reader[T]]
-    pickler.read[T](node)(using reader)
+    val reader = summonInline[readWriters.Reader[T]]
+    readWriters.read[T](node)(using reader)
 
 case object UpickleJsonCodec:
 
