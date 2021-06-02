@@ -79,7 +79,8 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    */
   inline def encodeArguments[A <: Product: Mirror.ProductOf](arguments: A): Params[Node] =
     val mirror = summon[Mirror.Of[A]]
-    Map.empty.view.mapValues(argument => codec.encode(argument)).toMap.asRight
+    val argumentsNode = codec.encode(arguments)
+    codec.decode[Map[String, Node]](argumentsNode).asRight
 
   /**
    * Create response result decoding function.
