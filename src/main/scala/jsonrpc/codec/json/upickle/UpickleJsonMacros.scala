@@ -7,7 +7,7 @@ import upickle.Api
 
 case object UpickleJsonMacros:
 
-  inline def encode[Pickler <: Api, T](pickler: Pickler, value: T): Value = ${ encode('pickler, 'value) }
+  inline def encode[Pickler <: Api, T](pickler: Pickler, value: T): Value = ${ encode[Pickler, T]('pickler, 'value) }
 
   private def encode[Pickler <: Api: Type, T: Type](pickler: Expr[Pickler], value: Expr[T])(using
     quotes: Quotes

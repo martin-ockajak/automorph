@@ -30,11 +30,11 @@ class CirceJsonSpec extends CodecSpec:
   )
 
   "" - {
-//    "Encode / Decode" in {
+    "Encode / Decode" in {
 //      val encodedJson = codec.encode(record)
 //      val decodedJson = codec.decode[Record](encodedJson)
 //      decodedJson.should(equal(record))
-//    }
+    }
   }
 
 object JsonPickler:
