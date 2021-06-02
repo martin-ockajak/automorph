@@ -31,19 +31,17 @@ class CirceJsonSpec extends CodecSpec:
 
   "" - {
     "Encode / Decode" in {
-      import JsonPickler.given
-//      import io.circe.generic.auto.*
       val encodedJson = codec.encode(record)
       val decodedJson = codec.decode[Record](encodedJson)
       decodedJson.should(equal(record))
     }
   }
 
-object JsonPickler:
+object JsonPickler extends CirceCodecs:
 
-  given Encoder[Enum] = Encoder.encodeInt.contramap[Enum](_.ordinal)
-  given Decoder[Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
-  given Encoder[Structure] = deriveEncoder[Structure]
-  given Decoder[Structure] = deriveDecoder[Structure]
-  given Encoder[Record] = deriveEncoder[Record]
-  given Decoder[Record] = deriveDecoder[Record]
+  given CirceEncoder[Enum] = Encoder.encodeInt.contramap[Enum](_.ordinal).wrap
+  given CirceDecoder[Enum] = Decoder.decodeInt.map(Enum.fromOrdinal).wrap
+  given CirceEncoder[Structure] = deriveEncoder[Structure].wrap
+  given CirceDecoder[Structure] = deriveDecoder[Structure].wrap
+  given CirceEncoder[Record] = deriveEncoder[Record].wrap
+  given CirceDecoder[Record] = deriveDecoder[Record].wrap
