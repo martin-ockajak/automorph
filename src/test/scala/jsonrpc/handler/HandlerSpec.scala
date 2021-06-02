@@ -8,7 +8,6 @@ import jsonrpc.codec.json.upickle.UpickleJsonCodec
 import jsonrpc.effect.standard.FutureEffect
 import jsonrpc.effect.standard.NoEffect
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.collection.immutable.ArraySeq
 
 class HandlerSpec extends BaseSpec:
