@@ -14,6 +14,8 @@ import upickle.Api
  *
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[http://com-lihaoyi.github.io/upickle/#uPack Node type]]
+ * @param readWriters Upickle reader and writer implicits instance
+ * @tparam ReadWriters Upickle reader and writer implicits instance type
  */
 final case class UpickleMessagePackCodec[ReadWriters <: Api](readWriters: ReadWriters) extends Codec[Msg]:
 

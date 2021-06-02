@@ -13,6 +13,8 @@ import scala.compiletime.summonInline
  *
  * @see [[https://circe.github.io/circe Documentation]]
  * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
+ * @param encodeDecoders Circe encoders and decoders implicits instance
+ * @tparam EncodeDecoders Circe encoders and decoders implicits instance type
  */
 final case class CirceJsonCodec[EncodeDecoders](encodeDecoders: EncodeDecoders) extends Codec[Json]:
   import encodeDecoders.given
