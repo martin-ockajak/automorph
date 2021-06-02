@@ -1,13 +1,9 @@
 package jsonrpc.transport.http.sttp
 
-import java.net.{HttpURLConnection, URL, URLConnection}
-import java.nio.charset.StandardCharsets
 import jsonrpc.core.EncodingOps.asArraySeq
 import jsonrpc.spi.{Effect, Transport}
-import org.asynchttpclient.AsyncHttpClientConfig
 import scala.collection.immutable.ArraySeq
-import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
-import sttp.client3.{emptyRequest, Empty, FollowRedirectsBackend, Identity, PartialRequest, Request, RequestOptions, RequestT, SttpApi, SttpBackend}
+import sttp.client3.{Identity, PartialRequest, Request, SttpApi, SttpBackend}
 import sttp.model.{Header, Method, Uri}
 
 /**
@@ -26,12 +22,8 @@ case class SttpTransport[Outcome[_], Capabilities](
   effect: Effect[Outcome]
 ) extends Transport[Outcome, PartialRequest[Either[String, String], Any]] with SttpApi:
 
-  private val charset = StandardCharsets.UTF_8
-  private val contentLengthHeader = "Content-Length"
-  private val contentTypeHeader = "Content-Type"
-  private val acceptHeader = "Accept"
+  private val acceptEncoding = "gzip, deflate"
   private val contentType = "application/json"
-  private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
 
   override def call(
     request: ArraySeq.ofByte,
@@ -56,6 +48,7 @@ case class SttpTransport[Outcome[_], Capabilities](
   private def setupHttpRequest(
     request: ArraySeq.ofByte,
     context: PartialRequest[Either[String, String], Any]
-  ): RequestT[Identity, Either[String, String], Any] =
+  ): Request[Either[String, String], Any] =
     context.copy[Identity, Either[String, String], Any](uri = url, method = method)
-      .body(request.unsafeArray)
+      .contentType(contentType).header(Header.accept(contentType))
+      .acceptEncoding(acceptEncoding).body(request.unsafeArray)
