@@ -5,7 +5,7 @@ import jsonrpc.core.{Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Codec, Effect, Message, MessageError, Transport}
-import jsonrpc.util.CannotEqual
+import jsonrpc.util.{CannotEqual, Empty}
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Random, Success, Try}
@@ -137,7 +137,12 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return result value
    */
-  private def performCall[R](method: String, arguments: Params[Node], context: Context, decodeResult: Node => R): Outcome[R] =
+  private def performCall[R](
+    method: String,
+    arguments: Params[Node],
+    context: Context,
+    decodeResult: Node => R
+  ): Outcome[R] =
     val id = Math.abs(random.nextLong()).toString.asRight[BigDecimal].asSome
     val formedRequest = Request(id, method, arguments).formed
     logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
@@ -183,7 +188,11 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return result value
    */
-  private def processResponse[R](rawResponse: ArraySeq.ofByte, formedRequest: Message[Node], decodeResult: Node => R): Outcome[R] =
+  private def processResponse[R](
+    rawResponse: ArraySeq.ofByte,
+    formedRequest: Message[Node],
+    decodeResult: Node => R
+  ): Outcome[R] =
     // Deserialize response
     Try(codec.deserialize(rawResponse)) match
       case Success(formedResponse) =>
@@ -230,11 +239,8 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
 
 case object JsonRpcClient:
 
-  final case class NoContextFor[T]()
-  type AnyJsonRpcClient = JsonRpcClient[?, ?, ?, ?]
-
-  type NoContext = NoContextFor[AnyJsonRpcClient]
-  given NoContext = NoContextFor[AnyJsonRpcClient]()
+  type NoContext = Empty[JsonRpcClient[?, ?, ?, ?]]
+  given NoContext = Empty[JsonRpcClient[?, ?, ?, ?]]()
 
   /**
    * Create a new JSON-RPC client using the specified `codec`, `effect` and 'transport' plugins without request 'Context' type.
@@ -252,6 +258,6 @@ case object JsonRpcClient:
   inline def basic[Node, CodecType <: Codec[Node], Outcome[_]](
     codec: CodecType,
     effect: Effect[Outcome],
-    transport: Transport[Outcome, None.type]
-  ): JsonRpcClient[Node, CodecType, Outcome, None.type] =
+    transport: Transport[Outcome, NoContext]
+  ): JsonRpcClient[Node, CodecType, Outcome, NoContext] =
     new JsonRpcClient(codec, effect, transport)

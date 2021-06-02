@@ -9,7 +9,7 @@ import jsonrpc.core.{Errors, Protocol, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMacros, MethodHandle}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Codec, Effect, Message, MessageError}
-import jsonrpc.util.CannotEqual
+import jsonrpc.util.{CannotEqual, Empty}
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import scala.collection.immutable.ArraySeq
 import scala.compiletime.erasedValue
@@ -293,11 +293,9 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     s"$JsonRpcHandler(Codec: $codecName, Effect: $effectName, Bound methods: $boundMethods)"
 
 case object JsonRpcHandler:
-  final case class NoContextFor[T]()
-  type AnyJsonRpcHandler = JsonRpcHandler[?, ?, ?, ?]
 
-  type NoContext = NoContextFor[AnyJsonRpcHandler]
-  given NoContext = NoContextFor[AnyJsonRpcHandler]()
+  type NoContext = Empty[JsonRpcHandler[?, ?, ?, ?]]
+  given NoContext = Empty[JsonRpcHandler[?, ?, ?, ?]]()
 
   /**
    * Create a new JSON-RPC request handler using the specified `codec` and `effect` plugins without request 'Context' type.
