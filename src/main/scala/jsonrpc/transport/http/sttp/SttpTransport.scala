@@ -4,7 +4,7 @@ import jsonrpc.core.EncodingOps.asArraySeq
 import jsonrpc.spi.{Effect, Transport}
 import scala.collection.immutable.ArraySeq
 import sttp.client3.{Identity, PartialRequest, Request, SttpApi, SttpBackend}
-import sttp.model.{Header, Method, Uri}
+import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
  * STTP HTTP transport using AsyncHttpClientFutureBackend.
@@ -22,8 +22,7 @@ case class SttpTransport[Outcome[_], Capabilities](
   effect: Effect[Outcome]
 ) extends Transport[Outcome, PartialRequest[Either[String, String], Any]] with SttpApi:
 
-  private val acceptEncoding = "gzip, deflate"
-  private val contentType = "application/json"
+  private val contentType = MediaType.ApplicationJson
 
   override def call(
     request: ArraySeq.ofByte,
@@ -50,5 +49,4 @@ case class SttpTransport[Outcome[_], Capabilities](
     context: PartialRequest[Either[String, String], Any]
   ): Request[Either[String, String], Any] =
     context.copy[Identity, Either[String, String], Any](uri = url, method = method)
-      .contentType(contentType).header(Header.accept(contentType))
-      .acceptEncoding(acceptEncoding).body(request.unsafeArray)
+      .contentType(contentType).header(Header.accept(contentType)).body(request.unsafeArray)
