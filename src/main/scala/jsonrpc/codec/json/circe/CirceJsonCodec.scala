@@ -20,11 +20,14 @@ final case class CirceJsonCodec[EncodersDecoders](encodersDecoders: EncodersDeco
   private given Encoder[Message[Json]] = deriveEncoder[Message[Json]]
   private given Decoder[Message[Json]] = deriveDecoder[Message[Json]]
 
-  def serialize(message: Message[Json]): ArraySeq.ofByte = message.asJson.noSpaces.toArraySeq
+  def serialize(message: Message[Json]): ArraySeq.ofByte =
+    message.asJson.noSpaces.toArraySeq
 
-  def deserialize(data: ArraySeq.ofByte): Message[Json] = parser.decode[Message[Json]](data.asString).toTry.get
+  def deserialize(data: ArraySeq.ofByte): Message[Json] =
+    parser.decode[Message[Json]](data.asString).toTry.get
 
-  def format(message: Message[Json]): String = message.asJson.spaces2
+  def format(message: Message[Json]): String =
+    message.asJson.spaces2
 
   inline def encode[T](value: T): Json =
     import encodersDecoders.given

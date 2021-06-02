@@ -1,6 +1,6 @@
 package jsonrpc.codec.messagepack.upickle
 
-import jsonrpc.codec.messagepack.upickle.UpickleMessagePackCodec.{Message, MessageError, fromSpi}
+import jsonrpc.codec.messagepack.upickle.UpickleMessagePackCodec.{fromSpi, Message, MessageError}
 import jsonrpc.core.EncodingOps.asArraySeq
 import jsonrpc.spi
 import jsonrpc.spi.Codec
@@ -21,11 +21,14 @@ final case class UpickleMessagePackCodec[ReadWriters <: Api](readWriters: ReadWr
   private given readWriters.ReadWriter[Message] = readWriters.macroRW
   private given readWriters.ReadWriter[MessageError] = readWriters.macroRW
 
-  def serialize(message: spi.Message[Msg]): ArraySeq.ofByte = readWriters.writeToByteArray(fromSpi(message)).asArraySeq
+  def serialize(message: spi.Message[Msg]): ArraySeq.ofByte =
+    readWriters.writeToByteArray(fromSpi(message)).asArraySeq
 
-  def deserialize(data: ArraySeq.ofByte): spi.Message[Msg] = readWriters.read[Message](data.unsafeArray).toSpi
+  def deserialize(data: ArraySeq.ofByte): spi.Message[Msg] =
+    readWriters.read[Message](data.unsafeArray).toSpi
 
-  def format(message: spi.Message[Msg]): String = readWriters.write(fromSpi(message), indent)
+  def format(message: spi.Message[Msg]): String =
+    readWriters.write(fromSpi(message), indent)
 
   inline def encode[T](value: T): Msg =
     val writer = summonInline[readWriters.Writer[T]]
