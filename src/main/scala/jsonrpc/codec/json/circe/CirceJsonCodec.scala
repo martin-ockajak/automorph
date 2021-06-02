@@ -3,17 +3,10 @@ package jsonrpc.codec.json.circe
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json, parser}
-import jsonrpc.core.EncodingOps.{asArraySeq, asString, toArraySeq}
+import jsonrpc.core.EncodingOps.{asString, toArraySeq}
 import jsonrpc.spi.{Codec, Message, MessageError}
 import scala.collection.immutable.ArraySeq
 import scala.compiletime.summonInline
-
-trait CirceCodecs:
-  final case class CirceEncoder[T](underlying: Encoder[T])
-  final case class CirceDecoder[T](underlying: Decoder[T])
-
-  given [T]: Conversion[Encoder[T], CirceEncoder[T]] = CirceEncoder(_)
-  given [T]: Conversion[Decoder[T], CirceDecoder[T]] = CirceDecoder(_)
 
 /**
  * Circe JSON codec plugin.
@@ -40,9 +33,14 @@ final case class CirceJsonCodec[Codecs <: CirceCodecs](codecs: Codecs) extends C
   inline def encode[T](value: T): Json =
     val encoder = summonInline[codecs.CirceEncoder[T]].underlying
     value.asJson(using encoder)
-//    CirceJsonMacros.encode[EncodeDecoders, T](encodeDecoders, value)
 
   inline def decode[T](node: Json): T =
     val decoder = summonInline[codecs.CirceDecoder[T]].underlying
     node.as[T](using decoder).toTry.get
-//    CirceJsonMacros.decode[EncodeDecoders, T](encodeDecoders, node)
+
+trait CirceCodecs:
+  final case class CirceEncoder[T](underlying: Encoder[T])
+  final case class CirceDecoder[T](underlying: Decoder[T])
+
+  given [T]: Conversion[Encoder[T], CirceEncoder[T]] = CirceEncoder(_)
+  given [T]: Conversion[Decoder[T], CirceDecoder[T]] = CirceDecoder(_)
