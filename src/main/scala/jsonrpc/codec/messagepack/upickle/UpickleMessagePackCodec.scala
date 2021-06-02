@@ -1,6 +1,6 @@
 package jsonrpc.codec.messagepack.upickle
 
-import jsonrpc.codec.messagepack.upickle.UpickleMessagePackCodec.{fromSpi, Message, MessageError}
+import jsonrpc.codec.messagepack.upickle.UpickleMessagePackCodec.{Message, MessageError, fromSpi}
 import jsonrpc.core.EncodingOps.asArraySeq
 import jsonrpc.spi
 import jsonrpc.spi.Codec
@@ -27,9 +27,13 @@ final case class UpickleMessagePackCodec[Pickler <: Api](pickler: Pickler) exten
 
   def format(message: spi.Message[Msg]): String = pickler.write(fromSpi(message), indent)
 
-  inline def encode[T](value: T): Msg = UpickleMessagePackMacros.encode(pickler, value)
+  inline def encode[T](value: T): Msg =
+    val writer = summonInline[pickler.Writer[T]]
+    pickler.writeMsg(value)(using writer)
 
-  inline def decode[T](node: Msg): T = UpickleMessagePackMacros.decode[Pickler, T](pickler, node)
+  inline def decode[T](node: Msg): T =
+    val reader = summonInline[pickler.Reader[T]]
+    pickler.readBinary[T](node)(using reader)
 
 case object UpickleMessagePackCodec:
 
