@@ -30,7 +30,7 @@ import scala.util.{Failure, Success, Try}
  * @tparam Outcome effectful computation outcome type
  * @tparam Context request context type
  */
-final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Context] (
+final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Context](
   codec: CodecType,
   effect: Effect[Outcome],
   bufferSize: Int,
@@ -293,6 +293,8 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     s"$JsonRpcHandler(Codec: $codecName, Effect: $effectName, Bound methods: $boundMethods)"
 
 case object JsonRpcHandler:
+
+  given None.type = None
 
   /**
    * Create a JSON-RPC request handler.

@@ -129,7 +129,7 @@ object HandlerMacros:
     import quotes.reflect.TypeRepr
     given Quotes = quotes
 
-    !(TypeRepr.of[Context] =:= TypeRepr.of[Unit])
+    !(TypeRepr.of[Context] =:= TypeRepr.of[None.type] || TypeRepr.of[Context] =:= TypeRepr.of[Unit])
 
   private def generateMethodHandle[
     Node: Type,
