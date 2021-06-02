@@ -2,7 +2,6 @@ package jsonrpc.handler
 
 import base.BaseSpec
 import jsonrpc.{ApiImpl, JsonRpcHandler, SimpleApi}
-import jsonrpc.JsonRpcHandler.given
 import jsonrpc.JsonRpcHandler.NoContext
 import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
