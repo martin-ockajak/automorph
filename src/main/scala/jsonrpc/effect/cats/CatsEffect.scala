@@ -9,7 +9,7 @@ import jsonrpc.spi.Effect
  * @see [[https://typelevel.org/cats-effect/ Documentation]]
  * @see [[https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html Effect type]]
  */
-final case class CatsEffect[Environment]() extends Effect[IO]:
+final case class CatsEffect() extends Effect[IO]:
 
   def pure[T](value: T): IO[T] = IO.pure(value)
 

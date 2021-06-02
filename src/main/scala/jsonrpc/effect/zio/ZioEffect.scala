@@ -8,6 +8,7 @@ import zio.{RIO, Task}
  *
  * @see [[https://zio.dev/ Documentation]]
  * @see [[https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html Effect type]]
+ * @tparam Environment ZIO environment type
  */
 final case class ZioEffect[Environment]() extends Effect[[T] =>> RIO[Environment, T]]:
 

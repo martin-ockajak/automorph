@@ -12,8 +12,9 @@ import scala.util.{Failure, Success, Try}
  *
  * @see [[https://docs.scala-lang.org/overviews/core/futures.html Documentation]]
  * @see Effect type: [[scala.concurrent.Future]]
+ * @param executionContext execution context
  */
-final case class FutureEffect()(using ExecutionContext) extends Effect[Future]:
+final case class FutureEffect()(using executionContext: ExecutionContext) extends Effect[Future]:
 
   def pure[T](value: T): Future[T] = Future.successful(value)
 

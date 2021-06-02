@@ -9,7 +9,7 @@ import monix.eval.Task
  * @see [[https://monix.io/ Documentation]]
  * @see [[https://monix.io/api/current/monix/eval/Task.html Effect type]]
  */
-final case class MonixEffect[Environment]() extends Effect[Task]:
+final case class MonixEffect() extends Effect[Task]:
 
   def pure[T](value: T): Task[T] = Task.pure(value)
 
