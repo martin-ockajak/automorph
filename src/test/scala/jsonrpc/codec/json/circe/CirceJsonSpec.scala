@@ -39,9 +39,9 @@ class CirceJsonSpec extends CodecSpec:
 
 object JsonPickler extends CirceCodecs:
 
-  given CirceEncoder[Enum] = Encoder.encodeInt.contramap[Enum](_.ordinal).wrap
-  given CirceDecoder[Enum] = Decoder.decodeInt.map(Enum.fromOrdinal).wrap
-  given CirceEncoder[Structure] = deriveEncoder[Structure].wrap
-  given CirceDecoder[Structure] = deriveDecoder[Structure].wrap
-  given CirceEncoder[Record] = deriveEncoder[Record].wrap
-  given CirceDecoder[Record] = deriveDecoder[Record].wrap
+  given CirceEncoder[Enum] = Encoder.encodeInt.contramap[Enum](_.ordinal)
+  given CirceDecoder[Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
+  given CirceEncoder[Structure] = deriveEncoder[Structure]
+  given CirceDecoder[Structure] = deriveDecoder[Structure]
+  given CirceEncoder[Record] = deriveEncoder[Record]
+  given CirceDecoder[Record] = deriveDecoder[Record]

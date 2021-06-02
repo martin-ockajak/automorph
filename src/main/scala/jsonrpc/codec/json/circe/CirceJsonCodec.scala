@@ -12,8 +12,8 @@ trait CirceCodecs:
   final case class CirceEncoder[T](underlying: Encoder[T])
   final case class CirceDecoder[T](underlying: Decoder[T])
 
-  extension[T](encoder:Encoder[T]) def wrap = CirceEncoder(encoder)
-  extension[T](decoder:Decoder[T]) def wrap = CirceDecoder(decoder)
+  given [T]: Conversion[Encoder[T], CirceEncoder[T]] = CirceEncoder(_)
+  given [T]: Conversion[Decoder[T], CirceDecoder[T]] = CirceDecoder(_)
 
 /**
  * Circe JSON codec plugin.
