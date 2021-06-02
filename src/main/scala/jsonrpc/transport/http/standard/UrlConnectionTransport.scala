@@ -3,7 +3,7 @@ package jsonrpc.transport.http.standard
 import java.net.{HttpURLConnection, URL, URLConnection}
 import jsonrpc.core.EncodingOps.toArraySeq
 import jsonrpc.effect.standard.NoEffect.Identity
-import jsonrpc.spi.{Effect, Transport}
+import jsonrpc.spi.Transport
 import jsonrpc.transport.http.standard.UrlConnectionTransport.HttpProperties
 import scala.collection.immutable.ArraySeq
 
