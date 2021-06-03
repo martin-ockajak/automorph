@@ -1,5 +1,5 @@
 // Project
-ThisBuild / organization := "json-rpc"
+ThisBuild / organization := "io.json-rpc"
 ThisBuild / version := "0.1.0"
 
 lazy val root = project.in(file(".")).aggregate(
@@ -52,7 +52,6 @@ lazy val upickle = (project in file("codec/upickle")).dependsOn(
 lazy val circe = (project in file("codec/circe")).dependsOn(
   util, spi, test % Test
 ).settings(
-  name := "json-rpc-circe",
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-parser" % "0.14.1",
     "io.circe" %% "circe-generic" % "0.14.1"
