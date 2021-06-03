@@ -13,11 +13,7 @@ lazy val root = project.in(file(".")).aggregate(
   core, test % Test, codecUpickle % Test
 ).settings(
   name := "json-rpc",
-  description := "JSON-RPC client & server",
-  libraryDependencies ++= Seq(
-    // Format
-    ("com.fasterxml.jackson.module" % "jackson-module-scala" % "2.12.3").cross(CrossVersion.for3Use2_13)
-  )
+  description := "JSON-RPC client & server"
 )
 
 // Dependencies
