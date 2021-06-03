@@ -2,7 +2,7 @@ package jsonrpc.core
 
 import java.io.IOException
 import jsonrpc.spi.{MessageError, Message}
-import jsonrpc.util.ValueOps.{asRight, asSome}
+import jsonrpc.util.ValueOps.{asRight, asOption, asSome}
 
 /**
  * JSON-RPC protocol data structures.
@@ -73,6 +73,36 @@ case object Protocol:
   /** Supported JSON-RPC protocol version. */
   val version = "2.0"
 
+  /**
+   * Return specified mandatory property value or throw an exception if it is missing.
+   *
+   * @param value property value
+   * @param name property name
+   * @tparam T property type
+   * @return property value
+   * @throws InvalidRequestException if the property value is missing
+   */
   def mandatory[T](value: Option[T], name: String): T = value.getOrElse(
     throw InvalidRequestException(s"Missing message property: $name", None.orNull)
   )
+
+  /**
+   * Assemble detailed error description from a throwable and its filtered causes.
+   *
+   * @param throwable exception
+   * @param filter only include throwables satisfying this condition
+   * @param maxCauses maximum number of included exception causes
+   * @return error messages
+   */
+  def errorDetails(
+    throwable: Throwable,
+    filter: Throwable => Boolean = _ => true,
+    maxCauses: Int = 100
+  ): Seq[String] =
+    LazyList.iterate(throwable.asSome)(_.flatMap(_.getCause.asOption))
+      .takeWhile(_.isDefined).flatten.filter(filter).take(maxCauses).map { throwable =>
+      val exceptionName = throwable.getClass.getSimpleName
+      throwable.getMessage.asOption.map(_.trim).filter(_.nonEmpty).map { message =>
+        s"$exceptionName: $message"
+      }.getOrElse(exceptionName)
+    }

@@ -1,18 +1,17 @@
 package jsonrpc
 
 import java.beans.IntrospectionException
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
+import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.util.EncodingOps.toArraySeq
-import jsonrpc.core.Protocol.{Id, MethodNotFoundException, ParseErrorException}
-import jsonrpc.core.{Errors, Protocol, Request, Response, ResponseError}
+import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
+import jsonrpc.core.{Protocol, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMacros, MethodHandle}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Codec, Effect, Message, MessageError}
-import jsonrpc.util.{CannotEqual, Empty}
+import jsonrpc.util.EncodingOps.toArraySeq
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
+import jsonrpc.util.{CannotEqual, Empty}
 import scala.collection.immutable.ArraySeq
-import scala.compiletime.erasedValue
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -197,7 +196,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     logger.debug(s"Processing JSON-RPC request", formedRequest.properties)
     methodBindings.get(validRequest.method).map { methodHandle =>
       // Invoke method
-      val contextSupplied = context.isInstanceOf[None.type] || context.isInstanceOf[Unit]
+      val contextSupplied = context.isInstanceOf[Empty[?]] || context.isInstanceOf[None.type] || context.isInstanceOf[Unit]
       val arguments = extractArguments(validRequest, contextSupplied, methodHandle)
       Try(effect.either(methodHandle.function(arguments, context))) match
         case Success(outcome) => effect.flatMap(
@@ -265,9 +264,9 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     formedRequest.id.map { id =>
       // Assemble error details
       val code = Protocol.exceptionError(error.getClass).code
-      val descriptions = Errors.descriptions(error)
-      val message = descriptions.headOption.getOrElse("Unknown error")
-      val data = encodeStrings(descriptions.drop(1)).asSome
+      val errorDetails = Protocol.errorDetails(error)
+      val message = errorDetails.headOption.getOrElse("Unknown error")
+      val data = encodeStrings(errorDetails.drop(1)).asSome
 
       // Serialize response
       val validResponse = Response[Node](id, ResponseError(code, message, data).asLeft)
