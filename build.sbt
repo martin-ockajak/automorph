@@ -8,9 +8,8 @@ lazy val root = project.in(file(".")).aggregate(
   effectZio,
   effectMonix,
   effectCats,
-  transportSttp
-).dependsOn(
-  core, test % Test, codecUpickle % Test
+  transportSttp,
+  integration
 ).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server"
@@ -88,6 +87,11 @@ lazy val transportSttp = (project in file("transport/sttp")).dependsOn(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.5"
   )
+)
+
+// Integration
+lazy val integration = project.dependsOn(
+  core, test % Test, codecUpickle % Test
 )
 
 
