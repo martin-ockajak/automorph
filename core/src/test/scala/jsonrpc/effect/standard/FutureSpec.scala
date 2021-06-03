@@ -2,9 +2,9 @@ package jsonrpc.effect.standard
 
 import jsonrpc.effect.EffectSpec
 import jsonrpc.spi.Effect
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import concurrent.ExecutionContext.Implicits.global
 
 class FutureSpec extends EffectSpec[Future]:
   def effect: Effect[Future] = FutureEffect()

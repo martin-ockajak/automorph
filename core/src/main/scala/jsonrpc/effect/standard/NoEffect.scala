@@ -1,7 +1,7 @@
 package jsonrpc.effect.standard
 
+import jsonrpc.effect.standard.NoEffect.Identity
 import jsonrpc.spi.Effect
-import NoEffect.Identity
 
 /**
  * No effect system plugin.
