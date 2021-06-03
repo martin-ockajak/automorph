@@ -1,14 +1,15 @@
 // Project
+ThisBuild / organization := "json-rpc"
 ThisBuild / version := "0.1.0"
 
 lazy val root = project.in(file(".")).aggregate(
   core,
-  codecUpickle,
-  codecCirce,
-  effectZio,
-  effectMonix,
-  effectCats,
-  transportSttp,
+  upickle,
+  circe,
+  zio,
+  monix,
+  cats,
+  sttp,
   integration
 ).settings(
   name := "json-rpc",
@@ -40,16 +41,17 @@ lazy val core = project.dependsOn(
 )
 
 // Codec
-lazy val codecUpickle = (project in file("codec/upickle")).dependsOn(
+lazy val upickle = (project in file("codec/upickle")).dependsOn(
   util, spi, test % Test
 ).settings(
   libraryDependencies ++= Seq(
     "com.lihaoyi" %% "upickle" % "1.3.15"
   )
 )
-lazy val codecCirce = (project in file("codec/circe")).dependsOn(
+lazy val circe = (project in file("codec/circe")).dependsOn(
   util, spi, test % Test
 ).settings(
+  name := "json-rpc-circe",
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-parser" % "0.14.1",
     "io.circe" %% "circe-generic" % "0.14.1"
@@ -57,21 +59,21 @@ lazy val codecCirce = (project in file("codec/circe")).dependsOn(
 )
 
 // Effect
-lazy val effectZio = (project in file("effect/zio")).dependsOn(
+lazy val zio = (project in file("effect/zio")).dependsOn(
   util, spi, test % Test
 ).settings(
   libraryDependencies ++= Seq(
     "dev.zio" %% "zio" % "1.0.8"
   )
 )
-lazy val effectMonix = (project in file("effect/monix")).dependsOn(
+lazy val monix = (project in file("effect/monix")).dependsOn(
   util, spi, test % Test
 ).settings(
   libraryDependencies ++= Seq(
     "io.monix" %% "monix-eval" % "3.4.0"
   )
 )
-lazy val effectCats = (project in file("effect/cats")).dependsOn(
+lazy val cats = (project in file("effect/cats")).dependsOn(
   util, spi, test % Test
 ).settings(
   libraryDependencies ++= Seq(
@@ -80,7 +82,7 @@ lazy val effectCats = (project in file("effect/cats")).dependsOn(
 )
 
 // Transport
-lazy val transportSttp = (project in file("transport/sttp")).dependsOn(
+lazy val sttp = (project in file("transport/sttp")).dependsOn(
   util, spi, test % Test
 ).settings(
   libraryDependencies ++= Seq(
@@ -90,7 +92,10 @@ lazy val transportSttp = (project in file("transport/sttp")).dependsOn(
 
 // Integration
 lazy val integration = project.dependsOn(
-  core, test % Test, codecUpickle % Test
+  core, test % Test, upickle % Test
+).settings(
+  publishLocal := { },
+  publish := { }
 )
 
 
