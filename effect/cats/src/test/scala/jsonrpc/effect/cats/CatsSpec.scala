@@ -4,6 +4,7 @@ import jsonrpc.effect.EffectSpec
 import jsonrpc.spi.Effect
 import scala.util.Try
 import cats.effect.IO
+import cats.effect.unsafe.implicits.global
 
 class CatsSpec extends EffectSpec[IO] :
   def effect: Effect[IO] = CatsEffect()

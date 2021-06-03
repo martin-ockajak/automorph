@@ -2,10 +2,12 @@
 ThisBuild / version := "0.1.0"
 
 lazy val root = project.in(file(".")).aggregate(
-  core
-).dependsOn(
   core,
-  test % Test
+  effectZio,
+  effectMonix,
+  effectCats
+).dependsOn(
+  core, test % Test
 ).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server",
@@ -15,11 +17,6 @@ lazy val root = project.in(file(".")).aggregate(
     "io.circe" %% "circe-parser" % "0.14.1",
     "io.circe" %% "circe-generic" % "0.14.1",
     ("com.fasterxml.jackson.module" % "jackson-module-scala" % "2.12.3").cross(CrossVersion.for3Use2_13),
-
-    // Effect
-    "dev.zio" %% "zio" % "1.0.8",
-    "io.monix" %% "monix-eval" % "3.4.0",
-//    "org.typelevel" %% "cats-effect" % "3.1.1",
 
     // Transport
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.5",
@@ -33,8 +30,7 @@ lazy val util = project
 lazy val spi = project
 
 lazy val test = project.dependsOn(
-  util,
-  spi
+  util, spi
 ).settings(
   libraryDependencies ++= Seq(
     // Test
@@ -45,9 +41,7 @@ lazy val test = project.dependsOn(
 )
 
 lazy val core = project.dependsOn(
-  util,
-  spi,
-  test % Test
+  util, spi, test % Test
 ).settings(
   libraryDependencies ++= Seq(
     // Utilities
@@ -55,6 +49,31 @@ lazy val core = project.dependsOn(
     "com.lihaoyi" %% "pprint" % "0.6.6",
   )
 )
+
+lazy val effectZio = (project in file("effect/zio")).dependsOn(
+  util, spi, test % Test
+).settings(
+  libraryDependencies ++= Seq(
+    "dev.zio" %% "zio" % "1.0.8"
+  )
+)
+
+lazy val effectMonix = (project in file("effect/monix")).dependsOn(
+  util, spi, test % Test
+).settings(
+  libraryDependencies ++= Seq(
+    "io.monix" %% "monix-eval" % "3.4.0"
+  )
+)
+
+lazy val effectCats = (project in file("effect/cats")).dependsOn(
+  util, spi, test % Test
+).settings(
+  libraryDependencies ++= Seq(
+    "org.typelevel" %% "cats-effect" % "3.1.1"
+  )
+)
+
 
 // Compile
 ThisBuild / scalaVersion := "3.0.0"
