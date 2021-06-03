@@ -8,7 +8,7 @@ lazy val root = project.in(file(".")).settings(
     "com.lihaoyi" %% "upickle" % "1.3.15",
     "io.circe" %% "circe-parser" % "0.14.1",
     "io.circe" %% "circe-generic" % "0.14.1",
-    "com.fasterxml.jackson.module" % "jackson-module-scala_2.13" % "2.12.3",
+    ("com.fasterxml.jackson.module" % "jackson-module-scala" % "2.12.3").cross(CrossVersion.for3Use2_13),
 
     // Effect
     "dev.zio" %% "zio" % "1.0.8",
