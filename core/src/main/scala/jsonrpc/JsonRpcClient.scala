@@ -1,12 +1,12 @@
 package jsonrpc
 
 import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
-import jsonrpc.core.{Protocol, Request, Response, ResponseError}
+import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Codec, Effect, Message, MessageError, Transport}
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
-import jsonrpc.util.{CannotEqual, Empty}
+import jsonrpc.util.CannotEqual
 import scala.collection.immutable.ArraySeq
 import scala.util.{Random, Try}
 

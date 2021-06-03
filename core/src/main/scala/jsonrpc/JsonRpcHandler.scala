@@ -4,13 +4,13 @@ import java.beans.IntrospectionException
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
-import jsonrpc.core.{Protocol, Request, Response, ResponseError}
+import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMacros, MethodHandle}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Codec, Effect, Message, MessageError}
 import jsonrpc.util.EncodingOps.toArraySeq
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
-import jsonrpc.util.{CannotEqual, Empty}
+import jsonrpc.util.CannotEqual
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
