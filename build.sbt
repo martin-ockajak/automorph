@@ -3,32 +3,30 @@ ThisBuild / version := "0.1.0"
 
 lazy val root = project.in(file(".")).aggregate(
   core,
+  codecUpickle,
+  codecCirce,
   effectZio,
   effectMonix,
   effectCats
 ).dependsOn(
-  core, test % Test
+  core, test % Test, codecUpickle % Test
 ).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server",
   libraryDependencies ++= Seq(
     // Format
-    "com.lihaoyi" %% "upickle" % "1.3.15",
-    "io.circe" %% "circe-parser" % "0.14.1",
-    "io.circe" %% "circe-generic" % "0.14.1",
     ("com.fasterxml.jackson.module" % "jackson-module-scala" % "2.12.3").cross(CrossVersion.for3Use2_13),
 
     // Transport
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.5",
-
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.5"
   )
 )
 
 // Dependencies
+
+// Basic
 lazy val util = project
-
 lazy val spi = project
-
 lazy val test = project.dependsOn(
   util, spi
 ).settings(
@@ -39,7 +37,6 @@ lazy val test = project.dependsOn(
     "ch.qos.logback" % "logback-classic" % "1.2.3"
   )
 )
-
 lazy val core = project.dependsOn(
   util, spi, test % Test
 ).settings(
@@ -50,6 +47,24 @@ lazy val core = project.dependsOn(
   )
 )
 
+// Codec
+lazy val codecUpickle = (project in file("codec/upickle")).dependsOn(
+  util, spi, test % Test
+).settings(
+  libraryDependencies ++= Seq(
+    "com.lihaoyi" %% "upickle" % "1.3.15"
+  )
+)
+lazy val codecCirce = (project in file("codec/circe")).dependsOn(
+  util, spi, test % Test
+).settings(
+  libraryDependencies ++= Seq(
+    "io.circe" %% "circe-parser" % "0.14.1",
+    "io.circe" %% "circe-generic" % "0.14.1"
+  )
+)
+
+// Effect
 lazy val effectZio = (project in file("effect/zio")).dependsOn(
   util, spi, test % Test
 ).settings(
@@ -57,7 +72,6 @@ lazy val effectZio = (project in file("effect/zio")).dependsOn(
     "dev.zio" %% "zio" % "1.0.8"
   )
 )
-
 lazy val effectMonix = (project in file("effect/monix")).dependsOn(
   util, spi, test % Test
 ).settings(
@@ -65,7 +79,6 @@ lazy val effectMonix = (project in file("effect/monix")).dependsOn(
     "io.monix" %% "monix-eval" % "3.4.0"
   )
 )
-
 lazy val effectCats = (project in file("effect/cats")).dependsOn(
   util, spi, test % Test
 ).settings(
