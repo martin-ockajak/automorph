@@ -14,11 +14,12 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @param method HTTP method
  * @param backend STTP backend
  * @param effect effect system plugin
+ * @tparam Outcome effectful computation outcome type
  */
-case class SttpTransport[Outcome[_], Capabilities](
+case class SttpTransport[Outcome[_]](
   url: Uri,
   method: Method,
-  backend: SttpBackend[Outcome, Capabilities],
+  backend: SttpBackend[Outcome, ?],
   effect: Effect[Outcome]
 ) extends Transport[Outcome, PartialRequest[Either[String, String], Any]] with SttpApi:
 
