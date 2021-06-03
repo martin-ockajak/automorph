@@ -1,7 +1,7 @@
 package jsonrpc.util
 
 import jsonrpc.util.ValueOps.asSome
-import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, Type}
 
 /**
  * Data type reflection tools.
@@ -11,7 +11,7 @@ import scala.quoted.{Expr, Quotes, Type, quotes}
 final class Reflection(val quotes: Quotes):
 
   // All meta-programming data types must are path-dependent on the compiler-generated quotation context
-  import quotes.reflect.{Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree, asTerm}
+  import quotes.reflect.{asTerm, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
 
   final case class QuotedParameter(
     name: String,
@@ -152,9 +152,7 @@ final class Reflection(val quotes: Quotes):
   private def availableSymbol(symbol: Symbol): Boolean = !matchesFlags(symbol.flags, unavailableMemberFlags)
 
   private def matchesFlags(flags: Flags, matchingFlags: Seq[Flags]): Boolean =
-    matchingFlags.foldLeft(false) { (result, current) =>
-      result | flags.is(current)
-    }
+    matchingFlags.foldLeft(false)((result, current) => result | flags.is(current))
 
 final case class Parameter(
   name: String,
@@ -176,7 +174,8 @@ final case class Method(
   documentation: Option[String]
 ):
 
-  def signature: String =
+  /** Method signature. */
+  lazy val signature: String =
     val typeParametersText = typeParameters.map { typeParameter =>
       s"${typeParameter.name}"
     } match
