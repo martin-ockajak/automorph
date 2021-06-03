@@ -38,12 +38,13 @@ case object ApiReflection:
    * @return true if the context type is empty, false otherwise
    */
   def contextEmpty[Context: Type](quotes: Quotes): Boolean =
-    import quotes.reflect.TypeRepr
+    import quotes.reflect.{AppliedType, TypeRepr}
     given Quotes = quotes
 
-    TypeRepr.of[Context] <:< TypeRepr.of[Empty[?]] ||
-      TypeRepr.of[Context] =:= TypeRepr.of[None.type] ||
-      TypeRepr.of[Context] =:= TypeRepr.of[Unit]
+    val contextType = TypeRepr.of[Context]
+    contextType match
+      case appliedType: AppliedType => appliedType.tycon =:= TypeRepr.of[Empty]
+      case _                        => contextType =:= TypeRepr.of[None.type] || contextType =:= TypeRepr.of[Unit]
 
   /**
    * Determine whether a method is a valid API method.
