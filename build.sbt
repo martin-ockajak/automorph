@@ -1,11 +1,13 @@
+// Project
 ThisBuild / version := "0.1.0"
-ThisBuild / scalaVersion := "3.0.0"
 
 lazy val root = project.in(file(".")).aggregate(
   spi,
+  test,
   core
 ).dependsOn(
   spi,
+  test % Test,
   core
 ).settings(
   name := "json-rpc",
@@ -25,17 +27,24 @@ lazy val root = project.in(file(".")).aggregate(
     // Transport
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.5",
 
-    // Test
-    "org.scalatest" %% "scalatest" % "3.2.9" % Test,
-    "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0" % Test,
-    "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
   )
 )
 
+// Dependencies
 lazy val spi = project
 
+lazy val test = project.settings(
+  libraryDependencies ++= Seq(
+    // Test
+    "org.scalatest" %% "scalatest" % "3.2.9",
+    "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0",
+    "ch.qos.logback" % "logback-classic" % "1.2.3"
+  )
+)
+
 lazy val core = project.dependsOn(
-  spi
+  spi,
+  test % Test
 ).settings(
   libraryDependencies ++= Seq(
     // Utilities
@@ -44,6 +53,8 @@ lazy val core = project.dependsOn(
   )
 )
 
+// Compile
+ThisBuild / scalaVersion := "3.0.0"
 ThisBuild / scalacOptions ++= Seq(
   "-source",
   "future-migration",
