@@ -3,7 +3,7 @@ package jsonrpc
 import java.beans.IntrospectionException
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.core.EncodingOps.toArraySeq
+import jsonrpc.util.EncodingOps.toArraySeq
 import jsonrpc.core.Protocol.{Id, MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Errors, Protocol, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMacros, MethodHandle}

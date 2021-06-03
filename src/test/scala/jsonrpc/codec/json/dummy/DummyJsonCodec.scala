@@ -1,6 +1,6 @@
 package jsonrpc.codec.json.dummy
 
-import jsonrpc.core.EncodingOps.toArraySeq
+import jsonrpc.util.EncodingOps.toArraySeq
 import jsonrpc.spi.{Codec, Message}
 
 import scala.collection.immutable.ArraySeq

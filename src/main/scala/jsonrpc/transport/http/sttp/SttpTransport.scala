@@ -1,6 +1,6 @@
 package jsonrpc.transport.http.sttp
 
-import jsonrpc.core.EncodingOps.asArraySeq
+import jsonrpc.util.EncodingOps.asArraySeq
 import jsonrpc.spi.{Effect, Transport}
 import scala.collection.immutable.ArraySeq
 import sttp.client3.{Identity, PartialRequest, Request, SttpApi, SttpBackend}

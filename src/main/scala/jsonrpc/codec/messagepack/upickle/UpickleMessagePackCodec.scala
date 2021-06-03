@@ -1,7 +1,7 @@
 package jsonrpc.codec.messagepack.upickle
 
 import jsonrpc.codec.messagepack.upickle.UpickleMessagePackCodec.{fromSpi, Message, MessageError}
-import jsonrpc.core.EncodingOps.asArraySeq
+import jsonrpc.util.EncodingOps.asArraySeq
 import jsonrpc.spi
 import jsonrpc.spi.Codec
 import scala.collection.immutable.ArraySeq

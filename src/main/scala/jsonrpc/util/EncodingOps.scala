@@ -1,12 +1,12 @@
-package jsonrpc.core
+package jsonrpc.util
 
 import java.io.{ByteArrayOutputStream, InputStream}
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
+import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.Future
 import scala.util.{Success, Try}
-import scala.annotation.tailrec
 
 case object EncodingOps:
 
