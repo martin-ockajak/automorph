@@ -41,9 +41,9 @@ case object ApiReflection:
     import quotes.reflect.TypeRepr
     given Quotes = quotes
 
-    !(TypeRepr.of[Context] <:< TypeRepr.of[Empty[?]] ||
+    TypeRepr.of[Context] <:< TypeRepr.of[Empty[?]] ||
       TypeRepr.of[Context] =:= TypeRepr.of[None.type] ||
-      TypeRepr.of[Context] =:= TypeRepr.of[Unit])
+      TypeRepr.of[Context] =:= TypeRepr.of[Unit]
 
   /**
    * Determine whether a method is a valid API method.
@@ -67,7 +67,7 @@ case object ApiReflection:
       s"Bound API method '$signature' must not have type parameters".asLeft
     else if !method.available then
       s"Bound API method '$signature' must be callable at runtime".asLeft
-    else if contextEmpty[Context](ref.quotes) && method.parameters.lastOption.map { parameters =>
+    else if !contextEmpty[Context](ref.quotes) && method.parameters.lastOption.map { parameters =>
         !(parameters.last.dataType =:= TypeRepr.of[Context])
       }.getOrElse(true)
     then

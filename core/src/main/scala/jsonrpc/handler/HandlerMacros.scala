@@ -178,7 +178,7 @@ case object HandlerMacros:
             val argumentNodes = arguments.head.asInstanceOf[Term]
             val argumentIndex = Literal(IntConstant(offset + index))
             val argumentNode = callTerm(ref.quotes, argumentNodes, "apply", List.empty, List(List(argumentIndex)))
-            if ApiReflection.contextEmpty[Context](ref.quotes) && (offset + index) == lastArgumentIndex then
+            if !ApiReflection.contextEmpty[Context](ref.quotes) && (offset + index) == lastArgumentIndex then
               arguments.last.asInstanceOf[Term]
             else
               callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
