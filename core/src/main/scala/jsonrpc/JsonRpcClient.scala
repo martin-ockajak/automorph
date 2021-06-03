@@ -8,7 +8,7 @@ import jsonrpc.spi.{Codec, Effect, Message, MessageError, Transport}
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
 import jsonrpc.util.{CannotEqual, Empty}
 import scala.collection.immutable.ArraySeq
-import scala.util.{Failure, Random, Success, Try}
+import scala.util.{Random, Try}
 
 /**
  * JSON-RPC client layer.
@@ -158,24 +158,28 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
     decodeResult: Node => R
   ): Outcome[R] =
     // Deserialize response
-    Try(codec.deserialize(rawResponse)) match
-      case Success(formedResponse) =>
+    Try(codec.deserialize(rawResponse)).fold(
+      error => raiseError(ParseErrorException("Invalid response format", error), formedRequest),
+      formedResponse =>
         // Validate response
         logger.trace(s"Received JSON-RPC message:\n${codec.format(formedResponse)}")
-        Try(Response(formedResponse)) match
-          case Success(validResponse) => validResponse.value match
-              case Right(result) =>
-                // Decode result
-                Try(decodeResult(result)) match
-                  case Success(result) =>
+        Try(Response(formedResponse)).fold(
+          error => raiseError(error, formedRequest),
+          validResponse =>
+            validResponse.value.fold(
+              // Raise error
+              error => raiseError(Protocol.errorException(error.code, error.message), formedRequest),
+              // Decode result
+              result =>
+                Try(decodeResult(result)).fold(
+                  error => raiseError(error, formedRequest),
+                  result =>
                     logger.info(s"Performed JSON-RPC request", formedRequest.properties)
                     effect.pure(result)
-                  case Failure(error) => raiseError(error, formedRequest)
-              case Left(error) =>
-                // Raise error
-                raiseError(Protocol.errorException(error.code, error.message), formedRequest)
-          case Failure(error) => raiseError(error, formedRequest)
-      case Failure(error) => raiseError(ParseErrorException("Invalid response format", error), formedRequest)
+                )
+            )
+        )
+    )
 
   /**
    * Serialize JSON-RPC message.
@@ -185,9 +189,10 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    */
   private def serialize(formedMessage: Message[Node]): Outcome[ArraySeq.ofByte] =
     logger.trace(s"Sending JSON-RPC message:\n${codec.format(formedMessage)}")
-    Try(codec.serialize(formedMessage)) match
-      case Success(message) => effect.pure(message)
-      case Failure(error)   => raiseError(ParseErrorException("Invalid message format", error), formedMessage)
+    Try(codec.serialize(formedMessage)).fold(
+      error => raiseError(ParseErrorException("Invalid message format", error), formedMessage),
+      message => effect.pure(message)
+    )
 
   /**
    * Create an error effect for a request.
