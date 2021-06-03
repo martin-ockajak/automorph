@@ -26,7 +26,7 @@ lazy val util = project.settings(
 )
 lazy val spi = project
 lazy val test = project.dependsOn(
-  util, spi
+  spi
 ).settings(
   libraryDependencies ++= Seq(
     // Test

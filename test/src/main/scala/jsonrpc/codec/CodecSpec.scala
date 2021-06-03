@@ -1,13 +1,14 @@
 package jsonrpc.codec
 
 import base.BaseSpec
+import java.nio.charset.StandardCharsets
 import jsonrpc.spi.Message.{Params, version}
 import jsonrpc.spi.{Codec, Message, MessageError}
-import jsonrpc.util.EncodingOps.toArraySeq
-import jsonrpc.util.ValueOps.{asRight, asSome}
 import jsonrpc.{Enum, Record, Structure}
 
 trait CodecSpec extends BaseSpec:
+
+  private lazy val charset = StandardCharsets.UTF_8
 
   type Node
   type CodecType <: Codec[Node]
@@ -23,16 +24,16 @@ trait CodecSpec extends BaseSpec:
       argument <- messageArguments
       result <- messageResults
     yield Message(
-      version.asSome,
-      "test".asRight.asSome,
+      Some(version),
+      Some(Right("test")),
       None,
-      argument.asSome,
-      result.asSome,
-      MessageError(
-        0.asSome,
-        "Test error".asSome,
+      Some(argument),
+      Some(result),
+      Some(MessageError(
+        Some(0),
+        Some("Test error"),
         None
-      ).asSome
+      ))
     )
 
   val record = Record(
@@ -40,19 +41,19 @@ trait CodecSpec extends BaseSpec:
     boolean = true,
     0,
     1,
-    2.asSome,
+    Some(2),
     3,
     None,
     6.7,
-    Enum.One.asSome,
+    Some(Enum.One),
     List("x", "y", "z"),
     Map(
       "foo" -> 0,
       "bar" -> 1
     ),
-    Structure(
+    Some(Structure(
       "test"
-    ).asSome,
+    )),
     None
   )
 
@@ -68,7 +69,7 @@ trait CodecSpec extends BaseSpec:
       messages.foreach { message =>
         val formattedMessage = codec.format(message)
         val rawMessage = codec.serialize(message)
-        formattedMessage.toArraySeq.size.should(be > rawMessage.size)
+        formattedMessage.getBytes(charset).size.should(be > rawMessage.size)
       }
     }
   }
