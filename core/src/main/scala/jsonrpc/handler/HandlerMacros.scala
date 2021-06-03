@@ -2,8 +2,8 @@ package jsonrpc.handler
 
 import java.beans.IntrospectionException
 import jsonrpc.spi.{Codec, Effect}
-import jsonrpc.util.ValueOps.{asLeft, asRight}
-import jsonrpc.util.{Empty, Method, Reflection}
+import jsonrpc.core.ApiReflection
+import jsonrpc.util.{Method, Reflection}
 import scala.collection.immutable.ArraySeq
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
@@ -27,7 +27,7 @@ final case class MethodHandle[Node, Outcome[_], Context](
   parameterTypes: Seq[String]
 )
 
-object HandlerMacros:
+case object HandlerMacros:
 
   /**
    * Generate JSON-RPC bindings for all valid public methods of an API type.
@@ -58,7 +58,7 @@ object HandlerMacros:
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = detectApiMethods[Outcome, Context](ref, TypeTree.of[ApiType])
+    val apiMethods = ApiReflection.detectApiMethods[Outcome, Context](ref, TypeTree.of[ApiType])
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethods = apiMethods.flatMap(_.swap.toOption)
     if invalidMethods.nonEmpty then
@@ -78,60 +78,6 @@ object HandlerMacros:
     '{
       $methodHandles.toMap[String, MethodHandle[Node, Outcome, Context]]
     }
-
-  private def detectApiMethods[Outcome[_]: Type, Context: Type](
-    ref: Reflection,
-    apiType: ref.quotes.reflect.TypeTree
-  ): Seq[Either[(String, String), ref.QuotedMethod]] =
-    import ref.quotes.reflect.{TypeRepr, TypeTree}
-    given Quotes = ref.quotes
-
-    val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap {
-      baseType => ref.methods(baseType).filter(_.public).map(_.name)
-    }.toSet
-    val methods = ref.methods(apiType.tpe).filter(_.public).filter {
-      method => !baseMethodNames.contains(method.symbol.name)
-    }
-    methods.map(method => validateApiMethod(ref, apiType, method))
-
-  private def validateApiMethod[Outcome[_]: Type, Context: Type](
-    ref: Reflection,
-    apiType: ref.quotes.reflect.TypeTree,
-    method: ref.QuotedMethod
-  ): Either[(String, String), ref.QuotedMethod] =
-    import ref.quotes.reflect.{AppliedType, LambdaType, NamedType, TypeRepr}
-
-    val signature = s"${apiType.show}.${method.lift.signature}"
-    val validatedMethod =
-      if method.typeParameters.nonEmpty then
-        s"Bound API method '$signature' must not have type parameters".asLeft
-      else if !method.available then
-        s"Bound API method '$signature' must be callable at runtime".asLeft
-      else if contextSupplied[Context](ref.quotes) && method.parameters.lastOption.map { parameters =>
-          !(parameters.last.dataType =:= TypeRepr.of[Context])
-        }.getOrElse(true)
-      then
-        s"Bound API method '$signature' must accept the specified request context type '${TypeRepr.of[Context].show}' as its last parameter".asLeft
-      else
-        TypeRepr.of[Outcome] match
-          case lambdaType: LambdaType =>
-            if method.resultType match
-                case appliedType: AppliedType => !(appliedType.tycon =:= lambdaType)
-                case _                        => false
-            then
-              s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'".asLeft
-            else
-              method.asRight
-          case _ => method.asRight
-    validatedMethod.swap.map(error => method.name -> error).swap
-
-  private def contextSupplied[Context: Type](quotes: Quotes): Boolean =
-    import quotes.reflect.TypeRepr
-    given Quotes = quotes
-
-    !(TypeRepr.of[Context] <:< TypeRepr.of[Empty[?]] ||
-      TypeRepr.of[Context] =:= TypeRepr.of[None.type] ||
-      TypeRepr.of[Context] =:= TypeRepr.of[Unit])
 
   private def generateMethodHandle[
     Node: Type,
@@ -232,7 +178,7 @@ object HandlerMacros:
             val argumentNodes = arguments.head.asInstanceOf[Term]
             val argumentIndex = Literal(IntConstant(offset + index))
             val argumentNode = callTerm(ref.quotes, argumentNodes, "apply", List.empty, List(List(argumentIndex)))
-            if contextSupplied[Context](ref.quotes) && (offset + index) == lastArgumentIndex then
+            if ApiReflection.contextSupplied[Context](ref.quotes) && (offset + index) == lastArgumentIndex then
               arguments.last.asInstanceOf[Term]
             else
               callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))

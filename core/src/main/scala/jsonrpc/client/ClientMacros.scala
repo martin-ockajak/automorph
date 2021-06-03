@@ -4,4 +4,4 @@
 //import jsonrpc.util.Reflection
 //import scala.quoted.{quotes, Expr, Quotes, Type}
 //
-//object ClientMacros:
+//case object ClientMacros:
