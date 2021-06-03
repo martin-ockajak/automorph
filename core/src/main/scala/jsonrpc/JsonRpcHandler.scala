@@ -12,7 +12,7 @@ import jsonrpc.util.EncodingOps.toArraySeq
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import jsonrpc.util.{CannotEqual, Empty}
 import scala.collection.immutable.ArraySeq
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 /**
  * JSON-RPC request handler layer.
@@ -169,11 +169,12 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     // Deserialize request
     Try(codec.deserialize(rawRequest)).fold(
       error =>
-        val virtualMessage = Message[Node](None, unknownId.asSome, None, None, None, None)
-        errorResponse(ParseErrorException("Invalid request format", error), virtualMessage)
-      ,
-      // Validate request
+        errorResponse(
+          ParseErrorException("Invalid request format", error),
+          Message[Node](None, unknownId.asSome, None, None, None, None)
+        ),
       formedRequest =>
+        // Validate request
         logger.trace(s"Received JSON-RPC message:\n${codec.format(formedRequest)}")
         Try(Request(formedRequest)).fold(
           error => errorResponse(error, formedRequest),
@@ -198,13 +199,18 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   ): Outcome[Option[ArraySeq.ofByte]] =
     logger.debug(s"Processing JSON-RPC request", formedRequest.properties)
     methodBindings.get(validRequest.method).map { methodHandle =>
-      // Invoke method
+      // Extract arguments
       val contextSupplied =
         context.isInstanceOf[Empty[?]] || context.isInstanceOf[None.type] || context.isInstanceOf[Unit]
       val arguments = extractArguments(validRequest, contextSupplied, methodHandle)
-      Try(effect.either(methodHandle.function(arguments, context))) match
-        case Success(outcome) => effect.flatMap(
+
+      // Invoke method
+      Try(effect.either(methodHandle.function(arguments, context))).fold(
+        error => errorResponse(error, formedRequest),
+        outcome =>
+          effect.flatMap(
             outcome,
+            // Process result
             _.fold(
               error => errorResponse(error, formedRequest),
               result =>
@@ -216,7 +222,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
                 }.getOrElse(effect.pure(None))
             )
           )
-        case Failure(error) => errorResponse(error, formedRequest)
+      )
     }.getOrElse {
       errorResponse(
         MethodNotFoundException(s"Method not found: ${validRequest.method}", None.orNull),
@@ -240,15 +246,16 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     methodHandle: MethodHandle[Node, Outcome, Context]
   ): Seq[Node] =
     val parameters = methodHandle.paramNames.dropRight(if contextSupplied then 1 else 0)
-    validRequest.params match
-      case Left(arguments) =>
+    validRequest.params.fold(
+      arguments =>
         // Arguments by position
         if arguments.size < parameters.size then
           throw IllegalArgumentException(s"Missing arguments: ${parameters.drop(arguments.size)}")
         else if arguments.size > parameters.size then
           throw IllegalArgumentException(s"Redundant arguments: ${parameters.size - arguments.size}")
         arguments
-      case Right(namedArguments) =>
+      ,
+      namedArguments =>
         // Arguments by name
         val arguments = parameters.flatMap(namedArguments.get)
         if arguments.size < parameters.size then
@@ -256,13 +263,13 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
         else if arguments.size > parameters.size then
           throw IllegalArgumentException(s"Redundant arguments: ${namedArguments.keys.filterNot(parameters.contains)}")
         arguments
+    )
 
   /**
    * Create an error response for a request.
    *
    * @param error exception
    * @param formedRequest formed request
-   * @param requestId request identifier
    * @return error response if applicable
    */
   private def errorResponse(error: Throwable, formedRequest: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
@@ -292,7 +299,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
       message => effect.pure(message.asSome)
     )
 
-  override def toString =
+  override def toString: String =
     val codecName = codec.className
     val effectName = effect.className
     val boundMethods = methodBindings.size

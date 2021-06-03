@@ -167,10 +167,9 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
           error => raiseError(error, formedRequest),
           validResponse =>
             validResponse.value.fold(
-              // Raise error
               error => raiseError(Protocol.errorException(error.code, error.message), formedRequest),
-              // Decode result
               result =>
+                // Decode result
                 Try(decodeResult(result)).fold(
                   error => raiseError(error, formedRequest),
                   result =>
