@@ -8,7 +8,7 @@ import zio.RIO
 import zio.ZEnv
 import zio.FiberFailure
 
-class ZioSpec extends EffectSpec[[T] =>> RIO[ZEnv, T]]:
+class ZioEffectSpec extends EffectSpec[[T] =>> RIO[ZEnv, T]]:
   def effect: Effect[[T] =>> RIO[ZEnv, T]] = ZioEffect[ZEnv]()
 
   def run[T](outcome: RIO[ZEnv, T]): Either[Throwable, T] = Try(Runtime.default.unsafeRunTask(outcome)).toEither

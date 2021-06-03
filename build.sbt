@@ -4,13 +4,17 @@ ThisBuild / version := "0.1.0"
 
 lazy val root = project.in(file(".")).aggregate(
   core,
+  integration,
+
   upickle,
   circe,
+
   zio,
   monix,
   cats,
-  sttp,
-  integration
+  scalaz,
+
+  sttp
 ).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server"
@@ -89,6 +93,14 @@ lazy val cats = (project in file("effect/cats")).dependsOn(
   name := "json-rpc-cats",
   libraryDependencies ++= Seq(
     "org.typelevel" %% "cats-effect" % "3.1.1"
+  )
+)
+lazy val scalaz = (project in file("effect/scalaz")).dependsOn(
+  util, spi, test % Test
+).settings(
+  name := "json-rpc-scalaz",
+  libraryDependencies ++= Seq(
+    "org.scalaz" %% "scalaz-effect" % "7.4.0-M7"
   )
 )
 

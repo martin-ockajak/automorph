@@ -6,7 +6,7 @@ import scala.util.Try
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 
-class CatsSpec extends EffectSpec[IO] :
+class CatsEffectSpec extends EffectSpec[IO] :
   def effect: Effect[IO] = CatsEffect()
 
   def run[T](outcome: IO[T]): Either[Throwable, T] = Try(outcome.unsafeRunSync()).toEither
