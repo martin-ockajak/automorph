@@ -13,7 +13,7 @@ lazy val root = project.in(file(".")).aggregate(
 ).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server"
-)
+).enablePlugins(ScalaUnidocPlugin)
 
 // Dependencies
 
@@ -116,3 +116,7 @@ ThisBuild / scalacOptions ++= Seq(
   "-pagewidth",
   "120"
 )
+
+// Doc
+ThisBuild / autoAPIMappings := true
+
