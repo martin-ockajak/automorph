@@ -16,16 +16,17 @@ lazy val root = project.in(file(".")).aggregate(
   description := "JSON-RPC client & server"
 ).enablePlugins(ScalaUnidocPlugin)
 
+
 // Dependencies
 
-// Basic
+// Core
+lazy val spi = project
 lazy val util = project.settings(
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-api" % "1.7.30",
     "com.lihaoyi" %% "pprint" % "0.6.6",
   )
 )
-lazy val spi = project
 lazy val test = project.dependsOn(
   spi
 ).settings(
