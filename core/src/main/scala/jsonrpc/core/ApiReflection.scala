@@ -42,9 +42,9 @@ case object ApiReflection:
     given Quotes = quotes
 
     val contextType = TypeRepr.of[Context]
-    contextType match
-      case appliedType: AppliedType => appliedType.tycon =:= TypeRepr.of[Empty]
-      case _                        => contextType =:= TypeRepr.of[None.type] || contextType =:= TypeRepr.of[Unit]
+    contextType <:< TypeRepr.of[Empty[?]] ||
+      contextType =:= TypeRepr.of[None.type] ||
+      contextType =:= TypeRepr.of[Unit]
 
   /**
    * Determine whether a method is a valid API method.
