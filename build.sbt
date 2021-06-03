@@ -18,7 +18,12 @@ lazy val root = project.in(file(".")).aggregate(
 // Dependencies
 
 // Basic
-lazy val util = project
+lazy val util = project.settings(
+  libraryDependencies ++= Seq(
+    "org.slf4j" % "slf4j-api" % "1.7.30",
+    "com.lihaoyi" %% "pprint" % "0.6.6",
+  )
+)
 lazy val spi = project
 lazy val test = project.dependsOn(
   util, spi
@@ -32,12 +37,6 @@ lazy val test = project.dependsOn(
 )
 lazy val core = project.dependsOn(
   util, spi, test % Test
-).settings(
-  libraryDependencies ++= Seq(
-    // Utilities
-    "org.slf4j" % "slf4j-api" % "1.7.30",
-    "com.lihaoyi" %% "pprint" % "0.6.6",
-  )
 )
 
 // Codec
