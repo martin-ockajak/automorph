@@ -28,6 +28,11 @@
 //  )
 //
 //  "" - {
+//    "Encode / Decode" in {
+//      val encodedValue = codec.encode(record)
+//      val decodedValue = codec.decode[Record](encodedValue)
+//      decodedValue.should(equal(record))
+//    }
 //    "Deserialize" in {
 //      val x = codec.deserialize(codec.serialize(messages.head))
 //      println(messages.head)
