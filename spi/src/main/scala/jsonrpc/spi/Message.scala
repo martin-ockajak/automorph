@@ -47,6 +47,9 @@ object Message:
   /** Request parameters type. */
   type Params[Node] = Either[List[Node], Map[String, Node]]
 
+  /** Supported JSON-RPC protocol version. */
+  val version = "2.0"
+
 /**
  * JSON-RPC protocol message error structure.
  *

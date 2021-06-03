@@ -2,13 +2,10 @@
 ThisBuild / version := "0.1.0"
 
 lazy val root = project.in(file(".")).aggregate(
-  spi,
-  test,
   core
 ).dependsOn(
-  spi,
-  test % Test,
-  core
+  core,
+  test % Test
 ).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server",
@@ -31,9 +28,14 @@ lazy val root = project.in(file(".")).aggregate(
 )
 
 // Dependencies
+lazy val util = project
+
 lazy val spi = project
 
-lazy val test = project.settings(
+lazy val test = project.dependsOn(
+  util,
+  spi
+).settings(
   libraryDependencies ++= Seq(
     // Test
     "org.scalatest" %% "scalatest" % "3.2.9",
@@ -43,6 +45,7 @@ lazy val test = project.settings(
 )
 
 lazy val core = project.dependsOn(
+  util,
   spi,
   test % Test
 ).settings(

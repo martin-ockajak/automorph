@@ -67,9 +67,6 @@ case object Protocol:
     case _ if code < ErrorType.ApplicationError.code => InternalErrorException(message, None.orNull)
     case _                                           => RuntimeException(message, None.orNull)
 
-  /** Supported JSON-RPC protocol version. */
-  val version = "2.0"
-
   /**
    * Return specified mandatory property value or throw an exception if it is missing.
    *

@@ -1,10 +1,9 @@
 package jsonrpc.codec
 
 import base.BaseSpec
-import jsonrpc.core.Protocol
-import jsonrpc.util.EncodingOps.toArraySeq
-import jsonrpc.spi.Message.Params
+import jsonrpc.spi.Message.{Params, version}
 import jsonrpc.spi.{Codec, Message, MessageError}
+import jsonrpc.util.EncodingOps.toArraySeq
 import jsonrpc.util.ValueOps.{asRight, asSome}
 import jsonrpc.{Enum, Record, Structure}
 
@@ -24,13 +23,13 @@ trait CodecSpec extends BaseSpec:
       argument <- messageArguments
       result <- messageResults
     yield Message(
-      Protocol.version.asSome,
+      version.asSome,
       "test".asRight.asSome,
       None,
       argument.asSome,
       result.asSome,
       MessageError(
-        Protocol.ErrorType.ApplicationError.code.asSome,
+        0.asSome,
         "Test error".asSome,
         None
       ).asSome
