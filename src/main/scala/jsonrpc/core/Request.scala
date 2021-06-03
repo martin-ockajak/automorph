@@ -2,7 +2,7 @@ package jsonrpc.core
 
 import jsonrpc.core.Protocol.{ErrorType, InvalidRequestException}
 import jsonrpc.spi.Message
-import jsonrpc.spi.Message.Params
+import jsonrpc.spi.Message.{Id, Params}
 import jsonrpc.util.ValueOps.{asRight, asSome}
 
 /**
@@ -16,7 +16,7 @@ import jsonrpc.util.ValueOps.{asRight, asSome}
  * @tparam Node message node representation type
  */
 final case class Request[Node](
-  id: Option[Protocol.Id],
+  id: Option[Id],
   method: String,
   params: Params[Node]
 ):

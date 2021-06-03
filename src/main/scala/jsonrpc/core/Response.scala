@@ -3,7 +3,8 @@ package jsonrpc.core
 import java.io.IOException
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.{ErrorType, InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
-import jsonrpc.spi.{MessageError, Message}
+import jsonrpc.spi.Message.Id
+import jsonrpc.spi.{Message, MessageError}
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
 
 /**
@@ -15,7 +16,7 @@ import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
  * @tparam Node message node representation type
  */
 final case class Response[Node](
-  id: Protocol.Id,
+  id: Id,
   value: Either[ResponseError[Node], Node]
 ):
 

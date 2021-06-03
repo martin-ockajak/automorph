@@ -11,9 +11,6 @@ import jsonrpc.util.ValueOps.{asRight, asOption, asSome}
  */
 case object Protocol:
 
-  /** Message identifier type. */
-  type Id = Either[BigDecimal, String]
-
   /** JSON-RPC parse error. */
   final case class ParseErrorException(
     message: String,

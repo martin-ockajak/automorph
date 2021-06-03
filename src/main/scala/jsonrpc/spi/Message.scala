@@ -41,6 +41,9 @@ final case class Message[Node](
       }
 
 object Message:
+  /** Message identifier type. */
+  type Id = Either[BigDecimal, String]
+
   /** Request parameters type. */
   type Params[Node] = Either[List[Node], Map[String, Node]]
 
