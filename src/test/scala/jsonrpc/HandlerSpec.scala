@@ -1,14 +1,13 @@
-package jsonrpc.handler
+package jsonrpc
 
 import base.BaseSpec
-import jsonrpc.{ApiImpl, JsonRpcHandler, SimpleApi}
 import jsonrpc.JsonRpcHandler.NoContext
 import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
-import jsonrpc.effect.standard.FutureEffect
-import jsonrpc.effect.standard.NoEffect
-import scala.concurrent.ExecutionContext.Implicits.global
+import jsonrpc.effect.standard.{FutureEffect, NoEffect}
+import jsonrpc.{ApiImpl, JsonRpcHandler, SimpleApi}
 import scala.collection.immutable.ArraySeq
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class HandlerSpec extends BaseSpec:
 

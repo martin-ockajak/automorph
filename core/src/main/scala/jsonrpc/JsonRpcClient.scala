@@ -5,8 +5,8 @@ import jsonrpc.core.{Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Codec, Effect, Message, MessageError, Transport}
-import jsonrpc.util.{CannotEqual, Empty}
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
+import jsonrpc.util.{CannotEqual, Empty}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Random, Success, Try}
 

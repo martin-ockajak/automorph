@@ -1,8 +1,15 @@
-lazy val root = project.in(file(".")).settings(
+ThisBuild / version := "0.1.0"
+ThisBuild / scalaVersion := "3.0.0"
+
+lazy val root = project.in(file(".")).aggregate(
+  spi,
+  core
+).dependsOn(
+  spi,
+  core
+).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server",
-  version := "0.1.0",
-  scalaVersion := "3.0.0",
   libraryDependencies ++= Seq(
     // Format
     "com.lihaoyi" %% "upickle" % "1.3.15",
@@ -18,10 +25,6 @@ lazy val root = project.in(file(".")).settings(
     // Transport
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.5",
 
-    // Utilities
-    "org.slf4j" % "slf4j-api" % "1.7.30",
-    "com.lihaoyi" %% "pprint" % "0.6.6",
-
     // Test
     "org.scalatest" %% "scalatest" % "3.2.9" % Test,
     "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0" % Test,
@@ -29,7 +32,19 @@ lazy val root = project.in(file(".")).settings(
   )
 )
 
-scalacOptions ++= Seq(
+lazy val spi = project
+
+lazy val core = project.dependsOn(
+  spi
+).settings(
+  libraryDependencies ++= Seq(
+    // Utilities
+    "org.slf4j" % "slf4j-api" % "1.7.30",
+    "com.lihaoyi" %% "pprint" % "0.6.6",
+  )
+)
+
+ThisBuild / scalacOptions ++= Seq(
   "-source",
   "future-migration",
   "-new-syntax",

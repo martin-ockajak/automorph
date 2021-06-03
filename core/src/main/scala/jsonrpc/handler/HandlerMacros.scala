@@ -3,10 +3,9 @@ package jsonrpc.handler
 import java.beans.IntrospectionException
 import jsonrpc.spi.{Codec, Effect}
 import jsonrpc.util.ValueOps.{asLeft, asRight}
-import jsonrpc.util.{Method, Reflection}
+import jsonrpc.util.{Empty, Method, Reflection}
 import scala.collection.immutable.ArraySeq
 import scala.quoted.{Expr, Quotes, Type, quotes}
-import jsonrpc.JsonRpcHandler.NoContext
 
 /**
  * Bound API method handle.
@@ -130,7 +129,7 @@ object HandlerMacros:
     import quotes.reflect.TypeRepr
     given Quotes = quotes
 
-    !(TypeRepr.of[Context] =:= TypeRepr.of[NoContext] ||
+    !(TypeRepr.of[Context] <:< TypeRepr.of[Empty[?]] ||
       TypeRepr.of[Context] =:= TypeRepr.of[None.type] ||
       TypeRepr.of[Context] =:= TypeRepr.of[Unit])
 
