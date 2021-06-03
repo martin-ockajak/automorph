@@ -8,7 +8,6 @@ import jsonrpc.spi.{Codec, Effect, Message, MessageError, Transport}
 import jsonrpc.util.{CannotEqual, Empty}
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
 import scala.collection.immutable.ArraySeq
-import scala.deriving.Mirror
 import scala.util.{Failure, Random, Success, Try}
 
 /**
@@ -45,7 +44,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return result value
    */
-  inline def call[A <: Product: Mirror.ProductOf, R](method: String, arguments: A)(using context: Context): Outcome[R] =
+  inline def call[A <: Product, R](method: String, arguments: A)(using context: Context): Outcome[R] =
     performCall(method, encodeArguments(arguments), context, decodeResult[R])
 
   /**
@@ -59,7 +58,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return nothing
    */
-  inline def notify[A <: Product: Mirror.ProductOf](method: String, arguments: A)(using context: Context): Outcome[Unit] =
+  inline def notify[A <: Product](method: String, arguments: A)(using context: Context): Outcome[Unit] =
     performNotify(method, encodeArguments(arguments), context)
 
   /**
@@ -77,8 +76,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @param arguments request arguments
    * @return encoded request arguments
    */
-  inline def encodeArguments[A <: Product: Mirror.ProductOf](arguments: A): Params[Node] =
-    val mirror = summon[Mirror.Of[A]]
+  inline def encodeArguments[A <: Product](arguments: A): Params[Node] =
     val argumentsNode = codec.encode(arguments)
     codec.decode[Map[String, Node]](argumentsNode).asRight
 
