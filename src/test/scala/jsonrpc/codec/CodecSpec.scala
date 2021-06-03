@@ -2,6 +2,7 @@ package jsonrpc.codec
 
 import base.BaseSpec
 import jsonrpc.core.Protocol
+import jsonrpc.core.EncodingOps.toArraySeq
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Codec, Message, MessageError}
 import jsonrpc.util.ValueOps.{asRight, asSome}
@@ -68,7 +69,7 @@ trait CodecSpec extends BaseSpec:
       messages.foreach { message =>
         val formattedMessage = codec.format(message)
         val rawMessage = codec.serialize(message)
-        formattedMessage.size.should(be > rawMessage.size)
+        formattedMessage.toArraySeq.size.should(be > rawMessage.size)
       }
     }
   }
