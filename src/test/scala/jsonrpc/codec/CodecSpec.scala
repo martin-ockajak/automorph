@@ -67,7 +67,8 @@ trait CodecSpec extends BaseSpec:
     "Format" in {
       messages.foreach { message =>
         val formattedMessage = codec.format(message)
-        formattedMessage.should(not(be(empty)))
+        val rawMessage = codec.serialize(message)
+        formattedMessage.size.should(be > rawMessage.size)
       }
     }
   }
