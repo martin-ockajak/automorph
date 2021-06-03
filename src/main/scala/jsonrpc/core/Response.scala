@@ -1,8 +1,7 @@
 package jsonrpc.core
 
-import java.io.IOException
 import jsonrpc.core.Protocol
-import jsonrpc.core.Protocol.{ErrorType, InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
+import jsonrpc.core.Protocol.{InvalidRequestException, mandatory}
 import jsonrpc.spi.Message.Id
 import jsonrpc.spi.{Message, MessageError}
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
@@ -67,6 +66,6 @@ final case class ResponseError[Node](
 case object ResponseError:
 
   def apply[Node](error: MessageError[Node]): ResponseError[Node] =
-    val code = Protocol.mandatory(error.code, "code")
-    val message = Protocol.mandatory(error.message, "message")
+    val code = mandatory(error.code, "code")
+    val message = mandatory(error.message, "message")
     ResponseError(code, message, error.data)
