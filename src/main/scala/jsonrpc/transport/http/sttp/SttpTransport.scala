@@ -7,7 +7,7 @@ import sttp.client3.{Identity, PartialRequest, Request, SttpApi, SttpBackend}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
- * STTP HTTP transport using AsyncHttpClientFutureBackend.
+ * STTP HTTP transport using the specified STTP backend.
  *
  * @see [[https://sttp.softwaremill.com/en/latest/index.html Documentation]]
  * @param url HTTP endpoint URL
