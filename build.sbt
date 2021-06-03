@@ -7,7 +7,8 @@ lazy val root = project.in(file(".")).aggregate(
   codecCirce,
   effectZio,
   effectMonix,
-  effectCats
+  effectCats,
+  transportSttp
 ).dependsOn(
   core, test % Test, codecUpickle % Test
 ).settings(
@@ -15,10 +16,7 @@ lazy val root = project.in(file(".")).aggregate(
   description := "JSON-RPC client & server",
   libraryDependencies ++= Seq(
     // Format
-    ("com.fasterxml.jackson.module" % "jackson-module-scala" % "2.12.3").cross(CrossVersion.for3Use2_13),
-
-    // Transport
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.5"
+    ("com.fasterxml.jackson.module" % "jackson-module-scala" % "2.12.3").cross(CrossVersion.for3Use2_13)
   )
 )
 
@@ -84,6 +82,15 @@ lazy val effectCats = (project in file("effect/cats")).dependsOn(
 ).settings(
   libraryDependencies ++= Seq(
     "org.typelevel" %% "cats-effect" % "3.1.1"
+  )
+)
+
+// Transport
+lazy val transportSttp = (project in file("transport/sttp")).dependsOn(
+  util, spi, test % Test
+).settings(
+  libraryDependencies ++= Seq(
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.5"
   )
 )
 
