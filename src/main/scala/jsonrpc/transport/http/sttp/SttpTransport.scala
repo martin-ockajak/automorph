@@ -10,7 +10,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * STTP HTTP transport using the specified STTP backend.
  *
  * @see [[https://sttp.softwaremill.com/en/latest/index.html Documentation]]
- * @param url HTTP endpoint URL
+ * @param url endpoint URL
  * @param method HTTP method
  * @param backend STTP backend
  * @param effect effect system plugin
