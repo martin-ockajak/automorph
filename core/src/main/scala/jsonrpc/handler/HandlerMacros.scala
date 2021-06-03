@@ -60,10 +60,10 @@ case object HandlerMacros:
     // Detect and validate public methods in the API type
     val apiMethods = ApiReflection.detectApiMethods[Outcome, Context](ref, TypeTree.of[ApiType])
     val validMethods = apiMethods.flatMap(_.toOption)
-    val invalidMethods = apiMethods.flatMap(_.swap.toOption)
-    if invalidMethods.nonEmpty then
+    val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
+    if invalidMethodErrors.nonEmpty then
       throw new IntrospectionException(
-        s"Failed to bind API methods:\n${invalidMethods.map((_, error) => s"  $error").mkString("\n")}"
+        s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
       )
 
     // Debug prints
@@ -178,7 +178,7 @@ case object HandlerMacros:
             val argumentNodes = arguments.head.asInstanceOf[Term]
             val argumentIndex = Literal(IntConstant(offset + index))
             val argumentNode = callTerm(ref.quotes, argumentNodes, "apply", List.empty, List(List(argumentIndex)))
-            if ApiReflection.contextSupplied[Context](ref.quotes) && (offset + index) == lastArgumentIndex then
+            if ApiReflection.contextEmpty[Context](ref.quotes) && (offset + index) == lastArgumentIndex then
               arguments.last.asInstanceOf[Term]
             else
               callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))

@@ -200,9 +200,8 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     logger.debug(s"Processing JSON-RPC request", formedRequest.properties)
     methodBindings.get(validRequest.method).map { methodHandle =>
       // Extract arguments
-      val contextSupplied =
-        context.isInstanceOf[Empty[?]] || context.isInstanceOf[None.type] || context.isInstanceOf[Unit]
-      val arguments = extractArguments(validRequest, contextSupplied, methodHandle)
+      val contextEmpty = context.isInstanceOf[Empty[?]] || context.isInstanceOf[None.type] || context.isInstanceOf[Unit]
+      val arguments = extractArguments(validRequest, contextEmpty, methodHandle)
 
       // Invoke method
       Try(effect.either(methodHandle.function(arguments, context))).fold(
@@ -236,16 +235,16 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * Optional request context is used as a last method argument.
    *
    * @param validRequest valid request
-   * @param contextSupplied request context supplied
+   * @param contextEmpty request context is empty
    * @param methodHandle bound method handle
    * @return bound method arguments
    */
   private def extractArguments(
     validRequest: Request[Node],
-    contextSupplied: Boolean,
+    contextEmpty: Boolean,
     methodHandle: MethodHandle[Node, Outcome, Context]
   ): Seq[Node] =
-    val parameters = methodHandle.paramNames.dropRight(if contextSupplied then 1 else 0)
+    val parameters = methodHandle.paramNames.dropRight(if contextEmpty then 0 else 1)
     validRequest.params.fold(
       arguments =>
         // Arguments by position
