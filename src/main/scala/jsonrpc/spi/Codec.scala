@@ -1,7 +1,5 @@
 package jsonrpc.spi
 
-import java.io.{InputStream, OutputStream}
-import java.nio.ByteBuffer
 import jsonrpc.spi.Message
 import scala.collection.immutable.ArraySeq
 
