@@ -199,7 +199,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @param error exception
    * @param requestMessage request message
    * @tparam T effectful value type
-   * @return error effect
+   * @return error value
    */
   private def raiseError[T](error: Throwable, requestMessage: Message[Node]): Outcome[T] =
     logger.error(s"Failed to perform JSON-RPC request", error, requestMessage.properties)
