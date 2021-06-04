@@ -47,10 +47,9 @@ case object ClientMacros:
     // Debug prints
     println(validMethods.map(_.lift).map(methodDescription).mkString("\n"))
 
-    // Generate printouts code using the previously generated code
     '{
-      null.asInstanceOf[ApiType]
-    }
+      null
+    }.asInstanceOf[Expr[ApiType]]
 
   private def methodDescription(method: Method): String =
     val documentation = method.documentation.map(_ + "\n").getOrElse("")

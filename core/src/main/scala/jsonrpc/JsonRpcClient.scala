@@ -70,7 +70,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam T remote API type
    * @return remote API proxy instance
    */
-  inline def bind[T]: T = ClientMacros.bind(codec, effect)
+  inline def bind[T <: AnyRef]: T = ClientMacros.bind[Node, CodecType, Outcome, Context, T](codec, effect)
 
   /**
    * Encode request arguments by name.

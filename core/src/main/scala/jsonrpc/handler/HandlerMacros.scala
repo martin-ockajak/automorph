@@ -73,8 +73,6 @@ case object HandlerMacros:
     val methodHandles = Expr.ofSeq(validMethods.map { method =>
       generateMethodHandle[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
     })
-
-    // Generate printouts code using the previously generated code
     '{
       $methodHandles.toMap[String, MethodHandle[Node, Outcome, Context]]
     }
