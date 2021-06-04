@@ -28,6 +28,8 @@ class HandlerSpec extends BaseSpec:
         client.bind[Api]
         (0 == 0).shouldBe(true)
 
+
+
       }
     }
   }
