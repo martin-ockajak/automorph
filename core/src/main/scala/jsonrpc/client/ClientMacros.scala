@@ -34,7 +34,7 @@ case object ClientMacros:
     codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]]
   )(using quotes: Quotes): Expr[ApiType] =
-    import ref.quotes.reflect.{asTerm, TypeRepr, TypeTree}
+    import ref.quotes.reflect.{asTerm, Printer, TypeRepr, TypeTree}
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -48,6 +48,15 @@ case object ClientMacros:
 
     // Debug prints
     println(validMethods.map(_.lift).map(methodDescription).mkString("\n"))
+
+    val proxy = '{
+      new Runnable:
+        def run(): Unit = ()
+    }
+    println(proxy.asTerm.show(using Printer.TreeCode))
+    println(proxy.asTerm)
+    // TypeDef($anon,Template(DefDef(<init>,List(List()),TypeTree[TypeRef(TermRef(ThisType(TypeRef(NoPrefix,module class <root>)),object scala),Unit)],EmptyTree),List(Apply(Select(New(TypeTree[TypeRef(TermRef(ThisType(TypeRef(NoPrefix,module class java)),object lang),Object)]),<init>),List()), Ident(Runnable)),ValDef(_,EmptyTree,EmptyTree),List(DefDef(run,List(List()),Ident(Unit),Literal(Constant(())))))),
+    // Typed(Apply(Select(New(Ident($anon)),<init>),List()),TypeTree[TypeRef(TermRef(ThisType(TypeRef(NoPrefix,module class java)),object lang),Runnable)])
 
     '{
       null
