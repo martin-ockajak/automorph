@@ -18,11 +18,11 @@ import scala.util.{Random, Try}
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Create a new JSON-RPC client using the specified `codec`, `effect` and 'transport' plugins with defined request 'Context' type.
- * @param codec data format codec plugin
+ * @param codec message format codec plugin
  * @param effect effect system plugin
  * @param transport message transport plugin
- * @tparam Node data format node representation type
- * @tparam CodecType data format codec plugin type
+ * @tparam Node message format node representation type
+ * @tparam CodecType message format codec plugin type
  * @tparam Outcome effectful computation outcome type
  * @tparam Context request context type
  */
@@ -218,10 +218,10 @@ case object JsonRpcClient:
    * The client can be used by an application to perform JSON-RPC calls and notifications.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec hierarchical data format codec plugin
+   * @param codec hierarchical message format codec plugin
    * @param effect computation effect system plugin
    * @param bufferSize input stream reading buffer size
-   * @tparam Node data format node representation type
+   * @tparam Node message format node representation type
    * @tparam Outcome computation outcome effect type
    * @return JSON-RPC request client
    */

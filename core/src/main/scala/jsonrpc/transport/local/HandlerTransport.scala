@@ -9,8 +9,8 @@ import scala.collection.immutable.ArraySeq
  *
  * @param handler request handler layer
  * @param effect effect system plugin
- * @tparam Node data format node representation type
- * @tparam CodecType data format codec plugin type
+ * @tparam Node message format node representation type
+ * @tparam CodecType message format codec plugin type
  * @tparam Outcome effectful computation outcome type
  * @tparam Context request context type
  */

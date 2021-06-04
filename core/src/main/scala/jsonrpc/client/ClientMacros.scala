@@ -13,10 +13,10 @@ case object ClientMacros:
   /**
    * Generate proxy instance with JSON-RPC bindings for all valid public methods of an API type.
    *
-   * @param codec data format codec
+   * @param codec message format codec
    * @param effect effect system
-   * @tparam Node data format node representation type
-   * @tparam CodecType data format codec type
+   * @tparam Node message format node representation type
+   * @tparam CodecType message format codec type
    * @tparam Outcome computation outcome effect type
    * @tparam Context request context type
    * @tparam ApiType API type

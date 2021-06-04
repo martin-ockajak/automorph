@@ -9,8 +9,8 @@ package jsonrpc
  * @constructor Create a new JSON-RPC error.
  * @param message error description
  * @param data additional error information
- * @param cause error cause
- * @tparam Node data format node representation type
+ * @param cause exception cause
+ * @tparam Node message format node representation type
  */
 final case class JsonRpcException[Node](
   message: String,
