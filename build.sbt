@@ -4,7 +4,6 @@ ThisBuild / version := "0.1.0"
 
 lazy val root = project.in(file(".")).aggregate(
   core,
-  integration,
 
   upickle,
   circe,
@@ -112,14 +111,6 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.5"
   )
-)
-
-// Integration
-lazy val integration = project.dependsOn(
-  core, test % Test, upickle % Test
-).settings(
-  publishLocal := { },
-  publish := { }
 )
 
 
