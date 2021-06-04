@@ -53,10 +53,42 @@ case object ClientMacros:
       new Runnable:
         def run(): Unit = ()
     }
+
     println(proxy.asTerm.show(using Printer.TreeCode))
     println(proxy.asTerm)
-    // TypeDef($anon,Template(DefDef(<init>,List(List()),TypeTree[TypeRef(TermRef(ThisType(TypeRef(NoPrefix,module class <root>)),object scala),Unit)],EmptyTree),List(Apply(Select(New(TypeTree[TypeRef(TermRef(ThisType(TypeRef(NoPrefix,module class java)),object lang),Object)]),<init>),List()), Ident(Runnable)),ValDef(_,EmptyTree,EmptyTree),List(DefDef(run,List(List()),Ident(Unit),Literal(Constant(())))))),
-    // Typed(Apply(Select(New(Ident($anon)),<init>),List()),TypeTree[TypeRef(TermRef(ThisType(TypeRef(NoPrefix,module class java)),object lang),Runnable)])
+
+    // TypeDef(
+    //   $anon,
+    //   Template(
+    //     DefDef(
+    //       <init>,
+    //       List(List())
+    //       TypeTree[TypeRef(TermRef(ThisType(TypeRef(NoPrefix,module class <root>)),object scala),Unit)],
+    //       EmptyTree
+    //     ),
+    //     List(
+    //       Apply(Select(New(TypeTree[TypeRef(TermRef(ThisType(TypeRef(NoPrefix,module class java)),object lang),Object)]),<init>),List()),
+    //       Ident(Runnable)
+    //     ),
+    //     ValDef(
+    //       _,
+    //       EmptyTree,
+    //       EmptyTree
+    //     ),
+    //     List(
+    //       DefDef(
+    //         run,
+    //         List(List()),
+    //         Ident(Unit),
+    //         Literal(Constant(()))
+    //       )
+    //     )
+    //   )
+    // ),
+    // Typed(
+    //   Apply(Select(New(Ident($anon)),<init>),List()),
+    //   TypeTree[TypeRef(TermRef(ThisType(TypeRef(NoPrefix,module class java)),object lang),Runnable)]
+    // )
 
     '{
       null
