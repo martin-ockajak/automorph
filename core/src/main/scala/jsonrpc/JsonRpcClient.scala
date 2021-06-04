@@ -1,5 +1,6 @@
 package jsonrpc
 
+import jsonrpc.client.ClientMacros
 import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
@@ -62,13 +63,14 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
     performNotify(method, encodeArguments(arguments), context)
 
   /**
-   * Create a ''transparent proxy instance'' of a remote JSON-RPC API.
+   * Create a transparent ''proxy instance'' of a remote JSON-RPC API.
+   *
    * Invocations of local proxy methods are translated into remote JSON-API calls.
    *
    * @tparam T remote API type
    * @return remote API proxy instance
    */
-  inline def proxy[T]: T = ???
+  inline def bind[T]: T = ClientMacros.bind(codec, effect)
 
   /**
    * Encode request arguments by name.
