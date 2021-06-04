@@ -69,7 +69,7 @@ case object ApiReflection:
     else if !method.available then
       s"Bound API method '$signature' must be callable at runtime".asLeft
     else if !contextEmpty[Context](ref.quotes) && method.parameters.lastOption.map { parameters =>
-        !(parameters.last.dataType =:= TypeRepr.of[Context])
+        !(parameters.lastOption.exists(_.dataType =:= TypeRepr.of[Context]))
       }.getOrElse(true)
     then
       s"Bound API method '$signature' must accept the specified request context type '${TypeRepr.of[Context].show}' as its last parameter".asLeft

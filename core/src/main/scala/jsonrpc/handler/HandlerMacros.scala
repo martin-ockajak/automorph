@@ -5,7 +5,7 @@ import jsonrpc.spi.{Codec, Effect}
 import jsonrpc.core.ApiReflection
 import jsonrpc.util.{Method, Reflection}
 import scala.collection.immutable.ArraySeq
-import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, Type}
 
 /**
  * Bound API method handle.
@@ -47,14 +47,15 @@ case object HandlerMacros:
     codec: CodecType,
     effect: Effect[Outcome],
     api: ApiType
-  ): Map[String, MethodHandle[Node, Outcome, Context]] = ${ bind('codec, 'effect, 'api) }
+  ): Map[String, MethodHandle[Node, Outcome, Context]] =
+    ${ bind[Node, CodecType, Outcome, Context, ApiType]('codec, 'effect, 'api) }
 
   private def bind[Node: Type, CodecType <: Codec[Node]: Type, Outcome[_]: Type, Context: Type, ApiType <: AnyRef: Type](
     codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
   )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Outcome, Context]]] =
-    import ref.quotes.reflect.{TypeRepr, TypeTree, asTerm}
+    import ref.quotes.reflect.{asTerm, TypeRepr, TypeTree}
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -67,7 +68,7 @@ case object HandlerMacros:
       )
 
     // Debug prints
-    println(validMethods.map(_.lift).map(methodDescription).mkString("\n"))
+//    println(validMethods.map(_.lift).map(methodDescription).mkString("\n"))
 
     // Generate API method handles including wrapper functions consuming and product Node values
     val methodHandles = Expr.ofSeq(validMethods.map { method =>
@@ -114,7 +115,7 @@ case object HandlerMacros:
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
   ): Expr[(Seq[Node], Context) => Outcome[Node]] =
-    import ref.quotes.reflect.{IntConstant, Lambda, Literal, MethodType, Printer, Symbol, Term, Tree, TypeRepr, asTerm}
+    import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Printer, Symbol, Term, Tree, TypeRepr}
     given Quotes = ref.quotes
 
     // Method call function expression consuming argument nodes and returning the method call result
@@ -126,10 +127,11 @@ case object HandlerMacros:
 
     // Binding function expression
     val bindingFunction = '{
-      (argumentNodes: Seq[Node], context: Context) => $effect.map(
-        $decodeArgumentsAndCallMethod(argumentNodes, context),
-        $encodeResult.asInstanceOf[Any => Node]
-      )
+      (argumentNodes: Seq[Node], context: Context) =>
+        $effect.map(
+          $decodeArgumentsAndCallMethod(argumentNodes, context),
+          $encodeResult.asInstanceOf[Any => Node]
+        )
 //        $decodeAndCallMethod(argumentNodes, context)
     }
 
@@ -154,7 +156,7 @@ case object HandlerMacros:
     effect: Expr[Effect[Outcome]],
     api: Expr[ApiType]
   ): Expr[(Seq[Node], Context) => Outcome[Any]] =
-    import ref.quotes.reflect.{IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr, asTerm}
+    import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
     Lambda(
@@ -197,7 +199,7 @@ case object HandlerMacros:
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
   ): Expr[Any => Node] =
-    import ref.quotes.reflect.{AppliedType, Lambda, MethodType, Symbol, Term, TypeRepr, asTerm}
+    import ref.quotes.reflect.{asTerm, AppliedType, Lambda, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
     val resultType =

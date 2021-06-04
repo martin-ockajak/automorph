@@ -7,9 +7,10 @@ import jsonrpc.handler.HandlerMacros.{generateMethodHandle, methodDescription}
 import jsonrpc.handler.MethodHandle
 import jsonrpc.util.{Method, Reflection}
 import scala.collection.immutable.ArraySeq
-import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, Type}
 
 case object ClientMacros:
+
   /**
    * Generate proxy instance with JSON-RPC bindings for all valid public methods of an API type.
    *
@@ -26,13 +27,14 @@ case object ClientMacros:
   inline def bind[Node, CodecType <: Codec[Node], Outcome[_], Context, ApiType <: AnyRef](
     codec: CodecType,
     effect: Effect[Outcome]
-  ): ApiType = ${ bind('codec, 'effect) }
+  ): ApiType =
+    ${ bind[Node, CodecType, Outcome, Context, ApiType]('codec, 'effect) }
 
   private def bind[Node: Type, CodecType <: Codec[Node]: Type, Outcome[_]: Type, Context: Type, ApiType <: AnyRef: Type](
     codec: Expr[CodecType],
     effect: Expr[Effect[Outcome]]
   )(using quotes: Quotes): Expr[ApiType] =
-    import ref.quotes.reflect.{TypeRepr, TypeTree, asTerm}
+    import ref.quotes.reflect.{asTerm, TypeRepr, TypeTree}
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
