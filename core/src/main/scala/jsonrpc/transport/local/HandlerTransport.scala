@@ -8,21 +8,21 @@ import scala.collection.immutable.ArraySeq
  * Local handler transport.
  *
  * @param handler JSON-RPC request handler layer
- * @param effect effect system plugin
+ * @param backend effect backend plugin
  * @tparam Node message format node representation type
  * @tparam CodecType message format codec plugin type
- * @tparam Outcome effectful computation outcome type
+ * @tparam Effect effect type
  * @tparam Context request context type
  */
-case class HandlerTransport[Node, CodecType <: Codec[Node], Outcome[_], Context](
-  handler: JsonRpcHandler[Node, CodecType, Outcome, Context],
-  effect: Backend[Outcome]
-) extends Transport[Outcome, Context]:
+case class HandlerTransport[Node, CodecType <: Codec[Node], Effect[_], Context](
+  handler: JsonRpcHandler[Node, CodecType, Effect, Context],
+  backend: Backend[Effect]
+) extends Transport[Effect, Context]:
 
-  def call(request: ArraySeq.ofByte, context: Context): Outcome[ArraySeq.ofByte] =
-    effect.map(handler.processRequest(request)(using context), { result =>
+  def call(request: ArraySeq.ofByte, context: Context): Effect[ArraySeq.ofByte] =
+    backend.map(handler.processRequest(request)(using context), { result =>
       result.response.getOrElse(throw IllegalStateException("Missing call response"))
     })
 
-  def notify(request: ArraySeq.ofByte, context: Context): Outcome[Unit] =
-    effect.map(handler.processRequest(request)(using context), _ => ())
+  def notify(request: ArraySeq.ofByte, context: Context): Effect[Unit] =
+    backend.map(handler.processRequest(request)(using context), _ => ())

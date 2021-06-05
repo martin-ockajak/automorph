@@ -11,11 +11,11 @@ case object ApiReflection:
    *
    * @param ref reflection
    * @param apiType API type
-   * @tparam Outcome effectful computation outcome type
+   * @tparam Effect effect type
    * @tparam Context request context type
    * @return valid method descriptors or error messages by method name
    */
-  def detectApiMethods[Outcome[_]: Type, Context: Type](
+  def detectApiMethods[Effect[_]: Type, Context: Type](
     ref: Reflection,
     apiType: ref.quotes.reflect.TypeTree
   ): Seq[Either[String, ref.QuotedMethod]] =
