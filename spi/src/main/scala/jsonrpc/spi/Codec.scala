@@ -11,6 +11,12 @@ import scala.collection.immutable.ArraySeq
  * @tparam Node message format node representation type
  */
 trait Codec[Node]:
+  /**
+   * Message format MIME type.
+   *
+   * @return message format MIME type
+   */
+  def mimeType: String
 
   /**
    * Serialize a message as binary data.

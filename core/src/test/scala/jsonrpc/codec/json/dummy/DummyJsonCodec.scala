@@ -7,17 +7,19 @@ import scala.collection.immutable.ArraySeq
 
 final case class DummyJsonCodec() extends Codec[String]:
 
-  def serialize(message: Message[String]): ArraySeq.ofByte =
+  override def mimeType: String = "text/plain"
+
+  override def serialize(message: Message[String]): ArraySeq.ofByte =
     message.toString.toArraySeq
 
-  def deserialize(data: ArraySeq.ofByte): Message[String] =
+  override def deserialize(data: ArraySeq.ofByte): Message[String] =
     Message(None, None, None, None, None, None)
 
-  def format(message: Message[String]): String =
+  override def format(message: Message[String]): String =
     message.toString
 
-  inline def encode[T](value: T): String =
+  override inline def encode[T](value: T): String =
     value.toString
 
-  inline def decode[T](node: String): T =
+  override inline def decode[T](node: String): T =
     node.asInstanceOf[T]

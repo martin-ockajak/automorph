@@ -23,20 +23,22 @@ final case class UpickleJsonCodec[ReadWriters <: Api](readWriters: ReadWriters =
   private given readWriters.ReadWriter[Message] = readWriters.macroRW
   private given readWriters.ReadWriter[MessageError] = readWriters.macroRW
 
-  def serialize(message: spi.Message[Value]): ArraySeq.ofByte =
+  override def mimeType: String = "application/json"
+
+  override def serialize(message: spi.Message[Value]): ArraySeq.ofByte =
     readWriters.writeToByteArray(fromSpi(message)).asArraySeq
 
-  def deserialize(data: ArraySeq.ofByte): spi.Message[Value] =
+  override def deserialize(data: ArraySeq.ofByte): spi.Message[Value] =
     readWriters.read[Message](data.unsafeArray).toSpi
 
-  def format(message: spi.Message[Value]): String =
+  override def format(message: spi.Message[Value]): String =
     readWriters.write(fromSpi(message), indent)
 
-  inline def encode[T](value: T): Value =
+  override inline def encode[T](value: T): Value =
     val writer = summonInline[readWriters.Writer[T]]
     readWriters.writeJs(value)(using writer)
 
-  inline def decode[T](node: Value): T =
+  override inline def decode[T](node: Value): T =
     val reader = summonInline[readWriters.Reader[T]]
     readWriters.read[T](node)(using reader)
 

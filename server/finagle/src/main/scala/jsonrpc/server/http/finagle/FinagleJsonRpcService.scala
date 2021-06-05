@@ -45,27 +45,31 @@ final case class FinagleJsonRpcService(
     asTwitterFuture(backend.map(
       backend.either(handler.processRequest(rawRequest)(using request)),
       _.fold(
-        error => serverErrorResponse(error, request),
+        error => serverError(error, request),
         result =>
           // Send the response
           val response = result.response.getOrElse(ArraySeq.ofByte(Array.empty))
           val status = result.errorCode.map(errorStatus).getOrElse(Status.Ok)
           val reader = Reader.fromBuf(Buf.ByteArray.Owned(response.unsafeArray))
-          logger.debug("Sending HTTP response", Map("Client" -> client, "Status" -> status.code.toString))
-          Response(request.version, status, reader)
+          createResponse(request, reader, status)
       )
     ))
 
-  private def serverErrorResponse(error: Throwable, request: Request): Response =
+  private def serverError(error: Throwable, request: Request): Response =
     val status = Status.InternalServerError
     val errorMessage = Protocol.errorDetails(error).mkString("\n")
     val reader = Reader.fromBuf(Buf.Utf8(errorMessage))
-    logger.error("Failed processing HTTP request", error, Map("Client" -> clientAddress(request)))
-    Response(request.version, status, reader)
+    logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(request)))
+    createResponse(request, reader, status)
+
+  private def createResponse(request: Request, reader: Reader[Buf], status: Status): Response =
+    val response = Response(request.version, status, reader)
+    response.contentType = handler.codec.mimeType
+    logger.debug("Sending HTTP response", Map("Client" -> clientAddress(request), "Status" -> status.code.toString))
+    response
 
   private def clientAddress(request: Request): String =
-    val forwardedFor = request.xForwardedFor
-    forwardedFor.map(_.split(",", 2)(0)).getOrElse {
+    request.xForwardedFor.map(_.split(",", 2)(0)).getOrElse {
       val address = request.remoteAddress.toString.split("/", 2).reverse.head
       address.replaceAll("/", "").split(":").init.mkString(":")
     }

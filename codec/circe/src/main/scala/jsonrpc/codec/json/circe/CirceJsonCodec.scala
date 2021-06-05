@@ -21,20 +21,22 @@ final case class CirceJsonCodec[Codecs <: CirceCodecs](codecs: Codecs) extends C
   private given Encoder[Message[Json]] = deriveEncoder[Message[Json]]
   private given Decoder[Message[Json]] = deriveDecoder[Message[Json]]
 
-  def serialize(message: Message[Json]): ArraySeq.ofByte =
+  override def mimeType: String = "application/json"
+
+  override def serialize(message: Message[Json]): ArraySeq.ofByte =
     message.asJson.noSpaces.toArraySeq
 
-  def deserialize(data: ArraySeq.ofByte): Message[Json] =
+  override def deserialize(data: ArraySeq.ofByte): Message[Json] =
     parser.decode[Message[Json]](data.asString).toTry.get
 
-  def format(message: Message[Json]): String =
+  override def format(message: Message[Json]): String =
     message.asJson.spaces2
 
-  inline def encode[T](value: T): Json =
+  override inline def encode[T](value: T): Json =
     val encoder = summonInline[codecs.CirceEncoder[T]].encoder
     value.asJson(using encoder)
 
-  inline def decode[T](node: Json): T =
+  override inline def decode[T](node: Json): T =
     val decoder = summonInline[codecs.CirceDecoder[T]].decoder
     node.as[T](using decoder).toTry.get
 

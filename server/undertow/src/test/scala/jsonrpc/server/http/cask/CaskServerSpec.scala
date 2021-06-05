@@ -10,9 +10,12 @@ import jsonrpc.codec.json.upickle.UpickleJsonCodec
 import jsonrpc.http.undertow.UndertowJsonRpcHandler
 import scala.language.adhocExtensions
 
-class CaskServerSpec extends BaseSpec {
-
-}
+class CaskServerSpec extends BaseSpec:
+  "" - {
+    "Server" in {
+      CaskServer
+    }
+  }
 
 object Api:
   def test(value: String): String = value

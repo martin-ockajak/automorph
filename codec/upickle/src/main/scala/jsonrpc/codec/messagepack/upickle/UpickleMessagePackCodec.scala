@@ -23,20 +23,22 @@ final case class UpickleMessagePackCodec[ReadWriters <: Api](readWriters: ReadWr
   private given readWriters.ReadWriter[Message] = readWriters.macroRW
   private given readWriters.ReadWriter[MessageError] = readWriters.macroRW
 
-  def serialize(message: spi.Message[Msg]): ArraySeq.ofByte =
+  override def mimeType: String = "application/msgpack"
+
+  override def serialize(message: spi.Message[Msg]): ArraySeq.ofByte =
     readWriters.writeToByteArray(fromSpi(message)).asArraySeq
 
-  def deserialize(data: ArraySeq.ofByte): spi.Message[Msg] =
+  override def deserialize(data: ArraySeq.ofByte): spi.Message[Msg] =
     readWriters.read[Message](data.unsafeArray).toSpi
 
-  def format(message: spi.Message[Msg]): String =
+  override def format(message: spi.Message[Msg]): String =
     readWriters.write(fromSpi(message), indent)
 
-  inline def encode[T](value: T): Msg =
+  override inline def encode[T](value: T): Msg =
     val writer = summonInline[readWriters.Writer[T]]
     readWriters.writeMsg(value)(using writer)
 
-  inline def decode[T](node: Msg): T =
+  override inline def decode[T](node: Msg): T =
     val reader = summonInline[readWriters.Reader[T]]
     readWriters.readBinary[T](node)(using reader)
 
