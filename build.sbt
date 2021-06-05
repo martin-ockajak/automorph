@@ -117,7 +117,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
 
 // Server
 lazy val undertow = (project in file("server/undertow")).dependsOn(
-  core, test % Test
+  core, test % Test, upickle % Test
 ).settings(
   name := "json-rpc-undertow",
   libraryDependencies ++= Seq(

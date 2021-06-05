@@ -31,8 +31,7 @@ final case class UndertowServer(
 
   private def build(): Undertow =
     // Configure the request handler
-    val pathHandler = Handlers.path(ResponseCodeHandler.HANDLE_404)
-    pathHandler.addPrefixPath(urlPath, httpHandler)
+    val pathHandler = Handlers.path(ResponseCodeHandler.HANDLE_404).addPrefixPath(urlPath, httpHandler)
 
     // Configure the web server
     val undertow = builder.setHandler(pathHandler).build()
