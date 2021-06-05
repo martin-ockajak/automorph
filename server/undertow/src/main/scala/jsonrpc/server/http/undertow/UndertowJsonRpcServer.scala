@@ -64,7 +64,13 @@ final case class UndertowJsonRpcServer[Outcome[_]](
 
 case object UndertowJsonRpcServer:
 
+  /**
+   * Default Undertow web server builder providing the following settings:
+   * - IO threads: 2 * number of CPU cores
+   * - Worker threads: number of CPU cores
+   * - HTTP listener port: 8080
+   */
   val defaultBuilder = Undertow.builder()
     .setIoThreads(Runtime.getRuntime.availableProcessors * 2)
     .setWorkerThreads(Runtime.getRuntime.availableProcessors)
-    .addHttpListener(80, "0.0.0.0")
+    .addHttpListener(8080, "0.0.0.0")
