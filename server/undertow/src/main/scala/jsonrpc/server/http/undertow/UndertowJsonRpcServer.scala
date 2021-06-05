@@ -22,7 +22,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @param effectRunAsync asynchronous effect execution function
  * @param errorStatusCode JSON-RPC error code to HTTP status code mapping function
  * @param builder Undertow web server builder
- * @param path JSON-RPC API URL path
+ * @param apiPath JSON-RPC API URL path
  * @tparam Node message format node representation type
  * @tparam CodecType message format codec plugin type
  * @tparam Outcome effectful computation outcome type
@@ -33,7 +33,7 @@ final case class UndertowJsonRpcServer[Node, CodecType <: Codec[Node], Outcome[_
   effectRunAsync: Outcome[Any] => Unit,
   errorStatusCode: Int => Int = defaultStatusCodes,
   builder: Undertow.Builder = defaultBuilder,
-  path: String = "/"
+  apiPath: String = "/"
 ) extends AutoCloseable with Logging:
 
   private val httpHandler =
@@ -46,7 +46,7 @@ final case class UndertowJsonRpcServer[Node, CodecType <: Codec[Node], Outcome[_
   private def build(): Undertow =
     // Configure the request handler
     val pathHandler = Handlers.path(ResponseCodeHandler.HANDLE_404)
-    pathHandler.addPrefixPath(path, httpHandler)
+    pathHandler.addPrefixPath(apiPath, httpHandler)
 
     // Configure the web server
     val undertow = builder.setHandler(pathHandler).build()
@@ -72,3 +72,4 @@ case object UndertowJsonRpcServer:
   val defaultBuilder = Undertow.builder()
     .setIoThreads(Runtime.getRuntime.availableProcessors * 2)
     .setWorkerThreads(Runtime.getRuntime.availableProcessors)
+    .addHttpListener(80, "0.0.0.0")
