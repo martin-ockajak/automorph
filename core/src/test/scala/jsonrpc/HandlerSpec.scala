@@ -36,9 +36,9 @@ class HandlerSpec extends BaseSpec:
       "Upickle / Future" in {
         testBind(upickleCodec, futureBackend)
       }
-//      "Upickle / Monix" in {
-//        testBind(upickleCodec, monixBackend)
-//      }
+      "Upickle / Monix" in {
+        testBind(upickleCodec, monixBackend)
+      }
 //      "Upickle / Zio" in {
 //        testBind(upickleCodec, zioBackend)
 //      }
