@@ -7,31 +7,30 @@ import java.nio.ByteBuffer
 import jsonrpc.JsonRpcHandler
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
-import jsonrpc.http.undertow.UndertowJsonRpcHandler.defaultStatusCodes
+import jsonrpc.http.undertow.UndertowJsonRpcHandler.defaultStatuses
 import jsonrpc.log.Logging
-import jsonrpc.spi.{Codec, Backend}
-import jsonrpc.util.EncodingOps.asArraySeq
-import jsonrpc.util.EncodingOps.toArraySeq
+import jsonrpc.spi.Backend
+import jsonrpc.util.EncodingOps.{asArraySeq, toArraySeq}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
 /**
  * JSON-RPC HTTP handler for Undertow web server.
  *
- * The handler interprets HTTP request body as a JSON-RPC request and processess it using the specified JSON-RPC handler.
- * Subsequent response returned by the JSON-RPC handler is sent as a body of a HTTP response.
+ * The handler interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
+ * The response returned by the JSON-RPC handler is used as HTTP response body.
  *
  * @see [[https://undertow.io Documentation]]
- * @constructor Create a JSON=RPC HTTP handler for Undertow web server using the specified JSON-RPC ''handler'' and ''effect'' plugin.
+ * @constructor Create a JSON=RPC HTTP handler for Undertow web server using the specified JSON-RPC ''handler''.
  * @param handler JSON-RPC request handler
  * @param effectRunAsync asynchronous effect execution function
- * @param errorStatusCode JSON-RPC error code to HTTP status code mapping function
+ * @param errorStatus JSON-RPC error code to HTTP status mapping function
  * @tparam Effect effect type
  */
 final case class UndertowJsonRpcHandler[Effect[_]](
   handler: JsonRpcHandler[?, ?, Effect, HttpServerExchange],
   effectRunAsync: Effect[Any] => Unit,
-  errorStatusCode: Int => Int = defaultStatusCodes
+  errorStatus: Int => Int = defaultStatuses
 ) extends HttpHandler with Logging:
 
   private val backend = handler.backend
@@ -52,7 +51,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
               result =>
                 // Send the response
                 val response = result.response.getOrElse(ArraySeq.ofByte(Array.empty))
-                val statusCode = result.errorCode.map(errorStatusCode).getOrElse(StatusCodes.OK)
+                val statusCode = result.errorCode.map(errorStatus).getOrElse(StatusCodes.OK)
                 sendResponse(response, statusCode, exchange)
             )
           ))
@@ -60,7 +59,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
 
   override def handleRequest(exchange: HttpServerExchange): Unit =
     // Receive the request
-    logger.debug("Receiving HTTP request", Map("Client" -> clientAddress(exchange)))
+    logger.trace("Receiving HTTP request", Map("Client" -> clientAddress(exchange)))
     Try(exchange.getRequestReceiver.receiveFullBytes(receiveCallback)).recover { case error =>
       sendServerError(error, exchange)
     }.get
@@ -74,7 +73,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
   private def sendResponse(message: ArraySeq.ofByte, statusCode: Int, exchange: HttpServerExchange): Unit =
     if exchange.isResponseChannelAvailable then
       val client = clientAddress(exchange)
-      logger.debug("Sending HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
+      logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
       exchange.setStatusCode(statusCode).getResponseSender.send(ByteBuffer.wrap(message.unsafeArray))
       logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
 
@@ -88,7 +87,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
 case object UndertowJsonRpcHandler:
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultStatusCodes = Map(
+  val defaultStatuses = Map(
     ErrorType.ParseError -> StatusCodes.BAD_REQUEST,
     ErrorType.InvalidRequest -> StatusCodes.BAD_REQUEST,
     ErrorType.MethodNotFound -> StatusCodes.NOT_IMPLEMENTED,

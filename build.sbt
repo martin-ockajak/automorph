@@ -15,7 +15,8 @@ lazy val root = project.in(file(".")).aggregate(
 
   sttp,
 
-  undertow
+  undertow,
+  finagle
 ).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server"
@@ -123,6 +124,14 @@ lazy val undertow = (project in file("server/undertow")).dependsOn(
   libraryDependencies ++= Seq(
     "io.undertow" % "undertow-core" % "2.2.8.Final",
     "com.lihaoyi" %% "cask" % "0.7.11" % Test
+  )
+)
+lazy val finagle = (project in file("server/finagle")).dependsOn(
+  core, test % Test, upickle % Test
+).settings(
+  name := "json-rpc-finagle",
+  libraryDependencies ++= Seq(
+    "com.twitter" % "finagle-http_2.13" % "21.5.0"
   )
 )
 
