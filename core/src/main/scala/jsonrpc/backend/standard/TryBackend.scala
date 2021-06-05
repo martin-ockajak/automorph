@@ -11,10 +11,10 @@ import scala.util.{Failure, Success, Try}
  */
 final case class TryBackend() extends Backend[Try]:
 
-  def pure[T](value: T): Try[T] = Success(value)
+  override def pure[T](value: T): Try[T] = Success(value)
 
-  def failed[T](exception: Throwable): Try[T] = Failure(exception)
+  override def failed[T](exception: Throwable): Try[T] = Failure(exception)
 
-  def flatMap[T, R](effect: Try[T], function: T => Try[R]): Try[R] = effect.flatMap(function)
+  override def flatMap[T, R](effect: Try[T], function: T => Try[R]): Try[R] = effect.flatMap(function)
 
-  def either[T](value: Try[T]): Try[Either[Throwable, T]] = Success(value.toEither)
+  override def either[T](value: Try[T]): Try[Either[Throwable, T]] = Success(value.toEither)

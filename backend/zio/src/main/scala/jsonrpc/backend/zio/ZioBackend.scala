@@ -12,10 +12,10 @@ import zio.{RIO, Task}
  */
 final case class ZioBackend[Environment]() extends Backend[[T] =>> RIO[Environment, T]]:
 
-  def pure[T](value: T): RIO[Environment, T] = RIO.succeed(value)
+  override def pure[T](value: T): RIO[Environment, T] = RIO.succeed(value)
 
-  def failed[T](exception: Throwable): RIO[Environment, T] = RIO.fail(exception)
+  override def failed[T](exception: Throwable): RIO[Environment, T] = RIO.fail(exception)
 
-  def flatMap[T, R](value: RIO[Environment, T], function: T => RIO[Environment, R]): RIO[Environment, R] = value.flatMap(function)
+  override def flatMap[T, R](value: RIO[Environment, T], function: T => RIO[Environment, R]): RIO[Environment, R] = value.flatMap(function)
 
-  def either[T](value: RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] = value.either
+  override def either[T](value: RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] = value.either

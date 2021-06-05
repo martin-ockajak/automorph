@@ -11,10 +11,10 @@ import jsonrpc.spi.Backend
  */
 final case class CatsBackend() extends Backend[IO]:
 
-  def pure[T](value: T): IO[T] = IO.pure(value)
+  override def pure[T](value: T): IO[T] = IO.pure(value)
 
-  def failed[T](exception: Throwable): IO[T] = IO.raiseError(exception)
+  override def failed[T](exception: Throwable): IO[T] = IO.raiseError(exception)
 
-  def flatMap[T, R](value: IO[T], function: T => IO[R]): IO[R] = value.flatMap(function)
+  override def flatMap[T, R](value: IO[T], function: T => IO[R]): IO[R] = value.flatMap(function)
 
-  def either[T](value: IO[T]): IO[Either[Throwable, T]] = value.attempt
+  override def either[T](value: IO[T]): IO[Either[Throwable, T]] = value.attempt
