@@ -24,19 +24,17 @@ import scala.util.Try
  * @see [[https://undertow.io Documentation]]
  * @constructor Create a new JSON=RPC handler for Undertow web server using the specified JSON-RPC ''handler'' and ''effect'' plugin.
  * @param handler JSON-RPC request handler
- * @param effect effect system plugin
  * @param effectRunAsync asynchronous effect execution function
  * @param errorStatusCode JSON-RPC error code to HTTP status code mapping function
- * @tparam Node message format node representation type
- * @tparam CodecType message format codec plugin type
  * @tparam Outcome effectful computation outcome type
  */
-final case class UndertowJsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_]](
-  handler: JsonRpcHandler[Node, CodecType, Outcome, HttpServerExchange],
-  effect: Effect[Outcome],
+final case class UndertowJsonRpcHandler[Outcome[_]](
+  handler: JsonRpcHandler[?, ?, Outcome, HttpServerExchange],
   effectRunAsync: Outcome[Any] => Unit,
   errorStatusCode: Int => Int = defaultStatusCodes
 ) extends HttpHandler with Logging:
+
+  private val effect = handler.effect
 
   private val receiveCallback = new Receiver.FullBytesCallback:
 
@@ -84,6 +82,7 @@ final case class UndertowJsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[
     }
 
 case object UndertowJsonRpcHandler:
+
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultStatusCodes = Map(
     ErrorType.ParseError -> StatusCodes.BAD_REQUEST,

@@ -18,26 +18,21 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see [[https://undertow.io Documentation]]
  * @constructor Create a new JSON=RPC server based on Undertow web server using the specified JSON-RPC ''handler'' and ''effect'' plugin.
  * @param handler JSON-RPC request handler
- * @param effect effect system plugin
  * @param effectRunAsync asynchronous effect execution function
  * @param errorStatusCode JSON-RPC error code to HTTP status code mapping function
  * @param builder Undertow web server builder
  * @param apiPath JSON-RPC API URL path
- * @tparam Node message format node representation type
- * @tparam CodecType message format codec plugin type
  * @tparam Outcome effectful computation outcome type
  */
-final case class UndertowJsonRpcServer[Node, CodecType <: Codec[Node], Outcome[_]](
-  handler: JsonRpcHandler[Node, CodecType, Outcome, HttpServerExchange],
-  effect: Effect[Outcome],
+final case class UndertowJsonRpcServer[Outcome[_]](
+  handler: JsonRpcHandler[?, ?, Outcome, HttpServerExchange],
   effectRunAsync: Outcome[Any] => Unit,
   errorStatusCode: Int => Int = defaultStatusCodes,
   builder: Undertow.Builder = defaultBuilder,
   apiPath: String = "/"
 ) extends AutoCloseable with Logging:
 
-  private val httpHandler =
-    UndertowJsonRpcHandler[Node, CodecType, Outcome](handler, effect, effectRunAsync, errorStatusCode)
+  private val httpHandler = UndertowJsonRpcHandler[Outcome](handler, effectRunAsync, errorStatusCode)
   private val undertow = build()
 
   override def close(): Unit =
