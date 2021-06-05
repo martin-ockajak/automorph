@@ -48,7 +48,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
    * - returns the specified effect type
    * - (if request context type is not Unit) accepts the specified request context type as its last parameter
    *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context fuction accepting one
+   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
    * API methods are exposed using their actual names.
@@ -69,7 +69,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
    * - returns the specified effect type
    * - (if request context type is not Unit) accepts the specified request context type as its last parameter
    *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context fuction accepting one
+   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
    * API methods are exposed using names resulting from a transformation of their actual names via the `exposedNames` function.
@@ -95,7 +95,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
    * - returns the specified effect type
    * - (if request context type is not Unit) accepts the specified request context type as its last parameter
    *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context fuction accepting one
+   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
    * API methods are exposed using names resulting from a transformation of their actual names via the `exposedNames` function.
