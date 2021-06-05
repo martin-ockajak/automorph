@@ -18,7 +18,7 @@ import scala.util.{Failure, Success, Try}
 /**
  * JSON-RPC HTTP service for Finagle RPC system.
  *
- * The endpoint interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
+ * The service interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
  * The response returned by the JSON-RPC handler is used as HTTP response body.
  *
  * @see [[https://finagle.github.io/finch Documentation]]
