@@ -2,13 +2,12 @@
 //
 //import base.BaseSpec
 //import io.undertow.server.{HttpHandler, HttpServerExchange}
-//import io.undertow.{Handlers, Undertow}
+//import io.undertow.Handlers
 //import io.undertow.server.handlers.BlockingHandler
 //import jsonrpc.JsonRpcHandler
 //import jsonrpc.backend.standard.NoBackend
 //import jsonrpc.codec.json.upickle.UpickleJsonCodec
 //import jsonrpc.http.undertow.UndertowJsonRpcHandler
-//import scala.concurrent.Future
 //import scala.language.adhocExtensions
 //
 //class CaskServerSpec extends BaseSpec {
