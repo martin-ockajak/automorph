@@ -206,8 +206,8 @@ case object HandlerMacros:
 
     val resultType =
       method.resultType match
-        case appliedType: AppliedType => appliedType.args.head
-        case _                        => method.resultType
+        case appliedType: AppliedType => appliedType.args.last
+        case otherType                        => otherType
     Lambda(
       Symbol.spliceOwner,
       MethodType(List("result"))(_ => List(resultType), _ => TypeRepr.of[Node]),
