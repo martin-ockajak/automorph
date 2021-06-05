@@ -308,7 +308,7 @@ case object JsonRpcHandler:
   given NoContext = Empty[JsonRpcHandler[?, ?, ?, ?]]()
 
   /**
-   * Create a new JSON-RPC request handler using the specified ''codec'' and ''effect'' plugins without request `Context` type.
+   * Create a JSON-RPC request handler using the specified ''codec'' and ''effect'' plugins without request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
    *
@@ -328,7 +328,7 @@ case object JsonRpcHandler:
     new JsonRpcHandler(codec, effect, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
 
   /**
-   * Create a new JSON-RPC request handler using the specified ''codec'' and ''effect'' plugins with defined request Context type.
+   * Create a JSON-RPC request handler using the specified ''codec'' and ''effect'' plugins with defined request Context type.
    *
    * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
    *

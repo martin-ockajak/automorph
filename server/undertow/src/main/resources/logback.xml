@@ -1,0 +1,25 @@
+<configuration>
+  <!-- Disable Logback internal logging at startup -->
+  <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+  <!-- Release logging resources on application termination -->
+  <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
+
+  <!-- Default pattern -->
+  <property name="defaultPattern" value="%date \(%level\) %message" />
+
+  <!-- Standard console logging -->
+  <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%date \(%level\) [%logger{16}] %message%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="${LOG_LEVEL:-INFO}">
+    <appender-ref ref="Console" />
+  </root>
+
+  <!--
+    <logger name="jsonrpc" level="TRACE"/>
+  -->
+</configuration>

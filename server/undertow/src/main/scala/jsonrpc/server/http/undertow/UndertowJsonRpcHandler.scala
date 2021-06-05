@@ -22,7 +22,7 @@ import scala.util.Try
  * Subsequent response returned by the JSON-RPC handler is sent as a body of a HTTP response.
  *
  * @see [[https://undertow.io Documentation]]
- * @constructor Create a new JSON=RPC handler for Undertow web server using the specified JSON-RPC ''handler'' and ''effect'' plugin.
+ * @constructor Create a JSON=RPC HTTP handler for Undertow web server using the specified JSON-RPC ''handler'' and ''effect'' plugin.
  * @param handler JSON-RPC request handler
  * @param effectRunAsync asynchronous effect execution function
  * @param errorStatusCode JSON-RPC error code to HTTP status code mapping function
