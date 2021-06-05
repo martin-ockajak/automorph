@@ -27,18 +27,18 @@ class HandlerSpec extends BaseSpec:
 
   "" - {
     "Bind" - {
-      "Simple" in {
+      "No context" in {
         JsonRpcHandler(DummyJsonCodec(), noBackend).bind(simpleApi)
       }
-//      "Upickle / No" in {
-//        testBind(upickleCodec, noBackend)
-//      }
+      "Upickle / No effect" in {
+        testBind(upickleCodec, noBackend)
+      }
       "Upickle / Future" in {
         testBind(upickleCodec, futureBackend)
       }
-      "Upickle / Monix" in {
-        testBind(upickleCodec, monixBackend)
-      }
+//      "Upickle / Monix" in {
+//        testBind(upickleCodec, monixBackend)
+//      }
 //      "Upickle / Zio" in {
 //        testBind(upickleCodec, zioBackend)
 //      }

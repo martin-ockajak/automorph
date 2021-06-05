@@ -142,8 +142,8 @@ case object HandlerMacros:
 //    println(method.name)
 //    println(s"  ${methodCaller.asTerm.show(using Printer.TreeCode)}")
 //    println(s"  ${resultConverter.asTerm.show(using Printer.TreeCode)}")
-    println(bindingFunction.asTerm.show(using Printer.TreeCode))
-    println()
+//    println(bindingFunction.asTerm.show(using Printer.TreeCode))
+//    println()
     bindingFunction
 
   private def decodeArgumentsAndCallMethodExpr[

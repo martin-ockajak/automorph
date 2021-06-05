@@ -47,19 +47,28 @@ case object ApiReflection:
   ): Either[String, ref.QuotedMethod] =
     import ref.quotes.reflect.{AppliedType, LambdaType, NamedType, TypeRepr}
 
+    // No type parameters
     val signature = s"${apiType.show}.${method.lift.signature}"
     if method.typeParameters.nonEmpty then
       s"Bound API method '$signature' must not have type parameters".asLeft
+
+    // Callable at runtime
     else if !method.available then
       s"Bound API method '$signature' must be callable at runtime".asLeft
     else
-      TypeRepr.of[Effect] match
-        case lambdaType: LambdaType =>
-          if method.resultType match
-              case appliedType: AppliedType => !(appliedType.tycon =:= lambdaType)
-              case _                        => false
-          then
-            s"Bound API method '$signature' must return the specified effect type '${lambdaType.resType.show}'".asLeft
-          else
-            method.asRight
-        case _ => method.asRight
+      // Returns the effect type
+      val effectType =
+        TypeRepr.of[Effect] match
+          case lambdaType: LambdaType => lambdaType.resType
+          case otherType              => otherType
+      val resultEffectType =
+        effectType match
+          case appliedEffectType: AppliedType =>
+            method.resultType match
+              case resultType: AppliedType => resultType.tycon =:= appliedEffectType.tycon
+              case _                       => false
+          case _ => true
+      if !resultEffectType then
+        s"Bound API method '$signature' must return the specified effect type '${effectType.show}'".asLeft
+      else
+        method.asRight
