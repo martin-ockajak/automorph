@@ -1,7 +1,7 @@
 //package jsonrpc.server.http.cask
 //
 //import base.BaseSpec
-//import io.undertow.server.{HttpHandler, HttpServerExchange}
+//import io.undertow.server.HttpHandler
 //import io.undertow.Handlers
 //import io.undertow.server.handlers.BlockingHandler
 //import jsonrpc.JsonRpcHandler
@@ -15,7 +15,7 @@
 //}
 //
 //object Api:
-//  def test(value: String)(using exchange: HttpServerExchange): String = value
+//  def test(value: String): String = value
 //
 //object CaskServer extends cask.MainRoutes:
 //  val apiPath = "/api"
