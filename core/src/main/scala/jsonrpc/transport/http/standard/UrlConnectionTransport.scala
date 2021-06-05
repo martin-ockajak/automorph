@@ -11,17 +11,18 @@ import scala.collection.immutable.ArraySeq
  * URL connection HTTP transport.
  *
  * @param url HTTP endpoint URL
+ * @param contentType HTTP request Content-Type
  * @param bufferSize input stream reading buffer size
  */
 case class UrlConnectionTransport(
   url: URL,
+  contentType: String,
   bufferSize: Int = 4096
 ) extends Transport[Identity, HttpProperties]:
 
   private val contentLengthHeader = "Content-Length"
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
-  private val contentType = "application/json"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   private val connection = connect()
 

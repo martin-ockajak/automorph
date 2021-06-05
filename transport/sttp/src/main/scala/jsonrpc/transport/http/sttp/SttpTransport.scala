@@ -12,6 +12,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @see [[https://sttp.softwaremill.com/en/latest/index.html Documentation]]
  * @param url endpoint URL
  * @param method HTTP method
+ * @param contentType HTTP request Content-Type
  * @param sttpBackend STTP backend
  * @param backend effect backend plugin
  * @tparam Effect effect type
@@ -19,11 +20,10 @@ import sttp.model.{Header, MediaType, Method, Uri}
 case class SttpTransport[Effect[_]](
   url: Uri,
   method: Method,
+  contentType: String,
   sttpBackend: SttpBackend[Effect, ?],
   backend: Backend[Effect]
 ) extends Transport[Effect, PartialRequest[Either[String, String], Any]] with SttpApi:
-
-  private val contentType = MediaType.ApplicationJson
 
   override def call(
     request: ArraySeq.ofByte,
