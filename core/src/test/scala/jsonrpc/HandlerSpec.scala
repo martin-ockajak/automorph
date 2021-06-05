@@ -1,39 +1,60 @@
 package jsonrpc
 
 import base.BaseSpec
-import jsonrpc.JsonRpcHandler.NoContext
+import io.circe.generic.auto.*
+import jsonrpc.backend.monix.MonixBackend
 import jsonrpc.backend.standard.{FutureBackend, NoBackend}
+import jsonrpc.backend.zio.ZioBackend
 import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
+import jsonrpc.codec.json.circe.CirceJsonCodec
+import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.transport.local.HandlerTransport
 import jsonrpc.{ApiImpl, Enum, JsonRpcHandler, Record, SimpleApi, Structure}
-import scala.collection.immutable.ArraySeq
+import monix.execution.Scheduler.Implicits.global
 import scala.concurrent.ExecutionContext.Implicits.global
 import upickle.AttributeTagged
+import zio.{FiberFailure, RIO, Runtime, ZEnv}
 
 class HandlerSpec extends BaseSpec:
+  private val simpleApi = SimpleApi()
+  private val upickleCodec = UpickleJsonCodec(JsonPickler)
+  private val circeCodec = CirceJsonCodec()
+  private val noBackend = NoBackend()
+  private val futureBackend = FutureBackend()
+  private val monixBackend = MonixBackend()
+  private val zioBackend = ZioBackend[ZEnv]()
 
   "" - {
     "Bind" - {
-      "Default" in {
-        val api = ApiImpl("")
-        val simpleApi = SimpleApi()
-        JsonRpcHandler[String, DummyJsonCodec, NoBackend.Identity, Float](DummyJsonCodec(), NoBackend()).bind(simpleApi)
-        val handler = JsonRpcHandler[String, DummyJsonCodec, NoBackend.Identity, NoContext](DummyJsonCodec(), NoBackend())
-//        val futureHandler = JsonRpcHandler.basic(DummyJsonCodec(), FutureEffect()).bind(api)
-        val futureHandler = JsonRpcHandler.basic(UpickleJsonCodec(JsonPickler), FutureBackend()).bind(api)
-//        futureHandler.processRequest(ArraySeq.ofByte(Array.empty[Byte]))
-
-        val transport = HandlerTransport(handler, NoBackend())
-        val client = JsonRpcClient[String, DummyJsonCodec, NoBackend.Identity, NoContext](DummyJsonCodec(), NoBackend(), transport)
-        client.bind[Api]
-        (0 == 0).shouldBe(true)
-
-
-
+      "Simple" in {
+        JsonRpcHandler(DummyJsonCodec(), noBackend).bind(simpleApi)
       }
+//      "Upickle / No" in {
+//        testBind(upickleCodec, noBackend)
+//      }
+      "Upickle / Future" in {
+        testBind(upickleCodec, futureBackend)
+      }
+      "Upickle / Monix" in {
+        testBind(upickleCodec, monixBackend)
+      }
+//      "Upickle / Zio" in {
+//        testBind(upickleCodec, zioBackend)
+//      }
+//      "Circe / Future" in {
+//        testBind(circeCodec, futureBackend)
+//      }
     }
+
   }
+
+  private inline def testBind[Node, CodecType <: Codec[Node], Effect[_]](codec: CodecType, backend: Backend[Effect]): Unit =
+    val api = ApiImpl(backend)
+    val handler = JsonRpcHandler[Node, CodecType, Effect, Short](codec, backend).bind[Api[Effect]](api)
+    val transport = HandlerTransport(handler, backend)
+    val client = JsonRpcClient[Node, CodecType, Effect, Short](codec, backend, transport)
+    val apiProxy = client.bind[Api[Effect]]
 
 object JsonPickler extends AttributeTagged:
 

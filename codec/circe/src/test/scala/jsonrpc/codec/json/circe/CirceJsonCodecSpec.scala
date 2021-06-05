@@ -10,6 +10,7 @@ import jsonrpc.spi.Message.Params
 import jsonrpc.util.ValueOps.asRight
 import jsonrpc.{Enum, Record, Structure}
 import scala.language.implicitConversions
+import io.circe.generic.auto.*
 
 class CirceJsonSpec extends CodecSpec:
 
