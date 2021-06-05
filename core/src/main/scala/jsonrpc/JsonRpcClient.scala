@@ -17,7 +17,7 @@ import scala.util.{Random, Try}
  * The client can be used by an application to perform JSON-RPC calls and notifications.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @constructor Create a new JSON-RPC client using the specified `codec`, `effect` and 'transport' plugins with defined request 'Context' type.
+ * @constructor Create a new JSON-RPC client using the specified ''codec'', ''effect'' and ''transport'' plugins with defined request `Context` type.
  * @param codec message format codec plugin
  * @param effect effect system plugin
  * @param transport message transport plugin
@@ -196,7 +196,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
     )
 
   /**
-   * Create an error effect for a request.
+   * Create an error effect from an exception.
    *
    * @param error exception
    * @param requestMessage request message
@@ -213,7 +213,7 @@ case object JsonRpcClient:
   given NoContext = Empty[JsonRpcClient[?, ?, ?, ?]]()
 
   /**
-   * Create a new JSON-RPC client using the specified `codec`, `effect` and 'transport' plugins without request 'Context' type.
+   * Create a new JSON-RPC client using the specified ''codec'', ''effect'' and ''transport'' plugins without request `Context` type.
    *
    * The client can be used by an application to perform JSON-RPC calls and notifications.
    *

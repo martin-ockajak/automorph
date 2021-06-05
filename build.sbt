@@ -13,7 +13,9 @@ lazy val root = project.in(file(".")).aggregate(
   cats,
   scalaz,
 
-  sttp
+  sttp,
+
+  undertow
 ).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server"
@@ -110,6 +112,16 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
   name := "json-rpc-sttp",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.5"
+  )
+)
+
+// Server
+lazy val undertow = (project in file("server/undertow")).dependsOn(
+  core, test % Test
+).settings(
+  name := "json-rpc-undertow",
+  libraryDependencies ++= Seq(
+    "io.undertow" % "undertow-core" % "2.2.8.Final"
   )
 )
 

@@ -7,7 +7,7 @@ import scala.collection.immutable.ArraySeq
 /**
  * Local handler transport.
  *
- * @param handler request handler layer
+ * @param handler JSON-RPC request handler layer
  * @param effect effect system plugin
  * @tparam Node message format node representation type
  * @tparam CodecType message format codec plugin type

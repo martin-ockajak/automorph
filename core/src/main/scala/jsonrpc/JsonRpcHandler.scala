@@ -20,7 +20,7 @@ import scala.util.Try
  * The handler can be used by a JSON-RPC server to process incoming JSON-RPC requests, invoke the requested API methods and return JSON-RPC responses.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @constructor Create a new JSON-RPC request handler using the specified `codec` and `effect` plugins with defined request 'Context' type.
+ * @constructor Create a new JSON-RPC request handler using the specified ''codec'' and ''effect'' plugins with defined request `Context` type.
  * @param codec message format codec plugin
  * @param effect effect system plugin
  * @param bufferSize input stream reading buffer size
@@ -130,7 +130,21 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @return optional response message
    */
   def processRequest(request: ArraySeq.ofByte)(using context: Context): Outcome[Option[ArraySeq.ofByte]] =
-    handleRequest(request, context)
+    // Deserialize request
+    Try(codec.deserialize(request)).fold(
+      error =>
+        errorResponse(
+          ParseErrorException("Invalid request format", error),
+          Message[Node](None, unknownId.asSome, None, None, None, None)
+        ),
+      formedRequest =>
+        // Validate request
+        logger.trace(s"Received JSON-RPC message:\n${codec.format(formedRequest)}")
+          Try(Request(formedRequest)).fold(
+          error => errorResponse(error, formedRequest),
+          validRequest => invokeMethod(formedRequest, validRequest, context)
+        )
+    )
 
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.
@@ -153,33 +167,6 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     effect.map(
       processRequest(request.toArraySeq(bufferSize))(using context),
       _.map(response => ByteArrayInputStream(response.unsafeArray))
-    )
-
-  /**
-   * Handle a JSON-RPC request.
-   *
-   * @param rawRequest raw request
-   * @param context request context
-   * @return response message
-   */
-  private def handleRequest(
-    rawRequest: ArraySeq.ofByte,
-    context: Context
-  ): Outcome[Option[ArraySeq.ofByte]] =
-    // Deserialize request
-    Try(codec.deserialize(rawRequest)).fold(
-      error =>
-        errorResponse(
-          ParseErrorException("Invalid request format", error),
-          Message[Node](None, unknownId.asSome, None, None, None, None)
-        ),
-      formedRequest =>
-        // Validate request
-        logger.trace(s"Received JSON-RPC message:\n${codec.format(formedRequest)}")
-        Try(Request(formedRequest)).fold(
-          error => errorResponse(error, formedRequest),
-          validRequest => invokeMethod(formedRequest, validRequest, context)
-        )
     )
 
   /**
@@ -310,7 +297,7 @@ case object JsonRpcHandler:
   given NoContext = Empty[JsonRpcHandler[?, ?, ?, ?]]()
 
   /**
-   * Create a new JSON-RPC request handler using the specified `codec` and `effect` plugins without request 'Context' type.
+   * Create a new JSON-RPC request handler using the specified ''codec'' and ''effect'' plugins without request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
    *
@@ -330,7 +317,7 @@ case object JsonRpcHandler:
     new JsonRpcHandler(codec, effect, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
 
   /**
-   * Create a new JSON-RPC request handler using the specified `codec` and `effect` plugins with defined request 'Context' type.
+   * Create a new JSON-RPC request handler using the specified ''codec'' and ''effect'' plugins with defined request Context type.
    *
    * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
    *
