@@ -1,7 +1,7 @@
 package jsonrpc.handler
 
 import java.beans.IntrospectionException
-import jsonrpc.spi.{Codec, Backend}
+import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.core.ApiReflection
 import jsonrpc.util.{Method, Reflection}
 import scala.collection.immutable.ArraySeq
@@ -24,7 +24,8 @@ final case class MethodHandle[Node, Effect[_], Context](
   name: String,
   resultType: String,
   paramNames: Seq[String],
-  parameterTypes: Seq[String]
+  parameterTypes: Seq[String],
+  usesContext: Boolean
 )
 
 case object HandlerMacros:
@@ -92,14 +93,16 @@ case object HandlerMacros:
     api: Expr[ApiType]
   ): Expr[(String, MethodHandle[Node, Effect, Context])] =
     given Quotes = ref.quotes
+
     val liftedMethod = method.lift
     val function = generateBindingFunction[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
     val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
     val parameterTypes = Expr(liftedMethod.parameters.flatMap(_.map(_.dataType)))
+    val usesContext = Expr(methodUsesContext[Context](ref, method))
     '{
-      $name -> MethodHandle($function, $name, $resultType, $parameterNames, $parameterTypes)
+      $name -> MethodHandle($function, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)
     }
 
   private def generateBindingFunction[
@@ -178,15 +181,14 @@ case object HandlerMacros:
             val argumentNodes = arguments.head.asInstanceOf[Term]
             val argumentIndex = Literal(IntConstant(offset + index))
             val argumentNode = callTerm(ref.quotes, argumentNodes, "apply", List.empty, List(List(argumentIndex)))
-            if !ApiReflection.contextEmpty[Context](ref.quotes) && (offset + index) == lastArgumentIndex then
-              arguments.last.asInstanceOf[Term]
-            else
-              callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
+            callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
           }
-        ).asInstanceOf[List[List[Term]]]
+        )
+        val contextArgumentLists = if methodUsesContext[Context](ref, method) then List(List(arguments.last)) else List.empty
+        val allArgumentLists = (argumentLists ++ contextArgumentLists).asInstanceOf[List[List[Term]]]
 
         // Call the method using the decoded arguments
-        callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
+        callTerm(ref.quotes, api.asTerm, method.name, List.empty, allArgumentLists)
 //        val methodCall = callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
 //
 //        // Encode the method call result into a node
@@ -231,6 +233,11 @@ case object HandlerMacros:
     arguments: List[List[quotes.reflect.Term]]
   ): quotes.reflect.Term =
     quotes.reflect.Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(arguments)
+
+  private def methodUsesContext[Context: Type](ref: Reflection, method: ref.QuotedMethod): Boolean =
+    import ref.quotes.reflect.TypeRepr
+
+    method.parameters.flatten.lastOption.exists(_.dataType =:= TypeRepr.of[Context])
 
   private def methodDescription(method: Method): String =
     val documentation = method.documentation.map(_ + "\n").getOrElse("")

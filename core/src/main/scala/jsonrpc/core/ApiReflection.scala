@@ -31,32 +31,16 @@ case object ApiReflection:
     methods.map(method => validateApiMethod(ref, apiType, method))
 
   /**
-   * Determine whether a request context type is empty.
-   *
-   * @param quotes quotation context
-   * @tparam Context request context type
-   * @return true if the context type is empty, false otherwise
-   */
-  def contextEmpty[Context: Type](quotes: Quotes): Boolean =
-    import quotes.reflect.{AppliedType, TypeRepr}
-    given Quotes = quotes
-
-    val contextType = TypeRepr.of[Context]
-    contextType <:< TypeRepr.of[Empty[?]] ||
-      contextType =:= TypeRepr.of[None.type] ||
-      contextType =:= TypeRepr.of[Unit]
-
-  /**
    * Determine whether a method is a valid API method.
    *
    * @param ref reflection context
    * @param apiType API type
    * @param method method
-   * @tparam Outcome effectful computation outcome type
+   * @tparam Effect effect type
    * @tparam Context request context type
    * @return valid API method or an error message
    */
-  private def validateApiMethod[Outcome[_]: Type, Context: Type](
+  private def validateApiMethod[Effect[_]: Type, Context: Type](
     ref: Reflection,
     apiType: ref.quotes.reflect.TypeTree,
     method: ref.QuotedMethod
@@ -68,13 +52,8 @@ case object ApiReflection:
       s"Bound API method '$signature' must not have type parameters".asLeft
     else if !method.available then
       s"Bound API method '$signature' must be callable at runtime".asLeft
-    else if !contextEmpty[Context](ref.quotes) && method.parameters.lastOption.map { parameters =>
-        !(parameters.lastOption.exists(_.dataType =:= TypeRepr.of[Context]))
-      }.getOrElse(true)
-    then
-      s"Bound API method '$signature' must accept the specified request context type '${TypeRepr.of[Context].show}' as its last parameter".asLeft
     else
-      TypeRepr.of[Outcome] match
+      TypeRepr.of[Effect] match
         case lambdaType: LambdaType =>
           if method.resultType match
               case appliedType: AppliedType => !(appliedType.tycon =:= lambdaType)
