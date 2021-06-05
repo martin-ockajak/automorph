@@ -5,7 +5,7 @@ import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
-import jsonrpc.spi.{Codec, Effect, Message, MessageError, Transport}
+import jsonrpc.spi.{Codec, Backend, Message, MessageError, Transport}
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
 import jsonrpc.util.CannotEqual
 import scala.collection.immutable.ArraySeq
@@ -17,19 +17,19 @@ import scala.util.{Random, Try}
  * The client can be used by an application to perform JSON-RPC calls and notifications.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @constructor Create a JSON-RPC client using the specified ''codec'', ''effect'' and ''transport'' plugins with defined request `Context` type.
- * @param codec message format codec plugin
- * @param effect effect system plugin
+ * @constructor Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with defined request `Context` type.
+ * @param codec message codec plugin
+ * @param backend effect backend plugin
  * @param transport message transport plugin
  * @tparam Node message format node representation type
- * @tparam CodecType message format codec plugin type
- * @tparam Outcome effectful computation outcome type
+ * @tparam CodecType message codec plugin type
+ * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Context](
+final case class JsonRpcClient[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
-  effect: Effect[Outcome],
-  transport: Transport[Outcome, Context]
+  backend: Backend[Effect],
+  transport: Transport[Effect, Context]
 ) extends CannotEqual with Logging:
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
@@ -45,7 +45,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return result value
    */
-  inline def call[A <: Product, R](method: String, arguments: A)(using context: Context): Outcome[R] =
+  inline def call[A <: Product, R](method: String, arguments: A)(using context: Context): Effect[R] =
     performCall(method, encodeArguments(arguments), context, decodeResult[R])
 
   /**
@@ -59,7 +59,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return nothing
    */
-  inline def notify[A <: Product](method: String, arguments: A)(using context: Context): Outcome[Unit] =
+  inline def notify[A <: Product](method: String, arguments: A)(using context: Context): Effect[Unit] =
     performNotify(method, encodeArguments(arguments), context)
 
   /**
@@ -70,7 +70,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam T remote API type
    * @return remote API proxy instance
    */
-  inline def bind[T <: AnyRef]: T = ClientMacros.bind[Node, CodecType, Outcome, Context, T](codec, effect)
+  inline def bind[T <: AnyRef]: T = ClientMacros.bind[Node, CodecType, Effect, Context, T](codec, backend)
 
   /**
    * Encode request arguments by name.
@@ -108,16 +108,16 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
     arguments: Params[Node],
     context: Context,
     decodeResult: Node => R
-  ): Outcome[R] =
+  ): Effect[R] =
     val id = Math.abs(random.nextLong()).toString.asRight[BigDecimal].asSome
     val formedRequest = Request(id, method, arguments).formed
     logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
-    effect.flatMap(
+    backend.flatMap(
       // Serialize request
       serialize(formedRequest),
       rawRequest =>
         // Send request
-        effect.flatMap(
+        backend.flatMap(
           transport.call(rawRequest, context),
           // Process response
           rawResponse => processResponse[R](rawResponse, formedRequest, decodeResult)
@@ -135,9 +135,9 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam R result type
    * @return nothing
    */
-  private def performNotify(methodName: String, arguments: Params[Node], context: Context): Outcome[Unit] =
+  private def performNotify(methodName: String, arguments: Params[Node], context: Context): Effect[Unit] =
     val formedRequest = Request(None, methodName, arguments).formed
-    effect.map(
+    backend.map(
       // Serialize request
       serialize(formedRequest),
       rawRequest =>
@@ -158,7 +158,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
     rawResponse: ArraySeq.ofByte,
     formedRequest: Message[Node],
     decodeResult: Node => R
-  ): Outcome[R] =
+  ): Effect[R] =
     // Deserialize response
     Try(codec.deserialize(rawResponse)).fold(
       error => raiseError(ParseErrorException("Invalid response format", error), formedRequest),
@@ -176,7 +176,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
                   error => raiseError(error, formedRequest),
                   result =>
                     logger.info(s"Performed JSON-RPC request", formedRequest.properties)
-                    effect.pure(result)
+                    backend.pure(result)
                 )
             )
         )
@@ -188,11 +188,11 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @param formedMessage JSON-RPC message
    * @return serialized response
    */
-  private def serialize(formedMessage: Message[Node]): Outcome[ArraySeq.ofByte] =
+  private def serialize(formedMessage: Message[Node]): Effect[ArraySeq.ofByte] =
     logger.trace(s"Sending JSON-RPC message:\n${codec.format(formedMessage)}")
     Try(codec.serialize(formedMessage)).fold(
       error => raiseError(ParseErrorException("Invalid message format", error), formedMessage),
-      message => effect.pure(message)
+      message => backend.pure(message)
     )
 
   /**
@@ -203,9 +203,9 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Outcome[_], Conte
    * @tparam T effectful value type
    * @return error value
    */
-  private def raiseError[T](error: Throwable, requestMessage: Message[Node]): Outcome[T] =
+  private def raiseError[T](error: Throwable, requestMessage: Message[Node]): Effect[T] =
     logger.error(s"Failed to perform JSON-RPC request", error, requestMessage.properties)
-    effect.failed(error)
+    backend.failed(error)
 
 case object JsonRpcClient:
 
@@ -213,21 +213,21 @@ case object JsonRpcClient:
   given NoContext = Empty[JsonRpcClient[?, ?, ?, ?]]()
 
   /**
-   * Create a JSON-RPC client using the specified ''codec'', ''effect'' and ''transport'' plugins without request `Context` type.
+   * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins without request `Context` type.
    *
    * The client can be used by an application to perform JSON-RPC calls and notifications.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec hierarchical message format codec plugin
-   * @param effect computation effect system plugin
+   * @param codec message codec plugin
+   * @param backend effect backend plugin
    * @param bufferSize input stream reading buffer size
    * @tparam Node message format node representation type
-   * @tparam Outcome computation outcome effect type
+   * @tparam Effect effect type
    * @return JSON-RPC request client
    */
-  inline def basic[Node, CodecType <: Codec[Node], Outcome[_]](
+  inline def basic[Node, CodecType <: Codec[Node], Effect[_]](
     codec: CodecType,
-    effect: Effect[Outcome],
-    transport: Transport[Outcome, NoContext]
-  ): JsonRpcClient[Node, CodecType, Outcome, NoContext] =
-    new JsonRpcClient(codec, effect, transport)
+    backend: Backend[Effect],
+    transport: Transport[Effect, NoContext]
+  ): JsonRpcClient[Node, CodecType, Effect, NoContext] =
+    new JsonRpcClient(codec, backend, transport)

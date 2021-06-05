@@ -1,7 +1,7 @@
 package jsonrpc.transport.http.sttp
 
 import jsonrpc.util.EncodingOps.asArraySeq
-import jsonrpc.spi.{Effect, Transport}
+import jsonrpc.spi.{Backend, Transport}
 import scala.collection.immutable.ArraySeq
 import sttp.client3.{Identity, PartialRequest, Request, SttpApi, SttpBackend}
 import sttp.model.{Header, MediaType, Method, Uri}
@@ -20,7 +20,7 @@ case class SttpTransport[Outcome[_]](
   url: Uri,
   method: Method,
   backend: SttpBackend[Outcome, ?],
-  effect: Effect[Outcome]
+  effect: Backend[Outcome]
 ) extends Transport[Outcome, PartialRequest[Either[String, String], Any]] with SttpApi:
 
   private val contentType = MediaType.ApplicationJson

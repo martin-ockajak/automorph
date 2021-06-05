@@ -1,6 +1,6 @@
 package jsonrpc.spi
 
-import jsonrpc.spi.Effect
+import jsonrpc.spi.Backend
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -8,10 +8,10 @@ import scala.collection.immutable.ArraySeq
  *
  * The transport is used by a client to send requests and receive responses to and from a remote endpoint.
  *
- * @tparam Outcome effectful computation outcome type
+ * @tparam Effect effect type
  * @tparam Context request context type
  */
-trait Transport[Outcome[_], Context]:
+trait Transport[Effect[_], Context]:
 
   /**
    * Send a ''request'' to a remote endpoint and retrieve the ''response''.
@@ -22,7 +22,7 @@ trait Transport[Outcome[_], Context]:
    * @param context request context
    * @return response message
    */
-  def call(request: ArraySeq.ofByte, context: Context): Outcome[ArraySeq.ofByte]
+  def call(request: ArraySeq.ofByte, context: Context): Effect[ArraySeq.ofByte]
 
   /**
    * Send a ''request'' to a remote endpoint without retrieving a response.
@@ -33,4 +33,4 @@ trait Transport[Outcome[_], Context]:
    * @param context request context
    * @return nothing
    */
-  def notify(request: ArraySeq.ofByte, context: Context): Outcome[Unit]
+  def notify(request: ArraySeq.ofByte, context: Context): Effect[Unit]

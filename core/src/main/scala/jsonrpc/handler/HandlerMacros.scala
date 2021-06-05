@@ -1,7 +1,7 @@
 package jsonrpc.handler
 
 import java.beans.IntrospectionException
-import jsonrpc.spi.{Codec, Effect}
+import jsonrpc.spi.{Codec, Backend}
 import jsonrpc.core.ApiReflection
 import jsonrpc.util.{Method, Reflection}
 import scala.collection.immutable.ArraySeq
@@ -16,11 +16,11 @@ import scala.quoted.{quotes, Expr, Quotes, Type}
  * @param paramNames parameter names
  * @param parameterTypes paramter types
  * @tparam Node message format node representation type
- * @tparam Outcome computation outcome effect type
+ * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class MethodHandle[Node, Outcome[_], Context](
-  function: (Seq[Node], Context) => Outcome[Node],
+final case class MethodHandle[Node, Effect[_], Context](
+  function: (Seq[Node], Context) => Effect[Node],
   name: String,
   resultType: String,
   paramNames: Seq[String],
@@ -32,34 +32,34 @@ case object HandlerMacros:
   /**
    * Generate JSON-RPC bindings for all valid public methods of an API type.
    *
-   * @param codec message format codec
-   * @param effect effect system
+   * @param codec message format codec plugin
+   * @param backend effect backend plugin
    * @param api API instance
    * @tparam Node message format node representation type
    * @tparam CodecType message format codec type
-   * @tparam Outcome computation outcome effect type
+   * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam ApiType API type
    * @return mapping of method names to their JSON-RPC wrapper functions
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[Node, CodecType <: Codec[Node], Outcome[_], Context, ApiType <: AnyRef](
+  inline def bind[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
     codec: CodecType,
-    effect: Effect[Outcome],
+    backend: Backend[Effect],
     api: ApiType
-  ): Map[String, MethodHandle[Node, Outcome, Context]] =
-    ${ bind[Node, CodecType, Outcome, Context, ApiType]('codec, 'effect, 'api) }
+  ): Map[String, MethodHandle[Node, Effect, Context]] =
+    ${ bind[Node, CodecType, Effect, Context, ApiType]('codec, 'backend, 'api) }
 
-  private def bind[Node: Type, CodecType <: Codec[Node]: Type, Outcome[_]: Type, Context: Type, ApiType <: AnyRef: Type](
+  private def bind[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type, Context: Type, ApiType <: AnyRef: Type](
     codec: Expr[CodecType],
-    effect: Expr[Effect[Outcome]],
+    backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
-  )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Outcome, Context]]] =
+  )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Effect, Context]]] =
     import ref.quotes.reflect.{asTerm, TypeRepr, TypeTree}
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = ApiReflection.detectApiMethods[Outcome, Context](ref, TypeTree.of[ApiType])
+    val apiMethods = ApiReflection.detectApiMethods[Effect, Context](ref, TypeTree.of[ApiType])
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if invalidMethodErrors.nonEmpty then
@@ -72,28 +72,28 @@ case object HandlerMacros:
 
     // Generate API method handles including wrapper functions consuming and product Node values
     val methodHandles = Expr.ofSeq(validMethods.map { method =>
-      generateMethodHandle[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
+      generateMethodHandle[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
     })
     '{
-      $methodHandles.toMap[String, MethodHandle[Node, Outcome, Context]]
+      $methodHandles.toMap[String, MethodHandle[Node, Effect, Context]]
     }
 
   private def generateMethodHandle[
     Node: Type,
     CodecType <: Codec[Node]: Type,
-    Outcome[_]: Type,
+    Effect[_]: Type,
     Context: Type,
     ApiType: Type
   ](
     ref: Reflection,
     method: ref.QuotedMethod,
     codec: Expr[CodecType],
-    effect: Expr[Effect[Outcome]],
+    backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
-  ): Expr[(String, MethodHandle[Node, Outcome, Context])] =
+  ): Expr[(String, MethodHandle[Node, Effect, Context])] =
     given Quotes = ref.quotes
     val liftedMethod = method.lift
-    val function = generateBindingFunction[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
+    val function = generateBindingFunction[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
     val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
@@ -105,22 +105,22 @@ case object HandlerMacros:
   private def generateBindingFunction[
     Node: Type,
     CodecType <: Codec[Node]: Type,
-    Outcome[_]: Type,
+    Effect[_]: Type,
     Context: Type,
     ApiType: Type
   ](
     ref: Reflection,
     method: ref.QuotedMethod,
     codec: Expr[CodecType],
-    effect: Expr[Effect[Outcome]],
+    backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
-  ): Expr[(Seq[Node], Context) => Outcome[Node]] =
+  ): Expr[(Seq[Node], Context) => Effect[Node]] =
     import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Printer, Symbol, Term, Tree, TypeRepr}
     given Quotes = ref.quotes
 
     // Method call function expression consuming argument nodes and returning the method call result
     val decodeArgumentsAndCallMethod =
-      decodeArgumentsAndCallMethodExpr[Node, CodecType, Outcome, Context, ApiType](ref, method, codec, effect, api)
+      decodeArgumentsAndCallMethodExpr[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
 
     // Result conversion function expression consuming the method result and returning a node
     val encodeResult = encodeResultExpr[Node, CodecType](ref, method, codec)
@@ -128,7 +128,7 @@ case object HandlerMacros:
     // Binding function expression
     val bindingFunction = '{
       (argumentNodes: Seq[Node], context: Context) =>
-        $effect.map(
+        $backend.map(
           $decodeArgumentsAndCallMethod(argumentNodes, context),
           $encodeResult.asInstanceOf[Any => Node]
         )
@@ -146,16 +146,16 @@ case object HandlerMacros:
   private def decodeArgumentsAndCallMethodExpr[
     Node: Type,
     CodecType <: Codec[Node]: Type,
-    Outcome[_]: Type,
+    Effect[_]: Type,
     Context: Type,
     ApiType: Type
   ](
     ref: Reflection,
     method: ref.QuotedMethod,
     codec: Expr[CodecType],
-    effect: Expr[Effect[Outcome]],
+    backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
-  ): Expr[(Seq[Node], Context) => Outcome[Any]] =
+  ): Expr[(Seq[Node], Context) => Effect[Any]] =
     import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
@@ -191,8 +191,8 @@ case object HandlerMacros:
 //
 //        // Encode the method call result into a node
 //        val encodeResult = encodeResultExpr[Node, CodecType](ref, method, codec)
-//        callTerm(ref.quotes, effect.asTerm, "map", List(method.resultType, TypeRepr.of[Node]), List(List(methodCall, convertResult.asTerm)))
-    ).asExpr.asInstanceOf[Expr[(Seq[Node], Context) => Outcome[Any]]]
+//        callTerm(ref.quotes, backend.asTerm, "map", List(method.resultType, TypeRepr.of[Node]), List(List(methodCall, convertResult.asTerm)))
+    ).asExpr.asInstanceOf[Expr[(Seq[Node], Context) => Effect[Any]]]
 
   private def encodeResultExpr[Node: Type, CodecType <: Codec[Node]: Type](
     ref: Reflection,

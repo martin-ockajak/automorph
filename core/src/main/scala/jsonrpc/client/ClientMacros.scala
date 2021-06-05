@@ -1,7 +1,7 @@
 package jsonrpc.client
 
 import java.beans.IntrospectionException
-import jsonrpc.spi.{Codec, Effect}
+import jsonrpc.spi.{Codec, Backend}
 import jsonrpc.core.ApiReflection
 import jsonrpc.handler.HandlerMacros.{generateMethodHandle, methodDescription}
 import jsonrpc.handler.MethodHandle
@@ -14,31 +14,31 @@ case object ClientMacros:
   /**
    * Generate proxy instance with JSON-RPC bindings for all valid public methods of an API type.
    *
-   * @param codec message format codec
-   * @param effect effect system
+   * @param codec message format codec plugin
+   * @param backend effect backend plugin
    * @tparam Node message format node representation type
    * @tparam CodecType message format codec type
-   * @tparam Outcome computation outcome effect type
+   * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam ApiType API type
    * @return mapping of method names to their JSON-RPC wrapper functions
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[Node, CodecType <: Codec[Node], Outcome[_], Context, ApiType <: AnyRef](
+  inline def bind[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
     codec: CodecType,
-    effect: Effect[Outcome]
+    backend: Backend[Effect]
   ): ApiType =
-    ${ bind[Node, CodecType, Outcome, Context, ApiType]('codec, 'effect) }
+    ${ bind[Node, CodecType, Effect, Context, ApiType]('codec, 'backend) }
 
-  private def bind[Node: Type, CodecType <: Codec[Node]: Type, Outcome[_]: Type, Context: Type, ApiType <: AnyRef: Type](
+  private def bind[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type, Context: Type, ApiType <: AnyRef: Type](
     codec: Expr[CodecType],
-    effect: Expr[Effect[Outcome]]
+    backend: Expr[Backend[Effect]]
   )(using quotes: Quotes): Expr[ApiType] =
     import ref.quotes.reflect.{asTerm, Block, Printer, Symbol, TypeDef, TypeRepr, TypeTree}
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = ApiReflection.detectApiMethods[Outcome, Context](ref, TypeTree.of[ApiType])
+    val apiMethods = ApiReflection.detectApiMethods[Effect, Context](ref, TypeTree.of[ApiType])
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if invalidMethodErrors.nonEmpty then

@@ -9,7 +9,7 @@ import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
 import jsonrpc.http.undertow.UndertowJsonRpcHandler.defaultStatusCodes
 import jsonrpc.log.Logging
-import jsonrpc.spi.{Codec, Effect}
+import jsonrpc.spi.{Codec, Backend}
 import jsonrpc.util.EncodingOps.asArraySeq
 import jsonrpc.util.EncodingOps.toArraySeq
 import scala.collection.immutable.ArraySeq
@@ -26,15 +26,15 @@ import scala.util.Try
  * @param handler JSON-RPC request handler
  * @param effectRunAsync asynchronous effect execution function
  * @param errorStatusCode JSON-RPC error code to HTTP status code mapping function
- * @tparam Outcome effectful computation outcome type
+ * @tparam Effect effect type
  */
-final case class UndertowJsonRpcHandler[Outcome[_]](
-  handler: JsonRpcHandler[?, ?, Outcome, HttpServerExchange],
-  effectRunAsync: Outcome[Any] => Unit,
+final case class UndertowJsonRpcHandler[Effect[_]](
+  handler: JsonRpcHandler[?, ?, Effect, HttpServerExchange],
+  effectRunAsync: Effect[Any] => Unit,
   errorStatusCode: Int => Int = defaultStatusCodes
 ) extends HttpHandler with Logging:
 
-  private val effect = handler.effect
+  private val backend = handler.backend
 
   private val receiveCallback = new Receiver.FullBytesCallback:
 
@@ -45,8 +45,8 @@ final case class UndertowJsonRpcHandler[Outcome[_]](
 
         override def run(): Unit =
           // Process the request
-          effectRunAsync(effect.map(
-            effect.either(handler.processRequest(request.asArraySeq)(using exchange)),
+          effectRunAsync(backend.map(
+            backend.either(handler.processRequest(request.asArraySeq)(using exchange)),
             _.fold(
               error => sendServerError(error, exchange),
               result =>

@@ -2,9 +2,9 @@ package jsonrpc
 
 import base.BaseSpec
 import jsonrpc.JsonRpcHandler.NoContext
+import jsonrpc.backend.standard.{FutureBackend, NoBackend}
 import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
-import jsonrpc.effect.standard.{FutureEffect, NoEffect}
 import jsonrpc.transport.local.HandlerTransport
 import jsonrpc.{ApiImpl, Enum, JsonRpcHandler, Record, SimpleApi, Structure}
 import scala.collection.immutable.ArraySeq
@@ -18,14 +18,14 @@ class HandlerSpec extends BaseSpec:
       "Default" in {
         val api = ApiImpl("")
         val simpleApi = SimpleApi()
-        JsonRpcHandler[String, DummyJsonCodec, NoEffect.Identity, String](DummyJsonCodec(), NoEffect()).bind(simpleApi)
-        val handler = JsonRpcHandler[String, DummyJsonCodec, NoEffect.Identity, NoContext](DummyJsonCodec(), NoEffect())
+        JsonRpcHandler[String, DummyJsonCodec, NoBackend.Identity, String](DummyJsonCodec(), NoBackend()).bind(simpleApi)
+        val handler = JsonRpcHandler[String, DummyJsonCodec, NoBackend.Identity, NoContext](DummyJsonCodec(), NoBackend())
 //        val futureHandler = JsonRpcHandler.basic(DummyJsonCodec(), FutureEffect()).bind(api)
-        val futureHandler = JsonRpcHandler.basic(UpickleJsonCodec(JsonPickler), FutureEffect()).bind(api)
+        val futureHandler = JsonRpcHandler.basic(UpickleJsonCodec(JsonPickler), FutureBackend()).bind(api)
 //        futureHandler.processRequest(ArraySeq.ofByte(Array.empty[Byte]))
 
-        val transport = HandlerTransport(handler, NoEffect())
-        val client = JsonRpcClient[String, DummyJsonCodec, NoEffect.Identity, NoContext](DummyJsonCodec(), NoEffect(), transport)
+        val transport = HandlerTransport(handler, NoBackend())
+        val client = JsonRpcClient[String, DummyJsonCodec, NoBackend.Identity, NoContext](DummyJsonCodec(), NoBackend(), transport)
         client.bind[Api]
         (0 == 0).shouldBe(true)
 

@@ -72,7 +72,7 @@ lazy val circe = (project in file("codec/circe")).dependsOn(
 )
 
 // Effect
-lazy val zio = (project in file("effect/zio")).dependsOn(
+lazy val zio = (project in file("backend/zio")).dependsOn(
   util, spi, test % Test
 ).settings(
   name := "json-rpc-zio",
@@ -80,7 +80,7 @@ lazy val zio = (project in file("effect/zio")).dependsOn(
     "dev.zio" %% "zio" % "1.0.8"
   )
 )
-lazy val monix = (project in file("effect/monix")).dependsOn(
+lazy val monix = (project in file("backend/monix")).dependsOn(
   util, spi, test % Test
 ).settings(
   name := "json-rpc-monix",
@@ -88,7 +88,7 @@ lazy val monix = (project in file("effect/monix")).dependsOn(
     "io.monix" %% "monix-eval" % "3.4.0"
   )
 )
-lazy val cats = (project in file("effect/cats")).dependsOn(
+lazy val cats = (project in file("backend/cats")).dependsOn(
   util, spi, test % Test
 ).settings(
   name := "json-rpc-cats",
@@ -96,7 +96,7 @@ lazy val cats = (project in file("effect/cats")).dependsOn(
     "org.typelevel" %% "cats-effect" % "3.1.1"
   )
 )
-lazy val scalaz = (project in file("effect/scalaz")).dependsOn(
+lazy val scalaz = (project in file("backend/scalaz")).dependsOn(
   util, spi, test % Test
 ).settings(
   name := "json-rpc-scalaz",

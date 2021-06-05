@@ -7,7 +7,7 @@ import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMacros, MethodHandle}
 import jsonrpc.log.Logging
-import jsonrpc.spi.{Codec, Effect, Message, MessageError}
+import jsonrpc.spi.{Codec, Backend, Message, MessageError}
 import jsonrpc.util.EncodingOps.toArraySeq
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import jsonrpc.util.CannotEqual
@@ -20,20 +20,20 @@ import scala.util.Try
  * The handler can be used by a JSON-RPC server to process incoming JSON-RPC requests, invoke the requested API methods and return JSON-RPC responses.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @constructor Create a new JSON-RPC request handler using the specified ''codec'' and ''effect'' plugins with defined request `Context` type.
- * @param codec message format codec plugin
- * @param effect effect system plugin
+ * @constructor Create a new JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context` type.
+ * @param codec message codec plugin
+ * @param backend effect backend plugin
  * @param bufferSize input stream reading buffer size
  * @tparam Node message format node representation type
- * @tparam CodecType message format codec plugin type
- * @tparam Outcome effectful computation outcome type
+ * @tparam CodecType message codec plugin type
+ * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Context](
+final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
-  effect: Effect[Outcome],
+  backend: Backend[Effect],
   bufferSize: Int,
-  private val methodBindings: Map[String, MethodHandle[Node, Outcome, Context]],
+  private val methodBindings: Map[String, MethodHandle[Node, Effect, Context]],
   private val encodeStrings: Seq[String] => Node
 ) extends CannotEqual with Logging:
 
@@ -58,7 +58,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, CodecType, Outcome, Context] = bind(api, name => Seq(name))
+  inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, CodecType, Effect, Context] = bind(api, name => Seq(name))
 
   /**
    * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
@@ -83,7 +83,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   inline def bind[T <: AnyRef](
     api: T,
     exposedNames: String => Seq[String]
-  ): JsonRpcHandler[Node, CodecType, Outcome, Context] =
+  ): JsonRpcHandler[Node, CodecType, Effect, Context] =
     bind(api, Function.unlift(name => Some(exposedNames(name))))
 
   /**
@@ -109,9 +109,9 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   inline def bind[T <: AnyRef](
     api: T,
     exposedNames: PartialFunction[String, Seq[String]]
-  ): JsonRpcHandler[Node, CodecType, Outcome, Context] =
+  ): JsonRpcHandler[Node, CodecType, Effect, Context] =
     val bindings =
-      HandlerMacros.bind[Node, CodecType, Outcome, Context, T](codec, effect, api).flatMap { (methodName, method) =>
+      HandlerMacros.bind[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap { (methodName, method) =>
         exposedNames.applyOrElse(
           methodName,
           _ =>
@@ -129,7 +129,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param context request context
    * @return optional response message
    */
-  def processRequest(request: ArraySeq.ofByte)(using context: Context): Outcome[HandlerResult[ArraySeq.ofByte]] =
+  def processRequest(request: ArraySeq.ofByte)(using context: Context): Effect[HandlerResult[ArraySeq.ofByte]] =
     // Deserialize request
     Try(codec.deserialize(request)).fold(
       error =>
@@ -153,8 +153,8 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param context request context
    * @return optional response message
    */
-  def processRequest(request: ByteBuffer)(using context: Context): Outcome[HandlerResult[ByteBuffer]] =
-    effect.map(
+  def processRequest(request: ByteBuffer)(using context: Context): Effect[HandlerResult[ByteBuffer]] =
+    backend.map(
       processRequest(request.toArraySeq)(using context),
       result => result.copy(response = result.response.map(response => ByteBuffer.wrap(response.unsafeArray)))
     )
@@ -166,8 +166,8 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param context request context
    * @return optional response message
    */
-  def processRequest(request: InputStream)(using context: Context): Outcome[HandlerResult[InputStream]] =
-    effect.map(
+  def processRequest(request: InputStream)(using context: Context): Effect[HandlerResult[InputStream]] =
+    backend.map(
       processRequest(request.toArraySeq(bufferSize))(using context),
       result => result.copy(response = result.response.map(response => ByteArrayInputStream(response.unsafeArray)))
     )
@@ -186,7 +186,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     formedRequest: Message[Node],
     validRequest: Request[Node],
     context: Context
-  ): Outcome[HandlerResult[ArraySeq.ofByte]] =
+  ): Effect[HandlerResult[ArraySeq.ofByte]] =
     logger.debug(s"Processing JSON-RPC request", formedRequest.properties)
     methodBindings.get(validRequest.method).map { methodHandle =>
       // Extract arguments
@@ -194,22 +194,22 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
       val arguments = extractArguments(validRequest, contextEmpty, methodHandle)
 
       // Invoke method
-      Try(effect.either(methodHandle.function(arguments, context))).fold(
+      Try(backend.either(methodHandle.function(arguments, context))).fold(
         error => errorResponse(error, formedRequest),
         outcome =>
-          effect.flatMap(
+          backend.flatMap(
             outcome,
             // Process result
             _.fold(
               error => errorResponse(error, formedRequest),
               result =>
-                effect.map(
+                backend.map(
                   validRequest.id.map { id =>
                     // Serialize response
                     val validResponse = Response(id, result.asRight)
                     logger.info(s"Processed JSON-RPC request", formedRequest.properties)
                     serialize(validResponse.formed)
-                  }.getOrElse(effect.pure(None)),
+                  }.getOrElse(backend.pure(None)),
                   rawResponse =>
                     HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
                 )
@@ -236,7 +236,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
   private def extractArguments(
     validRequest: Request[Node],
     contextEmpty: Boolean,
-    methodHandle: MethodHandle[Node, Outcome, Context]
+    methodHandle: MethodHandle[Node, Effect, Context]
   ): Seq[Node] =
     val parameters = methodHandle.paramNames.dropRight(if contextEmpty then 0 else 1)
     validRequest.params.fold(
@@ -265,10 +265,10 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param formedRequest formed request
    * @return error response if applicable
    */
-  private def errorResponse(error: Throwable, formedRequest: Message[Node]): Outcome[HandlerResult[ArraySeq.ofByte]] =
+  private def errorResponse(error: Throwable, formedRequest: Message[Node]): Effect[HandlerResult[ArraySeq.ofByte]] =
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
     val code = Protocol.exceptionError(error.getClass).code
-    effect.map(
+    backend.map(
       formedRequest.id.map { id =>
         // Assemble error details
         val errorDetails = Protocol.errorDetails(error)
@@ -278,7 +278,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
         // Serialize response
         val validResponse = Response[Node](id, ResponseError(code, message, data).asLeft)
         serialize(validResponse.formed)
-      }.getOrElse(effect.pure(None)),
+      }.getOrElse(backend.pure(None)),
       rawResponse =>
         HandlerResult(rawResponse, formedRequest.id, formedRequest.method, code.asSome)
     )
@@ -289,16 +289,16 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param formedMessage JSON-RPC message
    * @return serialized response
    */
-  private def serialize(formedMessage: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
+  private def serialize(formedMessage: Message[Node]): Effect[Option[ArraySeq.ofByte]] =
     logger.trace(s"Sending JSON-RPC message:\n${codec.format(formedMessage)}")
     Try(codec.serialize(formedMessage)).fold(
-      error => effect.failed(ParseErrorException("Invalid message format", error)),
-      message => effect.pure(message.asSome)
+      error => backend.failed(ParseErrorException("Invalid message format", error)),
+      message => backend.pure(message.asSome)
     )
 
   override def toString: String =
     val codecName = codec.className
-    val effectName = effect.className
+    val effectName = backend.className
     val boundMethods = methodBindings.size
     s"$JsonRpcHandler(Codec: $codecName, Effect: $effectName, Bound methods: $boundMethods)"
 
@@ -308,44 +308,44 @@ case object JsonRpcHandler:
   given NoContext = Empty[JsonRpcHandler[?, ?, ?, ?]]()
 
   /**
-   * Create a JSON-RPC request handler using the specified ''codec'' and ''effect'' plugins without request `Context` type.
+   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec hierarchical message format codec plugin
-   * @param effect computation effect system plugin
+   * @param codec hierarchical message codec plugin
+   * @param backend effect backend plugin
    * @param bufferSize input stream reading buffer size
    * @tparam Node message format node representation type
-   * @tparam Outcome computation outcome effect type
+   * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  inline def basic[Node, CodecType <: Codec[Node], Outcome[_]](
+  inline def basic[Node, CodecType <: Codec[Node], Effect[_]](
     codec: CodecType,
-    effect: Effect[Outcome],
+    backend: Backend[Effect],
     bufferSize: Int = 4096
-  ): JsonRpcHandler[Node, CodecType, Outcome, NoContext] =
-    new JsonRpcHandler(codec, effect, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
+  ): JsonRpcHandler[Node, CodecType, Effect, NoContext] =
+    new JsonRpcHandler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
 
   /**
-   * Create a JSON-RPC request handler using the specified ''codec'' and ''effect'' plugins with defined request Context type.
+   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
    *
    * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec hierarchical message format codec plugin
-   * @param effect computation effect system plugin
+   * @param codec message codec plugin
+   * @param backend effect backend plugin
    * @param bufferSize input stream reading buffer size
    * @tparam Node message format node representation type
-   * @tparam Outcome computation outcome effect type
+   * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  inline def apply[Node, CodecType <: Codec[Node], Outcome[_], Context](
+  inline def apply[Node, CodecType <: Codec[Node], Effect[_], Context](
     codec: CodecType,
-    effect: Effect[Outcome],
+    backend: Backend[Effect],
     bufferSize: Int = 4096
-  ): JsonRpcHandler[Node, CodecType, Outcome, Context] =
-    new JsonRpcHandler(codec, effect, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
+  ): JsonRpcHandler[Node, CodecType, Effect, Context] =
+    new JsonRpcHandler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
 
 final case class HandlerResult[T](
   response: Option[T],
