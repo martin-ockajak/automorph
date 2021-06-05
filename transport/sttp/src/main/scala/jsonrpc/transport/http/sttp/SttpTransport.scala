@@ -12,38 +12,38 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @see [[https://sttp.softwaremill.com/en/latest/index.html Documentation]]
  * @param url endpoint URL
  * @param method HTTP method
- * @param backend STTP backend
- * @param effect effect system plugin
- * @tparam Outcome effectful computation outcome type
+ * @param sttpBackend STTP backend
+ * @param backend effect backend plugin
+ * @tparam Effect effect type
  */
-case class SttpTransport[Outcome[_]](
+case class SttpTransport[Effect[_]](
   url: Uri,
   method: Method,
-  backend: SttpBackend[Outcome, ?],
-  effect: Backend[Outcome]
-) extends Transport[Outcome, PartialRequest[Either[String, String], Any]] with SttpApi:
+  sttpBackend: SttpBackend[Effect, ?],
+  backend: Backend[Effect]
+) extends Transport[Effect, PartialRequest[Either[String, String], Any]] with SttpApi:
 
   private val contentType = MediaType.ApplicationJson
 
   override def call(
     request: ArraySeq.ofByte,
     context: PartialRequest[Either[String, String], Any]
-  ): Outcome[ArraySeq.ofByte] =
+  ): Effect[ArraySeq.ofByte] =
     val httpRequest = setupHttpRequest(request, context).response(asByteArray)
-    effect.flatMap(
-      httpRequest.send(backend),
+    backend.flatMap(
+      httpRequest.send(sttpBackend),
       _.body.fold(
-        error => effect.failed(IllegalStateException(error)),
-        response => effect.pure(response.asArraySeq)
+        error => backend.failed(IllegalStateException(error)),
+        response => backend.pure(response.asArraySeq)
       )
     )
 
   override def notify(
     request: ArraySeq.ofByte,
     context: PartialRequest[Either[String, String], Any]
-  ): Outcome[Unit] =
+  ): Effect[Unit] =
     val httpRequest = setupHttpRequest(request, context).response(ignore)
-    effect.map(httpRequest.send(backend), _.body)
+    backend.map(httpRequest.send(sttpBackend), _.body)
 
   private def setupHttpRequest(
     request: ArraySeq.ofByte,
