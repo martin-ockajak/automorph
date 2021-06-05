@@ -20,8 +20,8 @@ case class HandlerTransport[Node, CodecType <: Codec[Node], Outcome[_], Context]
 ) extends Transport[Outcome, Context]:
 
   def call(request: ArraySeq.ofByte, context: Context): Outcome[ArraySeq.ofByte] =
-    effect.map(handler.processRequest(request)(using context), { response =>
-      response.getOrElse(throw IllegalStateException("Missing call response"))
+    effect.map(handler.processRequest(request)(using context), { result =>
+      result.response.getOrElse(throw IllegalStateException("Missing call response"))
     })
 
   def notify(request: ArraySeq.ofByte, context: Context): Outcome[Unit] =

@@ -4,7 +4,6 @@ import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, StatusCodes}
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
 import jsonrpc.JsonRpcHandler
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
@@ -12,6 +11,7 @@ import jsonrpc.http.undertow.UndertowJsonRpcHandler.defaultStatusCodes
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Codec, Effect}
 import jsonrpc.util.EncodingOps.asArraySeq
+import jsonrpc.util.EncodingOps.toArraySeq
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -39,7 +39,8 @@ final case class UndertowJsonRpcHandler[Outcome[_]](
   private val receiveCallback = new Receiver.FullBytesCallback:
 
     override def handle(exchange: HttpServerExchange, request: Array[Byte]): Unit =
-      logger.debug("Received HTTP request", Map("Client" -> clientAddress(exchange)))
+      val client = clientAddress(exchange)
+      logger.debug("Received HTTP request", Map("Client" -> client))
       exchange.dispatch(new Runnable:
 
         override def run(): Unit =
@@ -50,12 +51,9 @@ final case class UndertowJsonRpcHandler[Outcome[_]](
               error => sendServerError(error, exchange),
               result =>
                 // Send the response
-                val client = clientAddress(exchange)
-                val statusCode = exchange.getStatusCode.toString
-                logger.debug("Sending HTTP response", Map("Client" -> client, "Status" -> statusCode))
-                val response = result.getOrElse(ArraySeq.ofByte(Array.empty))
-                exchange.getResponseSender.send(ByteBuffer.wrap(response.unsafeArray))
-                logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> statusCode))
+                val response = result.response.getOrElse(ArraySeq.ofByte(Array.empty))
+                val statusCode = result.errorCode.map(errorStatusCode).getOrElse(StatusCodes.OK)
+                sendResponse(response, statusCode, exchange)
             )
           ))
       )
@@ -71,8 +69,14 @@ final case class UndertowJsonRpcHandler[Outcome[_]](
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
     val errorMessage = Protocol.errorDetails(error).mkString("\n")
     logger.error("Failed processing HTTP request", error, Map("Client" -> clientAddress(exchange)))
+    sendResponse(errorMessage.toArraySeq, statusCode, exchange)
+
+  private def sendResponse(message: ArraySeq.ofByte, statusCode: Int, exchange: HttpServerExchange): Unit =
     if exchange.isResponseChannelAvailable then
-      exchange.setStatusCode(statusCode).getResponseSender.send(errorMessage, StandardCharsets.UTF_8)
+      val client = clientAddress(exchange)
+      logger.debug("Sending HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
+      exchange.setStatusCode(statusCode).getResponseSender.send(ByteBuffer.wrap(message.unsafeArray))
+      logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
 
   private def clientAddress(exchange: HttpServerExchange): String =
     val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)

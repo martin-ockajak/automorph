@@ -129,7 +129,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param context request context
    * @return optional response message
    */
-  def processRequest(request: ArraySeq.ofByte)(using context: Context): Outcome[Option[ArraySeq.ofByte]] =
+  def processRequest(request: ArraySeq.ofByte)(using context: Context): Outcome[HandlerResult[ArraySeq.ofByte]] =
     // Deserialize request
     Try(codec.deserialize(request)).fold(
       error =>
@@ -140,7 +140,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
       formedRequest =>
         // Validate request
         logger.trace(s"Received JSON-RPC message:\n${codec.format(formedRequest)}")
-          Try(Request(formedRequest)).fold(
+        Try(Request(formedRequest)).fold(
           error => errorResponse(error, formedRequest),
           validRequest => invokeMethod(formedRequest, validRequest, context)
         )
@@ -153,8 +153,11 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param context request context
    * @return optional response message
    */
-  def processRequest(request: ByteBuffer)(using context: Context): Outcome[Option[ByteBuffer]] =
-    effect.map(processRequest(request.toArraySeq)(using context), _.map(response => ByteBuffer.wrap(response.unsafeArray)))
+  def processRequest(request: ByteBuffer)(using context: Context): Outcome[HandlerResult[ByteBuffer]] =
+    effect.map(
+      processRequest(request.toArraySeq)(using context),
+      result => result.copy(response = result.response.map(response => ByteBuffer.wrap(response.unsafeArray)))
+    )
 
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.
@@ -163,10 +166,10 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param context request context
    * @return optional response message
    */
-  def processRequest(request: InputStream)(using context: Context): Outcome[Option[InputStream]] =
+  def processRequest(request: InputStream)(using context: Context): Outcome[HandlerResult[InputStream]] =
     effect.map(
       processRequest(request.toArraySeq(bufferSize))(using context),
-      _.map(response => ByteArrayInputStream(response.unsafeArray))
+      result => result.copy(response = result.response.map(response => ByteArrayInputStream(response.unsafeArray)))
     )
 
   /**
@@ -183,7 +186,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
     formedRequest: Message[Node],
     validRequest: Request[Node],
     context: Context
-  ): Outcome[Option[ArraySeq.ofByte]] =
+  ): Outcome[HandlerResult[ArraySeq.ofByte]] =
     logger.debug(s"Processing JSON-RPC request", formedRequest.properties)
     methodBindings.get(validRequest.method).map { methodHandle =>
       // Extract arguments
@@ -200,12 +203,16 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
             _.fold(
               error => errorResponse(error, formedRequest),
               result =>
-                validRequest.id.map { id =>
-                  // Serialize response
-                  val validResponse = Response(id, result.asRight)
-                  logger.info(s"Processed JSON-RPC request", formedRequest.properties)
-                  serialize(validResponse.formed)
-                }.getOrElse(effect.pure(None))
+                effect.map(
+                  validRequest.id.map { id =>
+                    // Serialize response
+                    val validResponse = Response(id, result.asRight)
+                    logger.info(s"Processed JSON-RPC request", formedRequest.properties)
+                    serialize(validResponse.formed)
+                  }.getOrElse(effect.pure(None)),
+                  rawResponse =>
+                    HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
+                )
             )
           )
       )
@@ -258,19 +265,23 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Outcome[_], Cont
    * @param formedRequest formed request
    * @return error response if applicable
    */
-  private def errorResponse(error: Throwable, formedRequest: Message[Node]): Outcome[Option[ArraySeq.ofByte]] =
+  private def errorResponse(error: Throwable, formedRequest: Message[Node]): Outcome[HandlerResult[ArraySeq.ofByte]] =
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
-    formedRequest.id.map { id =>
-      // Assemble error details
-      val code = Protocol.exceptionError(error.getClass).code
-      val errorDetails = Protocol.errorDetails(error)
-      val message = errorDetails.headOption.getOrElse("Unknown error")
-      val data = encodeStrings(errorDetails.drop(1)).asSome
+    val code = Protocol.exceptionError(error.getClass).code
+    effect.map(
+      formedRequest.id.map { id =>
+        // Assemble error details
+        val errorDetails = Protocol.errorDetails(error)
+        val message = errorDetails.headOption.getOrElse("Unknown error")
+        val data = encodeStrings(errorDetails.drop(1)).asSome
 
-      // Serialize response
-      val validResponse = Response[Node](id, ResponseError(code, message, data).asLeft)
-      serialize(validResponse.formed)
-    }.getOrElse(effect.pure(None))
+        // Serialize response
+        val validResponse = Response[Node](id, ResponseError(code, message, data).asLeft)
+        serialize(validResponse.formed)
+      }.getOrElse(effect.pure(None)),
+      rawResponse =>
+        HandlerResult(rawResponse, formedRequest.id, formedRequest.method, code.asSome)
+    )
 
   /**
    * Serialize JSON-RPC message.
@@ -335,3 +346,10 @@ case object JsonRpcHandler:
     bufferSize: Int = 4096
   ): JsonRpcHandler[Node, CodecType, Outcome, Context] =
     new JsonRpcHandler(codec, effect, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
+
+final case class HandlerResult[T](
+  response: Option[T],
+  id: Option[Message.Id],
+  method: Option[String],
+  errorCode: Option[Int]
+)
