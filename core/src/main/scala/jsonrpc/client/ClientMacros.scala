@@ -1,14 +1,18 @@
 package jsonrpc.client
 
 import java.beans.IntrospectionException
-import jsonrpc.spi.{Codec, Backend}
+import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.core.ApiReflection
+import jsonrpc.handler.HandlerMacros.{debugDefault, debugProperty}
 import jsonrpc.handler.MethodHandle
 import jsonrpc.util.{Method, Reflection}
 import scala.collection.immutable.ArraySeq
-import scala.quoted.{quotes, Expr, Quotes, Type}
+import scala.quoted.{Expr, Quotes, Type, quotes}
 
 case object ClientMacros:
+  private val debugProperty = "jsonrpc.macro.debug"
+  private val debugDefault = "true"
+//  private val debugDefault = ""
 
   /**
    * Generate proxy instance with JSON-RPC bindings for all valid public methods of an API type.
@@ -57,7 +61,8 @@ case object ClientMacros:
 //    val generatedProxy = TypeDef(Symbol.classSymbol("Test"))
     val generatedProxy = TypeDef.copy(Symbol.spliceOwner.tree)("Test", Block(List.empty, Expr(0).asTerm))
 //    println(generatedProxy.show(using Printer.TreeCode))
-    println(generatedProxy)
+    if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
+      println(generatedProxy)
 
 //    println(proxy.asTerm.show(using Printer.TreeCode))
 //    println(proxy.asTerm)

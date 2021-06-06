@@ -121,7 +121,7 @@ case object HandlerMacros:
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
-    import ref.quotes.reflect.{asTerm, AppliedType, IntConstant, Lambda, Literal, MethodType, Printer, Symbol, Term, TypeRepr}
+    import ref.quotes.reflect.{asTerm, AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
     // Map multiple parameter lists to flat argument node list offsets
