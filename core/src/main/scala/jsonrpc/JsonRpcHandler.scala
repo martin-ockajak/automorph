@@ -45,7 +45,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
    * @param context request context
    * @return optional response message
    */
-  def processRequest(request: ArraySeq.ofByte)(using context: Context): Effect[HandlerResult[ArraySeq.ofByte]] =
+  override def processRequest(request: ArraySeq.ofByte)(using context: Context): Effect[HandlerResult[ArraySeq.ofByte]] =
     // Deserialize request
     Try(codec.deserialize(request)).fold(
       error =>
@@ -69,7 +69,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
    * @param context request context
    * @return optional response message
    */
-  def processRequest(request: ByteBuffer)(using context: Context): Effect[HandlerResult[ByteBuffer]] =
+  override def processRequest(request: ByteBuffer)(using context: Context): Effect[HandlerResult[ByteBuffer]] =
     backend.map(
       processRequest(request.toArraySeq)(using context),
       result => result.copy(response = result.response.map(response => ByteBuffer.wrap(response.unsafeArray)))
@@ -82,7 +82,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
    * @param context request context
    * @return optional response message
    */
-  def processRequest(request: InputStream)(using context: Context): Effect[HandlerResult[InputStream]] =
+  override def processRequest(request: InputStream)(using context: Context): Effect[HandlerResult[InputStream]] =
     backend.map(
       processRequest(request.toArraySeq(bufferSize))(using context),
       result => result.copy(response = result.response.map(response => ByteArrayInputStream(response.unsafeArray)))
