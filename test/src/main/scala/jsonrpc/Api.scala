@@ -21,9 +21,9 @@ trait Api[Effect[_]]:
 
   def method5(p0: String, p1: Int): Effect[Option[String]]
 
-//  def method6(p0: Record)(using context: Short): Effect[Int]
-//
-//  def method7(p0: Record, p1: String)(using Short): Effect[Record]
+  def method6(p0: Record)(using context: Short): Effect[Int]
+
+  def method7(p0: Record, p1: String)(using Short): Effect[Record]
 
   def method8(p0: Option[Boolean], p1: Float)(p2: List[Int]): Effect[Map[String, String]]
 

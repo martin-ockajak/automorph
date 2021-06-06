@@ -69,6 +69,7 @@ class HandlerSpec extends BaseSpec:
       }
     }
 
+
   }
 
   private inline def testBind[Node, CodecType <: Codec[Node], Effect[_]](codec: CodecType, backend: Backend[Effect]): Unit =

@@ -181,14 +181,15 @@ case object HandlerMacros:
             val argumentNodes = arguments.head.asInstanceOf[Term]
             val argumentIndex = Literal(IntConstant(offset + index))
             val argumentNode = callTerm(ref.quotes, argumentNodes, "apply", List.empty, List(List(argumentIndex)))
-            callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
+            if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
+              arguments.last.asInstanceOf[Term]
+            else
+              callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
           }
-        )
-        val contextArgumentLists = if methodUsesContext[Context](ref, method) then List(List(arguments.last)) else List.empty
-        val allArgumentLists = (argumentLists ++ contextArgumentLists).asInstanceOf[List[List[Term]]]
+        ).asInstanceOf[List[List[Term]]]
 
         // Call the method using the decoded arguments
-        callTerm(ref.quotes, api.asTerm, method.name, List.empty, allArgumentLists)
+        callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
 //        val methodCall = callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
 //
 //        // Encode the method call result into a node
