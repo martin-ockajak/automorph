@@ -3,12 +3,12 @@ package jsonrpc
 import scala.concurrent.Future
 import jsonrpc.spi.Backend
 
-final case class SimpleApi():
+final case class SimpleApi[Effect[_]](backend: Backend[Effect]):
 
-  def method(test: String): String = test
+  def method(test: String): Effect[String] = backend.pure(test)
 
 
-trait Api[Effect[_]]:
+trait ComplexApi[Effect[_]]:
   def method0(): Effect[Unit]
 
   def method1(): Effect[Double]
@@ -32,7 +32,7 @@ trait Api[Effect[_]]:
   protected def protectedMethod: Unit
 
 
-final case class ApiImpl[Effect[_]](backend: Backend[Effect]) extends Api[Effect]:
+final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends ComplexApi[Effect]:
 
   /**
    * Test method.

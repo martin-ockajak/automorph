@@ -14,14 +14,13 @@ import jsonrpc.codec.json.upickle.UpickleJsonCodec
 import jsonrpc.codec.json.circe.CirceJsonCodec
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.transport.local.HandlerTransport
-import jsonrpc.{ApiImpl, Enum, Record, SimpleApi, Structure}
+import jsonrpc.{ComplexApiImpl, Enum, Record, SimpleApi, Structure}
 import monix.execution.Scheduler.Implicits.global
 import scala.concurrent.ExecutionContext.Implicits.global
 import upickle.AttributeTagged
 import zio.{FiberFailure, RIO, Runtime, ZEnv}
 
 class HandlerSpec extends BaseSpec:
-  private val simpleApi = SimpleApi()
   private val upickleCodec = UpickleJsonCodec(JsonPickler)
   private val circeCodec = CirceJsonCodec()
   private val noBackend = NoBackend()
@@ -36,6 +35,7 @@ class HandlerSpec extends BaseSpec:
     "Bind" - {
       "Dummy" - {
         "No context" in {
+          val simpleApi = SimpleApi(noBackend)
           HandlerFactory(DummyJsonCodec(), noBackend).bind(simpleApi)
         }
       }
@@ -75,11 +75,11 @@ class HandlerSpec extends BaseSpec:
   }
 
   private inline def testBind[Node, CodecType <: Codec[Node], Effect[_]](codec: CodecType, backend: Backend[Effect]): Unit =
-    val api = ApiImpl(backend)
-    val handler = HandlerFactory[Node, CodecType, Effect, Short](codec, backend).bind[Api[Effect]](api)
+    val api = ComplexApiImpl(backend)
+    val handler = HandlerFactory[Node, CodecType, Effect, Short](codec, backend).bind[ComplexApi[Effect]](api)
     val transport = HandlerTransport(handler, backend)
     val client = ClientFactory[Node, CodecType, Effect, Short](codec, backend, transport)
-    val apiProxy = client.bind[Api[Effect]]
+    val apiProxy = client.bind[ComplexApi[Effect]]
 
 object JsonPickler extends AttributeTagged:
 

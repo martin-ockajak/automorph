@@ -1,37 +1,31 @@
 //package jsonrpc
 //
-//import java.nio.charset.StandardCharsets
-//import java.util.concurrent.LinkedTransferQueue
-//import jsonrpc.{JsonRpcClient, JsonRpcMessage, JsonRpcServer}
-//import scala.concurrent.ExecutionContext.Implicits.global
-//import scala.concurrent.{ExecutionContext, Future}
+//import base.BaseSpec
+//import jsonrpc.client.ClientFactory
+//import jsonrpc.handler.{Handler, HandlerFactory}
+//import jsonrpc.spi.{Backend, Codec}
+//import jsonrpc.transport.local.HandlerTransport
+//import jsonrpc.{ComplexApiImpl, Enum, Record, SimpleApi, Structure}
 //
-//class CoreSpec extends ClientServerSpec {
-//  override def createClientServer(): (JsonRpcClient, JsonRpcServer) = {
-//    val server = new BaseJsonRpcServer(jsonFormats, ExecutionContext.Implicits.global) {
-//      override def close(): Unit = ()
+//trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
+//
+//  inline def codec: CodecType
+//
+//  inline def backend: Backend[Effect]
+//
+//  "" - {
+//    val simpleApi = SimpleApi(backend)
+//    val complexApi = ComplexApiImpl(backend)
+//    val handler = createHandler(simpleApi, complexApi)
+//    val transport = HandlerTransport(handler, backend)
+//    val client = ClientFactory[Node, CodecType, Effect, Short](codec, backend, transport)
+//    val simpleApiProxy = client.bind[SimpleApi[Effect]]
+//    val complexApiProxy = client.bind[ComplexApi[Effect]]
+//    "Bind" in {
 //    }
-//    (new DirectClient(server), server)
 //  }
 //
-//  private class DirectClient(server: JsonRpcServer) extends BaseJsonRpcClient(jsonFormats, ExecutionContext.Implicits.global) {
-//
-//    override def sendCallRequest(requestMessage: Array[Byte]): Future[Array[Byte]] = {
-//      sendRequest(requestMessage)
-//    }
-//
-//    override def sendNotifyRequest(requestMessage: Array[Byte]): Future[Unit] = {
-//      sendRequest(requestMessage).map(_ => ())
-//    }
-//
-//    override def close(): Unit = ()
-//
-//    private def sendRequest(requestMessage: Array[Byte]): Future[Array[Byte]] = {
-//      val responseQueue = new LinkedTransferQueue[Option[JsonRpcMessage]]
-//      server.handleRequest(requestMessage, responseQueue.put, "Test Client")
-//      Future(responseQueue.take().map(_.message.getBytes(StandardCharsets.UTF_8)).getOrElse(Array.empty))
-//    }
-//
-//    override def getServerId: String = "Test Server"
-//  }
-//}
+//  inline def createHandler(simpleApi: SimpleApi[Effect], complexApi: ComplexApi[Effect]): Handler[Node, CodecType, Effect, Short] =
+//    HandlerFactory[Node, CodecType, Effect, Short](codec, backend)
+//      .bind(simpleApi)
+//      .bind[ComplexApi[Effect]](complexApi)
