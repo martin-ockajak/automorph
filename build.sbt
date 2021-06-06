@@ -81,7 +81,7 @@ lazy val zio = (project in file("backend/zio")).dependsOn(
 ).settings(
   name := "json-rpc-zio",
   libraryDependencies ++= Seq(
-    "dev.zio" %% "zio" % "1.0.8"
+    "dev.zio" %% "zio" % "1.0.9"
   )
 )
 lazy val monix = (project in file("backend/monix")).dependsOn(
