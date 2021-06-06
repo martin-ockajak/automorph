@@ -1,6 +1,5 @@
 package jsonrpc
 
-import jsonrpc.client.ClientMacros
 import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
@@ -10,6 +9,7 @@ import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
 import jsonrpc.util.CannotEqual
 import scala.collection.immutable.ArraySeq
 import scala.util.{Random, Try}
+import jsonrpc.client.ClientBindings
 
 /**
  * JSON-RPC client layer.
@@ -30,66 +30,9 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Effect[_], Contex
   codec: CodecType,
   backend: Backend[Effect],
   transport: Transport[Effect, Context]
-) extends CannotEqual with Logging:
+) extends ClientBindings[Node, CodecType, Effect, Context] with CannotEqual with Logging:
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
-
-  /**
-   * Perform a remote JSON-RPC method ''call'' supplying the ''arguments by name''.
-   *
-   * The specified ''context'' may be used to supply additional information needed to send the request.
-   *
-   * @param method method name
-   * @param arguments arguments by by name
-   * @param context request context
-   * @tparam R result type
-   * @return result value
-   */
-  inline def call[A <: Product, R](method: String, arguments: A)(using context: Context): Effect[R] =
-    performCall(method, encodeArguments(arguments), context, decodeResult[R])
-
-  /**
-   * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by name''.
-   *
-   * The specified ''context'' may be used to supply additional information needed to send the request.
-   *
-   * @param method method name
-   * @param arguments arguments by name
-   * @param context JSON-RPC request context
-   * @tparam R result type
-   * @return nothing
-   */
-  inline def notify[A <: Product](method: String, arguments: A)(using context: Context): Effect[Unit] =
-    performNotify(method, encodeArguments(arguments), context)
-
-  /**
-   * Create a transparent ''proxy instance'' of a remote JSON-RPC API.
-   *
-   * Invocations of local proxy methods are translated into remote JSON-API calls.
-   *
-   * @tparam T remote API type
-   * @return remote API proxy instance
-   */
-  inline def bind[T <: AnyRef]: T = ClientMacros.bind[Node, CodecType, Effect, Context, T](codec, backend)
-
-  /**
-   * Encode request arguments by name.
-   *
-   * @param arguments request arguments
-   * @return encoded request arguments
-   */
-  inline def encodeArguments[A <: Product](arguments: A): Params[Node] =
-    val argumentsNode = codec.encode(arguments)
-    codec.decode[Map[String, Node]](argumentsNode).asRight
-
-  /**
-   * Create response result decoding function.
-   *
-   * @tparam R result type
-   * @return result decoding function
-   */
-  inline def decodeResult[R]: Node => R =
-    resultNode => codec.decode(resultNode)
 
   /**
    * Perform a method call using specified arguments.
@@ -103,7 +46,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Effect[_], Contex
    * @tparam R result type
    * @return result value
    */
-  private def performCall[R](
+  protected def performCall[R](
     method: String,
     arguments: Params[Node],
     context: Context,
@@ -135,7 +78,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Effect[_], Contex
    * @tparam R result type
    * @return nothing
    */
-  private def performNotify(methodName: String, arguments: Params[Node], context: Context): Effect[Unit] =
+  protected def performNotify(methodName: String, arguments: Params[Node], context: Context): Effect[Unit] =
     val formedRequest = Request(None, methodName, arguments).formed
     backend.map(
       // Serialize request
