@@ -51,16 +51,15 @@ class HandlerSpec extends BaseSpec:
         "Monix" in {
           testBind(codec, monixBackend)
         }
-        "Zio" in {
-          testBind(codec, zioBackend)
-        }
+//        "Zio" in {
+//          testBind(codec, zioBackend)
+//        }
 //        "Cats" in {
 //          testBind(codec, catsBackend)
 //        }
         "Scalaz" in {
           testBind(codec, scalazBackend)
         }
-
       }
       "Circe" - {
         val codec = circeCodec

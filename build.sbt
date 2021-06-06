@@ -145,6 +145,7 @@ lazy val finagle = (project in file("server/finagle")).dependsOn(
 // Compile
 ThisBuild / scalaVersion := "3.0.0"
 ThisBuild / scalacOptions ++= Seq(
+//  "-Djsonrpc.macro.debug=true",
   "-source",
   "future-migration",
   "-new-syntax",

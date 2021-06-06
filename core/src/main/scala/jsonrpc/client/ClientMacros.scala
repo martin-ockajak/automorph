@@ -3,7 +3,6 @@ package jsonrpc.client
 import java.beans.IntrospectionException
 import jsonrpc.spi.{Codec, Backend}
 import jsonrpc.core.ApiReflection
-import jsonrpc.handler.HandlerMacros.{generateMethodHandle, methodDescription}
 import jsonrpc.handler.MethodHandle
 import jsonrpc.util.{Method, Reflection}
 import scala.collection.immutable.ArraySeq
@@ -47,7 +46,7 @@ case object ClientMacros:
       )
 
     // Debug prints
-//    println(validMethods.map(_.lift).map(methodDescription).mkString("\n"))
+//    println(validMethods.map(_.lift).map(method => ApiReflection.methodDescription[ApiType](ref, method)).mkString("\n"))
 
     val proxy = '{
       new Runnable:
@@ -99,7 +98,3 @@ case object ClientMacros:
     '{
       null
     }.asInstanceOf[Expr[ApiType]]
-
-  private def methodDescription(method: Method): String =
-    val documentation = method.documentation.map(_ + "\n").getOrElse("")
-    s"$documentation${method.signature}\n"
