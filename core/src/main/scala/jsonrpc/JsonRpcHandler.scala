@@ -118,11 +118,11 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
             _.fold(
               error => errorResponse(error, formedRequest),
               result =>
+                validRequest.id.foreach(_ => logger.info(s"Processed JSON-RPC request", formedRequest.properties))
                 backend.map(
                   validRequest.id.map { id =>
                     // Serialize response
                     val validResponse = Response(id, result.asRight)
-                    logger.info(s"Processed JSON-RPC request", formedRequest.properties)
                     serialize(validResponse.formed)
                   }.getOrElse(backend.pure(None)),
                   rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
