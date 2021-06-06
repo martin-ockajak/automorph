@@ -64,7 +64,7 @@ final case class FinagleJsonRpcService[Effect[_]](
 
   private def createResponse(request: Request, reader: Reader[Buf], status: Status): Response =
     val response = Response(request.version, status, reader)
-    response.contentType = handler.codec.mimeType
+    response.contentType = handler.codec.mediaType
     logger.debug("Sending HTTP response", Map("Client" -> clientAddress(request), "Status" -> status.code.toString))
     response
 

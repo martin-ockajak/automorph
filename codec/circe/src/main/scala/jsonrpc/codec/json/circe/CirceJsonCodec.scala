@@ -23,7 +23,7 @@ final case class CirceJsonCodec[Codecs <: CirceCodecs](
   private given Encoder[Message[Json]] = deriveEncoder[Message[Json]]
   private given Decoder[Message[Json]] = deriveDecoder[Message[Json]]
 
-  override def mimeType: String = "application/json"
+  override def mediaType: String = "application/json"
 
   override def serialize(message: Message[Json]): ArraySeq.ofByte =
     message.asJson.noSpaces.toArraySeq

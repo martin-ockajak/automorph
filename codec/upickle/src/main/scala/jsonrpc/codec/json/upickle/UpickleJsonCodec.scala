@@ -25,7 +25,7 @@ final case class UpickleJsonCodec[ReadWriters <: Api](
   private given readWriters.ReadWriter[Message] = readWriters.macroRW
   private given readWriters.ReadWriter[MessageError] = readWriters.macroRW
 
-  override def mimeType: String = "application/json"
+  override def mediaType: String = "application/json"
 
   override def serialize(message: spi.Message[Value]): ArraySeq.ofByte =
     readWriters.writeToByteArray(fromSpi(message)).asArraySeq

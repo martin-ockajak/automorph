@@ -74,7 +74,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
     if exchange.isResponseChannelAvailable then
       val client = clientAddress(exchange)
       logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
-      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.codec.mimeType)
+      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.codec.mediaType)
       exchange.setStatusCode(statusCode).getResponseSender.send(ByteBuffer.wrap(message.unsafeArray))
       logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
 

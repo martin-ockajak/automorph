@@ -23,7 +23,7 @@ final case class UpickleMessagePackCodec[ReadWriters <: Api](readWriters: ReadWr
   private given readWriters.ReadWriter[Message] = readWriters.macroRW
   private given readWriters.ReadWriter[MessageError] = readWriters.macroRW
 
-  override def mimeType: String = "application/msgpack"
+  override def mediaType: String = "application/msgpack"
 
   override def serialize(message: spi.Message[Msg]): ArraySeq.ofByte =
     readWriters.writeToByteArray(fromSpi(message)).asArraySeq
