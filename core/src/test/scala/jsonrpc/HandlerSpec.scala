@@ -48,7 +48,7 @@ class HandlerSpec extends BaseSpec:
         "Future" in {
           testBind(codec, futureBackend)
         }
-        " Monix" in {
+        "Monix" in {
           testBind(codec, monixBackend)
         }
         "Zio" in {
