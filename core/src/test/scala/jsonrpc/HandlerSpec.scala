@@ -5,6 +5,8 @@ import io.circe.generic.auto.*
 //import jsonrpc.backend.cats.CatsBackend
 import jsonrpc.backend.monix.MonixBackend
 import jsonrpc.backend.scalaz.ScalazBackend
+import jsonrpc.client.ClientFactory
+import jsonrpc.handler.HandlerFactory
 import jsonrpc.backend.standard.{FutureBackend, NoBackend, TryBackend}
 import jsonrpc.backend.zio.ZioBackend
 import jsonrpc.codec.json.dummy.DummyJsonCodec
@@ -34,7 +36,7 @@ class HandlerSpec extends BaseSpec:
     "Bind" - {
       "Dummy" - {
         "No context" in {
-          JsonRpcHandlerFactory(DummyJsonCodec(), noBackend).bind(simpleApi)
+          HandlerFactory(DummyJsonCodec(), noBackend).bind(simpleApi)
         }
       }
       "Upickle" - {
@@ -74,9 +76,9 @@ class HandlerSpec extends BaseSpec:
 
   private inline def testBind[Node, CodecType <: Codec[Node], Effect[_]](codec: CodecType, backend: Backend[Effect]): Unit =
     val api = ApiImpl(backend)
-    val handler = JsonRpcHandlerFactory[Node, CodecType, Effect, Short](codec, backend).bind[Api[Effect]](api)
+    val handler = HandlerFactory[Node, CodecType, Effect, Short](codec, backend).bind[Api[Effect]](api)
     val transport = HandlerTransport(handler, backend)
-    val client = JsonRpcClientFactory[Node, CodecType, Effect, Short](codec, backend, transport)
+    val client = ClientFactory[Node, CodecType, Effect, Short](codec, backend, transport)
     val apiProxy = client.bind[Api[Effect]]
 
 object JsonPickler extends AttributeTagged:

@@ -4,7 +4,7 @@ import jsonrpc.JsonRpcClient
 import jsonrpc.core.Empty
 import jsonrpc.spi.{Backend, Codec, Transport}
 
-trait ClientFactory:
+case object ClientFactory:
 
   type NoContext = Empty[JsonRpcClient[?, ?, ?, ?]]
   given NoContext = Empty[JsonRpcClient[?, ?, ?, ?]]()
@@ -28,7 +28,8 @@ trait ClientFactory:
     codec: CodecType,
     backend: Backend[Effect],
     transport: Transport[Effect, Context]
-  ): JsonRpcClient[Node, CodecType, Effect, Context]
+  ): JsonRpcClient[Node, CodecType, Effect, Context] =
+    new JsonRpcClient(codec, backend, transport)
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins without request `Context` type.
@@ -48,4 +49,5 @@ trait ClientFactory:
     codec: CodecType,
     backend: Backend[Effect],
     transport: Transport[Effect, NoContext]
-  ): JsonRpcClient[Node, CodecType, Effect, NoContext]
+  ): JsonRpcClient[Node, CodecType, Effect, NoContext] =
+    new JsonRpcClient(codec, backend, transport)
