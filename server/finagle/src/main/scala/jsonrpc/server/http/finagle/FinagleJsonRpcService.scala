@@ -3,7 +3,7 @@ package jsonrpc.server.http.finagle
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}
-import com.twitter.util.{Promise, Future as TwitterFuture}
+import com.twitter.util.{Promise, Future}
 import jsonrpc.JsonRpcHandler
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
@@ -12,7 +12,6 @@ import jsonrpc.server.http.finagle.FinagleJsonRpcService.defaultStatuses
 import jsonrpc.spi.Backend
 import jsonrpc.util.EncodingOps.{asArraySeq, toArraySeq}
 import scala.collection.immutable.ArraySeq
-import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -24,25 +23,26 @@ import scala.util.{Failure, Success, Try}
  * @see [[https://finagle.github.io/finch Documentation]]
  * @constructor Create a JSON=RPC HTTP handler for Undertow web server using the specified JSON-RPC ''handler''.
  * @param handler JSON-RPC request handler
+ * @param effectRunAsync asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
- * @param executionContext execution context
+ * @tparam Effect effect type
  */
-final case class FinagleJsonRpcService(
-  handler: JsonRpcHandler[?, ?, Future, Request],
+final case class FinagleJsonRpcService[Effect[_]](
+  handler: JsonRpcHandler[?, ?, Effect, Request],
   errorStatus: Int => Status = defaultStatuses
-)(using executionContext: ExecutionContext)
+)
   extends Service[Request, Response] with Logging:
 
   private val backend = handler.backend
 
-  override def apply(request: Request): TwitterFuture[Response] =
+  override def apply(request: Request): Future[Response] =
     // Receive the request
     val client = clientAddress(request)
     logger.debug("Received HTTP request", Map("Client" -> client))
     val rawRequest = Buf.ByteArray.Owned.extract(request.content).asArraySeq
 
     // Process the request
-    asTwitterFuture(backend.map(
+    asFuture(backend.map(
       backend.either(handler.processRequest(rawRequest)(using request)),
       _.fold(
         error => serverError(error, request),
@@ -74,12 +74,12 @@ final case class FinagleJsonRpcService(
       address.replaceAll("/", "").split(":").init.mkString(":")
     }
 
-  private def asTwitterFuture[T](future: Future[T]): TwitterFuture[T] =
+  private def asFuture[T](value: Effect[T]): Future[T] =
     val promise = Promise[T]()
-    future.onComplete {
-      case Success(value)     => promise.setValue(value)
-      case Failure(exception) => promise.setException(exception)
-    }(executionContext)
+    backend.map(backend.either(value), _.fold(
+      error => promise.setException(error),
+      result => promise.setValue(result)
+    ))
     promise
 
 case object FinagleJsonRpcService:
