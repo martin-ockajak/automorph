@@ -53,7 +53,10 @@ lazy val core = project.dependsOn(
   upickle % Test, circe % Test,
   sttp % Test
 ).settings(
-  name := "json-rpc-core"
+  name := "json-rpc-core",
+  libraryDependencies ++= Seq(
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.6"
+  )
 )
 
 // Codec
@@ -115,7 +118,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
 ).settings(
   name := "json-rpc-sttp",
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.5"
+    "com.softwaremill.sttp.client3" %% "core" % "3.3.6"
   )
 )
 
