@@ -1,7 +1,7 @@
 package jsonrpc.handler
 
 /**
- * JSON-RPC exception.
+ * JSON-RPC API error exception.
  *
  * API methods bound via a JSON-RPC handler can throw this exception to customize JSON-RPC error response content.
  *
