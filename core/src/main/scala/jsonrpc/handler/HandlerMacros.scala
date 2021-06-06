@@ -29,6 +29,7 @@ final case class MethodHandle[Node, Effect[_], Context](
 )
 
 case object HandlerMacros:
+
   private val debugProperty = "jsonrpc.macro.debug"
 //  private val debugDefault = "true"
   private val debugDefault = ""
@@ -75,9 +76,7 @@ case object HandlerMacros:
     val methodHandles = Expr.ofSeq(validMethods.map { method =>
       generateMethodHandle[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
     })
-    '{
-      $methodHandles.toMap[String, MethodHandle[Node, Effect, Context]]
-    }
+    '{ $methodHandles.toMap[String, MethodHandle[Node, Effect, Context]] }
 
   private def generateMethodHandle[
     Node: Type,
@@ -129,9 +128,10 @@ case object HandlerMacros:
 
     // Determine the method result value type
     val effectType = TypeRepr.of[Effect]
-    val resultValueType = method.resultType match
-      case appliedType: AppliedType if appliedType.tycon =:= effectType => appliedType.args.last
-      case otherType                => otherType
+    val resultValueType =
+      method.resultType match
+        case appliedType: AppliedType if appliedType.tycon =:= effectType => appliedType.args.last
+        case otherType                                                    => otherType
 
     // Create binding function
     //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
@@ -139,40 +139,51 @@ case object HandlerMacros:
       _ => List(TypeRepr.of[Seq[Node]], TypeRepr.of[Context]),
       _ => effectType.appliedTo(TypeRepr.of[Node])
     )
-    val bindingFunction = Lambda(Symbol.spliceOwner, bindingType, (symbol, arguments) =>
-      // Create the method argument lists by decoding corresponding argument nodes into required parameter types
-      //   List(List(
-      //     codec.decode[Parameter0Type](argumentNodes(0)),
-      //     codec.decode[Parameter1Type](argumentNodes(1)),
-      //     ...
-      //     codec.decode[ParameterNType](argumentNodes(N)) OR context
-      //   )): List[List[ParameterXType]]
-      val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
-        parameters.toList.zipWithIndex.map { (parameter, index) =>
-          val argumentNodes = arguments.head.asInstanceOf[Term]
-          val argumentIndex = Literal(IntConstant(offset + index))
-          val argumentNode = callTerm(ref.quotes, argumentNodes, "apply", List.empty, List(List(argumentIndex)))
-          if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
-            arguments.last
-          else
-            callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
-        }
-      ).asInstanceOf[List[List[Term]]]
+    val bindingFunction = Lambda(
+      Symbol.spliceOwner,
+      bindingType,
+      (symbol, arguments) =>
+        // Create the method argument lists by decoding corresponding argument nodes into required parameter types
+        //   List(List(
+        //     codec.decode[Parameter0Type](argumentNodes(0)),
+        //     codec.decode[Parameter1Type](argumentNodes(1)),
+        //     ...
+        //     codec.decode[ParameterNType](argumentNodes(N)) OR context
+        //   )): List[List[ParameterXType]]
+        val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
+          parameters.toList.zipWithIndex.map { (parameter, index) =>
+            val argumentNodes = arguments.head.asInstanceOf[Term]
+            val argumentIndex = Literal(IntConstant(offset + index))
+            val argumentNode = callTerm(ref.quotes, argumentNodes, "apply", List.empty, List(List(argumentIndex)))
+            if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
+              arguments.last
+            else
+              callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
+          }
+        ).asInstanceOf[List[List[Term]]]
 
-      // Create the method call using the decoded arguments
-      //   api.method(arguments ...): Effect[ResultValueType]
-      val methodCall = callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
+        // Create the method call using the decoded arguments
+        //   api.method(arguments ...): Effect[ResultValueType]
+        val methodCall = callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
 
-      // Create encode result function
-      //   (result: ResultValue) => Node = codec.encode[ResultValueType](result)
-      val encodeResultType = MethodType(List("result"))(_ => List(resultValueType), _ => TypeRepr.of[Node])
-      val encodeResult = Lambda( symbol, encodeResultType, (symbol, arguments) =>
-        callTerm(ref.quotes, codec.asTerm, "encode", List(resultValueType), List(arguments))
-      )
+        // Create encode result function
+        //   (result: ResultValue) => Node = codec.encode[ResultValueType](result)
+        val encodeResultType = MethodType(List("result"))(_ => List(resultValueType), _ => TypeRepr.of[Node])
+        val encodeResult = Lambda(
+          symbol,
+          encodeResultType,
+          (symbol, arguments) => callTerm(ref.quotes, codec.asTerm, "encode", List(resultValueType), List(arguments))
+        )
 
-      // Create an effect mapping call using the method call and the encode result function
-      //   backend.map(methodCall, encodeResult): Effect[Node]
-      callTerm(ref.quotes, backend.asTerm, "map", List(resultValueType, TypeRepr.of[Node]), List(List(methodCall, encodeResult)))
+        // Create an effect mapping call using the method call and the encode result function
+        //   backend.map(methodCall, encodeResult): Effect[Node]
+        callTerm(
+          ref.quotes,
+          backend.asTerm,
+          "map",
+          List(resultValueType, TypeRepr.of[Node]),
+          List(List(methodCall, encodeResult))
+        )
     ).asExpr.asInstanceOf[Expr[(Seq[Node], Context) => Effect[Node]]]
 
     // Log the binding function
@@ -198,15 +209,23 @@ case object HandlerMacros:
   ): quotes.reflect.Term =
     import quotes.reflect.{Select, Term}
 
-    Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(arguments.asInstanceOf[List[List[Term]]])
+    Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(
+      arguments.asInstanceOf[List[List[Term]]]
+    )
 
   private def methodUsesContext[Context: Type](ref: Reflection, method: ref.QuotedMethod): Boolean =
     import ref.quotes.reflect.TypeRepr
 
     method.parameters.flatten.lastOption.exists(_.dataType =:= TypeRepr.of[Context])
 
-  private def logBindingFunction[ApiType: Type](ref: Reflection, method: ref.QuotedMethod, bindingFunction: ref.quotes.reflect.Term): Unit =
+  private def logBindingFunction[ApiType: Type](
+    ref: Reflection,
+    method: ref.QuotedMethod,
+    bindingFunction: ref.quotes.reflect.Term
+  ): Unit =
     import ref.quotes.reflect.{Printer, TypeRepr}
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
-      println(s"${ApiReflection.methodDescription[ApiType](ref, method)} = \n  ${bindingFunction.show(using Printer.TreeAnsiCode)}\n")
+      println(
+        s"${ApiReflection.methodDescription[ApiType](ref, method)} = \n  ${bindingFunction.show(using Printer.TreeAnsiCode)}\n"
+      )
