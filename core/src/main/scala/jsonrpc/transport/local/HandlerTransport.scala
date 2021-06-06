@@ -1,7 +1,7 @@
 package jsonrpc.transport.local
 
-import jsonrpc.JsonRpcHandler
-import jsonrpc.spi.{Codec, Backend, Transport}
+import jsonrpc.handler.Handler
+import jsonrpc.spi.{Backend, Codec, Transport}
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -15,7 +15,7 @@ import scala.collection.immutable.ArraySeq
  * @tparam Context request context type
  */
 case class HandlerTransport[Node, CodecType <: Codec[Node], Effect[_], Context](
-  handler: JsonRpcHandler[Node, CodecType, Effect, Context],
+  handler: Handler[Node, CodecType, Effect, Context],
   backend: Backend[Effect]
 ) extends Transport[Effect, Context]:
 

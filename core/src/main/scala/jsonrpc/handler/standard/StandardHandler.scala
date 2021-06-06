@@ -1,10 +1,10 @@
-package jsonrpc
+package jsonrpc.handler.standard
 
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
-import jsonrpc.handler.{HandlerBindings, MethodHandle}
+import jsonrpc.handler.{Handler, HandlerBindings, HandlerResult, MethodHandle}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
 import jsonrpc.util.CannotEqual
@@ -28,7 +28,7 @@ import scala.util.Try
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Context](
+final case class StandardHandler[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
   backend: Backend[Effect],
   bufferSize: Int,
@@ -90,6 +90,9 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
 
   override def toString: String =
     s"${this.className}(Codec: ${codec.className}, Effect: ${backend.className}, Bound methods: ${methodBindings.size})"
+
+  override protected def clone(extraMethodBindings: Map[String, MethodHandle[Node, Effect, Context]]): Handler[Node, CodecType, Effect, Context] =
+    StandardHandler(codec, backend, bufferSize, methodBindings ++ extraMethodBindings, encodeStrings)
 
   /**
    * Invoke bound method specified in a request.
@@ -209,20 +212,3 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
       error => backend.failed(ParseErrorException("Invalid message format", error)),
       message => backend.pure(message.asSome)
     )
-
-/**
- * JSON-RPC handler request processing result.
- *
- * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @param response response message
- * @param id call identifier, a request without and identifier is considered to be a notification
- * @param method invoked method name
- * @param errorCode failed call error code
- * @tparam ResponseType response message type
- */
-final case class HandlerResult[ResponseType](
-  response: Option[ResponseType],
-  id: Option[Message.Id],
-  method: Option[String],
-  errorCode: Option[Int]
-)

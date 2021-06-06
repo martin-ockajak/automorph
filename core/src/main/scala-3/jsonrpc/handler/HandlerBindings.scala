@@ -1,26 +1,25 @@
 package jsonrpc.handler
 
 import java.beans.IntrospectionException
-import jsonrpc.JsonRpcHandler
 import jsonrpc.handler.HandlerMacros
-import jsonrpc.spi.Codec
+import jsonrpc.spi.{Backend, Codec}
 
 trait HandlerBindings[Node, CodecType <: Codec[Node], Effect[_], Context]
   extends Handler[Node, CodecType, Effect, Context]:
-  this: JsonRpcHandler[Node, CodecType, Effect, Context] =>
 
-  override inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, CodecType, Effect, Context] = bind(api, name => Seq(name))
+  override inline def bind[T <: AnyRef](api: T): Handler[Node, CodecType, Effect, Context] =
+    bind(api, name => Seq(name))
 
   override inline def bind[T <: AnyRef](
     api: T,
     exposedNames: String => Seq[String]
-  ): JsonRpcHandler[Node, CodecType, Effect, Context] =
+  ): Handler[Node, CodecType, Effect, Context] =
     bind(api, Function.unlift(name => Some(exposedNames(name))))
 
   override inline def bind[T <: AnyRef](
     api: T,
     exposedNames: PartialFunction[String, Seq[String]]
-  ): JsonRpcHandler[Node, CodecType, Effect, Context] =
+  ): Handler[Node, CodecType, Effect, Context] =
     val bindings =
       HandlerMacros.bind[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap { (methodName, method) =>
         exposedNames.applyOrElse(
@@ -31,4 +30,12 @@ trait HandlerBindings[Node, CodecType <: Codec[Node], Effect[_], Context]
             )
         ).map(_ -> method)
       }
-    JsonRpcHandler(codec, backend, bufferSize, methodBindings ++ bindings, encodeStrings)
+    clone(bindings)
+
+  protected def codec: CodecType
+
+  protected def backend: Backend[Effect]
+
+  protected def clone(
+    extraMethodBindings: Map[String, MethodHandle[Node, Effect, Context]]
+  ): Handler[Node, CodecType, Effect, Context]

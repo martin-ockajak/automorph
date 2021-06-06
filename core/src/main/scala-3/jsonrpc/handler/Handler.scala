@@ -2,7 +2,6 @@ package jsonrpc.handler
 
 import java.io.InputStream
 import java.nio.ByteBuffer
-import jsonrpc.{HandlerResult, JsonRpcHandler}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.core.Empty
 import scala.collection.immutable.ArraySeq
@@ -28,7 +27,7 @@ trait Handler[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, CodecType, Effect, Context]
+  inline def bind[T <: AnyRef](api: T): Handler[Node, CodecType, Effect, Context]
 
   /**
    * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
@@ -53,7 +52,7 @@ trait Handler[Node, CodecType <: Codec[Node], Effect[_], Context]:
   inline def bind[T <: AnyRef](
     api: T,
     exposedNames: String => Seq[String]
-  ): JsonRpcHandler[Node, CodecType, Effect, Context]
+  ): Handler[Node, CodecType, Effect, Context]
 
   /**
    * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
@@ -78,7 +77,7 @@ trait Handler[Node, CodecType <: Codec[Node], Effect[_], Context]:
   inline def bind[T <: AnyRef](
     api: T,
     exposedNames: PartialFunction[String, Seq[String]]
-  ): JsonRpcHandler[Node, CodecType, Effect, Context]
+  ): Handler[Node, CodecType, Effect, Context]
 
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.

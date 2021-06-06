@@ -14,7 +14,7 @@ import jsonrpc.codec.json.upickle.UpickleJsonCodec
 import jsonrpc.codec.json.circe.CirceJsonCodec
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.transport.local.HandlerTransport
-import jsonrpc.{ApiImpl, Enum, JsonRpcHandler, Record, SimpleApi, Structure}
+import jsonrpc.{ApiImpl, Enum, Record, SimpleApi, Structure}
 import monix.execution.Scheduler.Implicits.global
 import scala.concurrent.ExecutionContext.Implicits.global
 import upickle.AttributeTagged

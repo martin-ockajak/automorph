@@ -1,15 +1,15 @@
-package jsonrpc
+package jsonrpc.client.standard
 
+import jsonrpc.client.ClientBindings
 import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
-import jsonrpc.spi.{Codec, Backend, Message, MessageError, Transport}
-import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
+import jsonrpc.spi.{Backend, Codec, Message, MessageError, Transport}
 import jsonrpc.util.CannotEqual
+import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Random, Try}
-import jsonrpc.client.ClientBindings
 
 /**
  * JSON-RPC client layer.
@@ -26,7 +26,7 @@ import jsonrpc.client.ClientBindings
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class JsonRpcClient[Node, CodecType <: Codec[Node], Effect[_], Context](
+final case class StandardClient[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
   backend: Backend[Effect],
   transport: Transport[Effect, Context]
@@ -37,19 +37,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Effect[_], Contex
   override def toString: String =
     s"${this.className}(Codec: ${codec.className}, Effect: ${backend.className})"
 
-  /**
-   * Perform a method call using specified arguments.
-   *
-   * Optional request context is used as a last method argument.
-   *
-   * @param methodName method name
-   * @param arguments method arguments
-   * @param context request context
-   * @param decodeResult result decoding function
-   * @tparam R result type
-   * @return result value
-   */
-  protected def performCall[R](
+  override protected def performCall[R](
     method: String,
     arguments: Params[Node],
     context: Context,
@@ -70,18 +58,7 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Effect[_], Contex
         )
     )
 
-  /**
-   * Perform a method notification using specified arguments.
-   *
-   * Optional request context is used as a last method argument.
-   *
-   * @param methodName method name
-   * @param arguments method arguments
-   * @param context request context
-   * @tparam R result type
-   * @return nothing
-   */
-  protected def performNotify(methodName: String, arguments: Params[Node], context: Context): Effect[Unit] =
+  override protected def performNotify(methodName: String, arguments: Params[Node], context: Context): Effect[Unit] =
     val formedRequest = Request(None, methodName, arguments).formed
     backend.map(
       // Serialize request

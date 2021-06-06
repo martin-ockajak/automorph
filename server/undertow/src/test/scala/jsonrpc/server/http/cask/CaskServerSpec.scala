@@ -4,9 +4,9 @@ import base.BaseSpec
 import io.undertow.server.HttpHandler
 import io.undertow.Handlers
 import io.undertow.server.handlers.BlockingHandler
-import jsonrpc.JsonRpcHandler
 import jsonrpc.backend.standard.NoBackend
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
+import jsonrpc.handler.standard.JsonRpcHandler
 import jsonrpc.http.undertow.UndertowJsonRpcHandler
 import scala.language.adhocExtensions
 

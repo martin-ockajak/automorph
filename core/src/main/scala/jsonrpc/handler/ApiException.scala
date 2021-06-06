@@ -1,4 +1,4 @@
-package jsonrpc
+package jsonrpc.handler
 
 /**
  * JSON-RPC exception.
@@ -12,7 +12,7 @@ package jsonrpc
  * @param cause exception cause
  * @tparam Node message format node representation type
  */
-final case class JsonRpcException[Node](
+final case class ApiException[Node](
   message: String,
   data: Node,
   cause: Throwable
