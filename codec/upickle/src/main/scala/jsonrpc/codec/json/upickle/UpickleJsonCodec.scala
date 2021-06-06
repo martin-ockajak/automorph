@@ -17,7 +17,9 @@ import upickle.Api
  * @param readWriters Upickle reader and writer implicits instance
  * @tparam ReadWriters Upickle reader and writer implicits instance type
  */
-final case class UpickleJsonCodec[ReadWriters <: Api](readWriters: ReadWriters = upickle.default) extends Codec[Value]:
+final case class UpickleJsonCodec[ReadWriters <: Api](
+  readWriters: ReadWriters = upickle.default
+) extends Codec[Value]:
 
   private val indent = 2
   private given readWriters.ReadWriter[Message] = readWriters.macroRW

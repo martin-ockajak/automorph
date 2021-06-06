@@ -2,7 +2,7 @@ package jsonrpc.codec.json.circe
 
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
-import io.circe.{Decoder, Encoder, Json, parser}
+import io.circe.{parser, Decoder, Encoder, Json}
 import jsonrpc.util.EncodingOps.{asString, toArraySeq}
 import jsonrpc.spi.{Codec, Message, MessageError}
 import scala.collection.immutable.ArraySeq
@@ -16,7 +16,9 @@ import scala.compiletime.summonInline
  * @param codecs Circe encoders and decoders implicits instance
  * @tparam Codecs Circe encoders and decoders implicits instance type
  */
-final case class CirceJsonCodec[Codecs <: CirceCodecs](codecs: Codecs = new CirceCodecs {}) extends Codec[Json]:
+final case class CirceJsonCodec[Codecs <: CirceCodecs](
+  codecs: Codecs = new CirceCodecs {}
+) extends Codec[Json]:
 
   private given Encoder[Message[Json]] = deriveEncoder[Message[Json]]
   private given Decoder[Message[Json]] = deriveDecoder[Message[Json]]
@@ -41,6 +43,7 @@ final case class CirceJsonCodec[Codecs <: CirceCodecs](codecs: Codecs = new Circ
     node.as[T](using decoder).toTry.get
 
 trait CirceCodecs:
+
   final case class CirceEncoder[T](encoder: Encoder[T])
   final case class CirceDecoder[T](decoder: Decoder[T])
 

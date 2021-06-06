@@ -2,8 +2,10 @@ package jsonrpc
 
 import base.BaseSpec
 import io.circe.generic.auto.*
+import jsonrpc.backend.cats.CatsBackend
 import jsonrpc.backend.monix.MonixBackend
-import jsonrpc.backend.standard.{FutureBackend, NoBackend}
+import jsonrpc.backend.scalaz.ScalazBackend
+import jsonrpc.backend.standard.{FutureBackend, NoBackend, TryBackend}
 import jsonrpc.backend.zio.ZioBackend
 import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
@@ -21,30 +23,50 @@ class HandlerSpec extends BaseSpec:
   private val upickleCodec = UpickleJsonCodec(JsonPickler)
   private val circeCodec = CirceJsonCodec()
   private val noBackend = NoBackend()
+  private val tryBackend = TryBackend()
   private val futureBackend = FutureBackend()
   private val monixBackend = MonixBackend()
   private val zioBackend = ZioBackend[ZEnv]()
+  private val catsBackend = CatsBackend()
+  private val scalazBackend = ScalazBackend()
 
   "" - {
     "Bind" - {
-      "No context" in {
-        JsonRpcHandler(DummyJsonCodec(), noBackend).bind(simpleApi)
+      "Dummy" - {
+        "No context" in {
+          JsonRpcHandler(DummyJsonCodec(), noBackend).bind(simpleApi)
+        }
       }
-      "Upickle / No effect" in {
-        testBind(upickleCodec, noBackend)
+      "Upickle" - {
+        val codec = upickleCodec
+        "No effect" in {
+          testBind(codec, noBackend)
+        }
+        "Try" in {
+          testBind(codec, tryBackend)
+        }
+        "Future" in {
+          testBind(codec, futureBackend)
+        }
+//        " Monix" in {
+//          testBind(codec, monixBackend)
+//        }
+        "Zio" in {
+          testBind(codec, zioBackend)
+        }
+        "Cats" in {
+          testBind(codec, catsBackend)
+        }
+//        "Scalaz" in {
+//          testBind(codec, scalazBackend)
+//        }
       }
-      "Upickle / Future" in {
-        testBind(upickleCodec, futureBackend)
+      "Circe" - {
+        val codec = circeCodec
+//        " Future" in {
+//          testBind(codec, futureBackend)
+//        }
       }
-      "Upickle / Monix" in {
-        testBind(upickleCodec, monixBackend)
-      }
-      "Upickle / Zio" in {
-        testBind(upickleCodec, zioBackend)
-      }
-//      "Circe / Future" in {
-//        testBind(circeCodec, futureBackend)
-//      }
     }
 
   }

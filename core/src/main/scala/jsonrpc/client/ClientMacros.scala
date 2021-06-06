@@ -60,8 +60,8 @@ case object ClientMacros:
 //    println(generatedProxy.show(using Printer.TreeCode))
     println(generatedProxy)
 
-    println(proxy.asTerm.show(using Printer.TreeCode))
-    println(proxy.asTerm)
+//    println(proxy.asTerm.show(using Printer.TreeCode))
+//    println(proxy.asTerm)
 
     // TypeDef(
     //   $anon,
