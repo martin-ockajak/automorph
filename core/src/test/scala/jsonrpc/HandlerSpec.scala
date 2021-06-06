@@ -34,7 +34,7 @@ class HandlerSpec extends BaseSpec:
     "Bind" - {
       "Dummy" - {
         "No context" in {
-          JsonRpcHandler(DummyJsonCodec(), noBackend).bind(simpleApi)
+          JsonRpcHandlerFactory(DummyJsonCodec(), noBackend).bind(simpleApi)
         }
       }
       "Upickle" - {
@@ -74,7 +74,7 @@ class HandlerSpec extends BaseSpec:
 
   private inline def testBind[Node, CodecType <: Codec[Node], Effect[_]](codec: CodecType, backend: Backend[Effect]): Unit =
     val api = ApiImpl(backend)
-    val handler = JsonRpcHandler[Node, CodecType, Effect, Short](codec, backend).bind[Api[Effect]](api)
+    val handler = JsonRpcHandlerFactory[Node, CodecType, Effect, Short](codec, backend).bind[Api[Effect]](api)
     val transport = HandlerTransport(handler, backend)
     val client = JsonRpcClient[Node, CodecType, Effect, Short](codec, backend, transport)
     val apiProxy = client.bind[Api[Effect]]

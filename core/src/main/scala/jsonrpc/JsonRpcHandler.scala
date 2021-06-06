@@ -33,7 +33,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
   backend: Backend[Effect],
   bufferSize: Int,
   protected val methodBindings: Map[String, MethodHandle[Node, Effect, Context]],
-  private val encodeStrings: Seq[String] => Node
+  protected val encodeStrings: Seq[String] => Node
 ) extends HandlerBindings[Node, CodecType, Effect, Context] with CannotEqual with Logging:
 
   private val unknownId = "[unknown]".asRight
@@ -87,6 +87,9 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
       processRequest(request.toArraySeq(bufferSize))(using context),
       result => result.copy(response = result.response.map(response => ByteArrayInputStream(response.unsafeArray)))
     )
+
+  override def toString: String =
+    s"${this.className}(Codec: ${codec.className}, Effect: ${backend.className}, Bound methods: ${methodBindings.size})"
 
   /**
    * Invoke bound method specified in a request.
@@ -207,59 +210,18 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
       message => backend.pure(message.asSome)
     )
 
-  override def toString: String =
-    val codecName = codec.className
-    val effectName = backend.className
-    val boundMethods = methodBindings.size
-    s"$JsonRpcHandler(Codec: $codecName, Effect: $effectName, Bound methods: $boundMethods)"
-
-case object JsonRpcHandler:
-
-  type NoContext = Empty[JsonRpcHandler[?, ?, ?, ?]]
-  given NoContext = Empty[JsonRpcHandler[?, ?, ?, ?]]()
-
-  /**
-   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.
-   *
-   * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
-   *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec hierarchical message codec plugin
-   * @param backend effect backend plugin
-   * @param bufferSize input stream reading buffer size
-   * @tparam Node message format node representation type
-   * @tparam Effect effect type
-   * @return JSON-RPC request handler
-   */
-  inline def basic[Node, CodecType <: Codec[Node], Effect[_]](
-    codec: CodecType,
-    backend: Backend[Effect],
-    bufferSize: Int = 4096
-  ): JsonRpcHandler[Node, CodecType, Effect, NoContext] =
-    new JsonRpcHandler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
-
-  /**
-   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
-   *
-   * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
-   *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec message codec plugin
-   * @param backend effect backend plugin
-   * @param bufferSize input stream reading buffer size
-   * @tparam Node message format node representation type
-   * @tparam Effect effect type
-   * @return JSON-RPC request handler
-   */
-  inline def apply[Node, CodecType <: Codec[Node], Effect[_], Context](
-    codec: CodecType,
-    backend: Backend[Effect],
-    bufferSize: Int = 4096
-  ): JsonRpcHandler[Node, CodecType, Effect, Context] =
-    new JsonRpcHandler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
-
-final case class HandlerResult[T](
-  response: Option[T],
+/**
+ * JSON-RPC handler request processing result.
+ *
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+ * @param response response message
+ * @param id call identifier, a request without and identifier is considered to be a notification
+ * @param method invoked method name
+ * @param errorCode failed call error code
+ * @tparam ResponseType response message type
+ */
+final case class HandlerResult[ResponseType](
+  response: Option[ResponseType],
   id: Option[Message.Id],
   method: Option[String],
   errorCode: Option[Int]

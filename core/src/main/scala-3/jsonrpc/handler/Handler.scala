@@ -3,7 +3,8 @@ package jsonrpc.handler
 import java.io.InputStream
 import java.nio.ByteBuffer
 import jsonrpc.{HandlerResult, JsonRpcHandler}
-import jsonrpc.spi.Codec
+import jsonrpc.spi.{Backend, Codec}
+import jsonrpc.core.Empty
 import scala.collection.immutable.ArraySeq
 
 trait Handler[Node, CodecType <: Codec[Node], Effect[_], Context]:

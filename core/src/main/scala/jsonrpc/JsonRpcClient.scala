@@ -5,7 +5,7 @@ import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Codec, Backend, Message, MessageError, Transport}
-import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
+import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import jsonrpc.util.CannotEqual
 import scala.collection.immutable.ArraySeq
 import scala.util.{Random, Try}
@@ -33,6 +33,9 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Effect[_], Contex
 ) extends ClientBindings[Node, CodecType, Effect, Context] with CannotEqual with Logging:
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
+
+  override def toString: String =
+    s"${this.className}(Codec: ${codec.className}, Effect: ${backend.className})"
 
   /**
    * Perform a method call using specified arguments.
@@ -149,28 +152,3 @@ final case class JsonRpcClient[Node, CodecType <: Codec[Node], Effect[_], Contex
   private def raiseError[T](error: Throwable, requestMessage: Message[Node]): Effect[T] =
     logger.error(s"Failed to perform JSON-RPC request", error, requestMessage.properties)
     backend.failed(error)
-
-case object JsonRpcClient:
-
-  type NoContext = Empty[JsonRpcClient[?, ?, ?, ?]]
-  given NoContext = Empty[JsonRpcClient[?, ?, ?, ?]]()
-
-  /**
-   * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins without request `Context` type.
-   *
-   * The client can be used by an application to perform JSON-RPC calls and notifications.
-   *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec message codec plugin
-   * @param backend effect backend plugin
-   * @param bufferSize input stream reading buffer size
-   * @tparam Node message format node representation type
-   * @tparam Effect effect type
-   * @return JSON-RPC request client
-   */
-  inline def basic[Node, CodecType <: Codec[Node], Effect[_]](
-    codec: CodecType,
-    backend: Backend[Effect],
-    transport: Transport[Effect, NoContext]
-  ): JsonRpcClient[Node, CodecType, Effect, NoContext] =
-    new JsonRpcClient(codec, backend, transport)

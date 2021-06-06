@@ -31,4 +31,4 @@ trait HandlerBindings[Node, CodecType <: Codec[Node], Effect[_], Context]
             )
         ).map(_ -> method)
       }
-    copy(methodBindings = methodBindings ++ bindings)
+    JsonRpcHandler(codec, backend, bufferSize, methodBindings ++ bindings, encodeStrings)
