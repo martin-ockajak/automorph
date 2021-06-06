@@ -58,4 +58,5 @@ trait Backend[Effect[_]]:
    * @tparam R function result type
    * @return effectful transformed value
    */
-  def map[T, R](effect: Effect[T], function: T => R): Effect[R] = flatMap(effect, value => pure(function(value)))
+  def map[T, R](effect: Effect[T], function: T => R): Effect[R] =
+    flatMap(effect, value => pure(function(value)))

@@ -118,7 +118,7 @@ case object HandlerMacros:
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
-    import ref.quotes.reflect.{asTerm, IntConstant, Lambda, Literal, MethodType, Printer, Symbol, Term, Tree, TypeRepr}
+    import ref.quotes.reflect.{asTerm, AppliedType, IntConstant, Lambda, Literal, MethodType, Printer, Symbol, Term, Tree, TypeRepr}
     given Quotes = ref.quotes
 
     // Method call function expression consuming argument nodes and returning the method call result
@@ -128,11 +128,31 @@ case object HandlerMacros:
     // Result conversion function expression consuming the method result and returning a node
     val encodeResult = encodeResultExpr[Node, CodecType](ref, method, codec)
 
+//    val resultType =
+//      method.resultType match
+//        case appliedType: AppliedType => appliedType.args.last
+//        case otherType                        => otherType
+//    val mapResult = Lambda(
+//      Symbol.spliceOwner,
+//      MethodType(List("argumentNodes", "context"))(
+//        _ => List(TypeRepr.of[Seq[Node]], TypeRepr.of[Context]),
+//        _ => TypeRepr.of[Effect].appliedTo(List(TypeRepr.of[Node]))
+//      ),
+//      (symbol, arguments) =>
+//        callTerm(ref.quotes, backend.asTerm, "map", List(resultType, TypeRepr.of[Node]), List(List(
+//          decodeArgumentsAndCallMethod.asTerm,
+//          encodeResult.asTerm
+//        )))
+////        callTerm(ref.quotes, codec.asTerm, "encode", List(resultType), List(arguments.asInstanceOf[List[Term]]))
+//    ).asExpr.asInstanceOf[Expr[(Seq[Node], Context) => Node]]
+
+    // FIXME - remove type coercions
     // Binding function expression
     val bindingFunction = '{
       (argumentNodes: Seq[Node], context: Context) =>
+//        $mapResult(argumentNodes, context)
         $backend.map(
-          $decodeArgumentsAndCallMethod(argumentNodes, context),
+          $decodeArgumentsAndCallMethod(argumentNodes, context).asInstanceOf[Effect[Any]],
           $encodeResult.asInstanceOf[Any => Node]
         )
 //        $decodeAndCallMethod(argumentNodes, context)
