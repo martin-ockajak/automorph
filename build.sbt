@@ -49,7 +49,7 @@ lazy val test = project.dependsOn(
 )
 lazy val core = project.dependsOn(
   util, spi, test % Test,
-  zio % Test, monix % Test, cats % Test, scalaz % Test,
+  zio % Test, monix % Test, scalaz % Test,
   upickle % Test, circe % Test,
   sttp % Test
 ).settings(

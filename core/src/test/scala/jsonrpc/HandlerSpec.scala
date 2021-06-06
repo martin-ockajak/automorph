@@ -2,7 +2,7 @@ package jsonrpc
 
 import base.BaseSpec
 import io.circe.generic.auto.*
-import jsonrpc.backend.cats.CatsBackend
+//import jsonrpc.backend.cats.CatsBackend
 import jsonrpc.backend.monix.MonixBackend
 import jsonrpc.backend.scalaz.ScalazBackend
 import jsonrpc.backend.standard.{FutureBackend, NoBackend, TryBackend}
@@ -27,7 +27,7 @@ class HandlerSpec extends BaseSpec:
   private val futureBackend = FutureBackend()
   private val monixBackend = MonixBackend()
   private val zioBackend = ZioBackend[ZEnv]()
-  private val catsBackend = CatsBackend()
+//  private val catsBackend = CatsBackend()
   private val scalazBackend = ScalazBackend()
 
   "" - {
@@ -48,15 +48,15 @@ class HandlerSpec extends BaseSpec:
         "Future" in {
           testBind(codec, futureBackend)
         }
-//        " Monix" in {
-//          testBind(codec, monixBackend)
-//        }
+        " Monix" in {
+          testBind(codec, monixBackend)
+        }
         "Zio" in {
           testBind(codec, zioBackend)
         }
-        "Cats" in {
-          testBind(codec, catsBackend)
-        }
+//        "Cats" in {
+//          testBind(codec, catsBackend)
+//        }
 //        "Scalaz" in {
 //          testBind(codec, scalazBackend)
 //        }
