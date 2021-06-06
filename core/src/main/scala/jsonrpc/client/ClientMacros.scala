@@ -49,9 +49,6 @@ case object ClientMacros:
         s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
       )
 
-    // Debug prints
-//    println(validMethods.map(_.lift).map(method => ApiReflection.methodDescription[ApiType](ref, method)).mkString("\n"))
-
     val proxy = '{
       new Runnable:
         def run(): Unit = ()
@@ -61,9 +58,11 @@ case object ClientMacros:
 //    val generatedProxy = TypeDef(Symbol.classSymbol("Test"))
     val generatedProxy = TypeDef.copy(Symbol.spliceOwner.tree)("Test", Block(List.empty, Expr(0).asTerm))
 //    println(generatedProxy.show(using Printer.TreeCode))
-    if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
-      println(generatedProxy)
 
+    // Debug prints
+    if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
+//    println(validMethods.map(_.lift).map(method => ApiReflection.methodDescription[ApiType](ref, method)).mkString("\n"))
+      println(generatedProxy)
 //    println(proxy.asTerm.show(using Printer.TreeCode))
 //    println(proxy.asTerm)
 

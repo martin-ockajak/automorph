@@ -71,9 +71,6 @@ case object HandlerMacros:
         s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
       )
 
-    // Debug prints
-//    println(validMethods.map(_.lift).map(methodDescription).mkString("\n"))
-
     // Generate API method handles including wrapper functions consuming and product Node values
     val methodHandles = Expr.ofSeq(validMethods.map { method =>
       generateMethodHandle[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
