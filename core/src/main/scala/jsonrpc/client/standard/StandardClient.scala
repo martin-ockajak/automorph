@@ -1,7 +1,7 @@
 package jsonrpc.client.standard
 
 import jsonrpc.client.ClientBindings
-import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
+import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
@@ -84,7 +84,7 @@ final case class StandardClient[Node, CodecType <: Codec[Node], Effect[_], Conte
   ): Effect[R] =
     // Deserialize response
     Try(codec.deserialize(rawResponse)).fold(
-      error => raiseError(ParseErrorException("Invalid response format", error), formedRequest),
+      error => raiseError(ParseError("Invalid response format", error), formedRequest),
       formedResponse =>
         // Validate response
         logger.trace(s"Received JSON-RPC message:\n${codec.format(formedResponse)}")
@@ -114,7 +114,7 @@ final case class StandardClient[Node, CodecType <: Codec[Node], Effect[_], Conte
   private def serialize(formedMessage: Message[Node]): Effect[ArraySeq.ofByte] =
     logger.trace(s"Sending JSON-RPC message:\n${codec.format(formedMessage)}")
     Try(codec.serialize(formedMessage)).fold(
-      error => raiseError(ParseErrorException("Invalid message format", error), formedMessage),
+      error => raiseError(ParseError("Invalid message format", error), formedMessage),
       message => backend.pure(message)
     )
 

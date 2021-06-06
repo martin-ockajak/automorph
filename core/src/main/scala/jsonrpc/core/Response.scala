@@ -1,7 +1,7 @@
 package jsonrpc.core
 
 import jsonrpc.core.Protocol
-import jsonrpc.core.Protocol.{InvalidRequestException, mandatory}
+import jsonrpc.core.Protocol.{InvalidRequest, mandatory}
 import jsonrpc.spi.Message.{Id, version}
 import jsonrpc.spi.{Message, MessageError}
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome}
@@ -33,7 +33,7 @@ case object Response:
   def apply[Node](message: Message[Node]): Response[Node] =
     val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
     if jsonrpc != version then
-      throw InvalidRequestException(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
+      throw InvalidRequest(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
     val id = mandatory(message.id, "id")
     message.result.map { result =>
       Response(id, result.asRight)

@@ -12,25 +12,25 @@ import jsonrpc.util.ValueOps.{asRight, asOption, asSome}
 case object Protocol:
 
   /** JSON-RPC parse error. */
-  final case class ParseErrorException(
+  final case class ParseError(
     message: String,
     cause: Throwable
   ) extends RuntimeException(message, cause)
 
   /** JSON-RPC invalid request error. */
-  final case class InvalidRequestException(
+  final case class InvalidRequest(
     message: String,
     cause: Throwable
   ) extends RuntimeException(message, cause)
 
   /** JSON-RPC method not found error. */
-  final case class MethodNotFoundException(
+  final case class MethodNotFound(
     message: String,
     cause: Throwable
   ) extends RuntimeException(message, cause)
 
   /** JSON-RPC internal error. */
-  final case class InternalErrorException(
+  final case class InternalError(
     message: String,
     cause: Throwable
   ) extends RuntimeException(message, cause)
@@ -48,23 +48,23 @@ case object Protocol:
 
   /** Mapping of standard exception types to JSON-RPC errors. */
   lazy val exceptionError: Map[Class[? <: Throwable], ErrorType] = Map(
-    classOf[ParseErrorException] -> ErrorType.ParseError,
-    classOf[InvalidRequestException] -> ErrorType.InvalidRequest,
-    classOf[MethodNotFoundException] -> ErrorType.MethodNotFound,
+    classOf[ParseError] -> ErrorType.ParseError,
+    classOf[InvalidRequest] -> ErrorType.InvalidRequest,
+    classOf[MethodNotFound] -> ErrorType.MethodNotFound,
     classOf[IllegalArgumentException] -> ErrorType.InvalidParams,
-    classOf[InternalErrorException] -> ErrorType.InternalError,
+    classOf[InternalError] -> ErrorType.InternalError,
     classOf[IOException] -> ErrorType.IOError
   ).withDefaultValue(ErrorType.ApplicationError)
 
   /** Mapping of JSON-RPC errors to standard exception types. */
   def errorException(code: Int, message: String): Throwable = code match
-    case ErrorType.ParseError.code                   => ParseErrorException(message, None.orNull)
-    case ErrorType.InvalidRequest.code               => InvalidRequestException(message, None.orNull)
-    case ErrorType.MethodNotFound.code               => MethodNotFoundException(message, None.orNull)
+    case ErrorType.ParseError.code                   => ParseError(message, None.orNull)
+    case ErrorType.InvalidRequest.code               => InvalidRequest(message, None.orNull)
+    case ErrorType.MethodNotFound.code               => MethodNotFound(message, None.orNull)
     case ErrorType.InvalidParams.code                => IllegalArgumentException(message, None.orNull)
-    case ErrorType.InternalError.code                => InternalErrorException(message, None.orNull)
+    case ErrorType.InternalError.code                => InternalError(message, None.orNull)
     case ErrorType.IOError.code                      => IOException(message, None.orNull)
-    case _ if code < ErrorType.ApplicationError.code => InternalErrorException(message, None.orNull)
+    case _ if code < ErrorType.ApplicationError.code => InternalError(message, None.orNull)
     case _                                           => RuntimeException(message, None.orNull)
 
   /**
@@ -74,10 +74,10 @@ case object Protocol:
    * @param name property name
    * @tparam T property type
    * @return property value
-   * @throws InvalidRequestException if the property value is missing
+   * @throws InvalidRequest if the property value is missing
    */
   def mandatory[T](value: Option[T], name: String): T = value.getOrElse(
-    throw InvalidRequestException(s"Missing message property: $name", None.orNull)
+    throw InvalidRequest(s"Missing message property: $name", None.orNull)
   )
 
   /**

@@ -2,7 +2,7 @@ package jsonrpc.handler.standard
 
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
+import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
 import jsonrpc.handler.{Handler, HandlerBindings, HandlerResult, MethodHandle}
 import jsonrpc.log.Logging
@@ -50,7 +50,7 @@ final case class StandardHandler[Node, CodecType <: Codec[Node], Effect[_], Cont
     Try(codec.deserialize(request)).fold(
       error =>
         errorResponse(
-          ParseErrorException("Invalid request format", error),
+          ParseError("Invalid request format", error),
           Message[Node](None, unknownId.asSome, None, None, None, None)
         ),
       formedRequest =>
@@ -138,7 +138,7 @@ final case class StandardHandler[Node, CodecType <: Codec[Node], Effect[_], Cont
       )
     }.getOrElse {
       errorResponse(
-        MethodNotFoundException(s"Method not found: ${validRequest.method}", None.orNull),
+        MethodNotFound(s"Method not found: ${validRequest.method}", None.orNull),
         formedRequest
       )
     }
@@ -209,6 +209,6 @@ final case class StandardHandler[Node, CodecType <: Codec[Node], Effect[_], Cont
   private def serialize(formedMessage: Message[Node]): Effect[Option[ArraySeq.ofByte]] =
     logger.trace(s"Sending JSON-RPC message:\n${codec.format(formedMessage)}")
     Try(codec.serialize(formedMessage)).fold(
-      error => backend.failed(ParseErrorException("Invalid message format", error)),
+      error => backend.failed(ParseError("Invalid message format", error)),
       message => backend.pure(message.asSome)
     )
