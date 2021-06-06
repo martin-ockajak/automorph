@@ -6,7 +6,7 @@ import io.undertow.Handlers
 import io.undertow.server.handlers.BlockingHandler
 import jsonrpc.backend.standard.NoBackend
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
-import jsonrpc.handler.standard.JsonRpcHandler
+import jsonrpc.handler.HandlerFactory
 import jsonrpc.http.undertow.UndertowJsonRpcHandler
 import scala.language.adhocExtensions
 
@@ -25,7 +25,7 @@ object CaskServer extends cask.MainRoutes:
 
   override def defaultHandler =
     val httpHandler = UndertowJsonRpcHandler(
-      JsonRpcHandler(UpickleJsonCodec(), NoBackend()).bind(Api),
+      HandlerFactory(UpickleJsonCodec(), NoBackend()).bind(Api),
       _ => ()
     )
     val pathHandler = Handlers.path(super.defaultHandler).addPrefixPath(apiPath, httpHandler)

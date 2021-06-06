@@ -6,7 +6,7 @@ import io.undertow.util.{Headers, StatusCodes}
 import java.nio.ByteBuffer
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
-import jsonrpc.handler.standard.JsonRpcHandler
+import jsonrpc.handler.Handler
 import jsonrpc.http.undertow.UndertowJsonRpcHandler.defaultStatuses
 import jsonrpc.log.Logging
 import jsonrpc.spi.Backend
@@ -28,7 +28,7 @@ import scala.util.Try
  * @tparam Effect effect type
  */
 final case class UndertowJsonRpcHandler[Effect[_]](
-  handler: JsonRpcHandler[?, ?, Effect, HttpServerExchange],
+  handler: Handler[?, ?, Effect, HttpServerExchange],
   effectRunAsync: Effect[Any] => Unit,
   errorStatus: Int => Int = defaultStatuses
 ) extends HttpHandler with Logging:

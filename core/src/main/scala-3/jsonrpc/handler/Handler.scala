@@ -105,3 +105,17 @@ trait Handler[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @return optional response message
    */
   def processRequest(request: InputStream)(using context: Context): Effect[HandlerResult[InputStream]]
+
+  /**
+   * Message codec plugin.
+   *
+   * @return message codec plugin
+   */
+  def codec: CodecType
+
+  /**
+   * Effect backend plugin.
+   *
+   *  @return effect backend plugin
+   */
+  def backend: Backend[Effect]

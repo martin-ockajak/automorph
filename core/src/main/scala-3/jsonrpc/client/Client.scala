@@ -1,6 +1,6 @@
 package jsonrpc.client
 
-import jsonrpc.spi.Codec
+import jsonrpc.spi.{Backend, Codec}
 
 trait Client[Node, CodecType <: Codec[Node], Effect[_], Context]:
 
@@ -39,3 +39,17 @@ trait Client[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @return remote API proxy instance
    */
   inline def bind[T <: AnyRef]: T
+
+  /**
+   * Message codec plugin.
+   *
+   * @return message codec plugin
+   */
+  def codec: CodecType
+
+  /**
+   * Effect backend plugin.
+   *
+   *  @return effect backend plugin
+   */
+  def backend: Backend[Effect]

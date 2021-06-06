@@ -6,7 +6,7 @@ import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise}
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
-import jsonrpc.handler.standard.JsonRpcHandler
+import jsonrpc.handler.Handler
 import jsonrpc.log.Logging
 import jsonrpc.server.http.finagle.FinagleJsonRpcService.defaultStatuses
 import jsonrpc.spi.Backend
@@ -28,7 +28,7 @@ import scala.util.{Failure, Success, Try}
  * @tparam Effect effect type
  */
 final case class FinagleJsonRpcService[Effect[_]](
-  handler: JsonRpcHandler[?, ?, Effect, Request],
+  handler: Handler[?, ?, Effect, Request],
   errorStatus: Int => Status = defaultStatuses
 )
   extends Service[Request, Response] with Logging:

@@ -32,10 +32,6 @@ trait HandlerBindings[Node, CodecType <: Codec[Node], Effect[_], Context]
       }
     clone(bindings)
 
-  protected def codec: CodecType
-
-  protected def backend: Backend[Effect]
-
   protected def clone(
     extraMethodBindings: Map[String, MethodHandle[Node, Effect, Context]]
   ): Handler[Node, CodecType, Effect, Context]

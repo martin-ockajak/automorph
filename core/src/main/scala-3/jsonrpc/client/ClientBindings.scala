@@ -20,10 +20,6 @@ trait ClientBindings[Node, CodecType <: Codec[Node], Effect[_], Context]
 
   override inline def bind[T <: AnyRef]: T = ClientMacros.bind[Node, CodecType, Effect, Context, T](codec, backend)
 
-  protected def codec: CodecType
-
-  protected def backend: Backend[Effect]
-
   /**
    * Perform a method call using specified arguments.
    *
