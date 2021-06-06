@@ -1,16 +1,15 @@
 package jsonrpc
 
-import java.beans.IntrospectionException
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.core.Protocol.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
-import jsonrpc.handler.{HandlerMacros, MethodHandle}
+import jsonrpc.handler.{HandlerBindings, MethodHandle}
 import jsonrpc.log.Logging
-import jsonrpc.spi.{Codec, Backend, Message, MessageError}
+import jsonrpc.spi.{Backend, Codec, Message, MessageError}
+import jsonrpc.util.CannotEqual
 import jsonrpc.util.EncodingOps.toArraySeq
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
-import jsonrpc.util.CannotEqual
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -33,94 +32,11 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
   codec: CodecType,
   backend: Backend[Effect],
   bufferSize: Int,
-  private val methodBindings: Map[String, MethodHandle[Node, Effect, Context]],
+  protected val methodBindings: Map[String, MethodHandle[Node, Effect, Context]],
   private val encodeStrings: Seq[String] => Node
-) extends CannotEqual with Logging:
+) extends HandlerBindings[Node, CodecType, Effect, Context] with CannotEqual with Logging:
 
   private val unknownId = "[unknown]".asRight
-
-  /**
-   * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
-   *
-   * A method is considered valid if it satisfied all of these conditions:
-   * - can be called at runtime
-   * - has no type parameters
-   * - returns the specified effect type
-   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
-   *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
-   * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
-   *
-   * API methods are exposed using their actual names.
-   *
-   * @param api API instance
-   * @tparam T API type (only member methods of this types are exposed)
-   * @return JSON-RPC server including the additional API bindings
-   * @throws IllegalArgumentException if invalid public methods are found in the API type
-   */
-  inline def bind[T <: AnyRef](api: T): JsonRpcHandler[Node, CodecType, Effect, Context] = bind(api, name => Seq(name))
-
-  /**
-   * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
-   *
-   * A method is considered valid if it satisfied all of these conditions:
-   * - can be called at runtime
-   * - has no type parameters
-   * - returns the specified effect type
-   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
-   *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
-   * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
-   *
-   * API methods are exposed using names resulting from a transformation of their actual names via the `exposedNames` function.
-   *
-   * @param api API instance
-   * @param exposedNames create exposed method names from its actual name (empty result causes the method not to be exposed)
-   * @tparam T API type (only member methods of this types are exposed)
-   * @return JSON-RPC server including the additional API bindings
-   * @throws IllegalArgumentException if invalid public methods are found in the API type
-   */
-  inline def bind[T <: AnyRef](
-    api: T,
-    exposedNames: String => Seq[String]
-  ): JsonRpcHandler[Node, CodecType, Effect, Context] =
-    bind(api, Function.unlift(name => Some(exposedNames(name))))
-
-  /**
-   * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
-   *
-   * A method is considered valid if it satisfied all of these conditions:
-   * - can be called at runtime
-   * - has no type parameters
-   * - returns the specified effect type
-   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
-   *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
-   * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
-   *
-   * API methods are exposed using names resulting from a transformation of their actual names via the `exposedNames` function.
-   *
-   * @param api API instance
-   * @param exposedNames create exposed method names from its actual name (empty result causes the method not to be exposed)
-   * @tparam T API type (only member methods of this types are exposed)
-   * @return JSON-RPC server including the additional API bindings
-   * @throws IllegalArgumentException if invalid public methods are found in the API type
-   */
-  inline def bind[T <: AnyRef](
-    api: T,
-    exposedNames: PartialFunction[String, Seq[String]]
-  ): JsonRpcHandler[Node, CodecType, Effect, Context] =
-    val bindings =
-      HandlerMacros.bind[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap { (methodName, method) =>
-        exposedNames.applyOrElse(
-          methodName,
-          _ =>
-            throw new IntrospectionException(
-              s"Bound API does not contain the specified public method: ${api.getClass.getName}.$methodName"
-            )
-        ).map(_ -> method)
-      }
-    copy(methodBindings = methodBindings ++ bindings)
 
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.
@@ -209,8 +125,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
                     logger.info(s"Processed JSON-RPC request", formedRequest.properties)
                     serialize(validResponse.formed)
                   }.getOrElse(backend.pure(None)),
-                  rawResponse =>
-                    HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
+                  rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
                 )
             )
           )
@@ -276,8 +191,7 @@ final case class JsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_], Conte
         val validResponse = Response[Node](id, ResponseError(code, message, data).asLeft)
         serialize(validResponse.formed)
       }.getOrElse(backend.pure(None)),
-      rawResponse =>
-        HandlerResult(rawResponse, formedRequest.id, formedRequest.method, code.asSome)
+      rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, code.asSome)
     )
 
   /**
