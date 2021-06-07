@@ -85,7 +85,50 @@ case object ClientMacros:
     ref: Reflection,
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
-  ): Expr[(Seq[Any], Context) => Seq[Node]] = ???
+  ): Expr[(Seq[Any], Context) => Seq[Node]] =
+    import ref.quotes.reflect.{AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr, asTerm}
+    given Quotes = ref.quotes
+
+    // Map multiple parameter lists to flat argument node list offsets
+    val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
+      indices :+ (indices.last + size)
+    }
+    val lastArgumentIndex = method.parameters.map(_.size).sum - 1
+
+    // Create encode arguments function
+    //   (arguments: Seq[Any], context: Context) => Seq[Node]
+    val encodeArgumentsType = MethodType(List("arguments", "context"))(
+      _ => List(TypeRepr.of[Seq[Any]], TypeRepr.of[Context]),
+      _ => TypeRepr.of[Seq[Node]]
+    )
+    Lambda(
+      Symbol.spliceOwner,
+      encodeArgumentsType,
+      (symbol, arguments) =>
+        // Create the method argument lists by encoding corresponding arguments into nodes
+        //   List(
+        //     codec.encode[Parameter0Type](arguments(0)),
+        //     codec.encode[Parameter1Type](arguments(1)),
+        //     ...
+        //     codec.encode[ParameterNType](arguments(N)) OR context
+        //   )): List[Node]
+        val List(argumentValues, context) = arguments
+        val argumentList = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
+          parameters.toList.zipWithIndex.map { (parameter, index) =>
+            val argumentIndex = Literal(IntConstant(offset + index))
+            val argumentValue =
+              callMethodTerm(ref.quotes, argumentValues.asInstanceOf[Term], "apply", List.empty, List(List(argumentIndex)))
+            if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
+              context
+            else
+              callMethodTerm(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argumentValue)))
+          }
+        ).asInstanceOf[List[Term]]
+
+        // Create the sequence construction call the encoded arguments
+        //   Seq(encodedArguments ...): Seq[Node]
+        callMethodTerm(ref.quotes, '{ List }.asTerm, "apply", List(TypeRepr.of[Node]), List(argumentList))
+    ).asExprOf[(Seq[Any], Context) => Seq[Node]]
 
   private def generateDecodeResultFunction[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type](
     ref: Reflection,
