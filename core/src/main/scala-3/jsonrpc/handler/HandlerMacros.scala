@@ -165,7 +165,7 @@ case object HandlerMacros:
           List(resultValueType, TypeRepr.of[Node]),
           List(List(methodCall, encodeResult))
         )
-    ).asExpr.asInstanceOf[Expr[(Seq[Node], Context) => Effect[Node]]]
+    ).asExprOf[(Seq[Node], Context) => Effect[Node]]
 
     // Log the binding function
     logBindingFunction[ApiType](ref, method, bindingFunction.asTerm)
