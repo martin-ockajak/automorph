@@ -103,7 +103,7 @@ case object HandlerMacros:
     }
     val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
-    // Create binding function
+    // Create invoke function
     //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
     val bindingType = MethodType(List("argumentNodes", "context"))(
       _ => List(TypeRepr.of[Seq[Node]], TypeRepr.of[Context]),
@@ -148,7 +148,7 @@ case object HandlerMacros:
             callMethodTerm(ref.quotes, codec.asTerm, "encode", List(resultValueType), List(arguments))
         )
 
-        // Create an effect mapping call using the method call and the encode result function
+        // Create the effect mapping call using the method call and the encode result function
         //   backend.map(methodCall, encodeResult): Effect[Node]
         callMethodTerm(
           ref.quotes,
