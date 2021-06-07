@@ -170,7 +170,6 @@ ThisBuild / scalacOptions ++= Seq(
     "120"
   )
   case _ => Seq(
-    "-feature",
     "-Xlint",
     "-Wextra-implicit",
     "-Wnumeric-widen",
