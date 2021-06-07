@@ -1,6 +1,5 @@
 // Project
 ThisBuild / organization := "io.json-rpc"
-ThisBuild / version := "0.1.0"
 
 lazy val root = project.in(file(".")).aggregate(
   core,
@@ -19,7 +18,9 @@ lazy val root = project.in(file(".")).aggregate(
   finagle
 ).settings(
   name := "json-rpc",
-  description := "JSON-RPC client & server"
+  description := "JSON-RPC client & server",
+  publish / skip := true,
+//  crossScalaVersions := Seq.empty
 ).enablePlugins(ScalaUnidocPlugin)
 
 
@@ -137,7 +138,7 @@ lazy val finagle = (project in file("server/finagle")).dependsOn(
 ).settings(
   name := "json-rpc-finagle",
   libraryDependencies ++= Seq(
-    "com.twitter" % "finagle-http_2.13" % "21.5.0"
+    ("com.twitter" % "finagle-http" % "21.5.0").cross(CrossVersion.for3Use2_13)
   )
 )
 
@@ -183,6 +184,26 @@ ThisBuild / scalacOptions ++= Seq(
   )
 })
 
-// Doc
+
+// Documentation
 ThisBuild / autoAPIMappings := true
+apiURL := Some(url("https://javadoc.io/doc/io.jsonrpc/jsonrpc-core_3/latest"))
+//Compile / doc / scalacOptions ++= Seq("-groups", "-implicits")
+//apiMappings += (
+//  (unmanagedBase.value / "cats-effect.jar") -> 
+//    url("https://example.org/api/")
+//)
+
+
+// Release
+ThisBuild / releaseCrossBuild := true
+ThisBuild / homepage := Some(url("https://github.com/jsonrpc/jsonrpc"))
+ThisBuild / scmInfo := Some(ScmInfo(
+  url("https://github.com/jsonrpc/jsonrpc"),
+  "scm:git:git@github.com:jsonrpc/jsonrpc.git"
+))
+ThisBuild / releaseVcsSign := true
+ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
+ThisBuild / versionScheme := Some("semver-spec")
+ThisBuild / publishTo := Some(MavenCache("local-maven", file("target/maven-relases")))
 
