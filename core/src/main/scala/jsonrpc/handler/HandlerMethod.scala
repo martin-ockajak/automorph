@@ -3,7 +3,7 @@ package jsonrpc.handler
 /**
  * Handler bound API method binding.
  *
- * @param function binding function wrapping the bound method
+ * @param invoke bound method invocation function
  * @param name method name
  * @param resultType result type
  * @param paramNames parameter names
@@ -13,7 +13,7 @@ package jsonrpc.handler
  * @tparam Context request context type
  */
 final case class HandlerMethod[Node, Effect[_], Context](
-  function: (Seq[Node], Context) => Effect[Node],
+  invoke: (Seq[Node], Context) => Effect[Node],
   name: String,
   resultType: String,
   paramNames: Seq[String],

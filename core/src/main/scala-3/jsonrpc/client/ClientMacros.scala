@@ -18,7 +18,6 @@ case object ClientMacros:
    * Generate proxy instance with JSON-RPC bindings for all valid public methods of an API type.
    *
    * @param codec message format codec plugin
-   * @param backend effect backend plugin
    * @tparam Node message format node representation type
    * @tparam CodecType message format codec type
    * @tparam Effect effect type
@@ -27,14 +26,12 @@ case object ClientMacros:
    * @return mapping of method names to their JSON-RPC wrapper functions
    */
   inline def bind[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
-    codec: CodecType,
-    backend: Backend[Effect]
+    codec: CodecType
   ): ApiType =
-    ${ bind[Node, CodecType, Effect, Context, ApiType]('codec, 'backend) }
+    ${ bind[Node, CodecType, Effect, Context, ApiType]('codec) }
 
   private def bind[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type, Context: Type, ApiType <: AnyRef: Type](
-    codec: Expr[CodecType],
-    backend: Expr[Backend[Effect]]
+    codec: Expr[CodecType]
   )(using quotes: Quotes): Expr[ApiType] =
     import ref.quotes.reflect.{asTerm, Block, Printer, Symbol, TypeDef, TypeRepr, TypeTree}
     val ref = Reflection(quotes)

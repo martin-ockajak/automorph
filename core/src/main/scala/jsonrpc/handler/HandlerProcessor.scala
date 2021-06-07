@@ -107,7 +107,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
       val arguments = extractArguments(validRequest, methodHandle)
 
       // Invoke method
-      Try(backend.either(methodHandle.function(arguments, context))).fold(
+      Try(backend.either(methodHandle.invoke(arguments, context))).fold(
         error => errorResponse(error, formedRequest),
         outcome =>
           backend.flatMap(

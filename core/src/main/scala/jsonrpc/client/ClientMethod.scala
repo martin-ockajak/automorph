@@ -3,7 +3,8 @@ package jsonrpc.client
 /**
  * Client bound API method binding.
  *
- * @param function binding function wrapping the bound method
+ * @param encodeArguments bound method arguments encoding function
+ * @param decodeResult bound method result decoding function
  * @param name method name
  * @param resultType result type
  * @param paramNames parameter names
@@ -13,7 +14,8 @@ package jsonrpc.client
  * @tparam Context request context type
  */
 final case class ClientMethod[Node, Effect[_], Context](
-  function: (Seq[Any], Context) => Effect[Any],
+  encodeArguments: (Seq[Any], Context) => Seq[Node],
+  decodeResult: Node => Any,
   name: String,
   resultType: String,
   paramNames: Seq[String],
