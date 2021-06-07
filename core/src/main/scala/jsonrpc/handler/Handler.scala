@@ -1,10 +1,10 @@
-package jsonrpc.handler.standard
+package jsonrpc.handler
 
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
-import jsonrpc.handler.{Handler, HandlerBindings, HandlerResult, MethodHandle}
+import jsonrpc.handler.{HandlerBindings, HandlerResult, MethodHandle}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
 import jsonrpc.util.CannotEqual
@@ -28,7 +28,7 @@ import scala.util.Try
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class StandardHandler[Node, CodecType <: Codec[Node], Effect[_], Context](
+final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
   backend: Backend[Effect],
   bufferSize: Int,
@@ -45,7 +45,7 @@ final case class StandardHandler[Node, CodecType <: Codec[Node], Effect[_], Cont
    * @param context request context
    * @return optional response message
    */
-  override def processRequest(request: ArraySeq.ofByte)(using context: Context): Effect[HandlerResult[ArraySeq.ofByte]] =
+  def processRequest(request: ArraySeq.ofByte)(using context: Context): Effect[HandlerResult[ArraySeq.ofByte]] =
     // Deserialize request
     Try(codec.deserialize(request)).fold(
       error =>
@@ -69,7 +69,7 @@ final case class StandardHandler[Node, CodecType <: Codec[Node], Effect[_], Cont
    * @param context request context
    * @return optional response message
    */
-  override def processRequest(request: ByteBuffer)(using context: Context): Effect[HandlerResult[ByteBuffer]] =
+  def processRequest(request: ByteBuffer)(using context: Context): Effect[HandlerResult[ByteBuffer]] =
     backend.map(
       processRequest(request.toArraySeq)(using context),
       result => result.copy(response = result.response.map(response => ByteBuffer.wrap(response.unsafeArray)))
@@ -82,7 +82,7 @@ final case class StandardHandler[Node, CodecType <: Codec[Node], Effect[_], Cont
    * @param context request context
    * @return optional response message
    */
-  override def processRequest(request: InputStream)(using context: Context): Effect[HandlerResult[InputStream]] =
+  def processRequest(request: InputStream)(using context: Context): Effect[HandlerResult[InputStream]] =
     backend.map(
       processRequest(request.toArraySeq(bufferSize))(using context),
       result => result.copy(response = result.response.map(response => ByteArrayInputStream(response.unsafeArray)))
@@ -90,9 +90,6 @@ final case class StandardHandler[Node, CodecType <: Codec[Node], Effect[_], Cont
 
   override def toString: String =
     s"${this.className}(Codec: ${codec.className}, Effect: ${backend.className}, Bound methods: ${methodBindings.size})"
-
-  override protected def clone(extraMethodBindings: Map[String, MethodHandle[Node, Effect, Context]]): Handler[Node, CodecType, Effect, Context] =
-    StandardHandler(codec, backend, bufferSize, methodBindings ++ extraMethodBindings, encodeStrings)
 
   /**
    * Invoke bound method specified in a request.

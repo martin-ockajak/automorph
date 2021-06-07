@@ -1,4 +1,4 @@
-package jsonrpc.client.standard
+package jsonrpc.client
 
 import jsonrpc.client.ClientBindings
 import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
@@ -26,7 +26,7 @@ import scala.util.{Random, Try}
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class StandardClient[Node, CodecType <: Codec[Node], Effect[_], Context](
+final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
   backend: Backend[Effect],
   transport: Transport[Effect, Context]
@@ -37,7 +37,19 @@ final case class StandardClient[Node, CodecType <: Codec[Node], Effect[_], Conte
   override def toString: String =
     s"${this.className}(Codec: ${codec.className}, Effect: ${backend.className})"
 
-  override protected def performCall[R](
+  /**
+   * Perform a method call using specified arguments.
+   *
+   * Optional request context is used as a last method argument.
+   *
+   * @param methodName method name
+   * @param arguments method arguments
+   * @param context request context
+   * @param decodeResult result decoding function
+   * @tparam R result type
+   * @return result value
+   */
+  protected def performCall[R](
     method: String,
     arguments: Params[Node],
     context: Context,
@@ -58,7 +70,18 @@ final case class StandardClient[Node, CodecType <: Codec[Node], Effect[_], Conte
         )
     )
 
-  override protected def performNotify(methodName: String, arguments: Params[Node], context: Context): Effect[Unit] =
+  /**
+   * Perform a method notification using specified arguments.
+   *
+   * Optional request context is used as a last method argument.
+   *
+   * @param methodName method name
+   * @param arguments method arguments
+   * @param context request context
+   * @tparam R result type
+   * @return nothing
+   */
+  protected def performNotify(methodName: String, arguments: Params[Node], context: Context): Effect[Unit] =
     val formedRequest = Request(None, methodName, arguments).formed
     backend.map(
       // Serialize request

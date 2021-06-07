@@ -2,7 +2,6 @@ package jsonrpc
 
 import base.BaseSpec
 import jsonrpc.client.Client
-import jsonrpc.handler.Handler
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.{ComplexApi, ComplexApiImpl, SimpleApi}
 

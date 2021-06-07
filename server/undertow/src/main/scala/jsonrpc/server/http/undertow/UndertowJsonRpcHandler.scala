@@ -6,7 +6,6 @@ import io.undertow.util.{Headers, StatusCodes}
 import java.nio.ByteBuffer
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
-import jsonrpc.handler.Handler
 import jsonrpc.http.undertow.UndertowJsonRpcHandler.defaultStatuses
 import jsonrpc.log.Logging
 import jsonrpc.spi.Backend

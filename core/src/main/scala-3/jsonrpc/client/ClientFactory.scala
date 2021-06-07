@@ -1,13 +1,13 @@
 package jsonrpc.client
 
-import jsonrpc.client.standard.StandardClient
 import jsonrpc.core.Empty
 import jsonrpc.spi.{Backend, Codec, Transport}
+import jsonrpc.client.Client
 
 case object ClientFactory:
 
-  type NoContext = Empty[StandardClient[?, ?, ?, ?]]
-  given NoContext = Empty[StandardClient[?, ?, ?, ?]]()
+  type NoContext = Empty[Client[?, ?, ?, ?]]
+  given NoContext = Empty[Client[?, ?, ?, ?]]()
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with defined request `Context` type.
@@ -28,8 +28,8 @@ case object ClientFactory:
     codec: CodecType,
     backend: Backend[Effect],
     transport: Transport[Effect, Context]
-  ): StandardClient[Node, CodecType, Effect, Context] =
-    StandardClient(codec, backend, transport)
+  ): Client[Node, CodecType, Effect, Context] =
+    Client(codec, backend, transport)
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins without request `Context` type.
@@ -49,5 +49,5 @@ case object ClientFactory:
     codec: CodecType,
     backend: Backend[Effect],
     transport: Transport[Effect, NoContext]
-  ): StandardClient[Node, CodecType, Effect, NoContext] =
-    StandardClient(codec, backend, transport)
+  ): Client[Node, CodecType, Effect, NoContext] =
+    Client(codec, backend, transport)

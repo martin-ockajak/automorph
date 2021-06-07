@@ -2,7 +2,6 @@ package jsonrpc
 
 import base.BaseSpec
 import jsonrpc.UpickleJsonSpec.{CodecType, Node}
-import jsonrpc.client.Client
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
 import jsonrpc.spi.Codec
 import jsonrpc.{ComplexApi, Enum, Record, SimpleApi, Structure}

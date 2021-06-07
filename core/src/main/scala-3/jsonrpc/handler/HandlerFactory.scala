@@ -1,13 +1,12 @@
 package jsonrpc.handler
 
 import jsonrpc.core.Empty
-import jsonrpc.handler.standard.StandardHandler
 import jsonrpc.spi.{Backend, Codec}
 
 case object HandlerFactory:
 
-  type NoContext = Empty[StandardHandler[?, ?, ?, ?]]
-  given NoContext = Empty[StandardHandler[?, ?, ?, ?]]()
+  type NoContext = Empty[Handler[?, ?, ?, ?]]
+  given NoContext = Empty[Handler[?, ?, ?, ?]]()
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.
@@ -27,8 +26,8 @@ case object HandlerFactory:
     codec: CodecType,
     backend: Backend[Effect],
     bufferSize: Int = 4096
-  ): StandardHandler[Node, CodecType, Effect, NoContext] =
-    StandardHandler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
+  ): Handler[Node, CodecType, Effect, NoContext] =
+    Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
@@ -48,5 +47,5 @@ case object HandlerFactory:
     codec: CodecType,
     backend: Backend[Effect],
     bufferSize: Int = 4096
-  ): StandardHandler[Node, CodecType, Effect, Context] =
-    StandardHandler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
+  ): Handler[Node, CodecType, Effect, Context] =
+    Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
