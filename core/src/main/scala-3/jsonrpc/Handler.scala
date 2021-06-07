@@ -3,7 +3,7 @@ package jsonrpc
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
-import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
+import jsonrpc.core.{NoContextFor, Protocol, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMeta, HandlerProcessor, HandlerResult, MethodHandle}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
@@ -39,8 +39,8 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
 
 object Handler:
 
-  type NoContext = Empty[Handler[?, ?, ?, ?]]
-  given NoContext = Empty[Handler[?, ?, ?, ?]]()
+  type NoContext = NoContextFor[Handler[?, ?, ?, ?]]
+  given NoContext = NoContextFor[Handler[?, ?, ?, ?]]()
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.

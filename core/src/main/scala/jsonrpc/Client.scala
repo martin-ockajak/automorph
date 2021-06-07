@@ -2,7 +2,7 @@ package jsonrpc
 
 import jsonrpc.client.ClientMeta
 import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
-import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
+import jsonrpc.core.{NoContextFor, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, MessageError, Transport}
@@ -155,8 +155,8 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
 
 object Client:
 
-  type NoContext = Empty[Client[?, ?, ?, ?]]
-  given NoContext = Empty[Client[?, ?, ?, ?]]()
+  type NoContext = NoContextFor[Client[?, ?, ?, ?]]
+  given NoContext = NoContextFor[Client[?, ?, ?, ?]]()
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with defined request `Context` type.
