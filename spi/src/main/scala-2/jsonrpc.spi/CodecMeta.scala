@@ -10,7 +10,7 @@ trait CodecMeta[Node]:
    * @tparam T value type
    * @return message format node
    */
-  inline def encode[T](value: T): Node
+  def encode[T](value: T): Node
 
   /**
    * Decode a value from a node.
@@ -19,4 +19,4 @@ trait CodecMeta[Node]:
    * @tparam T value type
    * @return value of given type
    */
-  inline def decode[T](node: Node): T
+  def decode[T](node: Node): T
