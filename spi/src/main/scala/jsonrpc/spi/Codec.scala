@@ -10,7 +10,7 @@ import scala.collection.immutable.ArraySeq
  *
  * @tparam Node message format node representation type
  */
-trait Codec[Node]:
+trait Codec[Node] extends CodecMeta[Node]:
   /**
    * Message format media (MIME) type.
    *
@@ -41,21 +41,3 @@ trait Codec[Node]:
    * @return message in textual form
    */
   def format(message: Message[Node]): String
-
-  /**
-   * Encode a value as a node.
-   *
-   * @param value value of given type
-   * @tparam T value type
-   * @return message format node
-   */
-  inline def encode[T](value: T): Node
-
-  /**
-   * Decode a value from a node.
-   *
-   * @param node message format node
-   * @tparam T value type
-   * @return value of given type
-   */
-  inline def decode[T](node: Node): T
