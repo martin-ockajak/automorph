@@ -105,13 +105,13 @@ case object HandlerMacros:
 
     // Create invoke function
     //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
-    val bindingType = MethodType(List("argumentNodes", "context"))(
+    val invokeType = MethodType(List("argumentNodes", "context"))(
       _ => List(TypeRepr.of[Seq[Node]], TypeRepr.of[Context]),
       _ => TypeRepr.of[Effect].appliedTo(TypeRepr.of[Node])
     )
     Lambda(
       Symbol.spliceOwner,
-      bindingType,
+      invokeType,
       (symbol, arguments) =>
         // Create the method argument lists by decoding corresponding argument nodes into required parameter types
         //   List(List(
