@@ -4,7 +4,7 @@ import java.beans.IntrospectionException
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.core.ApiReflection
 import jsonrpc.handler.HandlerMacros.{debugDefault, debugProperty}
-import jsonrpc.handler.MethodHandle
+import jsonrpc.handler.HandlerMethod
 import jsonrpc.util.{Method, Reflection}
 import scala.collection.immutable.ArraySeq
 import scala.quoted.{Expr, Quotes, Type, quotes}

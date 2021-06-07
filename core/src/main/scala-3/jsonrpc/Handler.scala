@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
 import jsonrpc.core.{NoContextFor, Protocol, Request, Response, ResponseError}
-import jsonrpc.handler.{HandlerMeta, HandlerProcessor, HandlerResult, MethodHandle}
+import jsonrpc.handler.{HandlerMeta, HandlerProcessor, HandlerResult, HandlerMethod}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
 import jsonrpc.util.CannotEqual
@@ -32,7 +32,7 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
   backend: Backend[Effect],
   bufferSize: Int,
-  protected val methodBindings: Map[String, MethodHandle[Node, Effect, Context]],
+  protected val methodBindings: Map[String, HandlerMethod[Node, Effect, Context]],
   protected val encodeStrings: Seq[String] => Node
 ) extends HandlerProcessor[Node, CodecType, Effect, Context]
   with HandlerMeta[Node, CodecType, Effect, Context] with CannotEqual with Logging

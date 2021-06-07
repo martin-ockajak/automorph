@@ -30,14 +30,14 @@ case object HandlerMacros:
     codec: CodecType,
     backend: Backend[Effect],
     api: ApiType
-  ): Map[String, MethodHandle[Node, Effect, Context]] =
+  ): Map[String, HandlerMethod[Node, Effect, Context]] =
     ${ bind[Node, CodecType, Effect, Context, ApiType]('codec, 'backend, 'api) }
 
   private def bind[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type, Context: Type, ApiType <: AnyRef: Type](
     codec: Expr[CodecType],
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
-  )(using quotes: Quotes): Expr[Map[String, MethodHandle[Node, Effect, Context]]] =
+  )(using quotes: Quotes): Expr[Map[String, HandlerMethod[Node, Effect, Context]]] =
     import ref.quotes.reflect.{asTerm, TypeRepr, TypeTree}
     val ref = Reflection(quotes)
 
@@ -54,7 +54,7 @@ case object HandlerMacros:
     val methodHandles = Expr.ofSeq(validMethods.map { method =>
       generateMethodHandle[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
     })
-    '{ $methodHandles.toMap[String, MethodHandle[Node, Effect, Context]] }
+    '{ $methodHandles.toMap[String, HandlerMethod[Node, Effect, Context]] }
 
   private def generateMethodHandle[
     Node: Type,
@@ -68,7 +68,7 @@ case object HandlerMacros:
     codec: Expr[CodecType],
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
-  ): Expr[(String, MethodHandle[Node, Effect, Context])] =
+  ): Expr[(String, HandlerMethod[Node, Effect, Context])] =
     given Quotes = ref.quotes
 
     val liftedMethod = method.lift
@@ -79,7 +79,7 @@ case object HandlerMacros:
     val parameterTypes = Expr(liftedMethod.parameters.flatMap(_.map(_.dataType)))
     val usesContext = Expr(methodUsesContext[Context](ref, method))
     '{
-      $name -> MethodHandle($function, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)
+      $name -> HandlerMethod($function, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)
     }
 
   private def generateBindingFunction[

@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 import jsonrpc.{Handler, JsonRpcError}
 import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
 import jsonrpc.core.{NoContextFor, Protocol, Request, Response, ResponseError}
-import jsonrpc.handler.{HandlerMeta, HandlerResult, MethodHandle}
+import jsonrpc.handler.{HandlerMeta, HandlerResult, HandlerMethod}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
 import jsonrpc.util.CannotEqual
@@ -146,7 +146,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
    */
   private def extractArguments(
     validRequest: Request[Node],
-    methodHandle: MethodHandle[Node, Effect, Context]
+    methodHandle: HandlerMethod[Node, Effect, Context]
   ): Seq[Node] =
     val parameters = methodHandle.paramNames.dropRight(if methodHandle.usesContext then 1 else 0)
     validRequest.params.fold(

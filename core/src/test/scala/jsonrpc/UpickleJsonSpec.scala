@@ -8,6 +8,9 @@ import jsonrpc.{ComplexApi, Enum, Record, SimpleApi, Structure}
 import ujson.Value
 import upickle.AttributeTagged
 
+//class UpickleJsonSpec[Effect[_]] extends CoreSpec[Value, CodecType, Effect]:
+//  def codec: CodecType = UpickleJsonCodec(ReadWriters)
+
 object UpickleJsonSpec:
   type Node = Value
   type CodecType = UpickleJsonCodec[ReadWriters.type]
