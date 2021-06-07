@@ -50,11 +50,11 @@ case object HandlerMacros:
 
     // Generate API method handles including wrapper functions consuming and product Node values
     val methodHandles = Expr.ofSeq(validMethods.map { method =>
-      generateMethodHandle[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
+      generateHandlerMethod[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
     })
     '{ $methodHandles.toMap[String, HandlerMethod[Node, Effect, Context]] }
 
-  private def generateMethodHandle[
+  private def generateHandlerMethod[
     Node: Type,
     CodecType <: Codec[Node]: Type,
     Effect[_]: Type,

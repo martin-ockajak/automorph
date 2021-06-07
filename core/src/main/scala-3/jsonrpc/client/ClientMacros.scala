@@ -42,55 +42,9 @@ case object ClientMacros:
         s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
       )
 
-    val proxy = '{
-      new Runnable:
-        def run(): Unit = ()
-//      class X
-    }
-
-//    val generatedProxy = TypeDef(Symbol.classSymbol("Test"))
-    val generatedProxy = TypeDef.copy(Symbol.spliceOwner.tree)("Test", Block(List.empty, Expr(0).asTerm))
-//    println(generatedProxy.show(using Printer.TreeCode))
-
     // Debug prints
-    if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
-//    println(validMethods.map(_.lift).map(method => methodDescription[ApiType](ref, method)).mkString("\n"))
-      println(generatedProxy)
-//    println(proxy.asTerm.show(using Printer.TreeCode))
+//    println(proxy.asTerm.show(using Printer.TreeAnsiCode))
 //    println(proxy.asTerm)
-
-    // TypeDef(
-    //   $anon,
-    //   Template(
-    //     DefDef(
-    //       <init>,
-    //       List(List())
-    //       TypeTree[TypeRef(TermRef(ThisType(TypeRef(NoPrefix,module class <root>)),object scala),Unit)],
-    //       EmptyTree
-    //     ),
-    //     List(
-    //       Apply(Select(New(TypeTree[TypeRef(TermRef(ThisType(TypeRef(NoPrefix,module class java)),object lang),Object)]),<init>),List()),
-    //       Ident(Runnable)
-    //     ),
-    //     ValDef(
-    //       _,
-    //       EmptyTree,
-    //       EmptyTree
-    //     ),
-    //     List(
-    //       DefDef(
-    //         run,
-    //         List(List()),
-    //         Ident(Unit),
-    //         Literal(Constant(()))
-    //       )
-    //     )
-    //   )
-    // ),
-    // Typed(
-    //   Apply(Select(New(Ident($anon)),<init>),List()),
-    //   TypeTree[TypeRef(TermRef(ThisType(TypeRef(NoPrefix,module class java)),object lang),Runnable)]
-    // )
 
     '{
       null
