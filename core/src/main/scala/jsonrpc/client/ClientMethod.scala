@@ -1,7 +1,7 @@
-package jsonrpc.handler
+package jsonrpc.client
 
 /**
- * Handler bound API method binding.
+ * Client bound API method binding.
  *
  * @param function binding function wrapping the bound method
  * @param name method name
@@ -12,8 +12,8 @@ package jsonrpc.handler
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class HandlerMethod[Node, Effect[_], Context](
-  function: (Seq[Node], Context) => Effect[Node],
+final case class ClientMethod[Node, Effect[_], Context](
+  function: (Seq[Any], Context) => Effect[Any],
   name: String,
   resultType: String,
   paramNames: Seq[String],
