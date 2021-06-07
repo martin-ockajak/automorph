@@ -133,17 +133,17 @@ case object HandlerMacros:
         val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentIndex = Literal(IntConstant(offset + index))
-            val argumentNode = callTerm(ref.quotes, argumentNodes.asInstanceOf[Term], "apply", List.empty, List(List(argumentIndex)))
+            val argumentNode = callMethodTerm(ref.quotes, argumentNodes.asInstanceOf[Term], "apply", List.empty, List(List(argumentIndex)))
             if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
               context
             else
-              callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
+              callMethodTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
           }
         ).asInstanceOf[List[List[Term]]]
 
         // Create the method call using the decoded arguments
-        //   api.method(arguments ...): Effect[ResultValueType]
-        val methodCall = callTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
+        //   api.method(decodedArguments ...): Effect[ResultValueType]
+        val methodCall = callMethodTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
 
         // Create encode result function
         //   (result: ResultValue) => Node = codec.encode[ResultValueType](result)
@@ -151,12 +151,12 @@ case object HandlerMacros:
         val encodeResult = Lambda(
           symbol,
           encodeResultType,
-          (symbol, arguments) => callTerm(ref.quotes, codec.asTerm, "encode", List(resultValueType), List(arguments))
+          (symbol, arguments) => callMethodTerm(ref.quotes, codec.asTerm, "encode", List(resultValueType), List(arguments))
         )
 
         // Create an effect mapping call using the method call and the encode result function
         //   backend.map(methodCall, encodeResult): Effect[Node]
-        callTerm(
+        callMethodTerm(
           ref.quotes,
           backend.asTerm,
           "map",
@@ -179,7 +179,7 @@ case object HandlerMacros:
    * @param arguments method argument terms
    * @return instance method call term
    */
-  private def callTerm(
+  private def callMethodTerm(
     quotes: Quotes,
     instance: quotes.reflect.Term,
     methodName: String,
