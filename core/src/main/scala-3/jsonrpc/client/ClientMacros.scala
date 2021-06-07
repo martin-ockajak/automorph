@@ -1,12 +1,9 @@
 package jsonrpc.client
 
-import java.beans.IntrospectionException
-import jsonrpc.spi.{Backend, Codec}
-import jsonrpc.core.ApiReflection
-import jsonrpc.handler.HandlerMacros.{debugDefault, debugProperty}
-import jsonrpc.handler.HandlerMethod
-import jsonrpc.util.{Method, Reflection}
-import scala.collection.immutable.ArraySeq
+import jsonrpc.client.ClientMethod
+import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, methodDescription}
+import jsonrpc.spi.Codec
+import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
 case object ClientMacros:
@@ -15,7 +12,7 @@ case object ClientMacros:
 //  private val debugDefault = ""
 
   /**
-   * Generate proxy instance with JSON-RPC bindings for all valid public methods of an API type.
+   * Generate client bindings for all valid public methods of an API type.
    *
    * @param codec message format codec plugin
    * @tparam Node message format node representation type
@@ -33,11 +30,11 @@ case object ClientMacros:
   private def bind[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type, Context: Type, ApiType <: AnyRef: Type](
     codec: Expr[CodecType]
   )(using quotes: Quotes): Expr[ApiType] =
-    import ref.quotes.reflect.{asTerm, Block, Printer, Symbol, TypeDef, TypeRepr, TypeTree}
+    import ref.quotes.reflect.{Block, Printer, Symbol, TypeDef, TypeRepr, TypeTree, asTerm}
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = ApiReflection.detectApiMethods[Effect, Context](ref, TypeTree.of[ApiType])
+    val apiMethods = detectApiMethods[Effect, Context](ref, TypeTree.of[ApiType])
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if invalidMethodErrors.nonEmpty then
@@ -57,7 +54,7 @@ case object ClientMacros:
 
     // Debug prints
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
-//    println(validMethods.map(_.lift).map(method => ApiReflection.methodDescription[ApiType](ref, method)).mkString("\n"))
+//    println(validMethods.map(_.lift).map(method => methodDescription[ApiType](ref, method)).mkString("\n"))
       println(generatedProxy)
 //    println(proxy.asTerm.show(using Printer.TreeCode))
 //    println(proxy.asTerm)

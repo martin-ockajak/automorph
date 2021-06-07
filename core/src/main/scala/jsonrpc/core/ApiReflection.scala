@@ -31,6 +31,29 @@ case object ApiReflection:
     methods.map(method => validateApiMethod(ref, apiType, method))
 
   /**
+   * Create instance method call term.
+   *
+   * @param quotes quototation context
+   * @param instance instance term
+   * @param methodName method name
+   * @param typeArguments method type argument types
+   * @param arguments method argument terms
+   * @return instance method call term
+   */
+  def callMethodTerm(
+    quotes: Quotes,
+    instance: quotes.reflect.Term,
+    methodName: String,
+    typeArguments: List[quotes.reflect.TypeRepr],
+    arguments: List[List[quotes.reflect.Tree]]
+  ): quotes.reflect.Term =
+    import quotes.reflect.{Select, Term}
+
+    Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(
+      arguments.asInstanceOf[List[List[Term]]]
+    )
+
+  /**
    * Determine whether a method is a valid API method.
    *
    * @param ref reflection context

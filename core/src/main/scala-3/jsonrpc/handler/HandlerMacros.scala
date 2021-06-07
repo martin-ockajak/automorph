@@ -1,11 +1,9 @@
 package jsonrpc.handler
 
-import java.beans.IntrospectionException
+import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, methodDescription}
 import jsonrpc.spi.{Backend, Codec}
-import jsonrpc.core.ApiReflection
-import jsonrpc.util.{Method, Reflection}
-import scala.collection.immutable.ArraySeq
-import scala.quoted.{quotes, Expr, Quotes, Type}
+import jsonrpc.util.Reflection
+import scala.quoted.{Expr, Quotes, Type, quotes}
 
 case object HandlerMacros:
 
@@ -14,7 +12,7 @@ case object HandlerMacros:
   private val debugDefault = ""
 
   /**
-   * Generate JSON-RPC bindings for all valid public methods of an API type.
+   * Generate handler bindings for all valid public methods of an API type.
    *
    * @param codec message format codec plugin
    * @param backend effect backend plugin
@@ -38,11 +36,11 @@ case object HandlerMacros:
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
   )(using quotes: Quotes): Expr[Map[String, HandlerMethod[Node, Effect, Context]]] =
-    import ref.quotes.reflect.{asTerm, TypeRepr, TypeTree}
+    import ref.quotes.reflect.{TypeRepr, TypeTree, asTerm}
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = ApiReflection.detectApiMethods[Effect, Context](ref, TypeTree.of[ApiType])
+    val apiMethods = detectApiMethods[Effect, Context](ref, TypeTree.of[ApiType])
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if invalidMethodErrors.nonEmpty then
@@ -95,7 +93,7 @@ case object HandlerMacros:
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
-    import ref.quotes.reflect.{asTerm, AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
+    import ref.quotes.reflect.{AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr, asTerm}
     given Quotes = ref.quotes
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -170,29 +168,6 @@ case object HandlerMacros:
     logBindingFunction[ApiType](ref, method, bindingFunction.asTerm)
     bindingFunction
 
-  /**
-   * Create instance method call term.
-   *
-   * @param quotes quototation context
-   * @param instance instance term
-   * @param methodName method name
-   * @param typeArguments method type argument types
-   * @param arguments method argument terms
-   * @return instance method call term
-   */
-  private def callMethodTerm(
-    quotes: Quotes,
-    instance: quotes.reflect.Term,
-    methodName: String,
-    typeArguments: List[quotes.reflect.TypeRepr],
-    arguments: List[List[quotes.reflect.Tree]]
-  ): quotes.reflect.Term =
-    import quotes.reflect.{Select, Term}
-
-    Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(
-      arguments.asInstanceOf[List[List[Term]]]
-    )
-
   private def methodUsesContext[Context: Type](ref: Reflection, method: ref.QuotedMethod): Boolean =
     import ref.quotes.reflect.TypeRepr
 
@@ -207,5 +182,5 @@ case object HandlerMacros:
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
       println(
-        s"${ApiReflection.methodDescription[ApiType](ref, method)} = \n  ${bindingFunction.show(using Printer.TreeAnsiCode)}\n"
+        s"${methodDescription[ApiType](ref, method)} = \n  ${bindingFunction.show(using Printer.TreeAnsiCode)}\n"
       )
