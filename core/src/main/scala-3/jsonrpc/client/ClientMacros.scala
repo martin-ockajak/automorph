@@ -20,16 +20,16 @@ case object ClientMacros:
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam ApiType API type
-   * @return mapping of method names to their JSON-RPC wrapper functions
+   * @return mapping of method names to client method bindings
    */
   inline def bind[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
     codec: CodecType
-  ): ApiType =
+  ): Map[String, ClientMethod[Node, Context]] =
     ${ bind[Node, CodecType, Effect, Context, ApiType]('codec) }
 
   private def bind[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type, Context: Type, ApiType <: AnyRef: Type](
     codec: Expr[CodecType]
-  )(using quotes: Quotes): Expr[ApiType] =
+  )(using quotes: Quotes): Expr[Map[String, ClientMethod[Node, Context]]] =
     import ref.quotes.reflect.{Block, Printer, Symbol, TypeDef, TypeRepr, TypeTree, asTerm}
     val ref = Reflection(quotes)
 
@@ -51,10 +51,10 @@ case object ClientMacros:
     }.asInstanceOf[Expr[ApiType]]
 
     // Generate bound API method bindings
-//    val clientMethods = Expr.ofSeq(validMethods.map { method =>
-//      generateClientMethod[Node, CodecType, Effect, Context](ref, method, codec, backend, api)
-//    })
-//    '{ $clientMethods.toMap[String, ClientMethod[Node, Effect, Context]] }
+    val clientMethods = Expr.ofSeq(validMethods.map { method =>
+      generateClientMethod[Node, CodecType, Effect, Context, ApiType](ref, method, codec)
+    })
+    '{ $clientMethods.toMap[String, ClientMethod[Node, Context]] }
 
   private def generateClientMethod[
     Node: Type,

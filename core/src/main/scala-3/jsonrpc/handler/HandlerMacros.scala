@@ -22,7 +22,7 @@ case object HandlerMacros:
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam ApiType API type
-   * @return mapping of method names to their JSON-RPC wrapper functions
+   * @return mapping of method names to handler method bindings
    */
   inline def bind[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
     codec: CodecType,
