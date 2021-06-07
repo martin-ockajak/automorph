@@ -5,11 +5,11 @@ import scala.reflect.ClassTag
 final case class Invocation(methodName: String, params: Seq[Any])
 
 final case class ClientProxy():
-  def instanceFor[T: ClassTag](callback: Invocation => Any):T =
+  def instanceFor[T: ClassTag](f: Invocation => Any):T =
     Proxy.newProxyInstance(
       this.getClass.getClassLoader,
       Array( summon[ClassTag[T]].runtimeClass),
-      ( proxy, method, params) => callback( Invocation( method.getName, params.toSeq))
+      ( proxy, method, params) => f( Invocation( method.getName, params.toSeq))
     ).asInstanceOf[T]
 
 
