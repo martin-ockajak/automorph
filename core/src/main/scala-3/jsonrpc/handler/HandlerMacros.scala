@@ -129,13 +129,13 @@ case object HandlerMacros:
         //     ...
         //     codec.decode[ParameterNType](argumentNodes(N)) OR context
         //   )): List[List[ParameterXType]]
+        val List(argumentNodes, context) = arguments
         val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
-            val argumentNodes = arguments.head.asInstanceOf[Term]
             val argumentIndex = Literal(IntConstant(offset + index))
-            val argumentNode = callTerm(ref.quotes, argumentNodes, "apply", List.empty, List(List(argumentIndex)))
+            val argumentNode = callTerm(ref.quotes, argumentNodes.asInstanceOf[Term], "apply", List.empty, List(List(argumentIndex)))
             if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
-              arguments.last
+              context
             else
               callTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
           }
