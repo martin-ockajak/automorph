@@ -2,11 +2,11 @@ package jsonrpc
 
 import base.BaseSpec
 import jsonrpc.spi.{Backend, Codec}
-import jsonrpc.{ComplexApi, ComplexApiImpl, SimpleApi}
+import jsonrpc.{ComplexApi, ComplexApiImpl, SimpleApi, SimpleApiImpl}
 
 trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
 
-  val simpleApi = SimpleApi(backend)
+  val simpleApi = SimpleApiImpl(backend)
   val complexApi = ComplexApiImpl(backend)
 
   def backend: Backend[Effect]
@@ -20,5 +20,6 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
   "" - {
     "Bind" in {
       client.backend
+      println(simpleApiProxy.test("test"))
     }
   }

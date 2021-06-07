@@ -5,6 +5,9 @@ import jsonrpc.client.ClientMacros
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.spi.Codec
+import java.lang.reflect.Proxy
+import scala.compiletime.summonInline
+import scala.reflect.ClassTag
 
 trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Client[Node, CodecType, Effect, Context] =>
@@ -41,4 +44,13 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
     performNotify(method, encodedArguments, context)
 
-  inline def bind[T <: AnyRef]: T = ClientMacros.bind[Node, CodecType, Effect, Context, T](codec, backend)
+  inline def bind[T <: AnyRef]: T =
+    val classTag = summonInline[ClassTag[T]]
+    Proxy.newProxyInstance(
+      getClass.getClassLoader,
+      Array(classTag.runtimeClass),
+      (proxy, method, methodArgs) =>
+        println(method.getName)
+        ()
+    ).asInstanceOf[T]
+//    ClientMacros.bind[Node, CodecType, Effect, Context, T](codec, backend)

@@ -11,7 +11,7 @@ import jsonrpc.backend.zio.ZioBackend
 import jsonrpc.codec.json.dummy.DummyJsonCodec
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.transport.local.HandlerTransport
-import jsonrpc.{ComplexApiImpl, Enum, Record, SimpleApi, Structure}
+import jsonrpc.{ComplexApiImpl, Enum, Record, SimpleApiImpl, Structure}
 import monix.execution.Scheduler.Implicits.global
 import scala.concurrent.ExecutionContext.Implicits.global
 import upickle.AttributeTagged
@@ -32,7 +32,7 @@ class HandlerSpec extends BaseSpec:
     "Bind" - {
       "Dummy" - {
         "No context" in {
-          val simpleApi = SimpleApi(noBackend)
+          val simpleApi = SimpleApiImpl(noBackend)
           Handler(DummyJsonCodec(), noBackend).bind(simpleApi)
         }
       }
