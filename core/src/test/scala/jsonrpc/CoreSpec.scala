@@ -21,6 +21,6 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
 
   "" - {
     "Bind" in {
-      backend.pure(())
+      client.backend
     }
   }
