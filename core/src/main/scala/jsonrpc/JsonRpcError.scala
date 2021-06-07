@@ -1,4 +1,4 @@
-package jsonrpc.handler
+package jsonrpc
 
 /**
  * Custom JSON-RPC API error exception.
@@ -13,7 +13,7 @@ package jsonrpc.handler
  * @param cause exception cause
  * @tparam Node message format node representation type
  */
-final case class ApiError[Node](
+final case class JsonRpcError[Node](
   message: String,
   code: Int,
   data: Node,

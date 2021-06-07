@@ -2,7 +2,7 @@ package jsonrpc.handler
 
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.Handler
+import jsonrpc.{Handler, JsonRpcError}
 import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMeta, HandlerResult, MethodHandle}
@@ -178,7 +178,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
   private def errorResponse(error: Throwable, formedRequest: Message[Node]): Effect[HandlerResult[ArraySeq.ofByte]] =
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
     val (code, message, data) = error match
-      case ApiError(message, code, data, _) => (code, message, data.asInstanceOf[Option[Node]])
+      case JsonRpcError(message, code, data, _) => (code, message, data.asInstanceOf[Option[Node]])
       case _ =>
         // Assemble error details
         val code = Protocol.exceptionError(error.getClass).code
