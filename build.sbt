@@ -144,15 +144,10 @@ lazy val finagle = (project in file("server/finagle")).dependsOn(
 
 // Compile
 ThisBuild / scalaVersion := "3.0.0"
+ThisBuild / crossScalaVersions ++= Seq("2.13.6", "3.0.0")
 ThisBuild / scalacOptions ++= Seq(
 //  "-Djsonrpc.macro.debug=true",
-  "-source",
-  "future-migration",
-  "-new-syntax",
-  "-indent",
   "-feature",
-  "-Xcheck-macros",
-  "-Ysafe-init",
 //  "-Xfatal-warnings",
   "-deprecation",
   "-unchecked",
@@ -162,9 +157,31 @@ ThisBuild / scalacOptions ++= Seq(
   "8",
   "-encoding",
   "utf8",
-  "-pagewidth",
-  "120"
-)
+) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
+  case Some((3, _)) => Seq(
+    "-source",
+    "future-migration",
+    "-new-syntax",
+    "-indent",
+    "-Xcheck-macros",
+    "-Ysafe-init",
+    "-pagewidth",
+    "120"
+  )
+  case _ => Seq(
+    "-feature",
+    "-Xlint",
+    "-Wextra-implicit",
+    "-Wnumeric-widen",
+    "-Wvalue-discard",
+    "-Wunused:imports,patvars,privates,locals,params",
+    "-Vfree-terms",
+    "-Vfree-types",
+    "-Vimplicits",
+    "-Ybackend-parallelism",
+    "4"
+  )
+})
 
 // Doc
 ThisBuild / autoAPIMappings := true
