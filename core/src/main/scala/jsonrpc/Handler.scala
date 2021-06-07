@@ -1,4 +1,4 @@
-package jsonrpc.handler
+package jsonrpc
 
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer

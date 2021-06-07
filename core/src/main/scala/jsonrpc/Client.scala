@@ -1,4 +1,4 @@
-package jsonrpc.client
+package jsonrpc
 
 import jsonrpc.client.ClientMeta
 import jsonrpc.core.Protocol.{MethodNotFound, ParseError}

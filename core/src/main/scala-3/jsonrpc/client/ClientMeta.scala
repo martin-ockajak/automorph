@@ -1,5 +1,6 @@
 package jsonrpc.client
 
+import jsonrpc.Client
 import jsonrpc.client.ClientMacros
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec}

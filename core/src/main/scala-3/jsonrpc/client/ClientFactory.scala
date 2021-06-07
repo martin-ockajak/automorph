@@ -1,8 +1,8 @@
 package jsonrpc.client
 
+import jsonrpc.Client
 import jsonrpc.core.Empty
 import jsonrpc.spi.{Backend, Codec, Transport}
-import jsonrpc.client.Client
 
 case object ClientFactory:
 

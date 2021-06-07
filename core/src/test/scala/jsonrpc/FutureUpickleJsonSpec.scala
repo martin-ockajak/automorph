@@ -4,7 +4,7 @@ import jsonrpc.FutureUpickleJsonSpec.Effect
 import jsonrpc.ReadWriters
 import jsonrpc.UpickleJsonSpec.{CodecType, Node}
 import jsonrpc.backend.standard.FutureBackend
-import jsonrpc.client.{Client, ClientFactory}
+import jsonrpc.client.ClientFactory
 import jsonrpc.codec.json.upickle.UpickleJsonCodec
 import jsonrpc.handler.HandlerFactory
 import jsonrpc.spi.{Backend, Codec, Transport}

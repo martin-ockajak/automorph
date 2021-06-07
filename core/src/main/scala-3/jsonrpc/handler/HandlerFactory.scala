@@ -1,5 +1,6 @@
 package jsonrpc.handler
 
+import jsonrpc.Handler
 import jsonrpc.core.Empty
 import jsonrpc.spi.{Backend, Codec}
 

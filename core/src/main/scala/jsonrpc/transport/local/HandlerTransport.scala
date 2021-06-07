@@ -1,6 +1,6 @@
 package jsonrpc.transport.local
 
-import jsonrpc.handler.Handler
+import jsonrpc.Handler
 import jsonrpc.spi.{Backend, Codec, Transport}
 import scala.collection.immutable.ArraySeq
 
