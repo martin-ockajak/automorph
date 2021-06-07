@@ -25,7 +25,6 @@ case object ClientMacros:
    * @tparam Context request context type
    * @tparam ApiType API type
    * @return mapping of method names to their JSON-RPC wrapper functions
-   * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
     codec: CodecType,
@@ -45,7 +44,7 @@ case object ClientMacros:
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if invalidMethodErrors.nonEmpty then
-      throw IntrospectionException(
+      ref.quotes.reflect.report.throwError(
         s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
       )
 
