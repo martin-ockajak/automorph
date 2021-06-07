@@ -177,14 +177,17 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
    */
   private def errorResponse(error: Throwable, formedRequest: Message[Node]): Effect[HandlerResult[ArraySeq.ofByte]] =
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
-    val code = Protocol.exceptionError(error.getClass).code
-    backend.map(
-      formedRequest.id.map { id =>
+    val (code, message, data) = error match
+      case ApiError(message, code, data, _) => (code, message, data.asInstanceOf[Option[Node]])
+      case _ =>
         // Assemble error details
+        val code = Protocol.exceptionError(error.getClass).code
         val errorDetails = Protocol.errorDetails(error)
         val message = errorDetails.headOption.getOrElse("Unknown error")
         val data = encodeStrings(errorDetails.drop(1)).asSome
-
+        (code, message, data)
+    backend.map(
+      formedRequest.id.map { id =>
         // Serialize response
         val validResponse = Response[Node](id, ResponseError(code, message, data).asLeft)
         serialize(validResponse.formed)

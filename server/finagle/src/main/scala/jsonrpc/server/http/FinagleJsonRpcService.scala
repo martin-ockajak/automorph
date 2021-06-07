@@ -1,4 +1,4 @@
-package jsonrpc.server.http.finagle
+package jsonrpc.server.http
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
@@ -8,7 +8,7 @@ import jsonrpc.Handler
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
 import jsonrpc.log.Logging
-import jsonrpc.server.http.finagle.FinagleJsonRpcService.defaultStatuses
+import jsonrpc.server.http.FinagleJsonRpcService.defaultStatuses
 import jsonrpc.spi.Backend
 import jsonrpc.util.EncodingOps.{asArraySeq, toArraySeq}
 import scala.collection.immutable.ArraySeq

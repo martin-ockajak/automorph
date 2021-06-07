@@ -1,4 +1,4 @@
-package jsonrpc.http.undertow
+package jsonrpc.server.http
 
 import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
@@ -7,7 +7,7 @@ import java.nio.ByteBuffer
 import jsonrpc.Handler
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
-import jsonrpc.http.undertow.UndertowJsonRpcHandler.defaultStatuses
+import jsonrpc.server.http.UndertowJsonRpcHandler.defaultStatuses
 import jsonrpc.log.Logging
 import jsonrpc.spi.Backend
 import jsonrpc.util.EncodingOps.{asArraySeq, toArraySeq}

@@ -1,11 +1,11 @@
-package jsonrpc.http.undertow
+package jsonrpc.server.http
 
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.{Handlers, Undertow}
 import java.lang.Runtime
 import java.net.InetSocketAddress
-import jsonrpc.http.undertow.UndertowServer.defaultBuilder
+import jsonrpc.server.http.UndertowServer.defaultBuilder
 import jsonrpc.log.Logging
 import scala.jdk.CollectionConverters.ListHasAsScala
 

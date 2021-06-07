@@ -1,4 +1,4 @@
-package jsonrpc.server.http.cask
+package jsonrpc.server.http
 
 import base.BaseSpec
 import io.undertow.Handlers
@@ -7,7 +7,7 @@ import io.undertow.server.handlers.BlockingHandler
 import jsonrpc.Handler
 import jsonrpc.backend.standard.NoBackend
 import jsonrpc.codec.json.UpickleJsonCodec
-import jsonrpc.http.undertow.UndertowJsonRpcHandler
+import jsonrpc.server.http.UndertowJsonRpcHandler
 import scala.language.adhocExtensions
 
 class CaskServerSpec extends BaseSpec:
