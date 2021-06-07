@@ -133,7 +133,8 @@ case object HandlerMacros:
         val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentIndex = Literal(IntConstant(offset + index))
-            val argumentNode = callMethodTerm(ref.quotes, argumentNodes.asInstanceOf[Term], "apply", List.empty, List(List(argumentIndex)))
+            val argumentNode =
+              callMethodTerm(ref.quotes, argumentNodes.asInstanceOf[Term], "apply", List.empty, List(List(argumentIndex)))
             if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
               context
             else
@@ -151,7 +152,8 @@ case object HandlerMacros:
         val encodeResult = Lambda(
           symbol,
           encodeResultType,
-          (symbol, arguments) => callMethodTerm(ref.quotes, codec.asTerm, "encode", List(resultValueType), List(arguments))
+          (symbol, arguments) =>
+            callMethodTerm(ref.quotes, codec.asTerm, "encode", List(resultValueType), List(arguments))
         )
 
         // Create an effect mapping call using the method call and the encode result function
