@@ -15,7 +15,7 @@ case object ApiReflection:
    * @tparam Context request context type
    * @return valid method descriptors or error messages by method name
    */
-  def detectApiMethods[Effect[_]: Type, Context: Type](
+  def detectApiMethods[Effect[_]: Type](
     ref: Reflection,
     apiType: ref.quotes.reflect.TypeTree
   ): Seq[Either[String, ref.QuotedMethod]] =
@@ -54,16 +54,27 @@ case object ApiReflection:
     )
 
   /**
+   * Determine whether a method uses request context as its parameter.
+   * @param ref reflection context
+   * @param method method
+   * @tparam Context request context type
+   * @return true if the method uses request context as its last parameter, false otherwise
+   */
+  def methodUsesContext[Context: Type](ref: Reflection, method: ref.QuotedMethod): Boolean =
+    import ref.quotes.reflect.TypeRepr
+
+    method.parameters.flatten.lastOption.exists(_.dataType =:= TypeRepr.of[Context])
+
+  /**
    * Determine whether a method is a valid API method.
    *
    * @param ref reflection context
    * @param apiType API type
    * @param method method
    * @tparam Effect effect type
-   * @tparam Context request context type
    * @return valid API method or an error message
    */
-  private def validateApiMethod[Effect[_]: Type, Context: Type](
+  private def validateApiMethod[Effect[_]: Type](
     ref: Reflection,
     apiType: ref.quotes.reflect.TypeTree,
     method: ref.QuotedMethod

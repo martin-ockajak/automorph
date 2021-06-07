@@ -1,8 +1,8 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, methodDescription}
-import jsonrpc.spi.Codec
+import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, methodDescription, methodUsesContext}
+import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
@@ -34,7 +34,7 @@ case object ClientMacros:
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = detectApiMethods[Effect, Context](ref, TypeTree.of[ApiType])
+    val apiMethods = detectApiMethods[Effect](ref, TypeTree.of[ApiType])
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if invalidMethodErrors.nonEmpty then
@@ -49,3 +49,46 @@ case object ClientMacros:
     '{
       null
     }.asInstanceOf[Expr[ApiType]]
+
+    // Generate bound API method bindings
+//    val clientMethods = Expr.ofSeq(validMethods.map { method =>
+//      generateClientMethod[Node, CodecType, Effect, Context](ref, method, codec, backend, api)
+//    })
+//    '{ $clientMethods.toMap[String, ClientMethod[Node, Effect, Context]] }
+
+  private def generateClientMethod[
+    Node: Type,
+    CodecType <: Codec[Node]: Type,
+    Effect[_]: Type,
+    Context: Type,
+    ApiType: Type
+  ](
+    ref: Reflection,
+    method: ref.QuotedMethod,
+    codec: Expr[CodecType]
+  ): Expr[(String, ClientMethod[Node, Context])] =
+    given Quotes = ref.quotes
+
+    val liftedMethod = method.lift
+    val encodeArguments = generateEncodeArgumentsFunction[Node, CodecType, Context](ref, method, codec)
+    val decodeResult = generateDecodeResultFunction[Node, CodecType](ref, method, codec)
+    val name = Expr(liftedMethod.name)
+    val resultType = Expr(liftedMethod.resultType)
+    val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
+    val parameterTypes = Expr(liftedMethod.parameters.flatMap(_.map(_.dataType)))
+    val usesContext = Expr(methodUsesContext[Context](ref, method))
+    '{
+      $name -> ClientMethod($encodeArguments, $decodeResult, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)
+    }
+
+  private def generateEncodeArgumentsFunction[Node: Type, CodecType <: Codec[Node]: Type, Context: Type](
+    ref: Reflection,
+    method: ref.QuotedMethod,
+    codec: Expr[CodecType]
+  ): Expr[(Seq[Any], Context) => Seq[Node]] = ???
+
+  private def generateDecodeResultFunction[Node: Type, CodecType <: Codec[Node]: Type](
+    ref: Reflection,
+    method: ref.QuotedMethod,
+    codec: Expr[CodecType]
+  ): Expr[Node => Any] = ???

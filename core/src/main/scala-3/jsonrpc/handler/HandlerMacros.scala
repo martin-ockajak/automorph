@@ -1,6 +1,6 @@
 package jsonrpc.handler
 
-import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, methodDescription}
+import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, methodDescription, methodUsesContext}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type, quotes}
@@ -40,7 +40,7 @@ case object HandlerMacros:
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = detectApiMethods[Effect, Context](ref, TypeTree.of[ApiType])
+    val apiMethods = detectApiMethods[Effect](ref, TypeTree.of[ApiType])
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if invalidMethodErrors.nonEmpty then
@@ -48,11 +48,11 @@ case object HandlerMacros:
         s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
       )
 
-    // Generate API method handles including wrapper functions consuming and product Node values
-    val methodHandles = Expr.ofSeq(validMethods.map { method =>
+    // Generate bound API method bindings
+    val handlerMethods = Expr.ofSeq(validMethods.map { method =>
       generateHandlerMethod[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
     })
-    '{ $methodHandles.toMap[String, HandlerMethod[Node, Effect, Context]] }
+    '{ $handlerMethods.toMap[String, HandlerMethod[Node, Effect, Context]] }
 
   private def generateHandlerMethod[
     Node: Type,
@@ -70,14 +70,15 @@ case object HandlerMacros:
     given Quotes = ref.quotes
 
     val liftedMethod = method.lift
-    val function = generateInvokeFunction[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
+    val invoke = generateInvokeFunction[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
     val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
     val parameterTypes = Expr(liftedMethod.parameters.flatMap(_.map(_.dataType)))
     val usesContext = Expr(methodUsesContext[Context](ref, method))
+    logBoundMethod[ApiType](ref, method, invoke)
     '{
-      $name -> HandlerMethod($function, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)
+      $name -> HandlerMethod($invoke, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)
     }
 
   private def generateInvokeFunction[
@@ -115,7 +116,7 @@ case object HandlerMacros:
       _ => List(TypeRepr.of[Seq[Node]], TypeRepr.of[Context]),
       _ => effectType.appliedTo(TypeRepr.of[Node])
     )
-    val bindingFunction = Lambda(
+    Lambda(
       Symbol.spliceOwner,
       bindingType,
       (symbol, arguments) =>
@@ -164,23 +165,14 @@ case object HandlerMacros:
         )
     ).asExprOf[(Seq[Node], Context) => Effect[Node]]
 
-    // Log the binding function
-    logBoundMethod[ApiType](ref, method, bindingFunction.asTerm)
-    bindingFunction
-
-  private def methodUsesContext[Context: Type](ref: Reflection, method: ref.QuotedMethod): Boolean =
-    import ref.quotes.reflect.TypeRepr
-
-    method.parameters.flatten.lastOption.exists(_.dataType =:= TypeRepr.of[Context])
-
   private def logBoundMethod[ApiType: Type](
     ref: Reflection,
     method: ref.QuotedMethod,
-    bindingFunction: ref.quotes.reflect.Term
+    bindingFunction: Expr[Any]
   ): Unit =
-    import ref.quotes.reflect.{Printer, TypeRepr}
+    import ref.quotes.reflect.{asTerm, Printer, TypeRepr}
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
       println(
-        s"${methodDescription[ApiType](ref, method)} = \n  ${bindingFunction.show(using Printer.TreeAnsiCode)}\n"
+        s"${methodDescription[ApiType](ref, method)} = \n  ${bindingFunction.asTerm.show(using Printer.TreeAnsiCode)}\n"
       )

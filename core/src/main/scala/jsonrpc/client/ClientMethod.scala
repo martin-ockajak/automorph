@@ -10,10 +10,9 @@ package jsonrpc.client
  * @param paramNames parameter names
  * @param parameterTypes paramter types
  * @tparam Node message format node representation type
- * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class ClientMethod[Node, Effect[_], Context](
+final case class ClientMethod[Node, Context](
   encodeArguments: (Seq[Any], Context) => Seq[Node],
   decodeResult: Node => Any,
   name: String,
