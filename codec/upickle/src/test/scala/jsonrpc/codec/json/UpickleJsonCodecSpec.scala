@@ -1,30 +1,30 @@
-package jsonrpc.codec.messagepack.upickle
+package jsonrpc.codec.json
 
 import jsonrpc.codec.CodecSpec
-import jsonrpc.codec.messagepack.upickle.UpickleMessagePackCodec
+import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
 import jsonrpc.util.ValueOps.asRight
 import jsonrpc.{Enum, Record, Structure}
-import upack.{Bool, Float64, Msg, Str}
+import ujson.{Bool, Num, Str, Value}
 import upickle.AttributeTagged
 
-class UpickleMessagePackSpec extends CodecSpec:
+class UpickleJsonSpec extends CodecSpec:
 
-  type Node = Msg
-  type CodecType = UpickleMessagePackCodec[MessagePackPickler.type]
+  type Node = Value
+  type CodecType = UpickleJsonCodec[JsonPickler.type]
 
-  def codec: CodecType = UpickleMessagePackCodec(MessagePackPickler)
+  def codec: CodecType = UpickleJsonCodec(JsonPickler)
 
   def messageArguments: Seq[Params[Node]] = Seq(
     Map(
       "x" -> Str("foo"),
-      "y" -> Float64(1),
+      "y" -> Num(1),
       "z" -> Bool(true)
     ).asRight
   )
 
-  def messageResults: Seq[Msg] = Seq(
+  def messageResults: Seq[Value] = Seq(
     Str("test")
   )
 
@@ -36,7 +36,7 @@ class UpickleMessagePackSpec extends CodecSpec:
     }
   }
 
-object MessagePackPickler extends AttributeTagged:
+object JsonPickler extends AttributeTagged:
 
   given ReadWriter[Enum] = readwriter[Int].bimap[Enum](
     value => value.ordinal,

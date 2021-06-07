@@ -4,6 +4,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise}
+import jsonrpc.Handler
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
 import jsonrpc.log.Logging

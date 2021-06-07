@@ -1,16 +1,16 @@
-package jsonrpc.codec.json.circe
+package jsonrpc.codec.json
 
+import io.circe.generic.auto
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json, parser}
 import jsonrpc.codec.CodecSpec
-import jsonrpc.codec.json.circe.CirceJsonCodec
+import jsonrpc.codec.json.JsonPickler
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
 import jsonrpc.util.ValueOps.asRight
 import jsonrpc.{Enum, Record, Structure}
 import scala.language.implicitConversions
-import io.circe.generic.auto.*
 
 class CirceJsonSpec extends CodecSpec:
 

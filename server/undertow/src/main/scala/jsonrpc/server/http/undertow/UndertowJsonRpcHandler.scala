@@ -4,6 +4,7 @@ import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, StatusCodes}
 import java.nio.ByteBuffer
+import jsonrpc.Handler
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
 import jsonrpc.http.undertow.UndertowJsonRpcHandler.defaultStatuses

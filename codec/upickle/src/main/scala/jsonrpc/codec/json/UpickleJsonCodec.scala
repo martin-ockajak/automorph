@@ -1,9 +1,9 @@
-package jsonrpc.codec.json.upickle
+package jsonrpc.codec.json
 
-import jsonrpc.codec.json.upickle.UpickleJsonCodec.{fromSpi, Message, MessageError}
-import jsonrpc.util.EncodingOps.asArraySeq
+import jsonrpc.codec.json.UpickleJsonCodec.{Message, MessageError, fromSpi}
 import jsonrpc.spi
 import jsonrpc.spi.Codec
+import jsonrpc.util.EncodingOps.asArraySeq
 import scala.collection.immutable.ArraySeq
 import scala.compiletime.summonInline
 import ujson.Value

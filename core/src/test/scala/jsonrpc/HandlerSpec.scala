@@ -1,7 +1,8 @@
 package jsonrpc
 
 import base.BaseSpec
-import io.circe.generic.auto.*
+import io.circe.generic.auto
+import jsonrpc.codec.json.{CirceJsonCodec, UpickleJsonCodec}
 //import jsonrpc.backend.cats.CatsBackend
 import jsonrpc.backend.monix.MonixBackend
 import jsonrpc.backend.scalaz.ScalazBackend
@@ -10,8 +11,6 @@ import jsonrpc.handler.HandlerFactory
 import jsonrpc.backend.standard.{FutureBackend, NoBackend, TryBackend}
 import jsonrpc.backend.zio.ZioBackend
 import jsonrpc.codec.json.dummy.DummyJsonCodec
-import jsonrpc.codec.json.upickle.UpickleJsonCodec
-import jsonrpc.codec.json.circe.CirceJsonCodec
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.transport.local.HandlerTransport
 import jsonrpc.{ComplexApiImpl, Enum, Record, SimpleApi, Structure}

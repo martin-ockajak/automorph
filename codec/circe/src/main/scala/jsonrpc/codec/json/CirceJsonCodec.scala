@@ -1,10 +1,10 @@
-package jsonrpc.codec.json.circe
+package jsonrpc.codec.json
 
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
-import io.circe.{parser, Decoder, Encoder, Json}
-import jsonrpc.util.EncodingOps.{asString, toArraySeq}
+import io.circe.{Decoder, Encoder, Json, parser}
 import jsonrpc.spi.{Codec, Message, MessageError}
+import jsonrpc.util.EncodingOps.{asString, toArraySeq}
 import scala.collection.immutable.ArraySeq
 import scala.compiletime.summonInline
 
