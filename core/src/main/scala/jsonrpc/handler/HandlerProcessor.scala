@@ -1,7 +1,8 @@
-package jsonrpc
+package jsonrpc.handler
 
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
+import jsonrpc.Handler
 import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMeta, HandlerResult, MethodHandle}
@@ -24,17 +25,11 @@ import scala.util.Try
  * @param backend effect backend plugin
  * @param bufferSize input stream reading buffer size
  * @tparam Node message format node representation type
- * @tparam CodecType message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
-  codec: CodecType,
-  backend: Backend[Effect],
-  bufferSize: Int,
-  protected val methodBindings: Map[String, MethodHandle[Node, Effect, Context]],
-  protected val encodeStrings: Seq[String] => Node
-) extends HandlerMeta[Node, CodecType, Effect, Context] with CannotEqual with Logging:
+trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
+  this: Handler[Node, CodecType, Effect, Context] =>
 
   private val unknownId = "[unknown]".asRight
 
@@ -46,7 +41,7 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
    * @return optional response message
    */
   def processRequest(request: ArraySeq.ofByte)(using context: Context): Effect[HandlerResult[ArraySeq.ofByte]] =
-    // Deserialize request
+  // Deserialize request
     Try(codec.deserialize(request)).fold(
       error =>
         errorResponse(
@@ -56,7 +51,7 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
       formedRequest =>
         // Validate request
         logger.trace(s"Received JSON-RPC message:\n${codec.format(formedRequest)}")
-        Try(Request(formedRequest)).fold(
+          Try (Request(formedRequest)).fold(
           error => errorResponse(error, formedRequest),
           validRequest => invokeMethod(formedRequest, validRequest, context)
         )
@@ -122,16 +117,16 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
               error => errorResponse(error, formedRequest),
               result =>
                 validRequest.id.foreach(_ => logger.info(s"Processed JSON-RPC request", formedRequest.properties))
-                backend.map(
-                  validRequest.id.map { id =>
-                    // Serialize response
-                    val validResponse = Response(id, result.asRight)
-                    serialize(validResponse.formed)
-                  }.getOrElse(backend.pure(None)),
-                  rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
-                )
+                  backend.map(
+              validRequest.id.map { id =>
+                // Serialize response
+                val validResponse = Response(id, result.asRight)
+                serialize(validResponse.formed)
+              }.getOrElse(backend.pure(None)),
+              rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
             )
           )
+      )
       )
     }.getOrElse {
       errorResponse(
