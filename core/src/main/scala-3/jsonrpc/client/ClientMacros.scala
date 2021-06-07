@@ -1,7 +1,7 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, methodDescription, methodUsesContext}
+import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, methodDescription, methodUsesContext, effectResultType}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type, quotes}
@@ -71,7 +71,7 @@ case object ClientMacros:
 
     val liftedMethod = method.lift
     val encodeArguments = generateEncodeArgumentsFunction[Node, CodecType, Context](ref, method, codec)
-    val decodeResult = generateDecodeResultFunction[Node, CodecType](ref, method, codec)
+    val decodeResult = generateDecodeResultFunction[Node, CodecType, Effect](ref, method, codec)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
     val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
@@ -87,8 +87,21 @@ case object ClientMacros:
     codec: Expr[CodecType]
   ): Expr[(Seq[Any], Context) => Seq[Node]] = ???
 
-  private def generateDecodeResultFunction[Node: Type, CodecType <: Codec[Node]: Type](
+  private def generateDecodeResultFunction[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type](
     ref: Reflection,
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
-  ): Expr[Node => Any] = ???
+  ): Expr[Node => Any] =
+    import ref.quotes.reflect.{AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr, asTerm}
+    given Quotes = ref.quotes
+
+    // Create decode result function
+    //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
+    val resultValueType = effectResultType[Effect](ref, method)
+    val decodeResultType = MethodType(List("resultNode"))(_ => List(TypeRepr.of[Node]), _ => resultValueType)
+    Lambda(
+      Symbol.spliceOwner,
+      decodeResultType,
+      (symbol, arguments) =>
+        callMethodTerm(ref.quotes, codec.asTerm, "decode", List(resultValueType), List(arguments))
+    ).asExprOf[Node => Any]

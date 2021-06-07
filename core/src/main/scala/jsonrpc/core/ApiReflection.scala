@@ -66,6 +66,22 @@ case object ApiReflection:
     method.parameters.flatten.lastOption.exists(_.dataType =:= TypeRepr.of[Context])
 
   /**
+   * Determine method result value type wrapped in the specified effect type.
+   *
+   * @param ref reflection context
+   * @param method method
+   * @tparam Effect effect type
+   * @return result value type
+   */
+  def effectResultType[Effect[_]: Type](ref: Reflection, method: ref.QuotedMethod): ref.quotes.reflect.TypeRepr =
+    import ref.quotes.reflect.{AppliedType, TypeRepr}
+
+    // Determine the method result value type
+    method.resultType match
+      case appliedType: AppliedType if appliedType.tycon =:= TypeRepr.of[Effect] => appliedType.args.last
+      case otherType                                                             => otherType
+
+  /**
    * Determine whether a method is a valid API method.
    *
    * @param ref reflection context

@@ -1,6 +1,6 @@
 package jsonrpc.handler
 
-import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, methodDescription, methodUsesContext}
+import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, methodDescription, methodUsesContext, effectResultType}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type, quotes}
@@ -103,18 +103,11 @@ case object HandlerMacros:
     }
     val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
-    // Determine the method result value type
-    val effectType = TypeRepr.of[Effect]
-    val resultValueType =
-      method.resultType match
-        case appliedType: AppliedType if appliedType.tycon =:= effectType => appliedType.args.last
-        case otherType                                                    => otherType
-
     // Create binding function
     //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
     val bindingType = MethodType(List("argumentNodes", "context"))(
       _ => List(TypeRepr.of[Seq[Node]], TypeRepr.of[Context]),
-      _ => effectType.appliedTo(TypeRepr.of[Node])
+      _ => TypeRepr.of[Effect].appliedTo(TypeRepr.of[Node])
     )
     Lambda(
       Symbol.spliceOwner,
@@ -145,7 +138,8 @@ case object HandlerMacros:
         val methodCall = callMethodTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
 
         // Create encode result function
-        //   (result: ResultValue) => Node = codec.encode[ResultValueType](result)
+        //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
+        val resultValueType = effectResultType[Effect](ref, method)
         val encodeResultType = MethodType(List("result"))(_ => List(resultValueType), _ => TypeRepr.of[Node])
         val encodeResult = Lambda(
           symbol,
