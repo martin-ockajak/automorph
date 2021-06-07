@@ -70,7 +70,7 @@ case object HandlerMacros:
     given Quotes = ref.quotes
 
     val liftedMethod = method.lift
-    val function = generateBindingFunction[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
+    val function = generateInvokeFunction[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
     val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
@@ -80,7 +80,7 @@ case object HandlerMacros:
       $name -> HandlerMethod($function, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)
     }
 
-  private def generateBindingFunction[
+  private def generateInvokeFunction[
     Node: Type,
     CodecType <: Codec[Node]: Type,
     Effect[_]: Type,
@@ -165,7 +165,7 @@ case object HandlerMacros:
     ).asExprOf[(Seq[Node], Context) => Effect[Node]]
 
     // Log the binding function
-    logBindingFunction[ApiType](ref, method, bindingFunction.asTerm)
+    logBoundMethod[ApiType](ref, method, bindingFunction.asTerm)
     bindingFunction
 
   private def methodUsesContext[Context: Type](ref: Reflection, method: ref.QuotedMethod): Boolean =
@@ -173,7 +173,7 @@ case object HandlerMacros:
 
     method.parameters.flatten.lastOption.exists(_.dataType =:= TypeRepr.of[Context])
 
-  private def logBindingFunction[ApiType: Type](
+  private def logBoundMethod[ApiType: Type](
     ref: Reflection,
     method: ref.QuotedMethod,
     bindingFunction: ref.quotes.reflect.Term
