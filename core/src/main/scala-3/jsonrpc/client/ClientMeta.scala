@@ -5,7 +5,7 @@ import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.spi.Codec
 
-trait ClientBindings[Node, CodecType <: Codec[Node], Effect[_], Context]:
+trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Client[Node, CodecType, Effect, Context] =>
 
   /**

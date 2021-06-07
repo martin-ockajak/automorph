@@ -1,6 +1,6 @@
 package jsonrpc.client
 
-import jsonrpc.client.ClientBindings
+import jsonrpc.client.ClientMeta
 import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
@@ -30,7 +30,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
   backend: Backend[Effect],
   transport: Transport[Effect, Context]
-) extends ClientBindings[Node, CodecType, Effect, Context] with CannotEqual with Logging:
+) extends ClientMeta[Node, CodecType, Effect, Context] with CannotEqual with Logging:
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 

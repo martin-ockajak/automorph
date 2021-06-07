@@ -4,7 +4,7 @@ import java.beans.IntrospectionException
 import jsonrpc.handler.HandlerMacros
 import jsonrpc.spi.{Backend, Codec}
 
-trait HandlerBindings[Node, CodecType <: Codec[Node], Effect[_], Context]:
+trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Handler[Node, CodecType, Effect, Context] =>
 
   /**

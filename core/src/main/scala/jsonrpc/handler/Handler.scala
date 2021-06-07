@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
 import jsonrpc.core.{Empty, Protocol, Request, Response, ResponseError}
-import jsonrpc.handler.{HandlerBindings, HandlerResult, MethodHandle}
+import jsonrpc.handler.{HandlerMeta, HandlerResult, MethodHandle}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
 import jsonrpc.util.CannotEqual
@@ -34,7 +34,7 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
   bufferSize: Int,
   protected val methodBindings: Map[String, MethodHandle[Node, Effect, Context]],
   protected val encodeStrings: Seq[String] => Node
-) extends HandlerBindings[Node, CodecType, Effect, Context] with CannotEqual with Logging:
+) extends HandlerMeta[Node, CodecType, Effect, Context] with CannotEqual with Logging:
 
   private val unknownId = "[unknown]".asRight
 
