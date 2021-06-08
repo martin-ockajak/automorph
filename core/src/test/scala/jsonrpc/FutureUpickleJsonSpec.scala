@@ -18,7 +18,7 @@
 //    val codec = UpickleJsonCodec(ReadWriters)
 //    val handler = Handler[Node, CodecType, Effect, Short](codec, backend)
 //      .bind(simpleApi).bind[ComplexApi[Effect]](complexApi)
-//    val transport = HandlerTransport[Node, CodecType, Effect, Short](handler, backend)
+//    val transport = HandlerTransport[Node, CodecType, Effect, Short](handler, backend, 0)
 //    Client[Node, CodecType, Effect, Short](codec, backend, transport)
 //
 //  override def client: Client[Node, CodecType, Effect, Short] = theClient

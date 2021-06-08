@@ -26,7 +26,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   inline def call[A <: Product, R](method: String, arguments: A)(using context: Context): Effect[R] =
     val argumentsNode = codec.encode(arguments)
     val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
-    performCall(method, encodedArguments, context, resultNode => codec.decode(resultNode))
+    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
 
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
@@ -42,7 +42,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   inline def notify[A <: Product](method: String, arguments: A)(using context: Context): Effect[Unit] =
     val argumentsNode = codec.encode(arguments)
     val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
-    performNotify(method, encodedArguments, context)
+    performNotify(method, encodedArguments, Some(context))
 
   /**
    * Create a remote JSON-RPC API proxy instance by generating method bindings for all valid public methods of the specified API.
@@ -78,9 +78,9 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
         methodBindings.get(method.getName).map { clientMethod =>
           // Adjust expected method parameters if it uses context as its last parameter
           val (validArguments, context) = if clientMethod.usesContext then
-            (arguments.dropRight(1).toSeq, arguments.last)
+            (arguments.dropRight(1).toSeq, Some(arguments.last).asInstanceOf[Option[Context]])
           else
-            (arguments.toSeq, null)
+            (arguments.toSeq, None)
 
           // Encode method arguments
           val argumentNodes = clientMethod.encodeArguments(validArguments)
@@ -90,6 +90,6 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
             Left(argumentNodes.toList)
 
           // Perform the remote API call
-          performCall(method.getName, encodedArguments, context.asInstanceOf[Context], resultNode => clientMethod.decodeResult)
+          performCall(method.getName, encodedArguments, context, resultNode => clientMethod.decodeResult)
         }.getOrElse(throw IllegalStateException(s"Method not found: ${method.getName}"))
     ).asInstanceOf[T]

@@ -73,7 +73,7 @@ class HandlerSpec extends BaseSpec:
   private inline def testBind[Node, CodecType <: Codec[Node], Effect[_]](codec: CodecType, backend: Backend[Effect]): Unit =
     val api = ComplexApiImpl(backend)
     val handler = Handler[Node, CodecType, Effect, Short](codec, backend).bind[ComplexApi[Effect]](api)
-    val transport = HandlerTransport(handler, backend)
+    val transport = HandlerTransport(handler, backend, 0)
     val client = Client[Node, CodecType, Effect, Short](codec, backend, transport)
 //    val apiProxy = client.bind[ComplexApi[Effect]]
 

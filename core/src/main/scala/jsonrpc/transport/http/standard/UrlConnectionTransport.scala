@@ -26,7 +26,7 @@ case class UrlConnectionTransport(
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   private val connection = connect()
 
-  override def call(request: ArraySeq.ofByte, context: HttpProperties): Identity[ArraySeq.ofByte] =
+  override def call(request: ArraySeq.ofByte, context: Option[HttpProperties]): Identity[ArraySeq.ofByte] =
     send(request, context)
     val inputStream = connection.getInputStream
     try
@@ -34,17 +34,17 @@ case class UrlConnectionTransport(
     finally
       inputStream.close()
 
-  override def notify(request: ArraySeq.ofByte, context: HttpProperties): Identity[Unit] =
+  override def notify(request: ArraySeq.ofByte, context: Option[HttpProperties]): Identity[Unit] =
     send(request, context)
     ()
 
-  private def send(request: ArraySeq.ofByte, context: HttpProperties): Unit =
+  private def send(request: ArraySeq.ofByte, context: Option[HttpProperties]): Unit =
     val outputStream = connection.getOutputStream
     try
-      setProperties(request, context)
+      context.foreach(setProperties(request, _))
       outputStream.write(request.unsafeArray)
     finally
-      clearProperties(context)
+      context.foreach(clearProperties)
       outputStream.close()
 
   private def setProperties(request: ArraySeq.ofByte, context: HttpProperties): Unit =

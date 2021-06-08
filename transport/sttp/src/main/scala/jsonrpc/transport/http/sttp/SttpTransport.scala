@@ -27,7 +27,7 @@ case class SttpTransport[Effect[_]](
 
   override def call(
     request: ArraySeq.ofByte,
-    context: PartialRequest[Either[String, String], Any]
+    context: Option[PartialRequest[Either[String, String], Any]]
   ): Effect[ArraySeq.ofByte] =
     val httpRequest = setupHttpRequest(request, context).response(asByteArray)
     backend.flatMap(
@@ -40,14 +40,14 @@ case class SttpTransport[Effect[_]](
 
   override def notify(
     request: ArraySeq.ofByte,
-    context: PartialRequest[Either[String, String], Any]
+    context: Option[PartialRequest[Either[String, String], Any]]
   ): Effect[Unit] =
     val httpRequest = setupHttpRequest(request, context).response(ignore)
     backend.map(httpRequest.send(sttpBackend), _.body)
 
   private def setupHttpRequest(
     request: ArraySeq.ofByte,
-    context: PartialRequest[Either[String, String], Any]
+    context: Option[PartialRequest[Either[String, String], Any]]
   ): Request[Either[String, String], Any] =
-    context.copy[Identity, Either[String, String], Any](uri = url, method = method)
+    context.getOrElse(basicRequest).copy[Identity, Either[String, String], Any](uri = url, method = method)
       .contentType(contentType).header(Header.accept(contentType)).body(request.unsafeArray)

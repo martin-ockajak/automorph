@@ -54,7 +54,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   protected def performCall[R](
     method: String,
     arguments: Params[Node],
-    context: Context,
+    context: Option[Context],
     decodeResult: Node => R
   ): Effect[R] =
     val id = Math.abs(random.nextLong()).toString.asRight[BigDecimal].asSome
@@ -83,7 +83,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
    * @tparam R result type
    * @return nothing
    */
-  protected def performNotify(methodName: String, arguments: Params[Node], context: Context): Effect[Unit] =
+  protected def performNotify(methodName: String, arguments: Params[Node], context: Option[Context]): Effect[Unit] =
     val formedRequest = Request(None, methodName, arguments).formed
     backend.map(
       // Serialize request
