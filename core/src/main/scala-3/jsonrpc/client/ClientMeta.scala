@@ -106,12 +106,11 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
-   * @param argumentNames method argument names
    * @param arguments method arguments of arbitrary types
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notifyByName[A <: Product: Mirror.ProductOf, R](method: String)(arguments: A)(using context: Context): Effect[Unit] =
+  inline def notifyByName[A <: Mirror.ProductOf, R](method: String)(arguments: A)(using context: Context): Effect[Unit] =
     val argumentsNode = codec.encode(arguments)
     val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
     performNotify(method, encodedArguments, Some(context))
