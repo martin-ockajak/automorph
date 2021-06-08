@@ -82,6 +82,21 @@ case object ApiReflection:
       case otherType                                                             => otherType
 
   /**
+   * Create API method description.
+   *
+   * @param ref reflection
+   * @param method method
+   * @tparam ApiType API type
+   * @return method description
+   */
+  def methodDescription[ApiType: Type](ref: Reflection, method: ref.QuotedMethod): String =
+    import ref.quotes.reflect.TypeRepr
+
+    val apiType = TypeRepr.of[ApiType].show
+    val documentation = method.lift.documentation.map(_ + "\n").getOrElse("")
+    s"$documentation$apiType.${method.lift.signature}"
+
+  /**
    * Determine whether a method is a valid API method.
    *
    * @param ref reflection context
@@ -122,18 +137,3 @@ case object ApiReflection:
         s"Bound API method '$signature' must return the specified effect type '${effectType.show}'".asLeft
       else
         method.asRight
-
-  /**
-   * Create API method description.
-   *
-   * @param ref reflection
-   * @param method method
-   * @tparam ApiType API type
-   * @return method description
-   */
-  def methodDescription[ApiType: Type](ref: Reflection, method: ref.QuotedMethod): String =
-    import ref.quotes.reflect.TypeRepr
-
-    val apiType = TypeRepr.of[ApiType].show
-    val documentation = method.lift.documentation.map(_ + "\n").getOrElse("")
-    s"$documentation$apiType.${method.lift.signature}"
