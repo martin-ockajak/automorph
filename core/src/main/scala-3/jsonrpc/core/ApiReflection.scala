@@ -1,8 +1,8 @@
 package jsonrpc.core
 
-import jsonrpc.util.ValueOps.{asLeft, asRight}
 import jsonrpc.util.Reflection
-import scala.quoted.{quotes, Quotes, Type}
+import jsonrpc.util.ValueOps.{asLeft, asRight}
+import scala.quoted.{Quotes, Type, quotes}
 
 case object ApiReflection:
 

@@ -2,11 +2,11 @@ package jsonrpc
 
 import jsonrpc.client.ClientMeta
 import jsonrpc.core.Protocol.ParseError
-import jsonrpc.core.{NoContextFor, Protocol, Request, Response, ResponseError}
+import jsonrpc.core.{Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, MessageError, Transport}
-import jsonrpc.util.CannotEqual
+import jsonrpc.util.{CannotEqual, NoContextFor}
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Random, Try}

@@ -1,7 +1,7 @@
 package jsonrpc.util
 
 import jsonrpc.util.ValueOps.asSome
-import scala.quoted.{quotes, Expr, Quotes, Type}
+import scala.quoted.{Expr, Quotes, Type, quotes}
 
 /**
  * Data type reflection tools.
@@ -11,7 +11,7 @@ import scala.quoted.{quotes, Expr, Quotes, Type}
 final case class Reflection(quotes: Quotes):
 
   // All meta-programming data types must are path-dependent on the compiler-generated quotation context
-  import quotes.reflect.{asTerm, Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree}
+  import quotes.reflect.{Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree, asTerm}
 
   final case class QuotedParameter(
     name: String,

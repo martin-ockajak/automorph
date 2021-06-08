@@ -8,7 +8,6 @@ import jsonrpc.core.{Protocol, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerResult}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
-import jsonrpc.util.CannotEqual
 import jsonrpc.util.EncodingOps.toArraySeq
 import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import scala.collection.immutable.ArraySeq
