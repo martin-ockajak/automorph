@@ -42,7 +42,7 @@ case object MethodBindings:
    * @param arguments method argument terms
    * @return instance method call term
    */
-  def callMethodTerm(
+  def methodCall(
     quotes: Quotes,
     instance: quotes.reflect.Term,
     methodName: String,

@@ -1,15 +1,13 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.core.MethodBindings.{callMethodTerm, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
+import jsonrpc.core.MethodBindings.{methodCall, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
 import jsonrpc.handler.HandlerBindings.{debugDefault, debugProperty}
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
 
-/**
- * JSON-RPC client layer bindings code generation.
- */
+/** JSON-RPC client layer bindings code generation. */
 case object ClientBindings:
 
   private val debugProperty = "jsonrpc.macro.debug"
@@ -32,7 +30,13 @@ case object ClientBindings:
   ): Map[String, ClientMethod[Node]] =
     ${ generate[Node, CodecType, Effect, Context, ApiType]('codec) }
 
-  private def generate[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type, Context: Type, ApiType <: AnyRef: Type](
+  private def generate[
+    Node: Type,
+    CodecType <: Codec[Node]: Type,
+    Effect[_]: Type,
+    Context: Type,
+    ApiType <: AnyRef: Type
+  ](
     codec: Expr[CodecType]
   )(using quotes: Quotes): Expr[Map[String, ClientMethod[Node]]] =
     val ref = Reflection(quotes)
@@ -91,7 +95,7 @@ case object ClientBindings:
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
   ): Expr[Seq[Any] => Seq[Node]] =
-    import ref.quotes.reflect.{asTerm, AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
+    import ref.quotes.reflect.{asTerm, AppliedType, Lambda, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -111,24 +115,25 @@ case object ClientBindings:
       (symbol, arguments) =>
         // Create the method argument lists by encoding corresponding argument values into nodes
         //   List(
-        //     codec.encode[Parameter0Type](arguments(0)),
-        //     codec.encode[Parameter1Type](arguments(1)),
+        //     codec.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
+        //     codec.encode[Parameter1Type](arguments(1).asInstanceOf[Parameter1Type]),
         //     ...
-        //     codec.encode[ParameterNType](arguments(N))
+        //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
         //   )): List[Node]
         val List(argumentValues) = arguments.asInstanceOf[List[Term]]
         val argumentList = Expr.ofSeq(method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
-            val argumentIndex = Literal(IntConstant(offset + index))
-            val argumentValue = callMethodTerm(ref.quotes, argumentValues, "apply", List.empty, List(List(argumentIndex)))
-            val argument = callMethodTerm(ref.quotes, argumentValue, "asInstanceOf", List(parameter.dataType), List.empty)
-            callMethodTerm(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument)))
+            val argumentIndex = Expr(offset + index)
+            val argument = parameter.dataType.asType match
+              case '[parameterType] =>
+                '{ ${ argumentValues.asExprOf[Seq[Any]] }($argumentIndex).asInstanceOf[parameterType] }
+            methodCall(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
           }
         ).map(_.asInstanceOf[Term].asExprOf[Node]))
 
         // Create the encoded arguments sequence construction call
         //   Seq(encodedArguments ...): Seq[Node]
-        '{Seq(${argumentList}*) }.asTerm
+        '{ Seq(${ argumentList }*) }.asTerm
     ).asExprOf[Seq[Any] => Seq[Node]]
 
   private def generateDecodeResultFunction[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type](
@@ -146,7 +151,7 @@ case object ClientBindings:
     Lambda(
       Symbol.spliceOwner,
       decodeResultType,
-      (symbol, arguments) => callMethodTerm(ref.quotes, codec.asTerm, "decode", List(resultValueType), List(arguments))
+      (symbol, arguments) => methodCall(ref.quotes, codec.asTerm, "decode", List(resultValueType), List(arguments))
     ).asExprOf[Node => Any]
 
   private def logBoundMethod[ApiType: Type](

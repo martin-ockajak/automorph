@@ -1,13 +1,11 @@
 package jsonrpc.handler
 
-import jsonrpc.core.MethodBindings.{callMethodTerm, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
+import jsonrpc.core.MethodBindings.{detectApiMethods, effectResultType, methodCall, methodDescription, methodUsesContext}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
 
-/**
- * JSON-RPC handler layer bindings code generation.
- */
+/** JSON-RPC handler layer bindings code generation. */
 case object HandlerBindings:
 
   private val debugProperty = "jsonrpc.macro.debug"
@@ -34,7 +32,13 @@ case object HandlerBindings:
   ): Map[String, HandlerMethod[Node, Effect, Context]] =
     ${ generate[Node, CodecType, Effect, Context, ApiType]('codec, 'backend, 'api) }
 
-  private def generate[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type, Context: Type, ApiType <: AnyRef: Type](
+  private def generate[
+    Node: Type,
+    CodecType <: Codec[Node]: Type,
+    Effect[_]: Type,
+    Context: Type,
+    ApiType <: AnyRef: Type
+  ](
     codec: Expr[CodecType],
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
@@ -96,7 +100,7 @@ case object HandlerBindings:
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
-    import ref.quotes.reflect.{asTerm, AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
+    import ref.quotes.reflect.{asTerm, AppliedType, Lambda, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -125,18 +129,19 @@ case object HandlerBindings:
         val List(argumentNodes, context) = arguments.asInstanceOf[List[Term]]
         val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
-            val argumentIndex = Literal(IntConstant(offset + index))
-            val argumentNode = callMethodTerm(ref.quotes, argumentNodes, "apply", List.empty, List(List(argumentIndex)))
+            val argumentIndex = Expr(offset + index)
+            val argumentNode = parameter.dataType.asType match
+              case '[parameterType] => '{ ${ argumentNodes.asExprOf[Seq[Node]] }($argumentIndex) }
             if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
               context
             else
-              callMethodTerm(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode)))
+              methodCall(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode.asTerm)))
           }
         ).asInstanceOf[List[List[Term]]]
 
-        // Create the method call using the decoded arguments
+        // Create the API method call using the decoded arguments
         //   api.method(decodedArguments ...): Effect[ResultValueType]
-        val methodCall = callMethodTerm(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
+        val apiMethodCall = methodCall(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
 
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
@@ -146,18 +151,13 @@ case object HandlerBindings:
           symbol,
           encodeResultType,
           (symbol, arguments) =>
-            callMethodTerm(ref.quotes, codec.asTerm, "encode", List(resultValueType), List(arguments))
+            methodCall(ref.quotes, codec.asTerm, "encode", List(resultValueType), List(arguments))
         )
 
         // Create the effect mapping call using the method call and the encode result function
         //   backend.map(methodCall, encodeResult): Effect[Node]
-        callMethodTerm(
-          ref.quotes,
-          backend.asTerm,
-          "map",
-          List(resultValueType, TypeRepr.of[Node]),
-          List(List(methodCall, encodeResult))
-        )
+        val backendMapArguments = List(List(apiMethodCall, encodeResult))
+        methodCall(ref.quotes, backend.asTerm, "map", List(resultValueType, TypeRepr.of[Node]), backendMapArguments)
     ).asExprOf[(Seq[Node], Context) => Effect[Node]]
 
   private def logBoundMethod[ApiType: Type](
