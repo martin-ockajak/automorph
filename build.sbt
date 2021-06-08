@@ -187,6 +187,7 @@ ThisBuild / scalacOptions ++= Seq(
 // Documentation
 ThisBuild / autoAPIMappings := true
 apiURL := Some(url("https://javadoc.io/doc/io.jsonrpc/jsonrpc-core_3/latest"))
+ScalaUnidoc / unidoc / scalacOptions += "-Ymacro-expand:none"
 //Compile / doc / scalacOptions ++= Seq("-groups", "-implicits")
 //apiMappings += (
 //  (unmanagedBase.value / "cats-effect.jar") -> 
