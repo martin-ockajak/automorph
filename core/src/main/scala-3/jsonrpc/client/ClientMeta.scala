@@ -56,6 +56,22 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
 
   /**
+   * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by name''.
+   *
+   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * @param method method name
+   * @param arguments method arguments of arbitrary types
+   * @param context request context
+   * @tparam R result type
+   * @return result value
+   */
+  inline def callByName[A <: Product, R](method: String)(arguments: A)(using context: Context): Effect[R] =
+    val argumentsNode = codec.encode(arguments)
+    val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
+    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
+
+/**
    * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by position''.
    *
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
