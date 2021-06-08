@@ -9,9 +9,9 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Handler[Node, CodecType, Effect, Context] =>
 
   /**
-   * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
+   * Create a JSON-RPC request handler by adding generated method bindings for all valid public methods of the specified API.
    *
-   * A method is considered valid if it satisfied all of these conditions:
+   * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
    * - has no type parameters
    * - returns the specified effect type
@@ -20,7 +20,7 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
-   * API methods are exposed using their actual names.
+   * Bound API methods are exposed using their actual names.
    *
    * @param api API instance
    * @tparam T API type (only member methods of this types are exposed)
@@ -31,9 +31,9 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     bind(api, name => Seq(name))
 
   /**
-   * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
+   * Create a JSON-RPC request handler by adding generated method bindings for all valid public methods of the specified API.
    *
-   * A method is considered valid if it satisfied all of these conditions:
+   * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
    * - has no type parameters
    * - returns the specified effect type
@@ -42,7 +42,7 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
-   * API methods are exposed using names resulting from a transformation of their actual names via the `exposedNames` function.
+   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `exposedNames` function.
    *
    * @param api API instance
    * @param exposedNames create exposed method names from its actual name (empty result causes the method not to be exposed)
@@ -57,9 +57,9 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     bind(api, Function.unlift(name => Some(exposedNames(name))))
 
   /**
-   * Create a new JSON-RPC request handler while generating method bindings for all valid public methods of the specified API.
+   * Create a JSON-RPC request handler by adding generated method bindings for all valid public methods of the specified API.
    *
-   * A method is considered valid if it satisfied all of these conditions:
+   * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
    * - has no type parameters
    * - returns the specified effect type
@@ -68,7 +68,7 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
-   * API methods are exposed using names resulting from a transformation of their actual names via the `exposedNames` function.
+   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `exposedNames` function.
    *
    * @param api API instance
    * @param exposedNames create exposed method names from its actual name (empty result causes the method not to be exposed)

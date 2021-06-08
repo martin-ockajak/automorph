@@ -21,6 +21,7 @@ import scala.util.{Random, Try}
  * @param codec message codec plugin
  * @param backend effect backend plugin
  * @param transport message transport plugin
+ * @param argumentsByName supply JSON-RPC request arguments ''by name'' if true, supply JSON-RPC request arguments ''by position'' if false
  * @tparam Node message format node representation type
  * @tparam CodecType message codec plugin type
  * @tparam Effect effect type
@@ -29,7 +30,8 @@ import scala.util.{Random, Try}
 final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
   backend: Backend[Effect],
-  transport: Transport[Effect, Context]
+  transport: Transport[Effect, Context],
+  argumentsByName: Boolean
 ) extends ClientMeta[Node, CodecType, Effect, Context] with CannotEqual with Logging:
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
@@ -166,7 +168,8 @@ object Client:
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec message codec plugin
    * @param backend effect backend plugin
-   * @param bufferSize input stream reading buffer size
+   * @param transport message transport plugin
+   * @param argumentsByName supply JSON-RPC request arguments ''by name'' if true, supply JSON-RPC request arguments ''by position'' if false
    * @tparam Node message format node representation type
    * @tparam CodecType message codec plugin type
    * @tparam Effect effect type
@@ -176,9 +179,10 @@ object Client:
   def apply[Node, CodecType <: Codec[Node], Effect[_], Context](
     codec: CodecType,
     backend: Backend[Effect],
-    transport: Transport[Effect, Context]
+    transport: Transport[Effect, Context],
+    argumentsByName: Boolean = true
   ): Client[Node, CodecType, Effect, Context] =
-    new Client(codec, backend, transport)
+    new Client(codec, backend, transport, argumentsByName)
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins without request `Context` type.
@@ -188,7 +192,8 @@ object Client:
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec message codec plugin
    * @param backend effect backend plugin
-   * @param bufferSize input stream reading buffer size
+   * @param transport message transport plugin
+   * @param argumentsByName supply JSON-RPC request arguments ''by name'' if true, supply JSON-RPC request arguments ''by position'' if false
    * @tparam Node message format node representation type
    * @tparam CodecType message codec plugin type
    * @tparam Effect effect type
@@ -197,6 +202,7 @@ object Client:
   def basic[Node, CodecType <: Codec[Node], Effect[_]](
     codec: CodecType,
     backend: Backend[Effect],
-    transport: Transport[Effect, NoContext]
+    transport: Transport[Effect, NoContext],
+    argumentsByName: Boolean = true
   ): Client[Node, CodecType, Effect, NoContext] =
-    Client(codec, backend, transport)
+    Client(codec, backend, transport, argumentsByName)

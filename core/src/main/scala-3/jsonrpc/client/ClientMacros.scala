@@ -144,6 +144,7 @@ case object ClientMacros:
       decodeResultType,
       (symbol, arguments) => callMethodTerm(ref.quotes, codec.asTerm, "decode", List(resultValueType), List(arguments))
     ).asExprOf[Node => Any]
+//    '{ $lambda.asInstanceOf[Node => Any] }
 
   private def logBoundMethod[ApiType: Type](
     ref: Reflection,

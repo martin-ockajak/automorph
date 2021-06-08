@@ -13,9 +13,9 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Client[Node, CodecType, Effect, Context] =>
 
   /**
-   * Perform a remote JSON-RPC method ''call'' supplying the ''arguments by name''.
+   * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by name''.
    *
-   * The specified ''context'' may be used to supply additional information needed to send the request.
+   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
    * @param arguments arguments by by name
@@ -29,9 +29,9 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     performCall(method, encodedArguments, context, resultNode => codec.decode(resultNode))
 
   /**
-   * Perform a remote JSON-RPC method ''notification'' supplying the ''arguments by name''.
+   * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
    *
-   * The specified ''context'' may be used to supply additional information needed to send the request.
+   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
    * @param arguments arguments by name
@@ -44,13 +44,52 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
     performNotify(method, encodedArguments, context)
 
+  /**
+   * Create a remote JSON-RPC API proxy instance by generating method bindings for all valid public methods of the specified API.
+   *
+   * A method is considered valid if it satisfies all of these conditions:
+   * - can be called at runtime
+   * - has no type parameters
+   * - returns the specified effect type
+   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
+   *
+   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
+   * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Bound API method JSON-RPC request arguments are supplied ''by name''.
+   *
+   * @param api API trait (classes are not supported)
+   * @tparam T API type (only member methods of this types are exposed)
+   * @return remote JSON-RPC API proxy instance
+   * @throws IllegalArgumentException if invalid public methods are found in the API type
+   */
   inline def bind[T <: AnyRef]: T =
+    // Generate API method bindings
+//    val methodBindings = ClientMacros.bind[Node, CodecType, Effect, Context, T](codec)
+    val methodBindings = Map.empty[String, ClientMethod[Node]]
+
+    // Create API proxy instance
     val classTag = summonInline[ClassTag[T]]
     Proxy.newProxyInstance(
       getClass.getClassLoader,
       Array(classTag.runtimeClass),
-      (proxy, method, methodArgs) =>
-        println(method.getName)
-        ()
+      (proxy, method, arguments) =>
+        // Lookup bindings for the specified method
+        methodBindings.get(method.getName).map { clientMethod =>
+          // Adjust expected method parameters if it uses context as its last parameter
+          val (validArguments, context) = if clientMethod.usesContext then
+            (arguments.dropRight(1).toSeq, arguments.last)
+          else
+            (arguments.toSeq, null)
+
+          // Encode method arguments
+          val argumentNodes = clientMethod.encodeArguments(validArguments)
+          val encodedArguments = if argumentsByName then
+            Right(clientMethod.paramNames.zip(argumentNodes).toMap)
+          else
+            Left(argumentNodes.toList)
+
+          // Perform the remote API call
+          performCall(method.getName, encodedArguments, context.asInstanceOf[Context], resultNode => clientMethod.decodeResult)
+        }.getOrElse(throw IllegalStateException(s"Method not found: ${method.getName}"))
     ).asInstanceOf[T]
-//    ClientMacros.bind[Node, CodecType, Effect, Context, T](codec, backend)

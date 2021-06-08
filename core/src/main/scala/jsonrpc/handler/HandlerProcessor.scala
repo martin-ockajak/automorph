@@ -4,8 +4,8 @@ import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.{Handler, JsonRpcError}
 import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
-import jsonrpc.core.{NoContextFor, Protocol, Request, Response, ResponseError}
-import jsonrpc.handler.{HandlerMeta, HandlerResult, HandlerMethod}
+import jsonrpc.core.{Protocol, Request, Response, ResponseError}
+import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerResult}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
 import jsonrpc.util.CannotEqual
@@ -41,7 +41,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @return optional response message
    */
   def processRequest(request: ArraySeq.ofByte)(using context: Context): Effect[HandlerResult[ArraySeq.ofByte]] =
-  // Deserialize request
+    // Deserialize request
     Try(codec.deserialize(request)).fold(
       error =>
         errorResponse(
@@ -51,7 +51,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
       formedRequest =>
         // Validate request
         logger.trace(s"Received JSON-RPC message:\n${codec.format(formedRequest)}")
-          Try (Request(formedRequest)).fold(
+        Try(Request(formedRequest)).fold(
           error => errorResponse(error, formedRequest),
           validRequest => invokeMethod(formedRequest, validRequest, context)
         )
@@ -101,13 +101,14 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
     validRequest: Request[Node],
     context: Context
   ): Effect[HandlerResult[ArraySeq.ofByte]] =
+    // Lookup bindings for the specified method
     logger.debug(s"Processing JSON-RPC request", formedRequest.properties)
-    methodBindings.get(validRequest.method).map { methodHandle =>
+    methodBindings.get(validRequest.method).map { handlerMethod =>
       // Extract arguments
-      val arguments = extractArguments(validRequest, methodHandle)
+      val arguments = extractArguments(validRequest, handlerMethod)
 
       // Invoke method
-      Try(backend.either(methodHandle.invoke(arguments, context))).fold(
+      Try(backend.either(handlerMethod.invoke(arguments, context))).fold(
         error => errorResponse(error, formedRequest),
         outcome =>
           backend.flatMap(
@@ -117,16 +118,16 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
               error => errorResponse(error, formedRequest),
               result =>
                 validRequest.id.foreach(_ => logger.info(s"Processed JSON-RPC request", formedRequest.properties))
-                  backend.map(
-              validRequest.id.map { id =>
-                // Serialize response
-                val validResponse = Response(id, result.asRight)
-                serialize(validResponse.formed)
-              }.getOrElse(backend.pure(None)),
-              rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
+                backend.map(
+                  validRequest.id.map { id =>
+                    // Serialize response
+                    val validResponse = Response(id, result.asRight)
+                    serialize(validResponse.formed)
+                  }.getOrElse(backend.pure(None)),
+                  rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
+                )
             )
           )
-      )
       )
     }.getOrElse {
       errorResponse(
@@ -141,14 +142,15 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * Optional request context is used as a last method argument.
    *
    * @param validRequest valid request
-   * @param methodHandle bound method handle
+   * @param handlerMethod handler method binding
    * @return bound method arguments
    */
   private def extractArguments(
     validRequest: Request[Node],
-    methodHandle: HandlerMethod[Node, Effect, Context]
+    handlerMethod: HandlerMethod[Node, Effect, Context]
   ): Seq[Node] =
-    val parameters = methodHandle.paramNames.dropRight(if methodHandle.usesContext then 1 else 0)
+    // Adjust expected method parameters if it uses context as its last parameter
+    val parameters = handlerMethod.paramNames.dropRight(if handlerMethod.usesContext then 1 else 0)
     validRequest.params.fold(
       arguments =>
         // Arguments by position
@@ -179,7 +181,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
     val (code, message, data) = error match
       case JsonRpcError(message, code, data, _) => (code, message, data.asInstanceOf[Option[Node]])
-      case _ =>
+      case _                                    =>
         // Assemble error details
         val code = Protocol.exceptionError(error.getClass).code
         val errorDetails = Protocol.errorDetails(error)
