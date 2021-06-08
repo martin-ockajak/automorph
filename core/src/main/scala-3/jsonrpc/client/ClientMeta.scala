@@ -137,7 +137,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context, BindingType
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notifyByName(argumentNames: String*)(method: String)(arguments: Tuple)(using
+  inline def notifyByName(method: String)(argumentNames: String*)(arguments: Tuple)(using
     context: Context
   ): Effect[Unit] =
     val encodedArguments = Right(argumentNames.zip(encodeArguments(arguments)).toMap)
@@ -153,7 +153,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context, BindingType
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notifyByName[A <: Product, R](method: String)(arguments: A)(using context: Context): Effect[Unit] =
+  inline def notifyByName[A <: Product](method: String)(arguments: A)(using context: Context): Effect[Unit] =
     val argumentsNode = codec.encode(arguments)
     val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
     performNotify(method, encodedArguments, Some(context))
