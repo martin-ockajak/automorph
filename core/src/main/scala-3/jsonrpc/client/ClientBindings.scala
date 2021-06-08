@@ -117,7 +117,8 @@ case object ClientBindings:
         val argumentList = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentIndex = Literal(IntConstant(offset + index))
-            val argument = callMethodTerm(ref.quotes, argumentValues, "apply", List.empty, List(List(argumentIndex)))
+            val argumentValue = callMethodTerm(ref.quotes, argumentValues, "apply", List.empty, List(List(argumentIndex)))
+            val argument = callMethodTerm(ref.quotes, argumentValue, "asInstanceOf", List(parameter.dataType), List.empty)
             callMethodTerm(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument)))
           }
         ).asInstanceOf[List[Term]]
