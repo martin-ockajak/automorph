@@ -2,7 +2,6 @@ package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
 import jsonrpc.core.MethodBindings.{methodCall, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
-import jsonrpc.handler.HandlerBindings.{debugDefault, debugProperty}
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
