@@ -19,9 +19,9 @@ class EffectUpickleJsonSpec extends UpickleJsonSpec[Effect]:
 
   override def client: Client[Node, CodecType, Effect, Short] = theClient
 
-  override def simpleApiProxy: SimpleApi[Effect] = theClient.bind[SimpleApi[Effect]]
+  override def simpleApiProxy: SimpleApi[Effect] = theClient.bindByPosition[SimpleApi[Effect]]
 
-  override def complexApiProxy: ComplexApi[Effect] = theClient.bind[ComplexApi[Effect]]
+  override def complexApiProxy: ComplexApi[Effect] = theClient.bindByName[ComplexApi[Effect]]
 
 object FutureUpickleJsonSpec:
   type Effect[T] = Future[T]

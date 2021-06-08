@@ -31,7 +31,7 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * Bound API methods are exposed using their actual names.
    *
    * @param api API instance
-   * @tparam T API type (only member methods of this types are exposed)
+   * @tparam T API type (only member methods of this type are exposed)
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
@@ -54,7 +54,7 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    *
    * @param api API instance
    * @param exposedNames create exposed method names from its actual name (empty result causes the method not to be exposed)
-   * @tparam T API type (only member methods of this types are exposed)
+   * @tparam T API type (only member methods of this type are exposed)
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
@@ -80,7 +80,7 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    *
    * @param api API instance
    * @param exposedNames create exposed method names from its actual name (empty result causes the method not to be exposed)
-   * @tparam T API type (only member methods of this types are exposed)
+   * @tparam T API type (only member methods of this type are exposed)
    * @return JSON-RPC server including the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */

@@ -74,7 +74,7 @@ class HandlerSpec extends BaseSpec:
     val handler = Handler[Node, CodecType, Effect, Short](codec, backend).bind[ComplexApi[Effect]](api)
     val transport = HandlerTransport(handler, backend, 0)
     val client = Client[Node, CodecType, Effect, Short](codec, backend, transport)
-    val apiProxy = client.bind[ComplexApi[Effect]]
+    val apiProxy = client.bindByName[ComplexApi[Effect]]
 
 object JsonPickler extends AttributeTagged:
 

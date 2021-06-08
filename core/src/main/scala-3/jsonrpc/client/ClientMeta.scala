@@ -18,6 +18,7 @@ import scala.util.NotGiven
  */
 trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Client[Node, CodecType, Effect, Context] =>
+
   type NotTuple[T] = NotGiven[T =:= Tuple]
 
   given CanEqual[EmptyTuple, EmptyTuple] = CanEqual.derived
@@ -52,7 +53,9 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @tparam R result type
    * @return result value
    */
-  inline def callByName[R](method: String)(argumentNames: String*)(arguments: Tuple)(using context: Context): Effect[R] =
+  inline def callByName[R](method: String)(argumentNames: String*)(arguments: Tuple)(using
+    context: Context
+  ): Effect[R] =
     val encodedArguments = Right(argumentNames.zip(encodeArguments(arguments)).toMap)
     performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
 
@@ -97,7 +100,9 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notifyByName(argumentNames: String*)(method: String)(arguments: Tuple)(using context: Context): Effect[Unit] =
+  inline def notifyByName(argumentNames: String*)(method: String)(arguments: Tuple)(using
+    context: Context
+  ): Effect[Unit] =
     val encodedArguments = Right(argumentNames.zip(encodeArguments(arguments)).toMap)
     performNotify(method, encodedArguments, Some(context))
 
@@ -141,12 +146,52 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    *
    * Bound API method JSON-RPC request arguments are supplied ''by name''.
    *
-   * @param api API trait (classes are not supported)
-   * @tparam T API type (only member methods of this types are exposed)
+   * @tparam T API trait type (classes are not supported)
    * @return remote JSON-RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef]: T =
+  inline def bindByName[T <: AnyRef]: T = bind[T](true)
+
+  /**
+   * Create a remote JSON-RPC API proxy instance by generating method bindings for all valid public methods of the specified API.
+   *
+   * A method is considered valid if it satisfies all of these conditions:
+   * - can be called at runtime
+   * - has no type parameters
+   * - returns the specified effect type
+   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
+   *
+   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
+   * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Bound API method JSON-RPC request arguments are supplied ''by name''.
+   *
+   * @tparam T API trait type (classes are not supported)
+   * @return remote JSON-RPC API proxy instance
+   * @throws IllegalArgumentException if invalid public methods are found in the API type
+   */
+  inline def bindByPosition[T <: AnyRef]: T = bind[T](false)
+
+  /**
+   * Create a remote JSON-RPC API proxy instance by generating method bindings for all valid public methods of the specified API.
+   *
+   * A method is considered valid if it satisfies all of these conditions:
+   * - can be called at runtime
+   * - has no type parameters
+   * - returns the specified effect type
+   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
+   *
+   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
+   * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Bound API method JSON-RPC request arguments are supplied ''by name''.
+   *
+   * @param argumentsByName supply JSON-RPC request arguments ''by name'' if true, supply JSON-RPC request arguments ''by position'' if false
+   * @tparam T API trait type (classes are not supported)
+   * @return remote JSON-RPC API proxy instance
+   * @throws IllegalArgumentException if invalid public methods are found in the API type
+   */
+  private[jsonrpc] inline def bind[T <: AnyRef](argumentsByName: Boolean = true): T =
     // Generate API method bindings
     val methodBindings = ClientBindings.generate[Node, CodecType, Effect, Context, T](codec)
 //    val methodBindings = Map.empty[String, ClientMethod[Node]]
