@@ -4,7 +4,7 @@ import jsonrpc.util.Reflection
 import jsonrpc.util.ValueOps.{asLeft, asRight}
 import scala.quoted.{Quotes, Type, quotes}
 
-case object ApiBindings:
+case object CommonBindings:
 
   /**
    * Detect valid API methods in the specified API type.

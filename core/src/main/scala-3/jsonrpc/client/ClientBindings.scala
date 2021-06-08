@@ -1,7 +1,7 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.core.ApiBindings.{callMethodTerm, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
+import jsonrpc.core.CommonBindings.{callMethodTerm, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
 import jsonrpc.handler.HandlerBindings.{debugDefault, debugProperty}
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
