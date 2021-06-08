@@ -17,7 +17,7 @@ case object MethodBindings:
    * @tparam Context request context type
    * @return valid method descriptors or error messages by method name
    */
-  def detectApiMethods[Effect[_]: Type](
+  def validApiMethods[Effect[_]: Type](
     ref: Reflection,
     apiType: ref.quotes.reflect.TypeTree
   ): Seq[Either[String, ref.QuotedMethod]] =

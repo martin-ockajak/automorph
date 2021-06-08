@@ -1,6 +1,6 @@
 package jsonrpc.handler
 
-import jsonrpc.core.MethodBindings.{detectApiMethods, effectResultType, methodCall, methodDescription, methodUsesContext}
+import jsonrpc.core.MethodBindings.{validApiMethods, effectResultType, methodCall, methodDescription, methodUsesContext}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -46,7 +46,7 @@ case object HandlerBindings:
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = detectApiMethods[Effect](ref, ref.quotes.reflect.TypeTree.of[ApiType])
+    val apiMethods = validApiMethods[Effect](ref, ref.quotes.reflect.TypeTree.of[ApiType])
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if invalidMethodErrors.nonEmpty then

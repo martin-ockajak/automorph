@@ -1,7 +1,7 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.core.MethodBindings.{methodCall, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
+import jsonrpc.core.MethodBindings.{methodCall, validApiMethods, effectResultType, methodDescription, methodUsesContext}
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -41,7 +41,7 @@ case object ClientBindings:
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = detectApiMethods[Effect](ref, ref.quotes.reflect.TypeTree.of[ApiType])
+    val apiMethods = validApiMethods[Effect](ref, ref.quotes.reflect.TypeTree.of[ApiType])
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if invalidMethodErrors.nonEmpty then
