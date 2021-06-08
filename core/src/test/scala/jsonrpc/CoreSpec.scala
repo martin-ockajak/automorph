@@ -20,6 +20,5 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
   "" - {
     "Bind" in {
       client.backend
-      println(simpleApiProxy.test("test"))
     }
   }
