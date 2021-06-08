@@ -14,7 +14,7 @@ class EffectUpickleJsonSpec extends CoreSpec[Node, CodecType, Effect]:
 
   override def backend: Backend[Effect] = FutureBackend()
 
-  val theClient =
+  lazy val theClient =
     val codec = UpickleJsonCodec(ReadWriters)
     val handler = Handler[Node, CodecType, Effect, Short](codec, backend)
       .bind(simpleApi).bind[ComplexApi[Effect]](complexApi)
