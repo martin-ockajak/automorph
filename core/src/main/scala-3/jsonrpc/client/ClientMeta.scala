@@ -61,7 +61,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
-   * @param arguments method arguments of arbitrary types
+   * @param arguments case class containing method arguments of arbitrary types
    * @param context request context
    * @tparam R result type
    * @return result value
@@ -106,7 +106,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
-   * @param arguments method arguments of arbitrary types
+   * @param arguments case class containing method arguments of arbitrary types
    * @param context JSON-RPC request context
    * @return nothing
    */
