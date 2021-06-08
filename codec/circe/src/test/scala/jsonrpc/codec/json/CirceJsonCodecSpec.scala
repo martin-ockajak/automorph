@@ -8,7 +8,6 @@ import jsonrpc.codec.CodecSpec
 import jsonrpc.codec.json.JsonPickler
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
-import jsonrpc.util.ValueOps.asRight
 import jsonrpc.{Enum, Record, Structure}
 import scala.language.implicitConversions
 
@@ -20,11 +19,11 @@ class CirceJsonSpec extends CodecSpec:
   def codec: CodecType = CirceJsonCodec(JsonPickler)
 
   def messageArguments: Seq[Params[Node]] = Seq(
-    Map(
+    (Map(
       "x" -> Json.fromString("foo"),
       "y" -> Json.fromInt(1),
       "z" -> Json.fromBoolean(true)
-    ).asRight
+    ))
   )
 
   def messageResults: Seq[Json] = Seq(

@@ -4,7 +4,6 @@ import jsonrpc.codec.CodecSpec
 import jsonrpc.codec.messagepack.UpickleMessagePackCodec
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
-import jsonrpc.util.ValueOps.asRight
 import jsonrpc.{Enum, Record, Structure}
 import upack.{Bool, Float64, Msg, Str}
 import upickle.AttributeTagged
@@ -17,11 +16,11 @@ class UpickleMessagePackSpec extends CodecSpec:
   def codec: CodecType = UpickleMessagePackCodec(MessagePackPickler)
 
   def messageArguments: Seq[Params[Node]] = Seq(
-    Map(
+    Right(Map(
       "x" -> Str("foo"),
       "y" -> Float64(1),
       "z" -> Bool(true)
-    ).asRight
+    ))
   )
 
   def messageResults: Seq[Msg] = Seq(

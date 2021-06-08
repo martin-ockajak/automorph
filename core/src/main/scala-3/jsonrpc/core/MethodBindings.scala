@@ -1,7 +1,6 @@
 package jsonrpc.core
 
 import jsonrpc.util.Reflection
-import jsonrpc.util.ValueOps.{asLeft, asRight}
 import scala.quoted.{Quotes, Type, quotes}
 
 /**
@@ -118,11 +117,11 @@ case object MethodBindings:
     // No type parameters
     val signature = s"${apiType.show}.${method.lift.signature}"
     if method.typeParameters.nonEmpty then
-      s"Bound API method '$signature' must not have type parameters".asLeft
+      Left(s"Bound API method '$signature' must not have type parameters")
 
     // Callable at runtime
     else if !method.available then
-      s"Bound API method '$signature' must be callable at runtime".asLeft
+      Left(s"Bound API method '$signature' must be callable at runtime")
     else
       // Returns the effect type
       val effectType =
@@ -137,6 +136,6 @@ case object MethodBindings:
               case _                       => false
           case _ => true
       if !resultEffectType then
-        s"Bound API method '$signature' must return the specified effect type '${effectType.show}'".asLeft
+        Left(s"Bound API method '$signature' must return the specified effect type '${effectType.show}'")
       else
-        method.asRight
+        Right(method)
