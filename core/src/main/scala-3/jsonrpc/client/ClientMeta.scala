@@ -122,17 +122,6 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     performNotify(method, encodedArguments, Some(context))
 
   /**
-   * Encode method arguments by position.
-   *
-   * @param arguments arguments of arbitrary types
-   * @return argument nodes
-   */
-  inline def encodeArguments(arguments: Tuple): List[Node] =
-    arguments match
-      case EmptyTuple   => List()
-      case head *: tail => List(codec.encode(head)) ++ encodeArguments(tail)
-
-  /**
    * Create a remote JSON-RPC API proxy instance by generating method bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
@@ -171,6 +160,17 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bindByPosition[T <: AnyRef]: T = bind[T](false)
+
+  /**
+   * Encode method arguments by position.
+   *
+   * @param arguments arguments of arbitrary types
+   * @return argument nodes
+   */
+  private[jsonrpc] inline def encodeArguments(arguments: Tuple): List[Node] =
+    arguments match
+      case EmptyTuple   => List()
+      case head *: tail => List(codec.encode(head)) ++ encodeArguments(tail)
 
   /**
    * Create a remote JSON-RPC API proxy instance by generating method bindings for all valid public methods of the specified API.
