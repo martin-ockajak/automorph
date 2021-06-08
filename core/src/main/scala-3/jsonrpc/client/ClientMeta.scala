@@ -1,11 +1,11 @@
 package jsonrpc.client
 
+import java.lang.reflect.Proxy
 import jsonrpc.Client
 import jsonrpc.client.ClientBindings
 import jsonrpc.spi.Codec
-import jsonrpc.spi.Codec
-import java.lang.reflect.Proxy
 import scala.compiletime.summonInline
+import scala.deriving.Mirror
 import scala.reflect.ClassTag
 
 /**
@@ -66,7 +66,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @tparam R result type
    * @return result value
    */
-  inline def callByName[A <: Product, R](method: String)(arguments: A)(using context: Context): Effect[R] =
+  inline def callByName[A <: Product: Mirror.ProductOf, R](method: String)(arguments: A)(using context: Context): Effect[R] =
     val argumentsNode = codec.encode(arguments)
     val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
     performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
