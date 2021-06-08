@@ -7,7 +7,7 @@ import com.twitter.util.{Future, Promise}
 import jsonrpc.Handler
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
-import jsonrpc.core.log.Logging
+import jsonrpc.log.Logging
 import jsonrpc.server.http.FinagleJsonRpcService.defaultStatuses
 import jsonrpc.spi.Backend
 import jsonrpc.util.EncodingOps.toArraySeq

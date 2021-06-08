@@ -1,4 +1,4 @@
-package jsonrpc.core.log
+package jsonrpc.log
 
 import org.slf4j.LoggerFactory
 

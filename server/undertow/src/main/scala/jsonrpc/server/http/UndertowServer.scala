@@ -6,7 +6,7 @@ import io.undertow.{Handlers, Undertow}
 import java.lang.Runtime
 import java.net.InetSocketAddress
 import jsonrpc.server.http.UndertowServer.defaultBuilder
-import jsonrpc.core.log.Logging
+import jsonrpc.log.Logging
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
