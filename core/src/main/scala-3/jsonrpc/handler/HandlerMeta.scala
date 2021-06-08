@@ -2,7 +2,7 @@ package jsonrpc.handler
 
 import java.beans.IntrospectionException
 import jsonrpc.Handler
-import jsonrpc.handler.HandlerMacros
+import jsonrpc.handler.HandlerBindings
 import jsonrpc.spi.{Backend, Codec}
 
 trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
@@ -81,7 +81,7 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     exposedNames: PartialFunction[String, Seq[String]]
   ): Handler[Node, CodecType, Effect, Context] =
     val bindings =
-      HandlerMacros.bind[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap { (methodName, method) =>
+      HandlerBindings.bind[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap { (methodName, method) =>
         exposedNames.applyOrElse(
           methodName,
           _ =>

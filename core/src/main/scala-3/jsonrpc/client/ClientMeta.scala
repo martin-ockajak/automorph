@@ -1,7 +1,7 @@
 package jsonrpc.client
 
 import jsonrpc.Client
-import jsonrpc.client.ClientMacros
+import jsonrpc.client.ClientBindings
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Codec
 import java.lang.reflect.Proxy
