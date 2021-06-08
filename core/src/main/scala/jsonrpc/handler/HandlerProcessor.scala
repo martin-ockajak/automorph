@@ -9,7 +9,6 @@ import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerResult}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
 import jsonrpc.util.EncodingOps.toArraySeq
-import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -30,7 +29,7 @@ import scala.util.Try
 trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Handler[Node, CodecType, Effect, Context] =>
 
-  private val unknownId = "[unknown]".asRight
+  private val unknownId = "[unknown]"
 
   /**
    * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.
@@ -45,7 +44,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
       error =>
         errorResponse(
           ParseError("Invalid request format", error),
-          Message[Node](None, unknownId.asSome, None, None, None, None)
+          Message[Node](None, Some(Right(unknownId)), None, None, None, None)
         ),
       formedRequest =>
         // Validate request
@@ -83,7 +82,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
     )
 
   override def toString: String =
-    s"${this.className}(Codec: ${codec.className}, Effect: ${backend.className}, Bound methods: ${methodBindings.size})"
+    s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Effect: ${backend.getClass.getName}, Bound methods: ${methodBindings.size})"
 
   /**
    * Invoke bound method specified in a request.
@@ -120,7 +119,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
                 backend.map(
                   validRequest.id.map { id =>
                     // Serialize response
-                    val validResponse = Response(id, result.asRight)
+                    val validResponse = Response(id, Right(result))
                     serialize(validResponse.formed)
                   }.getOrElse(backend.pure(None)),
                   rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
@@ -185,15 +184,15 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
         val code = Protocol.exceptionError(error.getClass).code
         val errorDetails = Protocol.errorDetails(error)
         val message = errorDetails.headOption.getOrElse("Unknown error")
-        val data = encodeStrings(errorDetails.drop(1)).asSome
+        val data = Some(encodeStrings(errorDetails.drop(1)))
         (code, message, data)
     backend.map(
       formedRequest.id.map { id =>
         // Serialize response
-        val validResponse = Response[Node](id, ResponseError(code, message, data).asLeft)
+        val validResponse = Response[Node](id, Left(ResponseError(code, message, data)))
         serialize(validResponse.formed)
       }.getOrElse(backend.pure(None)),
-      rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, code.asSome)
+      rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, Some(code))
     )
 
   /**
@@ -206,5 +205,5 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
     logger.trace(s"Sending JSON-RPC message:\n${codec.format(formedMessage)}")
     Try(codec.serialize(formedMessage)).fold(
       error => backend.failed(ParseError("Invalid message format", error)),
-      message => backend.pure(message.asSome)
+      message => backend.pure(Some(message))
     )

@@ -3,7 +3,6 @@ package jsonrpc.core
 import jsonrpc.core.Protocol.{InvalidRequest, mandatory}
 import jsonrpc.spi.Message
 import jsonrpc.spi.Message.{Id, Params, version}
-import jsonrpc.util.ValueOps.{asRight, asSome}
 
 /**
  * JSON-RPC request.
@@ -21,10 +20,10 @@ final case class Request[Node](
   params: Params[Node]
 ):
   def formed: Message[Node] = Message[Node](
-    jsonrpc = version.asSome,
+    jsonrpc = Some(version),
     id = id,
-    method = method.asSome,
-    params = params.asSome,
+    method = Some(method),
+    params = Some(params),
     result = None,
     error = None
   )
@@ -36,5 +35,5 @@ case object Request:
       throw InvalidRequest(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
     val id = message.id
     val method = mandatory(message.method, "method")
-    val params = message.params.getOrElse(Map.empty.asRight[List[Node]])
+    val params = message.params.getOrElse(Right(Map.empty))
     Request(id, method, params)

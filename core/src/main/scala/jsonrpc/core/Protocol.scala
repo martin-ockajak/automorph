@@ -2,7 +2,6 @@ package jsonrpc.core
 
 import java.io.IOException
 import jsonrpc.spi.{MessageError, Message}
-import jsonrpc.util.ValueOps.{asRight, asOption, asSome}
 
 /**
  * JSON-RPC protocol data structures.
@@ -93,10 +92,10 @@ case object Protocol:
     filter: Throwable => Boolean = _ => true,
     maxCauses: Int = 100
   ): Seq[String] =
-    LazyList.iterate(throwable.asSome)(_.flatMap(_.getCause.asOption))
+    LazyList.iterate(Option(throwable))(_.flatMap(error => Option(error.getCause)))
       .takeWhile(_.isDefined).flatten.filter(filter).take(maxCauses).map { throwable =>
       val exceptionName = throwable.getClass.getSimpleName
-      throwable.getMessage.asOption.map(_.trim).filter(_.nonEmpty).map { message =>
+      Option(throwable.getMessage).map(_.trim).filter(_.nonEmpty).map { message =>
         s"$exceptionName: $message"
       }.getOrElse(exceptionName)
     }

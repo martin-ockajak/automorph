@@ -1,6 +1,5 @@
 package jsonrpc.util
 
-import jsonrpc.util.ValueOps.asSome
 import scala.quoted.{Expr, Quotes, Type, quotes}
 
 /**
@@ -109,7 +108,7 @@ final case class Reflection(quotes: Quotes):
     symbolType match
       case methodType: MethodType =>
         val (parameters, resultType) = methodSignature(methodType)
-        QuotedMethod(
+        Some(QuotedMethod(
           methodSymbol.name,
           resultType,
           parameters,
@@ -117,14 +116,14 @@ final case class Reflection(quotes: Quotes):
           publicSymbol(methodSymbol),
           availableSymbol(methodSymbol),
           methodSymbol
-        ).asSome
+        ))
       case _ => None
 
   private def methodSignature(methodType: MethodType): (Seq[Seq[QuotedParameter]], TypeRepr) =
     val methodTypes = LazyList.iterate(Option(methodType)) {
       case Some(currentType) =>
         currentType.resType match
-          case resultType: MethodType => resultType.asSome
+          case resultType: MethodType => Some(resultType)
           case _                      => None
       case _ => None
     }.takeWhile(_.isDefined).flatten
@@ -139,13 +138,13 @@ final case class Reflection(quotes: Quotes):
 
   private def field(classType: TypeRepr, fieldSymbol: Symbol): Option[QuotedField] =
     val fieldType = classType.memberType(fieldSymbol)
-    QuotedField(
+    Some(QuotedField(
       fieldSymbol.name,
       fieldType,
       publicSymbol(fieldSymbol),
       availableSymbol(fieldSymbol),
       fieldSymbol
-    ).asSome
+    ))
 
   private def publicSymbol(symbol: Symbol): Boolean = !matchesFlags(symbol.flags, hiddenMemberFlags)
 

@@ -7,7 +7,6 @@ import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, MessageError, Transport}
 import jsonrpc.util.CannotEqual
-import jsonrpc.util.ValueOps.{asLeft, asRight, asSome, className}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Random, Try}
 
@@ -37,7 +36,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   override def toString: String =
-    s"${this.className}(Codec: ${codec.className}, Effect: ${backend.className})"
+    s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Effect: ${backend.getClass.getName})"
 
   /**
    * Perform a method call using specified arguments.
@@ -57,7 +56,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
     context: Option[Context],
     decodeResult: Node => R
   ): Effect[R] =
-    val id = Math.abs(random.nextLong()).toString.asRight[BigDecimal].asSome
+    val id = Some(Right[BigDecimal, String](Math.abs(random.nextLong()).toString))
     val formedRequest = Request(id, method, arguments).formed
     logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
     backend.flatMap(
