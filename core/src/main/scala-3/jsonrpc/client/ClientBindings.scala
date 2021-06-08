@@ -10,8 +10,8 @@ import scala.quoted.{Expr, Quotes, Type}
 case object ClientBindings:
 
   private val debugProperty = "jsonrpc.macro.debug"
-  private val debugDefault = "true"
-//  private val debugDefault = ""
+//  private val debugDefault = "true"
+  private val debugDefault = ""
 
   /**
    * Generate client bindings for all valid public methods of an API type.
@@ -114,18 +114,18 @@ case object ClientBindings:
         //     codec.encode[ParameterNType](arguments(N))
         //   )): List[Node]
         val List(argumentValues) = arguments.asInstanceOf[List[Term]]
-        val argumentList = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
+        val argumentList = Expr.ofSeq(method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentIndex = Literal(IntConstant(offset + index))
             val argumentValue = callMethodTerm(ref.quotes, argumentValues, "apply", List.empty, List(List(argumentIndex)))
             val argument = callMethodTerm(ref.quotes, argumentValue, "asInstanceOf", List(parameter.dataType), List.empty)
             callMethodTerm(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument)))
           }
-        ).asInstanceOf[List[Term]]
+        ).map(_.asInstanceOf[Term].asExprOf[Node]))
 
         // Create the encoded arguments sequence construction call
         //   Seq(encodedArguments ...): Seq[Node]
-        callMethodTerm(ref.quotes, '{ List }.asTerm, "apply", List(TypeRepr.of[Node]), List(argumentList))
+        '{Seq(${argumentList}*) }.asTerm
     ).asExprOf[Seq[Any] => Seq[Node]]
 
   private def generateDecodeResultFunction[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type](
