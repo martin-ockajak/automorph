@@ -2,7 +2,6 @@ package jsonrpc.codec.messagepack
 
 import jsonrpc.codec.messagepack.UpickleMessagePackCodec.{Message, MessageError, fromSpi}
 import jsonrpc.spi
-import jsonrpc.util.EncodingOps.asArraySeq
 import scala.collection.immutable.ArraySeq
 import upack.Msg
 import upickle.Api
@@ -25,7 +24,7 @@ final case class UpickleMessagePackCodec[Customized <: Api](customized: Customiz
   override def mediaType: String = "application/msgpack"
 
   override def serialize(message: spi.Message[Msg]): ArraySeq.ofByte =
-    customized.writeToByteArray(fromSpi(message)).asArraySeq
+    ArraySeq.ofByte(customized.writeToByteArray(fromSpi(message)))
 
   override def deserialize(data: ArraySeq.ofByte): spi.Message[Msg] =
     customized.read[Message](data.unsafeArray).toSpi

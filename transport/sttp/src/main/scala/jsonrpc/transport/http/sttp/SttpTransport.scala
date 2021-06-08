@@ -1,6 +1,5 @@
 package jsonrpc.transport.http.sttp
 
-import jsonrpc.util.EncodingOps.asArraySeq
 import jsonrpc.spi.{Backend, Transport}
 import scala.collection.immutable.ArraySeq
 import sttp.client3.{Identity, PartialRequest, Request, SttpApi, SttpBackend}
@@ -34,7 +33,7 @@ case class SttpTransport[Effect[_]](
       httpRequest.send(sttpBackend),
       _.body.fold(
         error => backend.failed(IllegalStateException(error)),
-        response => backend.pure(response.asArraySeq)
+        response => backend.pure(ArraySeq.ofByte(response))
       )
     )
 

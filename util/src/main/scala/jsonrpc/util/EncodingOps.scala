@@ -13,9 +13,8 @@ case object EncodingOps:
   private lazy val charset = StandardCharsets.UTF_8
   private val maxReadIterations = 1000_000
 
-  extension (bytes: Array[Byte]) def asArraySeq: ArraySeq.ofByte = ArraySeq.ofByte(bytes)
 
-  extension (string: String) def toArraySeq: ArraySeq.ofByte = string.getBytes(charset).asArraySeq
+  extension (string: String) def toArraySeq: ArraySeq.ofByte = ArraySeq.ofByte(string.getBytes(charset))
 
   extension (bytes: ArraySeq.ofByte) def asString: String = new String(bytes.unsafeArray, charset)
 
@@ -23,7 +22,7 @@ case object EncodingOps:
 
     def toArraySeq: ArraySeq.ofByte =
       if buffer.hasArray then
-        buffer.array.asArraySeq
+        ArraySeq.ofByte(buffer.array)
       else
         val array = Array.ofDim[Byte](buffer.remaining)
         buffer.get(array, 0, array.size)
@@ -38,4 +37,4 @@ case object EncodingOps:
         outputStream.write(buffer, 0, length)
         inputStream.read(buffer)
       ).takeWhile(_ >= 0).take(maxReadIterations)
-      buffer.asArraySeq
+      ArraySeq.ofByte(buffer)
