@@ -1,12 +1,14 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, methodDescription, methodUsesContext, effectResultType}
+import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
+import jsonrpc.handler.HandlerMacros.{debugDefault, debugProperty}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
-import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, Type}
 
 case object ClientMacros:
+
   private val debugProperty = "jsonrpc.macro.debug"
   private val debugDefault = "true"
 //  private val debugDefault = ""
@@ -30,7 +32,7 @@ case object ClientMacros:
   private def bind[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type, Context: Type, ApiType <: AnyRef: Type](
     codec: Expr[CodecType]
   )(using quotes: Quotes): Expr[Map[String, ClientMethod[Node, Context]]] =
-    import ref.quotes.reflect.{Block, Printer, Symbol, TypeDef, TypeRepr, TypeTree, asTerm}
+    import ref.quotes.reflect.{asTerm, Block, Printer, Symbol, TypeDef, TypeRepr, TypeTree}
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -77,8 +79,17 @@ case object ClientMacros:
     val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
     val parameterTypes = Expr(liftedMethod.parameters.flatMap(_.map(_.dataType)))
     val usesContext = Expr(methodUsesContext[Context](ref, method))
+    logBoundMethod[ApiType](ref, method, encodeArguments, decodeResult)
     '{
-      $name -> ClientMethod($encodeArguments, $decodeResult, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)
+      $name -> ClientMethod(
+        $encodeArguments,
+        $decodeResult,
+        $name,
+        $resultType,
+        $parameterNames,
+        $parameterTypes,
+        $usesContext
+      )
     }
 
   private def generateEncodeArgumentsFunction[Node: Type, CodecType <: Codec[Node]: Type, Context: Type](
@@ -86,7 +97,7 @@ case object ClientMacros:
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
   ): Expr[(Seq[Any], Context) => Seq[Node]] =
-    import ref.quotes.reflect.{AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr, asTerm}
+    import ref.quotes.reflect.{asTerm, AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -135,7 +146,7 @@ case object ClientMacros:
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
   ): Expr[Node => Any] =
-    import ref.quotes.reflect.{AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr, asTerm}
+    import ref.quotes.reflect.{asTerm, AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
     // Create decode result function
@@ -145,6 +156,20 @@ case object ClientMacros:
     Lambda(
       Symbol.spliceOwner,
       decodeResultType,
-      (symbol, arguments) =>
-        callMethodTerm(ref.quotes, codec.asTerm, "decode", List(resultValueType), List(arguments))
+      (symbol, arguments) => callMethodTerm(ref.quotes, codec.asTerm, "decode", List(resultValueType), List(arguments))
     ).asExprOf[Node => Any]
+
+  private def logBoundMethod[ApiType: Type](
+    ref: Reflection,
+    method: ref.QuotedMethod,
+    encodeArguments: Expr[Any],
+    decodeResult: Expr[Any]
+  ): Unit =
+    import ref.quotes.reflect.{asTerm, Printer, TypeRepr}
+
+    if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
+      println(
+        s"${methodDescription[ApiType](ref, method)} = \n  ${encodeArguments.asTerm.show(using
+          Printer.TreeAnsiCode
+        )}\n  ${decodeResult.asTerm.show(using Printer.TreeAnsiCode)}\n"
+      )
