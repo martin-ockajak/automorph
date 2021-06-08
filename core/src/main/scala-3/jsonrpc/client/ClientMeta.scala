@@ -15,9 +15,15 @@ import scala.util.NotGiven
  * @tparam CodecType message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
+ * @tparam BindingType API method binding type
  */
-trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
-  this: Client[Node, CodecType, Effect, Context] =>
+trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context, BindingType <: Binding[
+  Node,
+  CodecType,
+  Effect,
+  Context
+]]:
+  this: Client[Node, CodecType, Effect, Context, BindingType] =>
 
   type NotTuple[T] = NotGiven[T =:= Tuple]
 
@@ -45,6 +51,18 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
 //
 //  // CallableWithNames
 //  client.bind("method").call.byName(tuple)
+
+  /**
+   * Create a specified JSON-RPC API method binding.
+   *
+   * @param method method name
+   * @return method binding
+   */
+  inline def bind(method: String): BindingType =
+    if argumentsByName then
+      UnnamedBinding[Node, CodecType, Effect, Context](this, method).asInstanceOf[BindingType]
+    else
+      PositionalBinding[Node, CodecType, Effect, Context](this, method).asInstanceOf[BindingType]
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.

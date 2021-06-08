@@ -1,6 +1,6 @@
 package jsonrpc
 
-import jsonrpc.client.ClientMeta
+import jsonrpc.client.{Binding, ClientMeta, PositionalBinding, UnnamedBinding}
 import jsonrpc.core.Protocol.ParseError
 import jsonrpc.core.{NoContextFor, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
@@ -25,13 +25,19 @@ import scala.util.{Random, Try}
  * @tparam CodecType message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
+ * @tparam BindingType API method binding type
  */
-final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
+final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context, BindingType <: Binding[
+  Node,
+  CodecType,
+  Effect,
+  Context
+]](
   codec: CodecType,
   backend: Backend[Effect],
   transport: Transport[Effect, Context],
   argumentsByName: Boolean
-) extends ClientMeta[Node, CodecType, Effect, Context] with CannotEqual with Logging:
+) extends ClientMeta[Node, CodecType, Effect, Context, BindingType] with CannotEqual with Logging:
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
@@ -43,7 +49,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
    *
    * @return JSON-RPC client with arguments supplied ''by name''
    */
-  def named: Client[Node, CodecType, Effect, Context] =
+  def named: Client[Node, CodecType, Effect, Context, UnnamedBinding[Node, CodecType, Effect, Context]] =
     Client(codec, backend, transport, false)
 
   /**
@@ -51,7 +57,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
    *
    * @return JSON-RPC client with arguments supplied ''by position''
    */
-  def positional: Client[Node, CodecType, Effect, Context] =
+  def positional: Client[Node, CodecType, Effect, Context, PositionalBinding[Node, CodecType, Effect, Context]] =
     Client(codec, backend, transport, true)
 
   /**
@@ -172,8 +178,8 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
 
 object Client:
 
-  type NoContext = NoContextFor[Client[?, ?, ?, ?]]
-  given NoContext = NoContextFor[Client[?, ?, ?, ?]]()
+  type NoContext = NoContextFor[Client[?, ?, ?, ?, ?]]
+  given NoContext = NoContextFor[Client[?, ?, ?, ?, ?]]()
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with defined request `Context` type.
@@ -194,7 +200,7 @@ object Client:
     codec: CodecType,
     backend: Backend[Effect],
     transport: Transport[Effect, Context]
-  ): Client[Node, CodecType, Effect, Context] =
+  ): Client[Node, CodecType, Effect, Context, UnnamedBinding[Node, CodecType, Effect, Context]] =
     new Client(codec, backend, transport, true)
 
   /**
@@ -215,5 +221,5 @@ object Client:
     codec: CodecType,
     backend: Backend[Effect],
     transport: Transport[Effect, NoContext]
-  ): Client[Node, CodecType, Effect, NoContext] =
+  ): Client[Node, CodecType, Effect, NoContext, UnnamedBinding[Node, CodecType, Effect, NoContext]] =
     Client(codec, backend, transport, true)

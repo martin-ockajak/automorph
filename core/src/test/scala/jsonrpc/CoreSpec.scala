@@ -1,6 +1,7 @@
 package jsonrpc
 
 import base.BaseSpec
+import jsonrpc.client.UnnamedBinding
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.{ComplexApi, ComplexApiImpl, SimpleApi, SimpleApiImpl}
 
@@ -11,7 +12,7 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
 
   def backend: Backend[Effect]
 
-  def client: Client[Node, CodecType, Effect, Short]
+  def client: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]]
 
   def simpleApiProxy: SimpleApi[Effect]
 

@@ -3,6 +3,7 @@ package jsonrpc
 import jsonrpc.FutureUpickleJsonSpec.Effect
 import jsonrpc.UpickleJsonSpec.{CodecType, Node}
 import jsonrpc.backend.standard.FutureBackend
+import jsonrpc.client.UnnamedBinding
 import jsonrpc.spi.Backend
 import jsonrpc.transport.local.HandlerTransport
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -17,7 +18,7 @@ class EffectUpickleJsonSpec extends UpickleJsonSpec[Effect]:
 
   lazy val theClient = Client(codec, backend, HandlerTransport(handler, backend, 0))
 
-  override def client: Client[Node, CodecType, Effect, Short] = theClient
+  override def client: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]] = theClient
 
   override def simpleApiProxy: SimpleApi[Effect] = theClient.bind[SimpleApi[Effect]]
 
