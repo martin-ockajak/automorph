@@ -10,7 +10,10 @@ import scala.util.{Success, Try}
 
 case object EncodingOps:
 
+  private val charset = StandardCharsets.UTF_8
   private val maxReadIterations = 1024 * 1024
+
+  extension (string: String) def toArraySeq: ArraySeq.ofByte = ArraySeq.ofByte(string.getBytes(charset))
 
   extension (buffer: ByteBuffer)
 

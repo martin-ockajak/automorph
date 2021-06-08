@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
 import jsonrpc.core.{NoContextFor, Protocol, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerProcessor, HandlerResult}
-import jsonrpc.log.Logging
+import jsonrpc.core.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
 import jsonrpc.util.CannotEqual
 import scala.collection.immutable.ArraySeq

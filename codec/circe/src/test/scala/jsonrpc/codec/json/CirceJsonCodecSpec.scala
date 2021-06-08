@@ -19,7 +19,7 @@ class CirceJsonSpec extends CodecSpec:
   def codec: CodecType = CirceJsonCodec(JsonPickler)
 
   def messageArguments: Seq[Params[Node]] = Seq(
-    (Map(
+    Right(Map(
       "x" -> Json.fromString("foo"),
       "y" -> Json.fromInt(1),
       "z" -> Json.fromBoolean(true)

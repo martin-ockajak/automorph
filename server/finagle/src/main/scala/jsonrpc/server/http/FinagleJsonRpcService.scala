@@ -7,10 +7,10 @@ import com.twitter.util.{Future, Promise}
 import jsonrpc.Handler
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
-import jsonrpc.log.Logging
+import jsonrpc.core.log.Logging
 import jsonrpc.server.http.FinagleJsonRpcService.defaultStatuses
 import jsonrpc.spi.Backend
-import jsonrpc.util.EncodingOps.{asArraySeq, toArraySeq}
+import jsonrpc.util.EncodingOps.toArraySeq
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
 
@@ -39,7 +39,7 @@ final case class FinagleJsonRpcService[Effect[_]](
     // Receive the request
     val client = clientAddress(request)
     logger.debug("Received HTTP request", Map("Client" -> client))
-    val rawRequest = Buf.ByteArray.Owned.extract(request.content).asArraySeq
+    val rawRequest = ArraySeq.ofByte(Buf.ByteArray.Owned.extract(request.content))
 
     // Process the request
     asFuture(backend.map(

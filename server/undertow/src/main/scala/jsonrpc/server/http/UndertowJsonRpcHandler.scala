@@ -7,10 +7,10 @@ import java.nio.ByteBuffer
 import jsonrpc.Handler
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
+import jsonrpc.core.log.Logging
 import jsonrpc.server.http.UndertowJsonRpcHandler.defaultStatuses
-import jsonrpc.log.Logging
 import jsonrpc.spi.Backend
-import jsonrpc.util.EncodingOps.{asArraySeq, toArraySeq}
+import jsonrpc.util.EncodingOps.toArraySeq
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -45,7 +45,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
         override def run(): Unit =
           // Process the request
           effectRunAsync(backend.map(
-            backend.either(handler.processRequest(request.asArraySeq)(using exchange)),
+            backend.either(handler.processRequest(ArraySeq.ofByte(request))(using exchange)),
             _.fold(
               error => sendServerError(error, exchange),
               result =>
@@ -66,9 +66,9 @@ final case class UndertowJsonRpcHandler[Effect[_]](
 
   private def sendServerError(error: Throwable, exchange: HttpServerExchange): Unit =
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
-    val errorMessage = Protocol.errorDetails(error).mkString("\n")
+    val errorMessage = Protocol.errorDetails(error).mkString("\n").toArraySeq
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(exchange)))
-    sendResponse(errorMessage.toArraySeq, statusCode, exchange)
+    sendResponse(errorMessage, statusCode, exchange)
 
   private def sendResponse(message: ArraySeq.ofByte, statusCode: Int, exchange: HttpServerExchange): Unit =
     if exchange.isResponseChannelAvailable then

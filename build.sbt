@@ -30,13 +30,6 @@ lazy val root = project.in(file(".")).aggregate(
 lazy val spi = project.settings(
   name := "json-rpc-spi"
 )
-lazy val util = project.settings(
-  name := "json-rpc-util",
-  libraryDependencies ++= Seq(
-    "org.slf4j" % "slf4j-api" % "1.7.30",
-    "com.lihaoyi" %% "pprint" % "0.6.6",
-  )
-)
 lazy val test = project.dependsOn(
   spi
 ).settings(
@@ -49,20 +42,22 @@ lazy val test = project.dependsOn(
   )
 )
 lazy val core = project.dependsOn(
-  util, spi, test % Test,
+  spi, test % Test,
   zio % Test, monix % Test, scalaz % Test,
   upickle % Test, circe % Test,
   sttp % Test
 ).settings(
   name := "json-rpc-core",
   libraryDependencies ++= Seq(
+    "org.slf4j" % "slf4j-api" % "1.7.30",
+    "com.lihaoyi" %% "pprint" % "0.6.6",
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.6"
   )
 )
 
 // Codec
 lazy val upickle = (project in file("codec/upickle")).dependsOn(
-  util, spi, test % Test
+  spi, test % Test
 ).settings(
   name := "json-rpc-upickle",
   libraryDependencies ++= Seq(
@@ -70,7 +65,7 @@ lazy val upickle = (project in file("codec/upickle")).dependsOn(
   )
 )
 lazy val circe = (project in file("codec/circe")).dependsOn(
-  util, spi, test % Test
+  spi, test % Test
 ).settings(
   name := "json-rpc-circe",
   libraryDependencies ++= Seq(
@@ -81,7 +76,7 @@ lazy val circe = (project in file("codec/circe")).dependsOn(
 
 // Effect
 lazy val zio = (project in file("backend/zio")).dependsOn(
-  util, spi, test % Test
+  spi, test % Test
 ).settings(
   name := "json-rpc-zio",
   libraryDependencies ++= Seq(
@@ -89,7 +84,7 @@ lazy val zio = (project in file("backend/zio")).dependsOn(
   )
 )
 lazy val monix = (project in file("backend/monix")).dependsOn(
-  util, spi, test % Test
+  spi, test % Test
 ).settings(
   name := "json-rpc-monix",
   libraryDependencies ++= Seq(
@@ -97,7 +92,7 @@ lazy val monix = (project in file("backend/monix")).dependsOn(
   )
 )
 lazy val cats = (project in file("backend/cats")).dependsOn(
-  util, spi, test % Test
+  spi, test % Test
 ).settings(
   name := "json-rpc-cats",
   libraryDependencies ++= Seq(
@@ -105,7 +100,7 @@ lazy val cats = (project in file("backend/cats")).dependsOn(
   )
 )
 lazy val scalaz = (project in file("backend/scalaz")).dependsOn(
-  util, spi, test % Test
+  spi, test % Test
 ).settings(
   name := "json-rpc-scalaz",
   libraryDependencies ++= Seq(
@@ -115,7 +110,7 @@ lazy val scalaz = (project in file("backend/scalaz")).dependsOn(
 
 // Transport
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
-  util, spi, test % Test
+  spi, test % Test
 ).settings(
   name := "json-rpc-sttp",
   libraryDependencies ++= Seq(

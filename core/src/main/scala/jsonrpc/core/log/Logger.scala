@@ -1,4 +1,4 @@
-package jsonrpc.log
+package jsonrpc.core.log
 
 import java.nio.file.{Files, Path, Paths}
 import org.slf4j.{LoggerFactory, MDC, Logger as Underlying}
