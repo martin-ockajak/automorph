@@ -2,8 +2,8 @@ package jsonrpc.codec.json
 
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json, parser}
+import java.nio.charset.StandardCharsets
 import jsonrpc.spi.Message
-import jsonrpc.util.EncodingOps.{asString, toArraySeq}
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -17,14 +17,15 @@ import scala.collection.immutable.ArraySeq
 final case class CirceJsonCodec[Customized <: CirceCustomized](
   customized: Customized = new CirceCustomized {}
 ) extends CirceJsonCodecMeta[Customized]:
+  private val charset = StandardCharsets.UTF_8
 
   override def mediaType: String = "application/json"
 
   override def serialize(message: Message[Json]): ArraySeq.ofByte =
-    message.asJson.noSpaces.toArraySeq
+    ArraySeq.ofByte(message.asJson.noSpaces.getBytes(charset))
 
   override def deserialize(data: ArraySeq.ofByte): Message[Json] =
-    parser.decode[Message[Json]](data.asString).toTry.get
+    parser.decode[Message[Json]](new String(data.unsafeArray, charset)).toTry.get
 
   override def format(message: Message[Json]): String =
     message.asJson.spaces2

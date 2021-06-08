@@ -1,16 +1,17 @@
 package jsonrpc.codec.json.dummy
 
-import jsonrpc.util.EncodingOps.toArraySeq
+import java.nio.charset.StandardCharsets
 import jsonrpc.spi.{Codec, Message}
-
 import scala.collection.immutable.ArraySeq
 
 final case class DummyJsonCodec() extends Codec[String]:
 
+  private val charset = StandardCharsets.UTF_8
+
   override def mediaType: String = "text/plain"
 
   override def serialize(message: Message[String]): ArraySeq.ofByte =
-    message.toString.toArraySeq
+    ArraySeq.ofByte(message.toString.getBytes(charset))
 
   override def deserialize(data: ArraySeq.ofByte): Message[String] =
     Message(None, None, None, None, None, None)
