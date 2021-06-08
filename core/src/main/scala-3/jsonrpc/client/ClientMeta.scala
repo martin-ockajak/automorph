@@ -2,6 +2,7 @@ package jsonrpc.client
 
 import java.lang.reflect.Proxy
 import jsonrpc.Client
+import jsonrpc.Client.NotTuple
 import jsonrpc.client.ClientBindings
 import jsonrpc.spi.Codec
 import scala.compiletime.summonInline
@@ -24,8 +25,6 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context, BindingType
   Context
 ]]:
   this: Client[Node, CodecType, Effect, Context, BindingType] =>
-
-  type NotTuple[T] = NotGiven[T =:= Tuple]
 
   given CanEqual[EmptyTuple, EmptyTuple] = CanEqual.derived
   given CanEqual[EmptyTuple, Tuple] = CanEqual.derived

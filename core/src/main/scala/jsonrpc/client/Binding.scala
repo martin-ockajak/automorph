@@ -1,7 +1,8 @@
 package jsonrpc.client
 
-import jsonrpc.spi.Codec
+import jsonrpc.Client.NotTuple
 import jsonrpc.client.ClientMeta
+import jsonrpc.spi.Codec
 
 sealed trait Binding[Node, CodecType <: Codec[Node], Effect[_], Context]:
   def methodName: String
@@ -11,11 +12,18 @@ case class UnnamedBinding[Node, CodecType <: Codec[Node], Effect[_], Context](
   methodName: String
 ) extends Binding[Node, CodecType, Effect, Context]:
 
-  inline def parameters(parameterNames: Seq[String]): NamedBinding[Node, CodecType, Effect, Context] =
+  inline def call[A <: Product: NotTuple, R](arguments: A)(using context: Context): Effect[R] =
+    given NotTuple[A] = summon[NotTuple[A]]
+    client.callByName[A, R](methodName)(arguments)
+
+  inline def parameters(parameterNames: String*): NamedBinding[Node, CodecType, Effect, Context] =
     NamedBinding(client, methodName, parameterNames)
 
   inline def positional: PositionalBinding[Node, CodecType, Effect, Context] =
     PositionalBinding(client, methodName)
+
+  inline def unnamed: UnnamedBinding[Node, CodecType, Effect, Context] =
+    UnnamedBinding(client, methodName)
 
 case class NamedBinding[Node, CodecType <: Codec[Node], Effect[_], Context](
   client: ClientMeta[Node, CodecType, Effect, Context, ?],

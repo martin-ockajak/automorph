@@ -8,7 +8,7 @@ import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, MessageError, Transport}
 import jsonrpc.util.CannotEqual
 import scala.collection.immutable.ArraySeq
-import scala.util.{Random, Try}
+import scala.util.{NotGiven, Random, Try}
 
 /**
  * JSON-RPC client layer.
@@ -178,6 +178,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context, Bind
 
 object Client:
 
+  type NotTuple[T] = NotGiven[T =:= Tuple]
   type NoContext = NoContextFor[Client[?, ?, ?, ?, ?]]
   given NoContext = NoContextFor[Client[?, ?, ?, ?, ?]]()
 
