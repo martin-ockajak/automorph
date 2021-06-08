@@ -5,6 +5,14 @@ import jsonrpc.Handler
 import jsonrpc.handler.HandlerBindings
 import jsonrpc.spi.{Backend, Codec}
 
+/**
+ * JSON-RPC handler layer code generation.
+ *
+ * @tparam Node message format node representation type
+ * @tparam CodecType message codec plugin type
+ * @tparam Effect effect type
+ * @tparam Context request context type
+ */
 trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Handler[Node, CodecType, Effect, Context] =>
 

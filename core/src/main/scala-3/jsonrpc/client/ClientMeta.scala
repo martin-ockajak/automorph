@@ -8,6 +8,14 @@ import java.lang.reflect.Proxy
 import scala.compiletime.summonInline
 import scala.reflect.ClassTag
 
+/**
+ * JSON-RPC client layer code generation.
+ *
+ * @tparam Node message format node representation type
+ * @tparam CodecType message codec plugin type
+ * @tparam Effect effect type
+ * @tparam Context request context type
+ */
 trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Client[Node, CodecType, Effect, Context] =>
 

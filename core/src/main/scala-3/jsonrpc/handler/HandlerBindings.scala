@@ -1,10 +1,13 @@
 package jsonrpc.handler
 
-import jsonrpc.core.CommonBindings.{callMethodTerm, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
+import jsonrpc.core.MethodBindings.{callMethodTerm, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
 
+/**
+ * JSON-RPC handler layer bindings code generation.
+ */
 case object HandlerBindings:
 
   private val debugProperty = "jsonrpc.macro.debug"

@@ -2,10 +2,8 @@ package jsonrpc.codec.messagepack
 
 import jsonrpc.codec.messagepack.UpickleMessagePackCodec.{Message, MessageError, fromSpi}
 import jsonrpc.spi
-import jsonrpc.spi.Codec
 import jsonrpc.util.EncodingOps.asArraySeq
 import scala.collection.immutable.ArraySeq
-import scala.compiletime.summonInline
 import upack.Msg
 import upickle.Api
 
@@ -14,33 +12,26 @@ import upickle.Api
  *
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[http://com-lihaoyi.github.io/upickle/#uPack Node type]]
- * @param readWriters Upickle reader and writer implicits instance
- * @tparam ReadWriters Upickle reader and writer implicits instance type
+ * @param customized customized Upickle reader and writer implicits instance
+ * @tparam Customized customized Upickle reader and writer implicits instance type
  */
-final case class UpickleMessagePackCodec[ReadWriters <: Api](readWriters: ReadWriters) extends Codec[Msg]:
+final case class UpickleMessagePackCodec[Customized <: Api](customized: Customized)
+  extends UpickleMessagePackCodecMeta[Customized]:
 
   private val indent = 2
-  private given readWriters.ReadWriter[Message] = readWriters.macroRW
-  private given readWriters.ReadWriter[MessageError] = readWriters.macroRW
+  private given customized.ReadWriter[Message] = customized.macroRW
+  private given customized.ReadWriter[MessageError] = customized.macroRW
 
   override def mediaType: String = "application/msgpack"
 
   override def serialize(message: spi.Message[Msg]): ArraySeq.ofByte =
-    readWriters.writeToByteArray(fromSpi(message)).asArraySeq
+    customized.writeToByteArray(fromSpi(message)).asArraySeq
 
   override def deserialize(data: ArraySeq.ofByte): spi.Message[Msg] =
-    readWriters.read[Message](data.unsafeArray).toSpi
+    customized.read[Message](data.unsafeArray).toSpi
 
   override def format(message: spi.Message[Msg]): String =
-    readWriters.write(fromSpi(message), indent)
-
-  override inline def encode[T](value: T): Msg =
-    val writer = summonInline[readWriters.Writer[T]]
-    readWriters.writeMsg(value)(using writer)
-
-  override inline def decode[T](node: Msg): T =
-    val reader = summonInline[readWriters.Reader[T]]
-    readWriters.readBinary[T](node)(using reader)
+    customized.write(fromSpi(message), indent)
 
 case object UpickleMessagePackCodec:
 

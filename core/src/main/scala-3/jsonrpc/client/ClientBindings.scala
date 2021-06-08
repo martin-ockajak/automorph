@@ -1,12 +1,15 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.core.CommonBindings.{callMethodTerm, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
+import jsonrpc.core.MethodBindings.{callMethodTerm, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
 import jsonrpc.handler.HandlerBindings.{debugDefault, debugProperty}
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
 
+/**
+ * JSON-RPC client layer bindings code generation.
+ */
 case object ClientBindings:
 
   private val debugProperty = "jsonrpc.macro.debug"

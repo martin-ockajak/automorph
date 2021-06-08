@@ -1,27 +1,22 @@
 package jsonrpc.codec.json
 
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json, parser}
-import jsonrpc.spi.{Codec, Message, MessageError}
+import jsonrpc.spi.Message
 import jsonrpc.util.EncodingOps.{asString, toArraySeq}
 import scala.collection.immutable.ArraySeq
-import scala.compiletime.summonInline
 
 /**
  * Circe JSON codec plugin.
  *
  * @see [[https://circe.github.io/circe Documentation]]
  * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
- * @param codecs Circe encoders and decoders implicits instance
- * @tparam Codecs Circe encoders and decoders implicits instance type
+ * @param customized customized Circe encoders and decoders implicits instance
+ * @tparam Customized customized Circe encoders and decoders implicits instance type
  */
-final case class CirceJsonCodec[Codecs <: CirceCodecs](
-  codecs: Codecs = new CirceCodecs {}
-) extends Codec[Json]:
-
-  private given Encoder[Message[Json]] = deriveEncoder[Message[Json]]
-  private given Decoder[Message[Json]] = deriveDecoder[Message[Json]]
+final case class CirceJsonCodec[Customized <: CirceCustomized](
+  customized: Customized = new CirceCustomized {}
+) extends CirceJsonCodecMeta[Customized]:
 
   override def mediaType: String = "application/json"
 
@@ -34,15 +29,7 @@ final case class CirceJsonCodec[Codecs <: CirceCodecs](
   override def format(message: Message[Json]): String =
     message.asJson.spaces2
 
-  override inline def encode[T](value: T): Json =
-    val encoder = summonInline[codecs.CirceEncoder[T]].encoder
-    value.asJson(using encoder)
-
-  override inline def decode[T](node: Json): T =
-    val decoder = summonInline[codecs.CirceDecoder[T]].decoder
-    node.as[T](using decoder).toTry.get
-
-trait CirceCodecs:
+trait CirceCustomized:
 
   final case class CirceEncoder[T](encoder: Encoder[T])
   final case class CirceDecoder[T](decoder: Decoder[T])
