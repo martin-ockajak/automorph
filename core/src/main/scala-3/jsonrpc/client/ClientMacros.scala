@@ -3,9 +3,9 @@ package jsonrpc.client
 import jsonrpc.client.ClientMethod
 import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
 import jsonrpc.handler.HandlerMacros.{debugDefault, debugProperty}
-import jsonrpc.spi.{Backend, Codec}
+import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
-import scala.quoted.{quotes, Expr, Quotes, Type}
+import scala.quoted.{Expr, Quotes, Type}
 
 case object ClientMacros:
 

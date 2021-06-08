@@ -1,7 +1,7 @@
 package jsonrpc
 
 import jsonrpc.client.ClientMeta
-import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
+import jsonrpc.core.Protocol.ParseError
 import jsonrpc.core.{NoContextFor, Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params

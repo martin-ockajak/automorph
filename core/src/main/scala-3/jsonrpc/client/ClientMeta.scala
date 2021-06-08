@@ -2,8 +2,7 @@ package jsonrpc.client
 
 import jsonrpc.Client
 import jsonrpc.client.ClientMacros
-import jsonrpc.spi.Message.Params
-import jsonrpc.spi.{Backend, Codec}
+import jsonrpc.spi.Codec
 import jsonrpc.spi.Codec
 import java.lang.reflect.Proxy
 import scala.compiletime.summonInline
