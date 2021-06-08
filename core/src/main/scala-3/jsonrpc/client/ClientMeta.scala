@@ -6,6 +6,7 @@ import jsonrpc.client.ClientBindings
 import jsonrpc.spi.Codec
 import scala.compiletime.summonInline
 import scala.reflect.ClassTag
+import scala.util.NotGiven
 
 /**
  * JSON-RPC client layer code generation.
@@ -17,6 +18,7 @@ import scala.reflect.ClassTag
  */
 trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Client[Node, CodecType, Effect, Context] =>
+  type NotTuple[T] = NotGiven[T =:= Tuple]
 
   given CanEqual[EmptyTuple, EmptyTuple] = CanEqual.derived
   given CanEqual[EmptyTuple, Tuple] = CanEqual.derived
@@ -65,7 +67,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @tparam R result type
    * @return result value
    */
-  inline def callByName[A <: Product, R](method: String)(arguments: A)(using context: Context): Effect[R] =
+  inline def callByName[A <: Product: NotTuple, R](method: String)(arguments: A)(using context: Context): Effect[R] =
     val argumentsNode = codec.encode(arguments)
     val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
     performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
