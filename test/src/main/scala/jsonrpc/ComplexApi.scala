@@ -23,11 +23,11 @@ trait ComplexApi[Effect[_]]:
   def method2(p0: String): Effect[Unit]
 
   def method3(p0: Int): Effect[Seq[String]]
-
-  def method4(p0: Option[Int]): Effect[Long]
-
-  def method5(p0: String, p1: Int): Effect[Option[String]]
-
+//
+//  def method4(p0: Option[Int]): Effect[Long]
+//
+//  def method5(p0: String, p1: Int): Effect[Option[String]]
+//
 //  def method6(p0: Record)(using context: Short): Effect[Int]
 //
 //  def method7(p0: Record, p1: String)(using Short): Effect[Record]
@@ -49,10 +49,10 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
 
   override def method3(p0: Int): Effect[Seq[String]] = backend.pure(Seq.fill(p0)("x"))
 
-  override def method4(p0: Option[Int]): Effect[Long] = backend.pure(p0.map(_ + 1).getOrElse(0))
-
-  override def method5(p0: String, p1: Int): Effect[Option[String]] = backend.pure(Some(s"$p0$p1"))
-
+//  override def method4(p0: Option[Int]): Effect[Long] = backend.pure(p0.map(_ + 1).getOrElse(0))
+//
+//  override def method5(p0: String, p1: Int): Effect[Option[String]] = backend.pure(Some(s"$p0$p1"))
+//
 //  override def method6(p0: Record)(using context: Short): Effect[Int] = p0.int match
 //    case Some(int) => backend.pure(int + context)
 //    case _         => backend.pure(0)
