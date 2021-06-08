@@ -57,11 +57,12 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context, BindingType
    * @param method method name
    * @return method binding
    */
-  inline def bind(method: String): Binding[Node, CodecType, Effect, Context] =
-    if argumentsByName then
-      UnnamedBinding[Node, CodecType, Effect, Context](this, method)
-    else
-      PositionalBinding[Node, CodecType, Effect, Context](this, method)
+  inline def bind(method: String): BindingType =
+    (inline if argumentsByName then
+       UnnamedBinding[Node, CodecType, Effect, Context](this, method)
+     else
+       PositionalBinding[Node, CodecType, Effect, Context](this, method)
+    ).asInstanceOf[BindingType]
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
