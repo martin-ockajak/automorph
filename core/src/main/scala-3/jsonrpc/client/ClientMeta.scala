@@ -5,7 +5,6 @@ import jsonrpc.Client
 import jsonrpc.client.ClientBindings
 import jsonrpc.spi.Codec
 import scala.compiletime.summonInline
-import scala.deriving.Mirror
 import scala.reflect.ClassTag
 
 /**
@@ -66,7 +65,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @tparam R result type
    * @return result value
    */
-  inline def callByName[A <: Product: Mirror.ProductOf, R](method: String)(arguments: A)(using context: Context): Effect[R] =
+  inline def callByName[A <: Product, R](method: String)(arguments: A)(using context: Context): Effect[R] =
     val argumentsNode = codec.encode(arguments)
     val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
     performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
@@ -110,7 +109,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notifyByName[A <: Product: Mirror.ProductOf, R](method: String)(arguments: A)(using context: Context): Effect[Unit] =
+  inline def notifyByName[A <: Product, R](method: String)(arguments: A)(using context: Context): Effect[Unit] =
     val argumentsNode = codec.encode(arguments)
     val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
     performNotify(method, encodedArguments, Some(context))
