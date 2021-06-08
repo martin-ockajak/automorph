@@ -20,6 +20,7 @@ import scala.util.{Random, Try}
  * @param codec message codec plugin
  * @param backend effect backend plugin
  * @param transport message transport plugin
+ * @param argumentsByName supply JSON-RPC request arguments ''by name'' if true and ''by position'' if false
  * @tparam Node message format node representation type
  * @tparam CodecType message codec plugin type
  * @tparam Effect effect type
@@ -28,13 +29,30 @@ import scala.util.{Random, Try}
 final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
   backend: Backend[Effect],
-  transport: Transport[Effect, Context]
+  transport: Transport[Effect, Context],
+  argumentsByName: Boolean
 ) extends ClientMeta[Node, CodecType, Effect, Context] with CannotEqual with Logging:
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   override def toString: String =
     s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Effect: ${backend.getClass.getName})"
+
+  /**
+   * Create a copy of this client with JSON-RPC request arguments supplied ''by name''.
+   *
+   * @return JSON-RPC client with arguments supplied ''by name''
+   */
+  def named: Client[Node, CodecType, Effect, Context] =
+    Client(codec, backend, transport, false)
+
+  /**
+   * Create a copy of this client with JSON-RPC request arguments supplied ''by position''.
+   *
+   * @return JSON-RPC client with arguments supplied ''by position''
+   */
+  def positional: Client[Node, CodecType, Effect, Context] =
+    Client(codec, backend, transport, true)
 
   /**
    * Perform a method call using specified arguments.
@@ -177,7 +195,7 @@ object Client:
     backend: Backend[Effect],
     transport: Transport[Effect, Context]
   ): Client[Node, CodecType, Effect, Context] =
-    new Client(codec, backend, transport)
+    new Client(codec, backend, transport, true)
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins without request `Context` type.
@@ -198,4 +216,4 @@ object Client:
     backend: Backend[Effect],
     transport: Transport[Effect, NoContext]
   ): Client[Node, CodecType, Effect, NoContext] =
-    Client(codec, backend, transport)
+    Client(codec, backend, transport, true)

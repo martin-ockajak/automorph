@@ -26,6 +26,26 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   given CanEqual[Tuple, EmptyTuple] = CanEqual.derived
   given CanEqual[Tuple, Tuple] = CanEqual.derived
 
+//  client.call[RemoteApi].byName
+//  client.call[RemoteApi].byPosition
+//
+//  client.bind[RemoteApi].byName
+//
+//  client.bind[RemoteApi].byPosition
+//
+//  // Callable
+//  client.bind("method").call.byName(caseClass)
+//
+//  client.bind("method").parameters("a", "b", "c")
+//  client.bind("method").call.defineNames("a", "b", "c")
+//  client.bind("method").call.defineNames("a", "b", "c").byName(tuple)
+//
+//  // CallableWithoutNames
+//  client.bind("method").call.byName(caseClass)
+//
+//  // CallableWithNames
+//  client.bind("method").call.byName(tuple)
+
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
    *
@@ -122,7 +142,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     performNotify(method, encodedArguments, Some(context))
 
   /**
-   * Create a remote JSON-RPC API proxy instance by generating method bindings for all valid public methods of the specified API.
+   * Create a JSON-RPC API proxy instance with generated method bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -133,66 +153,13 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
    *
-   * Bound API method JSON-RPC request arguments are supplied ''by name''.
-   *
    * @tparam T API trait type (classes are not supported)
-   * @return remote JSON-RPC API proxy instance
+   * @return JSON-RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bindByName[T <: AnyRef]: T = bind[T](true)
-
-  /**
-   * Create a remote JSON-RPC API proxy instance by generating method bindings for all valid public methods of the specified API.
-   *
-   * A method is considered valid if it satisfies all of these conditions:
-   * - can be called at runtime
-   * - has no type parameters
-   * - returns the specified effect type
-   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
-   *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
-   * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * Bound API method JSON-RPC request arguments are supplied ''by position''.
-   *
-   * @tparam T API trait type (classes are not supported)
-   * @return remote JSON-RPC API proxy instance
-   * @throws IllegalArgumentException if invalid public methods are found in the API type
-   */
-  inline def bindByPosition[T <: AnyRef]: T = bind[T](false)
-
-  /**
-   * Encode method arguments by position.
-   *
-   * @param arguments arguments of arbitrary types
-   * @return argument nodes
-   */
-  private[jsonrpc] inline def encodeArguments(arguments: Tuple): List[Node] =
-    arguments match
-      case EmptyTuple   => List()
-      case head *: tail => List(codec.encode(head)) ++ encodeArguments(tail)
-
-  /**
-   * Create a remote JSON-RPC API proxy instance by generating method bindings for all valid public methods of the specified API.
-   *
-   * A method is considered valid if it satisfies all of these conditions:
-   * - can be called at runtime
-   * - has no type parameters
-   * - returns the specified effect type
-   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
-   *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
-   * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * @param argumentsByName supply JSON-RPC request arguments ''by name'' if true, supply JSON-RPC request arguments ''by position'' if false
-   * @tparam T API trait type (classes are not supported)
-   * @return remote JSON-RPC API proxy instance
-   * @throws IllegalArgumentException if invalid public methods are found in the API type
-   */
-  private[jsonrpc] inline def bind[T <: AnyRef](argumentsByName: Boolean = true): T =
+  inline def bind[T <: AnyRef]: T =
     // Generate API method bindings
     val methodBindings = ClientBindings.generate[Node, CodecType, Effect, Context, T](codec)
-//    val methodBindings = Map.empty[String, ClientMethod[Node]]
 
     // Create API proxy instance
     val classTag = summonInline[ClassTag[T]]
@@ -205,11 +172,9 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
           // Adjust expected method parameters if it uses context as its last parameter
           val (validArguments, context) =
             if clientMethod.usesContext then
-              (arguments.dropRight(1).toSeq, Some(arguments.last).asInstanceOf[Option[Context]]
-            )
+              arguments.dropRight(1).toSeq -> Some(arguments.last).asInstanceOf[Option[Context]]
             else
-              (arguments.toSeq, None
-            )
+              arguments.toSeq -> None
 
           // Encode method arguments
           val argumentNodes = clientMethod.encodeArguments(validArguments)
@@ -219,7 +184,18 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
             else
               Left(argumentNodes.toList)
 
-          // Perform the remote API call
+          // Perform the API call
           performCall(method.getName, encodedArguments, context, resultNode => clientMethod.decodeResult)
         }.getOrElse(throw IllegalStateException(s"Method not found: ${method.getName}"))
     ).asInstanceOf[T]
+
+  /**
+   * Encode method arguments by position.
+   *
+   * @param arguments arguments of arbitrary types
+   * @return argument nodes
+   */
+  private[jsonrpc] inline def encodeArguments(arguments: Tuple): List[Node] =
+    arguments match
+      case EmptyTuple   => List()
+      case head *: tail => List(codec.encode(head)) ++ encodeArguments(tail)

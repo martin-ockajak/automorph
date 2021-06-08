@@ -17,7 +17,7 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Handler[Node, CodecType, Effect, Context] =>
 
   /**
-   * Create a JSON-RPC request handler by adding generated method bindings for all valid public methods of the specified API.
+   * Create a copy of this handler with generated method bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -32,14 +32,14 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    *
    * @param api API instance
    * @tparam T API type (only member methods of this type are exposed)
-   * @return JSON-RPC server including the additional API bindings
+   * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[T <: AnyRef](api: T): Handler[Node, CodecType, Effect, Context] =
     bind(api, name => Seq(name))
 
   /**
-   * Create a JSON-RPC request handler by adding generated method bindings for all valid public methods of the specified API.
+   * Create a copy of this handler with generated method bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -55,7 +55,7 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param api API instance
    * @param exposedNames create exposed method names from its actual name (empty result causes the method not to be exposed)
    * @tparam T API type (only member methods of this type are exposed)
-   * @return JSON-RPC server including the additional API bindings
+   * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[T <: AnyRef](
@@ -65,7 +65,7 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     bind(api, Function.unlift(name => Some(exposedNames(name))))
 
   /**
-   * Create a JSON-RPC request handler by adding generated method bindings for all valid public methods of the specified API.
+   * Create a copy of this handler with generated method bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -79,9 +79,9 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * Bound API methods are exposed using names resulting from a transformation of their actual names via the `exposedNames` function.
    *
    * @param api API instance
-   * @param exposedNames create exposed method names from its actual name (empty result causes the method not to be exposed)
+   * @param exposedNames define names under which a method is exposed from its actual name (empty result causes the method not to be exposed)
    * @tparam T API type (only member methods of this type are exposed)
-   * @return JSON-RPC server including the additional API bindings
+   * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[T <: AnyRef](
