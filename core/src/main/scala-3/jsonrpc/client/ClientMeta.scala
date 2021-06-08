@@ -72,7 +72,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
     performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
 
-/**
+  /**
    * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by position''.
    *
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
