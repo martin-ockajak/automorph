@@ -164,7 +164,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
    *
-   * Bound API method JSON-RPC request arguments are supplied ''by name''.
+   * Bound API method JSON-RPC request arguments are supplied ''by position''.
    *
    * @tparam T API trait type (classes are not supported)
    * @return remote JSON-RPC API proxy instance
@@ -183,8 +183,6 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    *
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * Bound API method JSON-RPC request arguments are supplied ''by name''.
    *
    * @param argumentsByName supply JSON-RPC request arguments ''by name'' if true, supply JSON-RPC request arguments ''by position'' if false
    * @tparam T API trait type (classes are not supported)
