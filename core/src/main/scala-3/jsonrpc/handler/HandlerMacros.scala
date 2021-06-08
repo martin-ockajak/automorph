@@ -1,9 +1,9 @@
 package jsonrpc.handler
 
-import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, methodDescription, methodUsesContext, effectResultType}
+import jsonrpc.core.ApiReflection.{callMethodTerm, detectApiMethods, effectResultType, methodDescription, methodUsesContext}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
-import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, Type}
 
 case object HandlerMacros:
 
@@ -22,7 +22,7 @@ case object HandlerMacros:
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam ApiType API type
-   * @return mapping of method names to their JSON-RPC wrapper functions
+   * @return mapping of method names to handler method bindings
    */
   inline def bind[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
     codec: CodecType,
@@ -36,7 +36,7 @@ case object HandlerMacros:
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
   )(using quotes: Quotes): Expr[Map[String, HandlerMethod[Node, Effect, Context]]] =
-    import ref.quotes.reflect.{TypeRepr, TypeTree, asTerm}
+    import ref.quotes.reflect.{asTerm, TypeRepr, TypeTree}
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -94,7 +94,7 @@ case object HandlerMacros:
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
-    import ref.quotes.reflect.{AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr, asTerm}
+    import ref.quotes.reflect.{asTerm, AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -162,11 +162,11 @@ case object HandlerMacros:
   private def logBoundMethod[ApiType: Type](
     ref: Reflection,
     method: ref.QuotedMethod,
-    bindingFunction: Expr[Any]
+    invoke: Expr[Any]
   ): Unit =
     import ref.quotes.reflect.{asTerm, Printer, TypeRepr}
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
       println(
-        s"${methodDescription[ApiType](ref, method)} = \n  ${bindingFunction.asTerm.show(using Printer.TreeAnsiCode)}\n"
+        s"${methodDescription[ApiType](ref, method)} = \n  ${invoke.asTerm.show(using Printer.TreeAnsiCode)}\n"
       )
