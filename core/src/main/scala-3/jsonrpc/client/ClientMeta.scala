@@ -19,347 +19,81 @@ import scala.reflect.ClassTag
 trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Client[Node, CodecType, Effect, Context] =>
 
-  /**
-   * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
-   *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * @param method method name
-   * @param context request context
-   * @tparam R result type
-   * @return result value
-   */
-  inline def callByPosition[R](method: String)()(using context: Context): Effect[R] =
-    val encodedArguments = Left(List())
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
+  given CanEqual[EmptyTuple, EmptyTuple] = CanEqual.derived
+  given CanEqual[EmptyTuple, Tuple] = CanEqual.derived
+  given CanEqual[Tuple, EmptyTuple] = CanEqual.derived
+  given CanEqual[Tuple, Tuple] = CanEqual.derived
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
+   * @param arguments method arguments of arbitrary types
    * @param context request context
    * @tparam R result type
    * @return result value
    */
-  inline def callByPosition[T1, R](method: String)(p1: T1)(using context: Context): Effect[R] =
-    val encodedArguments = Left(List(
-      codec.encode(p1)
-    ))
+  inline def callByPosition[R](method: String)(arguments: Tuple)(using context: Context): Effect[R] =
+    val encodedArguments = Left(encodeArguments(arguments))
     performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
 
   /**
-   * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
+   * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by name''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
+   * @param argumentNames method argument names
+   * @param arguments method arguments of arbitrary types
    * @param context request context
    * @tparam R result type
    * @return result value
    */
-  inline def callByPosition[T1, T2, R](method: String)(p1: T1, p2: T2)(using context: Context): Effect[R] =
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2)
-    ))
+  inline def callByName[R](method: String)(argumentNames: String*)(arguments: Tuple)(using context: Context): Effect[R] =
+    val encodedArguments = Right(argumentNames.zip(encodeArguments(arguments)).toMap)
     performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
 
   /**
-   * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
+   * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by position''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
-   * @param context request context
-   * @tparam R result type
-   * @return result value
-   */
-  inline def callByPosition[T1, T2, T3, R](method: String)(p1: T1, p2: T2, p3: T3)(using context: Context): Effect[R] =
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2),
-      codec.encode(p3)
-    ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
-
-  /**
-   * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
-   *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * @param method method name
-   * @param context request context
-   * @tparam R result type
-   * @return result value
-   */
-  inline def callByPosition[T1, T2, T3, T4, R](method: String)(p1: T1, p2: T2, p3: T3, p4: T4)(using
-    context: Context
-  ): Effect[R] =
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2),
-      codec.encode(p3),
-      codec.encode(p4)
-    ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
-
-  /**
-   * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
-   *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * @param method method name
-   * @param context request context
-   * @tparam R result type
-   * @return result value
-   */
-  inline def callByPosition[T1, T2, T3, T4, T5, R](method: String)(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5)(using
-    context: Context
-  ): Effect[R] =
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2),
-      codec.encode(p3),
-      codec.encode(p4),
-      codec.encode(p5)
-    ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
-
-  /**
-   * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
-   *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * @param method method name
-   * @param context request context
-   * @tparam R result type
-   * @return result value
-   */
-  inline def callByPosition[T1, T2, T3, T4, T5, T6, R](method: String)(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6)(
-    using context: Context
-  ): Effect[R] =
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2),
-      codec.encode(p3),
-      codec.encode(p4),
-      codec.encode(p5),
-      codec.encode(p6)
-    ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
-
-  /**
-   * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
-   *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * @param method method name
-   * @param context request context
-   * @tparam R result type
-   * @return result value
-   */
-  inline def callByPosition[T1, T2, T3, T4, T5, T6, T7, R](method: String)(
-    p1: T1,
-    p2: T2,
-    p3: T3,
-    p4: T4,
-    p5: T5,
-    p6: T6,
-    p7: T7
-  )(
-    using context: Context
-  ): Effect[R] =
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2),
-      codec.encode(p3),
-      codec.encode(p4),
-      codec.encode(p5),
-      codec.encode(p6),
-      codec.encode(p7)
-    ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
-
-  /**
-   * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
-   *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * @param method method name
-   * @param arguments arguments by name
+   * @param arguments method arguments of arbitrary types
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notifyByPosition(method: String)()(using context: Context): Effect[Unit] =
-    val encodedArguments = Left(List())
+  inline def notifyByPosition(method: String)(arguments: Tuple)(using context: Context): Effect[Unit] =
+    val encodedArguments = Left(encodeArguments(arguments))
     performNotify(method, encodedArguments, Some(context))
 
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
-   * @param arguments arguments by name
+   * @param argumentNames method argument names
+   * @param arguments method arguments of arbitrary types
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notifyByPosition[T1](method: String)(p1: T1)(using context: Context): Effect[Unit] =
-    val encodedArguments = Left(List(
-      codec.encode(p1)
-    ))
+  inline def notifyByName(argumentNames: String*)(method: String)(arguments: Tuple)(using context: Context): Effect[Unit] =
+    val encodedArguments = Right(argumentNames.zip(encodeArguments(arguments)).toMap)
     performNotify(method, encodedArguments, Some(context))
 
   /**
-   * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
+   * Encode method arguments by position.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * @param method method name
-   * @param arguments arguments by name
-   * @param context JSON-RPC request context
-   * @return nothing
+   * @param arguments arguments of arbitrary types
+   * @return argument nodes
    */
-  inline def notifyByPosition[T1, T2](method: String)(p1: T1, p2: T2)(using context: Context): Effect[Unit] =
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2)
-    ))
-    performNotify(method, encodedArguments, Some(context))
-
-  /**
-   * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
-   *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * @param method method name
-   * @param arguments arguments by name
-   * @param context JSON-RPC request context
-   * @return nothing
-   */
-  inline def notifyByPosition[T1, T2, T3](method: String)(p1: T1, p2: T2, p3: T3)(using
-    context: Context
-  ): Effect[Unit] =
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2),
-      codec.encode(p3)
-    ))
-    performNotify(method, encodedArguments, Some(context))
-
-  /**
-   * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
-   *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * @param method method name
-   * @param arguments arguments by name
-   * @param context JSON-RPC request context
-   * @return nothing
-   */
-  inline def notifyByPosition[T1, T2, T3, T4](method: String)(p1: T1, p2: T2, p3: T3, p4: T4)(using
-    context: Context
-  ): Effect[Unit] =
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2),
-      codec.encode(p3),
-      codec.encode(p4)
-    ))
-    performNotify(method, encodedArguments, Some(context))
-
-  /**
-   * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
-   *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * @param method method name
-   * @param arguments arguments by name
-   * @param context JSON-RPC request context
-   * @return nothing
-   */
-  inline def notifyByPosition[T1, T2, T3, T4, T5](method: String)(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5)(using
-    context: Context
-  ): Effect[Unit] =
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2),
-      codec.encode(p3),
-      codec.encode(p4),
-      codec.encode(p5)
-    ))
-    performNotify(method, encodedArguments, Some(context))
-
-  /**
-   * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
-   *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * @param method method name
-   * @param arguments arguments by name
-   * @param context JSON-RPC request context
-   * @return nothing
-   */
-  inline def notifyByPosition[T1, T2, T3, T4, T5, T6](method: String)(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6)(
-    using context: Context
-  ): Effect[Unit] =
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2),
-      codec.encode(p3),
-      codec.encode(p4),
-      codec.encode(p5),
-      codec.encode(p6)
-    ))
-    performNotify(method, encodedArguments, Some(context))
-
-  /**
-   * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
-   *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
-   *
-   * @param method method name
-   * @param arguments arguments by name
-   * @param context JSON-RPC request context
-   * @return nothing
-   */
-  inline def notifyByPosition[T1, T2, T3, T4, T5, T6, T7](method: String)(
-    p1: T1,
-    p2: T2,
-    p3: T3,
-    p4: T4,
-    p5: T5,
-    p6: T6,
-    p7: T7
-  )(using context: Context): Effect[Unit] =
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2),
-      codec.encode(p3),
-      codec.encode(p4),
-      codec.encode(p5),
-      codec.encode(p6),
-      codec.encode(p7)
-    ))
-    performNotify(method, encodedArguments, Some(context))
+  inline def encodeArguments(arguments: Tuple): List[Node] =
+    arguments match
+      case EmptyTuple   => List()
+      case head *: tail => List(codec.encode(head)) ++ encodeArguments(tail)
 
   /**
    * Create a remote JSON-RPC API proxy instance by generating method bindings for all valid public methods of the specified API.
