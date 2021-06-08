@@ -81,7 +81,7 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     exposedNames: PartialFunction[String, Seq[String]]
   ): Handler[Node, CodecType, Effect, Context] =
     val bindings =
-      HandlerBindings.bind[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap { (methodName, method) =>
+      HandlerBindings.generate[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap { (methodName, method) =>
         exposedNames.applyOrElse(
           methodName,
           _ =>

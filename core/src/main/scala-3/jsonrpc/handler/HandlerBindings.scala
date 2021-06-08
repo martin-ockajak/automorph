@@ -24,14 +24,14 @@ case object HandlerBindings:
    * @tparam ApiType API type
    * @return mapping of method names to handler method bindings
    */
-  inline def bind[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
+  inline def generate[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
     codec: CodecType,
     backend: Backend[Effect],
     api: ApiType
   ): Map[String, HandlerMethod[Node, Effect, Context]] =
-    ${ bind[Node, CodecType, Effect, Context, ApiType]('codec, 'backend, 'api) }
+    ${ generate[Node, CodecType, Effect, Context, ApiType]('codec, 'backend, 'api) }
 
-  private def bind[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type, Context: Type, ApiType <: AnyRef: Type](
+  private def generate[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type, Context: Type, ApiType <: AnyRef: Type](
     codec: Expr[CodecType],
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]

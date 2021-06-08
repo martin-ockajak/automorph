@@ -64,7 +64,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    */
   inline def bind[T <: AnyRef]: T =
     // Generate API method bindings
-//    val methodBindings = ClientMacros.bind[Node, CodecType, Effect, Context, T](codec)
+//    val methodBindings = ClientBindings.generate[Node, CodecType, Effect, Context, T](codec)
     val methodBindings = Map.empty[String, ClientMethod[Node]]
 
     // Create API proxy instance

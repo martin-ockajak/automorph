@@ -24,12 +24,12 @@ case object ClientBindings:
    * @tparam ApiType API type
    * @return mapping of method names to client method bindings
    */
-  inline def bind[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
+  inline def generate[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
     codec: CodecType
   ): Map[String, ClientMethod[Node]] =
-    ${ bind[Node, CodecType, Effect, Context, ApiType]('codec) }
+    ${ generate[Node, CodecType, Effect, Context, ApiType]('codec) }
 
-  private def bind[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type, Context: Type, ApiType <: AnyRef: Type](
+  private def generate[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type, Context: Type, ApiType <: AnyRef: Type](
     codec: Expr[CodecType]
   )(using quotes: Quotes): Expr[Map[String, ClientMethod[Node]]] =
     val ref = Reflection(quotes)
