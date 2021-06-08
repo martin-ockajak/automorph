@@ -1,13 +1,10 @@
 package jsonrpc.codec.json.dummy
 
-import java.nio.charset.StandardCharsets
 import jsonrpc.spi.{Codec, Message}
 import jsonrpc.util.EncodingOps.toArraySeq
 import scala.collection.immutable.ArraySeq
 
 final case class DummyJsonCodec() extends Codec[String]:
-
-  private val charset = StandardCharsets.UTF_8
 
   override def mediaType: String = "text/plain"
 
