@@ -36,11 +36,10 @@ case object HandlerMacros:
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
   )(using quotes: Quotes): Expr[Map[String, HandlerMethod[Node, Effect, Context]]] =
-    import ref.quotes.reflect.{asTerm, TypeRepr, TypeTree}
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = detectApiMethods[Effect](ref, TypeTree.of[ApiType])
+    val apiMethods = detectApiMethods[Effect](ref, ref.quotes.reflect.TypeTree.of[ApiType])
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if invalidMethodErrors.nonEmpty then
@@ -113,19 +112,18 @@ case object HandlerMacros:
       Symbol.spliceOwner,
       invokeType,
       (symbol, arguments) =>
-        // Create the method argument lists by decoding corresponding argument nodes into required parameter types
+        // Create the method argument lists by decoding corresponding argument nodes into values
         //   List(List(
         //     codec.decode[Parameter0Type](argumentNodes(0)),
         //     codec.decode[Parameter1Type](argumentNodes(1)),
         //     ...
         //     codec.decode[ParameterNType](argumentNodes(N)) OR context
         //   )): List[List[ParameterXType]]
-        val List(argumentNodes, context) = arguments
+        val List(argumentNodes, context) = arguments.asInstanceOf[List[Term]]
         val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentIndex = Literal(IntConstant(offset + index))
-            val argumentNode =
-              callMethodTerm(ref.quotes, argumentNodes.asInstanceOf[Term], "apply", List.empty, List(List(argumentIndex)))
+            val argumentNode = callMethodTerm(ref.quotes, argumentNodes, "apply", List.empty, List(List(argumentIndex)))
             if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
               context
             else
