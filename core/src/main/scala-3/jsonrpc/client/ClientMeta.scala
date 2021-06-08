@@ -30,7 +30,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @tparam R result type
    * @return result value
    */
-  inline def call[R](method: String)()(using context: Context): Effect[R] =
+  inline def callByPosition[R](method: String)()(using context: Context): Effect[R] =
     val encodedArguments = Left(List())
     performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
 
@@ -45,7 +45,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @tparam R result type
    * @return result value
    */
-  inline def call[T1, R](method: String)(p1: T1)(using context: Context): Effect[R] =
+  inline def callByPosition[T1, R](method: String)(p1: T1)(using context: Context): Effect[R] =
     val encodedArguments = Left(List(
       codec.encode(p1)
     ))
@@ -62,7 +62,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @tparam R result type
    * @return result value
    */
-  inline def call[T1, T2, R](method: String)(p1: T1, p2: T2)(using context: Context): Effect[R] =
+  inline def callByPosition[T1, T2, R](method: String)(p1: T1, p2: T2)(using context: Context): Effect[R] =
     val encodedArguments = Left(List(
       codec.encode(p1),
       codec.encode(p2)
@@ -80,7 +80,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @tparam R result type
    * @return result value
    */
-  inline def call[T1, T2, T3, R](method: String)(p1: T1, p2: T2, p3: T3)(using context: Context): Effect[R] =
+  inline def callByPosition[T1, T2, T3, R](method: String)(p1: T1, p2: T2, p3: T3)(using context: Context): Effect[R] =
     val encodedArguments = Left(List(
       codec.encode(p1),
       codec.encode(p2),
@@ -99,7 +99,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @tparam R result type
    * @return result value
    */
-  inline def call[T1, T2, T3, T4, R](method: String)(p1: T1, p2: T2, p3: T3, p4: T4)(using
+  inline def callByPosition[T1, T2, T3, T4, R](method: String)(p1: T1, p2: T2, p3: T3, p4: T4)(using
     context: Context
   ): Effect[R] =
     val encodedArguments = Left(List(
@@ -121,7 +121,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @tparam R result type
    * @return result value
    */
-  inline def call[T1, T2, T3, T4, T5, R](method: String)(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5)(using
+  inline def callByPosition[T1, T2, T3, T4, T5, R](method: String)(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5)(using
     context: Context
   ): Effect[R] =
     val encodedArguments = Left(List(
@@ -144,8 +144,8 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @tparam R result type
    * @return result value
    */
-  inline def call[T1, T2, T3, T4, T5, T6, R](method: String)(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6)(using
-    context: Context
+  inline def callByPosition[T1, T2, T3, T4, T5, T6, R](method: String)(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6)(
+    using context: Context
   ): Effect[R] =
     val encodedArguments = Left(List(
       codec.encode(p1),
@@ -168,7 +168,15 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @tparam R result type
    * @return result value
    */
-  inline def call[T1, T2, T3, T4, T5, T6, T7, R](method: String)(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6, p7: T7)(
+  inline def callByPosition[T1, T2, T3, T4, T5, T6, T7, R](method: String)(
+    p1: T1,
+    p2: T2,
+    p3: T3,
+    p4: T4,
+    p5: T5,
+    p6: T6,
+    p7: T7
+  )(
     using context: Context
   ): Effect[R] =
     val encodedArguments = Left(List(
@@ -193,7 +201,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notify(method: String)()(using context: Context): Effect[Unit] =
+  inline def notifyByPosition(method: String)()(using context: Context): Effect[Unit] =
     val encodedArguments = Left(List())
     performNotify(method, encodedArguments, Some(context))
 
@@ -208,7 +216,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notify[T1](method: String)(p1: T1)(using context: Context): Effect[Unit] =
+  inline def notifyByPosition[T1](method: String)(p1: T1)(using context: Context): Effect[Unit] =
     val encodedArguments = Left(List(
       codec.encode(p1)
     ))
@@ -225,7 +233,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notify[T1, T2](method: String)(p1: T1, p2: T2)(using context: Context): Effect[Unit] =
+  inline def notifyByPosition[T1, T2](method: String)(p1: T1, p2: T2)(using context: Context): Effect[Unit] =
     val encodedArguments = Left(List(
       codec.encode(p1),
       codec.encode(p2)
@@ -243,7 +251,9 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notify[T1, T2, T3](method: String)(p1: T1, p2: T2, p3: T3)(using context: Context): Effect[Unit] =
+  inline def notifyByPosition[T1, T2, T3](method: String)(p1: T1, p2: T2, p3: T3)(using
+    context: Context
+  ): Effect[Unit] =
     val encodedArguments = Left(List(
       codec.encode(p1),
       codec.encode(p2),
@@ -262,7 +272,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notify[T1, T2, T3, T4](method: String)(p1: T1, p2: T2, p3: T3, p4: T4)(using
+  inline def notifyByPosition[T1, T2, T3, T4](method: String)(p1: T1, p2: T2, p3: T3, p4: T4)(using
     context: Context
   ): Effect[Unit] =
     val encodedArguments = Left(List(
@@ -284,7 +294,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notify[T1, T2, T3, T4, T5](method: String)(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5)(using
+  inline def notifyByPosition[T1, T2, T3, T4, T5](method: String)(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5)(using
     context: Context
   ): Effect[Unit] =
     val encodedArguments = Left(List(
@@ -307,8 +317,8 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notify[T1, T2, T3, T4, T5, T6](method: String)(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6)(using
-    context: Context
+  inline def notifyByPosition[T1, T2, T3, T4, T5, T6](method: String)(p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6)(
+    using context: Context
   ): Effect[Unit] =
     val encodedArguments = Left(List(
       codec.encode(p1),
@@ -331,7 +341,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notify[T1, T2, T3, T4, T5, T6, T7](method: String)(
+  inline def notifyByPosition[T1, T2, T3, T4, T5, T6, T7](method: String)(
     p1: T1,
     p2: T2,
     p3: T3,
