@@ -110,7 +110,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param context JSON-RPC request context
    * @return nothing
    */
-  inline def notifyByName[A <: Mirror.ProductOf, R](method: String)(arguments: A)(using context: Context): Effect[Unit] =
+  inline def notifyByName[A <: Product: Mirror.ProductOf, R](method: String)(arguments: A)(using context: Context): Effect[Unit] =
     val argumentsNode = codec.encode(arguments)
     val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
     performNotify(method, encodedArguments, Some(context))
