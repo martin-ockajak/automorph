@@ -8,11 +8,11 @@ trait BackendSpec[Effect[_]] extends BaseSpec:
   private val text = "test"
   private val number = 0
 
+  case class TestException(message: String) extends RuntimeException(message) derives CanEqual
+
   def effect: Backend[Effect]
 
-  def run[T](outcome: Effect[T]): Either[Throwable, T]
-
-  case class TestException(message: String) extends RuntimeException(message) derives CanEqual
+  def run[T](effect: Effect[T]): Either[Throwable, T]
 
   "" - {
     "Pure" in {

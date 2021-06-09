@@ -9,4 +9,4 @@ import scala.util.{Failure, Success, Try}
 class FutureBackendSpec extends BackendSpec[Future]:
   def effect: Backend[Future] = FutureBackend()
 
-  def run[T](outcome: Future[T]): Either[Throwable, T] = Try(await(outcome)).toEither
+  def run[T](effect: Future[T]): Either[Throwable, T] = Try(await(effect)).toEither

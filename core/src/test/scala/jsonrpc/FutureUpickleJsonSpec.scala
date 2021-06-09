@@ -13,16 +13,22 @@ class EffectUpickleJsonSpec extends UpickleJsonSpec[Effect]:
 
   override def backend: Backend[Effect] = FutureBackend()
 
+  override def run[T](effect: Effect[T]): T = await(effect)
+
   lazy val handler = Handler[Node, CodecType, Effect, Short](codec, backend)
-    .bind(simpleApi).bind[ComplexApi[Effect]](complexApi)
+    .bind(simpleApiInstance).bind[ComplexApi[Effect]](complexApiInstance)
 
   lazy val theClient = Client(codec, backend, HandlerTransport(handler, backend, 0))
 
   override def client: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]] = theClient
 
-  override def simpleApiProxy: SimpleApi[Effect] = theClient.bind[SimpleApi[Effect]]
+  override def simpleApiLocal: SimpleApi[Effect] = theClient.bind[SimpleApi[Effect]]
 
-  override def complexApiProxy: ComplexApi[Effect] = theClient.bind[ComplexApi[Effect]]
+  override def complexApiLocal: ComplexApi[Effect] = theClient.bind[ComplexApi[Effect]]
+
+  override def simpleApiRemote: SimpleApi[Effect] = theClient.bind[SimpleApi[Effect]]
+
+  override def complexApiRemote: ComplexApi[Effect] = theClient.bind[ComplexApi[Effect]]
 
 object FutureUpickleJsonSpec:
   type Effect[T] = Future[T]

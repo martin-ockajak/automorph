@@ -8,4 +8,4 @@ import scala.util.Try
 class ScalazBackendSpec extends BackendSpec[IO]:
   def effect: Backend[IO] = ScalazBackend()
 
-  def run[T](outcome: IO[T]): Either[Throwable, T] = Try(outcome.unsafePerformIO()).toEither
+  def run[T](effect: IO[T]): Either[Throwable, T] = Try(effect.unsafePerformIO()).toEither

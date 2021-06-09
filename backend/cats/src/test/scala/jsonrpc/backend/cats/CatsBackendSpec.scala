@@ -9,4 +9,4 @@ import cats.effect.unsafe.implicits.global
 class CatsBackendSpec extends BackendSpec[IO] :
   def effect: Backend[IO] = CatsBackend()
 
-  def run[T](outcome: IO[T]): Either[Throwable, T] = Try(outcome.unsafeRunSync()).toEither
+  def run[T](effect: IO[T]): Either[Throwable, T] = Try(effect.unsafeRunSync()).toEither

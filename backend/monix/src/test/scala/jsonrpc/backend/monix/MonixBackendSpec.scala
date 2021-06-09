@@ -10,4 +10,4 @@ import scala.util.Try
 class MonixBackendSpec extends BackendSpec[Task] :
   def effect: Backend[Task] = MonixBackend()
 
-  def run[T](outcome: Task[T]): Either[Throwable, T] = Try(outcome.runSyncUnsafe(Duration.Inf)).toEither
+  def run[T](effect: Task[T]): Either[Throwable, T] = Try(effect.runSyncUnsafe(Duration.Inf)).toEither

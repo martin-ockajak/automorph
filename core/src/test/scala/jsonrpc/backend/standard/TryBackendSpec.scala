@@ -7,4 +7,4 @@ import scala.util.{Failure, Success, Try}
 class TryBackendSpec extends BackendSpec[Try]:
   def effect: Backend[Try] = TryBackend()
 
-  def run[T](outcome: Try[T]): Either[Throwable, T] = outcome.toEither
+  def run[T](effect: Try[T]): Either[Throwable, T] = effect.toEither
