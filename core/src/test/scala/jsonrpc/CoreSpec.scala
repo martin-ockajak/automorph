@@ -35,18 +35,18 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
   "" - {
     "SimpleApi" - {
       val apis = Seq("Instance" -> simpleApiInstance, "Local" -> simpleApiLocal, "Remote" -> simpleApiRemote)
-      "test" - {
-        lazy val results = apis.toMap.view.mapValues(api => run(api.test("test")))
-        apis.indices.combinations(2).foreach {
-          case Seq(index1, index2) =>
-            val (binding1, api1) = apis(index1)
-            val (binding2, api2) = apis(index2)
-            s"$binding1 / $binding2" in {
-//              results(binding1).should(equal(results(binding2)))
+      apis.indices.combinations(2).foreach {
+        case Seq(index1, index2) =>
+          val (binding1, api1) = apis(index1)
+          val (binding2, api2) = apis(index2)
+          s"$binding1 / $binding2" - {
+            val results = apis.toMap.view.mapValues(api => () => run(api.test("test")))
+            "test" in {
+//            results(binding1)().should(equal(results(binding2)()))
             }
-            ()
-          case _ => ()
-        }
+          }
+          ()
+        case _ => ()
       }
 //      client.callByName[Int]("test")("a", "b")(1, 2, 3)(using 0)
 //      client.bind("test").parameters("a", "b").call[Int](1, 2, 3)(using 0)
