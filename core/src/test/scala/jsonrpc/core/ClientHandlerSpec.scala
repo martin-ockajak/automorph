@@ -8,6 +8,7 @@ import scala.concurrent.Future
 import scala.util.Try
 
 trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
+
   case class TestedApis[Api](
     namedLocal: Api,
     positionalLocal: Api,
@@ -38,71 +39,93 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
     "Call" - {
       "Trait" - {
         "Simple API" - {
-          apiCombinations(simpleApiInstance, simpleApis).foreach { case (bindings, apis) =>
-            bindings - {
-              "test" ignore {
-                val Seq(expected, result) = apis.map(api => run(api.test("test")))
-                expected.should(equal(result))
+          apiCombinations(simpleApiInstance, simpleApis).foreach { case (outerTest, tests) =>
+            outerTest - {
+              tests.foreach { case (innerTest, apis) =>
+                innerTest - {
+                  "test" ignore {
+                    val Seq(expected, result) = apis.map(api => run(api.test("test")))
+                    expected.should(equal(result))
+                  }
+                }
               }
             }
           }
         }
         "Complex API" - {
-          apiCombinations(complexApiInstance, complexApis).foreach { case (binding, apis) =>
-            binding - {
-              "method0" ignore {
-                val Seq(expected, result) = apis.map(api => run(api.method0()))
-                expected.should(equal(result))
+          apiCombinations(complexApiInstance, complexApis).foreach { case (outerTest, tests) =>
+            outerTest - {
+              tests.foreach { case (innerTest, apis) =>
+                innerTest - {
+                  "method0" ignore {
+                    val Seq(expected, result) = apis.map(api => run(api.method0()))
+                    expected.should(equal(result))
+                  }
+                }
               }
             }
           }
         }
       }
       "Tuple" - {
-        "Named / Local" - {
-          "Simple API" in {
-//            client.callByName[Int]("test")("a", "b")(1, 2, 3)(using 0)
-//            client.bind("test").parameters("a", "b").call[Int](1, 2, 3)(using 0)
-//            val x = client.callByName[Int]("test")("a", "b")
-//            val y = x(1, 2, 3)(using 0)
-//            y(0)
+        "Simple API" - {
+          "Named" - {
+            "Local" in {
+//              client.callByName[Int]("test")("a", "b")(1, 2, 3)(using 0)
+//              client.bind("test").parameters("a", "b").call[Int](1, 2, 3)(using 0)
+//              val x = client.callByName[Int]("test")("a", "b")
+//              val y = x(1, 2, 3)(using 0)
+//              y(0)
             }
+          }
         }
-        "Positional" - {
-          "Simple API" in {
-//            client.callByPosition[Int]("test")(1, 2, 3)(using 0)
+        "Simple API" - {
+          "Positional" - {
+            "Local" in {
+//              client.callByPosition[Int]("test")(1, 2, 3)(using 0)
+            }
           }
         }
       }
       "Case class" - {
-        "Named / Local" - {
-          "Simple API" in {
-//            client.bind("test").call[Arguments, Int](Arguments("test", 1))(using 0)
+        "Simple API" - {
+          "Named" - {
+            "Local" in {
+//              client.bind("test").call[Arguments, Int](Arguments("test", 1))(using 0)
+            }
           }
         }
       }
     }
     "Notify" - {
       "Tuple" - {
-        "Named / Local" ignore {
-
-        }
-        "Positional / Local" ignore {
-
+        "Simple API" - {
+          "Named" - {
+            "Local" ignore {}
+          }
+          "Positional" - {
+            "Local" ignore {}
+          }
         }
       }
       "Case class" - {
-        "Named" ignore {
-
+        "Simple API" - {
+          "Named" - {
+            "Local" ignore {}
+          }
         }
       }
     }
   }
 
-  private def apiCombinations[Api](originalApi: Api, testedApis: TestedApis[Api]): Seq[(String, Seq[Api])] =
-    testedApis.productElementNames.zipWithIndex.map { case (binding, index) =>
-      val (outer, inner) = binding match
-       case testApiNamePattern(first, second) => first -> second
-       case name => name -> "[None]"
-      s"${outer.capitalize} / $inner" ->Seq(originalApi, testedApis.productElement(index).asInstanceOf[Api])
+  private def apiCombinations[Api](originalApi: Api, testedApis: TestedApis[Api]): Seq[(String, Seq[(String, Seq[Api])])] =
+    val tests = testedApis.productElementNames.zipWithIndex.map { case (name, index) =>
+      val (outer, inner) =
+        name match
+          case testApiNamePattern(first, second) => first -> second
+          case first                              => first -> "[None]"
+      (outer.capitalize, inner, Seq(originalApi, testedApis.productElement(index).asInstanceOf[Api]))
     }.toSeq
+    tests.groupBy(_._1).view.mapValues(_.map { case (_, inner, apis) =>
+      inner -> apis
+    }).toSeq
