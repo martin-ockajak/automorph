@@ -26,6 +26,8 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
 
   def localClient: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]]
 
+  def remoteClient: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]]
+
   def simpleApis: TestedApis[SimpleApi[Effect]]
 
   def complexApis: TestedApis[ComplexApi[Effect]]

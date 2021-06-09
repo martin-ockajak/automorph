@@ -20,20 +20,24 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec[Effect]:
 
   lazy val theLocalClient = Client(codec, backend, HandlerTransport(handler, backend, 0))
 
+  lazy val theRemoteClient = theLocalClient
+
   override def localClient: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]] = theLocalClient
+
+  override def remoteClient: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]] = theRemoteClient
 
   override def simpleApis: TestedApis[SimpleApi[Effect]] = TestedApis(
     theLocalClient.bind,
     theLocalClient.positional.bind,
-    theLocalClient.bind,
-    theLocalClient.positional.bind,
+    theRemoteClient.bind,
+    theRemoteClient.positional.bind,
   )
 
   override def complexApis: TestedApis[ComplexApi[Effect]] = TestedApis(
     theLocalClient.bind,
     theLocalClient.positional.bind,
-    theLocalClient.bind,
-    theLocalClient.positional.bind,
+    theRemoteClient.bind,
+    theRemoteClient.positional.bind,
   )
 
 object FutureUpickleJsonSpec:
