@@ -48,8 +48,10 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
           case _ => ()
         }
       }
-//      val x = client.bind("test").parameters("a", "b").call[Int](1, 2, 3)(using 0)
-//      val x = client.bind("test").call[Arguments, Int](Arguments("test", 1))(using 0)
+//      client.callByName[Int]("test")("a", "b")(1, 2, 3)(using 0)
+//      client.bind("test").parameters("a", "b").call[Int](1, 2, 3)(using 0)
+//      client.bind("test").call[Arguments, Int](Arguments("test", 1))(using 0)
+//      val x = client.callByName[Int]("test")("a", "b")
 //      val y = x(1, 2, 3)(using 0)
 //      y(0)
     }

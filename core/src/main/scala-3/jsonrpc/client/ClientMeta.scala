@@ -213,6 +213,6 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context, BindingType
    * @return argument nodes
    */
   private[jsonrpc] inline def encodeArguments(arguments: Tuple): List[Node] =
-    arguments match
+    inline arguments match
       case EmptyTuple   => List()
       case head *: tail => List(codec.encode(head)) ++ encodeArguments(tail)
