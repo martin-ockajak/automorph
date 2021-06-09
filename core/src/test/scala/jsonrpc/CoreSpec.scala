@@ -48,6 +48,24 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
           ()
         case _ => ()
       }
+    }
+    "ComplexApi" - {
+      val apis = Seq("Instance" -> complexApiInstance, "Local" -> complexApiLocal, "Remote" -> complexApiRemote)
+      apis.indices.combinations(2).foreach {
+        case Seq(index1, index2) =>
+          val (binding1, api1) = apis(index1)
+          val (binding2, api2) = apis(index2)
+          s"$binding1 / $binding2" - {
+            val results = apis.toMap.view.mapValues(api => () => run(api.method0()))
+            "test" in {
+//            results(binding1)().should(equal(results(binding2)()))
+            }
+          }
+          ()
+        case _ => ()
+      }
+    }
+    "Dynamic" in {
 //      client.callByName[Int]("test")("a", "b")(1, 2, 3)(using 0)
 //      client.bind("test").parameters("a", "b").call[Int](1, 2, 3)(using 0)
 //      client.bind("test").call[Arguments, Int](Arguments("test", 1))(using 0)
