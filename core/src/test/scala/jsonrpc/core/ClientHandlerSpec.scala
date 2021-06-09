@@ -46,8 +46,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
               tests.foreach { case (innerTest, apis) =>
                 innerTest - {
                   "test" in {
-                    val Seq(expected, result) = apis.map(api => run(api.test("test")))
-                    expected.should(equal(result))
+                    call(apis, _.test("test"))
                   }
                 }
               }
@@ -60,12 +59,10 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
               tests.foreach { case (innerTest, apis) =>
                 innerTest - {
                   "method0" in {
-                    val Seq(expected, result) = apis.map(api => run(api.method0()))
-                    expected.should(equal(result))
+                    call(apis, _.method0())
                   }
                   "method1" in {
-                    val Seq(expected, result) = apis.map(api => run(api.method1()))
-                    expected.should(equal(result))
+                    call(apis, _.method1())
                   }
                 }
               }
@@ -135,3 +132,8 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
     tests.groupBy(_._1).view.mapValues(_.map { case (_, inner, apis) =>
       inner -> apis
     }).toSeq
+
+  private def call[Api, R](apis: Seq[Api], function: Api => Effect[R]): Unit =
+    val Seq(expected, result) = apis.map(api => run(function(api)))
+    expected.should(equal(result))
+
