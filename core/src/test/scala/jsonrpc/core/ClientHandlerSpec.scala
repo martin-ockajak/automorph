@@ -68,7 +68,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                     call(apis, _.method2("test"))
                   }
                   "method3" in {
-                    call(apis, _.method3(0))
+                    check((a0: Int) => consistent(apis, _.method3(0)))
                   }
                   "method4" in {
                     call(apis, _.method4(None))
@@ -146,7 +146,10 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
       inner -> apis
     }).toSeq
 
+  private def consistent[Api, R](apis: Seq[Api], function: Api => Effect[R]): Boolean =
+    val Seq(expected, result) = apis.map(api => run(function(api)))
+    expected.equals(result)
+
   private def call[Api, R](apis: Seq[Api], function: Api => Effect[R]): Unit =
     val Seq(expected, result) = apis.map(api => run(function(api)))
     expected.should(equal(result))
-
