@@ -203,7 +203,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context, BindingType
               Left(argumentNodes.toList)
 
           // Perform the API call
-          performCall(method.getName, encodedArguments, context, resultNode => clientMethod.decodeResult)
+          performCall(method.getName, encodedArguments, context, resultNode => clientMethod.decodeResult(resultNode))
         }.getOrElse(throw IllegalStateException(s"Method not found: ${method.getName}"))
     ).asInstanceOf[T]
 

@@ -22,7 +22,7 @@
     </encoder>
   </appender>
 
-  <root level="${LOG_LEVEL:-INFO}">
+  <root level="${LOG_LEVEL:-WARN}">
     <appender-ref ref="CompactConsole" />
   </root>
 
