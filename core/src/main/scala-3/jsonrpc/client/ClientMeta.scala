@@ -2,7 +2,6 @@ package jsonrpc.client
 
 import java.lang.reflect.Proxy
 import jsonrpc.Client
-import jsonrpc.Client.NotTuple
 import jsonrpc.client.ClientBindings
 import jsonrpc.spi.Codec
 import scala.compiletime.summonInline
@@ -58,7 +57,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context, BindingType
    * @return method binding
    */
   inline def bind(method: String): BindingType =
-    (inline if argumentsByName then
+    (if argumentsByName then
        UnnamedBinding[Node, CodecType, Effect, Context](this, method)
      else
        PositionalBinding[Node, CodecType, Effect, Context](this, method)
@@ -108,7 +107,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context, BindingType
    * @tparam R result type
    * @return result value
    */
-  inline def callByName[A <: Product: NotTuple, R](method: String)(arguments: A)(using context: Context): Effect[R] =
+  inline def callByName[A <: Product, R](method: String)(arguments: A)(using context: Context): Effect[R] =
     val argumentsNode = codec.encode(arguments)
     val encodedArguments = Right(codec.decode[Map[String, Node]](argumentsNode))
     performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))

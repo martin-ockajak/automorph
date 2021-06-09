@@ -1,6 +1,5 @@
 package jsonrpc.client
 
-import jsonrpc.Client.NotTuple
 import jsonrpc.client.ClientMeta
 import jsonrpc.spi.Codec
 
@@ -12,12 +11,10 @@ case class UnnamedBinding[Node, CodecType <: Codec[Node], Effect[_], Context](
   methodName: String
 ) extends Binding[Node, CodecType, Effect, Context]:
 
-  inline def call[A <: Product: NotTuple, R](arguments: A)(using context: Context): Effect[R] =
-    given NotTuple[A] = summon[NotTuple[A]]
+  inline def call[A <: Product, R](arguments: A)(using context: Context): Effect[R] =
     client.callByName[A, R](methodName)(arguments)
 
-  inline def notify[A <: Product: NotTuple](arguments: A)(using context: Context): Effect[Unit] =
-    given NotTuple[A] = summon[NotTuple[A]]
+  inline def notify[A <: Product](arguments: A)(using context: Context): Effect[Unit] =
     client.notifyByName[A](methodName)(arguments)
 
   inline def parameters(parameterNames: String*): NamedBinding[Node, CodecType, Effect, Context] =

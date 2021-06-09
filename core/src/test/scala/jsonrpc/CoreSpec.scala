@@ -1,6 +1,7 @@
 package jsonrpc
 
 import base.BaseSpec
+import jsonrpc.Client.NotTuple
 import jsonrpc.client.UnnamedBinding
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.{ComplexApi, ComplexApiImpl, SimpleApi, SimpleApiImpl}
