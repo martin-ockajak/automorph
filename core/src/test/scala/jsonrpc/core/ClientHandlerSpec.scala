@@ -63,6 +63,10 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                     val Seq(expected, result) = apis.map(api => run(api.method0()))
                     expected.should(equal(result))
                   }
+                  "method1" ignore {
+                    val Seq(expected, result) = apis.map(api => run(api.method1()))
+                    expected.should(equal(result))
+                  }
                 }
               }
             }
