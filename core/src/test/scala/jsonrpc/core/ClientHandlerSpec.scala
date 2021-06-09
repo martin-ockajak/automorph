@@ -64,6 +64,19 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                   "method1" in {
                     call(apis, _.method1())
                   }
+                  "method2" in {
+                    call(apis, _.method2("test"))
+                  }
+                  "method3" in {
+                    call(apis, _.method3(0))
+                  }
+                  "method4" in {
+                    call(apis, _.method4(None))
+                    call(apis, _.method4(Some(1)))
+                  }
+                  "method5" in {
+                    call(apis, _.method5("test", 0))
+                  }
                 }
               }
             }
@@ -76,16 +89,16 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
         "Simple API" - {
           "Named" - {
             "Local" in {
-//              client.callByName[Int]("test")("a", "b")(1, 2, 3)(using 0)
-//              client.bind("test").parameters("a", "b").call[Int](1, 2, 3)(using 0)
-//              val x = client.callByName[Int]("test")("a", "b")
+//              localClient.callByName[Int]("test")("a", "b")(1, 2, 3)(using 0)
+//              localClient.bind("test").parameters("a", "b").call[Int](1, 2, 3)(using 0)
+//              val x = localClient.callByName[Int]("test")("a", "b")
 //              val y = x(1, 2, 3)(using 0)
 //              y(0)
             }
           }
           "Positional" - {
             "Local" in {
-//              client.callByPosition[Int]("test")(1, 2, 3)(using 0)
+//              localClient.callByPosition[Int]("test")(1, 2, 3)(using 0)
             }
           }
         }
@@ -106,7 +119,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
         "Simple API" - {
           "Named" - {
             "Local" in {
-//              client.bind("test").call[Arguments, Int](Arguments("test", 1))(using 0)
+//              localClient.bind("test").call[Arguments, Int](Arguments("test", 1))(using 0)
             }
           }
         }
