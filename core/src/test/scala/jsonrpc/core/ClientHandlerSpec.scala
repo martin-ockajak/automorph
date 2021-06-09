@@ -36,8 +36,8 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
   )
 
   "" - {
-    "Call" - {
-      "Trait" - {
+    "Trait" - {
+      "Call" - {
         "Simple API" - {
           apiCombinations(simpleApiInstance, simpleApis).foreach { case (outerTest, tests) =>
             outerTest - {
@@ -67,7 +67,9 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
           }
         }
       }
-      "Tuple" - {
+    }
+    "Tuple" - {
+      "Call" - {
         "Simple API" - {
           "Named" - {
             "Local" in {
@@ -78,8 +80,6 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
 //              y(0)
             }
           }
-        }
-        "Simple API" - {
           "Positional" - {
             "Local" in {
 //              client.callByPosition[Int]("test")(1, 2, 3)(using 0)
@@ -87,7 +87,19 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
           }
         }
       }
-      "Case class" - {
+      "Notify" - {
+        "Simple API" - {
+          "Named" - {
+            "Local" ignore {}
+          }
+          "Positional" - {
+            "Local" ignore {}
+          }
+        }
+      }
+    }
+    "Case class" - {
+      "Call" - {
         "Simple API" - {
           "Named" - {
             "Local" in {
@@ -96,19 +108,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
           }
         }
       }
-    }
-    "Notify" - {
-      "Tuple" - {
-        "Simple API" - {
-          "Named" - {
-            "Local" ignore {}
-          }
-          "Positional" - {
-            "Local" ignore {}
-          }
-        }
-      }
-      "Case class" - {
+      "Notify" - {
         "Simple API" - {
           "Named" - {
             "Local" ignore {}
