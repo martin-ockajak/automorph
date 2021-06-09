@@ -101,8 +101,8 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
 
   private def apiCombinations[Api](originalApi: Api, testedApis: TestedApis[Api]): Seq[(String, Seq[Api])] =
     testedApis.productElementNames.zipWithIndex.map { case (binding, index) =>
-      val (outer, inner) = binding.capitalize match
+      val (outer, inner) = binding match
        case testApiNamePattern(first, second) => first -> second
        case name => name -> "[None]"
-      s"$outer / $inner" ->Seq(originalApi, testedApis.productElement(index).asInstanceOf[Api])
+      s"${outer.capitalize} / $inner" ->Seq(originalApi, testedApis.productElement(index).asInstanceOf[Api])
     }.toSeq
