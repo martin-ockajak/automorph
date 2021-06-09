@@ -9,7 +9,7 @@ import jsonrpc.transport.local.HandlerTransport
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class EffectUpickleJsonSpec extends UpickleJsonSpec[Effect]:
+class FutureUpickleJsonSpec extends UpickleJsonSpec[Effect]:
 
   override def backend: Backend[Effect] = FutureBackend()
 

@@ -2,10 +2,11 @@ package jsonrpc
 
 import jsonrpc.UpickleJsonSpec.{CodecType, Node, ReadWriters}
 import jsonrpc.codec.json.UpickleJsonCodec
+import jsonrpc.core.ClientHandlerSpec
 import ujson.Value
 import upickle.AttributeTagged
 
-trait UpickleJsonSpec[Effect[_]] extends CoreSpec[Value, CodecType, Effect]:
+trait UpickleJsonSpec[Effect[_]] extends ClientHandlerSpec[Value, CodecType, Effect]:
   def codec: CodecType = UpickleJsonCodec(ReadWriters)
 
 object UpickleJsonSpec:
