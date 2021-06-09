@@ -33,7 +33,7 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
 
   "" - {
     "SimpleApi" - {
-      apiCombinations("Instance" -> simpleApiInstance, "Local" -> simpleApiLocal, "Remote" -> simpleApiRemote).foreach { case (bindings, apis) =>
+      apiCombinations(simpleApiInstance, "Local" -> simpleApiLocal, "Remote" -> simpleApiRemote).foreach { case (bindings, apis) =>
         bindings - {
           "test" in {
 //             val Seq(expected, result) = apis.map(api => run(api.test("test")))
@@ -43,7 +43,7 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
       }
     }
     "ComplexApi" - {
-      apiCombinations("Instance" -> complexApiInstance, "Local" -> complexApiLocal, "Remote" -> complexApiRemote).foreach { case (binding, apis) =>
+      apiCombinations(complexApiInstance, "Local" -> complexApiLocal, "Remote" -> complexApiRemote).foreach { case (binding, apis) =>
         binding - {
           "method0" in {
 //            val Seq(expected, result) = apis.map(api => run(api.method0()))
