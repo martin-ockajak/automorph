@@ -31,37 +31,35 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
     y: Int
   )
 
+  private def apiCombinations[Api](apis: (String, Api)*): Seq[(String, Seq[Api])] =
+
+    apis.indices.combinations(2).flatMap {
+      case Seq(index1, index2) =>
+        val (binding1, api1) = apis(index1)
+        val (binding2, api2) = apis(index2)
+        Some((s"$binding1 / $binding2", Seq(api1, api2)))
+      case _ => None
+    }.toSeq
+
   "" - {
     "SimpleApi" - {
-      val apis = Seq("Instance" -> simpleApiInstance, "Local" -> simpleApiLocal, "Remote" -> simpleApiRemote)
-      apis.indices.combinations(2).foreach {
-        case Seq(index1, index2) =>
-          val (binding1, api1) = apis(index1)
-          val (binding2, api2) = apis(index2)
-          s"$binding1 / $binding2" - {
-            val results = apis.toMap.view.mapValues(api => () => run(api.test("test")))
-            "test" in {
-//            results(binding1)().should(equal(results(binding2)()))
-            }
+      apiCombinations("Instance" -> simpleApiInstance, "Local" -> simpleApiLocal, "Remote" -> simpleApiRemote).foreach { case (bindings, apis) =>
+        bindings - {
+          "test" in {
+//             val Seq(result1, result2) = apis.map(api => run(api.test("test")))
+//             result1.should(equal(result2))
           }
-          ()
-        case _ => ()
+        }
       }
     }
     "ComplexApi" - {
-      val apis = Seq("Instance" -> complexApiInstance, "Local" -> complexApiLocal, "Remote" -> complexApiRemote)
-      apis.indices.combinations(2).foreach {
-        case Seq(index1, index2) =>
-          val (binding1, api1) = apis(index1)
-          val (binding2, api2) = apis(index2)
-          s"$binding1 / $binding2" - {
-            val results = apis.toMap.view.mapValues(api => () => run(api.method0()))
-            "test" in {
-//            results(binding1)().should(equal(results(binding2)()))
-            }
+      apiCombinations("Instance" -> complexApiInstance, "Local" -> complexApiLocal, "Remote" -> complexApiRemote).foreach { case (bindings, apis) =>
+        bindings - {
+          "method0" in {
+//            val Seq(result1, result2) = apis.map(api => run(api.method0()))
+//             results1.should(equal(result2))
           }
-          ()
-        case _ => ()
+        }
       }
     }
     "Dynamic" in {
