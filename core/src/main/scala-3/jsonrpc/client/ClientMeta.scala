@@ -187,14 +187,15 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context, BindingType
         // Lookup bindings for the specified method
         methodBindings.get(method.getName).map { clientMethod =>
           // Adjust expected method parameters if it uses context as its last parameter
-          val (validArguments, context) =
-            if clientMethod.usesContext then
-              arguments.dropRight(1).toSeq -> Some(arguments.last).asInstanceOf[Option[Context]]
+          val callArguments = Option(arguments).getOrElse(Array.empty[AnyRef])
+          val (argumentValues, context) =
+            if clientMethod.usesContext && arguments.nonEmpty then
+              callArguments.dropRight(1).toSeq -> Some(callArguments.last.asInstanceOf[Context])
             else
-              arguments.toSeq -> None
+              callArguments.toSeq -> None
 
           // Encode method arguments
-          val argumentNodes = clientMethod.encodeArguments(validArguments)
+          val argumentNodes = clientMethod.encodeArguments(argumentValues)
           val encodedArguments =
             if argumentsByName then
               Right(clientMethod.paramNames.zip(argumentNodes).toMap)

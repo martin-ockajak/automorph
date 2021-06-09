@@ -59,7 +59,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
             outerTest - {
               tests.foreach { case (innerTest, apis) =>
                 innerTest - {
-                  "method0" ignore {
+                  "method0" in {
                     val Seq(expected, result) = apis.map(api => run(api.method0()))
                     expected.should(equal(result))
                   }
