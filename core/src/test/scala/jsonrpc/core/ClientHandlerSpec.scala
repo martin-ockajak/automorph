@@ -17,6 +17,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
 
   val simpleApiInstance = SimpleApiImpl(backend)
   val complexApiInstance = ComplexApiImpl(backend)
+  private val testApiNamePattern = """^(\w+)([A-Z]\w+)$""".r
 
   def backend: Backend[Effect]
 
@@ -100,5 +101,8 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
 
   private def apiCombinations[Api](originalApi: Api, testedApis: TestedApis[Api]): Seq[(String, Seq[Api])] =
     testedApis.productElementNames.zipWithIndex.map { case (binding, index) =>
-      binding.capitalize -> Seq(originalApi, testedApis.productElement(index).asInstanceOf[Api])
+      val (outer, inner) = binding.capitalize match
+       case testApiNamePattern(first, second) => first -> second
+       case name => name -> "[None]"
+      s"$outer / $inner" ->Seq(originalApi, testedApis.productElement(index).asInstanceOf[Api])
     }.toSeq
