@@ -31,9 +31,6 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
     y: Int
   )
 
-  private def apiCombinations[Api](originalApi: Api, boundApis: (String, Api)*): Seq[(String, Seq[Api])] =
-    boundApis.map((binding, api) => binding -> Seq(originalApi, api))
-
   "" - {
     "SimpleApi" - {
       apiCombinations("Instance" -> simpleApiInstance, "Local" -> simpleApiLocal, "Remote" -> simpleApiRemote).foreach { case (bindings, apis) =>
@@ -64,3 +61,6 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
 //      y(0)
     }
   }
+
+  private def apiCombinations[Api](originalApi: Api, boundApis: (String, Api)*): Seq[(String, Seq[Api])] =
+    boundApis.map((binding, api) => binding -> Seq(originalApi, api))
