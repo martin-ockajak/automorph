@@ -9,10 +9,10 @@ import scala.util.Try
 
 trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
   case class TestedApis[Api](
-    localNamed: Api,
-    localPositional: Api,
-    remoteNamed: Api,
-    remotePositional: Api
+    namedLocal: Api,
+    positionalLocal: Api,
+    namedRemote: Api,
+    positionalRemote: Api
   )
 
   val simpleApiInstance = SimpleApiImpl(backend)
@@ -58,27 +58,23 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
         }
       }
       "Tuple" - {
-        "Named" - {
-          "Tuple" - {
-            "Simple API" in {
-//              client.callByName[Int]("test")("a", "b")(1, 2, 3)(using 0)
-//              client.bind("test").parameters("a", "b").call[Int](1, 2, 3)(using 0)
-//              val x = client.callByName[Int]("test")("a", "b")
-//              val y = x(1, 2, 3)(using 0)
-//              y(0)
+        "Named / Local" - {
+          "Simple API" in {
+//            client.callByName[Int]("test")("a", "b")(1, 2, 3)(using 0)
+//            client.bind("test").parameters("a", "b").call[Int](1, 2, 3)(using 0)
+//            val x = client.callByName[Int]("test")("a", "b")
+//            val y = x(1, 2, 3)(using 0)
+//            y(0)
             }
-          }
         }
         "Positional" - {
-          "Tuple" - {
-            "Simple API" in {
-//              client.callByPosition[Int]("test")(1, 2, 3)(using 0)
-            }
+          "Simple API" in {
+//            client.callByPosition[Int]("test")(1, 2, 3)(using 0)
           }
         }
       }
       "Case class" - {
-        "Named" - {
+        "Named / Local" - {
           "Simple API" in {
 //            client.bind("test").call[Arguments, Int](Arguments("test", 1))(using 0)
           }
@@ -87,11 +83,11 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
     }
     "Notify" - {
       "Tuple" - {
-        "Named" ignore {
+        "Named / Local" ignore {
 
         }
-        "Positional" ignore {
-          
+        "Positional / Local" ignore {
+
         }
       }
       "Case class" - {
