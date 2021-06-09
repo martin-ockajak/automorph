@@ -31,15 +31,8 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
     y: Int
   )
 
-  private def apiCombinations[Api](apis: (String, Api)*): Seq[(String, Seq[Api])] =
-
-    apis.indices.combinations(2).flatMap {
-      case Seq(index1, index2) =>
-        val (binding1, api1) = apis(index1)
-        val (binding2, api2) = apis(index2)
-        Some((s"$binding1 / $binding2", Seq(api1, api2)))
-      case _ => None
-    }.toSeq
+  private def apiCombinations[Api](originalApi: Api, boundApis: (String, Api)*): Seq[(String, Seq[Api])] =
+    boundApis.map((binding, api) => binding -> Seq(originalApi, api))
 
   "" - {
     "SimpleApi" - {
@@ -53,8 +46,8 @@ trait CoreSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
       }
     }
     "ComplexApi" - {
-      apiCombinations("Instance" -> complexApiInstance, "Local" -> complexApiLocal, "Remote" -> complexApiRemote).foreach { case (bindings, apis) =>
-        bindings - {
+      apiCombinations("Instance" -> complexApiInstance, "Local" -> complexApiLocal, "Remote" -> complexApiRemote).foreach { case (binding, apis) =>
+        binding - {
           "method0" in {
 //            val Seq(result1, result2) = apis.map(api => run(api.method0()))
 //             results1.should(equal(result2))
