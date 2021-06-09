@@ -61,7 +61,7 @@ lazy val upickle = (project in file("codec/upickle")).dependsOn(
 ).settings(
   name := "json-rpc-upickle",
   libraryDependencies ++= Seq(
-    "com.lihaoyi" %% "upickle" % "1.3.15"
+    "com.lihaoyi" %% "upickle" % "1.4.0"
   )
 )
 lazy val circe = (project in file("codec/circe")).dependsOn(
