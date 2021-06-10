@@ -8,12 +8,6 @@ enum Enum:
   case Zero
   case One
 
-case object Enum:
-
-  given Arbitrary[Enum] = Arbitrary {
-    Gen.choose(0, Enum.values.size - 1).map(Enum.fromOrdinal)
-  }
-
 final case class Record(
   string: String,
   boolean: Boolean,
@@ -30,7 +24,21 @@ final case class Record(
   none: Option[String]
 )
 
-case object Record:
+final case class Structure(
+  value: String
+)
+
+case object Generators:
+
+  given Arbitrary[Enum] = Arbitrary {
+    Gen.choose(0, Enum.values.size - 1).map(Enum.fromOrdinal)
+  }
+
+  given Arbitrary[Structure] = Arbitrary {
+    for
+      value <- arbitrary[String]
+    yield Structure(value)
+  }
 
   given Arbitrary[Record] = Arbitrary {
     for
@@ -62,16 +70,4 @@ case object Record:
       structure,
       none
     )
-  }
-
-final case class Structure(
-  value: String
-)
-
-case object Structure:
-
-  given Arbitrary[Structure] = Arbitrary {
-    for
-      value <- arbitrary[String]
-    yield Structure(value)
   }

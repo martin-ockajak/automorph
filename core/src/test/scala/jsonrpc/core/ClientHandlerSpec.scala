@@ -4,13 +4,14 @@ import base.{BaseSpec, Network}
 import jsonrpc.client.UnnamedBinding
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.{Client, ComplexApi, ComplexApiImpl, Record, SimpleApi, SimpleApiImpl, Structure}
+import jsonrpc.Generators.given
 import org.scalacheck.Prop
 import scala.concurrent.Future
 import scala.util.Try
 
 trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec with Network:
 
-  case class TestedApis[Api](
+  final case class TestedApis[Api](
     namedLocal: Api,
     positionalLocal: Api,
     namedRemote: Api,
@@ -156,7 +157,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
         "Simple API" - {
           "Named" - {
             "Local" in {
-              case class Arguments(x: String, y: Int)
+              final case class Arguments(x: String, y: Int)
 //              localClient.bind("test").call[Arguments, Int](Arguments("test", 1))(using 0)
             }
           }
