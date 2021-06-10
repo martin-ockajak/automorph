@@ -79,11 +79,11 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
 
 trait InvalidApi[Effect[_]]:
 
-  def nomethod(test: String): Effect[Unit]
+  def nomethod(p0: String): Effect[Unit]
 
-  def method1(test: String): Effect[Unit]
+  def method1(p0: String): Effect[Unit]
 
-  def method2(test: String): Effect[String]
+  def method2(p0: String): Effect[String]
 
   def method3(p0: Short, p1: Seq[Int]): Effect[Int]
 
@@ -91,11 +91,11 @@ trait InvalidApi[Effect[_]]:
 
 final case class InvalidApiImpl[Effect[_]](backend: Backend[Effect]) extends InvalidApi[Effect]:
 
-  def nomethod(test: String): Effect[Unit] = backend.pure(())
+  def nomethod(p0: String): Effect[Unit] = backend.pure(())
 
-  def method1(test: String): Effect[Unit] = backend.pure(())
+  def method1(p0: String): Effect[Unit] = backend.pure(())
 
-  def method2(test: String): Effect[String] = backend.pure("")
+  def method2(p0: String): Effect[String] = backend.pure("")
 
   def method3(p0: Short, p1: Seq[Int]): Effect[Int] = backend.pure(0)
 
