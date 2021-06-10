@@ -104,7 +104,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                       consistent(apis, _.method7(a0, a1)(using context))
                     })
                   }
-                  "method8" ignore {
+                  "method8" in {
                     check(Prop.forAll { (a0: Record, a1: String, a2: Option[Double], context: Short) =>
                       consistent(apis, _.method8(a0, a1, a2)(using context))
                     })
