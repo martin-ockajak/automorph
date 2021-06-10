@@ -164,6 +164,6 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
       inner -> apis
     }).toSeq
 
-  private def consistent[Api, R](apis: Seq[Api], function: Api => Effect[R]): Boolean =
+  private def consistent[Api, Result](apis: Seq[Api], function: Api => Effect[Result]): Boolean =
     val Seq(expected, result) = apis.map(api => run(function(api)))
     expected.equals(result)
