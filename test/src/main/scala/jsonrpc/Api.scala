@@ -76,3 +76,27 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
   protected def protectedMethod = ()
 
   private def privateMethod = ()
+
+trait InvalidApi[Effect[_]]:
+
+  def nomethod(test: String): Effect[Unit]
+
+  def method1(test: String): Effect[Unit]
+
+  def method2(test: String): Effect[String]
+
+  def method3(p0: Short, p1: Seq[Int]): Effect[Int]
+
+  def method4(p0: Long, p1: Byte, p2: String): Effect[String]
+
+final case class InvalidApiImpl[Effect[_]](backend: Backend[Effect]) extends InvalidApi[Effect]:
+
+  def nomethod(test: String): Effect[Unit] = backend.pure(())
+
+  def method1(test: String): Effect[Unit] = backend.pure(())
+
+  def method2(test: String): Effect[String] = backend.pure("")
+
+  def method3(p0: Short, p1: Seq[Int]): Effect[Int] = backend.pure(0)
+
+  def method4(p0: Long, p1: Byte, p2: String): Effect[String] = backend.pure("")

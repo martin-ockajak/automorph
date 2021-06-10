@@ -3,8 +3,9 @@ package jsonrpc.core
 import base.{BaseSpec, Network}
 import jsonrpc.client.UnnamedBinding
 import jsonrpc.spi.{Backend, Codec}
-import jsonrpc.{Client, ComplexApi, ComplexApiImpl, Record, SimpleApi, SimpleApiImpl, Structure}
+import jsonrpc.{Client, ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, Record, SimpleApi, SimpleApiImpl, Structure}
 import jsonrpc.Generators.given
+import jsonrpc.core.Protocol.MethodNotFound
 import org.scalacheck.Prop
 import scala.concurrent.Future
 import scala.util.Try
@@ -20,6 +21,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
 
   val simpleApiInstance = SimpleApiImpl(backend)
   val complexApiInstance = ComplexApiImpl(backend)
+  val invalidApiInstance = InvalidApiImpl(backend)
   private val testApiNamePattern = """^(\w+)([A-Z]\w+)$""".r
   private lazy val httpServer =
     availablePort
@@ -37,6 +39,8 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
 
   def complexApis: TestedApis[ComplexApi[Effect]]
 
+  def invalidApis: TestedApis[InvalidApi[Effect]]
+
   override def afterAll(): Unit =
 //    httpServer.close()
     super.afterAll()
@@ -44,6 +48,36 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
   "" - {
     "Trait" - {
       "Call" - {
+        "Invalid API" - {
+          apiCombinations(invalidApiInstance, invalidApis).foreach { case (outerTest, tests) =>
+            outerTest - {
+              tests.foreach { case (innerTest, apis) =>
+                innerTest - {
+                  val api = apis.last
+                  "Method not found" in {
+                    val error = intercept[MethodNotFound] {
+                      run(api.nomethod(""))
+                    }.getMessage.toLowerCase
+                    error.should(include("nomethod"))
+//                    error.getMessage.should(equal())
+                  }
+                  "Redundant arguments" in {
+                    val error = intercept[IllegalArgumentException] {
+                      run(api.method1(""))
+                    }.getMessage.toLowerCase
+                    error.should(include("redundant"))
+                  }
+                  "Missing arguments" ignore {
+//                    val error = intercept[IllegalArgumentException] {
+                      run(api.method2(""))
+//                    }.getMessage.toLowerCase
+//                    error.should(include("TEST"))
+                  }
+                }
+              }
+            }
+          }
+        }
         "Simple API" - {
           apiCombinations(simpleApiInstance, simpleApis).foreach { case (outerTest, tests) =>
             outerTest - {

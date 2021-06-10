@@ -40,5 +40,12 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec[Effect]:
     theRemoteClient.positional.bind,
   )
 
+  override def invalidApis: TestedApis[InvalidApi[Effect]] = TestedApis(
+    theLocalClient.bind,
+    theLocalClient.positional.bind,
+    theRemoteClient.bind,
+    theRemoteClient.positional.bind,
+  )
+
 object FutureUpickleJsonSpec:
   type Effect[T] = Future[T]
