@@ -48,36 +48,6 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
   "" - {
     "Trait" - {
       "Call" - {
-        "Invalid API" - {
-          apiCombinations(invalidApiInstance, invalidApis).foreach { case (outerTest, tests) =>
-            outerTest - {
-              tests.foreach { case (innerTest, apis) =>
-                innerTest - {
-                  val api = apis.last
-                  "Method not found" in {
-                    val error = intercept[MethodNotFound] {
-                      run(api.nomethod(""))
-                    }.getMessage.toLowerCase
-                    error.should(include("nomethod"))
-//                    error.getMessage.should(equal())
-                  }
-                  "Redundant arguments" in {
-                    val error = intercept[IllegalArgumentException] {
-                      run(api.method1(""))
-                    }.getMessage.toLowerCase
-                    error.should(include("redundant"))
-                  }
-                  "Missing arguments" ignore {
-//                    val error = intercept[IllegalArgumentException] {
-                      run(api.method2(""))
-//                    }.getMessage.toLowerCase
-//                    error.should(include("TEST"))
-                  }
-                }
-              }
-            }
-          }
-        }
         "Simple API" - {
           apiCombinations(simpleApiInstance, simpleApis).foreach { case (outerTest, tests) =>
             outerTest - {
@@ -149,6 +119,36 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                       val expectedErrorMessage = expected.swap.map(error => s"[${error.getClass.getSimpleName}] ${Option(error.getMessage).getOrElse("")}")
                       expectedErrorMessage.equals(result.swap.map(_.getMessage))
                     })
+                  }
+                }
+              }
+            }
+          }
+        }
+        "Invalid API" - {
+          apiCombinations(invalidApiInstance, invalidApis).foreach { case (outerTest, tests) =>
+            outerTest - {
+              tests.foreach { case (innerTest, apis) =>
+                innerTest - {
+                  val api = apis.last
+                  "Method not found" in {
+                    val error = intercept[MethodNotFound] {
+                      run(api.nomethod(""))
+                    }.getMessage.toLowerCase
+                    error.should(include("nomethod"))
+                    //                    error.getMessage.should(equal())
+                  }
+                  "Redundant arguments" in {
+                    val error = intercept[IllegalArgumentException] {
+                      run(api.method1(""))
+                    }.getMessage.toLowerCase
+                    error.should(include("redundant"))
+                  }
+                  "Missing arguments" ignore {
+                    //                    val error = intercept[IllegalArgumentException] {
+                    run(api.method2(""))
+                    //                    }.getMessage.toLowerCase
+                    //                    error.should(include("TEST"))
                   }
                 }
               }
