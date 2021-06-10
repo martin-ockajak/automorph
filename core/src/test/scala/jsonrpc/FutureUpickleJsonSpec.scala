@@ -13,7 +13,7 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec[Effect]:
 
   override def backend: Backend[Effect] = FutureBackend()
 
-  override def run[T](effect: Effect[T]): Either[Throwable, T] = await(backend.either(effect))
+  override def run[T](effect: Effect[T]): T = await(effect)
 
   lazy val handler = Handler[Node, CodecType, Effect, Short](codec, backend)
     .bind(simpleApiInstance).bind[ComplexApi[Effect]](complexApiInstance)

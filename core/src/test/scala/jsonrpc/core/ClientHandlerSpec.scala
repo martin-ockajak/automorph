@@ -26,7 +26,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
 
   def backend: Backend[Effect]
 
-  def run[T](effect: Effect[T]): Either[Throwable, T]
+  def run[T](effect: Effect[T]): T
 
   def localClient: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]]
 
@@ -93,7 +93,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                       consistent(apis, _.method5(a0, a1)(a2))
                     })
                   }
-                  "method6" ignore {
+                  "method6" in {
                     check(Prop.forAll { (a0: Record, a1: Double) =>
                       consistent(apis, _.method6(a0, a1))
                     })
@@ -110,7 +110,8 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                   }
                   "method9" ignore {
                     check(Prop.forAll { (a0: String) =>
-                      consistent(apis, _.method9(a0))
+                      val Seq(expected, result) = apis.map(api => Try(run(api.method9(a0))).toEither.swap.map(_.getMessage).swap)
+                      expected.equals(result)
                     })
                   }
                 }
@@ -184,5 +185,5 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
     }).toSeq
 
   private def consistent[Api, Result](apis: Seq[Api], function: Api => Effect[Result]): Boolean =
-    val Seq(expected, result) = apis.map(api => run(function(api)).swap.map(_.getMessage).swap)
+    val Seq(expected, result) = apis.map(api => run(function(api)))
     expected.equals(result)
