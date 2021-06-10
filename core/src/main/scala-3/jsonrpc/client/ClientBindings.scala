@@ -169,7 +169,6 @@ case object ClientBindings:
         val argumentList = Expr.ofSeq(method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
             val argumentIndex = Expr(offset + index)
-
             if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
               None
             else
