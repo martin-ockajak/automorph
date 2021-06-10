@@ -140,6 +140,7 @@ case object ClientBindings:
   ): Expr[Seq[Any] => Seq[Node]] =
     import ref.quotes.reflect.{asTerm, AppliedType, Lambda, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
+    println("BIIIIIIIIIIND")
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
@@ -165,7 +166,7 @@ case object ClientBindings:
         //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
         //   )): List[Node]
         val argumentValues = arguments.head.asInstanceOf[Term].asExprOf[Seq[Any]]
-        val argumentList = Expr.ofSeq(method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
+        val argumentList = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
             val argumentIndex = Expr(offset + index)
             if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
@@ -175,11 +176,11 @@ case object ClientBindings:
                 case '[parameterType] => '{ ${ argumentValues }($argumentIndex).asInstanceOf[parameterType] }
               Some(methodCall(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm))))
           }
-        ).map(_.asInstanceOf[Term].asExprOf[Node]))
+        ).map(_.asInstanceOf[Term].asExprOf[Node])
 
         // Create the encoded arguments sequence construction call
         //   Seq(encodedArguments ...): Seq[Node]
-        '{ Seq(${ argumentList }*) }.asTerm
+        '{ Seq(${ Expr.ofSeq(argumentList) }*) }.asTerm
     ).asExprOf[Seq[Any] => Seq[Node]]
 
   private def generateDecodeResultFunction[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type](
