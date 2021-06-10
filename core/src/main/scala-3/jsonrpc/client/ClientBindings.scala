@@ -164,7 +164,7 @@ case object ClientBindings:
         //     ...
         //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
         //   )): List[Node]
-        val List(argumentValues) = arguments.asInstanceOf[List[Term]]
+        val argumentValues = arguments.head.asInstanceOf[Term].asExprOf[Seq[Any]]
         val argumentList = Expr.ofSeq(method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
             val argumentIndex = Expr(offset + index)
@@ -172,8 +172,7 @@ case object ClientBindings:
               None
             else
               val argument = parameter.dataType.asType match
-                case '[parameterType] =>
-                  '{ ${ argumentValues.asExprOf[Seq[Any]] }($argumentIndex).asInstanceOf[parameterType] }
+                case '[parameterType] => '{ ${ argumentValues }($argumentIndex).asInstanceOf[parameterType] }
               Some(methodCall(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm))))
           }
         ).map(_.asInstanceOf[Term].asExprOf[Node]))
