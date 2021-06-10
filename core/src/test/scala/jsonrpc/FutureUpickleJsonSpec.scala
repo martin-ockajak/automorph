@@ -18,33 +18,25 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec[Effect]:
   lazy val handler = Handler[Node, CodecType, Effect, Short](codec, backend)
     .bind(simpleApiInstance).bind[ComplexApi[Effect]](complexApiInstance)
 
-  lazy val theLocalClient = Client(codec, backend, HandlerTransport(handler, backend, 0))
+  lazy val localClient = Client(codec, backend, HandlerTransport(handler, backend, 0))
 
-  lazy val theRemoteClient = theLocalClient
+  lazy val theRemoteClient = localClient
 
-  override def localClient: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]] = theLocalClient
-
-  override def remoteClient: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]] = theRemoteClient
+  override def client: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]] = localClient
 
   override def simpleApis: TestedApis[SimpleApi[Effect]] = TestedApis(
-    theLocalClient.bind,
-    theLocalClient.positional.bind,
-    theRemoteClient.bind,
-    theRemoteClient.positional.bind,
+    localClient.bind,
+    localClient.positional.bind
   )
 
   override def complexApis: TestedApis[ComplexApi[Effect]] = TestedApis(
-    theLocalClient.bind,
-    theLocalClient.positional.bind,
-    theRemoteClient.bind,
-    theRemoteClient.positional.bind,
+    localClient.bind,
+    localClient.positional.bind
   )
 
   override def invalidApis: TestedApis[InvalidApi[Effect]] = TestedApis(
-    theLocalClient.bind,
-    theLocalClient.positional.bind,
-    theRemoteClient.bind,
-    theRemoteClient.positional.bind,
+    localClient.bind,
+    localClient.positional.bind
   )
 
 object FutureUpickleJsonSpec:

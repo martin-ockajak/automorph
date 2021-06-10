@@ -13,10 +13,8 @@ import scala.util.Try
 trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec with Network:
 
   final case class TestedApis[Api](
-    namedLocal: Api,
-    positionalLocal: Api,
-    namedRemote: Api,
-    positionalRemote: Api
+    named: Api,
+    positional: Api
   )
 
   val simpleApiInstance = SimpleApiImpl(backend)
@@ -32,9 +30,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
 
   def run[T](effect: Effect[T]): T
 
-  def localClient: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]]
-
-  def remoteClient: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]]
+  def client: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]]
 
   def simpleApis: TestedApis[SimpleApi[Effect]]
 
