@@ -146,6 +146,7 @@ case object ClientBindings:
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
       indices :+ (indices.last + size)
     }
+    val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
     // Create encode arguments function
     //   (arguments: Seq[Any]) => Seq[Node]
@@ -165,14 +166,17 @@ case object ClientBindings:
         //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
         //   )): List[Node]
         val List(argumentValues) = arguments.asInstanceOf[List[Term]]
-        val parameters = method.parameters.dropRight(if methodUsesContext[Context](ref, method) then 1 else 0)
-        val argumentList = Expr.ofSeq(parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
-          parameters.toList.zipWithIndex.map { (parameter, index) =>
+        val argumentList = Expr.ofSeq(method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
+          parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
             val argumentIndex = Expr(offset + index)
-            val argument = parameter.dataType.asType match
-              case '[parameterType] =>
-                '{ ${ argumentValues.asExprOf[Seq[Any]] }($argumentIndex).asInstanceOf[parameterType] }
-            methodCall(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
+
+            if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
+              None
+            else
+              val argument = parameter.dataType.asType match
+                case '[parameterType] =>
+                  '{ ${ argumentValues.asExprOf[Seq[Any]] }($argumentIndex).asInstanceOf[parameterType] }
+              Some(methodCall(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm))))
           }
         ).map(_.asInstanceOf[Term].asExprOf[Node]))
 
