@@ -161,10 +161,9 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
       ,
       namedArguments =>
         // Arguments by name
-        val arguments = parameters.flatMap(namedArguments.get)
         val redundantArguments = namedArguments.keys.toSeq.diff(parameters)
         if redundantArguments.nonEmpty then
-          throw IllegalArgumentException(s"Redundant arguments: ${redundantArguments}")
+          throw IllegalArgumentException(s"Redundant arguments: ${redundantArguments.mkString(", ")}")
         else
           parameters.map(name => namedArguments.get(name).getOrElse(encodedNone))
     )

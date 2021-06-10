@@ -142,7 +142,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                     val error = intercept[IllegalArgumentException](run(api.method1(""))).getMessage.toLowerCase
                     error.should(include("redundant"))
                   }
-                  "Missing arguments" ignore {
+                  "Missing arguments" in {
 //                    val error = intercept[IllegalArgumentException] {
                     run(api.method2(""))
 //                    }.getMessage.toLowerCase

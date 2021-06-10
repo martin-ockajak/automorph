@@ -140,7 +140,6 @@ case object ClientBindings:
   ): Expr[Seq[Any] => Seq[Node]] =
     import ref.quotes.reflect.{asTerm, AppliedType, Lambda, MethodType, Symbol, Term, TypeRepr}
     given Quotes = ref.quotes
-    println("BIIIIIIIIIIND")
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
