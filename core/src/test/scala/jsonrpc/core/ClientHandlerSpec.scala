@@ -6,6 +6,8 @@ import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.{Client, ComplexApi, ComplexApiImpl, SimpleApi, SimpleApiImpl}
 import scala.concurrent.Future
 import scala.util.Try
+import org.scalacheck.Prop
+import org.scalacheck.Gen
 
 trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
 
@@ -19,6 +21,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
   val simpleApiInstance = SimpleApiImpl(backend)
   val complexApiInstance = ComplexApiImpl(backend)
   private val testApiNamePattern = """^(\w+)([A-Z]\w+)$""".r
+  private val integers = Gen.choose(-2000000000, 2000000000)
 
   def backend: Backend[Effect]
 
@@ -59,23 +62,34 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
               tests.foreach { case (innerTest, apis) =>
                 innerTest - {
                   "method0" in {
-                    call(apis, _.method0())
+                    check(Prop.forAll { () =>
+                      consistent(apis, _.method0())
+                    })
                   }
                   "method1" in {
-                    call(apis, _.method1())
+                    check(Prop.forAll { () =>
+                      consistent(apis, _.method1())
+                    })
                   }
                   "method2" in {
-                    call(apis, _.method2("test"))
+                    check(Prop.forAll { (a0: String) =>
+                      consistent(apis, _.method2(a0))
+                    })
                   }
                   "method3" in {
-                    check((a0: Int) => consistent(apis, _.method3(0)))
+                    check(Prop.forAll(integers) { (a0: Int) =>
+                      consistent(apis, _.method3(0))
+                    })
                   }
                   "method4" in {
-                    call(apis, _.method4(None))
-                    call(apis, _.method4(Some(1)))
+                    check(Prop.forAll { (a0: Option[Int]) =>
+                      consistent(apis, _.method4(a0))
+                    })
                   }
                   "method5" in {
-                    call(apis, _.method5("test", 0))
+                    check(Prop.forAll { (a0: String, a1: Int) =>
+                      consistent(apis, _.method5(a0, a1))
+                    })
                   }
                 }
               }
