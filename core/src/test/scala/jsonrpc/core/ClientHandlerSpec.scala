@@ -86,24 +86,24 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                       consistent(apis, _.method4(a0, a1, a2, a3))
                     })
                   }
-                  "method5" ignore {
-                    check(Prop.forAll { (a0: Record, a1: Double) =>
-                      consistent(apis, _.method5(a0, a1))
+                  "method5" in {
+                    check(Prop.forAll { (a0: Boolean, a1: Float, a2: List[Int]) =>
+                      consistent(apis, _.method5(a0, a1)(a2))
                     })
                   }
                   "method6" ignore {
-                    check(Prop.forAll { (a0: Record, a1: Boolean, context: Short) =>
-                      consistent(apis, _.method6(a0, a1)(using context))
+                    check(Prop.forAll { (a0: Record, a1: Double) =>
+                      consistent(apis, _.method6(a0, a1))
                     })
                   }
                   "method7" ignore {
-                    check(Prop.forAll { (a0: Record, a1: String, a2: Option[Double], context: Short) =>
-                      consistent(apis, _.method7(a0, a1, a2)(using context))
+                    check(Prop.forAll { (a0: Record, a1: Boolean, context: Short) =>
+                      consistent(apis, _.method7(a0, a1)(using context))
                     })
                   }
-                  "method8" in {
-                    check(Prop.forAll { (a0: Boolean, a1: Float, a2: List[Int]) =>
-                      consistent(apis, _.method8(a0, a1)(a2))
+                  "method8" ignore {
+                    check(Prop.forAll { (a0: Record, a1: String, a2: Option[Double], context: Short) =>
+                      consistent(apis, _.method8(a0, a1, a2)(using context))
                     })
                   }
                   "method9" ignore {

@@ -26,13 +26,13 @@ trait ComplexApi[Effect[_]]:
 
   def method4(p0: Long, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long]
 
-  def method5(p0: Record, p1: Double): Effect[Option[String]]
+  def method5(p0: Boolean, p1: Float)(p2: List[Int]): Effect[Map[String, String]]
 
-  def method6(p0: Record, p1: Boolean)(using context: Short): Effect[Int]
+  def method6(p0: Record, p1: Double): Effect[Option[String]]
 
-  def method7(p0: Record, p1: String, p2: Option[Double])(using Short): Effect[Record]
+  def method7(p0: Record, p1: Boolean)(using context: Short): Effect[Int]
 
-  def method8(p0: Boolean, p1: Float)(p2: List[Int]): Effect[Map[String, String]]
+  def method8(p0: Record, p1: String, p2: Option[Double])(using Short): Effect[Record]
 
   def method9(p0: String): Effect[String]
 
@@ -52,26 +52,26 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
   override def method4(p0: Long, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long] =
     backend.pure(p0 + p1 + p2.values.sum + p3.map(_.size).getOrElse(0))
 
-  override def method5(p0: Record, p1: Double): Effect[Option[String]] =
+  override def method5(p0: Boolean, p1: Float)(p2: List[Int]): Effect[Map[String, String]] =
+    backend.pure(Map(
+      "boolean" -> p0.toString,
+      "float" -> p1.toString,
+      "list" -> p2.mkString(", ")
+    ))
+
+  override def method6(p0: Record, p1: Double): Effect[Option[String]] =
     backend.pure(Some((p0.double + p1).toString))
 
-  override def method6(p0: Record, p1: Boolean)(using context: Short): Effect[Int] = p0.int match
+  override def method7(p0: Record, p1: Boolean)(using context: Short): Effect[Int] = p0.int match
     case Some(int) if p1 => backend.pure(int + context)
     case _               => backend.pure(0)
 
-  override def method7(p0: Record, p1: String, p2: Option[Double])(using Short): Effect[Record] =
+  override def method8(p0: Record, p1: String, p2: Option[Double])(using Short): Effect[Record] =
     backend.pure(p0.copy(
       string = s"${p0.string} - $p1",
       long = p0.long + summon[Short],
       double = p2.getOrElse(0.1),
       enumeration = Enum.One
-    ))
-
-  override def method8(p0: Boolean, p1: Float)(p2: List[Int]): Effect[Map[String, String]] =
-    backend.pure(Map(
-      "boolean" -> p0.toString,
-      "float" -> p1.toString,
-      "list" -> p2.mkString(", ")
     ))
 
   override def method9(p0: String): Effect[String] = backend.failed(IllegalArgumentException(p0))
