@@ -20,6 +20,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
   val simpleApiInstance = SimpleApiImpl(backend)
   val complexApiInstance = ComplexApiImpl(backend)
   private val testApiNamePattern = """^(\w+)([A-Z]\w+)$""".r
+  private lazy val httpServer = "test"
 
   def backend: Backend[Effect]
 
@@ -33,10 +34,9 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
 
   def complexApis: TestedApis[ComplexApi[Effect]]
 
-  case class Arguments(
-    x: String,
-    y: Int
-  )
+  override def afterAll(): Unit =
+//    httpServer.close()
+    super.afterAll()
 
   "" - {
     "Trait" - {
@@ -153,6 +153,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
         "Simple API" - {
           "Named" - {
             "Local" in {
+              case class Arguments(x: String, y: Int)
 //              localClient.bind("test").call[Arguments, Int](Arguments("test", 1))(using 0)
             }
           }
