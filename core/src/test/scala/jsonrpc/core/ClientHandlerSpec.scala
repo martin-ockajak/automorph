@@ -82,8 +82,8 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                     })
                   }
                   "method4" ignore {
-                    check(Prop.forAll { (a0: Option[Long], a1: Option[Byte], a2: Option[String]) =>
-                      consistent(apis, _.method4(a0, a1, a2))
+                    check(Prop.forAll { (a0: Long, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
+                      consistent(apis, _.method4(a0, a1, a2, a3))
                     })
                   }
                   "method5" ignore {
@@ -102,7 +102,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                     })
                   }
                   "method8" ignore {
-                    check(Prop.forAll { (a0: Option[Boolean], a1: Float, a2: List[Int]) =>
+                    check(Prop.forAll { (a0: Boolean, a1: Float, a2: List[Int]) =>
                       consistent(apis, _.method8(a0, a1)(a2))
                     })
                   }

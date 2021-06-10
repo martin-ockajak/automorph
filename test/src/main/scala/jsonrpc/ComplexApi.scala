@@ -24,7 +24,7 @@ trait ComplexApi[Effect[_]]:
 
   def method3(p0: Short, p1: Seq[Int]): Effect[Seq[String]]
 
-  def method4(p0: Option[Long], p1: Option[Byte], p2: Option[String]): Effect[Long]
+  def method4(p0: Long, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long]
 
   def method5(p0: Record, p1: Double): Effect[Option[String]]
 
@@ -32,7 +32,7 @@ trait ComplexApi[Effect[_]]:
 
   def method7(p0: Record, p1: String, p2: Option[Double])(using Short): Effect[Record]
 
-  def method8(p0: Option[Boolean], p1: Float)(p2: List[Int]): Effect[Map[String, String]]
+  def method8(p0: Boolean, p1: Float)(p2: List[Int]): Effect[Map[String, String]]
 
   def method9(p0: String): Effect[String]
 
@@ -49,8 +49,8 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
   override def method3(p0: Short, p1: Seq[Int]): Effect[Seq[String]] =
     backend.pure(p1.map(_.toString) :+ p0.toString)
 
-  override def method4(p0: Option[Long], p1: Option[Byte], p2: Option[String]): Effect[Long] =
-    backend.pure(p0.map(_ + 1).getOrElse(0L) + p1.getOrElse(0.toByte) + p2.map(_.size).getOrElse(0))
+  override def method4(p0: Long, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long] =
+    backend.pure(p0 + p1 + p2.values.sum + p3.map(_.size).getOrElse(0))
 
   override def method5(p0: Record, p1: Double): Effect[Option[String]] =
     backend.pure(Some((p0.double + p1).toString))
@@ -67,9 +67,9 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
       enumeration = Enum.One
     ))
 
-  override def method8(p0: Option[Boolean], p1: Float)(p2: List[Int]): Effect[Map[String, String]] =
+  override def method8(p0: Boolean, p1: Float)(p2: List[Int]): Effect[Map[String, String]] =
     backend.pure(Map(
-      "boolean" -> p0.getOrElse(false).toString,
+      "boolean" -> p0.toString,
       "float" -> p1.toString,
       "list" -> p2.mkString(", ")
     ))
