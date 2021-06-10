@@ -95,7 +95,6 @@ case object Protocol:
     LazyList.iterate(Option(throwable))(_.flatMap(error => Option(error.getCause)))
       .takeWhile(_.isDefined).flatten.filter(filter).take(maxCauses).map { throwable =>
       val exceptionName = throwable.getClass.getSimpleName
-      Option(throwable.getMessage).map(_.trim).filter(_.nonEmpty).map { message =>
-        s"$exceptionName: $message"
-      }.getOrElse(exceptionName)
+      val message = Option(throwable.getMessage).getOrElse("")
+      s"[$exceptionName] $message"
     }

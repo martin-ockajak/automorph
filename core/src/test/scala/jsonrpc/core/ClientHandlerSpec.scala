@@ -109,10 +109,11 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                       consistent(apis, _.method8(a0, a1, a2)(using context))
                     })
                   }
-                  "method9" ignore {
+                  "method9" in {
                     check(Prop.forAll { (a0: String) =>
-                      val Seq(expected, result) = apis.map(api => Try(run(api.method9(a0))).toEither.swap.map(_.getMessage).swap)
-                      expected.equals(result)
+                      val Seq(expected, result) = apis.map(api => Try(run(api.method9(a0))).toEither)
+                      val expectedErrorMessage = expected.swap.map(error => s"[${error.getClass.getSimpleName}] ${Option(error.getMessage).getOrElse("")}")
+                      expectedErrorMessage.equals(result.swap.map(_.getMessage))
                     })
                   }
                 }
