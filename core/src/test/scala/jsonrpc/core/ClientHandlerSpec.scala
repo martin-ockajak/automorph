@@ -85,8 +85,8 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                     })
                   }
                   "method3" in {
-                    check(Prop.forAll { (a0: Short, a1: Seq[Int]) =>
-                      consistent(apis, _.method3(a0, a1))
+                    check(Prop.forAll { (a0: Short, a1: BigDecimal, a2: Seq[Int]) =>
+                      consistent(apis, _.method3(a0, a1, a2))
                     })
                   }
                   "method4" in {
@@ -148,7 +148,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                     }.getMessage.toLowerCase
                     error.should(include("invalid"))
                   }
-                  "Missing arguments" ignore {
+                  "Missing arguments" in {
 //                    val error = intercept[IllegalStateException] {
                       run(api.method3(0))
 //                    }.getMessage.toLowerCase

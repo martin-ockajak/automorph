@@ -19,7 +19,7 @@ trait ComplexApi[Effect[_]]:
 
   def method2(p0: String): Effect[Unit]
 
-  def method3(p0: Short, p1: Seq[Int]): Effect[Seq[String]]
+  def method3(p0: Short, p1: BigDecimal, p2: Seq[Int]): Effect[Seq[String]]
 
   def method4(p0: Long, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long]
 
@@ -43,8 +43,8 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
 
   override def method2(p0: String): Effect[Unit] = backend.pure(())
 
-  override def method3(p0: Short, p1: Seq[Int]): Effect[Seq[String]] =
-    backend.pure(p1.map(_.toString) :+ p0.toString)
+  override def method3(p0: Short, p1: BigDecimal, p2: Seq[Int]): Effect[Seq[String]] =
+    backend.pure(p2.map(number => number.toString + p1.toString) :+ p0.toString)
 
   override def method4(p0: Long, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long] =
     backend.pure(p0 + p1 + p2.values.sum + p3.map(_.size).getOrElse(0))
@@ -85,7 +85,7 @@ trait InvalidApi[Effect[_]]:
 
   def method2(p0: String): Effect[String]
 
-  def method3(p0: Short): Effect[Int]
+  def method3(p0: Short): Effect[Seq[String]]
 
   def method4(p0: Long, p1: Byte, p2: String): Effect[String]
 
@@ -97,6 +97,6 @@ final case class InvalidApiImpl[Effect[_]](backend: Backend[Effect]) extends Inv
 
   def method2(p0: String): Effect[String] = backend.pure("")
 
-  def method3(p0: Short): Effect[Int] = backend.pure(0)
+  def method3(p0: Short): Effect[Seq[String]] = backend.pure(Seq(p0.toString))
 
   def method4(p0: Long, p1: Byte, p2: String): Effect[String] = backend.pure("")
