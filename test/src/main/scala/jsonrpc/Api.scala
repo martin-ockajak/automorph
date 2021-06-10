@@ -85,7 +85,7 @@ trait InvalidApi[Effect[_]]:
 
   def method2(p0: String): Effect[String]
 
-  def method3(p0: Short, p1: Seq[Int]): Effect[Int]
+  def method3(p0: Short): Effect[Int]
 
   def method4(p0: Long, p1: Byte, p2: String): Effect[String]
 
@@ -97,6 +97,6 @@ final case class InvalidApiImpl[Effect[_]](backend: Backend[Effect]) extends Inv
 
   def method2(p0: String): Effect[String] = backend.pure("")
 
-  def method3(p0: Short, p1: Seq[Int]): Effect[Int] = backend.pure(0)
+  def method3(p0: Short): Effect[Int] = backend.pure(0)
 
   def method4(p0: Long, p1: Byte, p2: String): Effect[String] = backend.pure("")
