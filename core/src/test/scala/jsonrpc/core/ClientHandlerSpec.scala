@@ -49,7 +49,9 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
               tests.foreach { case (innerTest, apis) =>
                 innerTest - {
                   "test" in {
-                    call(apis, _.test("test"))
+                    check(Prop.forAll { (a0: String) =>
+                      consistent(apis, _.test(a0))
+                    })
                   }
                 }
               }
