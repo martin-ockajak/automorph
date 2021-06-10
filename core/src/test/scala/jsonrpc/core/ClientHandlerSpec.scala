@@ -6,6 +6,7 @@ import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.{Client, ComplexApi, ComplexApiImpl, Record, SimpleApi, SimpleApiImpl, Structure}
 import org.scalacheck.Prop
 import scala.concurrent.Future
+import scala.util.Try
 
 trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
 
@@ -75,26 +76,44 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                       consistent(apis, _.method2(a0))
                     })
                   }
-                  "method3" in {
-                    check(Prop.forAll { (a0: Int) =>
-                      consistent(apis, _.method3(0))
+                  "method3" ignore {
+                    check(Prop.forAll { (a0: Short, a1: Seq[Int]) =>
+                      consistent(apis, _.method3(a0, a1))
                     })
                   }
-                  "method4" in {
-                    check(Prop.forAll { (a0: Long, a1: String) =>
-                      consistent(apis, _.method4(a0, a1))
+                  "method4" ignore {
+                    check(Prop.forAll { (a0: Option[Long], a1: Option[Byte], a2: Option[String]) =>
+                      consistent(apis, _.method4(a0, a1, a2))
                     })
                   }
-//                  "method5" in {
-//                    check(Prop.forAll { (a0: Record, a1: Double) =>
-//                      consistent(apis, _.method5(a0, a1))
-//                    })
-//                  }
-//                  "method6" in {
-//                    check(Prop.forAll { (a0: Record, a1: Boolean) =>
-//                      consistent(apis, _.method6(a0, a1))
-//                    })
-//                  }
+                  "method5" ignore {
+                    check(Prop.forAll { (a0: Record, a1: Double) =>
+                      consistent(apis, _.method5(a0, a1))
+                    })
+                  }
+                  "method6" ignore {
+                    check(Prop.forAll { (a0: Record, a1: Boolean, context: Short) =>
+                      consistent(apis, _.method6(a0, a1)(using context))
+                    })
+                  }
+                  "method7" ignore {
+                    check(Prop.forAll { (a0: Record, a1: String, a2: Option[Double], context: Short) =>
+                      consistent(apis, _.method7(a0, a1, a2)(using context))
+                    })
+                  }
+                  "method8" ignore {
+                    check(Prop.forAll { (a0: Option[Boolean], a1: Float, a2: List[Int]) =>
+                      consistent(apis, _.method8(a0, a1)(a2))
+                    })
+                  }
+                  "method9" ignore {
+                    check(Prop.forAll { (a0: String) =>
+                      val Seq(expected, result) = apis.map(api => Try(run(api.method9(a0))).recover { case error =>
+                        error.getMessage
+                      }.get)
+                      expected.equals(result)
+                    })
+                  }
                 }
               }
             }

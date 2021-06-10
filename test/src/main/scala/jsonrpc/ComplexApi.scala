@@ -22,16 +22,15 @@ trait ComplexApi[Effect[_]]:
 
   def method2(p0: String): Effect[Unit]
 
-  def method3(p0: Int): Effect[Seq[String]]
+  def method3(p0: Short, p1: Seq[Int]): Effect[Seq[String]]
 
-//  def method4(p0: Option[Long], p1: Option[String]): Effect[Long]
-  def method4(p0: Long, p1: String): Effect[Long]
+  def method4(p0: Option[Long], p1: Option[Byte], p2: Option[String]): Effect[Long]
 
   def method5(p0: Record, p1: Double): Effect[Option[String]]
 
   def method6(p0: Record, p1: Boolean)(using context: Short): Effect[Int]
 
-  def method7(p0: Record, p1: String)(using Short): Effect[Record]
+  def method7(p0: Record, p1: String, p2: Option[Double])(using Short): Effect[Record]
 
   def method8(p0: Option[Boolean], p1: Float)(p2: List[Int]): Effect[Map[String, String]]
 
@@ -47,21 +46,24 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
 
   override def method2(p0: String): Effect[Unit] = backend.pure(())
 
-  override def method3(p0: Int): Effect[Seq[String]] = backend.pure(Seq.fill(p0 % 8)("x"))
+  override def method3(p0: Short, p1: Seq[Int]): Effect[Seq[String]] =
+    backend.pure(p1.map(_.toString) :+ p0.toString)
 
-//  override def method4(p0: Option[Long], p1: Option[String]): Effect[Long] = backend.pure(p0.map(_ + 1).getOrElse(0L) + p1.map(_.size).getOrElse(0))
-  override def method4(p0: Long, p1: String): Effect[Long] = backend.pure(p0 + p1.size)
+  override def method4(p0: Option[Long], p1: Option[Byte], p2: Option[String]): Effect[Long] =
+    backend.pure(p0.map(_ + 1).getOrElse(0L) + p1.getOrElse(0.toByte) + p2.map(_.size).getOrElse(0))
 
-  override def method5(p0: Record, p1: Double): Effect[Option[String]] = backend.pure(Some((p0.double + p1).toString))
+  override def method5(p0: Record, p1: Double): Effect[Option[String]] =
+    backend.pure(Some((p0.double + p1).toString))
 
   override def method6(p0: Record, p1: Boolean)(using context: Short): Effect[Int] = p0.int match
     case Some(int) if p1 => backend.pure(int + context)
     case _               => backend.pure(0)
 
-  override def method7(p0: Record, p1: String)(using Short): Effect[Record] =
+  override def method7(p0: Record, p1: String, p2: Option[Double])(using Short): Effect[Record] =
     backend.pure(p0.copy(
       string = s"${p0.string} - $p1",
       long = p0.long + summon[Short],
+      double = p2.getOrElse(0.1),
       enumeration = Enum.One
     ))
 
