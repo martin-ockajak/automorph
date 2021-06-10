@@ -8,7 +8,7 @@ import jsonrpc.Handler
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
 import jsonrpc.log.Logging
-import jsonrpc.server.http.FinagleJsonRpcService.defaultStatuses
+import jsonrpc.server.http.FinagleJsonRpcService.defaultErrorStatus
 import jsonrpc.spi.Backend
 import jsonrpc.util.EncodingOps.toArraySeq
 import scala.collection.immutable.ArraySeq
@@ -21,7 +21,7 @@ import scala.util.{Failure, Success, Try}
  * The response returned by the JSON-RPC handler is used as HTTP response body.
  *
  * @see [[https://finagle.github.io/finch Documentation]]
- * @constructor Create a JSON=RPC HTTP handler for Undertow web server using the specified JSON-RPC ''handler''.
+ * @constructor Create a JSON=RPC HTTP handler for Undertow web server using the specified JSON-RPC request ''handler''.
  * @param handler JSON-RPC request handler
  * @param effectRunAsync asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
@@ -29,7 +29,7 @@ import scala.util.{Failure, Success, Try}
  */
 final case class FinagleJsonRpcService[Effect[_]](
   handler: Handler[?, ?, Effect, Request],
-  errorStatus: Int => Status = defaultStatuses
+  errorStatus: Int => Status = defaultErrorStatus
 )
   extends Service[Request, Response] with Logging:
 
@@ -85,7 +85,7 @@ final case class FinagleJsonRpcService[Effect[_]](
 case object FinagleJsonRpcService:
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultStatuses = Map(
+  val defaultErrorStatus = Map(
     ErrorType.ParseError -> Status.BadRequest,
     ErrorType.InvalidRequest -> Status.BadRequest,
     ErrorType.MethodNotFound -> Status.NotImplemented,

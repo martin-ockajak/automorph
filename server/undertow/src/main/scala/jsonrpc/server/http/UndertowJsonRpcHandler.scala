@@ -8,7 +8,7 @@ import jsonrpc.Handler
 import jsonrpc.core.Protocol
 import jsonrpc.core.Protocol.ErrorType
 import jsonrpc.log.Logging
-import jsonrpc.server.http.UndertowJsonRpcHandler.defaultStatuses
+import jsonrpc.server.http.UndertowJsonRpcHandler.defaultErrorStatus
 import jsonrpc.spi.Backend
 import jsonrpc.util.EncodingOps.toArraySeq
 import scala.collection.immutable.ArraySeq
@@ -21,7 +21,7 @@ import scala.util.Try
  * The response returned by the JSON-RPC handler is used as HTTP response body.
  *
  * @see [[https://undertow.io Documentation]]
- * @constructor Create a JSON=RPC HTTP handler for Undertow web server using the specified JSON-RPC ''handler''.
+ * @constructor Create a JSON=RPC HTTP handler for Undertow web server using the specified JSON-RPC request ''handler''.
  * @param handler JSON-RPC request handler
  * @param effectRunAsync asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
@@ -30,7 +30,7 @@ import scala.util.Try
 final case class UndertowJsonRpcHandler[Effect[_]](
   handler: Handler[?, ?, Effect, HttpServerExchange],
   effectRunAsync: Effect[Any] => Unit,
-  errorStatus: Int => Int = defaultStatuses
+  errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpHandler with Logging:
 
   private val backend = handler.backend
@@ -88,7 +88,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
 case object UndertowJsonRpcHandler:
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultStatuses = Map(
+  val defaultErrorStatus = Map(
     ErrorType.ParseError -> StatusCodes.BAD_REQUEST,
     ErrorType.InvalidRequest -> StatusCodes.BAD_REQUEST,
     ErrorType.MethodNotFound -> StatusCodes.NOT_IMPLEMENTED,

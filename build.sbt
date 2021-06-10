@@ -177,6 +177,12 @@ ThisBuild / scalacOptions ++= Seq(
     "4"
   )
 })
+ThisBuild / javacOptions ++= Seq(
+  "-source",
+  "8",
+  "-target",
+  "8"
+)
 
 
 // Documentation
