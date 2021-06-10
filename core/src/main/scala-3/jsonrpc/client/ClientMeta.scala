@@ -189,7 +189,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context, BindingType
           // Adjust expected method parameters if it uses context as its last parameter
           val callArguments = Option(arguments).getOrElse(Array.empty[AnyRef])
           val (argumentValues, context) =
-            if clientMethod.usesContext && arguments.nonEmpty then
+            if clientMethod.usesContext && callArguments.nonEmpty then
               callArguments.dropRight(1).toSeq -> Some(callArguments.last.asInstanceOf[Context])
             else
               callArguments.toSeq -> None
