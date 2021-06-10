@@ -136,7 +136,6 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                       run(api.nomethod(""))
                     }.getMessage.toLowerCase
                     error.should(include("nomethod"))
-                    //                    error.getMessage.should(equal())
                   }
                   "Redundant arguments" in {
                     val error = intercept[IllegalArgumentException] {
