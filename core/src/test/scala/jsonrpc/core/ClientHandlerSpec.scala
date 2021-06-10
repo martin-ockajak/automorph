@@ -10,6 +10,15 @@ import org.scalacheck.Prop
 import scala.concurrent.Future
 import scala.util.Try
 
+/**
+ * Main client -> handler API method invocation test.
+ *
+ * Validates the results of remote method invocations against identical local invocations.
+ *
+ * @tparam Node message format node representation type
+ * @tparam CodecType message codec plugin type
+ * @tparam Effect effect type
+ */
 trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec with Network:
 
   final case class TestedApis[Api](

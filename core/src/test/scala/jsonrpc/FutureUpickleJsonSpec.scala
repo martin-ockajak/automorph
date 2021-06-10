@@ -20,7 +20,8 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec[Effect]:
 
   override def run[T](effect: Effect[T]): T = await(effect)
 
-  override def client: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]] = localClient
+  override def client: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]] =
+    localClient
 
   override def simpleApis: TestedApis[SimpleApi[Effect]] = TestedApis(
     localClient.bind,
