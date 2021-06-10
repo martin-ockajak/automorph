@@ -1,7 +1,7 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.core.MethodBindings.{methodCall, validApiMethods, effectResultType, methodDescription, methodUsesContext}
+import jsonrpc.core.MethodBindings.{effectResultType, methodCall, methodDescription, methodUsesContext, validApiMethods}
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -114,7 +114,7 @@ case object ClientBindings:
     given Quotes = ref.quotes
 
     val liftedMethod = method.lift
-    val encodeArguments = generateEncodeArgumentsFunction[Node, CodecType](ref, method, codec)
+    val encodeArguments = generateEncodeArgumentsFunction[Node, CodecType, Context](ref, method, codec)
     val decodeResult = generateDecodeResultFunction[Node, CodecType, Effect](ref, method, codec)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
@@ -134,7 +134,7 @@ case object ClientBindings:
       )
     }
 
-  private def generateEncodeArgumentsFunction[Node: Type, CodecType <: Codec[Node]: Type](
+  private def generateEncodeArgumentsFunction[Node: Type, CodecType <: Codec[Node]: Type, Context: Type](
     ref: Reflection,
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
@@ -165,7 +165,8 @@ case object ClientBindings:
         //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
         //   )): List[Node]
         val List(argumentValues) = arguments.asInstanceOf[List[Term]]
-        val argumentList = Expr.ofSeq(method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
+        val parameters = method.parameters.dropRight(if methodUsesContext[Context](ref, method) then 1 else 0)
+        val argumentList = Expr.ofSeq(parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentIndex = Expr(offset + index)
             val argument = parameter.dataType.asType match
