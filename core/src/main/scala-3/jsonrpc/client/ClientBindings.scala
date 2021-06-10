@@ -46,8 +46,7 @@ case object ClientBindings:
 //        val List(argumentValues) = arguments.asInstanceOf[List[Term]]
 //        val argumentList = Expr.ofSeq(argumentValues.zipWithIndex.map { (parameter, index) =>
 //          val argumentIndex = Expr(index)
-//          val argument = parameter.dataType.asType match
-//            case '[parameterType] => '{ ${ argumentValues.asExprOf[Seq[Any]] }($argumentIndex) }
+//          val argument = '{ ${ argumentValues.asExprOf[Seq[Any]] }($argumentIndex) }
 //          val argument = methodCall(quotes, argumentValues, s"_${argumentIndex}", List(), List())
 //          methodCall(quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
 //        }.map(_.asInstanceOf[Term].asExprOf[Node]))

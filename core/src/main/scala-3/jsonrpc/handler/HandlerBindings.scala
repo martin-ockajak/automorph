@@ -130,8 +130,7 @@ case object HandlerBindings:
         val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentIndex = Expr(offset + index)
-            val argumentNode = parameter.dataType.asType match
-              case '[parameterType] => '{ ${ argumentNodes.asExprOf[Seq[Node]] }($argumentIndex) }
+            val argumentNode = '{ ${ argumentNodes.asExprOf[Seq[Node]] }($argumentIndex) }
             if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
               context
             else
