@@ -45,7 +45,7 @@ trait CodecSpec extends BaseSpec:
     3,
     None,
     6.7,
-    Some(Enum.One),
+    Enum.One,
     List("x", "y", "z"),
     Map(
       "foo" -> 0,

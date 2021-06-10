@@ -3,11 +3,9 @@ package jsonrpc.core
 import base.BaseSpec
 import jsonrpc.client.UnnamedBinding
 import jsonrpc.spi.{Backend, Codec}
-import jsonrpc.{Client, ComplexApi, ComplexApiImpl, SimpleApi, SimpleApiImpl}
-import scala.concurrent.Future
-import scala.util.Try
+import jsonrpc.{Client, ComplexApi, ComplexApiImpl, Record, SimpleApi, SimpleApiImpl, Structure}
 import org.scalacheck.Prop
-import org.scalacheck.Gen
+import scala.concurrent.Future
 
 trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
 
@@ -21,7 +19,6 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
   val simpleApiInstance = SimpleApiImpl(backend)
   val complexApiInstance = ComplexApiImpl(backend)
   private val testApiNamePattern = """^(\w+)([A-Z]\w+)$""".r
-  private val integers = Gen.choose(-2000000000, 2000000000)
 
   def backend: Backend[Effect]
 
@@ -79,20 +76,25 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                     })
                   }
                   "method3" in {
-                    check(Prop.forAll(integers) { (a0: Int) =>
+                    check(Prop.forAll { (a0: Int) =>
                       consistent(apis, _.method3(0))
                     })
                   }
                   "method4" in {
-                    check(Prop.forAll { (a0: Option[Int]) =>
-                      consistent(apis, _.method4(a0))
+                    check(Prop.forAll { (a0: Long, a1: String) =>
+                      consistent(apis, _.method4(a0, a1))
                     })
                   }
-                  "method5" in {
-                    check(Prop.forAll { (a0: String, a1: Int) =>
-                      consistent(apis, _.method5(a0, a1))
-                    })
-                  }
+//                  "method5" in {
+//                    check(Prop.forAll { (a0: Record, a1: Double) =>
+//                      consistent(apis, _.method5(a0, a1))
+//                    })
+//                  }
+//                  "method6" in {
+//                    check(Prop.forAll { (a0: Record, a1: Boolean) =>
+//                      consistent(apis, _.method6(a0, a1))
+//                    })
+//                  }
                 }
               }
             }
@@ -155,7 +157,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
       val (outer, inner) =
         name match
           case testApiNamePattern(first, second) => first -> second
-          case first                              => first -> "[None]"
+          case first                             => first -> "[None]"
       (outer.capitalize, inner, Seq(originalApi, testedApis.productElement(index).asInstanceOf[Api]))
     }.toSeq
     tests.groupBy(_._1).view.mapValues(_.map { case (_, inner, apis) =>
