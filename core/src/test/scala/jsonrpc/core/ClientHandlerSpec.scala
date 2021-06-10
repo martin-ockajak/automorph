@@ -1,6 +1,6 @@
 package jsonrpc.core
 
-import base.BaseSpec
+import base.{BaseSpec, Network}
 import jsonrpc.client.UnnamedBinding
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.{Client, ComplexApi, ComplexApiImpl, Record, SimpleApi, SimpleApiImpl, Structure}
@@ -8,7 +8,7 @@ import org.scalacheck.Prop
 import scala.concurrent.Future
 import scala.util.Try
 
-trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
+trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec with Network:
 
   case class TestedApis[Api](
     namedLocal: Api,
@@ -20,7 +20,9 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
   val simpleApiInstance = SimpleApiImpl(backend)
   val complexApiInstance = ComplexApiImpl(backend)
   private val testApiNamePattern = """^(\w+)([A-Z]\w+)$""".r
-  private lazy val httpServer = "test"
+  private lazy val httpServer =
+    availablePort
+    "test"
 
   def backend: Backend[Effect]
 
