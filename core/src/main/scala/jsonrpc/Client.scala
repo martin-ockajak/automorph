@@ -142,7 +142,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context, Bind
               result =>
                 // Decode result
                 Try(decodeResult(result)).fold(
-                  error => raiseError(error, formedRequest),
+                  error => raiseError(IllegalStateException("Invalid result", error), formedRequest),
                   result =>
                     logger.info(s"Performed JSON-RPC request", formedRequest.properties)
                     backend.pure(result)
