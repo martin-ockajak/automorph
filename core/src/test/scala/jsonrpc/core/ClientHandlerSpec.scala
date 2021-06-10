@@ -23,6 +23,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
   val complexApiInstance = ComplexApiImpl(backend)
   val invalidApiInstance = InvalidApiImpl(backend)
   private val testApiNamePattern = """^(\w+)([A-Z]\w+)$""".r
+
   private lazy val httpServer =
     availablePort
     "test"
@@ -116,7 +117,9 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                   "method9" in {
                     check(Prop.forAll { (a0: String) =>
                       val Seq(expected, result) = apis.map(api => Try(run(api.method9(a0))).toEither)
-                      val expectedErrorMessage = expected.swap.map(error => s"[${error.getClass.getSimpleName}] ${Option(error.getMessage).getOrElse("")}")
+                      val expectedErrorMessage = expected.swap.map(error =>
+                        s"[${error.getClass.getSimpleName}] ${Option(error.getMessage).getOrElse("")}"
+                      )
                       expectedErrorMessage.equals(result.swap.map(_.getMessage))
                     })
                   }
@@ -132,22 +135,18 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                 innerTest - {
                   val api = apis.last
                   "Method not found" in {
-                    val error = intercept[MethodNotFound] {
-                      run(api.nomethod(""))
-                    }.getMessage.toLowerCase
+                    val error = intercept[MethodNotFound](run(api.nomethod(""))).getMessage.toLowerCase
                     error.should(include("nomethod"))
                   }
                   "Redundant arguments" in {
-                    val error = intercept[IllegalArgumentException] {
-                      run(api.method1(""))
-                    }.getMessage.toLowerCase
+                    val error = intercept[IllegalArgumentException](run(api.method1(""))).getMessage.toLowerCase
                     error.should(include("redundant"))
                   }
                   "Missing arguments" ignore {
-                    //                    val error = intercept[IllegalArgumentException] {
+//                    val error = intercept[IllegalArgumentException] {
                     run(api.method2(""))
-                    //                    }.getMessage.toLowerCase
-                    //                    error.should(include("TEST"))
+//                    }.getMessage.toLowerCase
+//                    error.should(include("TEST"))
                   }
                 }
               }
