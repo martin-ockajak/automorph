@@ -154,18 +154,19 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
         // Arguments by position
         if arguments.size < parameters.size then
           throw IllegalArgumentException(s"Missing arguments: ${parameters.drop(arguments.size)}")
-        else if arguments.size > parameters.size then
+        if arguments.size > parameters.size then
           throw IllegalArgumentException(s"Redundant arguments: ${parameters.size - arguments.size}")
-        arguments
+        else
+          arguments ++ Seq.fill(parameters.size - arguments.size)(encodedNone)
       ,
       namedArguments =>
         // Arguments by name
         val arguments = parameters.flatMap(namedArguments.get)
-        if arguments.size < parameters.size then
-          throw IllegalArgumentException(s"Missing arguments: ${parameters.filterNot(namedArguments.contains)}")
-        else if arguments.size > parameters.size then
-          throw IllegalArgumentException(s"Redundant arguments: ${namedArguments.keys.filterNot(parameters.contains)}")
-        arguments
+        val redundantArguments = namedArguments.keys.toSeq.diff(parameters)
+        if redundantArguments.nonEmpty then
+          throw IllegalArgumentException(s"Redundant arguments: ${redundantArguments}")
+        else
+          parameters.map(name => namedArguments.get(name).getOrElse(encodedNone))
     )
 
   /**

@@ -31,7 +31,8 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
   backend: Backend[Effect],
   bufferSize: Int,
   protected val methodBindings: Map[String, HandlerMethod[Node, Effect, Context]],
-  protected val encodeStrings: Seq[String] => Node
+  protected val encodeStrings: Seq[String] => Node,
+  protected val encodedNone: Node
 ) extends HandlerProcessor[Node, CodecType, Effect, Context]
   with HandlerMeta[Node, CodecType, Effect, Context] with CannotEqual with Logging
 
@@ -59,7 +60,7 @@ object Handler:
     backend: Backend[Effect],
     bufferSize: Int = 4096
   ): Handler[Node, CodecType, Effect, NoContext] =
-    Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
+    Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
@@ -80,4 +81,4 @@ object Handler:
     backend: Backend[Effect],
     bufferSize: Int = 4096
   ): Handler[Node, CodecType, Effect, Context] =
-    new Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value))
+    new Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))

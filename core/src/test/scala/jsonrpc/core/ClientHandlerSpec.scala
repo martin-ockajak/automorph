@@ -81,7 +81,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
                       consistent(apis, _.method3(a0, a1))
                     })
                   }
-                  "method4" ignore {
+                  "method4" in {
                     check(Prop.forAll { (a0: Long, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
                       consistent(apis, _.method4(a0, a1, a2, a3))
                     })
