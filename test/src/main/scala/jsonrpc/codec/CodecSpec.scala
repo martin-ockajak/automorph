@@ -4,7 +4,7 @@ import base.BaseSpec
 import java.nio.charset.StandardCharsets
 import jsonrpc.spi.Message.{Params, version}
 import jsonrpc.spi.{Codec, Message, MessageError}
-import jsonrpc.{Enum, Generators, Record, Structure}
+import jsonrpc.Generators.arbitraryMesage
 import org.scalacheck.Arbitrary
 
 /**
@@ -23,29 +23,8 @@ trait CodecSpec extends BaseSpec:
 
   def arbitraryNode: Arbitrary[Node]
 
-  val record: Record = Record(
-    "test",
-    boolean = true,
-    0,
-    1,
-    Some(2),
-    3,
-    None,
-    6.7,
-    Enum.One,
-    List("x", "y", "z"),
-    Map(
-      "foo" -> 0,
-      "bar" -> 1
-    ),
-    Some(Structure(
-      "test"
-    )),
-    None
-  )
-
   "" - {
-    given Arbitrary[Message[Node]] = Generators.arbitraryMesage(using arbitraryNode)
+    given Arbitrary[Message[Node]] = arbitraryMesage(using arbitraryNode)
     "Serialize / Deserialize" in {
       check { (message: Message[Node]) =>
         val rawMessage = codec.serialize(message)
