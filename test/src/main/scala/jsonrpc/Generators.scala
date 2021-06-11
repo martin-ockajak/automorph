@@ -7,17 +7,17 @@ import jsonrpc.spi.{Message, MessageError}
 
 case object Generators:
 
-  given Arbitrary[Enum] = Arbitrary {
+  given arbitraryEnum: Arbitrary[Enum] = Arbitrary {
     Gen.choose(0, Enum.values.size - 1).map(Enum.fromOrdinal)
   }
 
-  given Arbitrary[Structure] = Arbitrary {
+  given arbitraryStructure: Arbitrary[Structure] = Arbitrary {
     for
       value <- arbitrary[String]
     yield Structure(value)
   }
 
-  given Arbitrary[Record] = Arbitrary {
+  given arbitraryRecord: Arbitrary[Record] = Arbitrary {
     for
       string <- arbitrary[String]
       boolean <- arbitrary[Boolean]

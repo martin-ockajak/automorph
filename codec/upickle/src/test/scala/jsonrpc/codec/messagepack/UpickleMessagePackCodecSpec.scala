@@ -5,7 +5,7 @@ import jsonrpc.codec.messagepack.UpickleMessagePackCodec
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
 import jsonrpc.{Enum, Record, Structure}
-import jsonrpc.Generators.given
+import jsonrpc.Generators
 import org.scalacheck.{Arbitrary, Gen}
 import upack.{Bool, Float64, Msg, Obj, Str}
 import upickle.AttributeTagged
@@ -27,10 +27,16 @@ class UpickleMessagePackSpec extends CodecSpec:
   )))
 
   "" - {
+//    given Arbitrary[Record] = Arbitrary(Arbitrary.arbitrary(Generators.arbitraryRecord).suchThat { record =>
+//      record.float.isEmpty &&
+//      record.double < 1000000000
+//    })
     "Encode / Decode" in {
-      val encodedValue = codec.encode(record)
-      val decodedValue = codec.decode[Record](encodedValue)
-      decodedValue.should(equal(record))
+//      check { (record: Record) =>
+        val encodedValue = codec.encode(record)
+        val decodedValue = codec.decode[Record](encodedValue)
+        decodedValue.equals(record)
+//      }
     }
   }
 
