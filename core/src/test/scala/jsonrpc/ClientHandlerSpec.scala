@@ -25,14 +25,6 @@ trait ClientHandlerSpec extends BaseSpec:
   type CodecType <: Codec[Node]
   type Effect[_]
 
-  final case class Proxies[Api](
-    named: Api,
-    positional: Api
-  )
-
-  case object Proxies:
-    def apply[Api](apis: Seq[Api]): Proxies[Api] = Proxies(apis.head, apis.last)
-
   val simpleApiInstance = SimpleApiImpl(backend)
   val complexApiInstance = ComplexApiImpl(backend)
   val invalidApiInstance = InvalidApiImpl(backend)
