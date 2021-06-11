@@ -76,11 +76,11 @@ trait ClientHandlerSpec extends BaseSpec:
                   consistent(apis, _.method2(a0))
                 }
               }
-//              "method3" in {
-//                check { (a0: Float, a1: Long, a2: Option[Seq[Int]]) =>
-//                  consistent(apis, _.method3(a0, a1, a2))
-//                }
-//              }
+              "method3" in {
+                check { (a0: Float, a1: Long, a2: Option[Seq[Int]]) =>
+                  consistent(apis, _.method3(a0, a1, a2))
+                }
+              }
               "method4" in {
                 check { (a0: BigDecimal, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
                   consistent(apis, _.method4(a0, a1, a2, a3))
