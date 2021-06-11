@@ -21,7 +21,7 @@ import scala.util.Try
  */
 trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
 
-  final case class TestedApis[Api](
+  final case class Proxies[Api](
     named: Api,
     positional: Api
   )
@@ -31,21 +31,17 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
   val invalidApiInstance = InvalidApiImpl(backend)
   private val testApiNamePattern = """^(\w+)([A-Z]\w+)$""".r
 
-  private lazy val httpServer =
-    availablePort
-    "test"
-
   def backend: Backend[Effect]
 
   def run[T](effect: Effect[T]): T
 
   def client: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]]
 
-  def simpleApis: TestedApis[SimpleApi[Effect]]
+  def simpleApis: Proxies[SimpleApi[Effect]]
 
-  def complexApis: TestedApis[ComplexApi[Effect]]
+  def complexApis: Proxies[ComplexApi[Effect]]
 
-  def invalidApis: TestedApis[InvalidApi[Effect]]
+  def invalidApis: Proxies[InvalidApi[Effect]]
 
   override def afterAll(): Unit =
 //    httpServer.close()
@@ -223,7 +219,7 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
     }
   }
 
-  private def apiCombinations[Api](originalApi: Api, testedApis: TestedApis[Api]): Seq[(String, Seq[(String, Seq[Api])])] =
+  private def apiCombinations[Api](originalApi: Api, testedApis: Proxies[Api]): Seq[(String, Seq[(String, Seq[Api])])] =
     val tests = testedApis.productElementNames.zipWithIndex.map { case (name, index) =>
       val (outer, inner) =
         name match
