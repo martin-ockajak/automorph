@@ -32,7 +32,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    */
   inline def callByPosition[R](method: String)()(using context: Context): Effect[R] =
     val encodedArguments = Left(List())
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
+    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
@@ -49,7 +49,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     val encodedArguments = Left(List(
       codec.encode(p1)
     ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
+    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
@@ -67,7 +67,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
       codec.encode(p1),
       codec.encode(p2)
     ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
+    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
@@ -86,7 +86,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
       codec.encode(p2),
       codec.encode(p3)
     ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
+    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
@@ -108,7 +108,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
       codec.encode(p3),
       codec.encode(p4)
     ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
+    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
@@ -131,7 +131,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
       codec.encode(p4),
       codec.encode(p5)
     ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
+    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
@@ -155,7 +155,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
       codec.encode(p5),
       codec.encode(p6)
     ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
+    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
@@ -188,7 +188,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
       codec.encode(p6),
       codec.encode(p7)
     ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode(resultNode))
+    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
 
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.

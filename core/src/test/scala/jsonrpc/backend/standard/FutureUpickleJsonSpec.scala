@@ -24,8 +24,8 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec:
 
   override def invalidApis: Seq[InvalidApi[Effect]] = clients.map(_.bind[InvalidApi[Effect]])
 
-//  "" - {
-//    "test" in {
-//      client.callByPosition[String, String]("test")("test")(using 0)
-//    }
-//  }
+  "" - {
+    "test" in {
+      client.callByPosition[String, String]("test")("test")(using 0)
+    }
+  }
