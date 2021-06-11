@@ -189,8 +189,8 @@ trait ClientHandlerSpec extends BaseSpec:
         "Simple API" - {
           "Named" - {
             "Local" in {
-              final case class Arguments(x: String, y: Int)
-//              localClient.bind("test").call[Arguments, Int](Arguments("test", 1))(using 0)
+              final case class Arguments(test: String)
+//              client.asInstanceOf[Client[Node, CodecType, Effect, Short, ?]].callByName[Arguments, Int]("test")(Arguments("test"))(using 0)
             }
           }
         }
