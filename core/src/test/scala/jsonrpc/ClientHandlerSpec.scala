@@ -153,50 +153,19 @@ trait ClientHandlerSpec extends BaseSpec:
         }
       }
     }
-    "Tuple" - {
+    "Direct" - {
       "Call" - {
         "Simple API" - {
-          "Named" - {
-            "Local" in {
-//              localClient.callByName[Int]("test")("a", "b")(1, 2, 3)(using 0)
-//              localClient.bind("test").parameters("a", "b").call[Int](1, 2, 3)(using 0)
-//              val x = localClient.callByName[Int]("test")("a", "b")
-//              val y = x(1, 2, 3)(using 0)
-//              y(0)
-            }
-          }
           "Positional" - {
             "Local" in {
-//              localClient.callByPosition[Int]("test")(1, 2, 3)(using 0)
+//              client.callByPosition[String, String]("test")("test")(using 0)
             }
           }
         }
       }
       "Notify" - {
         "Simple API" - {
-          "Named" - {
-            "Local" ignore {}
-          }
           "Positional" - {
-            "Local" ignore {}
-          }
-        }
-      }
-    }
-    "Case class" - {
-      "Call" - {
-        "Simple API" - {
-          "Named" - {
-            "Local" in {
-              final case class Arguments(test: String)
-//              client.asInstanceOf[Client[Node, CodecType, Effect, Short, ?]].callByName[Arguments, Int]("test")(Arguments("test"))(using 0)
-            }
-          }
-        }
-      }
-      "Notify" - {
-        "Simple API" - {
-          "Named" - {
             "Local" ignore {}
           }
         }

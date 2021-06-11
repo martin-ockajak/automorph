@@ -26,6 +26,6 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec:
 
 //  "" - {
 //    "test" in {
-//      client.asInstanceOf[Client[Node, CodecType, Effect, Short, ?]].callByName[UpickleJsonSpec.Arguments, Int]("test")(UpickleJsonSpec.Arguments("test"))(using 0)
+//      client.callByPosition[String, String]("test")("test")(using 0)
 //    }
 //  }

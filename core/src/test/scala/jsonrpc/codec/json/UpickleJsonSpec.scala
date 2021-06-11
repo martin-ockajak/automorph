@@ -20,10 +20,6 @@ trait UpickleJsonSpec extends ClientHandlerSpec:
 
 object UpickleJsonSpec extends AttributeTagged:
 
-  final case class Arguments(test: String)
-
-  given ReadWriter[Arguments] = macroRW
-
   given ReadWriter[Enum] = readwriter[Int].bimap[Enum](
       value => value.ordinal,
       number => Enum.fromOrdinal(number)
