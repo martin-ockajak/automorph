@@ -14,8 +14,6 @@ trait UpickleJsonSpec extends ClientHandlerSpec:
 
   def codec: CodecType = UpickleJsonCodec(UpickleJsonSpec)
 
-  def backend: Backend[Effect]
-
   lazy val handler: Handler[Node, CodecType, Effect, Short] = Handler[Node, CodecType, Effect, Short](codec, backend)
     .bind(simpleApiInstance).bind[ComplexApi[Effect]](complexApiInstance)
 
