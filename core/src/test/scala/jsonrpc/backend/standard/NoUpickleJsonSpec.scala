@@ -1,11 +1,8 @@
 //package jsonrpc.backend.standard
 //
-//import jsonrpc.backend.standard.FutureBackend
 //import jsonrpc.codec.json.UpickleJsonSpec
 //import jsonrpc.spi.Backend
-//import jsonrpc.transport.local.HandlerTransport
 //import jsonrpc.{Client, ComplexApi, InvalidApi, SimpleApi}
-//import scala.concurrent.ExecutionContext.Implicits.global
 //import jsonrpc.backend.standard.NoBackend.Identity
 //
 //class NoUpickleJsonSpec extends UpickleJsonSpec:
