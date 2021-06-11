@@ -65,7 +65,9 @@ case object MethodBindings:
   def methodUsesContext[Context: Type](ref: Reflection, method: ref.QuotedMethod): Boolean =
     import ref.quotes.reflect.TypeRepr
 
-    method.parameters.flatten.lastOption.exists(_.dataType =:= TypeRepr.of[Context])
+    method.parameters.flatten.lastOption.exists { parameter =>
+      parameter.contextual && parameter.dataType =:= TypeRepr.of[Context]
+    }
 
   /**
    * Determine method result value type wrapped in the specified effect type.

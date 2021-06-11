@@ -14,9 +14,10 @@ final case class Reflection(quotes: Quotes):
 
   final case class QuotedParameter(
     name: String,
-    dataType: TypeRepr
+    dataType: TypeRepr,
+    contextual: Boolean
   ):
-    def lift: Parameter = Parameter(name, dataType.show)
+    def lift: Parameter = Parameter(name, dataType.show, contextual)
 
   final case class QuotedTypeParam(
     name: String,
@@ -130,7 +131,7 @@ final case class Reflection(quotes: Quotes):
     val parameters = methodTypes.map {
       currentType =>
         currentType.paramNames.zip(currentType.paramTypes).map {
-          (name, dataType) => QuotedParameter(name, dataType)
+          (name, dataType) => QuotedParameter(name, dataType, currentType.isImplicit)
         }
     }
     val resultType = methodTypes.last.resType
@@ -155,7 +156,8 @@ final case class Reflection(quotes: Quotes):
 
 final case class Parameter(
   name: String,
-  dataType: String
+  dataType: String,
+  contextual: Boolean
 )
 
 final case class TypeParameter(
