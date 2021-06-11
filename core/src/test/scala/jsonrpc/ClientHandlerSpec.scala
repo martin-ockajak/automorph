@@ -26,6 +26,10 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
     positional: Api
   )
 
+  case object Proxies:
+    inline def apply[Api <: AnyRef]: Proxies[Api] =
+      Proxies(client.bind[Api], client.positional.bind[Api])
+
   val simpleApiInstance = SimpleApiImpl(backend)
   val complexApiInstance = ComplexApiImpl(backend)
   val invalidApiInstance = InvalidApiImpl(backend)
@@ -42,10 +46,6 @@ trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseS
   def complexApis: Proxies[ComplexApi[Effect]]
 
   def invalidApis: Proxies[InvalidApi[Effect]]
-
-  override def afterAll(): Unit =
-//    httpServer.close()
-    super.afterAll()
 
   "" - {
     "Trait" - {
