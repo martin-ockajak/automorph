@@ -1,7 +1,5 @@
 package jsonrpc.codec.json
 
-import jsonrpc.codec.json.UpickleJsonSpec.ReadWriters
-import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.Handler
 import jsonrpc.spi.Backend
 import jsonrpc.transport.local.HandlerTransport
@@ -12,9 +10,9 @@ import upickle.AttributeTagged
 trait UpickleJsonSpec extends ClientHandlerSpec:
 
   type Node = Value
-  type CodecType = UpickleJsonCodec[ReadWriters.type]
+  type CodecType = UpickleJsonCodec[UpickleJsonSpec.type]
 
-  def codec: CodecType = UpickleJsonCodec(ReadWriters)
+  def codec: CodecType = UpickleJsonCodec(UpickleJsonSpec)
 
   def backend: Backend[Effect]
 
@@ -23,9 +21,7 @@ trait UpickleJsonSpec extends ClientHandlerSpec:
 
   lazy val handlerTransport: HandlerTransport[Node, CodecType, Effect, Short] = HandlerTransport(handler, backend, 0)
 
-object UpickleJsonSpec:
-
-  object ReadWriters extends AttributeTagged:
+object UpickleJsonSpec extends AttributeTagged:
 
     given ReadWriter[Enum] = readwriter[Int].bimap[Enum](
       value => value.ordinal,
