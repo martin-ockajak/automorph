@@ -41,7 +41,7 @@ trait CodecSpec extends BaseSpec:
       ))
     )
 
-  val record = Record(
+  val record: Record = Record(
     "test",
     boolean = true,
     0,
@@ -74,7 +74,7 @@ trait CodecSpec extends BaseSpec:
       messages.foreach { message =>
         val formattedMessage = codec.format(message)
         val rawMessage = codec.serialize(message)
-        formattedMessage.getBytes(charset).size.should(be > rawMessage.size)
+        formattedMessage.getBytes(charset).length.should(be > rawMessage.size)
       }
     }
   }
