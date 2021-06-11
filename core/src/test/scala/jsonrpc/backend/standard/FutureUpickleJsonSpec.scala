@@ -5,7 +5,7 @@ import jsonrpc.client.UnnamedBinding
 import jsonrpc.codec.json.UpickleJsonSpec
 import jsonrpc.spi.Backend
 import jsonrpc.transport.local.HandlerTransport
-import jsonrpc.{Client, ComplexApi, Handler, InvalidApi, SimpleApi}
+import jsonrpc.{Client, ComplexApi, InvalidApi, SimpleApi}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
