@@ -19,9 +19,9 @@ trait ComplexApi[Effect[_]]:
 
   def method2(p0: String): Effect[Unit]
 
-  def method3(p0: Short, p1: BigDecimal, p2: Seq[Int]): Effect[Seq[String]]
+  def method3(p0: Short, p1: Long, p2: Option[Seq[Int]]): Effect[Seq[String]]
 
-  def method4(p0: Long, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long]
+  def method4(p0: BigDecimal, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long]
 
   def method5(p0: Boolean, p1: Float)(p2: List[Int]): Effect[Map[String, String]]
 
@@ -43,11 +43,11 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
 
   override def method2(p0: String): Effect[Unit] = backend.pure(())
 
-  override def method3(p0: Short, p1: BigDecimal, p2: Seq[Int]): Effect[Seq[String]] =
-    backend.pure(p2.map(number => number.toString + p1.toString) :+ p0.toString)
+  override def method3(p0: Short, p1: Long, p2: Option[Seq[Int]]): Effect[Seq[String]] =
+    backend.pure(p2.getOrElse(Seq()).map(number => number.toString + p1.toString) :+ p0.toString)
 
-  override def method4(p0: Long, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long] =
-    backend.pure(p0 + p1 + p2.values.sum + p3.map(_.size).getOrElse(0))
+  override def method4(p0: BigDecimal, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long] =
+    backend.pure(p0.sign.toLong + p1 + p2.values.sum + p3.map(_.size).getOrElse(0))
 
   override def method5(p0: Boolean, p1: Float)(p2: List[Int]): Effect[Map[String, String]] =
     backend.pure(Map(
