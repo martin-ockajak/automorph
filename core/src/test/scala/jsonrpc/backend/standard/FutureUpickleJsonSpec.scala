@@ -19,17 +19,8 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec:
   override def client: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]] =
     Client(codec, backend, handlerTransport)
 
-  override def simpleApis: Proxies[SimpleApi[Effect]] = Proxies(
-    client.bind,
-    client.positional.bind
-  )
+  override def simpleApis: Seq[SimpleApi[Effect]] = clients.map(_.bind[SimpleApi[Effect]])
 
-  override def complexApis: Proxies[ComplexApi[Effect]] = Proxies(
-    client.bind,
-    client.positional.bind
-  )
+  override def complexApis: Seq[ComplexApi[Effect]] = clients.map(_.bind[ComplexApi[Effect]])
 
-  override def invalidApis: Proxies[InvalidApi[Effect]] = Proxies(
-    client.bind,
-    client.positional.bind
-  )
+  override def invalidApis: Seq[InvalidApi[Effect]] = clients.map(_.bind[InvalidApi[Effect]])
