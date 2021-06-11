@@ -44,7 +44,7 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
   override def method2(p0: String): Effect[Unit] = backend.pure(())
 
   override def method3(p0: Short, p1: Long, p2: Option[Seq[Int]]): Effect[Seq[String]] =
-    backend.pure(p2.getOrElse(Seq()).map(number => number.toString + p1.toString) :+ p0.toString)
+    backend.pure(p2.getOrElse(Seq(0)).map(number => (p1 + p0 + number).toString))
 
   override def method4(p0: BigDecimal, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long] =
     backend.pure(p0.sign.toLong + p1 + p2.values.sum + p3.map(_.size).getOrElse(0))
