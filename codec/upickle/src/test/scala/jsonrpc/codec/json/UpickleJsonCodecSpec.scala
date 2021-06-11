@@ -11,7 +11,7 @@ import org.scalacheck.Gen
 import ujson.{Bool, Num, Obj, Str, Value}
 import upickle.AttributeTagged
 
-trait UpickleJsonSpec extends CodecSpec:
+class UpickleJsonCodecSpec extends CodecSpec:
 
   type Node = Value
   type CodecType = UpickleJsonCodec[UpickleJsonCodecSpec.type]
