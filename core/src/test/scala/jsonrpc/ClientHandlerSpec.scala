@@ -1,7 +1,6 @@
 package jsonrpc
 
 import base.BaseSpec
-import jsonrpc.client.UnnamedBinding
 import jsonrpc.protocol.Errors.MethodNotFound
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.{Client, ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, SimpleApiImpl}
@@ -33,9 +32,9 @@ trait ClientHandlerSpec extends BaseSpec:
 
   def run[T](effect: Effect[T]): T
 
-  def client: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]]
+  def client: Client[Node, CodecType, Effect, Short]
 
-  def clients: Seq[Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]]] = Seq(
+  def clients: Seq[Client[Node, CodecType, Effect, Short]] = Seq(
     client, client.copy(argumentsByName = false)
   )
 

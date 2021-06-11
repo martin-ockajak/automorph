@@ -1,7 +1,6 @@
 package jsonrpc.backend.standard
 
 import jsonrpc.backend.standard.FutureBackend
-import jsonrpc.client.UnnamedBinding
 import jsonrpc.codec.json.UpickleJsonSpec
 import jsonrpc.spi.Backend
 import jsonrpc.transport.local.HandlerTransport
@@ -16,7 +15,7 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec:
 
   override def run[T](effect: Effect[T]): T = await(effect)
 
-  override def client: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]] =
+  override def client: Client[Node, CodecType, Effect, Short] =
     Client(codec, backend, handlerTransport)
 
   override def simpleApis: Seq[SimpleApi[Effect]] = clients.map(_.bind[SimpleApi[Effect]])

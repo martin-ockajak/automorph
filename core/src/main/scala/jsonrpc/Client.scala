@@ -1,9 +1,9 @@
 package jsonrpc
 
-import jsonrpc.client.{Binding, ClientMeta, PositionalBinding, UnnamedBinding}
+import jsonrpc.client.ClientMeta
+import jsonrpc.log.Logging
 import jsonrpc.protocol.Errors.ParseError
 import jsonrpc.protocol.{Errors, Request, Response, ResponseError}
-import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, MessageError, Transport}
 import jsonrpc.util.{CannotEqual, NoContextFor}
@@ -25,40 +25,18 @@ import scala.util.{NotGiven, Random, Try}
  * @tparam CodecType message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
- * @tparam BindingType API method binding type
  */
-final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context, BindingType <: Binding[
-  Node,
-  CodecType,
-  Effect,
-  Context
-]](
+final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
   backend: Backend[Effect],
   transport: Transport[Effect, Context],
   argumentsByName: Boolean
-) extends ClientMeta[Node, CodecType, Effect, Context, BindingType] with CannotEqual with Logging:
+) extends ClientMeta[Node, CodecType, Effect, Context] with CannotEqual with Logging:
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   override def toString: String =
     s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Effect: ${backend.getClass.getName})"
-
-  /**
-   * Create a copy of this client with JSON-RPC request arguments supplied ''by name''.
-   *
-   * @return JSON-RPC client with arguments supplied ''by name''
-   */
-  def named: Client[Node, CodecType, Effect, Context, UnnamedBinding[Node, CodecType, Effect, Context]] =
-    Client(codec, backend, transport, false)
-
-  /**
-   * Create a copy of this client with JSON-RPC request arguments supplied ''by position''.
-   *
-   * @return JSON-RPC client with arguments supplied ''by position''
-   */
-  def positional: Client[Node, CodecType, Effect, Context, PositionalBinding[Node, CodecType, Effect, Context]] =
-    Client(codec, backend, transport, true)
 
   /**
    * Perform a method call using specified arguments.
@@ -179,8 +157,8 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context, Bind
 object Client:
 
   type NotTuple[T] = NotGiven[T =:= Tuple]
-  type NoContext = NoContextFor[Client[?, ?, ?, ?, ?]]
-  given NoContext = NoContextFor[Client[?, ?, ?, ?, ?]]()
+  type NoContext = NoContextFor[Client[?, ?, ?, ?]]
+  given NoContext = NoContextFor[Client[?, ?, ?, ?]]()
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with defined request `Context` type.
@@ -201,7 +179,7 @@ object Client:
     codec: CodecType,
     backend: Backend[Effect],
     transport: Transport[Effect, Context]
-  ): Client[Node, CodecType, Effect, Context, UnnamedBinding[Node, CodecType, Effect, Context]] =
+  ): Client[Node, CodecType, Effect, Context] =
     new Client(codec, backend, transport, true)
 
   /**
@@ -222,5 +200,5 @@ object Client:
     codec: CodecType,
     backend: Backend[Effect],
     transport: Transport[Effect, NoContext]
-  ): Client[Node, CodecType, Effect, NoContext, UnnamedBinding[Node, CodecType, Effect, NoContext]] =
+  ): Client[Node, CodecType, Effect, NoContext] =
     Client(codec, backend, transport, true)
