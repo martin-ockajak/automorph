@@ -34,6 +34,21 @@ class UpickleMessagePackSpec extends CodecSpec:
       record.double < 1000.0
     })
     "Encode / Decode" in {
+//       val record = Record(
+//         "",
+//         true,
+//         43,
+//         -1,
+//         Some(516610680),
+//         -9223372036854775808,
+//         Some(-2.63055002E9.toFloat),
+//         -1.9435757251505682E34,
+//         Enum.Zero,
+//         List(),
+//         Map(),
+//         Some(Structure("")),
+//         Some("")
+//       )
       val record: Record = Record(
         "test",
         boolean = true,
