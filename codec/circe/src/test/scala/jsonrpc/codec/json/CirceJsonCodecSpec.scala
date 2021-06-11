@@ -9,6 +9,7 @@ import jsonrpc.codec.json.CirceJsonCodecSpec
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
 import jsonrpc.{Enum, Record, Structure}
+import jsonrpc.Generators.given
 import org.scalacheck.{Arbitrary, Gen}
 import scala.language.implicitConversions
 
@@ -30,9 +31,11 @@ class CirceJsonSpec extends CodecSpec:
 
   "" - {
     "Encode / Decode" in {
-      val encodedJson = codec.encode(record)
-      val decodedJson = codec.decode[Record](encodedJson)
-      decodedJson.should(equal(record))
+      check { (record: Record) =>
+        val encodedValue = codec.encode(record)
+        val decodedValue = codec.decode[Record](encodedValue)
+        decodedValue.equals(record)
+      }
     }
   }
 

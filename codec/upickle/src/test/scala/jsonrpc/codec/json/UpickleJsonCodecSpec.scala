@@ -5,6 +5,7 @@ import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
 import jsonrpc.{Enum, Record, Structure}
+import jsonrpc.Generators.given
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
 import ujson.{Bool, Num, Obj, Str, Value}
@@ -28,9 +29,11 @@ trait UpickleJsonSpec extends CodecSpec:
 
   "" - {
     "Encode / Decode" in {
-      val encodedValue = codec.encode(record)
-      val decodedValue = codec.decode[Record](encodedValue)
-      decodedValue.should(equal(record))
+      check { (record: Record) =>
+        val encodedValue = codec.encode(record)
+        val decodedValue = codec.decode[Record](encodedValue)
+        decodedValue.equals(record)
+      }
     }
   }
 
