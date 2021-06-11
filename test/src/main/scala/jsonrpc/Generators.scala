@@ -25,14 +25,13 @@ case object Generators:
       short <- arbitrary[Short]
       int <- arbitrary[Option[Int]]
       long <- arbitrary[Long]
-      float <- arbitrary[Option[Float]]
       double <- arbitrary[Double]
       enumeration <- arbitrary[Enum]
       list <- arbitrary[List[String]]
       map <- arbitrary[Map[String, Int]]
       structure <- arbitrary[Option[Structure]]
       none <- arbitrary[Option[String]]
-    yield Record(string, boolean, byte, short, int, long, float, double, enumeration, list, map, structure, none)
+    yield Record(string, boolean, byte, short, int, long, double, enumeration, list, map, structure, none)
   }
 
   def arbitraryMesage[Node: Arbitrary]: Arbitrary[Message[Node]] =

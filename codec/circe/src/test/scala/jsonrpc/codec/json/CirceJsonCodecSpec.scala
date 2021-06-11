@@ -4,12 +4,10 @@ import io.circe.generic.auto
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json, parser}
+import jsonrpc.Generators.arbitraryRecord
 import jsonrpc.codec.CodecSpec
 import jsonrpc.codec.json.CirceJsonCodecSpec
-import jsonrpc.spi.Codec
-import jsonrpc.spi.Message.Params
 import jsonrpc.{Enum, Record, Structure}
-import jsonrpc.Generators.arbitraryRecord
 import org.scalacheck.{Arbitrary, Gen}
 import scala.language.implicitConversions
 
