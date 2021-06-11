@@ -1,4 +1,4 @@
-package jsonrpc.core
+package jsonrpc.protocol
 
 import jsonrpc.util.Reflection
 import scala.quoted.{Quotes, Type, quotes}

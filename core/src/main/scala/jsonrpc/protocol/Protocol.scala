@@ -1,4 +1,4 @@
-package jsonrpc.core
+package jsonrpc.protocol
 
 import java.io.IOException
 import jsonrpc.spi.{MessageError, Message}

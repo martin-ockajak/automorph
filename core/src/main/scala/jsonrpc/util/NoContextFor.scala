@@ -1,3 +1,3 @@
-package jsonrpc.core
+package jsonrpc.util
 
 final case class NoContextFor[T]()

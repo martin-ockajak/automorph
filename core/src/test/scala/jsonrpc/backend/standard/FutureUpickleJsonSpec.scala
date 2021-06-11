@@ -1,11 +1,13 @@
-package jsonrpc
+package jsonrpc.backend.standard
 
-import jsonrpc.FutureUpickleJsonSpec.Effect
-import jsonrpc.UpickleJsonSpec.{CodecType, Node}
+import jsonrpc.backend.standard.FutureUpickleJsonSpec.Effect
+import jsonrpc.codec.json.UpickleJsonSpec.{CodecType, Node}
 import jsonrpc.backend.standard.FutureBackend
 import jsonrpc.client.UnnamedBinding
+import jsonrpc.codec.json.UpickleJsonSpec
 import jsonrpc.spi.Backend
 import jsonrpc.transport.local.HandlerTransport
+import jsonrpc.{Client, ComplexApi, Handler, InvalidApi, SimpleApi}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

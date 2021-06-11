@@ -2,12 +2,12 @@ package jsonrpc
 
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.core.Protocol.{MethodNotFound, ParseError}
-import jsonrpc.core.{NoContextFor, Protocol, Request, Response, ResponseError}
+import jsonrpc.protocol.Protocol.{MethodNotFound, ParseError}
+import jsonrpc.protocol.{Protocol, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerProcessor, HandlerResult}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
-import jsonrpc.util.CannotEqual
+import jsonrpc.util.{CannotEqual, NoContextFor}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 

@@ -1,6 +1,6 @@
 package jsonrpc.handler
 
-import jsonrpc.core.MethodBindings.{validApiMethods, effectResultType, methodCall, methodDescription, methodUsesContext}
+import jsonrpc.protocol.MethodBindings.{validApiMethods, effectResultType, methodCall, methodDescription, methodUsesContext}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}

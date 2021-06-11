@@ -5,8 +5,8 @@ import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise}
 import jsonrpc.Handler
-import jsonrpc.core.Protocol
-import jsonrpc.core.Protocol.ErrorType
+import jsonrpc.protocol.Protocol
+import jsonrpc.protocol.Protocol.ErrorType
 import jsonrpc.log.Logging
 import jsonrpc.server.http.FinagleJsonRpcService.defaultErrorStatus
 import jsonrpc.spi.Backend

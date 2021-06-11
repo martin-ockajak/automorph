@@ -1,12 +1,12 @@
-package jsonrpc.core
+package jsonrpc
 
 import base.{BaseSpec, Network}
 import jsonrpc.client.UnnamedBinding
+import jsonrpc.protocol.Protocol.MethodNotFound
 import jsonrpc.spi.{Backend, Codec}
-import jsonrpc.{Client, ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, Record, SimpleApi, SimpleApiImpl, Structure}
-import jsonrpc.Generators.given
-import jsonrpc.core.Protocol.MethodNotFound
+import jsonrpc.{Client, ComplexApi, ComplexApiImpl, Generators, InvalidApi, InvalidApiImpl, Record, SimpleApi, SimpleApiImpl, Structure}
 import org.scalacheck.Prop
+import jsonrpc.Generators.given
 import scala.concurrent.Future
 import scala.util.Try
 

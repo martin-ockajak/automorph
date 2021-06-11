@@ -1,12 +1,12 @@
 package jsonrpc
 
 import jsonrpc.client.{Binding, ClientMeta, PositionalBinding, UnnamedBinding}
-import jsonrpc.core.Protocol.ParseError
-import jsonrpc.core.{NoContextFor, Protocol, Request, Response, ResponseError}
+import jsonrpc.protocol.Protocol.ParseError
+import jsonrpc.protocol.{Protocol, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, MessageError, Transport}
-import jsonrpc.util.CannotEqual
+import jsonrpc.util.{CannotEqual, NoContextFor}
 import scala.collection.immutable.ArraySeq
 import scala.util.{NotGiven, Random, Try}
 

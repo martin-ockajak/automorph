@@ -1,8 +1,8 @@
-package jsonrpc
+package jsonrpc.codec.json
 
-import jsonrpc.UpickleJsonSpec.{CodecType, Node, ReadWriters}
+import jsonrpc.codec.json.UpickleJsonSpec.{CodecType, Node, ReadWriters}
 import jsonrpc.codec.json.UpickleJsonCodec
-import jsonrpc.core.ClientHandlerSpec
+import jsonrpc.{ClientHandlerSpec, Enum, Record, Structure}
 import ujson.Value
 import upickle.AttributeTagged
 

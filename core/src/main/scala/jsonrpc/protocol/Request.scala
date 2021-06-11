@@ -1,6 +1,6 @@
-package jsonrpc.core
+package jsonrpc.protocol
 
-import jsonrpc.core.Protocol.{InvalidRequest, mandatory}
+import jsonrpc.protocol.Protocol.{InvalidRequest, mandatory}
 import jsonrpc.spi.Message
 import jsonrpc.spi.Message.{Id, Params, version}
 
