@@ -1,7 +1,9 @@
 package jsonrpc
 
 import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.*
+import jsonrpc.spi.{Message, MessageError}
 
 case object Generators:
 
@@ -30,19 +32,25 @@ case object Generators:
       map <- arbitrary[Map[String, Int]]
       structure <- arbitrary[Option[Structure]]
       none <- arbitrary[Option[String]]
-    yield Record(
-      string,
-      boolean,
-      byte,
-      short,
-      int,
-      long,
-      float,
-      double,
-      enumeration,
-      list,
-      map,
-      structure,
-      none
-    )
+    yield Record(string, boolean, byte, short, int, long, float, double, enumeration, list, map, structure, none)
   }
+
+  def arbitraryMesage[Node: Arbitrary]: Arbitrary[Message[Node]] =
+    given Arbitrary[MessageError[Node]] = Arbitrary {
+      for
+        code <- arbitrary[Option[Int]]
+        message <- arbitrary[Option[String]]
+        data <- arbitrary[Option[Node]]
+      yield MessageError(code, message, data)
+    }
+    Arbitrary {
+      for
+        jsonrpc <- arbitrary[Option[String]]
+        id <- arbitrary[Option[Either[BigDecimal, String]]]
+        method <- arbitrary[Option[String]]
+        params <- arbitrary[Option[Message.Params[Node]]]
+        result <- arbitrary[Option[Node]]
+        value <- arbitrary[String]
+        error <- arbitrary[Option[MessageError[Node]]]
+      yield Message(jsonrpc, id, method, params, result, error)
+    }
