@@ -26,6 +26,11 @@ class UpickleJsonCodecSpec extends CodecSpec:
   )))
 
   "" - {
+    "test" in {
+      println(Custom.longFromNull())
+      println(Custom.read[Long](ujson.Null))
+//      codec.custom.read[Long](ujson.Null)(using reader)
+    }
     "Encode / Decode" in {
       check { (record: Record) =>
         val encodedValue = codec.encode(record)
@@ -34,6 +39,9 @@ class UpickleJsonCodecSpec extends CodecSpec:
       }
     }
   }
+
+object Custom extends AttributeTagged:
+  def longFromNull(): Long = read[Long](ujson.Null)
 
 object UpickleJsonCodecSpec extends UpickleCustom:
 

@@ -21,7 +21,7 @@
 //
 //  lazy val handlerTransport: HandlerTransport[Node, CodecType, Effect, Short] = HandlerTransport(handler, backend, 0)
 //
-//object CirceJsonSpec extends CirceCustomized:
+//object CirceJsonSpec extends CirceCustom:
 //
 //  given CirceEncoder[Enum] = Encoder.encodeInt.contramap[Enum](_.ordinal)
 //  given CirceDecoder[Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)

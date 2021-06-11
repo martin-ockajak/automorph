@@ -20,6 +20,10 @@ trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Codec[Value]:
 
   override def mediaType: String = "application/json"
 
+  inline def test[T](): T =
+    val reader = compiletime.summonInline[custom.Reader[T]]
+    custom.read[T](ujson.Null)(using reader)
+
   override inline def encode[T](value: T): Value =
     val writer = summonInline[custom.Writer[T]]
     custom.writeJs(value)(using writer)
