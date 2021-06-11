@@ -4,6 +4,13 @@ import base.BaseSpec
 import jsonrpc.spi.Backend
 import scala.util.{Failure, Success, Try}
 
+/**
+ * Backend test.
+ *
+ * Checks effect type operations.
+ *
+ * @tparam Effect effect type
+ */
 trait BackendSpec[Effect[_]] extends BaseSpec:
   private val text = "test"
   private val number = 0

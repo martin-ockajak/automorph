@@ -6,6 +6,11 @@ import jsonrpc.spi.Message.{Params, version}
 import jsonrpc.spi.{Codec, Message, MessageError}
 import jsonrpc.{Enum, Record, Structure}
 
+/**
+ * Codec test.
+ *
+ * Checks message serialization, deserialization and formatting.
+ */
 trait CodecSpec extends BaseSpec:
 
   private lazy val charset = StandardCharsets.UTF_8
