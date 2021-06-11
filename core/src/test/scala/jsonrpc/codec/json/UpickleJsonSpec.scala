@@ -1,6 +1,7 @@
 package jsonrpc.codec.json
 
 import jsonrpc.Handler
+import jsonrpc.codec.common.upickle.UpickleCustom
 import jsonrpc.transport.local.HandlerTransport
 import jsonrpc.{ClientHandlerSpec, ComplexApi, Enum, Record, Structure}
 import ujson.Value

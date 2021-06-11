@@ -19,11 +19,11 @@ trait ComplexApi[Effect[_]]:
 
   def method2(p0: String): Effect[Unit]
 
-  def method3(p0: Short, p1: Long, p2: Option[Seq[Int]]): Effect[Seq[String]]
+  def method3(p0: Float, p1: Long, p2: Option[Seq[Int]]): Effect[Seq[String]]
 
   def method4(p0: BigDecimal, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long]
 
-  def method5(p0: Boolean, p1: Float)(p2: List[Int]): Effect[Map[String, String]]
+  def method5(p0: Boolean, p1: Short)(p2: List[Int]): Effect[Map[String, String]]
 
   def method6(p0: Record, p1: Double): Effect[Option[String]]
 
@@ -43,13 +43,13 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
 
   override def method2(p0: String): Effect[Unit] = backend.pure(())
 
-  override def method3(p0: Short, p1: Long, p2: Option[Seq[Int]]): Effect[Seq[String]] =
+  override def method3(p0: Float, p1: Long, p2: Option[Seq[Int]]): Effect[Seq[String]] =
     backend.pure(p2.getOrElse(Seq(0)).map(number => (p1 + p0 + number).toString))
 
   override def method4(p0: BigDecimal, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long] =
     backend.pure(p0.sign.toLong + p1 + p2.values.sum + p3.map(_.size).getOrElse(0))
 
-  override def method5(p0: Boolean, p1: Float)(p2: List[Int]): Effect[Map[String, String]] =
+  override def method5(p0: Boolean, p1: Short)(p2: List[Int]): Effect[Map[String, String]] =
     backend.pure(Map(
       "boolean" -> p0.toString,
       "float" -> p1.toString,
@@ -85,7 +85,7 @@ trait InvalidApi[Effect[_]]:
 
   def method2(p0: String): Effect[String]
 
-  def method3(p0: Short): Effect[Seq[String]]
+  def method3(p0: Float, p1: Option[Long]): Effect[Seq[String]]
 
   def method4(p0: Long, p1: Byte, p2: String): Effect[String]
 
@@ -97,6 +97,6 @@ final case class InvalidApiImpl[Effect[_]](backend: Backend[Effect]) extends Inv
 
   def method2(p0: String): Effect[String] = backend.pure("")
 
-  def method3(p0: Short): Effect[Seq[String]] = backend.pure(Seq(p0.toString))
+  def method3(p0: Float, p1: Option[Long]): Effect[Seq[String]] = backend.pure(Seq())
 
   def method4(p0: Long, p1: Byte, p2: String): Effect[String] = backend.pure("")

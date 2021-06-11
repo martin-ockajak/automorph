@@ -77,7 +77,7 @@ trait ClientHandlerSpec extends BaseSpec:
                 }
               }
               "method3" in {
-                check { (a0: Short, a1: Long, a2: Option[Seq[Int]]) =>
+                check { (a0: Float, a1: Long, a2: Option[Seq[Int]]) =>
                   consistent(apis, _.method3(a0, a1, a2))
                 }
               }
@@ -87,7 +87,7 @@ trait ClientHandlerSpec extends BaseSpec:
                 }
               }
               "method5" in {
-                check { (a0: Boolean, a1: Float, a2: List[Int]) =>
+                check { (a0: Boolean, a1: Short, a2: List[Int]) =>
                   consistent(apis, _.method5(a0, a1)(a2))
                 }
               }
@@ -137,16 +137,21 @@ trait ClientHandlerSpec extends BaseSpec:
                 error.should(include("invalid"))
               }
               "Missing arguments" in {
-//                val error = intercept[RuntimeException] {
-                  run(api.method3(0))
-//                }.getMessage.toLowerCase
-//                error.should(include("null"))
+                val error = intercept[RuntimeException] {
+                  run(api.method3(0, None))
+                }.getMessage.toLowerCase
+                error.should(include("expected"))
+                error.should(include("null"))
+              }
+              "Optional arguments" in {
+                run(api.method3(0, Some(0)))
               }
               "Invalid argument" in {
                 val error = intercept[RuntimeException] {
                   run(api.method4(0, 0, ""))
                 }.getMessage.toLowerCase
-//                    error.should(include("expected"))
+                error.should(include("expected"))
+                error.should(include("string"))
               }
             }
           }

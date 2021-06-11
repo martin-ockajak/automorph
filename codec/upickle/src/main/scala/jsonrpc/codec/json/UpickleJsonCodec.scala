@@ -1,11 +1,14 @@
 package jsonrpc.codec.json
 
-import jsonrpc.codec.json.UpickleJsonCodec.{fromSpi, Message, MessageError}
+import jsonrpc.codec.common.upickle.UpickleCustom
+import jsonrpc.codec.json.UpickleJsonCodec.{Message, MessageError, fromSpi}
 import jsonrpc.spi
 import scala.collection.immutable.ArraySeq
 import scala.language.adhocExtensions
 import ujson.{Null, Value}
 import upickle.AttributeTagged
+import upickle.core.Util
+import upickle.core.Abort
 
 /**
  * UPickle JSON codec plugin.
@@ -89,12 +92,4 @@ case object UpickleJsonCodec:
     v.data
   )
 
-trait UpickleCustom extends AttributeTagged:
-  override implicit def OptionWriter[T: Writer]: Writer[Option[T]] =
-    summon[Writer[T]].comap[Option[T]](_.getOrElse(null.asInstanceOf[T]))
 
-  override implicit def OptionReader[T: Reader]: Reader[Option[T]] = {
-    new Reader.Delegate[Any, Option[T]](summon[Reader[T]].map(Some(_))){
-      override def visitNull(index: Int) = None
-    }
-  }

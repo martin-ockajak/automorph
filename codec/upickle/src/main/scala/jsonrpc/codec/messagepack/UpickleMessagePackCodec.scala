@@ -1,5 +1,6 @@
 package jsonrpc.codec.messagepack
 
+import jsonrpc.codec.common.upickle.UpickleCustom
 import jsonrpc.codec.messagepack.UpickleMessagePackCodec.{Message, MessageError, fromSpi}
 import jsonrpc.spi
 import scala.collection.immutable.ArraySeq
@@ -87,13 +88,3 @@ case object UpickleMessagePackCodec:
     v.message,
     v.data
   )
-
-trait UpickleCustom extends AttributeTagged:
-  override implicit def OptionWriter[T: Writer]: Writer[Option[T]] =
-    summon[Writer[T]].comap[Option[T]](_.getOrElse(null.asInstanceOf[T]))
-
-  override implicit def OptionReader[T: Reader]: Reader[Option[T]] = {
-    new Reader.Delegate[Any, Option[T]](summon[Reader[T]].map(Some(_))){
-      override def visitNull(index: Int) = None
-    }
-  }

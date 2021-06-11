@@ -2,7 +2,8 @@ package jsonrpc.codec.json
 
 import jsonrpc.Generators.arbitraryRecord
 import jsonrpc.codec.CodecSpec
-import jsonrpc.codec.json.{UpickleCustom, UpickleJsonCodec}
+import jsonrpc.codec.common.upickle.UpickleCustom
+import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.{Enum, Record, Structure}
 import org.scalacheck.{Arbitrary, Gen}
 import ujson.{Bool, Num, Obj, Str, Value}
