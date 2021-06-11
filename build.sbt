@@ -7,6 +7,7 @@ lazy val root = project.in(file(".")).aggregate(
   upickle,
   circe,
 
+  standard,
   zio,
   monix,
   cats,
@@ -26,24 +27,12 @@ lazy val root = project.in(file(".")).aggregate(
 
 // Dependencies
 
-// Core
+// Basic
 lazy val spi = project.settings(
   name := "json-rpc-spi"
 )
-lazy val test = project.dependsOn(
-  spi
-).settings(
-  name := "json-rpc-test",
-  libraryDependencies ++= Seq(
-    // Test
-    "org.scalatest" %% "scalatest" % "3.2.9",
-    "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0",
-    "ch.qos.logback" % "logback-classic" % "1.2.3"
-  )
-)
 lazy val core = project.dependsOn(
-  spi, test % Test,
-  upickle % Test, circe % Test
+  spi, testBase % Test
 ).settings(
   name := "json-rpc-core",
   libraryDependencies ++= Seq(
@@ -52,10 +41,15 @@ lazy val core = project.dependsOn(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.6"
   )
 )
+lazy val standard = project.dependsOn(
+  core, testCore % Test
+).settings(
+  name := "json-rpc-standard"
+)
 
 // Codec
 lazy val upickle = (project in file("codec/upickle")).dependsOn(
-  spi, test % Test
+  spi, testBase % Test
 ).settings(
   name := "json-rpc-upickle",
   libraryDependencies ++= Seq(
@@ -63,7 +57,7 @@ lazy val upickle = (project in file("codec/upickle")).dependsOn(
   )
 )
 lazy val circe = (project in file("codec/circe")).dependsOn(
-  spi, test % Test
+  spi, testBase % Test
 ).settings(
   name := "json-rpc-circe",
   libraryDependencies ++= Seq(
@@ -74,7 +68,7 @@ lazy val circe = (project in file("codec/circe")).dependsOn(
 
 // Effect
 lazy val zio = (project in file("backend/zio")).dependsOn(
-  spi, test % Test
+  spi, testCore % Test
 ).settings(
   name := "json-rpc-zio",
   libraryDependencies ++= Seq(
@@ -82,7 +76,7 @@ lazy val zio = (project in file("backend/zio")).dependsOn(
   )
 )
 lazy val monix = (project in file("backend/monix")).dependsOn(
-  spi, test % Test
+  spi, testCore % Test
 ).settings(
   name := "json-rpc-monix",
   libraryDependencies ++= Seq(
@@ -90,7 +84,7 @@ lazy val monix = (project in file("backend/monix")).dependsOn(
   )
 )
 lazy val cats = (project in file("backend/cats")).dependsOn(
-  spi, test % Test
+  spi, testCore % Test
 ).settings(
   name := "json-rpc-cats",
   libraryDependencies ++= Seq(
@@ -98,7 +92,7 @@ lazy val cats = (project in file("backend/cats")).dependsOn(
   )
 )
 lazy val scalaz = (project in file("backend/scalaz")).dependsOn(
-  spi, test % Test
+  spi, testCore % Test
 ).settings(
   name := "json-rpc-scalaz",
   libraryDependencies ++= Seq(
@@ -108,7 +102,7 @@ lazy val scalaz = (project in file("backend/scalaz")).dependsOn(
 
 // Transport
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
-  spi, test % Test
+  spi, testCore % Test, standard % Test
 ).settings(
   name := "json-rpc-sttp",
   libraryDependencies ++= Seq(
@@ -118,7 +112,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
 
 // Server
 lazy val undertow = (project in file("server/undertow")).dependsOn(
-  core, test % Test, upickle % Test
+  core, testCore % Test, standard % Test
 ).settings(
   name := "json-rpc-undertow",
   libraryDependencies ++= Seq(
@@ -127,12 +121,27 @@ lazy val undertow = (project in file("server/undertow")).dependsOn(
   )
 )
 lazy val finagle = (project in file("server/finagle")).dependsOn(
-  core, test % Test, upickle % Test
+  core, testCore % Test, standard % Test
 ).settings(
   name := "json-rpc-finagle",
   libraryDependencies ++= Seq(
     ("com.twitter" % "finagle-http" % "21.5.0").cross(CrossVersion.for3Use2_13)
   )
+)
+
+// Test
+lazy val testBase = (project in file("test/base")).dependsOn(
+  spi
+).settings(
+  libraryDependencies ++= Seq(
+    // Test
+    "org.scalatest" %% "scalatest" % "3.2.9",
+    "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0",
+    "ch.qos.logback" % "logback-classic" % "1.2.3"
+  )
+)
+lazy val testCore = (project in file("test/core")).dependsOn(
+  testBase, core, upickle, circe
 )
 
 

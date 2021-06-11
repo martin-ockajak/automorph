@@ -1,6 +1,6 @@
 package jsonrpc.backend.standard
 
-import NoBackend.Identity
+import jsonrpc.backend.standard.NoBackend.Identity
 import jsonrpc.spi.Backend
 
 /**

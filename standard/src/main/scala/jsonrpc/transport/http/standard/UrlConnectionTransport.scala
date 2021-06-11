@@ -1,11 +1,12 @@
 package jsonrpc.transport.http.standard
 
+import java.io.ByteArrayOutputStream
 import java.net.{HttpURLConnection, URL, URLConnection}
-import jsonrpc.util.EncodingOps.toArraySeq
 import jsonrpc.backend.standard.NoBackend.Identity
 import jsonrpc.spi.Transport
 import jsonrpc.transport.http.standard.UrlConnectionTransport.HttpProperties
 import scala.collection.immutable.ArraySeq
+import scala.util.Using
 
 /**
  * URL connection HTTP transport.
@@ -24,15 +25,20 @@ case class UrlConnectionTransport(
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
+  private val maxReadIterations = 1024 * 1024
   private val connection = connect()
 
   override def call(request: ArraySeq.ofByte, context: Option[HttpProperties]): Identity[ArraySeq.ofByte] =
     send(request, context)
-    val inputStream = connection.getInputStream
-    try
-      inputStream.toArraySeq(bufferSize)
-    finally
-      inputStream.close()
+    Using.resource(connection.getInputStream) { inputStream =>
+      val outputStream = ByteArrayOutputStream()
+      val buffer = Array.ofDim[Byte](bufferSize)
+      LazyList.iterate(inputStream.read(buffer))(length =>
+        outputStream.write(buffer, 0, length)
+          inputStream.read(buffer)
+      ).takeWhile(_ >= 0).take(maxReadIterations)
+      ArraySeq.ofByte(buffer)
+    }
 
   override def notify(request: ArraySeq.ofByte, context: Option[HttpProperties]): Identity[Unit] =
     send(request, context)

@@ -1,10 +1,10 @@
 package jsonrpc
 
 import base.BaseSpec
+import jsonrpc.Generators.arbitraryRecord
 import jsonrpc.protocol.Errors.MethodNotFound
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.{Client, ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, SimpleApiImpl}
-import jsonrpc.Generators.arbitraryRecord
 import scala.util.Try
 
 /**

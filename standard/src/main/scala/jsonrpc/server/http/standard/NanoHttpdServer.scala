@@ -2,15 +2,15 @@ package jsonrpc.server.http.standard
 
 import java.io.ByteArrayInputStream
 import java.nio.ByteBuffer
-import jsonrpc.util.EncodingOps.toArraySeq
 import jsonrpc.Handler
-import jsonrpc.protocol.Errors
-import jsonrpc.protocol.Errors.ErrorType
 import jsonrpc.handler.HandlerResult
 import jsonrpc.log.Logging
+import jsonrpc.protocol.Errors
+import jsonrpc.protocol.Errors.ErrorType
 import jsonrpc.server.http.standard.NanoHTTPD.Response.Status
-import jsonrpc.server.http.standard.NanoHTTPD.{newFixedLengthResponse, IHTTPSession, Response}
+import jsonrpc.server.http.standard.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import jsonrpc.server.http.standard.NanoHttpdServer.defaultErrorStatus
+import jsonrpc.util.EncodingOps.toArraySeq
 import scala.collection.immutable.ArraySeq
 
 /**
