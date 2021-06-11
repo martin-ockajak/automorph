@@ -140,7 +140,7 @@ trait ClientHandlerSpec extends BaseSpec:
                 val error = intercept[RuntimeException] {
                   run(api.method3(0))
                 }.getMessage.toLowerCase
-//                    error.should(include("invalid"))
+                error.should(include("null"))
               }
               "Invalid argument" in {
                 val error = intercept[RuntimeException] {

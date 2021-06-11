@@ -152,8 +152,6 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
     validRequest.params.fold(
       arguments =>
         // Arguments by position
-        if arguments.size < parameters.size then
-          throw IllegalArgumentException(s"Missing arguments: ${parameters.drop(arguments.size)}")
         if arguments.size > parameters.size then
           throw IllegalArgumentException(s"Redundant arguments: ${parameters.size - arguments.size}")
         else
