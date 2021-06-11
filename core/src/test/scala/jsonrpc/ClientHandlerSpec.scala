@@ -1,13 +1,11 @@
 package jsonrpc
 
-import base.{BaseSpec, Network}
+import base.BaseSpec
 import jsonrpc.client.UnnamedBinding
 import jsonrpc.protocol.Errors.MethodNotFound
 import jsonrpc.spi.{Backend, Codec}
-import jsonrpc.{Client, ComplexApi, ComplexApiImpl, Generators, InvalidApi, InvalidApiImpl, Record, SimpleApi, SimpleApiImpl, Structure}
-import org.scalacheck.Prop
+import jsonrpc.{Client, ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, SimpleApiImpl}
 import jsonrpc.Generators.given
-import scala.concurrent.Future
 import scala.util.Try
 
 /**
@@ -54,9 +52,9 @@ trait ClientHandlerSpec extends BaseSpec:
           apiCombinations(simpleApiInstance, simpleApis, apiNames).foreach { case (mode, apis) =>
             mode - {
               "test" in {
-                check(Prop.forAll { (a0: String) =>
+                check { (a0: String) =>
                   consistent(apis, _.test(a0))
-                })
+                }
               }
             }
           }
@@ -65,58 +63,58 @@ trait ClientHandlerSpec extends BaseSpec:
           apiCombinations(complexApiInstance, complexApis, apiNames).foreach { case (mode, apis) =>
             mode - {
               "method0" in {
-                check(Prop.forAll { () =>
+                check { () =>
                   consistent(apis, _.method0())
-                })
+                }
               }
               "method1" in {
-                check(Prop.forAll { () =>
+                check { () =>
                   consistent(apis, _.method1())
-                })
+                }
               }
               "method2" in {
-                check(Prop.forAll { (a0: String) =>
+                check { (a0: String) =>
                   consistent(apis, _.method2(a0))
-                })
+                }
               }
               "method3" in {
-                check(Prop.forAll { (a0: Short, a1: BigDecimal, a2: Seq[Int]) =>
+                check { (a0: Short, a1: BigDecimal, a2: Seq[Int]) =>
                   consistent(apis, _.method3(a0, a1, a2))
-                })
+                }
               }
               "method4" in {
-                check(Prop.forAll { (a0: Long, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
+                check { (a0: Long, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
                   consistent(apis, _.method4(a0, a1, a2, a3))
-                })
+                }
               }
               "method5" in {
-                check(Prop.forAll { (a0: Boolean, a1: Float, a2: List[Int]) =>
+                check { (a0: Boolean, a1: Float, a2: List[Int]) =>
                   consistent(apis, _.method5(a0, a1)(a2))
-                })
+                }
               }
               "method6" in {
-                check(Prop.forAll { (a0: Record, a1: Double) =>
+                check { (a0: Record, a1: Double) =>
                   consistent(apis, _.method6(a0, a1))
-                })
+                }
               }
               "method7" in {
-                check(Prop.forAll { (a0: Record, a1: Boolean, context: Short) =>
+                check { (a0: Record, a1: Boolean, context: Short) =>
                   consistent(apis, _.method7(a0, a1)(using context))
-                })
+                }
               }
               "method8" in {
-                check(Prop.forAll { (a0: Record, a1: String, a2: Option[Double], context: Short) =>
+                check { (a0: Record, a1: String, a2: Option[Double], context: Short) =>
                   consistent(apis, _.method8(a0, a1, a2)(using context))
-                })
+                }
               }
               "method9" in {
-                check(Prop.forAll { (a0: String) =>
+                check { (a0: String) =>
                   val Seq(expected, result) = apis.map(api => Try(run(api.method9(a0))).toEither)
                   val expectedErrorMessage = expected.swap.map(error =>
                     s"[${error.getClass.getSimpleName}] ${Option(error.getMessage).getOrElse("")}"
                   )
                   expectedErrorMessage.equals(result.swap.map(_.getMessage))
-                })
+                }
               }
             }
           }
