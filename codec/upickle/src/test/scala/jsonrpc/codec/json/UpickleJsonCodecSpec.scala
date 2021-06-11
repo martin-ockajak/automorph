@@ -5,27 +5,26 @@ import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
 import jsonrpc.{Enum, Record, Structure}
-import ujson.{Bool, Num, Str, Value}
+import org.scalacheck.Arbitrary
+import org.scalacheck.Gen
+import ujson.{Bool, Num, Obj, Str, Value}
 import upickle.AttributeTagged
 
 trait UpickleJsonSpec extends CodecSpec:
 
   type Node = Value
-  type CodecType = UpickleJsonCodec[JsonPickler.type]
+  type CodecType = UpickleJsonCodec[UpickleJsonCodecSpec.type]
 
-  def codec: CodecType = UpickleJsonCodec(JsonPickler)
+  override def codec: CodecType = UpickleJsonCodec(UpickleJsonCodecSpec)
 
-  def messageArguments: Seq[Params[Node]] = Seq(
-    Right(Map(
+  override def arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.oneOf(Seq(
+    Str("test"),
+    Obj(
       "x" -> Str("foo"),
       "y" -> Num(1),
       "z" -> Bool(true)
-    ))
-  )
-
-  def messageResults: Seq[Value] = Seq(
-    Str("test")
-  )
+    )
+  )))
 
   "" - {
     "Encode / Decode" in {
@@ -35,7 +34,7 @@ trait UpickleJsonSpec extends CodecSpec:
     }
   }
 
-object JsonPickler extends AttributeTagged:
+object UpickleJsonCodecSpec extends AttributeTagged:
 
   given ReadWriter[Enum] = readwriter[Int].bimap[Enum](
     value => value.ordinal,

@@ -5,30 +5,28 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json, parser}
 import jsonrpc.codec.CodecSpec
-import jsonrpc.codec.json.JsonPickler
+import jsonrpc.codec.json.CirceJsonCodecSpec
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
 import jsonrpc.{Enum, Record, Structure}
+import org.scalacheck.{Arbitrary, Gen}
 import scala.language.implicitConversions
 
 class CirceJsonSpec extends CodecSpec:
 
   type Node = Json
-  type CodecType = CirceJsonCodec[JsonPickler.type]
+  type CodecType = CirceJsonCodec[CirceJsonCodecSpec.type]
 
-  def codec: CodecType = CirceJsonCodec(JsonPickler)
+  override def codec: CodecType = CirceJsonCodec(CirceJsonCodecSpec)
 
-  def messageArguments: Seq[Params[Node]] = Seq(
-    Right(Map(
+  override def arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.oneOf(Seq(
+    Json.fromString("test"),
+    Json.obj(
       "x" -> Json.fromString("foo"),
       "y" -> Json.fromInt(1),
       "z" -> Json.fromBoolean(true)
-    ))
-  )
-
-  def messageResults: Seq[Json] = Seq(
-    Json.fromString("test")
-  )
+    )
+  )))
 
   "" - {
     "Encode / Decode" in {
@@ -38,7 +36,7 @@ class CirceJsonSpec extends CodecSpec:
     }
   }
 
-object JsonPickler extends CirceCustomized:
+object CirceJsonCodecSpec extends CirceCustomized:
 
   given CirceEncoder[Enum] = Encoder.encodeInt.contramap[Enum](_.ordinal)
   given CirceDecoder[Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)

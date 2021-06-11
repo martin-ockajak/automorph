@@ -4,7 +4,8 @@ import base.BaseSpec
 import java.nio.charset.StandardCharsets
 import jsonrpc.spi.Message.{Params, version}
 import jsonrpc.spi.{Codec, Message, MessageError}
-import jsonrpc.{Enum, Record, Structure}
+import jsonrpc.{Enum, Generators, Record, Structure}
+import org.scalacheck.Arbitrary
 
 /**
  * Codec test.
@@ -20,26 +21,7 @@ trait CodecSpec extends BaseSpec:
 
   def codec: CodecType
 
-  def messageArguments: Seq[Params[Node]]
-
-  def messageResults: Seq[Node]
-
-  def messages: Seq[Message[Node]] =
-    for
-      argument <- messageArguments
-      result <- messageResults
-    yield Message(
-      Some(version),
-      Some(Right("test")),
-      None,
-      Some(argument),
-      Some(result),
-      Some(MessageError(
-        Some(0),
-        Some("Test error"),
-        None
-      ))
-    )
+  def arbitraryNode: Arbitrary[Node]
 
   val record: Record = Record(
     "test",
@@ -63,18 +45,19 @@ trait CodecSpec extends BaseSpec:
   )
 
   "" - {
+    given Arbitrary[Message[Node]] = Generators.arbitraryMesage(using arbitraryNode)
     "Serialize / Deserialize" in {
-      messages.foreach { message =>
+      check { (message: Message[Node]) =>
         val rawMessage = codec.serialize(message)
         val formedMessage = codec.deserialize(rawMessage)
-        formedMessage.should(equal(message))
+        formedMessage.equals(message)
       }
     }
     "Format" in {
-      messages.foreach { message =>
+      check { (message: Message[Node]) =>
         val formattedMessage = codec.format(message)
         val rawMessage = codec.serialize(message)
-        formattedMessage.getBytes(charset).length.should(be > rawMessage.size)
+        formattedMessage.getBytes(charset).length > rawMessage.size
       }
     }
   }
