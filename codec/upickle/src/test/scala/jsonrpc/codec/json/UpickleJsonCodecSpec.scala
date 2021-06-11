@@ -5,7 +5,7 @@ import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
 import jsonrpc.{Enum, Record, Structure}
-import jsonrpc.Generators.given
+import jsonrpc.Generators.arbitraryRecord
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
 import ujson.{Bool, Num, Obj, Str, Value}

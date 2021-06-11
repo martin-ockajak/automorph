@@ -9,7 +9,7 @@ import jsonrpc.codec.json.CirceJsonCodecSpec
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
 import jsonrpc.{Enum, Record, Structure}
-import jsonrpc.Generators.given
+import jsonrpc.Generators.arbitraryRecord
 import org.scalacheck.{Arbitrary, Gen}
 import scala.language.implicitConversions
 

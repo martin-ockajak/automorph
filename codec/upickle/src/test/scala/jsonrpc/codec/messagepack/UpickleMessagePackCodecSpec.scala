@@ -5,7 +5,7 @@ import jsonrpc.codec.messagepack.UpickleMessagePackCodec
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
 import jsonrpc.{Enum, Record, Structure}
-import jsonrpc.Generators
+import jsonrpc.Generators.arbitraryRecord
 import org.scalacheck.{Arbitrary, Gen}
 import upack.{Bool, Float64, Msg, Obj, Str}
 import upickle.AttributeTagged

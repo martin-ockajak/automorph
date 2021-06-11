@@ -5,7 +5,7 @@ import jsonrpc.client.UnnamedBinding
 import jsonrpc.protocol.Errors.MethodNotFound
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.{Client, ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, SimpleApiImpl}
-import jsonrpc.Generators.given
+import jsonrpc.Generators.arbitraryRecord
 import scala.util.Try
 
 /**
