@@ -24,3 +24,9 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec:
   override def complexApis: Seq[ComplexApi[Effect]] = clients.map(_.bind[ComplexApi[Effect]])
 
   override def invalidApis: Seq[InvalidApi[Effect]] = clients.map(_.bind[InvalidApi[Effect]])
+
+//  "" - {
+//    "test" in {
+//      client.asInstanceOf[Client[Node, CodecType, Effect, Short, ?]].callByName[UpickleJsonSpec.Arguments, Int]("test")(UpickleJsonSpec.Arguments("test"))(using 0)
+//    }
+//  }
