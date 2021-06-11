@@ -34,7 +34,7 @@ class UpickleMessagePackSpec extends CodecSpec:
     }
   }
 
-object UpickleMessagePackCodecSpec extends AttributeTagged:
+object UpickleMessagePackCodecSpec extends UpickleCustom:
 
   given ReadWriter[Enum] = readwriter[Int].bimap[Enum](
     value => value.ordinal,

@@ -11,12 +11,12 @@ import scala.collection.immutable.ArraySeq
  *
  * @see [[https://circe.github.io/circe Documentation]]
  * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
- * @param customized customized Circe encoders and decoders implicits instance
- * @tparam Customized customized Circe encoders and decoders implicits instance type
+ * @param custom customized Circe encoders and decoders implicits instance
+ * @tparam Custom customized Circe encoders and decoders implicits instance type
  */
-final case class CirceJsonCodec[Customized <: CirceCustomized](
-  customized: Customized = new CirceCustomized {}
-) extends CirceJsonCodecMeta[Customized]:
+final case class CirceJsonCodec[Custom <: CirceCustom](
+  custom: Custom = new CirceCustom {}
+) extends CirceJsonCodecMeta[Custom]:
   private val charset = StandardCharsets.UTF_8
 
   override def mediaType: String = "application/json"
@@ -30,7 +30,7 @@ final case class CirceJsonCodec[Customized <: CirceCustomized](
   override def format(message: Message[Json]): String =
     message.asJson.spaces2
 
-trait CirceCustomized:
+trait CirceCustom:
 
   final case class CirceEncoder[T](encoder: Encoder[T])
   final case class CirceDecoder[T](decoder: Decoder[T])

@@ -9,10 +9,10 @@ import scala.compiletime.summonInline
 /**
  * Circe JSON codec plugin code generation.
  *
- * @tparam Customized customized Circe encoders and decoders implicits instance type
+ * @tparam Custom customized Circe encoders and decoders implicits instance type
  */
-trait CirceJsonCodecMeta[Customized <: CirceCustomized] extends Codec[Json]:
-  this: CirceJsonCodec[Customized] =>
+trait CirceJsonCodecMeta[Custom <: CirceCustom] extends Codec[Json]:
+  this: CirceJsonCodec[Custom] =>
 
   given Encoder[Message[Json]] = deriveEncoder[Message[Json]]
   given Decoder[Message[Json]] = deriveDecoder[Message[Json]]
@@ -20,10 +20,9 @@ trait CirceJsonCodecMeta[Customized <: CirceCustomized] extends Codec[Json]:
   override def mediaType: String = "application/json"
 
   override inline def encode[T](value: T): Json =
-    val encoder = summonInline[customized.CirceEncoder[T]].encoder
+    val encoder = summonInline[custom.CirceEncoder[T]].encoder
     value.asJson(using encoder)
 
   override inline def decode[T](node: Json): T =
-    val decoder = summonInline[customized.CirceDecoder[T]].decoder
+    val decoder = summonInline[custom.CirceDecoder[T]].decoder
     node.as[T](using decoder).toTry.get
-

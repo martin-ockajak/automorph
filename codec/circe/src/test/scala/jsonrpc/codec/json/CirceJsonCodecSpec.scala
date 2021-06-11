@@ -37,7 +37,7 @@ class CirceJsonSpec extends CodecSpec:
     }
   }
 
-object CirceJsonCodecSpec extends CirceCustomized:
+object CirceJsonCodecSpec extends CirceCustom:
 
   given CirceEncoder[Enum] = Encoder.encodeInt.contramap[Enum](_.ordinal)
   given CirceDecoder[Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)

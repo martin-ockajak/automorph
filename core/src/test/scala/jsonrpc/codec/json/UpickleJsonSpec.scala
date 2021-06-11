@@ -18,7 +18,7 @@ trait UpickleJsonSpec extends ClientHandlerSpec:
 
   lazy val handlerTransport: HandlerTransport[Node, CodecType, Effect, Short] = HandlerTransport(handler, backend, 0)
 
-object UpickleJsonSpec extends AttributeTagged:
+object UpickleJsonSpec extends UpickleCustom:
 
   given ReadWriter[Enum] = readwriter[Int].bimap[Enum](
       value => value.ordinal,

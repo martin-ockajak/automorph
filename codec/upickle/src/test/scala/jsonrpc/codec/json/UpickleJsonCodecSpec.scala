@@ -2,7 +2,7 @@ package jsonrpc.codec.json
 
 import jsonrpc.Generators.arbitraryRecord
 import jsonrpc.codec.CodecSpec
-import jsonrpc.codec.json.UpickleJsonCodec
+import jsonrpc.codec.json.{UpickleCustom, UpickleJsonCodec}
 import jsonrpc.{Enum, Record, Structure}
 import org.scalacheck.{Arbitrary, Gen}
 import ujson.{Bool, Num, Obj, Str, Value}
@@ -34,7 +34,7 @@ class UpickleJsonCodecSpec extends CodecSpec:
     }
   }
 
-object UpickleJsonCodecSpec extends AttributeTagged:
+object UpickleJsonCodecSpec extends UpickleCustom:
 
   given ReadWriter[Enum] = readwriter[Int].bimap[Enum](
     value => value.ordinal,

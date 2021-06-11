@@ -1,37 +1,38 @@
 package jsonrpc.codec.json
 
-import jsonrpc.codec.json.UpickleJsonCodec.{Message, MessageError, fromSpi}
+import jsonrpc.codec.json.UpickleJsonCodec.{fromSpi, Message, MessageError}
 import jsonrpc.spi
 import scala.collection.immutable.ArraySeq
-import ujson.Value
-import upickle.Api
+import scala.language.adhocExtensions
+import ujson.{Null, Value}
+import upickle.AttributeTagged
 
 /**
  * UPickle JSON codec plugin.
  *
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[http://com-lihaoyi.github.io/upickle/#uJson Node type]]
- * @param customized customized Upickle reader and writer implicits instance
- * @tparam Customized customized Upickle reader and writer implicits instance type
+ * @param custom customized Upickle reader and writer implicits instance
+ * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-final case class UpickleJsonCodec[Customized <: Api](
-  customized: Customized = upickle.default
-) extends UpickleJsonCodecMeta[Customized]:
+final case class UpickleJsonCodec[Custom <: UpickleCustom](
+  custom: Custom = new UpickleCustom {}
+) extends UpickleJsonCodecMeta[Custom]:
 
   private val indent = 2
-  private given customized.ReadWriter[Message] = customized.macroRW
-  private given customized.ReadWriter[MessageError] = customized.macroRW
+  private given custom.ReadWriter[Message] = custom.macroRW
+  private given custom.ReadWriter[MessageError] = custom.macroRW
 
   override def mediaType: String = "application/json"
 
   override def serialize(message: spi.Message[Value]): ArraySeq.ofByte =
-    ArraySeq.ofByte(customized.writeToByteArray(fromSpi(message)))
+    ArraySeq.ofByte(custom.writeToByteArray(fromSpi(message)))
 
   override def deserialize(data: ArraySeq.ofByte): spi.Message[Value] =
-    customized.read[Message](data.unsafeArray).toSpi
+    custom.read[Message](data.unsafeArray).toSpi
 
   override def format(message: spi.Message[Value]): String =
-    customized.write(fromSpi(message), indent)
+    custom.write(fromSpi(message), indent)
 
 case object UpickleJsonCodec:
 
@@ -87,3 +88,13 @@ case object UpickleJsonCodec:
     v.message,
     v.data
   )
+
+trait UpickleCustom extends AttributeTagged:
+  override implicit def OptionWriter[T: Writer]: Writer[Option[T]] =
+    summon[Writer[T]].comap[Option[T]](_.getOrElse(null.asInstanceOf[T]))
+
+  override implicit def OptionReader[T: Reader]: Reader[Option[T]] = {
+    new Reader.Delegate[Any, Option[T]](summon[Reader[T]].map(Some(_))){
+      override def visitNull(index: Int) = None
+    }
+  }
