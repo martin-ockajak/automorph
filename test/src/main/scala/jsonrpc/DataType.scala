@@ -12,6 +12,7 @@ final case class Record(
   short: Short,
   int: Option[Int],
   long: Long,
+  float: Float,
   double: Double,
   enumeration: Enum,
   list: List[String],

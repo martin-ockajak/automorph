@@ -28,9 +28,14 @@ class UpickleMessagePackSpec extends CodecSpec:
   "" - {
     "Encode / Decode" in {
       check { (record: Record) =>
-        val encodedValue = codec.encode(record)
-        val decodedValue = codec.decode[Record](encodedValue)
-        decodedValue.equals(record)
+        try
+          val encodedValue = codec.encode(record)
+          val decodedValue = codec.decode[Record](encodedValue)
+          decodedValue.equals(record)
+        catch
+          case error =>
+            println(error)
+            throw error
       }
     }
   }
