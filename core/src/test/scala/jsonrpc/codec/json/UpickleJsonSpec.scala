@@ -1,6 +1,6 @@
 package jsonrpc.codec.json
 
-import jsonrpc.codec.json.UpickleJsonSpec.{CodecType, Node, ReadWriters}
+import jsonrpc.codec.json.UpickleJsonSpec.ReadWriters
 import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.Handler
 import jsonrpc.spi.Backend
@@ -24,8 +24,6 @@ trait UpickleJsonSpec extends ClientHandlerSpec:
   lazy val handlerTransport: HandlerTransport[Node, CodecType, Effect, Short] = HandlerTransport(handler, backend, 0)
 
 object UpickleJsonSpec:
-  type Node = Value
-  type CodecType = UpickleJsonCodec[ReadWriters.type]
 
   object ReadWriters extends AttributeTagged:
 

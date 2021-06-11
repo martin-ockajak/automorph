@@ -3,7 +3,6 @@ package jsonrpc.backend.standard
 import jsonrpc.backend.standard.FutureBackend
 import jsonrpc.client.UnnamedBinding
 import jsonrpc.codec.json.UpickleJsonSpec
-import jsonrpc.codec.json.UpickleJsonSpec.{CodecType, Node}
 import jsonrpc.spi.Backend
 import jsonrpc.transport.local.HandlerTransport
 import jsonrpc.{Client, ComplexApi, Handler, InvalidApi, SimpleApi}
