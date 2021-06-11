@@ -8,7 +8,7 @@ import jsonrpc.spi.{MessageError, Message}
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  */
-case object ErrorHandling:
+case object Errors:
 
   /** JSON-RPC parse error. */
   final case class ParseError(

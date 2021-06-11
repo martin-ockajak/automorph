@@ -1,8 +1,8 @@
 package jsonrpc
 
 import jsonrpc.client.{Binding, ClientMeta, PositionalBinding, UnnamedBinding}
-import jsonrpc.protocol.ErrorHandling.ParseError
-import jsonrpc.protocol.{ErrorHandling, Request, Response, ResponseError}
+import jsonrpc.protocol.Errors.ParseError
+import jsonrpc.protocol.{Errors, Request, Response, ResponseError}
 import jsonrpc.log.Logging
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, MessageError, Transport}
@@ -138,7 +138,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context, Bind
           error => raiseError(error, formedRequest),
           validResponse =>
             validResponse.value.fold(
-              error => raiseError(ErrorHandling.errorException(error.code, error.message), formedRequest),
+              error => raiseError(Errors.errorException(error.code, error.message), formedRequest),
               result =>
                 // Decode result
                 Try(decodeResult(result)).fold(

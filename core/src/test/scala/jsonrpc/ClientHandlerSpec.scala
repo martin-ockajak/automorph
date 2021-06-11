@@ -2,7 +2,7 @@ package jsonrpc
 
 import base.{BaseSpec, Network}
 import jsonrpc.client.UnnamedBinding
-import jsonrpc.protocol.ErrorHandling.MethodNotFound
+import jsonrpc.protocol.Errors.MethodNotFound
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.{Client, ComplexApi, ComplexApiImpl, Generators, InvalidApi, InvalidApiImpl, Record, SimpleApi, SimpleApiImpl, Structure}
 import org.scalacheck.Prop
