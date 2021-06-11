@@ -9,7 +9,10 @@ import jsonrpc.{ClientHandlerSpec, ComplexApi, Enum, Record, Structure}
 import ujson.Value
 import upickle.AttributeTagged
 
-trait UpickleJsonSpec[Effect[_]] extends ClientHandlerSpec[Value, CodecType, Effect]:
+trait UpickleJsonSpec extends ClientHandlerSpec:
+
+  type Node = Value
+  type CodecType = UpickleJsonCodec[ReadWriters.type]
 
   def codec: CodecType = UpickleJsonCodec(ReadWriters)
 

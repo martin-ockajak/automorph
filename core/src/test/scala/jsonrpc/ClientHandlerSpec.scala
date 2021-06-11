@@ -19,7 +19,11 @@ import scala.util.Try
  * @tparam CodecType message codec plugin type
  * @tparam Effect effect type
  */
-trait ClientHandlerSpec[Node, CodecType <: Codec[Node], Effect[_]] extends BaseSpec:
+trait ClientHandlerSpec extends BaseSpec:
+
+  type Node
+  type CodecType <: Codec[Node]
+  type Effect[_]
 
   final case class Proxies[Api](
     named: Api,
