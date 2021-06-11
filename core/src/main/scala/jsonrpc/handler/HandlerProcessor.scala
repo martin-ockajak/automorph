@@ -3,8 +3,8 @@ package jsonrpc.handler
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.{Handler, JsonRpcError}
-import jsonrpc.protocol.Protocol.{MethodNotFound, ParseError}
-import jsonrpc.protocol.{Protocol, Request, Response, ResponseError}
+import jsonrpc.protocol.ErrorHandling.{MethodNotFound, ParseError}
+import jsonrpc.protocol.{ErrorHandling, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerResult}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
@@ -181,8 +181,8 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
       case JsonRpcError(message, code, data, _) => ResponseError(code, message, data.asInstanceOf[Option[Node]])
       case _                                    =>
         // Assemble error details
-        val code = Protocol.exceptionError(error.getClass).code
-        val errorDetails = Protocol.errorDetails(error)
+        val code = ErrorHandling.exceptionError(error.getClass).code
+        val errorDetails = ErrorHandling.errorDetails(error)
         val message = errorDetails.headOption.getOrElse("Unknown error")
         val data = Some(encodeStrings(errorDetails.drop(1)))
         ResponseError(code, message, data)

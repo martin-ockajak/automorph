@@ -5,8 +5,8 @@ import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, StatusCodes}
 import java.nio.ByteBuffer
 import jsonrpc.Handler
-import jsonrpc.protocol.Protocol
-import jsonrpc.protocol.Protocol.ErrorType
+import jsonrpc.protocol.ErrorHandling
+import jsonrpc.protocol.ErrorHandling.ErrorType
 import jsonrpc.log.Logging
 import jsonrpc.server.http.UndertowJsonRpcHandler.defaultErrorStatus
 import jsonrpc.spi.Backend
@@ -66,7 +66,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
 
   private def sendServerError(error: Throwable, exchange: HttpServerExchange): Unit =
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
-    val errorMessage = Protocol.errorDetails(error).mkString("\n").toArraySeq
+    val errorMessage = ErrorHandling.errorDetails(error).mkString("\n").toArraySeq
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(exchange)))
     sendResponse(errorMessage, statusCode, exchange)
 

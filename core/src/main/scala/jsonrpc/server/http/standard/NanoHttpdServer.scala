@@ -4,8 +4,8 @@ import java.io.ByteArrayInputStream
 import java.nio.ByteBuffer
 import jsonrpc.util.EncodingOps.toArraySeq
 import jsonrpc.Handler
-import jsonrpc.protocol.Protocol
-import jsonrpc.protocol.Protocol.ErrorType
+import jsonrpc.protocol.ErrorHandling
+import jsonrpc.protocol.ErrorHandling.ErrorType
 import jsonrpc.handler.HandlerResult
 import jsonrpc.log.Logging
 import jsonrpc.server.http.standard.NanoHTTPD.Response.Status
@@ -60,7 +60,7 @@ case class NanoHttpdServer[Effect[_]] private (
 
   private def createServerError(error: Throwable, session: IHTTPSession): Response =
     val status = Status.INTERNAL_ERROR
-    val errorMessage = Protocol.errorDetails(error).mkString("\n").toArraySeq
+    val errorMessage = ErrorHandling.errorDetails(error).mkString("\n").toArraySeq
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(session)))
     createResponse(errorMessage, status, session)
 

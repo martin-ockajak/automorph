@@ -2,8 +2,8 @@ package jsonrpc
 
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
-import jsonrpc.protocol.Protocol.{MethodNotFound, ParseError}
-import jsonrpc.protocol.{Protocol, Request, Response, ResponseError}
+import jsonrpc.protocol.ErrorHandling.{MethodNotFound, ParseError}
+import jsonrpc.protocol.{ErrorHandling, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerProcessor, HandlerResult}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
