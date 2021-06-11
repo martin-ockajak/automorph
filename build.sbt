@@ -43,9 +43,7 @@ lazy val test = project.dependsOn(
 )
 lazy val core = project.dependsOn(
   spi, test % Test,
-  zio % Test, monix % Test, scalaz % Test,
-  upickle % Test, circe % Test,
-  sttp % Test
+  upickle % Test, circe % Test
 ).settings(
   name := "json-rpc-core",
   libraryDependencies ++= Seq(
