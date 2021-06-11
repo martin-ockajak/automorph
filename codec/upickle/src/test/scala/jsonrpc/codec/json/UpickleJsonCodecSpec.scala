@@ -4,7 +4,7 @@ import jsonrpc.codec.CodecSpec
 import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
-import jsonrpc.{ComplexApi, Enum, Record, Structure}
+import jsonrpc.{Enum, Record, Structure}
 import ujson.{Bool, Num, Str, Value}
 import upickle.AttributeTagged
 
