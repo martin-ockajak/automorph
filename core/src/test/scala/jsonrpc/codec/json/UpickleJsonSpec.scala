@@ -2,12 +2,23 @@ package jsonrpc.codec.json
 
 import jsonrpc.codec.json.UpickleJsonSpec.{CodecType, Node, ReadWriters}
 import jsonrpc.codec.json.UpickleJsonCodec
-import jsonrpc.{ClientHandlerSpec, Enum, Record, Structure}
+import jsonrpc.Handler
+import jsonrpc.spi.Backend
+import jsonrpc.transport.local.HandlerTransport
+import jsonrpc.{ClientHandlerSpec, ComplexApi, Enum, Record, Structure}
 import ujson.Value
 import upickle.AttributeTagged
 
 trait UpickleJsonSpec[Effect[_]] extends ClientHandlerSpec[Value, CodecType, Effect]:
+
   def codec: CodecType = UpickleJsonCodec(ReadWriters)
+
+  def backend: Backend[Effect]
+
+  def handler: Handler[Node, CodecType, Effect, Short] = Handler[Node, CodecType, Effect, Short](codec, backend)
+    .bind(simpleApiInstance).bind[ComplexApi[Effect]](complexApiInstance)
+
+  def handlerTransport: HandlerTransport[Node, CodecType, Effect, Short] = HandlerTransport(handler, backend, 0)
 
 object UpickleJsonSpec:
   type Node = Value

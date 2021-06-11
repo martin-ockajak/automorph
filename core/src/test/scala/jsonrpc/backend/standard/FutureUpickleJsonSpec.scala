@@ -13,15 +13,12 @@ import scala.concurrent.Future
 
 class FutureUpickleJsonSpec extends UpickleJsonSpec[Effect]:
 
-  lazy val handler = Handler[Node, CodecType, Effect, Short](codec, backend)
-    .bind(simpleApiInstance).bind[ComplexApi[Effect]](complexApiInstance)
-
   override def backend: Backend[Effect] = FutureBackend()
 
   override def run[T](effect: Effect[T]): T = await(effect)
 
   override def client: Client[Node, CodecType, Effect, Short, UnnamedBinding[Node, CodecType, Effect, Short]] =
-    Client(codec, backend, HandlerTransport(handler, backend, 0))
+    Client(codec, backend, handlerTransport)
 
   override def simpleApis: TestedApis[SimpleApi[Effect]] = TestedApis(
     client.bind,

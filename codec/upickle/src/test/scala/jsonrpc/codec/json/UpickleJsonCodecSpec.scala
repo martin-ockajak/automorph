@@ -4,11 +4,11 @@ import jsonrpc.codec.CodecSpec
 import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.spi.Codec
 import jsonrpc.spi.Message.Params
-import jsonrpc.{Enum, Record, Structure}
+import jsonrpc.{ComplexApi, Enum, Record, Structure}
 import ujson.{Bool, Num, Str, Value}
 import upickle.AttributeTagged
 
-class UpickleJsonSpec extends CodecSpec:
+trait UpickleJsonSpec extends CodecSpec:
 
   type Node = Value
   type CodecType = UpickleJsonCodec[JsonPickler.type]
