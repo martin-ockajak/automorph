@@ -1,7 +1,7 @@
 package jsonrpc.codec.messagepack
 
 import jsonrpc.codec.common.upickle.UpickleCustom
-import jsonrpc.codec.messagepack.UpickleMessagePackCodec.{Message, MessageError, fromSpi}
+import jsonrpc.codec.messagepack.UpickleMessagePackCodec.{fromSpi, Message, MessageError}
 import jsonrpc.spi
 import scala.collection.immutable.ArraySeq
 import upack.Msg
@@ -16,10 +16,12 @@ import upack.Msg
  */
 final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
   custom: Custom = new UpickleCustom {}
-) extends UpickleMessagePackCodecMeta[Custom]:
+) extends UpickleMessagePackCodecMeta[Custom] {
 
   private val indent = 2
+
   private given custom.ReadWriter[Message] = custom.macroRW
+
   private given custom.ReadWriter[MessageError] = custom.macroRW
 
   override def mediaType: String = "application/msgpack"
@@ -32,8 +34,9 @@ final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
 
   override def format(message: spi.Message[Msg]): String =
     custom.write(fromSpi(message), indent)
+}
 
-case object UpickleMessagePackCodec:
+case object UpickleMessagePackCodec {
 
   // Workaround for upickle bug causing the following error when using its
   // macroRW method to generate readers and writers for case classes with type parameters:
@@ -50,7 +53,7 @@ case object UpickleMessagePackCodec:
     params: Option[Either[List[Msg], Map[String, Msg]]],
     result: Option[Msg],
     error: Option[MessageError]
-  ):
+  ) {
 
     def toSpi: spi.Message[Msg] = spi.Message[Msg](
       jsonrpc,
@@ -60,6 +63,7 @@ case object UpickleMessagePackCodec:
       result,
       error.map(_.toSpi)
     )
+  }
 
   def fromSpi(v: spi.Message[Msg]): Message = Message(
     v.jsonrpc,
@@ -74,16 +78,18 @@ case object UpickleMessagePackCodec:
     code: Option[Int],
     message: Option[String],
     data: Option[Msg]
-  ):
+  ) {
 
     def toSpi: spi.MessageError[Msg] = spi.MessageError[Msg](
       code,
       message,
       data
     )
+  }
 
   def fromSpi(v: spi.MessageError[Msg]): MessageError = MessageError(
     v.code,
     v.message,
     v.data
   )
+}

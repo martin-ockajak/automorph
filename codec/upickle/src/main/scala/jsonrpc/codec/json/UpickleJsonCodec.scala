@@ -1,7 +1,7 @@
 package jsonrpc.codec.json
 
 import jsonrpc.codec.common.upickle.UpickleCustom
-import jsonrpc.codec.json.UpickleJsonCodec.{Message, MessageError, fromSpi}
+import jsonrpc.codec.json.UpickleJsonCodec.{fromSpi, Message, MessageError}
 import jsonrpc.spi
 import scala.collection.immutable.ArraySeq
 import ujson.Value
@@ -16,10 +16,12 @@ import ujson.Value
  */
 final case class UpickleJsonCodec[Custom <: UpickleCustom](
   custom: Custom = new UpickleCustom {}
-) extends UpickleJsonCodecMeta[Custom]:
+) extends UpickleJsonCodecMeta[Custom] {
 
   private val indent = 2
+
   private given custom.ReadWriter[Message] = custom.macroRW
+
   private given custom.ReadWriter[MessageError] = custom.macroRW
 
   override def mediaType: String = "application/json"
@@ -32,8 +34,9 @@ final case class UpickleJsonCodec[Custom <: UpickleCustom](
 
   override def format(message: spi.Message[Value]): String =
     custom.write(fromSpi(message), indent)
+}
 
-case object UpickleJsonCodec:
+case object UpickleJsonCodec {
 
   // Workaround for upickle bug causing the following error when using its
   // macroRW method to generate readers and writers for case classes with type parameters:
@@ -50,7 +53,7 @@ case object UpickleJsonCodec:
     params: Option[Either[List[Value], Map[String, Value]]],
     result: Option[Value],
     error: Option[MessageError]
-  ):
+  ) {
 
     def toSpi: spi.Message[Value] = spi.Message[Value](
       jsonrpc,
@@ -60,6 +63,7 @@ case object UpickleJsonCodec:
       result,
       error.map(_.toSpi)
     )
+  }
 
   def fromSpi(v: spi.Message[Value]): Message = Message(
     v.jsonrpc,
@@ -74,18 +78,18 @@ case object UpickleJsonCodec:
     code: Option[Int],
     message: Option[String],
     data: Option[Value]
-  ):
+  ) {
 
     def toSpi: spi.MessageError[Value] = spi.MessageError[Value](
       code,
       message,
       data
     )
+  }
 
   def fromSpi(v: spi.MessageError[Value]): MessageError = MessageError(
     v.code,
     v.message,
     v.data
   )
-
-
+}
