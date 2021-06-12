@@ -14,8 +14,9 @@ import upack.Msg
  * @param custom customized Upickle reader and writer implicits instance
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-final case class UpickleMessagePackCodec[Custom <: UpickleCustom](custom: Custom)
-  extends UpickleMessagePackCodecMeta[Custom]:
+final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
+  custom: Custom = new UpickleCustom {}
+) extends UpickleMessagePackCodecMeta[Custom]:
 
   private val indent = 2
   private given custom.ReadWriter[Message] = custom.macroRW
