@@ -12,11 +12,14 @@ import org.slf4j.LoggerFactory
  * Scala Logging documentation: https://github.com/lightbend/scala-logging
  * MDC concept description: http://logback.qos.ch/manual/mdc.html
  */
-trait Logging:
+trait Logging {
   protected val logger = Logger(LoggerFactory.getLogger(getClass))
+}
 
-trait StrictLogging:
+trait StrictLogging {
   protected val logger = Logger(LoggerFactory.getLogger(getClass))
+}
 
-trait LazyLogging:
+trait LazyLogging {
   protected lazy val logger = Logger(LoggerFactory.getLogger(getClass))
+}

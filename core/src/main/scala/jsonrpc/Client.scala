@@ -31,7 +31,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   backend: Backend[Effect],
   transport: Transport[Effect, Context],
   argumentsByName: Boolean
-) extends ClientMeta[Node, CodecType, Effect, Context] with CannotEqual with Logging:
+) extends ClientMeta[Node, CodecType, Effect, Context] with CannotEqual with Logging {
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
@@ -153,8 +153,9 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   private def raiseError[T](error: Throwable, requestMessage: Message[Node]): Effect[T] =
     logger.error(s"Failed to perform JSON-RPC request", error, requestMessage.properties)
     backend.failed(error)
+}
 
-object Client:
+object Client {
 
   type NotTuple[T] = NotGiven[T =:= Tuple]
   type NoContext = NoContextFor[Client[?, ?, ?, ?]]
@@ -202,3 +203,4 @@ object Client:
     transport: Transport[Effect, NoContext]
   ): Client[Node, CodecType, Effect, NoContext] =
     Client(codec, backend, transport, true)
+}

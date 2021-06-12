@@ -12,9 +12,8 @@ import org.slf4j.{LoggerFactory, MDC, Logger as Underlying}
  * @see [[http://logback.qos.ch/manual/mdc.html MDC concept description]]
  * @param underlying underlying [[https://www.javadoc.io/doc/org.slf4j/slf4j-api/1.7.30/org/slf4j/Logger.html SLF4J logger]]
  */
-
 @SerialVersionUID(782158461L)
-final case class Logger private (private val underlying: Underlying):
+final case class Logger private (private val underlying: Underlying) {
 
   type Not[T] = T => Nothing
   infix type Or[T, U] = Not[Not[T] & Not[U]]
@@ -137,9 +136,10 @@ final case class Logger private (private val underlying: Underlying):
       removeDiagnosticContext(iterableProperties)
 
   private def unpackProperties[T <: Matchable](properties: => T): Iterable[(String, Matchable)] =
-    val iterableProperties = properties match
-      case product: Product                        => productProperties(product)
-      case iterable: Iterable[?] => iterable
+    val iterableProperties =
+      properties match
+        case product: Product      => productProperties(product)
+        case iterable: Iterable[?] => iterable
     // FIXME - find a way to avoid Matchable type coercion
     iterableProperties.asInstanceOf[Iterable[(String, Matchable)]]
 
@@ -159,8 +159,9 @@ final case class Logger private (private val underlying: Underlying):
     value match
       case stringValue: String => stringValue
       case anyValue            => Logger.prettyPrint(anyValue).plainText
+}
 
-case object Logger:
+case object Logger {
 
   private val prettyPrint = pprint.PPrinter.BlackWhite.copy(defaultIndent = 2, defaultWidth = 0)
 
@@ -179,3 +180,4 @@ case object Logger:
    * @return logger
    */
   def apply(name: String): Logger = new Logger(LoggerFactory.getLogger(name))
+}

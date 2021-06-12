@@ -163,7 +163,7 @@ ThisBuild / scalacOptions ++= Seq(
   case Some((3, _)) => Seq(
     "-source",
     "future-migration",
-    "-new-syntax",
+//    "-new-syntax",
     "-language:strictEquality",
     "-indent",
     "-Xcheck-macros",
