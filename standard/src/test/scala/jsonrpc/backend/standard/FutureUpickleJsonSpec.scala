@@ -24,6 +24,8 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec:
 
   "" - {
     "test" in {
+      given Short = 0
+      val function = client.callByPosition[String, String]("test")("test")
       client.callByPosition[String, String]("test")("test")(using 0)
     }
   }

@@ -1,8 +1,6 @@
 package jsonrpc.spi
 
-import jsonrpc.spi.Message
-
-trait CodecMeta[Node]:
+trait CodecMeta[Node] {
   /**
    * Encode a value as a node.
    *
@@ -20,3 +18,4 @@ trait CodecMeta[Node]:
    * @return value of given type
    */
   def decode[T](node: Node): T
+}

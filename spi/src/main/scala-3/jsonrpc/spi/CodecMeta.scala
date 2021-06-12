@@ -1,7 +1,5 @@
 package jsonrpc.spi
 
-import jsonrpc.spi.Message
-
 trait CodecMeta[Node]:
   /**
    * Encode a value as a node.

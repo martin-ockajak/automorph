@@ -7,7 +7,7 @@ package jsonrpc.spi
  *
  * @tparam Effect monadic effect type
  */
-trait Backend[Effect[_]]:
+trait Backend[Effect[_]] {
 
   /**
    * Lift a value into a new effect of given type.
@@ -59,4 +59,5 @@ trait Backend[Effect[_]]:
    * @return effectful transformed value
    */
   def map[T, R](effect: Effect[T], function: T => R): Effect[R] =
-    flatMap(effect, value => pure(function(value)))
+    flatMap(effect, (value: T) => pure(function(value)))
+}

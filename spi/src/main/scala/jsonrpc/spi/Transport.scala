@@ -1,6 +1,5 @@
 package jsonrpc.spi
 
-import jsonrpc.spi.Backend
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -11,7 +10,7 @@ import scala.collection.immutable.ArraySeq
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-trait Transport[Effect[_], Context]:
+trait Transport[Effect[_], Context] {
 
   /**
    * Send a ''request'' to a remote endpoint and retrieve the ''response''.
@@ -34,3 +33,4 @@ trait Transport[Effect[_], Context]:
    * @return nothing
    */
   def notify(request: ArraySeq.ofByte, context: Option[Context]): Effect[Unit]
+}

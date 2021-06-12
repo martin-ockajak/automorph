@@ -1,5 +1,7 @@
 package jsonrpc.spi
 
+import jsonrpc.spi.MessageType.MessageType
+
 /**
  * JSON-RPC protocol message structure.
  *
@@ -19,10 +21,10 @@ final case class Message[Node](
   params: Option[Message.Params[Node]],
   result: Option[Node],
   error: Option[MessageError[Node]]
-) derives CanEqual:
+) {
 
   /** Message type. */
-  lazy val objectType: MessageType = error.map(_ => MessageType.Error).getOrElse {
+  lazy val messageType: MessageType = error.map(_ => MessageType.Error).getOrElse {
     result.map(_ => MessageType.Result).getOrElse {
       id.map(_ => MessageType.Call).getOrElse(MessageType.Notification)
     }
@@ -31,7 +33,7 @@ final case class Message[Node](
   /** Message properties. */
   lazy val properties: Map[String, String] =
     Map(
-      "Type" -> objectType.toString
+      "Type" -> messageType.toString
     ) ++
       id.map(value => "Id" -> value.fold(_.toString, identity)) ++
       method.map(value => "Method" -> value) ++
@@ -39,8 +41,9 @@ final case class Message[Node](
       error.toSeq.flatMap { value =>
         value.code.map(code => "ErrorCode" -> code.toString) ++ value.message.map(message => "ErrorMessage" -> message)
       }
+}
 
-object Message:
+object Message {
   /** Message identifier type. */
   type Id = Either[BigDecimal, String]
 
@@ -49,6 +52,7 @@ object Message:
 
   /** Supported JSON-RPC protocol version. */
   val version = "2.0"
+}
 
 /**
  * JSON-RPC protocol message error structure.
@@ -64,7 +68,3 @@ final case class MessageError[Node](
   message: Option[String],
   data: Option[Node]
 )
-
-/** JSON-RPC message types. */
-enum MessageType:
-  case Call, Notification, Result, Error
