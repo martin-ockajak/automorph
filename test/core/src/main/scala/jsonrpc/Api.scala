@@ -1,5 +1,6 @@
 package jsonrpc
 
+import jsonrpc.Enum.Enum
 import jsonrpc.spi.Backend
 
 trait SimpleApi[Effect[_]]:

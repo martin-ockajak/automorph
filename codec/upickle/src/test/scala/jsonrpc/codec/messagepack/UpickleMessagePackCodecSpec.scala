@@ -1,10 +1,11 @@
 package jsonrpc.codec.messagepack
 
+import jsonrpc.Enum.Enum
 import jsonrpc.Generators.arbitraryRecord
 import jsonrpc.codec.CodecSpec
 import jsonrpc.codec.common.upickle.UpickleCustom
 import jsonrpc.codec.messagepack.UpickleMessagePackCodec
-import jsonrpc.{Enum, Record, Structure}
+import jsonrpc.{Record, Structure}
 import org.scalacheck.{Arbitrary, Gen}
 import upack.{Bool, Float64, Msg, Obj, Str}
 import upickle.AttributeTagged

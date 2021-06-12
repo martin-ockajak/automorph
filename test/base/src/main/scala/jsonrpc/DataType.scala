@@ -1,9 +1,6 @@
 package jsonrpc
 
-enum Enum:
-
-  case Zero
-  case One
+import Enum.Enum
 
 final case class Record(
   string: String,

@@ -11,11 +11,11 @@ import scala.util.{Failure, Success, Try}
  *
  * @tparam Effect effect type
  */
-trait BackendSpec[Effect[_]] extends BaseSpec:
+trait BackendSpec[Effect[_]] extends BaseSpec {
   private val text = "test"
   private val number = 0
 
-  case class TestException(message: String) extends RuntimeException(message) derives CanEqual
+  case class TestException(message: String) extends RuntimeException(message)
 
   def effect: Backend[Effect]
 
@@ -27,16 +27,17 @@ trait BackendSpec[Effect[_]] extends BaseSpec:
       run(outcome).should(equal(Right(text)))
     }
     "Failed" in {
-      Try(effect.failed(TestException(text))) match
+      Try(effect.failed(TestException(text))) match {
         case Success(outcome) => run(outcome).should(equal(Left(TestException(text))))
         case Failure(error) => error.should(equal(TestException(text)))
+      }
     }
     "Map" in {
-      val outcome = effect.map(effect.pure(text), result => s"$result$number")
+      val outcome = effect.map(effect.pure(text), (result: String) => s"$result$number")
       run(outcome).should(equal(Right(s"$text$number")))
     }
     "Flatmap" in {
-      val outcome = effect.flatMap(effect.pure(text), result => effect.pure(s"$result$number"))
+      val outcome = effect.flatMap(effect.pure(text), (result: String) => effect.pure(s"$result$number"))
       run(outcome).should(equal(Right(s"$text$number")))
     }
     "Either" in {
@@ -44,3 +45,4 @@ trait BackendSpec[Effect[_]] extends BaseSpec:
       run(outcome).should(equal(Right(Right(text))))
     }
   }
+}

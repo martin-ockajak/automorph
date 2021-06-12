@@ -5,6 +5,7 @@
 //import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 //import io.circe.syntax.EncoderOps
 //import io.circe.{Decoder, Encoder, Json, parser}
+//import jsonrpc.Enum.Enum
 //import jsonrpc.transport.local.HandlerTransport
 //import jsonrpc.{ClientHandlerSpec, ComplexApi, Enum, Handler, Record, Structure}
 //import scala.language.implicitConversions

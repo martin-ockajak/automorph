@@ -2,9 +2,8 @@ package jsonrpc.codec
 
 import base.BaseSpec
 import java.nio.charset.StandardCharsets
-import jsonrpc.spi.Message.{Params, version}
-import jsonrpc.spi.{Codec, Message, MessageError}
-import jsonrpc.Generators.arbitraryMesage
+import jsonrpc.spi.{Codec, Message}
+import jsonrpc.Generators
 import org.scalacheck.Arbitrary
 
 /**
@@ -12,7 +11,7 @@ import org.scalacheck.Arbitrary
  *
  * Checks message serialization, deserialization and formatting.
  */
-trait CodecSpec extends BaseSpec:
+trait CodecSpec extends BaseSpec {
 
   private lazy val charset = StandardCharsets.UTF_8
 
@@ -21,10 +20,11 @@ trait CodecSpec extends BaseSpec:
 
   def codec: CodecType
 
-  def arbitraryNode: Arbitrary[Node]
+  implicit def arbitraryNode: Arbitrary[Node]
 
   "" - {
-    given Arbitrary[Message[Node]] = arbitraryMesage(using arbitraryNode)
+    implicit val arbitraryMessage: Arbitrary[Message[Node]] = Generators.arbitraryMesage
+
     "Serialize / Deserialize" in {
       check { (message: Message[Node]) =>
         val rawMessage = codec.serialize(message)
@@ -40,3 +40,4 @@ trait CodecSpec extends BaseSpec:
       }
     }
   }
+}

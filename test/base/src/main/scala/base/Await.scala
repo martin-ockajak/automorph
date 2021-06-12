@@ -3,7 +3,7 @@ package base
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-trait Await:
+trait Await {
   /**
    * Wait for completion of the specified future.
    *
@@ -12,3 +12,4 @@ trait Await:
    * @return future result
    */
   def await[T](future: => Future[T]): T = Await.result(future, Duration.Inf)
+}
