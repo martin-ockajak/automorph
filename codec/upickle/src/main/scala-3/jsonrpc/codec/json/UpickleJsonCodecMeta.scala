@@ -14,13 +14,6 @@ import ujson.Value
 trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Codec[Value]:
   this: UpickleJsonCodec[Custom] =>
 
-  private given custom.ReadWriter[Message] = custom.macroRW
-  private given custom.ReadWriter[MessageError] = custom.macroRW
-
-  inline def test[T](): T =
-    val reader = compiletime.summonInline[custom.Reader[T]]
-    custom.read[T](ujson.Null)(using reader)
-
   override inline def encode[T](value: T): Value =
     val writer = summonInline[custom.Writer[T]]
     custom.writeJs(value)(using writer)

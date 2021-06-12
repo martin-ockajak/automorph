@@ -15,9 +15,6 @@ import upickle.Api
 trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends Codec[Msg]:
   this: UpickleMessagePackCodec[Custom] =>
 
-  private given custom.ReadWriter[Message] = custom.macroRW
-  private given custom.ReadWriter[MessageError] = custom.macroRW
-
   override inline def encode[T](value: T): Msg =
     val writer = summonInline[custom.Writer[T]]
     custom.writeMsg(value)(using writer)

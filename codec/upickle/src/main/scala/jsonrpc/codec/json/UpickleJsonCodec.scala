@@ -21,7 +21,6 @@ final case class UpickleJsonCodec[Custom <: UpickleCustom](
   private val indent = 2
 
   private given custom.ReadWriter[Message] = custom.macroRW
-
   private given custom.ReadWriter[MessageError] = custom.macroRW
 
   override def mediaType: String = "application/json"
