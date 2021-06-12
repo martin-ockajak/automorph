@@ -11,7 +11,7 @@ import jsonrpc.{Record, Structure}
 import org.scalacheck.{Arbitrary, Gen}
 import scala.language.implicitConversions
 
-class CirceJsonSpec extends CodecSpec:
+class CirceJsonSpec extends CodecSpec {
 
   type Node = Json
   type CodecType = CirceJsonCodec[CirceJsonCodecSpec.type]
@@ -36,8 +36,9 @@ class CirceJsonSpec extends CodecSpec:
       }
     }
   }
+}
 
-object CirceJsonCodecSpec extends CirceCustom:
+object CirceJsonCodecSpec extends CirceCustom {
 
   given CirceEncoder[Enum] = Encoder.encodeInt.contramap[Enum](_.ordinal)
   given CirceDecoder[Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
@@ -45,3 +46,4 @@ object CirceJsonCodecSpec extends CirceCustom:
   given CirceDecoder[Structure] = deriveDecoder[Structure]
   given CirceEncoder[Record] = deriveEncoder[Record]
   given CirceDecoder[Record] = deriveDecoder[Record]
+}
