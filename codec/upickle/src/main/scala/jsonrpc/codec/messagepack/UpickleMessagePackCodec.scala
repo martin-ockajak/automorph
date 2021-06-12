@@ -19,8 +19,8 @@ final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
 ) extends UpickleMessagePackCodecMeta[Custom] {
 
   private val indent = 2
-  private given custom.ReadWriter[Message] = custom.macroRW
   private given custom.ReadWriter[MessageError] = custom.macroRW
+  private given custom.ReadWriter[Message] = custom.macroRW
 
   override def mediaType: String = "application/msgpack"
 
