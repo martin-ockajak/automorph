@@ -63,9 +63,10 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
   override def method6(p0: Record, p1: Double): Effect[Option[String]] =
     backend.pure(Some((p0.double + p1).toString))
 
-  override def method7(p0: Record, p1: Boolean)(using context: Short): Effect[Int] = p0.int match
+  override def method7(p0: Record, p1: Boolean)(using context: Short): Effect[Int] = p0.int match {
     case Some(int) if p1 => backend.pure(int + context)
     case _ => backend.pure(0)
+  }
 
   override def method8(p0: Record, p1: String, p2: Option[Double])(using Short): Effect[Record] =
     backend.pure(p0.copy(
