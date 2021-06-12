@@ -3,15 +3,17 @@ package jsonrpc
 import jsonrpc.Enum.Enum
 import jsonrpc.spi.Backend
 
-trait SimpleApi[Effect[_]]:
+trait SimpleApi[Effect[_]] {
 
   def test(test: String): Effect[String]
+}
 
-final case class SimpleApiImpl[Effect[_]](backend: Backend[Effect]) extends SimpleApi[Effect]:
+final case class SimpleApiImpl[Effect[_]](backend: Backend[Effect]) extends SimpleApi[Effect] {
 
   override def test(test: String): Effect[String] = backend.pure(test)
+}
 
-trait ComplexApi[Effect[_]]:
+trait ComplexApi[Effect[_]] {
 
   /** Test method. */
   def method0(): Effect[Unit]
@@ -35,8 +37,9 @@ trait ComplexApi[Effect[_]]:
   def method9(p0: String): Effect[String]
 
   protected def protectedMethod: Unit
+}
 
-final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends ComplexApi[Effect]:
+final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends ComplexApi[Effect] {
 
   override def method0(): Effect[Unit] = backend.pure(())
 
@@ -62,12 +65,12 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
 
   override def method7(p0: Record, p1: Boolean)(using context: Short): Effect[Int] = p0.int match
     case Some(int) if p1 => backend.pure(int + context)
-    case _               => backend.pure(0)
+    case _ => backend.pure(0)
 
   override def method8(p0: Record, p1: String, p2: Option[Double])(using Short): Effect[Record] =
     backend.pure(p0.copy(
       string = s"${p0.string} - $p1",
-      long = p0.long + summon[Short],
+      long = p0.long + implicitly[Short],
       double = p2.getOrElse(0.1),
       enumeration = Enum.One
     ))
@@ -77,8 +80,9 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
   protected def protectedMethod = ()
 
   private def privateMethod = ()
+}
 
-trait InvalidApi[Effect[_]]:
+trait InvalidApi[Effect[_]] {
 
   def nomethod(p0: String): Effect[Unit]
 
@@ -89,8 +93,9 @@ trait InvalidApi[Effect[_]]:
   def method3(p0: Float, p1: Option[Long]): Effect[Seq[String]]
 
   def method4(p0: Long, p1: Byte, p2: String): Effect[String]
+}
 
-final case class InvalidApiImpl[Effect[_]](backend: Backend[Effect]) extends InvalidApi[Effect]:
+final case class InvalidApiImpl[Effect[_]](backend: Backend[Effect]) extends InvalidApi[Effect] {
 
   def nomethod(p0: String): Effect[Unit] = backend.pure(())
 
@@ -101,3 +106,4 @@ final case class InvalidApiImpl[Effect[_]](backend: Backend[Effect]) extends Inv
   def method3(p0: Float, p1: Option[Long]): Effect[Seq[String]] = backend.pure(Seq())
 
   def method4(p0: Long, p1: Byte, p2: String): Effect[String] = backend.pure("")
+}

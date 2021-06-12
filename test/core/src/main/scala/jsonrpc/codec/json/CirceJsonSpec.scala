@@ -10,7 +10,7 @@
 //import jsonrpc.{ClientHandlerSpec, ComplexApi, Enum, Handler, Record, Structure}
 //import scala.language.implicitConversions
 //
-//trait CirceJsonSpec extends ClientHandlerSpec:
+//trait CirceJsonSpec extends ClientHandlerSpec {
 //
 //  type Node = Json
 //  type CodecType = CirceJsonCodec[CirceJsonSpec.type]
@@ -21,8 +21,9 @@
 //    .bind(simpleApiInstance).bind[ComplexApi[Effect]](complexApiInstance)
 //
 //  lazy val handlerTransport: HandlerTransport[Node, CodecType, Effect, Short] = HandlerTransport(handler, backend, 0)
+//}
 //
-//object CirceJsonSpec extends CirceCustom:
+//object CirceJsonSpec extends CirceCustom {
 //
 //  given CirceEncoder[Enum] = Encoder.encodeInt.contramap[Enum](_.ordinal)
 //  given CirceDecoder[Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
@@ -30,3 +31,4 @@
 //  given CirceDecoder[Structure] = deriveDecoder[Structure]
 //  given CirceEncoder[Record] = deriveEncoder[Record]
 //  given CirceDecoder[Record] = deriveDecoder[Record]
+//}

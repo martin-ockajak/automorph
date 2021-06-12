@@ -6,7 +6,7 @@ import jsonrpc.transport.local.HandlerTransport
 import jsonrpc.{ClientHandlerSpec, ComplexApi, Handler, Record, Structure}
 import ujson.Value
 
-trait UpickleJsonSpec extends ClientHandlerSpec:
+trait UpickleJsonSpec extends ClientHandlerSpec {
 
   type Node = Value
   type CodecType = UpickleJsonCodec[UpickleJsonSpec.type]
@@ -17,12 +17,14 @@ trait UpickleJsonSpec extends ClientHandlerSpec:
     .bind(simpleApiInstance).bind[ComplexApi[Effect]](complexApiInstance)
 
   lazy val handlerTransport: HandlerTransport[Node, CodecType, Effect, Short] = HandlerTransport(handler, backend, 0)
+}
 
-object UpickleJsonSpec extends UpickleCustom:
+object UpickleJsonSpec extends UpickleCustom {
 
   given ReadWriter[Enum] = readwriter[Int].bimap[Enum](
-      value => value.ordinal,
-      number => Enum.fromOrdinal(number)
-    )
-    given ReadWriter[Structure] = macroRW
-    given ReadWriter[Record] = macroRW
+    value => value.ordinal,
+    number => Enum.fromOrdinal(number)
+  )
+  given ReadWriter[Structure] = macroRW
+  given ReadWriter[Record] = macroRW
+}

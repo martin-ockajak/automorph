@@ -16,7 +16,7 @@ import scala.util.Try
  * @tparam CodecType message codec plugin type
  * @tparam Effect effect type
  */
-trait ClientHandlerSpec extends BaseSpec:
+trait ClientHandlerSpec extends BaseSpec {
 
   type Node
   type CodecType <: Codec[Node]
@@ -26,7 +26,6 @@ trait ClientHandlerSpec extends BaseSpec:
   val complexApiInstance = ComplexApiImpl(backend)
   val invalidApiInstance = InvalidApiImpl(backend)
   private val apiNames = Seq("Named", "Positional")
-  private val testApiNamePattern = """^(\w+)([A-Z]\w+)$""".r
 
   def backend: Backend[Effect]
 
@@ -163,7 +162,7 @@ trait ClientHandlerSpec extends BaseSpec:
         "Simple API" - {
           "Positional" - {
             "Local" in {
-//              client.callByPosition[String, String]("test")("test")(using 0)
+              //              client.callByPosition[String, String]("test")("test")(using 0)
             }
           }
         }
@@ -178,11 +177,14 @@ trait ClientHandlerSpec extends BaseSpec:
     }
   }
 
-  private def apiCombinations[Api](originalApi: Api, apis: Seq[Api], names: Seq[String]): Seq[(String, Seq[Api])] =
+  private def apiCombinations[Api](originalApi: Api, apis: Seq[Api], names: Seq[String]): Seq[(String, Seq[Api])] = {
     apis.zip(names).map { (api, name) =>
       name -> Seq(originalApi, api)
     }
+  }
 
-  private def consistent[Api, Result](apis: Seq[Api], function: Api => Effect[Result]): Boolean =
+  private def consistent[Api, Result](apis: Seq[Api], function: Api => Effect[Result]): Boolean = {
     val Seq(expected, result) = apis.map(api => run(function(api)))
     expected.equals(result)
+  }
+}
