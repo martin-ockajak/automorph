@@ -10,7 +10,7 @@ import org.scalacheck.{Arbitrary, Gen}
 import upack.{Bool, Float64, Msg, Obj, Str}
 import upickle.AttributeTagged
 
-class UpickleMessagePackSpec extends CodecSpec:
+class UpickleMessagePackSpec extends CodecSpec {
 
   type Node = Msg
   type CodecType = UpickleMessagePackCodec[UpickleMessagePackCodecSpec.type]
@@ -40,8 +40,9 @@ class UpickleMessagePackSpec extends CodecSpec:
       }
     }
   }
+}
 
-object UpickleMessagePackCodecSpec extends UpickleCustom:
+object UpickleMessagePackCodecSpec extends UpickleCustom {
 
   given ReadWriter[Enum] = readwriter[Int].bimap[Enum](
     value => value.ordinal,
@@ -49,3 +50,4 @@ object UpickleMessagePackCodecSpec extends UpickleCustom:
   )
   given ReadWriter[Structure] = macroRW
   given ReadWriter[Record] = macroRW
+}

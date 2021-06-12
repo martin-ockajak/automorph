@@ -10,7 +10,7 @@ import org.scalacheck.{Arbitrary, Gen}
 import ujson.{Bool, Num, Obj, Str, Value}
 import upickle.AttributeTagged
 
-class UpickleJsonCodecSpec extends CodecSpec:
+class UpickleJsonCodecSpec extends CodecSpec {
 
   type Node = Value
   type CodecType = UpickleJsonCodec[UpickleJsonCodecSpec.type]
@@ -27,11 +27,6 @@ class UpickleJsonCodecSpec extends CodecSpec:
   )))
 
   "" - {
-    "test" in {
-      println(Custom.longFromNull())
-      println(Custom.read[Long](ujson.Null))
-//      codec.custom.read[Long](ujson.Null)(using reader)
-    }
     "Encode / Decode" in {
       check { (record: Record) =>
         val encodedValue = codec.encode(record)
@@ -40,11 +35,9 @@ class UpickleJsonCodecSpec extends CodecSpec:
       }
     }
   }
+}
 
-object Custom extends AttributeTagged:
-  def longFromNull(): Long = read[Long](ujson.Null)
-
-object UpickleJsonCodecSpec extends UpickleCustom:
+object UpickleJsonCodecSpec extends UpickleCustom {
 
   given ReadWriter[Enum] = readwriter[Int].bimap[Enum](
     value => value.ordinal,
@@ -52,3 +45,4 @@ object UpickleJsonCodecSpec extends UpickleCustom:
   )
   given ReadWriter[Structure] = macroRW
   given ReadWriter[Record] = macroRW
+}
