@@ -14,11 +14,8 @@ import ujson.Value
 trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Codec[Value]:
   this: UpickleJsonCodec[Custom] =>
 
-  private val indent = 2
   private given custom.ReadWriter[Message] = custom.macroRW
   private given custom.ReadWriter[MessageError] = custom.macroRW
-
-  override def mediaType: String = "application/json"
 
   inline def test[T](): T =
     val reader = compiletime.summonInline[custom.Reader[T]]

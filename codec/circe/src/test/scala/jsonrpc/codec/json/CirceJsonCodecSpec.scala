@@ -2,8 +2,7 @@ package jsonrpc.codec.json
 
 import io.circe.generic.auto
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.syntax.EncoderOps
-import io.circe.{Decoder, Encoder, Json, parser}
+import io.circe.{Decoder, Encoder, Json}
 import jsonrpc.Enum.Enum
 import jsonrpc.Generators.arbitraryRecord
 import jsonrpc.codec.CodecSpec

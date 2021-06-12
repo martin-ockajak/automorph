@@ -4,11 +4,7 @@ import jsonrpc.codec.common.upickle.UpickleCustom
 import jsonrpc.codec.json.UpickleJsonCodec.{Message, MessageError, fromSpi}
 import jsonrpc.spi
 import scala.collection.immutable.ArraySeq
-import scala.language.adhocExtensions
-import ujson.{Null, Value}
-import upickle.AttributeTagged
-import upickle.core.Util
-import upickle.core.Abort
+import ujson.Value
 
 /**
  * UPickle JSON codec plugin.

@@ -3,7 +3,7 @@ package jsonrpc.codec.json
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import io.circe.{Decoder, Encoder, Json}
-import jsonrpc.spi.{Codec, Message, MessageError}
+import jsonrpc.spi.{Codec, Message}
 import scala.compiletime.summonInline
 
 /**
@@ -16,8 +16,6 @@ trait CirceJsonCodecMeta[Custom <: CirceCustom] extends Codec[Json]:
 
   given Encoder[Message[Json]] = deriveEncoder[Message[Json]]
   given Decoder[Message[Json]] = deriveDecoder[Message[Json]]
-
-  override def mediaType: String = "application/json"
 
   override inline def encode[T](value: T): Json =
     val encoder = summonInline[custom.CirceEncoder[T]].encoder

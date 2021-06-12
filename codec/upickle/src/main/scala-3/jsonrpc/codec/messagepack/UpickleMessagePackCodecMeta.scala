@@ -1,7 +1,7 @@
 package jsonrpc.codec.messagepack
 
 import jsonrpc.codec.common.upickle.UpickleCustom
-import jsonrpc.codec.json.UpickleJsonCodec.{Message, MessageError}
+import jsonrpc.codec.messagepack.UpickleMessagePackCodec.{Message, MessageError}
 import jsonrpc.spi.Codec
 import scala.compiletime.summonInline
 import upack.Msg
@@ -15,11 +15,8 @@ import upickle.Api
 trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends Codec[Msg]:
   this: UpickleMessagePackCodec[Custom] =>
 
-  private val indent = 2
   private given custom.ReadWriter[Message] = custom.macroRW
   private given custom.ReadWriter[MessageError] = custom.macroRW
-
-  override def mediaType: String = "application/json"
 
   override inline def encode[T](value: T): Msg =
     val writer = summonInline[custom.Writer[T]]

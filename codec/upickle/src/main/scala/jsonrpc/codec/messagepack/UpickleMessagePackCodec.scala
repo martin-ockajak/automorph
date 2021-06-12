@@ -4,9 +4,7 @@ import jsonrpc.codec.common.upickle.UpickleCustom
 import jsonrpc.codec.messagepack.UpickleMessagePackCodec.{Message, MessageError, fromSpi}
 import jsonrpc.spi
 import scala.collection.immutable.ArraySeq
-import scala.language.adhocExtensions
 import upack.Msg
-import upickle.AttributeTagged
 
 /**
  * UPickle MessagePack codec plugin.
