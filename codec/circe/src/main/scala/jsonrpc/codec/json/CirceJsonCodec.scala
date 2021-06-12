@@ -20,8 +20,8 @@ final case class CirceJsonCodec[Custom <: CirceCustom](
 ) extends CirceJsonCodecMeta[Custom] {
 
   private val charset = StandardCharsets.UTF_8
-  given Encoder[Message[Json]] = deriveEncoder[Message[Json]]
-  given Decoder[Message[Json]] = deriveDecoder[Message[Json]]
+  private given Encoder[Message[Json]] = deriveEncoder[Message[Json]]
+  private given Decoder[Message[Json]] = deriveDecoder[Message[Json]]
 
   override def mediaType: String = "application/json"
 
