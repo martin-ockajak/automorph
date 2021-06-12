@@ -21,10 +21,10 @@ trait UpickleJsonSpec extends ClientHandlerSpec {
 
 object UpickleJsonSpec extends UpickleCustom {
 
-  given ReadWriter[Enum] = readwriter[Int].bimap[Enum](
+  implicit def enumRw: ReadWriter[Enum] = readwriter[Int].bimap[Enum](
     value => value.ordinal,
     number => Enum.fromOrdinal(number)
   )
-  given ReadWriter[Structure] = macroRW
-  given ReadWriter[Record] = macroRW
+  implicit def structureRw: ReadWriter[Structure] = macroRW
+  implicit def recordRw: ReadWriter[Record] = macroRW
 }
