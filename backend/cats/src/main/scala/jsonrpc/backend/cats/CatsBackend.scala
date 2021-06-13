@@ -9,7 +9,7 @@ import jsonrpc.spi.Backend
  * @see [[https://typelevel.org/cats-effect/ Documentation]]
  * @see [[https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html Effect type]]
  */
-final case class CatsBackend() extends Backend[IO]:
+final case class CatsBackend() extends Backend[IO] {
 
   override def pure[T](value: T): IO[T] = IO.pure(value)
 
@@ -18,3 +18,4 @@ final case class CatsBackend() extends Backend[IO]:
   override def flatMap[T, R](value: IO[T], function: T => IO[R]): IO[R] = value.flatMap(function)
 
   override def either[T](value: IO[T]): IO[Either[Throwable, T]] = value.attempt
+}

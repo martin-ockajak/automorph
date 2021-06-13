@@ -9,7 +9,7 @@ import scalaz.effect.IO
  * @see [[https://github.com/scalaz/ioeffect Documentation]]
  * @see [[https://javadoc.io/doc/org.scalaz/scalaz-effect_2.12/latest/scalaz/effect/IO.html Effect type]]
  */
-final case class ScalazBackend() extends Backend[IO]:
+final case class ScalazBackend() extends Backend[IO] {
 
   override def pure[T](value: T): IO[T] = IO(value)
 
@@ -18,3 +18,4 @@ final case class ScalazBackend() extends Backend[IO]:
   override def flatMap[T, R](value: IO[T], function: T => IO[R]): IO[R] = value.flatMap(function)
 
   override def either[T](value: IO[T]): IO[Either[Throwable, T]] = value.catchLeft.map(_.toEither)
+}

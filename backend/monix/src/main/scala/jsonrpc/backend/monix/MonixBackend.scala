@@ -9,7 +9,7 @@ import monix.eval.Task
  * @see [[https://monix.io/ Documentation]]
  * @see [[https://monix.io/api/current/monix/eval/Task.html Effect type]]
  */
-final case class MonixBackend() extends Backend[Task]:
+final case class MonixBackend() extends Backend[Task] {
 
   override def pure[T](value: T): Task[T] = Task.pure(value)
 
@@ -18,3 +18,4 @@ final case class MonixBackend() extends Backend[Task]:
   override def flatMap[T, R](effect: Task[T], function: T => Task[R]): Task[R] = effect.flatMap(function)
 
   override def either[T](value: Task[T]): Task[Either[Throwable, T]] = value.attempt
+}
