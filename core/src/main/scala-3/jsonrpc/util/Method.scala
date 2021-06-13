@@ -1,16 +1,5 @@
 package jsonrpc.util
 
-final case class Parameter(
-  name: String,
-  dataType: String,
-  contextual: Boolean
-)
-
-final case class TypeParameter(
-  name: String,
-  bounds: String
-)
-
 final case class Method(
   name: String,
   resultType: String,
@@ -40,10 +29,13 @@ final case class Method(
   }
 }
 
-final case class Field(
+final case class Parameter(
   name: String,
   dataType: String,
-  public: Boolean,
-  available: Boolean,
-  documentation: Option[String]
+  contextual: Boolean
+)
+
+final case class TypeParameter(
+  name: String,
+  bounds: String
 )

@@ -46,22 +46,6 @@ final case class Reflection(quotes: Quotes):
       symbol.docstring
     )
 
-  final case class RefField(
-    name: String,
-    dataType: TypeRepr,
-    public: Boolean,
-    available: Boolean,
-    symbol: Symbol
-  ):
-
-    def lift: Field = Field(
-      name,
-      dataType.show,
-      public = public,
-      available = available,
-      documentation = symbol.docstring
-    )
-
   /** Unavailable class member flags. */
   private val unavailableMemberFlags = Seq(
     Flags.Erased,
@@ -87,15 +71,6 @@ final case class Reflection(quotes: Quotes):
    */
   def methods(classType: TypeRepr): Seq[RefMethod] =
     classType.typeSymbol.memberMethods.flatMap(method(classType, _))
-
-  /**
-   * Describe class fields within quoted context.
-   *
-   * @param classType class type representation
-   * @return quoted class field descriptors
-   */
-  def fields(classType: TypeRepr): Seq[RefField] =
-    classType.typeSymbol.memberFields.flatMap(field(classType, _))
 
   private def method(classType: TypeRepr, methodSymbol: Symbol): Option[RefMethod] =
     val (symbolType, typeParameters) = classType.memberType(methodSymbol) match
@@ -135,16 +110,6 @@ final case class Reflection(quotes: Quotes):
     }
     val resultType = methodTypes.last.resType
     (Seq(parameters*), resultType)
-
-  private def field(classType: TypeRepr, fieldSymbol: Symbol): Option[RefField] =
-    val fieldType = classType.memberType(fieldSymbol)
-    Some(RefField(
-      fieldSymbol.name,
-      fieldType,
-      publicSymbol(fieldSymbol),
-      availableSymbol(fieldSymbol),
-      fieldSymbol
-    ))
 
   private def publicSymbol(symbol: Symbol): Boolean = !matchesFlags(symbol.flags, hiddenMemberFlags)
 
