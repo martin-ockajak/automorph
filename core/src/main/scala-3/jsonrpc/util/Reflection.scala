@@ -70,7 +70,7 @@ final case class Reflection(quotes: Quotes):
    * @return quoted class method descriptors
    */
   def methods(classType: TypeRepr): Seq[RefMethod] =
-    classType.typeSymbol.memberMethods.flatMap(method(classType, _))
+    classType.typeSymbol.memberMethods.filterNot(_.isClassConstructor).flatMap(method(classType, _))
 
   private def method(classType: TypeRepr, methodSymbol: Symbol): Option[RefMethod] =
     val (symbolType, typeParameters) = classType.memberType(methodSymbol) match
