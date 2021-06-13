@@ -30,12 +30,11 @@ import scala.util.{Failure, Success, Try}
 final case class FinagleJsonRpcService[Effect[_]](
   handler: Handler[?, ?, Effect, Request],
   errorStatus: Int => Status = defaultErrorStatus
-)
-  extends Service[Request, Response] with Logging:
+) extends Service[Request, Response] with Logging {
 
   private val backend = handler.backend
 
-  override def apply(request: Request): Future[Response] =
+  override def apply(request: Request): Future[Response] = {
     // Receive the request
     val client = clientAddress(request)
     logger.debug("Received HTTP request", Map("Client" -> client))
@@ -51,38 +50,44 @@ final case class FinagleJsonRpcService[Effect[_]](
           val response = result.response.getOrElse(ArraySeq.ofByte(Array.empty))
           val status = result.errorCode.map(errorStatus).getOrElse(Status.Ok)
           val reader = Reader.fromBuf(Buf.ByteArray.Owned(response.unsafeArray))
-          createResponse(request, reader, status)
+            createResponse(request, reader, status)
       )
     ))
+  }
 
-  private def serverError(error: Throwable, request: Request): Response =
+  private def serverError(error: Throwable, request: Request): Response = {
     val status = Status.InternalServerError
     val errorMessage = Errors.errorDetails(error).mkString("\n")
     val reader = Reader.fromBuf(Buf.Utf8(errorMessage))
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(request)))
     createResponse(request, reader, status)
+  }
 
-  private def createResponse(request: Request, reader: Reader[Buf], status: Status): Response =
+  private def createResponse(request: Request, reader: Reader[Buf], status: Status): Response = {
     val response = Response(request.version, status, reader)
     response.contentType = handler.codec.mediaType
     logger.debug("Sending HTTP response", Map("Client" -> clientAddress(request), "Status" -> status.code.toString))
     response
+  }
 
-  private def clientAddress(request: Request): String =
+  private def clientAddress(request: Request): String = {
     request.xForwardedFor.map(_.split(",", 2)(0)).getOrElse {
       val address = request.remoteAddress.toString.split("/", 2).reverse.head
       address.replaceAll("/", "").split(":").init.mkString(":")
     }
+  }
 
-  private def asFuture[T](value: Effect[T]): Future[T] =
+  private def asFuture[T](value: Effect[T]): Future[T] = {
     val promise = Promise[T]()
     backend.map(backend.either(value), _.fold(
       error => promise.setException(error),
       result => promise.setValue(result)
     ))
     promise
+  }
+}
 
-case object FinagleJsonRpcService:
+case object FinagleJsonRpcService {
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus = Map(
@@ -94,3 +99,4 @@ case object FinagleJsonRpcService:
     ErrorType.IOError -> Status.InternalServerError,
     ErrorType.ApplicationError -> Status.InternalServerError
   ).withDefaultValue(Status.InternalServerError).map((errorType, status) => errorType.code -> status)
+}

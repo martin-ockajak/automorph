@@ -31,19 +31,19 @@ final case class UndertowJsonRpcHandler[Effect[_]](
   handler: Handler[?, ?, Effect, HttpServerExchange],
   effectRunAsync: Effect[Any] => Unit,
   errorStatus: Int => Int = defaultErrorStatus
-) extends HttpHandler with Logging:
+) extends HttpHandler with Logging {
 
   private val backend = handler.backend
 
-  private val receiveCallback = new Receiver.FullBytesCallback:
+  private val receiveCallback = new Receiver.FullBytesCallback {
 
-    override def handle(exchange: HttpServerExchange, request: Array[Byte]): Unit =
+    override def handle(exchange: HttpServerExchange, request: Array[Byte]): Unit = {
       val client = clientAddress(exchange)
       logger.debug("Received HTTP request", Map("Client" -> client))
-      exchange.dispatch(new Runnable:
+      exchange.dispatch(new Runnable :
 
         override def run(): Unit =
-          // Process the request
+        // Process the request
           effectRunAsync(backend.map(
             backend.either(handler.processRequest(ArraySeq.ofByte(request))(using exchange)),
             _.fold(
@@ -52,40 +52,48 @@ final case class UndertowJsonRpcHandler[Effect[_]](
                 // Send the response
                 val response = result.response.getOrElse(ArraySeq.ofByte(Array.empty))
                 val statusCode = result.errorCode.map(errorStatus).getOrElse(StatusCodes.OK)
-                sendResponse(response, statusCode, exchange)
+                  sendResponse(response, statusCode, exchange)
             )
           ))
       )
+    }
+  }
 
-  override def handleRequest(exchange: HttpServerExchange): Unit =
+  override def handleRequest(exchange: HttpServerExchange): Unit = {
     // Receive the request
     logger.trace("Receiving HTTP request", Map("Client" -> clientAddress(exchange)))
     Try(exchange.getRequestReceiver.receiveFullBytes(receiveCallback)).recover { case error =>
       sendServerError(error, exchange)
     }.get
+  }
 
-  private def sendServerError(error: Throwable, exchange: HttpServerExchange): Unit =
+  private def sendServerError(error: Throwable, exchange: HttpServerExchange): Unit = {
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
     val errorMessage = Encoding.toArraySeq(Errors.errorDetails(error).mkString("\n"))
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(exchange)))
     sendResponse(errorMessage, statusCode, exchange)
+  }
 
-  private def sendResponse(message: ArraySeq.ofByte, statusCode: Int, exchange: HttpServerExchange): Unit =
-    if exchange.isResponseChannelAvailable then
+  private def sendResponse(message: ArraySeq.ofByte, statusCode: Int, exchange: HttpServerExchange): Unit = {
+    if (exchange.isResponseChannelAvailable) {
       val client = clientAddress(exchange)
       logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
       exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.codec.mediaType)
       exchange.setStatusCode(statusCode).getResponseSender.send(ByteBuffer.wrap(message.unsafeArray))
       logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
+    }
+  }
 
-  private def clientAddress(exchange: HttpServerExchange): String =
+  private def clientAddress(exchange: HttpServerExchange): String = {
     val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)
     forwardedFor.map(_.split(",", 2)(0)).getOrElse {
       val address = exchange.getSourceAddress.toString.split("/", 2).reverse.head
       address.replaceAll("/", "").split(":").init.mkString(":")
     }
+  }
+}
 
-case object UndertowJsonRpcHandler:
+case object UndertowJsonRpcHandler {
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus = Map(
@@ -97,3 +105,4 @@ case object UndertowJsonRpcHandler:
     ErrorType.IOError -> StatusCodes.INTERNAL_SERVER_ERROR,
     ErrorType.ApplicationError -> StatusCodes.INTERNAL_SERVER_ERROR
   ).withDefaultValue(StatusCodes.INTERNAL_SERVER_ERROR).map((errorType, statusCode) => errorType.code -> statusCode)
+}

@@ -24,14 +24,13 @@ final case class UndertowServer(
   httpHandler: HttpHandler,
   urlPath: String = "/",
   builder: Undertow.Builder = defaultBuilder
-) extends AutoCloseable with Logging:
+) extends AutoCloseable with Logging {
 
   private val undertow = start()
 
-  override def close(): Unit =
-    undertow.stop()
+  override def close(): Unit = undertow.stop()
 
-  private def start(): Undertow =
+  private def start(): Undertow = {
     // Configure the request handler
     val pathHandler = Handlers.path(ResponseCodeHandler.HANDLE_404).addPrefixPath(urlPath, httpHandler)
 
@@ -44,17 +43,19 @@ final case class UndertowServer(
         "Protocol" -> listener.getProtcol
       ) ++ (listener.getAddress match
         case address: InetSocketAddress => Map(
-            "Host" -> address.getHostString,
-            "Port" -> address.getPort.toString
-          )
+          "Host" -> address.getHostString,
+          "Port" -> address.getPort.toString
+        )
         case _ => Map.empty
-      )
+        )
       logger.info("Listening for connections", properties)
     }
     undertow.start()
     undertow
+  }
+}
 
-case object UndertowServer:
+case object UndertowServer {
 
   /**
    * Default Undertow web server builder providing the following settings:
@@ -66,3 +67,4 @@ case object UndertowServer:
     .setIoThreads(Runtime.getRuntime.availableProcessors * 2)
     .setWorkerThreads(Runtime.getRuntime.availableProcessors)
     .addHttpListener(8080, "0.0.0.0")
+}

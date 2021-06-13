@@ -31,16 +31,17 @@ case class NanoHttpdServer[Effect[_]] private (
   port: Int,
   readTimeout: Int,
   errorStatus: Int => Status
-) extends NanoHTTPD(port) with AutoCloseable with Logging:
+) extends NanoHTTPD(port) with AutoCloseable with Logging {
 
   private val HeaderXForwardedFor = "X-Forwarded-For"
   private val backend = handler.backend
 
-  override def start(): Unit =
+  override def start(): Unit = {
     logger.info("Listening for connections", Map("Port" -> port.toString))
     super.start()
+  }
 
-  override def serve(session: IHTTPSession): Response =
+  override def serve(session: IHTTPSession): Response = {
     // Receive the request
     logger.trace("Receiving HTTP request", Map("Client" -> clientAddress(session)))
     val request = Encoding.toArraySeq(session.getInputStream, handler.bufferSize)
@@ -54,34 +55,38 @@ case class NanoHttpdServer[Effect[_]] private (
           // Send the response
           val response = result.response.getOrElse(ArraySeq.ofByte(Array.empty))
           val status = result.errorCode.map(errorStatus).getOrElse(Status.OK)
-          createResponse(response, status, session)
+            createResponse(response, status, session)
       )
     ))
+  }
 
-  private def createServerError(error: Throwable, session: IHTTPSession): Response =
+  private def createServerError(error: Throwable, session: IHTTPSession): Response = {
     val status = Status.INTERNAL_ERROR
     val errorMessage = Encoding.toArraySeq(Errors.errorDetails(error).mkString("\n"))
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(session)))
     createResponse(errorMessage, status, session)
+  }
 
-  private def createResponse(message: ArraySeq.ofByte, status: Status, session: IHTTPSession): Response =
+  private def createResponse(message: ArraySeq.ofByte, status: Status, session: IHTTPSession): Response = {
     val client = clientAddress(session)
     logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> status.getRequestStatus.toString))
     val inputStream = ByteArrayInputStream(message.unsafeArray)
     val response = newFixedLengthResponse(status, handler.codec.mediaType, inputStream, message.size)
     logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> status.getRequestStatus.toString))
     response
+  }
 
-  private def clientAddress(session: IHTTPSession): String =
+  private def clientAddress(session: IHTTPSession): String = {
     val forwardedFor = Option(session.getHeaders.get(HeaderXForwardedFor))
     forwardedFor.map(_.split(",", 2)(0)).getOrElse {
       session.getRemoteHostName
     }
+  }
 
-  override def close(): Unit =
-    stop()
+  override def close(): Unit = stop()
+}
 
-case object NanoHttpdServer:
+case object NanoHttpdServer {
 
   /**
    * Create an NanoHTTPD web server using the specified JSON-RPC request ''handler''.
@@ -114,3 +119,4 @@ case object NanoHttpdServer:
     ErrorType.IOError -> Status.INTERNAL_ERROR,
     ErrorType.ApplicationError -> Status.INTERNAL_ERROR
   ).withDefaultValue(Status.INTERNAL_ERROR).map((errorType, status) => errorType.code -> status)
+}
