@@ -10,7 +10,7 @@ import jsonrpc.log.Logging
 import jsonrpc.server.http.UndertowJsonRpcHandler.defaultErrorStatus
 import jsonrpc.protocol.ErrorType.ErrorType
 import jsonrpc.spi.Backend
-import jsonrpc.util.EncodingOps.toArraySeq
+import jsonrpc.util.Encoding
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -66,7 +66,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
 
   private def sendServerError(error: Throwable, exchange: HttpServerExchange): Unit =
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
-    val errorMessage = Errors.errorDetails(error).mkString("\n").toArraySeq
+    val errorMessage = Encoding.toArraySeq(Errors.errorDetails(error).mkString("\n"))
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(exchange)))
     sendResponse(errorMessage, statusCode, exchange)
 

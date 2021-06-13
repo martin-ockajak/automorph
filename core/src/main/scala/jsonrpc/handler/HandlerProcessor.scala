@@ -8,7 +8,7 @@ import jsonrpc.protocol.{Errors, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerResult}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}
-import jsonrpc.util.EncodingOps.toArraySeq
+import jsonrpc.util.Encoding
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -64,7 +64,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
    */
   def processRequest(request: ByteBuffer)(using context: Context): Effect[HandlerResult[ByteBuffer]] =
     backend.map(
-      processRequest(request.toArraySeq)(using context),
+      processRequest(Encoding.toArraySeq(request))(using context),
       result => result.copy(response = result.response.map(response => ByteBuffer.wrap(response.unsafeArray)))
     )
 
@@ -77,7 +77,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
    */
   def processRequest(request: InputStream)(using context: Context): Effect[HandlerResult[InputStream]] =
     backend.map(
-      processRequest(request.toArraySeq(bufferSize))(using context),
+      processRequest(Encoding.toArraySeq(request, bufferSize))(using context),
       result => result.copy(response = result.response.map(response => ByteArrayInputStream(response.unsafeArray)))
     )
 

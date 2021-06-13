@@ -10,7 +10,7 @@ import jsonrpc.protocol.ErrorType.ErrorType
 import jsonrpc.server.http.standard.NanoHTTPD.Response.Status
 import jsonrpc.server.http.standard.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import jsonrpc.server.http.standard.NanoHttpdServer.defaultErrorStatus
-import jsonrpc.util.EncodingOps.toArraySeq
+import jsonrpc.util.Encoding
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -43,7 +43,7 @@ case class NanoHttpdServer[Effect[_]] private (
   override def serve(session: IHTTPSession): Response =
     // Receive the request
     logger.trace("Receiving HTTP request", Map("Client" -> clientAddress(session)))
-    val request = session.getInputStream.toArraySeq(handler.bufferSize)
+    val request = Encoding.toArraySeq(session.getInputStream, handler.bufferSize)
 
     // Process the request
     effectRunSync(backend.map(
@@ -60,7 +60,7 @@ case class NanoHttpdServer[Effect[_]] private (
 
   private def createServerError(error: Throwable, session: IHTTPSession): Response =
     val status = Status.INTERNAL_ERROR
-    val errorMessage = Errors.errorDetails(error).mkString("\n").toArraySeq
+    val errorMessage = Encoding.toArraySeq(Errors.errorDetails(error).mkString("\n"))
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(session)))
     createResponse(errorMessage, status, session)
 

@@ -10,7 +10,7 @@ import jsonrpc.log.Logging
 import jsonrpc.server.http.FinagleJsonRpcService.defaultErrorStatus
 import jsonrpc.protocol.ErrorType.ErrorType
 import jsonrpc.spi.Backend
-import jsonrpc.util.EncodingOps.toArraySeq
+import jsonrpc.util.Encoding.toArraySeq
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
 
