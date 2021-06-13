@@ -5,7 +5,7 @@
 //import jsonrpc.{Client, ComplexApi, InvalidApi, SimpleApi}
 //import jsonrpc.backend.standard.NoBackend.Identity
 //
-//class NoUpickleJsonSpec extends UpickleJsonSpec:
+//class NoUpickleJsonSpec extends UpickleJsonSpec {
 //  type Effect[T] = Identity[T]
 //
 //  override def backend: Backend[Effect] = NoBackend()
@@ -20,3 +20,4 @@
 //  override def complexApis: Seq[ComplexApi[Effect]] = clients.map(_.bind[ComplexApi[Effect]])
 //
 //  override def invalidApis: Seq[InvalidApi[Effect]] = clients.map(_.bind[InvalidApi[Effect]])
+//}

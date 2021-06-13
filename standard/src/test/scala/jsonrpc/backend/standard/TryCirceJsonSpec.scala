@@ -9,7 +9,7 @@
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.util.Try
 //
-//class TryCirceJsonSpec extends UpickleJsonSpec:
+//class TryCirceJsonSpec extends UpickleJsonSpec {
 //  type Effect[T] = Try[T]
 //
 //  override def backend: Backend[Effect] = TryBackend()
@@ -24,3 +24,4 @@
 //  override def complexApis: Seq[ComplexApi[Effect]] = clients.map(_.bind[ComplexApi[Effect]])
 //
 //  override def invalidApis: Seq[InvalidApi[Effect]] = clients.map(_.bind[InvalidApi[Effect]])
+//}

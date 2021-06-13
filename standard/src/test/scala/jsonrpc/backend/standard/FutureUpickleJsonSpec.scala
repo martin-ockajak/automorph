@@ -6,7 +6,7 @@ import jsonrpc.{Client, ComplexApi, InvalidApi, SimpleApi}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class FutureUpickleJsonSpec extends UpickleJsonSpec:
+class FutureUpickleJsonSpec extends UpickleJsonSpec {
   type Effect[T] = Future[T]
 
   override def backend: Backend[Effect] = FutureBackend()
@@ -25,7 +25,9 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec:
   "" - {
     "test" in {
       given Short = 0
+
       val function = client.callByPosition[String, String]("test")("test")
       client.callByPosition[String, String]("test")("test")(using 0)
     }
   }
+}
