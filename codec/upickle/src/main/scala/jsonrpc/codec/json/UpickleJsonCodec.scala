@@ -1,7 +1,7 @@
 package jsonrpc.codec.json
 
-import jsonrpc.codec.common.upickle.UpickleCustom
-import jsonrpc.codec.json.UpickleJsonCodec.{fromSpi, Message, MessageError}
+import jsonrpc.codec.common.UpickleCustom
+import jsonrpc.codec.json.UpickleJsonCodec.{Message, MessageError, fromSpi}
 import jsonrpc.spi
 import scala.collection.immutable.ArraySeq
 import ujson.Value

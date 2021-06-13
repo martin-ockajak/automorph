@@ -1,4 +1,4 @@
-package jsonrpc.codec.common.upickle
+package jsonrpc.codec.common
 
 import scala.language.adhocExtensions
 import upickle.AttributeTagged
