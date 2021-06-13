@@ -17,7 +17,7 @@ case class Reflection[Context <: blackbox.Context](c: Context) {
     dataType: Type,
     contextual: Boolean
   ) {
-    def lift: Parameter = Parameter(name, dataType.termSymbol.fullName, contextual)
+    def lift: Parameter = Parameter(name, dataType.typeSymbol.fullName, contextual)
   }
 
   case class RefMethod(
@@ -32,7 +32,7 @@ case class Reflection[Context <: blackbox.Context](c: Context) {
 
     def lift: Method = Method(
       name,
-      resultType.termSymbol.fullName,
+      resultType.typeSymbol.fullName,
       parameters.map(_.map(_.lift)),
       typeParameters.map(_.lift),
       public = public,
