@@ -138,7 +138,7 @@ case object ClientBindings:
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
   ): Expr[Seq[Any] => Seq[Node]] =
-    import ref.quotes.reflect.{asTerm, AppliedType, Lambda, MethodType, Symbol, Term, TypeRepr}
+    import ref.quotes.reflect.{asTerm, Term, TypeRepr}
     given Quotes = ref.quotes
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -149,22 +149,15 @@ case object ClientBindings:
 
     // Create encode arguments function
     //   (arguments: Seq[Any]) => Seq[Node]
-    val encodeArgumentsType = MethodType(List("arguments"))(
-      _ => List(TypeRepr.of[Seq[Any]]),
-      _ => TypeRepr.of[Seq[Node]]
-    )
-    Lambda(
-      Symbol.spliceOwner,
-      encodeArgumentsType,
-      (symbol, arguments) =>
+    '{ (arguments: Seq[Any]) =>
+      ${
         // Create the method argument lists by encoding corresponding argument values into nodes
         //   List(
         //     codec.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
         //     codec.encode[Parameter1Type](arguments(1).asInstanceOf[Parameter1Type]),
         //     ...
         //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
-        //   )): List[Node]
-        val argumentValues = arguments.head.asInstanceOf[Term].asExprOf[Seq[Any]]
+        //   ): List[Node]
         val argumentList = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
             val argumentIndex = Expr(offset + index)
@@ -172,15 +165,16 @@ case object ClientBindings:
               None
             else
               val argument = parameter.dataType.asType match
-                case '[parameterType] => '{ ${ argumentValues }($argumentIndex).asInstanceOf[parameterType] }
+                case '[parameterType] => '{ arguments($argumentIndex).asInstanceOf[parameterType] }
               Some(methodCall(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm))))
           }
         ).map(_.asInstanceOf[Term].asExprOf[Node])
 
         // Create the encoded arguments sequence construction call
         //   Seq(encodedArguments ...): Seq[Node]
-        '{ Seq(${ Expr.ofSeq(argumentList) }*) }.asTerm
-    ).asExprOf[Seq[Any] => Seq[Node]]
+        '{ Seq(${ Expr.ofSeq(argumentList) }*) }
+      }
+    }
 
   private def generateDecodeResultFunction[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type](
     ref: Reflection,
