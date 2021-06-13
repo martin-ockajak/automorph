@@ -100,7 +100,7 @@ case object HandlerBindings:
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
-    import ref.quotes.reflect.{asTerm, AppliedType, Lambda, MethodType, Symbol, Term, TypeRepr}
+    import ref.quotes.reflect.{asTerm, Term, TypeRepr}
     given Quotes = ref.quotes
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -111,14 +111,8 @@ case object HandlerBindings:
 
     // Create invoke function
     //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
-    val invokeType = MethodType(List("argumentNodes", "context"))(
-      _ => List(TypeRepr.of[Seq[Node]], TypeRepr.of[Context]),
-      _ => TypeRepr.of[Effect].appliedTo(TypeRepr.of[Node])
-    )
-    Lambda(
-      Symbol.spliceOwner,
-      invokeType,
-      (symbol, arguments) =>
+    '{ (argumentNodes: Seq[Node], context: Context) =>
+      ${
         // Create the method argument lists by decoding corresponding argument nodes into values
         //   List(List(
         //     codec.decode[Parameter0Type](argumentNodes(0)),
@@ -126,13 +120,12 @@ case object HandlerBindings:
         //     ...
         //     codec.decode[ParameterNType](argumentNodes(N)) OR context
         //   )): List[List[ParameterXType]]
-        val List(argumentNodes, context) = arguments.asInstanceOf[List[Term]]
         val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentIndex = Expr(offset + index)
-            val argumentNode = '{ ${ argumentNodes.asExprOf[Seq[Node]] }($argumentIndex) }
+            val argumentNode = '{ argumentNodes($argumentIndex) }
             if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
-              context
+              'context
             else
               methodCall(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode.asTerm)))
           }
@@ -145,7 +138,6 @@ case object HandlerBindings:
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
         val resultValueType = effectResultType[Effect](ref, method)
-        val encodeResultType = MethodType(List("result"))(_ => List(resultValueType), _ => TypeRepr.of[Node])
         val encodeResult = resultValueType.asType match
           case '[resultType] => '{ (result: resultType) =>
               ${
@@ -162,8 +154,15 @@ case object HandlerBindings:
         // Create the effect mapping call using the method call and the encode result function
         //   backend.map(methodCall, encodeResult): Effect[Node]
         val backendMapArguments = List(List(apiMethodCall, encodeResult.asTerm))
-        methodCall(ref.quotes, backend.asTerm, "map", List(resultValueType, TypeRepr.of[Node]), backendMapArguments)
-    ).asExprOf[(Seq[Node], Context) => Effect[Node]]
+        methodCall(
+          ref.quotes,
+          backend.asTerm,
+          "map",
+          List(resultValueType, TypeRepr.of[Node]),
+          backendMapArguments
+        ).asExprOf[Effect[Node]]
+      }
+    }
 
   private def logBoundMethod[ApiType: Type](
     ref: Reflection,
