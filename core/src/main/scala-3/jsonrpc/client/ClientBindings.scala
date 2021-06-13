@@ -160,12 +160,11 @@ case object ClientBindings:
         //   ): List[Node]
         val argumentList = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
-            if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
-              None
-            else
+            Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[Context](ref, method)) {
               val argument = parameter.dataType.asType match
                 case '[parameterType] => '{ arguments(${ Expr(offset + index) }).asInstanceOf[parameterType] }
-              Some(methodCall(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm))))
+              methodCall(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
+            }
           }
         ).map(_.asInstanceOf[Term].asExprOf[Node])
 
