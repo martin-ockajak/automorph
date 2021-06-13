@@ -22,12 +22,12 @@ case class SttpTransport[Effect[_]](
   contentType: String,
   sttpBackend: SttpBackend[Effect, ?],
   backend: Backend[Effect]
-) extends Transport[Effect, PartialRequest[Either[String, String], Any]] with SttpApi:
+) extends Transport[Effect, PartialRequest[Either[String, String], Any]] with SttpApi {
 
   override def call(
     request: ArraySeq.ofByte,
     context: Option[PartialRequest[Either[String, String], Any]]
-  ): Effect[ArraySeq.ofByte] =
+  ): Effect[ArraySeq.ofByte] = {
     val httpRequest = setupHttpRequest(request, context).response(asByteArray)
     backend.flatMap(
       httpRequest.send(sttpBackend),
@@ -36,17 +36,21 @@ case class SttpTransport[Effect[_]](
         response => backend.pure(ArraySeq.ofByte(response))
       )
     )
+  }
 
   override def notify(
     request: ArraySeq.ofByte,
     context: Option[PartialRequest[Either[String, String], Any]]
-  ): Effect[Unit] =
+  ): Effect[Unit] = {
     val httpRequest = setupHttpRequest(request, context).response(ignore)
     backend.map(httpRequest.send(sttpBackend), _.body)
+  }
 
   private def setupHttpRequest(
     request: ArraySeq.ofByte,
     context: Option[PartialRequest[Either[String, String], Any]]
-  ): Request[Either[String, String], Any] =
+  ): Request[Either[String, String], Any] = {
     context.getOrElse(basicRequest).copy[Identity, Either[String, String], Any](uri = url, method = method)
       .contentType(contentType).header(Header.accept(contentType)).body(request.unsafeArray)
+  }
+}
