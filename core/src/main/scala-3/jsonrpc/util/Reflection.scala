@@ -5,13 +5,13 @@ import scala.quoted.{Expr, Quotes, Type, quotes}
 /**
  * Data type reflection tools.
  *
- * @param quotes quotation context
+ * @param q quotation context
  */
-final case class Reflection(quotes: Quotes):
+final case class Reflection(q: Quotes):
 
   // All meta-programming data types are path-dependent on the compiler-generated reflection context
-  import quotes.reflect.{Flags, MethodType, PolyType, Symbol, TypeRepr}
-  private given Quotes = quotes
+  import q.reflect.{Flags, MethodType, PolyType, Symbol, TypeRepr}
+  private given Quotes = q
 
   final case class RefParameter(
     name: String,

@@ -15,8 +15,8 @@ case object MethodBindings:
    * @return valid method descriptors or error messages by method name
    */
   def validApiMethods[ApiType: Type, Effect[_]: Type](ref: Reflection): Seq[Either[String, ref.RefMethod]] =
-    import ref.quotes.reflect.TypeRepr
-    given Quotes = ref.quotes
+    import ref.q.reflect.TypeRepr
+    given Quotes = ref.q
 
     // Filter out base data types methods
     val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap {
@@ -46,10 +46,8 @@ case object MethodBindings:
     typeArguments: List[quotes.reflect.TypeRepr],
     arguments: List[List[quotes.reflect.Tree]]
   ): quotes.reflect.Term =
-    import quotes.reflect.{Select, Term}
-
-    Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(
-      arguments.asInstanceOf[List[List[Term]]]
+    quotes.reflect.Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(
+      arguments.asInstanceOf[List[List[quotes.reflect.Term]]]
     )
 
   /**
@@ -61,10 +59,8 @@ case object MethodBindings:
    * @return true if the method uses request context as its last parameter, false otherwise
    */
   def methodUsesContext[Context: Type](ref: Reflection, method: ref.RefMethod): Boolean =
-    import ref.quotes.reflect.TypeRepr
-
     method.parameters.flatten.lastOption.exists { parameter =>
-      parameter.contextual && parameter.dataType =:= TypeRepr.of[Context]
+      parameter.contextual && parameter.dataType =:= ref.q.reflect.TypeRepr.of[Context]
     }
 
   /**
@@ -75,11 +71,8 @@ case object MethodBindings:
    * @tparam Wrapper wrapper type
    * @return wrapped type
    */
-  def unwrapType[Wrapper[_]: Type](
-    ref: Reflection,
-    wrappedType: ref.quotes.reflect.TypeRepr
-  ): ref.quotes.reflect.TypeRepr =
-    import ref.quotes.reflect.{AppliedType, TypeRepr}
+  def unwrapType[Wrapper[_]: Type](ref: Reflection, wrappedType: ref.q.reflect.TypeRepr): ref.q.reflect.TypeRepr =
+    import ref.q.reflect.{AppliedType, TypeRepr}
 
     // Determine the method result value type
     wrappedType match
@@ -95,7 +88,7 @@ case object MethodBindings:
    * @return method description
    */
   def methodSignature[ApiType: Type](ref: Reflection, method: ref.RefMethod): String =
-    s"${ref.quotes.reflect.TypeRepr.of[ApiType].show}.${method.lift.signature}"
+    s"${ref.q.reflect.TypeRepr.of[ApiType].show}.${method.lift.signature}"
 
   /**
    * Determine whether a method is a valid API method.
@@ -110,7 +103,7 @@ case object MethodBindings:
     ref: Reflection,
     method: ref.RefMethod
   ): Either[String, ref.RefMethod] =
-    import ref.quotes.reflect.{AppliedType, LambdaType, TypeRepr, TypeTree}
+    import ref.q.reflect.{AppliedType, LambdaType, TypeRepr, TypeTree}
 
     // No type parameters
     val apiType = TypeTree.of[ApiType]

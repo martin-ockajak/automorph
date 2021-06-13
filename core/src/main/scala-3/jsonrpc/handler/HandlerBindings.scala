@@ -1,6 +1,6 @@
 package jsonrpc.handler
 
-import jsonrpc.protocol.MethodBindings.{unwrapType, call, methodSignature, methodUsesContext, validApiMethods}
+import jsonrpc.protocol.MethodBindings.{call, methodSignature, methodUsesContext, unwrapType, validApiMethods}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -50,7 +50,7 @@ case object HandlerBindings:
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if invalidMethodErrors.nonEmpty then
-      ref.quotes.reflect.report.throwError(
+      ref.q.reflect.report.throwError(
         s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
       )
 
@@ -73,7 +73,7 @@ case object HandlerBindings:
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
   ): Expr[(String, HandlerMethod[Node, Effect, Context])] =
-    given Quotes = ref.quotes
+    given Quotes = ref.q
 
     val liftedMethod = method.lift
     val invoke = generateInvokeFunction[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
@@ -100,8 +100,8 @@ case object HandlerBindings:
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
-    import ref.quotes.reflect.{asTerm, Term, TypeRepr}
-    given Quotes = ref.quotes
+    import ref.q.reflect.{asTerm, Term, TypeRepr}
+    given Quotes = ref.q
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
@@ -126,13 +126,13 @@ case object HandlerBindings:
             if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
               'context
             else
-              call(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode.asTerm)))
+              call(ref.q, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode.asTerm)))
           }
         ).asInstanceOf[List[List[Term]]]
 
         // Create the API method call using the decoded arguments
         //   api.method(decodedArguments ...): Effect[ResultValueType]
-        val apiMethodCall = call(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
+        val apiMethodCall = call(ref.q, api.asTerm, method.name, List.empty, argumentLists)
 
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
@@ -140,21 +140,19 @@ case object HandlerBindings:
         val encodeResult = resultValueType.asType match
           case '[resultType] => '{ (result: resultType) =>
               ${
-                val encodeArguments = List(List('{ result }.asTerm))
-                call(ref.quotes, codec.asTerm, "encode", List(resultValueType), encodeArguments).asExprOf[Node]
+                call(ref.q, codec.asTerm, "encode", List(resultValueType), List(List('{ result }.asTerm))).asExprOf[Node]
               }
             }
 
         // Create the effect mapping call using the method call and the encode result function
         //   backend.map(methodCall, encodeResult): Effect[Node]
-        val mapTypeArguments = List(resultValueType, TypeRepr.of[Node])
         val mapArguments = List(List(apiMethodCall, encodeResult.asTerm))
-        call(ref.quotes, backend.asTerm, "map", mapTypeArguments, mapArguments).asExprOf[Effect[Node]]
+        call(ref.q, backend.asTerm, "map", List(resultValueType, TypeRepr.of[Node]), mapArguments).asExprOf[Effect[Node]]
       }
     }
 
   private def logBoundMethod[ApiType: Type](ref: Reflection, method: ref.RefMethod, invoke: Expr[Any]): Unit =
-    import ref.quotes.reflect.{asTerm, Printer}
+    import ref.q.reflect.{asTerm, Printer}
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
       println(

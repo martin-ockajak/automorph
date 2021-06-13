@@ -1,7 +1,7 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.protocol.MethodBindings.{unwrapType, call, methodSignature, methodUsesContext, validApiMethods}
+import jsonrpc.protocol.MethodBindings.{call, methodSignature, methodUsesContext, unwrapType, validApiMethods}
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -87,7 +87,7 @@ case object ClientBindings:
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if invalidMethodErrors.nonEmpty then
-      ref.quotes.reflect.report.throwError(
+      ref.q.reflect.report.throwError(
         s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
       )
 
@@ -104,7 +104,7 @@ case object ClientBindings:
     Context: Type,
     ApiType: Type
   ](ref: Reflection, method: ref.RefMethod, codec: Expr[CodecType]): Expr[(String, ClientMethod[Node])] =
-    given Quotes = ref.quotes
+    given Quotes = ref.q
 
     val liftedMethod = method.lift
     val encodeArguments = generateEncodeArgumentsFunction[Node, CodecType, Context](ref, method, codec)
@@ -132,8 +132,8 @@ case object ClientBindings:
     method: ref.RefMethod,
     codec: Expr[CodecType]
   ): Expr[Seq[Any] => Seq[Node]] =
-    import ref.quotes.reflect.{asTerm, Term}
-    given Quotes = ref.quotes
+    import ref.q.reflect.{asTerm, Term}
+    given Quotes = ref.q
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
@@ -157,7 +157,7 @@ case object ClientBindings:
             Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[Context](ref, method)) {
               val argument = parameter.dataType.asType match
                 case '[parameterType] => '{ arguments(${ Expr(offset + index) }).asInstanceOf[parameterType] }
-              call(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
+              call(ref.q, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
             }
           }
         ).map(_.asInstanceOf[Term].asExprOf[Node])
@@ -173,16 +173,15 @@ case object ClientBindings:
     method: ref.RefMethod,
     codec: Expr[CodecType]
   ): Expr[Node => Any] =
-    import ref.quotes.reflect.asTerm
-    given Quotes = ref.quotes
+    import ref.q.reflect.asTerm
+    given Quotes = ref.q
 
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
     val resultValueType = unwrapType[Effect](ref, method.resultType)
     '{ (resultNode: Node) =>
       ${
-        val decodeArguments = List(List('{ resultNode }.asTerm))
-        call(ref.quotes, codec.asTerm, "decode", List(resultValueType), decodeArguments).asExprOf[Any]
+        call(ref.q, codec.asTerm, "decode", List(resultValueType), List(List('{ resultNode }.asTerm))).asExprOf[Any]
       }
     }
 
@@ -192,11 +191,9 @@ case object ClientBindings:
     encodeArguments: Expr[Any],
     decodeResult: Expr[Any]
   ): Unit =
-    import ref.quotes.reflect.{asTerm, Printer}
+    import ref.q.reflect.{asTerm, Printer}
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
       println(
-        s"${methodSignature[ApiType](ref, method)} = \n  ${encodeArguments.asTerm.show(using
-          Printer.TreeAnsiCode
-        )}\n  ${decodeResult.asTerm.show(using Printer.TreeAnsiCode)}\n"
+        s"${methodSignature[ApiType](ref, method)} = \n  ${encodeArguments.asTerm.show(using Printer.TreeAnsiCode)}\n  ${decodeResult.asTerm.show(using Printer.TreeAnsiCode)}\n"
       )
