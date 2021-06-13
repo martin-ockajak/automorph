@@ -30,41 +30,33 @@ case object MethodBindings {
     methods.map(method => validateApiMethod[C, ApiType, Effect](ref)(method))
   }
 
-  //  /**
-  //   * Determine whether a method uses request context as its parameter.
-  //   *
-  //   * @param ref reflection context
-  //   * @param method method descriptor
-  //   * @tparam Context request context type
-  //   * @return true if the method uses request context as its last parameter, false otherwise
-  //   */
-  //  def methodUsesContext[Context: Type](ref: Reflection, method: ref.RefMethod): Boolean =
-  //    import ref.quotes.reflect.TypeRepr
-  //
-  //    method.parameters.flatten.lastOption.exists { parameter =>
-  //      parameter.contextual && parameter.dataType =:= TypeRepr.of[Context]
-  //    }
-  //
-//  /**
-//   * Extract type wrapped in the specified wrapper type.
-//   *
-//   * @param ref reflection context
-//   * @param wrappedType wrapped type
-//   * @tparam Wrapper wrapper type
-//   * @return wrapped type
-//   */
-//  def unwrapType[Wrapper[_]: Type](
-//    ref: Reflection,
-//    wrappedType: ref.quotes.reflect.TypeRepr
-//  ): ref.quotes.reflect.TypeRepr = {
-//    import ref.quotes.reflect.{AppliedType, TypeRepr}
-//
-//    // Determine the method result value type
-//    wrappedType match {
-//      case appliedType: AppliedType if appliedType.tycon =:= TypeRepr.of[Wrapper] => appliedType.args.last
-//      case otherType                                                              => otherType
-//    }
-//  }
+  /**
+   * Determine whether a method uses request context as its parameter.
+   *
+   * @param ref reflection context
+   * @param method method descriptor
+   * @tparam Context request context type
+   * @return true if the method uses request context as its last parameter, false otherwise
+   */
+  def methodUsesContext[C <: Context](ref: Reflection[C])(method: ref.RefMethod): Boolean =
+    method.parameters.flatten.lastOption.exists { parameter =>
+      parameter.contextual && parameter.dataType =:= ref.c.weakTypeOf[Context]
+    }
+
+  /**
+   * Extract type wrapped in the specified wrapper type.
+   *
+   * @param ref reflection context
+   * @param wrappedType wrapped type
+   * @tparam Wrapper wrapper type
+   * @return wrapped type
+   */
+  def unwrapType[C <: Context, Wrapper: ref.c.WeakTypeTag](ref: Reflection[C])(wrappedType: ref.c.Type): ref.c.Type =
+    if (wrappedType.typeArgs.nonEmpty && wrappedType.typeConstructor =:= ref.c.weakTypeOf[Wrapper]) {
+      wrappedType.typeArgs.last
+    } else {
+      wrappedType
+    }
 
   /**
    * Create API method signature.
@@ -77,7 +69,7 @@ case object MethodBindings {
    */
   def methodSignature[C <: Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[C])(
     method: ref.RefMethod
-  ): String = s"${ref.c.weakTypeOf[ApiType].typeSymbol.fullName}.${method.lift.signature}"
+  ): String = s"${ref.c.universe.show(ref.c.weakTypeOf[ApiType])}.${method.lift.signature}"
 
   /**
    * Determine whether a method is a valid API method.
@@ -104,8 +96,12 @@ case object MethodBindings {
         Left(s"Bound API method '$signature' must be callable at runtime")
       } else {
         // Returns the effect type
-        val effectType = weakTypeOf[Effect]
-        println(effectType.typeSymbol.fullName)
+        val effectType = weakTypeOf[Effect].typeConstructor
+        println(method.resultType.typeConstructor)
+        println(effectType)
+        println(effectType =:= method.resultType.typeConstructor)
+//        println(method.resultType.typeConstructor)
+//        println(method.resultType.typeArgs)
         if (
 //          effectType match {
 //            case appliedEffectType: AppliedType =>

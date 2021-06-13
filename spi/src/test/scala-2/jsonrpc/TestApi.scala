@@ -21,7 +21,7 @@ trait TestApi[Effect[_]] {
 
   def method8(p1: String, p2: Option[Double])(implicit context: Short): Effect[Record]
 
-  def method9(p0: String): Effect[String]
+  def method9(p0: String): String
 
   protected def protectedMethod: String
 }

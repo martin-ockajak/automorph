@@ -72,12 +72,10 @@ case object MethodBindings:
    * @return wrapped type
    */
   def unwrapType[Wrapper[_]: Type](ref: Reflection, wrappedType: ref.q.reflect.TypeRepr): ref.q.reflect.TypeRepr =
-    import ref.q.reflect.{AppliedType, TypeRepr}
-
-    // Determine the method result value type
     wrappedType match
-      case appliedType: AppliedType if appliedType.tycon =:= TypeRepr.of[Wrapper] => appliedType.args.last
-      case otherType                                                              => otherType
+      case appliedType: ref.q.reflect.AppliedType if appliedType.tycon =:= ref.q.reflect.TypeRepr.of[Wrapper] =>
+        appliedType.args.last
+      case otherType => otherType
 
   /**
    * Create API method signature.
@@ -88,7 +86,7 @@ case object MethodBindings:
    * @return method description
    */
   def methodSignature[ApiType: Type](ref: Reflection, method: ref.RefMethod): String =
-    import ref.q.reflect.{TypeRepr, Printer}
+    import ref.q.reflect.{Printer, TypeRepr}
 
     s"${TypeRepr.of[ApiType].show(using Printer.TypeReprCode)}.${method.lift.signature}"
 
