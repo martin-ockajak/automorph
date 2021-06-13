@@ -116,11 +116,12 @@ final case class Logger private (private val underlying: Underlying) {
   private def log[T <: Matchable](message: => String, properties: => T, enabled: Boolean, logMessage: String => Unit)(
     using evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
   ): Unit =
-    if enabled then
+    if (enabled) {
       val iterableProperties = unpackProperties(properties)
       addDiagnosticContext(iterableProperties)
       logMessage(s"$message\n${formatProperties(iterableProperties)}\n")
       removeDiagnosticContext(iterableProperties)
+    }
 
   private def log[T <: Matchable](
     message: => String,

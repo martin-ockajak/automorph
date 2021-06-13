@@ -32,8 +32,9 @@ case object Response {
 
   def apply[Node](message: Message[Node]): Response[Node] =
     val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
-    if jsonrpc != version then
+    if (jsonrpc != version) {
       throw InvalidRequest(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
+    }
     val id = mandatory(message.id, "id")
     message.result.map { result =>
       Response(id, Right(result))

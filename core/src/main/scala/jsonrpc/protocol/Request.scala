@@ -31,8 +31,9 @@ final case class Request[Node](
 case object Request {
   def apply[Node](message: Message[Node]): Request[Node] = {
     val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
-    if jsonrpc != version then
+    if (jsonrpc != version) {
       throw InvalidRequest(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
+    }
     val id = message.id
     val method = mandatory(message.method, "method")
     val params = message.params.getOrElse(Right(Map.empty))
