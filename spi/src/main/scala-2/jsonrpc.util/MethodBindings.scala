@@ -1,7 +1,7 @@
 package jsonrpc.util
 
 import jsonrpc.util.Reflection
-import scala.reflect.macros.blackbox
+import scala.reflect.macros.blackbox.Context
 
 /** Method bindings code generation. */
 case object MethodBindings {
@@ -97,7 +97,7 @@ case object MethodBindings {
    * @tparam ApiType API type
    * @return method description
    */
-  def methodDescription[Context <: blackbox.Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[Context])(
+  def methodDescription[C <: Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[C])(
     method: ref.RefMethod
   ): String = {
     val apiType = ref.c.weakTypeOf[ApiType]
