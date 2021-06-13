@@ -30,6 +30,15 @@ lazy val root = project.in(file(".")).aggregate(
 // Basic
 lazy val spi = project.settings(
   name := "json-rpc-spi"
+).settings(
+  libraryDependencies ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, _)) => Seq(
+	"org.scala-lang" % "scala-reflect" % scalaVersion.value
+      )
+      case _ => Seq.empty
+    }
+  }
 )
 lazy val core = project.dependsOn(
   spi, testBase % Test
