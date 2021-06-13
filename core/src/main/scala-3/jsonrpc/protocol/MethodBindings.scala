@@ -18,12 +18,15 @@ case object MethodBindings:
     import ref.quotes.reflect.TypeRepr
     given Quotes = ref.quotes
 
+    // Filter out base data types methods
     val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap {
       baseType => ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
     val methods = ref.methods(TypeRepr.of[ApiType]).filter(_.public).filter {
       method => !baseMethodNames.contains(method.name)
     }
+
+    // Validate methods
     methods.map(method => validateApiMethod[ApiType, Effect](ref, method))
 
   /**
