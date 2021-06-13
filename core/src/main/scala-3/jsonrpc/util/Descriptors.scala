@@ -25,9 +25,10 @@ final case class Method(
   lazy val signature: String = {
     val typeParametersText = typeParameters.map { typeParameter =>
       s"${typeParameter.name}"
-    } match
+    } match {
       case Seq() => ""
       case values => s"[${values.mkString(", ")}]"
+    }
     val parametersText = parameters.map { parameters =>
       s"(${
         parameters.map { parameter =>
