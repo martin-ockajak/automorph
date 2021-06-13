@@ -1,6 +1,6 @@
 package jsonrpc.util
 
-import jsonrpc.util.MethodBindings.methodDescription
+import jsonrpc.util.MethodBindings.methodSignature
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -14,7 +14,7 @@ object Bindings {
     val apiType = weakTypeOf[T]
     val methods = ref.methods(apiType)
     methods.foreach { method =>
-      println(methodDescription[c.type, T](ref)(method))
+      println(methodSignature[c.type, T](ref)(method))
     }
     c.Expr[Unit](q"""
       ()

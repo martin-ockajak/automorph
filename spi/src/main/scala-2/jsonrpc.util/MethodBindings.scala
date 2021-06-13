@@ -112,13 +112,13 @@ case object MethodBindings {
    * @tparam Effect effect type
    * @return valid API method or an error message
    */
-  private def validateApiMethod[C <: Context, ApiType: ref.c.WeakTypeTag, Effect[_]: ref.c.WeakTypeTag](
+  private def validateApiMethod[C <: Context, ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
     ref: Reflection[C]
   )(method: ref.RefMethod): Either[String, ref.RefMethod] = {
-    import ref.c.{AppliedType, LambdaType, Type}
+    import ref.c.weakTypeOf
 
     // No type parameters
-    val apiType = ref.c.weakTypeOf[ApiType]
+    val apiType = weakTypeOf[ApiType]
     val signature = methodSignature[C, ApiType](ref)(method)
     if (method.typeParameters.nonEmpty) {
       Left(s"Bound API method '$signature' must not have type parameters")
@@ -128,7 +128,7 @@ case object MethodBindings {
         Left(s"Bound API method '$signature' must be callable at runtime")
       } else {
         // Returns the effect type
-        val effectType = TypeRepr.of[Effect] match {
+        val effectType = weakTypeOf[Effect] match {
           case lambdaType: LambdaType => lambdaType.resType
           case otherType              => otherType
         }
