@@ -22,9 +22,9 @@ final case class Reflection(quotes: Quotes):
 
   final case class RefTypeParameter(
     name: String,
-    bounds: TypeBounds
+    dataType: TypeRepr
   ):
-    def lift: TypeParameter = TypeParameter(name, bounds.show)
+    def lift: TypeParameter = TypeParameter(name, dataType.show)
 
   final case class RefMethod(
     name: String,
@@ -75,8 +75,8 @@ final case class Reflection(quotes: Quotes):
   private def method(classType: TypeRepr, methodSymbol: Symbol): Option[RefMethod] =
     val (symbolType, typeParameters) = classType.memberType(methodSymbol) match
       case polyType: PolyType =>
-        val typeParameters = polyType.paramNames.zip(polyType.paramBounds).map {
-          (name, bounds) => RefTypeParameter(name, bounds)
+        val typeParameters = polyType.paramNames.zip(polyType.paramBounds.indices).map {
+          (name, index) => RefTypeParameter(name, polyType.param(index))
         }
         (polyType.resType, typeParameters)
       case otherType => (otherType, Seq.empty)
