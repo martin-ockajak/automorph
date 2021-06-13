@@ -55,7 +55,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
     arguments: Params[Node],
     context: Option[Context],
     decodeResult: Node => R
-  ): Effect[R] =
+  ): Effect[R] = {
     val id = Some(Right[BigDecimal, String](Math.abs(random.nextLong()).toString))
     val formedRequest = Request(id, method, arguments).formed
     logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
@@ -70,6 +70,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
           rawResponse => processResponse[R](rawResponse, formedRequest, decodeResult)
         )
     )
+  }
 
   /**
    * Perform a method notification using specified arguments.
@@ -82,7 +83,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
    * @tparam R result type
    * @return nothing
    */
-  protected def performNotify(methodName: String, arguments: Params[Node], context: Option[Context]): Effect[Unit] =
+  protected def performNotify(methodName: String, arguments: Params[Node], context: Option[Context]): Effect[Unit] = {
     val formedRequest = Request(None, methodName, arguments).formed
     backend.map(
       // Serialize request
@@ -91,6 +92,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
         // Send request
         transport.notify(rawRequest, context)
     )
+  }
 
   /**
    * Process a method call response.
@@ -135,12 +137,13 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
    * @param formedMessage JSON-RPC message
    * @return serialized response
    */
-  private def serialize(formedMessage: Message[Node]): Effect[ArraySeq.ofByte] =
+  private def serialize(formedMessage: Message[Node]): Effect[ArraySeq.ofByte] = {
     logger.trace(s"Sending JSON-RPC message:\n${codec.format(formedMessage)}")
     Try(codec.serialize(formedMessage)).fold(
       error => raiseError(ParseError("Invalid message format", error), formedMessage),
       message => backend.pure(message)
     )
+  }
 
   /**
    * Create an error effect from an exception.
@@ -150,9 +153,10 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
    * @tparam T effectful value type
    * @return error value
    */
-  private def raiseError[T](error: Throwable, requestMessage: Message[Node]): Effect[T] =
+  private def raiseError[T](error: Throwable, requestMessage: Message[Node]): Effect[T] = {
     logger.error(s"Failed to perform JSON-RPC request", error, requestMessage.properties)
     backend.failed(error)
+  }
 }
 
 object Client {
@@ -180,8 +184,7 @@ object Client {
     codec: CodecType,
     backend: Backend[Effect],
     transport: Transport[Effect, Context]
-  ): Client[Node, CodecType, Effect, Context] =
-    new Client(codec, backend, transport, true)
+  ): Client[Node, CodecType, Effect, Context] = new Client(codec, backend, transport, true)
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins without request `Context` type.
@@ -201,6 +204,5 @@ object Client {
     codec: CodecType,
     backend: Backend[Effect],
     transport: Transport[Effect, NoContext]
-  ): Client[Node, CodecType, Effect, NoContext] =
-    Client(codec, backend, transport, true)
+  ): Client[Node, CodecType, Effect, NoContext] = Client(codec, backend, transport, true)
 }

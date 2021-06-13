@@ -19,7 +19,7 @@ case class HandlerTransport[Node, CodecType <: Codec[Node], Effect[_], Context](
   handler: Handler[Node, CodecType, Effect, Context],
   backend: Backend[Effect],
   defaultContext: Context
-) extends Transport[Effect, Context]:
+) extends Transport[Effect, Context] {
 
   def call(request: ArraySeq.ofByte, context: Option[Context]): Effect[ArraySeq.ofByte] =
     backend.map(handler.processRequest(request)(using context.getOrElse(defaultContext)), { result =>
@@ -28,3 +28,4 @@ case class HandlerTransport[Node, CodecType <: Codec[Node], Effect[_], Context](
 
   def notify(request: ArraySeq.ofByte, context: Option[Context]): Effect[Unit] =
     backend.map(handler.processRequest(request)(using context.getOrElse(defaultContext)), _ => ())
+}

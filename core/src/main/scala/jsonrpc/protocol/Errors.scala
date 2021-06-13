@@ -1,14 +1,14 @@
 package jsonrpc.protocol
 
 import java.io.IOException
-import jsonrpc.spi.{MessageError, Message}
+import jsonrpc.protocol.ErrorType.ErrorType
 
 /**
  * JSON-RPC protocol data structures.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  */
-case object Errors:
+case object Errors {
 
   /** JSON-RPC parse error. */
   final case class ParseError(
@@ -34,17 +34,6 @@ case object Errors:
     cause: Throwable
   ) extends RuntimeException(message, cause)
 
-  /** JSON-RPC error types with codes. */
-  enum ErrorType(val code: Int):
-
-    case ParseError extends ErrorType(-32700)
-    case InvalidRequest extends ErrorType(-32600)
-    case MethodNotFound extends ErrorType(-32601)
-    case InvalidParams extends ErrorType(-32602)
-    case InternalError extends ErrorType(-32603)
-    case IOError extends ErrorType(-32000)
-    case ApplicationError extends ErrorType(0)
-
   /** Mapping of standard exception types to JSON-RPC errors. */
   lazy val exceptionError: Map[Class[? <: Throwable], ErrorType] = Map(
     classOf[ParseError] -> ErrorType.ParseError,
@@ -56,15 +45,16 @@ case object Errors:
   ).withDefaultValue(ErrorType.ApplicationError)
 
   /** Mapping of JSON-RPC errors to standard exception types. */
-  def errorException(code: Int, message: String): Throwable = code match
-    case ErrorType.ParseError.code                   => ParseError(message, None.orNull)
-    case ErrorType.InvalidRequest.code               => InvalidRequest(message, None.orNull)
-    case ErrorType.MethodNotFound.code               => MethodNotFound(message, None.orNull)
-    case ErrorType.InvalidParams.code                => IllegalArgumentException(message, None.orNull)
-    case ErrorType.InternalError.code                => InternalError(message, None.orNull)
-    case ErrorType.IOError.code                      => IOException(message, None.orNull)
+  def errorException(code: Int, message: String): Throwable = code match {
+    case ErrorType.ParseError.code => ParseError(message, None.orNull)
+    case ErrorType.InvalidRequest.code => InvalidRequest(message, None.orNull)
+    case ErrorType.MethodNotFound.code => MethodNotFound(message, None.orNull)
+    case ErrorType.InvalidParams.code => IllegalArgumentException(message, None.orNull)
+    case ErrorType.InternalError.code => InternalError(message, None.orNull)
+    case ErrorType.IOError.code => IOException(message, None.orNull)
     case _ if code < ErrorType.ApplicationError.code => InternalError(message, None.orNull)
-    case _                                           => RuntimeException(message, None.orNull)
+    case _ => RuntimeException(message, None.orNull)
+  }
 
   /**
    * Return specified mandatory property value or throw an exception if it is missing.
@@ -91,10 +81,12 @@ case object Errors:
     throwable: Throwable,
     filter: Throwable => Boolean = _ => true,
     maxCauses: Int = 100
-  ): Seq[String] =
+  ): Seq[String] = {
     LazyList.iterate(Option(throwable))(_.flatMap(error => Option(error.getCause)))
       .takeWhile(_.isDefined).flatten.filter(filter).take(maxCauses).map { throwable =>
       val exceptionName = throwable.getClass.getSimpleName
       val message = Option(throwable.getMessage).getOrElse("")
       s"[$exceptionName] $message"
     }
+  }
+}

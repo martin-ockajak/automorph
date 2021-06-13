@@ -6,9 +6,9 @@ import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise}
 import jsonrpc.Handler
 import jsonrpc.protocol.Errors
-import jsonrpc.protocol.Errors.ErrorType
 import jsonrpc.log.Logging
 import jsonrpc.server.http.FinagleJsonRpcService.defaultErrorStatus
+import jsonrpc.protocol.ErrorType.ErrorType
 import jsonrpc.spi.Backend
 import jsonrpc.util.EncodingOps.toArraySeq
 import scala.collection.immutable.ArraySeq

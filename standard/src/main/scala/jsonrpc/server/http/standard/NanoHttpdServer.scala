@@ -6,7 +6,7 @@ import jsonrpc.Handler
 import jsonrpc.handler.HandlerResult
 import jsonrpc.log.Logging
 import jsonrpc.protocol.Errors
-import jsonrpc.protocol.Errors.ErrorType
+import jsonrpc.protocol.ErrorType.ErrorType
 import jsonrpc.server.http.standard.NanoHTTPD.Response.Status
 import jsonrpc.server.http.standard.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import jsonrpc.server.http.standard.NanoHttpdServer.defaultErrorStatus
