@@ -4,7 +4,7 @@ import io.circe.syntax.EncoderOps
 import io.circe.Json
 import jsonrpc.spi.Codec
 import scala.language.experimental.macros
-import scala.reflect.macros.blackbox
+import scala.reflect.macros.blackbox.Context
 
 /**
  * Circe JSON codec plugin code generation.
@@ -20,7 +20,7 @@ trait CirceJsonCodecMeta[Custom <: CirceCustom] extends Codec[Json] {
 }
 
 object CirceJsonCodecMeta {
-  def encode[Custom: c.TypeTag, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], value: c.Expr[T]): c.Expr[Json] = {
+  def encode[Custom: c.TypeTag, T: c.WeakTypeTag](c: Context)(custom: c.Expr[Custom], value: c.Expr[T]): c.Expr[Json] = {
     import c.universe._
 
     val valueType = weakTypeOf[T]
@@ -30,7 +30,7 @@ object CirceJsonCodecMeta {
     """)
   }
 
-  def decode[Custom: c.TypeTag, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], node: c.Expr[Json]): c.Expr[T] = {
+  def decode[Custom: c.TypeTag, T: c.WeakTypeTag](c: Context)(custom: c.Expr[Custom], node: c.Expr[Json]): c.Expr[T] = {
     import c.universe._
 
     val valueType = weakTypeOf[T]
