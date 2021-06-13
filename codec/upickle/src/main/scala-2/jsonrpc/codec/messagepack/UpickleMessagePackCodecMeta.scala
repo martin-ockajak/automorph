@@ -20,7 +20,7 @@ trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends Codec[Msg] {
 }
 
 object UpickleMessagePackCodecMeta {
-  def encode[Custom: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], value: c.Expr[T]): c.Expr[Msg] = {
+  def encode[Custom: c.TypeTag, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], value: c.Expr[T]): c.Expr[Msg] = {
     import c.universe._
 
     val valueType = weakTypeOf[T]
@@ -30,7 +30,7 @@ object UpickleMessagePackCodecMeta {
     """)
   }
 
-  def decode[Custom: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], node: c.Expr[Msg]): c.Expr[T] = {
+  def decode[Custom: c.TypeTag, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], node: c.Expr[Msg]): c.Expr[T] = {
     import c.universe._
 
     val valueType = weakTypeOf[T]

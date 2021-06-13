@@ -20,7 +20,7 @@ trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Codec[Value] {
 }
 
 object UpickleJsonCodecMeta {
-  def encode[Custom: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], value: c.Expr[T]): c.Expr[Value] = {
+  def encode[Custom: c.TypeTag, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], value: c.Expr[T]): c.Expr[Value] = {
     import c.universe._
 
     val valueType = weakTypeOf[T]
@@ -30,7 +30,7 @@ object UpickleJsonCodecMeta {
     """)
   }
 
-  def decode[Custom: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], node: c.Expr[Value]): c.Expr[T] = {
+  def decode[Custom: c.TypeTag, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], node: c.Expr[Value]): c.Expr[T] = {
     import c.universe._
 
     val valueType = weakTypeOf[T]
