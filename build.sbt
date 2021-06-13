@@ -202,8 +202,8 @@ ThisBuild / javacOptions ++= Seq(
 
 
 // Analyze
-//ThisBuild / scalastyleConfig := baseDirectory.value / "project" / "scalastyle.xml"
-//ThisBuild / scalastyleFailOnError := true
+//scalastyleConfig := baseDirectory.value / "project" / "scalastyle.xml"
+//scalastyleFailOnError := true
 ThisBuild / scalafmtConfig := baseDirectory.value / "project" / "scalafmt.conf"
 lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 testScalastyle := scalastyle.in(Test).toTask("").value
