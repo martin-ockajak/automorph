@@ -20,18 +20,11 @@ case class Reflection[Context <: blackbox.Context](val c: Context) {
     def lift: Parameter = Parameter(name, dataType.termSymbol.fullName, contextual)
   }
 
-  case class RefTypeParameter(
-    name: String,
-    bounds: TypeBounds
-  ) {
-    def lift: TypeParameter = TypeParameter(name, bounds.termSymbol.fullName)
-  }
-
   case class RefMethod(
     name: String,
     resultType: Type,
     parameters: Seq[Seq[RefParameter]],
-    typeParameters: Seq[RefTypeParameter],
+    typeParameters: Seq[RefParameter],
     public: Boolean,
     available: Boolean,
     symbol: Symbol
@@ -118,16 +111,11 @@ final case class Parameter(
   contextual: Boolean
 )
 
-final case class TypeParameter(
-  name: String,
-  bounds: String
-)
-
 final case class Method(
   name: String,
   resultType: String,
   parameters: Seq[Seq[Parameter]],
-  typeParameters: Seq[TypeParameter],
+  typeParameters: Seq[Parameter],
   public: Boolean,
   available: Boolean,
   documentation: Option[String]

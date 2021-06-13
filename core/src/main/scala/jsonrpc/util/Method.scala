@@ -4,7 +4,7 @@ final case class Method(
   name: String,
   resultType: String,
   parameters: Seq[Seq[Parameter]],
-  typeParameters: Seq[TypeParameter],
+  typeParameters: Seq[Parameter],
   public: Boolean,
   available: Boolean,
   documentation: Option[String]
@@ -33,9 +33,4 @@ final case class Parameter(
   name: String,
   dataType: String,
   contextual: Boolean
-)
-
-final case class TypeParameter(
-  name: String,
-  bounds: String
 )
