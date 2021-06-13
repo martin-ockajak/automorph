@@ -151,5 +151,8 @@ case object ClientBindings:
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
       println(
-        s"${methodSignature[ApiType](ref, method)} = \n  ${encodeArguments.asTerm.show(using Printer.TreeAnsiCode)}\n  ${decodeResult.asTerm.show(using Printer.TreeAnsiCode)}\n"
+        s"""${methodSignature[ApiType](ref, method)} = 
+          |  ${encodeArguments.asTerm.show(using Printer.TreeShortCode)}
+          |  ${decodeResult.asTerm.show(using Printer.TreeShortCode)}
+          |  """.stripMargin
       )

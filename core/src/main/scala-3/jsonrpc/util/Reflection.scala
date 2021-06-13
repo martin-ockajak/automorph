@@ -10,7 +10,7 @@ import scala.quoted.{Expr, Quotes, Type, quotes}
 final case class Reflection(q: Quotes):
 
   // All meta-programming data types are path-dependent on the compiler-generated reflection context
-  import q.reflect.{Flags, MethodType, PolyType, Symbol, TypeRepr}
+  import q.reflect.{Flags, MethodType, PolyType, Printer, Symbol, TypeRepr}
   private given Quotes = q
 
   final case class RefParameter(
@@ -18,7 +18,7 @@ final case class Reflection(q: Quotes):
     dataType: TypeRepr,
     contextual: Boolean
   ):
-    def lift: Parameter = Parameter(name, dataType.show, contextual)
+    def lift: Parameter = Parameter(name, dataType.show(using Printer.TypeReprShortCode), contextual)
 
   final case class RefMethod(
     name: String,
@@ -32,7 +32,7 @@ final case class Reflection(q: Quotes):
 
     def lift: Method = Method(
       name,
-      resultType.show,
+      resultType.show(using Printer.TypeReprShortCode),
       parameters.map(_.map(_.lift)),
       typeParameters.map(_.lift),
       public = public,
