@@ -58,8 +58,9 @@ case class Reflection[Context <: blackbox.Context](val c: Context) {
     classType.members.filter(_.isMethod).flatMap(member => method(classType, member.asMethod)).toSeq
 
   private def method(classType: Type, methodSymbol: MethodSymbol): Option[RefMethod] = {
+    println(methodSymbol.name)
     val typeParameters = methodSymbol.typeParams.map(_.asType).map { typeSymbol =>
-
+      println(typeSymbol.name)
     }
 //    val (symbolType, typeParameters) = classType.memberType(methodSymbol) match {
 //      case polyType: PolyType =>
