@@ -1,7 +1,7 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.protocol.MethodBindings.{unwrapType, call, methodDescription, methodUsesContext, validApiMethods}
+import jsonrpc.protocol.MethodBindings.{unwrapType, call, methodSignature, methodUsesContext, validApiMethods}
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -196,7 +196,7 @@ case object ClientBindings:
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
       println(
-        s"${methodDescription[ApiType](ref, method)} = \n  ${encodeArguments.asTerm.show(using
+        s"${methodSignature[ApiType](ref, method)} = \n  ${encodeArguments.asTerm.show(using
           Printer.TreeAnsiCode
         )}\n  ${decodeResult.asTerm.show(using Printer.TreeAnsiCode)}\n"
       )

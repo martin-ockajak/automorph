@@ -1,6 +1,6 @@
 package jsonrpc.handler
 
-import jsonrpc.protocol.MethodBindings.{unwrapType, call, methodDescription, methodUsesContext, validApiMethods}
+import jsonrpc.protocol.MethodBindings.{unwrapType, call, methodSignature, methodUsesContext, validApiMethods}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -158,5 +158,5 @@ case object HandlerBindings:
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
       println(
-        s"${methodDescription[ApiType](ref, method)} = \n  ${invoke.asTerm.show(using Printer.TreeAnsiCode)}\n"
+        s"${methodSignature[ApiType](ref, method)} = \n  ${invoke.asTerm.show(using Printer.TreeAnsiCode)}\n"
       )

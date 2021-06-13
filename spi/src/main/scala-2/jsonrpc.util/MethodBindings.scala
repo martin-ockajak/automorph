@@ -90,7 +90,7 @@ case object MethodBindings {
 //  }
 
   /**
-   * Create API method description.
+   * Create API method signature.
    *
    * @param ref reflection context
    * @param method method
@@ -98,7 +98,7 @@ case object MethodBindings {
    * @tparam ApiType API type
    * @return method description
    */
-  def methodDescription[C <: Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[C])(
+  def methodSignature[C <: Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[C])(
     method: ref.RefMethod
   ): String = s"${ref.c.weakTypeOf[ApiType].typeSymbol.fullName}.${method.lift.signature}"
 
@@ -119,13 +119,13 @@ case object MethodBindings {
 
     // No type parameters
     val apiType = ref.c.weakTypeOf[ApiType]
-    val description = methodDescription[C, ApiType](ref)(method)
+    val signature = methodSignature[C, ApiType](ref)(method)
     if (method.typeParameters.nonEmpty) {
-      Left(s"Bound API method '$description' must not have type parameters")
+      Left(s"Bound API method '$signature' must not have type parameters")
     } else {
       // Callable at runtime
       if (!method.available) {
-        Left(s"Bound API method '$description' must be callable at runtime")
+        Left(s"Bound API method '$signature' must be callable at runtime")
       } else {
         // Returns the effect type
         val effectType = TypeRepr.of[Effect] match {
@@ -142,7 +142,7 @@ case object MethodBindings {
             case _ => true
           }
         ) {
-          Left(s"Bound API method '$description' must return the specified effect type '${effectType.show}'")
+          Left(s"Bound API method '$signature' must return the specified effect type '${effectType.show}'")
         } else {
           Right(method)
         }

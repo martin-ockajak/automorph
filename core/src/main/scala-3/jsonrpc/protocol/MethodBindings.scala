@@ -85,14 +85,14 @@ case object MethodBindings:
       case otherType                                                              => otherType
 
   /**
-   * Create API method description.
+   * Create API method signature.
    *
    * @param ref reflection context
    * @param method method
    * @tparam ApiType API type
    * @return method description
    */
-  def methodDescription[ApiType: Type](ref: Reflection, method: ref.RefMethod): String =
+  def methodSignature[ApiType: Type](ref: Reflection, method: ref.RefMethod): String =
     s"${ref.quotes.reflect.TypeRepr.of[ApiType].show}.${method.lift.signature}"
 
   /**
@@ -112,13 +112,13 @@ case object MethodBindings:
 
     // No type parameters
     val apiType = TypeTree.of[ApiType]
-    val description = methodDescription[ApiType](ref, method)
+    val signature = methodSignature[ApiType](ref, method)
     if method.typeParameters.nonEmpty then
-      Left(s"Bound API method '$description' must not have type parameters")
+      Left(s"Bound API method '$signature' must not have type parameters")
 
     // Callable at runtime
     else if !method.available then
-      Left(s"Bound API method '$description' must be callable at runtime")
+      Left(s"Bound API method '$signature' must be callable at runtime")
     else
       // Returns the effect type
       val effectType =
@@ -132,6 +132,6 @@ case object MethodBindings:
               case _                       => false
           case _ => true
       then
-        Left(s"Bound API method '$description' must return the specified effect type '${effectType.show}'")
+        Left(s"Bound API method '$signature' must return the specified effect type '${effectType.show}'")
       else
         Right(method)
