@@ -40,23 +40,6 @@ final case class Reflection(quotes: Quotes):
       symbol.docstring
     )
 
-  /** Unavailable class member flags. */
-  private val unavailableMemberFlags = Seq(
-    Flags.Erased,
-    Flags.Inline,
-    Flags.Invisible,
-    Flags.Macro,
-    Flags.Transparent
-  )
-
-  /** Hidden class member flags. */
-  private val hiddenMemberFlags = Seq(
-    Flags.Private,
-    Flags.PrivateLocal,
-    Flags.Protected,
-    Flags.Synthetic
-  )
-
   /**
    * Describe class methods within quoted context.
    *
@@ -82,8 +65,8 @@ final case class Reflection(quotes: Quotes):
           resultType,
           parameters,
           typeParameters,
-          publicSymbol(methodSymbol),
-          availableSymbol(methodSymbol),
+          publicMethod(methodSymbol),
+          availableMethod(methodSymbol),
           methodSymbol
         ))
       case _ => None
@@ -105,9 +88,20 @@ final case class Reflection(quotes: Quotes):
     val resultType = methodTypes.last.resType
     (Seq(parameters*), resultType)
 
-  private def publicSymbol(symbol: Symbol): Boolean = !matchesFlags(symbol.flags, hiddenMemberFlags)
+  private def publicMethod(methodSymbol: Symbol): Boolean = !matchesFlags(methodSymbol.flags, Seq(
+    Flags.Private,
+    Flags.PrivateLocal,
+    Flags.Protected,
+    Flags.Synthetic
+  ))
 
-  private def availableSymbol(symbol: Symbol): Boolean = !matchesFlags(symbol.flags, unavailableMemberFlags)
+  private def availableMethod(methodSymbol: Symbol): Boolean = !matchesFlags(methodSymbol.flags, Seq(
+    Flags.Erased,
+    Flags.Inline,
+    Flags.Invisible,
+    Flags.Macro,
+    Flags.Transparent
+  ))
 
   private def matchesFlags(flags: Flags, matchingFlags: Seq[Flags]): Boolean =
     matchingFlags.foldLeft(false)((result, current) => result | flags.is(current))

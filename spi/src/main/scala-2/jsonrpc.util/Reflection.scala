@@ -54,47 +54,27 @@ case class Reflection[Context <: blackbox.Context](c: Context) {
     val typeParameters = methodSymbol.typeParams.map(_.asType).map { typeSymbol =>
       RefParameter(typeSymbol.name.toString, typeSymbol.toType, false)
     }
-    RefMethod(methodSymbol.name.toString, methodSymbol.returnType, Seq(), typeParameters, true, true, methodSymbol)
-//    symbolType match {
-//      case methodType: MethodType =>
-//        val (parameters, resultType) = methodSignature(methodType)
-//        Some(RefMethod(
-//          methodSymbol.name,
-//          resultType,
-//          parameters,
-//          typeParameters,
-//          publicSymbol(methodSymbol),
-//          availableSymbol(methodSymbol),
-//          methodSymbol
-//        ))
-//      case _ => None
-//    }
+    val parameters = methodSymbol.paramLists.map(_.map { parameter =>
+      RefParameter(parameter.name.toString, parameter.typeSignature, false)
+    })
+    RefMethod(
+      methodSymbol.name.toString,
+      methodSymbol.returnType,
+      parameters,
+      typeParameters,
+      publicMethod(methodSymbol),
+      availableMethod(methodSymbol),
+      methodSymbol
+    )
   }
-}
 
-//  private def methodSignature(methodType: MethodType): (Seq[Seq[RefParameter]], Type) =
-//    val methodTypes = LazyList.iterate(Option(methodType)) {
-//      case Some(currentType) =>
-//        currentType.resType match
-//          case resultType: MethodType => Some(resultType)
-//          case _                      => None
-//      case _ => None
-//    }.takeWhile(_.isDefined).flatten
-//    val parameters = methodTypes.map {
-//      currentType =>
-//        currentType.paramNames.zip(currentType.paramTypes).map {
-//          (name, dataType) => RefParameter(name, dataType, currentType.isImplicit)
-//        }
-//    }
-//    val resultType = methodTypes.last.resType
-//    (Seq(parameters*), resultType)
-//
-//  private def publicSymbol(symbol: Symbol): Boolean = !matchesFlags(symbol.flags, hiddenMemberFlags)
-//
-//  private def availableSymbol(symbol: Symbol): Boolean = !matchesFlags(symbol.flags, unavailableMemberFlags)
-//
-//  private def matchesFlags(flags: Flags, matchingFlags: Seq[Flags]): Boolean =
-//    matchingFlags.foldLeft(false)((result, current) => result | flags.is(current))
+  private def publicMethod(methodSymbol: MethodSymbol): Boolean =
+    methodSymbol.isPublic &&
+      !methodSymbol.isSynthetic
+
+  private def availableMethod(methodSymbol: MethodSymbol): Boolean =
+    !methodSymbol.isMacro
+}
 
 final case class Parameter(
   name: String,
@@ -117,15 +97,13 @@ final case class Method(
     val typeParametersText = typeParameters.map { typeParameter =>
       s"${typeParameter.name}"
     } match {
-      case Seq() => ""
+      case Seq()  => ""
       case values => s"[${values.mkString(", ")}]"
     }
     val parametersText = parameters.map { parameters =>
-      s"(${
-        parameters.map { parameter =>
-          s"${parameter.name}: ${parameter.dataType}"
-        }.mkString(", ")
-      })"
+      s"(${parameters.map { parameter =>
+        s"${parameter.name}: ${parameter.dataType}"
+      }.mkString(", ")})"
     }.mkString
     s"$name$typeParametersText$parametersText: $resultType"
   }
