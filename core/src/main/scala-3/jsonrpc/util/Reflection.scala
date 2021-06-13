@@ -9,7 +9,7 @@ import scala.quoted.{Expr, Quotes, Type, quotes}
  */
 final case class Reflection(quotes: Quotes):
 
-  // All meta-programming data types must are path-dependent on the compiler-generated quotation context
+  // All meta-programming data types are path-dependent on the compiler-generated reflection context
   import quotes.reflect.{Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree, asTerm}
   private given Quotes = quotes
 

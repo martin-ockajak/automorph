@@ -8,6 +8,8 @@ import scala.reflect.macros.blackbox
  * @param quotes quotation context
  */
 case class Reflection[Context <: blackbox.Context](val c: Context) {
+
+  // All meta-programming data types are path-dependent on the compiler-generated reflection context
   import c.universe._
 
   case class RefParameter(
@@ -64,7 +66,6 @@ case class Reflection[Context <: blackbox.Context](val c: Context) {
   }
 }
 
-//  // All meta-programming data types must are path-dependent on the compiler-generated quotation context
 //  import quotes.reflect.{Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, Type, TypeTree, asTerm}
 //
 //  final case class RefParameter(
