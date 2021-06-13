@@ -124,7 +124,7 @@ case object HandlerBindings:
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentNode = '{ argumentNodes(${ Expr(offset + index) }) }
             if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
-              'context
+              'context.asTerm
             else
               call(ref.q, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode.asTerm)))
           }
