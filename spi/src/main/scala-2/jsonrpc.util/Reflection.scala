@@ -1,14 +1,17 @@
 package jsonrpc.util
 
-//import scala.quoted.{Expr, Quotes, Type, quotes}
+//import scala.language.experimental.macros
+//import scala.reflect.macros.blackbox
 //
 ///**
 // * Data type reflection tools.
 // *
 // * @param quotes quotation context
 // */
-//final case class Reflection(quotes: Quotes):
+//final case class Reflection[Context <: blackbox.Context](val c: Context) {
 //
+//}
+
 //  // All meta-programming data types must are path-dependent on the compiler-generated quotation context
 //  import quotes.reflect.{Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree, asTerm}
 //

@@ -3,7 +3,8 @@ package jsonrpc.codec.json
 import io.circe.syntax.EncoderOps
 import io.circe.Json
 import jsonrpc.spi.Codec
-import scala.compiletime.summonInline
+import scala.language.experimental.macros
+import scala.reflect.macros.blackbox
 
 /**
  * Circe JSON codec plugin code generation.

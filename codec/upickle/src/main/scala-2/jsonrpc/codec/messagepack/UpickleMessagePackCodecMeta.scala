@@ -2,7 +2,8 @@ package jsonrpc.codec.messagepack
 
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.spi.Codec
-import scala.compiletime.summonInline
+import scala.language.experimental.macros
+import scala.reflect.macros.blackbox
 import upack.Msg
 
 /**
