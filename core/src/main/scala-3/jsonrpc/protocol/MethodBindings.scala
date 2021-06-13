@@ -120,13 +120,14 @@ case object MethodBindings:
         TypeRepr.of[Effect] match
           case lambdaType: LambdaType => lambdaType.resType
           case otherType              => otherType
-      if effectType match
+      val resultEffectType =
+        effectType match
           case appliedEffectType: AppliedType =>
             method.resultType match
               case resultType: AppliedType => resultType.tycon =:= appliedEffectType.tycon
               case _                       => false
           case _ => true
-      then
+      if !resultEffectType then
         Left(s"Bound API method '$signature' must return the specified effect type '${effectType.show}'")
       else
         Right(method)
