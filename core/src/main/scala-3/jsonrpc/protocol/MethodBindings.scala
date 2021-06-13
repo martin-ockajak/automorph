@@ -3,7 +3,7 @@ package jsonrpc.protocol
 import jsonrpc.util.Reflection
 import scala.quoted.{quotes, Quotes, Type}
 
-/** Method bindings code generation. */
+/** Method bindings introspection. */
 case object MethodBindings:
 
   /**
