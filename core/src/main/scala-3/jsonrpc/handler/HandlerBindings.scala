@@ -68,7 +68,7 @@ case object HandlerBindings:
     ApiType: Type
   ](
     ref: Reflection,
-    method: ref.QuotedMethod,
+    method: ref.RefMethod,
     codec: Expr[CodecType],
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
@@ -95,7 +95,7 @@ case object HandlerBindings:
     ApiType: Type
   ](
     ref: Reflection,
-    method: ref.QuotedMethod,
+    method: ref.RefMethod,
     codec: Expr[CodecType],
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
@@ -153,7 +153,7 @@ case object HandlerBindings:
       }
     }
 
-  private def logBoundMethod[ApiType: Type](ref: Reflection, method: ref.QuotedMethod, invoke: Expr[Any]): Unit =
+  private def logBoundMethod[ApiType: Type](ref: Reflection, method: ref.RefMethod, invoke: Expr[Any]): Unit =
     import ref.quotes.reflect.{asTerm, Printer}
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then

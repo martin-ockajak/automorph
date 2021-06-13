@@ -103,7 +103,7 @@ case object ClientBindings:
     Effect[_]: Type,
     Context: Type,
     ApiType: Type
-  ](ref: Reflection, method: ref.QuotedMethod, codec: Expr[CodecType]): Expr[(String, ClientMethod[Node])] =
+  ](ref: Reflection, method: ref.RefMethod, codec: Expr[CodecType]): Expr[(String, ClientMethod[Node])] =
     given Quotes = ref.quotes
 
     val liftedMethod = method.lift
@@ -129,7 +129,7 @@ case object ClientBindings:
 
   private def generateEncodeArgumentsFunction[Node: Type, CodecType <: Codec[Node]: Type, Context: Type](
     ref: Reflection,
-    method: ref.QuotedMethod,
+    method: ref.RefMethod,
     codec: Expr[CodecType]
   ): Expr[Seq[Any] => Seq[Node]] =
     import ref.quotes.reflect.{asTerm, Term}
@@ -170,7 +170,7 @@ case object ClientBindings:
 
   private def generateDecodeResultFunction[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type](
     ref: Reflection,
-    method: ref.QuotedMethod,
+    method: ref.RefMethod,
     codec: Expr[CodecType]
   ): Expr[Node => Any] =
     import ref.quotes.reflect.asTerm
@@ -188,7 +188,7 @@ case object ClientBindings:
 
   private def logBoundMethod[ApiType: Type](
     ref: Reflection,
-    method: ref.QuotedMethod,
+    method: ref.RefMethod,
     encodeArguments: Expr[Any],
     decodeResult: Expr[Any]
   ): Unit =

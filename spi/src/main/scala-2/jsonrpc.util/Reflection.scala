@@ -10,29 +10,81 @@ import scala.reflect.macros.blackbox
 case class Reflection[Context <: blackbox.Context](val c: Context) {
   import c.universe._
 
+  case class RefParameter(
+    name: String,
+    dataType: Type,
+    contextual: Boolean
+  ) {
+    def lift: Parameter = Parameter(name, dataType.termSymbol.fullName, contextual)
+  }
+
+  case class RefTypeParameter(
+    name: String,
+    bounds: TypeBounds
+  ) {
+    def lift: TypeParameter = TypeParameter(name, bounds.termSymbol.fullName)
+  }
+
+  case class RefMethod(
+    name: String,
+    resultType: Type,
+    parameters: Seq[Seq[RefParameter]],
+    typeParameters: Seq[RefTypeParameter],
+    public: Boolean,
+    available: Boolean,
+    symbol: Symbol
+  ) {
+
+    def lift: Method = Method(
+      name,
+      resultType.termSymbol.fullName,
+      parameters.map(_.map(_.lift)),
+      typeParameters.map(_.lift),
+      public = public,
+      available = available,
+      documentation = None
+    )
+  }
+
+  case class RefField(
+    name: String,
+    dataType: Type,
+    public: Boolean,
+    available: Boolean,
+    symbol: Symbol
+  ) {
+
+    def lift: Field = Field(
+      name,
+      dataType.termSymbol.fullName,
+      public = public,
+      available = available,
+      documentation = None
+    )
+  }
 }
 
 //  // All meta-programming data types must are path-dependent on the compiler-generated quotation context
-//  import quotes.reflect.{Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree, asTerm}
+//  import quotes.reflect.{Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, Type, TypeTree, asTerm}
 //
-//  final case class QuotedParameter(
+//  final case class RefParameter(
 //    name: String,
-//    dataType: TypeRepr,
+//    dataType: Type,
 //    contextual: Boolean
 //  ):
 //    def lift: Parameter = Parameter(name, dataType.show, contextual)
 //
-//  final case class QuotedTypeParam(
+//  final case class RefTypeParam(
 //    name: String,
 //    bounds: TypeBounds
 //  ):
 //    def lift: TypeParameter = TypeParameter(name, bounds.show)
 //
-//  final case class QuotedMethod(
+//  final case class RefMethod(
 //    name: String,
-//    resultType: TypeRepr,
-//    parameters: Seq[Seq[QuotedParameter]],
-//    typeParameters: Seq[QuotedTypeParam],
+//    resultType: Type,
+//    parameters: Seq[Seq[RefParameter]],
+//    typeParameters: Seq[RefTypeParam],
 //    public: Boolean,
 //    available: Boolean,
 //    symbol: Symbol
@@ -48,9 +100,9 @@ case class Reflection[Context <: blackbox.Context](val c: Context) {
 //      symbol.docstring
 //    )
 //
-//  final case class QuotedField(
+//  final case class RefField(
 //    name: String,
-//    dataType: TypeRepr,
+//    dataType: Type,
 //    public: Boolean,
 //    available: Boolean,
 //    symbol: Symbol
@@ -89,7 +141,7 @@ case class Reflection[Context <: blackbox.Context](val c: Context) {
 //   * @param classType class type representation
 //   * @return quoted class method descriptors
 //   */
-//  def methods(classType: TypeRepr): Seq[QuotedMethod] =
+//  def methods(classType: Type): Seq[RefMethod] =
 //    classType.typeSymbol.memberMethods.flatMap(method(classType, _))
 //
 //  /**
@@ -98,21 +150,21 @@ case class Reflection[Context <: blackbox.Context](val c: Context) {
 //   * @param classType class type representation
 //   * @return quoted class field descriptors
 //   */
-//  def fields(classType: TypeRepr): Seq[QuotedField] =
+//  def fields(classType: Type): Seq[RefField] =
 //    classType.typeSymbol.memberFields.flatMap(field(classType, _))
 //
-//  private def method(classType: TypeRepr, methodSymbol: Symbol): Option[QuotedMethod] =
+//  private def method(classType: Type, methodSymbol: Symbol): Option[RefMethod] =
 //    val (symbolType, typeParameters) = classType.memberType(methodSymbol) match
 //      case polyType: PolyType =>
 //        val typeParameters = polyType.paramNames.zip(polyType.paramBounds).map {
-//          (name, bounds) => QuotedTypeParam(name, bounds)
+//          (name, bounds) => RefTypeParam(name, bounds)
 //        }
 //        (polyType.resType, typeParameters)
 //      case otherType => (otherType, Seq.empty)
 //    symbolType match
 //      case methodType: MethodType =>
 //        val (parameters, resultType) = methodSignature(methodType)
-//        Some(QuotedMethod(
+//        Some(RefMethod(
 //          methodSymbol.name,
 //          resultType,
 //          parameters,
@@ -123,7 +175,7 @@ case class Reflection[Context <: blackbox.Context](val c: Context) {
 //        ))
 //      case _ => None
 //
-//  private def methodSignature(methodType: MethodType): (Seq[Seq[QuotedParameter]], TypeRepr) =
+//  private def methodSignature(methodType: MethodType): (Seq[Seq[RefParameter]], Type) =
 //    val methodTypes = LazyList.iterate(Option(methodType)) {
 //      case Some(currentType) =>
 //        currentType.resType match
@@ -134,15 +186,15 @@ case class Reflection[Context <: blackbox.Context](val c: Context) {
 //    val parameters = methodTypes.map {
 //      currentType =>
 //        currentType.paramNames.zip(currentType.paramTypes).map {
-//          (name, dataType) => QuotedParameter(name, dataType, currentType.isImplicit)
+//          (name, dataType) => RefParameter(name, dataType, currentType.isImplicit)
 //        }
 //    }
 //    val resultType = methodTypes.last.resType
 //    (Seq(parameters*), resultType)
 //
-//  private def field(classType: TypeRepr, fieldSymbol: Symbol): Option[QuotedField] =
+//  private def field(classType: Type, fieldSymbol: Symbol): Option[RefField] =
 //    val fieldType = classType.memberType(fieldSymbol)
-//    Some(QuotedField(
+//    Some(RefField(
 //      fieldSymbol.name,
 //      fieldType,
 //      publicSymbol(fieldSymbol),

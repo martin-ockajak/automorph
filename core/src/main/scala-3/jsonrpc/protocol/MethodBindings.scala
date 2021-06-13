@@ -20,7 +20,7 @@ case object MethodBindings:
   def validApiMethods[Effect[_]: Type](
     ref: Reflection,
     apiType: ref.quotes.reflect.TypeTree
-  ): Seq[Either[String, ref.QuotedMethod]] =
+  ): Seq[Either[String, ref.RefMethod]] =
     import ref.quotes.reflect.{TypeRepr, TypeTree}
     given Quotes = ref.quotes
 
@@ -62,7 +62,7 @@ case object MethodBindings:
    * @tparam Context request context type
    * @return true if the method uses request context as its last parameter, false otherwise
    */
-  def methodUsesContext[Context: Type](ref: Reflection, method: ref.QuotedMethod): Boolean =
+  def methodUsesContext[Context: Type](ref: Reflection, method: ref.RefMethod): Boolean =
     import ref.quotes.reflect.TypeRepr
 
     method.parameters.flatten.lastOption.exists { parameter =>
@@ -77,7 +77,7 @@ case object MethodBindings:
    * @tparam Effect effect type
    * @return result value type
    */
-  def effectResultType[Effect[_]: Type](ref: Reflection, method: ref.QuotedMethod): ref.quotes.reflect.TypeRepr =
+  def effectResultType[Effect[_]: Type](ref: Reflection, method: ref.RefMethod): ref.quotes.reflect.TypeRepr =
     import ref.quotes.reflect.{AppliedType, TypeRepr}
 
     // Determine the method result value type
@@ -93,7 +93,7 @@ case object MethodBindings:
    * @tparam ApiType API type
    * @return method description
    */
-  def methodDescription[ApiType: Type](ref: Reflection, method: ref.QuotedMethod): String =
+  def methodDescription[ApiType: Type](ref: Reflection, method: ref.RefMethod): String =
     import ref.quotes.reflect.TypeRepr
 
     val apiType = TypeRepr.of[ApiType].show
@@ -112,8 +112,8 @@ case object MethodBindings:
   private def validateApiMethod[Effect[_]: Type](
     ref: Reflection,
     apiType: ref.quotes.reflect.TypeTree,
-    method: ref.QuotedMethod
-  ): Either[String, ref.QuotedMethod] =
+    method: ref.RefMethod
+  ): Either[String, ref.RefMethod] =
     import ref.quotes.reflect.{AppliedType, LambdaType, NamedType, TypeRepr}
 
     // No type parameters

@@ -11,25 +11,26 @@ final case class Reflection(quotes: Quotes):
 
   // All meta-programming data types must are path-dependent on the compiler-generated quotation context
   import quotes.reflect.{Flags, MethodType, PolyType, Select, Symbol, Term, TypeBounds, TypeRepr, TypeTree, asTerm}
+  private given Quotes = quotes
 
-  final case class QuotedParameter(
+  final case class RefParameter(
     name: String,
     dataType: TypeRepr,
     contextual: Boolean
   ):
     def lift: Parameter = Parameter(name, dataType.show, contextual)
 
-  final case class QuotedTypeParam(
+  final case class RefTypeParameter(
     name: String,
     bounds: TypeBounds
   ):
     def lift: TypeParameter = TypeParameter(name, bounds.show)
 
-  final case class QuotedMethod(
+  final case class RefMethod(
     name: String,
     resultType: TypeRepr,
-    parameters: Seq[Seq[QuotedParameter]],
-    typeParameters: Seq[QuotedTypeParam],
+    parameters: Seq[Seq[RefParameter]],
+    typeParameters: Seq[RefTypeParameter],
     public: Boolean,
     available: Boolean,
     symbol: Symbol
@@ -45,7 +46,7 @@ final case class Reflection(quotes: Quotes):
       symbol.docstring
     )
 
-  final case class QuotedField(
+  final case class RefField(
     name: String,
     dataType: TypeRepr,
     public: Boolean,
@@ -60,8 +61,6 @@ final case class Reflection(quotes: Quotes):
       available = available,
       documentation = symbol.docstring
     )
-
-  private given Quotes = quotes
 
   /** Unavailable class member flags. */
   private val unavailableMemberFlags = Seq(
@@ -86,7 +85,7 @@ final case class Reflection(quotes: Quotes):
    * @param classType class type representation
    * @return quoted class method descriptors
    */
-  def methods(classType: TypeRepr): Seq[QuotedMethod] =
+  def methods(classType: TypeRepr): Seq[RefMethod] =
     classType.typeSymbol.memberMethods.flatMap(method(classType, _))
 
   /**
@@ -95,21 +94,21 @@ final case class Reflection(quotes: Quotes):
    * @param classType class type representation
    * @return quoted class field descriptors
    */
-  def fields(classType: TypeRepr): Seq[QuotedField] =
+  def fields(classType: TypeRepr): Seq[RefField] =
     classType.typeSymbol.memberFields.flatMap(field(classType, _))
 
-  private def method(classType: TypeRepr, methodSymbol: Symbol): Option[QuotedMethod] =
+  private def method(classType: TypeRepr, methodSymbol: Symbol): Option[RefMethod] =
     val (symbolType, typeParameters) = classType.memberType(methodSymbol) match
       case polyType: PolyType =>
         val typeParameters = polyType.paramNames.zip(polyType.paramBounds).map {
-          (name, bounds) => QuotedTypeParam(name, bounds)
+          (name, bounds) => RefTypeParameter(name, bounds)
         }
         (polyType.resType, typeParameters)
       case otherType => (otherType, Seq.empty)
     symbolType match
       case methodType: MethodType =>
         val (parameters, resultType) = methodSignature(methodType)
-        Some(QuotedMethod(
+        Some(RefMethod(
           methodSymbol.name,
           resultType,
           parameters,
@@ -120,7 +119,7 @@ final case class Reflection(quotes: Quotes):
         ))
       case _ => None
 
-  private def methodSignature(methodType: MethodType): (Seq[Seq[QuotedParameter]], TypeRepr) =
+  private def methodSignature(methodType: MethodType): (Seq[Seq[RefParameter]], TypeRepr) =
     val methodTypes = LazyList.iterate(Option(methodType)) {
       case Some(currentType) =>
         currentType.resType match
@@ -131,15 +130,15 @@ final case class Reflection(quotes: Quotes):
     val parameters = methodTypes.map {
       currentType =>
         currentType.paramNames.zip(currentType.paramTypes).map {
-          (name, dataType) => QuotedParameter(name, dataType, currentType.isImplicit)
+          (name, dataType) => RefParameter(name, dataType, currentType.isImplicit)
         }
     }
     val resultType = methodTypes.last.resType
     (Seq(parameters*), resultType)
 
-  private def field(classType: TypeRepr, fieldSymbol: Symbol): Option[QuotedField] =
+  private def field(classType: TypeRepr, fieldSymbol: Symbol): Option[RefField] =
     val fieldType = classType.memberType(fieldSymbol)
-    Some(QuotedField(
+    Some(RefField(
       fieldSymbol.name,
       fieldType,
       publicSymbol(fieldSymbol),
