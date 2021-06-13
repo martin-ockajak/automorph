@@ -189,13 +189,8 @@ case object ClientBindings:
     val resultValueType = effectResultType[Effect](ref, method)
     '{ (resultNode: Node) =>
       ${
-        methodCall(
-          ref.quotes,
-          codec.asTerm,
-          "decode",
-          List(resultValueType),
-          List(List('{ resultNode }.asTerm))
-        ).asExprOf[Any]
+        val decodeArguments = List(List('{ resultNode }.asTerm))
+        methodCall(ref.quotes, codec.asTerm, "decode", List(resultValueType), decodeArguments).asExprOf[Any]
       }
     }
 

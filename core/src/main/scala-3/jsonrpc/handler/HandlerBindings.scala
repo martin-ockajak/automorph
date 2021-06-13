@@ -141,26 +141,16 @@ case object HandlerBindings:
         val encodeResult = resultValueType.asType match
           case '[resultType] => '{ (result: resultType) =>
               ${
-                methodCall(
-                  ref.quotes,
-                  codec.asTerm,
-                  "encode",
-                  List(resultValueType),
-                  List(List('{ result }.asTerm))
-                ).asExprOf[Node]
+                val encodeArguments = List(List('{ result }.asTerm))
+                methodCall(ref.quotes, codec.asTerm, "encode", List(resultValueType), encodeArguments).asExprOf[Node]
               }
             }
 
         // Create the effect mapping call using the method call and the encode result function
         //   backend.map(methodCall, encodeResult): Effect[Node]
-        val backendMapArguments = List(List(apiMethodCall, encodeResult.asTerm))
-        methodCall(
-          ref.quotes,
-          backend.asTerm,
-          "map",
-          List(resultValueType, TypeRepr.of[Node]),
-          backendMapArguments
-        ).asExprOf[Effect[Node]]
+        val mapTypeArguments = List(resultValueType, TypeRepr.of[Node])
+        val mapArguments = List(List(apiMethodCall, encodeResult.asTerm))
+        methodCall(ref.quotes, backend.asTerm, "map", mapTypeArguments, mapArguments).asExprOf[Effect[Node]]
       }
     }
 
