@@ -48,9 +48,9 @@ case class Reflection[Context <: blackbox.Context](c: Context) {
    * @return quoted class method descriptors
    */
   def methods(classType: Type): Seq[RefMethod] =
-    classType.members.filter(_.isMethod).flatMap(member => method(classType, member.asMethod)).toSeq
+    classType.members.filter(_.isMethod).flatMap(member => method(member.asMethod)).toSeq
 
-  private def method(classType: Type, methodSymbol: MethodSymbol): Option[RefMethod] = {
+  private def method(methodSymbol: MethodSymbol): Option[RefMethod] = {
     val typeParameters = methodSymbol.typeParams.map(_.asType).map { typeSymbol =>
       RefParameter(typeSymbol.name.toString, typeSymbol.toType, false)
     }
