@@ -1,6 +1,6 @@
 package jsonrpc.handler
 
-import jsonrpc.protocol.MethodBindings.{validApiMethods, effectResultType, methodCall, methodDescription, methodUsesContext}
+import jsonrpc.protocol.MethodBindings.{effectResultType, methodCall, methodDescription, methodUsesContext, validApiMethods}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -146,16 +146,22 @@ case object HandlerBindings:
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
         val resultValueType = effectResultType[Effect](ref, method)
         val encodeResultType = MethodType(List("result"))(_ => List(resultValueType), _ => TypeRepr.of[Node])
-        val encodeResult = Lambda(
-          symbol,
-          encodeResultType,
-          (symbol, arguments) =>
-            methodCall(ref.quotes, codec.asTerm, "encode", List(resultValueType), List(arguments))
-        )
+        val encodeResult = resultValueType.asType match
+          case '[resultType] => '{ (result: resultType) =>
+              ${
+                methodCall(
+                  ref.quotes,
+                  codec.asTerm,
+                  "encode",
+                  List(resultValueType),
+                  List(List('{ result }.asTerm))
+                ).asExprOf[Node]
+              }
+            }
 
         // Create the effect mapping call using the method call and the encode result function
         //   backend.map(methodCall, encodeResult): Effect[Node]
-        val backendMapArguments = List(List(apiMethodCall, encodeResult))
+        val backendMapArguments = List(List(apiMethodCall, encodeResult.asTerm))
         methodCall(ref.quotes, backend.asTerm, "map", List(resultValueType, TypeRepr.of[Node]), backendMapArguments)
     ).asExprOf[(Seq[Node], Context) => Effect[Node]]
 

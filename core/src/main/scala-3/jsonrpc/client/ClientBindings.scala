@@ -194,7 +194,15 @@ case object ClientBindings:
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
     val resultValueType = effectResultType[Effect](ref, method)
     '{ (resultNode: Node) =>
-      ${methodCall(ref.quotes, codec.asTerm, "decode", List(resultValueType), List(List('{resultNode}.asTerm))).asExprOf[Any]}
+      ${
+        methodCall(
+          ref.quotes,
+          codec.asTerm,
+          "decode",
+          List(resultValueType),
+          List(List('{ resultNode }.asTerm))
+        ).asExprOf[Any]
+      }
     }
 
   private def logBoundMethod[ApiType: Type](
