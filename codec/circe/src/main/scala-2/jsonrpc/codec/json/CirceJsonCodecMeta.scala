@@ -13,13 +13,13 @@ import scala.compiletime.summonInline
 trait CirceJsonCodecMeta[Custom <: CirceCustom] extends Codec[Json] {
   this: CirceJsonCodec[Custom] =>
 
-  override inline def encode[T](value: T): Json = macro CirceJsonCodecMeta.encode[Custom, T]
+  override def encode[T](value: T): Json = macro CirceJsonCodecMeta.encode[Custom, T]
 
-  override inline def decode[T](node: Json): T = macro CirceJsonCodecMeta.decode[Custom, T]
+  override def decode[T](node: Json): T = macro CirceJsonCodecMeta.decode[Custom, T]
 }
 
 object CirceJsonCodecMeta {
-  def encode[Custom, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], value: c.Expr[T]): c.Expr[Json] = {
+  def encode[Custom: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], value: c.Expr[T]): c.Expr[Json] = {
     import c.universe._
 
     val valueType = weakTypeOf[T]
@@ -29,7 +29,7 @@ object CirceJsonCodecMeta {
     """)
   }
 
-  def decode[Custom, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], node: c.Expr[Json]): c.Expr[T] = {
+  def decode[Custom: c.WeakTypeTag, T: c.WeakTypeTag](c: blackbox.Context)(custom: c.Expr[Custom], node: c.Expr[Json]): c.Expr[T] = {
     import c.universe._
 
     val valueType = weakTypeOf[T]
