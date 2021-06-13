@@ -2,7 +2,7 @@ package jsonrpc.codec.json
 
 import io.circe.syntax.EncoderOps
 import io.circe.Json
-import jsonrpc.spi.{Codec, Message}
+import jsonrpc.spi.Codec
 import scala.compiletime.summonInline
 
 /**
