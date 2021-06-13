@@ -69,7 +69,7 @@ case object MethodBindings {
    */
   def methodSignature[C <: Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[C])(
     method: ref.RefMethod
-  ): String = s"${ref.c.universe.show(ref.c.weakTypeOf[ApiType])}.${method.lift.signature}"
+  ): String = s"${ref.c.weakTypeOf[ApiType].typeSymbol.fullName}.${method.lift.signature}"
 
   /**
    * Determine whether a method is a valid API method.
@@ -85,6 +85,7 @@ case object MethodBindings {
     ref: Reflection[C]
   )(method: ref.RefMethod): Either[String, ref.RefMethod] = {
     import ref.c.weakTypeOf
+    import ref.c._
 
     // No type parameters
     val signature = methodSignature[C, ApiType](ref)(method)
@@ -97,7 +98,8 @@ case object MethodBindings {
       } else {
         // Returns the effect type
         val effectType = weakTypeOf[Effect].typeConstructor
-        println(method.resultType.typeConstructor)
+        println(method.resultType.getClass.getName)
+        println(method.resultType)
         println(effectType)
         println(effectType =:= method.resultType.typeConstructor)
 //        println(method.resultType.typeConstructor)
