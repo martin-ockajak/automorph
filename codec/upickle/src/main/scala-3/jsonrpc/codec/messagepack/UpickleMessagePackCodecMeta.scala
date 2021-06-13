@@ -1,11 +1,9 @@
 package jsonrpc.codec.messagepack
 
 import jsonrpc.codec.common.UpickleCustom
-import jsonrpc.codec.messagepack.UpickleMessagePackCodec.{Message, MessageError}
 import jsonrpc.spi.Codec
 import scala.compiletime.summonInline
 import upack.Msg
-import upickle.Api
 
 /**
  * UPickle JSON codec plugin code generation.

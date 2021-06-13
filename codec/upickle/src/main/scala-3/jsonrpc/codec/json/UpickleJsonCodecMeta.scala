@@ -1,7 +1,6 @@
 package jsonrpc.codec.json
 
 import jsonrpc.codec.common.UpickleCustom
-import jsonrpc.codec.json.UpickleJsonCodec.{Message, MessageError}
 import jsonrpc.spi.Codec
 import scala.compiletime.summonInline
 import ujson.Value
