@@ -19,7 +19,7 @@ case object MethodBindings:
     ref: Reflection,
     apiType: ref.quotes.reflect.TypeTree
   ): Seq[Either[String, ref.RefMethod]] =
-    import ref.quotes.reflect.{TypeRepr, TypeTree}
+    import ref.quotes.reflect.TypeRepr
     given Quotes = ref.quotes
 
     val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap {
@@ -116,7 +116,7 @@ case object MethodBindings:
     apiType: ref.quotes.reflect.TypeTree,
     method: ref.RefMethod
   ): Either[String, ref.RefMethod] =
-    import ref.quotes.reflect.{AppliedType, LambdaType, NamedType, TypeRepr}
+    import ref.quotes.reflect.{AppliedType, LambdaType, TypeRepr}
 
     // No type parameters
     val signature = s"${apiType.show}.${method.lift.signature}"
