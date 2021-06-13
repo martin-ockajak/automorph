@@ -46,14 +46,11 @@ case class UrlConnectionTransport(
 
   private def send(request: ArraySeq.ofByte, context: Option[HttpProperties]): Unit = {
     val outputStream = connection.getOutputStream
-    Try {
-      context.foreach(setProperties(request, _))
-      outputStream.write(request.unsafeArray)
-    }.recover {
-      case _ =>
-        context.foreach(clearProperties)
-        outputStream.close()
-    }
+    context.foreach(setProperties(request, _))
+    val trySend = Try(outputStream.write(request.unsafeArray))
+    context.foreach(clearProperties)
+    outputStream.close()
+    trySend.get
   }
 
   private def setProperties(request: ArraySeq.ofByte, context: HttpProperties): Unit = {

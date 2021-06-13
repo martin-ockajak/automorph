@@ -1,7 +1,6 @@
 package base
 
-import scala.util.Using
-import scala.util.Using.Releasable
+import scala.util.{Try, Using}
 
 trait Fixtures {
 
@@ -19,7 +18,7 @@ trait Fixtures {
    * @tparam T fixture type
    * @return loan fixture function
    */
-  def loanFixture[T: Releasable](createFixture: => T): Fixture[T] =
+  def loanFixture[T: Using.Releasable](createFixture: => T): Fixture[T] =
     test => Using(createFixture)(fixture => test(fixture)).map(_ => ()).get
 
   /**
@@ -32,10 +31,9 @@ trait Fixtures {
    */
   def loanFixture[T](createFixture: => T, releaseFixture: T => Unit): Fixture[T] = test => {
     lazy val fixture = createFixture
-    try {
-      test(fixture)
-      ()
-    } finally
-      releaseFixture(fixture)
+    val tryTest = Try(test(fixture))
+    releaseFixture(fixture)
+    tryTest.get
+    ()
   }
 }
