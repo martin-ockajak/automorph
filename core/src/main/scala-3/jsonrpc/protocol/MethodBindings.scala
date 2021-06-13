@@ -1,11 +1,9 @@
 package jsonrpc.protocol
 
 import jsonrpc.util.Reflection
-import scala.quoted.{Quotes, Type, quotes}
+import scala.quoted.{quotes, Quotes, Type}
 
-/**
- * Method bindings code generation.
- */
+/** Method bindings code generation. */
 case object MethodBindings:
 
   /**
@@ -42,7 +40,7 @@ case object MethodBindings:
    * @param arguments method argument terms
    * @return instance method call term
    */
-  def methodCall(
+  def call(
     quotes: Quotes,
     instance: quotes.reflect.Term,
     methodName: String,
@@ -57,6 +55,7 @@ case object MethodBindings:
 
   /**
    * Determine whether a method uses request context as its parameter.
+   *
    * @param ref reflection context
    * @param method method
    * @tparam Context request context type
@@ -70,20 +69,20 @@ case object MethodBindings:
     }
 
   /**
-   * Determine method result value type wrapped in the specified effect type.
+   * Extract type wrapped in the specified wrapper type.
    *
    * @param ref reflection context
-   * @param method method
-   * @tparam Effect effect type
-   * @return result value type
+   * @param wrappedType wrapped type
+   * @tparam Wrapper wrapper type
+   * @return wrapped type
    */
-  def effectResultType[Effect[_]: Type](ref: Reflection, method: ref.RefMethod): ref.quotes.reflect.TypeRepr =
+  def unwrapType[Wrapper[_]: Type](ref: Reflection, wrappedType: ref.quotes.reflect.TypeRepr): ref.quotes.reflect.TypeRepr =
     import ref.quotes.reflect.{AppliedType, TypeRepr}
 
     // Determine the method result value type
-    method.resultType match
-      case appliedType: AppliedType if appliedType.tycon =:= TypeRepr.of[Effect] => appliedType.args.last
-      case otherType                                                             => otherType
+    wrappedType match
+      case appliedType: AppliedType if appliedType.tycon =:= TypeRepr.of[Wrapper] => appliedType.args.last
+      case otherType                                                              => otherType
 
   /**
    * Create API method description.

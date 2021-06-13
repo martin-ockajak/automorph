@@ -1,6 +1,6 @@
 package jsonrpc.handler
 
-import jsonrpc.protocol.MethodBindings.{effectResultType, methodCall, methodDescription, methodUsesContext, validApiMethods}
+import jsonrpc.protocol.MethodBindings.{unwrapType, call, methodDescription, methodUsesContext, validApiMethods}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -126,22 +126,22 @@ case object HandlerBindings:
             if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
               'context
             else
-              methodCall(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode.asTerm)))
+              call(ref.quotes, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode.asTerm)))
           }
         ).asInstanceOf[List[List[Term]]]
 
         // Create the API method call using the decoded arguments
         //   api.method(decodedArguments ...): Effect[ResultValueType]
-        val apiMethodCall = methodCall(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
+        val apiMethodCall = call(ref.quotes, api.asTerm, method.name, List.empty, argumentLists)
 
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
-        val resultValueType = effectResultType[Effect](ref, method)
+        val resultValueType = unwrapType[Effect](ref, method.resultType)
         val encodeResult = resultValueType.asType match
           case '[resultType] => '{ (result: resultType) =>
               ${
                 val encodeArguments = List(List('{ result }.asTerm))
-                methodCall(ref.quotes, codec.asTerm, "encode", List(resultValueType), encodeArguments).asExprOf[Node]
+                call(ref.quotes, codec.asTerm, "encode", List(resultValueType), encodeArguments).asExprOf[Node]
               }
             }
 
@@ -149,7 +149,7 @@ case object HandlerBindings:
         //   backend.map(methodCall, encodeResult): Effect[Node]
         val mapTypeArguments = List(resultValueType, TypeRepr.of[Node])
         val mapArguments = List(List(apiMethodCall, encodeResult.asTerm))
-        methodCall(ref.quotes, backend.asTerm, "map", mapTypeArguments, mapArguments).asExprOf[Effect[Node]]
+        call(ref.quotes, backend.asTerm, "map", mapTypeArguments, mapArguments).asExprOf[Effect[Node]]
       }
     }
 

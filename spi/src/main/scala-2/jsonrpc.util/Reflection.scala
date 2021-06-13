@@ -7,7 +7,7 @@ import scala.reflect.macros.blackbox
  *
  * @param quotes quotation context
  */
-case class Reflection[Context <: blackbox.Context](val c: Context) {
+case class Reflection[Context <: blackbox.Context](c: Context) {
 
   // All meta-programming data types are path-dependent on the compiler-generated reflection context
   import c.universe._
@@ -51,10 +51,10 @@ case class Reflection[Context <: blackbox.Context](val c: Context) {
     classType.members.filter(_.isMethod).flatMap(member => method(classType, member.asMethod)).toSeq
 
   private def method(classType: Type, methodSymbol: MethodSymbol): Option[RefMethod] = {
-    println(methodSymbol.name)
     val typeParameters = methodSymbol.typeParams.map(_.asType).map { typeSymbol =>
-      println(typeSymbol.name)
+      RefParameter(typeSymbol.name.toString, typeSymbol.toType, false)
     }
+    Some(RefMethod(methodSymbol.name.toString, methodSymbol.returnType, Seq(), typeParameters, true, true, methodSymbol))
 //    val (symbolType, typeParameters) = classType.memberType(methodSymbol) match {
 //      case polyType: PolyType =>
 //        val typeParameters = polyType.paramNames.zip(polyType.paramBounds).map {
@@ -77,7 +77,6 @@ case class Reflection[Context <: blackbox.Context](val c: Context) {
 //        ))
 //      case _ => None
 //    }
-    None
   }
 }
 

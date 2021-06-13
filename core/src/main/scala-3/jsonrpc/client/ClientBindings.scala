@@ -1,7 +1,7 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.protocol.MethodBindings.{effectResultType, methodCall, methodDescription, methodUsesContext, validApiMethods}
+import jsonrpc.protocol.MethodBindings.{unwrapType, call, methodDescription, methodUsesContext, validApiMethods}
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -157,7 +157,7 @@ case object ClientBindings:
             Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[Context](ref, method)) {
               val argument = parameter.dataType.asType match
                 case '[parameterType] => '{ arguments(${ Expr(offset + index) }).asInstanceOf[parameterType] }
-              methodCall(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
+              call(ref.quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
             }
           }
         ).map(_.asInstanceOf[Term].asExprOf[Node])
@@ -178,11 +178,11 @@ case object ClientBindings:
 
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
-    val resultValueType = effectResultType[Effect](ref, method)
+    val resultValueType = unwrapType[Effect](ref, method.resultType)
     '{ (resultNode: Node) =>
       ${
         val decodeArguments = List(List('{ resultNode }.asTerm))
-        methodCall(ref.quotes, codec.asTerm, "decode", List(resultValueType), decodeArguments).asExprOf[Any]
+        call(ref.quotes, codec.asTerm, "decode", List(resultValueType), decodeArguments).asExprOf[Any]
       }
     }
 
