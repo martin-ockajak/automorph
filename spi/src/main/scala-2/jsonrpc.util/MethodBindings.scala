@@ -129,20 +129,21 @@ case object MethodBindings {
       } else {
         // Returns the effect type
         val effectType = weakTypeOf[Effect] match {
-          case lambdaType: LambdaType => lambdaType.resType
+//          case lambdaType: LambdaType => lambdaType.resType
           case otherType              => otherType
         }
         if (
-          effectType match {
-            case appliedEffectType: AppliedType =>
-              method.resultType match {
-                case resultType: AppliedType => resultType.tycon =:= appliedEffectType.tycon
-                case _                       => false
-              }
-            case _ => true
-          }
+//          effectType match {
+//            case appliedEffectType: AppliedType =>
+//              method.resultType match {
+//                case resultType: AppliedType => resultType.tycon =:= appliedEffectType.tycon
+//                case _                       => false
+//              }
+//            case _ => true
+//          }
+            false
         ) {
-          Left(s"Bound API method '$signature' must return the specified effect type '${effectType.show}'")
+          Left(s"Bound API method '$signature' must return the specified effect type '${effectType.typeSymbol.fullName}'")
         } else {
           Right(method)
         }
