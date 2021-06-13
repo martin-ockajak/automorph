@@ -26,7 +26,7 @@ import scala.util.Try
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
+trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
   this: Handler[Node, CodecType, Effect, Context] =>
 
   private val unknownId = "[unknown]"
@@ -98,7 +98,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
     formedRequest: Message[Node],
     validRequest: Request[Node],
     context: Context
-  ): Effect[HandlerResult[ArraySeq.ofByte]] =
+  ): Effect[HandlerResult[ArraySeq.ofByte]] = {
     // Lookup bindings for the specified method
     logger.debug(s"Processing JSON-RPC request", formedRequest.properties)
     methodBindings.get(validRequest.method).map { handlerMethod =>
@@ -133,6 +133,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
         formedRequest
       )
     }
+  }
 
   /**
    * Validata and extract specified bound method arguments from a request.
@@ -146,25 +147,27 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
   private def extractArguments(
     validRequest: Request[Node],
     handlerMethod: HandlerMethod[Node, Effect, Context]
-  ): Seq[Node] =
+  ): Seq[Node] = {
     // Adjust expected method parameters if it uses context as its last parameter
-    val parameters = handlerMethod.paramNames.dropRight(if handlerMethod.usesContext then 1 else 0)
+    val parameters = handlerMethod.paramNames.dropRight(if (handlerMethod.usesContext) 1 else 0)
     validRequest.params.fold(
       arguments =>
         // Arguments by position
-        if arguments.size > parameters.size then
+        if (arguments.size > parameters.size) {
           throw IllegalArgumentException(s"Redundant arguments: ${parameters.size - arguments.size}")
-        else
+        } else {
           arguments ++ Seq.fill(parameters.size - arguments.size)(encodedNone)
-      ,
+        },
       namedArguments =>
         // Arguments by name
         val redundantArguments = namedArguments.keys.toSeq.diff(parameters)
-        if redundantArguments.nonEmpty then
+        if (redundantArguments.nonEmpty) {
           throw IllegalArgumentException(s"Redundant arguments: ${redundantArguments.mkString(", ")}")
-        else
+        } else {
           parameters.map(name => namedArguments.get(name).getOrElse(encodedNone))
+        }
     )
+  }
 
   /**
    * Create an error response for a request.
@@ -173,7 +176,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param formedRequest formed request
    * @return error response if applicable
    */
-  private def errorResponse(error: Throwable, formedRequest: Message[Node]): Effect[HandlerResult[ArraySeq.ofByte]] =
+  private def errorResponse(error: Throwable, formedRequest: Message[Node]): Effect[HandlerResult[ArraySeq.ofByte]] = {
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
     val responseError = error match
       case JsonRpcError(message, code, data, _) => ResponseError(code, message, data.asInstanceOf[Option[Node]])
@@ -192,6 +195,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
       }.getOrElse(backend.pure(None)),
       rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, Some(responseError.code))
     )
+  }
 
   /**
    * Serialize JSON-RPC message.
@@ -199,9 +203,11 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @param formedMessage JSON-RPC message
    * @return serialized response
    */
-  private def serialize(formedMessage: Message[Node]): Effect[Option[ArraySeq.ofByte]] =
+  private def serialize(formedMessage: Message[Node]): Effect[Option[ArraySeq.ofByte]] = {
     logger.trace(s"Sending JSON-RPC message:\n${codec.format(formedMessage)}")
     Try(codec.serialize(formedMessage)).fold(
       error => backend.failed(ParseError("Invalid message format", error)),
       message => backend.pure(Some(message))
     )
+  }
+}
