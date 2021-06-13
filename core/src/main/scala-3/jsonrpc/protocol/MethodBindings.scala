@@ -76,7 +76,10 @@ case object MethodBindings:
    * @tparam Wrapper wrapper type
    * @return wrapped type
    */
-  def unwrapType[Wrapper[_]: Type](ref: Reflection, wrappedType: ref.quotes.reflect.TypeRepr): ref.quotes.reflect.TypeRepr =
+  def unwrapType[Wrapper[_]: Type](
+    ref: Reflection,
+    wrappedType: ref.quotes.reflect.TypeRepr
+  ): ref.quotes.reflect.TypeRepr =
     import ref.quotes.reflect.{AppliedType, TypeRepr}
 
     // Determine the method result value type
@@ -129,14 +132,13 @@ case object MethodBindings:
         TypeRepr.of[Effect] match
           case lambdaType: LambdaType => lambdaType.resType
           case otherType              => otherType
-      val resultEffectType =
-        effectType match
+      if effectType match
           case appliedEffectType: AppliedType =>
             method.resultType match
               case resultType: AppliedType => resultType.tycon =:= appliedEffectType.tycon
               case _                       => false
           case _ => true
-      if !resultEffectType then
+      then
         Left(s"Bound API method '$signature' must return the specified effect type '${effectType.show}'")
       else
         Right(method)
