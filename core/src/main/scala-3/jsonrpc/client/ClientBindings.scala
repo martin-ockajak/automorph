@@ -187,18 +187,15 @@ case object ClientBindings:
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
   ): Expr[Node => Any] =
-    import ref.quotes.reflect.{asTerm, AppliedType, IntConstant, Lambda, Literal, MethodType, Symbol, Term, TypeRepr}
+    import ref.quotes.reflect.asTerm
     given Quotes = ref.quotes
 
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
     val resultValueType = effectResultType[Effect](ref, method)
-    val decodeResultType = MethodType(List("resultNode"))(_ => List(TypeRepr.of[Node]), _ => resultValueType)
-    Lambda(
-      Symbol.spliceOwner,
-      decodeResultType,
-      (symbol, arguments) => methodCall(ref.quotes, codec.asTerm, "decode", List(resultValueType), List(arguments))
-    ).asExprOf[Node => Any]
+    '{ (resultNode: Node) =>
+      ${methodCall(ref.quotes, codec.asTerm, "decode", List(resultValueType), List(List('{resultNode}.asTerm))).asExprOf[Any]}
+    }
 
   private def logBoundMethod[ApiType: Type](
     ref: Reflection,
