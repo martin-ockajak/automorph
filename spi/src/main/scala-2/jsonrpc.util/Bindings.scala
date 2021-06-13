@@ -1,5 +1,6 @@
 package jsonrpc.util
 
+import jsonrpc.util.MethodBindings.methodDescription
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -13,23 +14,10 @@ object Bindings {
     val apiType = weakTypeOf[T]
     val methods = ref.methods(apiType)
     methods.foreach { method =>
-      println(methodDescription(ref)(apiType, method))
+      println(methodDescription[c.type, T](ref)(method))
     }
     c.Expr[Unit](q"""
       ()
     """)
-  }
-
-  /**
-   * Create API method description.
-   *
-   * @param ref reflection
-   * @param method method
-   * @tparam ApiType API type
-   * @return method description
-   */
-  def methodDescription[Context <: blackbox.Context](ref: Reflection[Context])(apiType: ref.c.Type, method: ref.RefMethod): String = {
-    val documentation = method.lift.documentation.map(_ + "\n").getOrElse("")
-    s"$documentation${apiType.typeSymbol.fullName}.${method.lift.signature}"
   }
 }
