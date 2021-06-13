@@ -90,7 +90,7 @@ case object MethodBindings:
   def methodSignature[ApiType: Type](ref: Reflection, method: ref.RefMethod): String =
     import ref.q.reflect.{TypeRepr, Printer}
 
-    s"${TypeRepr.of[ApiType].show(using Printer.TypeReprShortCode)}.${method.lift.signature}"
+    s"${TypeRepr.of[ApiType].show(using Printer.TypeReprCode)}.${method.lift.signature}"
 
   /**
    * Determine whether a method is a valid API method.
