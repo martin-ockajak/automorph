@@ -39,6 +39,13 @@ lazy val spi = project.settings(
       case _ => Seq.empty
     }
   }
+).settings(
+  libraryDependencies ++= Seq(
+    // Test
+    "org.scalatest" %% "scalatest" % "3.2.9",
+    "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0",
+    "ch.qos.logback" % "logback-classic" % "1.2.3"
+  )
 )
 lazy val core = project.dependsOn(
   spi, testBase % Test
@@ -206,8 +213,8 @@ ThisBuild / javacOptions ++= Seq(
 //scalastyleFailOnError := true
 ThisBuild / scalafmtConfig := baseDirectory.value / "project" / "scalafmt.conf"
 lazy val testScalastyle = taskKey[Unit]("testScalastyle")
-testScalastyle := scalastyle.in(Test).toTask("").value
-//(test in Test) := ((test in Test) dependsOn testScalastyle).value
+testScalastyle := (Test / scalastyle).toTask("").value
+//Test / test := ((Test / test) dependsOn testScalastyle).value
 
 
 // Documentation
