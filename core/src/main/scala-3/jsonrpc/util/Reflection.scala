@@ -1,6 +1,6 @@
 package jsonrpc.util
 
-import scala.quoted.{Expr, Quotes, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, Type}
 
 /**
  * Data type reflection tools.
@@ -88,20 +88,26 @@ final case class Reflection(q: Quotes):
     val resultType = methodTypes.last.resType
     (Seq(parameters*), resultType)
 
-  private def publicMethod(methodSymbol: Symbol): Boolean = !matchesFlags(methodSymbol.flags, Seq(
-    Flags.Private,
-    Flags.PrivateLocal,
-    Flags.Protected,
-    Flags.Synthetic
-  ))
+  private def publicMethod(methodSymbol: Symbol): Boolean = !matchesFlags(
+    methodSymbol.flags,
+    Seq(
+      Flags.Private,
+      Flags.PrivateLocal,
+      Flags.Protected,
+      Flags.Synthetic
+    )
+  )
 
-  private def availableMethod(methodSymbol: Symbol): Boolean = !matchesFlags(methodSymbol.flags, Seq(
-    Flags.Erased,
-    Flags.Inline,
-    Flags.Invisible,
-    Flags.Macro,
-    Flags.Transparent
-  ))
+  private def availableMethod(methodSymbol: Symbol): Boolean = !matchesFlags(
+    methodSymbol.flags,
+    Seq(
+      Flags.Erased,
+      Flags.Inline,
+      Flags.Invisible,
+      Flags.Macro,
+      Flags.Transparent
+    )
+  )
 
   private def matchesFlags(flags: Flags, matchingFlags: Seq[Flags]): Boolean =
     matchingFlags.foldLeft(false)((result, current) => result | flags.is(current))
