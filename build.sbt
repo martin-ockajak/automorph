@@ -201,6 +201,15 @@ ThisBuild / javacOptions ++= Seq(
 )
 
 
+// Analyze
+//ThisBuild / scalastyleConfig := baseDirectory.value / "project" / "scalastyle.xml"
+//ThisBuild / scalastyleFailOnError := true
+ThisBuild / scalafmtConfig := baseDirectory.value / "project" / "scalafmt.conf"
+lazy val testScalastyle = taskKey[Unit]("testScalastyle")
+testScalastyle := scalastyle.in(Test).toTask("").value
+//(test in Test) := ((test in Test) dependsOn testScalastyle).value
+
+
 // Documentation
 ThisBuild / autoAPIMappings := true
 apiURL := Some(url("https://javadoc.io/doc/io.jsonrpc/jsonrpc-core_3/latest"))
