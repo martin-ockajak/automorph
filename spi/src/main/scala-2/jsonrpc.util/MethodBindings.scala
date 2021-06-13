@@ -100,36 +100,32 @@ case object MethodBindings {
    */
   def methodDescription[C <: Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[C])(
     method: ref.RefMethod
-  ): String = {
-    val apiType = ref.c.weakTypeOf[ApiType]
-    val documentation = method.lift.documentation.map(_ + "\n").getOrElse("")
-    s"$documentation${apiType.typeSymbol.fullName}.${method.lift.signature}"
-  }
+  ): String = s"${ref.c.weakTypeOf[ApiType].typeSymbol.fullName}.${method.lift.signature}"
 
   /**
    * Determine whether a method is a valid API method.
    *
    * @param ref reflection context
-   * @param apiType API type
    * @param method method
    * @tparam C macro context type
+   * @tparam ApiType API type
    * @tparam Effect effect type
    * @return valid API method or an error message
    */
-  private def validateApiMethod[C <: Context, Effect[_]: ref.c.WeakTypeTag](ref: Reflection[C])(
-    apiType: ref.c.Type,
-    method: ref.RefMethod
-  ): Either[String, ref.RefMethod] = {
+  private def validateApiMethod[C <: Context, ApiType: ref.c.WeakTypeTag, Effect[_]: ref.c.WeakTypeTag](
+    ref: Reflection[C]
+  )(method: ref.RefMethod): Either[String, ref.RefMethod] = {
     import ref.c.{AppliedType, LambdaType, Type}
 
     // No type parameters
-    val signature = s"${apiType.show}.${method.lift.signature}"
+    val apiType = ref.c.weakTypeOf[ApiType]
+    val description = methodDescription[C, ApiType](ref)(method)
     if (method.typeParameters.nonEmpty) {
-      Left(s"Bound API method '$signature' must not have type parameters")
+      Left(s"Bound API method '$description' must not have type parameters")
     } else {
       // Callable at runtime
       if (!method.available) {
-        Left(s"Bound API method '$signature' must be callable at runtime")
+        Left(s"Bound API method '$description' must be callable at runtime")
       } else {
         // Returns the effect type
         val effectType = TypeRepr.of[Effect] match {
@@ -146,7 +142,7 @@ case object MethodBindings {
             case _ => true
           }
         ) {
-          Left(s"Bound API method '$signature' must return the specified effect type '${effectType.show}'")
+          Left(s"Bound API method '$description' must return the specified effect type '${effectType.show}'")
         } else {
           Right(method)
         }
