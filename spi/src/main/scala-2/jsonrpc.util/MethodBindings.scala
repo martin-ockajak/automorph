@@ -18,17 +18,15 @@ case object MethodBindings {
   def validApiMethods[C <: Context, ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
     ref: Reflection[C]
   ): Seq[Either[String, ref.RefMethod]] = {
-    import ref.c.weakTypeOf
-
-    val baseMethodNames = Seq(weakTypeOf[AnyRef], weakTypeOf[Product]).flatMap {
+    val baseMethodNames = Seq(ref.c.weakTypeOf[AnyRef], ref.c.weakTypeOf[Product]).flatMap {
       baseType => ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
-    val methods = ref.methods(weakTypeOf[ApiType]).filter(_.public).filter {
+    val methods = ref.methods(ref.c.weakTypeOf[ApiType]).filter(_.public).filter {
       method => !baseMethodNames.contains(method.name)
     }
     methods.map(method => validateApiMethod[C, ApiType, Effect](ref)(method))
   }
-  //
+
   //  /**
   //   * Create instance method call term.
   //   *
