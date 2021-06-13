@@ -13,50 +13,6 @@ case object ClientBindings:
 //  private val debugDefault = "true"
   private val debugDefault = ""
 
-//  inline def generateX[Node, CodecType <: Codec[Node], Arguments <: Tuple]( codec: CodecType ): Tuple => Seq[Node] =
-//    ${ generateX[Node, CodecType, Effect, Context, ApiType]('codec) }
-//
-//  private def generateX[Node: Type, CodecType <: Codec[Node]: Type, Arguments <: Tuple: Type](
-//    codec: Expr[CodecType]
-//  )(using quotes: Quotes): Expr[Map[String, ClientMethod[Node]]] =
-//    import quotes.reflect.{asTerm, AppliedType, Lambda, MethodType, Symbol, Term, TypeRepr}
-//
-//    // Map multiple parameter lists to flat argument node list offsets
-//    val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
-//      indices :+ (indices.last + size)
-//    }
-//
-//    // Create encode arguments function
-//    //   (arguments: Seq[Any]) => Seq[Node]
-//    val encodeArgumentsType = MethodType(List("arguments"))(
-//      _ => List(TypeRepr.of[Tuple]),
-//      _ => TypeRepr.of[Seq[Node]]
-//    )
-//    Lambda(
-//      Symbol.spliceOwner,
-//      encodeArgumentsType,
-//      (symbol, arguments) =>
-//        // Create the method argument lists by encoding corresponding argument values into nodes
-//        //   List(
-//        //     codec.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
-//        //     codec.encode[Parameter1Type](arguments(1).asInstanceOf[Parameter1Type]),
-//        //     ...
-//        //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
-//        //   )): List[Node]
-//        val List(argumentValues) = arguments.asInstanceOf[List[Term]]
-//        val argumentList = Expr.ofSeq(argumentValues.zipWithIndex.map { (parameter, index) =>
-//          val argumentIndex = Expr(index)
-//          val argument = '{ ${ argumentValues.asExprOf[Seq[Any]] }($argumentIndex) }
-//          val argument = methodCall(quotes, argumentValues, s"_${argumentIndex}", List(), List())
-//          methodCall(quotes, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
-//        }.map(_.asInstanceOf[Term].asExprOf[Node]))
-//
-//        // Create the encoded arguments sequence construction call
-//        //   Seq(encodedArguments ...): Seq[Node]
-//        '{ Seq(${ argumentList }*) }.asTerm
-//    ).asExprOf[Tuple => Seq[Node]]
-//    Expr(()).asInstanceOf[Expr[Tuple => Seq[Node]]]
-
   /**
    * Generate client bindings for all valid public methods of an API type.
    *
