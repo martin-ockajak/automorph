@@ -79,9 +79,7 @@ case object ClientBindings:
     Effect[_]: Type,
     Context: Type,
     ApiType <: AnyRef: Type
-  ](
-    codec: Expr[CodecType]
-  )(using quotes: Quotes): Expr[Map[String, ClientMethod[Node]]] =
+  ](codec: Expr[CodecType])(using quotes: Quotes): Expr[Map[String, ClientMethod[Node]]] =
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -105,11 +103,7 @@ case object ClientBindings:
     Effect[_]: Type,
     Context: Type,
     ApiType: Type
-  ](
-    ref: Reflection,
-    method: ref.QuotedMethod,
-    codec: Expr[CodecType]
-  ): Expr[(String, ClientMethod[Node])] =
+  ](ref: Reflection, method: ref.QuotedMethod, codec: Expr[CodecType]): Expr[(String, ClientMethod[Node])] =
     given Quotes = ref.quotes
 
     val liftedMethod = method.lift
@@ -138,7 +132,7 @@ case object ClientBindings:
     method: ref.QuotedMethod,
     codec: Expr[CodecType]
   ): Expr[Seq[Any] => Seq[Node]] =
-    import ref.quotes.reflect.{asTerm, Term, TypeRepr}
+    import ref.quotes.reflect.{asTerm, Term}
     given Quotes = ref.quotes
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -198,7 +192,7 @@ case object ClientBindings:
     encodeArguments: Expr[Any],
     decodeResult: Expr[Any]
   ): Unit =
-    import ref.quotes.reflect.{asTerm, Printer, TypeRepr}
+    import ref.quotes.reflect.{asTerm, Printer}
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
       println(
