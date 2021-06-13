@@ -10,7 +10,7 @@ import jsonrpc.spi.Backend
  *
  * Effect type: Identity
  */
-final case class NoBackend() extends Backend[Identity]:
+final case class NoBackend() extends Backend[Identity] {
 
   override def pure[T](value: T): T = value
 
@@ -19,6 +19,8 @@ final case class NoBackend() extends Backend[Identity]:
   override def flatMap[T, R](value: T, function: T => R): R = function(value)
 
   override def either[T](value: T): Either[Throwable, T] = Right(value)
+}
 
-case object NoBackend:
+case object NoBackend {
   type Identity[T] = T
+}

@@ -14,7 +14,7 @@ import scala.util.{Failure, Success, Try}
  * @see Effect type: [[scala.concurrent.Future]]
  * @param executionContext execution context
  */
-final case class FutureBackend()(using executionContext: ExecutionContext) extends Backend[Future]:
+final case class FutureBackend()(using executionContext: ExecutionContext) extends Backend[Future] {
 
   override def pure[T](value: T): Future[T] = Future.successful(value)
 
@@ -23,3 +23,4 @@ final case class FutureBackend()(using executionContext: ExecutionContext) exten
   override def flatMap[T, R](effect: Future[T], function: T => Future[R]): Future[R] = effect.flatMap(function)
 
   override def either[T](effect: Future[T]): Future[Either[Throwable, T]] = effect.transform(value => Success(value.toEither))
+}

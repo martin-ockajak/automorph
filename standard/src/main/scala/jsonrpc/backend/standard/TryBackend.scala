@@ -9,7 +9,7 @@ import scala.util.{Failure, Success, Try}
  * @see [[https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html Documentation]]
  * @see Effect type: [[scala.util.Try]]
  */
-final case class TryBackend() extends Backend[Try]:
+final case class TryBackend() extends Backend[Try] {
 
   override def pure[T](value: T): Try[T] = Success(value)
 
@@ -18,3 +18,4 @@ final case class TryBackend() extends Backend[Try]:
   override def flatMap[T, R](effect: Try[T], function: T => Try[R]): Try[R] = effect.flatMap(function)
 
   override def either[T](value: Try[T]): Try[Either[Throwable, T]] = Success(value.toEither)
+}
