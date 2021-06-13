@@ -204,5 +204,5 @@ object Client {
     codec: CodecType,
     backend: Backend[Effect],
     transport: Transport[Effect, NoContext]
-  ): Client[Node, CodecType, Effect, NoContext] = Client(codec, backend, transport, true)
+  ): Client[Node, CodecType, Effect, NoContext] = new Client(codec, backend, transport, true)
 }

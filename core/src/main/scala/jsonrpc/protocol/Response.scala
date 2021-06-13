@@ -16,7 +16,7 @@ import jsonrpc.spi.{Message, MessageError}
 final case class Response[Node](
   id: Id,
   value: Either[ResponseError[Node], Node]
-):
+) {
 
   def formed: Message[Node] = Message[Node](
     jsonrpc = Some(version),
@@ -26,8 +26,9 @@ final case class Response[Node](
     result = value.toOption,
     error = value.swap.toOption.map(_.formed)
   )
+}
 
-case object Response:
+case object Response {
 
   def apply[Node](message: Message[Node]): Response[Node] =
     val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
@@ -38,8 +39,9 @@ case object Response:
       Response(id, Right(result))
     }.getOrElse {
       val error = mandatory(message.error, "error")
-      Response(id, Left(ResponseError(error)))
+      new Response(id, Left(ResponseError(error)))
     }
+}
 
 /**
  * JSON-RPC call response error.
@@ -54,17 +56,19 @@ final case class ResponseError[Node](
   code: Int,
   message: String,
   data: Option[Node]
-):
+) {
 
   def formed: MessageError[Node] = MessageError[Node](
     code = Some(code),
     message = Some(message),
     data = data
   )
+}
 
-case object ResponseError:
+case object ResponseError {
 
   def apply[Node](error: MessageError[Node]): ResponseError[Node] =
     val code = mandatory(error.code, "code")
     val message = mandatory(error.message, "message")
-    ResponseError(code, message, error.data)
+    new ResponseError(code, message, error.data)
+}
