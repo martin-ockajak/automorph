@@ -153,11 +153,7 @@ case object HandlerBindings:
       }
     }
 
-  private def logBoundMethod[ApiType: Type](
-    ref: Reflection,
-    method: ref.QuotedMethod,
-    invoke: Expr[Any]
-  ): Unit =
+  private def logBoundMethod[ApiType: Type](ref: Reflection, method: ref.QuotedMethod, invoke: Expr[Any]): Unit =
     import ref.quotes.reflect.{asTerm, Printer, TypeRepr}
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
