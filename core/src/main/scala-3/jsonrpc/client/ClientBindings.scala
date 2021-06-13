@@ -83,7 +83,7 @@ case object ClientBindings:
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = validApiMethods[Effect](ref, ref.quotes.reflect.TypeTree.of[ApiType])
+    val apiMethods = validApiMethods[ApiType, Effect](ref)
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if invalidMethodErrors.nonEmpty then

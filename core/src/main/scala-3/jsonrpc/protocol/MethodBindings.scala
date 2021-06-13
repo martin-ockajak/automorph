@@ -10,25 +10,22 @@ case object MethodBindings:
    * Detect valid API methods in the specified API type.
    *
    * @param ref reflection
-   * @param apiType API type
+   * @tparam ApiType API type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @return valid method descriptors or error messages by method name
    */
-  def validApiMethods[Effect[_]: Type](
-    ref: Reflection,
-    apiType: ref.quotes.reflect.TypeTree
-  ): Seq[Either[String, ref.RefMethod]] =
+  def validApiMethods[ApiType: Type, Effect[_]: Type](ref: Reflection): Seq[Either[String, ref.RefMethod]] =
     import ref.quotes.reflect.TypeRepr
     given Quotes = ref.quotes
 
     val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap {
       baseType => ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
-    val methods = ref.methods(apiType.tpe).filter(_.public).filter {
+    val methods = ref.methods(TypeRepr.of[ApiType]).filter(_.public).filter {
       method => !baseMethodNames.contains(method.symbol.name)
     }
-    methods.map(method => validateApiMethod(ref, apiType, method))
+    methods.map(method => validateApiMethod[ApiType, Effect](ref, method))
 
   /**
    * Create instance method call term.
@@ -90,7 +87,7 @@ case object MethodBindings:
   /**
    * Create API method description.
    *
-   * @param ref reflection
+   * @param ref reflection context
    * @param method method
    * @tparam ApiType API type
    * @return method description
@@ -106,19 +103,19 @@ case object MethodBindings:
    * Determine whether a method is a valid API method.
    *
    * @param ref reflection context
-   * @param apiType API type
    * @param method method
+   * @tparam ApiType API type
    * @tparam Effect effect type
    * @return valid API method or an error message
    */
-  private def validateApiMethod[Effect[_]: Type](
+  private def validateApiMethod[ApiType: Type, Effect[_]: Type](
     ref: Reflection,
-    apiType: ref.quotes.reflect.TypeTree,
     method: ref.RefMethod
   ): Either[String, ref.RefMethod] =
-    import ref.quotes.reflect.{AppliedType, LambdaType, TypeRepr}
+    import ref.quotes.reflect.{AppliedType, LambdaType, TypeRepr, TypeTree}
 
     // No type parameters
+    val apiType = TypeTree.of[ApiType]
     val signature = s"${apiType.show}.${method.lift.signature}"
     if method.typeParameters.nonEmpty then
       Left(s"Bound API method '$signature' must not have type parameters")

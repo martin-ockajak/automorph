@@ -92,8 +92,9 @@ case object MethodBindings {
   /**
    * Create API method description.
    *
-   * @param ref reflection
+   * @param ref reflection context
    * @param method method
+   * @tparam C macro context type
    * @tparam ApiType API type
    * @return method description
    */
@@ -105,44 +106,51 @@ case object MethodBindings {
     s"$documentation${apiType.typeSymbol.fullName}.${method.lift.signature}"
   }
 
-  //  /**
-  //   * Determine whether a method is a valid API method.
-  //   *
-  //   * @param ref reflection context
-  //   * @param apiType API type
-  //   * @param method method
-  //   * @tparam Effect effect type
-  //   * @return valid API method or an error message
-  //   */
-  //  private def validateApiMethod[Effect[_]: Type](
-  //    ref: Reflection,
-  //    apiType: ref.quotes.reflect.TypeTree,
-  //    method: ref.RefMethod
-  //  ): Either[String, ref.RefMethod] =
-  //    import ref.quotes.reflect.{AppliedType, LambdaType, TypeRepr}
-  //
-  //    // No type parameters
-  //    val signature = s"${apiType.show}.${method.lift.signature}"
-  //    if method.typeParameters.nonEmpty then
-  //      Left(s"Bound API method '$signature' must not have type parameters")
-  //
-  //    // Callable at runtime
-  //    else if !method.available then
-  //      Left(s"Bound API method '$signature' must be callable at runtime")
-  //    else
-  //      // Returns the effect type
-  //      val effectType =
-  //        TypeRepr.of[Effect] match
-  //          case lambdaType: LambdaType => lambdaType.resType
-  //          case otherType              => otherType
-  //      if effectType match
-  //          case appliedEffectType: AppliedType =>
-  //            method.resultType match
-  //              case resultType: AppliedType => resultType.tycon =:= appliedEffectType.tycon
-  //              case _                       => false
-  //          case _ => true
-  //      then
-  //        Left(s"Bound API method '$signature' must return the specified effect type '${effectType.show}'")
-  //      else
-  //        Right(method)
+  /**
+   * Determine whether a method is a valid API method.
+   *
+   * @param ref reflection context
+   * @param apiType API type
+   * @param method method
+   * @tparam C macro context type
+   * @tparam Effect effect type
+   * @return valid API method or an error message
+   */
+  private def validateApiMethod[C <: Context, Effect[_]: ref.c.WeakTypeTag](ref: Reflection[C])(
+    apiType: ref.c.Type,
+    method: ref.RefMethod
+  ): Either[String, ref.RefMethod] = {
+    import ref.c.{AppliedType, LambdaType, Type}
+
+    // No type parameters
+    val signature = s"${apiType.show}.${method.lift.signature}"
+    if (method.typeParameters.nonEmpty) {
+      Left(s"Bound API method '$signature' must not have type parameters")
+    } else {
+      // Callable at runtime
+      if (!method.available) {
+        Left(s"Bound API method '$signature' must be callable at runtime")
+      } else {
+        // Returns the effect type
+        val effectType = TypeRepr.of[Effect] match {
+          case lambdaType: LambdaType => lambdaType.resType
+          case otherType              => otherType
+        }
+        if (
+          effectType match {
+            case appliedEffectType: AppliedType =>
+              method.resultType match {
+                case resultType: AppliedType => resultType.tycon =:= appliedEffectType.tycon
+                case _                       => false
+              }
+            case _ => true
+          }
+        ) {
+          Left(s"Bound API method '$signature' must return the specified effect type '${effectType.show}'")
+        } else {
+          Right(method)
+        }
+      }
+    }
+  }
 }
