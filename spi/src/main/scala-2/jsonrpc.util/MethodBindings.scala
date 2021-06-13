@@ -6,29 +6,28 @@ import scala.reflect.macros.blackbox.Context
 /** Method bindings code generation. */
 case object MethodBindings {
 
-  //  /**
-  //   * Detect valid API methods in the specified API type.
-  //   *
-  //   * @param ref reflection
-  //   * @param apiType API type
-  //   * @tparam Effect effect type
-  //   * @tparam Context request context type
-  //   * @return valid method descriptors or error messages by method name
-  //   */
-  //  def validApiMethods[Effect[_]: Type](
-  //    ref: Reflection,
-  //    apiType: ref.quotes.reflect.TypeTree
-  //  ): Seq[Either[String, ref.RefMethod]] =
-  //    import ref.quotes.reflect.TypeRepr
-  //    given Quotes = ref.quotes
-  //
-  //    val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap {
-  //      baseType => ref.methods(baseType).filter(_.public).map(_.name)
-  //    }.toSet
-  //    val methods = ref.methods(apiType.tpe).filter(_.public).filter {
-  //      method => !baseMethodNames.contains(method.symbol.name)
-  //    }
-  //    methods.map(method => validateApiMethod(ref, apiType, method))
+  /**
+   * Detect valid API methods in the specified API type.
+   *
+   * @param ref reflection
+   * @tparam C macro context type
+   * @tparam ApiType API type
+   * @tparam Effect effect type
+   * @return valid method descriptors or error messages by method name
+   */
+  def validApiMethods[C <: Context, ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
+    ref: Reflection[C]
+  ): Seq[Either[String, ref.RefMethod]] = {
+    import ref.c.weakTypeOf
+
+    val baseMethodNames = Seq(weakTypeOf[AnyRef], weakTypeOf[Product]).flatMap {
+      baseType => ref.methods(baseType).filter(_.public).map(_.name)
+    }.toSet
+    val methods = ref.methods(weakTypeOf[ApiType]).filter(_.public).filter {
+      method => !baseMethodNames.contains(method.name)
+    }
+    methods.map(method => validateApiMethod[C, ApiType, Effect](ref)(method))
+  }
   //
   //  /**
   //   * Create instance method call term.
@@ -57,7 +56,7 @@ case object MethodBindings {
   //   * Determine whether a method uses request context as its parameter.
   //   *
   //   * @param ref reflection context
-  //   * @param method method
+  //   * @param method method descriptor
   //   * @tparam Context request context type
   //   * @return true if the method uses request context as its last parameter, false otherwise
   //   */
@@ -93,7 +92,7 @@ case object MethodBindings {
    * Create API method signature.
    *
    * @param ref reflection context
-   * @param method method
+   * @param method method descriptor
    * @tparam C macro context type
    * @tparam ApiType API type
    * @return method description
@@ -118,7 +117,6 @@ case object MethodBindings {
     import ref.c.weakTypeOf
 
     // No type parameters
-    val apiType = weakTypeOf[ApiType]
     val signature = methodSignature[C, ApiType](ref)(method)
     if (method.typeParameters.nonEmpty) {
       Left(s"Bound API method '$signature' must not have type parameters")
@@ -128,10 +126,8 @@ case object MethodBindings {
         Left(s"Bound API method '$signature' must be callable at runtime")
       } else {
         // Returns the effect type
-        val effectType = weakTypeOf[Effect] match {
-//          case lambdaType: LambdaType => lambdaType.resType
-          case otherType              => otherType
-        }
+        val effectType = weakTypeOf[Effect]
+        println(effectType.typeSymbol.fullName)
         if (
 //          effectType match {
 //            case appliedEffectType: AppliedType =>
@@ -141,7 +137,7 @@ case object MethodBindings {
 //              }
 //            case _ => true
 //          }
-            false
+          false
         ) {
           Left(s"Bound API method '$signature' must return the specified effect type '${effectType.typeSymbol.fullName}'")
         } else {

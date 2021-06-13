@@ -12,7 +12,6 @@ case object MethodBindings:
    * @param ref reflection
    * @tparam ApiType API type
    * @tparam Effect effect type
-   * @tparam Context request context type
    * @return valid method descriptors or error messages by method name
    */
   def validApiMethods[ApiType: Type, Effect[_]: Type](ref: Reflection): Seq[Either[String, ref.RefMethod]] =
@@ -23,7 +22,7 @@ case object MethodBindings:
       baseType => ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
     val methods = ref.methods(TypeRepr.of[ApiType]).filter(_.public).filter {
-      method => !baseMethodNames.contains(method.symbol.name)
+      method => !baseMethodNames.contains(method.name)
     }
     methods.map(method => validateApiMethod[ApiType, Effect](ref, method))
 
@@ -54,7 +53,7 @@ case object MethodBindings:
    * Determine whether a method uses request context as its parameter.
    *
    * @param ref reflection context
-   * @param method method
+   * @param method method descriptor
    * @tparam Context request context type
    * @return true if the method uses request context as its last parameter, false otherwise
    */
@@ -88,7 +87,7 @@ case object MethodBindings:
    * Create API method signature.
    *
    * @param ref reflection context
-   * @param method method
+   * @param method method descriptor
    * @tparam ApiType API type
    * @return method description
    */
@@ -99,7 +98,7 @@ case object MethodBindings:
    * Determine whether a method is a valid API method.
    *
    * @param ref reflection context
-   * @param method method
+   * @param method method descriptor
    * @tparam ApiType API type
    * @tparam Effect effect type
    * @return valid API method or an error message

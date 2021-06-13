@@ -1,5 +1,16 @@
 package jsonrpc.util
 
+/**
+ * Method descriptor.
+ *
+ * @param name name
+ * @param resultType result type
+ * @param parameters parameters
+ * @param typeParameters type parameters
+ * @param public true if the method is publicly accessible
+ * @param available true if the method can be called
+ * @param documentation documentation
+ */
 final case class Method(
   name: String,
   resultType: String,
@@ -29,6 +40,13 @@ final case class Method(
   }
 }
 
+/**
+ * Method parameter descriptor.
+ *
+ * @param name name
+ * @param dataType type
+ * @param contextual true if the parameter is implicit
+ */
 final case class Parameter(
   name: String,
   dataType: String,
