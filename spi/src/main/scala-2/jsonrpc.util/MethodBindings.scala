@@ -85,7 +85,6 @@ case object MethodBindings {
     ref: Reflection[C]
   )(method: ref.RefMethod): Either[String, ref.RefMethod] = {
     import ref.c.weakTypeOf
-    import ref.c._
 
     // No type parameters
     val signature = methodSignature[C, ApiType](ref)(method)
@@ -97,23 +96,14 @@ case object MethodBindings {
         Left(s"Bound API method '$signature' must be callable at runtime")
       } else {
         // Returns the effect type
+        // FIXME - get concrete result type constructor
         val effectType = weakTypeOf[Effect].typeConstructor
-        println(method.resultType.getClass.getName)
-        println(method.resultType)
-        println(effectType)
-        println(effectType =:= method.resultType.typeConstructor)
-//        println(method.resultType.typeConstructor)
-//        println(method.resultType.typeArgs)
+        val resultEffectType = method.resultType.typeArgs.nonEmpty && effectType =:= method.resultType.typeConstructor
+//        println(method.resultType)
+//        println(effectType)
+//        println(effectType =:= method.resultType.typeConstructor)
         if (
-//          effectType match {
-//            case appliedEffectType: AppliedType =>
-//              method.resultType match {
-//                case resultType: AppliedType => resultType.tycon =:= appliedEffectType.tycon
-//                case _                       => false
-//              }
-//            case _ => true
-//          }
-          false
+          !resultEffectType && false
         ) {
           Left(s"Bound API method '$signature' must return the specified effect type '${effectType.typeSymbol.fullName}'")
         } else {

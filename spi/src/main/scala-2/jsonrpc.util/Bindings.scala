@@ -13,7 +13,6 @@ object Bindings {
     import c.universe._
 
     val ref = Reflection[c.type](c)
-    val apiType = weakTypeOf[T]
     val apiMethods = validApiMethods[c.type, T, Future[_]](ref)
     val validMethods = apiMethods.flatMap(_.toOption)
     validMethods.foreach { method =>
