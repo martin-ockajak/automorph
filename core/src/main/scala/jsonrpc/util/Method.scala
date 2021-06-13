@@ -26,15 +26,13 @@ final case class Method(
     val typeParametersText = typeParameters.map { typeParameter =>
       s"${typeParameter.name}"
     } match {
-      case Seq() => ""
+      case Seq()  => ""
       case values => s"[${values.mkString(", ")}]"
     }
     val parametersText = parameters.map { parameters =>
-      s"(${
-        parameters.map { parameter =>
-          s"${parameter.name}: ${parameter.dataType}"
-        }.mkString(", ")
-      })"
+      s"(${parameters.map { parameter =>
+        s"${parameter.name}: ${parameter.dataType}"
+      }.mkString(", ")})"
     }.mkString
     s"$name$typeParametersText$parametersText: $resultType"
   }

@@ -162,6 +162,6 @@ case object HandlerBindings:
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
       println(
         s"""${methodSignature[ApiType](ref, method)} =
-           |  ${invoke.asTerm.show(using Printer.TreeShortCode)}
-           |""".stripMargin
+          |  ${invoke.asTerm.show(using Printer.TreeShortCode)}
+          |""".stripMargin
       )

@@ -46,14 +46,14 @@ case object Errors {
 
   /** Mapping of JSON-RPC errors to standard exception types. */
   def errorException(code: Int, message: String): Throwable = code match {
-    case ErrorType.ParseError.code => ParseError(message, None.orNull)
-    case ErrorType.InvalidRequest.code => InvalidRequest(message, None.orNull)
-    case ErrorType.MethodNotFound.code => MethodNotFound(message, None.orNull)
-    case ErrorType.InvalidParams.code => IllegalArgumentException(message, None.orNull)
-    case ErrorType.InternalError.code => InternalError(message, None.orNull)
-    case ErrorType.IOError.code => IOException(message, None.orNull)
+    case ErrorType.ParseError.code                   => ParseError(message, None.orNull)
+    case ErrorType.InvalidRequest.code               => InvalidRequest(message, None.orNull)
+    case ErrorType.MethodNotFound.code               => MethodNotFound(message, None.orNull)
+    case ErrorType.InvalidParams.code                => IllegalArgumentException(message, None.orNull)
+    case ErrorType.InternalError.code                => InternalError(message, None.orNull)
+    case ErrorType.IOError.code                      => IOException(message, None.orNull)
     case _ if code < ErrorType.ApplicationError.code => InternalError(message, None.orNull)
-    case _ => RuntimeException(message, None.orNull)
+    case _                                           => RuntimeException(message, None.orNull)
   }
 
   /**
@@ -81,12 +81,11 @@ case object Errors {
     throwable: Throwable,
     filter: Throwable => Boolean = _ => true,
     maxCauses: Int = 100
-  ): Seq[String] = {
+  ): Seq[String] =
     LazyList.iterate(Option(throwable))(_.flatMap(error => Option(error.getCause)))
       .takeWhile(_.isDefined).flatten.filter(filter).take(maxCauses).map { throwable =>
-      val exceptionName = throwable.getClass.getSimpleName
-      val message = Option(throwable.getMessage).getOrElse("")
-      s"[$exceptionName] $message"
-    }
-  }
+        val exceptionName = throwable.getClass.getSimpleName
+        val message = Option(throwable.getMessage).getOrElse("")
+        s"[$exceptionName] $message"
+      }
 }

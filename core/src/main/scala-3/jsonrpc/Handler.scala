@@ -34,7 +34,9 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
   protected val encodeStrings: Seq[String] => Node,
   protected val encodedNone: Node
 ) extends HandlerProcessor[Node, CodecType, Effect, Context]
-  with HandlerMeta[Node, CodecType, Effect, Context] with CannotEqual with Logging
+  with HandlerMeta[Node, CodecType, Effect, Context]
+  with CannotEqual
+  with Logging
 
 object Handler:
 

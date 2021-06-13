@@ -89,13 +89,14 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
     exposedNames: PartialFunction[String, Seq[String]]
   ): Handler[Node, CodecType, Effect, Context] =
     val bindings =
-      HandlerBindings.generate[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap { (methodName, method) =>
-        exposedNames.applyOrElse(
-          methodName,
-          _ =>
-            throw IntrospectionException(
-              s"Bound API does not contain the specified public method: ${api.getClass.getName}.$methodName"
-            )
-        ).map(_ -> method)
+      HandlerBindings.generate[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap {
+        (methodName, method) =>
+          exposedNames.applyOrElse(
+            methodName,
+            _ =>
+              throw IntrospectionException(
+                s"Bound API does not contain the specified public method: ${api.getClass.getName}.$methodName"
+              )
+          ).map(_ -> method)
       }
     copy(methodBindings = methodBindings ++ bindings)
