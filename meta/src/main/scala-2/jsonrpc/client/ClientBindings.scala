@@ -27,9 +27,9 @@ case object ClientBindings {
    */
   def generate[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
     codec: CodecType
-  ): Map[String, ClientMethod[Node]] = macro generate[Node, CodecType, Effect, Context, ApiType]
+  ): Map[String, ClientMethod[Node]] = macro generateExpr[Node, CodecType, Effect, Context, ApiType]
 
-  def generate[
+  def generateExpr[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_]: c.WeakTypeTag,
