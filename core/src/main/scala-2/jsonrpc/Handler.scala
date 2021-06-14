@@ -34,9 +34,9 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
 
 object Handler {
 
-  type NoContext = NoContextFor[Handler[_, _, _, _]]
+  type NoContext = NoContextFor[Handler.type]
 
-  implicit val noContext: NoContext = NoContextFor[Handler[_, _, _, _]]()
+  implicit val noContext: NoContext = NoContextFor[Handler.type]()
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.

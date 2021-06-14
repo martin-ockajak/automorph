@@ -5,6 +5,7 @@ import jsonrpc.Generators.arbitraryRecord
 import jsonrpc.protocol.Errors.MethodNotFound
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.{Client, ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, SimpleApiImpl}
+import org.scalacheck.Arbitrary
 import scala.util.Try
 
 /**
@@ -21,27 +22,31 @@ trait ClientHandlerSpec extends BaseSpec {
   type Node
   type CodecType <: Codec[Node]
   type Effect[_]
+  type Context
 
-  val simpleApiInstance = SimpleApiImpl(backend)
-  val complexApiInstance = ComplexApiImpl(backend)
-  val invalidApiInstance = InvalidApiImpl(backend)
+  val simpleApiInstance: SimpleApi[Effect] = SimpleApiImpl(backend)
+  val complexApiInstance: ComplexApi[Effect, Context] = ComplexApiImpl(backend)
+  val invalidApiInstance: InvalidApi[Effect] = InvalidApiImpl(backend)
   private val apiNames = Seq("Named", "Positional")
 
   def backend: Backend[Effect]
 
   def run[T](effect: Effect[T]): T
 
-  def client: Client[Node, CodecType, Effect, Short]
-
-  def clients: Seq[Client[Node, CodecType, Effect, Short]] = Seq(
-    client, client.copy(argumentsByName = false)
-  )
+  def client: Client[Node, CodecType, Effect, Context]
 
   def simpleApis: Seq[SimpleApi[Effect]]
 
-  def complexApis: Seq[ComplexApi[Effect]]
+  def complexApis: Seq[ComplexApi[Effect, Context]]
 
   def invalidApis: Seq[InvalidApi[Effect]]
+
+  def clients: Seq[Client[Node, CodecType, Effect, Context]] = Seq(
+    client,
+    client.copy(argumentsByName = false)
+  )
+
+  implicit def arbitraryContext: Arbitrary[Context]
 
   "" - {
     "Trait" - {
@@ -96,13 +101,15 @@ trait ClientHandlerSpec extends BaseSpec {
                 }
               }
               "method7" in {
-                check { (a0: Record, a1: Boolean, context: Short) =>
-                  consistent(apis, _.method7(a0, a1)(using context))
+                check { (a0: Record, a1: Boolean, context: Context) =>
+                  implicit val usingContext: Context = context
+                  consistent(apis, _.method7(a0, a1))
                 }
               }
               "method8" in {
-                check { (a0: Record, a1: String, a2: Option[Double], context: Short) =>
-                  consistent(apis, _.method8(a0, a1, a2)(using context))
+                check { (a0: Record, a1: String, a2: Option[Double], context: Context) =>
+                  implicit val usingContext: Context = context
+                  consistent(apis, _.method8(a0, a1, a2))
                 }
               }
               "method9" in {
@@ -162,7 +169,7 @@ trait ClientHandlerSpec extends BaseSpec {
         "Simple API" - {
           "Positional" - {
             "Local" in {
-              //              client.callByPosition[String, String]("test")("test")(using 0)
+              //              client.callByPosition[String, String]("test")("test")(0)
             }
           }
         }
@@ -177,11 +184,10 @@ trait ClientHandlerSpec extends BaseSpec {
     }
   }
 
-  private def apiCombinations[Api](originalApi: Api, apis: Seq[Api], names: Seq[String]): Seq[(String, Seq[Api])] = {
+  private def apiCombinations[Api](originalApi: Api, apis: Seq[Api], names: Seq[String]): Seq[(String, Seq[Api])] =
     apis.zip(names).map { (api, name) =>
       name -> Seq(originalApi, api)
     }
-  }
 
   private def consistent[Api, Result](apis: Seq[Api], function: Api => Effect[Result]): Boolean = {
     val Seq(expected, result) = apis.map(api => run(function(api)))

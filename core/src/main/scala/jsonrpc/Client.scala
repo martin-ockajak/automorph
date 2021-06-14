@@ -161,8 +161,8 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
 
 object Client {
 
-  type NoContext = NoContextFor[Client[_, _, _, _]]
-  implicit val noContext: NoContext = NoContextFor[Client[_, _, _, _]]()
+  type NoContext = NoContextFor[Client.type]
+  implicit val noContext: NoContext = NoContextFor[Client.type]()
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with defined request `Context` type.

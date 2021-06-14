@@ -13,7 +13,7 @@ final case class SimpleApiImpl[Effect[_]](backend: Backend[Effect]) extends Simp
   override def test(test: String): Effect[String] = backend.pure(test)
 }
 
-trait ComplexApi[Effect[_]] {
+trait ComplexApi[Effect[_], Context] {
 
   /** Test method. */
   def method0(): Effect[Unit]
@@ -30,16 +30,16 @@ trait ComplexApi[Effect[_]] {
 
   def method6(p0: Record, p1: Double): Effect[Option[String]]
 
-  def method7(p0: Record, p1: Boolean)(using context: Short): Effect[Int]
+  def method7(p0: Record, p1: Boolean)(using context: Context): Effect[Int]
 
-  def method8(p0: Record, p1: String, p2: Option[Double])(using Short): Effect[Record]
+  def method8(p0: Record, p1: String, p2: Option[Double])(using Context): Effect[Record]
 
   def method9(p0: String): Effect[String]
 
   protected def protectedMethod: Unit
 }
 
-final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends ComplexApi[Effect] {
+final case class ComplexApiImpl[Effect[_], Context](backend: Backend[Effect]) extends ComplexApi[Effect, Context] {
 
   override def method0(): Effect[Unit] = backend.pure(())
 
@@ -63,15 +63,15 @@ final case class ComplexApiImpl[Effect[_]](backend: Backend[Effect]) extends Com
   override def method6(p0: Record, p1: Double): Effect[Option[String]] =
     backend.pure(Some((p0.double + p1).toString))
 
-  override def method7(p0: Record, p1: Boolean)(using context: Short): Effect[Int] = p0.int match {
-    case Some(int) if p1 => backend.pure(int + context)
+  override def method7(p0: Record, p1: Boolean)(using context: Context): Effect[Int] = p0.int match {
+    case Some(int) if p1 => backend.pure(int + context.toString.size)
     case _ => backend.pure(0)
   }
 
-  override def method8(p0: Record, p1: String, p2: Option[Double])(using Short): Effect[Record] =
+  override def method8(p0: Record, p1: String, p2: Option[Double])(using Context): Effect[Record] =
     backend.pure(p0.copy(
       string = s"${p0.string} - $p1",
-      long = p0.long + implicitly[Short],
+      long = p0.long + implicitly[Context].toString.size,
       double = p2.getOrElse(0.1),
       enumeration = Enum.One
     ))

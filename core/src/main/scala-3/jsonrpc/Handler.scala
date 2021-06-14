@@ -35,7 +35,7 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
 object Handler:
 
   type NoContext = NoContextFor[Handler[?, ?, ?, ?]]
-  given NoContext = NoContextFor[Handler[?, ?, ?, ?]]()
+  given noContext: NoContext = NoContextFor[Handler[?, ?, ?, ?]]()
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.
