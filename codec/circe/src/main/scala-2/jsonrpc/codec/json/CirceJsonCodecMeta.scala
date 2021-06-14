@@ -11,7 +11,7 @@ import scala.reflect.macros.blackbox.Context
  *
  * @tparam Custom customized Circe encoders and decoders implicits instance type
  */
-trait CirceJsonCodecMeta[Custom <: CirceCustom] extends Codec[Json] {
+private[jsonrpc] trait CirceJsonCodecMeta[Custom <: CirceCustom] extends Codec[Json] {
   this: CirceJsonCodec[Custom] =>
 
   override def encode[T](value: T): Json = macro CirceJsonCodecMeta.encode[Custom, T]
@@ -19,7 +19,7 @@ trait CirceJsonCodecMeta[Custom <: CirceCustom] extends Codec[Json] {
   override def decode[T](node: Json): T = macro CirceJsonCodecMeta.decode[Custom, T]
 }
 
-object CirceJsonCodecMeta {
+private[jsonrpc] object CirceJsonCodecMeta {
   def encode[Custom: c.TypeTag, T: c.WeakTypeTag](c: Context)(custom: c.Expr[Custom], value: c.Expr[T]): c.Expr[Json] = {
     import c.universe._
 

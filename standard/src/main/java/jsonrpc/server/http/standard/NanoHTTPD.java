@@ -150,7 +150,7 @@ import javax.net.ssl.TrustManagerFactory;
  * See the separate "LICENSE.md" file for the distribution license (Modified BSD
  * licence)
  */
-public abstract class NanoHTTPD {
+abstract class NanoHTTPD {
 
     /**
      * The runnable that will be used for every new client connection.

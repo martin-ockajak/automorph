@@ -10,7 +10,7 @@ import upack.Msg
  *
  * @tparam Custom custom Upickle reader and writer implicits instance type
  */
-trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends Codec[Msg]:
+private[jsonrpc] trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends Codec[Msg]:
   this: UpickleMessagePackCodec[Custom] =>
 
   override inline def encode[T](value: T): Msg =
