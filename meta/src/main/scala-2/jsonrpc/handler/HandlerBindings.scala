@@ -30,12 +30,12 @@ case object HandlerBindings {
     codec: CodecType,
     backend: Backend[Effect],
     api: ApiType
-  ): Map[String, HandlerMethod[Node, Effect, Context]] = macro generate[Node, CodecType, Effect[_], Context, ApiType]
+  ): Map[String, HandlerMethod[Node, Effect, Context]] = macro generate[Node, CodecType, Effect, Context, ApiType]
 
   def generate[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
-    Effect: c.WeakTypeTag,
+    Effect[_]: c.WeakTypeTag,
     Context: c.WeakTypeTag,
     ApiType <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(

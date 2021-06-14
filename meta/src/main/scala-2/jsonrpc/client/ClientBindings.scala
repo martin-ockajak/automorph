@@ -27,12 +27,12 @@ case object ClientBindings {
    */
   def generate[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
     codec: CodecType
-  ): Map[String, ClientMethod[Node]] = macro generate[Node, CodecType, Effect[_], Context, ApiType]
+  ): Map[String, ClientMethod[Node]] = macro generate[Node, CodecType, Effect, Context, ApiType]
 
   def generate[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
-    Effect: c.WeakTypeTag,
+    Effect[_]: c.WeakTypeTag,
     Context: c.WeakTypeTag,
     ApiType <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(codec: c.Expr[CodecType]): c.Expr[Map[String, ClientMethod[Node]]] = {
