@@ -1,4 +1,4 @@
-package jsonrpc.codec.messagepack
+package test.codec.messagepack
 
 import jsonrpc.Enum.Enum
 import jsonrpc.Generators.arbitraryRecord
