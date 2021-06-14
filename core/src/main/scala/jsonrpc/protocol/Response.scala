@@ -1,6 +1,5 @@
 package jsonrpc.protocol
 
-import jsonrpc.protocol.Errors
 import jsonrpc.protocol.Errors.{mandatory, InvalidRequest}
 import jsonrpc.spi.Message.{version, Id}
 import jsonrpc.spi.{Message, MessageError}
@@ -40,7 +39,7 @@ case object Response {
       Response(id, Right(result))
     }.getOrElse {
       val error = mandatory(message.error, "error")
-      new Response(id, Left(ResponseError(error)))
+      Response(id, Left(ResponseError(error)))
     }
   }
 }

@@ -3,7 +3,7 @@ package jsonrpc
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 import java.nio.ByteBuffer
 import jsonrpc.protocol.Errors.{MethodNotFound, ParseError}
-import jsonrpc.protocol.{Errors, Request, Response, ResponseError}
+import jsonrpc.protocol.{Errors, Request, Response}
 import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerProcessor, HandlerResult}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec, Message, MessageError}

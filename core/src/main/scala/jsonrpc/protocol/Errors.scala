@@ -46,14 +46,14 @@ case object Errors {
 
   /** Mapping of JSON-RPC errors to standard exception types. */
   def errorException(code: Int, message: String): Throwable = code match {
-    case ErrorType.ParseError.code                   => ParseError(message, None.orNull)
-    case ErrorType.InvalidRequest.code               => InvalidRequest(message, None.orNull)
-    case ErrorType.MethodNotFound.code               => MethodNotFound(message, None.orNull)
-    case ErrorType.InvalidParams.code                => IllegalArgumentException(message, None.orNull)
-    case ErrorType.InternalError.code                => InternalError(message, None.orNull)
-    case ErrorType.IOError.code                      => IOException(message, None.orNull)
-    case _ if code < ErrorType.ApplicationError.code => InternalError(message, None.orNull)
-    case _                                           => RuntimeException(message, None.orNull)
+    case ErrorType.ParseError.code                   => new ParseError(message, None.orNull)
+    case ErrorType.InvalidRequest.code               => new InvalidRequest(message, None.orNull)
+    case ErrorType.MethodNotFound.code               => new MethodNotFound(message, None.orNull)
+    case ErrorType.InvalidParams.code                => new IllegalArgumentException(message, None.orNull)
+    case ErrorType.InternalError.code                => new InternalError(message, None.orNull)
+    case ErrorType.IOError.code                      => new IOException(message, None.orNull)
+    case _ if code < ErrorType.ApplicationError.code => new InternalError(message, None.orNull)
+    case _                                           => new RuntimeException(message, None.orNull)
   }
 
   /**

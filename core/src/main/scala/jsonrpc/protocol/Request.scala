@@ -39,6 +39,6 @@ case object Request {
     val id = message.id
     val method = mandatory(message.method, "method")
     val params = message.params.getOrElse(Right(Map.empty))
-    new Request(id, method, params)
+    Request(id, method, params)
   }
 }

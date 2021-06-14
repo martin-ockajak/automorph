@@ -1,6 +1,7 @@
 package jsonrpc.transport.local
 
 import jsonrpc.Handler
+import jsonrpc.handler.HandlerResult
 import jsonrpc.spi.{Backend, Codec, Transport}
 import scala.collection.immutable.ArraySeq
 
@@ -24,9 +25,13 @@ case class HandlerTransport[Node, CodecType <: Codec[Node], Effect[_], Context](
   def call(request: ArraySeq.ofByte, context: Option[Context]): Effect[ArraySeq.ofByte] =
     backend.map(
       handler.processRequest(request)(context.getOrElse(defaultContext)),
-      result => result.response.getOrElse(throw IllegalStateException("Missing call response"))
+      (result: HandlerResult[ArraySeq.ofByte]) =>
+        result.response.getOrElse(throw new IllegalStateException("Missing call response"))
     )
 
   def notify(request: ArraySeq.ofByte, context: Option[Context]): Effect[Unit] =
-    backend.map(handler.processRequest(request)(context.getOrElse(defaultContext)), _ => ())
+    backend.map(
+      handler.processRequest(request)(context.getOrElse(defaultContext)),
+      (_: HandlerResult[ArraySeq.ofByte]) => ()
+    )
 }

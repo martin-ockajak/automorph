@@ -1,13 +1,13 @@
 package jsonrpc.handler
 
-import java.io.{ByteArrayInputStream, InputStream, OutputStream}
+import java.io.{ByteArrayInputStream, InputStream}
 import java.nio.ByteBuffer
 import jsonrpc.{Handler, JsonRpcError}
 import jsonrpc.protocol.Errors.{MethodNotFound, ParseError}
 import jsonrpc.protocol.{Errors, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerResult}
 import jsonrpc.log.Logging
-import jsonrpc.spi.{Backend, Codec, Message, MessageError}
+import jsonrpc.spi.{Backend, Codec, Message}
 import jsonrpc.util.Encoding
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
