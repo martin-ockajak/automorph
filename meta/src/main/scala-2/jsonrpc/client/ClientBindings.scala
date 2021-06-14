@@ -32,10 +32,10 @@ case object ClientBindings {
   def generateExpr[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
-    Effect[_]: c.WeakTypeTag,
+    Effect[_],
     Context: c.WeakTypeTag,
     ApiType <: AnyRef: c.WeakTypeTag
-  ](c: blackbox.Context)(codec: c.Expr[CodecType]): c.Expr[Map[String, ClientMethod[Node]]] = {
+  ](c: blackbox.Context)(codec: c.Expr[CodecType])(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, ClientMethod[Node]]] = {
     import c.universe._
 //    val ref = Reflection(quotes)
 //

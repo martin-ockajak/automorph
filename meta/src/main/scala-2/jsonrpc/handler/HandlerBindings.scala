@@ -35,14 +35,14 @@ case object HandlerBindings {
   def generateExpr[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
-    Effect[_]: c.WeakTypeTag,
+    Effect[_],
     Context: c.WeakTypeTag,
     ApiType <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     codec: c.Expr[CodecType],
     backend: c.Expr[Backend[Effect]],
     api: c.Expr[ApiType]
-  ): c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]] = {
     import c.universe._
 //    val ref = Reflection(quotes)
 //
