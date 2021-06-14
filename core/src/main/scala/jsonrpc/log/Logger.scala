@@ -16,7 +16,7 @@ import org.slf4j.{LoggerFactory, MDC}
 final case class Logger private (private val underlying: slf4j.Logger) {
 
   type Not[T] = T => Nothing
-  type Or[T, U] = Not[Not[T] & Not[U]]
+  type Or[T, U] = Not[Not[T] with Not[U]]
 
   def error[T](message: => String): Unit = underlying.error(message)
 

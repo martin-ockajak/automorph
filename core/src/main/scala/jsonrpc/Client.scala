@@ -2,13 +2,12 @@ package jsonrpc
 
 import jsonrpc.client.ClientMeta
 import jsonrpc.log.Logging
-import jsonrpc.protocol.Errors.ParseError
 import jsonrpc.protocol.{Errors, Request, Response}
 import jsonrpc.spi.Message.Params
-import jsonrpc.spi.{Backend, Codec, Message, MessageError, Transport}
+import jsonrpc.spi.{Backend, Codec, Message, Transport}
 import jsonrpc.util.{CannotEqual, NoContextFor}
 import scala.collection.immutable.ArraySeq
-import scala.util.{NotGiven, Random, Try}
+import scala.util.{Random, Try}
 
 /**
  * JSON-RPC client layer.
@@ -62,7 +61,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
     backend.flatMap(
       // Serialize request
       serialize(formedRequest),
-      rawRequest =>
+      (rawRequest: ArraySeq.ofByte) =>
         // Send request
         backend.flatMap(
           transport.call(rawRequest, context),
@@ -88,9 +87,8 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
     backend.map(
       // Serialize request
       serialize(formedRequest),
-      rawRequest =>
-        // Send request
-        transport.notify(rawRequest, context)
+      // Send request
+      (rawRequest: ArraySeq.ofByte) => transport.notify(rawRequest, context)
     )
   }
 
@@ -110,7 +108,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   ): Effect[R] =
     // Deserialize response
     Try(codec.deserialize(rawResponse)).fold(
-      error => raiseError(ParseError("Invalid response format", error), formedRequest),
+      error => raiseError(Errors.ParseError("Invalid response format", error), formedRequest),
       formedResponse =>
         // Validate response
         logger.trace(s"Received JSON-RPC message:\n${codec.format(formedResponse)}")
@@ -141,7 +139,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   private def serialize(formedMessage: Message[Node]): Effect[ArraySeq.ofByte] = {
     logger.trace(s"Sending JSON-RPC message:\n${codec.format(formedMessage)}")
     Try(codec.serialize(formedMessage)).fold(
-      error => raiseError(ParseError("Invalid message format", error), formedMessage),
+      error => raiseError(Errors.ParseError("Invalid message format", error), formedMessage),
       message => backend.pure(message)
     )
   }
@@ -162,7 +160,6 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
 
 object Client {
 
-  type NotTuple[T] = NotGiven[T =:= Tuple]
   type NoContext = NoContextFor[Client[_, _, _, _]]
   implicit val noContext: NoContext = NoContextFor[Client[_, _, _, _]]()
 
