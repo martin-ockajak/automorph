@@ -40,8 +40,13 @@ lazy val spi = project.settings(
     }
   }
 )
+lazy val meta = project.dependsOn(
+  spi
+).settings(
+  name := "json-rpc-meta"
+)
 lazy val core = project.dependsOn(
-  spi, testBase % Test
+  spi, meta, testBase % Test
 ).settings(
   name := "json-rpc-core",
   libraryDependencies ++= Seq(

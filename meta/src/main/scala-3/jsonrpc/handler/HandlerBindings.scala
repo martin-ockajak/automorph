@@ -40,7 +40,7 @@ case object HandlerBindings:
     ApiType <: AnyRef: Type
   ](
     codec: Expr[CodecType],
-    backend: Expr[Backend[Effect]],
+    backend: Expr[Backend[Effect[_]]],
     api: Expr[ApiType]
   )(using quotes: Quotes): Expr[Map[String, HandlerMethod[Node, Effect, Context]]] =
     val ref = Reflection(quotes)

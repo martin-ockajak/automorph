@@ -23,7 +23,7 @@ case object MethodBindings {
       baseType => ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
     val methods = ref.methods(ref.c.weakTypeOf[ApiType]).filter(_.public).filter {
-      method =>! baseMethodNames.contains(method.name)
+      method => !baseMethodNames.contains(method.name)
     }
 
     // Validate methods
