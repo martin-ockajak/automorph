@@ -3,7 +3,7 @@ package jsonrpc.handler
 import java.beans.IntrospectionException
 import jsonrpc.Handler
 import jsonrpc.handler.HandlerBindings
-import jsonrpc.spi.{Backend, Codec}
+import jsonrpc.spi.Codec
 
 /**
  * JSON-RPC handler layer code generation.
@@ -87,11 +87,11 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context] {
   ): Handler[Node, CodecType, Effect, Context] = {
     val bindings =
       HandlerBindings.generate[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap {
-        (methodName, method) =>
+        case (methodName: String, method: HandlerMethod[Node, Effect, Context]) =>
           exposedNames.applyOrElse(
             methodName,
-            _ =>
-              throw IntrospectionException(
+            (_: String) =>
+              throw new IntrospectionException(
                 s"Bound API does not contain the specified public method: ${api.getClass.getName}.$methodName"
               )
           ).map(_ -> method)
