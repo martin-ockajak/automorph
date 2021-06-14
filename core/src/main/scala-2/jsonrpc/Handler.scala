@@ -34,31 +34,6 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
 
 object Handler {
 
-  type NoContext = NoContextFor[Handler.type]
-
-  implicit val noContext: NoContext = NoContextFor[Handler.type]()
-
-  /**
-   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.
-   *
-   * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
-   *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec hierarchical message codec plugin
-   * @param backend effect backend plugin
-   * @param bufferSize input stream reading buffer size
-   * @tparam Node message format node representation type
-   * @tparam CodecType message codec plugin type
-   * @tparam Effect effect type
-   * @return JSON-RPC request handler
-   */
-  def basic[Node, CodecType <: Codec[Node], Effect[_]](
-    codec: CodecType,
-    backend: Backend[Effect],
-    bufferSize: Int = 4096
-  ): Handler[Node, CodecType, Effect, NoContext] =
-    new Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))
-
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
    *
@@ -78,5 +53,26 @@ object Handler {
     backend: Backend[Effect],
     bufferSize: Int = 4096
   ): Handler[Node, CodecType, Effect, Context] =
+    new Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))
+
+  /**
+   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.
+   *
+   * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
+   *
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+   * @param codec hierarchical message codec plugin
+   * @param backend effect backend plugin
+   * @param bufferSize input stream reading buffer size
+   * @tparam Node message format node representation type
+   * @tparam CodecType message codec plugin type
+   * @tparam Effect effect type
+   * @return JSON-RPC request handler
+   */
+  def basic[Node, CodecType <: Codec[Node], Effect[_]](
+    codec: CodecType,
+    backend: Backend[Effect],
+    bufferSize: Int = 4096
+  ): Handler[Node, CodecType, Effect, NoContextFor.NoContext] =
     new Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))
 }

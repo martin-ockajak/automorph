@@ -29,15 +29,6 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec {
   override def invalidApis: Seq[InvalidApi[Effect]] = clients.map(_.bind[InvalidApi[Effect]])
 
   "" - {
-    "Bind" in {
-      val errorTransport = new Transport[Effect, Client.NoContext] {
-        def call(request: ArraySeq.ofByte, context: Option[Client.NoContext]): Effect[ArraySeq.ofByte] = ???
-
-        def notify(request: ArraySeq.ofByte, context: Option[Client.NoContext]): Effect[Unit] = ???
-      }
-      val client = Client.basic(codec, backend, errorTransport)
-      client.callByPosition[String, String]("test")("test")
-    }
     "test" in {
       implicit val context: Context = arbitraryContext.arbitrary.sample.get
 
