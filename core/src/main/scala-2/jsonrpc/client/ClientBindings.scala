@@ -27,15 +27,16 @@ case object ClientBindings {
    */
   def generate[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
     codec: CodecType
-  ): Map[String, ClientMethod[Node]] = macro generate[Node, CodecType, Effect, Context, ApiType]
+  ): Map[String, ClientMethod[Node]] = macro generate[Node, CodecType, Effect[_], Context, ApiType]
 
-  private def generate[
+  def generate[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
-    Effect[_]: c.WeakTypeTag,
+    Effect: c.WeakTypeTag,
     Context: c.WeakTypeTag,
     ApiType <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(codec: c.Expr[CodecType]): c.Expr[Map[String, ClientMethod[Node]]] = {
+    import c.universe._
 //    val ref = Reflection(quotes)
 //
 //    // Detect and validate public methods in the API type

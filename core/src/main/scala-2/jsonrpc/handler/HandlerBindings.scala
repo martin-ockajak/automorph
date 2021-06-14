@@ -30,12 +30,12 @@ case object HandlerBindings {
     codec: CodecType,
     backend: Backend[Effect],
     api: ApiType
-  ): Map[String, HandlerMethod[Node, Effect, Context]] = macro generate[Node, CodecType, Effect, Context, ApiType]
+  ): Map[String, HandlerMethod[Node, Effect, Context]] = macro generate[Node, CodecType, Effect[_], Context, ApiType]
 
-  private def generate[
+  def generate[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
-    Effect[_]: c.WeakTypeTag,
+    Effect: c.WeakTypeTag,
     Context: c.WeakTypeTag,
     ApiType <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
@@ -43,6 +43,7 @@ case object HandlerBindings {
     backend: c.Expr[Backend[Effect]],
     api: c.Expr[ApiType]
   ): c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]] = {
+    import c.universe._
 //    val ref = Reflection(quotes)
 //
 //    // Detect and validate public methods in the API type
