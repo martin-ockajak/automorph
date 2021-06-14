@@ -51,8 +51,7 @@ lazy val core = project.dependsOn(
   name := "json-rpc-core",
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-api" % "1.7.30",
-    "com.lihaoyi" %% "pprint" % "0.6.6",
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.6"
+    "com.lihaoyi" %% "pprint" % "0.6.6"
   ),
   Compile / packageBin / mappings ++= (meta / Compile / packageBin / mappings).value,
   Compile / packageSrc / mappings ++= (meta / Compile / packageSrc / mappings).value
@@ -158,6 +157,10 @@ lazy val testBase = (project in file("test/base")).dependsOn(
 )
 lazy val testCore = (project in file("test/core")).dependsOn(
   testBase, core, upickle, circe
+).settings(
+  libraryDependencies ++= Seq(
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.6"
+  )
 )
 
 
