@@ -3,7 +3,7 @@ package jsonrpc
 import jsonrpc.client.ClientMeta
 import jsonrpc.log.Logging
 import jsonrpc.protocol.Errors.ParseError
-import jsonrpc.protocol.{Errors, Request, Response, ResponseError}
+import jsonrpc.protocol.{Errors, Request, Response}
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, MessageError, Transport}
 import jsonrpc.util.{CannotEqual, NoContextFor}
@@ -164,7 +164,7 @@ object Client {
 
   type NotTuple[T] = NotGiven[T =:= Tuple]
   type NoContext = NoContextFor[Client[_, _, _, _]]
-  implicit val noContext: NoContext = NoContextFor[Client[_, _, _, -]]()
+  implicit val noContext: NoContext = NoContextFor[Client[_, _, _, _]]()
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with defined request `Context` type.
