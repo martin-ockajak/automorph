@@ -1,3 +1,5 @@
+package jsonrpc.protocol
+
 /** Method bindings code introspection. */
 case object MethodBindings {
 
