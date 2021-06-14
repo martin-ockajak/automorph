@@ -1,8 +1,3 @@
-package jsonrpc.util
-
-import jsonrpc.util.Reflection
-import scala.reflect.macros.blackbox.Context
-
 /** Method bindings code introspection. */
 case object MethodBindings {
 
@@ -23,7 +18,7 @@ case object MethodBindings {
       baseType => ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
     val methods = ref.methods(ref.c.weakTypeOf[ApiType]).filter(_.public).filter {
-      method => !baseMethodNames.contains(method.name)
+      method =>! baseMethodNames.contains(method.name)
     }
 
     // Validate methods
@@ -102,9 +97,7 @@ case object MethodBindings {
 //        println(method.resultType)
 //        println(effectType)
 //        println(effectType =:= method.resultType.typeConstructor)
-        if (
-          !resultEffectType && false
-        ) {
+        if (!resultEffectType && false) {
           Left(s"Bound API method '$signature' must return the specified effect type '${effectType.typeSymbol.fullName}'")
         } else {
           Right(method)

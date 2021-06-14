@@ -38,7 +38,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
    * @param context request context
    * @return optional response message
    */
-  def processRequest(request: ArraySeq.ofByte)(using context: Context): Effect[HandlerResult[ArraySeq.ofByte]] =
+  def processRequest(request: ArraySeq.ofByte)(implicit context: Context): Effect[HandlerResult[ArraySeq.ofByte]] =
     // Deserialize request
     Try(codec.deserialize(request)).fold(
       error =>
@@ -62,9 +62,9 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
    * @param context request context
    * @return optional response message
    */
-  def processRequest(request: ByteBuffer)(using context: Context): Effect[HandlerResult[ByteBuffer]] =
+  def processRequest(request: ByteBuffer)(implicit context: Context): Effect[HandlerResult[ByteBuffer]] =
     backend.map(
-      processRequest(Encoding.toArraySeq(request))(using context),
+      processRequest(Encoding.toArraySeq(request))(context),
       result => result.copy(response = result.response.map(response => ByteBuffer.wrap(response.unsafeArray)))
     )
 
@@ -75,9 +75,9 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
    * @param context request context
    * @return optional response message
    */
-  def processRequest(request: InputStream)(using context: Context): Effect[HandlerResult[InputStream]] =
+  def processRequest(request: InputStream)(implicit context: Context): Effect[HandlerResult[InputStream]] =
     backend.map(
-      processRequest(Encoding.toArraySeq(request, bufferSize))(using context),
+      processRequest(Encoding.toArraySeq(request, bufferSize))(context),
       result => result.copy(response = result.response.map(response => ByteArrayInputStream(response.unsafeArray)))
     )
 
@@ -114,24 +114,22 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
             // Process result
             _.fold(
               error => errorResponse(error, formedRequest),
-              result =>
+              result => {
                 validRequest.id.foreach(_ => logger.info(s"Processed JSON-RPC request", formedRequest.properties))
                 backend.map(
+                  // Serialize response
                   validRequest.id.map { id =>
-                    // Serialize response
                     val validResponse = Response(id, Right(result))
                     serialize(validResponse.formed)
                   }.getOrElse(backend.pure(None)),
                   rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
                 )
+              }
             )
           )
       )
     }.getOrElse {
-      errorResponse(
-        MethodNotFound(s"Method not found: ${validRequest.method}", None.orNull),
-        formedRequest
-      )
+      errorResponse(MethodNotFound(s"Method not found: ${validRequest.method}", None.orNull), formedRequest)
     }
   }
 
@@ -158,7 +156,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
         } else {
           arguments ++ Seq.fill(parameters.size - arguments.size)(encodedNone)
         },
-      namedArguments =>
+      namedArguments => {
         // Arguments by name
         val redundantArguments = namedArguments.keys.toSeq.diff(parameters)
         if (redundantArguments.nonEmpty) {
@@ -166,6 +164,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
         } else {
           parameters.map(name => namedArguments.get(name).getOrElse(encodedNone))
         }
+      }
     )
   }
 
@@ -178,15 +177,16 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
    */
   private def errorResponse(error: Throwable, formedRequest: Message[Node]): Effect[HandlerResult[ArraySeq.ofByte]] = {
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
-    val responseError = error match
+    val responseError = error match {
       case JsonRpcError(message, code, data, _) => ResponseError(code, message, data.asInstanceOf[Option[Node]])
-      case _                                    =>
+      case _ =>
         // Assemble error details
         val code = Errors.exceptionError(error.getClass).code
         val errorDetails = Errors.errorDetails(error)
         val message = errorDetails.headOption.getOrElse("Unknown error")
         val data = Some(encodeStrings(errorDetails.drop(1)))
         ResponseError(code, message, data)
+    }
     backend.map(
       formedRequest.id.map { id =>
         // Serialize response

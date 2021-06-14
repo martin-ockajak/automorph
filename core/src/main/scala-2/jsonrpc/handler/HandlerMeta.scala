@@ -13,7 +13,7 @@ import jsonrpc.spi.{Backend, Codec}
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
+trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context] {
   this: Handler[Node, CodecType, Effect, Context] =>
 
   /**
@@ -35,7 +35,7 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef](api: T): Handler[Node, CodecType, Effect, Context] =
+  def bind[T <: AnyRef](api: T): Handler[Node, CodecType, Effect, Context] =
     bind(api, name => Seq(name))
 
   /**
@@ -58,7 +58,7 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef](api: T, exposedNames: String => Seq[String]): Handler[Node, CodecType, Effect, Context] =
+  def bind[T <: AnyRef](api: T, exposedNames: String => Seq[String]): Handler[Node, CodecType, Effect, Context] =
     bind(api, Function.unlift(name => Some(exposedNames(name))))
 
   /**
@@ -81,10 +81,10 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
    * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef](
+  def bind[T <: AnyRef](
     api: T,
     exposedNames: PartialFunction[String, Seq[String]]
-  ): Handler[Node, CodecType, Effect, Context] =
+  ): Handler[Node, CodecType, Effect, Context] = {
     val bindings =
       HandlerBindings.generate[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap {
         (methodName, method) =>
@@ -97,3 +97,5 @@ trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
           ).map(_ -> method)
       }
     copy(methodBindings = methodBindings ++ bindings)
+  }
+}

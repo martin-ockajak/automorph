@@ -30,7 +30,7 @@ final case class Response[Node](
 
 case object Response {
 
-  def apply[Node](message: Message[Node]): Response[Node] =
+  def apply[Node](message: Message[Node]): Response[Node] = {
     val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")
     if (jsonrpc != version) {
       throw InvalidRequest(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
@@ -42,6 +42,7 @@ case object Response {
       val error = mandatory(message.error, "error")
       new Response(id, Left(ResponseError(error)))
     }
+  }
 }
 
 /**
@@ -68,8 +69,9 @@ final case class ResponseError[Node](
 
 case object ResponseError {
 
-  def apply[Node](error: MessageError[Node]): ResponseError[Node] =
+  def apply[Node](error: MessageError[Node]): ResponseError[Node] = {
     val code = mandatory(error.code, "code")
     val message = mandatory(error.message, "message")
     new ResponseError(code, message, error.data)
+  }
 }

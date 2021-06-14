@@ -23,11 +23,10 @@ case class HandlerTransport[Node, CodecType <: Codec[Node], Effect[_], Context](
 
   def call(request: ArraySeq.ofByte, context: Option[Context]): Effect[ArraySeq.ofByte] =
     backend.map(
-      handler.processRequest(request)(using context.getOrElse(defaultContext)),
-      result =>
-        result.response.getOrElse(throw IllegalStateException("Missing call response"))
+      handler.processRequest(request)(context.getOrElse(defaultContext)),
+      result => result.response.getOrElse(throw IllegalStateException("Missing call response"))
     )
 
   def notify(request: ArraySeq.ofByte, context: Option[Context]): Effect[Unit] =
-    backend.map(handler.processRequest(request)(using context.getOrElse(defaultContext)), _ => ())
+    backend.map(handler.processRequest(request)(context.getOrElse(defaultContext)), _ => ())
 }

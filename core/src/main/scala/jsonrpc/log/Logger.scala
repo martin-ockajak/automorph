@@ -1,10 +1,11 @@
 package jsonrpc.log
 
 import java.nio.file.{Files, Path, Paths}
-import org.slf4j.{LoggerFactory, MDC, Logger as Underlying}
+import org.slf4j
+import org.slf4j.{LoggerFactory, MDC}
 
 /**
- * Scala Logging compatible structured logger using SLF4J Mapped Diagnostic Context.
+ * Scala Logging compatible structured logger implicit SLF4J Mapped Diagnostic Context.
  *
  * Can be used as a drop-in replacement for Logger class in Scala Logging.
  *
@@ -13,22 +14,21 @@ import org.slf4j.{LoggerFactory, MDC, Logger as Underlying}
  * @param underlying underlying [[https://www.javadoc.io/doc/org.slf4j/slf4j-api/1.7.30/org/slf4j/Logger.html SLF4J logger]]
  */
 @SerialVersionUID(782158461L)
-final case class Logger private (private val underlying: Underlying) {
+final case class Logger private (private val underlying: slf4j.Logger) {
 
   type Not[T] = T => Nothing
-  infix type Or[T, U] = Not[Not[T] & Not[U]]
+  type Or[T, U] = Not[Not[T] & Not[U]]
 
   def error[T](message: => String): Unit = underlying.error(message)
 
   def error[T](message: => String, cause: => Throwable): Unit = underlying.error(message, cause)
 
-  def error[T <: Matchable](message: => String, properties: => T)(using
-    evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
-  ): Unit =
-    log(message, properties, underlying.isErrorEnabled, message => underlying.error(message))
+  def error[T <: Matchable](message: => String, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])
+  ): Unit = log(message, properties, underlying.isErrorEnabled, message => underlying.error(message))
 
-  def error[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(using
-    evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
+  def error[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])
   ): Unit =
     log(message, cause, properties, underlying.isErrorEnabled, (message, cause) => underlying.error(message, cause))
 
@@ -41,13 +41,12 @@ final case class Logger private (private val underlying: Underlying) {
 
   def warn[T](message: => String, cause: => Throwable): Unit = underlying.warn(message, cause)
 
-  def warn[T <: Matchable](message: => String, properties: => T)(using
-    evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
-  ): Unit =
-    log(message, properties, underlying.isWarnEnabled, message => underlying.warn(message))
+  def warn[T <: Matchable](message: => String, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])
+  ): Unit = log(message, properties, underlying.isWarnEnabled, message => underlying.warn(message))
 
-  def warn[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(using
-    evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
+  def warn[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])
   ): Unit =
     log(message, cause, properties, underlying.isWarnEnabled, (message, cause) => underlying.warn(message, cause))
 
@@ -60,13 +59,12 @@ final case class Logger private (private val underlying: Underlying) {
 
   def info[T](message: => String, cause: => Throwable): Unit = underlying.info(message, cause)
 
-  def info[T <: Matchable](message: => String, properties: => T)(using
-    evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
-  ): Unit =
-    log(message, properties, underlying.isInfoEnabled, message => underlying.info(message))
+  def info[T <: Matchable](message: => String, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])
+  ): Unit = log(message, properties, underlying.isInfoEnabled, message => underlying.info(message))
 
-  def info[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(using
-    evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
+  def info[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])
   ): Unit =
     log(message, cause, properties, underlying.isInfoEnabled, (message, cause) => underlying.info(message, cause))
 
@@ -79,13 +77,12 @@ final case class Logger private (private val underlying: Underlying) {
 
   def debug[T](message: => String, cause: => Throwable): Unit = underlying.debug(message, cause)
 
-  def debug[T <: Matchable](message: => String, properties: => T)(using
-    evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
-  ): Unit =
-    log(message, properties, underlying.isDebugEnabled, message => underlying.debug(message))
+  def debug[T <: Matchable](message: => String, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])
+  ): Unit = log(message, properties, underlying.isDebugEnabled, message => underlying.debug(message))
 
-  def debug[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(using
-    evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
+  def debug[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])
   ): Unit =
     log(message, cause, properties, underlying.isDebugEnabled, (message, cause) => underlying.debug(message, cause))
 
@@ -98,13 +95,12 @@ final case class Logger private (private val underlying: Underlying) {
 
   def trace[T](message: => String, cause: => Throwable): Unit = underlying.trace(message, cause)
 
-  def trace[T <: Matchable](message: => String, properties: => T)(using
-    evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
-  ): Unit =
-    log(message, properties, underlying.isTraceEnabled, message => underlying.trace(message))
+  def trace[T <: Matchable](message: => String, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])
+  ): Unit = log(message, properties, underlying.isTraceEnabled, message => underlying.trace(message))
 
-  def trace[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(using
-    evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
+  def trace[T <: Matchable](message: => String, cause: => Throwable, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])
   ): Unit =
     log(message, cause, properties, underlying.isTraceEnabled, (message, cause) => underlying.trace(message, cause))
 
@@ -114,7 +110,7 @@ final case class Logger private (private val underlying: Underlying) {
     trace(message, cause, properties)
 
   private def log[T <: Matchable](message: => String, properties: => T, enabled: Boolean, logMessage: String => Unit)(
-    using evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)
+    implicit evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])
   ): Unit =
     if (enabled) {
       val iterableProperties = unpackProperties(properties)
@@ -129,7 +125,7 @@ final case class Logger private (private val underlying: Underlying) {
     properties: => T,
     enabled: Boolean,
     logMessage: (String, Throwable) => Unit
-  )(using evidence: Not[Not[T]] <:< (Iterable[(String, Any)] Or Product)): Unit =
+  )(implicit evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])): Unit =
     if (enabled) {
       val iterableProperties = unpackProperties(properties)
       addDiagnosticContext(iterableProperties)
@@ -137,13 +133,14 @@ final case class Logger private (private val underlying: Underlying) {
       removeDiagnosticContext(iterableProperties)
     }
 
-  private def unpackProperties[T <: Matchable](properties: => T): Iterable[(String, Matchable)] =
-    val iterableProperties =
-      properties match
-        case product: Product      => productProperties(product)
-        case iterable: Iterable[?] => iterable
+  private def unpackProperties[T <: Matchable](properties: => T): Iterable[(String, Matchable)] = {
+    val iterableProperties = properties match {
+      case product: Product      => productProperties(product)
+      case iterable: Iterable[?] => iterable
+    }
     // FIXME - find a way to avoid Matchable type coercion
     iterableProperties.asInstanceOf[Iterable[(String, Matchable)]]
+  }
 
   private def productProperties(product: Product): Map[String, Any] =
     product.productElementNames.map(_.capitalize).zip(product.productIterator).toMap
@@ -157,10 +154,10 @@ final case class Logger private (private val underlying: Underlying) {
   private def removeDiagnosticContext(properties: Iterable[(String, Any)]): Unit =
     properties.foreach { case (key, _) => MDC.remove(key) }
 
-  private def format(value: Matchable): String =
-    value match
-      case stringValue: String => stringValue
-      case anyValue            => Logger.prettyPrint(anyValue).plainText
+  private def format(value: Matchable): String = value match {
+    case stringValue: String => stringValue
+    case anyValue            => Logger.prettyPrint(anyValue).plainText
+  }
 }
 
 case object Logger {
@@ -168,12 +165,12 @@ case object Logger {
   private val prettyPrint = pprint.PPrinter.BlackWhite.copy(defaultIndent = 2, defaultWidth = 0)
 
   /**
-   * Create a [[Logger]] using the underlying `org.slf4j.Logger`.
+   * Create a [[Logger]] implicit the underlying `org.slf4j.Logger`.
    *
    * @param underlying underlying [[https://www.javadoc.io/doc/org.slf4j/slf4j-api/1.7.30/org/slf4j/Logger.html SLF4J logger]]
    * @return logger
    */
-  def apply(underlying: Underlying): Logger = new Logger(underlying)
+  def apply(underlying: slf4j.Logger): Logger = new Logger(underlying)
 
   /**
    * Create a [[Logger]] with the specified name.

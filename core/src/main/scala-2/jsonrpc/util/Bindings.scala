@@ -1,12 +1,10 @@
 package jsonrpc.util
 
-import jsonrpc.util.MethodBindings.methodSignature
-import jsonrpc.util.MethodBindings.validApiMethods
 import scala.language.experimental.macros
-import scala.reflect.macros.blackbox
-import scala.concurrent.Future
+import scala.reflect.macros.blackbox.Context
 
 object Bindings {
+
   def bind[T]: Unit = macro Bindings.bindMacro[T]
 
   def bindMacro[T: c.WeakTypeTag](c: blackbox.Context): c.Expr[Unit] = {
