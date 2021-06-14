@@ -171,7 +171,7 @@ ThisBuild / scalacOptions ++= Seq(
 ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
   case Some((3, _)) => Seq(
     "-source",
-    "future-migration",
+    "3.0",
 //    "-new-syntax",
     "-language:strictEquality",
     "-indent",
