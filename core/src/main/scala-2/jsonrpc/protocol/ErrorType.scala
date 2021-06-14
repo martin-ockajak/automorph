@@ -2,7 +2,7 @@ package jsonrpc.protocol
 
 /** JSON-RPC error types with codes. */
 object ErrorType extends Enumeration {
-  type ErrorType = ErrorType
+  type ErrorType = ErrorTypeValue
   sealed case class ErrorTypeValue private[ErrorType](name: String, code: Int) extends Val(name)
 
   val ParseError = ErrorTypeValue("ParseError", -32700)
