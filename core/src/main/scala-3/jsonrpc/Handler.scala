@@ -3,7 +3,7 @@ package jsonrpc
 import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerProcessor}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec}
-import jsonrpc.util.{CannotEqual, NoContextFor}
+import jsonrpc.util.{CannotEqual, Void}
 
 /**
  * JSON-RPC request handler layer.
@@ -73,5 +73,5 @@ object Handler:
     codec: CodecType,
     backend: Backend[Effect],
     bufferSize: Int = 4096
-  ): Handler[Node, CodecType, Effect, NoContextFor.NoContext] =
+  ): Handler[Node, CodecType, Effect, Void.Value] =
     Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))

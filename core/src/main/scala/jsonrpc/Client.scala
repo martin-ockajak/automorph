@@ -5,7 +5,7 @@ import jsonrpc.log.Logging
 import jsonrpc.protocol.{Errors, Request, Response}
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, Transport}
-import jsonrpc.util.{CannotEqual, NoContextFor}
+import jsonrpc.util.{CannotEqual, Void}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Random, Try}
 
@@ -199,6 +199,6 @@ object Client {
   def basic[Node, CodecType <: Codec[Node], Effect[_]](
     codec: CodecType,
     backend: Backend[Effect],
-    transport: Transport[Effect, NoContextFor.NoContext]
-  ): Client[Node, CodecType, Effect, NoContextFor.NoContext] = new Client(codec, backend, transport, true)
+    transport: Transport[Effect, Void.Value]
+  ): Client[Node, CodecType, Effect, Void.Value] = new Client(codec, backend, transport, true)
 }
