@@ -109,7 +109,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
     // Deserialize response
     Try(codec.deserialize(rawResponse)).fold(
       error => raiseError(Errors.ParseError("Invalid response format", error), formedRequest),
-      formedResponse =>
+      formedResponse => {
         // Validate response
         logger.trace(s"Received JSON-RPC message:\n${codec.format(formedResponse)}")
         Try(Response(formedResponse)).fold(
@@ -120,7 +120,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
               result =>
                 // Decode result
                 Try(decodeResult(result)).fold(
-                  error => raiseError(IllegalStateException("Invalid result", error), formedRequest),
+                  error => raiseError(new IllegalStateException("Invalid result", error), formedRequest),
                   result => {
                     logger.info(s"Performed JSON-RPC request", formedRequest.properties)
                     backend.pure(result)
@@ -128,6 +128,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
                 )
             )
         )
+      }
     )
 
   /**

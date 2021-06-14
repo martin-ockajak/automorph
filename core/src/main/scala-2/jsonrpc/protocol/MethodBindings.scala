@@ -1,5 +1,8 @@
 package jsonrpc.protocol
 
+import jsonrpc.util.Reflection
+import scala.reflect.macros.blackbox.Context
+
 /** Method bindings code introspection. */
 case object MethodBindings {
 

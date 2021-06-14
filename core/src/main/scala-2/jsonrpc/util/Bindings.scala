@@ -1,7 +1,9 @@
 package jsonrpc.util
 
+import jsonrpc.protocol.MethodBindings.validApiMethods
+import scala.concurrent.Future
 import scala.language.experimental.macros
-import scala.reflect.macros.blackbox.Context
+import scala.reflect.macros.blackbox
 
 object Bindings {
 
