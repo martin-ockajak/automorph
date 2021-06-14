@@ -400,7 +400,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context] {
     Proxy.newProxyInstance(
       getClass.getClassLoader,
       Array(classTag.runtimeClass),
-      (proxy, method, arguments) =>
+      (_, method, arguments) =>
         // Lookup bindings for the specified method
         methodBindings.get(method.getName).map { clientMethod =>
           // Adjust expected method parameters if it uses context as its last parameter
@@ -423,7 +423,7 @@ trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context] {
 
           // Perform the API call
           performCall(method.getName, encodedArguments, context, resultNode => clientMethod.decodeResult(resultNode))
-        }.getOrElse(throw IllegalStateException(s"Method not found: ${method.getName}"))
+        }.getOrElse(throw new IllegalStateException(s"Method not found: ${method.getName}"))
     ).asInstanceOf[T]
   }
 }

@@ -84,7 +84,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
    */
   protected def performNotify(methodName: String, arguments: Params[Node], context: Option[Context]): Effect[Unit] = {
     val formedRequest = Request(None, methodName, arguments).formed
-    backend.map(
+    backend.flatMap(
       // Serialize request
       serialize(formedRequest),
       // Send request
