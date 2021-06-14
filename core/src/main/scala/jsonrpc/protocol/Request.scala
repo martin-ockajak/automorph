@@ -38,7 +38,7 @@ case object Request {
     }
     val id = message.id
     val method = mandatory(message.method, "method")
-    val params = message.params.getOrElse(Right(Map.empty))
+    val params = message.params.getOrElse(Right(Map.empty[String, Node]))
     Request(id, method, params)
   }
 }

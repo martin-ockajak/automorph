@@ -132,14 +132,11 @@ final case class Logger private (private val underlying: slf4j.Logger) {
       removeDiagnosticContext(iterableProperties)
     }
 
-  private def unpackProperties[T](properties: => T): Iterable[(String, Any)] = {
-    val iterableProperties = properties match {
+  private def unpackProperties[T](properties: => T): Iterable[(String, Any)] =
+    properties match {
       case product: Product      => productProperties(product)
-      case iterable: Iterable[_] => iterable
+      case iterable: Iterable[_] => iterable.asInstanceOf[Iterable[(String, Any)]]
     }
-    // FIXME - find a way to avoid Matchable type coercion
-    iterableProperties.asInstanceOf[Iterable[(String, Matchable)]]
-  }
 
   private def productProperties(product: Product): Map[String, Any] =
     product.productElementNames.map(_.capitalize).zip(product.productIterator).toMap
