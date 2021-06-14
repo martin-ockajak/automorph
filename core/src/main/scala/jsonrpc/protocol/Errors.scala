@@ -35,7 +35,7 @@ case object Errors {
   ) extends RuntimeException(message, cause)
 
   /** Mapping of standard exception types to JSON-RPC errors. */
-  lazy val exceptionError: Map[Class[? <: Throwable], ErrorType] = Map(
+  lazy val exceptionError: Map[Class[_ <: Throwable], ErrorType] = Map(
     classOf[ParseError] -> ErrorType.ParseError,
     classOf[InvalidRequest] -> ErrorType.InvalidRequest,
     classOf[MethodNotFound] -> ErrorType.MethodNotFound,
