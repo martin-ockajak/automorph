@@ -42,7 +42,7 @@ case object Errors {
     classOf[IllegalArgumentException] -> ErrorType.InvalidParams,
     classOf[InternalError] -> ErrorType.InternalError,
     classOf[IOException] -> ErrorType.IOError
-  ).withDefaultValue(ErrorType.ApplicationError)
+  ).withDefaultValue(ErrorType.ApplicationError).asInstanceOf[Map[Class[_ <: Throwable], ErrorType]]
 
   /** Mapping of JSON-RPC errors to standard exception types. */
   def errorException(code: Int, message: String): Throwable = code match {

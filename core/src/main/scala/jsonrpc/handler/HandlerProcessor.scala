@@ -5,9 +5,8 @@ import java.nio.ByteBuffer
 import jsonrpc.{Handler, JsonRpcError}
 import jsonrpc.protocol.Errors.{MethodNotFound, ParseError}
 import jsonrpc.protocol.{Errors, Request, Response, ResponseError}
-import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerResult}
-import jsonrpc.log.Logging
-import jsonrpc.spi.{Backend, Codec, Message}
+import jsonrpc.handler.{HandlerMethod, HandlerResult}
+import jsonrpc.spi.{Codec, Message}
 import jsonrpc.util.Encoding
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
@@ -46,13 +45,14 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
           ParseError("Invalid request format", error),
           Message[Node](None, Some(Right(unknownId)), None, None, None, None)
         ),
-      formedRequest =>
+      formedRequest => {
         // Validate request
         logger.trace(s"Received JSON-RPC message:\n${codec.format(formedRequest)}")
         Try(Request(formedRequest)).fold(
           error => errorResponse(error, formedRequest),
           validRequest => invokeMethod(formedRequest, validRequest, context)
         )
+      }
     )
 
   /**
@@ -65,7 +65,8 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
   def processRequest(request: ByteBuffer)(implicit context: Context): Effect[HandlerResult[ByteBuffer]] =
     backend.map(
       processRequest(Encoding.toArraySeq(request))(context),
-      result => result.copy(response = result.response.map(response => ByteBuffer.wrap(response.unsafeArray)))
+      (result: HandlerResult[ArraySeq.ofByte]) =>
+        result.copy(response = result.response.map(response => ByteBuffer.wrap(response.unsafeArray)))
     )
 
   /**
@@ -78,7 +79,8 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
   def processRequest(request: InputStream)(implicit context: Context): Effect[HandlerResult[InputStream]] =
     backend.map(
       processRequest(Encoding.toArraySeq(request, bufferSize))(context),
-      result => result.copy(response = result.response.map(response => ByteArrayInputStream(response.unsafeArray)))
+      (result: HandlerResult[ArraySeq.ofByte]) =>
+        result.copy(response = result.response.map(response => new ByteArrayInputStream(response.unsafeArray)))
     )
 
   override def toString: String =
@@ -108,11 +110,11 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
       // Invoke method
       Try(backend.either(handlerMethod.invoke(arguments, context))).fold(
         error => errorResponse(error, formedRequest),
-        outcome =>
+        effect =>
           backend.flatMap(
-            outcome,
+            effect,
             // Process result
-            _.fold(
+            (outcome: Either[Throwable, Node]) => outcome.fold(
               error => errorResponse(error, formedRequest),
               result => {
                 validRequest.id.foreach(_ => logger.info(s"Processed JSON-RPC request", formedRequest.properties))
@@ -122,7 +124,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
                     val validResponse = Response(id, Right(result))
                     serialize(validResponse.formed)
                   }.getOrElse(backend.pure(None)),
-                  rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
+                  (rawResponse: Option[ArraySeq.ofByte]) => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
                 )
               }
             )
@@ -152,7 +154,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
       arguments =>
         // Arguments by position
         if (arguments.size > parameters.size) {
-          throw IllegalArgumentException(s"Redundant arguments: ${parameters.size - arguments.size}")
+          throw new IllegalArgumentException(s"Redundant arguments: ${parameters.size - arguments.size}")
         } else {
           arguments ++ Seq.fill(parameters.size - arguments.size)(encodedNone)
         },
@@ -160,7 +162,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
         // Arguments by name
         val redundantArguments = namedArguments.keys.toSeq.diff(parameters)
         if (redundantArguments.nonEmpty) {
-          throw IllegalArgumentException(s"Redundant arguments: ${redundantArguments.mkString(", ")}")
+          throw new IllegalArgumentException(s"Redundant arguments: ${redundantArguments.mkString(", ")}")
         } else {
           parameters.map(name => namedArguments.get(name).getOrElse(encodedNone))
         }
@@ -179,7 +181,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
     val responseError = error match {
       case JsonRpcError(message, code, data, _) => ResponseError(code, message, data.asInstanceOf[Option[Node]])
-      case _ =>
+      case _                                    =>
         // Assemble error details
         val code = Errors.exceptionError(error.getClass).code
         val errorDetails = Errors.errorDetails(error)
@@ -193,7 +195,7 @@ trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
         val validResponse = Response[Node](id, Left(responseError))
         serialize(validResponse.formed)
       }.getOrElse(backend.pure(None)),
-      rawResponse => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, Some(responseError.code))
+      (rawResponse: Option[ArraySeq.ofByte]) => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, Some(responseError.code))
     )
   }
 
