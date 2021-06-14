@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import scala.collection.immutable.ArraySeq
 
-case object Encoding {
+private[jsonrpc] case object Encoding {
 
   private val charset = StandardCharsets.UTF_8
   private val maxReadIterations = 1024 * 1024

@@ -6,7 +6,7 @@ import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
 
 /** JSON-RPC handler layer bindings code generation. */
-case object HandlerBindings:
+private[jsonrpc] case object HandlerBindings:
 
   private val debugProperty = "jsonrpc.macro.debug"
 //  private val debugDefault = "true"

@@ -12,7 +12,7 @@ package jsonrpc.handler
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class HandlerMethod[Node, Effect[_], Context](
+private[jsonrpc] final case class HandlerMethod[Node, Effect[_], Context](
   invoke: (Seq[Node], Context) => Effect[Node],
   name: String,
   resultType: String,

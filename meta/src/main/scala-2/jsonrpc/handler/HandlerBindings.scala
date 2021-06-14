@@ -7,7 +7,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /** JSON-RPC handler layer bindings code generation. */
-case object HandlerBindings {
+private[jsonrpc] case object HandlerBindings {
 
   private val debugProperty = "jsonrpc.macro.debug"
 //  private val debugDefault = "true"

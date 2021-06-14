@@ -15,7 +15,7 @@ import scala.reflect.ClassTag
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
+private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Client[Node, CodecType, Effect, Context] =>
 
   /**

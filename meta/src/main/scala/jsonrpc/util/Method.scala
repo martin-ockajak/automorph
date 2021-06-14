@@ -11,7 +11,7 @@ package jsonrpc.util
  * @param available true if the method can be called
  * @param documentation documentation
  */
-final case class Method(
+private[jsonrpc] final case class Method(
   name: String,
   resultType: String,
   parameters: Seq[Seq[Parameter]],
@@ -45,7 +45,7 @@ final case class Method(
  * @param dataType type
  * @param contextual true if the parameter is implicit
  */
-final case class Parameter(
+private[jsonrpc] final case class Parameter(
   name: String,
   dataType: String,
   contextual: Boolean

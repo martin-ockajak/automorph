@@ -13,7 +13,7 @@ import jsonrpc.spi.{Backend, Codec}
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
+private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
   this: Handler[Node, CodecType, Effect, Context] =>
 
   /**

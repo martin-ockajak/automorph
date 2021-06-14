@@ -1,6 +1,6 @@
 package jsonrpc.protocol
 
-object ErrorType:
+private[jsonrpc] object ErrorType:
 
   /** JSON-RPC error types with codes. */
   enum ErrorType(val code: Int):

@@ -13,7 +13,7 @@ import org.slf4j.{LoggerFactory, MDC}
  * @param underlying underlying [[https://www.javadoc.io/doc/org.slf4j/slf4j-api/1.7.30/org/slf4j/Logger.html SLF4J logger]]
  */
 @SerialVersionUID(782158461L)
-final case class Logger private (private val underlying: slf4j.Logger) {
+private[jsonrpc] final case class Logger private (private val underlying: slf4j.Logger) {
 
   type Not[T] = T => Nothing
   type Or[T, U] = Not[Not[T] with Not[U]]

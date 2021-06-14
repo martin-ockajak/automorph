@@ -25,7 +25,7 @@ import scala.util.Try
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
+private[jsonrpc] trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_], Context] {
   this: Handler[Node, CodecType, Effect, Context] =>
 
   private val unknownId = "[unknown]"

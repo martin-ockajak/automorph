@@ -4,7 +4,7 @@ import jsonrpc.util.Reflection
 import scala.quoted.{quotes, Quotes, Type}
 
 /** Method bindings introspection. */
-case object MethodBindings:
+private[jsonrpc] case object MethodBindings:
 
   /**
    * Detect valid API methods in the specified API type.

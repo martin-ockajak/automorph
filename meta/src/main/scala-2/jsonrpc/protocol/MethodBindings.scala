@@ -4,7 +4,7 @@ import jsonrpc.util.Reflection
 import scala.reflect.macros.blackbox.Context
 
 /** Method bindings code introspection. */
-case object MethodBindings {
+private[jsonrpc] case object MethodBindings {
 
   /**
    * Detect valid API methods in the specified API type.

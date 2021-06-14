@@ -7,7 +7,7 @@ import scala.quoted.{quotes, Expr, Quotes, Type}
  *
  * @param q quotation context
  */
-final case class Reflection(q: Quotes):
+private[jsonrpc] final case class Reflection(q: Quotes):
 
   // All meta-programming data types are path-dependent on the compiler-generated reflection context
   import q.reflect.{Flags, MethodType, PolyType, Printer, Symbol, TypeRepr}

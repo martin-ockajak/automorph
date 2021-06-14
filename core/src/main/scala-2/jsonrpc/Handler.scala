@@ -24,9 +24,9 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
   backend: Backend[Effect],
   bufferSize: Int,
-  protected val methodBindings: Map[String, HandlerMethod[Node, Effect, Context]],
   protected val encodeStrings: Seq[String] => Node,
-  protected val encodedNone: Node
+  protected val encodedNone: Node,
+  protected val methodBindings: Map[String, HandlerMethod[Node, Effect, Context]]
 ) extends HandlerProcessor[Node, CodecType, Effect, Context]
   with HandlerMeta[Node, CodecType, Effect, Context]
   with CannotEqual
@@ -53,7 +53,7 @@ object Handler {
     backend: Backend[Effect],
     bufferSize: Int = 4096
   ): Handler[Node, CodecType, Effect, Context] =
-    new Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))
+    new Handler(codec, backend, bufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.
@@ -74,5 +74,5 @@ object Handler {
     backend: Backend[Effect],
     bufferSize: Int = 4096
   ): Handler[Node, CodecType, Effect, Void.Value] =
-    new Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))
+    new Handler(codec, backend, bufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
 }
