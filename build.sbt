@@ -50,8 +50,7 @@ lazy val core = project.dependsOn(
 ).settings(
   name := "json-rpc-core",
   libraryDependencies ++= Seq(
-    "org.slf4j" % "slf4j-api" % "1.7.30",
-    "com.lihaoyi" %% "pprint" % "0.6.6"
+    "org.slf4j" % "slf4j-api" % "1.7.30"
   ),
   Compile / packageBin / mappings ++= (meta / Compile / packageBin / mappings).value,
   Compile / packageSrc / mappings ++= (meta / Compile / packageSrc / mappings).value

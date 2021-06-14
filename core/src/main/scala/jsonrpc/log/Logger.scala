@@ -150,15 +150,10 @@ private[jsonrpc] final case class Logger private (private val underlying: slf4j.
   private def removeDiagnosticContext(properties: Iterable[(String, Any)]): Unit =
     properties.foreach { case (key, _) => MDC.remove(key) }
 
-  private def format(value: Any): String = value match {
-    case stringValue: String => stringValue
-    case anyValue            => Logger.prettyPrint(anyValue).plainText
-  }
+  private def format(value: Any): String = value.toString
 }
 
 case object Logger {
-
-  private val prettyPrint = pprint.PPrinter.BlackWhite.copy(defaultIndent = 2, defaultWidth = 0)
 
   /**
    * Create a [[Logger]] implicit the underlying `org.slf4j.Logger`.
