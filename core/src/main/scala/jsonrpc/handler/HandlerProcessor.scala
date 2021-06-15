@@ -186,7 +186,7 @@ private[jsonrpc] trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_
       case JsonRpcError(message, code, data, _) => ResponseError(code, message, data.asInstanceOf[Option[Node]])
       case _                                    =>
         // Assemble error details
-        val code = Errors.exceptionError(error.getClass).code
+        val code = Errors.fromException(error.getClass).code
         val trace = Errors.trace(error)
         val message = trace.headOption.getOrElse("Unknown error")
         val data = Some(encodeStrings(trace.drop(1)))

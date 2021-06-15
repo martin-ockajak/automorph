@@ -118,7 +118,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
           error => raiseError(error, formedRequest),
           validResponse =>
             validResponse.value.fold(
-              error => raiseError(Errors.errorException(error.code, error.message), formedRequest),
+              error => raiseError(Errors.toException(error.code, error.message), formedRequest),
               result =>
                 // Decode result
                 Try(decodeResult(result)).fold(

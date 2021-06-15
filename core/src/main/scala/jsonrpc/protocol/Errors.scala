@@ -31,7 +31,7 @@ case object Errors {
 
 
   /** Mapping of standard exception types to JSON-RPC errors. */
-  private[jsonrpc] val exceptionError: Map[Class[_ <: Throwable], ErrorType] = Map(
+  private[jsonrpc] val fromException: Map[Class[_ <: Throwable], ErrorType] = Map(
     classOf[ParseError] -> ErrorType.ParseError,
     classOf[InvalidRequest] -> ErrorType.InvalidRequest,
     classOf[MethodNotFound] -> ErrorType.MethodNotFound,
@@ -41,7 +41,7 @@ case object Errors {
   ).withDefaultValue(ErrorType.ApplicationError).asInstanceOf[Map[Class[_ <: Throwable], ErrorType]]
 
   /** Mapping of JSON-RPC errors to standard exception types. */
-  private[jsonrpc] def errorException(code: Int, message: String): Throwable = code match {
+  private[jsonrpc] def toException(code: Int, message: String): Throwable = code match {
     case ErrorType.ParseError.code                   => ParseError(message, None.orNull)
     case ErrorType.InvalidRequest.code               => InvalidRequest(message, None.orNull)
     case ErrorType.MethodNotFound.code               => MethodNotFound(message, None.orNull)
