@@ -2,8 +2,32 @@ package jsonrpc.protocol
 
 import java.io.IOException
 import jsonrpc.protocol.ErrorType.ErrorType
+import jsonrpc.spi.MessageError
 
-case object Errors {
+
+/**
+ * JSON-RPC call response error.
+ *
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+ * @param code error code
+ * @param message error description
+ * @param data additional error information
+ * @tparam Node message node representation type
+ */
+private[jsonrpc] final case class ResponseError[Node](
+  code: Int,
+  message: String,
+  data: Option[Node]
+) {
+
+  def formed: MessageError[Node] = MessageError[Node](
+    code = Some(code),
+    message = Some(message),
+    data = data
+  )
+}
+
+case object ResponseError {
 
   /** JSON-RPC parse error. */
   final case class ParseError(
@@ -29,6 +53,11 @@ case object Errors {
     cause: Throwable
   ) extends RuntimeException(message, cause)
 
+  private[jsonrpc] def apply[Node](error: MessageError[Node]): ResponseErrorx[Node] = {
+    val code = mandatory(error.code, "code")
+    val message = mandatory(error.message, "message")
+    new ResponseErrorx(code, message, error.data)
+  }
 
   /** Mapping of standard exception types to JSON-RPC errors. */
   private[jsonrpc] val fromException: Map[Class[_ <: Throwable], ErrorType] = Map(
@@ -53,10 +82,9 @@ case object Errors {
   }
 
   /**
-   * Assemble detailed error trace from a throwable and its filtered causes.
+   * Assemble detailed trace of an exception and its causes.
    *
    * @param throwable exception
-   * @param filter only include throwables satisfying this condition
    * @param maxCauses maximum number of included exception causes
    * @return error messages
    */
@@ -67,4 +95,17 @@ case object Errors {
       val message = Option(throwable.getMessage).getOrElse("")
       s"[$exceptionName] $message"
     }
+
+  /**
+   * Return specified mandatory property value or throw an exception if it is missing.
+   *
+   * @param value property value
+   * @param name property name
+   * @tparam T property type
+   * @return property value
+   * @throws InvalidRequest if the property value is missing
+   */
+  private[jsonrpc] def mandatory[T](value: Option[T], name: String): T = value.getOrElse(
+    throw InvalidRequest(s"Missing message property: $name", None.orNull)
+  )
 }

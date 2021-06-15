@@ -3,8 +3,8 @@ package jsonrpc
 import jsonrpc.client.ClientMeta
 import jsonrpc.log.Logging
 import jsonrpc.protocol.{Request, Response}
-import jsonrpc.protocol.Errors
-import jsonrpc.protocol.Errors.ParseError
+import jsonrpc.protocol.ResponseError
+import jsonrpc.protocol.ResponseError.ParseError
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, Transport}
 import jsonrpc.util.{CannotEqual, Void}
@@ -118,7 +118,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
           error => raiseError(error, formedRequest),
           validResponse =>
             validResponse.value.fold(
-              error => raiseError(Errors.toException(error.code, error.message), formedRequest),
+              error => raiseError(ResponseError.toException(error.code, error.message), formedRequest),
               result =>
                 // Decode result
                 Try(decodeResult(result)).fold(

@@ -5,7 +5,7 @@ import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise}
 import jsonrpc.Handler
-import jsonrpc.protocol.Errors
+import jsonrpc.protocol.ResponseError
 import jsonrpc.log.Logging
 import jsonrpc.server.http.FinagleJsonRpcService.defaultErrorStatus
 import jsonrpc.protocol.ErrorType.ErrorType
@@ -57,7 +57,7 @@ final case class FinagleJsonRpcService[Effect[_]](
 
   private def serverError(error: Throwable, request: Request): Response = {
     val status = Status.InternalServerError
-    val message = Errors.trace(error).mkString("\n")
+    val message = ResponseError.trace(error).mkString("\n")
     val reader = Reader.fromBuf(Buf.Utf8(message))
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(request)))
     createResponse(request, reader, status)

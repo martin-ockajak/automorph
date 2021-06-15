@@ -1,7 +1,7 @@
 package jsonrpc.protocol
 
-import jsonrpc.protocol.Common.mandatory
-import jsonrpc.protocol.Errors.InvalidRequest
+import ResponseError.mandatory
+import jsonrpc.protocol.ResponseError.InvalidRequest
 import jsonrpc.spi.Message
 import jsonrpc.spi.Message.{Id, Params, version}
 

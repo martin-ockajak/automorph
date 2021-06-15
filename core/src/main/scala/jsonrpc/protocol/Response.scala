@@ -1,7 +1,7 @@
 package jsonrpc.protocol
 
-import jsonrpc.protocol.Common.mandatory
-import jsonrpc.protocol.Errors.InvalidRequest
+import ResponseError.mandatory
+import jsonrpc.protocol.ResponseError.InvalidRequest
 import jsonrpc.spi.Message.{Id, version}
 import jsonrpc.spi.{Message, MessageError}
 
@@ -15,7 +15,7 @@ import jsonrpc.spi.{Message, MessageError}
  */
 private[jsonrpc] final case class Response[Node](
   id: Id,
-  value: Either[ResponseError[Node], Node]
+  value: Either[ResponseErrorx[Node], Node]
 ) {
 
   def formed: Message[Node] = Message[Node](
@@ -40,7 +40,7 @@ private[jsonrpc] case object Response {
       Response(id, Right(result))
     }.getOrElse {
       val error = mandatory(message.error, "error")
-      Response(id, Left(ResponseError(error)))
+      Response(id, Left(ResponseErrorx(error)))
     }
   }
 }
@@ -54,7 +54,7 @@ private[jsonrpc] case object Response {
  * @param data additional error information
  * @tparam Node message node representation type
  */
-private[jsonrpc] final case class ResponseError[Node](
+private[jsonrpc] final case class ResponseErrorx[Node](
   code: Int,
   message: String,
   data: Option[Node]
@@ -67,11 +67,11 @@ private[jsonrpc] final case class ResponseError[Node](
   )
 }
 
-private[jsonrpc] case object ResponseError {
+private[jsonrpc] case object ResponseErrorx {
 
-  def apply[Node](error: MessageError[Node]): ResponseError[Node] = {
+  def apply[Node](error: MessageError[Node]): ResponseErrorx[Node] = {
     val code = mandatory(error.code, "code")
     val message = mandatory(error.message, "message")
-    new ResponseError(code, message, error.data)
+    new ResponseErrorx(code, message, error.data)
   }
 }

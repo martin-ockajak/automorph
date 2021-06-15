@@ -6,7 +6,7 @@ import jsonrpc.Handler
 import jsonrpc.handler.HandlerResult
 import jsonrpc.log.Logging
 import jsonrpc.protocol.ErrorType.ErrorType
-import jsonrpc.protocol.Errors
+import jsonrpc.protocol.ResponseError
 import jsonrpc.server.http.NanoHTTPD.Response.Status
 import jsonrpc.server.http.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import jsonrpc.server.http.NanoHttpdServer.defaultErrorStatus
@@ -62,7 +62,7 @@ case class NanoHttpdServer[Effect[_]] private (
 
   private def createServerError(error: Throwable, session: IHTTPSession): Response = {
     val status = Status.INTERNAL_ERROR
-    val message = Encoding.toArraySeq(Errors.trace(error).mkString("\n"))
+    val message = Encoding.toArraySeq(ResponseError.trace(error).mkString("\n"))
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(session)))
     createResponse(message, status, session)
   }
