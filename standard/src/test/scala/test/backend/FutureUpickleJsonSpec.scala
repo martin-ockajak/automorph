@@ -1,13 +1,14 @@
-package jsonrpc.backend.standard
+package test.backend
 
-import jsonrpc.codec.json.UpickleJsonSpec
+import jsonrpc.{Client, Handler}
+import jsonrpc.backend.FutureBackend
 import jsonrpc.spi.{Backend, Transport}
-import jsonrpc.{Client, ComplexApi, Handler, InvalidApi, SimpleApi}
+import org.scalacheck.{Arbitrary, Gen}
 import scala.collection.immutable.ArraySeq
-import org.scalacheck.Arbitrary
-import org.scalacheck.Gen
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import test.codec.json.UpickleJsonSpec
+import test.{ComplexApi, InvalidApi, SimpleApi}
 
 class FutureUpickleJsonSpec extends UpickleJsonSpec {
   type Effect[T] = Future[T]

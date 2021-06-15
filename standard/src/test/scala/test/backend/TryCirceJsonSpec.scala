@@ -1,13 +1,13 @@
-//package jsonrpc.backend.standard
+//package test.backend.standard
 //
-//import jsonrpc.backend.standard.TryBackend
+//import jsonrpc.backend.TryBackend
 //import jsonrpc.client.UnnamedBinding
-//import jsonrpc.codec.json.UpickleJsonSpec
 //import jsonrpc.spi.Backend
 //import jsonrpc.transport.local.HandlerTransport
 //import jsonrpc.{Client, ComplexApi, InvalidApi, SimpleApi}
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.util.Try
+//import test.codec.json.UpickleJsonSpec
 //
 //class TryCirceJsonSpec extends UpickleJsonSpec {
 //  type Effect[T] = Try[T]

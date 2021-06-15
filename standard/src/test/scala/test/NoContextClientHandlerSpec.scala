@@ -1,14 +1,16 @@
-package jsonrpc
+package test
 
 import base.BaseSpec
-import jsonrpc.backend.standard.NoBackend
-import jsonrpc.backend.standard.NoBackend.Identity
+import jsonrpc.backend.NoBackend
+import jsonrpc.backend.NoBackend.Identity
 import jsonrpc.codec.common.UpickleCustom
-import jsonrpc.codec.json.{UpickleJsonCodec, UpickleJsonSpec}
+import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.spi.Transport
 import jsonrpc.transport.local.HandlerTransport
 import jsonrpc.util.Void
+import jsonrpc.{Client, Handler}
 import scala.collection.immutable.ArraySeq
+import test.codec.json.UpickleJsonSpec
 
 class NoContextClientHandlerSpec extends BaseSpec {
 

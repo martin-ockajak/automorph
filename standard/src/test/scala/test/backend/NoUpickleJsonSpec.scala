@@ -1,9 +1,10 @@
-//package jsonrpc.backend.standard
+//package test.backend.standard
 //
-//import jsonrpc.codec.json.UpickleJsonSpec
 //import jsonrpc.spi.Backend
 //import jsonrpc.{Client, ComplexApi, InvalidApi, SimpleApi}
-//import jsonrpc.backend.standard.NoBackend.Identity
+//import jsonrpc.backend.NoBackend
+//import jsonrpc.backend.NoBackend.Identity
+//import test.codec.json.UpickleJsonSpec
 //
 //class NoUpickleJsonSpec extends UpickleJsonSpec {
 //  type Effect[T] = Identity[T]

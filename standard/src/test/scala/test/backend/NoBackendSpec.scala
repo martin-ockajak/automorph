@@ -1,9 +1,10 @@
-package jsonrpc.backend.standard
+package test.backend
 
-import jsonrpc.backend.BackendSpec
-import jsonrpc.backend.standard.NoBackend.Identity
+import jsonrpc.backend.NoBackend
+import jsonrpc.backend.NoBackend.Identity
 import jsonrpc.spi.Backend
 import scala.util.{Failure, Success, Try}
+import test.backend.BackendSpec
 
 class NoBackendSpec extends BackendSpec[Identity] {
   def effect: Backend[Identity] = NoBackend()
