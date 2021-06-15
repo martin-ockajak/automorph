@@ -53,7 +53,7 @@ object Handler {
     backend: Backend[Effect],
     bufferSize: Int = 4096
   ): Handler[Node, CodecType, Effect, Context] =
-    new Handler(codec, backend, bufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
+    Handler(codec, backend, bufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.
@@ -74,5 +74,5 @@ object Handler {
     backend: Backend[Effect],
     bufferSize: Int = 4096
   ): Handler[Node, CodecType, Effect, Void.Value] =
-    new Handler(codec, backend, bufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
+    Handler(codec, backend, bufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
 }
