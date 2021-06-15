@@ -2,12 +2,13 @@ package jsonrpc.handler
 
 import java.io.{ByteArrayInputStream, InputStream}
 import java.nio.ByteBuffer
-import jsonrpc.{Handler, JsonRpcError}
-import jsonrpc.protocol.Errors.{MethodNotFound, ParseError}
-import jsonrpc.protocol.{Errors, Request, Response, ResponseError}
 import jsonrpc.handler.{HandlerMethod, HandlerResult}
+import jsonrpc.protocol.Errors
+import jsonrpc.protocol.Errors.{MethodNotFound, ParseError}
+import jsonrpc.protocol.{Request, Response, ResponseError}
 import jsonrpc.spi.{Codec, Message}
 import jsonrpc.util.Encoding
+import jsonrpc.{Handler, JsonRpcError}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -114,20 +115,22 @@ private[jsonrpc] trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_
           backend.flatMap(
             effect,
             // Process result
-            (outcome: Either[Throwable, Node]) => outcome.fold(
-              error => errorResponse(error, formedRequest),
-              result => {
-                validRequest.id.foreach(_ => logger.info(s"Processed JSON-RPC request", formedRequest.properties))
-                backend.map(
-                  // Serialize response
-                  validRequest.id.map { id =>
-                    val validResponse = Response(id, Right(result))
-                    serialize(validResponse.formed)
-                  }.getOrElse(backend.pure(None)),
-                  (rawResponse: Option[ArraySeq.ofByte]) => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
-                )
-              }
-            )
+            (outcome: Either[Throwable, Node]) =>
+              outcome.fold(
+                error => errorResponse(error, formedRequest),
+                result => {
+                  validRequest.id.foreach(_ => logger.info(s"Processed JSON-RPC request", formedRequest.properties))
+                  backend.map(
+                    // Serialize response
+                    validRequest.id.map { id =>
+                      val validResponse = Response(id, Right(result))
+                      serialize(validResponse.formed)
+                    }.getOrElse(backend.pure(None)),
+                    (rawResponse: Option[ArraySeq.ofByte]) =>
+                      HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
+                  )
+                }
+              )
           )
       )
     }.getOrElse {
@@ -184,9 +187,9 @@ private[jsonrpc] trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_
       case _                                    =>
         // Assemble error details
         val code = Errors.exceptionError(error.getClass).code
-        val errorDetails = Errors.errorDetails(error)
-        val message = errorDetails.headOption.getOrElse("Unknown error")
-        val data = Some(encodeStrings(errorDetails.drop(1)))
+        val trace = Errors.trace(error)
+        val message = trace.headOption.getOrElse("Unknown error")
+        val data = Some(encodeStrings(trace.drop(1)))
         ResponseError(code, message, data)
     }
     backend.map(
@@ -195,7 +198,8 @@ private[jsonrpc] trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_
         val validResponse = Response[Node](id, Left(responseError))
         serialize(validResponse.formed)
       }.getOrElse(backend.pure(None)),
-      (rawResponse: Option[ArraySeq.ofByte]) => HandlerResult(rawResponse, formedRequest.id, formedRequest.method, Some(responseError.code))
+      (rawResponse: Option[ArraySeq.ofByte]) =>
+        HandlerResult(rawResponse, formedRequest.id, formedRequest.method, Some(responseError.code))
     )
   }
 

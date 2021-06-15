@@ -1,8 +1,9 @@
 package jsonrpc.protocol
 
-import jsonrpc.protocol.Errors.{mandatory, InvalidRequest}
+import jsonrpc.protocol.Common.mandatory
+import jsonrpc.protocol.Errors.InvalidRequest
 import jsonrpc.spi.Message
-import jsonrpc.spi.Message.{version, Id, Params}
+import jsonrpc.spi.Message.{Id, Params, version}
 
 /**
  * JSON-RPC request.
@@ -29,7 +30,7 @@ private[jsonrpc] final case class Request[Node](
   )
 }
 
-case object Request {
+private[jsonrpc] case object Request {
 
   def apply[Node](message: Message[Node]): Request[Node] = {
     val jsonrpc = mandatory(message.jsonrpc, "jsonrpc")

@@ -3,12 +3,7 @@ package jsonrpc.protocol
 import java.io.IOException
 import jsonrpc.protocol.ErrorType.ErrorType
 
-/**
- * JSON-RPC protocol data structures.
- *
- * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- */
-private[jsonrpc] case object Errors {
+case object Errors {
 
   /** JSON-RPC parse error. */
   final case class ParseError(
@@ -34,8 +29,9 @@ private[jsonrpc] case object Errors {
     cause: Throwable
   ) extends RuntimeException(message, cause)
 
+
   /** Mapping of standard exception types to JSON-RPC errors. */
-  lazy val exceptionError: Map[Class[_ <: Throwable], ErrorType] = Map(
+  private[jsonrpc] val exceptionError: Map[Class[_ <: Throwable], ErrorType] = Map(
     classOf[ParseError] -> ErrorType.ParseError,
     classOf[InvalidRequest] -> ErrorType.InvalidRequest,
     classOf[MethodNotFound] -> ErrorType.MethodNotFound,
@@ -45,7 +41,7 @@ private[jsonrpc] case object Errors {
   ).withDefaultValue(ErrorType.ApplicationError).asInstanceOf[Map[Class[_ <: Throwable], ErrorType]]
 
   /** Mapping of JSON-RPC errors to standard exception types. */
-  def errorException(code: Int, message: String): Throwable = code match {
+  private[jsonrpc] def errorException(code: Int, message: String): Throwable = code match {
     case ErrorType.ParseError.code                   => ParseError(message, None.orNull)
     case ErrorType.InvalidRequest.code               => InvalidRequest(message, None.orNull)
     case ErrorType.MethodNotFound.code               => MethodNotFound(message, None.orNull)
@@ -57,35 +53,18 @@ private[jsonrpc] case object Errors {
   }
 
   /**
-   * Return specified mandatory property value or throw an exception if it is missing.
-   *
-   * @param value property value
-   * @param name property name
-   * @tparam T property type
-   * @return property value
-   * @throws InvalidRequest if the property value is missing
-   */
-  def mandatory[T](value: Option[T], name: String): T = value.getOrElse(
-    throw InvalidRequest(s"Missing message property: $name", None.orNull)
-  )
-
-  /**
-   * Assemble detailed error description from a throwable and its filtered causes.
+   * Assemble detailed error trace from a throwable and its filtered causes.
    *
    * @param throwable exception
    * @param filter only include throwables satisfying this condition
    * @param maxCauses maximum number of included exception causes
    * @return error messages
    */
-  def errorDetails(
-    throwable: Throwable,
-    filter: Throwable => Boolean = _ => true,
-    maxCauses: Int = 100
-  ): Seq[String] =
+  private[jsonrpc] def trace(throwable: Throwable, maxCauses: Int = 100): Seq[String] =
     LazyList.iterate(Option(throwable))(_.flatMap(error => Option(error.getCause)))
-      .takeWhile(_.isDefined).flatten.filter(filter).take(maxCauses).map { throwable =>
-        val exceptionName = throwable.getClass.getSimpleName
-        val message = Option(throwable.getMessage).getOrElse("")
-        s"[$exceptionName] $message"
-      }
+      .takeWhile(_.isDefined).flatten.take(maxCauses).map { throwable =>
+      val exceptionName = throwable.getClass.getSimpleName
+      val message = Option(throwable.getMessage).getOrElse("")
+      s"[$exceptionName] $message"
+    }
 }

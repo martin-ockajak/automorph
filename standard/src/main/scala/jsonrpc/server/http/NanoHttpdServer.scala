@@ -62,9 +62,9 @@ case class NanoHttpdServer[Effect[_]] private (
 
   private def createServerError(error: Throwable, session: IHTTPSession): Response = {
     val status = Status.INTERNAL_ERROR
-    val errorMessage = Encoding.toArraySeq(Errors.errorDetails(error).mkString("\n"))
+    val message = Encoding.toArraySeq(Errors.trace(error).mkString("\n"))
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(session)))
-    createResponse(errorMessage, status, session)
+    createResponse(message, status, session)
   }
 
   private def createResponse(message: ArraySeq.ofByte, status: Status, session: IHTTPSession): Response = {

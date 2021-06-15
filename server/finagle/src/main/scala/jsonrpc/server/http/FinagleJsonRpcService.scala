@@ -57,8 +57,8 @@ final case class FinagleJsonRpcService[Effect[_]](
 
   private def serverError(error: Throwable, request: Request): Response = {
     val status = Status.InternalServerError
-    val errorMessage = Errors.errorDetails(error).mkString("\n")
-    val reader = Reader.fromBuf(Buf.Utf8(errorMessage))
+    val message = Errors.trace(error).mkString("\n")
+    val reader = Reader.fromBuf(Buf.Utf8(message))
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(request)))
     createResponse(request, reader, status)
   }

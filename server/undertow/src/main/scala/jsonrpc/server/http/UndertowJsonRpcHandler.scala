@@ -69,9 +69,9 @@ final case class UndertowJsonRpcHandler[Effect[_]](
 
   private def sendServerError(error: Throwable, exchange: HttpServerExchange): Unit = {
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
-    val errorMessage = Encoding.toArraySeq(Errors.errorDetails(error).mkString("\n"))
+    val message = Encoding.toArraySeq(Errors.trace(error).mkString("\n"))
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(exchange)))
-    sendResponse(errorMessage, statusCode, exchange)
+    sendResponse(message, statusCode, exchange)
   }
 
   private def sendResponse(message: ArraySeq.ofByte, statusCode: Int, exchange: HttpServerExchange): Unit = {
