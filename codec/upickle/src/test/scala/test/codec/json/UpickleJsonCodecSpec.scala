@@ -1,12 +1,12 @@
 package test.codec.json
 
-import jsonrpc.Enum.Enum
-import jsonrpc.Generators.arbitraryRecord
-import jsonrpc.codec.CodecSpec
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.codec.json.UpickleJsonCodec
-import jsonrpc.{Record, Structure}
 import org.scalacheck.{Arbitrary, Gen}
+import test.Enum.Enum
+import test.Generators.arbitraryRecord
+import test.codec.CodecSpec
+import test.{Record, Structure}
 import ujson.{Bool, Num, Obj, Str, Value}
 import upickle.AttributeTagged
 

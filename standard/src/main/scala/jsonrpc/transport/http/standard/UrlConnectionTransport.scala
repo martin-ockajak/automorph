@@ -2,7 +2,7 @@ package jsonrpc.transport.http.standard
 
 import java.io.ByteArrayOutputStream
 import java.net.{HttpURLConnection, URL, URLConnection}
-import jsonrpc.backend.standard.NoBackend.Identity
+import jsonrpc.backend.NoBackend.Identity
 import jsonrpc.spi.Transport
 import jsonrpc.transport.http.standard.UrlConnectionTransport.HttpProperties
 import scala.collection.immutable.ArraySeq
