@@ -8,7 +8,7 @@ import jsonrpc.protocol.ErrorType.ErrorType
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  */
-case object Errors {
+private[jsonrpc] case object Errors {
 
   /** JSON-RPC parse error. */
   final case class ParseError(

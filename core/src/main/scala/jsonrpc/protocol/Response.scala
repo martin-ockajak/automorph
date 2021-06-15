@@ -12,7 +12,7 @@ import jsonrpc.spi.{Message, MessageError}
  * @param value response value, either a result or an error
  * @tparam Node message node representation type
  */
-final case class Response[Node](
+private[jsonrpc] final case class Response[Node](
   id: Id,
   value: Either[ResponseError[Node], Node]
 ) {

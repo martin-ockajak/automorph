@@ -13,7 +13,7 @@ import jsonrpc.spi.Message.{version, Id, Params}
  * @param params invoked method argument values by position or by name
  * @tparam Node message node representation type
  */
-final case class Request[Node](
+private[jsonrpc] final case class Request[Node](
   id: Option[Id],
   method: String,
   params: Params[Node]
