@@ -1,4 +1,4 @@
-package jsonrpc.server.http.standard;
+package jsonrpc.server.http;
 
 /*
  * #%L
@@ -33,10 +33,10 @@ package jsonrpc.server.http.standard;
  * #L%
  */
 
-import jsonrpc.server.http.standard.NanoHTTPD.ClientHandler;
-import jsonrpc.server.http.standard.NanoHTTPD.CookieHandler;
-import jsonrpc.server.http.standard.NanoHTTPD.Response.IStatus;
-import jsonrpc.server.http.standard.NanoHTTPD.Response.Status;
+import jsonrpc.server.http.NanoHTTPD.ClientHandler;
+import jsonrpc.server.http.NanoHTTPD.CookieHandler;
+import jsonrpc.server.http.NanoHTTPD.Response.IStatus;
+import jsonrpc.server.http.NanoHTTPD.Response.Status;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

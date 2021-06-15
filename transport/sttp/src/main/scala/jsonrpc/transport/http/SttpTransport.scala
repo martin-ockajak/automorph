@@ -1,4 +1,4 @@
-package jsonrpc.transport.http.sttp
+package jsonrpc.transport.http
 
 import jsonrpc.spi.{Backend, Transport}
 import scala.collection.immutable.ArraySeq
