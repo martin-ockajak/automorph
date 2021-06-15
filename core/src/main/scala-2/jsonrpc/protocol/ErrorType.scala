@@ -1,7 +1,7 @@
 package jsonrpc.protocol
 
 /** JSON-RPC error types with codes. */
-private[jsonrpc] object ErrorType extends Enumeration {
+object ErrorType extends Enumeration {
   type ErrorType = ErrorTypeValue
   sealed case class ErrorTypeValue private[ErrorType](name: String, code: Int) extends Val(name)
 
