@@ -17,6 +17,10 @@ object Bindings {
     val validMethods = apiMethods.flatMap(_.toOption)
     validMethods.foreach { method =>
       println(methodSignature[c.type, T](ref)(method))
+      println(method.resultType.getClass.getName)
+      method.resultType match {
+        case typeRef: TypeRef => println(typeRef.dealias.finalResultType.resultType)
+      }
     }
     c.Expr[Unit](q"""
       ()

@@ -63,7 +63,7 @@ private[jsonrpc] final case class Reflection[C <: Context](c: C) {
     })
     RefMethod(
       methodSymbol.name.toString,
-      methodSymbol.returnType,
+      methodSymbol.returnType.dealias.finalResultType.dealias,
       parameters,
       typeParameters,
       publicMethod(methodSymbol),

@@ -50,7 +50,7 @@ lazy val core = project.dependsOn(
 ).settings(
   name := "json-rpc-core",
   libraryDependencies ++= Seq(
-    "org.slf4j" % "slf4j-api" % "1.7.30"
+    "org.slf4j" % "slf4j-api" % "1.7.31"
   ),
   Compile / packageBin / mappings ++= (meta / Compile / packageBin / mappings).value,
   Compile / packageSrc / mappings ++= (meta / Compile / packageSrc / mappings).value
@@ -120,7 +120,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
 ).settings(
   name := "json-rpc-sttp",
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "core" % "3.3.6"
+    "com.softwaremill.sttp.client3" %% "core" % "3.3.7"
   )
 )
 
@@ -158,7 +158,7 @@ lazy val testCore = (project in file("test/core")).dependsOn(
   testBase, core, upickle, circe
 ).settings(
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.6"
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.7"
   )
 )
 
