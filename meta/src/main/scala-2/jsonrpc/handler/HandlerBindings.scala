@@ -89,7 +89,7 @@ private[jsonrpc] case object HandlerBindings {
     val parameterNames = q"..${liftedMethod.parameters.flatMap(_.map(_.name))}"
     val parameterTypes = q"..${liftedMethod.parameters.flatMap(_.map(_.dataType))}"
     val usesContext = q"${methodUsesContext[Context](ref)(method)}"
-//    logBoundMethod[ApiType](ref, method, invoke)
+//    logBoundMethod[ApiType](ref)(method, invoke)
 //    '
 //    {
 //    $name -> HandlerMethod($invoke, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)

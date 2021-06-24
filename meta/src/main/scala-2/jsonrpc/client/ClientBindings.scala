@@ -1,7 +1,7 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.protocol.MethodBindings.{methodSignature, validApiMethods}
+import jsonrpc.protocol.MethodBindings.{methodSignature, methodUsesContext, validApiMethods}
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
 import scala.language.experimental.macros
@@ -62,24 +62,27 @@ private[jsonrpc] case object ClientBindings {
     """)
   }
 
-  //  private def generateClientMethod[
-//    Node: Type,
-//    CodecType <: Codec[Node]: Type,
-//    Effect[_]: Type,
-//    Context: Type,
-//    ApiType: Type
-//  ](ref: Reflection, method: ref.RefMethod, codec: Expr[CodecType]): Expr[(String, ClientMethod[Node])] = {
-//    given Quotes = ref.q
-//
-//    val liftedMethod = method.lift
+  private def generateClientMethod[
+    Node: ref.c.WeakTypeTag,
+    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
+    Effect[_],
+    Context: ref.c.WeakTypeTag,
+    ApiType: ref.c.WeakTypeTag
+  ](ref: Reflection)(
+    method: ref.RefMethod,
+    codec: ref.c.Expr[CodecType]
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(String, ClientMethod[Node])] = {
+    import ref.c.universe._
+
+    val liftedMethod = method.lift
 //    val encodeArguments = generateEncodeArgumentsFunction[Node, CodecType, Context](ref, method, codec)
 //    val decodeResult = generateDecodeResultFunction[Node, CodecType, Effect](ref, method, codec)
 //    val name = Expr(liftedMethod.name)
 //    val resultType = Expr(liftedMethod.resultType)
 //    val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
 //    val parameterTypes = Expr(liftedMethod.parameters.flatMap(_.map(_.dataType)))
-//    val usesContext = Expr(methodUsesContext[Context](ref, method))
-//    logBoundMethod[ApiType](ref, method, encodeArguments, decodeResult)
+    val usesContext = q"${methodUsesContext[Context](ref)(method)}"
+//    logBoundMethod[ApiType](ref)(method, encodeArguments, decodeResult)
 //    '
 //    {
 //    $name -> ClientMethod(
@@ -92,7 +95,8 @@ private[jsonrpc] case object ClientBindings {
 //      $usesContext
 //    )
 //    }
-//  }
+    null
+  }
 //
 //  private def generateEncodeArgumentsFunction[Node: Type, CodecType <: Codec[Node]: Type, Context: Type](
 //    ref: Reflection,
