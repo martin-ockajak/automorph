@@ -63,7 +63,6 @@ private[jsonrpc] case object MethodBindings {
    *
    * @param ref reflection context
    * @param method method descriptor
-   * @tparam C macro context type
    * @tparam ApiType API type
    * @return method description
    */
