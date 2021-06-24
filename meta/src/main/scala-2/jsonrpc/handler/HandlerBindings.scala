@@ -81,7 +81,7 @@ private[jsonrpc] case object HandlerBindings {
 
     val invoke = generateInvoke[C, Node, CodecType, Effect, Context, ApiType](ref)(method, codec, backend, api)
     logBoundMethod[C, ApiType](ref)(method, invoke)
-    ref.c.Expr(q"""
+    ref.c.Expr[HandlerMethod[Node, Effect, Context]](q"""
       HandlerMethod(
         $invoke,
         ${method.lift.name},
@@ -116,7 +116,7 @@ private[jsonrpc] case object HandlerBindings {
 
     // Create invoke function
     //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
-    ref.c.Expr(q"""
+    ref.c.Expr[(Seq[Node], Context) => Effect[Node]](q"""
       (argumentNodes: Seq[Node], context: Context) => ${
       // Create the method argument lists by decoding corresponding argument nodes into values
       //   List(List(

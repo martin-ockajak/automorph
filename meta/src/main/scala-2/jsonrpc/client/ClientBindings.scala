@@ -75,7 +75,7 @@ private[jsonrpc] case object ClientBindings {
     val encodeArguments = generateEncodeArguments[C, Node, CodecType, Context](ref)(method, codec)
     val decodeResult = generateDecodeResult[C, Node, CodecType, Effect](ref)(method, codec)
     logBoundMethod[C, ApiType](ref)(method, encodeArguments, decodeResult)
-    ref.c.Expr(q"""
+    ref.c.Expr[ClientMethod[Node]](q"""
       ClientMethod(
         $encodeArguments,
         $decodeResult,
@@ -104,7 +104,7 @@ private[jsonrpc] case object ClientBindings {
 
     // Create encode arguments function
     //   (arguments: Seq[Any]) => Seq[Node]
-    ref.c.Expr(q"""
+    ref.c.Expr[Seq[Any] => Seq[Node]](q"""
       (arguments: Seq[Any]) => ${
       // Create the method argument lists by encoding corresponding argument values into nodes
       //   List(
@@ -123,9 +123,7 @@ private[jsonrpc] case object ClientBindings {
 
       // Create the encoded arguments sequence construction call
       //   Seq(encodedArguments*): Seq[Node]
-      q"""
-          Seq(..$argumentNodes)
-        """
+      q"Seq(..$argumentNodes)"
     }
     """)
   }
@@ -144,7 +142,7 @@ private[jsonrpc] case object ClientBindings {
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
     val nodeType = weakTypeOf[Node]
     val resultValueType = unwrapType[C, Effect[_]](ref)(method.resultType)
-    ref.c.Expr(q"""
+    ref.c.Expr[Node => Any](q"""
       (resultNode: $nodeType) => $codec.decode[$resultValueType](resultNode)
     """)
   }
