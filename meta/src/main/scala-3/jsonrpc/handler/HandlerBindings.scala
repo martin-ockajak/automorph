@@ -141,7 +141,6 @@ private[jsonrpc] case object HandlerBindings:
 //          case ('[codecType], '[resultType]) => '{ (result: resultType) =>
 //              $codec.asInstanceOf[codecType].encode(result)
 //            }
-
         val encodeResult = resultValueType.asType match
           case '[resultType] => '{ (result: resultType) =>
               ${
