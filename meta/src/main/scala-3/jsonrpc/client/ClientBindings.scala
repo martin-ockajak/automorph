@@ -49,9 +49,13 @@ private[jsonrpc] case object ClientBindings:
 
     // Generate bound API method bindings
     val clientMethods = Expr.ofSeq(validMethods.map { method =>
-      generateClientMethod[Node, CodecType, Effect, Context, ApiType](ref)(method, codec)
+      '{
+        ${ Expr(method.name) } -> ${
+          generateClientMethod[Node, CodecType, Effect, Context, ApiType](ref)(method, codec)
+        }
+      }
     })
-    '{ $clientMethods.map(method => method.name -> method).toMap }
+    '{ $clientMethods.toMap }
 
   private def generateClientMethod[
     Node: Type,
