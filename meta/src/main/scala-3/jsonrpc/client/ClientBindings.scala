@@ -63,8 +63,8 @@ private[jsonrpc] case object ClientBindings:
     given Quotes = ref.q
 
     val liftedMethod = method.lift
-    val encodeArguments = generateEncodeArgumentsFunction[Node, CodecType, Context](ref)(method, codec)
-    val decodeResult = generateDecodeResultFunction[Node, CodecType, Effect](ref)(method, codec)
+    val encodeArguments = generateEncodeArguments[Node, CodecType, Context](ref)(method, codec)
+    val decodeResult = generateDecodeResult[Node, CodecType, Effect](ref)(method, codec)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
     val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
@@ -83,7 +83,7 @@ private[jsonrpc] case object ClientBindings:
       )
     }
 
-  private def generateEncodeArgumentsFunction[Node: Type, CodecType <: Codec[Node]: Type, Context: Type](ref: Reflection)(
+  private def generateEncodeArguments[Node: Type, CodecType <: Codec[Node]: Type, Context: Type](ref: Reflection)(
     method: ref.RefMethod,
     codec: Expr[CodecType]
   ): Expr[Seq[Any] => Seq[Node]] =
@@ -123,7 +123,7 @@ private[jsonrpc] case object ClientBindings:
       }
     }
 
-  private def generateDecodeResultFunction[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type](ref: Reflection)(
+  private def generateDecodeResult[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type](ref: Reflection)(
     method: ref.RefMethod,
     codec: Expr[CodecType]
   ): Expr[Node => Any] =

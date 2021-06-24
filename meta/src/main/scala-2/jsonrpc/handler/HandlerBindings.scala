@@ -81,7 +81,7 @@ private[jsonrpc] case object HandlerBindings {
     import c.universe._
 
     val liftedMethod = method.lift
-    val invoke = generateInvokeFunction[Node, CodecType, Effect, Context, ApiType](c, ref)(method, codec, backend, api)
+    val invoke = generateInvoke[Node, CodecType, Effect, Context, ApiType](c, ref)(method, codec, backend, api)
     val name = q"${liftedMethod.name}"
     val resultType = q"${liftedMethod.resultType}"
     val parameterNames = q"..${liftedMethod.parameters.flatMap(_.map(_.name))}"
@@ -95,7 +95,7 @@ private[jsonrpc] case object HandlerBindings {
     null
   }
 
-  private def generateInvokeFunction[
+  private def generateInvoke[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_],

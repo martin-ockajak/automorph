@@ -74,8 +74,8 @@ private[jsonrpc] case object ClientBindings {
     import c.universe._
 
     val liftedMethod = method.lift
-    val encodeArguments = generateEncodeArgumentsFunction[Node, CodecType, Context](c, ref)(method, codec)
-    val decodeResult = generateDecodeResultFunction[Node, CodecType, Effect](c, ref)(method, codec)
+    val encodeArguments = generateEncodeArguments[Node, CodecType, Context](c, ref)(method, codec)
+    val decodeResult = generateDecodeResult[Node, CodecType, Effect](c, ref)(method, codec)
     val name = q"${liftedMethod.name}"
     val resultType = q"${liftedMethod.resultType}"
     val parameterNames = q"..${liftedMethod.parameters.flatMap(_.map(_.name))}"
@@ -97,7 +97,7 @@ private[jsonrpc] case object ClientBindings {
     null
   }
 
-  private def generateEncodeArgumentsFunction[Node: c.WeakTypeTag, CodecType <: Codec[Node]: c.WeakTypeTag, Context: c.WeakTypeTag](
+  private def generateEncodeArguments[Node: c.WeakTypeTag, CodecType <: Codec[Node]: c.WeakTypeTag, Context: c.WeakTypeTag](
     c: blackbox.Context, ref: Reflection
   )(method: ref.RefMethod, codec: c.Expr[CodecType] ): c.Expr[Seq[Any] => Seq[Node]] = {
     import c.universe._
@@ -145,7 +145,7 @@ private[jsonrpc] case object ClientBindings {
     null
   }
 
-  private def generateDecodeResultFunction[Node: c.WeakTypeTag, CodecType <: Codec[Node]: c.WeakTypeTag, Effect[_]](
+  private def generateDecodeResult[Node: c.WeakTypeTag, CodecType <: Codec[Node]: c.WeakTypeTag, Effect[_]](
     c: blackbox.Context, ref: Reflection
   )(method: ref.RefMethod, codec: c.Expr[CodecType])(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Node => Any] = {
     import c.universe._
