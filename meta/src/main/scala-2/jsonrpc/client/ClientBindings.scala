@@ -117,8 +117,7 @@ private[jsonrpc] case object ClientBindings {
     """
     //   (arguments: Seq[Any]) => Seq[Node]
 //    '{ (arguments: Seq[Any]) =>
-//      $
-//      {
+//      ${
 //      val argumentList = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
 //        parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
 //          Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[Context](ref, method)) {
