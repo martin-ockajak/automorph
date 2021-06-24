@@ -9,8 +9,6 @@ import scala.quoted.{Expr, Quotes, Type}
 private[jsonrpc] case object HandlerBindings:
 
   private val debugProperty = "jsonrpc.macro.debug"
-//  private val debugDefault = "true"
-  private val debugDefault = ""
 
   /**
    * Generate handler bindings for all valid public methods of an API type.
@@ -161,7 +159,7 @@ private[jsonrpc] case object HandlerBindings:
   private def logBoundMethod[ApiType: Type](ref: Reflection)(method: ref.RefMethod, invoke: Expr[Any]): Unit =
     import ref.q.reflect.{asTerm, Printer}
 
-    if Option(System.getProperty(debugProperty)).getOrElse(debugDefault).nonEmpty then
+    if Option(System.getProperty(debugProperty)).nonEmpty then
       println(
         s"""${methodSignature[ApiType](ref)(method)} =
           |  ${invoke.asTerm.show(using Printer.TreeShortCode)}
