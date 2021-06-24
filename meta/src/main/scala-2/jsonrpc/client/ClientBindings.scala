@@ -148,15 +148,14 @@ private[jsonrpc] case object ClientBindings {
     effectType: ref.c.WeakTypeTag[Effect[_]]
   ): ref.c.Expr[Node => Any] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}
-//    import c.universe._
 
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
+    val nodeType = weakTypeOf[Node]
     val resultValueType = unwrapType[C, Effect[_]](ref)(method.resultType)
-//    q"""
-//      resultNode => $codec.decode[$resultValueType](resultNode)
-//    """
-    null
+    ref.c.Expr(q"""
+      (resultNode: $nodeType) => $codec.decode[$resultValueType](resultNode)
+    """)
   }
 
   private def logBoundMethod[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[C])(
