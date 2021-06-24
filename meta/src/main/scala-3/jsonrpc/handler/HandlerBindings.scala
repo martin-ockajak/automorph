@@ -56,7 +56,7 @@ private[jsonrpc] case object HandlerBindings:
 
     // Generate bound API method bindings
     val handlerMethods = Expr.ofSeq(validMethods.map { method =>
-      generateHandlerMethod[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
+      generateHandlerMethod[Node, CodecType, Effect, Context, ApiType](ref)(method, codec, backend, api)
     })
     '{ $handlerMethods.toMap[String, HandlerMethod[Node, Effect, Context]] }
 
@@ -66,8 +66,7 @@ private[jsonrpc] case object HandlerBindings:
     Effect[_]: Type,
     Context: Type,
     ApiType: Type
-  ](
-    ref: Reflection,
+  ](ref: Reflection)(
     method: ref.RefMethod,
     codec: Expr[CodecType],
     backend: Expr[Backend[Effect]],
@@ -76,13 +75,13 @@ private[jsonrpc] case object HandlerBindings:
     given Quotes = ref.q
 
     val liftedMethod = method.lift
-    val invoke = generateInvokeFunction[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
+    val invoke = generateInvokeFunction[Node, CodecType, Effect, Context, ApiType](ref)(method, codec, backend, api)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
     val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
     val parameterTypes = Expr(liftedMethod.parameters.flatMap(_.map(_.dataType)))
     val usesContext = Expr(methodUsesContext[Context](ref)(method))
-    logBoundMethod[ApiType](ref, method, invoke)
+    logBoundMethod[ApiType](ref)(method, invoke)
     '{
       $name -> HandlerMethod($invoke, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)
     }
@@ -93,8 +92,7 @@ private[jsonrpc] case object HandlerBindings:
     Effect[_]: Type,
     Context: Type,
     ApiType: Type
-  ](
-    ref: Reflection,
+  ](ref: Reflection)(
     method: ref.RefMethod,
     codec: Expr[CodecType],
     backend: Expr[Backend[Effect]],
@@ -156,7 +154,7 @@ private[jsonrpc] case object HandlerBindings:
       }
     }
 
-  private def logBoundMethod[ApiType: Type](ref: Reflection, method: ref.RefMethod, invoke: Expr[Any]): Unit =
+  private def logBoundMethod[ApiType: Type](ref: Reflection)(method: ref.RefMethod, invoke: Expr[Any]): Unit =
     import ref.q.reflect.{asTerm, Printer}
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then

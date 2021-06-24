@@ -49,7 +49,7 @@ private[jsonrpc] case object ClientBindings:
 
     // Generate bound API method bindings
     val clientMethods = Expr.ofSeq(validMethods.map { method =>
-      generateClientMethod[Node, CodecType, Effect, Context, ApiType](ref, method, codec)
+      generateClientMethod[Node, CodecType, Effect, Context, ApiType](ref)(method, codec)
     })
     '{ $clientMethods.toMap[String, ClientMethod[Node]] }
 
@@ -59,18 +59,18 @@ private[jsonrpc] case object ClientBindings:
     Effect[_]: Type,
     Context: Type,
     ApiType: Type
-  ](ref: Reflection, method: ref.RefMethod, codec: Expr[CodecType]): Expr[(String, ClientMethod[Node])] =
+  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[CodecType]): Expr[(String, ClientMethod[Node])] =
     given Quotes = ref.q
 
     val liftedMethod = method.lift
-    val encodeArguments = generateEncodeArgumentsFunction[Node, CodecType, Context](ref, method, codec)
-    val decodeResult = generateDecodeResultFunction[Node, CodecType, Effect](ref, method, codec)
+    val encodeArguments = generateEncodeArgumentsFunction[Node, CodecType, Context](ref)(method, codec)
+    val decodeResult = generateDecodeResultFunction[Node, CodecType, Effect](ref)(method, codec)
     val name = Expr(liftedMethod.name)
     val resultType = Expr(liftedMethod.resultType)
     val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
     val parameterTypes = Expr(liftedMethod.parameters.flatMap(_.map(_.dataType)))
     val usesContext = Expr(methodUsesContext[Context](ref)(method))
-    logBoundMethod[ApiType](ref, method, encodeArguments, decodeResult)
+    logBoundMethod[ApiType](ref)(method, encodeArguments, decodeResult)
     '{
       $name -> ClientMethod(
         $encodeArguments,
@@ -83,8 +83,7 @@ private[jsonrpc] case object ClientBindings:
       )
     }
 
-  private def generateEncodeArgumentsFunction[Node: Type, CodecType <: Codec[Node]: Type, Context: Type](
-    ref: Reflection,
+  private def generateEncodeArgumentsFunction[Node: Type, CodecType <: Codec[Node]: Type, Context: Type](ref: Reflection)(
     method: ref.RefMethod,
     codec: Expr[CodecType]
   ): Expr[Seq[Any] => Seq[Node]] =
@@ -124,8 +123,7 @@ private[jsonrpc] case object ClientBindings:
       }
     }
 
-  private def generateDecodeResultFunction[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type](
-    ref: Reflection,
+  private def generateDecodeResultFunction[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type](ref: Reflection)(
     method: ref.RefMethod,
     codec: Expr[CodecType]
   ): Expr[Node => Any] =
@@ -141,8 +139,7 @@ private[jsonrpc] case object ClientBindings:
       }
     }
 
-  private def logBoundMethod[ApiType: Type](
-    ref: Reflection,
+  private def logBoundMethod[ApiType: Type](ref: Reflection)(
     method: ref.RefMethod,
     encodeArguments: Expr[Any],
     decodeResult: Expr[Any]
