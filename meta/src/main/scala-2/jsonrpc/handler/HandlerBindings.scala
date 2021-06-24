@@ -81,13 +81,13 @@ private[jsonrpc] case object HandlerBindings {
     import c.universe._
 
     val liftedMethod = method.lift
-//    val invoke = generateInvokeFunction[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
+    val invoke = generateInvokeFunction[Node, CodecType, Effect, Context, ApiType](c, ref)(method, codec, backend, api)
     val name = q"${liftedMethod.name}"
     val resultType = q"${liftedMethod.resultType}"
     val parameterNames = q"..${liftedMethod.parameters.flatMap(_.map(_.name))}"
     val parameterTypes = q"..${liftedMethod.parameters.flatMap(_.map(_.dataType))}"
     val usesContext = q"${methodUsesContext[Context](ref)(method)}"
-//    logBoundMethod[ApiType](ref)(method, invoke)
+    logBoundMethod[ApiType](c, ref)(method, invoke)
 //    '
 //    {
 //    $name -> HandlerMethod($invoke, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)
@@ -95,27 +95,26 @@ private[jsonrpc] case object HandlerBindings {
     null
   }
 
-//  private def generateInvokeFunction[
-//    Node: ref.c.WeakTypeTag,
-//    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
-//    Effect[_],
-//    Context: ref.c.WeakTypeTag,
-//    ApiType: ref.c.WeakTypeTag
-//  ](c: blackbox.Context, ref: Reflection)(
-//    method: ref.RefMethod,
-//    codec: Expr[CodecType],
-//    backend: Expr[Backend[Effect]],
-//    api: Expr[ApiType]
-//  )(implicit effectType: c.WeakTypeTag[Effect[_]]): Expr[(Seq[Node], Context) => Effect[Node]] = {
-//    import ref.q.reflect.{asTerm, Term, TypeRepr}
-//    given Quotes = ref.q
-//
-//    // Map multiple parameter lists to flat argument node list offsets
-//    val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
-//      indices :+ (indices.last + size)
-//    }
-//    val lastArgumentIndex = method.parameters.map(_.size).sum - 1
-//
+  private def generateInvokeFunction[
+    Node: c.WeakTypeTag,
+    CodecType <: Codec[Node]: c.WeakTypeTag,
+    Effect[_],
+    Context: c.WeakTypeTag,
+    ApiType: c.WeakTypeTag
+  ](c: blackbox.Context, ref: Reflection)(
+    method: ref.RefMethod,
+    codec: c.Expr[CodecType],
+    backend: c.Expr[Backend[Effect]],
+    api: c.Expr[ApiType]
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[(Seq[Node], Context) => Effect[Node]] = {
+    import c.universe._
+
+    // Map multiple parameter lists to flat argument node list offsets
+    val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
+      indices :+ (indices.last + size)
+    }
+    val lastArgumentIndex = method.parameters.map(_.size).sum - 1
+
 //    // Create invoke function
 //    //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
 //    '{ (argumentNodes: Seq[Node], context: Context) =>
@@ -162,13 +161,14 @@ private[jsonrpc] case object HandlerBindings {
 //        call(ref.q, backend.asTerm, "map", List(resultValueType, TypeRepr.of[Node]), mapArguments).asExprOf[Effect[Node]]
 //      }
 //    }
-//  }
+    null
+  }
 
-  private def logBoundMethod[ApiType: ref.c.WeakTypeTag](ref: Reflection)(
+  private def logBoundMethod[ApiType: ref.c.WeakTypeTag](c: blackbox.Context, ref: Reflection)(
     method: ref.RefMethod,
-    invoke: ref.c.Expr[Any]
+    invoke: c.Expr[Any]
   ): Unit = {
-    import ref.c.universe.showCode
+    import c.universe.showCode
 
     if (Option(System.getProperty(debugProperty)).getOrElse(debugDefault).nonEmpty) {
       println(

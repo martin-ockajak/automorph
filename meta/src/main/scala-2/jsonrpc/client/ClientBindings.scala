@@ -74,14 +74,14 @@ private[jsonrpc] case object ClientBindings {
     import c.universe._
 
     val liftedMethod = method.lift
-//    val encodeArguments = generateEncodeArgumentsFunction[Node, CodecType, Context](ref, method, codec)
-//    val decodeResult = generateDecodeResultFunction[Node, CodecType, Effect](ref, method, codec)
+    val encodeArguments = generateEncodeArgumentsFunction[Node, CodecType, Context](c, ref)(method, codec)
+    val decodeResult = generateDecodeResultFunction[Node, CodecType, Effect](c, ref)(method, codec)
     val name = q"${liftedMethod.name}"
     val resultType = q"${liftedMethod.resultType}"
     val parameterNames = q"..${liftedMethod.parameters.flatMap(_.map(_.name))}"
     val parameterTypes = q"..${liftedMethod.parameters.flatMap(_.map(_.dataType))}"
     val usesContext = q"${methodUsesContext[Context](ref)(method)}"
-//    logBoundMethod[ApiType](ref)(method, encodeArguments, decodeResult)
+    logBoundMethod[ApiType](c, ref)(method, encodeArguments, decodeResult)
 //    '
 //    {
 //    $name -> ClientMethod(
@@ -96,21 +96,18 @@ private[jsonrpc] case object ClientBindings {
 //    }
     null
   }
-//
-//  private def generateEncodeArgumentsFunction[Node: Type, CodecType <: Codec[Node]: Type, Context: Type](
-//    ref: Reflection,
-//    method: ref.RefMethod,
-//    codec: Expr[CodecType]
-//  ): Expr[Seq[Any] => Seq[Node]] = {
-//    import ref.q.reflect.{asTerm, Term}
-//    given Quotes = ref.q
-//
-//    // Map multiple parameter lists to flat argument node list offsets
-//    val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
-//      indices :+ (indices.last + size)
-//    }
-//    val lastArgumentIndex = method.parameters.map(_.size).sum - 1
-//
+
+  private def generateEncodeArgumentsFunction[Node: c.WeakTypeTag, CodecType <: Codec[Node]: c.WeakTypeTag, Context: c.WeakTypeTag](
+    c: blackbox.Context, ref: Reflection
+  )(method: ref.RefMethod, codec: c.Expr[CodecType] ): c.Expr[Seq[Any] => Seq[Node]] = {
+    import c.universe._
+
+    // Map multiple parameter lists to flat argument node list offsets
+    val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
+      indices :+ (indices.last + size)
+    }
+    val lastArgumentIndex = method.parameters.map(_.size).sum - 1
+
 //    // Create encode arguments function
 //    //   (arguments: Seq[Any]) => Seq[Node]
 //    '
@@ -145,16 +142,14 @@ private[jsonrpc] case object ClientBindings {
 //      {Expr.ofSeq(argumentList)} *)}
 //      }
 //    }
-//  }
-//
-//  private def generateDecodeResultFunction[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type](
-//    ref: Reflection,
-//    method: ref.RefMethod,
-//    codec: Expr[CodecType]
-//  ): Expr[Node => Any] = {
-//    import ref.q.reflect.asTerm
-//    given Quotes = ref.q
-//
+    null
+  }
+
+  private def generateDecodeResultFunction[Node: c.WeakTypeTag, CodecType <: Codec[Node]: c.WeakTypeTag, Effect[_]](
+    c: blackbox.Context, ref: Reflection
+  )(method: ref.RefMethod, codec: c.Expr[CodecType])(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Node => Any] = {
+    import c.universe._
+
 //    // Create decode result function
 //    //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
 //    val resultValueType = unwrapType[Effect](ref, method.resultType)
@@ -166,14 +161,15 @@ private[jsonrpc] case object ClientBindings {
 //        {resultNode}.asTerm))).asExprOf[Any]
 //      }
 //    }
-//  }
+    null
+  }
 
-  private def logBoundMethod[ApiType: ref.c.WeakTypeTag](ref: Reflection)(
+  private def logBoundMethod[ApiType: ref.c.WeakTypeTag](c: blackbox.Context, ref: Reflection)(
     method: ref.RefMethod,
-    encodeArguments: ref.c.Expr[Any],
-    decodeResult: ref.c.Expr[Any]
+    encodeArguments: c.Expr[Any],
+    decodeResult: c.Expr[Any]
   ): Unit = {
-    import ref.c.universe.showCode
+    import c.universe.showCode
 
     if (Option(System.getProperty(debugProperty)).getOrElse(debugDefault).nonEmpty) {
       println(
