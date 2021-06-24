@@ -47,9 +47,8 @@ private[jsonrpc] case object HandlerBindings:
 
     // Detect and validate public methods in the API type
     val apiMethods = validApiMethods[ApiType, Effect](ref)
-    val validMethods = apiMethods.flatMap(_.toOption)
-    apiMethods.flatMap(_.swap.toOption) match
-      case Seq() => ()
+    val validMethods = apiMethods.flatMap(_.swap.toOption) match
+      case Seq() => apiMethods.flatMap(_.toOption)
       case errors => ref.q.reflect.report.throwError(
         s"Failed to bind API methods:\n${errors.map(error => s"  $error").mkString("\n")}"
       )
