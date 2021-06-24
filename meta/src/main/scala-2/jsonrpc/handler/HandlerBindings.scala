@@ -118,36 +118,36 @@ private[jsonrpc] case object HandlerBindings {
     //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
     ref.c.Expr(q"""
       (argumentNodes: Seq[Node], context: Context) => ${
-        // Create the method argument lists by decoding corresponding argument nodes into values
-        //   List(List(
-        //     codec.decode[Parameter0Type](argumentNodes(0)),
-        //     codec.decode[Parameter1Type](argumentNodes(1)),
-        //     ...
-        //     codec.decode[ParameterNType](argumentNodes(N)) OR context
-        //   )): List[List[ParameterXType]]
-        val arguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
-          parameters.toList.zipWithIndex.map { case (parameter, index) =>
-            if ((offset + index) == lastArgumentIndex && methodUsesContext[C, Context](ref)(method)) {
-              q"context"
-            } else {
-              q"$codec.decode(argumentNodes[${parameter.dataType}](${offset + index}))"
-            }
+      // Create the method argument lists by decoding corresponding argument nodes into values
+      //   List(List(
+      //     codec.decode[Parameter0Type](argumentNodes(0)),
+      //     codec.decode[Parameter1Type](argumentNodes(1)),
+      //     ...
+      //     codec.decode[ParameterNType](argumentNodes(N)) OR context
+      //   )): List[List[ParameterXType]]
+      val arguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
+        parameters.toList.zipWithIndex.map { case (parameter, index) =>
+          if ((offset + index) == lastArgumentIndex && methodUsesContext[C, Context](ref)(method)) {
+            q"context"
+          } else {
+            q"$codec.decode(argumentNodes[${parameter.dataType}](${offset + index}))"
           }
         }
-
-        // Create the API method call using the decoded arguments
-        //   api.method(arguments ...): Effect[ResultValueType]
-        val apiMethodCall = q"$api.${method.symbol}($arguments)"
-
-        // Create encode result function
-        //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
-        val resultValueType = unwrapType[C, Effect[_]](ref)(method.resultType)
-        val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result)"
-
-        // Create the effect mapping call using the method call and the encode result function
-        //   backend.map(methodCall, encodeResult): Effect[Node]
-        q"$backend.map($apiMethodCall, $encodeResult)"
       }
+
+      // Create the API method call using the decoded arguments
+      //   api.method(arguments ...): Effect[ResultValueType]
+      val apiMethodCall = q"$api.${method.symbol}($arguments)"
+
+      // Create encode result function
+      //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
+      val resultValueType = unwrapType[C, Effect[_]](ref)(method.resultType)
+      val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result)"
+
+      // Create the effect mapping call using the method call and the encode result function
+      //   backend.map(methodCall, encodeResult): Effect[Node]
+      q"$backend.map($apiMethodCall, $encodeResult)"
+    }
     """)
   }
 

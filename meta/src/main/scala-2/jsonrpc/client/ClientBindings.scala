@@ -106,27 +106,27 @@ private[jsonrpc] case object ClientBindings {
     //   (arguments: Seq[Any]) => Seq[Node]
     ref.c.Expr(q"""
       (arguments: Seq[Any]) => ${
-        // Create the method argument lists by encoding corresponding argument values into nodes
-        //   List(
-        //     codec.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
-        //     codec.encode[Parameter1Type](arguments(1).asInstanceOf[Parameter1Type]),
-        //     ...
-        //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
-        //   ): List[Node]
-        val argumentNodes = method.parameters.toList.zip(parameterListOffsets).flatMap { case (parameters, offset) =>
-          parameters.toList.zipWithIndex.flatMap { case (parameter, index) =>
-            Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[C, Context](ref)(method)) {
-              q"$codec.encode(arguments[${parameter.dataType}](${offset + index}))"
-            }
+      // Create the method argument lists by encoding corresponding argument values into nodes
+      //   List(
+      //     codec.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
+      //     codec.encode[Parameter1Type](arguments(1).asInstanceOf[Parameter1Type]),
+      //     ...
+      //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
+      //   ): List[Node]
+      val argumentNodes = method.parameters.toList.zip(parameterListOffsets).flatMap { case (parameters, offset) =>
+        parameters.toList.zipWithIndex.flatMap { case (parameter, index) =>
+          Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[C, Context](ref)(method)) {
+            q"$codec.encode(arguments[${parameter.dataType}](${offset + index}))"
           }
         }
+      }
 
-        // Create the encoded arguments sequence construction call
-        //   Seq(encodedArguments*): Seq[Node]
-        q"""
+      // Create the encoded arguments sequence construction call
+      //   Seq(encodedArguments*): Seq[Node]
+      q"""
           Seq(..$argumentNodes)
         """
-      }
+    }
     """)
   }
 
