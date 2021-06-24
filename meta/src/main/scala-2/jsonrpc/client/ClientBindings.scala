@@ -103,39 +103,31 @@ private[jsonrpc] case object ClientBindings {
     val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
     // Create encode arguments function
-    q"""
-      (arguments: Seq[Any]) => ${
-//      // Create the method argument lists by encoding corresponding argument values into nodes
-//      //   List(
-//      //     codec.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
-//      //     codec.encode[Parameter1Type](arguments(1).asInstanceOf[Parameter1Type]),
-//      //     ...
-//      //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
-//      //   ): List[Node]
-        ""
-      }
-    """
     //   (arguments: Seq[Any]) => Seq[Node]
-//    '{ (arguments: Seq[Any]) =>
-//      ${
-//      val argumentList = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
-//        parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
-//          Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[Context](ref, method)) {
-//            val argument = parameter.dataType.asType match
-//              case '[parameterType] => ' {arguments(${Expr(offset + index)}).asInstanceOf[parameterType]}
-//            call(ref.q, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
-//          }
-//        }
-//      ).map(_.asInstanceOf[Term].asExprOf[Node])
-//
-//      // Create the encoded arguments sequence construction call
-//      //   Seq(encodedArguments ...): Seq[Node]
-//      '
-//      {Seq($
-//      {Expr.ofSeq(argumentList)} *)}
-//      }
-//    }
-    null
+    ref.c.Expr(q"""
+      (arguments: Seq[Any]) => ${
+        // Create the method argument lists by encoding corresponding argument values into nodes
+        //   List(
+        //     codec.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
+        //     codec.encode[Parameter1Type](arguments(1).asInstanceOf[Parameter1Type]),
+        //     ...
+        //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
+        //   ): List[Node]
+        val argumentNodes = method.parameters.toList.zip(parameterListOffsets).flatMap { case (parameters, offset) =>
+          parameters.toList.zipWithIndex.flatMap { case (parameter, index) =>
+            Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[C, Context](ref)(method)) {
+              q"$codec.encode(arguments[${parameter.dataType}](${offset + index}))"
+            }
+          }
+        }
+
+        // Create the encoded arguments sequence construction call
+        //   Seq(encodedArguments ...): Seq[Node]
+        q"""
+          Seq(..$argumentNodes)
+        """
+      }
+    """)
   }
 
   private def generateDecodeResult[

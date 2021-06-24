@@ -102,7 +102,7 @@ private[jsonrpc] case object ClientBindings:
         //     ...
         //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
         //   ): List[Node]
-        val argumentList = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
+        val argumentNodes = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
             Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[Context](ref)(method)) {
               val argument = parameter.dataType.asType match
@@ -114,7 +114,7 @@ private[jsonrpc] case object ClientBindings:
 
         // Create the encoded arguments sequence construction call
         //   Seq(encodedArguments ...): Seq[Node]
-        '{ Seq(${ Expr.ofSeq(argumentList) }*) }
+        '{ Seq(${ Expr.ofSeq(argumentNodes) }*) }
       }
     }
 
