@@ -110,13 +110,12 @@ final private[jsonrpc] case class Logger private (private val underlying: slf4j.
 
   private def log[T](message: => String, properties: => T, enabled: Boolean, logMessage: String => Unit)(
     implicit evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])
-  ): Unit =
-    if (enabled) {
-      val iterableProperties = unpackProperties(properties)
-      addDiagnosticContext(iterableProperties)
-      logMessage(s"$message\n${formatProperties(iterableProperties)}\n")
-      removeDiagnosticContext(iterableProperties)
-    }
+  ): Unit = if (enabled) {
+    val iterableProperties = unpackProperties(properties)
+    addDiagnosticContext(iterableProperties)
+    logMessage(s"$message\n${formatProperties(iterableProperties)}\n")
+    removeDiagnosticContext(iterableProperties)
+  }
 
   private def log[T](
     message: => String,
@@ -124,13 +123,12 @@ final private[jsonrpc] case class Logger private (private val underlying: slf4j.
     properties: => T,
     enabled: Boolean,
     logMessage: (String, Throwable) => Unit
-  )(implicit evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])): Unit =
-    if (enabled) {
-      val iterableProperties = unpackProperties(properties)
-      addDiagnosticContext(iterableProperties)
-      logMessage(s"$message\n${formatProperties(iterableProperties)}\n", cause)
-      removeDiagnosticContext(iterableProperties)
-    }
+  )(implicit evidence: Not[Not[T]] <:< (Or[Iterable[(String, Any)], Product])): Unit = if (enabled) {
+    val iterableProperties = unpackProperties(properties)
+    addDiagnosticContext(iterableProperties)
+    logMessage(s"$message\n${formatProperties(iterableProperties)}\n", cause)
+    removeDiagnosticContext(iterableProperties)
+  }
 
   private def unpackProperties[T](properties: => T): Iterable[(String, Any)] = properties match {
     case product: Product      => productProperties(product)
