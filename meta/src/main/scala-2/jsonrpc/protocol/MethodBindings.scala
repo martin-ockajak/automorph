@@ -38,9 +38,9 @@ private[jsonrpc] case object MethodBindings {
    * @tparam Context request context type
    * @return true if the method uses request context as its last parameter, false otherwise
    */
-  def methodUsesContext[C <: Context](ref: Reflection[C])(method: ref.RefMethod): Boolean =
+  def methodUsesContext[C <: Context, XXX: ref.c.WeakTypeTag](ref: Reflection[C])(method: ref.RefMethod): Boolean =
     method.parameters.flatten.lastOption.exists { parameter =>
-      parameter.contextual && parameter.dataType =:= ref.c.weakTypeOf[Context]
+      parameter.contextual && parameter.dataType =:= ref.c.weakTypeOf[XXX]
     }
 
   /**

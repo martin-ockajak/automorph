@@ -52,7 +52,7 @@ private[jsonrpc] final case class Reflection[C <: Context](c: C) {
    * @return quoted class method descriptors
    */
   def methods(classType: Type): Seq[RefMethod] =
-    classType.members.filter(_.isMethod).map(member => method(member.asMethod)).toSeq
+    classType.finalResultType.members.filter(_.isMethod).map(member => method(member.asMethod)).toSeq
 
   private def method(methodSymbol: MethodSymbol): RefMethod = {
     val typeParameters = methodSymbol.typeParams.map(_.asType).map { typeSymbol =>

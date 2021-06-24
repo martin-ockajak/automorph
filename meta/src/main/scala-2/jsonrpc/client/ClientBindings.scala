@@ -39,17 +39,19 @@ private[jsonrpc] case object ClientBindings {
     effectType: c.WeakTypeTag[Effect[_]]
   ): c.Expr[Map[String, ClientMethod[Node]]] = {
     import c.universe._
-//    val ref = Reflection(quotes)
-//
-//    // Detect and validate public methods in the API type
-//    val apiMethods = validApiMethods[ApiType, Effect](ref)
-//    val validMethods = apiMethods.flatMap(_.toOption)
-//    val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
-//    if invalidMethodErrors.nonEmpty then
-//      ref.q.reflect.report.throwError(
-//        s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
-//      )
-//
+    val ref = Reflection[c.type](c)
+
+    // Detect and validate public methods in the API type
+    val apiMethods = validApiMethods[ref.c.type, ApiType, Effect[_]](ref)
+    val validMethods = apiMethods.flatMap(_.toOption)
+    val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
+    if (invalidMethodErrors.nonEmpty) {
+      ref.c.abort(
+        c.enclosingPosition,
+        s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
+      )
+    }
+
 //    // Generate bound API method bindings
 //    val clientMethods = Expr.ofSeq(validMethods.map { method =>
 //      generateClientMethod[Node, CodecType, Effect, Context, ApiType](ref, method, codec)
@@ -162,25 +164,21 @@ private[jsonrpc] case object ClientBindings {
 //      }
 //    }
 //  }
-//
-//  private def logBoundMethod[ApiType: Type](
-//    ref: Reflection,
-//    method: ref.RefMethod,
-//    encodeArguments: Expr[Any],
-//    decodeResult: Expr[Any]
-//  ): Unit = {
-//    import ref.q.reflect.{asTerm, Printer}
-//
-//    if (Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty) then {
-//      println(
-//        s"""${methodSignature[ApiType](ref, method)} =
-//           |  ${encodeArguments.asTerm.show(using Printer.TreeShortCode)}
-//
-//           |  ${decodeResult.asTerm.show(using Printer.TreeShortCode)}
-//
-//           |  """.
-//          stripMargin
-//      )
-//    }
-//  }
+
+  private def logBoundMethod[RefContext <: blackbox.Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[RefContext])(
+    method: ref.RefMethod,
+    encodeArguments: ref.c.Expr[Any],
+    decodeResult: ref.c.Expr[Any]
+  ): Unit = {
+    import ref.c.universe.showCode
+
+    if (Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty) {
+      println(
+        s"""${methodSignature[RefContext, ApiType](ref)(method)} =
+          |  ${showCode(encodeArguments.tree)}
+          |  ${showCode(decodeResult.tree)}
+          |  """.stripMargin
+      )
+    }
+  }
 }
