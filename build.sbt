@@ -167,7 +167,7 @@ lazy val testCore = (project in file("test/core")).dependsOn(
 ThisBuild / scalaVersion := "3.0.0"
 ThisBuild / crossScalaVersions ++= Seq("2.13.6", "3.0.0")
 ThisBuild / scalacOptions ++= Seq(
-//  "-Djsonrpc.macro.debug=true",
+  "-Djsonrpc.macro.debug=true",
   "-feature",
 //  "-Xfatal-warnings",
   "-language:higherKinds",
