@@ -62,11 +62,11 @@ private[jsonrpc] case object ClientBindings {
   }
 
   private def generateClientMethod[
-    Node: ref.c.WeakTypeTag,
-    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
+    Node: c.WeakTypeTag,
+    CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
-    Context: ref.c.WeakTypeTag,
-    ApiType: ref.c.WeakTypeTag
+    Context: c.WeakTypeTag,
+    ApiType: c.WeakTypeTag
   ](c: blackbox.Context, ref: Reflection)(
     method: ref.RefMethod,
     codec: c.Expr[CodecType]

@@ -67,11 +67,11 @@ private[jsonrpc] case object HandlerBindings {
   }
 
   private def generateHandlerMethod[
-    Node: ref.c.WeakTypeTag,
-    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
+    Node: c.WeakTypeTag,
+    CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
-    Context: ref.c.WeakTypeTag,
-    ApiType: ref.c.WeakTypeTag
+    Context: c.WeakTypeTag,
+    ApiType: c.WeakTypeTag
   ](c: blackbox.Context, ref: Reflection)(
     method: ref.RefMethod,
     codec: c.Expr[CodecType],
@@ -96,18 +96,17 @@ private[jsonrpc] case object HandlerBindings {
   }
 
 //  private def generateInvokeFunction[
-//    Node: Type,
-//    CodecType <: Codec[Node]: Type,
-//    Effect[_]: Type,
-//    Context: Type,
-//    ApiType: Type
-//  ](
-//    ref: Reflection,
+//    Node: ref.c.WeakTypeTag,
+//    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
+//    Effect[_],
+//    Context: ref.c.WeakTypeTag,
+//    ApiType: ref.c.WeakTypeTag
+//  ](c: blackbox.Context, ref: Reflection)(
 //    method: ref.RefMethod,
 //    codec: Expr[CodecType],
 //    backend: Expr[Backend[Effect]],
 //    api: Expr[ApiType]
-//  ): Expr[(Seq[Node], Context) => Effect[Node]] = {
+//  )(implicit effectType: c.WeakTypeTag[Effect[_]]): Expr[(Seq[Node], Context) => Effect[Node]] = {
 //    import ref.q.reflect.{asTerm, Term, TypeRepr}
 //    given Quotes = ref.q
 //
@@ -164,8 +163,7 @@ private[jsonrpc] case object HandlerBindings {
 //      }
 //    }
 //  }
-//
-//
+
   private def logBoundMethod[ApiType: ref.c.WeakTypeTag](ref: Reflection)(
     method: ref.RefMethod,
     invoke: ref.c.Expr[Any]
