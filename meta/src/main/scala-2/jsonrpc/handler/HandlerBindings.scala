@@ -62,7 +62,7 @@ private[jsonrpc] case object HandlerBindings {
       generateHandlerMethod[Node, CodecType, Effect, Context, ApiType](c, ref)(method, codec, backend, api)
     }
     c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]](q"""
-      Seq(..$handlerMethods).toMap
+      Seq(..$handlerMethods).map(method => method.name -> method).toMap
     """)
   }
 
@@ -77,13 +77,13 @@ private[jsonrpc] case object HandlerBindings {
     codec: c.Expr[CodecType],
     backend: c.Expr[Backend[Effect]],
     api: c.Expr[ApiType]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[(String, HandlerMethod[Node, Effect, Context])] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[HandlerMethod[Node, Effect, Context]] = {
     import c.universe.Quasiquote
 
     val invoke = generateInvoke[Node, CodecType, Effect, Context, ApiType](c, ref)(method, codec, backend, api)
     logBoundMethod[ApiType](c, ref)(method, invoke)
     c.Expr(q"""
-      ${method.lift.name} -> HandlerMethod(
+      HandlerMethod(
         $invoke,
         ${method.lift.name},
         ${method.lift.resultType},
