@@ -146,7 +146,7 @@ private[jsonrpc] case object ClientBindings:
   ): Unit =
     import ref.q.reflect.{asTerm, Printer}
 
-    if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
+    if Option(System.getProperty(debugProperty)).getOrElse(debugDefault).nonEmpty then
       println(
         s"""${methodSignature[ApiType](ref)(method)} =
           |  ${encodeArguments.asTerm.show(using Printer.TreeShortCode)}

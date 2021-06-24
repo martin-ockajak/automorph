@@ -175,7 +175,7 @@ private[jsonrpc] case object ClientBindings {
   ): Unit = {
     import ref.c.universe.showCode
 
-    if (Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty) {
+    if (Option(System.getProperty(debugProperty)).getOrElse(debugDefault).nonEmpty) {
       println(
         s"""${methodSignature[ApiType](ref)(method)} =
           |  ${showCode(encodeArguments.tree)}
