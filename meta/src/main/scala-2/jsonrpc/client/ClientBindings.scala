@@ -122,7 +122,7 @@ private[jsonrpc] case object ClientBindings {
         }
 
         // Create the encoded arguments sequence construction call
-        //   Seq(encodedArguments ...): Seq[Node]
+        //   Seq(encodedArguments*): Seq[Node]
         q"""
           Seq(..$argumentNodes)
         """

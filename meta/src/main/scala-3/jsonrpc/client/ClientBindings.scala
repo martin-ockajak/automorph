@@ -113,7 +113,7 @@ private[jsonrpc] case object ClientBindings:
         ).map(_.asInstanceOf[Term].asExprOf[Node])
 
         // Create the encoded arguments sequence construction call
-        //   Seq(encodedArguments ...): Seq[Node]
+        //   Seq(argumentNodes*): Seq[Node]
         '{ Seq(${ Expr.ofSeq(argumentNodes) }*) }
       }
     }

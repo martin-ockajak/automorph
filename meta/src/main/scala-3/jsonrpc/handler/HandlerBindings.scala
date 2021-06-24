@@ -120,7 +120,7 @@ private[jsonrpc] case object HandlerBindings:
         //     ...
         //     codec.decode[ParameterNType](argumentNodes(N)) OR context
         //   )): List[List[ParameterXType]]
-        val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
+        val arguments = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentNode = '{ argumentNodes(${ Expr(offset + index) }) }
             if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref)(method) then
@@ -131,8 +131,8 @@ private[jsonrpc] case object HandlerBindings:
         ).asInstanceOf[List[List[Term]]]
 
         // Create the API method call using the decoded arguments
-        //   api.method(decodedArguments ...): Effect[ResultValueType]
-        val apiMethodCall = call(ref.q, api.asTerm, method.name, List.empty, argumentLists)
+        //   api.method(arguments*): Effect[ResultValueType]
+        val apiMethodCall = call(ref.q, api.asTerm, method.name, List.empty, arguments)
 
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
