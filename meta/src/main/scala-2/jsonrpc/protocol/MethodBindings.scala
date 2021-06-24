@@ -18,7 +18,7 @@ private[jsonrpc] case object MethodBindings {
   def validApiMethods[C <: Context, ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
     ref: Reflection[C]
   ): Seq[Either[String, ref.RefMethod]] = {
-    // Filter out base data types methods
+    // Omit base data type methods
     val baseMethodNames = Seq(ref.c.weakTypeOf[AnyRef], ref.c.weakTypeOf[Product]).flatMap {
       baseType => ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet

@@ -63,7 +63,7 @@ private[jsonrpc] final case class Reflection[C <: Context](c: C) {
     })
     RefMethod(
       methodSymbol.name.toString,
-      methodSymbol.returnType.dealias.finalResultType.dealias,
+      methodSymbol.returnType,
       parameters,
       typeParameters,
       publicMethod(methodSymbol),
@@ -74,7 +74,8 @@ private[jsonrpc] final case class Reflection[C <: Context](c: C) {
 
   private def publicMethod(methodSymbol: MethodSymbol): Boolean =
     methodSymbol.isPublic &&
-      !methodSymbol.isSynthetic
+      !methodSymbol.isSynthetic &&
+      !methodSymbol.isConstructor
 
   private def availableMethod(methodSymbol: MethodSymbol): Boolean =
     !methodSymbol.isMacro

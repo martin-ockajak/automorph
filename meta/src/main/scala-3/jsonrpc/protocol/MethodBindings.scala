@@ -18,7 +18,7 @@ private[jsonrpc] case object MethodBindings:
     import ref.q.reflect.TypeRepr
     given Quotes = ref.q
 
-    // Filter out base data types methods
+    // Omit base data type methods
     val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap {
       baseType => ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
