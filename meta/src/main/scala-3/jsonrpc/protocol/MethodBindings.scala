@@ -66,14 +66,14 @@ private[jsonrpc] case object MethodBindings:
   /**
    * Extract type wrapped in the specified wrapper type.
    *
-   * @param ref reflection context
+   * @param q quotation context
    * @param wrappedType wrapped type
    * @tparam Wrapper wrapper type
    * @return wrapped type
    */
-  def unwrapType[Wrapper[_]: Type](ref: Reflection)(wrappedType: ref.q.reflect.TypeRepr): ref.q.reflect.TypeRepr =
+  def unwrapType[Wrapper[_]: Type](q: Quotes)(wrappedType: q.reflect.TypeRepr): q.reflect.TypeRepr =
     wrappedType match
-      case appliedType: ref.q.reflect.AppliedType if appliedType.tycon =:= ref.q.reflect.TypeRepr.of[Wrapper] =>
+      case appliedType: q.reflect.AppliedType if appliedType.tycon =:= q.reflect.TypeRepr.of[Wrapper] =>
         appliedType.args.last
       case otherType => otherType
 
