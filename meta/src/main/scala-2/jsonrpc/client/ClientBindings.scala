@@ -122,11 +122,7 @@ private[jsonrpc] case object ClientBindings {
 //        parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
 //          Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[Context](ref, method)) {
 //            val argument = parameter.dataType.asType match
-//              case
-//            '[parameterType]
-//            => '
-//            {arguments($
-//            {Expr(offset + index)}).asInstanceOf[parameterType]}
+//              case '[parameterType] => ' {arguments(${Expr(offset + index)}).asInstanceOf[parameterType]}
 //            call(ref.q, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
 //          }
 //        }
