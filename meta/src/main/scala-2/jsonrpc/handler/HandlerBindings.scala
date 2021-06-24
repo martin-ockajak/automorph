@@ -106,7 +106,7 @@ private[jsonrpc] case object HandlerBindings {
     backend: ref.c.Expr[Backend[Effect]],
     api: ref.c.Expr[ApiType]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
-    import ref.c.universe._
+    import ref.c.universe.Quasiquote
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
@@ -114,17 +114,31 @@ private[jsonrpc] case object HandlerBindings {
     }
     val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
-//    // Create invoke function
-//    //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
+    // Create invoke function
+    //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
+    q"""
+      (argumentNodes: Seq[Node], context: Context) => ${
+        // Create the method argument lists by decoding corresponding argument nodes into values
+        //   List(List(
+        //     codec.decode[Parameter0Type](argumentNodes(0)),
+        //     codec.decode[Parameter1Type](argumentNodes(1)),
+        //     ...
+        //     codec.decode[ParameterNType](argumentNodes(N)) OR context
+        //   )): List[List[ParameterXType]]
+        val arguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
+          parameters.toList.zipWithIndex.map { case (parameter, index) =>
+            if ((offset + index) == lastArgumentIndex && methodUsesContext[C, Context](ref)(method)) {
+              q"context"
+            } else {
+              q"$codec.decode(argumentNodes[${parameter.dataType}](${offset + index}))"
+            }
+          }
+        }
+        ""
+      }
+    """
 //    '{ (argumentNodes: Seq[Node], context: Context) =>
 //      ${
-//        // Create the method argument lists by decoding corresponding argument nodes into values
-//        //   List(List(
-//        //     codec.decode[Parameter0Type](argumentNodes(0)),
-//        //     codec.decode[Parameter1Type](argumentNodes(1)),
-//        //     ...
-//        //     codec.decode[ParameterNType](argumentNodes(N)) OR context
-//        //   )): List[List[ParameterXType]]
 //        val arguments = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
 //          parameters.toList.zipWithIndex.map { (parameter, index) =>
 //            val argumentNode = '{ argumentNodes(${ Expr(offset + index) }) }

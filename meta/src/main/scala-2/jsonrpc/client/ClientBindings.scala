@@ -94,7 +94,7 @@ private[jsonrpc] case object ClientBindings {
     CodecType <: Codec[Node]: ref.c.WeakTypeTag,
     Context: ref.c.WeakTypeTag
   ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[CodecType]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
-    import ref.c.universe.{weakTypeOf, Quasiquote}
+    import ref.c.universe.Quasiquote
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
