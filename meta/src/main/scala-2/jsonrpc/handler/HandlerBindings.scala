@@ -81,12 +81,11 @@ private[jsonrpc] case object HandlerBindings {
     import c.universe.Quasiquote
 
     val invoke = generateInvoke[Node, CodecType, Effect, Context, ApiType](c, ref)(method, codec, backend, api)
-    val name = q"${method.lift.name}"
     logBoundMethod[ApiType](c, ref)(method, invoke)
     c.Expr(q"""
-      $name -> HandlerMethod(
+      ${method.lift.name} -> HandlerMethod(
         $invoke,
-        $name,
+        ${method.lift.name},
         ${method.lift.resultType},
         ..${method.lift.parameters.flatMap(_.map(_.name))},
         ..${method.lift.parameters.flatMap(_.map(_.dataType))},
