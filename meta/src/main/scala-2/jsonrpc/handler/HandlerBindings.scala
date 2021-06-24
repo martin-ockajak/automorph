@@ -10,8 +10,6 @@ import scala.reflect.macros.blackbox
 private[jsonrpc] case object HandlerBindings {
 
   private val debugProperty = "jsonrpc.macro.debug"
-//  private val debugDefault = "true"
-  private val debugDefault = ""
 
   /**
    * Generate handler bindings for all valid public methods of an API type.
@@ -169,7 +167,7 @@ private[jsonrpc] case object HandlerBindings {
   ): Unit = {
     import c.universe.showCode
 
-    if (Option(System.getProperty(debugProperty)).getOrElse(debugDefault).nonEmpty) {
+    if (Option(System.getProperty(debugProperty)).nonEmpty) {
       println(
         s"""${methodSignature[ApiType](ref)(method)} =
           |  ${showCode(invoke.tree)}

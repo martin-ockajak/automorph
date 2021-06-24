@@ -11,8 +11,6 @@ import scala.reflect.macros.blackbox
 private[jsonrpc] case object ClientBindings {
 
   private val debugProperty = "jsonrpc.macro.debug"
-//  private val debugDefault = "true"
-  private val debugDefault = ""
 
   /**
    * Generate client bindings for all valid public methods of an API type.
@@ -171,7 +169,7 @@ private[jsonrpc] case object ClientBindings {
   ): Unit = {
     import c.universe.showCode
 
-    if (Option(System.getProperty(debugProperty)).getOrElse(debugDefault).nonEmpty) {
+    if (Option(System.getProperty(debugProperty)).nonEmpty) {
       println(
         s"""${methodSignature[ApiType](ref)(method)} =
           |  ${showCode(encodeArguments.tree)}
