@@ -96,12 +96,10 @@ private[jsonrpc] case object MethodBindings {
         Left(s"Bound API method '$signature' must be callable at runtime")
       } else {
         // Returns the effect type
-        // FIXME - get concrete result type constructor
         val effectType = weakTypeOf[Effect].typeConstructor
         val resultEffectType = method.resultType.typeArgs.nonEmpty && effectType =:= method.resultType.typeConstructor
-//        println(method.resultType)
-//        println(effectType)
-//        println(effectType =:= method.resultType.typeConstructor)
+
+        // FIXME - determine concrete result type constructor instead of an abstract one
         if (!resultEffectType && false) {
           Left(s"Bound API method '$signature' must return the specified effect type '${effectType.typeSymbol.fullName}'")
         } else {
