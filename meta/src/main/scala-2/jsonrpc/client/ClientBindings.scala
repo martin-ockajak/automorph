@@ -37,10 +37,10 @@ private[jsonrpc] case object ClientBindings {
     effectType: c.WeakTypeTag[Effect[_]]
   ): c.Expr[Map[String, ClientMethod[Node]]] = {
     import c.universe.Quasiquote
-    val ref = Reflection(c)
+    val ref = Reflection[c.type](c)
 
     // Detect and validate public methods in the API type
-    val apiMethods = validApiMethods[ApiType, Effect[_]](ref)
+    val apiMethods = validApiMethods[c.type, ApiType, Effect[_]](ref)
     val validMethods = apiMethods.flatMap(_.swap.toOption) match {
       case Seq() => apiMethods.flatMap(_.toOption)
       case errors =>
@@ -52,7 +52,7 @@ private[jsonrpc] case object ClientBindings {
 
     // Generate bound API method bindings
     val clientMethods = validMethods.map { method =>
-      q"${method.name} -> ${generateClientMethod[Node, CodecType, Effect, Context, ApiType](c, ref)(method, codec)}"
+      q"${method.name} -> ${generateClientMethod[c.type, Node, CodecType, Effect, Context, ApiType](ref)(method, codec)}"
     }
     c.Expr[Map[String, ClientMethod[Node]]](q"""
       Seq(..$clientMethods).toMap
@@ -60,21 +60,22 @@ private[jsonrpc] case object ClientBindings {
   }
 
   private def generateClientMethod[
-    Node: c.WeakTypeTag,
-    CodecType <: Codec[Node]: c.WeakTypeTag,
+    C <: blackbox.Context,
+    Node: ref.c.WeakTypeTag,
+    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
     Effect[_],
-    Context: c.WeakTypeTag,
-    ApiType: c.WeakTypeTag
-  ](c: blackbox.Context, ref: Reflection)(
+    Context: ref.c.WeakTypeTag,
+    ApiType: ref.c.WeakTypeTag
+  ](ref: Reflection[C])(
     method: ref.RefMethod,
-    codec: c.Expr[CodecType]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[ClientMethod[Node]] = {
-    import c.universe.Quasiquote
+    codec: ref.c.Expr[CodecType]
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[ClientMethod[Node]] = {
+    import ref.c.universe.Quasiquote
 
-    val encodeArguments = generateEncodeArguments[Node, CodecType, Context](c, ref)(method, codec)
-    val decodeResult = generateDecodeResult[Node, CodecType, Effect](c, ref)(method, codec)
-    logBoundMethod[ApiType](c, ref)(method, encodeArguments, decodeResult)
-    c.Expr(q"""
+    val encodeArguments = generateEncodeArguments[C, Node, CodecType, Context](ref)(method, codec)
+    val decodeResult = generateDecodeResult[C, Node, CodecType, Effect](ref)(method, codec)
+    logBoundMethod[C, ApiType](ref)(method, encodeArguments, decodeResult)
+    ref.c.Expr(q"""
       ClientMethod(
         $encodeArguments,
         $decodeResult,
@@ -82,20 +83,18 @@ private[jsonrpc] case object ClientBindings {
         ${method.lift.resultType},
         ..${method.lift.parameters.flatMap(_.map(_.name))},
         ..${method.lift.parameters.flatMap(_.map(_.dataType))},
-        ${methodUsesContext[Context](ref)(method)}
+        ${methodUsesContext[C, Context](ref)(method)}
       )
     """)
   }
 
   private def generateEncodeArguments[
-    Node: c.WeakTypeTag,
-    CodecType <: Codec[Node]: c.WeakTypeTag,
-    Context: c.WeakTypeTag
-  ](
-    c: blackbox.Context,
-    ref: Reflection
-  )(method: ref.RefMethod, codec: c.Expr[CodecType]): c.Expr[Seq[Any] => Seq[Node]] = {
-    import c.universe._
+    C <: blackbox.Context,
+    Node: ref.c.WeakTypeTag,
+    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
+    Context: ref.c.WeakTypeTag
+  ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[CodecType]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
+    import ref.c.universe._
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
@@ -140,34 +139,36 @@ private[jsonrpc] case object ClientBindings {
     null
   }
 
-  private def generateDecodeResult[Node: c.WeakTypeTag, CodecType <: Codec[Node]: c.WeakTypeTag, Effect[_]](
-    c: blackbox.Context,
-    ref: Reflection
-  )(method: ref.RefMethod, codec: c.Expr[CodecType])(implicit
-    effectType: c.WeakTypeTag[Effect[_]]
-  ): c.Expr[Node => Any] = {
-    import c.universe.{weakTypeOf, Quasiquote}
-    import c.universe._
+  private def generateDecodeResult[
+    C <: blackbox.Context,
+    Node: ref.c.WeakTypeTag,
+    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
+    Effect[_]
+  ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[CodecType])(implicit
+    effectType: ref.c.WeakTypeTag[Effect[_]]
+  ): ref.c.Expr[Node => Any] = {
+    import ref.c.universe.{weakTypeOf, Quasiquote}
+//    import c.universe._
 
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
-    val resultValueType = unwrapType[Effect[_]](ref)(method.resultType)
-    q"""
-      resultNode => $codec.decode[$resultValueType](resultNode)
-    """
+    val resultValueType = unwrapType[C, Effect[_]](ref)(method.resultType)
+//    q"""
+//      resultNode => $codec.decode[$resultValueType](resultNode)
+//    """
     null
   }
 
-  private def logBoundMethod[ApiType: ref.c.WeakTypeTag](c: blackbox.Context, ref: Reflection)(
+  private def logBoundMethod[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[C])(
     method: ref.RefMethod,
-    encodeArguments: c.Expr[Any],
-    decodeResult: c.Expr[Any]
+    encodeArguments: ref.c.Expr[Any],
+    decodeResult: ref.c.Expr[Any]
   ): Unit = {
-    import c.universe.showCode
+    import ref.c.universe.showCode
 
     if (Option(System.getProperty(debugProperty)).nonEmpty) {
       println(
-        s"""${methodSignature[ApiType](ref)(method)} =
+        s"""${methodSignature[C, ApiType](ref)(method)} =
           |  ${showCode(encodeArguments.tree)}
           |  ${showCode(decodeResult.tree)}
           |  """.stripMargin

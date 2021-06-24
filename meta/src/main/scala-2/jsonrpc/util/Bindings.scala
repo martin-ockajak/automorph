@@ -13,10 +13,10 @@ object Bindings {
     import c.universe._
 
     val ref = Reflection(c)
-    val apiMethods = validApiMethods[T, Future[_]](ref)
+    val apiMethods = validApiMethods[blackbox.Context, T, Future[_]](ref)
     val validMethods = apiMethods.flatMap(_.toOption)
     validMethods.foreach { method =>
-      println(methodSignature[T](ref)(method))
+      println(methodSignature[blackbox.Context, T](ref)(method))
       println()
     }
     c.Expr[Unit](q"""
