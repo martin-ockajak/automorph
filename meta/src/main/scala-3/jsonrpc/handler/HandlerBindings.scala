@@ -58,7 +58,7 @@ private[jsonrpc] case object HandlerBindings:
     val handlerMethods = Expr.ofSeq(validMethods.map { method =>
       generateHandlerMethod[Node, CodecType, Effect, Context, ApiType](ref)(method, codec, backend, api)
     })
-    '{ $handlerMethods.toMap[String, HandlerMethod[Node, Effect, Context]] }
+    '{ $handlerMethods.map(method => method.name -> method).toMap }
 
   private def generateHandlerMethod[
     Node: Type,
@@ -71,13 +71,13 @@ private[jsonrpc] case object HandlerBindings:
     codec: Expr[CodecType],
     backend: Expr[Backend[Effect]],
     api: Expr[ApiType]
-  ): Expr[(String, HandlerMethod[Node, Effect, Context])] =
+  ): Expr[HandlerMethod[Node, Effect, Context]] =
     given Quotes = ref.q
 
     val invoke = generateInvoke[Node, CodecType, Effect, Context, ApiType](ref)(method, codec, backend, api)
     logBoundMethod[ApiType](ref)(method, invoke)
     '{
-      ${ Expr(method.lift.name) } -> HandlerMethod(
+      HandlerMethod(
         $invoke,
         ${ Expr(method.lift.name) },
         ${ Expr(method.lift.resultType) },

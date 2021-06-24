@@ -51,7 +51,7 @@ private[jsonrpc] case object ClientBindings:
     val clientMethods = Expr.ofSeq(validMethods.map { method =>
       generateClientMethod[Node, CodecType, Effect, Context, ApiType](ref)(method, codec)
     })
-    '{ $clientMethods.toMap[String, ClientMethod[Node]] }
+    '{ $clientMethods.map(method => method.name -> method).toMap }
 
   private def generateClientMethod[
     Node: Type,
@@ -59,14 +59,14 @@ private[jsonrpc] case object ClientBindings:
     Effect[_]: Type,
     Context: Type,
     ApiType: Type
-  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[CodecType]): Expr[(String, ClientMethod[Node])] =
+  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[CodecType]): Expr[ClientMethod[Node]] =
     given Quotes = ref.q
 
     val encodeArguments = generateEncodeArguments[Node, CodecType, Context](ref)(method, codec)
     val decodeResult = generateDecodeResult[Node, CodecType, Effect](ref)(method, codec)
     logBoundMethod[ApiType](ref)(method, encodeArguments, decodeResult)
     '{
-      ${ Expr(method.lift.name) } -> ClientMethod(
+      ClientMethod(
         $encodeArguments,
         $decodeResult,
         ${ Expr(method.lift.name) },
