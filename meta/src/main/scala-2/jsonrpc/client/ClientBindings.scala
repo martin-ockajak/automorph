@@ -82,19 +82,17 @@ private[jsonrpc] case object ClientBindings {
     val parameterTypes = q"..${liftedMethod.parameters.flatMap(_.map(_.dataType))}"
     val usesContext = q"${methodUsesContext[Context](ref)(method)}"
     logBoundMethod[ApiType](c, ref)(method, encodeArguments, decodeResult)
-//    '
-//    {
-//    $name -> ClientMethod(
-//      $encodeArguments,
-//      $decodeResult,
-//      $name,
-//      $resultType,
-//      $parameterNames,
-//      $parameterTypes,
-//      $usesContext
-//    )
-//    }
-    null
+    c.Expr(q"""
+      $name -> ClientMethod(
+        $encodeArguments,
+        $decodeResult,
+        $name,
+        $resultType,
+        $parameterNames,
+        $parameterTypes,
+        $usesContext
+      )
+    """)
   }
 
   private def generateEncodeArguments[Node: c.WeakTypeTag, CodecType <: Codec[Node]: c.WeakTypeTag, Context: c.WeakTypeTag](

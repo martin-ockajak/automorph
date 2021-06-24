@@ -88,11 +88,7 @@ private[jsonrpc] case object HandlerBindings {
     val parameterTypes = q"..${liftedMethod.parameters.flatMap(_.map(_.dataType))}"
     val usesContext = q"${methodUsesContext[Context](ref)(method)}"
     logBoundMethod[ApiType](c, ref)(method, invoke)
-//    '
-//    {
-//    $name -> HandlerMethod($invoke, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)
-//    }
-    null
+    c.Expr(q"$name -> HandlerMethod($invoke, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)")
   }
 
   private def generateInvoke[
