@@ -90,8 +90,6 @@ private[jsonrpc] case object MethodBindings {
   private def validateApiMethod[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
     ref: Reflection[C]
   )(method: ref.RefMethod): Either[String, ref.RefMethod] = {
-    import ref.c.weakTypeOf
-
     // No type parameters
     val signature = methodSignature[C, ApiType](ref)(method)
     if (method.typeParameters.nonEmpty) {
