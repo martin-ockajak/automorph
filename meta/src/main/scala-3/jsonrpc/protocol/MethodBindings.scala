@@ -27,7 +27,7 @@ private[jsonrpc] case object MethodBindings:
     }
 
     // Validate methods
-    methods.map(method => validateApiMethod[ApiType, Effect](ref, method))
+    methods.map(method => validateApiMethod[ApiType, Effect](ref)(method))
 
   /**
    * Create instance method call term.
@@ -58,7 +58,7 @@ private[jsonrpc] case object MethodBindings:
    * @tparam Context request context type
    * @return true if the method uses request context as its last parameter, false otherwise
    */
-  def methodUsesContext[Context: Type](ref: Reflection, method: ref.RefMethod): Boolean =
+  def methodUsesContext[Context: Type](ref: Reflection)(method: ref.RefMethod): Boolean =
     method.parameters.flatten.lastOption.exists { parameter =>
       parameter.contextual && parameter.dataType =:= ref.q.reflect.TypeRepr.of[Context]
     }
@@ -71,7 +71,7 @@ private[jsonrpc] case object MethodBindings:
    * @tparam Wrapper wrapper type
    * @return wrapped type
    */
-  def unwrapType[Wrapper[_]: Type](ref: Reflection, wrappedType: ref.q.reflect.TypeRepr): ref.q.reflect.TypeRepr =
+  def unwrapType[Wrapper[_]: Type](ref: Reflection)(wrappedType: ref.q.reflect.TypeRepr): ref.q.reflect.TypeRepr =
     wrappedType match
       case appliedType: ref.q.reflect.AppliedType if appliedType.tycon =:= ref.q.reflect.TypeRepr.of[Wrapper] =>
         appliedType.args.last
@@ -85,7 +85,7 @@ private[jsonrpc] case object MethodBindings:
    * @tparam ApiType API type
    * @return method description
    */
-  def methodSignature[ApiType: Type](ref: Reflection, method: ref.RefMethod): String =
+  def methodSignature[ApiType: Type](ref: Reflection)(method: ref.RefMethod): String =
     import ref.q.reflect.{Printer, TypeRepr}
 
     s"${TypeRepr.of[ApiType].show(using Printer.TypeReprCode)}.${method.lift.signature}"
@@ -99,15 +99,14 @@ private[jsonrpc] case object MethodBindings:
    * @tparam Effect effect type
    * @return valid API method or an error message
    */
-  private def validateApiMethod[ApiType: Type, Effect[_]: Type](
-    ref: Reflection,
+  private def validateApiMethod[ApiType: Type, Effect[_]: Type](ref: Reflection)(
     method: ref.RefMethod
   ): Either[String, ref.RefMethod] =
     import ref.q.reflect.{AppliedType, LambdaType, TypeRepr, TypeTree}
 
     // No type parameters
     val apiType = TypeTree.of[ApiType]
-    val signature = methodSignature[ApiType](ref, method)
+    val signature = methodSignature[ApiType](ref)(method)
     if method.typeParameters.nonEmpty then
       Left(s"Bound API method '$signature' must not have type parameters")
 

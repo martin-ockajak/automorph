@@ -81,7 +81,7 @@ private[jsonrpc] case object HandlerBindings:
     val resultType = Expr(liftedMethod.resultType)
     val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
     val parameterTypes = Expr(liftedMethod.parameters.flatMap(_.map(_.dataType)))
-    val usesContext = Expr(methodUsesContext[Context](ref, method))
+    val usesContext = Expr(methodUsesContext[Context](ref)(method))
     logBoundMethod[ApiType](ref, method, invoke)
     '{
       $name -> HandlerMethod($invoke, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)
@@ -123,7 +123,7 @@ private[jsonrpc] case object HandlerBindings:
         val argumentLists = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentNode = '{ argumentNodes(${ Expr(offset + index) }) }
-            if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref, method) then
+            if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref)(method) then
               'context.asTerm
             else
               call(ref.q, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode.asTerm)))
@@ -136,7 +136,7 @@ private[jsonrpc] case object HandlerBindings:
 
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
-        val resultValueType = unwrapType[Effect](ref, method.resultType)
+        val resultValueType = unwrapType[Effect](ref)(method.resultType)
 //        val encodeResult = (TypeRepr.of[CodecType].dealias.asType, resultValueType.asType) match
 //          case ('[codecType], '[resultType]) => '{ (result: resultType) =>
 //              $codec.asInstanceOf[codecType].encode(result)
@@ -161,7 +161,7 @@ private[jsonrpc] case object HandlerBindings:
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
       println(
-        s"""${methodSignature[ApiType](ref, method)} =
+        s"""${methodSignature[ApiType](ref)(method)} =
           |  ${invoke.asTerm.show(using Printer.TreeShortCode)}
           |""".stripMargin
       )

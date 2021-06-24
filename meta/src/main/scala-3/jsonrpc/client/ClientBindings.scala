@@ -69,7 +69,7 @@ private[jsonrpc] case object ClientBindings:
     val resultType = Expr(liftedMethod.resultType)
     val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
     val parameterTypes = Expr(liftedMethod.parameters.flatMap(_.map(_.dataType)))
-    val usesContext = Expr(methodUsesContext[Context](ref, method))
+    val usesContext = Expr(methodUsesContext[Context](ref)(method))
     logBoundMethod[ApiType](ref, method, encodeArguments, decodeResult)
     '{
       $name -> ClientMethod(
@@ -110,7 +110,7 @@ private[jsonrpc] case object ClientBindings:
         //   ): List[Node]
         val argumentList = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
-            Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[Context](ref, method)) {
+            Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[Context](ref)(method)) {
               val argument = parameter.dataType.asType match
                 case '[parameterType] => '{ arguments(${ Expr(offset + index) }).asInstanceOf[parameterType] }
               call(ref.q, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
@@ -134,7 +134,7 @@ private[jsonrpc] case object ClientBindings:
 
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
-    val resultValueType = unwrapType[Effect](ref, method.resultType)
+    val resultValueType = unwrapType[Effect](ref)(method.resultType)
     '{ (resultNode: Node) =>
       ${
         call(ref.q, codec.asTerm, "decode", List(resultValueType), List(List('{ resultNode }.asTerm))).asExprOf[Any]
@@ -151,7 +151,7 @@ private[jsonrpc] case object ClientBindings:
 
     if Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty then
       println(
-        s"""${methodSignature[ApiType](ref, method)} = 
+        s"""${methodSignature[ApiType](ref)(method)} =
           |  ${encodeArguments.asTerm.show(using Printer.TreeShortCode)}
           |  ${decodeResult.asTerm.show(using Printer.TreeShortCode)}
           |  """.stripMargin
