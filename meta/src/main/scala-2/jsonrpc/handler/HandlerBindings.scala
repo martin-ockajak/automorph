@@ -44,15 +44,15 @@ private[jsonrpc] case object HandlerBindings {
     api: c.Expr[ApiType]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]] = {
     import c.universe._
-    val ref = Reflection[c.type](c)
+    val ref = Reflection(c)
 
     // Detect and validate public methods in the API type
-    val apiMethods = validApiMethods[ref.c.type, ApiType, Effect[_]](ref)
+    val apiMethods = validApiMethods[ApiType, Effect[_]](ref)
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if (invalidMethodErrors.nonEmpty) {
       ref.c.abort(
-        c.enclosingPosition,
+        ref.c.enclosingPosition,
         s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
       )
     }
@@ -69,13 +69,12 @@ private[jsonrpc] case object HandlerBindings {
   }
 
   private def generateHandlerMethod[
-    RefContext <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
     CodecType <: Codec[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
     ApiType: ref.c.WeakTypeTag
-  ](ref: Reflection[RefContext])(
+  ](ref: Reflection)(
     method: ref.RefMethod,
     codec: ref.c.Expr[CodecType],
     backend: ref.c.Expr[Backend[Effect]],
@@ -89,7 +88,7 @@ private[jsonrpc] case object HandlerBindings {
     val resultType = q"${liftedMethod.resultType}"
     val parameterNames = q"..${liftedMethod.parameters.flatMap(_.map(_.name))}"
     val parameterTypes = q"..${liftedMethod.parameters.flatMap(_.map(_.dataType))}"
-    val usesContext = q"${methodUsesContext[RefContext, Context](ref)(method)}"
+    val usesContext = q"${methodUsesContext[Context](ref)(method)}"
 //    logBoundMethod[ApiType](ref, method, invoke)
 //    '
 //    {
@@ -169,7 +168,7 @@ private[jsonrpc] case object HandlerBindings {
 //  }
 //
 //
-  private def logBoundMethod[RefContext <: blackbox.Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[RefContext])(
+  private def logBoundMethod[ApiType: ref.c.WeakTypeTag](ref: Reflection)(
     method: ref.RefMethod,
     invoke: ref.c.Expr[Any]
   ): Unit = {
@@ -177,7 +176,7 @@ private[jsonrpc] case object HandlerBindings {
 
     if (Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty) {
       println(
-        s"""${methodSignature[RefContext, ApiType](ref)(method)} =
+        s"""${methodSignature[ApiType](ref)(method)} =
           |  ${showCode(invoke.tree)}
           |""".stripMargin
       )

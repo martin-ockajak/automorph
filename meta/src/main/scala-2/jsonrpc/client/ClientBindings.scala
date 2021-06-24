@@ -39,15 +39,15 @@ private[jsonrpc] case object ClientBindings {
     effectType: c.WeakTypeTag[Effect[_]]
   ): c.Expr[Map[String, ClientMethod[Node]]] = {
     import c.universe._
-    val ref = Reflection[c.type](c)
+    val ref = Reflection(c)
 
     // Detect and validate public methods in the API type
-    val apiMethods = validApiMethods[ref.c.type, ApiType, Effect[_]](ref)
+    val apiMethods = validApiMethods[ApiType, Effect[_]](ref)
     val validMethods = apiMethods.flatMap(_.toOption)
     val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
     if (invalidMethodErrors.nonEmpty) {
       ref.c.abort(
-        c.enclosingPosition,
+        ref.c.enclosingPosition,
         s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
       )
     }
@@ -165,7 +165,7 @@ private[jsonrpc] case object ClientBindings {
 //    }
 //  }
 
-  private def logBoundMethod[RefContext <: blackbox.Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[RefContext])(
+  private def logBoundMethod[ApiType: ref.c.WeakTypeTag](ref: Reflection)(
     method: ref.RefMethod,
     encodeArguments: ref.c.Expr[Any],
     decodeResult: ref.c.Expr[Any]
@@ -174,7 +174,7 @@ private[jsonrpc] case object ClientBindings {
 
     if (Option(System.getenv(debugProperty)).getOrElse(debugDefault).nonEmpty) {
       println(
-        s"""${methodSignature[RefContext, ApiType](ref)(method)} =
+        s"""${methodSignature[ApiType](ref)(method)} =
           |  ${showCode(encodeArguments.tree)}
           |  ${showCode(decodeResult.tree)}
           |  """.stripMargin

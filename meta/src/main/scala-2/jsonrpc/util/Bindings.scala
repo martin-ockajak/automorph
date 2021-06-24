@@ -12,11 +12,11 @@ object Bindings {
   def bindMacro[T: c.WeakTypeTag](c: blackbox.Context): c.Expr[Unit] = {
     import c.universe._
 
-    val ref = Reflection[c.type](c)
-    val apiMethods = validApiMethods[c.type, T, Future[_]](ref)
+    val ref = Reflection(c)
+    val apiMethods = validApiMethods[T, Future[_]](ref)
     val validMethods = apiMethods.flatMap(_.toOption)
     validMethods.foreach { method =>
-      println(methodSignature[c.type, T](ref)(method))
+      println(methodSignature[T](ref)(method))
       println()
     }
     c.Expr[Unit](q"""

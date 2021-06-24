@@ -15,8 +15,8 @@ private[jsonrpc] case object MethodBindings {
    * @tparam Effect effect type
    * @return valid method descriptors or error messages by method name
    */
-  def validApiMethods[C <: Context, ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
-    ref: Reflection[C]
+  def validApiMethods[ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
+    ref: Reflection
   ): Seq[Either[String, ref.RefMethod]] = {
     // Omit base data type methods
     val baseMethodNames = Seq(ref.c.weakTypeOf[AnyRef], ref.c.weakTypeOf[Product]).flatMap {
@@ -27,7 +27,7 @@ private[jsonrpc] case object MethodBindings {
     }
 
     // Validate methods
-    methods.map(method => validateApiMethod[C, ApiType, Effect](ref)(method))
+    methods.map(method => validateApiMethod[ApiType, Effect](ref)(method))
   }
 
   /**
@@ -38,9 +38,9 @@ private[jsonrpc] case object MethodBindings {
    * @tparam Context request context type
    * @return true if the method uses request context as its last parameter, false otherwise
    */
-  def methodUsesContext[C <: Context, XXX: ref.c.WeakTypeTag](ref: Reflection[C])(method: ref.RefMethod): Boolean =
+  def methodUsesContext[Context: ref.c.WeakTypeTag](ref: Reflection)(method: ref.RefMethod): Boolean =
     method.parameters.flatten.lastOption.exists { parameter =>
-      parameter.contextual && parameter.dataType =:= ref.c.weakTypeOf[XXX]
+      parameter.contextual && parameter.dataType =:= ref.c.weakTypeOf[Context]
     }
 
   /**
@@ -51,7 +51,7 @@ private[jsonrpc] case object MethodBindings {
    * @tparam Wrapper wrapper type
    * @return wrapped type
    */
-  def unwrapType[C <: Context, Wrapper: ref.c.WeakTypeTag](ref: Reflection[C])(wrappedType: ref.c.Type): ref.c.Type =
+  def unwrapType[Wrapper: ref.c.WeakTypeTag](ref: Reflection)(wrappedType: ref.c.Type): ref.c.Type =
     if (wrappedType.typeArgs.nonEmpty && wrappedType.typeConstructor =:= ref.c.weakTypeOf[Wrapper]) {
       wrappedType.typeArgs.last
     } else {
@@ -67,9 +67,8 @@ private[jsonrpc] case object MethodBindings {
    * @tparam ApiType API type
    * @return method description
    */
-  def methodSignature[C <: Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[C])(
-    method: ref.RefMethod
-  ): String = s"${ref.c.weakTypeOf[ApiType].typeSymbol.fullName}.${method.lift.signature}"
+  def methodSignature[ApiType: ref.c.WeakTypeTag](ref: Reflection)(method: ref.RefMethod): String =
+    s"${ref.c.weakTypeOf[ApiType].typeSymbol.fullName}.${method.lift.signature}"
 
   /**
    * Determine whether a method is a valid API method.
@@ -81,13 +80,13 @@ private[jsonrpc] case object MethodBindings {
    * @tparam Effect effect type
    * @return valid API method or an error message
    */
-  private def validateApiMethod[C <: Context, ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
-    ref: Reflection[C]
-  )(method: ref.RefMethod): Either[String, ref.RefMethod] = {
+  private def validateApiMethod[ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](ref: Reflection)(
+    method: ref.RefMethod
+  ): Either[String, ref.RefMethod] = {
     import ref.c.weakTypeOf
 
     // No type parameters
-    val signature = methodSignature[C, ApiType](ref)(method)
+    val signature = methodSignature[ApiType](ref)(method)
     if (method.typeParameters.nonEmpty) {
       Left(s"Bound API method '$signature' must not have type parameters")
     } else {

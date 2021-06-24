@@ -8,7 +8,7 @@ import scala.reflect.macros.blackbox.Context
  * @tparam C macro context type
  * @param c macro context
  */
-private[jsonrpc] final case class Reflection[C <: Context](c: C) {
+private[jsonrpc] final case class Reflection(c: Context) {
 
   // All meta-programming data types are path-dependent on the compiler-generated reflection context
   import c.universe._
