@@ -78,17 +78,21 @@ private[jsonrpc] case object HandlerBindings {
     backend: c.Expr[Backend[Effect]],
     api: c.Expr[ApiType]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[(String, HandlerMethod[Node, Effect, Context])] = {
-    import c.universe._
+    import c.universe.Quasiquote
 
-    val liftedMethod = method.lift
     val invoke = generateInvoke[Node, CodecType, Effect, Context, ApiType](c, ref)(method, codec, backend, api)
-    val name = q"${liftedMethod.name}"
-    val resultType = q"${liftedMethod.resultType}"
-    val parameterNames = q"..${liftedMethod.parameters.flatMap(_.map(_.name))}"
-    val parameterTypes = q"..${liftedMethod.parameters.flatMap(_.map(_.dataType))}"
-    val usesContext = q"${methodUsesContext[Context](ref)(method)}"
+    val name = q"${method.lift.name}"
     logBoundMethod[ApiType](c, ref)(method, invoke)
-    c.Expr(q"$name -> HandlerMethod($invoke, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)")
+    c.Expr(q"""
+      $name -> HandlerMethod(
+        $invoke,
+        $name,
+        ${method.lift.resultType},
+        ..${method.lift.parameters.flatMap(_.map(_.name))},
+        ..${method.lift.parameters.flatMap(_.map(_.dataType))},
+        ${methodUsesContext[Context](ref)(method)}
+      )
+    """)
   }
 
   private def generateInvoke[

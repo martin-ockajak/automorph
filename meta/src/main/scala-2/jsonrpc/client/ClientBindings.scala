@@ -71,26 +71,21 @@ private[jsonrpc] case object ClientBindings {
     method: ref.RefMethod,
     codec: c.Expr[CodecType]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[(String, ClientMethod[Node])] = {
-    import c.universe._
+    import c.universe.Quasiquote
 
-    val liftedMethod = method.lift
     val encodeArguments = generateEncodeArguments[Node, CodecType, Context](c, ref)(method, codec)
     val decodeResult = generateDecodeResult[Node, CodecType, Effect](c, ref)(method, codec)
-    val name = q"${liftedMethod.name}"
-    val resultType = q"${liftedMethod.resultType}"
-    val parameterNames = q"..${liftedMethod.parameters.flatMap(_.map(_.name))}"
-    val parameterTypes = q"..${liftedMethod.parameters.flatMap(_.map(_.dataType))}"
-    val usesContext = q"${methodUsesContext[Context](ref)(method)}"
+    val name = q"${method.lift.name}"
     logBoundMethod[ApiType](c, ref)(method, encodeArguments, decodeResult)
     c.Expr(q"""
       $name -> ClientMethod(
         $encodeArguments,
         $decodeResult,
         $name,
-        $resultType,
-        $parameterNames,
-        $parameterTypes,
-        $usesContext
+        ${method.lift.resultType},
+        ..${method.lift.parameters.flatMap(_.map(_.name))},
+        ..${method.lift.parameters.flatMap(_.map(_.dataType))},
+        ${methodUsesContext[Context](ref)(method)}
       )
     """)
   }
