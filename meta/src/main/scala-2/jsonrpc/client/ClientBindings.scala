@@ -94,7 +94,7 @@ private[jsonrpc] case object ClientBindings {
     CodecType <: Codec[Node]: ref.c.WeakTypeTag,
     Context: ref.c.WeakTypeTag
   ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[CodecType]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
-    import ref.c.universe._
+    import ref.c.universe.{weakTypeOf, Quasiquote}
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
@@ -102,10 +102,21 @@ private[jsonrpc] case object ClientBindings {
     }
     val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
-//    // Create encode arguments function
-//    //   (arguments: Seq[Any]) => Seq[Node]
-//    '
-//    { (arguments: Seq[Any]) =>
+    // Create encode arguments function
+    q"""
+      (arguments: Seq[Any]) => ${
+//      // Create the method argument lists by encoding corresponding argument values into nodes
+//      //   List(
+//      //     codec.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
+//      //     codec.encode[Parameter1Type](arguments(1).asInstanceOf[Parameter1Type]),
+//      //     ...
+//      //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
+//      //   ): List[Node]
+        ""
+      }
+    """
+    //   (arguments: Seq[Any]) => Seq[Node]
+//    '{ (arguments: Seq[Any]) =>
 //      $
 //      {
 //      // Create the method argument lists by encoding corresponding argument values into nodes
