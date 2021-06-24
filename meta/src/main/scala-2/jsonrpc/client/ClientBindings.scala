@@ -43,13 +43,13 @@ private[jsonrpc] case object ClientBindings {
 
     // Detect and validate public methods in the API type
     val apiMethods = validApiMethods[ApiType, Effect[_]](ref)
-    val validMethods = apiMethods.flatMap(_.toOption)
-    val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
-    if (invalidMethodErrors.nonEmpty) {
-      ref.c.abort(
-        ref.c.enclosingPosition,
-        s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
-      )
+    val validMethods = apiMethods.flatMap(_.swap.toOption) match {
+      case Seq() => apiMethods.flatMap(_.toOption)
+      case errors =>
+        ref.c.abort(
+          ref.c.enclosingPosition,
+          s"Failed to bind API methods:\n${errors.map(error => s"  $error").mkString("\n")}"
+        )
     }
 
     // Generate bound API method bindings
@@ -89,9 +89,14 @@ private[jsonrpc] case object ClientBindings {
     """)
   }
 
-  private def generateEncodeArguments[Node: c.WeakTypeTag, CodecType <: Codec[Node]: c.WeakTypeTag, Context: c.WeakTypeTag](
-    c: blackbox.Context, ref: Reflection
-  )(method: ref.RefMethod, codec: c.Expr[CodecType] ): c.Expr[Seq[Any] => Seq[Node]] = {
+  private def generateEncodeArguments[
+    Node: c.WeakTypeTag,
+    CodecType <: Codec[Node]: c.WeakTypeTag,
+    Context: c.WeakTypeTag
+  ](
+    c: blackbox.Context,
+    ref: Reflection
+  )(method: ref.RefMethod, codec: c.Expr[CodecType]): c.Expr[Seq[Any] => Seq[Node]] = {
     import c.universe._
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -138,8 +143,11 @@ private[jsonrpc] case object ClientBindings {
   }
 
   private def generateDecodeResult[Node: c.WeakTypeTag, CodecType <: Codec[Node]: c.WeakTypeTag, Effect[_]](
-    c: blackbox.Context, ref: Reflection
-  )(method: ref.RefMethod, codec: c.Expr[CodecType])(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Node => Any] = {
+    c: blackbox.Context,
+    ref: Reflection
+  )(method: ref.RefMethod, codec: c.Expr[CodecType])(implicit
+    effectType: c.WeakTypeTag[Effect[_]]
+  ): c.Expr[Node => Any] = {
     import c.universe._
 
 //    // Create decode result function
