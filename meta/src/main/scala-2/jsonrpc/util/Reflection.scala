@@ -56,14 +56,14 @@ private[jsonrpc] final case class Reflection(c: Context) {
 
   private def method(methodSymbol: MethodSymbol): RefMethod = {
     val typeParameters = methodSymbol.typeParams.map(_.asType).map { typeSymbol =>
-      RefParameter(typeSymbol.name.toString, typeSymbol.toType, false)
+      RefParameter(typeSymbol.name.toString, typeSymbol.toType.finalResultType, false)
     }
     val parameters = methodSymbol.paramLists.map(_.map { parameter =>
       RefParameter(parameter.name.toString, parameter.typeSignature, false)
     })
     RefMethod(
       methodSymbol.name.toString,
-      methodSymbol.returnType,
+      methodSymbol.returnType.finalResultType,
       parameters,
       typeParameters,
       publicMethod(methodSymbol),
