@@ -59,7 +59,7 @@ private[jsonrpc] case object HandlerBindings {
 
     // Generate bound API method bindings
     val handlerMethods = validMethods.map { method =>
-      q" ${method.name} -> ${generateHandlerMethod[Node, CodecType, Effect, Context, ApiType](c, ref)(method, codec, backend, api)}"
+      q"${method.name} -> ${generateHandlerMethod[Node, CodecType, Effect, Context, ApiType](c, ref)(method, codec, backend, api)}"
     }
     c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]](q"""
       Seq(..$handlerMethods).toMap

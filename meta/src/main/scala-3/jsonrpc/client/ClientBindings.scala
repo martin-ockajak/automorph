@@ -41,11 +41,11 @@ private[jsonrpc] case object ClientBindings:
     // Detect and validate public methods in the API type
     val apiMethods = validApiMethods[ApiType, Effect](ref)
     val validMethods = apiMethods.flatMap(_.toOption)
-    val invalidMethodErrors = apiMethods.flatMap(_.swap.toOption)
-    if invalidMethodErrors.nonEmpty then
-      ref.q.reflect.report.throwError(
-        s"Failed to bind API methods:\n${invalidMethodErrors.map(error => s"  $error").mkString("\n")}"
-      )
+    apiMethods.flatMap(_.swap.toOption) match
+      case Seq() => ()
+      case errors => ref.q.reflect.report.throwError(
+          s"Failed to bind API methods:\n${errors.map(error => s"  $error").mkString("\n")}"
+        )
 
     // Generate bound API method bindings
     val clientMethods = Expr.ofSeq(validMethods.map { method =>
