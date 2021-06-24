@@ -74,16 +74,18 @@ private[jsonrpc] case object HandlerBindings:
   ): Expr[(String, HandlerMethod[Node, Effect, Context])] =
     given Quotes = ref.q
 
-    val liftedMethod = method.lift
+    val name = Expr(method.lift.name)
     val invoke = generateInvoke[Node, CodecType, Effect, Context, ApiType](ref)(method, codec, backend, api)
-    val name = Expr(liftedMethod.name)
-    val resultType = Expr(liftedMethod.resultType)
-    val parameterNames = Expr(liftedMethod.parameters.flatMap(_.map(_.name)))
-    val parameterTypes = Expr(liftedMethod.parameters.flatMap(_.map(_.dataType)))
-    val usesContext = Expr(methodUsesContext[Context](ref)(method))
     logBoundMethod[ApiType](ref)(method, invoke)
     '{
-      $name -> HandlerMethod($invoke, $name, $resultType, $parameterNames, $parameterTypes, $usesContext)
+      $name -> HandlerMethod(
+        $invoke,
+        $name,
+        ${Expr(method.lift.resultType)},
+        ${Expr(method.lift.parameters.flatMap(_.map(_.name)))},
+        ${Expr(method.lift.parameters.flatMap(_.map(_.dataType)))},
+        ${Expr(methodUsesContext[Context](ref)(method))}
+      )
     }
 
   private def generateInvoke[
