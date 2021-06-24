@@ -48,8 +48,8 @@ private[jsonrpc] case object HandlerBindings:
     val validMethods = apiMethods.flatMap(_.swap.toOption) match
       case Seq() => apiMethods.flatMap(_.toOption)
       case errors => ref.q.reflect.report.throwError(
-        s"Failed to bind API methods:\n${errors.map(error => s"  $error").mkString("\n")}"
-      )
+          s"Failed to bind API methods:\n${errors.map(error => s"  $error").mkString("\n")}"
+        )
 
     // Generate bound API method bindings
     val handlerMethods = Expr.ofSeq(validMethods.map { method =>
@@ -111,7 +111,7 @@ private[jsonrpc] case object HandlerBindings:
 
     // Create invoke function
     //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
-    '{ (argumentNodes: Seq[Node], context: Context) =>
+    '{ (argumentNodes, context) =>
       ${
         // Create the method argument lists by decoding corresponding argument nodes into values
         //   List(List(

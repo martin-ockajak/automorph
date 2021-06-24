@@ -93,7 +93,7 @@ private[jsonrpc] case object ClientBindings:
 
     // Create encode arguments function
     //   (arguments: Seq[Any]) => Seq[Node]
-    '{ (arguments: Seq[Any]) =>
+    '{ arguments =>
       ${
         // Create the method argument lists by encoding corresponding argument values into nodes
         //   List(
@@ -128,7 +128,7 @@ private[jsonrpc] case object ClientBindings:
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
     val resultValueType = unwrapType[Effect](ref)(method.resultType)
-    '{ (resultNode: Node) =>
+    '{ resultNode =>
       ${
         call(ref.q, codec.asTerm, "decode", List(resultValueType), List(List('{ resultNode }.asTerm))).asExprOf[Any]
       }
