@@ -132,7 +132,7 @@ private[jsonrpc] case object ClientBindings {
 
   private def generateDecodeResult[
     C <: blackbox.Context,
-    Node: ref.c.WeakTypeTag,
+    Node,
     CodecType <: Codec[Node]: ref.c.WeakTypeTag,
     Effect[_]
   ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[CodecType])(implicit
