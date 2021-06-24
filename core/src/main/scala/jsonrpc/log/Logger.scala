@@ -13,7 +13,7 @@ import org.slf4j.{LoggerFactory, MDC}
  * @param underlying underlying [[https://www.javadoc.io/doc/org.slf4j/slf4j-api/1.7.30/org/slf4j/Logger.html SLF4J logger]]
  */
 @SerialVersionUID(782158461L)
-private[jsonrpc] final case class Logger private (private val underlying: slf4j.Logger) {
+final private[jsonrpc] case class Logger private (private val underlying: slf4j.Logger) {
 
   type Not[T] = T => Nothing
   type Or[T, U] = Not[Not[T] with Not[U]]
@@ -132,11 +132,11 @@ private[jsonrpc] final case class Logger private (private val underlying: slf4j.
       removeDiagnosticContext(iterableProperties)
     }
 
-  private def unpackProperties[T](properties: => T): Iterable[(String, Any)] =
-    properties match {
-      case product: Product      => productProperties(product)
-      case iterable: Iterable[_] => iterable.asInstanceOf[Iterable[(String, Any)]]
-    }
+  private def unpackProperties[T](properties: => T): Iterable[(String, Any)] = properties match {
+    case product: Product      => productProperties(product)
+    case iterable: Iterable[_] => iterable.asInstanceOf[Iterable[(String, Any)]]
+    case _                     => Iterable.empty
+  }
 
   private def productProperties(product: Product): Map[String, Any] =
     product.productElementNames.map(_.capitalize).zip(product.productIterator).toMap
