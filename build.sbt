@@ -139,7 +139,7 @@ lazy val finagle = (project in file("server/finagle")).dependsOn(
 ).settings(
   name := "json-rpc-finagle",
   libraryDependencies ++= Seq(
-    ("com.twitter" % "finagle-http" % "21.5.0").cross(CrossVersion.for3Use2_13)
+    ("com.twitter" % "finagle-http" % "21.6.0").cross(CrossVersion.for3Use2_13)
   )
 )
 
