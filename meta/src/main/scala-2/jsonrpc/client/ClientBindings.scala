@@ -52,13 +52,12 @@ private[jsonrpc] case object ClientBindings {
       )
     }
 
-//    // Generate bound API method bindings
-//    val clientMethods = Expr.ofSeq(validMethods.map { method =>
-//      generateClientMethod[Node, CodecType, Effect, Context, ApiType](ref, method, codec)
-//    })
-//    '{ $clientMethods.toMap[String, ClientMethod[Node]] }
+    // Generate bound API method bindings
+    val clientMethods = validMethods.map { method =>
+      generateClientMethod[Node, CodecType, Effect, Context, ApiType](c, ref)(method, codec)
+    }
     c.Expr[Map[String, ClientMethod[Node]]](q"""
-      Map.empty
+      Seq(..$clientMethods).toMap
     """)
   }
 
@@ -68,11 +67,11 @@ private[jsonrpc] case object ClientBindings {
     Effect[_],
     Context: ref.c.WeakTypeTag,
     ApiType: ref.c.WeakTypeTag
-  ](ref: Reflection)(
+  ](c: blackbox.Context, ref: Reflection)(
     method: ref.RefMethod,
-    codec: ref.c.Expr[CodecType]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(String, ClientMethod[Node])] = {
-    import ref.c.universe._
+    codec: c.Expr[CodecType]
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[(String, ClientMethod[Node])] = {
+    import c.universe._
 
     val liftedMethod = method.lift
 //    val encodeArguments = generateEncodeArgumentsFunction[Node, CodecType, Context](ref, method, codec)

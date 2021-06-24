@@ -57,14 +57,12 @@ private[jsonrpc] case object HandlerBindings {
       )
     }
 
-//    // Generate bound API method bindings
-//    val handlerMethods = Expr.ofSeq(validMethods.map { method =>
-//      generateHandlerMethod[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
-//    })
-//    '
-//    {$handlerMethods.toMap[String, HandlerMethod[Node, Effect, Context]]}
+    // Generate bound API method bindings
+    val handlerMethods = validMethods.map { method =>
+      generateHandlerMethod[Node, CodecType, Effect, Context, ApiType](c, ref)(method, codec, backend, api)
+    }
     c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]](q"""
-      Map.empty
+      Seq(..$handlerMethods).toMap
     """)
   }
 
@@ -74,13 +72,13 @@ private[jsonrpc] case object HandlerBindings {
     Effect[_],
     Context: ref.c.WeakTypeTag,
     ApiType: ref.c.WeakTypeTag
-  ](ref: Reflection)(
+  ](c: blackbox.Context, ref: Reflection)(
     method: ref.RefMethod,
-    codec: ref.c.Expr[CodecType],
-    backend: ref.c.Expr[Backend[Effect]],
-    api: ref.c.Expr[ApiType]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(String, HandlerMethod[Node, Effect, Context])] = {
-    import ref.c.universe._
+    codec: c.Expr[CodecType],
+    backend: c.Expr[Backend[Effect]],
+    api: c.Expr[ApiType]
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[(String, HandlerMethod[Node, Effect, Context])] = {
+    import c.universe._
 
     val liftedMethod = method.lift
 //    val invoke = generateInvokeFunction[Node, CodecType, Effect, Context, ApiType](ref, method, codec, backend, api)
