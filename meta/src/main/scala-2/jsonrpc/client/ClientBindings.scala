@@ -1,7 +1,7 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.protocol.MethodBindings.{methodSignature, methodUsesContext, validApiMethods}
+import jsonrpc.protocol.MethodBindings.{methodSignature, methodUsesContext, unwrapType, validApiMethods}
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
 import scala.language.experimental.macros
@@ -146,19 +146,15 @@ private[jsonrpc] case object ClientBindings {
   )(method: ref.RefMethod, codec: c.Expr[CodecType])(implicit
     effectType: c.WeakTypeTag[Effect[_]]
   ): c.Expr[Node => Any] = {
+    import c.universe.{weakTypeOf, Quasiquote}
     import c.universe._
 
-//    // Create decode result function
-//    //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
-//    val resultValueType = unwrapType[Effect](ref, method.resultType)
-//    '
-//    { (resultNode: Node) =>
-//      $
-//      {
-//      call(ref.q, codec.asTerm, "decode", List(resultValueType), List(List('
-//        {resultNode}.asTerm))).asExprOf[Any]
-//      }
-//    }
+    // Create decode result function
+    //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
+//    val resultValueType = tq"${unwrapType[Effect[_]](ref)(method.resultType)}"
+//    q"""
+//      resultNode => $codec.decode[$resultValueType](resultNode)
+//    """
     null
   }
 

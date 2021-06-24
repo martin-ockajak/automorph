@@ -1,7 +1,6 @@
 package jsonrpc.protocol
 
 import jsonrpc.util.Reflection
-import scala.reflect.macros.blackbox.Context
 
 /** Method bindings code introspection. */
 private[jsonrpc] case object MethodBindings {
@@ -63,6 +62,7 @@ private[jsonrpc] case object MethodBindings {
    *
    * @param ref reflection context
    * @param method method descriptor
+   * @tparam C macro context type
    * @tparam ApiType API type
    * @return method description
    */
