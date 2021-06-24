@@ -38,7 +38,7 @@ private[jsonrpc] case object ClientBindings {
   ](c: blackbox.Context)(codec: c.Expr[CodecType])(implicit
     effectType: c.WeakTypeTag[Effect[_]]
   ): c.Expr[Map[String, ClientMethod[Node]]] = {
-    import c.universe._
+    import c.universe.Quasiquote
     val ref = Reflection(c)
 
     // Detect and validate public methods in the API type

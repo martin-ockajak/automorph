@@ -43,7 +43,7 @@ private[jsonrpc] case object HandlerBindings {
     backend: c.Expr[Backend[Effect]],
     api: c.Expr[ApiType]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]] = {
-    import c.universe._
+    import c.universe.Quasiquote
     val ref = Reflection(c)
 
     // Detect and validate public methods in the API type
