@@ -42,8 +42,6 @@ lazy val spi = project.settings(
 )
 lazy val meta = project.dependsOn(
   spi, testBase % Test
-).settings(
-  name := "json-rpc-meta"
 )
 lazy val core = project.dependsOn(
   spi, meta, testBase % Test
