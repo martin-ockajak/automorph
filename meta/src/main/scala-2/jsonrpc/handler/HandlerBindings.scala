@@ -155,15 +155,11 @@ private[jsonrpc] case object HandlerBindings {
   private def logBoundMethod[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[C])(
     method: ref.RefMethod,
     invoke: ref.c.Expr[Any]
-  ): Unit = {
-    import ref.c.universe.showCode
-
-    if (Option(System.getProperty(debugProperty)).nonEmpty) {
-      println(
-        s"""${methodSignature[C, ApiType](ref)(method)} =
-          |  ${showCode(invoke.tree)}
-          |""".stripMargin
-      )
-    }
+  ): Unit = if (Option(System.getProperty(debugProperty)).nonEmpty) {
+    println(
+      s"""${methodSignature[C, ApiType](ref)(method)} =
+        |  ${ref.c.universe.showCode(invoke.tree)}
+        |""".stripMargin
+    )
   }
 }

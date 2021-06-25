@@ -146,5 +146,5 @@ private[jsonrpc] case object ClientBindings:
         s"""${methodSignature[ApiType](ref)(method)} =
           |  ${encodeArguments.asTerm.show(using Printer.TreeShortCode)}
           |  ${decodeResult.asTerm.show(using Printer.TreeShortCode)}
-          |  """.stripMargin
+          |""".stripMargin
       )

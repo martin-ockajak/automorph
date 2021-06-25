@@ -153,16 +153,12 @@ private[jsonrpc] case object ClientBindings {
     method: ref.RefMethod,
     encodeArguments: ref.c.Expr[Any],
     decodeResult: ref.c.Expr[Any]
-  ): Unit = {
-    import ref.c.universe.showCode
-
-    if (Option(System.getProperty(debugProperty)).nonEmpty) {
-      println(
-        s"""${methodSignature[C, ApiType](ref)(method)} =
-          |  ${showCode(encodeArguments.tree)}
-          |  ${showCode(decodeResult.tree)}
-          |  """.stripMargin
-      )
-    }
+  ): Unit = if (Option(System.getProperty(debugProperty)).nonEmpty) {
+    println(
+      s"""${methodSignature[C, ApiType](ref)(method)} =
+        |  ${ref.c.universe.showCode(encodeArguments.tree)}
+        |  ${ref.c.universe.showCode(decodeResult.tree)}
+        |""".stripMargin
+    )
   }
 }
