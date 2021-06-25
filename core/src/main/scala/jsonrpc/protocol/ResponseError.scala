@@ -1,7 +1,5 @@
 package jsonrpc.protocol
 
-import java.io.IOException
-import jsonrpc.protocol.ErrorType
 import jsonrpc.protocol.ErrorType.mandatory
 import jsonrpc.spi.MessageError
 
