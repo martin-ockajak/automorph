@@ -1,7 +1,7 @@
 package jsonrpc.server.http
 
 import io.undertow.server.handlers.ResponseCodeHandler
-import io.undertow.server.{HttpHandler, HttpServerExchange}
+import io.undertow.server.HttpHandler
 import io.undertow.{Handlers, Undertow}
 import java.lang.Runtime
 import java.net.InetSocketAddress

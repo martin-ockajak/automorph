@@ -25,7 +25,7 @@ final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
   override def mediaType: String = "application/msgpack"
 
   override def serialize(message: spi.Message[Msg]): ArraySeq.ofByte =
-    ArraySeq.ofByte(custom.writeToByteArray(fromSpi(message)))
+    new ArraySeq.ofByte(custom.writeToByteArray(fromSpi(message)))
 
   override def deserialize(data: ArraySeq.ofByte): spi.Message[Msg] =
     custom.read[Message](data.unsafeArray).toSpi

@@ -9,7 +9,6 @@ import jsonrpc.protocol.ResponseError
 import jsonrpc.log.Logging
 import jsonrpc.server.http.UndertowJsonRpcHandler.defaultErrorStatus
 import jsonrpc.protocol.ErrorType.ErrorType
-import jsonrpc.spi.Backend
 import jsonrpc.util.Encoding
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
@@ -104,5 +103,7 @@ case object UndertowJsonRpcHandler {
     ErrorType.InternalError -> StatusCodes.INTERNAL_SERVER_ERROR,
     ErrorType.IOError -> StatusCodes.INTERNAL_SERVER_ERROR,
     ErrorType.ApplicationError -> StatusCodes.INTERNAL_SERVER_ERROR
-  ).withDefaultValue(StatusCodes.INTERNAL_SERVER_ERROR).map((errorType, statusCode) => errorType.code -> statusCode)
+  ).withDefaultValue(StatusCodes.INTERNAL_SERVER_ERROR).map { case (errorType, statusCode) =>
+    errorType.code -> statusCode
+  }
 }
