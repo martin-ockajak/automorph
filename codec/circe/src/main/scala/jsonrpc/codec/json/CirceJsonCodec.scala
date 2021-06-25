@@ -21,7 +21,7 @@ final case class CirceJsonCodec[Custom <: CirceCustom](
 
   private val charset = StandardCharsets.UTF_8
   private implicit val messageEncoder: Encoder[Message[Json]] = deriveEncoder[Message[Json]]
-  private implicit val messageDecoder: )Decoder[Message[Json]] = deriveDecoder[Message[Json]]
+  private implicit val messageDecoder: Decoder[Message[Json]] = deriveDecoder[Message[Json]]
 
   override def mediaType: String = "application/json"
 
