@@ -9,10 +9,7 @@ import jsonrpc.protocol.ResponseError
 import jsonrpc.log.Logging
 import jsonrpc.server.http.FinagleJsonRpcService.defaultErrorStatus
 import jsonrpc.protocol.ErrorType.ErrorType
-import jsonrpc.spi.Backend
-import jsonrpc.util.Encoding.toArraySeq
 import scala.collection.immutable.ArraySeq
-import scala.util.{Failure, Success, Try}
 
 /**
  * JSON-RPC HTTP service for Finagle RPC system.
@@ -28,7 +25,7 @@ import scala.util.{Failure, Success, Try}
  * @tparam Effect effect type
  */
 final case class FinagleJsonRpcService[Effect[_]](
-  handler: Handler[?, ?, Effect, Request],
+  handler: Handler[_, _, Effect, Request],
   errorStatus: Int => Status = defaultErrorStatus
 ) extends Service[Request, Response] with Logging {
 
@@ -45,12 +42,13 @@ final case class FinagleJsonRpcService[Effect[_]](
       backend.either(handler.processRequest(rawRequest)(using request)),
       _.fold(
         error => serverError(error, request),
-        result =>
+        result => {
           // Send the response
           val response = result.response.getOrElse(ArraySeq.ofByte(Array.empty))
           val status = result.errorCode.map(errorStatus).getOrElse(Status.Ok)
           val reader = Reader.fromBuf(Buf.ByteArray.Owned(response.unsafeArray))
-            createResponse(request, reader, status)
+          createResponse(request, reader, status)
+        }
       )
     ))
   }
@@ -98,5 +96,7 @@ case object FinagleJsonRpcService {
     ErrorType.InternalError -> Status.InternalServerError,
     ErrorType.IOError -> Status.InternalServerError,
     ErrorType.ApplicationError -> Status.InternalServerError
-  ).withDefaultValue(Status.InternalServerError).map((errorType, status) => errorType.code -> status)
+  ).withDefaultValue(Status.InternalServerError).map { case (errorType, status) =>
+    errorType.code -> status
+  }
 }

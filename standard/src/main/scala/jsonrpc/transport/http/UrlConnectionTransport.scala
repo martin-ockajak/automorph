@@ -33,10 +33,10 @@ case class UrlConnectionTransport(
     Using.resource(connection.getInputStream) { inputStream =>
       val outputStream = ByteArrayOutputStream()
       val buffer = Array.ofDim[Byte](bufferSize)
-      LazyList.iterate(inputStream.read(buffer))(length =>
+      LazyList.iterate(inputStream.read(buffer)) { length =>
         outputStream.write(buffer, 0, length)
-          inputStream.read(buffer)
-      ).takeWhile(_ >= 0).take(maxReadIterations)
+        inputStream.read(buffer)
+      }.takeWhile(_ >= 0).take(maxReadIterations)
       ArraySeq.ofByte(buffer)
     }
   }

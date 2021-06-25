@@ -2,8 +2,8 @@ package jsonrpc.transport.http
 
 import jsonrpc.spi.{Backend, Transport}
 import scala.collection.immutable.ArraySeq
-import sttp.client3.{Identity, PartialRequest, Request, SttpApi, SttpBackend}
-import sttp.model.{Header, MediaType, Method, Uri}
+import sttp.client3.{Identity, PartialRequest, Request, Response, SttpApi, SttpBackend}
+import sttp.model.{Header, Method, Uri}
 
 /**
  * STTP HTTP transport using the specified STTP backend.
@@ -20,7 +20,7 @@ case class SttpTransport[Effect[_]](
   url: Uri,
   method: Method,
   contentType: String,
-  sttpBackend: SttpBackend[Effect, ?],
+  sttpBackend: SttpBackend[Effect, _],
   backend: Backend[Effect]
 ) extends Transport[Effect, PartialRequest[Either[String, String], Any]] with SttpApi {
 
@@ -31,7 +31,7 @@ case class SttpTransport[Effect[_]](
     val httpRequest = setupHttpRequest(request, context).response(asByteArray)
     backend.flatMap(
       httpRequest.send(sttpBackend),
-      _.body.fold(
+      response => response.body.fold(
         error => backend.failed(IllegalStateException(error)),
         response => backend.pure(ArraySeq.ofByte(response))
       )
@@ -43,7 +43,7 @@ case class SttpTransport[Effect[_]](
     context: Option[PartialRequest[Either[String, String], Any]]
   ): Effect[Unit] = {
     val httpRequest = setupHttpRequest(request, context).response(ignore)
-    backend.map(httpRequest.send(sttpBackend), _.body)
+    backend.map(httpRequest.send(sttpBackend), (_: Response[Unit]) => ())
   }
 
   private def setupHttpRequest(

@@ -26,7 +26,7 @@ import scala.collection.immutable.ArraySeq
  * @tparam Effect effect type
  */
 case class NanoHttpdServer[Effect[_]] private (
-  handler: Handler[?, ?, Effect, IHTTPSession],
+  handler: Handler[_, _, Effect, IHTTPSession],
   effectRunSync: Effect[Response] => Response,
   port: Int,
   readTimeout: Int,
@@ -51,11 +51,12 @@ case class NanoHttpdServer[Effect[_]] private (
       backend.either(handler.processRequest(request)(using session)),
       _.fold(
         error => createServerError(error, session),
-        result =>
+        result => {
           // Send the response
           val response = result.response.getOrElse(ArraySeq.ofByte(Array.empty))
           val status = result.errorCode.map(errorStatus).getOrElse(Status.OK)
-            createResponse(response, status, session)
+          createResponse(response, status, session)
+        }
       )
     ))
   }
@@ -99,7 +100,7 @@ case object NanoHttpdServer {
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
    */
   def apply[Effect[_]](
-    handler: Handler[?, ?, Effect, IHTTPSession],
+    handler: Handler[_, _, Effect, IHTTPSession],
     effectRunSync: Effect[Response] => Response,
     port: Int = 8080,
     readTimeout: Int = 5000,

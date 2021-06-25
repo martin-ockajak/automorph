@@ -28,7 +28,7 @@ import scala.util.Try
  * @tparam Effect effect type
  */
 final case class UndertowJsonRpcHandler[Effect[_]](
-  handler: Handler[?, ?, Effect, HttpServerExchange],
+  handler: Handler[_, _, Effect, HttpServerExchange],
   effectRunAsync: Effect[Any] => Unit,
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpHandler with Logging {
