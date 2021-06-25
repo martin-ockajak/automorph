@@ -1,9 +1,7 @@
 package jsonrpc.server.http
 
 import java.io.ByteArrayInputStream
-import java.nio.ByteBuffer
 import jsonrpc.Handler
-import jsonrpc.handler.HandlerResult
 import jsonrpc.log.Logging
 import jsonrpc.protocol.ErrorType.ErrorType
 import jsonrpc.protocol.ResponseError
@@ -48,8 +46,8 @@ case class NanoHttpdServer[Effect[_]] private (
 
     // Process the request
     effectRunSync(backend.map(
-      backend.either(handler.processRequest(request)(using session)),
-      _.fold(
+      backend.either(handler.processRequest(request)(session)),
+      (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) => handlerResult.fold(
         error => createServerError(error, session),
         result => {
           // Send the response
@@ -71,8 +69,8 @@ case class NanoHttpdServer[Effect[_]] private (
   private def createResponse(message: ArraySeq.ofByte, status: Status, session: IHTTPSession): Response = {
     val client = clientAddress(session)
     logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> status.getRequestStatus.toString))
-    val inputStream = ByteArrayInputStream(message.unsafeArray)
-    val response = newFixedLengthResponse(status, handler.codec.mediaType, inputStream, message.size)
+    val inputStream = new ByteArrayInputStream(message.unsafeArray)
+    val response = newFixedLengthResponse(status, handler.codec.mediaType, inputStream, message.size.toLong)
     logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> status.getRequestStatus.toString))
     response
   }
@@ -105,10 +103,11 @@ case object NanoHttpdServer {
     port: Int = 8080,
     readTimeout: Int = 5000,
     errorStatus: Int => Status = defaultErrorStatus
-  ): NanoHttpdServer[Effect] =
+  ): NanoHttpdServer[Effect] = {
     val server = new NanoHttpdServer(handler, effectRunSync, port, readTimeout, errorStatus)
     server.start()
     server
+  }
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus = Map(

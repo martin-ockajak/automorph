@@ -31,9 +31,9 @@ case class SttpTransport[Effect[_]](
     val httpRequest = setupHttpRequest(request, context).response(asByteArray)
     backend.flatMap(
       httpRequest.send(sttpBackend),
-      response => response.body.fold(
-        error => backend.failed(IllegalStateException(error)),
-        response => backend.pure(ArraySeq.ofByte(response))
+      (response: Response[Either[String, Array[Byte]]]) => response.body.fold(
+        error => backend.failed(new IllegalStateException(error)),
+        response => backend.pure(new ArraySeq.ofByte(response))
       )
     )
   }

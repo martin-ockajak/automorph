@@ -5,10 +5,11 @@ import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, StatusCodes}
 import java.nio.ByteBuffer
 import jsonrpc.Handler
-import jsonrpc.protocol.ResponseError
+import jsonrpc.handler.HandlerResult
 import jsonrpc.log.Logging
-import jsonrpc.server.http.UndertowJsonRpcHandler.defaultErrorStatus
 import jsonrpc.protocol.ErrorType.ErrorType
+import jsonrpc.protocol.ResponseError
+import jsonrpc.server.http.UndertowJsonRpcHandler.defaultErrorStatus
 import jsonrpc.util.Encoding
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
@@ -45,7 +46,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
           // Process the request
           effectRunAsync(backend.map(
             backend.either(handler.processRequest(ArraySeq.ofByte(request))(exchange)),
-            _.fold(
+            (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) => handlerResult.fold(
               error => sendServerError(error, exchange),
               result => {
                 // Send the response

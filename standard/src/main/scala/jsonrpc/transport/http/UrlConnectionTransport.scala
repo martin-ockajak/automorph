@@ -1,7 +1,7 @@
 package jsonrpc.transport.http
 
 import java.io.ByteArrayOutputStream
-import java.net.{HttpURLConnection, URL, URLConnection}
+import java.net.{HttpURLConnection, URL}
 import jsonrpc.backend.NoBackend.Identity
 import jsonrpc.spi.Transport
 import jsonrpc.transport.http.UrlConnectionTransport.HttpProperties
@@ -31,13 +31,13 @@ case class UrlConnectionTransport(
   override def call(request: ArraySeq.ofByte, context: Option[HttpProperties]): Identity[ArraySeq.ofByte] = {
     send(request, context)
     Using.resource(connection.getInputStream) { inputStream =>
-      val outputStream = ByteArrayOutputStream()
+      val outputStream = new ByteArrayOutputStream()
       val buffer = Array.ofDim[Byte](bufferSize)
       LazyList.iterate(inputStream.read(buffer)) { length =>
         outputStream.write(buffer, 0, length)
         inputStream.read(buffer)
       }.takeWhile(_ >= 0).take(maxReadIterations)
-      ArraySeq.ofByte(buffer)
+      new ArraySeq.ofByte(buffer)
     }
   }
 
@@ -64,11 +64,14 @@ case class UrlConnectionTransport(
     connection.setRequestMethod(context.method)
     connection.setConnectTimeout(context.connectTimeout)
     connection.setReadTimeout(context.readTimeout)
-    context.headers.foreach((key, value) => connection.setRequestProperty(key, value))
+    context.headers.foreach { case (key, value) =>
+      connection.setRequestProperty(key, value)
+    }
   }
 
-  private def clearProperties(context: HttpProperties): Unit =
-    context.headers.foreach((key, _) => connection.setRequestProperty(key, null))
+  private def clearProperties(context: HttpProperties): Unit = context.headers.foreach { case (key, _) =>
+    connection.setRequestProperty(key, null)
+  }
 
   private def connect(): HttpURLConnection = {
     // Open new HTTP connection

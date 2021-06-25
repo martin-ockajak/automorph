@@ -41,7 +41,7 @@ final case class FinagleJsonRpcService[Effect[_]](
     // Process the request
     asFuture(backend.map(
       backend.either(handler.processRequest(rawRequest)(request)),
-      (response: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) => response.fold(
+      (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) => handlerResult.fold(
         error => serverError(error, request),
         result => {
           // Send the response
