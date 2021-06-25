@@ -1,25 +1,11 @@
 package jsonrpc.codec.json
 
 import jsonrpc.codec.common.UpickleCustom
-import jsonrpc.spi.Codec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import ujson.Value
 
-/**
- * UPickle JSON codec plugin code generation.
- *
- * @tparam Custom customized Upickle reader and writer implicits instance type
- */
-private[jsonrpc] trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Codec[Value] {
-  this: UpickleJsonCodec[Custom] =>
-
-  override def encode[T](value: T): Value = UpickleJsonCodecMeta.encode(custom, value)
-
-  override def decode[T](node: Value): T = UpickleJsonCodecMeta.decode(custom, node)
-}
-
-object UpickleJsonCodecMeta {
+private [jsonrpc] object UpickleJsonCodecMacros {
 
   def encode[Custom <: UpickleCustom, T](custom: Custom, value: T): Value = macro encodeExpr[Custom, T]
 

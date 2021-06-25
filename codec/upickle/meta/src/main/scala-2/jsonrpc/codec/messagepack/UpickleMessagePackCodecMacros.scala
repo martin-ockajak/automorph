@@ -1,25 +1,11 @@
 package jsonrpc.codec.messagepack
 
 import jsonrpc.codec.common.UpickleCustom
-import jsonrpc.spi.Codec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox.Context
 import upack.Msg
 
-/**
- * UPickle JSON codec plugin code generation.
- *
- * @tparam Custom customized Upickle reader and writer implicits instance type
- */
-private[jsonrpc] trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends Codec[Msg] {
-  this: UpickleMessagePackCodec[Custom] =>
-
-  override def encode[T](value: T): Msg = UpickleMessagePackCodecMeta.encode(custom, value)
-
-  override def decode[T](node: Msg): T = UpickleMessagePackCodecMeta.decode(custom, node)
-}
-
-object UpickleMessagePackCodecMeta {
+private[jsonrpc] object UpickleMessagePackCodecMacros {
 
   def encode[Custom <: UpickleCustom, T](custom: Custom, value: T): Msg = macro encodeExpr[Custom, T]
 

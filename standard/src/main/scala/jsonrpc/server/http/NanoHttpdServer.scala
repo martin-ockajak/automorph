@@ -2,6 +2,7 @@ package jsonrpc.server.http
 
 import java.io.ByteArrayInputStream
 import jsonrpc.Handler
+import jsonrpc.handler.HandlerResult
 import jsonrpc.log.Logging
 import jsonrpc.protocol.ErrorType.ErrorType
 import jsonrpc.protocol.ResponseError
