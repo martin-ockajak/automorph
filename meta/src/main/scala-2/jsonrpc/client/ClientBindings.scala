@@ -153,7 +153,7 @@ private[jsonrpc] case object ClientBindings {
     method: ref.RefMethod,
     encodeArguments: ref.c.Expr[Any],
     decodeResult: ref.c.Expr[Any]
-  ): Unit = if (Option(System.getProperty(debugProperty)).nonEmpty) {
+  ): Unit = Option(System.getProperty(debugProperty)).foreach { _ =>
     println(
       s"""${methodSignature[C, ApiType](ref)(method)} =
         |  ${ref.c.universe.showCode(encodeArguments.tree)}

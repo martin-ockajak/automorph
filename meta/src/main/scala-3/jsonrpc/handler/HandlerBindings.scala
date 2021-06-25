@@ -154,7 +154,7 @@ private[jsonrpc] case object HandlerBindings:
   private def logBoundMethod[ApiType: Type](ref: Reflection)(method: ref.RefMethod, invoke: Expr[Any]): Unit =
     import ref.q.reflect.{asTerm, Printer}
 
-    if Option(System.getProperty(debugProperty)).nonEmpty then
+    Option(System.getProperty(debugProperty)).foreach
       println(
         s"""${methodSignature[ApiType](ref)(method)} =
           |  ${invoke.asTerm.show(using Printer.TreeShortCode)}
