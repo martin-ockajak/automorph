@@ -141,10 +141,11 @@ private[jsonrpc] case object ClientBindings:
   ): Unit =
     import ref.q.reflect.{asTerm, Printer}
 
-    Option(System.getProperty(debugProperty)).foreach
+    Option(System.getProperty(debugProperty)).foreach(_ =>
       println(
         s"""${methodSignature[ApiType](ref)(method)} =
           |  ${encodeArguments.asTerm.show(using Printer.TreeShortCode)}
           |  ${decodeResult.asTerm.show(using Printer.TreeShortCode)}
           |""".stripMargin
       )
+    )
