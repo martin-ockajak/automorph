@@ -14,6 +14,7 @@ private [jsonrpc] object UpickleJsonCodecMacros {
     value: c.Expr[T]
   ): c.Expr[Value] = {
     import c.universe.{weakTypeOf, Quasiquote}
+    weakTypeOf[Custom]
 
     val valueType = weakTypeOf[T]
     c.Expr[Value](q"""
@@ -26,6 +27,7 @@ private [jsonrpc] object UpickleJsonCodecMacros {
 
   def decodeExpr[Custom: c.WeakTypeTag, T: c.WeakTypeTag](c: Context)(custom: c.Expr[Custom], node: c.Expr[Value]): c.Expr[T] = {
     import c.universe.{weakTypeOf, Quasiquote}
+    weakTypeOf[Custom]
 
     val valueType = weakTypeOf[T]
     c.Expr[T](q"""

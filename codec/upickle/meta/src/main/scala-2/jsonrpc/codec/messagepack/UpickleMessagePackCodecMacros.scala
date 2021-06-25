@@ -11,6 +11,7 @@ private[jsonrpc] object UpickleMessagePackCodecMacros {
 
   def encodeExpr[Custom: c.WeakTypeTag, T: c.WeakTypeTag](c: Context)(custom: c.Expr[Custom], value: c.Expr[T]): c.Expr[Msg] = {
     import c.universe.{weakTypeOf, Quasiquote}
+    weakTypeOf[Custom]
 
     val valueType = weakTypeOf[T]
     c.Expr[Msg](q"""
@@ -26,6 +27,7 @@ private[jsonrpc] object UpickleMessagePackCodecMacros {
     node: c.Expr[Msg]
   ): c.Expr[T] = {
     import c.universe.{weakTypeOf, Quasiquote}
+    weakTypeOf[Custom]
 
     val valueType = weakTypeOf[T]
     c.Expr[T](q"""
