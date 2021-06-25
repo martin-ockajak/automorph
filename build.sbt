@@ -40,18 +40,18 @@ lazy val spi = project.settings(
     }
   }
 )
-lazy val meta = project.dependsOn(
-  spi, testBase % Test
+lazy val coreMeta = (project in file("core/meta")).dependsOn(
+  spi
 )
 lazy val core = project.dependsOn(
-  spi, meta, testBase % Test
+  coreMeta, testBase % Test
 ).settings(
   name := "json-rpc-core",
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-api" % "1.7.31"
   ),
-  Compile / packageBin / mappings ++= (meta / Compile / packageBin / mappings).value,
-  Compile / packageSrc / mappings ++= (meta / Compile / packageSrc / mappings).value
+  Compile / packageBin / mappings ++= (coreMeta / Compile / packageBin / mappings).value,
+  Compile / packageSrc / mappings ++= (coreMeta / Compile / packageSrc / mappings).value
 )
 lazy val standard = project.dependsOn(
   core, testCore % Test
@@ -60,22 +60,41 @@ lazy val standard = project.dependsOn(
 )
 
 // Codec
-lazy val upickle = (project in file("codec/upickle")).dependsOn(
-  spi, testBase % Test
+lazy val upickleMeta = (project in file("codec/upickle/meta")).dependsOn(
+  spi
 ).settings(
-  name := "json-rpc-upickle",
   libraryDependencies ++= Seq(
     "com.lihaoyi" %% "upickle" % "1.4.0"
   )
 )
+lazy val upickle = (project in file("codec/upickle")).dependsOn(
+  upickleMeta, testBase % Test
+).settings(
+  name := "json-rpc-upickle",
+  libraryDependencies ++= Seq(
+    "com.lihaoyi" %% "upickle" % "1.4.0"
+  ),
+  Compile / packageBin / mappings ++= (upickleMeta / Compile / packageBin / mappings).value,
+  Compile / packageSrc / mappings ++= (upickleMeta / Compile / packageSrc / mappings).value
+)
+lazy val circeMeta = (project in file("codec/circe/meta")).dependsOn(
+  spi
+).settings(
+  libraryDependencies ++= Seq(
+    "io.circe" %% "circe-parser" % "0.14.1",
+    "io.circe" %% "circe-generic" % "0.14.1"
+  )
+)
 lazy val circe = (project in file("codec/circe")).dependsOn(
-  spi, testBase % Test
+  circeMeta, testBase % Test
 ).settings(
   name := "json-rpc-circe",
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-parser" % "0.14.1",
     "io.circe" %% "circe-generic" % "0.14.1"
-  )
+  ),
+  Compile / packageBin / mappings ++= (circeMeta / Compile / packageBin / mappings).value,
+  Compile / packageSrc / mappings ++= (circeMeta / Compile / packageSrc / mappings).value
 )
 
 // Effect
