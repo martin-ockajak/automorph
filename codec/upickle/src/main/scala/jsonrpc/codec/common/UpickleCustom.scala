@@ -15,8 +15,9 @@ trait UpickleCustom extends AttributeTagged {
     implicitly[Writer[T]].comap[Option[T]](_.getOrElse(null.asInstanceOf[T]))
 
   implicit override def OptionReader[T: Reader]: Reader[Option[T]] =
-    new Reader.Delegate[Any, Option[T]](implicitly[Reader[T]].map(Some(_))):
+    new Reader.Delegate[Any, Option[T]](implicitly[Reader[T]].map(Some(_))) {
       override def visitNull(index: Int) = None
+    }
 
   implicit override val BooleanReader: Reader[Boolean] = new SimpleReader[Boolean] {
 
