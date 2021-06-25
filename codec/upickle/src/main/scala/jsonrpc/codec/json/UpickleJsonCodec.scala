@@ -25,7 +25,7 @@ final case class UpickleJsonCodec[Custom <: UpickleCustom](
   override def mediaType: String = "application/json"
 
   override def serialize(message: spi.Message[Value]): ArraySeq.ofByte =
-    ArraySeq.ofByte(custom.writeToByteArray(fromSpi(message)))
+    new ArraySeq.ofByte(custom.writeToByteArray(fromSpi(message)))
 
   override def deserialize(data: ArraySeq.ofByte): spi.Message[Value] =
     custom.read[Message](data.unsafeArray).toSpi

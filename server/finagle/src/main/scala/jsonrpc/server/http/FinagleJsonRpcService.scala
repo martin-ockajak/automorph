@@ -5,6 +5,7 @@ import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise}
 import jsonrpc.Handler
+import jsonrpc.handler.HandlerResult
 import jsonrpc.protocol.ResponseError
 import jsonrpc.log.Logging
 import jsonrpc.server.http.FinagleJsonRpcService.defaultErrorStatus
@@ -35,16 +36,16 @@ final case class FinagleJsonRpcService[Effect[_]](
     // Receive the request
     val client = clientAddress(request)
     logger.debug("Received HTTP request", Map("Client" -> client))
-    val rawRequest = ArraySeq.ofByte(Buf.ByteArray.Owned.extract(request.content))
+    val rawRequest = new ArraySeq.ofByte(Buf.ByteArray.Owned.extract(request.content))
 
     // Process the request
     asFuture(backend.map(
       backend.either(handler.processRequest(rawRequest)(request)),
-      _.fold(
+      (response: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) => response.fold(
         error => serverError(error, request),
         result => {
           // Send the response
-          val response = result.response.getOrElse(ArraySeq.ofByte(Array.empty))
+          val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
           val status = result.errorCode.map(errorStatus).getOrElse(Status.Ok)
           val reader = Reader.fromBuf(Buf.ByteArray.Owned(response.unsafeArray))
           createResponse(request, reader, status)
@@ -77,7 +78,7 @@ final case class FinagleJsonRpcService[Effect[_]](
 
   private def asFuture[T](value: Effect[T]): Future[T] = {
     val promise = Promise[T]()
-    backend.map(backend.either(value), _.fold(
+    backend.map(backend.either(value), (outcome: Either[Throwable, T]) => outcome.fold(
       error => promise.setException(error),
       result => promise.setValue(result)
     ))

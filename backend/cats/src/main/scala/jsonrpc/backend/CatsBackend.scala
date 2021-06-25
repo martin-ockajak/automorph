@@ -1,7 +1,6 @@
 package jsonrpc.backend
 
 import cats.effect.IO
-import jsonrpc.backend.CatsBackend
 import jsonrpc.spi.Backend
 
 /**
