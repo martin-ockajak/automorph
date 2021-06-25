@@ -3,8 +3,9 @@ package jsonrpc.handler
 import java.io.{ByteArrayInputStream, InputStream}
 import java.nio.ByteBuffer
 import jsonrpc.handler.{HandlerMethod, HandlerResult}
+import jsonrpc.protocol.ErrorType
 import jsonrpc.protocol.ResponseError
-import jsonrpc.protocol.ResponseError.{MethodNotFound, ParseError}
+import jsonrpc.protocol.ResponseError.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.protocol.{Request, Response, ResponseErrorx}
 import jsonrpc.spi.{Codec, Message}
 import jsonrpc.util.Encoding
@@ -43,7 +44,7 @@ private[jsonrpc] trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_
     Try(codec.deserialize(request)).fold(
       error =>
         errorResponse(
-          ParseError("Invalid request format", error),
+          ParseErrorException("Invalid request format", error),
           Message[Node](None, Some(Right(unknownId)), None, None, None, None)
         ),
       formedRequest => {
@@ -134,7 +135,7 @@ private[jsonrpc] trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_
           )
       )
     }.getOrElse {
-      errorResponse(MethodNotFound(s"Method not found: ${validRequest.method}", None.orNull), formedRequest)
+      errorResponse(MethodNotFoundException(s"Method not found: ${validRequest.method}", None.orNull), formedRequest)
     }
   }
 
@@ -186,7 +187,7 @@ private[jsonrpc] trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_
       case JsonRpcError(message, code, data, _) => ResponseErrorx(code, message, data.asInstanceOf[Option[Node]])
       case _                                    =>
         // Assemble error details
-        val code = ResponseError.fromException(error.getClass).code
+        val code = ErrorType.fromException(error.getClass).code
         val trace = ResponseError.trace(error)
         val message = trace.headOption.getOrElse("Unknown error")
         val data = Some(encodeStrings(trace.drop(1)))
@@ -212,7 +213,7 @@ private[jsonrpc] trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_
   private def serialize(formedMessage: Message[Node]): Effect[Option[ArraySeq.ofByte]] = {
     logger.trace(s"Sending JSON-RPC message:\n${codec.format(formedMessage)}")
     Try(codec.serialize(formedMessage)).fold(
-      error => backend.failed(ParseError("Invalid message format", error)),
+      error => backend.failed(ParseErrorException("Invalid message format", error)),
       message => backend.pure(Some(message))
     )
   }

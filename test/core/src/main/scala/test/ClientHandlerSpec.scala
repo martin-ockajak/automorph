@@ -2,7 +2,7 @@ package test
 
 import base.BaseSpec
 import jsonrpc.Client
-import jsonrpc.protocol.ResponseError.MethodNotFound
+import jsonrpc.protocol.ResponseError.MethodNotFoundException
 import jsonrpc.spi.{Backend, Codec}
 import org.scalacheck.Arbitrary
 import scala.util.Try
@@ -130,7 +130,7 @@ trait ClientHandlerSpec extends BaseSpec {
             mode - {
               val api = apis.last
               "Method not found" in {
-                val error = intercept[MethodNotFound](run(api.nomethod(""))).getMessage.toLowerCase
+                val error = intercept[MethodNotFoundException](run(api.nomethod(""))).getMessage.toLowerCase
                 error.should(include("nomethod"))
               }
               "Redundant arguments" in {

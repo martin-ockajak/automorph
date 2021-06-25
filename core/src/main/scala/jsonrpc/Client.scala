@@ -3,8 +3,8 @@ package jsonrpc
 import jsonrpc.client.ClientMeta
 import jsonrpc.log.Logging
 import jsonrpc.protocol.{Request, Response}
-import jsonrpc.protocol.ResponseError
-import jsonrpc.protocol.ResponseError.ParseError
+import jsonrpc.protocol.ErrorType
+import jsonrpc.protocol.ResponseError.ParseErrorException
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, Transport}
 import jsonrpc.util.{CannotEqual, Void}
@@ -110,7 +110,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   ): Effect[R] =
     // Deserialize response
     Try(codec.deserialize(rawResponse)).fold(
-      error => raiseError(ParseError("Invalid response format", error), formedRequest),
+      error => raiseError(ParseErrorException("Invalid response format", error), formedRequest),
       formedResponse => {
         // Validate response
         logger.trace(s"Received JSON-RPC message:\n${codec.format(formedResponse)}")
@@ -118,7 +118,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
           error => raiseError(error, formedRequest),
           validResponse =>
             validResponse.value.fold(
-              error => raiseError(ResponseError.toException(error.code, error.message), formedRequest),
+              error => raiseError(ErrorType.toException(error.code, error.message), formedRequest),
               result =>
                 // Decode result
                 Try(decodeResult(result)).fold(
@@ -142,7 +142,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   private def serialize(formedMessage: Message[Node]): Effect[ArraySeq.ofByte] = {
     logger.trace(s"Sending JSON-RPC message:\n${codec.format(formedMessage)}")
     Try(codec.serialize(formedMessage)).fold(
-      error => raiseError(ParseError("Invalid message format", error), formedMessage),
+      error => raiseError(ParseErrorException("Invalid message format", error), formedMessage),
       message => backend.pure(message)
     )
   }
