@@ -40,10 +40,10 @@ final case class UndertowJsonRpcHandler[Effect[_]](
     override def handle(exchange: HttpServerExchange, request: Array[Byte]): Unit = {
       val client = clientAddress(exchange)
       logger.debug("Received HTTP request", Map("Client" -> client))
-      exchange.dispatch(new Runnable :
+      exchange.dispatch(new Runnable:
 
         override def run(): Unit =
-        // Process the request
+          // Process the request
           effectRunAsync(backend.map(
             backend.either(handler.processRequest(ArraySeq.ofByte(request))(using exchange)),
             _.fold(
@@ -52,7 +52,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
                 // Send the response
                 val response = result.response.getOrElse(ArraySeq.ofByte(Array.empty))
                 val statusCode = result.errorCode.map(errorStatus).getOrElse(StatusCodes.OK)
-                  sendResponse(response, statusCode, exchange)
+                sendResponse(response, statusCode, exchange)
             )
           ))
       )
@@ -74,7 +74,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
     sendResponse(message, statusCode, exchange)
   }
 
-  private def sendResponse(message: ArraySeq.ofByte, statusCode: Int, exchange: HttpServerExchange): Unit = {
+  private def sendResponse(message: ArraySeq.ofByte, statusCode: Int, exchange: HttpServerExchange): Unit =
     if (exchange.isResponseChannelAvailable) {
       val client = clientAddress(exchange)
       logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
@@ -82,7 +82,6 @@ final case class UndertowJsonRpcHandler[Effect[_]](
       exchange.setStatusCode(statusCode).getResponseSender.send(ByteBuffer.wrap(message.unsafeArray))
       logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
     }
-  }
 
   private def clientAddress(exchange: HttpServerExchange): String = {
     val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)
