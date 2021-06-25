@@ -44,7 +44,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
         override def run(): Unit =
           // Process the request
           effectRunAsync(backend.map(
-            backend.either(handler.processRequest(ArraySeq.ofByte(request))(using exchange)),
+            backend.either(handler.processRequest(ArraySeq.ofByte(request))(exchange)),
             _.fold(
               error => sendServerError(error, exchange),
               result => {

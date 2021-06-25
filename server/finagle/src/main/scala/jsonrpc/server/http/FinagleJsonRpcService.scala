@@ -39,7 +39,7 @@ final case class FinagleJsonRpcService[Effect[_]](
 
     // Process the request
     asFuture(backend.map(
-      backend.either(handler.processRequest(rawRequest)(using request)),
+      backend.either(handler.processRequest(rawRequest)(request)),
       _.fold(
         error => serverError(error, request),
         result => {
