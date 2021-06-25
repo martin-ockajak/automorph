@@ -1,6 +1,5 @@
 package jsonrpc.codec.json
 
-import io.circe.syntax.EncoderOps
 import io.circe.Json
 import jsonrpc.spi.Codec
 import scala.language.experimental.macros

@@ -34,12 +34,3 @@ final case class CirceJsonCodec[Custom <: CirceCustom](
   override def format(message: Message[Json]): String =
     message.asJson.spaces2
 }
-
-trait CirceCustom {
-
-  final case class CirceEncoder[T](encoder: Encoder[T])
-  final case class CirceDecoder[T](decoder: Decoder[T])
-
-  given [T]: Conversion[Encoder[T], CirceEncoder[T]] = CirceEncoder(_)
-  given [T]: Conversion[Decoder[T], CirceDecoder[T]] = CirceDecoder(_)
-}
