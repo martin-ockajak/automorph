@@ -30,7 +30,7 @@ trait UpickleCustom extends AttributeTagged {
 
     override def expectedMsg = "expected number"
     override def visitString(s: CharSequence, index: Int) = s.toString.toDouble
-    override def visitInt32(d: Int, index: Int) = d
+    override def visitInt32(d: Int, index: Int) = d.toDouble
     override def visitInt64(d: Long, index: Int) = d.toDouble
     override def visitUInt64(d: Long, index: Int) = d.toDouble
     override def visitFloat64(d: Double, index: Int) = d
