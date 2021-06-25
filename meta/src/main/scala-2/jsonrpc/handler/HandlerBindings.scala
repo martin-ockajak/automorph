@@ -138,7 +138,7 @@ private[jsonrpc] case object HandlerBindings {
 
       // Create the API method call using the decoded arguments
       //   api.method(arguments ...): Effect[ResultValueType]
-      val apiMethodCall = q"$api.${method.symbol}($arguments)"
+      val apiMethodCall = q"$api.${method.symbol}(..$arguments)"
 
       // Create encode result function
       //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
