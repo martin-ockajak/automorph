@@ -41,13 +41,13 @@ final case class UndertowServer(
     undertow.getListenerInfo.asScala.foreach { listener =>
       val properties = Map(
         "Protocol" -> listener.getProtcol
-      ) ++ (listener.getAddress match
+      ) ++ (listener.getAddress match {
         case address: InetSocketAddress => Map(
-          "Host" -> address.getHostString,
-          "Port" -> address.getPort.toString
-        )
+            "Host" -> address.getHostString,
+            "Port" -> address.getPort.toString
+          )
         case _ => Map.empty
-        )
+      })
       logger.info("Listening for connections", properties)
     }
     undertow.start()

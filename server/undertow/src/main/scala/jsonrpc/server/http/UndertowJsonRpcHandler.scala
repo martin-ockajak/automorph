@@ -48,11 +48,12 @@ final case class UndertowJsonRpcHandler[Effect[_]](
             backend.either(handler.processRequest(ArraySeq.ofByte(request))(using exchange)),
             _.fold(
               error => sendServerError(error, exchange),
-              result =>
+              result => {
                 // Send the response
                 val response = result.response.getOrElse(ArraySeq.ofByte(Array.empty))
                 val statusCode = result.errorCode.map(errorStatus).getOrElse(StatusCodes.OK)
                 sendResponse(response, statusCode, exchange)
+              }
             )
           ))
       })
