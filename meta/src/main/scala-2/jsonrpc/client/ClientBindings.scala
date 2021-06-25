@@ -110,7 +110,6 @@ private[jsonrpc] case object ClientBindings {
       // Create the method argument lists by encoding corresponding argument values into nodes
       //   List(
       //     codec.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
-      //     codec.encode[Parameter1Type](arguments(1).asInstanceOf[Parameter1Type]),
       //     ...
       //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
       //   ): List[Node]

@@ -122,7 +122,6 @@ private[jsonrpc] case object HandlerBindings {
       // Create the method argument lists by decoding corresponding argument nodes into values
       //   List(List(
       //     codec.decode[Parameter0Type](argumentNodes(0)),
-      //     codec.decode[Parameter1Type](argumentNodes(1)),
       //     ...
       //     codec.decode[ParameterNType](argumentNodes(N)) OR context
       //   )): List[List[ParameterXType]]
