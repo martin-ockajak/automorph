@@ -45,12 +45,12 @@ final case class UndertowJsonRpcHandler[Effect[_]](
         override def run(): Unit =
           // Process the request
           effectRunAsync(backend.map(
-            backend.either(handler.processRequest(ArraySeq.ofByte(request))(exchange)),
+            backend.either(handler.processRequest(new ArraySeq.ofByte(request))(exchange)),
             (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) => handlerResult.fold(
               error => sendServerError(error, exchange),
               result => {
                 // Send the response
-                val response = result.response.getOrElse(ArraySeq.ofByte(Array.empty))
+                val response = result.response.getOrElse(new ArraySeq.ofByte(Array.empty))
                 val statusCode = result.errorCode.map(errorStatus).getOrElse(StatusCodes.OK)
                 sendResponse(response, statusCode, exchange)
               }

@@ -26,7 +26,7 @@ final case class CirceJsonCodec[Custom <: CirceCustom](
   override def mediaType: String = "application/json"
 
   override def serialize(message: Message[Json]): ArraySeq.ofByte =
-    ArraySeq.ofByte(message.asJson.noSpaces.getBytes(charset))
+    new ArraySeq.ofByte(message.asJson.noSpaces.getBytes(charset))
 
   override def deserialize(data: ArraySeq.ofByte): Message[Json] =
     parser.decode[Message[Json]](new String(data.unsafeArray, charset)).toTry.get

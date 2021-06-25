@@ -13,5 +13,5 @@ private[jsonrpc] trait CirceJsonCodecMeta[Custom <: CirceCustom] extends Codec[J
 
   override def encode[T](value: T): Json = CirceJsonCodecMacros.encode(custom, value)
 
-  override def decode[T](node: Json): T = CirceJsonCodecMacros.decode(custom, value)
+  override def decode[T](node: Json): T = CirceJsonCodecMacros.decode(custom, node)
 }

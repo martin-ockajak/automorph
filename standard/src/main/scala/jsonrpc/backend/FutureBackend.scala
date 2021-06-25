@@ -1,11 +1,8 @@
 package jsonrpc.backend
 
-import java.io.{ByteArrayOutputStream, InputStream, OutputStream}
-import java.nio.ByteBuffer
 import jsonrpc.spi.Backend
-import scala.collection.immutable.ArraySeq
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.Success
 
 /**
  * Future effect backend plugin.

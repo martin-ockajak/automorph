@@ -10,6 +10,7 @@ private[jsonrpc] object CirceJsonCodecMacros {
 
   def encodeExpr[Custom: c.WeakTypeTag, T: c.WeakTypeTag](c: Context)(custom: c.Expr[Custom], value: c.Expr[T]): c.Expr[Json] = {
     import c.universe.{weakTypeOf, Quasiquote}
+    weakTypeOf[Custom]
 
     val valueType = weakTypeOf[T]
     c.Expr[Json](q"""
@@ -22,6 +23,7 @@ private[jsonrpc] object CirceJsonCodecMacros {
 
   def decodeExpr[Custom: c.WeakTypeTag, T: c.WeakTypeTag](c: Context)(custom: c.Expr[Custom], node: c.Expr[Json]): c.Expr[T] = {
     import c.universe.{weakTypeOf, Quasiquote}
+    weakTypeOf[Custom]
 
     val valueType = weakTypeOf[T]
     c.Expr[T](q"""

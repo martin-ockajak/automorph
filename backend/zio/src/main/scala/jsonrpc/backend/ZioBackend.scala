@@ -1,7 +1,7 @@
 package jsonrpc.backend
 
 import jsonrpc.spi.Backend
-import zio.{RIO, Task}
+import zio.RIO
 
 /**
  * ZIO effect backend plugin.
