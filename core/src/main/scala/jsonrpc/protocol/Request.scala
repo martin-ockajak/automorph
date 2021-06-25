@@ -1,6 +1,6 @@
 package jsonrpc.protocol
 
-import jsonrpc.protocol.ResponseError.{InvalidRequestException, mandatory}
+import jsonrpc.protocol.ErrorType.{InvalidRequestException, mandatory}
 import jsonrpc.spi.Message
 import jsonrpc.spi.Message.{Id, Params, version}
 

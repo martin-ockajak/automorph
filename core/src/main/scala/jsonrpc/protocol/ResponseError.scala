@@ -2,6 +2,7 @@ package jsonrpc.protocol
 
 import java.io.IOException
 import jsonrpc.protocol.ErrorType
+import jsonrpc.protocol.ErrorType.mandatory
 import jsonrpc.spi.MessageError
 
 
@@ -29,34 +30,10 @@ private[jsonrpc] final case class ResponseError[Node](
 
 case object ResponseError {
 
-  /** JSON-RPC parse error. */
-  final case class ParseErrorException(
-    message: String,
-    cause: Throwable
-  ) extends RuntimeException(message, cause)
-
-  /** JSON-RPC invalid request error. */
-  final case class InvalidRequestException(
-    message: String,
-    cause: Throwable
-  ) extends RuntimeException(message, cause)
-
-  /** JSON-RPC method not found error. */
-  final case class MethodNotFoundException(
-    message: String,
-    cause: Throwable
-  ) extends RuntimeException(message, cause)
-
-  /** JSON-RPC internal error. */
-  final case class InternalErrorException(
-    message: String,
-    cause: Throwable
-  ) extends RuntimeException(message, cause)
-
-  private[jsonrpc] def apply[Node](error: MessageError[Node]): ResponseErrorx[Node] = {
+  private[jsonrpc] def apply[Node](error: MessageError[Node]): ResponseError[Node] = {
     val code = mandatory(error.code, "code")
     val message = mandatory(error.message, "message")
-    new ResponseErrorx(code, message, error.data)
+    new ResponseError(code, message, error.data)
   }
 
   /**
@@ -73,17 +50,4 @@ case object ResponseError {
       val message = Option(throwable.getMessage).getOrElse("")
       s"[$exceptionName] $message"
     }
-
-  /**
-   * Return specified mandatory property value or throw an exception if it is missing.
-   *
-   * @param value property value
-   * @param name property name
-   * @tparam T property type
-   * @return property value
-   * @throws InvalidRequestException if the property value is missing
-   */
-  private[jsonrpc] def mandatory[T](value: Option[T], name: String): T = value.getOrElse(
-    throw InvalidRequestException(s"Missing message property: $name", None.orNull)
-  )
 }

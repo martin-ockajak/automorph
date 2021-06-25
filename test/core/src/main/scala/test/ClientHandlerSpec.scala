@@ -2,7 +2,7 @@ package test
 
 import base.BaseSpec
 import jsonrpc.Client
-import jsonrpc.protocol.ResponseError.MethodNotFoundException
+import jsonrpc.protocol.ErrorType.MethodNotFoundException
 import jsonrpc.spi.{Backend, Codec}
 import org.scalacheck.Arbitrary
 import scala.util.Try

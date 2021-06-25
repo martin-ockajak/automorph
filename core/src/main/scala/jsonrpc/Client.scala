@@ -2,9 +2,8 @@ package jsonrpc
 
 import jsonrpc.client.ClientMeta
 import jsonrpc.log.Logging
-import jsonrpc.protocol.{Request, Response}
-import jsonrpc.protocol.ErrorType
-import jsonrpc.protocol.ResponseError.ParseErrorException
+import jsonrpc.protocol.ErrorType.ParseErrorException
+import jsonrpc.protocol.{ErrorType, Request, Response}
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, Transport}
 import jsonrpc.util.{CannotEqual, Void}

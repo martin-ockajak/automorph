@@ -3,10 +3,8 @@ package jsonrpc.handler
 import java.io.{ByteArrayInputStream, InputStream}
 import java.nio.ByteBuffer
 import jsonrpc.handler.{HandlerMethod, HandlerResult}
-import jsonrpc.protocol.ErrorType
-import jsonrpc.protocol.ResponseError
-import jsonrpc.protocol.ResponseError.{MethodNotFoundException, ParseErrorException}
-import jsonrpc.protocol.{Request, Response, ResponseErrorx}
+import jsonrpc.protocol.ErrorType.{MethodNotFoundException, ParseErrorException}
+import jsonrpc.protocol.{ErrorType, Request, Response, ResponseError}
 import jsonrpc.spi.{Codec, Message}
 import jsonrpc.util.Encoding
 import jsonrpc.{Handler, JsonRpcError}
@@ -184,14 +182,14 @@ private[jsonrpc] trait HandlerProcessor[Node, CodecType <: Codec[Node], Effect[_
   private def errorResponse(error: Throwable, formedRequest: Message[Node]): Effect[HandlerResult[ArraySeq.ofByte]] = {
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
     val responseError = error match {
-      case JsonRpcError(message, code, data, _) => ResponseErrorx(code, message, data.asInstanceOf[Option[Node]])
+      case JsonRpcError(message, code, data, _) => ResponseError(code, message, data.asInstanceOf[Option[Node]])
       case _                                    =>
         // Assemble error details
         val code = ErrorType.fromException(error.getClass).code
         val trace = ResponseError.trace(error)
         val message = trace.headOption.getOrElse("Unknown error")
         val data = Some(encodeStrings(trace.drop(1)))
-        ResponseErrorx(code, message, data)
+        ResponseError(code, message, data)
     }
     backend.map(
       formedRequest.id.map { id =>
