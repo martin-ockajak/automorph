@@ -14,9 +14,9 @@ import upack.Msg
 private[jsonrpc] trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends Codec[Msg] {
   this: UpickleMessagePackCodec[Custom] =>
 
-  override def encode[T](value: T): MessagePack = macro UpickleMessagePackCodecMeta.encode[Custom, T]
+  override def encode[T](value: T): Msg = macro UpickleMessagePackCodecMeta.encode[Custom, T]
 
-  override def decode[T](node: MessagePack): T = macro UpickleMessagePackCodecMeta.decode[Custom, T]
+  override def decode[T](node: Msg): T = macro UpickleMessagePackCodecMeta.decode[Custom, T]
 }
 
 object UpickleMessagePackCodecMeta {
