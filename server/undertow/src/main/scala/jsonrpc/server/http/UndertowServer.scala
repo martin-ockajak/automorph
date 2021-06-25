@@ -46,7 +46,7 @@ final case class UndertowServer(
             "Host" -> address.getHostString,
             "Port" -> address.getPort.toString
           )
-        case _ => Map.empty
+        case _ => Map()
       })
       logger.info("Listening for connections", properties)
     }

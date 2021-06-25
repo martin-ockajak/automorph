@@ -53,7 +53,7 @@ case class NanoHttpdServer[Effect[_]] private (
         error => createServerError(error, session),
         result => {
           // Send the response
-          val response = result.response.getOrElse(ArraySeq.ofByte(Array.empty))
+          val response = result.response.getOrElse(ArraySeq.ofByte(Array()))
           val status = result.errorCode.map(errorStatus).getOrElse(Status.OK)
           createResponse(response, status, session)
         }
