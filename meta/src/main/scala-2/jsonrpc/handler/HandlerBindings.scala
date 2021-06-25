@@ -30,9 +30,13 @@ private[jsonrpc] case object HandlerBindings {
     api: ApiType
   ): Map[String, HandlerMethod[Node, Effect, Context]] = macro generateExpr[Node, CodecType, Effect, Context, ApiType]
 
-  def generateExpr[Node, CodecType <: Codec[Node], Effect[_], Context: c.WeakTypeTag, ApiType <: AnyRef: c.WeakTypeTag](
-    c: blackbox.Context
-  )(
+  def generateExpr[
+    Node: c.WeakTypeTag,
+    CodecType <: Codec[Node]: c.WeakTypeTag,
+    Effect[_],
+    Context: c.WeakTypeTag,
+    ApiType <: AnyRef: c.WeakTypeTag
+  ](c: blackbox.Context)(
     codec: c.Expr[CodecType],
     backend: c.Expr[Backend[Effect]],
     api: c.Expr[ApiType]
@@ -62,8 +66,8 @@ private[jsonrpc] case object HandlerBindings {
 
   private def generateHandlerMethod[
     C <: blackbox.Context,
-    Node,
-    CodecType <: Codec[Node],
+    Node: ref.c.WeakTypeTag,
+    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
     ApiType: ref.c.WeakTypeTag
@@ -91,8 +95,8 @@ private[jsonrpc] case object HandlerBindings {
 
   private def generateInvoke[
     C <: blackbox.Context,
-    Node,
-    CodecType <: Codec[Node],
+    Node: ref.c.WeakTypeTag,
+    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
     ApiType
@@ -103,6 +107,7 @@ private[jsonrpc] case object HandlerBindings {
     api: ref.c.Expr[ApiType]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}
+    (weakTypeOf[Node], weakTypeOf[CodecType])
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>

@@ -12,6 +12,7 @@ object Bindings {
   def bindMacro[T: c.WeakTypeTag](c: blackbox.Context): c.Expr[Unit] = {
     import c.universe._
 
+    c.weakTypeOf[T]
     val ref = Reflection(c)
     val apiMethods = validApiMethods[blackbox.Context, T, Future[_]](ref)
     val validMethods = apiMethods.flatMap(_.toOption)
