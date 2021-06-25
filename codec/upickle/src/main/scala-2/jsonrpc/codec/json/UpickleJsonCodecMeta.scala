@@ -14,29 +14,37 @@ import ujson.Value
 private[jsonrpc] trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Codec[Value] {
   this: UpickleJsonCodec[Custom] =>
 
-  override def encode[T](value: T): Value = macro UpickleJsonCodecMeta.encode[Custom, T]
+  override def encode[T](value: T): Value = UpickleJsonCodecMeta.encode(custom, value)
 
-  override def decode[T](node: Value): T = macro UpickleJsonCodecMeta.decode[Custom, T]
+  override def decode[T](node: Value): T = UpickleJsonCodecMeta.decode(custom, node)
 }
 
 object UpickleJsonCodecMeta {
-  def encode[Custom: c.TypeTag, T: c.WeakTypeTag](c: Context)(custom: c.Expr[Custom], value: c.Expr[T]): c.Expr[Value] = {
-    import c.universe._
+
+  def encode[Custom <: UpickleCustom, T](custom: Custom, value: T): Value = macro encodeExpr[Custom, T]
+
+  def encodeExpr[Custom: c.WeakTypeTag, T: c.WeakTypeTag](c: Context)(
+    custom: c.Expr[Custom],
+    value: c.Expr[T]
+  ): c.Expr[Value] = {
+    import c.universe.{weakTypeOf, Quasiquote}
 
     val valueType = weakTypeOf[T]
     c.Expr[Value](q"""
       val writer = implicitly[$custom.Writer[$valueType]]
-      $custom.writeJs($value)($writer)
+      $custom.writeJs($value)(writer)
     """)
   }
 
-  def decode[Custom: c.TypeTag, T: c.WeakTypeTag](c: Context)(custom: c.Expr[Custom], node: c.Expr[Value]): c.Expr[T] = {
-    import c.universe._
+  def decode[Custom <: UpickleCustom, T](custom: Custom, node: Value): T = macro decodeExpr[Custom, T]
+
+  def decodeExpr[Custom: c.WeakTypeTag, T: c.WeakTypeTag](c: Context)(custom: c.Expr[Custom], node: c.Expr[Value]): c.Expr[T] = {
+    import c.universe.{weakTypeOf, Quasiquote}
 
     val valueType = weakTypeOf[T]
     c.Expr[Value](q"""
       val reader = implicitly[$custom.Reader[$valueType]]
-      $custom.read[$valueType]($node)($reader)
+      $custom.read[$valueType]($node)(reader)
     """)
   }
 }
