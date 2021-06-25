@@ -42,7 +42,7 @@ object UpickleJsonCodecMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val valueType = weakTypeOf[T]
-    c.Expr[Value](q"""
+    c.Expr[T](q"""
       val reader = implicitly[$custom.Reader[$valueType]]
       $custom.read[$valueType]($node)(reader)
     """)

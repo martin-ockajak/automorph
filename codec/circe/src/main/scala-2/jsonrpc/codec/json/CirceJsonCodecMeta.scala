@@ -39,7 +39,7 @@ private[jsonrpc] object CirceJsonCodecMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val valueType = weakTypeOf[T]
-    c.Expr[Json](q"""
+    c.Expr[T](q"""
       val decoder = implicitly[$custom.CirceDecoder[$valueType]].decoder
       $node.as[$valueType](decoder).toTry.get
     """)
