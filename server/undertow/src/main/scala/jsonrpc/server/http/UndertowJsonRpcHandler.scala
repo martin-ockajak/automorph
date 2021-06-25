@@ -40,9 +40,9 @@ final case class UndertowJsonRpcHandler[Effect[_]](
     override def handle(exchange: HttpServerExchange, request: Array[Byte]): Unit = {
       val client = clientAddress(exchange)
       logger.debug("Received HTTP request", Map("Client" -> client))
-      exchange.dispatch(new Runnable:
+      exchange.dispatch(new Runnable {
 
-        override def run(): Unit = {
+        override def run(): Unit =
           // Process the request
           effectRunAsync(backend.map(
             backend.either(handler.processRequest(ArraySeq.ofByte(request))(using exchange)),
@@ -55,8 +55,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
                 sendResponse(response, statusCode, exchange)
             )
           ))
-        }
-      )
+      })
     }
   }
 
