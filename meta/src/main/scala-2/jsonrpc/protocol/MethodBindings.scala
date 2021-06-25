@@ -50,14 +50,16 @@ private[jsonrpc] case object MethodBindings {
    * Extract type wrapped in the specified wrapper type.
    *
    * @param ref reflection context
+   * @param wrapperType wrapper type
    * @param wrappedType wrapped type
    * @tparam C macro context type
-   * @tparam Wrapper wrapper type
    * @return wrapped type
    */
-  def unwrapType[C <: blackbox.Context, Wrapper: ref.c.WeakTypeTag](ref: Reflection[C])(wrappedType: ref.c.Type)
-    : ref.c.Type =
-    if (wrappedType.typeArgs.nonEmpty && wrappedType.typeConstructor =:= ref.c.weakTypeOf[Wrapper]) {
+  def unwrapType[C <: blackbox.Context](ref: Reflection[C])(
+    wrapperType: ref.c.Type,
+    wrappedType: ref.c.Type
+  ): ref.c.Type =
+    if (wrappedType.typeArgs.nonEmpty && wrappedType.typeConstructor =:= wrapperType) {
       wrappedType.typeArgs.last
     } else {
       wrappedType

@@ -30,13 +30,9 @@ private[jsonrpc] case object HandlerBindings {
     api: ApiType
   ): Map[String, HandlerMethod[Node, Effect, Context]] = macro generateExpr[Node, CodecType, Effect, Context, ApiType]
 
-  def generateExpr[
-    Node: c.WeakTypeTag,
-    CodecType <: Codec[Node]: c.WeakTypeTag,
-    Effect[_],
-    Context: c.WeakTypeTag,
-    ApiType <: AnyRef: c.WeakTypeTag
-  ](c: blackbox.Context)(
+  def generateExpr[Node, CodecType <: Codec[Node], Effect[_], Context: c.WeakTypeTag, ApiType <: AnyRef: c.WeakTypeTag](
+    c: blackbox.Context
+  )(
     codec: c.Expr[CodecType],
     backend: c.Expr[Backend[Effect]],
     api: c.Expr[ApiType]
@@ -66,8 +62,8 @@ private[jsonrpc] case object HandlerBindings {
 
   private def generateHandlerMethod[
     C <: blackbox.Context,
-    Node: ref.c.WeakTypeTag,
-    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
+    Node,
+    CodecType <: Codec[Node],
     Effect[_],
     Context: ref.c.WeakTypeTag,
     ApiType: ref.c.WeakTypeTag
@@ -95,18 +91,18 @@ private[jsonrpc] case object HandlerBindings {
 
   private def generateInvoke[
     C <: blackbox.Context,
-    Node: ref.c.WeakTypeTag,
-    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
+    Node,
+    CodecType <: Codec[Node],
     Effect[_],
     Context: ref.c.WeakTypeTag,
-    ApiType: ref.c.WeakTypeTag
+    ApiType
   ](ref: Reflection[C])(
     method: ref.RefMethod,
     codec: ref.c.Expr[CodecType],
     backend: ref.c.Expr[Backend[Effect]],
     api: ref.c.Expr[ApiType]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
-    import ref.c.universe.Quasiquote
+    import ref.c.universe.{weakTypeOf, Quasiquote}
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
@@ -141,7 +137,7 @@ private[jsonrpc] case object HandlerBindings {
 
       // Create encode result function
       //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
-      val resultValueType = unwrapType[C, Effect[_]](ref)(method.resultType)
+      val resultValueType = unwrapType[C](ref)(weakTypeOf[Effect[_]], method.resultType)
       val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result)"
 
       // Create the effect mapping call using the method call and the encode result function
