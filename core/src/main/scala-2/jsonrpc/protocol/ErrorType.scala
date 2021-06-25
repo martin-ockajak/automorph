@@ -1,15 +1,14 @@
 package jsonrpc.protocol
 
 /** JSON-RPC error types with codes. */
-object ErrorType extends Enumeration {
-  type ErrorType = ErrorTypeValue
-  sealed case class ErrorTypeValue private[ErrorType](name: String, code: Int) extends Val(name)
+sealed abstract class ErrorType(val name: String, val code: Int)
 
-  val ParseError = ErrorTypeValue("ParseError", -32700)
-  val InvalidRequest = ErrorTypeValue("InvalidRequest", -32600)
-  val MethodNotFound = ErrorTypeValue("MethodNotFound", -32601)
-  val InvalidParams = ErrorTypeValue("InvalidParams", -32602)
-  val InternalError = ErrorTypeValue("InternalError", -32603)
-  val IOError = ErrorTypeValue("IOError", -32000)
-  val ApplicationError = ErrorTypeValue("ApplicationError", 0)
+object ErrorType {
+  case object ParseError extends ErrorType("ParseError", -32700)
+  case object InvalidRequest extends ErrorType("InvalidRequest", -32600)
+  case object MethodNotFound extends ErrorType("MethodNotFound", -32601)
+  case object InvalidParams extends ErrorType("InvalidParams", -32602)
+  case object InternalError extends ErrorType("InternalError", -32603)
+  case object IOError extends ErrorType("IOError", -32000)
+  case object ApplicationError extends ErrorType("ApplicationError", 0)
 }

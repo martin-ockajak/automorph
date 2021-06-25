@@ -9,7 +9,7 @@ import jsonrpc.handler.HandlerResult
 import jsonrpc.protocol.ResponseError
 import jsonrpc.log.Logging
 import jsonrpc.server.http.FinagleJsonRpcService.defaultErrorStatus
-import jsonrpc.protocol.ErrorType.ErrorType
+import jsonrpc.protocol.ErrorType
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -91,12 +91,12 @@ case object FinagleJsonRpcService {
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus = Map(
     ErrorType.ParseError -> Status.BadRequest,
-    ErrorType.InvalidRequest -> Status.BadRequest,
-    ErrorType.MethodNotFound -> Status.NotImplemented,
-    ErrorType.InvalidParams -> Status.BadRequest,
-    ErrorType.InternalError -> Status.InternalServerError,
-    ErrorType.IOError -> Status.InternalServerError,
-    ErrorType.ApplicationError -> Status.InternalServerError
+//    ErrorType.InvalidRequest -> Status.BadRequest,
+//    ErrorType.MethodNotFound -> Status.NotImplemented,
+//    ErrorType.InvalidParams -> Status.BadRequest,
+//    ErrorType.InternalError -> Status.InternalServerError,
+//    ErrorType.IOError -> Status.InternalServerError,
+//    ErrorType.ApplicationError -> Status.InternalServerError
   ).withDefaultValue(Status.InternalServerError).map { case (errorType, status) =>
     errorType.code -> status
   }

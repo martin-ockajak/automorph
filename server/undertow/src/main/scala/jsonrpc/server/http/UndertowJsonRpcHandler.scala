@@ -7,7 +7,7 @@ import java.nio.ByteBuffer
 import jsonrpc.Handler
 import jsonrpc.handler.HandlerResult
 import jsonrpc.log.Logging
-import jsonrpc.protocol.ErrorType.ErrorType
+import jsonrpc.protocol.ErrorType
 import jsonrpc.protocol.ResponseError
 import jsonrpc.server.http.UndertowJsonRpcHandler.defaultErrorStatus
 import jsonrpc.util.Encoding
@@ -57,6 +57,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
             )
           ))
       })
+      ()
     }
   }
 
