@@ -137,7 +137,7 @@ private[jsonrpc] case object HandlerBindings {
 
       // Create encode result function
       //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
-      val resultValueType = unwrapType[C](ref)(weakTypeOf[Effect[_]], method.resultType)
+      val resultValueType = unwrapType[C, Effect[_]](ref)(method.resultType)
       val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result)"
 
       // Create the effect mapping call using the method call and the encode result function
