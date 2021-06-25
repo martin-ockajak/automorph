@@ -1,6 +1,6 @@
 package jsonrpc.spi
 
-import jsonrpc.spi.MessageType.MessageType
+import jsonrpc.spi.MessageType
 
 /**
  * JSON-RPC protocol message structure.

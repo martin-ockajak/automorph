@@ -1,7 +1,11 @@
 package jsonrpc.spi
 
 /** JSON-RPC message types. */
-object MessageType extends Enumeration {
-  type MessageType = Value
-  val Call, Notification, Result, Error = Value
+sealed abstract class MessageType(val name: String)
+
+object MessageType {
+  case object Call extends MessageType("Call")
+  case object Notification extends MessageType("Notification")
+  case object Result extends MessageType("Result")
+  case object Error extends MessageType("Error")
 }
