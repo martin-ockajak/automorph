@@ -9,6 +9,7 @@ import jsonrpc.protocol.ResponseError
 import jsonrpc.server.http.NanoHTTPD.Response.Status
 import jsonrpc.server.http.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import jsonrpc.server.http.NanoHttpdServer.defaultErrorStatus
+import jsonrpc.spi.Codec
 import jsonrpc.util.Encoding
 import scala.collection.immutable.ArraySeq
 
@@ -24,8 +25,8 @@ import scala.collection.immutable.ArraySeq
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
  * @tparam Effect effect type
  */
-case class NanoHttpdServer[Effect[_]] private (
-  handler: Handler[_, _, Effect, IHTTPSession],
+case class NanoHttpdServer[Node, CodecType <: Codec[Node], Effect[_]] private (
+  handler: Handler[Node, CodecType, Effect, IHTTPSession],
   effectRunSync: Effect[Response] => Response,
   port: Int,
   readTimeout: Int,

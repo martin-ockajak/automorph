@@ -9,6 +9,7 @@ import jsonrpc.handler.HandlerResult
 import jsonrpc.protocol.ResponseError
 import jsonrpc.log.Logging
 import jsonrpc.server.http.FinagleJsonRpcService.defaultErrorStatus
+import jsonrpc.spi.Codec
 import jsonrpc.protocol.ErrorType
 import scala.collection.immutable.ArraySeq
 
@@ -25,8 +26,8 @@ import scala.collection.immutable.ArraySeq
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
  * @tparam Effect effect type
  */
-final case class FinagleJsonRpcService[Effect[_]](
-  handler: Handler[_, _, Effect, Request],
+final case class FinagleJsonRpcService[Node, CodecType <: Codec[Node], Effect[_]](
+  handler: Handler[Node, CodecType, Effect, Request],
   errorStatus: Int => Status = defaultErrorStatus
 ) extends Service[Request, Response] with Logging {
 

@@ -11,6 +11,7 @@ import jsonrpc.protocol.ErrorType
 import jsonrpc.protocol.ResponseError
 import jsonrpc.server.http.UndertowJsonRpcHandler.defaultErrorStatus
 import jsonrpc.util.Encoding
+import jsonrpc.spi.Codec
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -27,8 +28,8 @@ import scala.util.Try
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
  * @tparam Effect effect type
  */
-final case class UndertowJsonRpcHandler[Effect[_]](
-  handler: Handler[_, _, Effect, HttpServerExchange],
+final case class UndertowJsonRpcHandler[Node, CodecType <: Codec[Node], Effect[_]](
+  handler: Handler[Node, CodecType, Effect, HttpServerExchange],
   effectRunAsync: Effect[Any] => Unit,
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpHandler with Logging {
