@@ -12,7 +12,7 @@ import ujson.Value
 private[jsonrpc] trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Codec[Value] {
   this: UpickleJsonCodec[Custom] =>
 
-  override def encode[T](value: T): Value = UpickleJsonCodecMacros.encode(custom, value)
+  override def encode[T](value: T): Value = UpickleJsonCodecMacros.encode[Custom, T](custom, value)
 
-  override def decode[T](node: Value): T = UpickleJsonCodecMacros.decode(custom, node)
+  override def decode[T](node: Value): T = UpickleJsonCodecMacros.decode[Custom, T](custom, node)
 }
