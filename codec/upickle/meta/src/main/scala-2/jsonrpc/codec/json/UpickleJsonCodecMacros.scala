@@ -18,6 +18,7 @@ private [jsonrpc] object UpickleJsonCodecMacros {
 
     val valueType = weakTypeOf[T]
     c.Expr[Value](q"""
+      import $custom._
       val writer = implicitly[$custom.Writer[$valueType]]
       $custom.writeJs($value)(writer)
     """)
@@ -31,6 +32,7 @@ private [jsonrpc] object UpickleJsonCodecMacros {
 
     val valueType = weakTypeOf[T]
     c.Expr[T](q"""
+      import $custom._
       val reader = implicitly[$custom.Reader[$valueType]]
       $custom.read[$valueType]($node)(reader)
     """)
