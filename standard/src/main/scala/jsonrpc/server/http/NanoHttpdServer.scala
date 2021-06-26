@@ -8,7 +8,6 @@ import jsonrpc.protocol.ErrorType
 import jsonrpc.protocol.ResponseError
 import jsonrpc.server.http.NanoHTTPD.Response.Status
 import jsonrpc.server.http.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
-import jsonrpc.server.http.NanoHttpdServer.defaultErrorStatus
 import jsonrpc.spi.Codec
 import jsonrpc.util.Encoding
 import scala.collection.immutable.ArraySeq
@@ -23,6 +22,8 @@ import scala.collection.immutable.ArraySeq
  * @param port port to listen on for HTTP connections
  * @param readTimeout HTTP connection read timeout (milliseconds)
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
+ * @tparam Node message format node representation type
+ * @tparam CodecType message codec plugin type
  * @tparam Effect effect type
  */
 case class NanoHttpdServer[Node, CodecType <: Codec[Node], Effect[_]] private (
@@ -53,7 +54,7 @@ case class NanoHttpdServer[Node, CodecType <: Codec[Node], Effect[_]] private (
         error => createServerError(error, session),
         result => {
           // Send the response
-          val response = result.response.getOrElse(ArraySeq.ofByte(Array()))
+          val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
           val status = result.errorCode.map(errorStatus).getOrElse(Status.OK)
           createResponse(response, status, session)
         }
@@ -98,14 +99,17 @@ case object NanoHttpdServer {
    * @param port port to listen on for HTTP connections
    * @param readTimeout HTTP connection read timeout (milliseconds)
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
+   * @tparam Node message format node representation type
+   * @tparam CodecType message codec plugin type
+   * @tparam Effect effect type
    */
-  def apply[Effect[_]](
-    handler: Handler[_, _, Effect, IHTTPSession],
+  def apply[Node, CodecType <: Codec[Node], Effect[_]](
+    handler: Handler[Node, CodecType, Effect, IHTTPSession],
     effectRunSync: Effect[Response] => Response,
     port: Int = 8080,
     readTimeout: Int = 5000,
     errorStatus: Int => Status = defaultErrorStatus
-  ): NanoHttpdServer[Effect] = {
+  ): NanoHttpdServer[Node, CodecType, Effect] = {
     val server = new NanoHttpdServer(handler, effectRunSync, port, readTimeout, errorStatus)
     server.start()
     server
@@ -120,5 +124,7 @@ case object NanoHttpdServer {
     ErrorType.InternalError -> Status.INTERNAL_ERROR,
     ErrorType.IOError -> Status.INTERNAL_ERROR,
     ErrorType.ApplicationError -> Status.INTERNAL_ERROR
-  ).withDefaultValue(Status.INTERNAL_ERROR).map((errorType, status) => errorType.code -> status)
+  ).withDefaultValue(Status.INTERNAL_ERROR).map { case (errorType, status) =>
+    errorType.code -> status
+  }
 }

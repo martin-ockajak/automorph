@@ -24,6 +24,8 @@ import scala.collection.immutable.ArraySeq
  * @param handler JSON-RPC request handler
  * @param effectRunAsync asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
+ * @tparam Node message format node representation type
+ * @tparam CodecType message codec plugin type
  * @tparam Effect effect type
  */
 final case class FinagleJsonRpcService[Node, CodecType <: Codec[Node], Effect[_]](
