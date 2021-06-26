@@ -1,5 +1,7 @@
 package jsonrpc.codec.common
 
+import jsonrpc.codec.json
+import jsonrpc.codec.messagepack
 import upickle.AttributeTagged
 import upickle.core.{Abort, Util}
 
@@ -9,6 +11,11 @@ import upickle.core.{Abort, Util}
  * Contains null-safe readers and writers for basic data types.
  */
 trait UpickleCustom extends AttributeTagged {
+
+  private[jsonrpc] implicit val jsonMmessageErrorRw: ReadWriter[json.JsonMessageError] = macroRW
+  private[jsonrpc] implicit val jsonMessageRw: ReadWriter[json.JsonMessage] = macroRW
+  private[jsonrpc] implicit val messagePackMessageErrorRw: ReadWriter[messagepack.MessagePackMessageError] = macroRW
+  private[jsonrpc] implicit val messagePackMessageRw: ReadWriter[messagepack.MessagePackMessage] = macroRW
 
   implicit override def OptionWriter[T: Writer]: Writer[Option[T]] =
     implicitly[Writer[T]].comap[Option[T]](_.getOrElse(null.asInstanceOf[T]))
