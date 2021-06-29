@@ -3,7 +3,6 @@ package test.codec.messagepack
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.codec.messagepack.UpickleMessagePackCodec
 import org.scalacheck.{Arbitrary, Gen}
-import test.Enum
 import test.Generators.arbitraryRecord
 import test.codec.CodecSpec
 import test.{Enum, Record, Structure}

@@ -3,10 +3,9 @@ package test.codec.json
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.codec.json.UpickleJsonCodec
 import org.scalacheck.{Arbitrary, Gen}
-import test.Enum
 import test.Generators.arbitraryRecord
 import test.codec.CodecSpec
-import test.{Record, Structure}
+import test.{Enum, Record, Structure}
 import ujson.{Bool, Num, Obj, Str, Value}
 
 class UpickleJsonCodecSpec extends CodecSpec {
