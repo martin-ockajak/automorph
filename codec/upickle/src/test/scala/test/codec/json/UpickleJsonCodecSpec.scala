@@ -25,17 +25,9 @@ class UpickleJsonCodecSpec extends CodecSpec {
   )))
 
   "" - {
-    // Provide implicit encoder/decoder in this scope ?
-    //
-    // bind(...) - Generate the following code ...
-    //   type T is known here
-    //   ...
-    //   codec.encode[T]() - Needs to obtain implicit encoder/decoder
-    //     ... upickle.writeJs[T](value)
-    //   ...
-
     "Encode / Decode" in {
-//      implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
+      val custom = codec.custom
+      implicit val recordRw: custom.ReadWriter[Record] = custom.macroRW
       check { (record: Record) =>
         val encodedValue = codec.encode(record)
         val decodedValue = codec.decode[Record](encodedValue)
@@ -52,5 +44,4 @@ object UpickleJsonCodecSpec extends UpickleCustom {
     number => Enum.fromOrdinal(number)
   )
   implicit def structureRw: ReadWriter[Structure] = macroRW
-  implicit def recordRw: ReadWriter[Record] = macroRW
 }
