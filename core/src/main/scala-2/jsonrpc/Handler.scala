@@ -4,6 +4,8 @@ import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerProcessor}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.{CannotEqual, Void}
+import scala.language.experimental.macros
+import scala.reflect.macros.blackbox
 
 /**
  * JSON-RPC request handler layer.
@@ -50,10 +52,9 @@ object Handler {
    */
   def apply[Node, CodecType <: Codec[Node], Effect[_], Context](
     codec: CodecType,
-    backend: Backend[Effect],
-    bufferSize: Int = 4096
+    backend: Backend[Effect]
   ): Handler[Node, CodecType, Effect, Context] =
-    Handler(codec, backend, bufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
+    macro applyExpr[Node, CodecType, Effect, Context]
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.
@@ -71,8 +72,40 @@ object Handler {
    */
   def basic[Node, CodecType <: Codec[Node], Effect[_]](
     codec: CodecType,
-    backend: Backend[Effect],
-    bufferSize: Int = 4096
+    backend: Backend[Effect]
   ): Handler[Node, CodecType, Effect, Void.Value] =
-    Handler(codec, backend, bufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
+    macro basicExpr[Node, CodecType, Effect]
+
+  def applyExpr[
+    Node: c.WeakTypeTag,
+    CodecType <: Codec[Node]: c.WeakTypeTag,
+    Effect[_],
+    Context: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    codec: c.Expr[CodecType],
+    backend: c.Expr[Backend[Effect]]
+  ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+    Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
+
+    c.Expr[Handler[Node, CodecType, Effect, Context]]( q"""
+      Handler($codec, $backend, 4096, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
+    """)
+  }
+
+  def basicExpr[
+    Node: c.WeakTypeTag,
+    CodecType <: Codec[Node]: c.WeakTypeTag,
+    Effect[_]
+  ](c: blackbox.Context)(
+    codec: c.Expr[CodecType],
+    backend: c.Expr[Backend[Effect]]
+  ): c.Expr[Handler[Node, CodecType, Effect, Void.Value]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+    Seq(weakTypeOf[Node], weakTypeOf[CodecType])
+
+    c.Expr[Handler[Node, CodecType, Effect, Void.Value]]( q"""
+      Handler($codec, $backend, 4096, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
+    """)
+  }
 }
