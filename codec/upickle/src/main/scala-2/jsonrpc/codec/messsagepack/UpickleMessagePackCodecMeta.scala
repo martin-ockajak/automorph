@@ -19,7 +19,7 @@ private[jsonrpc] trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] exte
   override def decode[T](node: Msg): T = macro UpickleMessagePackCodecMeta.decodeExpr[T]
 }
 
-object UpickleMessagePackCodecMeta {
+private[jsonrpc] object UpickleMessagePackCodecMeta {
 
   def encodeExpr[T: c.WeakTypeTag](c: Context)(value: c.Expr[T]): c.Expr[Msg] = {
     import c.universe.{weakTypeOf, Quasiquote}

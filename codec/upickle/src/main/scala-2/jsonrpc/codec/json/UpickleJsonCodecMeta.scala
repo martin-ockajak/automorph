@@ -19,7 +19,7 @@ private[jsonrpc] trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Cod
   override def decode[T](node: Value): T = macro UpickleJsonCodecMeta.decodeExpr[T]
 }
 
-object UpickleJsonCodecMeta {
+private[jsonrpc] object UpickleJsonCodecMeta {
 
   def encodeExpr[T: c.WeakTypeTag](c: Context)(value: c.Expr[T]): c.Expr[Value] = {
     import c.universe.{weakTypeOf, Quasiquote}
