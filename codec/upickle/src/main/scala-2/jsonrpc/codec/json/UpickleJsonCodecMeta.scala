@@ -11,7 +11,7 @@ import ujson.Value
  *
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-private[jsonrpc] trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Codec[Value] {
+trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Codec[Value] {
   this: UpickleJsonCodec[Custom] =>
 
   override def encode[T](value: T): Value =
