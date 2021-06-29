@@ -115,8 +115,8 @@ trait ClientHandlerSpec extends BaseSpec {
               }
               "method9" in {
                 check { (a0: String) =>
-                  val (canonicalApi, testedApi) = apis
-                  val expected = Try(run(canonicalApi.method9(a0))).toEither
+                  val (referenceApi, testedApi) = apis
+                  val expected = Try(run(referenceApi.method9(a0))).toEither
                   val result = Try(run(testedApi.method9(a0))).toEither
                   val expectedErrorMessage = expected.swap.map(error =>
                     s"[${error.getClass.getSimpleName}] ${Option(error.getMessage).getOrElse("")}"
@@ -193,8 +193,8 @@ trait ClientHandlerSpec extends BaseSpec {
     }
 
   private def consistent[Api, Result](apis: (Api, Api), function: Api => Effect[Result]): Boolean = {
-    val (canonicalApi, testedApi) = apis
-    val expected = run(function(canonicalApi))
+    val (referenceApi, testedApi) = apis
+    val expected = run(function(referenceApi))
     val result = run(function(testedApi))
     expected.equals(result)
   }
