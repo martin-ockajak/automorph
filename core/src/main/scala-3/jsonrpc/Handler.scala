@@ -33,6 +33,7 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
   with Logging
 
 object Handler:
+  val defaultBufferSize = 4096
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
@@ -56,6 +57,25 @@ object Handler:
     Handler(codec, backend, bufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
 
   /**
+   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
+   *
+   * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
+   *
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+   * @param codec message codec plugin
+   * @param backend effect backend plugin
+   * @tparam Node message format node representation type
+   * @tparam CodecType message codec plugin type
+   * @tparam Effect effect type
+   * @return JSON-RPC request handler
+   */
+  inline def apply[Node, CodecType <: Codec[Node], Effect[_], Context](
+    codec: CodecType,
+    backend: Backend[Effect]
+  ): Handler[Node, CodecType, Effect, Context] =
+    Handler(codec, backend, defaultBufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
+
+  /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
@@ -63,7 +83,6 @@ object Handler:
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec hierarchical message codec plugin
    * @param backend effect backend plugin
-   * @param bufferSize input stream reading buffer size
    * @tparam Node message format node representation type
    * @tparam CodecType message codec plugin type
    * @tparam Effect effect type
@@ -71,7 +90,6 @@ object Handler:
    */
   inline def basic[Node, CodecType <: Codec[Node], Effect[_]](
     codec: CodecType,
-    backend: Backend[Effect],
-    bufferSize: Int = 4096
+    backend: Backend[Effect]
   ): Handler[Node, CodecType, Effect, Void.Value] =
-    Handler(codec, backend, bufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
+    Handler(codec, backend, defaultBufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
