@@ -73,7 +73,7 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
 
     c.Expr[Handler[Node, CodecType, Effect, Context]]( q"""
-      Handler($codec, $backend, $bufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
+      jsonrpc.Handler($codec, $backend, $bufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
     """)
   }
 
@@ -109,7 +109,7 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
 
     c.Expr[Handler[Node, CodecType, Effect, Context]]( q"""
-      Handler($codec, $backend, Handler.defaultBufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
+      jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
     """)
   }
 
@@ -145,7 +145,7 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[CodecType])
 
     c.Expr[Handler[Node, CodecType, Effect, Void.Value]]( q"""
-      Handler($codec, $backend, Handler.defaultBufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
+      jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
     """)
   }
 }

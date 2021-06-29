@@ -20,31 +20,31 @@ private[jsonrpc] case object HandlerBindings:
    * @tparam CodecType message format codec type
    * @tparam Effect effect type
    * @tparam Context request context type
-   * @tparam ApiType API type
+   * @tparam Api API type
    * @return mapping of method names to handler method bindings
    */
-  inline def bind[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
+  inline def bind[Node, CodecType <: Codec[Node], Effect[_], Context, Api <: AnyRef](
     codec: CodecType,
     backend: Backend[Effect],
-    api: ApiType
+    api: Api
   ): Map[String, HandlerMethod[Node, Effect, Context]] =
-    ${ bindMacro[Node, CodecType, Effect, Context, ApiType]('codec, 'backend, 'api) }
+    ${ bindMacro[Node, CodecType, Effect, Context, Api]('codec, 'backend, 'api) }
 
   private def bindMacro[
     Node: Type,
     CodecType <: Codec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
-    ApiType <: AnyRef: Type
+    Api <: AnyRef: Type
   ](
     codec: Expr[CodecType],
     backend: Expr[Backend[Effect]],
-    api: Expr[ApiType]
+    api: Expr[Api]
   )(using quotes: Quotes): Expr[Map[String, HandlerMethod[Node, Effect, Context]]] =
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = validApiMethods[ApiType, Effect](ref)
+    val apiMethods = validApiMethods[Api, Effect](ref)
     val validMethods = apiMethods.flatMap(_.swap.toOption) match
       case Seq() => apiMethods.flatMap(_.toOption)
       case errors => ref.q.reflect.report.throwError(
@@ -55,7 +55,7 @@ private[jsonrpc] case object HandlerBindings:
     val handlerMethods = Expr.ofSeq(validMethods.map { method =>
       '{
         ${ Expr(method.name) } -> ${
-          generateHandlerMethod[Node, CodecType, Effect, Context, ApiType](ref)(method, codec, backend, api)
+          generateHandlerMethod[Node, CodecType, Effect, Context, Api](ref)(method, codec, backend, api)
         }
       }
     })
@@ -66,17 +66,17 @@ private[jsonrpc] case object HandlerBindings:
     CodecType <: Codec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
-    ApiType: Type
+    Api: Type
   ](ref: Reflection)(
     method: ref.RefMethod,
     codec: Expr[CodecType],
     backend: Expr[Backend[Effect]],
-    api: Expr[ApiType]
+    api: Expr[Api]
   ): Expr[HandlerMethod[Node, Effect, Context]] =
     given Quotes = ref.q
 
-    val invoke = generateInvoke[Node, CodecType, Effect, Context, ApiType](ref)(method, codec, backend, api)
-    logBoundMethod[ApiType](ref)(method, invoke)
+    val invoke = generateInvoke[Node, CodecType, Effect, Context, Api](ref)(method, codec, backend, api)
+    logBoundMethod[Api](ref)(method, invoke)
     '{
       HandlerMethod(
         $invoke,
@@ -93,12 +93,12 @@ private[jsonrpc] case object HandlerBindings:
     CodecType <: Codec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
-    ApiType: Type
+    Api: Type
   ](ref: Reflection)(
     method: ref.RefMethod,
     codec: Expr[CodecType],
     backend: Expr[Backend[Effect]],
-    api: Expr[ApiType]
+    api: Expr[Api]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
     import ref.q.reflect.{asTerm, Term, TypeRepr}
     given Quotes = ref.q
@@ -151,12 +151,12 @@ private[jsonrpc] case object HandlerBindings:
       }
     }
 
-  private def logBoundMethod[ApiType: Type](ref: Reflection)(method: ref.RefMethod, invoke: Expr[Any]): Unit =
+  private def logBoundMethod[Api: Type](ref: Reflection)(method: ref.RefMethod, invoke: Expr[Any]): Unit =
     import ref.q.reflect.{asTerm, Printer}
 
     Option(System.getProperty(debugProperty)).foreach( _ =>
       println(
-        s"""${methodSignature[ApiType](ref)(method)} =
+        s"""${methodSignature[Api](ref)(method)} =
           |  ${invoke.asTerm.show(using Printer.TreeShortCode)}
           |""".stripMargin
       )

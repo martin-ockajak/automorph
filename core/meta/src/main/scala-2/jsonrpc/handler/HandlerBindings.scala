@@ -21,31 +21,31 @@ private[jsonrpc] case object HandlerBindings {
    * @tparam CodecType message format codec type
    * @tparam Effect effect type
    * @tparam Context request context type
-   * @tparam ApiType API type
+   * @tparam Api API type
    * @return mapping of method names to handler method bindings
    */
-  def bind[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
+  def bind[Node, CodecType <: Codec[Node], Effect[_], Context, Api <: AnyRef](
     codec: CodecType,
     backend: Backend[Effect],
-    api: ApiType
-  ): Map[String, HandlerMethod[Node, Effect, Context]] = macro bindMacro[Node, CodecType, Effect, Context, ApiType]
+    api: Api
+  ): Map[String, HandlerMethod[Node, Effect, Context]] = macro bindMacro[Node, CodecType, Effect, Context, Api]
 
   def bindMacro[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
-    ApiType <: AnyRef: c.WeakTypeTag
+    Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     codec: c.Expr[CodecType],
     backend: c.Expr[Backend[Effect]],
-    api: c.Expr[ApiType]
+    api: c.Expr[Api]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]] = {
     import c.universe.Quasiquote
     val ref = Reflection[c.type](c)
 
     // Detect and validate public methods in the API type
-    val apiMethods = validApiMethods[c.type, ApiType, Effect[_]](ref)
+    val apiMethods = validApiMethods[c.type, Api, Effect[_]](ref)
     val validMethods = apiMethods.flatMap(_.swap.toOption) match {
       case Seq() => apiMethods.flatMap(_.toOption)
       case errors =>
@@ -57,7 +57,7 @@ private[jsonrpc] case object HandlerBindings {
 
     // Generate bound API method bindings
     val handlerMethods = validMethods.map { method =>
-      q"${method.name} -> ${generateHandlerMethod[c.type, Node, CodecType, Effect, Context, ApiType](ref)(method, codec, backend, api)}"
+      q"${method.name} -> ${generateHandlerMethod[c.type, Node, CodecType, Effect, Context, Api](ref)(method, codec, backend, api)}"
     }
     c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]](q"""
       Seq(..$handlerMethods).toMap
@@ -70,17 +70,17 @@ private[jsonrpc] case object HandlerBindings {
     CodecType <: Codec[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
-    ApiType: ref.c.WeakTypeTag
+    Api: ref.c.WeakTypeTag
   ](ref: Reflection[C])(
     method: ref.RefMethod,
     codec: ref.c.Expr[CodecType],
     backend: ref.c.Expr[Backend[Effect]],
-    api: ref.c.Expr[ApiType]
+    api: ref.c.Expr[Api]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[HandlerMethod[Node, Effect, Context]] = {
     import ref.c.universe.Quasiquote
 
-    val invoke = generateInvoke[C, Node, CodecType, Effect, Context, ApiType](ref)(method, codec, backend, api)
-    logBoundMethod[C, ApiType](ref)(method, invoke)
+    val invoke = generateInvoke[C, Node, CodecType, Effect, Context, Api](ref)(method, codec, backend, api)
+    logBoundMethod[C, Api](ref)(method, invoke)
     ref.c.Expr[HandlerMethod[Node, Effect, Context]](q"""
       HandlerMethod(
         $invoke,
@@ -99,12 +99,12 @@ private[jsonrpc] case object HandlerBindings {
     CodecType <: Codec[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
-    ApiType
+    Api
   ](ref: Reflection[C])(
     method: ref.RefMethod,
     codec: ref.c.Expr[CodecType],
     backend: ref.c.Expr[Backend[Effect]],
-    api: ref.c.Expr[ApiType]
+    api: ref.c.Expr[Api]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}
     (weakTypeOf[Node], weakTypeOf[CodecType])
@@ -151,12 +151,12 @@ private[jsonrpc] case object HandlerBindings {
     """)
   }
 
-  private def logBoundMethod[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag](ref: Reflection[C])(
+  private def logBoundMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: Reflection[C])(
     method: ref.RefMethod,
     invoke: ref.c.Expr[Any]
   ): Unit = Option(System.getProperty(debugProperty)).foreach { _ =>
     println(
-      s"""${methodSignature[C, ApiType](ref)(method)} =
+      s"""${methodSignature[C, Api](ref)(method)} =
         |  ${ref.c.universe.showCode(invoke.tree)}
         |""".stripMargin
     )

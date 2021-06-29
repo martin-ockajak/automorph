@@ -372,16 +372,16 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
    *
-   * @tparam T API trait type (classes are not supported)
+   * @tparam Api API trait type (classes are not supported)
    * @return JSON-RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef]: T =
+  inline def bind[Api <: AnyRef]: Api =
     // Generate API method bindings
-    val methodBindings = ClientBindings.bind[Node, CodecType, Effect, Context, T](codec)
+    val methodBindings = ClientBindings.bind[Node, CodecType, Effect, Context, Api](codec)
 
     // Create API proxy instance
-    val classTag = summonInline[ClassTag[T]]
+    val classTag = summonInline[ClassTag[Api]]
     Proxy.newProxyInstance(
       getClass.getClassLoader,
       Array(classTag.runtimeClass),
@@ -407,4 +407,4 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
           // Perform the API call
           performCall(method.getName, encodedArguments, context, resultNode => clientMethod.decodeResult(resultNode))
         }.getOrElse(throw IllegalStateException(s"Method not found: ${method.getName}"))
-    ).asInstanceOf[T]
+    ).asInstanceOf[Api]

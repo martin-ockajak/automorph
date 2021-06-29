@@ -2,7 +2,9 @@ package jsonrpc.handler
 
 import jsonrpc.Handler
 import jsonrpc.handler.HandlerBindings
-import jsonrpc.spi.Codec
+import jsonrpc.spi.{Backend, Codec}
+import scala.language.experimental.macros
+import scala.reflect.macros.blackbox
 
 /**
  * JSON-RPC handler layer code generation.
@@ -30,11 +32,11 @@ private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Co
    * Bound API methods are exposed using their actual names.
    *
    * @param api API instance
-   * @tparam T API type (only member methods of this type are exposed)
+   * @tparam Api API type (only member methods of this type are exposed)
    * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[T <: AnyRef](api: T): Handler[Node, CodecType, Effect, Context] =
+  def bind[Api <: AnyRef](api: Api): Handler[Node, CodecType, Effect, Context] =
     bind(api, name => Seq(name))
 
   /**
@@ -53,15 +55,46 @@ private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Co
    *
    * @param api API instance
    * @param exposedNames create exposed method names from its actual name (empty result causes the method not to be exposed)
-   * @tparam T API type (only member methods of this type are exposed)
+   * @tparam Api API type (only member methods of this type are exposed)
    * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[T <: AnyRef](api: T, exposedNames: String => Seq[String]): Handler[Node, CodecType, Effect, Context] = {
-    val bindings = HandlerBindings.bind[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap {
+  def bind[Api <: AnyRef](api: Api, exposedNames: String => Seq[String]): Handler[Node, CodecType, Effect, Context] = {
+    val bindings = HandlerBindings.bind[Node, CodecType, Effect, Context, Api](codec, backend, api).flatMap {
       case (methodName: String, method: HandlerMethod[Node, Effect, Context]) =>
         exposedNames(methodName).map(_ -> method)
     }
     copy(methodBindings = methodBindings ++ bindings)
   }
+//    macro HandlerMeta.bindMacro[Node, CodecType, Effect, Context, T]
+}
+
+case object HandlerMeta {
+
+//  def bindMacro[
+//    Node: c.WeakTypeTag,
+//    CodecType <: Codec[Node]: c.WeakTypeTag,
+//    Effect[_],
+//    Context: c.WeakTypeTag,
+//    ApiType <: AnyRef: c.WeakTypeTag
+//  ](c: blackbox.Context)(
+//    api: c.Expr[ApiType],
+//    exposedNames: c.Expr[String => Seq[String]]
+//  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]] = {
+//    import c.universe.{Quasiquote, weakTypeOf}
+//
+//    val nodeType = weakTypeOf[Node]
+//    val codecType = weakTypeOf[CodecType]
+//    val contextType = weakTypeOf[Context]
+//    val apiType = weakTypeOf[ApiType]
+//    c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]](q"""
+//      val codec = ${c.prefix}.codec
+//      val backend = ${c.prefix}.backend
+//      val bindings = jsonrpc.handler.HandlerBindings.bind[$nodeType, $codecType, $effectType, $contextType, $apiType](codec, backend, $api).flatMap {
+//        case (methodName: String, method: HandlerMethod[$nodeType, $effectType, $contextType]) =>
+//          exposedNames(methodName).map(_ -> method)
+//      }
+//      ${c.prefix}.copy(methodBindings = methodBindings ++ bindings)
+//    """)
+//  }
 }

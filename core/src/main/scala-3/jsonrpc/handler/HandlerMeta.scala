@@ -30,11 +30,11 @@ private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Co
    * Bound API methods are exposed using their actual names.
    *
    * @param api API instance
-   * @tparam T API type (only member methods of this type are exposed)
+   * @tparam Api API type (only member methods of this type are exposed)
    * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef](api: T): Handler[Node, CodecType, Effect, Context] =
+  inline def bind[Api <: AnyRef](api: Api): Handler[Node, CodecType, Effect, Context] =
     bind(api, name => Seq(name))
 
   /**
@@ -53,12 +53,12 @@ private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Co
    *
    * @param api API instance
    * @param exposedNames create exposed method names from its actual name (empty result causes the method not to be exposed)
-   * @tparam T API type (only member methods of this type are exposed)
+   * @tparam Api API type (only member methods of this type are exposed)
    * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[T <: AnyRef](api: T, exposedNames: String => Seq[String]): Handler[Node, CodecType, Effect, Context] =
-    val bindings = HandlerBindings.bind[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap {
+  inline def bind[Api <: AnyRef](api: Api, exposedNames: String => Seq[String]): Handler[Node, CodecType, Effect, Context] =
+    val bindings = HandlerBindings.bind[Node, CodecType, Effect, Context, Api](codec, backend, api).flatMap {
       (methodName, method) => exposedNames(methodName).map(_ -> method)
     }
     copy(methodBindings = methodBindings ++ bindings)
