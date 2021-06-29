@@ -72,7 +72,7 @@ final case class ComplexApiImpl[Effect[_], Context](backend: Backend[Effect]) ex
       string = s"${p0.string} - $p1",
       long = p0.long + implicitly[Context].toString.size,
       double = p2.getOrElse(0.1),
-      enumeration = Enum.Enum.One
+      enumeration = Enum.fromOrdinal(1)
     ))
 
   override def method9(p0: String): Effect[String] = backend.failed(new IllegalArgumentException(p0))
