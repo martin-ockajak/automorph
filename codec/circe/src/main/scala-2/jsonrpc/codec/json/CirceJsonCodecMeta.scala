@@ -28,7 +28,9 @@ private[jsonrpc] object CirceJsonCodecMeta {
     val valueType = weakTypeOf[T]
     c.Expr[Json](q"""
       val custom = ${c.prefix}.custom
-      val encoder = implicitly[custom.CirceEncoder[$valueType]].encoder
+      import custom._
+      import io.circe.syntax.EncoderOps
+      val encoder = implicitly[io.circe.Encoder[$valueType]].encoder
       $value.asJson(encoder)
     """)
   }
@@ -39,7 +41,9 @@ private[jsonrpc] object CirceJsonCodecMeta {
     val valueType = weakTypeOf[T]
     c.Expr[T](q"""
       val custom = ${c.prefix}.custom
-      val decoder = implicitly[custom.CirceDecoder[$valueType]].decoder
+      import custom._
+      import io.circe.syntax.EncoderOps
+      val decoder = implicitly[io.circe.Decoder[$valueType]].decoder
       $node.as[$valueType](decoder).toTry.get
     """)
   }
