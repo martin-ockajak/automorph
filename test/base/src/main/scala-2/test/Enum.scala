@@ -5,4 +5,6 @@ object Enum extends Enumeration {
   val Zero, One = Value
 
   def fromOrdinal(ordinal: Int): Enum = this.values.toSeq(ordinal)
+
+  def toOrdinal(value: Enum): Int = value.id
 }

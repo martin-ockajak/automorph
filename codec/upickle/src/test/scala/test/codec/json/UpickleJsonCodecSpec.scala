@@ -3,12 +3,10 @@ package test.codec.json
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.codec.json.UpickleJsonCodec
 import org.scalacheck.{Arbitrary, Gen}
-import test.Enum.Enum
-import test.Generators.arbitraryRecord
+import test.Enum
 import test.codec.CodecSpec
 import test.{Record, Structure}
 import ujson.{Bool, Num, Obj, Str, Value}
-import upickle.AttributeTagged
 
 class UpickleJsonCodecSpec extends CodecSpec {
 
@@ -49,8 +47,8 @@ class UpickleJsonCodecSpec extends CodecSpec {
 
 object UpickleJsonCodecSpec extends UpickleCustom {
 
-  implicit def enumRw: ReadWriter[Enum] = readwriter[Int].bimap[Enum](
-    value => value.ordinal,
+  implicit def enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
+    value => Enum.toOrdinal(value),
     number => Enum.fromOrdinal(number)
   )
   implicit def structureRw: ReadWriter[Structure] = macroRW
