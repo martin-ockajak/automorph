@@ -83,8 +83,8 @@ case object HandlerMeta {
     c.Expr[Handler[Node, CodecType, Effect, Context]](q"""
       val codec = ${c.prefix}.codec
       val backend = ${c.prefix}.backend
-      val bindings = jsonrpc.handler.HandlerBindings.bind[$nodeType, $codecType, $effectType, $contextType, $apiType](codec, backend, $api).flatMap {
-        case (methodName, method) =>
+      val bindings = jsonrpc.handler.HandlerBindings
+        .bind[$nodeType, $codecType, $effectType, $contextType, $apiType](codec, backend, $api).flatMap { case (methodName, method) =>
           $exposedNames(methodName).map(_ -> method)
       }
       ${c.prefix}.copy(methodBindings = methodBindings ++ bindings)
