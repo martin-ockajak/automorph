@@ -30,7 +30,7 @@ private[jsonrpc] object CirceJsonCodecMeta {
       val custom = ${c.prefix}.custom
       import custom._
       import io.circe.syntax.EncoderOps
-      val encoder = implicitly[io.circe.Encoder[$valueType]].encoder
+      val encoder = implicitly[io.circe.Encoder[$valueType]]
       $value.asJson(encoder)
     """)
   }
@@ -43,7 +43,7 @@ private[jsonrpc] object CirceJsonCodecMeta {
       val custom = ${c.prefix}.custom
       import custom._
       import io.circe.syntax.EncoderOps
-      val decoder = implicitly[io.circe.Decoder[$valueType]].decoder
+      val decoder = implicitly[io.circe.Decoder[$valueType]]
       $node.as[$valueType](decoder).toTry.get
     """)
   }
