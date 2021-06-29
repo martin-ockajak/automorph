@@ -35,7 +35,7 @@ trait ComplexApi[Effect[_], Context] {
 
   def method9(p0: String): Effect[String]
 
-  protected def protectedMethod: Unit
+  protected def protectedMethod(): Unit
 }
 
 final case class ComplexApiImpl[Effect[_], Context](backend: Backend[Effect]) extends ComplexApi[Effect, Context] {
@@ -77,9 +77,9 @@ final case class ComplexApiImpl[Effect[_], Context](backend: Backend[Effect]) ex
 
   override def method9(p0: String): Effect[String] = backend.failed(new IllegalArgumentException(p0))
 
-  protected def protectedMethod: Unit = privateMethod
+  protected def protectedMethod(): Unit = privateMethod
 
-  private def privateMethod: Unit = ()
+  private def privateMethod(): Unit = ()
 }
 
 trait InvalidApi[Effect[_]] {
