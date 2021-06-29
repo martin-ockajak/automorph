@@ -57,9 +57,9 @@ case object Handler {
     backend: Backend[Effect],
     bufferSize: Int
   ): Handler[Node, CodecType, Effect, Context] =
-    macro applyExpr[Node, CodecType, Effect, Context]
+    macro applyMacro[Node, CodecType, Effect, Context]
 
-  def applyExpr[
+  def applyMacro[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
@@ -94,9 +94,9 @@ case object Handler {
     codec: CodecType,
     backend: Backend[Effect]
   ): Handler[Node, CodecType, Effect, Context] =
-    macro applyDefaultExpr[Node, CodecType, Effect, Context]
+    macro applyDefaultMacro[Node, CodecType, Effect, Context]
 
-  def applyDefaultExpr[
+  def applyDefaultMacro[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
@@ -131,9 +131,9 @@ case object Handler {
     codec: CodecType,
     backend: Backend[Effect]
   ): Handler[Node, CodecType, Effect, Void.Value] =
-    macro basicDefaultExpr[Node, CodecType, Effect]
+    macro basicMacro[Node, CodecType, Effect]
 
-  def basicDefaultExpr[
+  def basicMacro[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_]

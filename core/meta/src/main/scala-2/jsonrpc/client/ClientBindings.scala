@@ -25,9 +25,9 @@ private[jsonrpc] case object ClientBindings {
    */
   def bind[Node, CodecType <: Codec[Node], Effect[_], Context, ApiType <: AnyRef](
     codec: CodecType
-  ): Map[String, ClientMethod[Node]] = macro bindExpr[Node, CodecType, Effect, Context, ApiType]
+  ): Map[String, ClientMethod[Node]] = macro bindMacro[Node, CodecType, Effect, Context, ApiType]
 
-  def bindExpr[
+  def bindMacro[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_],

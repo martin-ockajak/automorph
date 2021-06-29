@@ -28,9 +28,9 @@ private[jsonrpc] case object HandlerBindings {
     codec: CodecType,
     backend: Backend[Effect],
     api: ApiType
-  ): Map[String, HandlerMethod[Node, Effect, Context]] = macro bindExpr[Node, CodecType, Effect, Context, ApiType]
+  ): Map[String, HandlerMethod[Node, Effect, Context]] = macro bindMacro[Node, CodecType, Effect, Context, ApiType]
 
-  def bindExpr[
+  def bindMacro[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_],

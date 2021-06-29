@@ -86,7 +86,7 @@ private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Co
     exposedNames: PartialFunction[String, Seq[String]]
   ): Handler[Node, CodecType, Effect, Context] = {
     val bindings =
-      HandlerBindings.generate[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap {
+      HandlerBindings.bind[Node, CodecType, Effect, Context, T](codec, backend, api).flatMap {
         case (methodName: String, method: HandlerMethod[Node, Effect, Context]) =>
           exposedNames.applyOrElse(
             methodName,
