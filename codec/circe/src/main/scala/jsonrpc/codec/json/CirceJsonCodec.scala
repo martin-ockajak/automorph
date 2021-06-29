@@ -20,6 +20,8 @@ final case class CirceJsonCodec[Custom <: CirceCustom](
 ) extends CirceJsonCodecMeta[Custom] {
 
   private val charset = StandardCharsets.UTF_8
+  private implicit val messageErrorEncoder: Encoder[CirceMessageError] = deriveEncoder[CirceMessageError]
+  private implicit val messageErrorDecoder: Decoder[CirceMessageError] = deriveDecoder[CirceMessageError]
   private implicit val messageEncoder: Encoder[CirceMessage] = deriveEncoder[CirceMessage]
   private implicit val messageDecoder: Decoder[CirceMessage] = deriveDecoder[CirceMessage]
 
