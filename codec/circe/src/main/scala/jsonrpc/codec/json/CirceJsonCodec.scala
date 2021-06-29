@@ -2,9 +2,9 @@ package jsonrpc.codec.json
 
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
-import io.circe.{parser, Decoder, Encoder, Json}
+import io.circe.{Decoder, Encoder, Json, parser}
 import java.nio.charset.StandardCharsets
-import jsonrpc.spi.Message
+import jsonrpc.spi.{Message, MessageError}
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -29,19 +29,19 @@ final case class CirceJsonCodec[Custom <: CirceCustom](
 
   implicit private val paramsDecoder: Decoder[Either[List[io.circe.Json], Map[String, io.circe.Json]]] =
     deriveDecoder[Either[List[io.circe.Json], Map[String, io.circe.Json]]]
-  implicit private val messageErrorEncoder: Encoder[CirceMessageError] = deriveEncoder[CirceMessageError]
-  implicit private val messageErrorDecoder: Decoder[CirceMessageError] = deriveDecoder[CirceMessageError]
-  implicit private val messageEncoder: Encoder[CirceMessage] = deriveEncoder[CirceMessage]
-  implicit private val messageDecoder: Decoder[CirceMessage] = deriveDecoder[CirceMessage]
+  implicit private val messageErrorEncoder: Encoder[MessageError[Json]] = deriveEncoder[MessageError[Json]]
+  implicit private val messageErrorDecoder: Decoder[MessageError[Json]] = deriveDecoder[MessageError[Json]]
+  implicit private val messageEncoder: Encoder[Message[Json]] = deriveEncoder[Message[Json]]
+  implicit private val messageDecoder: Decoder[Message[Json]] = deriveDecoder[Message[Json]]
 
   override def mediaType: String = "application/json"
 
   override def serialize(message: Message[Json]): ArraySeq.ofByte =
-    new ArraySeq.ofByte(CirceMessage.fromSpi(message).asJson.noSpaces.getBytes(charset))
+    new ArraySeq.ofByte(message.asJson.noSpaces.getBytes(charset))
 
   override def deserialize(data: ArraySeq.ofByte): Message[Json] =
-    parser.decode[CirceMessage](new String(data.unsafeArray, charset)).toTry.get.toSpi
+    parser.decode[Message[Json]](new String(data.unsafeArray, charset)).toTry.get
 
   override def format(message: Message[Json]): String =
-    CirceMessage.fromSpi(message).asJson.spaces2
+    message.asJson.spaces2
 }

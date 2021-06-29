@@ -26,15 +26,12 @@ final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
 
   override def mediaType: String = "application/msgpack"
 
-  override def serialize(message: Message[Msg]): ArraySeq.ofByte = {
+  override def serialize(message: Message[Msg]): ArraySeq.ofByte =
     new ArraySeq.ofByte(custom.writeToByteArray(UpickleMessage.fromSpi(message)))
-  }
 
-  override def deserialize(data: ArraySeq.ofByte): Message[Msg] = {
+  override def deserialize(data: ArraySeq.ofByte): Message[Msg] =
     custom.read[UpickleMessage](data.unsafeArray).toSpi
-  }
 
-  override def format(message: Message[Msg]): String = {
+  override def format(message: Message[Msg]): String =
     custom.write(UpickleMessage.fromSpi(message), indent)
-  }
 }

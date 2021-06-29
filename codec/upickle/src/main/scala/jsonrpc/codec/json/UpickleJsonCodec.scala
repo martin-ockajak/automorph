@@ -26,15 +26,12 @@ final case class UpickleJsonCodec[Custom <: UpickleCustom](
 
   override def mediaType: String = "application/json"
 
-  override def serialize(message: Message[Value]): ArraySeq.ofByte = {
+  override def serialize(message: Message[Value]): ArraySeq.ofByte =
     new ArraySeq.ofByte(custom.writeToByteArray(UpickleMessage.fromSpi(message)))
-  }
 
-  override def deserialize(data: ArraySeq.ofByte): Message[Value] = {
+  override def deserialize(data: ArraySeq.ofByte): Message[Value] =
     custom.read[UpickleMessage](data.unsafeArray).toSpi
-  }
 
-  override def format(message: Message[Value]): String = {
+  override def format(message: Message[Value]): String =
     custom.write(UpickleMessage.fromSpi(message), indent)
-  }
 }
