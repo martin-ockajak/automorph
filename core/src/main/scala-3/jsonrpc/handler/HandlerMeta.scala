@@ -1,6 +1,5 @@
 package jsonrpc.handler
 
-import java.beans.IntrospectionException
 import jsonrpc.Handler
 import jsonrpc.handler.HandlerBindings
 import jsonrpc.spi.{Backend, Codec}
