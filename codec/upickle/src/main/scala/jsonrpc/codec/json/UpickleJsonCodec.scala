@@ -21,7 +21,7 @@ final case class UpickleJsonCodec[Custom <: UpickleCustom](
 
   private val indent = 2
 
-  implicit private val messageRw: custom.ReadWriter[UpickleMessage] = {
+  implicit private lazy val messageRw: custom.ReadWriter[UpickleMessage] = {
     implicit val messageErrorRw: custom.ReadWriter[UpickleMessageError] = custom.macroRW
     custom.macroRW
   }
