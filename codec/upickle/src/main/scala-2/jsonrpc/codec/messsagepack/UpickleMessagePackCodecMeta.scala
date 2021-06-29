@@ -15,15 +15,15 @@ trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends Codec[Msg] {
   this: UpickleMessagePackCodec[Custom] =>
 
   override def encode[T](value: T): Msg =
-    macro UpickleMessagePackCodecMeta.encodeExpr[T]
+    macro UpickleMessagePackCodecMeta.encode[T]
 
   override def decode[T](node: Msg): T =
-    macro UpickleMessagePackCodecMeta.decodeExpr[T]
+    macro UpickleMessagePackCodecMeta.decode[T]
 }
 
-private[jsonrpc] object UpickleMessagePackCodecMeta {
+object UpickleMessagePackCodecMeta {
 
-  def encodeExpr[T: c.WeakTypeTag](c: Context)(value: c.Expr[T]): c.Expr[Msg] = {
+  def encode[T: c.WeakTypeTag](c: Context)(value: c.Expr[T]): c.Expr[Msg] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val valueType = weakTypeOf[T]
@@ -35,7 +35,7 @@ private[jsonrpc] object UpickleMessagePackCodecMeta {
     """)
   }
 
-  def decodeExpr[T: c.WeakTypeTag](c: Context)(node: c.Expr[Msg]): c.Expr[T] = {
+  def decode[T: c.WeakTypeTag](c: Context)(node: c.Expr[Msg]): c.Expr[T] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val valueType = weakTypeOf[T]
