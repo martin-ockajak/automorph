@@ -35,6 +35,7 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
   with Logging
 
 object Handler {
+  val defaultBufferSize = 4096
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
@@ -52,9 +53,29 @@ object Handler {
    */
   def apply[Node, CodecType <: Codec[Node], Effect[_], Context](
     codec: CodecType,
-    backend: Backend[Effect]
+    backend: Backend[Effect],
+    bufferSize: Int
   ): Handler[Node, CodecType, Effect, Context] =
     macro applyExpr[Node, CodecType, Effect, Context]
+
+  /**
+   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
+   *
+   * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
+   *
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+   * @param codec message codec plugin
+   * @param backend effect backend plugin
+   * @tparam Node message format node representation type
+   * @tparam CodecType message codec plugin type
+   * @tparam Effect effect type
+   * @return JSON-RPC request handler
+   */
+  def apply[Node, CodecType <: Codec[Node], Effect[_], Context](
+    codec: CodecType,
+    backend: Backend[Effect]
+  ): Handler[Node, CodecType, Effect, Context] =
+    macro applyDefaultExpr[Node, CodecType, Effect, Context]
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.
@@ -74,9 +95,27 @@ object Handler {
     codec: CodecType,
     backend: Backend[Effect]
   ): Handler[Node, CodecType, Effect, Void.Value] =
-    macro basicExpr[Node, CodecType, Effect]
+    macro basicDefaultExpr[Node, CodecType, Effect]
 
   def applyExpr[
+    Node: c.WeakTypeTag,
+    CodecType <: Codec[Node]: c.WeakTypeTag,
+    Effect[_],
+    Context: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    codec: c.Expr[CodecType],
+    backend: c.Expr[Backend[Effect]],
+    bufferSize: c.Expr[Int]
+  ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+    Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
+
+    c.Expr[Handler[Node, CodecType, Effect, Context]]( q"""
+      Handler($codec, $backend, $bufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
+    """)
+  }
+
+  def applyDefaultExpr[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
@@ -89,11 +128,11 @@ object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
 
     c.Expr[Handler[Node, CodecType, Effect, Context]]( q"""
-      Handler($codec, $backend, 4096, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
+      Handler($codec, $backend, Handler.defaultBufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
     """)
   }
 
-  def basicExpr[
+  def basicDefaultExpr[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_]
@@ -105,7 +144,7 @@ object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[CodecType])
 
     c.Expr[Handler[Node, CodecType, Effect, Void.Value]]( q"""
-      Handler($codec, $backend, 4096, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
+      Handler($codec, $backend, Handler.defaultBufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
     """)
   }
 }
