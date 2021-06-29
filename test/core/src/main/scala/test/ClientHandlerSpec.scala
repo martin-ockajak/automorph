@@ -115,7 +115,9 @@ trait ClientHandlerSpec extends BaseSpec {
               }
               "method9" in {
                 check { (a0: String) =>
-                  val Seq(expected, result) = apis.map((api: ComplexApi[Effect, Context]) => Try(run(api.method9(a0))).toEither)
+                  val (canonicalApi, testedApi) = apis
+                  val expected = Try(run(canonicalApi.method9(a0))).toEither
+                  val result = Try(run(testedApi.method9(a0))).toEither
                   val expectedErrorMessage = expected.swap.map(error =>
                     s"[${error.getClass.getSimpleName}] ${Option(error.getMessage).getOrElse("")}"
                   )
@@ -128,7 +130,7 @@ trait ClientHandlerSpec extends BaseSpec {
         "Invalid API" - {
           apiCombinations(invalidApiInstance, invalidApis, apiNames).foreach { case (mode, apis) =>
             mode - {
-              val api = apis.last
+              val (_, api) = apis
               "Method not found" in {
                 val error = intercept[MethodNotFoundException](run(api.nomethod(""))).getMessage.toLowerCase
                 error.should(include("nomethod"))
@@ -185,15 +187,15 @@ trait ClientHandlerSpec extends BaseSpec {
     }
   }
 
-  private def apiCombinations[Api](originalApi: Api, apis: Seq[Api], names: Seq[String]): Seq[(String, Seq[Api])] =
+  private def apiCombinations[Api](originalApi: Api, apis: Seq[Api], names: Seq[String]): Seq[(String, (Api, Api))] =
     apis.zip(names).map { case (api, name) =>
-      name -> Seq(originalApi, api)
+      name -> ((originalApi, api))
     }
 
-  private def consistent[Api, Result](apis: Seq[Api], function: Api => Effect[Result]): Boolean = {
-    apis.map(api => run(function(api))) match {
-      case Seq(expected, result) => expected.equals(result)
-      case _ => throw new IllegalStateException("Invalid number of APIs")
-    }
+  private def consistent[Api, Result](apis: (Api, Api), function: Api => Effect[Result]): Boolean = {
+    val (canonicalApi, testedApi) = apis
+    val expected = run(function(canonicalApi))
+    val result = run(function(testedApi))
+    expected.equals(result)
   }
 }
