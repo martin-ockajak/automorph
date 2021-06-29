@@ -84,7 +84,8 @@ case object HandlerMeta {
       val codec = ${c.prefix}.codec
       val backend = ${c.prefix}.backend
       val bindings = jsonrpc.handler.HandlerBindings
-        .bind[$nodeType, $codecType, $effectType, $contextType, $apiType](codec, backend, $api).flatMap { case (methodName, method) =>
+        .bind[$nodeType, $codecType, $effectType, $contextType, $apiType](codec, backend, $api)
+        .flatMap { case (methodName, method) =>
           $exposedNames(methodName).map(_ -> method)
       }
       ${c.prefix}.copy(methodBindings = methodBindings ++ bindings)
