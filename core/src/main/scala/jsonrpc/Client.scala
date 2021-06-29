@@ -160,7 +160,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
   }
 }
 
-object Client {
+case object Client {
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with defined request `Context` type.

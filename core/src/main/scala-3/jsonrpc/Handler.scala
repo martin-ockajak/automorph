@@ -32,7 +32,7 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
   with CannotEqual
   with Logging
 
-object Handler:
+case object Handler:
 
   /** Default handler buffer size. */
   val defaultBufferSize = 4096

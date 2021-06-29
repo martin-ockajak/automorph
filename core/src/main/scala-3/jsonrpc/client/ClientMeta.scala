@@ -378,7 +378,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
    */
   inline def bind[T <: AnyRef]: T =
     // Generate API method bindings
-    val methodBindings = ClientBindings.generate[Node, CodecType, Effect, Context, T](codec)
+    val methodBindings = ClientBindings.bind[Node, CodecType, Effect, Context, T](codec)
 
     // Create API proxy instance
     val classTag = summonInline[ClassTag[T]]
