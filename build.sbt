@@ -60,41 +60,22 @@ lazy val standard = project.dependsOn(
 )
 
 // Codec
-lazy val upickleMeta = (project in file("codec/upickle/meta")).dependsOn(
-  spi
-).settings(
-  libraryDependencies ++= Seq(
-    "com.lihaoyi" %% "upickle" % "1.4.0"
-  )
-)
 lazy val upickle = (project in file("codec/upickle")).dependsOn(
-  upickleMeta, testBase % Test
+  spi, testBase % Test
 ).settings(
   name := "json-rpc-upickle",
   libraryDependencies ++= Seq(
     "com.lihaoyi" %% "upickle" % "1.4.0"
-  ),
-  Compile / packageBin / mappings ++= (upickleMeta / Compile / packageBin / mappings).value,
-  Compile / packageSrc / mappings ++= (upickleMeta / Compile / packageSrc / mappings).value
-)
-lazy val circeMeta = (project in file("codec/circe/meta")).dependsOn(
-  spi
-).settings(
-  libraryDependencies ++= Seq(
-    "io.circe" %% "circe-parser" % "0.14.1",
-    "io.circe" %% "circe-generic" % "0.14.1"
   )
 )
 lazy val circe = (project in file("codec/circe")).dependsOn(
-  circeMeta, testBase % Test
+  spi, testBase % Test
 ).settings(
   name := "json-rpc-circe",
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-parser" % "0.14.1",
     "io.circe" %% "circe-generic" % "0.14.1"
-  ),
-  Compile / packageBin / mappings ++= (circeMeta / Compile / packageBin / mappings).value,
-  Compile / packageSrc / mappings ++= (circeMeta / Compile / packageSrc / mappings).value
+  )
 )
 
 // Effect

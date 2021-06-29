@@ -1,7 +1,7 @@
 package jsonrpc.codec.json
 
-import jsonrpc.spi.{Message, MessageError}
 import io.circe.Json
+import jsonrpc.spi.{Message, MessageError}
 
 private[jsonrpc] final case class CirceMessage(
   jsonrpc: Option[String],
