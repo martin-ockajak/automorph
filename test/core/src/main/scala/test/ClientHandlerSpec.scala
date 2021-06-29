@@ -191,7 +191,9 @@ trait ClientHandlerSpec extends BaseSpec {
     }
 
   private def consistent[Api, Result](apis: Seq[Api], function: Api => Effect[Result]): Boolean = {
-    val Seq(expected, result) = apis.map(api => run(function(api)))
-    expected.equals(result)
+    apis.map(api => run(function(api))) match {
+      case Seq(expected, result) => expected.equals(result)
+      case _ => throw new IllegalStateException("Invalid number of APIs")
+    }
   }
 }

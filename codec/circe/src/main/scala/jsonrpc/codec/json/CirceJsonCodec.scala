@@ -5,7 +5,6 @@ import io.circe.syntax.EncoderOps
 import io.circe.{parser, Decoder, Encoder, Json}
 import java.nio.charset.StandardCharsets
 import jsonrpc.spi.{Message, MessageError}
-import scala.annotation.nowarn
 import scala.collection.immutable.ArraySeq
 
 /**

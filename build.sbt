@@ -190,7 +190,7 @@ ThisBuild / scalacOptions ++= Seq(
   )
   case _ => Seq(
     "-Xlint",
-    "-Wconf:src=src/[^/]+/scala/[^/]+/codec/json/.*:silent",
+    "-Wconf:site=[^.]+\\.codec\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
     "-Wextra-implicit",
     "-Wnumeric-widen",
     "-Wvalue-discard",

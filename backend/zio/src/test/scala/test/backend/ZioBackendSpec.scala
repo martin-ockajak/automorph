@@ -4,7 +4,7 @@ import jsonrpc.backend.ZioBackend
 import jsonrpc.spi.Backend
 import scala.util.Try
 import test.backend.BackendSpec
-import zio.{FiberFailure, RIO, Runtime, ZEnv}
+import zio.{RIO, Runtime, ZEnv}
 
 class ZioBackendSpec extends BackendSpec[({ type Effect[T] = RIO[ZEnv, T] })#Effect] {
   def effect: Backend[({ type Effect[T] = RIO[ZEnv, T] })#Effect] = ZioBackend[ZEnv]()
