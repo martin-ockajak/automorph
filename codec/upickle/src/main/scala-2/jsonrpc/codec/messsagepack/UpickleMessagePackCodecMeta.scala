@@ -12,7 +12,6 @@ import upack.Msg
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
 trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends Codec[Msg] {
-  this: UpickleMessagePackCodec[Custom] =>
 
   override def encode[T](value: T): Msg =
     macro UpickleMessagePackCodecMeta.encode[T]
