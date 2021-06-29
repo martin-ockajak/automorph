@@ -20,21 +20,21 @@ final case class UpickleJsonCodec[Custom <: UpickleCustom](
   import custom._
 
   private val indent = 2
-  private implicit val jsonMmessageErrorRw: custom.ReadWriter[json.JsonMessageError] = custom.macroRW
-  private implicit val jsonMessageRw: custom.ReadWriter[json.JsonMessage] = custom.macroRW
+  private implicit val jsonMmessageErrorRw: custom.ReadWriter[json.UpickleMessageError] = custom.macroRW
+  private implicit val jsonMessageRw: custom.ReadWriter[json.UpickleMessage] = custom.macroRW
   jsonMmessageErrorRw
 
   override def mediaType: String = "application/json"
 
   override def serialize(message: Message[Value]): ArraySeq.ofByte = {
-    new ArraySeq.ofByte(custom.writeToByteArray(JsonMessage.fromSpi(message)))
+    new ArraySeq.ofByte(custom.writeToByteArray(UpickleMessage.fromSpi(message)))
   }
 
   override def deserialize(data: ArraySeq.ofByte): Message[Value] = {
-    custom.read[JsonMessage](data.unsafeArray).toSpi
+    custom.read[UpickleMessage](data.unsafeArray).toSpi
   }
 
   override def format(message: Message[Value]): String = {
-    custom.write(JsonMessage.fromSpi(message), indent)
+    custom.write(UpickleMessage.fromSpi(message), indent)
   }
 }

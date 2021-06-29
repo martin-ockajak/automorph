@@ -11,13 +11,13 @@ import ujson.Value
 //    at ujson.ByteParser.tryCloseCollection(ByteParser.scala:496)
 //    at ujson.ByteParser.parseNested(ByteParser.scala:462)
 //    at ujson.ByteParser.parseTopLevel0(ByteParser.scala:323)
-private[jsonrpc] final case class JsonMessage(
+private[jsonrpc] final case class UpickleMessage(
   jsonrpc: Option[String],
   id: Option[Either[BigDecimal, String]],
   method: Option[String],
   params: Option[Either[List[Value], Map[String, Value]]],
   result: Option[Value],
-  error: Option[JsonMessageError]
+  error: Option[UpickleMessageError]
 ) {
 
   def toSpi: Message[Value] = Message[Value](
@@ -30,19 +30,19 @@ private[jsonrpc] final case class JsonMessage(
   )
 }
 
-private[jsonrpc] object JsonMessage {
+private[jsonrpc] object UpickleMessage {
 
-  def fromSpi(v: Message[Value]): JsonMessage = JsonMessage(
+  def fromSpi(v: Message[Value]): UpickleMessage = UpickleMessage(
     v.jsonrpc,
     v.id,
     v.method,
     v.params,
     v.result,
-    v.error.map(JsonMessageError.fromSpi)
+    v.error.map(UpickleMessageError.fromSpi)
   )
 }
 
-private[jsonrpc] final case class JsonMessageError(
+private[jsonrpc] final case class UpickleMessageError(
   code: Option[Int],
   message: Option[String],
   data: Option[Value]
@@ -55,9 +55,9 @@ private[jsonrpc] final case class JsonMessageError(
   )
 }
 
-private[jsonrpc] object JsonMessageError {
+private[jsonrpc] object UpickleMessageError {
 
-  def fromSpi(v: MessageError[Value]): JsonMessageError = JsonMessageError(
+  def fromSpi(v: MessageError[Value]): UpickleMessageError = UpickleMessageError(
     v.code,
     v.message,
     v.data

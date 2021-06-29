@@ -20,21 +20,21 @@ final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
   import custom._
 
   private val indent = 2
-  private implicit val messagePackMessageErrorRw: custom.ReadWriter[messagepack.MessagePackMessageError] = custom.macroRW
-  private implicit val messagePackMessageRw: custom.ReadWriter[messagepack.MessagePackMessage] = custom.macroRW
+  private implicit val messagePackMessageErrorRw: custom.ReadWriter[messagepack.UpickleMessageError] = custom.macroRW
+  private implicit val messagePackMessageRw: custom.ReadWriter[messagepack.UpickleMessage] = custom.macroRW
   messagePackMessageErrorRw
 
   override def mediaType: String = "application/msgpack"
 
   override def serialize(message: Message[Msg]): ArraySeq.ofByte = {
-    new ArraySeq.ofByte(custom.writeToByteArray(MessagePackMessage.fromSpi(message)))
+    new ArraySeq.ofByte(custom.writeToByteArray(UpickleMessage.fromSpi(message)))
   }
 
   override def deserialize(data: ArraySeq.ofByte): Message[Msg] = {
-    custom.read[MessagePackMessage](data.unsafeArray).toSpi
+    custom.read[UpickleMessage](data.unsafeArray).toSpi
   }
 
   override def format(message: Message[Msg]): String = {
-    custom.write(MessagePackMessage.fromSpi(message), indent)
+    custom.write(UpickleMessage.fromSpi(message), indent)
   }
 }
