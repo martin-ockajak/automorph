@@ -64,6 +64,30 @@ private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Co
 
 case object HandlerMeta {
 
+  def bindDefaultMacro[
+    Node: c.WeakTypeTag,
+    CodecType <: Codec[Node]: c.WeakTypeTag,
+    Effect[_],
+    Context: c.WeakTypeTag,
+    Api <: AnyRef: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    api: c.Expr[Api]
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+
+    val nodeType = weakTypeOf[Node]
+    val codecType = weakTypeOf[CodecType]
+    val contextType = weakTypeOf[Context]
+    val apiType = weakTypeOf[Api]
+    c.Expr[Handler[Node, CodecType, Effect, Context]](q"""
+      val codec = ${c.prefix}.codec
+      val backend = ${c.prefix}.backend
+      val bindings = jsonrpc.handler.HandlerBindings
+        .bind[$nodeType, $codecType, $effectType, $contextType, $apiType](codec, backend, $api)
+      ${c.prefix}.copy(methodBindings = methodBindings ++ bindings)
+    """)
+  }
+
   def bindMacro[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
@@ -88,30 +112,6 @@ case object HandlerMeta {
         .flatMap { case (methodName, method) =>
           $exposedNames(methodName).map(_ -> method)
         }
-      ${c.prefix}.copy(methodBindings = methodBindings ++ bindings)
-    """)
-  }
-
-  def bindDefaultMacro[
-    Node: c.WeakTypeTag,
-    CodecType <: Codec[Node]: c.WeakTypeTag,
-    Effect[_],
-    Context: c.WeakTypeTag,
-    Api <: AnyRef: c.WeakTypeTag
-  ](c: blackbox.Context)(
-    api: c.Expr[Api]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
-    import c.universe.{weakTypeOf, Quasiquote}
-
-    val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[CodecType]
-    val contextType = weakTypeOf[Context]
-    val apiType = weakTypeOf[Api]
-    c.Expr[Handler[Node, CodecType, Effect, Context]](q"""
-      val codec = ${c.prefix}.codec
-      val backend = ${c.prefix}.backend
-      val bindings = jsonrpc.handler.HandlerBindings
-        .bind[$nodeType, $codecType, $effectType, $contextType, $apiType](codec, backend, $api)
       ${c.prefix}.copy(methodBindings = methodBindings ++ bindings)
     """)
   }
