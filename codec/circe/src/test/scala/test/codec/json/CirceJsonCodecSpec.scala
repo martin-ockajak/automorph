@@ -27,6 +27,7 @@ class CirceJsonSpec extends CodecSpec {
 
   "" - {
     "Encode / Decode" in {
+      import CirceJsonCodecSpec._
       check { (record: Record) =>
         val encodedValue = codec.encode(record)
         val decodedValue = codec.decode[Record](encodedValue)
