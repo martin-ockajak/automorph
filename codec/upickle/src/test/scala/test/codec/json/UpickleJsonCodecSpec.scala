@@ -28,6 +28,7 @@ class UpickleJsonCodecSpec extends CodecSpec {
 
   "" - {
     "Encode / Decode" in {
+//      implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
       check { (record: Record) =>
         val encodedValue = codec.encode(record)
         val decodedValue = codec.decode[Record](encodedValue)
