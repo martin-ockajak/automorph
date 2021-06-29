@@ -24,13 +24,13 @@ case object HandlerBindings {
    * @tparam Api API type
    * @return mapping of method names to handler method bindings
    */
-  def bind[Node, CodecType <: Codec[Node], Effect[_], Context, Api <: AnyRef](
+  def generate[Node, CodecType <: Codec[Node], Effect[_], Context, Api <: AnyRef](
     codec: CodecType,
     backend: Backend[Effect],
     api: Api
-  ): Map[String, HandlerMethod[Node, Effect, Context]] = macro bindMacro[Node, CodecType, Effect, Context, Api]
+  ): Map[String, HandlerMethod[Node, Effect, Context]] = macro generateMacro[Node, CodecType, Effect, Context, Api]
 
-  def bindMacro[
+  def generateMacro[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_],

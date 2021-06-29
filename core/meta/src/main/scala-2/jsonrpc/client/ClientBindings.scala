@@ -23,11 +23,11 @@ private[jsonrpc] case object ClientBindings {
    * @tparam Api API type
    * @return mapping of method names to client method bindings
    */
-  def bind[Node, CodecType <: Codec[Node], Effect[_], Context, Api <: AnyRef](
+  def generate[Node, CodecType <: Codec[Node], Effect[_], Context, Api <: AnyRef](
     codec: CodecType
-  ): Map[String, ClientMethod[Node]] = macro bindMacro[Node, CodecType, Effect, Context, Api]
+  ): Map[String, ClientMethod[Node]] = macro generateMacro[Node, CodecType, Effect, Context, Api]
 
-  def bindMacro[
+  def generateMacro[
     Node: c.WeakTypeTag,
     CodecType <: Codec[Node]: c.WeakTypeTag,
     Effect[_],

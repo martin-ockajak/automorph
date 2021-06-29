@@ -23,14 +23,14 @@ private[jsonrpc] case object HandlerBindings:
    * @tparam Api API type
    * @return mapping of method names to handler method bindings
    */
-  inline def bind[Node, CodecType <: Codec[Node], Effect[_], Context, Api <: AnyRef](
+  inline def generate[Node, CodecType <: Codec[Node], Effect[_], Context, Api <: AnyRef](
     codec: CodecType,
     backend: Backend[Effect],
     api: Api
   ): Map[String, HandlerMethod[Node, Effect, Context]] =
-    ${ bindMacro[Node, CodecType, Effect, Context, Api]('codec, 'backend, 'api) }
+    ${ generateMacro[Node, CodecType, Effect, Context, Api]('codec, 'backend, 'api) }
 
-  private def bindMacro[
+  private def generateMacro[
     Node: Type,
     CodecType <: Codec[Node]: Type,
     Effect[_]: Type,
