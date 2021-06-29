@@ -20,10 +20,19 @@ final case class CirceJsonCodec[Custom <: CirceCustom](
 ) extends CirceJsonCodecMeta[Custom] {
 
   private val charset = StandardCharsets.UTF_8
-  private implicit val messageErrorEncoder: Encoder[CirceMessageError] = deriveEncoder[CirceMessageError]
-  private implicit val messageErrorDecoder: Decoder[CirceMessageError] = deriveDecoder[CirceMessageError]
-  private implicit val messageEncoder: Encoder[CirceMessage] = deriveEncoder[CirceMessage]
-  private implicit val messageDecoder: Decoder[CirceMessage] = deriveDecoder[CirceMessage]
+
+  implicit private val idEncoder: Encoder[Either[BigDecimal, String]] = deriveEncoder[Either[BigDecimal, String]]
+  implicit private val idDecoder: Decoder[Either[BigDecimal, String]] = deriveDecoder[Either[BigDecimal, String]]
+
+  implicit private val paramsEncoder: Encoder[Either[List[io.circe.Json], Map[String, io.circe.Json]]] =
+    deriveEncoder[Either[List[io.circe.Json], Map[String, io.circe.Json]]]
+
+  implicit private val paramsDecoder: Decoder[Either[List[io.circe.Json], Map[String, io.circe.Json]]] =
+    deriveDecoder[Either[List[io.circe.Json], Map[String, io.circe.Json]]]
+  implicit private val messageErrorEncoder: Encoder[CirceMessageError] = deriveEncoder[CirceMessageError]
+  implicit private val messageErrorDecoder: Decoder[CirceMessageError] = deriveDecoder[CirceMessageError]
+  implicit private val messageEncoder: Encoder[CirceMessage] = deriveEncoder[CirceMessage]
+  implicit private val messageDecoder: Decoder[CirceMessage] = deriveDecoder[CirceMessage]
 
   override def mediaType: String = "application/json"
 
