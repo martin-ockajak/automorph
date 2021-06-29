@@ -4,9 +4,7 @@ import jsonrpc.Handler
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.transport.local.HandlerTransport
-import test.Enum.Enum
-import test.codec.CodecSpec
-import test.{ClientHandlerSpec, ComplexApi, Record, Structure}
+import test.{ClientHandlerSpec, ComplexApi, Enum, Record, Structure}
 import ujson.Value
 
 trait UpickleJsonSpec extends ClientHandlerSpec {
@@ -24,8 +22,8 @@ trait UpickleJsonSpec extends ClientHandlerSpec {
 
 object UpickleJsonSpec extends UpickleCustom {
 
-  implicit def enumRw: ReadWriter[Enum] = readwriter[Int].bimap[Enum](
-    value => value.ordinal,
+  implicit def enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
+    value => Enum.toOrdinal(value),
     number => Enum.fromOrdinal(number)
   )
   implicit def structureRw: ReadWriter[Structure] = macroRW

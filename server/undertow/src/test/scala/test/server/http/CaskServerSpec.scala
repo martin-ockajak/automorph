@@ -2,33 +2,35 @@ package test.server.http
 
 import base.BaseSpec
 import io.undertow.Handlers
-import io.undertow.server.HttpHandler
 import io.undertow.server.handlers.BlockingHandler
 import jsonrpc.Handler
 import jsonrpc.backend.NoBackend
 import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.server.http.UndertowJsonRpcHandler
-import scala.language.adhocExtensions
 
-class CaskServerSpec extends BaseSpec:
+class CaskServerSpec extends BaseSpec {
   "" - {
     "Server" in {
       CaskServer
     }
   }
+}
 
-object Api:
+object Api {
   def test(value: String): String = value
+}
 
-object CaskServer extends cask.MainRoutes:
+object CaskServer extends cask.MainRoutes {
   val apiPath = "/api"
 
-  override def defaultHandler =
+  override def defaultHandler = {
     val httpHandler = UndertowJsonRpcHandler(
       Handler(UpickleJsonCodec(), NoBackend()).bind(Api),
-      _ => ()
+      (_: Any) => ()
     )
     val pathHandler = Handlers.path(super.defaultHandler).addPrefixPath(apiPath, httpHandler)
-    BlockingHandler(pathHandler)
+    new BlockingHandler(pathHandler)
+  }
 
   initialize()
+}

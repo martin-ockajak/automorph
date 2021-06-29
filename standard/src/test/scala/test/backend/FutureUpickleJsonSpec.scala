@@ -1,10 +1,9 @@
 package test.backend
 
-import jsonrpc.{Client, Handler}
+import jsonrpc.Client
 import jsonrpc.backend.FutureBackend
-import jsonrpc.spi.{Backend, Transport}
-import org.scalacheck.{Arbitrary, Gen}
-import scala.collection.immutable.ArraySeq
+import jsonrpc.spi.Backend
+import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import test.codec.json.UpickleJsonSpec

@@ -1,7 +1,6 @@
 package test
 
 import jsonrpc.spi.Backend
-import test.Enum.Enum
 
 trait SimpleApi[Effect[_]] {
 
@@ -30,9 +29,9 @@ trait ComplexApi[Effect[_], Context] {
 
   def method6(p0: Record, p1: Double): Effect[Option[String]]
 
-  def method7(p0: Record, p1: Boolean)(using context: Context): Effect[Int]
+  def method7(p0: Record, p1: Boolean)(implicit context: Context): Effect[Int]
 
-  def method8(p0: Record, p1: String, p2: Option[Double])(using Context): Effect[Record]
+  def method8(p0: Record, p1: String, p2: Option[Double])(implicit context: Context): Effect[Record]
 
   def method9(p0: String): Effect[String]
 
@@ -63,24 +62,24 @@ final case class ComplexApiImpl[Effect[_], Context](backend: Backend[Effect]) ex
   override def method6(p0: Record, p1: Double): Effect[Option[String]] =
     backend.pure(Some((p0.double + p1).toString))
 
-  override def method7(p0: Record, p1: Boolean)(using context: Context): Effect[Int] = p0.int match {
+  override def method7(p0: Record, p1: Boolean)(implicit context: Context): Effect[Int] = p0.int match {
     case Some(int) if p1 => backend.pure(int + context.toString.size)
     case _ => backend.pure(0)
   }
 
-  override def method8(p0: Record, p1: String, p2: Option[Double])(using Context): Effect[Record] =
+  override def method8(p0: Record, p1: String, p2: Option[Double])(implicit context: Context): Effect[Record] =
     backend.pure(p0.copy(
       string = s"${p0.string} - $p1",
       long = p0.long + implicitly[Context].toString.size,
       double = p2.getOrElse(0.1),
-      enumeration = Enum.One
+      enumeration = Enum.Enum.One
     ))
 
-  override def method9(p0: String): Effect[String] = backend.failed(IllegalArgumentException(p0))
+  override def method9(p0: String): Effect[String] = backend.failed(new IllegalArgumentException(p0))
 
-  protected def protectedMethod = ()
+  protected def protectedMethod: Unit = privateMethod
 
-  private def privateMethod = ()
+  private def privateMethod: Unit = ()
 }
 
 trait InvalidApi[Effect[_]] {

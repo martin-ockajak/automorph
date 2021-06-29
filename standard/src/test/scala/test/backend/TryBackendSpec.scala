@@ -2,7 +2,7 @@ package test.backend
 
 import jsonrpc.backend.TryBackend
 import jsonrpc.spi.Backend
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 import test.backend.BackendSpec
 
 class TryBackendSpec extends BackendSpec[Try] {

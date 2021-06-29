@@ -4,7 +4,7 @@ import jsonrpc.backend.FutureBackend
 import jsonrpc.spi.Backend
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 import test.backend.BackendSpec
 
 class FutureBackendSpec extends BackendSpec[Future] {
