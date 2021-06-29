@@ -20,17 +20,17 @@ final case class CirceJsonCodec[Custom <: CirceCustom](
 ) extends CirceJsonCodecMeta[Custom] {
 
   private val charset = StandardCharsets.UTF_8
-  private implicit val messageEncoder: Encoder[Message[Json]] = deriveEncoder[Message[Json]]
-  private implicit val messageDecoder: Decoder[Message[Json]] = deriveDecoder[Message[Json]]
+  private implicit val messageEncoder: Encoder[CirceMessage] = deriveEncoder[CirceMessage]
+  private implicit val messageDecoder: Decoder[CirceMessage] = deriveDecoder[CirceMessage]
 
   override def mediaType: String = "application/json"
 
   override def serialize(message: Message[Json]): ArraySeq.ofByte =
-    new ArraySeq.ofByte(message.asJson.noSpaces.getBytes(charset))
+    new ArraySeq.ofByte(CirceMessage.fromSpi(message).asJson.noSpaces.getBytes(charset))
 
   override def deserialize(data: ArraySeq.ofByte): Message[Json] =
-    parser.decode[Message[Json]](new String(data.unsafeArray, charset)).toTry.get
+    parser.decode[CirceMessage](new String(data.unsafeArray, charset)).toTry.get.toSpi
 
   override def format(message: Message[Json]): String =
-    message.asJson.spaces2
+    CirceMessage.fromSpi(message).asJson.spaces2
 }

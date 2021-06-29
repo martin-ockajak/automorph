@@ -1,4 +1,4 @@
-package jsonrpc.codec.messagepack
+package jsonrpc.codec.json
 
 import jsonrpc.spi.{Message, MessageError}
 import io.circe.Json
@@ -9,7 +9,7 @@ private[jsonrpc] final case class CirceMessage(
   method: Option[String],
   params: Option[Either[List[Json], Map[String, Json]]],
   result: Option[Json],
-  error: Option[MessagePackMessageError]
+  error: Option[CirceMessageError]
 ) {
 
   def toSpi: Message[Json] = Message[Json](
