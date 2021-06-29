@@ -15,9 +15,9 @@ private[jsonrpc] trait CirceJsonCodecMeta[Custom <: CirceCustom] extends Codec[J
   import custom._
 
   override inline def encode[T](value: T): Json =
-    val encoder = summonInline[Encoder[T]].encoder
+    val encoder = summonInline[Encoder[T]]
     value.asJson(using encoder)
 
   override inline def decode[T](node: Json): T =
-    val decoder = summonInline[Decoder[T]].decoder
+    val decoder = summonInline[Decoder[T]]
     node.as[T](using decoder).toTry.get
