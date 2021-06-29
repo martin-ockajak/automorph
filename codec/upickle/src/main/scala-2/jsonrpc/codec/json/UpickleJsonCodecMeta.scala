@@ -13,6 +13,9 @@ private[jsonrpc] trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Cod
   this: UpickleJsonCodec[Custom] =>
 
   override def encode[T](value: T): Value = UpickleJsonCodecMacros.encode[Custom, T](custom, value)
+//  override def encode[T](value: T): Value = {
+//    custom.writeJs(value)
+//  }
 
   override def decode[T](node: Value): T = UpickleJsonCodecMacros.decode[Custom, T](custom, node)
 }

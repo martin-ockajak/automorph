@@ -27,6 +27,13 @@ class UpickleJsonCodecSpec extends CodecSpec {
   )))
 
   "" - {
+    // Provide implicit encoder/decoder in this scope ?
+    // 
+    // bind(...) - Generate the following code ...
+    //   ...
+    //   codec.encode() - Needs to obtain implicit encoder/decoder
+    //   ...
+    
     "Encode / Decode" in {
 //      implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
       check { (record: Record) =>
