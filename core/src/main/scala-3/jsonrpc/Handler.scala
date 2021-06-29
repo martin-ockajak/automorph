@@ -33,6 +33,8 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
   with Logging
 
 object Handler:
+
+  /** Default handler buffer size. */
   val defaultBufferSize = 4096
 
   /**
@@ -52,7 +54,7 @@ object Handler:
   inline def apply[Node, CodecType <: Codec[Node], Effect[_], Context](
     codec: CodecType,
     backend: Backend[Effect],
-    bufferSize: Int = 4096
+    bufferSize: Int
   ): Handler[Node, CodecType, Effect, Context] =
     Handler(codec, backend, bufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
 

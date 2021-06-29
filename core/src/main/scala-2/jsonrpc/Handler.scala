@@ -35,6 +35,7 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
   with Logging
 
 object Handler {
+  /** Default handler buffer size. */
   val defaultBufferSize = 4096
 
   /**
@@ -107,7 +108,7 @@ object Handler {
     backend: c.Expr[Backend[Effect]],
     bufferSize: c.Expr[Int]
   ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
-    import c.universe.{weakTypeOf, Quasiquote}
+    import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
 
     c.Expr[Handler[Node, CodecType, Effect, Context]]( q"""
@@ -124,7 +125,7 @@ object Handler {
     codec: c.Expr[CodecType],
     backend: c.Expr[Backend[Effect]]
   ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
-    import c.universe.{weakTypeOf, Quasiquote}
+    import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
 
     c.Expr[Handler[Node, CodecType, Effect, Context]]( q"""
@@ -140,7 +141,7 @@ object Handler {
     codec: c.Expr[CodecType],
     backend: c.Expr[Backend[Effect]]
   ): c.Expr[Handler[Node, CodecType, Effect, Void.Value]] = {
-    import c.universe.{weakTypeOf, Quasiquote}
+    import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[CodecType])
 
     c.Expr[Handler[Node, CodecType, Effect, Void.Value]]( q"""
