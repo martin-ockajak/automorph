@@ -2,7 +2,7 @@ package jsonrpc.codec.json
 
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
-import io.circe.{Decoder, Encoder, Json, parser}
+import io.circe.{parser, Decoder, Encoder, Json}
 import java.nio.charset.StandardCharsets
 import jsonrpc.spi.{Message, MessageError}
 import scala.annotation.nowarn
@@ -22,7 +22,6 @@ final case class CirceJsonCodec[Custom <: CirceCustom](
 
   private val charset = StandardCharsets.UTF_8
 
-  @nowarn
   implicit private val idEncoder: Encoder[Either[BigDecimal, String]] = deriveEncoder[Either[BigDecimal, String]]
   implicit private val idDecoder: Decoder[Either[BigDecimal, String]] = deriveDecoder[Either[BigDecimal, String]]
 
@@ -35,7 +34,6 @@ final case class CirceJsonCodec[Custom <: CirceCustom](
   implicit private val messageErrorDecoder: Decoder[MessageError[Json]] = deriveDecoder[MessageError[Json]]
   implicit private val messageEncoder: Encoder[Message[Json]] = deriveEncoder[Message[Json]]
   implicit private val messageDecoder: Decoder[Message[Json]] = deriveDecoder[Message[Json]]
-  Seq(idEncoder, idDecoder, paramsEncoder, paramsDecoder, messageErrorEncoder, messageErrorDecoder)
 
   override def mediaType: String = "application/json"
 

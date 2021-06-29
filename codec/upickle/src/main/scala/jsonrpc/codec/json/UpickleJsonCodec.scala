@@ -2,7 +2,6 @@ package jsonrpc.codec.json
 
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.spi.Message
-import jsonrpc.codec.json
 import scala.collection.immutable.ArraySeq
 import ujson.Value
 
@@ -17,12 +16,15 @@ import ujson.Value
 final case class UpickleJsonCodec[Custom <: UpickleCustom](
   custom: Custom = new UpickleCustom {}
 ) extends UpickleJsonCodecMeta[Custom] {
+
   import custom._
 
   private val indent = 2
-  private implicit val jsonMmessageErrorRw: custom.ReadWriter[json.UpickleMessageError] = custom.macroRW
-  private implicit val jsonMessageRw: custom.ReadWriter[json.UpickleMessage] = custom.macroRW
-  Seq(jsonMmessageErrorRw)
+
+  implicit private val messageRw: custom.ReadWriter[UpickleMessage] = {
+    implicit val messageErrorRw: custom.ReadWriter[UpickleMessageError] = custom.macroRW
+    custom.macroRW
+  }
 
   override def mediaType: String = "application/json"
 

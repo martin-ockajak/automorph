@@ -1,7 +1,6 @@
 package jsonrpc.codec.messagepack
 
 import jsonrpc.codec.common.UpickleCustom
-import jsonrpc.codec.messagepack
 import jsonrpc.spi.Message
 import scala.collection.immutable.ArraySeq
 import upack.Msg
@@ -17,12 +16,16 @@ import upack.Msg
 final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
   custom: Custom = new UpickleCustom {}
 ) extends UpickleMessagePackCodecMeta[Custom] {
+
   import custom._
 
   private val indent = 2
-  private implicit val messagePackMessageErrorRw: custom.ReadWriter[messagepack.UpickleMessageError] = custom.macroRW
-  private implicit val messagePackMessageRw: custom.ReadWriter[messagepack.UpickleMessage] = custom.macroRW
-  Seq(messagePackMessageErrorRw)
+
+  implicit private val messageRw: custom.ReadWriter[UpickleMessage] = {
+    implicit val messageErrorRw: custom.ReadWriter[UpickleMessageError] = custom.macroRW
+    Seq(messageErrorRw)
+    custom.macroRW
+  }
 
   override def mediaType: String = "application/msgpack"
 

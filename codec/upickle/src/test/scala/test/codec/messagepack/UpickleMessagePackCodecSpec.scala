@@ -40,9 +40,9 @@ class UpickleMessagePackSpec extends CodecSpec {
 
 object UpickleMessagePackCodecSpec extends UpickleCustom {
 
-  implicit def enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
+  implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
     value => Enum.toOrdinal(value),
     number => Enum.fromOrdinal(number)
   )
-  implicit def structureRw: ReadWriter[Structure] = macroRW
+  implicit lazy val structureRw: ReadWriter[Structure] = macroRW
 }
