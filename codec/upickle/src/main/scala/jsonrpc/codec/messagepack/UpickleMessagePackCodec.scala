@@ -22,7 +22,7 @@ final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
   private val indent = 2
   private implicit val messagePackMessageErrorRw: custom.ReadWriter[messagepack.UpickleMessageError] = custom.macroRW
   private implicit val messagePackMessageRw: custom.ReadWriter[messagepack.UpickleMessage] = custom.macroRW
-  Option(messagePackMessageErrorRw)
+  Seq(messagePackMessageErrorRw)
 
   override def mediaType: String = "application/msgpack"
 

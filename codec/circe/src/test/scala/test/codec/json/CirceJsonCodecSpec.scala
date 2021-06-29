@@ -28,6 +28,8 @@ class CirceJsonSpec extends CodecSpec {
   "" - {
     "Encode / Decode" in {
       import CirceJsonCodecSpec._
+      implicit val recordEncoder: Encoder[Record] = deriveEncoder[Record]
+      implicit val recordDecoder: Decoder[Record] = deriveDecoder[Record]
       check { (record: Record) =>
         val encodedValue = codec.encode(record)
         val decodedValue = codec.decode[Record](encodedValue)
@@ -43,6 +45,4 @@ object CirceJsonCodecSpec extends CirceCustom {
   implicit def enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
   implicit def structureEncoder: Encoder[Structure] = deriveEncoder[Structure]
   implicit def structureDecoder: Decoder[Structure] = deriveDecoder[Structure]
-  implicit def recordEncoder: Encoder[Record] = deriveEncoder[Record]
-  implicit def recordDecoder: Decoder[Record] = deriveDecoder[Record]
 }
