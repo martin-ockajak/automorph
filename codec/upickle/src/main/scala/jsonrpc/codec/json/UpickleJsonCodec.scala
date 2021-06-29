@@ -2,6 +2,7 @@ package jsonrpc.codec.json
 
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.spi.Message
+import scala.annotation.nowarn
 import scala.collection.immutable.ArraySeq
 import ujson.Value
 
