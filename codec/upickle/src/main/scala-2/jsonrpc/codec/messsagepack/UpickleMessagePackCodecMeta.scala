@@ -26,6 +26,7 @@ object UpickleMessagePackCodecMeta {
 
     val valueType = weakTypeOf[T]
     c.Expr[Msg](q"""
+      val custom = ${c.prefix}.custom
       import custom._
       val writer = implicitly[custom.Writer[$valueType]]
       custom.writeMsg($value)(writer)
@@ -37,6 +38,7 @@ object UpickleMessagePackCodecMeta {
 
     val valueType = weakTypeOf[T]
     c.Expr[T](q"""
+      val custom = ${c.prefix}.custom
       import custom._
       val reader = implicitly[custom.Reader[$valueType]]
       custom.readBinary[$valueType]($node)(reader)

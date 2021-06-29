@@ -26,6 +26,7 @@ object UpickleJsonCodecMeta {
 
     val valueType = weakTypeOf[T]
     c.Expr[Value](q"""
+      val custom = ${c.prefix}.custom
       import custom._
       val writer = implicitly[custom.Writer[$valueType]]
       custom.writeJs($value)(writer)
@@ -37,6 +38,7 @@ object UpickleJsonCodecMeta {
 
     val valueType = weakTypeOf[T]
     c.Expr[T](q"""
+      val custom = ${c.prefix}.custom
       import custom._
       val reader = implicitly[custom.Reader[$valueType]]
       custom.read[$valueType]($node)(reader)
