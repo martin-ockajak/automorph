@@ -130,7 +130,7 @@ case object HandlerBindings {
           if ((offset + index) == lastArgumentIndex && methodUsesContext[C, Context](ref)(method)) {
             q"context"
           } else {
-            q"$codec.decode(argumentNodes[${parameter.dataType}](${offset + index}))"
+            q"$codec.decode[${parameter.dataType}](argumentNodes(${offset + index}))"
           }
         }
       }
