@@ -66,62 +66,62 @@ trait ClientHandlerSpec extends BaseSpec {
         "Complex API" - {
           apiCombinations(complexApiInstance, complexApis, apiNames).foreach { case (mode, apis) =>
             mode - {
-//              "method0" in {
-//                check(() => {
-//                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method0())
-//                })
-//              }
-//              "method1" in {
-//                check { () =>
-//                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method1())
-//                }
-//              }
-              "method2" in {
-                check((a0: String) => {
-                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method2(a0))
+              "method0" in {
+                check((_: Unit) => {
+                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method0())
                 })
+              }
+              "method1" in {
+                check { (_: Unit) =>
+                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method1())
+                }
+              }
+              "method2" in {
+                check{ (a0: String) =>
+                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method2(a0))
+                }
               }
               "method3" in {
                 check { (a0: Float, a1: Long, a2: Option[Seq[Int]]) =>
                   consistent(apis, (api: ComplexApi[Effect, Context]) => api.method3(a0, a1, a2))
                 }
               }
-//              "method4" in {
-//                check { (a0: BigDecimal, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
-//                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method4(a0, a1, a2, a3))
-//                }
-//              }
-//              "method5" in {
-//                check { (a0: Boolean, a1: Short, a2: List[Int]) =>
-//                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method5(a0, a1)(a2))
-//                }
-//              }
-//              "method6" in {
-//                check { (a0: Record, a1: Double) =>
-//                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method6(a0, a1))
-//                }
-//              }
-//              "method7" in {
-//                check { (a0: Record, a1: Boolean, context: Context) =>
-//                  implicit val usingContext: Context = context
-//                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method7(a0, a1))
-//                }
-//              }
-//              "method8" in {
-//                check { (a0: Record, a1: String, a2: Option[Double], context: Context) =>
-//                  implicit val usingContext: Context = context
-//                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method8(a0, a1, a2))
-//                }
-//              }
-//              "method9" in {
-//                check { (a0: String) =>
-//                  val Seq(expected, result) = apis.map((api: ComplexApi[Effect, Context]) => Try(run(api.method9(a0))).toEither)
-//                  val expectedErrorMessage = expected.swap.map(error =>
-//                    s"[${error.getClass.getSimpleName}] ${Option(error.getMessage).getOrElse("")}"
-//                  )
-//                  expectedErrorMessage.equals(result.swap.map(_.getMessage))
-//                }
-//              }
+              "method4" in {
+                check { (a0: BigDecimal, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
+                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method4(a0, a1, a2, a3))
+                }
+              }
+              "method5" in {
+                check { (a0: Boolean, a1: Short, a2: List[Int]) =>
+                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method5(a0, a1)(a2))
+                }
+              }
+              "method6" in {
+                check { (a0: Record, a1: Double) =>
+                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method6(a0, a1))
+                }
+              }
+              "method7" in {
+                check { (a0: Record, a1: Boolean, context: Context) =>
+                  implicit val usingContext: Context = context
+                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method7(a0, a1))
+                }
+              }
+              "method8" in {
+                check { (a0: Record, a1: String, a2: Option[Double], context: Context) =>
+                  implicit val usingContext: Context = context
+                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method8(a0, a1, a2))
+                }
+              }
+              "method9" in {
+                check { (a0: String) =>
+                  val Seq(expected, result) = apis.map((api: ComplexApi[Effect, Context]) => Try(run(api.method9(a0))).toEither)
+                  val expectedErrorMessage = expected.swap.map(error =>
+                    s"[${error.getClass.getSimpleName}] ${Option(error.getMessage).getOrElse("")}"
+                  )
+                  expectedErrorMessage.equals(result.swap.map(_.getMessage))
+                }
+              }
             }
           }
         }
