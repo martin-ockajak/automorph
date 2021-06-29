@@ -76,7 +76,7 @@ private[jsonrpc] case object ClientBindings {
     val decodeResult = generateDecodeResult[C, Node, CodecType, Effect](ref)(method, codec)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
     ref.c.Expr[ClientMethod[Node]](q"""
-      ClientMethod(
+      jsonrpc.Client.ClientMethod(
         $encodeArguments,
         $decodeResult,
         ${method.lift.name},

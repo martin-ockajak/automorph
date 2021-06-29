@@ -11,7 +11,7 @@ package jsonrpc.client
  * @param parameterTypes paramter types
  * @tparam Node message format node representation type
  */
-private[jsonrpc] final case class ClientMethod[Node](
+final case class ClientMethod[Node](
   encodeArguments: Seq[Any] => Seq[Node],
   decodeResult: Node => Any,
   name: String,
