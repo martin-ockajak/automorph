@@ -1,12 +1,10 @@
 package test.codec.json
 
-import io.circe.generic.auto
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Json}
 import jsonrpc.codec.json.{CirceCustom, CirceJsonCodec}
 import org.scalacheck.{Arbitrary, Gen}
-import scala.language.implicitConversions
-import test.Enum.Enum
+import test.Enum
 import test.Generators.arbitraryRecord
 import test.codec.CodecSpec
 import test.{Record, Structure}
@@ -40,10 +38,10 @@ class CirceJsonSpec extends CodecSpec {
 
 object CirceJsonCodecSpec extends CirceCustom {
 
-  given CirceEncoder[Enum] = Encoder.encodeInt.contramap[Enum](_.ordinal)
-  given CirceDecoder[Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
-  given CirceEncoder[Structure] = deriveEncoder[Structure]
-  given CirceDecoder[Structure] = deriveDecoder[Structure]
-  given CirceEncoder[Record] = deriveEncoder[Record]
-  given CirceDecoder[Record] = deriveDecoder[Record]
+  implicit val enumEncoder: CirceEncoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
+  implicit val enumDecoder: CirceDecoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
+  implicit val structureEncoder: CirceEncoder[Structure] = deriveEncoder[Structure]
+  implicit val structureDecoder: CirceDecoder[Structure] = deriveDecoder[Structure]
+  implicit val recordEncoder: CirceEncoder[Record] = deriveEncoder[Record]
+  implicit val recordDecoder: CirceDecoder[Record] = deriveDecoder[Record]
 }

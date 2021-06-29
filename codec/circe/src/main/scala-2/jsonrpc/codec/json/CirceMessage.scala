@@ -30,7 +30,7 @@ private[jsonrpc] object CirceMessage {
     v.method,
     v.params,
     v.result,
-    v.error.map(MessagePackMessageError.fromSpi)
+    v.error.map(CirceMessageError.fromSpi)
   )
 }
 
