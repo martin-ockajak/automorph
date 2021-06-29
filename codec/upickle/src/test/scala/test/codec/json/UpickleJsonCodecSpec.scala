@@ -28,12 +28,14 @@ class UpickleJsonCodecSpec extends CodecSpec {
 
   "" - {
     // Provide implicit encoder/decoder in this scope ?
-    // 
+    //
     // bind(...) - Generate the following code ...
+    //   type T is known here
     //   ...
-    //   codec.encode() - Needs to obtain implicit encoder/decoder
+    //   codec.encode[T]() - Needs to obtain implicit encoder/decoder
+    //     ... upickle.writeJs[T](value)
     //   ...
-    
+
     "Encode / Decode" in {
 //      implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
       check { (record: Record) =>

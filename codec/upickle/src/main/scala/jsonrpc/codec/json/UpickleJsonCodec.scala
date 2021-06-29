@@ -2,6 +2,7 @@ package jsonrpc.codec.json
 
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.spi.Message
+import jsonrpc.codec.json
 import scala.collection.immutable.ArraySeq
 import ujson.Value
 
@@ -16,23 +17,24 @@ import ujson.Value
 final case class UpickleJsonCodec[Custom <: UpickleCustom](
   custom: Custom = new UpickleCustom {}
 ) extends UpickleJsonCodecMeta[Custom] {
+  import custom._
 
   private val indent = 2
+  private implicit val jsonMmessageErrorRw: custom.ReadWriter[json.JsonMessageError] = custom.macroRW
+  private implicit val jsonMessageRw: custom.ReadWriter[json.JsonMessage] = custom.macroRW
+  jsonMmessageErrorRw
 
   override def mediaType: String = "application/json"
 
   override def serialize(message: Message[Value]): ArraySeq.ofByte = {
-    implicit val writer = custom.jsonMessageRw
     new ArraySeq.ofByte(custom.writeToByteArray(JsonMessage.fromSpi(message)))
   }
 
   override def deserialize(data: ArraySeq.ofByte): Message[Value] = {
-    implicit val reader = custom.jsonMessageRw
     custom.read[JsonMessage](data.unsafeArray).toSpi
   }
 
   override def format(message: Message[Value]): String = {
-    implicit val writer = custom.jsonMessageRw
     custom.write(JsonMessage.fromSpi(message), indent)
   }
 }
