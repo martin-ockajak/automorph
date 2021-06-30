@@ -22,8 +22,8 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec {
     Client(codec, backend, handlerTransport)
 
   override lazy val handler: Handler[Node, CodecType, Effect, Context] =
-    Handler[Node, CodecType, Effect, Context](codec, backend)
-      .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
+    Handler[Node, CodecType, Future, Context](codec, backend)
+      .bind(simpleApiInstance).bind[ComplexApi[Future, Context]](complexApiInstance)
 
   override def simpleApis: Seq[SimpleApi[Effect]] = clients.map(_.bind[SimpleApi[Effect]])
 
