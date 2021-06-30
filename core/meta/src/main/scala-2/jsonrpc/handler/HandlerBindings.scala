@@ -154,7 +154,7 @@ case object HandlerBindings {
   private def logBoundMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: Reflection[C])(
     method: ref.RefMethod,
     invoke: ref.c.Expr[Any]
-  ): Unit = Option(System.getProperty(debugProperty)).foreach { _ =>
+  ): Unit = Option(System.getProperty(debugProperty)).orElse(Some("")).foreach { _ =>
     println(
       s"""${methodSignature[C, Api](ref)(method)} =
         |  ${ref.c.universe.showCode(invoke.tree)}
