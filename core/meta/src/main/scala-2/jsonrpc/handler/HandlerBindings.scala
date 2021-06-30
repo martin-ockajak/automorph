@@ -117,8 +117,10 @@ case object HandlerBindings {
 
     // Create invoke function
     //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
+    val nodeType = weakTypeOf[Node]
+    val contextType = weakTypeOf[Context]
     ref.c.Expr[(Seq[Node], Context) => Effect[Node]](q"""
-      (argumentNodes: Seq[Node], context: Context) => ${
+      (argumentNodes: Seq[$nodeType], context: $contextType) => ${
       // Create the method argument lists by decoding corresponding argument nodes into values
       //   List(List(
       //     codec.decode[Parameter0Type](argumentNodes(0)),
