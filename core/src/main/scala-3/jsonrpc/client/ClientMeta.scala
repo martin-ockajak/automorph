@@ -406,5 +406,5 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
 
           // Perform the API call
           performCall(method.getName, encodedArguments, context, resultNode => clientMethod.decodeResult(resultNode))
-        }.getOrElse(throw IllegalStateException(s"Method not found: ${method.getName}"))
+        }.getOrElse(throw UnsupportedOperationException(s"Method not found: ${method.getName}"))
     ).asInstanceOf[Api]

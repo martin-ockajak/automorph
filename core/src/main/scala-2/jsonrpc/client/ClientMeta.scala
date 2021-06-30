@@ -440,7 +440,7 @@ object ClientMeta {
 
             // Perform the API call
             ${c.prefix}.performCall(method.getName, encodedArguments, context, resultNode => clientMethod.decodeResult(resultNode))
-          }.getOrElse(throw new IllegalStateException("Method not found: " + method.getName))
+          }.getOrElse(throw new UnsupportedOperationException("Method not found: " + method.getName))
       ).asInstanceOf[$apiType]
     """)
   }
