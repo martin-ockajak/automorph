@@ -152,7 +152,7 @@ case object ClientBindings {
     method: ref.RefMethod,
     encodeArguments: ref.c.Expr[Any],
     decodeResult: ref.c.Expr[Any]
-  ): Unit = Option(System.getProperty(debugProperty)).foreach { _ =>
+  ): Unit = Option(System.getProperty(debugProperty)).orElse(Some("")).foreach { _ =>
     println(
       s"""${methodSignature[C, Api](ref)(method)} =
         |  ${ref.c.universe.showCode(encodeArguments.tree)}
