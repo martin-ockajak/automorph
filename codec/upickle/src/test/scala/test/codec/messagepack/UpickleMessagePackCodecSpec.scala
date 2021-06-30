@@ -25,11 +25,12 @@ class UpickleMessagePackSpec extends CodecSpec {
     )
   )))
 
+  private lazy val custom = codec.custom
+  implicit private lazy val recordRw: custom.ReadWriter[Record] = custom.macroRW
+  Seq(recordRw)
+
   "" - {
     "Encode / Decode" in {
-      val custom = codec.custom
-      implicit val recordRw: custom.ReadWriter[Record] = custom.macroRW
-      Seq(recordRw)
       check { (record: Record) =>
         val encodedValue = codec.encode(record)
         val decodedValue = codec.decode[Record](encodedValue)

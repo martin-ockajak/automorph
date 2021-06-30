@@ -1,13 +1,13 @@
 package test.codec.json
 
+import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Json}
 import jsonrpc.codec.json.{CirceCustom, CirceJsonCodec}
 import org.scalacheck.{Arbitrary, Gen}
-import test.Enum
 import test.Generators.arbitraryRecord
 import test.codec.CodecSpec
-import test.{Record, Structure}
+import test.{Enum, Record, Structure}
 
 class CirceJsonSpec extends CodecSpec {
 
@@ -25,11 +25,13 @@ class CirceJsonSpec extends CodecSpec {
     )
   )))
 
+  implicit private lazy val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
+  implicit private lazy val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
+  implicit private lazy val structureEncoder: Encoder[Structure] = deriveEncoder[Structure]
+  implicit private lazy val structureDecoder: Decoder[Structure] = deriveDecoder[Structure]
+
   "" - {
     "Encode / Decode" in {
-      import CirceJsonCodecSpec._
-      implicit val recordEncoder: Encoder[Record] = deriveEncoder[Record]
-      implicit val recordDecoder: Decoder[Record] = deriveDecoder[Record]
       check { (record: Record) =>
         val encodedValue = codec.encode(record)
         val decodedValue = codec.decode[Record](encodedValue)
@@ -39,10 +41,4 @@ class CirceJsonSpec extends CodecSpec {
   }
 }
 
-object CirceJsonCodecSpec extends CirceCustom {
-
-  implicit lazy val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
-  implicit lazy val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
-  implicit lazy val structureEncoder: Encoder[Structure] = deriveEncoder[Structure]
-  implicit lazy val structureDecoder: Decoder[Structure] = deriveDecoder[Structure]
-}
+object CirceJsonCodecSpec extends CirceCustom {}
