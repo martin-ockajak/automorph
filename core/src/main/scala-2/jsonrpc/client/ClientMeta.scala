@@ -424,7 +424,7 @@ object ClientMeta {
             val callArguments = Option(arguments).getOrElse(Array.empty[AnyRef])
             val (argumentValues, context) =
               if (clientMethod.usesContext && callArguments.nonEmpty) {
-                callArguments.dropRight(1).toSeq -> Some(callArguments.last.asInstanceOf[Context])
+                callArguments.dropRight(1).toSeq -> Some(callArguments.last.asInstanceOf[$contextType])
               } else {
                 callArguments.toSeq -> None
               }
