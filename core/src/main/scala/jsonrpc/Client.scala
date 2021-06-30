@@ -50,7 +50,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
    * @tparam R result type
    * @return result value
    */
-  protected def performCall[R](
+  def performCall[R](
     method: String,
     arguments: Params[Node],
     context: Option[Context],

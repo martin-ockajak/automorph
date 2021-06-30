@@ -8,7 +8,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /** JSON-RPC client layer bindings code generation. */
-private[jsonrpc] case object ClientBindings {
+case object ClientBindings {
 
   private val debugProperty = "jsonrpc.macro.debug"
 
@@ -76,13 +76,13 @@ private[jsonrpc] case object ClientBindings {
     val decodeResult = generateDecodeResult[C, Node, CodecType, Effect](ref)(method, codec)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
     ref.c.Expr[ClientMethod[Node]](q"""
-      jsonrpc.Client.ClientMethod(
+      jsonrpc.client.ClientMethod(
         $encodeArguments,
         $decodeResult,
         ${method.lift.name},
         ${method.lift.resultType},
-        ..${method.lift.parameters.flatMap(_.map(_.name))},
-        ..${method.lift.parameters.flatMap(_.map(_.dataType))},
+        Seq(..${method.lift.parameters.flatMap(_.map(_.name))}),
+        Seq(..${method.lift.parameters.flatMap(_.map(_.dataType))}),
         ${methodUsesContext[C, Context](ref)(method)}
       )
     """)

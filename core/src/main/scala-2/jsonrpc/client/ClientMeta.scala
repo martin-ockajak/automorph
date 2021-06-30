@@ -1,10 +1,9 @@
 package jsonrpc.client
 
-import java.lang.reflect.Proxy
 import jsonrpc.Client
-import jsonrpc.client.ClientBindings
 import jsonrpc.spi.Codec
-import scala.reflect.ClassTag
+import scala.language.experimental.macros
+import scala.reflect.macros.blackbox
 
 /**
  * JSON-RPC client layer code generation.
@@ -391,39 +390,58 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
    * @return JSON-RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef: ClassTag]: Api = {
-    // Generate API method bindings
-    val methodBindings = ClientBindings.generate[Node, CodecType, Effect, Context, Api](codec)
+  def bind[Api <: AnyRef]: Api = macro ClientMeta.bindMacro[Node, CodecType, Effect, Context, Api]
+}
 
-    // Create API proxy instance
-    val classTag = implicitly[ClassTag[Api]]
-    Proxy.newProxyInstance(
-      getClass.getClassLoader,
-      Array(classTag.runtimeClass),
-      (_, method, arguments) =>
-        // Lookup bindings for the specified method
-        methodBindings.get(method.getName).map { clientMethod =>
-          // Adjust expected method parameters if it uses context as its last parameter
-          val callArguments = Option(arguments).getOrElse(Array.empty[AnyRef])
-          val (argumentValues, context) =
-            if (clientMethod.usesContext && callArguments.nonEmpty) {
-              callArguments.dropRight(1).toSeq -> Some(callArguments.last.asInstanceOf[Context])
-            } else {
-              callArguments.toSeq -> None
-            }
+object ClientMeta {
 
-          // Encode method arguments
-          val argumentNodes = clientMethod.encodeArguments(argumentValues)
-          val encodedArguments =
-            if (argumentsByName) {
-              Right(clientMethod.paramNames.zip(argumentNodes).toMap)
-            } else {
-              Left(argumentNodes.toList)
-            }
+  def bindMacro[
+    Node: c.WeakTypeTag,
+    CodecType <: Codec[Node]: c.WeakTypeTag,
+    Effect[_],
+    Context: c.WeakTypeTag,
+    Api <: AnyRef: c.WeakTypeTag
+  ](c: blackbox.Context)(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Api] = {
+    import c.universe.{weakTypeOf, Quasiquote}
 
-          // Perform the API call
-          performCall(method.getName, encodedArguments, context, resultNode => clientMethod.decodeResult(resultNode))
-        }.getOrElse(throw new IllegalStateException(s"Method not found: ${method.getName}"))
-    ).asInstanceOf[Api]
+    val nodeType = weakTypeOf[Node]
+    val codecType = weakTypeOf[CodecType]
+    val contextType = weakTypeOf[Context]
+    val apiType = weakTypeOf[Api]
+    c.Expr[Api](q"""
+      // Generate API method bindings
+      val codec = ${c.prefix}.codec
+      val methodBindings = jsonrpc.client.ClientBindings.generate[$nodeType, $codecType, $effectType, $contextType, $apiType](codec)
+
+      // Create API proxy instance
+      java.lang.reflect.Proxy.newProxyInstance(
+        getClass.getClassLoader,
+        Array(classOf[$apiType]),
+        (_, method, arguments) =>
+          // Lookup bindings for the specified method
+          methodBindings.get(method.getName).map { clientMethod =>
+            // Adjust expected method parameters if it uses context as its last parameter
+            val callArguments = Option(arguments).getOrElse(Array.empty[AnyRef])
+            val (argumentValues, context) =
+              if (clientMethod.usesContext && callArguments.nonEmpty) {
+                callArguments.dropRight(1).toSeq -> Some(callArguments.last.asInstanceOf[Context])
+              } else {
+                callArguments.toSeq -> None
+              }
+
+            // Encode method arguments
+            val argumentNodes = clientMethod.encodeArguments(argumentValues)
+            val encodedArguments =
+              if (${c.prefix}.argumentsByName) {
+                Right(clientMethod.paramNames.zip(argumentNodes).toMap)
+              } else {
+                Left(argumentNodes.toList)
+              }
+
+            // Perform the API call
+            ${c.prefix}.performCall(method.getName, encodedArguments, context, resultNode => clientMethod.decodeResult(resultNode))
+          }.getOrElse(throw new IllegalStateException("Method not found: " + method.getName))
+      ).asInstanceOf[$apiType]
+    """)
   }
 }
