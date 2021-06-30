@@ -141,9 +141,9 @@ case object HandlerBindings {
 
       // Create encode result function
       //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
-      val resultValueType = unwrapType[C, Effect[_]](ref)(method.resultType)
-      println(s"Result type: ${method.resultType}")
-      println(s"Effect type: ${weakTypeOf[Effect[_]]}")
+      val resultValueType = unwrapType[C, Effect[_]](ref)(method.resultType.dealias).dealias
+      println(s"Result type: ${method.resultType.dealias}")
+      println(s"Effect type: ${weakTypeOf[Effect[_]].dealias}")
       println(s"Result value type: $resultValueType")
       val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result)"
 

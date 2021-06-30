@@ -142,7 +142,7 @@ private[jsonrpc] case object ClientBindings {
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
     val nodeType = weakTypeOf[Node]
-    val resultValueType = unwrapType[C, Effect[_]](ref)(method.resultType)
+    val resultValueType = unwrapType[C, Effect[_]](ref)(method.resultType.dealias).dealias
     ref.c.Expr[Node => Any](q"""
       (resultNode: $nodeType) => $codec.decode[$resultValueType](resultNode)
     """)

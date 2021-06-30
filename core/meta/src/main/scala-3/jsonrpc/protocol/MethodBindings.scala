@@ -73,7 +73,7 @@ private[jsonrpc] case object MethodBindings:
    */
   def unwrapType[Wrapper[_]: Type](q: Quotes)(wrappedType: q.reflect.TypeRepr): q.reflect.TypeRepr =
     wrappedType match
-      case appliedType: q.reflect.AppliedType if appliedType.tycon =:= q.reflect.TypeRepr.of[Wrapper] =>
+      case appliedType: q.reflect.AppliedType if appliedType.tycon =:= q.reflect.TypeRepr.of[Wrapper].dealias =>
         appliedType.args.last
       case otherType => otherType
 

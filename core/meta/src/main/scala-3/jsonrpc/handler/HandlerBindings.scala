@@ -136,7 +136,7 @@ private[jsonrpc] case object HandlerBindings:
 
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
-        val resultValueType = unwrapType[Effect](ref.q)(method.resultType)
+        val resultValueType = unwrapType[Effect](ref.q)(method.resultType.dealias).dealias
         val encodeResult = resultValueType.asType match
           case '[resultType] => '{ (result: resultType) =>
               ${
