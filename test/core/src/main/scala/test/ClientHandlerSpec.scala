@@ -5,6 +5,7 @@ import jsonrpc.Client
 import jsonrpc.protocol.ErrorType.MethodNotFoundException
 import jsonrpc.spi.{Backend, Codec}
 import org.scalacheck.Arbitrary
+import org.scalacheck.Gen
 import scala.util.Try
 import test.Generators.arbitraryRecord
 import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, SimpleApiImpl}
@@ -172,7 +173,11 @@ trait ClientHandlerSpec extends BaseSpec {
         "Simple API" - {
           "Positional" - {
             "Local" in {
-              //              client.callByPosition[String, String]("test")("test")(0)
+//              check { case (a0: String, context: Context) =>
+//                implicit val usingContext: Context = context
+//                run(client.callByPosition[String, String]("test")(a0)(context))
+//                true
+//              }
             }
           }
         }

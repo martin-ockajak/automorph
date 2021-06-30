@@ -21,7 +21,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -36,7 +36,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -53,7 +53,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -71,7 +71,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -90,7 +90,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -112,7 +112,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -135,7 +135,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -159,7 +159,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -192,7 +192,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -207,7 +207,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -224,7 +224,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -242,7 +242,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -263,7 +263,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -285,7 +285,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -308,7 +308,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
@@ -332,7 +332,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
   /**
    * Perform a remote JSON-RPC method ''notification'' supplying the arguments ''by name''.
    *
-   * Parameters 'p1', 'p2' ... 'aN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
+   * Parameters 'p1', 'p2' ... 'pN' represent invoked method arguments and type parameters 'T1', 'T2' ... 'TN' their respective types.
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * @param method method name
