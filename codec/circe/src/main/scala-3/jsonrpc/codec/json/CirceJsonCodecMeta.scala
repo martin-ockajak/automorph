@@ -10,9 +10,8 @@ import scala.compiletime.summonInline
  *
  * @tparam Custom customized Circe encoders and decoders implicits instance type
  */
-private[jsonrpc] trait CirceJsonCodecMeta[Custom <: CirceCustom] extends Codec[Json]:
-  this: CirceJsonCodec[Custom] =>
-  import custom._
+private[jsonrpc] trait CirceJsonCodecMeta extends Codec[Json]:
+  this: CirceJsonCodec =>
 
   override inline def encode[T](value: T): Json =
     val encoder = summonInline[Encoder[T]]

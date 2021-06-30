@@ -7,11 +7,9 @@ import scala.reflect.macros.blackbox.Context
 
 /**
  * Circe JSON codec plugin code generation.
- *
- * @tparam Custom customized Circe encoders and decoders implicits instance type
  */
-private[jsonrpc] trait CirceJsonCodecMeta[Custom <: CirceCustom] extends Codec[Json] {
-  this: CirceJsonCodec[Custom] =>
+private[jsonrpc] trait CirceJsonCodecMeta extends Codec[Json] {
+  this: CirceJsonCodec =>
 
   override def encode[T](value: T): Json =
     macro CirceJsonCodecMeta.encodeExpr[T]
@@ -27,8 +25,6 @@ private[jsonrpc] object CirceJsonCodecMeta {
 
     val valueType = weakTypeOf[T]
     c.Expr[Json](q"""
-      val custom = ${c.prefix}.custom
-      import custom._
       import io.circe.syntax.EncoderOps
       val encoder = implicitly[io.circe.Encoder[$valueType]]
       $value.asJson(encoder)
@@ -40,8 +36,6 @@ private[jsonrpc] object CirceJsonCodecMeta {
 
     val valueType = weakTypeOf[T]
     c.Expr[T](q"""
-      val custom = ${c.prefix}.custom
-      import custom._
       import io.circe.syntax.EncoderOps
       val decoder = implicitly[io.circe.Decoder[$valueType]]
       $node.as[$valueType](decoder).toTry.get

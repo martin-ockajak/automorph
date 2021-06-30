@@ -12,12 +12,8 @@ import scala.collection.immutable.ArraySeq
  *
  * @see [[https://circe.github.io/circe Documentation]]
  * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
- * @param custom customized Circe encoders and decoders implicits instance
- * @tparam Custom customized Circe encoders and decoders implicits instance type
  */
-final case class CirceJsonCodec[Custom <: CirceCustom](
-  custom: Custom = new CirceCustom {}
-) extends CirceJsonCodecMeta[Custom] {
+final case class CirceJsonCodec() extends CirceJsonCodecMeta {
 
   private val charset = StandardCharsets.UTF_8
 

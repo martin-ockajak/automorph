@@ -3,7 +3,7 @@ package test.codec.json
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Json}
-import jsonrpc.codec.json.{CirceCustom, CirceJsonCodec}
+import jsonrpc.codec.json.CirceJsonCodec
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
 import test.codec.CodecSpec
@@ -12,9 +12,9 @@ import test.{Enum, Record, Structure}
 class CirceJsonSpec extends CodecSpec {
 
   type Node = Json
-  type CodecType = CirceJsonCodec[CirceJsonCodecSpec.type]
+  type CodecType = CirceJsonCodec
 
-  override def codec: CodecType = CirceJsonCodec(CirceJsonCodecSpec)
+  override def codec: CodecType = CirceJsonCodec()
 
   override def arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.oneOf(Seq(
     Json.fromString("test"),
@@ -40,5 +40,3 @@ class CirceJsonSpec extends CodecSpec {
     }
   }
 }
-
-object CirceJsonCodecSpec extends CirceCustom {}
