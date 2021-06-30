@@ -175,7 +175,7 @@ trait ClientHandlerSpec extends BaseSpec {
             "Local" in {
               check { (a0: String, context: Context) =>
                 implicit val usingContext: Context = context
-//                run(client.callByPosition[String, String]("test")(a0)(context))
+//                run(client.callByPosition[String, String]("test")(a0))
                 true
               }
             }
