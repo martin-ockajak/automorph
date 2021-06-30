@@ -30,22 +30,22 @@ trait ClientHandlerSpec extends BaseSpec {
   val invalidApiInstance: InvalidApi[Effect] = InvalidApiImpl(backend)
   private val apiNames = Seq("Named", "Positional")
 
-  def backend: Backend[Effect]
-
   def run[T](effect: Effect[T]): T
 
+  def backend: Backend[Effect]
+
   def client: Client[Node, CodecType, Effect, Context]
+
+  def clients: Seq[Client[Node, CodecType, Effect, Context]] = Seq(
+    client,
+    client.copy(argumentsByName = false)
+  )
 
   def simpleApis: Seq[SimpleApi[Effect]]
 
   def complexApis: Seq[ComplexApi[Effect, Context]]
 
   def invalidApis: Seq[InvalidApi[Effect]]
-
-  def clients: Seq[Client[Node, CodecType, Effect, Context]] = Seq(
-    client,
-    client.copy(argumentsByName = false)
-  )
 
   implicit def arbitraryContext: Arbitrary[Context]
 
