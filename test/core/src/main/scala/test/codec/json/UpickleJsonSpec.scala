@@ -17,15 +17,10 @@ trait UpickleJsonSpec extends ClientHandlerSpec {
   lazy val codec: CodecType = UpickleJsonCodec(UpickleJsonSpec)
 
   lazy val handlerTransport: HandlerTransport[Node, CodecType, Effect, Context] = {
-    val boundHandler = handler.bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
+//    val boundHandler = handler.bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
+    val boundHandler = handler
     HandlerTransport(boundHandler, backend, arbitraryContext.arbitrary.sample.get)
   }
-
-  override def simpleApis: Seq[SimpleApi[Effect]] = clients.map(_.bind[SimpleApi[Effect]])
-
-  override def complexApis: Seq[ComplexApi[Effect, Context]] = clients.map(_.bind[ComplexApi[Effect, Context]])
-
-  override def invalidApis: Seq[InvalidApi[Effect]] = clients.map(_.bind[InvalidApi[Effect]])
 }
 
 object UpickleJsonSpec extends UpickleCustom {
