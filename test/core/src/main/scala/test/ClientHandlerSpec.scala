@@ -172,11 +172,11 @@ trait ClientHandlerSpec extends BaseSpec {
         "Simple API" - {
           "Positional" - {
             "Local" in {
-              check { (a0: String, context: Context) =>
-                implicit val usingContext: Context = context
+//              check { (a0: String, context: Context) =>
+//                implicit val usingContext: Context = context
 //                run(client.callByPosition[String, String]("test", a0))
-                true
-              }
+//                true
+//              }
             }
           }
         }

@@ -22,12 +22,6 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec {
 
   lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
-  override def simpleApis: Seq[SimpleApi[Effect]] = clients.map(_.bind[SimpleApi[Effect]])
-
-  override def complexApis: Seq[ComplexApi[Effect, Context]] = clients.map(_.bind[ComplexApi[Effect, Context]])
-
-  override def invalidApis: Seq[InvalidApi[Effect]] = clients.map(_.bind[InvalidApi[Effect]])
-
   "" - {
     "test" in {
       implicit val context: Context = arbitraryContext.arbitrary.sample.get
