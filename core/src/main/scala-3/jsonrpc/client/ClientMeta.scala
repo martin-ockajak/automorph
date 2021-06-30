@@ -44,7 +44,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
    * @tparam R result type
    * @return result value
    */
-  inline def callByPosition[T1, R](method: String)(p1: T1)(using context: Context): Effect[R] =
+  inline def callByPosition[T1, R](method: String, p1: T1)(using context: Context): Effect[R] =
     val encodedArguments = Left(List(
       codec.encode(p1)
     ))

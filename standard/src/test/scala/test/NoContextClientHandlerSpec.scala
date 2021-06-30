@@ -18,7 +18,8 @@ class NoContextClientHandlerSpec extends BaseSpec {
       val backend = NoBackend()
       val handler = Handler.basic[Value, codec.type, Identity](codec, backend)
       val handlerTransport = HandlerTransport(handler, backend, Void.value)
-      Client.basic[Value, codec.type, Identity](codec, backend, handlerTransport)
+      val client = Client.basic[Value, codec.type, Identity](codec, backend, handlerTransport)
+//      val result: String = client.callByPosition("test", 0)
     }
   }
 }

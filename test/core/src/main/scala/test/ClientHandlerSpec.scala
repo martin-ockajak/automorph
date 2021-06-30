@@ -5,7 +5,6 @@ import jsonrpc.Client
 import jsonrpc.protocol.ErrorType.MethodNotFoundException
 import jsonrpc.spi.{Backend, Codec}
 import org.scalacheck.Arbitrary
-import org.scalacheck.Gen
 import scala.util.Try
 import test.Generators.arbitraryRecord
 import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, SimpleApiImpl}
