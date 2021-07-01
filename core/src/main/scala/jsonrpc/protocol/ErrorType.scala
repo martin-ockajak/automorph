@@ -49,6 +49,12 @@ object ErrorType {
     cause: Throwable
   ) extends RuntimeException(message, cause)
 
+  /** JSON-RPC invalid response error. */
+  final case class InvalidResponseException(
+    message: String,
+    cause: Throwable
+  ) extends RuntimeException(message, cause)
+
   /** Mapping of standard exception types to JSON-RPC errors. */
   val fromException: Map[Class[_ <: Throwable], ErrorType] = Map(
     classOf[ParseErrorException] -> ErrorType.ParseError,

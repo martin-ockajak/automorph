@@ -1,9 +1,8 @@
 package jsonrpc
 
-import java.io.IOException
 import jsonrpc.client.ClientMeta
 import jsonrpc.log.Logging
-import jsonrpc.protocol.ErrorType.ParseErrorException
+import jsonrpc.protocol.ErrorType.{InvalidResponseException, ParseErrorException}
 import jsonrpc.protocol.{ErrorType, Request, Response}
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, Transport}
@@ -122,7 +121,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
               result =>
                 // Decode result
                 Try(decodeResult(result)).fold(
-                  error => raiseError(new IOException("Invalid result", error), formedRequest),
+                  error => raiseError(InvalidResponseException("Invalid result", error), formedRequest),
                   result => {
                     logger.info(s"Performed JSON-RPC request", formedRequest.properties)
                     backend.pure(result)

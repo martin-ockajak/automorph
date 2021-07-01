@@ -1,8 +1,8 @@
 package jsonrpc.transport.local
 
-import java.io.IOException
 import jsonrpc.Handler
 import jsonrpc.handler.HandlerResult
+import jsonrpc.protocol.ErrorType.InvalidResponseException
 import jsonrpc.spi.{Backend, Codec, Transport}
 import scala.collection.immutable.ArraySeq
 
@@ -27,7 +27,7 @@ case class HandlerTransport[Node, CodecType <: Codec[Node], Effect[_], Context](
     backend.flatMap(
       handler.processRequest(request)(context.getOrElse(defaultContext)),
       (result: HandlerResult[ArraySeq.ofByte]) =>
-        result.response.map(backend.pure).getOrElse(backend.failed(new IOException("Missing call response")))
+        result.response.map(backend.pure).getOrElse(backend.failed(InvalidResponseException("Missing call response", None.orNull)))
     )
 
   def notify(request: ArraySeq.ofByte, context: Option[Context]): Effect[Unit] =

@@ -1,9 +1,8 @@
 package test
 
 import base.BaseSpec
-import java.io.IOException
 import jsonrpc.Client
-import jsonrpc.protocol.ErrorType.MethodNotFoundException
+import jsonrpc.protocol.ErrorType.{InvalidResponseException, MethodNotFoundException}
 import jsonrpc.spi.{Backend, Codec}
 import org.scalacheck.Arbitrary
 import scala.util.Try
@@ -141,7 +140,7 @@ trait ClientHandlerSpec extends BaseSpec {
                 error.should(include("redundant"))
               }
               "Invalid result" in {
-                val error = intercept[IOException] {
+                val error = intercept[InvalidResponseException] {
                   run(api.method2(""))
                 }.getMessage.toLowerCase
                 error.should(include("invalid"))
