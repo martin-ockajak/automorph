@@ -35,9 +35,8 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec {
 
   "" - {
     "test" in {
-      implicit val context: Context = arbitraryContext.arbitrary.sample.get
-
-      client.callByPosition[String, String]("test", "test")
+//      implicit val context: Context = arbitraryContext.arbitrary.sample.get
+//      client.callByPosition[String, String]("test", "test")
     }
   }
 }
