@@ -4,7 +4,7 @@ import jsonrpc.Handler
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.transport.local.HandlerTransport
-import test.{ClientHandlerSpec, ComplexApi, Enum, InvalidApi, Record, SimpleApi, Structure}
+import test.{ClientHandlerSpec, Enum, Record, Structure}
 import ujson.Value
 
 trait UpickleJsonSpec extends ClientHandlerSpec {
