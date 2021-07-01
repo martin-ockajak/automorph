@@ -116,7 +116,7 @@ case object ClientBindings {
       val argumentNodes = method.parameters.toList.zip(parameterListOffsets).flatMap { case (parameters, offset) =>
         parameters.toList.zipWithIndex.flatMap { case (parameter, index) =>
           Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[C, Context](ref)(method)) {
-            q"$codec.encode[${parameter.dataType}](arguments(${offset + index}))"
+            q"$codec.encode[${parameter.dataType}](arguments(${offset + index}).asInstanceOf[${parameter.dataType}])"
           }
         }
       }
