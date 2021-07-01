@@ -72,7 +72,10 @@ case object HandlerMeta {
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     api: c.Expr[Api]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
+  )(implicit
+    effectType: c.WeakTypeTag[Effect[_]],
+    resultType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
+  ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val nodeType = weakTypeOf[Node]
@@ -97,7 +100,10 @@ case object HandlerMeta {
   ](c: blackbox.Context)(
     api: c.Expr[Api],
     exposedNames: c.Expr[String => Seq[String]]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
+  )(implicit
+    effectType: c.WeakTypeTag[Effect[_]],
+    resultType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
+  ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val nodeType = weakTypeOf[Node]
