@@ -27,10 +27,8 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
    * @tparam R result type
    * @return result value
    */
-  def callByPosition[R](method: String)()(implicit context: Context): Effect[R] = {
-    val encodedArguments = Left(List())
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
-  }
+  def callByPosition[R](method: String)(implicit context: Context): Effect[R] =
+    macro ClientMeta.callByPositionMacro[Effect, Context, R]
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
@@ -43,12 +41,8 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
    * @tparam R result type
    * @return result value
    */
-  def callByPosition[T1, R](method: String, p1: T1)(implicit context: Context): Effect[R] = {
-    val encodedArguments = Left(List(
-      codec.encode(p1)
-    ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
-  }
+  def callByPosition[T1, R](method: String, p1: T1)(implicit context: Context): Effect[R] =
+    macro ClientMeta.callByPositionMacro[Effect, Context, T1, R]
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
@@ -61,13 +55,8 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
    * @tparam R result type
    * @return result value
    */
-  def callByPosition[T1, T2, R](method: String, p1: T1, p2: T2)(implicit context: Context): Effect[R] = {
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2)
-    ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
-  }
+  def callByPosition[T1, T2, R](method: String, p1: T1, p2: T2)(implicit context: Context): Effect[R] =
+    macro ClientMeta.callByPositionMacro[Effect, Context, T1, T2, R]
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
@@ -80,14 +69,8 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
    * @tparam R result type
    * @return result value
    */
-  def callByPosition[T1, T2, T3, R](method: String, p1: T1, p2: T2, p3: T3)(implicit context: Context): Effect[R] = {
-    val encodedArguments = Left(List(
-      codec.encode(p1),
-      codec.encode(p2),
-      codec.encode(p3)
-    ))
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
-  }
+  def callByPosition[T1, T2, T3, R](method: String, p1: T1, p2: T2, p3: T3)(implicit context: Context): Effect[R] =
+    macro ClientMeta.callByPositionMacro[Effect, Context, T1, T2, T3, R]
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
@@ -206,7 +189,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
    * @param context JSON-RPC request context
    * @return nothing
    */
-  def notifyByPosition(method: String)()(implicit context: Context): Effect[Unit] = {
+  def notifyByPosition(method: String)(implicit context: Context): Effect[Unit] = {
     val encodedArguments = Left(List())
     performNotify(method, encodedArguments, Some(context))
   }
@@ -442,6 +425,91 @@ object ClientMeta {
             ${c.prefix}.performCall(method.getName, encodedArguments, context, resultNode => clientMethod.decodeResult(resultNode))
           }.getOrElse(throw new UnsupportedOperationException("Invalid method: " + method.getName))
       ).asInstanceOf[$apiType]
+    """)
+  }
+
+  def callByPositionMacro[
+    Effect[_],
+    Context,
+    R: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    method: c.Expr[String]
+  )(context: c.Expr[Context]): c.Expr[Effect[R]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+
+    c.Expr[Effect[R]](q"""
+      val codec = ${c.prefix}.codec
+      val encodedArguments = Left(List())
+      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => codec.decode[${weakTypeOf[R]}](resultNode))
+    """)
+  }
+
+  def callByPositionMacro[
+    Effect[_],
+    Context,
+    T1: c.WeakTypeTag,
+    R: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    method: c.Expr[String],
+    p1: c.Expr[T1]
+  )(context: c.Expr[Context]): c.Expr[Effect[R]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+
+    c.Expr[Effect[R]](q"""
+      val codec = ${c.prefix}.codec
+      val encodedArguments = Left(List(
+        codec.encode[${weakTypeOf[T1]}]($p1),
+      ))
+      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => codec.decode[${weakTypeOf[R]}](resultNode))
+    """)
+  }
+
+  def callByPositionMacro[
+    Effect[_],
+    Context,
+    T1: c.WeakTypeTag,
+    T2: c.WeakTypeTag,
+    R: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    method: c.Expr[String],
+    p1: c.Expr[T1],
+    p2: c.Expr[T1]
+  )(context: c.Expr[Context]): c.Expr[Effect[R]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+
+    c.Expr[Effect[R]](q"""
+      val codec = ${c.prefix}.codec
+      val encodedArguments = Left(List(
+        codec.encode[${weakTypeOf[T1]}]($p1),
+        codec.encode[${weakTypeOf[T2]}]($p2)
+      ))
+      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => codec.decode[${weakTypeOf[R]}](resultNode))
+    """)
+  }
+
+  def callByPositionMacro[
+    Effect[_],
+    Context,
+    T1: c.WeakTypeTag,
+    T2: c.WeakTypeTag,
+    T3: c.WeakTypeTag,
+    R: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    method: c.Expr[String],
+    p1: c.Expr[T1],
+    p2: c.Expr[T1],
+    p3: c.Expr[T1]
+  )(context: c.Expr[Context]): c.Expr[Effect[R]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+
+    c.Expr[Effect[R]](q"""
+      val codec = ${c.prefix}.codec
+      val encodedArguments = Left(List(
+        codec.encode[${weakTypeOf[T1]}]($p1),
+        codec.encode[${weakTypeOf[T2]}]($p2),
+        codec.encode[${weakTypeOf[T3]}]($p3)
+      ))
+      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => codec.decode[${weakTypeOf[R]}](resultNode))
     """)
   }
 }
