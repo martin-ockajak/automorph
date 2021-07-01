@@ -40,7 +40,12 @@ case object HandlerBindings {
     codec: c.Expr[CodecType],
     backend: c.Expr[Backend[Effect]],
     api: c.Expr[Api]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]] = {
+  )(implicit
+    effectType: c.WeakTypeTag[Effect[_]],
+    resultNodeType: c.WeakTypeTag[Effect[Node]],
+    handlerType: c.WeakTypeTag[HandlerMethod[Node, Effect, Context]],
+    resultType: c.WeakTypeTag[Map[String, HandlerMethod[Node, Effect, Context]]]
+  ): c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]] = {
     import c.universe.Quasiquote
     val ref = Reflection[c.type](c)
 
@@ -76,7 +81,11 @@ case object HandlerBindings {
     codec: ref.c.Expr[CodecType],
     backend: ref.c.Expr[Backend[Effect]],
     api: ref.c.Expr[Api]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[HandlerMethod[Node, Effect, Context]] = {
+  )(implicit
+    effectType: ref.c.WeakTypeTag[Effect[_]],
+    resultNodeType: ref.c.WeakTypeTag[Effect[Node]],
+    handlerType: ref.c.WeakTypeTag[HandlerMethod[Node, Effect, Context]]
+  ): ref.c.Expr[HandlerMethod[Node, Effect, Context]] = {
     import ref.c.universe.Quasiquote
 
     val invoke = generateInvoke[C, Node, CodecType, Effect, Context, Api](ref)(method, codec, backend, api)
@@ -105,9 +114,12 @@ case object HandlerBindings {
     codec: ref.c.Expr[CodecType],
     backend: ref.c.Expr[Backend[Effect]],
     api: ref.c.Expr[Api]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
+  )(implicit
+    effectType: ref.c.WeakTypeTag[Effect[_]],
+    resultNodeType: ref.c.WeakTypeTag[Effect[Node]]
+  ): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}
-    (weakTypeOf[Node], weakTypeOf[CodecType])
+    (weakTypeOf[Node], weakTypeOf[CodecType], resultNodeType)
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>

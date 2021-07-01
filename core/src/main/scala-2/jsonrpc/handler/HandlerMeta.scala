@@ -74,7 +74,7 @@ case object HandlerMeta {
     api: c.Expr[Api]
   )(implicit
     effectType: c.WeakTypeTag[Effect[_]],
-    resultType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
+    handlerType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
   ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
@@ -102,7 +102,7 @@ case object HandlerMeta {
     exposedNames: c.Expr[String => Seq[String]]
   )(implicit
     effectType: c.WeakTypeTag[Effect[_]],
-    resultType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
+    handlerType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
   ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 

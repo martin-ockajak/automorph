@@ -69,7 +69,7 @@ case object Handler {
     backend: c.Expr[Backend[Effect]],
     bufferSize: c.Expr[Int]
   )(implicit
-    resultType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
+    handlerType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
   ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
@@ -107,7 +107,7 @@ case object Handler {
     codec: c.Expr[CodecType],
     backend: c.Expr[Backend[Effect]]
   )(implicit
-    resultType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
+    handlerType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
   ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
@@ -145,7 +145,7 @@ case object Handler {
     codec: c.Expr[CodecType],
     backend: c.Expr[Backend[Effect]]
   )(implicit
-    resultType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Void.Value]]
+    handlerType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Void.Value]]
   ): c.Expr[Handler[Node, CodecType, Effect, Void.Value]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[CodecType])
