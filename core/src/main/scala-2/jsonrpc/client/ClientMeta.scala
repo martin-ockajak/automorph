@@ -346,7 +346,7 @@ object ClientMeta {
 
   def callByPositionMacro[Effect[_], Context, R: c.WeakTypeTag](c: blackbox.Context)(
     method: c.Expr[String]
-  )(context: c.Expr[Context]): c.Expr[Effect[R]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
@@ -357,7 +357,7 @@ object ClientMeta {
   def callByPositionMacro[Effect[_], Context, T1: c.WeakTypeTag, R: c.WeakTypeTag](c: blackbox.Context)(
     method: c.Expr[String],
     p1: c.Expr[T1]
-  )(context: c.Expr[Context]): c.Expr[Effect[R]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
@@ -377,7 +377,7 @@ object ClientMeta {
     method: c.Expr[String],
     p1: c.Expr[T1],
     p2: c.Expr[T2]
-  )(context: c.Expr[Context]): c.Expr[Effect[R]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
@@ -400,7 +400,7 @@ object ClientMeta {
     p1: c.Expr[T1],
     p2: c.Expr[T2],
     p3: c.Expr[T3]
-  )(context: c.Expr[Context]): c.Expr[Effect[R]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
@@ -426,7 +426,7 @@ object ClientMeta {
     p2: c.Expr[T2],
     p3: c.Expr[T3],
     p4: c.Expr[T4]
-  )(context: c.Expr[Context]): c.Expr[Effect[R]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
@@ -455,7 +455,7 @@ object ClientMeta {
     p3: c.Expr[T3],
     p4: c.Expr[T4],
     p5: c.Expr[T5]
-  )(context: c.Expr[Context]): c.Expr[Effect[R]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
@@ -487,7 +487,7 @@ object ClientMeta {
     p4: c.Expr[T4],
     p5: c.Expr[T5],
     p6: c.Expr[T6]
-  )(context: c.Expr[Context]): c.Expr[Effect[R]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
@@ -522,7 +522,7 @@ object ClientMeta {
     p5: c.Expr[T5],
     p6: c.Expr[T6],
     p7: c.Expr[T7]
-  )(context: c.Expr[Context]): c.Expr[Effect[R]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
@@ -541,7 +541,7 @@ object ClientMeta {
   def callByNameMacro[Effect[_], Context, T1: c.WeakTypeTag, R: c.WeakTypeTag](c: blackbox.Context)(
     method: c.Expr[String],
     p1: c.Expr[(String, T1)]
-  )(context: c.Expr[Context]): c.Expr[Effect[R]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
@@ -553,7 +553,7 @@ object ClientMeta {
 
   def notifyByPositionMacro[Effect[_], Context](c: blackbox.Context)(
     method: c.Expr[String]
-  )(context: c.Expr[Context]): c.Expr[Effect[Unit]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[Unit]]): c.Expr[Effect[Unit]] = {
     import c.universe.Quasiquote
 
     c.Expr[Effect[Unit]](q"""
@@ -564,7 +564,7 @@ object ClientMeta {
   def notifyByPositionMacro[Effect[_], Context, T1: c.WeakTypeTag](c: blackbox.Context)(
     method: c.Expr[String],
     p1: c.Expr[T1]
-  )(context: c.Expr[Context]): c.Expr[Effect[Unit]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[Unit]]): c.Expr[Effect[Unit]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
@@ -578,7 +578,7 @@ object ClientMeta {
     method: c.Expr[String],
     p1: c.Expr[T1],
     p2: c.Expr[T2]
-  )(context: c.Expr[Context]): c.Expr[Effect[Unit]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[Unit]]): c.Expr[Effect[Unit]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
@@ -600,7 +600,7 @@ object ClientMeta {
     p1: c.Expr[T1],
     p2: c.Expr[T2],
     p3: c.Expr[T3]
-  )(context: c.Expr[Context]): c.Expr[Effect[Unit]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[Unit]]): c.Expr[Effect[Unit]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
@@ -625,7 +625,7 @@ object ClientMeta {
     p2: c.Expr[T2],
     p3: c.Expr[T3],
     p4: c.Expr[T4]
-  )(context: c.Expr[Context]): c.Expr[Effect[Unit]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[Unit]]): c.Expr[Effect[Unit]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
@@ -653,7 +653,7 @@ object ClientMeta {
     p3: c.Expr[T3],
     p4: c.Expr[T4],
     p5: c.Expr[T5]
-  )(context: c.Expr[Context]): c.Expr[Effect[Unit]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[Unit]]): c.Expr[Effect[Unit]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
@@ -684,7 +684,7 @@ object ClientMeta {
     p4: c.Expr[T4],
     p5: c.Expr[T5],
     p6: c.Expr[T6]
-  )(context: c.Expr[Context]): c.Expr[Effect[Unit]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[Unit]]): c.Expr[Effect[Unit]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
@@ -718,7 +718,7 @@ object ClientMeta {
     p5: c.Expr[T5],
     p6: c.Expr[T6],
     p7: c.Expr[T7]
-  )(context: c.Expr[Context]): c.Expr[Effect[Unit]] = {
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[Unit]]): c.Expr[Effect[Unit]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
@@ -733,4 +733,5 @@ object ClientMeta {
       )), Some($context))
     """)
   }
+
 }
