@@ -350,9 +350,9 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
-      val codec = ${c.prefix}.codec
+      val ${c.prefix}.codec = ${c.prefix}.${c.prefix}.codec
       val encodedArguments = Left(List())
-      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => codec.decode[${weakTypeOf[R]}](resultNode))
+      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => ${c.prefix}.codec.decode[${weakTypeOf[R]}](resultNode))
     """)
   }
 
@@ -363,11 +363,11 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
-      val codec = ${c.prefix}.codec
+      val ${c.prefix}.codec = ${c.prefix}.${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
       ))
-      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => codec.decode[${weakTypeOf[R]}](resultNode))
+      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => ${c.prefix}.codec.decode[${weakTypeOf[R]}](resultNode))
     """)
   }
 
@@ -385,12 +385,11 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
-        codec.encode[${weakTypeOf[T2]}]($p2)
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2)
       ))
-      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => codec.decode[${weakTypeOf[R]}](resultNode))
+      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => ${c.prefix}.codec.decode[${weakTypeOf[R]}](resultNode))
     """)
   }
 
@@ -410,13 +409,12 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
-        codec.encode[${weakTypeOf[T2]}]($p2),
-        codec.encode[${weakTypeOf[T3]}]($p3)
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+        ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3)
       ))
-      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => codec.decode[${weakTypeOf[R]}](resultNode))
+      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => ${c.prefix}.codec.decode[${weakTypeOf[R]}](resultNode))
     """)
   }
 
@@ -438,14 +436,13 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
-        codec.encode[${weakTypeOf[T2]}]($p2),
-        codec.encode[${weakTypeOf[T3]}]($p3),
-        codec.encode[${weakTypeOf[T4]}]($p4)
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+        ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3),
+        ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4)
       ))
-      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => codec.decode[${weakTypeOf[R]}](resultNode))
+      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => ${c.prefix}.codec.decode[${weakTypeOf[R]}](resultNode))
     """)
   }
 
@@ -469,15 +466,14 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
-        codec.encode[${weakTypeOf[T2]}]($p2),
-        codec.encode[${weakTypeOf[T3]}]($p3),
-        codec.encode[${weakTypeOf[T4]}]($p4),
-        codec.encode[${weakTypeOf[T5]}]($p5)
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+        ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3),
+        ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4),
+        ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5)
       ))
-      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => codec.decode[${weakTypeOf[R]}](resultNode))
+      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => ${c.prefix}.codec.decode[${weakTypeOf[R]}](resultNode))
     """)
   }
 
@@ -503,16 +499,15 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
-        codec.encode[${weakTypeOf[T2]}]($p2),
-        codec.encode[${weakTypeOf[T3]}]($p3),
-        codec.encode[${weakTypeOf[T4]}]($p4),
-        codec.encode[${weakTypeOf[T5]}]($p5),
-        codec.encode[${weakTypeOf[T6]}]($p6)
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+        ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3),
+        ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4),
+        ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5),
+        ${c.prefix}.codec.encode[${weakTypeOf[T6]}]($p6)
       ))
-      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => codec.decode[${weakTypeOf[R]}](resultNode))
+      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => ${c.prefix}.codec.decode[${weakTypeOf[R]}](resultNode))
     """)
   }
 
@@ -540,17 +535,16 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
-        codec.encode[${weakTypeOf[T2]}]($p2),
-        codec.encode[${weakTypeOf[T3]}]($p3),
-        codec.encode[${weakTypeOf[T4]}]($p4),
-        codec.encode[${weakTypeOf[T5]}]($p5),
-        codec.encode[${weakTypeOf[T6]}]($p6),
-        codec.encode[${weakTypeOf[T7]}]($p7)
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+        ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3),
+        ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4),
+        ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5),
+        ${c.prefix}.codec.encode[${weakTypeOf[T6]}]($p6),
+        ${c.prefix}.codec.encode[${weakTypeOf[T7]}]($p7)
       ))
-      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => codec.decode[${weakTypeOf[R]}](resultNode))
+      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => ${c.prefix}.codec.decode[${weakTypeOf[R]}](resultNode))
     """)
   }
 
@@ -561,11 +555,10 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[R]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Right(Map(
-        $p1._1 -> codec.encode[${weakTypeOf[T1]}]($p1._2)
+        $p1._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2)
       ))
-      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => codec.decode[${weakTypeOf[R]}](resultNode))
+      ${c.prefix}.performCall($method, encodedArguments, Some($context), resultNode => ${c.prefix}.codec.decode[${weakTypeOf[R]}](resultNode))
     """)
   }
 
@@ -575,7 +568,7 @@ object ClientMeta {
     import c.universe.Quasiquote
 
     c.Expr[Effect[Unit]](q"""
-      val codec = ${c.prefix}.codec
+      val ${c.prefix}.codec = ${c.prefix}.${c.prefix}.codec
       val encodedArguments = Left(List())
       ${c.prefix}.performNotify($method, encodedArguments, Some($context))
     """)
@@ -588,9 +581,8 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
       ))
       ${c.prefix}.performNotify($method, encodedArguments, Some($context))
     """)
@@ -604,10 +596,9 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
-        codec.encode[${weakTypeOf[T2]}]($p2)
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2)
       ))
       ${c.prefix}.performNotify($method, encodedArguments, Some($context))
     """)
@@ -628,11 +619,10 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
-        codec.encode[${weakTypeOf[T2]}]($p2),
-        codec.encode[${weakTypeOf[T3]}]($p3)
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+        ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3)
       ))
       ${c.prefix}.performNotify($method, encodedArguments, Some($context))
     """)
@@ -655,12 +645,11 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
-        codec.encode[${weakTypeOf[T2]}]($p2),
-        codec.encode[${weakTypeOf[T3]}]($p3),
-        codec.encode[${weakTypeOf[T4]}]($p4)
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+        ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3),
+        ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4)
       ))
       ${c.prefix}.performNotify($method, encodedArguments, Some($context))
     """)
@@ -685,13 +674,12 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
-        codec.encode[${weakTypeOf[T2]}]($p2),
-        codec.encode[${weakTypeOf[T3]}]($p3),
-        codec.encode[${weakTypeOf[T4]}]($p4),
-        codec.encode[${weakTypeOf[T5]}]($p5)
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+        ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3),
+        ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4),
+        ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5)
       ))
       ${c.prefix}.performNotify($method, encodedArguments, Some($context))
     """)
@@ -718,14 +706,13 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
-        codec.encode[${weakTypeOf[T2]}]($p2),
-        codec.encode[${weakTypeOf[T3]}]($p3),
-        codec.encode[${weakTypeOf[T4]}]($p4),
-        codec.encode[${weakTypeOf[T5]}]($p5),
-        codec.encode[${weakTypeOf[T6]}]($p6)
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+        ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3),
+        ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4),
+        ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5),
+        ${c.prefix}.codec.encode[${weakTypeOf[T6]}]($p6)
       ))
       ${c.prefix}.performNotify($method, encodedArguments, Some($context))
     """)
@@ -754,15 +741,14 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Effect[Unit]](q"""
-      val codec = ${c.prefix}.codec
       val encodedArguments = Left(List(
-        codec.encode[${weakTypeOf[T1]}]($p1),
-        codec.encode[${weakTypeOf[T2]}]($p2),
-        codec.encode[${weakTypeOf[T3]}]($p3),
-        codec.encode[${weakTypeOf[T4]}]($p4),
-        codec.encode[${weakTypeOf[T5]}]($p5),
-        codec.encode[${weakTypeOf[T6]}]($p6),
-        codec.encode[${weakTypeOf[T7]}]($p7)
+        ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+        ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+        ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3),
+        ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4),
+        ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5),
+        ${c.prefix}.codec.encode[${weakTypeOf[T6]}]($p6),
+        ${c.prefix}.codec.encode[${weakTypeOf[T7]}]($p7)
       ))
       ${c.prefix}.performNotify($method, encodedArguments, Some($context))
     """)
