@@ -83,7 +83,7 @@ final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
    * @tparam R result type
    * @return nothing
    */
-  protected def performNotify(methodName: String, arguments: Params[Node], context: Option[Context]): Effect[Unit] = {
+  def performNotify(methodName: String, arguments: Params[Node], context: Option[Context]): Effect[Unit] = {
     val formedRequest = Request(None, methodName, arguments).formed
     backend.flatMap(
       // Serialize request
