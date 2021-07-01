@@ -1,5 +1,6 @@
 package jsonrpc.transport.local
 
+import java.io.IOException
 import jsonrpc.Handler
 import jsonrpc.handler.HandlerResult
 import jsonrpc.spi.{Backend, Codec, Transport}
@@ -23,10 +24,10 @@ case class HandlerTransport[Node, CodecType <: Codec[Node], Effect[_], Context](
 ) extends Transport[Effect, Context] {
 
   def call(request: ArraySeq.ofByte, context: Option[Context]): Effect[ArraySeq.ofByte] =
-    backend.map(
+    backend.flatMap(
       handler.processRequest(request)(context.getOrElse(defaultContext)),
       (result: HandlerResult[ArraySeq.ofByte]) =>
-        result.response.getOrElse(throw new IllegalStateException("Missing call response"))
+        result.response.map(backend.pure).getOrElse(backend.failed(new IOException("Missing call response")))
     )
 
   def notify(request: ArraySeq.ofByte, context: Option[Context]): Effect[Unit] =

@@ -1,6 +1,7 @@
 package test
 
 import base.BaseSpec
+import java.io.IOException
 import jsonrpc.Client
 import jsonrpc.protocol.ErrorType.MethodNotFoundException
 import jsonrpc.spi.{Backend, Codec}
@@ -140,7 +141,7 @@ trait ClientHandlerSpec extends BaseSpec {
                 error.should(include("redundant"))
               }
               "Invalid result" in {
-                val error = intercept[IllegalStateException] {
+                val error = intercept[IOException] {
                   run(api.method2(""))
                 }.getMessage.toLowerCase
                 error.should(include("invalid"))
