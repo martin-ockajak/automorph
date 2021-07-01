@@ -108,7 +108,7 @@ case object Handler {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
 
-    c.Expr[Handler[Node, CodecType, Effect, Context]]( q"""
+    c.Expr[Handler[Node, CodecType, Effect, Context]](q"""
       jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
     """)
   }
@@ -144,7 +144,7 @@ case object Handler {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[CodecType])
 
-    c.Expr[Handler[Node, CodecType, Effect, Void.Value]]( q"""
+    c.Expr[Handler[Node, CodecType, Effect, Void.Value]](q"""
       jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
     """)
   }
