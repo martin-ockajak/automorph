@@ -32,7 +32,6 @@ private[jsonrpc] object CirceJsonCodecMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[T](q"""
-      import io.circe.syntax.EncoderOps
       $node.as[${weakTypeOf[T]}].toTry.get
     """)
   }

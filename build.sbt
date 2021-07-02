@@ -6,6 +6,7 @@ lazy val root = project.in(file(".")).aggregate(
 
   upickle,
   circe,
+  argonaut,
 
   standard,
   zio,
@@ -75,6 +76,14 @@ lazy val circe = (project in file("codec/circe")).dependsOn(
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-parser" % "0.14.1",
     "io.circe" %% "circe-generic" % "0.14.1"
+  )
+)
+lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
+  spi, testBase % Test
+).settings(
+  name := "json-rpc-argonaut",
+  libraryDependencies ++= Seq(
+    "io.argonaut" %% "argonaut" % "6.3.5"
   )
 )
 
@@ -153,7 +162,7 @@ lazy val testBase = (project in file("test/base")).dependsOn(
   )
 )
 lazy val testCore = (project in file("test/core")).dependsOn(
-  testBase, core, upickle, circe
+  testBase, core, upickle, circe, argonaut
 ).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.9"

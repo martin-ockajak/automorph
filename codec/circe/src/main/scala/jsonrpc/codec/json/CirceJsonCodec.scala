@@ -20,11 +20,11 @@ final case class CirceJsonCodec() extends CirceJsonCodecMeta {
   implicit private val idEncoder: Encoder[Either[BigDecimal, String]] = deriveEncoder[Either[BigDecimal, String]]
   implicit private val idDecoder: Decoder[Either[BigDecimal, String]] = deriveDecoder[Either[BigDecimal, String]]
 
-  implicit private val paramsEncoder: Encoder[Either[List[io.circe.Json], Map[String, io.circe.Json]]] =
-    deriveEncoder[Either[List[io.circe.Json], Map[String, io.circe.Json]]]
+  implicit private val paramsEncoder: Encoder[Either[List[Json], Map[String, Json]]] =
+    deriveEncoder[Either[List[Json], Map[String, Json]]]
 
-  implicit private val paramsDecoder: Decoder[Either[List[io.circe.Json], Map[String, io.circe.Json]]] =
-    deriveDecoder[Either[List[io.circe.Json], Map[String, io.circe.Json]]]
+  implicit private val paramsDecoder: Decoder[Either[List[Json], Map[String, Json]]] =
+    deriveDecoder[Either[List[Json], Map[String, Json]]]
   implicit private val messageErrorEncoder: Encoder[MessageError[Json]] = deriveEncoder[MessageError[Json]]
   implicit private val messageErrorDecoder: Decoder[MessageError[Json]] = deriveDecoder[MessageError[Json]]
   implicit private val messageEncoder: Encoder[Message[Json]] = deriveEncoder[Message[Json]]
