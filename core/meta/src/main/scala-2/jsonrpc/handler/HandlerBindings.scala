@@ -91,7 +91,6 @@ case object HandlerBindings {
         ${methodUsesContext[C, Context](ref)(method)}
       )
     """)
-    ref.c.Expr[HandlerMethod[Node, Effect, Context]](q"None.orNull")
   }
 
   private def generateInvoke[
