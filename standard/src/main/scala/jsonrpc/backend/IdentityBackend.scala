@@ -1,16 +1,16 @@
 package jsonrpc.backend
 
-import jsonrpc.backend.NoBackend.Identity
+import jsonrpc.backend.IdentityBackend.Identity
 import jsonrpc.spi.Backend
 
 /**
- * No effect backend plugin.
+ * Identity effect backend plugin.
  *
  * Represents direct use of plain values without wrapping them in an effect.
  *
  * Effect type: Identity
  */
-final case class NoBackend() extends Backend[Identity] {
+final case class IdentityBackend() extends Backend[Identity] {
 
   override def pure[T](value: T): T = value
 
@@ -21,6 +21,6 @@ final case class NoBackend() extends Backend[Identity] {
   override def either[T](value: T): Either[Throwable, T] = Right(value)
 }
 
-case object NoBackend {
+case object IdentityBackend {
   type Identity[T] = T
 }

@@ -5,8 +5,8 @@ import io.undertow.Handlers
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.handlers.BlockingHandler
 import jsonrpc.Handler
-import jsonrpc.backend.NoBackend
-import jsonrpc.backend.NoBackend.Identity
+import jsonrpc.backend.IdentityBackend
+import jsonrpc.backend.IdentityBackend.Identity
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.server.http.UndertowJsonRpcHandler
@@ -30,7 +30,7 @@ object CaskServer extends cask.MainRoutes {
 
   override def defaultHandler = {
     val codec = UpickleJsonCodec[UpickleCustom]()
-    val handler = Handler[Value, codec.type, Identity, HttpServerExchange](codec, NoBackend()).bind(Api)
+    val handler = Handler[Value, codec.type, Identity, HttpServerExchange](codec, IdentityBackend()).bind(Api)
     val httpHandler = UndertowJsonRpcHandler[Value, codec.type, Identity](handler, (_: Any) => ())
     val pathHandler = Handlers.path(super.defaultHandler).addPrefixPath(apiPath, httpHandler)
     new BlockingHandler(pathHandler)

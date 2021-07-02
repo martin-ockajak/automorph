@@ -1,8 +1,8 @@
 package test
 
 import base.BaseSpec
-import jsonrpc.backend.NoBackend
-import jsonrpc.backend.NoBackend.Identity
+import jsonrpc.backend.IdentityBackend
+import jsonrpc.backend.IdentityBackend.Identity
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.transport.local.HandlerTransport
@@ -15,7 +15,7 @@ class NoContextClientHandlerSpec extends BaseSpec {
   "" - {
     "Construct" in {
       val codec = UpickleJsonCodec[UpickleCustom]()
-      val backend = NoBackend()
+      val backend = IdentityBackend()
       val handler = Handler.basic[Value, codec.type, Identity](codec, backend)
       val handlerTransport = HandlerTransport(handler, backend, Void.value)
       val client = Client.basic[Value, codec.type, Identity](codec, backend, handlerTransport)
