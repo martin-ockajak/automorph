@@ -1,7 +1,7 @@
 package jsonrpc.spi
 
 /**
- * Effectful computation runtime plugin.
+ * Effectful computation backend plugin.
  *
  * The underlying runtime must support monadic composition of effects.
  *
