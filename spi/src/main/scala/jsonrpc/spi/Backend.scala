@@ -5,7 +5,7 @@ package jsonrpc.spi
  *
  * The underlying runtime must support monadic composition of effects.
  *
- * @tparam Effect effect type (similar to IO Monad in Haskell)
+ * @tparam Effect effect type (similar to IO monad in Haskell)
  */
 trait Backend[Effect[_]] {
 
