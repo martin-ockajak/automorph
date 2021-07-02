@@ -10,7 +10,7 @@ import jsonrpc.util.Void
 import jsonrpc.{Client, Handler}
 import ujson.Value
 
-class NoContextClientHandlerSpec extends BaseSpec {
+class VoidContextClientHandlerSpec extends BaseSpec {
 
   "" - {
     "Construct" in {
