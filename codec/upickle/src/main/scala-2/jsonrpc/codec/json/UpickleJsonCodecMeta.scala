@@ -23,10 +23,10 @@ trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Codec[Value] {
 object UpickleJsonCodecMeta {
 
   def encode[T: c.WeakTypeTag](c: Context)(value: c.Expr[T]): c.Expr[Value] = {
-    import c.universe.Quasiquote
+    import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[Value](q"""
-      ${c.prefix}.custom.writeJs($value)
+      ${c.prefix}.custom.writeJs($value)(implicitly[${c.prefix}.custom.Writer[${weakTypeOf[T]}]])
     """)
   }
 
