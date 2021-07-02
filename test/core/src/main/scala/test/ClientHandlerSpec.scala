@@ -47,7 +47,7 @@ trait ClientHandlerSpec extends BaseSpec {
 
   def invalidApis: Seq[InvalidApi[Effect]]
 
-  def callByPosition(method:String, p1: String)(implicit context: Context): Effect[String]
+  def callByPosition(method: String, p1: String)(implicit context: Context): Effect[String]
 
   implicit def arbitraryContext: Arbitrary[Context]
 
