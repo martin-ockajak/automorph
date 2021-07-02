@@ -11,12 +11,11 @@ import upack.Msg
  * @tparam Custom custom Upickle reader and writer implicits instance type
  */
 private[jsonrpc] trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends Codec[Msg]:
-  this: UpickleMessagePackCodec[Custom] =>
+
+  val custom: Custom
 
   override inline def encode[T](value: T): Msg =
-    val writer = summonInline[custom.Writer[T]]
-    custom.writeMsg(value)(using writer)
+    custom.writeMsg(value)(using summonInline[custom.Writer[T]])
 
   override inline def decode[T](node: Msg): T =
-    val reader = summonInline[custom.Reader[T]]
-    custom.readBinary[T](node)(using reader)
+    custom.readBinary[T](node)(using summonInline[custom.Reader[T]])

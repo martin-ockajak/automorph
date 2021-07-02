@@ -23,26 +23,18 @@ trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Codec[Value] {
 object UpickleJsonCodecMeta {
 
   def encode[T: c.WeakTypeTag](c: Context)(value: c.Expr[T]): c.Expr[Value] = {
-    import c.universe.{weakTypeOf, Quasiquote}
+    import c.universe.Quasiquote
 
-    val valueType = weakTypeOf[T]
     c.Expr[Value](q"""
-      val custom = ${c.prefix}.custom
-      import custom._
-      val writer = implicitly[custom.Writer[$valueType]]
-      custom.writeJs($value)(writer)
+      ${c.prefix}.custom.writeJs($value)
     """)
   }
 
   def decode[T: c.WeakTypeTag](c: Context)(node: c.Expr[Value]): c.Expr[T] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
-    val valueType = weakTypeOf[T]
     c.Expr[T](q"""
-      val custom = ${c.prefix}.custom
-      import custom._
-      val reader = implicitly[custom.Reader[$valueType]]
-      custom.read[$valueType]($node)(reader)
+      ${c.prefix}.custom.read[${weakTypeOf[T]}]($node)
     """)
   }
 }

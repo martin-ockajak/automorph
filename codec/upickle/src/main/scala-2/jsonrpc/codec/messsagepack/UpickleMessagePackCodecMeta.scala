@@ -22,27 +22,19 @@ trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends Codec[Msg] {
 
 object UpickleMessagePackCodecMeta {
 
-  def encode[T: c.WeakTypeTag](c: Context)(value: c.Expr[T]): c.Expr[Msg] = {
-    import c.universe.{weakTypeOf, Quasiquote}
+  def encode[T](c: Context)(value: c.Expr[T]): c.Expr[Msg] = {
+    import c.universe.Quasiquote
 
-    val valueType = weakTypeOf[T]
     c.Expr[Msg](q"""
-      val custom = ${c.prefix}.custom
-      import custom._
-      val writer = implicitly[custom.Writer[$valueType]]
-      custom.writeMsg($value)(writer)
+      ${c.prefix}.custom.writeMsg($value)
     """)
   }
 
   def decode[T: c.WeakTypeTag](c: Context)(node: c.Expr[Msg]): c.Expr[T] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
-    val valueType = weakTypeOf[T]
     c.Expr[T](q"""
-      val custom = ${c.prefix}.custom
-      import custom._
-      val reader = implicitly[custom.Reader[$valueType]]
-      custom.readBinary[$valueType]($node)(reader)
+      ${c.prefix}.custom.readBinary[${weakTypeOf[T]}]($node)
     """)
   }
 }
