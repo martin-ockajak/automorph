@@ -17,11 +17,11 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec {
 
   override lazy val backend: Backend[Effect] = FutureBackend()
 
-  override lazy val client: Client[Node, CodecType, Effect, Context] =
+  override lazy val client: Client[Node, ExactCodec, Effect, Context] =
     Client(codec, backend, handlerTransport)
 
-  override lazy val handler: Handler[Node, CodecType, Effect, Context] =
-    Handler[Node, CodecType, Effect, Context](codec, backend)
+  override lazy val handler: Handler[Node, ExactCodec, Effect, Context] =
+    Handler[Node, ExactCodec, Effect, Context](codec, backend)
 
   lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 

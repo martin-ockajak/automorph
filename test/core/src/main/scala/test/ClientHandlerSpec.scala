@@ -15,13 +15,13 @@ import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, 
  * Checks the results of remote method invocations against identical local invocations.
  *
  * @tparam Node message format node representation type
- * @tparam CodecType message codec plugin type
+ * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  */
 trait ClientHandlerSpec extends BaseSpec {
 
   type Node
-  type CodecType <: Codec[Node]
+  type ExactCodec <: Codec[Node]
   type Effect[_]
   type Context
 
@@ -34,9 +34,9 @@ trait ClientHandlerSpec extends BaseSpec {
 
   def backend: Backend[Effect]
 
-  def client: Client[Node, CodecType, Effect, Context]
+  def client: Client[Node, ExactCodec, Effect, Context]
 
-  def clients: Seq[Client[Node, CodecType, Effect, Context]] = Seq(
+  def clients: Seq[Client[Node, ExactCodec, Effect, Context]] = Seq(
     client,
     client.copy(argumentsByName = false)
   )

@@ -12,9 +12,9 @@ import test.{Enum, Record, Structure}
 class CirceJsonSpec extends CodecSpec {
 
   type Node = Json
-  type CodecType = CirceJsonCodec
+  type ExactCodec = CirceJsonCodec
 
-  override def codec: CodecType = CirceJsonCodec()
+  override def codec: ExactCodec = CirceJsonCodec()
 
   override def arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.oneOf(Seq(
     Json.fromString("test"),

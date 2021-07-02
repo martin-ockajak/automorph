@@ -16,24 +16,24 @@ private[jsonrpc] case object ClientBindings:
    *
    * @param codec message format codec plugin
    * @tparam Node message format node representation type
-   * @tparam CodecType message format codec type
+   * @tparam ExactCodec message format codec type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to client method bindings
    */
-  inline def generate[Node, CodecType <: Codec[Node], Effect[_], Context, Api <: AnyRef](
-    codec: CodecType
+  inline def generate[Node, ExactCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
+    codec: ExactCodec
   ): Map[String, ClientMethod[Node]] =
-    ${ generateMacro[Node, CodecType, Effect, Context, Api]('codec) }
+    ${ generateMacro[Node, ExactCodec, Effect, Context, Api]('codec) }
 
   private def generateMacro[
     Node: Type,
-    CodecType <: Codec[Node]: Type,
+    ExactCodec <: Codec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
-  ](codec: Expr[CodecType])(using quotes: Quotes): Expr[Map[String, ClientMethod[Node]]] =
+  ](codec: Expr[ExactCodec])(using quotes: Quotes): Expr[Map[String, ClientMethod[Node]]] =
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -48,7 +48,7 @@ private[jsonrpc] case object ClientBindings:
     val clientMethods = Expr.ofSeq(validMethods.map { method =>
       '{
         ${ Expr(method.name) } -> ${
-          generateClientMethod[Node, CodecType, Effect, Context, Api](ref)(method, codec)
+          generateClientMethod[Node, ExactCodec, Effect, Context, Api](ref)(method, codec)
         }
       }
     })
@@ -56,15 +56,15 @@ private[jsonrpc] case object ClientBindings:
 
   private def generateClientMethod[
     Node: Type,
-    CodecType <: Codec[Node]: Type,
+    ExactCodec <: Codec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
-  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[CodecType]): Expr[ClientMethod[Node]] =
+  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[ExactCodec]): Expr[ClientMethod[Node]] =
     given Quotes = ref.q
 
-    val encodeArguments = generateEncodeArguments[Node, CodecType, Context](ref)(method, codec)
-    val decodeResult = generateDecodeResult[Node, CodecType, Effect](ref)(method, codec)
+    val encodeArguments = generateEncodeArguments[Node, ExactCodec, Context](ref)(method, codec)
+    val decodeResult = generateDecodeResult[Node, ExactCodec, Effect](ref)(method, codec)
     logBoundMethod[Api](ref)(method, encodeArguments, decodeResult)
     '{
       ClientMethod(
@@ -78,9 +78,9 @@ private[jsonrpc] case object ClientBindings:
       )
     }
 
-  private def generateEncodeArguments[Node: Type, CodecType <: Codec[Node]: Type, Context: Type](ref: Reflection)(
+  private def generateEncodeArguments[Node: Type, ExactCodec <: Codec[Node]: Type, Context: Type](ref: Reflection)(
     method: ref.RefMethod,
-    codec: Expr[CodecType]
+    codec: Expr[ExactCodec]
   ): Expr[Seq[Any] => Seq[Node]] =
     import ref.q.reflect.{asTerm, Term}
     given Quotes = ref.q
@@ -118,9 +118,9 @@ private[jsonrpc] case object ClientBindings:
       }
     }
 
-  private def generateDecodeResult[Node: Type, CodecType <: Codec[Node]: Type, Effect[_]: Type](ref: Reflection)(
+  private def generateDecodeResult[Node: Type, ExactCodec <: Codec[Node]: Type, Effect[_]: Type](ref: Reflection)(
     method: ref.RefMethod,
-    codec: Expr[CodecType]
+    codec: Expr[ExactCodec]
   ): Expr[Node => Any] =
     import ref.q.reflect.asTerm
     given Quotes = ref.q

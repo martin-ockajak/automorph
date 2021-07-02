@@ -18,26 +18,26 @@ case object HandlerBindings {
    * @param backend effect backend plugin
    * @param api API instance
    * @tparam Node message format node representation type
-   * @tparam CodecType message format codec type
+   * @tparam ExactCodec message format codec type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to handler method bindings
    */
-  def generate[Node, CodecType <: Codec[Node], Effect[_], Context, Api <: AnyRef](
-    codec: CodecType,
+  def generate[Node, ExactCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
+    codec: ExactCodec,
     backend: Backend[Effect],
     api: Api
-  ): Map[String, HandlerMethod[Node, Effect, Context]] = macro generateMacro[Node, CodecType, Effect, Context, Api]
+  ): Map[String, HandlerMethod[Node, Effect, Context]] = macro generateMacro[Node, ExactCodec, Effect, Context, Api]
 
   def generateMacro[
     Node: c.WeakTypeTag,
-    CodecType <: Codec[Node]: c.WeakTypeTag,
+    ExactCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
-    codec: c.Expr[CodecType],
+    codec: c.Expr[ExactCodec],
     backend: c.Expr[Backend[Effect]],
     api: c.Expr[Api]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]] = {
@@ -57,7 +57,7 @@ case object HandlerBindings {
 
     // Generate bound API method bindings
     val handlerMethods = validMethods.map { method =>
-      q"${method.name} -> ${generateHandlerMethod[c.type, Node, CodecType, Effect, Context, Api](ref)(method, codec, backend, api)}"
+      q"${method.name} -> ${generateHandlerMethod[c.type, Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)}"
     }
     c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]](q"""
       Seq(..$handlerMethods).toMap
@@ -67,19 +67,19 @@ case object HandlerBindings {
   private def generateHandlerMethod[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
+    ExactCodec <: Codec[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
     Api: ref.c.WeakTypeTag
   ](ref: Reflection[C])(
     method: ref.RefMethod,
-    codec: ref.c.Expr[CodecType],
+    codec: ref.c.Expr[ExactCodec],
     backend: ref.c.Expr[Backend[Effect]],
     api: ref.c.Expr[Api]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[HandlerMethod[Node, Effect, Context]] = {
     import ref.c.universe.Quasiquote
 
-    val invoke = generateInvoke[C, Node, CodecType, Effect, Context, Api](ref)(method, codec, backend, api)
+    val invoke = generateInvoke[C, Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)
     logBoundMethod[C, Api](ref)(method, invoke)
     ref.c.Expr[HandlerMethod[Node, Effect, Context]](q"""
       jsonrpc.handler.HandlerMethod(
@@ -96,18 +96,18 @@ case object HandlerBindings {
   private def generateInvoke[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
+    ExactCodec <: Codec[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
     Api
   ](ref: Reflection[C])(
     method: ref.RefMethod,
-    codec: ref.c.Expr[CodecType],
+    codec: ref.c.Expr[ExactCodec],
     backend: ref.c.Expr[Backend[Effect]],
     api: ref.c.Expr[Api]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}
-    (weakTypeOf[Node], weakTypeOf[CodecType])
+    (weakTypeOf[Node], weakTypeOf[ExactCodec])
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>

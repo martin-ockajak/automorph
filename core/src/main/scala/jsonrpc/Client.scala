@@ -22,16 +22,16 @@ import scala.util.{Random, Try}
  * @param transport message transport plugin
  * @param argumentsByName supply JSON-RPC request arguments ''by name'' if true and ''by position'' if false
  * @tparam Node message format node representation type
- * @tparam CodecType message codec plugin type
+ * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Client[Node, CodecType <: Codec[Node], Effect[_], Context](
-  codec: CodecType,
+final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
+  codec: ExactCodec,
   backend: Backend[Effect],
   transport: Transport[Effect, Context],
   argumentsByName: Boolean
-) extends ClientMeta[Node, CodecType, Effect, Context] with CannotEqual with Logging {
+) extends ClientMeta[Node, ExactCodec, Effect, Context] with CannotEqual with Logging {
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
@@ -172,16 +172,16 @@ case object Client {
    * @param backend effect backend plugin
    * @param transport message transport plugin
    * @tparam Node message format node representation type
-   * @tparam CodecType message codec plugin type
+   * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @return JSON-RPC request client
    */
-  def apply[Node, CodecType <: Codec[Node], Effect[_], Context](
-    codec: CodecType,
+  def apply[Node, ExactCodec <: Codec[Node], Effect[_], Context](
+    codec: ExactCodec,
     backend: Backend[Effect],
     transport: Transport[Effect, Context]
-  ): Client[Node, CodecType, Effect, Context] = new Client(codec, backend, transport, true)
+  ): Client[Node, ExactCodec, Effect, Context] = new Client(codec, backend, transport, true)
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with empty request `Context` type.
@@ -193,13 +193,13 @@ case object Client {
    * @param backend effect backend plugin
    * @param transport message transport plugin
    * @tparam Node message format node representation type
-   * @tparam CodecType message codec plugin type
+   * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request client
    */
-  def basic[Node, CodecType <: Codec[Node], Effect[_]](
-    codec: CodecType,
+  def basic[Node, ExactCodec <: Codec[Node], Effect[_]](
+    codec: ExactCodec,
     backend: Backend[Effect],
     transport: Transport[Effect, Void.Value]
-  ): Client[Node, CodecType, Effect, Void.Value] = new Client(codec, backend, transport, true)
+  ): Client[Node, ExactCodec, Effect, Void.Value] = new Client(codec, backend, transport, true)
 }

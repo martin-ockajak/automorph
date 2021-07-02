@@ -10,7 +10,7 @@ import ujson.Value
 trait UpickleJsonSpec extends ClientHandlerSpec {
 
   type Node = Value
-  type CodecType = UpickleJsonCodec[UpickleJsonSpec.type]
+  type ExactCodec = UpickleJsonCodec[UpickleJsonSpec.type]
 
   override def simpleApis: Seq[SimpleApi[Effect]] = clients.map(_.bind[SimpleApi[Effect]])
 
@@ -18,11 +18,11 @@ trait UpickleJsonSpec extends ClientHandlerSpec {
 
   override def invalidApis: Seq[InvalidApi[Effect]] = clients.map(_.bind[InvalidApi[Effect]])
 
-  def handler: Handler[Node, CodecType, Effect, Context]
+  def handler: Handler[Node, ExactCodec, Effect, Context]
 
-  lazy val codec: CodecType = UpickleJsonCodec(UpickleJsonSpec)
+  lazy val codec: ExactCodec = UpickleJsonCodec(UpickleJsonSpec)
 
-  lazy val handlerTransport: HandlerTransport[Node, CodecType, Effect, Context] = {
+  lazy val handlerTransport: HandlerTransport[Node, ExactCodec, Effect, Context] = {
     val boundHandler = handler.bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
     HandlerTransport(boundHandler, backend, arbitraryContext.arbitrary.sample.get)
   }

@@ -1,13 +1,13 @@
-package test.backend.standard
+package test.backend
 
-import jsonrpc.{Client, Handler}
 import jsonrpc.backend.TryBackend
 import jsonrpc.spi.Backend
+import jsonrpc.{Client, Handler}
 import org.scalacheck.Arbitrary
 import scala.util.Try
-import test.codec.json.CirceJsonSpec
+import test.codec.json.UpickleJsonSpec
 
-class TryCirceJsonSpec extends CirceJsonSpec {
+class TryUpickleJsonSpec extends UpickleJsonSpec {
 
   type Effect[T] = Try[T]
   type Context = Short

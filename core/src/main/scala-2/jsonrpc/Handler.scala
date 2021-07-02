@@ -18,19 +18,19 @@ import scala.reflect.macros.blackbox
  * @param backend effect backend plugin
  * @param bufferSize input stream reading buffer size
  * @tparam Node message format node representation type
- * @tparam CodecType message codec plugin type
+ * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
-  codec: CodecType,
+final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
+  codec: ExactCodec,
   backend: Backend[Effect],
   bufferSize: Int,
   methodBindings: Map[String, HandlerMethod[Node, Effect, Context]],
   protected val encodeStrings: Seq[String] => Node,
   protected val encodedNone: Node
-) extends HandlerProcessor[Node, CodecType, Effect, Context]
-  with HandlerMeta[Node, CodecType, Effect, Context]
+) extends HandlerProcessor[Node, ExactCodec, Effect, Context]
+  with HandlerMeta[Node, ExactCodec, Effect, Context]
   with CannotEqual
   with Logging
 
@@ -48,33 +48,33 @@ case object Handler {
    * @param backend effect backend plugin
    * @param bufferSize input stream reading buffer size
    * @tparam Node message format node representation type
-   * @tparam CodecType message codec plugin type
+   * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  def apply[Node, CodecType <: Codec[Node], Effect[_], Context](
-    codec: CodecType,
+  def apply[Node, ExactCodec <: Codec[Node], Effect[_], Context](
+    codec: ExactCodec,
     backend: Backend[Effect],
     bufferSize: Int
-  ): Handler[Node, CodecType, Effect, Context] =
-    macro applyMacro[Node, CodecType, Effect, Context]
+  ): Handler[Node, ExactCodec, Effect, Context] =
+    macro applyMacro[Node, ExactCodec, Effect, Context]
 
   def applyMacro[
     Node: c.WeakTypeTag,
-    CodecType <: Codec[Node]: c.WeakTypeTag,
+    ExactCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag
   ](c: blackbox.Context)(
-    codec: c.Expr[CodecType],
+    codec: c.Expr[ExactCodec],
     backend: c.Expr[Backend[Effect]],
     bufferSize: c.Expr[Int]
-  ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
+  ): c.Expr[Handler[Node, ExactCodec, Effect, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
-    Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
+    Seq(weakTypeOf[Node], weakTypeOf[ExactCodec], weakTypeOf[Context])
 
     c.Expr[Any]( q"""
       jsonrpc.Handler($codec, $backend, $bufferSize, Map.empty, value => $codec.encode[Seq[String]](value), $codec.encode(None))
-    """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Context]]]
+    """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Context]]]
   }
 
   /**
@@ -86,31 +86,31 @@ case object Handler {
    * @param codec message codec plugin
    * @param backend effect backend plugin
    * @tparam Node message format node representation type
-   * @tparam CodecType message codec plugin type
+   * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  def apply[Node, CodecType <: Codec[Node], Effect[_], Context](
-    codec: CodecType,
+  def apply[Node, ExactCodec <: Codec[Node], Effect[_], Context](
+    codec: ExactCodec,
     backend: Backend[Effect]
-  ): Handler[Node, CodecType, Effect, Context] =
-    macro applyDefaultMacro[Node, CodecType, Effect, Context]
+  ): Handler[Node, ExactCodec, Effect, Context] =
+    macro applyDefaultMacro[Node, ExactCodec, Effect, Context]
 
   def applyDefaultMacro[
     Node: c.WeakTypeTag,
-    CodecType <: Codec[Node]: c.WeakTypeTag,
+    ExactCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag
   ](c: blackbox.Context)(
-    codec: c.Expr[CodecType],
+    codec: c.Expr[ExactCodec],
     backend: c.Expr[Backend[Effect]]
-  ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
+  ): c.Expr[Handler[Node, ExactCodec, Effect, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
-    Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
+    Seq(weakTypeOf[Node], weakTypeOf[ExactCodec], weakTypeOf[Context])
 
     c.Expr[Any](q"""
       jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, Map.empty, value => $codec.encode[Seq[String]](value), $codec.encode(None))
-    """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Context]]]
+    """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Context]]]
   }
 
   /**
@@ -123,29 +123,29 @@ case object Handler {
    * @param backend effect backend plugin
    * @param bufferSize input stream reading buffer size
    * @tparam Node message format node representation type
-   * @tparam CodecType message codec plugin type
+   * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  def basic[Node, CodecType <: Codec[Node], Effect[_]](
-    codec: CodecType,
+  def basic[Node, ExactCodec <: Codec[Node], Effect[_]](
+    codec: ExactCodec,
     backend: Backend[Effect]
-  ): Handler[Node, CodecType, Effect, Void.Value] =
-    macro basicMacro[Node, CodecType, Effect]
+  ): Handler[Node, ExactCodec, Effect, Void.Value] =
+    macro basicMacro[Node, ExactCodec, Effect]
 
   def basicMacro[
     Node: c.WeakTypeTag,
-    CodecType <: Codec[Node]: c.WeakTypeTag,
+    ExactCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_]
   ](c: blackbox.Context)(
-    codec: c.Expr[CodecType],
+    codec: c.Expr[ExactCodec],
     backend: c.Expr[Backend[Effect]]
-  ): c.Expr[Handler[Node, CodecType, Effect, Void.Value]] = {
+  ): c.Expr[Handler[Node, ExactCodec, Effect, Void.Value]] = {
     import c.universe.{Quasiquote, weakTypeOf}
-    Seq(weakTypeOf[Node], weakTypeOf[CodecType])
+    Seq(weakTypeOf[Node], weakTypeOf[ExactCodec])
 
     c.Expr[Any](q"""
       jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, Map.empty, value => $codec.encode[Seq[String]](value), $codec.encode(None))
-    """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Void.Value]]]
+    """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Void.Value]]]
   }
 }

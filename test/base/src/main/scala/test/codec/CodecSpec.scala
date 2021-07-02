@@ -16,9 +16,9 @@ trait CodecSpec extends BaseSpec {
   private lazy val charset = StandardCharsets.UTF_8
 
   type Node
-  type CodecType <: Codec[Node]
+  type ExactCodec <: Codec[Node]
 
-  def codec: CodecType
+  def codec: ExactCodec
 
   implicit def arbitraryNode: Arbitrary[Node]
 

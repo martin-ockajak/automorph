@@ -16,19 +16,19 @@ import jsonrpc.util.{CannotEqual, Void}
  * @param backend effect backend plugin
  * @param bufferSize input stream reading buffer size
  * @tparam Node message format node representation type
- * @tparam CodecType message codec plugin type
+ * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
-  codec: CodecType,
+final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
+  codec: ExactCodec,
   backend: Backend[Effect],
   bufferSize: Int,
   methodBindings: Map[String, HandlerMethod[Node, Effect, Context]],
   protected val encodeStrings: Seq[String] => Node,
   protected val encodedNone: Node
-) extends HandlerProcessor[Node, CodecType, Effect, Context]
-  with HandlerMeta[Node, CodecType, Effect, Context]
+) extends HandlerProcessor[Node, ExactCodec, Effect, Context]
+  with HandlerMeta[Node, ExactCodec, Effect, Context]
   with CannotEqual
   with Logging
 
@@ -47,15 +47,15 @@ case object Handler:
    * @param backend effect backend plugin
    * @param bufferSize input stream reading buffer size
    * @tparam Node message format node representation type
-   * @tparam CodecType message codec plugin type
+   * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  inline def apply[Node, CodecType <: Codec[Node], Effect[_], Context](
-    codec: CodecType,
+  inline def apply[Node, ExactCodec <: Codec[Node], Effect[_], Context](
+    codec: ExactCodec,
     backend: Backend[Effect],
     bufferSize: Int
-  ): Handler[Node, CodecType, Effect, Context] =
+  ): Handler[Node, ExactCodec, Effect, Context] =
     Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))
 
   /**
@@ -67,14 +67,14 @@ case object Handler:
    * @param codec message codec plugin
    * @param backend effect backend plugin
    * @tparam Node message format node representation type
-   * @tparam CodecType message codec plugin type
+   * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  inline def apply[Node, CodecType <: Codec[Node], Effect[_], Context](
-    codec: CodecType,
+  inline def apply[Node, ExactCodec <: Codec[Node], Effect[_], Context](
+    codec: ExactCodec,
     backend: Backend[Effect]
-  ): Handler[Node, CodecType, Effect, Context] =
+  ): Handler[Node, ExactCodec, Effect, Context] =
     Handler(codec, backend, defaultBufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))
 
   /**
@@ -86,12 +86,12 @@ case object Handler:
    * @param codec hierarchical message codec plugin
    * @param backend effect backend plugin
    * @tparam Node message format node representation type
-   * @tparam CodecType message codec plugin type
+   * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  inline def basic[Node, CodecType <: Codec[Node], Effect[_]](
-    codec: CodecType,
+  inline def basic[Node, ExactCodec <: Codec[Node], Effect[_]](
+    codec: ExactCodec,
     backend: Backend[Effect]
-  ): Handler[Node, CodecType, Effect, Void.Value] =
+  ): Handler[Node, ExactCodec, Effect, Void.Value] =
     Handler(codec, backend, defaultBufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))

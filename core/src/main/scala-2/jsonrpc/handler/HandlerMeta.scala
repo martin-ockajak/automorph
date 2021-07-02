@@ -9,12 +9,12 @@ import scala.reflect.macros.blackbox
  * JSON-RPC handler layer code generation.
  *
  * @tparam Node message format node representation type
- * @tparam CodecType message codec plugin type
+ * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context] {
-  this: Handler[Node, CodecType, Effect, Context] =>
+private[jsonrpc] trait HandlerMeta[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
+  this: Handler[Node, ExactCodec, Effect, Context] =>
 
   /**
    * Create a copy of this handler with generated method bindings for all valid public methods of the specified API.
@@ -35,8 +35,8 @@ private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Co
    * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api): Handler[Node, CodecType, Effect, Context] =
-    macro HandlerMeta.bindDefaultMacro[Node, CodecType, Effect, Context, Api]
+  def bind[Api <: AnyRef](api: Api): Handler[Node, ExactCodec, Effect, Context] =
+    macro HandlerMeta.bindDefaultMacro[Node, ExactCodec, Effect, Context, Api]
 
   /**
    * Create a copy of this handler with generated method bindings for all valid public methods of the specified API.
@@ -58,48 +58,48 @@ private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Co
    * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api, exposedNames: String => Seq[String]): Handler[Node, CodecType, Effect, Context] =
-    macro HandlerMeta.bindMacro[Node, CodecType, Effect, Context, Api]
+  def bind[Api <: AnyRef](api: Api, exposedNames: String => Seq[String]): Handler[Node, ExactCodec, Effect, Context] =
+    macro HandlerMeta.bindMacro[Node, ExactCodec, Effect, Context, Api]
 }
 
 case object HandlerMeta {
 
   def bindDefaultMacro[
     Node: c.WeakTypeTag,
-    CodecType <: Codec[Node]: c.WeakTypeTag,
+    ExactCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     api: c.Expr[Api]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, ExactCodec, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[CodecType]
+    val codecType = weakTypeOf[ExactCodec]
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
       ${c.prefix}.copy(methodBindings = ${c.prefix}.methodBindings ++ jsonrpc.handler.HandlerBindings
         .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.backend, $api)
       )
-    """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Context]]]
+    """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Context]]]
   }
 
   def bindMacro[
     Node: c.WeakTypeTag,
-    CodecType <: Codec[Node]: c.WeakTypeTag,
+    ExactCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     api: c.Expr[Api],
     exposedNames: c.Expr[String => Seq[String]]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, ExactCodec, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[CodecType]
+    val codecType = weakTypeOf[ExactCodec]
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
@@ -109,6 +109,6 @@ case object HandlerMeta {
           $exposedNames(methodName).map(_ -> method)
         }
       )
-    """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Context]]]
+    """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Context]]]
   }
 }

@@ -8,12 +8,12 @@ import jsonrpc.spi.{Backend, Codec}
  * JSON-RPC handler layer code generation.
  *
  * @tparam Node message format node representation type
- * @tparam CodecType message codec plugin type
+ * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
-  this: Handler[Node, CodecType, Effect, Context] =>
+private[jsonrpc] trait HandlerMeta[Node, ExactCodec <: Codec[Node], Effect[_], Context]:
+  this: Handler[Node, ExactCodec, Effect, Context] =>
 
   /**
    * Create a copy of this handler with generated method bindings for all valid public methods of the specified API.
@@ -34,7 +34,7 @@ private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Co
    * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](api: Api): Handler[Node, CodecType, Effect, Context] =
+  inline def bind[Api <: AnyRef](api: Api): Handler[Node, ExactCodec, Effect, Context] =
     bind(api, name => Seq(name))
 
   /**
@@ -60,9 +60,9 @@ private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Co
   inline def bind[Api <: AnyRef](
     api: Api,
     exposedNames: String => Seq[String]
-  ): Handler[Node, CodecType, Effect, Context] =
+  ): Handler[Node, ExactCodec, Effect, Context] =
     copy(methodBindings =
-      methodBindings ++ HandlerBindings.generate[Node, CodecType, Effect, Context, Api](codec, backend, api).flatMap {
+      methodBindings ++ HandlerBindings.generate[Node, ExactCodec, Effect, Context, Api](codec, backend, api).flatMap {
         (methodName, method) => exposedNames(methodName).map(_ -> method)
       }
     )

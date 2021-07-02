@@ -17,23 +17,23 @@ case object ClientBindings {
    *
    * @param codec message format codec plugin
    * @tparam Node message format node representation type
-   * @tparam CodecType message format codec type
+   * @tparam ExactCodec message format codec type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to client method bindings
    */
-  def generate[Node, CodecType <: Codec[Node], Effect[_], Context, Api <: AnyRef](
-    codec: CodecType
-  ): Map[String, ClientMethod[Node]] = macro generateMacro[Node, CodecType, Effect, Context, Api]
+  def generate[Node, ExactCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
+    codec: ExactCodec
+  ): Map[String, ClientMethod[Node]] = macro generateMacro[Node, ExactCodec, Effect, Context, Api]
 
   def generateMacro[
     Node: c.WeakTypeTag,
-    CodecType <: Codec[Node]: c.WeakTypeTag,
+    ExactCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
-  ](c: blackbox.Context)(codec: c.Expr[CodecType])(implicit
+  ](c: blackbox.Context)(codec: c.Expr[ExactCodec])(implicit
     effectType: c.WeakTypeTag[Effect[_]]
   ): c.Expr[Map[String, ClientMethod[Node]]] = {
     import c.universe.Quasiquote
@@ -52,7 +52,7 @@ case object ClientBindings {
 
     // Generate bound API method bindings
     val clientMethods = validMethods.map { method =>
-      q"${method.name} -> ${generateClientMethod[c.type, Node, CodecType, Effect, Context, Api](ref)(method, codec)}"
+      q"${method.name} -> ${generateClientMethod[c.type, Node, ExactCodec, Effect, Context, Api](ref)(method, codec)}"
     }
     c.Expr[Map[String, ClientMethod[Node]]](q"""
       Seq(..$clientMethods).toMap
@@ -62,18 +62,18 @@ case object ClientBindings {
   private def generateClientMethod[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
+    ExactCodec <: Codec[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
     Api: ref.c.WeakTypeTag
   ](ref: Reflection[C])(
     method: ref.RefMethod,
-    codec: ref.c.Expr[CodecType]
+    codec: ref.c.Expr[ExactCodec]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[ClientMethod[Node]] = {
     import ref.c.universe.Quasiquote
 
-    val encodeArguments = generateEncodeArguments[C, Node, CodecType, Context](ref)(method, codec)
-    val decodeResult = generateDecodeResult[C, Node, CodecType, Effect](ref)(method, codec)
+    val encodeArguments = generateEncodeArguments[C, Node, ExactCodec, Context](ref)(method, codec)
+    val decodeResult = generateDecodeResult[C, Node, ExactCodec, Effect](ref)(method, codec)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
     ref.c.Expr[ClientMethod[Node]](q"""
       jsonrpc.client.ClientMethod(
@@ -91,11 +91,11 @@ case object ClientBindings {
   private def generateEncodeArguments[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
+    ExactCodec <: Codec[Node]: ref.c.WeakTypeTag,
     Context: ref.c.WeakTypeTag
-  ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[CodecType]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
+  ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[ExactCodec]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}
-    (weakTypeOf[Node], weakTypeOf[CodecType])
+    (weakTypeOf[Node], weakTypeOf[ExactCodec])
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
@@ -131,13 +131,13 @@ case object ClientBindings {
   private def generateDecodeResult[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    CodecType <: Codec[Node]: ref.c.WeakTypeTag,
+    ExactCodec <: Codec[Node]: ref.c.WeakTypeTag,
     Effect[_]
-  ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[CodecType])(implicit
+  ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[ExactCodec])(implicit
     effectType: ref.c.WeakTypeTag[Effect[_]]
   ): ref.c.Expr[Node => Any] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}
-    (weakTypeOf[Node], weakTypeOf[CodecType])
+    (weakTypeOf[Node], weakTypeOf[ExactCodec])
 
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)

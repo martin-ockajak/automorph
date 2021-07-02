@@ -11,12 +11,12 @@ import scala.reflect.ClassTag
  * JSON-RPC client layer code generation.
  *
  * @tparam Node message format node representation type
- * @tparam CodecType message codec plugin type
+ * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context]:
-  this: Client[Node, CodecType, Effect, Context] =>
+private[jsonrpc] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Context]:
+  this: Client[Node, ExactCodec, Effect, Context] =>
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
@@ -393,7 +393,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
    */
   inline def bind[Api <: AnyRef]: Api =
     // Generate API method bindings
-    val methodBindings = ClientBindings.generate[Node, CodecType, Effect, Context, Api](codec)
+    val methodBindings = ClientBindings.generate[Node, ExactCodec, Effect, Context, Api](codec)
 
     // Create API proxy instance
     val classTag = summonInline[ClassTag[Api]]

@@ -11,9 +11,9 @@ import ujson.{Bool, Num, Obj, Str, Value}
 class UpickleJsonCodecSpec extends CodecSpec {
 
   type Node = Value
-  type CodecType = UpickleJsonCodec[UpickleJsonCodecSpec.type]
+  type ExactCodec = UpickleJsonCodec[UpickleJsonCodecSpec.type]
 
-  override def codec: CodecType = UpickleJsonCodec(UpickleJsonCodecSpec)
+  override def codec: ExactCodec = UpickleJsonCodec(UpickleJsonCodecSpec)
 
   override def arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.oneOf(Seq(
     Str("test"),

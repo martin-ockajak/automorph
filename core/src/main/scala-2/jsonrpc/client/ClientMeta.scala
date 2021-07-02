@@ -9,12 +9,12 @@ import scala.reflect.macros.blackbox
  * JSON-RPC client layer code generation.
  *
  * @tparam Node message format node representation type
- * @tparam CodecType message codec plugin type
+ * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Context] {
-  this: Client[Node, CodecType, Effect, Context] =>
+private[jsonrpc] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
+  this: Client[Node, ExactCodec, Effect, Context] =>
 
   /**
    * Perform a remote JSON-RPC method ''call'' supplying the arguments ''by position''.
@@ -289,14 +289,14 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
    * @return JSON-RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef]: Api = macro ClientMeta.bindMacro[Node, CodecType, Effect, Context, Api]
+  def bind[Api <: AnyRef]: Api = macro ClientMeta.bindMacro[Node, ExactCodec, Effect, Context, Api]
 }
 
 object ClientMeta {
 
   def bindMacro[
     Node: c.WeakTypeTag,
-    CodecType <: Codec[Node]: c.WeakTypeTag,
+    ExactCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
@@ -304,7 +304,7 @@ object ClientMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[CodecType]
+    val codecType = weakTypeOf[ExactCodec]
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Api](q"""

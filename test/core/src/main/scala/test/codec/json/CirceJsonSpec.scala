@@ -11,7 +11,7 @@ import test.{ClientHandlerSpec, ComplexApi, Enum, InvalidApi, Record, SimpleApi,
 trait CirceJsonSpec extends ClientHandlerSpec {
 
   type Node = Json
-  type CodecType = CirceJsonCodec
+  type ExactCodec = CirceJsonCodec
 
   override def simpleApis: Seq[SimpleApi[Effect]] = clients.map(_.bind[SimpleApi[Effect]])
 
@@ -19,16 +19,16 @@ trait CirceJsonSpec extends ClientHandlerSpec {
 
   override def invalidApis: Seq[InvalidApi[Effect]] = clients.map(_.bind[InvalidApi[Effect]])
 
-  def handler: Handler[Node, CodecType, Effect, Context]
+  def handler: Handler[Node, ExactCodec, Effect, Context]
 
   implicit private lazy val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
   implicit private lazy val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
   implicit private lazy val structureEncoder: Encoder[Structure] = deriveEncoder[Structure]
   implicit private lazy val structureDecoder: Decoder[Structure] = deriveDecoder[Structure]
 
-  lazy val codec: CodecType = CirceJsonCodec()
+  lazy val codec: ExactCodec = CirceJsonCodec()
 
-  lazy val handlerTransport: HandlerTransport[Node, CodecType, Effect, Context] = {
+  lazy val handlerTransport: HandlerTransport[Node, ExactCodec, Effect, Context] = {
     val boundHandler = handler.bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
     HandlerTransport(boundHandler, backend, arbitraryContext.arbitrary.sample.get)
   }

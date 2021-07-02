@@ -12,9 +12,9 @@ import upack.{Bool, Float64, Msg, Obj, Str}
 class UpickleMessagePackSpec extends CodecSpec {
 
   type Node = Msg
-  type CodecType = UpickleMessagePackCodec[UpickleMessagePackCodecSpec.type]
+  type ExactCodec = UpickleMessagePackCodec[UpickleMessagePackCodecSpec.type]
 
-  override def codec: CodecType = UpickleMessagePackCodec(UpickleMessagePackCodecSpec)
+  override def codec: ExactCodec = UpickleMessagePackCodec(UpickleMessagePackCodecSpec)
 
   override def arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.oneOf(Seq(
     Str("test"),

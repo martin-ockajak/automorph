@@ -25,11 +25,11 @@ import scala.collection.immutable.ArraySeq
  * @param effectRunAsync asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
  * @tparam Node message format node representation type
- * @tparam CodecType message codec plugin type
+ * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  */
-final case class FinagleJsonRpcService[Node, CodecType <: Codec[Node], Effect[_]](
-  handler: Handler[Node, CodecType, Effect, Request],
+final case class FinagleJsonRpcService[Node, ExactCodec <: Codec[Node], Effect[_]](
+  handler: Handler[Node, ExactCodec, Effect, Request],
   errorStatus: Int => Status = defaultErrorStatus
 ) extends Service[Request, Response] with Logging {
 
