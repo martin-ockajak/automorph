@@ -18,6 +18,9 @@ trait UpickleJsonSpec extends ClientHandlerSpec {
 
   override def invalidApis: Seq[InvalidApi[Effect]] = clients.map(_.bind[InvalidApi[Effect]])
 
+  override def callByPosition(method:String, p1: String)(implicit context: Context): Effect[String] =
+    client.callByPosition[String, String](method, "test")
+
   def handler: Handler[Node, ExactCodec, Effect, Context]
 
   lazy val codec: ExactCodec = UpickleJsonCodec(UpickleJsonSpec)

@@ -24,11 +24,4 @@ class FutureUpickleJsonSpec extends UpickleJsonSpec {
     Handler[Node, ExactCodec, Effect, Context](codec, backend)
 
   lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
-
-  "" - {
-    "test" in {
-      implicit val context: Context = arbitraryContext.arbitrary.sample.get
-      client.callByPosition[String, String]("test", "test")
-    }
-  }
 }

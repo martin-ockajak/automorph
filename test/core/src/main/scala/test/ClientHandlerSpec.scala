@@ -47,6 +47,8 @@ trait ClientHandlerSpec extends BaseSpec {
 
   def invalidApis: Seq[InvalidApi[Effect]]
 
+  def callByPosition(method:String, p1: String)(implicit context: Context): Effect[String]
+
   implicit def arbitraryContext: Arbitrary[Context]
 
   "" - {
@@ -172,11 +174,11 @@ trait ClientHandlerSpec extends BaseSpec {
         "Simple API" - {
           "Positional" - {
             "Local" in {
-//              check { (a0: String, context: Context) =>
-//                implicit val usingContext: Context = context
-//                run(client.callByPosition[String, String]("test", a0))
-//                true
-//              }
+              check { (a0: String, context: Context) =>
+                implicit val usingContext: Context = context
+                run(callByPosition("test", a0))
+                true
+              }
             }
           }
         }
