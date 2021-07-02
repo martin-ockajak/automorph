@@ -25,14 +25,13 @@ object Api {
 }
 
 object CaskServer extends cask.MainRoutes {
+
   val apiPath = "/api"
 
   override def defaultHandler = {
     val codec = UpickleJsonCodec[UpickleCustom]()
-    val httpHandler = UndertowJsonRpcHandler(
-      Handler[Value, codec.type, Identity, HttpServerExchange](codec, NoBackend()).bind(Api),
-      (_: Any) => ()
-    )
+    val handler = Handler[Value, codec.type, Identity, HttpServerExchange](codec, NoBackend()).bind(Api)
+    val httpHandler = UndertowJsonRpcHandler[Value, codec.type, Identity](handler, (_: Any) => ())
     val pathHandler = Handlers.path(super.defaultHandler).addPrefixPath(apiPath, httpHandler)
     new BlockingHandler(pathHandler)
   }
