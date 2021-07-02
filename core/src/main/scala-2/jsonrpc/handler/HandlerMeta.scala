@@ -72,23 +72,20 @@ case object HandlerMeta {
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     api: c.Expr[Api]
-  )(implicit
-    effectType: c.WeakTypeTag[Effect[_]],
-    handlerType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
-  ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val nodeType = weakTypeOf[Node]
     val codecType = weakTypeOf[CodecType]
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
-    c.Expr[Handler[Node, CodecType, Effect, Context]](q"""
+    c.Expr[Any](q"""
       val codec = ${c.prefix}.codec
       val backend = ${c.prefix}.backend
       val bindings = jsonrpc.handler.HandlerBindings
         .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](codec, backend, $api)
       ${c.prefix}.copy(methodBindings = methodBindings ++ bindings)
-    """)
+    """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Context]]]
   }
 
   def bindMacro[
@@ -100,17 +97,14 @@ case object HandlerMeta {
   ](c: blackbox.Context)(
     api: c.Expr[Api],
     exposedNames: c.Expr[String => Seq[String]]
-  )(implicit
-    effectType: c.WeakTypeTag[Effect[_]],
-    handlerType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
-  ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val nodeType = weakTypeOf[Node]
     val codecType = weakTypeOf[CodecType]
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
-    c.Expr[Handler[Node, CodecType, Effect, Context]](q"""
+    c.Expr[Any](q"""
       val codec = ${c.prefix}.codec
       val backend = ${c.prefix}.backend
       val bindings = jsonrpc.handler.HandlerBindings
@@ -119,6 +113,6 @@ case object HandlerMeta {
           $exposedNames(methodName).map(_ -> method)
         }
       ${c.prefix}.copy(methodBindings = methodBindings ++ bindings)
-    """)
+    """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Context]]]
   }
 }
