@@ -1,24 +1,27 @@
-//package test.backend.standard
+//package test.backend
 //
-//import jsonrpc.spi.Backend
-//import jsonrpc.{Client, ComplexApi, InvalidApi, SimpleApi}
+//import jsonrpc.{Client, Handler}
 //import jsonrpc.backend.NoBackend
 //import jsonrpc.backend.NoBackend.Identity
+//import jsonrpc.spi.Backend
+//import org.scalacheck.Arbitrary
+//import scala.concurrent.ExecutionContext.Implicits.global
 //import test.codec.json.UpickleJsonSpec
 //
 //class NoUpickleJsonSpec extends UpickleJsonSpec {
-//  type Effect[T] = Identity[T]
 //
-//  override def backend: Backend[Effect] = NoBackend()
+//  type Effect[T] = Identity[T]
+//  type Context = Short
 //
 //  override def run[T](effect: Effect[T]): T = effect
 //
-//  override def client: Client[Node, CodecType, Effect, Short] =
+//  override lazy val backend: Backend[Effect] = NoBackend()
+//
+//  override lazy val client: Client[Node, CodecType, Effect, Context] =
 //    Client(codec, backend, handlerTransport)
 //
-//  override def simpleApis: Seq[SimpleApi[Effect]] = clients.map(_.bind[SimpleApi[Effect]])
+//  override lazy val handler: Handler[Node, CodecType, Effect, Context] =
+//    Handler[Node, CodecType, Effect, Context](codec, backend)
 //
-//  override def complexApis: Seq[ComplexApi[Effect]] = clients.map(_.bind[ComplexApi[Effect]])
-//
-//  override def invalidApis: Seq[InvalidApi[Effect]] = clients.map(_.bind[InvalidApi[Effect]])
+//  lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 //}
