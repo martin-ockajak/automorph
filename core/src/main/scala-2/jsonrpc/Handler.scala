@@ -26,9 +26,9 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
   backend: Backend[Effect],
   bufferSize: Int,
+  methodBindings: Map[String, HandlerMethod[Node, Effect, Context]],
   protected val encodeStrings: Seq[String] => Node,
-  protected val encodedNone: Node,
-  protected val methodBindings: Map[String, HandlerMethod[Node, Effect, Context]]
+  protected val encodedNone: Node
 ) extends HandlerProcessor[Node, CodecType, Effect, Context]
   with HandlerMeta[Node, CodecType, Effect, Context]
   with CannotEqual
@@ -73,7 +73,7 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
 
     c.Expr[Any]( q"""
-      jsonrpc.Handler($codec, $backend, $bufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
+      jsonrpc.Handler($codec, $backend, $bufferSize, Map.empty, value => $codec.encode[Seq[String]](value), $codec.encode(None))
     """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Context]]]
   }
 
@@ -109,7 +109,7 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
 
     c.Expr[Any](q"""
-      jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
+      jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, Map.empty, value => $codec.encode[Seq[String]](value), $codec.encode(None))
     """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Context]]]
   }
 
@@ -145,7 +145,7 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[CodecType])
 
     c.Expr[Any](q"""
-      jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
+      jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, Map.empty, value => $codec.encode[Seq[String]](value), $codec.encode(None))
     """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Void.Value]]]
   }
 }

@@ -57,8 +57,12 @@ private[jsonrpc] trait HandlerMeta[Node, CodecType <: Codec[Node], Effect[_], Co
    * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](api: Api, exposedNames: String => Seq[String]): Handler[Node, CodecType, Effect, Context] =
-    val bindings = HandlerBindings.generate[Node, CodecType, Effect, Context, Api](codec, backend, api).flatMap {
-      (methodName, method) => exposedNames(methodName).map(_ -> method)
-    }
-    copy(methodBindings = methodBindings ++ bindings)
+  inline def bind[Api <: AnyRef](
+    api: Api,
+    exposedNames: String => Seq[String]
+  ): Handler[Node, CodecType, Effect, Context] =
+    copy(methodBindings =
+      methodBindings ++ HandlerBindings.generate[Node, CodecType, Effect, Context, Api](codec, backend, api).flatMap {
+        (methodName, method) => exposedNames(methodName).map(_ -> method)
+      }
+    )

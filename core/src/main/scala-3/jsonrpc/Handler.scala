@@ -24,9 +24,9 @@ final case class Handler[Node, CodecType <: Codec[Node], Effect[_], Context](
   codec: CodecType,
   backend: Backend[Effect],
   bufferSize: Int,
+  methodBindings: Map[String, HandlerMethod[Node, Effect, Context]],
   protected val encodeStrings: Seq[String] => Node,
-  protected val encodedNone: Node,
-  protected val methodBindings: Map[String, HandlerMethod[Node, Effect, Context]]
+  protected val encodedNone: Node
 ) extends HandlerProcessor[Node, CodecType, Effect, Context]
   with HandlerMeta[Node, CodecType, Effect, Context]
   with CannotEqual
@@ -56,7 +56,7 @@ case object Handler:
     backend: Backend[Effect],
     bufferSize: Int
   ): Handler[Node, CodecType, Effect, Context] =
-    Handler(codec, backend, bufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
+    Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
@@ -75,10 +75,10 @@ case object Handler:
     codec: CodecType,
     backend: Backend[Effect]
   ): Handler[Node, CodecType, Effect, Context] =
-    Handler(codec, backend, defaultBufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
+    Handler(codec, backend, defaultBufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))
 
   /**
-   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.
+   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with empty request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
    *
@@ -94,4 +94,4 @@ case object Handler:
     codec: CodecType,
     backend: Backend[Effect]
   ): Handler[Node, CodecType, Effect, Void.Value] =
-    Handler(codec, backend, defaultBufferSize, value => codec.encode[Seq[String]](value), codec.encode(None), Map.empty)
+    Handler(codec, backend, defaultBufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))

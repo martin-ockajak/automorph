@@ -175,9 +175,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
     p5: T5,
     p6: T6,
     p7: T7
-  )(
-    using context: Context
-  ): Effect[R] =
+  )(using context: Context): Effect[R] =
     val encodedArguments = Left(List(
       codec.encode(p1),
       codec.encode(p2),
@@ -200,7 +198,7 @@ private[jsonrpc] trait ClientMeta[Node, CodecType <: Codec[Node], Effect[_], Con
    * @tparam R result type
    * @return result value
    */
-  def callByName[T1, R](method: String, p1: (String , T1))(implicit context: Context): Effect[R] =
+  inline def callByName[T1, R](method: String, p1: (String, T1))(using context: Context): Effect[R] =
     val encodedArguments = Right(Map(
       p1._1 -> codec.encode(p1._2)
     ))

@@ -80,11 +80,9 @@ case object HandlerMeta {
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
-      val codec = ${c.prefix}.codec
-      val backend = ${c.prefix}.backend
-      val bindings = jsonrpc.handler.HandlerBindings
-        .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](codec, backend, $api)
-      ${c.prefix}.copy(methodBindings = methodBindings ++ bindings)
+      ${c.prefix}.copy(methodBindings = ${c.prefix}.methodBindings ++ jsonrpc.handler.HandlerBindings
+        .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.backend, $api)
+      )
     """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Context]]]
   }
 
@@ -105,14 +103,12 @@ case object HandlerMeta {
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
-      val codec = ${c.prefix}.codec
-      val backend = ${c.prefix}.backend
-      val bindings = jsonrpc.handler.HandlerBindings
-        .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](codec, backend, $api)
+      ${c.prefix}.copy(methodBindings = ${c.prefix}.methodBindings ++ jsonrpc.handler.HandlerBindings
+        .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.backend, $api)
         .flatMap { case (methodName, method) =>
           $exposedNames(methodName).map(_ -> method)
         }
-      ${c.prefix}.copy(methodBindings = methodBindings ++ bindings)
+      )
     """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Context]]]
   }
 }

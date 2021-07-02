@@ -184,7 +184,7 @@ case object Client {
   ): Client[Node, CodecType, Effect, Context] = new Client(codec, backend, transport, true)
 
   /**
-   * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins without request `Context` type.
+   * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with empty request `Context` type.
    *
    * The client can be used by an application to perform JSON-RPC calls and notifications.
    *

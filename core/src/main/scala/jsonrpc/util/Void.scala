@@ -1,9 +1,9 @@
 package jsonrpc.util
 
 /**
- * Non-exisstent value of specified type.
+ * Empty value of specified type.
  *
- * @tparam T void value type
+ * @tparam T empty value type
  */
 final case class Void[T]()
 
