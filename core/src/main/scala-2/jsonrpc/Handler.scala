@@ -68,15 +68,13 @@ case object Handler {
     codec: c.Expr[CodecType],
     backend: c.Expr[Backend[Effect]],
     bufferSize: c.Expr[Int]
-  )(implicit
-    handlerType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
   ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
 
-    c.Expr[Handler[Node, CodecType, Effect, Context]]( q"""
+    c.Expr[Any]( q"""
       jsonrpc.Handler($codec, $backend, $bufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
-    """)
+    """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Context]]]
   }
 
   /**
@@ -106,15 +104,13 @@ case object Handler {
   ](c: blackbox.Context)(
     codec: c.Expr[CodecType],
     backend: c.Expr[Backend[Effect]]
-  )(implicit
-    handlerType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Context]]
   ): c.Expr[Handler[Node, CodecType, Effect, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[CodecType], weakTypeOf[Context])
 
-    c.Expr[Handler[Node, CodecType, Effect, Context]](q"""
+    c.Expr[Any](q"""
       jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
-    """)
+    """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Context]]]
   }
 
   /**
@@ -144,14 +140,12 @@ case object Handler {
   ](c: blackbox.Context)(
     codec: c.Expr[CodecType],
     backend: c.Expr[Backend[Effect]]
-  )(implicit
-    handlerType: c.WeakTypeTag[Handler[Node, CodecType, Effect, Void.Value]]
   ): c.Expr[Handler[Node, CodecType, Effect, Void.Value]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[CodecType])
 
-    c.Expr[Handler[Node, CodecType, Effect, Void.Value]](q"""
+    c.Expr[Any](q"""
       jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, value => $codec.encode[Seq[String]](value), $codec.encode(None), Map.empty)
-    """)
+    """).asInstanceOf[c.Expr[Handler[Node, CodecType, Effect, Void.Value]]]
   }
 }
