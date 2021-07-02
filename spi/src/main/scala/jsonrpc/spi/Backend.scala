@@ -1,11 +1,11 @@
 package jsonrpc.spi
 
 /**
- * Effectful computation backend plugin.
+ * Effectful computation runtime plugin.
  *
  * The underlying runtime must support monadic composition of effects.
  *
- * @tparam Effect monadic effect type
+ * @tparam Effect effect type (similar to IO Monad in Haskell)
  */
 trait Backend[Effect[_]] {
 

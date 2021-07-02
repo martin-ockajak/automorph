@@ -118,7 +118,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
 ).settings(
   name := "json-rpc-sttp",
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "core" % "3.3.7"
+    "com.softwaremill.sttp.client3" %% "core" % "3.3.9"
   )
 )
 
@@ -156,7 +156,7 @@ lazy val testCore = (project in file("test/core")).dependsOn(
   testBase, core, upickle, circe
 ).settings(
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.7"
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.9"
   )
 )
 
