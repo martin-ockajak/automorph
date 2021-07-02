@@ -4,7 +4,7 @@ import jsonrpc.Handler
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.transport.local.HandlerTransport
-import test.{ClientHandlerSpec, Enum, Record, Structure}
+import test.{ClientHandlerSpec, ComplexApi, Enum, Record, Structure}
 import ujson.Value
 
 trait UpickleJsonSpec extends ClientHandlerSpec {
@@ -17,8 +17,7 @@ trait UpickleJsonSpec extends ClientHandlerSpec {
   lazy val codec: CodecType = UpickleJsonCodec(UpickleJsonSpec)
 
   lazy val handlerTransport: HandlerTransport[Node, CodecType, Effect, Context] = {
-//    val boundHandler = handler.bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
-    val boundHandler = handler
+    val boundHandler = handler.bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
     HandlerTransport(boundHandler, backend, arbitraryContext.arbitrary.sample.get)
   }
 }
