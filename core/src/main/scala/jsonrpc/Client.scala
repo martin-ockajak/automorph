@@ -20,7 +20,6 @@ import scala.util.{Random, Try}
  * @param codec message codec plugin
  * @param backend effect backend plugin
  * @param transport message transport plugin
- * @param argumentsByName supply JSON-RPC request arguments ''by name'' if true and ''by position'' if false
  * @tparam Node message format node representation type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
@@ -29,8 +28,7 @@ import scala.util.{Random, Try}
 final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   codec: ExactCodec,
   backend: Backend[Effect],
-  transport: Transport[Effect, Context],
-  argumentsByName: Boolean
+  transport: Transport[Effect, Context]
 ) extends ClientMeta[Node, ExactCodec, Effect, Context] with CannotEqual with Logging {
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
@@ -163,27 +161,6 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
 case object Client {
 
   /**
-   * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with defined request `Context` type.
-   *
-   * The client can be used by an application to perform JSON-RPC calls and notifications.
-   *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec message codec plugin
-   * @param backend effect backend plugin
-   * @param transport message transport plugin
-   * @tparam Node message format node representation type
-   * @tparam ExactCodec message codec plugin type
-   * @tparam Effect effect type
-   * @tparam Context request context type
-   * @return JSON-RPC request client
-   */
-  def apply[Node, ExactCodec <: Codec[Node], Effect[_], Context](
-    codec: ExactCodec,
-    backend: Backend[Effect],
-    transport: Transport[Effect, Context]
-  ): Client[Node, ExactCodec, Effect, Context] = new Client(codec, backend, transport, true)
-
-  /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with empty request `Context` type.
    *
    * The client can be used by an application to perform JSON-RPC calls and notifications.
@@ -201,5 +178,5 @@ case object Client {
     codec: ExactCodec,
     backend: Backend[Effect],
     transport: Transport[Effect, Void.Value]
-  ): Client[Node, ExactCodec, Effect, Void.Value] = new Client(codec, backend, transport, true)
+  ): Client[Node, ExactCodec, Effect, Void.Value] = new Client(codec, backend, transport)
 }

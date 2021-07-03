@@ -25,14 +25,13 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
         .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
       val transport = HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get)
       val client = Client(codec, backend, transport)
-      val clients = makeClients(client)
       CodecFixture(
         codec.getClass,
         client,
         handler,
-        clients.map(_.bind[SimpleApi[Effect]]),
-        clients.map(_.bind[ComplexApi[Effect, Context]]),
-        clients.map(_.bind[InvalidApi[Effect]]),
+        Seq(client.bindByName[SimpleApi[Effect]], client.bindByPosition[SimpleApi[Effect]]),
+        Seq(client.bindByName[ComplexApi[Effect, Context]], client.bindByPosition[ComplexApi[Effect, Context]]),
+        Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
         (method, p1, context) => {
           implicit val usingContext = context
           client.callByPosition[String, String](method, p1)
@@ -56,14 +55,13 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
         .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
       val transport = HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get)
       val client = Client(codec, backend, transport)
-      val clients = makeClients(client)
       CodecFixture(
         codec.getClass,
         client,
         handler,
-        clients.map(_.bind[SimpleApi[Effect]]),
-        clients.map(_.bind[ComplexApi[Effect, Context]]),
-        clients.map(_.bind[InvalidApi[Effect]]),
+        Seq(client.bindByName[SimpleApi[Effect]], client.bindByPosition[SimpleApi[Effect]]),
+        Seq(client.bindByName[ComplexApi[Effect, Context]], client.bindByPosition[ComplexApi[Effect, Context]]),
+        Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
         (method, p1, context) => {
           implicit val usingContext = context
           client.callByPosition[String, String](method, p1)
@@ -91,14 +89,13 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
         .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
       val transport = HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get)
       val client = Client(codec, backend, transport)
-      val clients = makeClients(client)
       CodecFixture(
         codec.getClass,
         client,
         handler,
-        clients.map(_.bind[SimpleApi[Effect]]),
-        clients.map(_.bind[ComplexApi[Effect, Context]]),
-        clients.map(_.bind[InvalidApi[Effect]]),
+        Seq(client.bindByName[SimpleApi[Effect]], client.bindByPosition[SimpleApi[Effect]]),
+        Seq(client.bindByName[ComplexApi[Effect, Context]], client.bindByPosition[ComplexApi[Effect, Context]]),
+        Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
         (method, p1, context) => {
           implicit val usingContext = context
           client.callByPosition[String, String](method, p1)
@@ -166,14 +163,13 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
 //        .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
 //      val transport = HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get)
 //      val client = Client(codec, backend, transport)
-//      val clients = makeClients(client)
 //      CodecFixture(
 //        codec.getClass,
 //        client,
 //        handler,
-//        clients.map(_.bind[SimpleApi[Effect]]),
-//        clients.map(_.bind[ComplexApi[Effect, Context]]),
-//        clients.map(_.bind[InvalidApi[Effect]]),
+//        Seq(client.bindByName[SimpleApi[Effect]], client.bindByPosition[SimpleApi[Effect]]),
+//        Seq(client.bindByName[ComplexApi[Effect, Context]], client.bindByPosition[ComplexApi[Effect, Context]]),
+//        Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
 //        (method, p1, context) => {
 //          implicit val usingContext = context
 //          client.callByPosition[String, String](method, p1)
@@ -193,10 +189,6 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
 //      )
     }
   )
-
-  private def makeClients[Node, ExactCodec <: Codec[Node]](client: Client[Node, ExactCodec, Effect, Context])
-    : Seq[Client[Node, ExactCodec, Effect, Context]] =
-    Seq(client, client.copy(argumentsByName = false))
 }
 
 object CodecClientHandlerSpec extends UpickleCustom {
