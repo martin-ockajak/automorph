@@ -32,11 +32,44 @@ private[jsonrpc] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Co
    * @tparam R result type
    * @return result value
    */
+  inline def callByName[R](method: String)(using context: Context): Effect[R] =
+    performCall(method, Right(Map()), Some(context), resultNode => codec.decode[R](resultNode))
+
+  /**
+   * Perform a remote JSON-RPC method ''call''.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent named method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method argument types.
+   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Invoked method arguments are supplied ''by name'' as an object.
+   *
+   * @param method method name
+   * @param context request context
+   * @tparam R result type
+   * @return result value
+   */
   inline def callByName[T1, R](method: String, p1: (String, T1))(using context: Context): Effect[R] =
     val encodedArguments = Right(Map(
       p1._1 -> codec.encode(p1._2)
     ))
     performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
+
+  /**
+   * Perform a remote JSON-RPC method ''notification''.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent named method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method argument types.
+   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Invoked method arguments are supplied ''by name'' as an object.
+   *
+   * @param method method name
+   * @param context JSON-RPC request context
+   * @return nothing
+   */
+  inline def notifyByName(method: String)(using context: Context): Effect[Unit] =
+    performNotify(method, Right(Map()), Some(context))
 
   /**
    * Perform a remote JSON-RPC method ''notification''.
@@ -71,8 +104,7 @@ private[jsonrpc] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Co
    * @return result value
    */
   inline def callByPosition[R](method: String)()(using context: Context): Effect[R] =
-    val encodedArguments = Left(List())
-    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
+    performCall(method, Left(List()), Some(context), resultNode => codec.decode[R](resultNode))
 
   /**
    * Perform a remote JSON-RPC method ''call''.
@@ -264,8 +296,7 @@ private[jsonrpc] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Co
    * @return nothing
    */
   inline def notifyByPosition(method: String)()(using context: Context): Effect[Unit] =
-    val encodedArguments = Left(List())
-    performNotify(method, encodedArguments, Some(context))
+    performNotify(method, Left(List()), Some(context))
 
   /**
    * Perform a remote JSON-RPC method ''notification''.

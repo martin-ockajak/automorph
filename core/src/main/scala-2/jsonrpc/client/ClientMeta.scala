@@ -30,8 +30,41 @@ private[jsonrpc] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Co
    * @tparam R result type
    * @return result value
    */
+  def callByName[R](method: String)(implicit context: Context): Effect[R] =
+    macro ClientMeta.callByNameMacro[Effect, Context, R]
+
+  /**
+   * Perform a remote JSON-RPC method ''call''.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent named method arguments.
+   * Type parameters 'T1', 'T2' ... 'TN' method argument types.
+   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Invoked method arguments are supplied ''by name'' as an object.
+   *
+   * @param method method name
+   * @param context request context
+   * @tparam R result type
+   * @return result value
+   */
   def callByName[T1, R](method: String, p1: (String , T1))(implicit context: Context): Effect[R] =
     macro ClientMeta.callByNameMacro[Effect, Context, T1, R]
+
+  /**
+   * Perform a remote JSON-RPC method ''notification''.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent named method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method argument types.
+   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Invoked method arguments are supplied ''by name'' as an object.
+   *
+   * @param method method name
+   * @param context JSON-RPC request context
+   * @return nothing
+   */
+  def notifyByName(method: String)(implicit context: Context): Effect[Unit] =
+    macro ClientMeta.notifyByNameMacro[Effect, Context]
 
   /**
    * Perform a remote JSON-RPC method ''notification''.
@@ -376,6 +409,16 @@ private[jsonrpc] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Co
 
 object ClientMeta {
 
+  def callByNameMacro[Effect[_], Context, R: c.WeakTypeTag](c: blackbox.Context)(
+    method: c.Expr[String]
+  )(context: c.Expr[Context])(implicit resultType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+
+    c.Expr[Effect[R]](q"""
+      ${c.prefix}.performCall($method, Right(Map()), Some($context), resultNode => ${c.prefix}.codec.decode[${weakTypeOf[R]}](resultNode))
+    """)
+  }
+
   def callByNameMacro[Effect[_], Context, T1: c.WeakTypeTag, R: c.WeakTypeTag](c: blackbox.Context)(
     method: c.Expr[String],
     p1: c.Expr[(String, T1)]
@@ -386,6 +429,16 @@ object ClientMeta {
       ${c.prefix}.performCall($method, Right(Map(
         $p1._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2)
       )), Some($context), resultNode => ${c.prefix}.codec.decode[${weakTypeOf[R]}](resultNode))
+    """)
+  }
+
+  def notifyByNameMacro[Effect[_], Context](c: blackbox.Context)(
+    method: c.Expr[String]
+  )(context: c.Expr[Context])(implicit resultType: c.WeakTypeTag[Effect[Unit]]): c.Expr[Effect[Unit]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+
+    c.Expr[Effect[Unit]](q"""
+      ${c.prefix}.performNotify($method, Right(Map()), Some($context))
     """)
   }
 
