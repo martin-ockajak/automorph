@@ -23,7 +23,7 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
       val codec = UpickleJsonCodec(CodecClientHandlerSpec)
       val handler = Handler[Value, UpickleJsonCodec[CodecClientHandlerSpec.type], Effect, Context](codec, backend)
         .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
-      val transport = HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get)
+      val transport = customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
       val client = Client(codec, backend, transport)
       CodecFixture(
         codec.getClass,
@@ -53,7 +53,7 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
       val codec = UpickleMessagePackCodec(CodecClientHandlerSpec)
       val handler = Handler[Msg, UpickleMessagePackCodec[CodecClientHandlerSpec.type], Effect, Context](codec, backend)
         .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
-      val transport = HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get)
+      val transport = customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
       val client = Client(codec, backend, transport)
       CodecFixture(
         codec.getClass,
@@ -87,7 +87,7 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
       val codec = CirceJsonCodec()
       val handler = Handler[Json, CirceJsonCodec, Effect, Context](codec, backend)
         .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
-      val transport = HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get)
+      val transport = customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
       val client = Client(codec, backend, transport)
       CodecFixture(
         codec.getClass,
@@ -161,7 +161,7 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
       val codec = ArgonautJsonCodec()
       val handler = Handler[argonaut.Json, ArgonautJsonCodec, Effect, Context](codec, backend)
         .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
-      val transport = HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get)
+      val transport = customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
       val client = Client(codec, backend, transport)
       CodecFixture(
         codec.getClass,
@@ -189,6 +189,8 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
       )
     }
   )
+
+  def customTransport: Option[Transport[Effect, Context]] = None
 }
 
 object CodecClientHandlerSpec extends UpickleCustom {
