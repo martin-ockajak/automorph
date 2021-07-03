@@ -16,14 +16,15 @@ class CirceJsonSpec extends CodecSpec {
 
   override def codec: ExactCodec = CirceJsonCodec()
 
-  override def arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.oneOf(Seq(
-    Json.fromString("test"),
-    Json.obj(
-      "x" -> Json.fromString("foo"),
-      "y" -> Json.fromInt(1),
-      "z" -> Json.fromBoolean(true)
+  override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
+    Gen.oneOf(
+      Gen.resultOf(Json.fromString _),
+      Gen.resultOf(Json.fromDoubleOrString _),
+      Gen.resultOf(Json.fromBoolean _),
+      Gen.listOfN[Node](2, recurse).map(Json.fromValues),
+      Gen.mapOfN(2, Gen.zip(Arbitrary.arbitrary[String], recurse)).map(Json.fromFields)
     )
-  )))
+  ))
 
   implicit private lazy val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
   implicit private lazy val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)

@@ -13,8 +13,6 @@ import test.Generators
  */
 trait CodecSpec extends BaseSpec {
 
-  private lazy val charset = StandardCharsets.UTF_8
-
   type Node
   type ExactCodec <: Codec[Node]
 
@@ -22,8 +20,10 @@ trait CodecSpec extends BaseSpec {
 
   implicit def arbitraryNode: Arbitrary[Node]
 
+  implicit lazy val arbitraryMessage: Arbitrary[Message[Node]] = Generators.arbitraryMesage
+  private lazy val charset = StandardCharsets.UTF_8
+
   "" - {
-    implicit val arbitraryMessage: Arbitrary[Message[Node]] = Generators.arbitraryMesage
 
     "Serialize / Deserialize" in {
       check { (message: Message[Node]) =>
