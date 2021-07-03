@@ -1,6 +1,6 @@
 package jsonrpc
 
-import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerProcessor}
+import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerCore}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.{CannotEqual, Void}
@@ -29,7 +29,7 @@ final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   methodBindings: Map[String, HandlerMethod[Node, Effect, Context]],
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
-) extends HandlerProcessor[Node, ExactCodec, Effect, Context]
+) extends HandlerCore[Node, ExactCodec, Effect, Context]
   with HandlerMeta[Node, ExactCodec, Effect, Context]
   with CannotEqual
   with Logging
