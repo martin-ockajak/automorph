@@ -188,7 +188,7 @@ private[jsonrpc] trait HandlerProcessor[Node, ExactCodec <: Codec[Node], Effect[
         val code = ErrorType.fromException(error.getClass).code
         val trace = ResponseError.trace(error)
         val message = trace.headOption.getOrElse("Unknown error")
-        val data = Some(encodeStrings(trace.drop(1)))
+        val data = Some(encodeStrings(trace.drop(1).toList))
         ResponseError(code, message, data)
     }
     backend.map(

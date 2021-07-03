@@ -27,7 +27,7 @@ final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   backend: Backend[Effect],
   bufferSize: Int,
   methodBindings: Map[String, HandlerMethod[Node, Effect, Context]],
-  protected val encodeStrings: Seq[String] => Node,
+  protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
 ) extends HandlerProcessor[Node, ExactCodec, Effect, Context]
   with HandlerMeta[Node, ExactCodec, Effect, Context]
@@ -73,7 +73,7 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[ExactCodec], weakTypeOf[Context])
 
     c.Expr[Any]( q"""
-      jsonrpc.Handler($codec, $backend, $bufferSize, Map.empty, value => $codec.encode[Seq[String]](value), $codec.encode(None))
+      jsonrpc.Handler($codec, $backend, $bufferSize, Map.empty, value => $codec.encode[List[String]](value), $codec.encode(None))
     """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Context]]]
   }
 
@@ -109,7 +109,7 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[ExactCodec], weakTypeOf[Context])
 
     c.Expr[Any](q"""
-      jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, Map.empty, value => $codec.encode[Seq[String]](value), $codec.encode(None))
+      jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, Map.empty, value => $codec.encode[List[String]](value), $codec.encode(None))
     """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Context]]]
   }
 
@@ -145,7 +145,7 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[ExactCodec])
 
     c.Expr[Any](q"""
-      jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, Map.empty, value => $codec.encode[Seq[String]](value), $codec.encode(None))
+      jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, Map.empty, value => $codec.encode[List[String]](value), $codec.encode(None))
     """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Void.Value]]]
   }
 }

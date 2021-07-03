@@ -25,7 +25,7 @@ final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   backend: Backend[Effect],
   bufferSize: Int,
   methodBindings: Map[String, HandlerMethod[Node, Effect, Context]],
-  protected val encodeStrings: Seq[String] => Node,
+  protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
 ) extends HandlerProcessor[Node, ExactCodec, Effect, Context]
   with HandlerMeta[Node, ExactCodec, Effect, Context]
@@ -56,7 +56,7 @@ case object Handler:
     backend: Backend[Effect],
     bufferSize: Int
   ): Handler[Node, ExactCodec, Effect, Context] =
-    Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))
+    Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[List[String]](value), codec.encode(None))
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
@@ -75,7 +75,7 @@ case object Handler:
     codec: ExactCodec,
     backend: Backend[Effect]
   ): Handler[Node, ExactCodec, Effect, Context] =
-    Handler(codec, backend, defaultBufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))
+    Handler(codec, backend, defaultBufferSize, Map.empty, value => codec.encode[List[String]](value), codec.encode(None))
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with empty request `Context` type.
@@ -94,4 +94,4 @@ case object Handler:
     codec: ExactCodec,
     backend: Backend[Effect]
   ): Handler[Node, ExactCodec, Effect, Void.Value] =
-    Handler(codec, backend, defaultBufferSize, Map.empty, value => codec.encode[Seq[String]](value), codec.encode(None))
+    Handler(codec, backend, defaultBufferSize, Map.empty, value => codec.encode[List[String]](value), codec.encode(None))
