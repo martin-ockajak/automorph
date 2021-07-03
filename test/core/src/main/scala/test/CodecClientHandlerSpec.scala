@@ -1,7 +1,7 @@
 package test
 
-import argonaut.Argonaut.{jNumber, jNull}
-import argonaut.{Argonaut, DecodeResult, CodecJson}
+import argonaut.Argonaut.jNumber
+import argonaut.{Argonaut, CodecJson}
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Json}
