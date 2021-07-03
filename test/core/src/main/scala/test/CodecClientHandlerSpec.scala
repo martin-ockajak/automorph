@@ -113,80 +113,80 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
           client.notifyByName[String](method, p1)
         }
       )
-//    }, {
-//      implicit lazy val noneCodecJson: CodecJson[None.type] = CodecJson(
-//        (v: None.type) => jNull,
-//        cursor => cursor.focus.as[None.type]
-//      )
-//      implicit lazy val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
-//        (v: Enum.Enum) => jNumber(Enum.toOrdinal(v)),
-//        cursor => cursor.focus.as[Int].map(Enum.fromOrdinal)
-//      )
-//      implicit lazy val structureCodecJson: CodecJson[Structure] =
-//        Argonaut.codec1(Structure.apply, (v: Structure) => (v.value))("value")
-//      implicit lazy val recordCodecJson: CodecJson[Record] =
-//        Argonaut.codec13(
-//          Record.apply,
-//          (v: Record) =>
-//            (
-//              v.string,
-//              v.boolean,
-//              v.byte,
-//              v.short,
-//              v.int,
-//              v.long,
-//              v.float,
-//              v.double,
-//              v.enumeration,
-//              v.list,
-//              v.map,
-//              v.structure,
-//              v.none
-//            )
-//        )(
-//          "string",
-//          "boolean",
-//          "byte",
-//          "short",
-//          "int",
-//          "long",
-//          "float",
-//          "double",
-//          "enumeration",
-//          "list",
-//          "map",
-//          "structure",
-//          "none"
-//        )
-//      val codec = ArgonautJsonCodec()
-//      val handler = Handler[argonaut.Json, ArgonautJsonCodec, Effect, Context](codec, backend)
-//        .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
-//      val transport = HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get)
-//      val client = Client(codec, backend, transport)
-//      CodecFixture(
-//        codec.getClass,
-//        client,
-//        handler,
-//        Seq(client.bindByName[SimpleApi[Effect]], client.bindByPosition[SimpleApi[Effect]]),
-//        Seq(client.bindByName[ComplexApi[Effect, Context]], client.bindByPosition[ComplexApi[Effect, Context]]),
-//        Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
-//        (method, p1, context) => {
-//          implicit val usingContext = context
-//          client.callByPosition[String, String](method, p1)
-//        },
-//        (method, p1, context) => {
-//          implicit val usingContext = context
-//          client.callByName[String, String](method, p1)
-//        },
-//        (method, p1, context) => {
-//          implicit val usingContext = context
-//          client.notifyByPosition[String](method, p1)
-//        },
-//        (method, p1, context) => {
-//          implicit val usingContext = context
-//          client.notifyByName[String](method, p1)
-//        }
-//      )
+    }, {
+      implicit lazy val noneCodecJson: CodecJson[None.type] = CodecJson(
+        (v: None.type) => jNull,
+        cursor => cursor.focus.as[None.type]
+      )
+      implicit lazy val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
+        (v: Enum.Enum) => jNumber(Enum.toOrdinal(v)),
+        cursor => cursor.focus.as[Int].map(Enum.fromOrdinal)
+      )
+      implicit lazy val structureCodecJson: CodecJson[Structure] =
+        Argonaut.codec1(Structure.apply, (v: Structure) => (v.value))("value")
+      implicit lazy val recordCodecJson: CodecJson[Record] =
+        Argonaut.codec13(
+          Record.apply,
+          (v: Record) =>
+            (
+              v.string,
+              v.boolean,
+              v.byte,
+              v.short,
+              v.int,
+              v.long,
+              v.float,
+              v.double,
+              v.enumeration,
+              v.list,
+              v.map,
+              v.structure,
+              v.none
+            )
+        )(
+          "string",
+          "boolean",
+          "byte",
+          "short",
+          "int",
+          "long",
+          "float",
+          "double",
+          "enumeration",
+          "list",
+          "map",
+          "structure",
+          "none"
+        )
+      val codec = ArgonautJsonCodec()
+      val handler = Handler[argonaut.Json, ArgonautJsonCodec, Effect, Context](codec, backend)
+        .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
+      val transport = HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get)
+      val client = Client(codec, backend, transport)
+      CodecFixture(
+        codec.getClass,
+        client,
+        handler,
+        Seq(client.bindByName[SimpleApi[Effect]], client.bindByPosition[SimpleApi[Effect]]),
+        Seq(client.bindByName[ComplexApi[Effect, Context]], client.bindByPosition[ComplexApi[Effect, Context]]),
+        Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
+        (method, p1, context) => {
+          implicit val usingContext = context
+          client.callByPosition[String, String](method, p1)
+        },
+        (method, p1, context) => {
+          implicit val usingContext = context
+          client.callByName[String, String](method, p1)
+        },
+        (method, p1, context) => {
+          implicit val usingContext = context
+          client.notifyByPosition[String](method, p1)
+        },
+        (method, p1, context) => {
+          implicit val usingContext = context
+          client.notifyByName[String](method, p1)
+        }
+      )
     }
   )
 }

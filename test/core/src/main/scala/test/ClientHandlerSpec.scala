@@ -51,7 +51,7 @@ trait ClientHandlerSpec extends BaseSpec {
 
   "" - {
     codecFixtures.foreach { fixture =>
-      fixture.codec.getSimpleName - {
+      fixture.codec.getSimpleName.replaceAll("Codec$", "") - {
         "Proxy" - {
           "Call" - {
             "Simple API" - {
@@ -82,7 +82,7 @@ trait ClientHandlerSpec extends BaseSpec {
                     }
                   }
                   "method3" in {
-                    check { (a0: Float, a1: Long, a2: Option[Seq[Int]]) =>
+                    check { (a0: Float, a1: Long, a2: Option[List[Int]]) =>
                       consistent(apis, (api: ComplexApi[Effect, Context]) => api.method3(a0, a1, a2))
                     }
                   }
