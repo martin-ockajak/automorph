@@ -1,9 +1,11 @@
 package jsonrpc.handler
 
 import jsonrpc.protocol.MethodBindings.{call, methodSignature, methodUsesContext, unwrapType, validApiMethods}
+import jsonrpc.protocol.ErrorType.InvalidRequestException
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
+import scala.util.Try
 
 /** JSON-RPC handler layer bindings code generation. */
 private[jsonrpc] case object HandlerBindings:
@@ -115,18 +117,27 @@ private[jsonrpc] case object HandlerBindings:
       ${
         // Create the method argument lists by decoding corresponding argument nodes into values
         //   List(List(
-        //     codec.decode[Parameter0Type](argumentNodes(0)),
-        //     codec.decode[Parameter1Type](argumentNodes(1)),
+        //     Try(codec.decode[Parameter0Type](argumentNodes(0)))
+        //       .recover { case error => throw InvalidRequestException("Invalid argument", error) }.get,
         //     ...
-        //     codec.decode[ParameterNType](argumentNodes(N)) OR context
+        //     Try(codec.decode[ParameterNType](argumentNodes(N))
+        //       .recover { case error => throw InvalidRequestException("Invalid argument", error) }.get OR context
         //   )): List[List[ParameterXType]]
         val arguments = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
-            val argumentNode = '{ argumentNodes(${ Expr(offset + index) }) }
-            if (offset + index) == lastArgumentIndex && methodUsesContext[Context](ref)(method) then
+            val argumentIndex = offset + index
+            val argumentNode = '{ argumentNodes(${ Expr(argumentIndex) }) }
+            if argumentIndex == lastArgumentIndex && methodUsesContext[Context](ref)(method) then
               'context.asTerm
             else
-              call(ref.q, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode.asTerm)))
+              val decodeCall =
+                call(ref.q, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode.asTerm)))
+              parameter.dataType.asType match
+                case '[argumentType] => '{
+                    Try(${ decodeCall.asExprOf[argumentType] }).recover { case error =>
+                      throw InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error)
+                    }.get
+                  }.asTerm
           }
         ).asInstanceOf[List[List[Term]]]
 
@@ -154,7 +165,7 @@ private[jsonrpc] case object HandlerBindings:
   private def logBoundMethod[Api: Type](ref: Reflection)(method: ref.RefMethod, invoke: Expr[Any]): Unit =
     import ref.q.reflect.{asTerm, Printer}
 
-    Option(System.getProperty(debugProperty)).foreach( _ =>
+    Option(System.getProperty(debugProperty)).foreach(_ =>
       println(
         s"""${methodSignature[Api](ref)(method)} =
           |  ${invoke.asTerm.show(using Printer.TreeShortCode)}

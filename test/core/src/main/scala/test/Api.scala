@@ -92,7 +92,7 @@ trait InvalidApi[Effect[_]] {
 
   def method3(p0: Float, p1: Option[Long]): Effect[List[String]]
 
-  def method4(p0: Long, p1: Byte, p2: String): Effect[String]
+  def method4(p0: BigDecimal, p1: String, p2: String): Effect[String]
 }
 
 final case class InvalidApiImpl[Effect[_]](backend: Backend[Effect]) extends InvalidApi[Effect] {
@@ -105,5 +105,5 @@ final case class InvalidApiImpl[Effect[_]](backend: Backend[Effect]) extends Inv
 
   def method3(p0: Float, p1: Option[Long]): Effect[List[String]] = backend.pure(List())
 
-  def method4(p0: Long, p1: Byte, p2: String): Effect[String] = backend.pure("")
+  def method4(p0: BigDecimal, p1: String, p2: String): Effect[String] = backend.pure("")
 }

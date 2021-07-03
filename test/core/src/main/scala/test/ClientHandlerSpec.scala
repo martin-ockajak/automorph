@@ -2,7 +2,7 @@ package test
 
 import base.BaseSpec
 import jsonrpc.{Client, Handler}
-import jsonrpc.protocol.ErrorType.{InvalidResponseException, MethodNotFoundException}
+import jsonrpc.protocol.ErrorType.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
 import jsonrpc.spi.Backend
 import org.scalacheck.Arbitrary
 import scala.util.Try
@@ -145,21 +145,21 @@ trait ClientHandlerSpec extends BaseSpec {
                     error.should(include("invalid"))
                   }
                   "Missing arguments" in {
-                    val error = intercept[RuntimeException] {
+                    val error = intercept[InvalidRequestException] {
                       run(api.method3(0, None))
                     }.getMessage.toLowerCase
-                    //                error.should(include("expected"))
-                    //                error.should(include("null"))
+                    error.should(include("argument"))
+                    error.should(include("1"))
                   }
                   "Optional arguments" in {
                     run(api.method3(0, Some(0)))
                   }
                   "Invalid argument" in {
-                    val error = intercept[RuntimeException] {
-                      run(api.method4(0, 0, ""))
+                    val error = intercept[InvalidRequestException] {
+                      run(api.method4(BigDecimal(0), "", ""))
                     }.getMessage.toLowerCase
-                    //                error.should(include("expected"))
-                    //                error.should(include("string"))
+                    error.should(include("argument"))
+                    error.should(include("1"))
                   }
                 }
               }

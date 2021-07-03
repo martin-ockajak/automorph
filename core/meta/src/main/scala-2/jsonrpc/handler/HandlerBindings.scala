@@ -123,16 +123,24 @@ case object HandlerBindings {
       (argumentNodes: Seq[$nodeType], context: $contextType) => ${
       // Create the method argument lists by decoding corresponding argument nodes into values
       //   List(List(
-      //     codec.decode[Parameter0Type](argumentNodes(0)),
+      //     Try(codec.decode[Parameter0Type](argumentNodes(0)))
+      //       .recover { case error => throw InvalidRequestException("Invalid argument", error) }.get,
       //     ...
-      //     codec.decode[ParameterNType](argumentNodes(N)) OR context
+      //     Try(codec.decode[ParameterNType](argumentNodes(N))
+      //       .recover { case error => throw InvalidRequestException("Invalid argument", error) }.get OR context
       //   )): List[List[ParameterXType]]
       val arguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
         parameters.toList.zipWithIndex.map { case (parameter, index) =>
-          if ((offset + index) == lastArgumentIndex && methodUsesContext[C, Context](ref)(method)) {
+          val argumentIndex = offset + index
+          if (argumentIndex == lastArgumentIndex && methodUsesContext[C, Context](ref)(method)) {
             q"context"
           } else {
-            q"$codec.decode[${parameter.dataType}](argumentNodes(${offset + index}))"
+            q"""
+              scala.util.Try($codec.decode[${parameter.dataType}](argumentNodes(${argumentIndex})))
+               .recover { case error =>
+                 throw jsonrpc.protocol.ErrorType.InvalidRequestException("Invalid argument: " + $argumentIndex, error)
+               }.get
+             """
           }
         }
       }
