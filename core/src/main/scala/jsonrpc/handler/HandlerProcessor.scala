@@ -47,7 +47,7 @@ private[jsonrpc] trait HandlerProcessor[Node, ExactCodec <: Codec[Node], Effect[
         ),
       formedRequest => {
         // Validate request
-        logger.trace(s"Received JSON-RPC message:\n${codec.format(formedRequest)}")
+        logger.trace(s"Received JSON-RPC request:\n${codec.format(formedRequest)}")
         Try(Request(formedRequest)).toEither.fold(
           error => errorResponse(error, formedRequest),
           validRequest => invokeMethod(formedRequest, validRequest, context)
@@ -205,13 +205,13 @@ private[jsonrpc] trait HandlerProcessor[Node, ExactCodec <: Codec[Node], Effect[
   /**
    * Serialize JSON-RPC message.
    *
-   * @param formedMessage JSON-RPC message
+   * @param formedResponse formed response
    * @return serialized response
    */
-  private def serialize(formedMessage: Message[Node]): Effect[Option[ArraySeq.ofByte]] = {
-    logger.trace(s"Sending JSON-RPC message:\n${codec.format(formedMessage)}")
-    Try(codec.serialize(formedMessage)).toEither.fold(
-      error => backend.failed(ParseErrorException("Invalid message format", error)),
+  private def serialize(formedResponse: Message[Node]): Effect[Option[ArraySeq.ofByte]] = {
+    logger.trace(s"Sending JSON-RPC response:\n${codec.format(formedResponse)}")
+    Try(codec.serialize(formedResponse)).toEither.fold(
+      error => backend.failed(ParseErrorException("Invalid response format", error)),
       message => backend.pure(Some(message))
     )
   }
