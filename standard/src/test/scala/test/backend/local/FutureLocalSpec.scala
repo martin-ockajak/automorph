@@ -1,4 +1,4 @@
-package test.local
+package test.backend.local
 
 import jsonrpc.backend.FutureBackend
 import jsonrpc.spi.Backend
