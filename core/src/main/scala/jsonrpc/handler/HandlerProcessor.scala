@@ -156,7 +156,7 @@ private[jsonrpc] trait HandlerProcessor[Node, ExactCodec <: Codec[Node], Effect[
       arguments =>
         // Arguments by position
         if (arguments.size > parameters.size) {
-          throw new IllegalArgumentException(s"Redundant arguments: ${parameters.size - arguments.size}")
+          throw new IllegalArgumentException(s"Redundant arguments: ${arguments.size - parameters.size}")
         } else {
           arguments ++ Seq.fill(parameters.size - arguments.size)(encodedNone)
         },
