@@ -3,7 +3,7 @@ package jsonrpc.protocol
 import jsonrpc.util.Reflection
 import scala.reflect.macros.blackbox
 
-/** Method bindings code introspection. */
+/** Method bindings introspection. */
 private[jsonrpc] case object MethodBindings {
 
   /**
