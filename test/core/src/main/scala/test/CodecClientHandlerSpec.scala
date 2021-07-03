@@ -18,7 +18,7 @@ import upack.Msg
 
 trait CodecClientHandlerSpec extends ClientHandlerSpec {
 
-  lazy val codecFixtures: Seq[CodecFixture] = Seq(
+  def codecFixtures: Seq[CodecFixture] = Seq(
     {
       val codec = UpickleJsonCodec(CodecClientHandlerSpec)
       val handler = Handler[Value, UpickleJsonCodec[CodecClientHandlerSpec.type], Effect, Context](codec, backend)
@@ -34,25 +34,25 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
         Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByPosition[String, String](method, p1)
+          client.callByPosition(method, p1)
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByName[String, String](method, p1)
+          client.callByName(method, p1)
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByPosition[String](method, p1)
+          client.notifyByPosition(method, p1)
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByName[String](method, p1)
+          client.notifyByName(method, p1)
         }
       )
     }, {
       val codec = UpickleMessagePackCodec(CodecClientHandlerSpec)
       val handler = Handler[Msg, UpickleMessagePackCodec[CodecClientHandlerSpec.type], Effect, Context](codec, backend)
-        .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
+        .bind(simpleApiInstance).bind(complexApiInstance)
       val transport = customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
       val client = Client(codec, backend, transport)
       CodecFixture(
@@ -64,19 +64,19 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
         Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByPosition[String, String](method, p1)
+          client.callByPosition(method, p1)
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByName[String, String](method, p1)
+          client.callByName(method, p1)
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByPosition[String](method, p1)
+          client.notifyByPosition(method, p1)
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByName[String](method, p1)
+          client.notifyByName(method, p1)
         }
       )
     }, {
@@ -98,19 +98,19 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
         Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByPosition[String, String](method, p1)
+          client.callByPosition(method, p1)
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByName[String, String](method, p1)
+          client.callByName(method, p1)
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByPosition[String](method, p1)
+          client.notifyByPosition(method, p1)
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByName[String](method, p1)
+          client.notifyByName(method, p1)
         }
       )
     }, {
@@ -172,19 +172,19 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
         Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByPosition[String, String](method, p1)
+          client.callByPosition(method, p1)
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByName[String, String](method, p1)
+          client.callByName(method, p1)
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByPosition[String](method, p1)
+          client.notifyByPosition(method, p1)
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByName[String](method, p1)
+          client.notifyByName(method, p1)
         }
       )
     }

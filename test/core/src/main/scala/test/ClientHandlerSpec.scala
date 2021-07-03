@@ -3,7 +3,7 @@ package test
 import base.BaseSpec
 import jsonrpc.{Client, Handler}
 import jsonrpc.protocol.ErrorType.{InvalidResponseException, MethodNotFoundException}
-import jsonrpc.spi.{Backend, Transport}
+import jsonrpc.spi.Backend
 import org.scalacheck.Arbitrary
 import scala.util.Try
 import test.Generators.arbitraryRecord
