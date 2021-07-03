@@ -1,9 +1,10 @@
 package test
 
 import base.BaseSpec
-import jsonrpc.Client
+import jsonrpc.{Client, Handler}
 import jsonrpc.protocol.ErrorType.{InvalidResponseException, MethodNotFoundException}
-import jsonrpc.spi.{Backend, Codec}
+import jsonrpc.spi.{Backend, Codec, Transport}
+import jsonrpc.transport.local.HandlerTransport
 import org.scalacheck.Arbitrary
 import scala.util.Try
 import test.Generators.arbitraryRecord
@@ -14,200 +15,189 @@ import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, 
  *
  * Checks the results of remote method invocations against identical local invocations.
  *
- * @tparam Node message format node representation type
- * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
+ * @tparam Context request context type
  */
 trait ClientHandlerSpec extends BaseSpec {
 
-  type Node
-  type ExactCodec <: Codec[Node]
   type Effect[_]
   type Context
 
-  val simpleApiInstance: SimpleApi[Effect] = SimpleApiImpl(backend)
-  val complexApiInstance: ComplexApi[Effect, Context] = ComplexApiImpl(backend)
-  val invalidApiInstance: InvalidApi[Effect] = InvalidApiImpl(backend)
-  private val apiNames = Seq("Named", "Positional")
+  case class CodecFixture(
+    codec: Class[_],
+    client: Client[_, _, Effect, Context],
+    handler: Handler[_, _, Effect, Context],
+    simpleApis: Seq[SimpleApi[Effect]],
+    complexApis: Seq[ComplexApi[Effect, Context]],
+    invalidApis: Seq[InvalidApi[Effect]],
+    callByPosition: (String, String, Context) => Effect[String],
+    callByName: (String, (String, String), Context) => Effect[String],
+    notifyByPosition: (String, String, Context) => Effect[Unit],
+    notifyByName: (String, (String, String), Context) => Effect[Unit]
+  )
+
+  implicit def arbitraryContext: Arbitrary[Context]
 
   def run[T](effect: Effect[T]): T
 
   def backend: Backend[Effect]
 
-  def client: Client[Node, ExactCodec, Effect, Context]
+  def codecFixtures: Seq[CodecFixture]
 
-  def clients: Seq[Client[Node, ExactCodec, Effect, Context]] = Seq(
-    client,
-    client.copy(argumentsByName = false)
-  )
-
-  def simpleApis: Seq[SimpleApi[Effect]]
-
-  def complexApis: Seq[ComplexApi[Effect, Context]]
-
-  def invalidApis: Seq[InvalidApi[Effect]]
-
-  def callByPosition(method: String, p1: String)(implicit context: Context): Effect[String]
-
-  def callByName(method: String, p1: (String, String))(implicit context: Context): Effect[String]
-
-  def notifyByPosition(method: String, p1: String)(implicit context: Context): Effect[Unit]
-
-  def notifyByName(method: String, p1: (String, String))(implicit context: Context): Effect[Unit]
-
-  implicit def arbitraryContext: Arbitrary[Context]
+  val simpleApiInstance: SimpleApi[Effect] = SimpleApiImpl(backend)
+  val complexApiInstance: ComplexApi[Effect, Context] = ComplexApiImpl(backend)
+  val invalidApiInstance: InvalidApi[Effect] = InvalidApiImpl(backend)
+  val apiNames = Seq("Named", "Positional")
 
   "" - {
-    "Proxy" - {
-      "Call" - {
-        "Simple API" - {
-          apiCombinations(simpleApiInstance, simpleApis, apiNames).foreach { case (mode, apis) =>
-            mode - {
-              "test" in {
-                check { (a0: String) =>
-                  consistent(apis, (api: SimpleApi[Effect]) => api.test(a0))
+    codecFixtures.foreach { fixture =>
+      fixture.codec.getSimpleName - {
+        "Proxy" - {
+          "Call" - {
+            "Simple API" - {
+              apiCombinations(simpleApiInstance, fixture.simpleApis).foreach { case (mode, apis) =>
+                mode - {
+                  "test" in {
+                    check { (a0: String) =>
+                      consistent(apis, (api: SimpleApi[Effect]) => api.test(a0))
+                    }
+                  }
+                }
+              }
+            }
+            "Complex API" - {
+              apiCombinations(complexApiInstance, fixture.complexApis).foreach { case (mode, apis) =>
+                mode - {
+                  "method0" in {
+                    check((_: Unit) => consistent(apis, (api: ComplexApi[Effect, Context]) => api.method0()))
+                  }
+                  "method1" in {
+                    check { (_: Unit) =>
+                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method1())
+                    }
+                  }
+                  "method2" in {
+                    check { (a0: String) =>
+                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method2(a0))
+                    }
+                  }
+                  "method3" in {
+                    check { (a0: Float, a1: Long, a2: Option[Seq[Int]]) =>
+                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method3(a0, a1, a2))
+                    }
+                  }
+                  "method4" in {
+                    check { (a0: BigDecimal, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
+                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method4(a0, a1, a2, a3))
+                    }
+                  }
+                  "method5" in {
+                    check { (a0: Boolean, a1: Short, a2: List[Int]) =>
+                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method5(a0, a1)(a2))
+                    }
+                  }
+                  "method6" in {
+                    check { (a0: Record, a1: Double) =>
+                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method6(a0, a1))
+                    }
+                  }
+                  "method7" in {
+                    check { (a0: Record, a1: Boolean, context: Context) =>
+                      implicit val usingContext: Context = context
+                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method7(a0, a1))
+                    }
+                  }
+                  "method8" in {
+                    check { (a0: Record, a1: String, a2: Option[Double], context: Context) =>
+                      implicit val usingContext: Context = context
+                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method8(a0, a1, a2))
+                    }
+                  }
+                  "method9" in {
+                    check { (a0: String) =>
+                      val (referenceApi, testedApi) = apis
+                      val expected = Try(run(referenceApi.method9(a0))).toEither
+                      val result = Try(run(testedApi.method9(a0))).toEither
+                      val expectedErrorMessage = expected.swap.map(error =>
+                        s"[${error.getClass.getSimpleName}] ${Option(error.getMessage).getOrElse("")}"
+                      )
+                      expectedErrorMessage == result.swap.map(_.getMessage)
+                    }
+                  }
+                }
+              }
+            }
+            "Invalid API" - {
+              apiCombinations(invalidApiInstance, fixture.invalidApis).foreach { case (mode, apis) =>
+                mode - {
+                  val (_, api) = apis
+                  "Method not found" in {
+                    val error = intercept[MethodNotFoundException](run(api.nomethod(""))).getMessage.toLowerCase
+                    error.should(include("nomethod"))
+                  }
+                  "Redundant arguments" in {
+                    val error = intercept[IllegalArgumentException](run(api.method1(""))).getMessage.toLowerCase
+                    error.should(include("redundant"))
+                  }
+                  "Invalid result" in {
+                    val error = intercept[InvalidResponseException] {
+                      run(api.method2(""))
+                    }.getMessage.toLowerCase
+                    error.should(include("invalid"))
+                  }
+                  "Missing arguments" in {
+                    val error = intercept[RuntimeException] {
+                      run(api.method3(0, None))
+                    }.getMessage.toLowerCase
+                    //                error.should(include("expected"))
+                    //                error.should(include("null"))
+                  }
+                  "Optional arguments" in {
+                    run(api.method3(0, Some(0)))
+                  }
+                  "Invalid argument" in {
+                    val error = intercept[RuntimeException] {
+                      run(api.method4(0, 0, ""))
+                    }.getMessage.toLowerCase
+                    //                error.should(include("expected"))
+                    //                error.should(include("string"))
+                  }
                 }
               }
             }
           }
         }
-        "Complex API" - {
-          apiCombinations(complexApiInstance, complexApis, apiNames).foreach { case (mode, apis) =>
-            mode - {
-              "method0" in {
-                check((_: Unit) => {
-                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method0())
-                })
-              }
-              "method1" in {
-                check { (_: Unit) =>
-                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method1())
+        "Direct" - {
+          "Call" - {
+            "Simple API" - {
+              "Positional" in {
+                check { (a0: String, context: Context) =>
+                  val expected = run(simpleApiInstance.test(a0))
+                  run(fixture.callByPosition("test", a0, context)) == expected
                 }
               }
-              "method2" in {
-                check{ (a0: String) =>
-                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method2(a0))
-                }
-              }
-              "method3" in {
-                check { (a0: Float, a1: Long, a2: Option[Seq[Int]]) =>
-                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method3(a0, a1, a2))
-                }
-              }
-              "method4" in {
-                check { (a0: BigDecimal, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
-                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method4(a0, a1, a2, a3))
-                }
-              }
-              "method5" in {
-                check { (a0: Boolean, a1: Short, a2: List[Int]) =>
-                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method5(a0, a1)(a2))
-                }
-              }
-              "method6" in {
-                check { (a0: Record, a1: Double) =>
-                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method6(a0, a1))
-                }
-              }
-              "method7" in {
-                check { (a0: Record, a1: Boolean, context: Context) =>
-                  implicit val usingContext: Context = context
-                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method7(a0, a1))
-                }
-              }
-              "method8" in {
-                check { (a0: Record, a1: String, a2: Option[Double], context: Context) =>
-                  implicit val usingContext: Context = context
-                  consistent(apis, (api: ComplexApi[Effect, Context]) => api.method8(a0, a1, a2))
-                }
-              }
-              "method9" in {
-                check { (a0: String) =>
-                  val (referenceApi, testedApi) = apis
-                  val expected = Try(run(referenceApi.method9(a0))).toEither
-                  val result = Try(run(testedApi.method9(a0))).toEither
-                  val expectedErrorMessage = expected.swap.map(error =>
-                    s"[${error.getClass.getSimpleName}] ${Option(error.getMessage).getOrElse("")}"
-                  )
-                  expectedErrorMessage == result.swap.map(_.getMessage)
+              "Named" in {
+                check { (a0: String, context: Context) =>
+                  val expected = run(simpleApiInstance.test(a0))
+                  run(fixture.callByName("test", "test" -> a0, context)) == expected
                 }
               }
             }
           }
-        }
-        "Invalid API" - {
-          apiCombinations(invalidApiInstance, invalidApis, apiNames).foreach { case (mode, apis) =>
-            mode - {
-              val (_, api) = apis
-              "Method not found" in {
-                val error = intercept[MethodNotFoundException](run(api.nomethod(""))).getMessage.toLowerCase
-                error.should(include("nomethod"))
+          "Notify" - {
+            "Simple API" - {
+              "Positional" in {
+                check { (a0: String, context: Context) =>
+                  run(fixture.notifyByPosition("test", a0, context))
+                  true
+                }
               }
-              "Redundant arguments" in {
-                val error = intercept[IllegalArgumentException](run(api.method1(""))).getMessage.toLowerCase
-                error.should(include("redundant"))
+              "Named" in {
+                check { (a0: String, context: Context) =>
+                  run(fixture.notifyByName("test", "test" -> a0, context))
+                  true
+                }
               }
-              "Invalid result" in {
-                val error = intercept[InvalidResponseException] {
-                  run(api.method2(""))
-                }.getMessage.toLowerCase
-                error.should(include("invalid"))
-              }
-              "Missing arguments" in {
-                val error = intercept[RuntimeException] {
-                  run(api.method3(0, None))
-                }.getMessage.toLowerCase
-//                error.should(include("expected"))
-//                error.should(include("null"))
-              }
-              "Optional arguments" in {
-                run(api.method3(0, Some(0)))
-              }
-              "Invalid argument" in {
-                val error = intercept[RuntimeException] {
-                  run(api.method4(0, 0, ""))
-                }.getMessage.toLowerCase
-//                error.should(include("expected"))
-//                error.should(include("string"))
-              }
-            }
-          }
-        }
-      }
-    }
-    "Direct" - {
-      "Call" - {
-        "Simple API" - {
-          "Positional" in {
-            check { (a0: String, context: Context) =>
-              implicit val usingContext: Context = context
-              val expected = run(simpleApiInstance.test(a0))
-              run(callByPosition("test", a0)) == expected
-            }
-          }
-          "Named" in {
-            check { (a0: String, context: Context) =>
-              implicit val usingContext: Context = context
-              val expected = run(simpleApiInstance.test(a0))
-              run(callByName("test", "test" -> a0)) == expected
-            }
-          }
-        }
-      }
-      "Notify" - {
-        "Simple API" - {
-          "Positional" in {
-            check { (a0: String, context: Context) =>
-              implicit val usingContext: Context = context
-              run(notifyByPosition("test", a0))
-              true
-            }
-          }
-          "Named" in {
-            check { (a0: String, context: Context) =>
-              implicit val usingContext: Context = context
-              run(notifyByName("test", "test" -> a0))
-              true
             }
           }
         }
@@ -215,8 +205,8 @@ trait ClientHandlerSpec extends BaseSpec {
     }
   }
 
-  private def apiCombinations[Api](originalApi: Api, apis: Seq[Api], names: Seq[String]): Seq[(String, (Api, Api))] =
-    apis.zip(names).map { case (api, name) =>
+  private def apiCombinations[Api](originalApi: Api, apis: Seq[Api]): Seq[(String, (Api, Api))] =
+    apis.zip(apiNames).map { case (api, name) =>
       name -> ((originalApi, api))
     }
 
