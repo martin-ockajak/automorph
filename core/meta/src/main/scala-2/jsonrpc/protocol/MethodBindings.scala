@@ -55,7 +55,8 @@ private[jsonrpc] case object MethodBindings {
    * @tparam C macro context type
    * @return wrapped type
    */
-  def unwrapType[C <: blackbox.Context, Wrapper: ref.c.WeakTypeTag](ref: Reflection[C])(wrappedType: ref.c.Type): ref.c.Type =
+  def unwrapType[C <: blackbox.Context, Wrapper: ref.c.WeakTypeTag](ref: Reflection[C])(wrappedType: ref.c.Type)
+    : ref.c.Type =
     if (wrappedType.typeArgs.nonEmpty && wrappedType.typeConstructor =:= ref.c.weakTypeOf[Wrapper].dealias) {
       wrappedType.typeArgs.last
     } else {
