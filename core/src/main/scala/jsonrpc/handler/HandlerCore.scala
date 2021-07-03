@@ -11,21 +11,8 @@ import jsonrpc.{Handler, JsonRpcError}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
-/**
- * JSON-RPC request handler layer.
- *
- * The handler can be used by a JSON-RPC server to process incoming JSON-RPC requests, invoke the requested API methods and return JSON-RPC responses.
- *
- * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @constructor Create a new JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context` type.
- * @param codec message codec plugin
- * @param backend effect backend plugin
- * @param bufferSize input stream reading buffer size
- * @tparam Node message format node representation type
- * @tparam Effect effect type
- * @tparam Context request context type
- */
-private[jsonrpc] trait HandlerProcessor[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
+/** JSON-RPC request handler core. */
+private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
   this: Handler[Node, ExactCodec, Effect, Context] =>
 
   private val unknownId = "[unknown]"
