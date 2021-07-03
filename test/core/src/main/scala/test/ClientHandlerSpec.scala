@@ -37,9 +37,9 @@ trait ClientHandlerSpec extends BaseSpec {
 
   implicit def arbitraryContext: Arbitrary[Context]
 
-  def run[T](effect: Effect[T]): T
-
   def backend: Backend[Effect]
+
+  def run[T](effect: Effect[T]): T
 
   def codecFixtures: Seq[CodecFixture]
 

@@ -162,7 +162,7 @@ lazy val testBase = (project in file("test/base")).dependsOn(
   )
 )
 lazy val testCore = (project in file("test/core")).dependsOn(
-  testBase, core, upickle, circe, argonaut
+  testBase, core, upickle, circe, argonaut,
 ).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.9"

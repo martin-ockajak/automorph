@@ -1,4 +1,4 @@
-package test.backend.local
+package test.local
 
 import jsonrpc.backend.TryBackend
 import jsonrpc.spi.Backend
@@ -11,9 +11,9 @@ class TryLocalSpec extends CodecClientHandlerSpec {
   type Effect[T] = Try[T]
   type Context = Short
 
-  override def backend: Backend[Effect] = TryBackend()
+  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
   override def run[T](effect: Effect[T]): T = effect.get
 
-  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
+  override def backend: Backend[Effect] = TryBackend()
 }

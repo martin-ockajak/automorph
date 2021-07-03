@@ -1,4 +1,4 @@
-package test.backend.local
+package test.local
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
@@ -12,9 +12,9 @@ class CatsLocalSpec extends CodecClientHandlerSpec {
   type Effect[T] = IO[T]
   type Context = Short
 
-  override def run[T](effect: Effect[T]): T = effect.unsafeRunSync()
+  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
   override lazy val backend: Backend[Effect] = CatsBackend()
 
-  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
+  override def run[T](effect: Effect[T]): T = effect.unsafeRunSync()
 }

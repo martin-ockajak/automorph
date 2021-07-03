@@ -26,7 +26,7 @@ import scala.collection.immutable.ArraySeq
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  */
-case class NanoHttpdServer[Node, ExactCodec <: Codec[Node], Effect[_]] private (
+final case class NanoHttpdServer[Node, ExactCodec <: Codec[Node], Effect[_]] private (
   handler: Handler[Node, ExactCodec, Effect, IHTTPSession],
   effectRunSync: Effect[Response] => Response,
   port: Int,

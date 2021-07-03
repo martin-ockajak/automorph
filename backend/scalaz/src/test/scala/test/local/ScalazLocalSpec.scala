@@ -1,4 +1,4 @@
-package test.backend.local
+package test.local
 
 import jsonrpc.backend.ScalazBackend
 import jsonrpc.spi.Backend
@@ -12,9 +12,9 @@ class ScalazLocalSpec extends CodecClientHandlerSpec {
   type Effect[T] = IO[T]
   type Context = Short
 
-  override def run[T](effect: Effect[T]): T = effect.unsafePerformIO()
+  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
   override lazy val backend: Backend[Effect] = ScalazBackend()
 
-  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
+  override def run[T](effect: Effect[T]): T = effect.unsafePerformIO()
 }

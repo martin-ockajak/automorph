@@ -17,7 +17,7 @@ import sttp.model.{Header, Method, Uri}
  * @param backend effect backend plugin
  * @tparam Effect effect type
  */
-case class SttpTransport[Effect[_]](
+final case class SttpTransport[Effect[_]](
   url: Uri,
   method: Method,
   contentType: String,

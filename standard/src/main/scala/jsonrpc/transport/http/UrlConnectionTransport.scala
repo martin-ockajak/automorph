@@ -15,7 +15,7 @@ import scala.util.{Try, Using}
  * @param contentType HTTP request Content-Type
  * @param bufferSize input stream reading buffer size
  */
-case class UrlConnectionTransport(
+final case class UrlConnectionTransport(
   url: URL,
   contentType: String,
   bufferSize: Int = 4096
@@ -81,7 +81,7 @@ case class UrlConnectionTransport(
   }
 }
 
-object UrlConnectionTransport {
+case object UrlConnectionTransport {
 
   /**
    * HTTP properties.

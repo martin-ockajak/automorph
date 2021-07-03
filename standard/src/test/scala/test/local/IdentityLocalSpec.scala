@@ -1,4 +1,4 @@
-package test.backend.local
+package test.local
 
 import jsonrpc.backend.IdentityBackend
 import jsonrpc.backend.IdentityBackend.Identity
@@ -11,9 +11,9 @@ class IdentityLocalSpec extends CodecClientHandlerSpec {
   type Effect[T] = Identity[T]
   type Context = Short
 
-  override def run[T](effect: Effect[T]): T = effect
+  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
   override lazy val backend: Backend[Effect] = IdentityBackend()
 
-  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
+  override def run[T](effect: Effect[T]): T = effect
 }

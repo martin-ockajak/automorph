@@ -1,4 +1,4 @@
-package test.backend.local
+package test.local
 
 import jsonrpc.backend.MonixBackend
 import jsonrpc.spi.Backend
@@ -13,9 +13,9 @@ class MonixLocalSpec extends CodecClientHandlerSpec {
   type Effect[T] = Task[T]
   type Context = Short
 
-  override def run[T](effect: Effect[T]): T = effect.runSyncUnsafe(Duration.Inf)
+  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
   override lazy val backend: Backend[Effect] = MonixBackend()
 
-  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
+  override def run[T](effect: Effect[T]): T = effect.runSyncUnsafe(Duration.Inf)
 }
