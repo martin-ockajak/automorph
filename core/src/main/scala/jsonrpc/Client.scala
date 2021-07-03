@@ -106,19 +106,19 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
     decodeResult: Node => R
   ): Effect[R] =
     // Deserialize response
-    Try(codec.deserialize(rawResponse)).fold(
-      error => raiseError(ParseErrorException("Invalid response format", error), formedRequest),
+    Try(codec.deserialize(rawResponse)).toEither.fold(
+      error => raiseError(ParseErrorException("Invalid response format", error), formedRequest) ,
       formedResponse => {
         // Validate response
         logger.trace(s"Received JSON-RPC message:\n${codec.format(formedResponse)}")
-        Try(Response(formedResponse)).fold(
+        Try(Response(formedResponse)).toEither.fold(
           error => raiseError(error, formedRequest),
           validResponse =>
             validResponse.value.fold(
               error => raiseError(ErrorType.toException(error.code, error.message), formedRequest),
               result =>
                 // Decode result
-                Try(decodeResult(result)).fold(
+                Try(decodeResult(result)).toEither.fold(
                   error => raiseError(InvalidResponseException("Invalid result", error), formedRequest),
                   result => {
                     logger.info(s"Performed JSON-RPC request", formedRequest.properties)
@@ -138,7 +138,7 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    */
   private def serialize(formedMessage: Message[Node]): Effect[ArraySeq.ofByte] = {
     logger.trace(s"Sending JSON-RPC message:\n${codec.format(formedMessage)}")
-    Try(codec.serialize(formedMessage)).fold(
+    Try(codec.serialize(formedMessage)).toEither.fold(
       error => raiseError(ParseErrorException("Invalid message format", error), formedMessage),
       message => backend.pure(message)
     )
