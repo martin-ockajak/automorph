@@ -23,7 +23,7 @@ private[jsonrpc] object ArgonautJsonCodecMeta {
     import c.universe.Quasiquote
 
     c.Expr[Json](q"""
-      implicit val noneCodecJson: argonaut.CodecJson[None.type] = ${c.prefix}.noneCodecJson
+      implicit val noneCodecJson: argonaut.CodecJson[None.type] = jsonrpc.codec.json.ArgonautJsonCodec.noneCodecJson
       $value.asJson
     """)
   }
@@ -33,7 +33,7 @@ private[jsonrpc] object ArgonautJsonCodecMeta {
 
     c.Expr[T](q"""
       import argonaut.Argonaut.ToJsonIdentity
-      implicit val noneCodecJson: argonaut.CodecJson[None.type] = ${c.prefix}.noneCodecJson
+      implicit val noneCodecJson: argonaut.CodecJson[None.type] = jsonrpc.codec.json.ArgonautJsonCodec.noneCodecJson
       $node.as[${weakTypeOf[T]}].fold(
         (errorMessage, _) => throw new IllegalArgumentException(errorMessage),
         identity

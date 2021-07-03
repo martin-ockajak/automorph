@@ -7,7 +7,6 @@ import scala.compiletime.summonInline
 
 /** Argonaut JSON codec plugin code generation. */
 private[jsonrpc] trait ArgonautJsonCodecMeta extends Codec[Json]:
-  this: ArgonautJsonCodec =>
 
   override inline def encode[T](value: T): Json =
     value.asJson(using summonInline[EncodeJson[T]])

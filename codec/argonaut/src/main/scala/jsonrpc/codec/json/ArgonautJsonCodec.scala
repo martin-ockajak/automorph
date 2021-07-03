@@ -1,6 +1,6 @@
 package jsonrpc.codec.json
 
-import argonaut.Argonaut.{StringToParseWrap, ToJsonIdentity, jNull}
+import argonaut.Argonaut.{jNull, StringToParseWrap, ToJsonIdentity}
 import argonaut.{Argonaut, CodecJson, DecodeResult, Json}
 import java.nio.charset.StandardCharsets
 import jsonrpc.spi.{Message, MessageError}
@@ -33,11 +33,6 @@ final case class ArgonautJsonCodec() extends ArgonautJsonCodecMeta {
       "error"
     )
 
-  implicit lazy val noneCodecJson: CodecJson[None.type] = CodecJson(
-    (v: None.type) => jNull,
-    cursor => if (cursor.focus.isNull) DecodeResult.ok(None) else DecodeResult.fail("Not a null", cursor.history)
-  )
-
   override def mediaType: String = "application/json"
 
   override def serialize(message: Message[Json]): ArraySeq.ofByte =
@@ -51,4 +46,12 @@ final case class ArgonautJsonCodec() extends ArgonautJsonCodecMeta {
 
   override def format(message: Message[Json]): String =
     message.asJson.spaces2
+}
+
+case object ArgonautJsonCodec {
+
+  implicit lazy val noneCodecJson: CodecJson[None.type] = CodecJson(
+    (v: None.type) => jNull,
+    cursor => if (cursor.focus.isNull) DecodeResult.ok(None) else DecodeResult.fail("Not a null", cursor.history)
+  )
 }
