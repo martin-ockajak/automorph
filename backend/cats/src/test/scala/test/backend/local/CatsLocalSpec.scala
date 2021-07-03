@@ -4,7 +4,6 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import jsonrpc.backend.CatsBackend
 import jsonrpc.spi.Backend
-import jsonrpc.{Client, Handler}
 import org.scalacheck.Arbitrary
 import test.CodecClientHandlerSpec
 

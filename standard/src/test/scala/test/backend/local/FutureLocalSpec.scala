@@ -2,7 +2,6 @@ package test.backend.local
 
 import jsonrpc.backend.FutureBackend
 import jsonrpc.spi.Backend
-import jsonrpc.{Client, Handler}
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

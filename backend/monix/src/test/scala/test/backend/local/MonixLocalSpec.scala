@@ -2,7 +2,6 @@ package test.backend.local
 
 import jsonrpc.backend.MonixBackend
 import jsonrpc.spi.Backend
-import jsonrpc.{Client, Handler}
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import org.scalacheck.Arbitrary

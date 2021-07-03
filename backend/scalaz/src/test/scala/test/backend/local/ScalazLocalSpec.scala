@@ -2,7 +2,6 @@ package test.backend.local
 
 import jsonrpc.backend.ScalazBackend
 import jsonrpc.spi.Backend
-import jsonrpc.{Client, Handler}
 import org.scalacheck.Arbitrary
 import scala.util.Try
 import scalaz.effect.IO
