@@ -118,13 +118,13 @@ private[jsonrpc] case object MethodBindings:
       val effectType =
         TypeRepr.of[Effect] match
           case lambdaType: LambdaType => lambdaType.resType
-          case otherType              => otherType
+          case otherType => otherType
       val resultEffectType =
         effectType match
           case appliedEffectType: AppliedType =>
             method.resultType match
               case resultType: AppliedType => resultType.tycon =:= appliedEffectType.tycon
-              case _                       => false
+              case _ => false
           case _ => true
       if !resultEffectType then
         Left(s"Bound API method '$signature' must return the specified effect type '${effectType.show}'")

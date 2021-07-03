@@ -17,6 +17,7 @@ sealed abstract class ErrorType(val code: Int) {
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  */
 object ErrorType {
+
   case object ParseError extends ErrorType(-32700)
   case object InvalidRequest extends ErrorType(-32600)
   case object MethodNotFound extends ErrorType(-32601)
@@ -67,14 +68,14 @@ object ErrorType {
 
   /** Mapping of JSON-RPC errors to standard exception types. */
   def toException(code: Int, message: String): Throwable = code match {
-    case ErrorType.ParseError.code                   => ParseErrorException(message, None.orNull)
-    case ErrorType.InvalidRequest.code               => InvalidRequestException(message, None.orNull)
-    case ErrorType.MethodNotFound.code               => MethodNotFoundException(message, None.orNull)
-    case ErrorType.InvalidParams.code                => new IllegalArgumentException(message, None.orNull)
-    case ErrorType.InternalError.code                => InternalErrorException(message, None.orNull)
-    case ErrorType.IOError.code                      => new IOException(message, None.orNull)
+    case ErrorType.ParseError.code => ParseErrorException(message, None.orNull)
+    case ErrorType.InvalidRequest.code => InvalidRequestException(message, None.orNull)
+    case ErrorType.MethodNotFound.code => MethodNotFoundException(message, None.orNull)
+    case ErrorType.InvalidParams.code => new IllegalArgumentException(message, None.orNull)
+    case ErrorType.InternalError.code => InternalErrorException(message, None.orNull)
+    case ErrorType.IOError.code => new IOException(message, None.orNull)
     case _ if code < ErrorType.ApplicationError.code => InternalErrorException(message, None.orNull)
-    case _                                           => new RuntimeException(message, None.orNull)
+    case _ => new RuntimeException(message, None.orNull)
   }
 
   /**

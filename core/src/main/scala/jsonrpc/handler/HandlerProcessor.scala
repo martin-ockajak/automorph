@@ -183,7 +183,7 @@ private[jsonrpc] trait HandlerProcessor[Node, ExactCodec <: Codec[Node], Effect[
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
     val responseError = error match {
       case JsonRpcError(message, code, data, _) => ResponseError(code, message, data.asInstanceOf[Option[Node]])
-      case _                                    =>
+      case _ =>
         // Assemble error details
         val code = ErrorType.fromException(error.getClass).code
         val trace = ResponseError.trace(error)

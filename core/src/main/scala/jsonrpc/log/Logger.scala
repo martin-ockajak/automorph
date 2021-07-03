@@ -131,9 +131,9 @@ final private[jsonrpc] case class Logger private (private val underlying: slf4j.
   }
 
   private def unpackProperties[T](properties: => T): Iterable[(String, Any)] = properties match {
-    case product: Product      => productProperties(product)
+    case product: Product => productProperties(product)
     case iterable: Iterable[_] => iterable.asInstanceOf[Iterable[(String, Any)]]
-    case _                     => Iterable()
+    case _ => Iterable()
   }
 
   private def productProperties(product: Product): Map[String, Any] =
