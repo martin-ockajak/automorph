@@ -1,7 +1,7 @@
 package test
 
 import argonaut.Argonaut.{jNumber, jNull}
-import argonaut.{Argonaut, CodecJson}
+import argonaut.{Argonaut, DecodeResult, CodecJson}
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Json}
@@ -116,7 +116,7 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
     }, {
       implicit lazy val noneCodecJson: CodecJson[None.type] = CodecJson(
         (v: None.type) => jNull,
-        cursor => cursor.focus.as[None.type]
+        cursor => if (cursor.focus.isNull) DecodeResult.ok(None) else DecodeResult.fail("Not a null", cursor.history)
       )
       implicit lazy val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
         (v: Enum.Enum) => jNumber(Enum.toOrdinal(v)),

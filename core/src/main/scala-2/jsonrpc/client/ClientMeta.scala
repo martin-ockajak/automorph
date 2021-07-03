@@ -435,7 +435,7 @@ object ClientMeta {
   def notifyByNameMacro[Effect[_], Context](c: blackbox.Context)(
     method: c.Expr[String]
   )(context: c.Expr[Context])(implicit resultType: c.WeakTypeTag[Effect[Unit]]): c.Expr[Effect[Unit]] = {
-    import c.universe.{weakTypeOf, Quasiquote}
+    import c.universe.Quasiquote
 
     c.Expr[Effect[Unit]](q"""
       ${c.prefix}.performNotify($method, Right(Map()), Some($context))
