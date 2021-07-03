@@ -189,7 +189,6 @@ ThisBuild / scalacOptions ++= Seq(
     "-source",
     "3.0",
 //    "-new-syntax",
-    "-language:strictEquality",
     "-language:adhocExtensions",
     "-indent",
     "-Xcheck-macros",

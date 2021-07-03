@@ -49,10 +49,16 @@ trait ClientHandlerSpec extends BaseSpec {
 
   def callByPosition(method: String, p1: String)(implicit context: Context): Effect[String]
 
+  def callByName(method: String, p1: (String, String))(implicit context: Context): Effect[String]
+
+  def notifyByPosition(method: String, p1: String)(implicit context: Context): Effect[Unit]
+
+  def notifyByName(method: String, p1: (String, String))(implicit context: Context): Effect[Unit]
+
   implicit def arbitraryContext: Arbitrary[Context]
 
   "" - {
-    "Trait" - {
+    "Proxy" - {
       "Call" - {
         "Simple API" - {
           apiCombinations(simpleApiInstance, simpleApis, apiNames).foreach { case (mode, apis) =>
@@ -123,7 +129,7 @@ trait ClientHandlerSpec extends BaseSpec {
                   val expectedErrorMessage = expected.swap.map(error =>
                     s"[${error.getClass.getSimpleName}] ${Option(error.getMessage).getOrElse("")}"
                   )
-                  expectedErrorMessage.equals(result.swap.map(_.getMessage))
+                  expectedErrorMessage == result.swap.map(_.getMessage)
                 }
               }
             }
@@ -172,21 +178,37 @@ trait ClientHandlerSpec extends BaseSpec {
     "Direct" - {
       "Call" - {
         "Simple API" - {
-          "Positional" - {
-            "Local" in {
-              check { (a0: String, context: Context) =>
-                implicit val usingContext: Context = context
-                run(callByPosition("test", a0))
-                true
-              }
+          "Positional" in {
+            check { (a0: String, context: Context) =>
+              implicit val usingContext: Context = context
+              val expected = run(simpleApiInstance.test(a0))
+              run(callByPosition("test", a0)) == expected
+            }
+          }
+          "Named" in {
+            check { (a0: String, context: Context) =>
+              implicit val usingContext: Context = context
+              val expected = run(simpleApiInstance.test(a0))
+              run(callByName("test", "test" -> a0)) == expected
             }
           }
         }
       }
       "Notify" - {
         "Simple API" - {
-          "Positional" - {
-            "Local" ignore {}
+          "Positional" in {
+            check { (a0: String, context: Context) =>
+              implicit val usingContext: Context = context
+              run(notifyByPosition("test", a0))
+              true
+            }
+          }
+          "Named" in {
+            check { (a0: String, context: Context) =>
+              implicit val usingContext: Context = context
+              run(notifyByName("test", "test" -> a0))
+              true
+            }
           }
         }
       }
@@ -202,6 +224,6 @@ trait ClientHandlerSpec extends BaseSpec {
     val (referenceApi, testedApi) = apis
     val expected = run(function(referenceApi))
     val result = run(function(testedApi))
-    expected.equals(result)
+    expected == result
   }
 }

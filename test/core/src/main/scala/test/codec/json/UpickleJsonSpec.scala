@@ -19,7 +19,16 @@ trait UpickleJsonSpec extends ClientHandlerSpec {
   override def invalidApis: Seq[InvalidApi[Effect]] = clients.map(_.bind[InvalidApi[Effect]])
 
   override def callByPosition(method: String, p1: String)(implicit context: Context): Effect[String] =
-    client.callByPosition[String, String](method, "test")
+    client.callByPosition[String, String](method, p1)
+
+  override def callByName(method: String, p1: (String, String))(implicit context: Context): Effect[String] =
+    client.callByName[String, String](method, p1)
+
+  override def notifyByPosition(method: String, p1: String)(implicit context: Context): Effect[Unit] =
+    client.notifyByPosition[String](method, p1)
+
+  override def notifyByName(method: String, p1: (String, String))(implicit context: Context): Effect[Unit] =
+    client.notifyByName[String](method, p1)
 
   def handler: Handler[Node, ExactCodec, Effect, Context]
 
