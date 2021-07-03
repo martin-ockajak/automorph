@@ -114,10 +114,7 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
         }
       )
     }, {
-      implicit lazy val noneCodecJson: CodecJson[None.type] = CodecJson(
-        (v: None.type) => jNull,
-        cursor => if (cursor.focus.isNull) DecodeResult.ok(None) else DecodeResult.fail("Not a null", cursor.history)
-      )
+      import ArgonautJsonCodec.noneCodecJson
       implicit lazy val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
         (v: Enum.Enum) => jNumber(Enum.toOrdinal(v)),
         cursor => cursor.focus.as[Int].map(Enum.fromOrdinal)
