@@ -49,7 +49,7 @@ trait ClientHandlerSpec extends BaseSpec {
   val apiNames = Seq("Named", "Positional")
 
   "" - {
-    codecFixtures.headOption.foreach { fixture =>
+    codecFixtures.foreach { fixture =>
       fixture.codec.getSimpleName.replaceAll("Codec$", "") - {
         "Proxy" - {
           "Call" - {
