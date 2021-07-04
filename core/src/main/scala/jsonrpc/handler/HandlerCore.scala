@@ -21,7 +21,7 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
    * @param context request context
    * @return optional response message
    */
-  def processRequest[Request: Bytes](request: Request)(implicit context: Context): Effect[HandlerResult[Request]] =
+  def processRequest[Request: Bytes](request: Request)(implicit context: Context): Effect[HandlerResult[Request]] = {
     // Deserialize request
     val bytes = implicitly[Bytes[Request]]
     val rawRequest = bytes.from(request)
@@ -41,6 +41,7 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
       }
     )
     backend.map(rawResult, result => result.copy(response = result.response.map(response => bytes.to(response))))
+  }
 
   override def toString: String =
     s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Effect: ${backend.getClass.getName}, Bound methods: ${methodBindings.size})"
