@@ -16,9 +16,9 @@ class VoidContextClientHandlerSpec extends BaseSpec {
     "Construct" in {
       val codec = UpickleJsonCodec[UpickleCustom]()
       val backend = IdentityBackend()
-      val handler = Handler.basic[Value, codec.type, Identity](codec, backend)
+      val handler = Handler.noContext[Value, codec.type, Identity](codec, backend)
       val handlerTransport = HandlerTransport(handler, backend, NoContext.value)
-      val client = Client.basic[Value, codec.type, Identity](codec, backend, handlerTransport)
+      val client = Client.noContext[Value, codec.type, Identity](codec, backend, handlerTransport)
       client
 //      val result: String = client.callByPosition("test", 0)
 //      val result: String = client.callByName("test", "foo" -> 0)

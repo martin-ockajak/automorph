@@ -33,7 +33,7 @@ final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
 case object Handler:
 
   /**
-   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context`` type.
+   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
@@ -64,7 +64,7 @@ case object Handler:
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  inline def basic[Node, ExactCodec <: Codec[Node], Effect[_]](
+  inline def noContext[Node, ExactCodec <: Codec[Node], Effect[_]](
     codec: ExactCodec,
     backend: Backend[Effect]
   ): Handler[Node, ExactCodec, Effect, NoContext.Value] =

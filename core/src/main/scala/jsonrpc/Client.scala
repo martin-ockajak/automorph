@@ -25,7 +25,7 @@ import scala.util.{Random, Try}
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
+final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context] (
   codec: ExactCodec,
   backend: Backend[Effect],
   transport: Transport[Effect, Context]
@@ -174,7 +174,7 @@ case object Client {
    * @tparam Effect effect type
    * @return JSON-RPC client
    */
-  def basic[Node, ExactCodec <: Codec[Node], Effect[_]](
+  def noContext[Node, ExactCodec <: Codec[Node], Effect[_]](
     codec: ExactCodec,
     backend: Backend[Effect],
     transport: Transport[Effect, NoContext.Value]

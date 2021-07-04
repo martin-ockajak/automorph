@@ -35,7 +35,7 @@ final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
 case object Handler {
 
   /**
-   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context`` type.
+   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
@@ -51,9 +51,9 @@ case object Handler {
     codec: ExactCodec,
     backend: Backend[Effect]
   ): Handler[Node, ExactCodec, Effect, Context] =
-    macro applyDefaultMacro[Node, ExactCodec, Effect, Context]
+    macro applyMacro[Node, ExactCodec, Effect, Context]
 
-  def applyDefaultMacro[
+  def applyMacro[
     Node: c.WeakTypeTag,
     ExactCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
@@ -66,12 +66,12 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[ExactCodec], weakTypeOf[Context])
 
     c.Expr[Any](q"""
-      jsonrpc.Handler($codec, $backend, Map.empty, value => $codec.encode[List[String]](value), $codec.encode(None))
+      new jsonrpc.Handler($codec, $backend, Map.empty, value => $codec.encode[List[String]](value), $codec.encode(None))
     """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Context]]]
   }
 
   /**
-   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins without request `Context` type.
+   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with empty request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
@@ -84,13 +84,13 @@ case object Handler {
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  def basic[Node, ExactCodec <: Codec[Node], Effect[_]](
+  def noContext[Node, ExactCodec <: Codec[Node], Effect[_]](
     codec: ExactCodec,
     backend: Backend[Effect]
   ): Handler[Node, ExactCodec, Effect, NoContext.Value] =
-    macro basicMacro[Node, ExactCodec, Effect]
+    macro noContextMacro[Node, ExactCodec, Effect]
 
-  def basicMacro[
+  def noContextMacro[
     Node: c.WeakTypeTag,
     ExactCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_]
