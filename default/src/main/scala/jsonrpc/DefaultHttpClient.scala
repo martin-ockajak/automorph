@@ -1,21 +1,20 @@
 package jsonrpc
 
 import jsonrpc.Client
-import jsonrpc.backend.{FutureBackend, IdentityBackend}
+import jsonrpc.Defaults.DefaultClient
 import jsonrpc.backend.IdentityBackend.Identity
+import jsonrpc.backend.{FutureBackend, IdentityBackend}
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.spi.Backend
 import jsonrpc.transport.http.SttpTransport
 import scala.concurrent.{ExecutionContext, Future}
+import sttp.client3
 import sttp.client3.{PartialRequest, SttpBackend}
 import sttp.model.{Method, Uri}
 import ujson.Value
-import sttp.client3
 
 case object DefaultHttpClient {
-
-  import Defaults.DefaultClient
 
   /**
    * Create a JSON-RPC over HTTP client using the specified ''backend'' plugin.
