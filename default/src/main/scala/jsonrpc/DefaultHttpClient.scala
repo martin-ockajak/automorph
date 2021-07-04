@@ -15,8 +15,7 @@ import sttp.client3
 
 case object DefaultHttpClient {
 
-  type DefaultClient[Effect[_]] =
-    Client[Value, UpickleJsonCodec[UpickleCustom], Effect, PartialRequest[Either[String, String], Any]]
+  import Defaults.DefaultClient
 
   /**
    * Create a JSON-RPC over HTTP client using the specified ''backend'' plugin.
