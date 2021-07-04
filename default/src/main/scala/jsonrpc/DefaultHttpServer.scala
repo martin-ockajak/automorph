@@ -2,16 +2,16 @@ package jsonrpc
 
 import io.undertow.Undertow
 import io.undertow.server.HttpServerExchange
+import jsonrpc.Defaults.DefaultHandler
+import jsonrpc.backend.IdentityBackend.Identity
 import jsonrpc.server.http.UndertowJsonRpcHandler.defaultErrorStatus
 import jsonrpc.server.http.UndertowServer.defaultBuilder
 import jsonrpc.server.http.{UndertowJsonRpcHandler, UndertowServer}
 import jsonrpc.spi.Backend
-import jsonrpc.backend.IdentityBackend.Identity
 import scala.concurrent.{ExecutionContext, Future}
 
 case object DefaultHttpServer {
 
-  import Defaults.DefaultHandler
   type BindApis[Effect[_]] = DefaultHandler[Effect, HttpServerExchange] => DefaultHandler[Effect, HttpServerExchange]
 
   /**
@@ -22,7 +22,7 @@ case object DefaultHttpServer {
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @see [[https://undertow.io HTTP Server Documentation]]
    * @param backend effect backend plugin
-   * @param effectRun effect execution function
+   * @param runEffect effect execution function
    * @param bindApis function to bind APIs to the underlying JSON-RPC handler
    * @param port port to listen on for HTTP connections
    * @param urlPath HTTP handler URL path
@@ -33,19 +33,15 @@ case object DefaultHttpServer {
    */
   def apply[Effect[_]](
     backend: Backend[Effect],
-    effectRun: Effect[Any] => Unit,
+    runEffect: Effect[Any] => Unit,
     bindApis: BindApis[Effect],
     port: Int = 8080,
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   ): UndertowServer =
-    UndertowServer(
-      UndertowJsonRpcHandler(bindApis(DefaultHandler(backend)), effectRun, errorStatus),
-      port,
-      urlPath,
-      builder
-    )
+    val handler = bindApis(DefaultHandler(backend))
+    UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
 
   /**
    * Create an asynchonous JSON-RPC request handler with defined request `Context` type.
@@ -69,12 +65,9 @@ case object DefaultHttpServer {
     errorStatus: Int => Int = defaultErrorStatus
   )(implicit executionContext: ExecutionContext): UndertowServer = {
     Seq(executionContext)
-    UndertowServer(
-      UndertowJsonRpcHandler(bindApis(DefaultHandler.async()), (_: Future[Any]) => (), errorStatus),
-      port,
-      urlPath,
-      builder
-    )
+    val handler = bindApis(DefaultHandler.async())
+    val runEffect = (_: Future[Any]) => ()
+    UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
   }
 
   /**
@@ -97,11 +90,9 @@ case object DefaultHttpServer {
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
-  ): UndertowServer =
-    UndertowServer(
-      UndertowJsonRpcHandler(bindApis(DefaultHandler.sync()), (_: Any) => (), errorStatus),
-      port,
-      urlPath,
-      builder
-    )
+  ): UndertowServer = {
+    val handler = bindApis(DefaultHandler.sync())
+    val runEffect = (_: Identity[Any]) => ()
+    UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
+  }
 }
