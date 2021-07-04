@@ -24,7 +24,7 @@ case object DefaultHttpClient {
    * @param backend effect backend plugin
    * @param url endpoint URL
    * @param httpMethod HTTP method
-   * @param httpBackend HTTP client backend
+   * @param sttpBackend HTTP client backend
    * @tparam Effect effect type
    * @return JSON-RPC over HTTP client
    */
@@ -32,10 +32,10 @@ case object DefaultHttpClient {
     backend: Backend[Effect],
     url: Uri,
     httpMethod: Method,
-    httpBackend: SttpBackend[Effect, _]
+    sttpBackend: SttpBackend[Effect, _]
   ): DefaultClient[Effect] = {
     val codec = UpickleJsonCodec()
-    val transport = SttpTransport(url, httpMethod, codec.mediaType, httpBackend, backend)
+    val transport = SttpTransport(url, httpMethod, codec.mediaType, sttpBackend, backend)
     Client[Value, UpickleJsonCodec[UpickleCustom], Effect, PartialRequest[Either[String, String], Any]](
       codec,
       backend,
