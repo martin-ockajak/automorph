@@ -39,9 +39,10 @@ case object DefaultHttpServer {
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
-  ): UndertowServer =
+  ): UndertowServer = {
     val handler = bindApis(DefaultHandler(backend))
     UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
+  }
 
   /**
    * Create an asynchonous JSON-RPC request handler with defined request `Context` type.

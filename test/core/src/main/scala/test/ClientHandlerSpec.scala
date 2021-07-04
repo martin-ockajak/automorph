@@ -21,14 +21,17 @@ trait ClientHandlerSpec extends BaseSpec {
 
   type Effect[_]
   type Context
+  type SimpleApiType = SimpleApi[Effect]
+  type ComplexApiType = ComplexApi[Effect, Context]
+  type InvalidApiType = InvalidApi[Effect]
 
   case class CodecFixture(
     codec: Class[_],
     client: Client[_, _, Effect, Context],
     handler: Handler[_, _, Effect, Context],
-    simpleApis: Seq[SimpleApi[Effect]],
-    complexApis: Seq[ComplexApi[Effect, Context]],
-    invalidApis: Seq[InvalidApi[Effect]],
+    simpleApis: Seq[SimpleApiType],
+    complexApis: Seq[ComplexApiType],
+    invalidApis: Seq[InvalidApiType],
     callByPosition: (String, String, Context) => Effect[String],
     callByName: (String, (String, String), Context) => Effect[String],
     notifyByPosition: (String, String, Context) => Effect[Unit],
@@ -43,9 +46,9 @@ trait ClientHandlerSpec extends BaseSpec {
 
   def codecFixtures: Seq[CodecFixture]
 
-  val simpleApiInstance: SimpleApi[Effect] = SimpleApiImpl(backend)
-  val complexApiInstance: ComplexApi[Effect, Context] = ComplexApiImpl(backend)
-  val invalidApiInstance: InvalidApi[Effect] = InvalidApiImpl(backend)
+  val simpleApiInstance: SimpleApiType = SimpleApiImpl(backend)
+  val complexApiInstance: ComplexApiType = ComplexApiImpl(backend)
+  val invalidApiInstance: InvalidApiType = InvalidApiImpl(backend)
   val apiNames = Seq("Named", "Positional")
 
   "" - {
@@ -58,7 +61,7 @@ trait ClientHandlerSpec extends BaseSpec {
                 mode - {
                   "test" in {
                     check { (a0: String) =>
-                      consistent(apis, (api: SimpleApi[Effect]) => api.test(a0))
+                      consistent(apis, (api: SimpleApiType) => api.test(a0))
                     }
                   }
                 }
@@ -68,48 +71,48 @@ trait ClientHandlerSpec extends BaseSpec {
               apiCombinations(complexApiInstance, fixture.complexApis).foreach { case (mode, apis) =>
                 mode - {
                   "method0" in {
-                    check((_: Unit) => consistent(apis, (api: ComplexApi[Effect, Context]) => api.method0()))
+                    check((_: Unit) => consistent(apis, (api: ComplexApiType) => api.method0()))
                   }
                   "method1" in {
                     check { (_: Unit) =>
-                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method1())
+                      consistent(apis, (api: ComplexApiType) => api.method1())
                     }
                   }
                   "method2" in {
                     check { (a0: String) =>
-                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method2(a0))
+                      consistent(apis, (api: ComplexApiType) => api.method2(a0))
                     }
                   }
                   "method3" in {
                     check { (a0: Float, a1: Long, a2: Option[List[Int]]) =>
-                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method3(a0, a1, a2))
+                      consistent(apis, (api: ComplexApiType) => api.method3(a0, a1, a2))
                     }
                   }
                   "method4" in {
                     check { (a0: BigDecimal, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
-                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method4(a0, a1, a2, a3))
+                      consistent(apis, (api: ComplexApiType) => api.method4(a0, a1, a2, a3))
                     }
                   }
                   "method5" in {
                     check { (a0: Boolean, a1: Short, a2: List[Int]) =>
-                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method5(a0, a1)(a2))
+                      consistent(apis, (api: ComplexApiType) => api.method5(a0, a1)(a2))
                     }
                   }
                   "method6" in {
                     check { (a0: Record, a1: Double) =>
-                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method6(a0, a1))
+                      consistent(apis, (api: ComplexApiType) => api.method6(a0, a1))
                     }
                   }
                   "method7" in {
                     check { (a0: Record, a1: Boolean, context: Context) =>
                       implicit val usingContext: Context = context
-                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method7(a0, a1))
+                      consistent(apis, (api: ComplexApiType) => api.method7(a0, a1))
                     }
                   }
                   "method8" in {
                     check { (a0: Record, a1: String, a2: Option[Double], context: Context) =>
                       implicit val usingContext: Context = context
-                      consistent(apis, (api: ComplexApi[Effect, Context]) => api.method8(a0, a1, a2))
+                      consistent(apis, (api: ComplexApiType) => api.method8(a0, a1, a2))
                     }
                   }
                   "method9" in {

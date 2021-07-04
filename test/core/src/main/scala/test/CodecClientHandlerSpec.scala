@@ -17,22 +17,22 @@ import ujson.Value
 import upack.Msg
 
 trait CodecClientHandlerSpec extends ClientHandlerSpec {
-  type CodecHandler[Node, ExtactCodec <: Codec[Node]] = Handler[Node, ExtactCodec, Effect, Context]
 
   def codecFixtures: Seq[CodecFixture] = Seq(
     {
       val codec = UpickleJsonCodec(CodecClientHandlerSpec)
-      val handler = TestHandler[Value, UpickleJsonCodec[CodecClientHandlerSpec.type]](codec, backend)
-        .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
-      val transport = customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
+      val handler = Handler[Value, UpickleJsonCodec[CodecClientHandlerSpec.type], Effect, Context](codec, backend)
+        .bind(simpleApiInstance).bind[ComplexApiType](complexApiInstance)
+      val transport =
+        customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
       val client = Client(codec, backend, transport)
       CodecFixture(
         codec.getClass,
         client,
         handler,
-        Seq(client.bindByName[SimpleApi[Effect]], client.bindByPosition[SimpleApi[Effect]]),
-        Seq(client.bindByName[ComplexApi[Effect, Context]], client.bindByPosition[ComplexApi[Effect, Context]]),
-        Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
+        Seq(client.bindByName[SimpleApiType], client.bindByPosition[SimpleApiType]),
+        Seq(client.bindByName[ComplexApiType], client.bindByPosition[ComplexApiType]),
+        Seq(client.bindByName[InvalidApiType], client.bindByPosition[InvalidApiType]),
         (method, p1, context) => {
           implicit val usingContext = context
           client.callByPosition(method, p1)
@@ -52,17 +52,18 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
       )
     }, {
       val codec = UpickleMessagePackCodec(CodecClientHandlerSpec)
-      val handler = TestHandler[Msg, UpickleMessagePackCodec[CodecClientHandlerSpec.type]](codec, backend)
+      val handler = Handler[Msg, UpickleMessagePackCodec[CodecClientHandlerSpec.type], Effect, Context](codec, backend)
         .bind(simpleApiInstance).bind(complexApiInstance)
-      val transport = customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
+      val transport =
+        customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
       val client = Client(codec, backend, transport)
       CodecFixture(
         codec.getClass,
         client,
         handler,
-        Seq(client.bindByName[SimpleApi[Effect]], client.bindByPosition[SimpleApi[Effect]]),
-        Seq(client.bindByName[ComplexApi[Effect, Context]], client.bindByPosition[ComplexApi[Effect, Context]]),
-        Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
+        Seq(client.bindByName[SimpleApiType], client.bindByPosition[SimpleApiType]),
+        Seq(client.bindByName[ComplexApiType], client.bindByPosition[ComplexApiType]),
+        Seq(client.bindByName[InvalidApiType], client.bindByPosition[InvalidApiType]),
         (method, p1, context) => {
           implicit val usingContext = context
           client.callByPosition(method, p1)
@@ -86,17 +87,18 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
       implicit lazy val structureEncoder: Encoder[Structure] = deriveEncoder[Structure]
       implicit lazy val structureDecoder: Decoder[Structure] = deriveDecoder[Structure]
       val codec = CirceJsonCodec()
-      val handler = TestHandler[Json, CirceJsonCodec](codec, backend)
-        .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
-      val transport = customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
+      val handler = Handler[Json, CirceJsonCodec, Effect, Context](codec, backend)
+        .bind(simpleApiInstance).bind[ComplexApiType](complexApiInstance)
+      val transport =
+        customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
       val client = Client(codec, backend, transport)
       CodecFixture(
         codec.getClass,
         client,
         handler,
-        Seq(client.bindByName[SimpleApi[Effect]], client.bindByPosition[SimpleApi[Effect]]),
-        Seq(client.bindByName[ComplexApi[Effect, Context]], client.bindByPosition[ComplexApi[Effect, Context]]),
-        Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
+        Seq(client.bindByName[SimpleApiType], client.bindByPosition[SimpleApiType]),
+        Seq(client.bindByName[ComplexApiType], client.bindByPosition[ComplexApiType]),
+        Seq(client.bindByName[InvalidApiType], client.bindByPosition[InvalidApiType]),
         (method, p1, context) => {
           implicit val usingContext = context
           client.callByPosition(method, p1)
@@ -157,17 +159,18 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
           "none"
         )
       val codec = ArgonautJsonCodec()
-      val handler = TestHandler[argonaut.Json, ArgonautJsonCodec](codec, backend)
-        .bind(simpleApiInstance).bind[ComplexApi[Effect, Context]](complexApiInstance)
-      val transport = customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
+      val handler = Handler[argonaut.Json, ArgonautJsonCodec, Effect, Context](codec, backend)
+        .bind(simpleApiInstance).bind[ComplexApiType](complexApiInstance)
+      val transport =
+        customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
       val client = Client(codec, backend, transport)
       CodecFixture(
         codec.getClass,
         client,
         handler,
-        Seq(client.bindByName[SimpleApi[Effect]], client.bindByPosition[SimpleApi[Effect]]),
-        Seq(client.bindByName[ComplexApi[Effect, Context]], client.bindByPosition[ComplexApi[Effect, Context]]),
-        Seq(client.bindByName[InvalidApi[Effect]], client.bindByPosition[InvalidApi[Effect]]),
+        Seq(client.bindByName[SimpleApiType], client.bindByPosition[SimpleApiType]),
+        Seq(client.bindByName[ComplexApiType], client.bindByPosition[ComplexApiType]),
+        Seq(client.bindByName[InvalidApiType], client.bindByPosition[InvalidApiType]),
         (method, p1, context) => {
           implicit val usingContext = context
           client.callByPosition(method, p1)
