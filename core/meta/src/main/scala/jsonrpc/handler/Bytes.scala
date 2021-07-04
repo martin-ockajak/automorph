@@ -66,7 +66,7 @@ object Bytes {
 
     override def to(bytes: ArraySeq.ofByte): ByteBuffer = ByteBuffer.wrap(bytes.unsafeArray)
 
-    override def from(data: ByteBuffer): ArraySeq.ofByte =
+    override def from(data: ByteBuffer): ArraySeq.ofByte = {
       if (data.hasArray) {
         new ArraySeq.ofByte(data.array)
       } else {
@@ -74,6 +74,7 @@ object Bytes {
         data.get(array, 0, array.size)
         new ArraySeq.ofByte(array)
       }
+    }
   }
 
   /** `InputStream` <-> byte sequence converter. */
