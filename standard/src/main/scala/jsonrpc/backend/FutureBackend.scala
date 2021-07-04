@@ -5,7 +5,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
 /**
- * Future effect backend plugin.
+ * Future effect asynchronous backend plugin.
  *
  * @see [[https://docs.scala-lang.org/overviews/core/futures.html Documentation]]
  * @see Effect type: [[scala.concurrent.Future]]

@@ -4,11 +4,11 @@ import jsonrpc.backend.IdentityBackend.Identity
 import jsonrpc.spi.Backend
 
 /**
- * Identity effect backend plugin.
+ * Identity synchronous backend plugin.
  *
  * Represents direct use of plain values without wrapping them in an effect.
  *
- * Effect type: Identity
+ * Effect type: original value type
  */
 final case class IdentityBackend() extends Backend[Identity] {
 

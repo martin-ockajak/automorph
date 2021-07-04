@@ -4,7 +4,7 @@ import jsonrpc.spi.Backend
 import scala.util.{Failure, Success, Try}
 
 /**
- * Try effect backend plugin.
+ * Try effect synchronous backend plugin.
  *
  * @see [[https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html Documentation]]
  * @see Effect type: [[scala.util.Try]]

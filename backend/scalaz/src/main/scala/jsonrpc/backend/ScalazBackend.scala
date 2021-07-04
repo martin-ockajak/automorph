@@ -4,7 +4,7 @@ import jsonrpc.spi.Backend
 import scalaz.effect.IO
 
 /**
- * FS2 effect backend plugin.
+ * Scalaz effect backend plugin.
  *
  * @see [[https://github.com/scalaz/ioeffect Documentation]]
  * @see [[https://javadoc.io/doc/org.scalaz/scalaz-effect_2.12/latest/scalaz/effect/IO.html Effect type]]
