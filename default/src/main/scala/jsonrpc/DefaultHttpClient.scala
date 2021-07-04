@@ -14,7 +14,9 @@ import ujson.Value
 import sttp.client3
 
 case object DefaultHttpClient {
-  type DefaultClient[Effect[_]] = Client[Value, UpickleJsonCodec[UpickleCustom], Effect, PartialRequest[Either[String, String], Any]]
+
+  type DefaultClient[Effect[_]] =
+    Client[Value, UpickleJsonCodec[UpickleCustom], Effect, PartialRequest[Either[String, String], Any]]
 
   /**
    * Create a JSON-RPC over HTTP client using the specified ''backend'' plugin.
@@ -57,8 +59,8 @@ case object DefaultHttpClient {
    * @param executionContext execution context
    * @return asynchronous JSON-RPC over HTTP client
    */
-  def async(url: Uri, httpMethod: Method, sttpBackend: SttpBackend[Future, _])(
-    implicit executionContext: ExecutionContext
+  def async(url: Uri, httpMethod: Method, sttpBackend: SttpBackend[Future, _])(implicit
+    executionContext: ExecutionContext
   ): DefaultClient[Future] =
     DefaultHttpClient(FutureBackend(), url, httpMethod, sttpBackend)
 
@@ -74,10 +76,6 @@ case object DefaultHttpClient {
    * @param httpBackend HTTP client backend
    * @return synchronous JSON-RPC over HTTP client
    */
-  def sync(
-    url: Uri,
-    httpMethod: Method,
-    httpBackend: SttpBackend[Identity, _]
-  ): DefaultClient[Identity] =
+  def sync(url: Uri, httpMethod: Method, httpBackend: SttpBackend[Identity, _]): DefaultClient[Identity] =
     DefaultHttpClient(IdentityBackend(), url, httpMethod, httpBackend)
 }

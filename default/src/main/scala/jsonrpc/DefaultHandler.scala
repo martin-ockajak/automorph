@@ -12,6 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import ujson.Value
 
 case object DefaultHandler {
+
   type DefaultHandler[Effect[_], Context] = Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, Context]
 
   /**
@@ -39,9 +40,7 @@ case object DefaultHandler {
    * @param executionContext execution context
    * @return asynchronous JSON-RPC request handler
    */
-  def async[Context]()(implicit
-    executionContext: ExecutionContext
-  ): DefaultHandler[Future, Context] =
+  def async[Context]()(implicit executionContext: ExecutionContext): DefaultHandler[Future, Context] =
     Handler(UpickleJsonCodec(), FutureBackend())
 
   /**
@@ -65,9 +64,7 @@ case object DefaultHandler {
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  def noContext[Effect[_]](
-    backend: Backend[Effect]
-  ): DefaultHandler[Effect, NoContext.Value] =
+  def noContext[Effect[_]](backend: Backend[Effect]): DefaultHandler[Effect, NoContext.Value] =
     Handler.noContext(UpickleJsonCodec(), backend)
 
   /**
@@ -79,9 +76,7 @@ case object DefaultHandler {
    * @param executionContext execution context
    * @return asynchronous JSON-RPC request handler
    */
-  def asyncNoContext()(implicit
-    executionContext: ExecutionContext
-  ): DefaultHandler[Future, NoContext.Value] =
+  def asyncNoContext()(implicit executionContext: ExecutionContext): DefaultHandler[Future, NoContext.Value] =
     Handler.noContext(UpickleJsonCodec(), FutureBackend())
 
   /**
