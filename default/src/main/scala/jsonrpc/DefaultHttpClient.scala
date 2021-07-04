@@ -52,14 +52,14 @@ case object DefaultHttpClient {
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url endpoint URL
    * @param httpMethod HTTP method
-   * @param httpBackend HTTP client backend
+   * @param sttpBackend STTP HTTP client backend
    * @param executionContext execution context
    * @return asynchronous JSON-RPC over HTTP client
    */
-  def async(url: Uri, httpMethod: Method, httpBackend: SttpBackend[Future, _])(
+  def async(url: Uri, httpMethod: Method, sttpBackend: SttpBackend[Future, _])(
     implicit executionContext: ExecutionContext
   ): Client[Value, UpickleJsonCodec[UpickleCustom], Future, PartialRequest[Either[String, String], Any]] =
-    DefaultHttpClient(FutureBackend(), url, httpMethod, httpBackend)
+    DefaultHttpClient(FutureBackend(), url, httpMethod, sttpBackend)
 
   /**
    * Create a asynchronous JSON-RPC over HTTP client.
