@@ -14,7 +14,6 @@ import jsonrpc.util.{CannotEqual, NoContext}
  * @constructor Create a new JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context` type.
  * @param codec message codec plugin
  * @param backend effect backend plugin
- * @param bufferSize input stream reading buffer size
  * @tparam Node message format node representation type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
@@ -23,7 +22,6 @@ import jsonrpc.util.{CannotEqual, NoContext}
 final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   codec: ExactCodec,
   backend: Backend[Effect],
-  bufferSize: Int,
   methodBindings: Map[String, HandlerMethod[Node, Effect, Context]],
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
@@ -33,30 +31,6 @@ final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   with Logging
 
 case object Handler:
-
-  /** Default handler buffer size. */
-  val defaultBufferSize = 4096
-
-  /**
-   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
-   *
-   * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
-   *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec message codec plugin
-   * @param backend effect backend plugin
-   * @param bufferSize input stream reading buffer size
-   * @tparam Node message format node representation type
-   * @tparam ExactCodec message codec plugin type
-   * @tparam Effect effect type
-   * @return JSON-RPC request handler
-   */
-  inline def apply[Node, ExactCodec <: Codec[Node], Effect[_], Context](
-    codec: ExactCodec,
-    backend: Backend[Effect],
-    bufferSize: Int
-  ): Handler[Node, ExactCodec, Effect, Context] =
-    Handler(codec, backend, bufferSize, Map.empty, value => codec.encode[List[String]](value), codec.encode(None))
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
@@ -75,7 +49,7 @@ case object Handler:
     codec: ExactCodec,
     backend: Backend[Effect]
   ): Handler[Node, ExactCodec, Effect, Context] =
-    Handler(codec, backend, defaultBufferSize, Map.empty, value => codec.encode[List[String]](value), codec.encode(None))
+    Handler(codec, backend, Map.empty, value => codec.encode[List[String]](value), codec.encode(None))
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with empty request `Context` type.
@@ -94,4 +68,4 @@ case object Handler:
     codec: ExactCodec,
     backend: Backend[Effect]
   ): Handler[Node, ExactCodec, Effect, NoContext.Value] =
-    Handler(codec, backend, defaultBufferSize, Map.empty, value => codec.encode[List[String]](value), codec.encode(None))
+    Handler(codec, backend, Map.empty, value => codec.encode[List[String]](value), codec.encode(None))
