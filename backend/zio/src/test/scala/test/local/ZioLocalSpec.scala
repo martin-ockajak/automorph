@@ -8,6 +8,8 @@ import zio.{RIO, Runtime, ZEnv}
 
 class ZioLocalSpec extends CodecClientHandlerSpec {
 
+  private lazy val runtime = Runtime.default.withReportFailure(_ => ())
+
   type Effect[T] = RIO[ZEnv, T]
   type Context = Short
 
@@ -15,5 +17,5 @@ class ZioLocalSpec extends CodecClientHandlerSpec {
 
   override lazy val backend: Backend[Effect] = ZioBackend[ZEnv]()
 
-  override def run[T](effect: Effect[T]): T = Runtime.default.unsafeRunTask(effect)
+  override def run[T](effect: Effect[T]): T = runtime.unsafeRunTask(effect)
 }
