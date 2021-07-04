@@ -6,7 +6,7 @@ import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.{CannotEqual, NoContext}
 
 /**
- * JSON-RPC request handler layer.
+ * JSON-RPC request handler.
  *
  * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
  *

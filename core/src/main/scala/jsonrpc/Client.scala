@@ -11,7 +11,7 @@ import scala.collection.immutable.ArraySeq
 import scala.util.{Random, Try}
 
 /**
- * JSON-RPC client layer.
+ * JSON-RPC client.
  *
  * The client can be used to perform JSON-RPC calls and notifications.
  *
