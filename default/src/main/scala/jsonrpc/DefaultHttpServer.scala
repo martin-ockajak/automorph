@@ -1,11 +1,16 @@
 package jsonrpc
 
 import io.undertow.Undertow
+import io.undertow.server.HttpServerExchange
 import jsonrpc.server.http.UndertowJsonRpcHandler.defaultErrorStatus
 import jsonrpc.server.http.UndertowServer.defaultBuilder
 import jsonrpc.server.http.{UndertowJsonRpcHandler, UndertowServer}
 import jsonrpc.spi.Backend
+import jsonrpc.backend.IdentityBackend.Identity
 import scala.concurrent.{ExecutionContext, Future}
+import ujson.Value
+import jsonrpc.codec.json.UpickleJsonCodec
+import jsonrpc.codec.common.UpickleCustom
 
 case object DefaultHttpServer {
 
@@ -27,11 +32,17 @@ case object DefaultHttpServer {
   def apply[Effect[_]](
     backend: Backend[Effect],
     effectRunAsync: Effect[Any] => Unit,
+    bind: (Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, HttpServerExchange]) => Handler[
+      Value,
+      UpickleJsonCodec[UpickleCustom],
+      Effect,
+      HttpServerExchange
+    ],
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   ): UndertowServer =
-    UndertowServer(UndertowJsonRpcHandler(DefaultHandler(backend), effectRunAsync, errorStatus), urlPath, builder)
+    UndertowServer(UndertowJsonRpcHandler(bind(DefaultHandler(backend)), effectRunAsync, errorStatus), urlPath, builder)
 
   /**
    * Create an asynchonous JSON-RPC request handler with defined request `Context` type.
@@ -46,12 +57,22 @@ case object DefaultHttpServer {
    * @return asynchronous JSON-RPC request handler
    */
   def async(
+    bind: (Handler[Value, UpickleJsonCodec[UpickleCustom], Future, HttpServerExchange]) => Handler[
+      Value,
+      UpickleJsonCodec[UpickleCustom],
+      Future,
+      HttpServerExchange
+    ],
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   )(implicit executionContext: ExecutionContext): UndertowServer = {
     Seq(executionContext)
-    UndertowServer(UndertowJsonRpcHandler(DefaultHandler.async(), (_: Future[Any]) => (), errorStatus), urlPath, builder)
+    UndertowServer(
+      UndertowJsonRpcHandler(bind(DefaultHandler.async()), (_: Future[Any]) => (), errorStatus),
+      urlPath,
+      builder
+    )
   }
 
   /**
@@ -67,9 +88,15 @@ case object DefaultHttpServer {
    * @return synchronous JSON-RPC request handler
    */
   def sync(
+    bind: (Handler[Value, UpickleJsonCodec[UpickleCustom], Identity, HttpServerExchange]) => Handler[
+      Value,
+      UpickleJsonCodec[UpickleCustom],
+      Identity,
+      HttpServerExchange
+    ],
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   ): UndertowServer =
-    UndertowServer(UndertowJsonRpcHandler(DefaultHandler.sync(), (_: Any) => (), errorStatus), urlPath, builder)
+    UndertowServer(UndertowJsonRpcHandler(bind(DefaultHandler.sync()), (_: Any) => (), errorStatus), urlPath, builder)
 }
