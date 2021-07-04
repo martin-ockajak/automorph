@@ -10,10 +10,10 @@ import jsonrpc.spi.Message
  * @param id call identifier, a request without and identifier is considered to be a notification
  * @param method invoked method name
  * @param errorCode failed call error code
- * @tparam ResponseMessage response message type
+ * @tparam Response response message type
  */
-final case class HandlerResult[ResponseMessage](
-  response: Option[ResponseMessage],
+final case class HandlerResult[Response](
+  response: Option[Response],
   id: Option[Message.Id],
   method: Option[String],
   errorCode: Option[Int]

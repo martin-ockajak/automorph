@@ -21,9 +21,9 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
    * @param context request context
    * @return optional response message
    */
-  def processRequest[RequestMessage: Bytes](request: RequestMessage)(implicit context: Context): Effect[HandlerResult[RequestMessage]] =
+  def processRequest[Request: Bytes](request: Request)(implicit context: Context): Effect[HandlerResult[Request]] =
     // Deserialize request
-    val bytes = implicitly[Bytes[RequestMessage]]
+    val bytes = implicitly[Bytes[Request]]
     val rawRequest = bytes.from(request)
     val rawResult = Try(codec.deserialize(rawRequest)).toEither.fold(
       error =>
