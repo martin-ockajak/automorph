@@ -1,12 +1,9 @@
 package jsonrpc.handler
 
-import java.io.{ByteArrayInputStream, InputStream}
-import java.nio.ByteBuffer
 import jsonrpc.handler.{HandlerMethod, HandlerResult}
 import jsonrpc.protocol.ErrorType.{MethodNotFoundException, ParseErrorException}
 import jsonrpc.protocol.{ErrorType, Request, Response, ResponseError}
 import jsonrpc.spi.{Codec, Message}
-import jsonrpc.util.Encoding
 import jsonrpc.{Handler, JsonRpcError}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
@@ -24,9 +21,11 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
    * @param context request context
    * @return optional response message
    */
-  def processRequest(request: ArraySeq.ofByte)(implicit context: Context): Effect[HandlerResult[ArraySeq.ofByte]] =
+  def processRequest[RequestType: Bytes](request: RequestType)(implicit context: Context): Effect[HandlerResult[RequestType]] =
     // Deserialize request
-    Try(codec.deserialize(request)).toEither.fold(
+    val bytes = implicitly[Bytes[RequestType]]
+    val rawRequest = bytes.from(request)
+    val rawResult = Try(codec.deserialize(rawRequest)).toEither.fold(
       error =>
         errorResponse(
           ParseErrorException("Invalid request format", error),
@@ -41,34 +40,7 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
         )
       }
     )
-
-  /**
-   * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.
-   *
-   * @param request request message
-   * @param context request context
-   * @return optional response message
-   */
-  def processRequest(request: ByteBuffer)(implicit context: Context): Effect[HandlerResult[ByteBuffer]] =
-    backend.map(
-      processRequest(Encoding.toArraySeq(request))(context),
-      (result: HandlerResult[ArraySeq.ofByte]) =>
-        result.copy(response = result.response.map(response => ByteBuffer.wrap(response.unsafeArray)))
-    )
-
-  /**
-   * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.
-   *
-   * @param request request message
-   * @param context request context
-   * @return optional response message
-   */
-  def processRequest(request: InputStream)(implicit context: Context): Effect[HandlerResult[InputStream]] =
-    backend.map(
-      processRequest(Encoding.toArraySeq(request, bufferSize))(context),
-      (result: HandlerResult[ArraySeq.ofByte]) =>
-        result.copy(response = result.response.map(response => new ByteArrayInputStream(response.unsafeArray)))
-    )
+    backend.map(rawResult, result => result.copy(response = result.response.map(response => bytes.to(response))))
 
   override def toString: String =
     s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Effect: ${backend.getClass.getName}, Bound methods: ${methodBindings.size})"

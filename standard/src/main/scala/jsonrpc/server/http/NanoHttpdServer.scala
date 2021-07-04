@@ -1,15 +1,14 @@
 package jsonrpc.server.http
 
-import java.io.ByteArrayInputStream
+import java.io.{ByteArrayInputStream, InputStream}
 import jsonrpc.Handler
 import jsonrpc.handler.HandlerResult
 import jsonrpc.log.Logging
-import jsonrpc.protocol.ErrorType
-import jsonrpc.protocol.ResponseError
+import jsonrpc.protocol.{ErrorType, ResponseError}
 import jsonrpc.server.http.NanoHTTPD.Response.Status
 import jsonrpc.server.http.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import jsonrpc.spi.Codec
-import jsonrpc.util.Encoding
+import jsonrpc.handler.Bytes
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -45,16 +44,17 @@ final case class NanoHttpdServer[Node, ExactCodec <: Codec[Node], Effect[_]] pri
   override def serve(session: IHTTPSession): Response = {
     // Receive the request
     logger.trace("Receiving HTTP request", Map("Client" -> clientAddress(session)))
-    val request = Encoding.toArraySeq(session.getInputStream, handler.bufferSize)
+    val request = Bytes.inputStreamBytes.from(session.getInputStream)
 
     // Process the request
+    implicit val usingContext = session
     effectRunSync(backend.map(
-      backend.either(handler.processRequest(request)(session)),
+      backend.either(handler.processRequest(request)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) => handlerResult.fold(
         error => createServerError(error, session),
         result => {
           // Send the response
-          val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
+          val response = result.response.getOrElse(ArraySeq.ofByte(Array()))
           val status = result.errorCode.map(errorStatus).getOrElse(Status.OK)
           createResponse(response, status, session)
         }
@@ -64,7 +64,7 @@ final case class NanoHttpdServer[Node, ExactCodec <: Codec[Node], Effect[_]] pri
 
   private def createServerError(error: Throwable, session: IHTTPSession): Response = {
     val status = Status.INTERNAL_ERROR
-    val message = Encoding.toArraySeq(ResponseError.trace(error).mkString("\n"))
+    val message = Bytes.stringBytes.from(ResponseError.trace(error).mkString("\n"))
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(session)))
     createResponse(message, status, session)
   }
@@ -72,7 +72,7 @@ final case class NanoHttpdServer[Node, ExactCodec <: Codec[Node], Effect[_]] pri
   private def createResponse(message: ArraySeq.ofByte, status: Status, session: IHTTPSession): Response = {
     val client = clientAddress(session)
     logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> status.getRequestStatus.toString))
-    val inputStream = new ByteArrayInputStream(message.unsafeArray)
+    val inputStream = Bytes.inputStreamBytes.to(message)
     val response = newFixedLengthResponse(status, handler.codec.mediaType, inputStream, message.size.toLong)
     logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> status.getRequestStatus.toString))
     response

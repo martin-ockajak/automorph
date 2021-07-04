@@ -39,18 +39,19 @@ final case class FinagleJsonRpcService[Node, ExactCodec <: Codec[Node], Effect[_
     // Receive the request
     val client = clientAddress(request)
     logger.debug("Received HTTP request", Map("Client" -> client))
-    val rawRequest = new ArraySeq.ofByte(Buf.ByteArray.Owned.extract(request.content))
+    val rawRequest = Buf.ByteArray.Owned.extract(request.content)
 
     // Process the request
+    implicit val usingContext = request
     asFuture(backend.map(
-      backend.either(handler.processRequest(rawRequest)(request)),
-      (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) => handlerResult.fold(
+      backend.either(handler.processRequest(rawRequest)),
+      (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) => handlerResult.fold(
         error => serverError(error, request),
         result => {
           // Send the response
-          val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
+          val response = result.response.getOrElse(Array[Byte]())
           val status = result.errorCode.map(errorStatus).getOrElse(Status.Ok)
-          val reader = Reader.fromBuf(Buf.ByteArray.Owned(response.unsafeArray))
+          val reader = Reader.fromBuf(Buf.ByteArray.Owned(response))
           createResponse(request, reader, status)
         }
       )
