@@ -35,7 +35,7 @@ object Bytes {
 
 
   /** `ArraySeq.ofByte' <-> byte sequence converter. */
-  implicit val ArraySeqOfByteBytes: Bytes[ArraySeq.ofByte] = new Bytes[ArraySeq.ofByte] {
+  implicit val arraySeqOfByteBytes: Bytes[ArraySeq.ofByte] = new Bytes[ArraySeq.ofByte] {
 
     override def to(bytes: ArraySeq.ofByte): ArraySeq.ofByte = bytes
 
