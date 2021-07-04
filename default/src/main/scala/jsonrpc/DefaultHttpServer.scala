@@ -13,6 +13,12 @@ import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.codec.common.UpickleCustom
 
 case object DefaultHttpServer {
+  type BindApis[Effect[_]] = (Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, HttpServerExchange]) => Handler[
+    Value,
+    UpickleJsonCodec[UpickleCustom],
+    Effect,
+    HttpServerExchange
+  ]
 
   /**
    * Create a JSON-RPC server using the specified ''backend'' plugin.
@@ -34,12 +40,7 @@ case object DefaultHttpServer {
   def apply[Effect[_]](
     backend: Backend[Effect],
     effectRun: Effect[Any] => Unit,
-    bindApis: (Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, HttpServerExchange]) => Handler[
-      Value,
-      UpickleJsonCodec[UpickleCustom],
-      Effect,
-      HttpServerExchange
-    ],
+    bindApis: BindApis[Effect],
     port: Int = 8080,
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
@@ -67,12 +68,7 @@ case object DefaultHttpServer {
    * @return asynchronous JSON-RPC request handler
    */
   def async(
-    bindApis: (Handler[Value, UpickleJsonCodec[UpickleCustom], Future, HttpServerExchange]) => Handler[
-      Value,
-      UpickleJsonCodec[UpickleCustom],
-      Future,
-      HttpServerExchange
-    ],
+    bindApis: BindApis[Future],
     port: Int = 8080,
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
@@ -102,12 +98,7 @@ case object DefaultHttpServer {
    * @return synchronous JSON-RPC request handler
    */
   def sync(
-    bindApis: (Handler[Value, UpickleJsonCodec[UpickleCustom], Identity, HttpServerExchange]) => Handler[
-      Value,
-      UpickleJsonCodec[UpickleCustom],
-      Identity,
-      HttpServerExchange
-    ],
+    bindApis: BindApis[Identity],
     port: Int = 8080,
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
