@@ -22,8 +22,8 @@ case object DefaultHttpServer {
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @see [[https://undertow.io HTTP Server Documentation]]
    * @param backend effect backend plugin
-   * @param effectRunAsync asynchronous effect execution function
-   * @param bindApis bind APIs to the underlying JSON-RPC handler
+   * @param effectRun effect execution function
+   * @param bindApis function to bind APIs to the underlying JSON-RPC handler
    * @param port port to listen on for HTTP connections
    * @param urlPath HTTP handler URL path
    * @param builder Undertow web server builder
@@ -33,7 +33,7 @@ case object DefaultHttpServer {
    */
   def apply[Effect[_]](
     backend: Backend[Effect],
-    effectRunAsync: Effect[Any] => Unit,
+    effectRun: Effect[Any] => Unit,
     bindApis: (Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, HttpServerExchange]) => Handler[
       Value,
       UpickleJsonCodec[UpickleCustom],
@@ -46,7 +46,7 @@ case object DefaultHttpServer {
     errorStatus: Int => Int = defaultErrorStatus
   ): UndertowServer =
     UndertowServer(
-      UndertowJsonRpcHandler(bindApis(DefaultHandler(backend)), effectRunAsync, errorStatus),
+      UndertowJsonRpcHandler(bindApis(DefaultHandler(backend)), effectRun, errorStatus),
       port,
       urlPath,
       builder
@@ -58,7 +58,7 @@ case object DefaultHttpServer {
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param bindApis bind APIs to the underlying JSON-RPC handler
+   * @param bindApis function to bind APIs to the underlying JSON-RPC handler
    * @param port port to listen on for HTTP connections
    * @param urlPath HTTP handler URL path
    * @param builder Undertow web server builder
@@ -93,7 +93,7 @@ case object DefaultHttpServer {
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param bindApis bind APIs to the underlying JSON-RPC handler
+   * @param bindApis function to bind APIs to the underlying JSON-RPC handler
    * @param port port to listen on for HTTP connections
    * @param urlPath HTTP handler URL path
    * @param builder Undertow web server builder
