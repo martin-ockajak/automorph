@@ -23,7 +23,7 @@ case object DefaultHttpServer {
    * @see [[https://undertow.io HTTP Server Documentation]]
    * @param backend effect backend plugin
    * @param effectRunAsync asynchronous effect execution function
-   * @param bindApis bind APIs to the default handler
+   * @param bindApis bind APIs to the underlying JSON-RPC handler
    * @param urlPath HTTP handler URL path
    * @param builder Undertow web server builder
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
@@ -55,7 +55,7 @@ case object DefaultHttpServer {
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param bindApis bind APIs to the default handler
+   * @param bindApis bind APIs to the underlying JSON-RPC handler
    * @param urlPath HTTP handler URL path
    * @param builder Undertow web server builder
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
@@ -87,7 +87,7 @@ case object DefaultHttpServer {
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param bindApis bind APIs to the default handler
+   * @param bindApis bind APIs to the underlying JSON-RPC handler
    * @param urlPath HTTP handler URL path
    * @param builder Undertow web server builder
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
