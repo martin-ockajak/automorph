@@ -24,9 +24,7 @@ case object DefaultHandler {
    * @tparam Context request context type
    * @return JSON-RPC request handler
    */
-  def apply[Effect[_], Context](
-    backend: Backend[Effect]
-  ): DefaultHandler[Effect, Context] =
+  def apply[Effect[_], Context](backend: Backend[Effect]): DefaultHandler[Effect, Context] =
     Handler(UpickleJsonCodec(), backend)
 
   /**
@@ -49,7 +47,7 @@ case object DefaultHandler {
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @return synchronous JSON-RPC request handler
    */
-  def sync[Context](): Handler[Value, UpickleJsonCodec[UpickleCustom], Identity, Context] =
+  def sync[Context](): DefaultHandler[Identity, Context] =
     Handler[Value, UpickleJsonCodec[UpickleCustom], Identity, Context](UpickleJsonCodec(), IdentityBackend())
 
   /**
