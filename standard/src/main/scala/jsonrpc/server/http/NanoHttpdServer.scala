@@ -16,7 +16,7 @@ import scala.collection.immutable.ArraySeq
  * @see [[https://github.com/NanoHttpd/nanohttpd Documentation]]
  * @constructor Create an NanoHTTPD web server using the specified JSON-RPC request ''handler''.
  * @param handler JSON-RPC request handler
- * @param effectRunSync synchronous effect execution function
+ * @param runEffectSync synchronous effect execution function
  * @param port port to listen on for HTTP connections
  * @param readTimeout HTTP connection read timeout (milliseconds)
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
@@ -26,7 +26,7 @@ import scala.collection.immutable.ArraySeq
  */
 final case class NanoHttpdServer[Node, ExactCodec <: Codec[Node], Effect[_]] private (
   handler: Handler[Node, ExactCodec, Effect, IHTTPSession],
-  effectRunSync: Effect[Response] => Response,
+  runEffectSync: Effect[Response] => Response,
   port: Int,
   readTimeout: Int,
   errorStatus: Int => Status
@@ -47,7 +47,7 @@ final case class NanoHttpdServer[Node, ExactCodec <: Codec[Node], Effect[_]] pri
 
     // Process the request
     implicit val usingContext = session
-    effectRunSync(backend.map(
+    runEffectSync(backend.map(
       backend.either(handler.processRequest(request)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) => handlerResult.fold(
         error => createServerError(error, session),

@@ -22,7 +22,7 @@ import scala.collection.immutable.ArraySeq
  * @see [[https://finagle.github.io/finch Documentation]]
  * @constructor Create a JSON=RPC HTTP handler for Undertow web server using the specified JSON-RPC request ''handler''.
  * @param handler JSON-RPC request handler
- * @param effectRunAsync asynchronous effect execution function
+ * @param runEffect asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
  * @tparam Node message format node representation type
  * @tparam ExactCodec message codec plugin type
