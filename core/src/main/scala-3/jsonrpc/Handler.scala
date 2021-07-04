@@ -8,7 +8,7 @@ import jsonrpc.util.{CannotEqual, NoContext}
 /**
  * JSON-RPC request handler layer.
  *
- * The handler can be used by a JSON-RPC server to process incoming JSON-RPC requests, invoke the requested API methods and return JSON-RPC responses.
+ * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Create a new JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context` type.
@@ -33,9 +33,9 @@ final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
 case object Handler:
 
   /**
-   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request Context type.
+   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context`` type.
    *
-   * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
+   * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec message codec plugin
@@ -54,7 +54,7 @@ case object Handler:
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with empty request `Context` type.
    *
-   * The handler can be used by a JSON-RPC server to process incoming requests, invoke the requested API methods and generate outgoing responses.
+   * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec hierarchical message codec plugin

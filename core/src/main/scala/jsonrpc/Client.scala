@@ -13,7 +13,7 @@ import scala.util.{Random, Try}
 /**
  * JSON-RPC client layer.
  *
- * The client can be used by an application to perform JSON-RPC calls and notifications.
+ * The client can be used to perform JSON-RPC calls and notifications.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with defined request `Context` type.
@@ -163,7 +163,7 @@ case object Client {
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with empty request `Context` type.
    *
-   * The client can be used by an application to perform JSON-RPC calls and notifications.
+   * The client can be used to perform JSON-RPC calls and notifications.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec message codec plugin

@@ -14,10 +14,11 @@ import ujson.Value
 case object DefaultHttpClient {
 
   /**
-   * Default JSON-RPC over HTTP client.
+   * Create a JSON-RPC over HTTP client using the specified ''backend'' plugin.
    *
-   * The client can be used by an application to perform JSON-RPC calls and notifications.
+   * The client can be used to perform JSON-RPC calls and notifications.
    *
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param url endpoint URL
    * @param httpMethod HTTP method
    * @param sttpBackend STTP backend
@@ -41,13 +42,15 @@ case object DefaultHttpClient {
   }
 
   /**
-   * Default asynchronous JSON-RPC over HTTP client.
+   * Create an asynchronous JSON-RPC over HTTP client.
    *
-   * The client can be used by an application to perform JSON-RPC calls and notifications.
+   * The client can be used to perform JSON-RPC calls and notifications.
    *
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param url endpoint URL
    * @param httpMethod HTTP method
    * @param sttpBackend STTP backend
+   * @param executionContext execution context
    * @return asynchronous JSON-RPC over HTTP client
    */
   def apply(
