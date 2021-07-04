@@ -8,9 +8,6 @@ import jsonrpc.server.http.{UndertowJsonRpcHandler, UndertowServer}
 import jsonrpc.spi.Backend
 import jsonrpc.backend.IdentityBackend.Identity
 import scala.concurrent.{ExecutionContext, Future}
-import ujson.Value
-import jsonrpc.codec.json.UpickleJsonCodec
-import jsonrpc.codec.common.UpickleCustom
 
 case object DefaultHttpServer {
 

@@ -1,6 +1,5 @@
 package jsonrpc
 
-import io.undertow.server.HttpServerExchange
 import jsonrpc.Defaults.DefaultHandler
 import jsonrpc.Handler
 import jsonrpc.backend.IdentityBackend.Identity

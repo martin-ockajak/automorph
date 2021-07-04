@@ -9,7 +9,6 @@ import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.spi.Backend
 import jsonrpc.transport.http.SttpTransport
 import scala.concurrent.{ExecutionContext, Future}
-import sttp.client3
 import sttp.client3.{PartialRequest, SttpBackend}
 import sttp.model.{Method, Uri}
 import ujson.Value
