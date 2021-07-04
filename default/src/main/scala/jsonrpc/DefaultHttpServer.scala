@@ -23,7 +23,7 @@ case object DefaultHttpServer {
    * @see [[https://undertow.io HTTP Server Documentation]]
    * @param backend effect backend plugin
    * @param effectRunAsync asynchronous effect execution function
-   * @param bind bind APIs to the default handler
+   * @param bindApis bind APIs to the default handler
    * @param urlPath HTTP handler URL path
    * @param builder Undertow web server builder
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
@@ -33,7 +33,7 @@ case object DefaultHttpServer {
   def apply[Effect[_]](
     backend: Backend[Effect],
     effectRunAsync: Effect[Any] => Unit,
-    bind: (Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, HttpServerExchange]) => Handler[
+    bindApis: (Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, HttpServerExchange]) => Handler[
       Value,
       UpickleJsonCodec[UpickleCustom],
       Effect,
@@ -44,7 +44,7 @@ case object DefaultHttpServer {
     errorStatus: Int => Int = defaultErrorStatus
   ): UndertowServer =
     UndertowServer(
-      UndertowJsonRpcHandler(bind(DefaultHandler(backend)), effectRunAsync, errorStatus),
+      UndertowJsonRpcHandler(bindApis(DefaultHandler(backend)), effectRunAsync, errorStatus),
       urlPath,
       builder
     )
@@ -55,7 +55,7 @@ case object DefaultHttpServer {
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param bind bind APIs to the default handler
+   * @param bindApis bind APIs to the default handler
    * @param urlPath HTTP handler URL path
    * @param builder Undertow web server builder
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
@@ -63,7 +63,7 @@ case object DefaultHttpServer {
    * @return asynchronous JSON-RPC request handler
    */
   def async(
-    bind: (Handler[Value, UpickleJsonCodec[UpickleCustom], Future, HttpServerExchange]) => Handler[
+    bindApis: (Handler[Value, UpickleJsonCodec[UpickleCustom], Future, HttpServerExchange]) => Handler[
       Value,
       UpickleJsonCodec[UpickleCustom],
       Future,
@@ -75,7 +75,7 @@ case object DefaultHttpServer {
   )(implicit executionContext: ExecutionContext): UndertowServer = {
     Seq(executionContext)
     UndertowServer(
-      UndertowJsonRpcHandler(bind(DefaultHandler.async()), (_: Future[Any]) => (), errorStatus),
+      UndertowJsonRpcHandler(bindApis(DefaultHandler.async()), (_: Future[Any]) => (), errorStatus),
       urlPath,
       builder
     )
@@ -87,7 +87,7 @@ case object DefaultHttpServer {
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param bind bind APIs to the default handler
+   * @param bindApis bind APIs to the default handler
    * @param urlPath HTTP handler URL path
    * @param builder Undertow web server builder
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
@@ -95,7 +95,7 @@ case object DefaultHttpServer {
    * @return synchronous JSON-RPC request handler
    */
   def sync(
-    bind: (Handler[Value, UpickleJsonCodec[UpickleCustom], Identity, HttpServerExchange]) => Handler[
+    bindApis: (Handler[Value, UpickleJsonCodec[UpickleCustom], Identity, HttpServerExchange]) => Handler[
       Value,
       UpickleJsonCodec[UpickleCustom],
       Identity,
@@ -106,7 +106,7 @@ case object DefaultHttpServer {
     errorStatus: Int => Int = defaultErrorStatus
   ): UndertowServer =
     UndertowServer(
-      UndertowJsonRpcHandler(bind(DefaultHandler.sync()), (_: Any) => (), errorStatus),
+      UndertowJsonRpcHandler(bindApis(DefaultHandler.sync()), (_: Any) => (), errorStatus),
       urlPath,
       builder
     )
