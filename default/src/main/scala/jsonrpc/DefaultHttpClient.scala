@@ -1,7 +1,8 @@
 package jsonrpc
 
 import jsonrpc.Client
-import jsonrpc.backend.FutureBackend
+import jsonrpc.backend.{FutureBackend, IdentityBackend}
+import jsonrpc.backend.IdentityBackend.Identity
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.spi.Backend
@@ -21,7 +22,7 @@ case object DefaultHttpClient {
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param url endpoint URL
    * @param httpMethod HTTP method
-   * @param sttpBackend STTP backend
+   * @param httpBackend HTTP client backend
    * @param backend effect backend plugin
    * @tparam Effect effect type
    * @return JSON-RPC over HTTP client
@@ -29,11 +30,11 @@ case object DefaultHttpClient {
   def apply[Effect[_]](
     url: Uri,
     httpMethod: Method,
-    sttpBackend: SttpBackend[Effect, _],
+    httpBackend: SttpBackend[Effect, _],
     backend: Backend[Effect]
   ): Client[Value, UpickleJsonCodec[UpickleCustom], Effect, PartialRequest[Either[String, String], Any]] = {
     val codec = UpickleJsonCodec()
-    val transport = SttpTransport(url, httpMethod, codec.mediaType, sttpBackend, backend)
+    val transport = SttpTransport(url, httpMethod, codec.mediaType, httpBackend, backend)
     Client[Value, UpickleJsonCodec[UpickleCustom], Effect, PartialRequest[Either[String, String], Any]](
       codec,
       backend,
@@ -47,18 +48,34 @@ case object DefaultHttpClient {
    * The client can be used to perform JSON-RPC calls and notifications.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+   * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url endpoint URL
    * @param httpMethod HTTP method
-   * @param sttpBackend STTP backend
+   * @param httpBackend HTTP client backend
    * @param executionContext execution context
    * @return asynchronous JSON-RPC over HTTP client
    */
-  def apply(
+  def async(url: Uri, httpMethod: Method, httpBackend: SttpBackend[Future, _])(
+    implicit executionContext: ExecutionContext
+  ): Client[Value, UpickleJsonCodec[UpickleCustom], Future, PartialRequest[Either[String, String], Any]] =
+    DefaultHttpClient(url, httpMethod, httpBackend, FutureBackend())
+
+  /**
+   * Create a asynchronous JSON-RPC over HTTP client.
+   *
+   * The client can be used to perform JSON-RPC calls and notifications.
+   *
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+   * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
+   * @param url endpoint URL
+   * @param httpMethod HTTP method
+   * @param httpBackend HTTP client backend
+   * @return synchronous JSON-RPC over HTTP client
+   */
+  def sync(
     url: Uri,
     httpMethod: Method,
-    sttpBackend: SttpBackend[Future, _]
-  )(implicit executionContext: ExecutionContext): Client[Value, UpickleJsonCodec[UpickleCustom], Future, PartialRequest[Either[String, String], Any]] = {
-    val backend = FutureBackend()
-    DefaultHttpClient(url, httpMethod, sttpBackend, backend)
-  }
+    httpBackend: SttpBackend[Identity, _]
+  ): Client[Value, UpickleJsonCodec[UpickleCustom], Identity, PartialRequest[Either[String, String], Any]] =
+    DefaultHttpClient(url, httpMethod, httpBackend, IdentityBackend())
 }

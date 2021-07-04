@@ -144,6 +144,15 @@ lazy val undertow = (project in file("server/undertow")).dependsOn(
     "com.lihaoyi" %% "cask" % "0.7.11" % Test
   )
 )
+lazy val jetty = (project in file("server/jetty")).dependsOn(
+  core, testCore % Test, standard % Test
+).settings(
+  name := "json-rpc-jetty",
+  libraryDependencies ++= Seq(
+    ("org.eclipse.jetty" % "jetty-servlet" % "11.0.5").cross(CrossVersion.for3Use2_13)
+  )
+)
+
 lazy val finagle = (project in file("server/finagle")).dependsOn(
   core, testCore % Test, standard % Test
 ).settings(
