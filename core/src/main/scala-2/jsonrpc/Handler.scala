@@ -3,7 +3,7 @@ package jsonrpc
 import jsonrpc.handler.{HandlerMeta, HandlerMethod, HandlerCore}
 import jsonrpc.log.Logging
 import jsonrpc.spi.{Backend, Codec}
-import jsonrpc.util.{CannotEqual, Void}
+import jsonrpc.util.{CannotEqual, NoContext}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -130,7 +130,7 @@ case object Handler {
   def basic[Node, ExactCodec <: Codec[Node], Effect[_]](
     codec: ExactCodec,
     backend: Backend[Effect]
-  ): Handler[Node, ExactCodec, Effect, Void.Value] =
+  ): Handler[Node, ExactCodec, Effect, NoContext.Value] =
     macro basicMacro[Node, ExactCodec, Effect]
 
   def basicMacro[
@@ -140,12 +140,12 @@ case object Handler {
   ](c: blackbox.Context)(
     codec: c.Expr[ExactCodec],
     backend: c.Expr[Backend[Effect]]
-  ): c.Expr[Handler[Node, ExactCodec, Effect, Void.Value]] = {
+  ): c.Expr[Handler[Node, ExactCodec, Effect, NoContext.Value]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[ExactCodec])
 
     c.Expr[Any](q"""
       jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, Map.empty, value => $codec.encode[List[String]](value), $codec.encode(None))
-    """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Void.Value]]]
+    """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, NoContext.Value]]]
   }
 }

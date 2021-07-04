@@ -6,7 +6,7 @@ import jsonrpc.protocol.ErrorType.{InvalidResponseException, ParseErrorException
 import jsonrpc.protocol.{ErrorType, Request, Response}
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, Transport}
-import jsonrpc.util.{CannotEqual, Void}
+import jsonrpc.util.{CannotEqual, NoContext}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Random, Try}
 
@@ -177,6 +177,6 @@ case object Client {
   def basic[Node, ExactCodec <: Codec[Node], Effect[_]](
     codec: ExactCodec,
     backend: Backend[Effect],
-    transport: Transport[Effect, Void.Value]
-  ): Client[Node, ExactCodec, Effect, Void.Value] = new Client(codec, backend, transport)
+    transport: Transport[Effect, NoContext.Value]
+  ): Client[Node, ExactCodec, Effect, NoContext.Value] = new Client(codec, backend, transport)
 }
