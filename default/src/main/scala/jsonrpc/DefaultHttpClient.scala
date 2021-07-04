@@ -4,14 +4,12 @@ import jsonrpc.Client
 import jsonrpc.Defaults.DefaultClient
 import jsonrpc.backend.IdentityBackend.Identity
 import jsonrpc.backend.{FutureBackend, IdentityBackend}
-import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.spi.Backend
 import jsonrpc.transport.http.SttpTransport
 import scala.concurrent.{ExecutionContext, Future}
-import sttp.client3.{PartialRequest, SttpBackend}
+import sttp.client3.SttpBackend
 import sttp.model.{Method, Uri}
-import ujson.Value
 
 case object DefaultHttpClient {
 
@@ -36,7 +34,7 @@ case object DefaultHttpClient {
   ): DefaultClient[Effect] = {
     val codec = UpickleJsonCodec()
     val transport = SttpTransport(url, httpMethod, codec.mediaType, sttpBackend, backend)
-    Client[Value, UpickleJsonCodec[UpickleCustom], Effect, PartialRequest[Either[String, String], Any]](
+    Client(
       codec,
       backend,
       transport
