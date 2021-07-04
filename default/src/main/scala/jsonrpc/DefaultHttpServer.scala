@@ -24,6 +24,7 @@ case object DefaultHttpServer {
    * @param backend effect backend plugin
    * @param effectRunAsync asynchronous effect execution function
    * @param bindApis bind APIs to the underlying JSON-RPC handler
+   * @param port port to listen on for HTTP connections
    * @param urlPath HTTP handler URL path
    * @param builder Undertow web server builder
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
@@ -39,12 +40,14 @@ case object DefaultHttpServer {
       Effect,
       HttpServerExchange
     ],
+    port: Int = 8080,
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   ): UndertowServer =
     UndertowServer(
       UndertowJsonRpcHandler(bindApis(DefaultHandler(backend)), effectRunAsync, errorStatus),
+      port,
       urlPath,
       builder
     )
@@ -56,6 +59,7 @@ case object DefaultHttpServer {
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param bindApis bind APIs to the underlying JSON-RPC handler
+   * @param port port to listen on for HTTP connections
    * @param urlPath HTTP handler URL path
    * @param builder Undertow web server builder
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
@@ -69,6 +73,7 @@ case object DefaultHttpServer {
       Future,
       HttpServerExchange
     ],
+    port: Int = 8080,
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
@@ -76,6 +81,7 @@ case object DefaultHttpServer {
     Seq(executionContext)
     UndertowServer(
       UndertowJsonRpcHandler(bindApis(DefaultHandler.async()), (_: Future[Any]) => (), errorStatus),
+      port,
       urlPath,
       builder
     )
@@ -88,6 +94,7 @@ case object DefaultHttpServer {
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param bindApis bind APIs to the underlying JSON-RPC handler
+   * @param port port to listen on for HTTP connections
    * @param urlPath HTTP handler URL path
    * @param builder Undertow web server builder
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
@@ -101,12 +108,14 @@ case object DefaultHttpServer {
       Identity,
       HttpServerExchange
     ],
+    port: Int = 8080,
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   ): UndertowServer =
     UndertowServer(
       UndertowJsonRpcHandler(bindApis(DefaultHandler.sync()), (_: Any) => (), errorStatus),
+      port,
       urlPath,
       builder
     )

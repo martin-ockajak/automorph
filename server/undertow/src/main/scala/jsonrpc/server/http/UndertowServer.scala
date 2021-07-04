@@ -17,11 +17,13 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see [[https://undertow.io Documentation]]
  * @constructor Create an Undertow web server using the specified HTTP handler.
  * @param httpHandler HTTP handler
+ * @param port port to listen on for HTTP connections
  * @param urlPath HTTP handler URL path
  * @param builder Undertow web server builder
  */
 final case class UndertowServer(
   httpHandler: HttpHandler,
+  port: Int = 8080,
   urlPath: String = "/",
   builder: Undertow.Builder = defaultBuilder
 ) extends AutoCloseable with Logging {
@@ -35,7 +37,7 @@ final case class UndertowServer(
     val pathHandler = Handlers.path(ResponseCodeHandler.HANDLE_404).addPrefixPath(urlPath, httpHandler)
 
     // Configure the web server
-    val undertow = builder.setHandler(pathHandler).build()
+    val undertow = builder.addHttpListener(8080, "0.0.0.0").setHandler(pathHandler).build()
 
     // Start the web server
     undertow.getListenerInfo.asScala.foreach { listener =>
@@ -66,5 +68,4 @@ case object UndertowServer {
   val defaultBuilder = Undertow.builder()
     .setIoThreads(Runtime.getRuntime.availableProcessors * 2)
     .setWorkerThreads(Runtime.getRuntime.availableProcessors)
-    .addHttpListener(8080, "0.0.0.0")
 }
