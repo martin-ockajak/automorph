@@ -23,7 +23,9 @@ case object DefaultHandler {
    * @tparam Context request context type
    * @return JSON-RPC request handler
    */
-  def apply[Effect[_], Context](backend: Backend[Effect]): Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, Context] =
+  def apply[Effect[_], Context](
+    backend: Backend[Effect]
+  ): Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, Context] =
     Handler(UpickleJsonCodec(), backend)
 
   /**
@@ -35,7 +37,9 @@ case object DefaultHandler {
    * @param executionContext execution context
    * @return asynchronous JSON-RPC request handler
    */
-  def async[Context]()(implicit executionContext: ExecutionContext): Handler[Value, UpickleJsonCodec[UpickleCustom], Future, Context] =
+  def async[Context]()(implicit
+    executionContext: ExecutionContext
+  ): Handler[Value, UpickleJsonCodec[UpickleCustom], Future, Context] =
     Handler(UpickleJsonCodec(), FutureBackend())
 
   /**
@@ -59,7 +63,9 @@ case object DefaultHandler {
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  def noContext[Effect[_]](backend: Backend[Effect]): Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, NoContext.Value] =
+  def noContext[Effect[_]](
+    backend: Backend[Effect]
+  ): Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, NoContext.Value] =
     Handler.noContext(UpickleJsonCodec(), backend)
 
   /**
@@ -71,7 +77,9 @@ case object DefaultHandler {
    * @param executionContext execution context
    * @return asynchronous JSON-RPC request handler
    */
-  def asyncNoContext()(implicit executionContext: ExecutionContext): Handler[Value, UpickleJsonCodec[UpickleCustom], Future, NoContext.Value] =
+  def asyncNoContext()(implicit
+    executionContext: ExecutionContext
+  ): Handler[Value, UpickleJsonCodec[UpickleCustom], Future, NoContext.Value] =
     Handler.noContext(UpickleJsonCodec(), FutureBackend())
 
   /**
