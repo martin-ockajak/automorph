@@ -2,8 +2,8 @@ package jsonrpc
 
 import io.undertow.server.HttpServerExchange
 import jsonrpc.Handler
-import jsonrpc.backend.{FutureBackend, IdentityBackend}
 import jsonrpc.backend.IdentityBackend.Identity
+import jsonrpc.backend.{FutureBackend, IdentityBackend}
 import jsonrpc.codec.common.UpickleCustom
 import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.spi.Backend
@@ -13,7 +13,7 @@ import ujson.Value
 
 case object DefaultHandler {
 
-  type DefaultHandler[Effect[_], Context] = Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, Context]
+  import Defaults.DefaultHandler
 
   /**
    * Create a JSON-RPC request handler using the specified ''backend'' plugin with defined request `Context` type.
