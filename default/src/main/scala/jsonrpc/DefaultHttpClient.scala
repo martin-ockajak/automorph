@@ -52,7 +52,6 @@ case object DefaultHttpClient {
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url endpoint URL
    * @param httpMethod HTTP method
-   * @param sttpBackend STTP HTTP client backend
    * @param executionContext execution context
    * @return asynchronous JSON-RPC over HTTP client
    */
@@ -70,7 +69,6 @@ case object DefaultHttpClient {
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url endpoint URL
    * @param httpMethod HTTP method
-   * @param httpBackend HTTP client backend
    * @return synchronous JSON-RPC over HTTP client
    */
   def sync(url: Uri, httpMethod: Method, httpBackend: SttpBackend[Identity, _]): DefaultClient[Identity] =
