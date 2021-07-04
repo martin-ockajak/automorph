@@ -13,7 +13,7 @@ import jsonrpc.codec.json.UpickleJsonCodec
 import jsonrpc.codec.common.UpickleCustom
 
 case object DefaultHttpServer {
-  type BindApis[Effect[_]] = DefaultHandler.Type[Effect, HttpServerExchange] => DefaultHandler.Type[Effect, HttpServerExchange]
+  type BindApis[Effect[_]] = DefaultHandler.DefaultHandler[Effect, HttpServerExchange] => DefaultHandler.DefaultHandler[Effect, HttpServerExchange]
 
   /**
    * Create a JSON-RPC server using the specified ''backend'' plugin.

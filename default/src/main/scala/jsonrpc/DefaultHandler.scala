@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import ujson.Value
 
 case object DefaultHandler {
-  type Type[Effect[_], Context] = Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, Context]
+  type DefaultHandler[Effect[_], Context] = Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, Context]
 
   /**
    * Create a JSON-RPC request handler using the specified ''backend'' plugin with defined request `Context` type.
@@ -27,7 +27,7 @@ case object DefaultHandler {
    */
   def apply[Effect[_], Context](
     backend: Backend[Effect]
-  ): Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, Context] =
+  ): DefaultHandler[Effect, Context] =
     Handler(UpickleJsonCodec(), backend)
 
   /**
@@ -41,7 +41,7 @@ case object DefaultHandler {
    */
   def async[Context]()(implicit
     executionContext: ExecutionContext
-  ): Handler[Value, UpickleJsonCodec[UpickleCustom], Future, Context] =
+  ): DefaultHandler[Future, Context] =
     Handler(UpickleJsonCodec(), FutureBackend())
 
   /**
@@ -67,7 +67,7 @@ case object DefaultHandler {
    */
   def noContext[Effect[_]](
     backend: Backend[Effect]
-  ): Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, NoContext.Value] =
+  ): DefaultHandler[Effect, NoContext.Value] =
     Handler.noContext(UpickleJsonCodec(), backend)
 
   /**
@@ -81,7 +81,7 @@ case object DefaultHandler {
    */
   def asyncNoContext()(implicit
     executionContext: ExecutionContext
-  ): Handler[Value, UpickleJsonCodec[UpickleCustom], Future, NoContext.Value] =
+  ): DefaultHandler[Future, NoContext.Value] =
     Handler.noContext(UpickleJsonCodec(), FutureBackend())
 
   /**
@@ -93,6 +93,6 @@ case object DefaultHandler {
    * @param executionContext execution context
    * @return asynchronous JSON-RPC request handler
    */
-  def syncNoContext(): Handler[Value, UpickleJsonCodec[UpickleCustom], Identity, NoContext.Value] =
+  def syncNoContext(): DefaultHandler[Identity, NoContext.Value] =
     Handler.noContext(UpickleJsonCodec(), IdentityBackend())
 }
