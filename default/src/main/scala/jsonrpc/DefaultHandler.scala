@@ -1,5 +1,6 @@
 package jsonrpc
 
+import io.undertow.server.HttpServerExchange
 import jsonrpc.Handler
 import jsonrpc.backend.{FutureBackend, IdentityBackend}
 import jsonrpc.backend.IdentityBackend.Identity
@@ -11,6 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import ujson.Value
 
 case object DefaultHandler {
+  type Type[Effect[_]] = Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, HttpServerExchange]
 
   /**
    * Create a JSON-RPC request handler using the specified ''backend'' plugin with defined request `Context` type.
