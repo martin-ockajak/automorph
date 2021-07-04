@@ -34,11 +34,7 @@ case object DefaultHttpClient {
   ): DefaultClient[Effect] = {
     val codec = UpickleJsonCodec()
     val transport = SttpTransport(url, httpMethod, codec.mediaType, sttpBackend, backend)
-    Client(
-      codec,
-      backend,
-      transport
-    )
+    Client(codec, backend, transport)
   }
 
   /**
