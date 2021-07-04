@@ -166,7 +166,10 @@ lazy val finagle = (project in file("server/finagle")).dependsOn(
 lazy val default = project.dependsOn(
   upickle, standard, undertow, sttp
 ).settings(
-  name := "json-rpc-default"
+  name := "json-rpc-default",
+  libraryDependencies ++= Seq(
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.9" % Test
+  )
 )
 
 // Test

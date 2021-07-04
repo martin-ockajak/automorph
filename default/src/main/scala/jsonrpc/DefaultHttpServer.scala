@@ -50,7 +50,7 @@ case object DefaultHttpServer {
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   )(implicit executionContext: ExecutionContext): UndertowServer = {
-    executionContext
+    Seq(executionContext)
     UndertowServer(UndertowJsonRpcHandler(DefaultHandler.async(), (_: Future[Any]) => (), errorStatus), urlPath, builder)
   }
 

@@ -11,6 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import sttp.client3.{PartialRequest, SttpBackend}
 import sttp.model.{Method, Uri}
 import ujson.Value
+import sttp.client3
 
 case object DefaultHttpClient {
 
@@ -20,18 +21,18 @@ case object DefaultHttpClient {
    * The client can be used to perform JSON-RPC calls and notifications.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+   * @param backend effect backend plugin
    * @param url endpoint URL
    * @param httpMethod HTTP method
    * @param httpBackend HTTP client backend
-   * @param backend effect backend plugin
    * @tparam Effect effect type
    * @return JSON-RPC over HTTP client
    */
   def apply[Effect[_]](
+    backend: Backend[Effect],
     url: Uri,
     httpMethod: Method,
-    httpBackend: SttpBackend[Effect, _],
-    backend: Backend[Effect]
+    httpBackend: SttpBackend[Effect, _]
   ): Client[Value, UpickleJsonCodec[UpickleCustom], Effect, PartialRequest[Either[String, String], Any]] = {
     val codec = UpickleJsonCodec()
     val transport = SttpTransport(url, httpMethod, codec.mediaType, httpBackend, backend)
@@ -58,7 +59,7 @@ case object DefaultHttpClient {
   def async(url: Uri, httpMethod: Method, httpBackend: SttpBackend[Future, _])(
     implicit executionContext: ExecutionContext
   ): Client[Value, UpickleJsonCodec[UpickleCustom], Future, PartialRequest[Either[String, String], Any]] =
-    DefaultHttpClient(url, httpMethod, httpBackend, FutureBackend())
+    DefaultHttpClient(FutureBackend(), url, httpMethod, httpBackend)
 
   /**
    * Create a asynchronous JSON-RPC over HTTP client.
@@ -77,5 +78,5 @@ case object DefaultHttpClient {
     httpMethod: Method,
     httpBackend: SttpBackend[Identity, _]
   ): Client[Value, UpickleJsonCodec[UpickleCustom], Identity, PartialRequest[Either[String, String], Any]] =
-    DefaultHttpClient(url, httpMethod, httpBackend, IdentityBackend())
+    DefaultHttpClient(IdentityBackend(), url, httpMethod, httpBackend)
 }
