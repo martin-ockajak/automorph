@@ -17,7 +17,9 @@ lazy val root = project.in(file(".")).aggregate(
   sttp,
 
   undertow,
-  finagle
+  finagle,
+
+  default
 ).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server",
@@ -149,6 +151,13 @@ lazy val finagle = (project in file("server/finagle")).dependsOn(
   libraryDependencies ++= Seq(
     ("com.twitter" % "finagle-http" % "21.6.0").cross(CrossVersion.for3Use2_13)
   )
+)
+
+// Default
+lazy val default = project.dependsOn(
+  upickle, undertow, sttp
+).settings(
+  name := "json-rpc-default"
 )
 
 // Test
