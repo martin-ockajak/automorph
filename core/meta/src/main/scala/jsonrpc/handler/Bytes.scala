@@ -47,7 +47,7 @@ object Bytes {
 
     override def to(bytes: ArraySeq.ofByte): Array[Byte] = bytes.unsafeArray
 
-    override def from(data: Array[Byte]): ArraySeq.ofByte = ArraySeq.ofByte(data)
+    override def from(data: Array[Byte]): ArraySeq.ofByte = new ArraySeq.ofByte(data)
   }
 
   /** `String` <-> byte sequence converter. */
@@ -58,7 +58,7 @@ object Bytes {
 
     override def to(bytes: ArraySeq.ofByte): String = new String(bytes.unsafeArray, charset)
 
-    override def from(data: String): ArraySeq.ofByte = ArraySeq.ofByte(data.getBytes(charset))
+    override def from(data: String): ArraySeq.ofByte = new ArraySeq.ofByte(data.getBytes(charset))
   }
 
   /** `ByteBuffer` <-> byte sequence converter. */

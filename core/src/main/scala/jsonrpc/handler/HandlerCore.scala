@@ -19,13 +19,13 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
    *
    * @param request request message
    * @param context request context
+   * @tparam Data message data type
    * @return optional response message
    */
-  def processRequest[Request: Bytes](request: Request)(implicit context: Context): Effect[HandlerResult[Request]] = {
+  def processRequest[Data: Bytes](request: Data)(implicit context: Context): Effect[HandlerResult[Data]] = {
     // Deserialize request
-    val bytes = implicitly[Bytes[Request]]
-    val rawRequest = bytes.from(request)
-    val rawResult = Try(codec.deserialize(rawRequest)).toEither.fold(
+    val rawRequest = implicitly[Bytes[Data]].from(request)
+    Try(codec.deserialize(rawRequest)).toEither.fold(
       error =>
         errorResponse(
           ParseErrorException("Invalid request format", error),
@@ -40,7 +40,6 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
         )
       }
     )
-    backend.map(rawResult, result => result.copy(response = result.response.map(response => bytes.to(response))))
   }
 
   override def toString: String =
@@ -54,13 +53,14 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
    * @param formedRequest formed request
    * @param validRequest valid request
    * @param context request context
+   * @tparam Data message data type
    * @return bound method invocation outcome
    */
-  private def invokeMethod(
+  private def invokeMethod[Data: Bytes](
     formedRequest: Message[Node],
     validRequest: Request[Node],
     context: Context
-  ): Effect[HandlerResult[ArraySeq.ofByte]] = {
+  ): Effect[HandlerResult[Data]] = {
     // Lookup bindings for the specified method
     logger.debug(s"Processing JSON-RPC request", formedRequest.properties)
     methodBindings.get(validRequest.method).map { handlerMethod =>
@@ -86,7 +86,7 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
                       serialize(validResponse.formed)
                     }.getOrElse(backend.pure(None)),
                     (rawResponse: Option[ArraySeq.ofByte]) =>
-                      HandlerResult(rawResponse, formedRequest.id, formedRequest.method, None)
+                      HandlerResult(rawResponse.map(implicitly[Bytes[Data]].to), formedRequest.id, formedRequest.method, None)
                   )
                 }
               )
@@ -137,9 +137,10 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
    *
    * @param error exception
    * @param formedRequest formed request
+   * @tparam Data message data type
    * @return error response if applicable
    */
-  private def errorResponse(error: Throwable, formedRequest: Message[Node]): Effect[HandlerResult[ArraySeq.ofByte]] = {
+  private def errorResponse[Data: Bytes](error: Throwable, formedRequest: Message[Node]): Effect[HandlerResult[Data]] = {
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
     val responseError = error match {
       case JsonRpcError(message, code, data, _) => ResponseError(code, message, data.asInstanceOf[Option[Node]])
@@ -158,7 +159,7 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
         serialize(validResponse.formed)
       }.getOrElse(backend.pure(None)),
       (rawResponse: Option[ArraySeq.ofByte]) =>
-        HandlerResult(rawResponse, formedRequest.id, formedRequest.method, Some(responseError.code))
+        HandlerResult(rawResponse.map(implicitly[Bytes[Data]].to), formedRequest.id, formedRequest.method, Some(responseError.code))
     )
   }
 
