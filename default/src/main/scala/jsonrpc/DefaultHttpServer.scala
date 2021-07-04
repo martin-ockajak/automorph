@@ -42,7 +42,11 @@ case object DefaultHttpServer {
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   ): UndertowServer =
-    UndertowServer(UndertowJsonRpcHandler(bind(DefaultHandler(backend)), effectRunAsync, errorStatus), urlPath, builder)
+    UndertowServer(
+      UndertowJsonRpcHandler(bind(DefaultHandler(backend)), effectRunAsync, errorStatus),
+      urlPath,
+      builder
+    )
 
   /**
    * Create an asynchonous JSON-RPC request handler with defined request `Context` type.
@@ -98,5 +102,9 @@ case object DefaultHttpServer {
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   ): UndertowServer =
-    UndertowServer(UndertowJsonRpcHandler(bind(DefaultHandler.sync()), (_: Any) => (), errorStatus), urlPath, builder)
+    UndertowServer(
+      UndertowJsonRpcHandler(bind(DefaultHandler.sync()), (_: Any) => (), errorStatus),
+      urlPath,
+      builder
+    )
 }
