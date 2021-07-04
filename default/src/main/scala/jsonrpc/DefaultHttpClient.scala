@@ -1,7 +1,7 @@
 package jsonrpc
 
 import jsonrpc.Client
-import jsonrpc.Defaults.DefaultClient
+import jsonrpc.DefaultTypes.DefaultClient
 import jsonrpc.backend.IdentityBackend.Identity
 import jsonrpc.backend.{FutureBackend, IdentityBackend}
 import jsonrpc.codec.json.UpickleJsonCodec

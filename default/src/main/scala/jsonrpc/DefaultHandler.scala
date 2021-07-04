@@ -1,6 +1,6 @@
 package jsonrpc
 
-import jsonrpc.Defaults.DefaultHandler
+import jsonrpc.DefaultTypes.DefaultHandler
 import jsonrpc.Handler
 import jsonrpc.backend.IdentityBackend.Identity
 import jsonrpc.backend.{FutureBackend, IdentityBackend}

@@ -2,7 +2,7 @@ package jsonrpc
 
 import io.undertow.Undertow
 import io.undertow.server.HttpServerExchange
-import jsonrpc.Defaults.DefaultHandler
+import jsonrpc.DefaultTypes.DefaultHandler
 import jsonrpc.backend.IdentityBackend.Identity
 import jsonrpc.server.http.UndertowJsonRpcHandler.defaultErrorStatus
 import jsonrpc.server.http.UndertowServer.defaultBuilder

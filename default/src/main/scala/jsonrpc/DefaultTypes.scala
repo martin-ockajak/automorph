@@ -6,7 +6,7 @@ import jsonrpc.codec.json.UpickleJsonCodec
 import sttp.client3.PartialRequest
 import ujson.Value
 
-case object Defaults {
+case object DefaultTypes {
 
   type DefaultHandler[Effect[_], Context] = Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, Context]
 
