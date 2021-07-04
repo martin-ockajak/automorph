@@ -1,13 +1,11 @@
 package jsonrpc
 
 import io.undertow.Undertow
-import io.undertow.server.HttpServerExchange
-import jsonrpc.Handler
 import jsonrpc.server.http.UndertowJsonRpcHandler.defaultErrorStatus
-import jsonrpc.spi.Backend
-import scala.concurrent.ExecutionContext
-import jsonrpc.server.http.{UndertowJsonRpcHandler, UndertowServer}
 import jsonrpc.server.http.UndertowServer.defaultBuilder
+import jsonrpc.server.http.{UndertowJsonRpcHandler, UndertowServer}
+import jsonrpc.spi.Backend
+import scala.concurrent.{ExecutionContext, Future}
 
 case object DefaultHttpServer {
 
@@ -32,9 +30,8 @@ case object DefaultHttpServer {
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
-  ): UndertowServer = {
+  ): UndertowServer =
     UndertowServer(UndertowJsonRpcHandler(DefaultHandler(backend), effectRunAsync, errorStatus), urlPath, builder)
-  }
 
   /**
    * Create an asynchonous JSON-RPC request handler with defined request `Context` type.
@@ -53,7 +50,8 @@ case object DefaultHttpServer {
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   )(implicit executionContext: ExecutionContext): UndertowServer = {
-    UndertowServer(UndertowJsonRpcHandler(DefaultHandler.async(), identity, errorStatus), urlPath, builder)
+    executionContext
+    UndertowServer(UndertowJsonRpcHandler(DefaultHandler.async(), (_: Future[Any]) => (), errorStatus), urlPath, builder)
   }
 
   /**
@@ -72,7 +70,6 @@ case object DefaultHttpServer {
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
-  ): UndertowServer = {
-    UndertowServer(UndertowJsonRpcHandler(DefaultHandler.sync(), identity, errorStatus), urlPath, builder)
-  }
+  ): UndertowServer =
+    UndertowServer(UndertowJsonRpcHandler(DefaultHandler.sync(), (_: Any) => (), errorStatus), urlPath, builder)
 }

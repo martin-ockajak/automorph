@@ -1,6 +1,5 @@
 package jsonrpc.server.http
 
-import java.io.{ByteArrayInputStream, InputStream}
 import jsonrpc.Handler
 import jsonrpc.handler.HandlerResult
 import jsonrpc.log.Logging
@@ -54,7 +53,7 @@ final case class NanoHttpdServer[Node, ExactCodec <: Codec[Node], Effect[_]] pri
         error => createServerError(error, session),
         result => {
           // Send the response
-          val response = result.response.getOrElse(ArraySeq.ofByte(Array()))
+          val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
           val status = result.errorCode.map(errorStatus).getOrElse(Status.OK)
           createResponse(response, status, session)
         }

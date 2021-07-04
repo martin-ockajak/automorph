@@ -102,7 +102,7 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[ExactCodec])
 
     c.Expr[Any](q"""
-      jsonrpc.Handler($codec, $backend, Handler.defaultBufferSize, Map.empty, value => $codec.encode[List[String]](value), $codec.encode(None))
+      jsonrpc.Handler($codec, $backend, Map.empty, value => $codec.encode[List[String]](value), $codec.encode(None))
     """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, NoContext.Value]]]
   }
 }
