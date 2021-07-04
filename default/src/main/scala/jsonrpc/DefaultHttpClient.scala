@@ -14,6 +14,7 @@ import ujson.Value
 import sttp.client3
 
 case object DefaultHttpClient {
+  type DefaultClient[Effect[_]] = Client[Value, UpickleJsonCodec[UpickleCustom], Effect, PartialRequest[Either[String, String], Any]]
 
   /**
    * Create a JSON-RPC over HTTP client using the specified ''backend'' plugin.
@@ -33,7 +34,7 @@ case object DefaultHttpClient {
     url: Uri,
     httpMethod: Method,
     httpBackend: SttpBackend[Effect, _]
-  ): Client[Value, UpickleJsonCodec[UpickleCustom], Effect, PartialRequest[Either[String, String], Any]] = {
+  ): DefaultClient[Effect] = {
     val codec = UpickleJsonCodec()
     val transport = SttpTransport(url, httpMethod, codec.mediaType, httpBackend, backend)
     Client[Value, UpickleJsonCodec[UpickleCustom], Effect, PartialRequest[Either[String, String], Any]](
@@ -58,7 +59,7 @@ case object DefaultHttpClient {
    */
   def async(url: Uri, httpMethod: Method, sttpBackend: SttpBackend[Future, _])(
     implicit executionContext: ExecutionContext
-  ): Client[Value, UpickleJsonCodec[UpickleCustom], Future, PartialRequest[Either[String, String], Any]] =
+  ): DefaultClient[Future] =
     DefaultHttpClient(FutureBackend(), url, httpMethod, sttpBackend)
 
   /**
@@ -77,6 +78,6 @@ case object DefaultHttpClient {
     url: Uri,
     httpMethod: Method,
     httpBackend: SttpBackend[Identity, _]
-  ): Client[Value, UpickleJsonCodec[UpickleCustom], Identity, PartialRequest[Either[String, String], Any]] =
+  ): DefaultClient[Identity] =
     DefaultHttpClient(IdentityBackend(), url, httpMethod, httpBackend)
 }
