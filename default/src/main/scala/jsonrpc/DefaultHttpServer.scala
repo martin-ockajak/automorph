@@ -64,7 +64,7 @@ case object DefaultHttpServer {
    * @param builder Undertow web server builder
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
    * @param executionContext execution context
-   * @return asynchronous JSON-RPC request handler
+   * @return synchronous JSON-RPC request handler
    */
   def sync(
     urlPath: String = "/",
