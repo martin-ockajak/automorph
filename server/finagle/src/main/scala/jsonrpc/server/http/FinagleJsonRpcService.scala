@@ -30,6 +30,7 @@ import scala.collection.immutable.ArraySeq
  */
 final case class FinagleJsonRpcService[Node, ExactCodec <: Codec[Node], Effect[_]](
   handler: Handler[Node, ExactCodec, Effect, Request],
+  runEffect: Effect[Any] => Unit,
   errorStatus: Int => Status = defaultErrorStatus
 ) extends Service[Request, Response] with Logging {
 
@@ -43,7 +44,7 @@ final case class FinagleJsonRpcService[Node, ExactCodec <: Codec[Node], Effect[_
 
     // Process the request
     implicit val usingContext = request
-    asFuture(backend.map(
+    runAsFuture(backend.map(
       backend.either(handler.processRequest(rawRequest)),
       (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) => handlerResult.fold(
         error => serverError(error, request),
@@ -80,12 +81,12 @@ final case class FinagleJsonRpcService[Node, ExactCodec <: Codec[Node], Effect[_
     }
   }
 
-  private def asFuture[T](value: Effect[T]): Future[T] = {
+  private def runAsFuture[T](value: Effect[T]): Future[T] = {
     val promise = Promise[T]()
-    backend.map(backend.either(value), (outcome: Either[Throwable, T]) => outcome.fold(
+    runEffect(backend.map(backend.either(value), (outcome: Either[Throwable, T]) => outcome.fold(
       error => promise.setException(error),
       result => promise.setValue(result)
-    ))
+    )))
     promise
   }
 }
