@@ -155,7 +155,7 @@ lazy val finagle = (project in file("server/finagle")).dependsOn(
 
 // Default
 lazy val default = project.dependsOn(
-  upickle, undertow, sttp
+  upickle, standard, undertow, sttp
 ).settings(
   name := "json-rpc-default"
 )

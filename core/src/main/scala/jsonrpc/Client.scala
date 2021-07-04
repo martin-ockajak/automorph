@@ -172,7 +172,7 @@ case object Client {
    * @tparam Node message format node representation type
    * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
-   * @return JSON-RPC request client
+   * @return JSON-RPC client
    */
   def basic[Node, ExactCodec <: Codec[Node], Effect[_]](
     codec: ExactCodec,
