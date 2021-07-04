@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import ujson.Value
 
 case object DefaultHandler {
-  type Type[Effect[_]] = Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, HttpServerExchange]
+  type Type[Effect[_], Context] = Handler[Value, UpickleJsonCodec[UpickleCustom], Effect, Context]
 
   /**
    * Create a JSON-RPC request handler using the specified ''backend'' plugin with defined request `Context` type.
