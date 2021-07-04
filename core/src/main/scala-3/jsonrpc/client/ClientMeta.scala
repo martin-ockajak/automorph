@@ -170,6 +170,78 @@ private[jsonrpc] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Co
     performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
 
   /**
+   * Perform a remote JSON-RPC method ''call''.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent named method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method argument types.
+   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Invoked method arguments are supplied ''by name'' as an object.
+   *
+   * @param method method name
+   * @param context request context
+   * @tparam R result type
+   * @return result value
+   */
+  inline def callByName[T1, T2, T3, T4, T5, T6, R](
+    method: String,
+    p1: (String, T1),
+    p2: (String, T2),
+    p3: (String, T3),
+    p4: (String, T4),
+    p5: (String, T5),
+    p6: (String, T6)
+  )(using
+    context: Context
+  ): Effect[R] =
+    val encodedArguments = Right(Map(
+      p1._1 -> codec.encode(p1._2),
+      p2._1 -> codec.encode(p2._2),
+      p3._1 -> codec.encode(p3._2),
+      p4._1 -> codec.encode(p4._2),
+      p6._1 -> codec.encode(p6._2),
+      p5._1 -> codec.encode(p5._2)
+    ))
+    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
+
+  /**
+   * Perform a remote JSON-RPC method ''call''.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent named method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method argument types.
+   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Invoked method arguments are supplied ''by name'' as an object.
+   *
+   * @param method method name
+   * @param context request context
+   * @tparam R result type
+   * @return result value
+   */
+  inline def callByName[T1, T2, T3, T4, T5, T6, T7, R](
+    method: String,
+    p1: (String, T1),
+    p2: (String, T2),
+    p3: (String, T3),
+    p4: (String, T4),
+    p5: (String, T5),
+    p6: (String, T6),
+    p7: (String, T7)
+  )(using
+    context: Context
+  ): Effect[R] =
+    val encodedArguments = Right(Map(
+      p1._1 -> codec.encode(p1._2),
+      p2._1 -> codec.encode(p2._2),
+      p3._1 -> codec.encode(p3._2),
+      p4._1 -> codec.encode(p4._2),
+      p6._1 -> codec.encode(p6._2),
+      p6._1 -> codec.encode(p6._2),
+      p7._1 -> codec.encode(p7._2)
+    ))
+    performCall(method, encodedArguments, Some(context), resultNode => codec.decode[R](resultNode))
+
+  /**
    * Perform a remote JSON-RPC method ''notification''.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent named method argument values.
@@ -308,6 +380,76 @@ private[jsonrpc] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Co
       p3._1 -> codec.encode(p3._2),
       p4._1 -> codec.encode(p4._2),
       p5._1 -> codec.encode(p5._2)
+    ))
+    performNotify(method, encodedArguments, Some(context))
+
+  /**
+   * Perform a remote JSON-RPC method ''notification''.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent named method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method argument types.
+   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Invoked method arguments are supplied ''by name'' as an object.
+   *
+   * @param method method name
+   * @param context JSON-RPC request context
+   * @return nothing
+   */
+  inline def notifyByName[T1, T2, T3, T4, T5, T6](
+    method: String,
+    p1: (String, T1),
+    p2: (String, T2),
+    p3: (String, T3),
+    p4: (String, T4),
+    p5: (String, T5),
+    p6: (String, T6)
+  )(using
+    context: Context
+  ): Effect[Unit] =
+    val encodedArguments = Right(Map(
+      p1._1 -> codec.encode(p1._2),
+      p2._1 -> codec.encode(p2._2),
+      p3._1 -> codec.encode(p3._2),
+      p4._1 -> codec.encode(p4._2),
+      p5._1 -> codec.encode(p5._2),
+      p6._1 -> codec.encode(p6._2)
+    ))
+    performNotify(method, encodedArguments, Some(context))
+
+  /**
+   * Perform a remote JSON-RPC method ''notification''.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent named method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method argument types.
+   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Invoked method arguments are supplied ''by name'' as an object.
+   *
+   * @param method method name
+   * @param context JSON-RPC request context
+   * @return nothing
+   */
+  inline def notifyByName[T1, T2, T3, T4, T5, T6, T7](
+    method: String,
+    p1: (String, T1),
+    p2: (String, T2),
+    p3: (String, T3),
+    p4: (String, T4),
+    p5: (String, T5),
+    p6: (String, T6),
+    p7: (String, T7)
+  )(using
+    context: Context
+  ): Effect[Unit] =
+    val encodedArguments = Right(Map(
+      p1._1 -> codec.encode(p1._2),
+      p2._1 -> codec.encode(p2._2),
+      p3._1 -> codec.encode(p3._2),
+      p4._1 -> codec.encode(p4._2),
+      p5._1 -> codec.encode(p5._2),
+      p6._1 -> codec.encode(p6._2),
+      p7._1 -> codec.encode(p7._2)
     ))
     performNotify(method, encodedArguments, Some(context))
 

@@ -250,6 +250,55 @@ private[jsonrpc] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Co
     macro ClientMeta.notifyByNameMacro[Effect, Context, T1, T2, T3, T4, T5]
 
   /**
+   * Perform a remote JSON-RPC method ''notification''.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent named method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method argument types.
+   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Invoked method arguments are supplied ''by name'' as an object.
+   *
+   * @param method method name
+   * @param context JSON-RPC request context
+   * @return nothing
+   */
+  def notifyByName[T1, T2, T3, T4, T5, T6](
+    method: String,
+    p1: (String, T1),
+    p2: (String, T2),
+    p3: (String, T3),
+    p4: (String, T4),
+    p5: (String, T5),
+    p6: (String, T6)
+  )(implicit context: Context): Effect[Unit] =
+    macro ClientMeta.notifyByNameMacro[Effect, Context, T1, T2, T3, T4, T5, T6]
+
+  /**
+   * Perform a remote JSON-RPC method ''notification''.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent named method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method argument types.
+   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Invoked method arguments are supplied ''by name'' as an object.
+   *
+   * @param method method name
+   * @param context JSON-RPC request context
+   * @return nothing
+   */
+  def notifyByName[T1, T2, T3, T4, T5, T6, T7](
+    method: String,
+    p1: (String, T1),
+    p2: (String, T2),
+    p3: (String, T3),
+    p4: (String, T4),
+    p5: (String, T5),
+    p6: (String, T6),
+    p7: (String, T7)
+  )(implicit context: Context): Effect[Unit] =
+    macro ClientMeta.notifyByNameMacro[Effect, Context, T1, T2, T3, T4, T5, T6, T7]
+
+  /**
    * Perform a remote JSON-RPC method ''call''.
    *
    *.
@@ -695,6 +744,75 @@ object ClientMeta {
     """)
   }
 
+  def callByNameMacro[
+    Effect[_],
+    Context,
+    T1: c.WeakTypeTag,
+    T2: c.WeakTypeTag,
+    T3: c.WeakTypeTag,
+    T4: c.WeakTypeTag,
+    T5: c.WeakTypeTag,
+    T6: c.WeakTypeTag,
+    R: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    method: c.Expr[String],
+    p1: c.Expr[(String, T1)],
+    p2: c.Expr[(String, T2)],
+    p3: c.Expr[(String, T3)],
+    p4: c.Expr[(String, T4)],
+    p5: c.Expr[(String, T5)],
+    p6: c.Expr[(String, T6)]
+  )(context: c.Expr[Context])(implicit resultType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+
+    c.Expr[Effect[R]](q"""
+      ${c.prefix}.performCall($method, Right(Map(
+        $p1._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
+        $p2._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
+        $p3._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2),
+        $p4._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4._2),
+        $p5._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5._2),
+        $p6._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T6]}]($p6._2)
+      )), Some($context), resultNode => ${c.prefix}.codec.decode[${weakTypeOf[R]}](resultNode))
+    """)
+  }
+
+  def callByNameMacro[
+    Effect[_],
+    Context,
+    T1: c.WeakTypeTag,
+    T2: c.WeakTypeTag,
+    T3: c.WeakTypeTag,
+    T4: c.WeakTypeTag,
+    T5: c.WeakTypeTag,
+    T6: c.WeakTypeTag,
+    T7: c.WeakTypeTag,
+    R: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    method: c.Expr[String],
+    p1: c.Expr[(String, T1)],
+    p2: c.Expr[(String, T2)],
+    p3: c.Expr[(String, T3)],
+    p4: c.Expr[(String, T4)],
+    p5: c.Expr[(String, T5)],
+    p6: c.Expr[(String, T6)],
+    p7: c.Expr[(String, T7)]
+  )(context: c.Expr[Context])(implicit resultType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+
+    c.Expr[Effect[R]](q"""
+      ${c.prefix}.performCall($method, Right(Map(
+        $p1._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
+        $p2._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
+        $p3._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2),
+        $p4._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4._2),
+        $p5._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5._2),
+        $p6._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T6]}]($p6._2),
+        $p7._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T7]}]($p7._2)
+      )), Some($context), resultNode => ${c.prefix}.codec.decode[${weakTypeOf[R]}](resultNode))
+    """)
+  }
+
   def notifyByNameMacro[Effect[_], Context](c: blackbox.Context)(
     method: c.Expr[String]
   )(context: c.Expr[Context])(implicit resultType: c.WeakTypeTag[Effect[Unit]]): c.Expr[Effect[Unit]] = {
@@ -801,6 +919,73 @@ object ClientMeta {
         $p3._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2),
         $p4._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4._2),
         $p5._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5._2)
+      )), Some($context))
+    """)
+  }
+
+  def notifyByNameMacro[
+    Effect[_],
+    Context,
+    T1: c.WeakTypeTag,
+    T2: c.WeakTypeTag,
+    T3: c.WeakTypeTag,
+    T4: c.WeakTypeTag,
+    T5: c.WeakTypeTag,
+    T6: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    method: c.Expr[String],
+    p1: c.Expr[(String, T1)],
+    p2: c.Expr[(String, T2)],
+    p3: c.Expr[(String, T3)],
+    p4: c.Expr[(String, T4)],
+    p5: c.Expr[(String, T5)],
+    p6: c.Expr[(String, T6)]
+  )(context: c.Expr[Context])(implicit resultType: c.WeakTypeTag[Effect[Unit]]): c.Expr[Effect[Unit]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+
+    c.Expr[Effect[Unit]](q"""
+      ${c.prefix}.performNotify($method, Right(Map(
+        $p1._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
+        $p2._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
+        $p3._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2),
+        $p4._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4._2),
+        $p5._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5._2),
+        $p6._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T6]}]($p6._2)
+      )), Some($context))
+    """)
+  }
+
+  def notifyByNameMacro[
+    Effect[_],
+    Context,
+    T1: c.WeakTypeTag,
+    T2: c.WeakTypeTag,
+    T3: c.WeakTypeTag,
+    T4: c.WeakTypeTag,
+    T5: c.WeakTypeTag,
+    T6: c.WeakTypeTag,
+    T7: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    method: c.Expr[String],
+    p1: c.Expr[(String, T1)],
+    p2: c.Expr[(String, T2)],
+    p3: c.Expr[(String, T3)],
+    p4: c.Expr[(String, T4)],
+    p5: c.Expr[(String, T5)],
+    p6: c.Expr[(String, T6)],
+    p7: c.Expr[(String, T7)]
+  )(context: c.Expr[Context])(implicit resultType: c.WeakTypeTag[Effect[Unit]]): c.Expr[Effect[Unit]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+
+    c.Expr[Effect[Unit]](q"""
+      ${c.prefix}.performNotify($method, Right(Map(
+        $p1._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
+        $p2._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
+        $p3._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2),
+        $p4._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4._2),
+        $p5._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5._2),
+        $p6._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T6]}]($p6._2),
+        $p7._1 -> ${c.prefix}.codec.encode[${weakTypeOf[T7]}]($p7._2)
       )), Some($context))
     """)
   }
