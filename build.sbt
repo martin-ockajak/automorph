@@ -149,7 +149,8 @@ lazy val jetty = (project in file("server/jetty")).dependsOn(
 ).settings(
   name := "json-rpc-jetty",
   libraryDependencies ++= Seq(
-    ("org.eclipse.jetty" % "jetty-servlet" % "11.0.5").cross(CrossVersion.for3Use2_13)
+    "org.eclipse.jetty" % "jetty-servlet" % "11.0.5",
+    "commons-io" % "commons-io" % "2.10.0"
   )
 )
 

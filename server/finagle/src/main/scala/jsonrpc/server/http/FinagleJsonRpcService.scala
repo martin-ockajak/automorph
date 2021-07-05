@@ -40,12 +40,12 @@ final case class FinagleJsonRpcService[Node, ExactCodec <: Codec[Node], Effect[_
     // Receive the request
     val client = clientAddress(request)
     logger.debug("Received HTTP request", Map("Client" -> client))
-    val rawRequest = Buf.ByteArray.Owned.extract(request.content)
+    val requestMessage = Buf.ByteArray.Owned.extract(request.content)
 
     // Process the request
     implicit val usingContext = request
     runAsFuture(backend.map(
-      backend.either(handler.processRequest(rawRequest)),
+      backend.either(handler.processRequest(requestMessage)),
       (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) => handlerResult.fold(
         error => serverError(error, request),
         result => {

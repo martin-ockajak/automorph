@@ -4,14 +4,13 @@ import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, StatusCodes}
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
 import jsonrpc.Handler
-import jsonrpc.handler.HandlerResult
+import jsonrpc.handler.{Bytes, HandlerResult}
 import jsonrpc.log.Logging
-import jsonrpc.protocol.ErrorType
-import jsonrpc.protocol.ResponseError
+import jsonrpc.protocol.{ErrorType, ResponseError}
 import jsonrpc.server.http.UndertowJsonRpcHandler.defaultErrorStatus
 import jsonrpc.spi.Codec
+import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
 /**
@@ -36,26 +35,26 @@ final case class UndertowJsonRpcHandler[Node, ExactCodec <: Codec[Node], Effect[
 ) extends HttpHandler with Logging {
 
   private val backend = handler.backend
-  private val charset = StandardCharsets.UTF_8
 
   private val receiveCallback = new Receiver.FullBytesCallback {
 
     override def handle(exchange: HttpServerExchange, request: Array[Byte]): Unit = {
       val client = clientAddress(exchange)
       logger.debug("Received HTTP request", Map("Client" -> client))
+      val requestMessage = Bytes.byteArrayBytes.from(request)
       exchange.dispatch(new Runnable {
 
         override def run(): Unit = {
           // Process the request
           implicit val usingContext = exchange
           runEffect(backend.map(
-            backend.either(handler.processRequest(request)),
-            (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
+            backend.either(handler.processRequest(requestMessage)),
+            (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
               handlerResult.fold(
                 error => sendServerError(error, exchange),
                 result => {
                   // Send the response
-                  val response = result.response.getOrElse(Array.empty[Byte])
+                  val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
                   val statusCode = result.errorCode.map(errorStatus).getOrElse(StatusCodes.OK)
                   sendResponse(response, statusCode, exchange)
                 }
@@ -77,18 +76,20 @@ final case class UndertowJsonRpcHandler[Node, ExactCodec <: Codec[Node], Effect[
 
   private def sendServerError(error: Throwable, exchange: HttpServerExchange): Unit = {
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
-    val message = ResponseError.trace(error).mkString("\n").getBytes(charset)
+    val message = Bytes.stringBytes.from(ResponseError.trace(error).mkString("\n"))
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(exchange)))
     sendResponse(message, statusCode, exchange)
   }
 
-  private def sendResponse(message: Array[Byte], statusCode: Int, exchange: HttpServerExchange): Unit =
+  private def sendResponse(message: ArraySeq.ofByte, statusCode: Int, exchange: HttpServerExchange): Unit =
+    val client = clientAddress(exchange)
+    logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
     if (exchange.isResponseChannelAvailable) {
-      val client = clientAddress(exchange)
-      logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
+      exchange.setStatusCode(statusCode).getResponseSender.send(Bytes.byteBufferBytes.to(message))
       exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.codec.mediaType)
-      exchange.setStatusCode(statusCode).getResponseSender.send(ByteBuffer.wrap(message))
       logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
+    } else {
+      logger.error("HTTP response channel not available", Map("Client" -> client, "Status" -> statusCode.toString))
     }
 
   private def clientAddress(exchange: HttpServerExchange): String = {
