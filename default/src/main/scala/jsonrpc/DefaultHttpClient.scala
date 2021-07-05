@@ -46,14 +46,14 @@ case object DefaultHttpClient {
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url endpoint URL
-   * @param httpMethod HTTP method
+   * @param method HTTP method
    * @param executionContext execution context
    * @return asynchronous JSON-RPC over HTTP client
    */
-  def async(url: Uri, httpMethod: Method = Method.POST)(implicit
+  def async(url: Uri, method: Method)(implicit
     executionContext: ExecutionContext
   ): DefaultClient[Future] =
-    DefaultHttpClient(FutureBackend(), AsyncHttpClientFutureBackend(), url, httpMethod)
+    DefaultHttpClient(FutureBackend(), AsyncHttpClientFutureBackend(), url, method)
 
   /**
    * Create a asynchronous JSON-RPC over HTTP client.
@@ -63,11 +63,11 @@ case object DefaultHttpClient {
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url endpoint URL
-   * @param httpMethod HTTP method
+   * @param method HTTP method
    * @return synchronous JSON-RPC over HTTP client
    */
-  def sync(url: Uri, httpMethod: Method = Method.POST): DefaultClient[Identity] = {
+  def sync(url: Uri, method: Method): DefaultClient[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
-    DefaultHttpClient(IdentityBackend(), HttpURLConnectionBackend(), url, httpMethod)
+    DefaultHttpClient(IdentityBackend(), HttpURLConnectionBackend(), url, method)
   }
 }
