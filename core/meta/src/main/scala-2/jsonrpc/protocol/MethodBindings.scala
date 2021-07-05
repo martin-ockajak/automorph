@@ -5,34 +5,36 @@ import scala.reflect.macros.blackbox
 
 /** Method bindings introspection. */
 private[jsonrpc] case object MethodBindings {
-  def methodLiftable[C <: blackbox.Context](ref: Reflection[C]): ref.c.universe.Liftable[Method] = new ref.c.universe.Liftable[Method] {
-    import ref.c.universe.{Quasiquote, Tree}
 
-    implicit val parameterLiftable = new ref.c.universe.Liftable[Parameter] {
+  def methodLiftable[C <: blackbox.Context](ref: Reflection[C]): ref.c.universe.Liftable[Method] =
+    new ref.c.universe.Liftable[Method] {
+
       import ref.c.universe.{Quasiquote, Tree}
 
-      override def apply(v: Parameter): Tree = q"""
-      jsonrpc.util.Parameter(
-        ${v.name},
-        ${v.dataType},
-        ${v.contextual}
-      )
-    """
-    }
-    Seq(parameterLiftable)
+      implicit val parameterLiftable = new ref.c.universe.Liftable[Parameter] {
 
-    override def apply(v: Method): Tree = q"""
-      jsonrpc.util.Method(
-        ${v.name},
-        ${v.resultType},
-        ..${v.parameters.map(values => q"..${values}")},
-        ..${v.typeParameters},
-        ${v.public},
-        ${v.available},
-        ${v.documentation},
-      )
-    """
-  }
+        override def apply(v: Parameter): Tree = q"""
+          jsonrpc.util.Parameter(
+            ${v.name},
+            ${v.dataType},
+            ${v.contextual}
+          )
+        """
+      }
+      Seq(parameterLiftable)
+
+      override def apply(v: Method): Tree = q"""
+        jsonrpc.util.Method(
+          ${v.name},
+          ${v.resultType},
+          ..${v.parameters.map(values => q"..$values")},
+          ..${v.typeParameters},
+          ${v.public},
+          ${v.available},
+          ${v.documentation},
+        )
+      """
+    }
 
   /**
    * Detect valid API methods in the specified API type.
