@@ -53,7 +53,7 @@ import io.automorph.DefaultHttpServer
 val api = new Api()
 val server = DefaultHttpServer.async(_.bind(api), 80, "/api") // The server is running
 
-server.close() // The server is stopped
+server.close() // The server stopped
 ```
 
 # Features
