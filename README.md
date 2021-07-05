@@ -23,7 +23,7 @@ Define an *API* class:
 import scala.concurrent.Future
 
 class Api {
-  def hello(typed: String): Future[String] = Future.succesful(s"Hello $typed world!")
+  def hello(something: String): Future[String] = Future.succesful(s"Hello $something!")
 }
 
 ```
@@ -51,8 +51,8 @@ import io.automorph.DefaultHttpClient
 val client = DefaultHttpClient.async("http://localhost/api", "POST")
 val api = client.bindByName[Api]
 
-val proxyResult = api.hello("neat") // Future[String]
-val directResult: Future[String] = client.callByName("hello", "neat")
+val proxyResult = api.hello("world") // Future[String]
+val directResult: Future[String] = client.callByName("hello", "world")
 
 ```
 
