@@ -7,7 +7,7 @@ and exposing remote APIs.
 
 * **Simple** - automatically generate JSON-RPC bindings for public methods of existing API classes
 * **Extensible** - support serialization of arbitrary data types
-* **Modular** - combine effectful **backend**, message format **codec**, message **transport** and endpoint **server** plugins to suit specific needs
+* **Modular** - combine effect **backend**, message format **codec**, message **transport** and endpoint **server** plugins to suit specific needs
 * **Flexible** - customize JSON-RPC method name and error code mapping
 * **Type safe** - validate bound API classes during compilation
 * **Performant** - generate optimized API binding code during compilation
