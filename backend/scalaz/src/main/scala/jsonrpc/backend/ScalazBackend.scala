@@ -7,7 +7,7 @@ import scalaz.effect.IO
  * Scalaz effect backend plugin.
  *
  * @see [[https://github.com/scalaz Documentation]]
- * @see [[https://www.javadoc.io/doc/org.scalaz/scalaz_2.13/7.4.0/scalaz/effect/IO.html Effect type]]
+ * @see [[https://www.javadoc.io/doc/org.scalaz/scalaz_2.13/latest/scalaz/effect/IO.html Effect type]]
  */
 final case class ScalazBackend() extends Backend[IO] {
 
