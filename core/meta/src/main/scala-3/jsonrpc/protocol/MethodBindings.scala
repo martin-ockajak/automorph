@@ -1,12 +1,15 @@
 package jsonrpc.protocol
 
 import jsonrpc.util.{Method, Parameter, Reflection}
-import scala.quoted.{Expr, Quotes, ToExpr, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, ToExpr, Type}
 
 /** Method bindings introspection. */
 private[jsonrpc] case object MethodBindings:
+
   given methodToExpr: ToExpr[Method] = new ToExpr[Method]:
+
     given parameterToExpr: ToExpr[Parameter] = new ToExpr[Parameter]:
+
       override def apply(v: Parameter)(using Quotes): Expr[Parameter] = '{
         Parameter(
           ${ Expr(v.name) },
@@ -23,7 +26,7 @@ private[jsonrpc] case object MethodBindings:
         ${ Expr(v.typeParameters) },
         ${ Expr(v.public) },
         ${ Expr(v.available) },
-        ${ Expr(v.documentation) },
+        ${ Expr(v.documentation) }
       )
     }
 
