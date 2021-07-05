@@ -17,6 +17,7 @@ lazy val root = project.in(file(".")).aggregate(
   sttp,
 
   undertow,
+  jetty,
   finagle,
 
   default
