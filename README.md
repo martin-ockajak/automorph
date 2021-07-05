@@ -5,15 +5,44 @@ and exposing remote APIs.
 
 # Features
 
-* **Simple** - automatically generate JSON-RPC bindings for public methods of existing API classes
-* **Extensible** - support serialization of arbitrary data types
-* **Modular** - combine effect **backend**, message format **codec**, message **transport** and endpoint **server** plugins to suit specific needs
-* **Flexible** - customize JSON-RPC method name and error code mapping
+* **Simple** - generate JSON-RPC bindings automatically from public methods of existing API classes
+* **Extensible** - automatically derive or implement serialization logic for arbitrary data types
+* **Modular** - freely combine various plugins to integrate with other libraries
+* **Flexible** - customize mapping of JSON-RPC method names and error codes
 * **Type safe** - validate bound API classes during compilation
 * **Performant** - generate optimized API binding code during compilation
-* **Compatible** - full support of JSON-RPC 2.0 specification
-* **No boilerplate** - even advanced use-cases require only a few lines of code
+* **Compatible** - support for [Scala 2.12](https://www.scala-lang.org/news/2.12.0/), [Scala 2.13](https://www.scala-lang.org/news/2.13.0) and [Scala 3](https://dotty.epfl.ch/)
+* **No boilerplate** - even advanced use requires only a few lines of code
 * **No dependencies** - core implementation depends on [SLF4J API](http://www.slf4j.org/) only
+
+# Plugins
+
+Plugins between different published artifacts to reduce the required external dependencies.
+
+## Backend
+
+Effectful computation plugins:
+
+| Name | Effect Type | Artifact | Library |
+| ---- | --- | --- | --- |
+| **IdentityBackend**  | *Identity* | [automorph-standard](https://mvnrepository.com/artifact/io.automorph/automorph-standard) | [Standard Library](https://www.scala-lang.org/) |
+| **FutureBackend**  | [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html) | [automorph-standard](https://mvnrepository.com/artifact/io.automorph/automorph-standard) | [Standard Library](https://docs.scala-lang.org/overviews/core/futures.html) |
+| **TryBackend**  | [Try](https://www.scala-lang.org/api/2.13.6/scala/util/Try.html) | [automorph-standard](https://mvnrepository.com/artifact/io.automorph/automorph-standard) | [Standard Library](https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html) |
+| **ZioBackend**  | [RIO](https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html) | [automorph-zio](https://mvnrepository.com/artifact/io.automorph/automorph-zio) | [ZIO](https://zio.dev/) |
+| **MonixBackend**  | [Task](https://monix.io/api/current/monix/eval/Task.html) | [automorph-monix](https://mvnrepository.com/artifact/io.automorph/automorph-monix) | [Monix](https://monix.io/) |
+| **MonixBackend**  | [IO](https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html) | [automorph-cats](https://mvnrepository.com/artifact/io.automorph/automorph-cats) | [Monix](https://typelevel.org/cats-effect/) |
+
+## Codec
+
+Hierarchical message data format plugins:
+
+## Transport
+
+Message transport plugins:
+
+## Server
+
+Remote endpoint server plugins:
 
 # Quick Start
 
@@ -109,15 +138,5 @@ Handler plugins:
             | Backend |    | Codec |
             '---------'    '-------'
 ```
-
-# Plugins
-
-## Backend
-
-## Codec
-
-## Transport
-
-## Server
 
 # Examples

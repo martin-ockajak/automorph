@@ -11,7 +11,7 @@ lazy val root = project.in(file(".")).aggregate(
   standard,
   zio,
   monix,
-  cats,
+  catsEffect,
   scalaz,
 
   sttp,
@@ -108,10 +108,10 @@ lazy val monix = (project in file("backend/monix")).dependsOn(
     "io.monix" %% "monix-eval" % "3.4.0"
   )
 )
-lazy val cats = (project in file("backend/cats")).dependsOn(
+lazy val catsEffect = (project in file("backend/cats-effect")).dependsOn(
   spi, testCore % Test
 ).settings(
-  name := "json-rpc-cats",
+  name := "json-rpc-cats-effect",
   libraryDependencies ++= Seq(
     "org.typelevel" %% "cats-effect" % "3.1.1"
   )

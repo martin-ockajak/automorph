@@ -3,7 +3,7 @@ package jsonrpc.spi
 import scala.collection.immutable.ArraySeq
 
 /**
- * Request and response message transport plugin.
+ * Message transport plugin.
  *
  * The transport can be used by a JSON-RPC client to send requests and receive responses to and from a remote endpoint.
  *
