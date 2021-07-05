@@ -72,8 +72,10 @@ val directResult: Future[String] = client.callByName("hello", "world")
 
 ## Client
 
-The client provides automatic creation of proxy instances for remote JSON-RPC APIs from existing classes thus making the remote calls fully transparent.
-Additionally, it allows calls and notifications of remote API methods directly.
+The client provides automatic creation of proxy instances for remote JSON-RPC APIs from existing classes or traits thus making the remote calls fully
+transparent. Additionally, it allows calls and notifications of remote API methods directly.
+
+Client plugins:
 
 ```
         .--------.     .-----------.
@@ -88,8 +90,9 @@ Additionally, it allows calls and notifications of remote API methods directly.
 
 ## Handler
 
-The handler provides automatic creation of JSOn-RPC endpoint bindings for existing API instances and subsequent processing JSON-RPC requests.
+The handler provides automatic creation of JSON-RPC endpoint bindings for existing API instances and subsequent processing JSON-RPC requests.
 
+Handler plugins:
 ```
      .--------.     .---------.
      | Server | --> | Handler |
