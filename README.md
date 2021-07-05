@@ -3,6 +3,18 @@
 **Automorph** is a [Scala](https://www.scala-lang.org/) [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for effortlessly invoking
 and exposing remote APIs.
 
+# Features
+
+* **Simple** - automatically generate JSON-RPC bindings for public methods of existing API classes
+* **Extensible** - support serialization of arbitrary data types
+* **Modular** - combine effect **backend**, data format **codec**, message **transport** and endpoint **server** plugins to suit specific needs
+* **Flexible** - customize JSON-RPC method name and error code mapping
+* **Type safe** - validate bound API classes during compilation
+* **Performant** - generate optimized API binding code during compilation
+* **Compatible** - full support of JSON-RPC 2.0 specification
+* **No boilerplate** - even advanced use-cases require only a few lines of code
+* **No dependencies** - core implementation depends on [SLF4J API](http://www.slf4j.org/) only
+
 # Quick Start
 
 JSON-RPC over HTTP.
@@ -61,18 +73,6 @@ val directResult: Future[String] = client.callByName("hello", "world")
 client.notifyByName("hello", "world") // Future[Unit]
 
 ```
-
-# Features
-
-* **Simple** - automatically generate JSON-RPC bindings for public methods of existing API classes
-* **Extensible** - support serialization of arbitrary data types
-* **Modular** - combine effect **backend**, data format **codec**, message **transport** and remote endpoint **server** plugins to suit specific needs
-* **Flexible** - customize JSON-RPC method name and error code mapping
-* **Type safe** - validate bound API classes during compilation
-* **Performant** - generate optimized API binding code during compilation
-* **Compatible** - full support of JSON-RPC 2.0 specification
-* **No boilerplate** - even advanced use-cases require only a few lines of code
-* **No dependencies** - core implementation depends on [SLF4J API](http://www.slf4j.org/) only
 
 # Architecture
 
