@@ -168,7 +168,7 @@ lazy val default = project.dependsOn(
 ).settings(
   name := "json-rpc-default",
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.9" % Test
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.9"
   )
 )
 
