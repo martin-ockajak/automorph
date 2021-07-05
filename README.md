@@ -23,7 +23,6 @@ Define an *API* class:
 import scala.concurrent.Future
 
 class Api {
-
   def hello(typed: String): Future[String] = Future.succesful(s"Hello $typed world")
 }
 
@@ -39,7 +38,7 @@ import io.automorph.DefaultHttpClient
 val client = DefaultHttpClient.async("http://example.net/api", "POST")
 val api = client.bindByName[Api]
 
-val proxyResult = api.hello("neat")  // Future[String]
+val proxyResult = api.hello("neat") // Future[String]
 val directResult: Future[String] = client.callByName("hello", "neat")
 
 ```
@@ -52,9 +51,9 @@ Create a remote *API* server:
 import io.automorph.DefaultHttpServer
 
 val api = new Api()
-val server = DefaultHttpServer.async(_.bind(api), 80, "/api")  // The server is running
+val server = DefaultHttpServer.async(_.bind(api), 80, "/api") // The server is running
 
-server.close()  // The server is stopped
+server.close() // The server is stopped
 ```
 
 # Features
