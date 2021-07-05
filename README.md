@@ -35,7 +35,7 @@ Create a remote *API* client:
 ```scala
 import io.automorph.DefaultHttpClient
 
-val client = DefaultHttpClient.async("http://example.net/api", "POST")
+val client = DefaultHttpClient.async("https://example.net/api", "POST")
 val api = client.bindByName[Api]
 
 val proxyResult = api.hello("neat") // Future[String]
