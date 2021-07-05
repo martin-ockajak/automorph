@@ -1,17 +1,22 @@
 package jsonrpc.client
 
+import jsonrpc.util.Method
+
 /**
  * Client bound API method binding.
  *
+ * @param method method descriptor
  * @param encodeArguments bound method arguments encoding function
  * @param decodeResult bound method result decoding function
  * @param name method name
  * @param resultType result type
  * @param paramNames parameter names
  * @param parameterTypes paramter types
+ * @param usesContext true if the last parameter of the bound method is contextual
  * @tparam Node message format node representation type
  */
 final case class ClientMethod[Node](
+//  method: Method,
   encodeArguments: Seq[Any] => Seq[Node],
   decodeResult: Node => Any,
   name: String,

@@ -1,6 +1,6 @@
 package jsonrpc.handler
 
-import jsonrpc.protocol.MethodBindings.{methodSignature, methodUsesContext, unwrapType, validApiMethods}
+import jsonrpc.protocol.MethodBindings.{methodSignature, methodLiftable, methodUsesContext, unwrapType, validApiMethods}
 import jsonrpc.spi.{Backend, Codec}
 import jsonrpc.util.Reflection
 import scala.language.experimental.macros
@@ -81,6 +81,9 @@ case object HandlerBindings {
 
     val invoke = generateInvoke[C, Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)
     logBoundMethod[C, Api](ref)(method, invoke)
+    implicit val methodLift = methodLiftable(ref)
+    Seq(methodLift)
+//        ${method.lift}
     ref.c.Expr[HandlerMethod[Node, Effect, Context]](q"""
       jsonrpc.handler.HandlerMethod(
         $invoke,

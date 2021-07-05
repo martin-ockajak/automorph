@@ -1,10 +1,30 @@
 package jsonrpc.protocol
 
-import jsonrpc.util.Reflection
-import scala.quoted.{quotes, Quotes, Type}
+import jsonrpc.util.{Method, Parameter, Reflection}
+import scala.quoted.{Expr, Quotes, ToExpr, Type, quotes}
 
 /** Method bindings introspection. */
 private[jsonrpc] case object MethodBindings:
+  given parameterToExpr: ToExpr[Parameter] = new ToExpr[Parameter]:
+    override def apply(v: Parameter)(using Quotes): Expr[Parameter] = '{
+      Parameter(
+        ${ Expr(v.name) },
+        ${ Expr(v.dataType) },
+        ${ Expr(v.contextual) }
+      )
+    }
+  given methodToExpr: ToExpr[Method] = new ToExpr[Method]:
+    override def apply(v: Method)(using Quotes): Expr[Method] = '{
+      Method(
+        ${ Expr(v.name) },
+        ${ Expr(v.resultType) },
+        ${ Expr(v.parameters) },
+        ${ Expr(v.typeParameters) },
+        ${ Expr(v.public) },
+        ${ Expr(v.available) },
+        ${ Expr(v.documentation) },
+      )
+    }
 
   /**
    * Detect valid API methods in the specified API type.

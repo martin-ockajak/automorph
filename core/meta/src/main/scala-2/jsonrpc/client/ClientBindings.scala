@@ -1,7 +1,7 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.protocol.MethodBindings.{methodSignature, methodUsesContext, unwrapType, validApiMethods}
+import jsonrpc.protocol.MethodBindings.{methodSignature, methodLiftable, methodUsesContext, unwrapType, validApiMethods}
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
 import scala.language.experimental.macros
@@ -75,6 +75,9 @@ case object ClientBindings {
     val encodeArguments = generateEncodeArguments[C, Node, ExactCodec, Context](ref)(method, codec)
     val decodeResult = generateDecodeResult[C, Node, ExactCodec, Effect](ref)(method, codec)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
+    implicit val methodLift = methodLiftable(ref)
+    Seq(methodLift)
+//        ${method.lift},
     ref.c.Expr[ClientMethod[Node]](q"""
       jsonrpc.client.ClientMethod(
         $encodeArguments,

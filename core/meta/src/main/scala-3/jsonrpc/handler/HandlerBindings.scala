@@ -1,9 +1,9 @@
 package jsonrpc.handler
 
-import jsonrpc.protocol.MethodBindings.{call, methodSignature, methodUsesContext, unwrapType, validApiMethods}
+import jsonrpc.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
 import jsonrpc.protocol.ErrorType.InvalidRequestException
 import jsonrpc.spi.{Backend, Codec}
-import jsonrpc.util.Reflection
+import jsonrpc.util.{Method, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
 import scala.util.Try
 
@@ -81,6 +81,7 @@ private[jsonrpc] case object HandlerBindings:
     logBoundMethod[Api](ref)(method, invoke)
     '{
       HandlerMethod(
+//        ${ Expr(method.lift) },
         $invoke,
         ${ Expr(method.lift.name) },
         ${ Expr(method.lift.resultType) },

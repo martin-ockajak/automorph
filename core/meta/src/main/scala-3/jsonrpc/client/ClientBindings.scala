@@ -1,7 +1,7 @@
 package jsonrpc.client
 
 import jsonrpc.client.ClientMethod
-import jsonrpc.protocol.MethodBindings.{call, methodSignature, methodUsesContext, unwrapType, validApiMethods}
+import jsonrpc.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
 import jsonrpc.spi.Codec
 import jsonrpc.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -68,6 +68,7 @@ private[jsonrpc] case object ClientBindings:
     logBoundMethod[Api](ref)(method, encodeArguments, decodeResult)
     '{
       ClientMethod(
+//        ${ Expr(method.lift) },
         $encodeArguments,
         $decodeResult,
         ${ Expr(method.lift.name) },
@@ -82,7 +83,7 @@ private[jsonrpc] case object ClientBindings:
     method: ref.RefMethod,
     codec: Expr[ExactCodec]
   ): Expr[Seq[Any] => Seq[Node]] =
-    import ref.q.reflect.{asTerm, Term}
+    import ref.q.reflect.{Term, asTerm}
     given Quotes = ref.q
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -139,7 +140,7 @@ private[jsonrpc] case object ClientBindings:
     encodeArguments: Expr[Any],
     decodeResult: Expr[Any]
   ): Unit =
-    import ref.q.reflect.{asTerm, Printer}
+    import ref.q.reflect.{Printer, asTerm}
 
     Option(System.getProperty(debugProperty)).foreach(_ =>
       println(
