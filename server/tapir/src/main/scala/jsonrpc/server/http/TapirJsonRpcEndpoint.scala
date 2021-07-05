@@ -1,15 +1,14 @@
 package jsonrpc.server.http
 
-import java.text.ParseException
 import jsonrpc.Handler
 import jsonrpc.handler.{Bytes, HandlerResult}
 import jsonrpc.log.Logging
 import jsonrpc.protocol.{ErrorType, ResponseError}
 import jsonrpc.spi.Codec
 import sttp.model.headers.Cookie
-import sttp.model.{Header, HeaderNames, MediaType, Method, QueryParams, StatusCode}
+import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode, Endpoint}
+import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode}
 
 /**
  * JSON-RPC HTTP endpoint for Tapir endpoint generator.
@@ -76,7 +75,7 @@ case object TapirJsonRpcEndpoint extends Logging {
                 Right(createResponse(message, status, client))
               }
             )
-        ),
+        )
       }
   }
 

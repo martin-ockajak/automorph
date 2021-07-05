@@ -11,7 +11,6 @@ import jsonrpc.log.Logging
 import jsonrpc.server.http.FinagleJsonRpcService.defaultErrorStatus
 import jsonrpc.spi.Codec
 import jsonrpc.protocol.ErrorType
-import scala.collection.immutable.ArraySeq
 
 /**
  * JSON-RPC over HTTP service for Finagle RPC system.

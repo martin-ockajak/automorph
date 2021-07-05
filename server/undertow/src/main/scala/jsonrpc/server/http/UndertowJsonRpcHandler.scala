@@ -3,7 +3,6 @@ package jsonrpc.server.http
 import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, StatusCodes}
-import java.nio.ByteBuffer
 import jsonrpc.Handler
 import jsonrpc.handler.{Bytes, HandlerResult}
 import jsonrpc.log.Logging
