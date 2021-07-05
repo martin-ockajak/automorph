@@ -35,10 +35,8 @@ val api = new Api()
 Expose the remote *API*:
 
 ```scala
-import io.automorph.DefaultHttpServer
-
 // Create and start the server
-val server = DefaultHttpServer.async(_.bind(api), 80, "/api")
+val server = io.automorph.DefaultHttpServer.async(_.bind(api), 80, "/api")
 
 // Stop the server
 server.close()
@@ -49,10 +47,8 @@ server.close()
 Invoke the remote *API*:
 
 ```scala
-import io.automorph.DefaultHttpClient
-
 // Create the client
-val client = DefaultHttpClient.async("http://localhost/api", "POST")
+val client = io.automorph.DefaultHttpClient.async("http://localhost/api", "POST")
 
 // Proxy call
 val apiProxy = client.bindByName[Api]
