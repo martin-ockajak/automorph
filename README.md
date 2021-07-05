@@ -23,7 +23,7 @@ Define an *API* class:
 import scala.concurrent.Future
 
 class Api {
-  def hello(typed: String): Future[String] = Future.succesful(s"Hello $typed world")
+  def hello(typed: String): Future[String] = Future.succesful(s"Hello $typed world!")
 }
 
 ```
