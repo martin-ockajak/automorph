@@ -45,7 +45,7 @@ final case class JettyJsonRpcServlet[Node, ExactCodec <: Codec[Node], Effect[_]]
     runEffect(backend.map(
       backend.either(handler.processRequest(requestMessage)),
       (handlerResult: Either[Throwable, HandlerResult[InputStream]]) => handlerResult.fold(
-        error => serverError(client, error, response),
+        error => serverError(error, response, client),
         result => {
           // Send the response
           val message = result.response.getOrElse(new ByteArrayInputStream(Array()))
@@ -59,7 +59,7 @@ final case class JettyJsonRpcServlet[Node, ExactCodec <: Codec[Node], Effect[_]]
   private def serverError(error: Throwable, response: HttpServletResponse, client: String): Unit = {
     val message = Bytes.inputStreamBytes.to(Bytes.stringBytes.from(ResponseError.trace(error).mkString("\n")))
     val status = HttpStatus.INTERNAL_SERVER_ERROR_500
-    logger.error("Failed to process HTTP request", error, Map("Client" -> client)
+    logger.error("Failed to process HTTP request", error, Map("Client" -> client))
     sendResponse(message, response, status, client)
   }
 
