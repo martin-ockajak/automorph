@@ -40,7 +40,7 @@ import io.automorph.DefaultHttpClient
 val client = DefaultHttpClient.async("http://example.net/api", "POST")
 val api = client.bindByName[Api]
 val proxyResult = api.hello("proxy")  // Future[String]
-val directResult: Future[String] = client.callByName("hello", direct")
+val directResult: Future[String] = client.callByName("hello", "direct")
 
 ```
 
