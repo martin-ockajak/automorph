@@ -1,6 +1,6 @@
 # Overview
 
-**Automorph** is a [Scala](https://www.scala-lang.org/) [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for effortlessly consuming
+**Automorph** is a [Scala](https://www.scala-lang.org/) [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for effortlessly invoking
 and exposing remote APIs.
 
 # Quick Start
@@ -28,9 +28,22 @@ class Api {
 
 ```
 
+## Server
+
+Expose the remote *API*:
+
+```scala
+import io.automorph.DefaultHttpServer
+
+val api = new Api()
+val server = DefaultHttpServer.async(_.bind(api), 80, "/api") // The server is running
+
+server.close() // The server stopped
+```
+
 ## Client
 
-Create a remote *API* client:
+Invoke the remote *API*:
 
 ```scala
 import io.automorph.DefaultHttpClient
@@ -41,19 +54,6 @@ val api = client.bindByName[Api]
 val proxyResult = api.hello("neat") // Future[String]
 val directResult: Future[String] = client.callByName("hello", "neat")
 
-```
-
-## Server
-
-Create a remote *API* server:
-
-```scala
-import io.automorph.DefaultHttpServer
-
-val api = new Api()
-val server = DefaultHttpServer.async(_.bind(api), 80, "/api") // The server is running
-
-server.close() // The server stopped
 ```
 
 # Features
