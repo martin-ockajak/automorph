@@ -81,7 +81,7 @@ final case class UndertowJsonRpcHandler[Node, ExactCodec <: Codec[Node], Effect[
     sendResponse(message, statusCode, exchange)
   }
 
-  private def sendResponse(message: ArraySeq.ofByte, statusCode: Int, exchange: HttpServerExchange): Unit =
+  private def sendResponse(message: ArraySeq.ofByte, statusCode: Int, exchange: HttpServerExchange): Unit = {
     val client = clientAddress(exchange)
     logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
     if (exchange.isResponseChannelAvailable) {
@@ -91,6 +91,7 @@ final case class UndertowJsonRpcHandler[Node, ExactCodec <: Codec[Node], Effect[
     } else {
       logger.error("HTTP response channel not available", Map("Client" -> client, "Status" -> statusCode.toString))
     }
+  }
 
   private def clientAddress(exchange: HttpServerExchange): String = {
     val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)
