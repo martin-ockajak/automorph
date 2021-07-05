@@ -26,6 +26,8 @@ class Api {
   def hello(thing: String): Future[String] = Future.succesful(s"Hello $thing!")
 }
 
+val api = new Api()
+
 ```
 
 ## Server
@@ -35,10 +37,11 @@ Expose the remote *API*:
 ```scala
 import io.automorph.DefaultHttpServer
 
-val api = new Api()
-val server = DefaultHttpServer.async(_.bind(api), 80, "/api") // The server is running
+// Create and start the server
+val server = DefaultHttpServer.async(_.bind(api), 80, "/api")
 
-server.close() // The server stopped
+// Stop the server
+server.close()
 ```
 
 ## Client
@@ -48,11 +51,17 @@ Invoke the remote *API*:
 ```scala
 import io.automorph.DefaultHttpClient
 
+// Create the client
 val client = DefaultHttpClient.async("http://localhost/api", "POST")
-val api = client.bindByName[Api]
 
-val proxyResult = api.hello("world") // Future[String]
+// Proxy call
+val apiProxy = client.bindByName[Api]
+val proxyResult = apiProxy.hello("world") // Future[String]
+
+// Direct call
 val directResult: Future[String] = client.callByName("hello", "world")
+
+// Direct notification
 client.notifyByName("hello", "world") // Future[Unit]
 
 ```
