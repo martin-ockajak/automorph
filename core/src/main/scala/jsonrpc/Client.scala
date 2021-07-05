@@ -33,9 +33,6 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context] (
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
-  override def toString: String =
-    s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Effect: ${backend.getClass.getName})"
-
   /**
    * Perform a method call using specified arguments.
    *
@@ -90,6 +87,9 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context] (
       (rawRequest: ArraySeq.ofByte) => transport.notify(rawRequest, context)
     )
   }
+
+  override def toString: String =
+    s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Backend: ${backend.getClass.getName}, Transport: ${transport.getClass.getName})"
 
   /**
    * Process a method call response.

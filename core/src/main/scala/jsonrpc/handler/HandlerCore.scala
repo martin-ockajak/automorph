@@ -42,8 +42,9 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
     )
   }
 
-  override def toString: String =
-    s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Effect: ${backend.getClass.getName}, Bound methods: ${methodBindings.size})"
+  override def toString: String = {
+    s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Backend: ${backend.getClass.getName}, Bound methods: ${methodBindings.size})"
+  }
 
   /**
    * Invoke bound method specified in a request.
