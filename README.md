@@ -30,7 +30,8 @@ Effectful computation plugins:
 | **TryBackend**  | [Try](https://www.scala-lang.org/api/2.13.6/scala/util/Try.html) | [automorph-standard](https://mvnrepository.com/artifact/io.automorph/automorph-standard) | [Standard Library](https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html) |
 | **ZioBackend**  | [RIO](https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html) | [automorph-zio](https://mvnrepository.com/artifact/io.automorph/automorph-zio) | [ZIO](https://zio.dev/) |
 | **MonixBackend**  | [Task](https://monix.io/api/current/monix/eval/Task.html) | [automorph-monix](https://mvnrepository.com/artifact/io.automorph/automorph-monix) | [Monix](https://monix.io/) |
-| **CatsBackend**  | [IO](https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html) | [automorph-cats](https://mvnrepository.com/artifact/io.automorph/automorph-cats) | [Cats](https://typelevel.org/cats-effect/) |
+| **CatsEffectBackend**  | [IO](https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html) | [automorph-cats-effect](https://mvnrepository.com/artifact/io.automorph/automorph-cats-effect) | [Cats](https://typelevel.org/cats-effect/) |
+| **ScalazBackend**  | [IO](https://www.javadoc.io/doc/org.scalaz/scalaz_2.13/7.4.0/scalaz/effect/IO.html) | [automorph-scalaz](https://mvnrepository.com/artifact/io.automorph/automorph-scalaz-effect) | [Scalaz](https://github.com/scalaz) |
 
 ## Codec
 
