@@ -24,8 +24,8 @@ import scala.concurrent.Future
 
 class Api {
 
-  def hello(kind: String): Future[String] =
-    Future.succesful(s"Hello $kind world")
+  def hello(typed: String): Future[String] =
+    Future.succesful(s"Hello $typed world")
 }
 
 ```
@@ -40,8 +40,8 @@ import io.automorph.DefaultHttpClient
 val client = DefaultHttpClient.async("http://example.net/api", "POST")
 val api = client.bindByName[Api]
 
-val proxyResult = api.hello("proxy")  // Future[String]
-val directResult: Future[String] = client.callByName("hello", "direct")
+val proxyResult = api.hello("neat")  // Future[String]
+val directResult: Future[String] = client.callByName("hello", "neat")
 
 ```
 
