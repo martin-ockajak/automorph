@@ -30,11 +30,11 @@ case object DefaultHttpClient {
   def apply[Effect[_]](
     backend: Backend[Effect],
     sttpBackend: SttpBackend[Effect, _],
-    url: Uri,
-    httpMethod: Method = Method.POST
+    url: String,
+    httpMethod: String
   ): DefaultClient[Effect] = {
     val codec = UpickleJsonCodec()
-    val transport = SttpTransport(url, httpMethod, codec.mediaType, sttpBackend, backend)
+    val transport = SttpTransport(Uri(url), Method.unsafeApply(httpMethod), codec.mediaType, sttpBackend, backend)
     Client(codec, backend, transport)
   }
 
@@ -46,14 +46,14 @@ case object DefaultHttpClient {
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url endpoint URL
-   * @param method HTTP method
+   * @param httpMethod HTTP method
    * @param executionContext execution context
    * @return asynchronous JSON-RPC over HTTP client
    */
-  def async(url: Uri, method: Method)(implicit
+  def async(url: String, httpMethod: String)(implicit
     executionContext: ExecutionContext
   ): DefaultClient[Future] =
-    DefaultHttpClient(FutureBackend(), AsyncHttpClientFutureBackend(), url, method)
+    DefaultHttpClient(FutureBackend(), AsyncHttpClientFutureBackend(), url, httpMethod)
 
   /**
    * Create a asynchronous JSON-RPC over HTTP client.
@@ -63,11 +63,11 @@ case object DefaultHttpClient {
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url endpoint URL
-   * @param method HTTP method
+   * @param httpMethod HTTP method
    * @return synchronous JSON-RPC over HTTP client
    */
-  def sync(url: Uri, method: Method): DefaultClient[Identity] = {
+  def sync(url: String, httpMethod: String): DefaultClient[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
-    DefaultHttpClient(IdentityBackend(), HttpURLConnectionBackend(), url, method)
+    DefaultHttpClient(IdentityBackend(), HttpURLConnectionBackend(), url, httpMethod)
   }
 }

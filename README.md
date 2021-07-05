@@ -1,26 +1,61 @@
 # Overview
 
-**Automorph** is a [Scala](https://www.scala-lang.org/) [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for effortlessly consuming and exposing remote APIs.
-
+**Automorph** is a [Scala](https://www.scala-lang.org/) [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for effortlessly consuming
+and exposing remote APIs.
 
 # Quick Start
 
-## API
+JSON-RPC over HTTP.
+
+## Build
+
+Add the following to your `build.sbt` file:
 
 ```scala
+libraryDependencies += "io.automorph" %% "automorph-default" % "1.0.0"
+```
+
+## API
+
+Define an *API* class:
+
+```scala
+import scala.concurrent.Future
+
+class Api {
+
+  def hello(kind: String): Future[String] =
+    Future.succesful(s"Hello $kind world")
+}
 
 ```
 
-
 ## Client
 
+Create a remote *API* client:
+
 ```scala
+import io.automorph.DefaultHttpClient
+
+val client = DefaultHttpClient.async("http://example.net/api", "POST")
+val api = client.bindByName[Api]
+val proxyResult = api.hello("proxy")  // Future[String]
+val directResult: String = client.callByName("direct")  // Future[String]
 
 ```
 
 ## Server
 
+Create a remote *API* server:
 
+```scala
+import io.automorph.DefaultHttpServer
+
+val api = new Api()
+val server = DefaultHttpServer.async(_.bind(api), 80, "/api")  // The server is running
+
+server.close()  // The server is stopped
+```
 
 # Features
 
@@ -34,12 +69,12 @@
 * **No boilerplate** - even advanced use-cases require only a few lines of code
 * **No dependencies** - core implementation depends on [SLF4J API](http://www.slf4j.org/) only
 
-
 # Architecture
 
 ## Client
 
-The client provides automatic creation of proxy instances for remote JSON-RPC APIs from existing classes thus making the remote calls fully transparent. Additionally, it allows calls and notifications of remote API methods directly.
+The client provides automatic creation of proxy instances for remote JSON-RPC APIs from existing classes thus making the remote calls fully transparent.
+Additionally, it allows calls and notifications of remote API methods directly.
 
 ```
         .--------.     .-----------.
@@ -51,7 +86,6 @@ The client provides automatic creation of proxy instances for remote JSON-RPC AP
   | Codec |    | Backend |
   '-------'    '---------'
 ```
-
 
 ## Handler
 
@@ -77,6 +111,5 @@ The handler provides automatic creation of JSOn-RPC endpoint bindings for existi
 ## Transport
 
 ## Server
-
 
 # Examples
