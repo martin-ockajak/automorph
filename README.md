@@ -53,6 +53,7 @@ val api = client.bindByName[Api]
 
 val proxyResult = api.hello("world") // Future[String]
 val directResult: Future[String] = client.callByName("hello", "world")
+client.notifyByName("hello", "world") // Future[Unit]
 
 ```
 
