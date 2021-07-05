@@ -6,6 +6,11 @@ import scala.quoted.{quotes, Expr, Quotes, ToExpr, Type}
 /** Method bindings introspection. */
 private[jsonrpc] case object MethodBindings:
 
+  /**
+   * Method quoted expression converter.
+   *
+   * @return method quoted expression converter
+   */
   given methodToExpr: ToExpr[Method] = new ToExpr[Method]:
 
     given parameterToExpr: ToExpr[Parameter] = new ToExpr[Parameter]:

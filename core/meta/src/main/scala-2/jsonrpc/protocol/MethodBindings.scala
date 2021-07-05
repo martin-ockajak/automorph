@@ -6,6 +6,13 @@ import scala.reflect.macros.blackbox
 /** Method bindings introspection. */
 private[jsonrpc] case object MethodBindings {
 
+  /**
+   * Method quoted tree converter.
+   *
+   * @param ref reflection
+   * @tparam C macro context type
+   * @return method quoted tree converter
+   */
   def methodLiftable[C <: blackbox.Context](ref: Reflection[C]): ref.c.universe.Liftable[Method] =
     new ref.c.universe.Liftable[Method] {
 
