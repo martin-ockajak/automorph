@@ -52,30 +52,29 @@ final case class FinagleJsonRpcService[Node, ExactCodec <: Codec[Node], Effect[_
           // Send the response
           val response = result.response.getOrElse(Array[Byte]())
           val status = result.errorCode.map(errorStatus).getOrElse(Status.Ok)
-          val reader = Reader.fromBuf(Buf.ByteArray.Owned(response))
-          createResponse(request, reader, status)
+          val message = Reader.fromBuf(Buf.ByteArray.Owned(response))
+          createResponse(message, status, request)
         }
       )
     ))
   }
 
   private def serverError(error: Throwable, request: Request): Response = {
+    val message = Reader.fromBuf(Buf.Utf8(ResponseError.trace(error).mkString("\n")))
     val status = Status.InternalServerError
-    val message = ResponseError.trace(error).mkString("\n")
-    val reader = Reader.fromBuf(Buf.Utf8(message))
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(request)))
-    createResponse(request, reader, status)
+    createResponse(message, status, request)
   }
 
-  private def createResponse(request: Request, reader: Reader[Buf], status: Status): Response = {
-    val response = Response(request.version, status, reader)
+  private def createResponse(message: Reader[Buf], status: Status, request: Request): Response = {
+    val response = Response(request.version, status, message)
     response.contentType = handler.codec.mediaType
     logger.debug("Sending HTTP response", Map("Client" -> clientAddress(request), "Status" -> status.code.toString))
     response
   }
 
   private def clientAddress(request: Request): String = {
-    request.xForwardedFor.map(_.split(",", 2)(0)).getOrElse {
+    request.xForwardedFor.flatMap(_.split(",", 2).headOption).getOrElse {
       val address = request.remoteAddress.toString.split("/", 2).reverse.head
       address.replaceAll("/", "").split(":").init.mkString(":")
     }

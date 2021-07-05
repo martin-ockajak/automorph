@@ -19,6 +19,7 @@ lazy val root = project.in(file(".")).aggregate(
   undertow,
   jetty,
   finagle,
+  tapir,
 
   default
 ).settings(
@@ -154,13 +155,20 @@ lazy val jetty = (project in file("server/jetty")).dependsOn(
     "commons-io" % "commons-io" % "2.10.0"
   )
 )
-
 lazy val finagle = (project in file("server/finagle")).dependsOn(
   core, testCore % Test, standard % Test
 ).settings(
   name := "json-rpc-finagle",
   libraryDependencies ++= Seq(
     ("com.twitter" % "finagle-http" % "21.6.0").cross(CrossVersion.for3Use2_13)
+  )
+)
+lazy val tapir = (project in file("server/tapir")).dependsOn(
+  core, testCore % Test, standard % Test
+).settings(
+  name := "json-rpc-tapir",
+  libraryDependencies ++= Seq(
+    "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.18.0-M18"
   )
 )
 

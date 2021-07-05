@@ -75,8 +75,8 @@ final case class UndertowJsonRpcHandler[Node, ExactCodec <: Codec[Node], Effect[
   }
 
   private def sendServerError(error: Throwable, exchange: HttpServerExchange): Unit = {
-    val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
     val message = Bytes.stringBytes.from(ResponseError.trace(error).mkString("\n"))
+    val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
     logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(exchange)))
     sendResponse(message, statusCode, exchange)
   }
@@ -94,7 +94,7 @@ final case class UndertowJsonRpcHandler[Node, ExactCodec <: Codec[Node], Effect[
 
   private def clientAddress(exchange: HttpServerExchange): String = {
     val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)
-    forwardedFor.map(_.split(",", 2)(0)).getOrElse {
+    forwardedFor.flatMap(_.split(",", 2).headOption).getOrElse {
       val address = exchange.getSourceAddress.toString.split("/", 2).reverse.head
       address.replaceAll("/", "").split(":").init.mkString(":")
     }
