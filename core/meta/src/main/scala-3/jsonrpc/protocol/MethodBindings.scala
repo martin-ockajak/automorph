@@ -5,15 +5,16 @@ import scala.quoted.{Expr, Quotes, ToExpr, Type, quotes}
 
 /** Method bindings introspection. */
 private[jsonrpc] case object MethodBindings:
-  given parameterToExpr: ToExpr[Parameter] = new ToExpr[Parameter]:
-    override def apply(v: Parameter)(using Quotes): Expr[Parameter] = '{
-      Parameter(
-        ${ Expr(v.name) },
-        ${ Expr(v.dataType) },
-        ${ Expr(v.contextual) }
-      )
-    }
   given methodToExpr: ToExpr[Method] = new ToExpr[Method]:
+    given parameterToExpr: ToExpr[Parameter] = new ToExpr[Parameter]:
+      override def apply(v: Parameter)(using Quotes): Expr[Parameter] = '{
+        Parameter(
+          ${ Expr(v.name) },
+          ${ Expr(v.dataType) },
+          ${ Expr(v.contextual) }
+        )
+      }
+
     override def apply(v: Method)(using Quotes): Expr[Method] = '{
       Method(
         ${ Expr(v.name) },
