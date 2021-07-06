@@ -6,14 +6,14 @@ way to invoke and expose remote APIs.
 # Features
 
 * **Simple** - generate JSON-RPC bindings automatically from public methods of existing API classes
-* **Modular** - freely combine various plugins to integrate with other libraries
+* **Modular** - combine various plugins to integrate with other libraries used in your application
 * **Extensible** - automatically derive or implement serialization logic for arbitrary data types
-* **Flexible** - customize mapping of JSON-RPC method names and error codes
+* **Flexible** - customize JSON-RPC method names and error codes
 * **Safe** - type checks bound API classes during compilation
 * **Fast** - generates optimized API binding code during compilation
 * **Compatible** - available for [Scala 2.12](https://www.scala-lang.org/news/2.12.0/), [Scala 2.13](https://www.scala-lang.org/news/2.13.0)
   and [Scala 3](https://dotty.epfl.ch/)
-* **Boilerplate free** - even advanced use requires only a few lines of code
+* **Boilerplate free** - even advanced use-cases require only a few lines of code
 * **Dependency free** - core implementation depends on [SLF4J API](http://www.slf4j.org/) only
 
 # Quickstart
@@ -76,11 +76,11 @@ client.notifyByName("hello", "thing" -> "world") // : Future[Unit]
 
 ```
 
-## [Scaladoc](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
+## [API Documentation](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
 
-# Plugins
+# Integrations
 
-Plugins for integrating various libraries are published in different artifacts to reduce transitive library dependencies.
+*Automorph* supports integration with various libraries via plugins published in different artifacts.
 
 ## [Backend](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/Backend.html)
 
