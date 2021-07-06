@@ -1,5 +1,8 @@
 // Project
 ThisBuild / organization := "io.json-rpc"
+ThisBuild / homepage := Some(url("https://github.com/martin-ockajak/automorph"))
+ThisBuild / licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
+ThisBuild / developers := List()
 
 lazy val root = project.in(file(".")).aggregate(
   core,
@@ -266,6 +269,9 @@ ScalaUnidoc / unidoc / scalacOptions += "-Ymacro-expand:none"
 
 // Continuous Integration
 ThisBuild / githubWorkflowPublishTargetBranches := Seq()
+ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
+ThisBuild / githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v")))
+ThisBuild / githubWorkflowPublish := Seq(WorkflowStep.Sbt(List("ci-release")))
 
 
 // Release
