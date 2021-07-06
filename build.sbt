@@ -211,6 +211,7 @@ ThisBuild / scalacOptions ++= Seq(
   "-language:higherKinds",
   "-deprecation",
   "-unchecked",
+  "-release:8",
   "-target:8",
   "-encoding",
   "utf8",
