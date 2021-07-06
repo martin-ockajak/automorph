@@ -33,10 +33,11 @@ libraryDependencies += "io.automorph" %% "automorph-default" % "1.0.0"
 Define an API class:
 
 ```scala
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class Api {
-  def hello(thing: String): Future[String] = Future.succesful(s"Hello $thing!")
+  def hello(thing: String): Future[String] = Future.successful(s"Hello $thing!")
 }
 
 val api = new Api()
