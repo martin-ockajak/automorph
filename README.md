@@ -64,13 +64,13 @@ val client = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
 
 // Proxy call
 val apiProxy = client.bindByName[Api]
-val proxyResult = apiProxy.hello("world") // Future[String]
+val proxyResult = apiProxy.hello("world") // : Future[String]
 
 // Direct call
 val directResult: Future[String] = client.callByName("hello", "thing" -> "world")
 
 // Direct notification
-client.notifyByName("hello", "thing" -> "world") // Future[Unit]
+client.notifyByName("hello", "thing" -> "world") // : Future[Unit]
 
 ```
 
