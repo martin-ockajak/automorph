@@ -87,7 +87,7 @@ lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
 ).settings(
   name := "json-rpc-argonaut",
   libraryDependencies ++= Seq(
-    "io.argonaut" %% "argonaut" % "6.3.5"
+    "io.argonaut" %% "argonaut" % "6.3.6"
   )
 )
 
