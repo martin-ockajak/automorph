@@ -2,8 +2,8 @@ package test.local
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import jsonrpc.backend.CatsEffectBackend
-import jsonrpc.spi.Backend
+import automorph.backend.CatsEffectBackend
+import automorph.spi.Backend
 import org.scalacheck.Arbitrary
 import test.CodecClientHandlerSpec
 

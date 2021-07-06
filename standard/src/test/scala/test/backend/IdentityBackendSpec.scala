@@ -1,8 +1,8 @@
 package test.backend
 
-import jsonrpc.backend.IdentityBackend
-import jsonrpc.backend.IdentityBackend.Identity
-import jsonrpc.spi.Backend
+import automorph.backend.IdentityBackend
+import automorph.backend.IdentityBackend.Identity
+import automorph.spi.Backend
 import scala.util.Try
 import test.backend.BackendSpec
 

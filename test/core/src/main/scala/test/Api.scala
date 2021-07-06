@@ -1,6 +1,6 @@
 package test
 
-import jsonrpc.spi.Backend
+import automorph.spi.Backend
 
 trait SimpleApi[Effect[_]] {
 

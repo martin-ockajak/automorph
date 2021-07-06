@@ -2,7 +2,7 @@ package test.codec.json
 
 import argonaut.Argonaut.{jArray, jBool, jNumber, jString, jObjectAssocList, ToJsonIdentity}
 import argonaut.{Argonaut, CodecJson, Json}
-import jsonrpc.codec.json.ArgonautJsonCodec
+import automorph.codec.json.ArgonautJsonCodec
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
 import test.codec.CodecSpec

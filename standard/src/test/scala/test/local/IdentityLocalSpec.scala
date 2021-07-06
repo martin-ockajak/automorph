@@ -1,8 +1,8 @@
 package test.local
 
-import jsonrpc.backend.IdentityBackend
-import jsonrpc.backend.IdentityBackend.Identity
-import jsonrpc.spi.Backend
+import automorph.backend.IdentityBackend
+import automorph.backend.IdentityBackend.Identity
+import automorph.spi.Backend
 import org.scalacheck.Arbitrary
 import test.CodecClientHandlerSpec
 

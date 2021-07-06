@@ -1,7 +1,7 @@
 package test.local
 
-import jsonrpc.backend.TryBackend
-import jsonrpc.spi.Backend
+import automorph.backend.TryBackend
+import automorph.spi.Backend
 import org.scalacheck.Arbitrary
 import scala.util.Try
 import test.CodecClientHandlerSpec

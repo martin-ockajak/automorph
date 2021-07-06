@@ -1,7 +1,7 @@
 package test.backend
 
 import base.BaseSpec
-import jsonrpc.spi.Backend
+import automorph.spi.Backend
 import scala.util.{Failure, Success, Try}
 
 /**

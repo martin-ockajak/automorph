@@ -1,7 +1,7 @@
 package test.backend
 
-import jsonrpc.backend.FutureBackend
-import jsonrpc.spi.Backend
+import automorph.backend.FutureBackend
+import automorph.spi.Backend
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Try

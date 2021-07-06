@@ -1,7 +1,7 @@
 package test.codec.messagepack
 
-import jsonrpc.codec.common.UpickleCustom
-import jsonrpc.codec.messagepack.UpickleMessagePackCodec
+import automorph.codec.common.UpickleCustom
+import automorph.codec.messagepack.UpickleMessagePackCodec
 import org.scalacheck.{Arbitrary, Gen}
 import scala.annotation.nowarn
 import scala.collection.mutable.LinkedHashMap

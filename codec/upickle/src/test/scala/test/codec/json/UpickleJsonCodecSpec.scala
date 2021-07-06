@@ -1,7 +1,7 @@
 package test.codec.json
 
-import jsonrpc.codec.common.UpickleCustom
-import jsonrpc.codec.json.UpickleJsonCodec
+import automorph.codec.common.UpickleCustom
+import automorph.codec.json.UpickleJsonCodec
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
 import test.codec.CodecSpec

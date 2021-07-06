@@ -1,4 +1,4 @@
-package jsonrpc.spi
+package automorph.spi
 
 import scala.annotation.nowarn
 

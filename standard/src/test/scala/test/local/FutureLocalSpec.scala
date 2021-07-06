@@ -1,7 +1,7 @@
 package test.local
 
-import jsonrpc.backend.FutureBackend
-import jsonrpc.spi.Backend
+import automorph.backend.FutureBackend
+import automorph.spi.Backend
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

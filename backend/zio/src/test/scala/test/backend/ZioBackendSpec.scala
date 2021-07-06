@@ -1,7 +1,7 @@
 package test.backend
 
-import jsonrpc.backend.ZioBackend
-import jsonrpc.spi.Backend
+import automorph.backend.ZioBackend
+import automorph.spi.Backend
 import scala.util.Try
 import test.backend.BackendSpec
 import zio.{RIO, Runtime, ZEnv}

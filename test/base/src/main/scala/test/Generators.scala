@@ -1,6 +1,6 @@
 package test
 
-import jsonrpc.spi.{Message, MessageError}
+import automorph.spi.{Message, MessageError}
 import org.scalacheck.Arbitrary.{arbBool, arbByte, arbContainer, arbDouble, arbEnum, arbFloat, arbInt, arbLong, arbOption, arbShort, arbString, arbitrary}
 import org.scalacheck.{Arbitrary, Gen}
 import test.Enum.Enum
@@ -47,13 +47,13 @@ case object Generators {
 
     Arbitrary {
       for {
-        jsonrpc <- arbitrary[Option[String]]
+        automorph <- arbitrary[Option[String]]
         id <- arbitrary[Option[Either[BigDecimal, String]]]
         method <- arbitrary[Option[String]]
         params <- arbitrary[Option[Message.Params[Node]]]
         result <- arbitrary[Option[Node]]
         error <- arbitrary[Option[MessageError[Node]]]
-      } yield Message(jsonrpc, id, method, params, result, error)
+      } yield Message(automorph, id, method, params, result, error)
     }
   }
 }

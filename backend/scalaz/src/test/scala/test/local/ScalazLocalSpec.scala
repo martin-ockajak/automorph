@@ -1,7 +1,7 @@
 package test.local
 
-import jsonrpc.backend.ScalazBackend
-import jsonrpc.spi.Backend
+import automorph.backend.ScalazBackend
+import automorph.spi.Backend
 import org.scalacheck.Arbitrary
 import scala.util.Try
 import scalaz.effect.IO

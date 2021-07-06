@@ -5,12 +5,12 @@ import argonaut.{Argonaut, CodecJson}
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Json}
-import jsonrpc.codec.common.UpickleCustom
-import jsonrpc.codec.json.{ArgonautJsonCodec, CirceJsonCodec, UpickleJsonCodec}
-import jsonrpc.codec.messagepack.UpickleMessagePackCodec
-import jsonrpc.spi.{Backend, Codec, Transport}
-import jsonrpc.transport.local.HandlerTransport
-import jsonrpc.{Client, Handler}
+import automorph.codec.common.UpickleCustom
+import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, UpickleJsonCodec}
+import automorph.codec.messagepack.UpickleMessagePackCodec
+import automorph.spi.{Backend, Codec, Transport}
+import automorph.transport.local.HandlerTransport
+import automorph.{Client, Handler}
 import scala.util.Try
 import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, SimpleApiImpl}
 import ujson.Value

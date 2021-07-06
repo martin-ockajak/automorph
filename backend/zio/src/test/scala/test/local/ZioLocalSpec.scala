@@ -1,7 +1,7 @@
 package test.local
 
-import jsonrpc.backend.ZioBackend
-import jsonrpc.spi.Backend
+import automorph.backend.ZioBackend
+import automorph.spi.Backend
 import org.scalacheck.Arbitrary
 import test.CodecClientHandlerSpec
 import zio.{RIO, Runtime, ZEnv}

@@ -1,7 +1,7 @@
 package test.backend
 
-import jsonrpc.backend.ScalazBackend
-import jsonrpc.spi.Backend
+import automorph.backend.ScalazBackend
+import automorph.spi.Backend
 import scala.util.Try
 import scalaz.effect.IO
 import test.backend.BackendSpec

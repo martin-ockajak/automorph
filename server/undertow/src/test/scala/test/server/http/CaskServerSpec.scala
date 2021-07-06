@@ -4,12 +4,12 @@ import base.BaseSpec
 import io.undertow.Handlers
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.handlers.BlockingHandler
-import jsonrpc.Handler
-import jsonrpc.backend.IdentityBackend
-import jsonrpc.backend.IdentityBackend.Identity
-import jsonrpc.codec.common.UpickleCustom
-import jsonrpc.codec.json.UpickleJsonCodec
-import jsonrpc.server.http.UndertowJsonRpcHandler
+import automorph.Handler
+import automorph.backend.IdentityBackend
+import automorph.backend.IdentityBackend.Identity
+import automorph.codec.common.UpickleCustom
+import automorph.codec.json.UpickleJsonCodec
+import automorph.server.http.UndertowJsonRpcHandler
 import ujson.Value
 
 class CaskServerSpec extends BaseSpec {

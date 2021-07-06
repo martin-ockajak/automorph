@@ -2,7 +2,7 @@ package test.codec
 
 import base.BaseSpec
 import java.nio.charset.StandardCharsets
-import jsonrpc.spi.{Codec, Message}
+import automorph.spi.{Codec, Message}
 import org.scalacheck.Arbitrary
 import test.Generators
 

@@ -27,6 +27,6 @@
   </root>
 
   <!--
-    <logger name="jsonrpc" level="TRACE"/>
+    <logger name="automorph" level="TRACE"/>
   -->
 </configuration>

@@ -2,8 +2,8 @@ package test.backend
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import jsonrpc.backend.CatsEffectBackend
-import jsonrpc.spi.Backend
+import automorph.backend.CatsEffectBackend
+import automorph.spi.Backend
 import scala.util.Try
 import test.backend.BackendSpec
 

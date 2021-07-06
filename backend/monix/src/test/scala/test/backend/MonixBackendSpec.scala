@@ -1,7 +1,7 @@
 package test.backend
 
-import jsonrpc.backend.MonixBackend
-import jsonrpc.spi.Backend
+import automorph.backend.MonixBackend
+import automorph.spi.Backend
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import scala.concurrent.duration.Duration

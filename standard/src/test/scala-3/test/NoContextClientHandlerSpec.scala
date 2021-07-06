@@ -1,13 +1,13 @@
 package test
 
 import base.BaseSpec
-import jsonrpc.backend.IdentityBackend
-import jsonrpc.backend.IdentityBackend.Identity
-import jsonrpc.codec.common.UpickleCustom
-import jsonrpc.codec.json.UpickleJsonCodec
-import jsonrpc.transport.local.HandlerTransport
-import jsonrpc.util.NoContext
-import jsonrpc.{Client, Handler}
+import automorph.backend.IdentityBackend
+import automorph.backend.IdentityBackend.Identity
+import automorph.codec.common.UpickleCustom
+import automorph.codec.json.UpickleJsonCodec
+import automorph.transport.local.HandlerTransport
+import automorph.util.NoContext
+import automorph.{Client, Handler}
 import ujson.Value
 
 class NoContextClientHandlerSpec extends BaseSpec {

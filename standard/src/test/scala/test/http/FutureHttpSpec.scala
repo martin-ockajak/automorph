@@ -1,8 +1,8 @@
 //package test.http
 //
-//import jsonrpc.backend.FutureBackend
-//import jsonrpc.server.http.NanoHttpdServer
-//import jsonrpc.spi.Backend
+//import automorph.backend.FutureBackend
+//import automorph.server.http.NanoHttpdServer
+//import automorph.spi.Backend
 //import org.scalacheck.Arbitrary
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
