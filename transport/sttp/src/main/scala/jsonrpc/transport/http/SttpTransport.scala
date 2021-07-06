@@ -9,7 +9,8 @@ import sttp.model.{Header, Method, Uri}
 /**
  * STTP HTTP transport using the specified STTP backend.
  *
- * @see [[https://sttp.softwaremill.com/en/latest/index.html Documentation]]
+ * @see [[https://sttp.softwaremill.com/en/latest/ Documentation]]
+ * @see [[https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_2.13/latest/sttp/client3/index.html API]]
  * @param url endpoint URL
  * @param method HTTP method
  * @param contentType HTTP request Content-Type

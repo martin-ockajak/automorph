@@ -11,6 +11,7 @@ import scala.util.{Try, Using}
 /**
  * URL connection HTTP transport.
  *
+ * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @param url HTTP endpoint URL
  * @param contentType HTTP request Content-Type
  * @param bufferSize input stream reading buffer size

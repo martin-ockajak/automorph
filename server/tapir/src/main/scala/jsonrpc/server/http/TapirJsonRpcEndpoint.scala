@@ -34,7 +34,8 @@ case object TapirJsonRpcEndpoint extends Logging {
    * The endpoint interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
    * The response returned by the JSON-RPC handler is used as HTTP response body.
    *
-   * @see [[https://tapir.softwaremill.com Documentation]]
+   * @see [[https://tapir.softwaremill.com/ Documentation]]
+   * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
    * @param handler JSON-RPC request handler
    * @param method HTTP method to server
    * @param errorStatus JSON-RPC error code to HTTP status code mapping function

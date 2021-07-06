@@ -14,7 +14,8 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  *
  * Default port to listen for HTTP connections: 8080
  *
- * @see [[https://undertow.io Documentation]]
+ * @see [[https://undertow.io/ Documentation]]
+ * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor Create an Undertow web server using the specified HTTP handler.
  * @param httpHandler HTTP handler
  * @param port port to listen on for HTTP connections

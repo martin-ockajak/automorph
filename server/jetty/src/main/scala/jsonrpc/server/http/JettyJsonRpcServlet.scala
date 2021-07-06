@@ -17,7 +17,8 @@ import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
  * The servlet interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
  * The response returned by the JSON-RPC handler is used as HTTP response body.
  *
- * @see [[https://www.eclipse.org/jetty Documentation]]
+ * @see [[https://www.eclipse.org/jetty/ Documentation]]
+ * @see [[https://www.eclipse.org/jetty/javadoc/jetty-11/index.html API]]
  * @constructor Create a JSON-RPC HTTP servlet for Jetty web server using the specified JSON-RPC request ''handler''.
  * @param handler JSON-RPC request handler
  * @param runEffect asynchronous effect execution function
