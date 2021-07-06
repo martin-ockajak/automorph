@@ -47,7 +47,7 @@ val api = new Api()
 Expose the remote *API*:
 
 ```scala
-// Create and start JSON-RPC over HTTP server
+// Create and start JSON-RPC over HTTP server listening on port 80 for requests with URL path '/api'
 val server = automorph.DefaultHttpServer.async(_.bind(api), 80, "/api")
 
 // Stop the server
@@ -59,7 +59,7 @@ server.close()
 Invoke the remote *API*:
 
 ```scala
-// Create JSON-RPC over HTTP client
+// Create JSON-RPC over HTTP client sending POST request to 'http://localhost/api'
 val client = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
 
 // Proxy call
@@ -78,7 +78,7 @@ client.notifyByName("hello", "thing" -> "world") // : Future[Unit]
 
 Plugins for integrating various libraries are published in different artifacts to reduce the transitive dependencies.
 
-## Backend
+## [Backend](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/Backend.html)
 
 Effectful computation plugins:
 
@@ -92,7 +92,7 @@ Effectful computation plugins:
 | [CatsEffectBackend](https://www.javadoc.io/doc/io.automorph/automorph-cats-effect_2.13/latest/automorph/backend/CatsEffectBackend.html) | [automorph-cats-effect](https://mvnrepository.com/artifact/io.automorph/automorph-cats-effect) | [Cats](https://typelevel.org/cats-effect/) | [IO](https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html) |
 | [ScalazBackend](https://www.javadoc.io/doc/io.automorph/automorph-scalaz_2.13/latest/automorph/backend/ScalazBackend.html) | [automorph-scalaz](https://mvnrepository.com/artifact/io.automorph/automorph-scalaz) | [Scalaz](https://github.com/scalaz) | [IO](https://www.javadoc.io/doc/org.scalaz/scalaz_2.13/latest/scalaz/effect/IO.html) |
 
-## Codec
+## [Codec](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/Codec.html)
 
 Hierarchical message data format plugins:
 
@@ -103,7 +103,7 @@ Hierarchical message data format plugins:
 | [CirceJsonCodec](https://www.javadoc.io/doc/io.automorph/automorph-circe_2.13/latest/automorph/codec/json/CirceJsonCodec.html) | [automorph-circe](https://mvnrepository.com/artifact/io.automorph/automorph-circe) | [Circe](https://circe.github.io/circe) |[Json](https://circe.github.io/circe/api/io/circe/Json.html) |
 | [ArgonautJsonCodec](https://www.javadoc.io/doc/io.automorph/automorph-argonaut_2.13/latest/automorph/codec/json/ArgonautJsonCodec.html) | [automorph-argonaut](https://mvnrepository.com/artifact/io.automorph/automorph-argonaut) | [Argonaut](http://argonaut.io/doc/) |[Json](http://argonaut.io/scaladocs/#argonaut.Json) |
 
-## Transport
+## [Transport](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/Transport.html)
 
 Message transport plugins:
 
