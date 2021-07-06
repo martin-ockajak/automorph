@@ -25,8 +25,7 @@ jobs:
         os: [ubuntu-latest]
 #        scala: [2.13.6, 3.0.0]
         scala: [3.0.0]
-#        java: [adopt@11]
-        java: [11]
+        java: [adopt@11]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout current branch (full)
@@ -38,7 +37,6 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: ${{ matrix.java }}
-          distribution: 'adopt'
 
       - name: Cache sbt
         uses: actions/cache@v2
@@ -51,9 +49,6 @@ jobs:
             ~/AppData/Local/Coursier/Cache/v1
             ~/Library/Caches/Coursier/v1
           key: ${{ runner.os }}-sbt-cache-v2-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
-
-#      - name: Check that workflows are up to date
-#        run: sbt --client '++${{ matrix.scala }}; githubWorkflowCheck'
 
       - name: Build project
         run: sbt --client '++${{ matrix.scala }}; test'
