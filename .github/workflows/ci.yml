@@ -60,7 +60,8 @@ jobs:
 #        run: sbt --client '++${{ matrix.scala }}; githubWorkflowCheck'
 
       - name: Build project
-        run: sbt --client '++${{ matrix.scala }}; test'
+#        run: sbt --client '++${{ matrix.scala }}; test'
+        run: sbt 'test'
 
       - name: Compress target directories
         run: tar cf targets.tar transport/sttp/target test/base/target server/tapir/target standard/target target codec/argonaut/target server/finagle/target codec/upickle/target server/undertow/target backend/zio/target test/core/target core/meta/target default/target codec/circe/target backend/cats-effect/target spi/target backend/monix/target server/jetty/target core/target backend/scalaz/target project/target
