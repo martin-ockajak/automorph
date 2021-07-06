@@ -24,7 +24,8 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         scala: [2.13.6, 3.0.0]
-        java: [adopt@1.11]
+#        java: [adopt@11]
+        java: '11'
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout current branch (full)
@@ -32,10 +33,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Java and Scala
-        uses: olafurpg/setup-scala@v12
+      - name: Setup Java
+        uses: actions/setup-java@v2
         with:
           java-version: ${{ matrix.java }}
+          distribution: 'adopt'
+
+#      - name: Setup Java and Scala
+#        uses: olafurpg/setup-scala@v12
+#        with:
+#          java-version: ${{ matrix.java }}
 
       - name: Cache sbt
         uses: actions/cache@v2
