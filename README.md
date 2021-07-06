@@ -75,7 +75,7 @@ client.notifyByName("hello", "thing" -> "world") // : Future[Unit]
 
 # Plugins
 
-Plugins for integrating various libraries are published in different artifacts to reduce the transitive dependencies.
+Plugins for integrating various libraries are published in different artifacts to reduce transitive library dependencies.
 
 ## [Backend](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/Backend.html)
 
