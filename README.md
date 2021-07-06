@@ -16,7 +16,7 @@
 
 # Quick Start
 
-Exposing and invoking JSON-RPC API over HTTP.
+Exposing and invoking remote JSON-RPC API over HTTP.
 
 ## Build
 
