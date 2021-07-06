@@ -183,7 +183,7 @@ case object Client {
     codec: ExactCodec,
     backend: Backend[Effect],
     transport: Transport[Effect, NoContext.Value],
-    mapError: (Int, String) => Throwable
+    mapError: (Int, String) => Throwable = defaultMapError
   ): Client[Node, ExactCodec, Effect, NoContext.Value] = new Client(codec, backend, transport, mapError)
 
   /**
