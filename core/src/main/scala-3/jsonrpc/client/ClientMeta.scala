@@ -878,6 +878,25 @@ private[jsonrpc] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Co
    */
   inline def bindByPosition[Api <: AnyRef]: Api = bind[Api](argumentsByName = false)
 
+  /**
+   * Create a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
+   *
+   * A method is considered valid if it satisfies all of these conditions:
+   * - can be called at runtime
+   * - has no type parameters
+   * - returns the specified effect type
+   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
+   *
+   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
+   * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
+   *
+   * Invoked method arguments are supplied ''by position'' as an array.
+   *
+   * @tparam Api API trait type (classes are not supported)
+   * @param argumentsByName if true, invoked method orguments are supplied ''by name'' as an object, otherwise ''by position'' as an array
+   * @return JSON-RPC API proxy instance
+   * @throws IllegalArgumentException if invalid public methods are found in the API type
+   */
   inline def bind[Api <: AnyRef](argumentsByName: Boolean): Api =
     // Generate API method bindings
     val methodBindings = ClientBindings.generate[Node, ExactCodec, Effect, Context, Api](codec)
