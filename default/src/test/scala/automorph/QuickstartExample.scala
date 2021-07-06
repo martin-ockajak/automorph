@@ -1,5 +1,6 @@
 package automorph
 
+import io.undertow.server.HttpServerExchange
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -21,7 +22,7 @@ class QuickstartExample {
   val proxyResult = apiProxy.hello("world") // : Future[String]
 
   // Direct call
-  val directResult: Future[String] = client.callByName[String, String]("hello", "thing" -> "world")
+  val directResult = client.callByName[String, String]("hello", "thing" -> "world")
 
   // Direct notification
   client.notifyByName("hello", "thing" -> "world") // : Future[Unit]
