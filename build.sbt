@@ -209,8 +209,8 @@ ThisBuild / scalacOptions ++= Seq(
   "-language:higherKinds",
   "-deprecation",
   "-unchecked",
-  "-release:8",
-  "-target:8",
+  "-release",
+  "8",
   "-encoding",
   "utf8",
 ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
