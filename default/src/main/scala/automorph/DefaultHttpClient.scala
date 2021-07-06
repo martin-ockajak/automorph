@@ -34,7 +34,7 @@ case object DefaultHttpClient {
     httpMethod: String
   ): DefaultClient[Effect] = {
     val codec = UpickleJsonCodec()
-    val transport = SttpTransport(Uri(url), Method.unsafeApply(httpMethod), codec.mediaType, sttpBackend, backend)
+    val transport = SttpTransport(backend, Uri(url), Method.unsafeApply(httpMethod), codec.mediaType, sttpBackend)
     Client(codec, backend, transport)
   }
 

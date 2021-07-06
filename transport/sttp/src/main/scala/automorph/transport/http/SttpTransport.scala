@@ -11,19 +11,19 @@ import sttp.model.{Header, Method, Uri}
  *
  * @see [[https://sttp.softwaremill.com/en/latest/ Documentation]]
  * @see [[https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_2.13/latest/sttp/client3/index.html API]]
+ * @param backend effect backend plugin
  * @param url endpoint URL
  * @param method HTTP method
  * @param contentType HTTP request Content-Type
  * @param sttpBackend STTP backend
- * @param backend effect backend plugin
  * @tparam Effect effect type
  */
 final case class SttpTransport[Effect[_]](
+  backend: Backend[Effect],
   url: Uri,
   method: Method,
   contentType: String,
-  sttpBackend: SttpBackend[Effect, _],
-  backend: Backend[Effect]
+  sttpBackend: SttpBackend[Effect, _]
 ) extends Transport[Effect, PartialRequest[Either[String, String], Any]] with SttpApi {
 
   override def call(
