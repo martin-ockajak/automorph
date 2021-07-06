@@ -205,9 +205,7 @@ lazy val testCore = (project in file("test/core")).dependsOn(
 ThisBuild / scalaVersion := "3.0.0"
 ThisBuild / crossScalaVersions ++= Seq("2.13.6", "3.0.0")
 ThisBuild / scalacOptions ++= Seq(
-//  "-Djsonrpc.macro.debug=true",
   "-feature",
-//  "-Xfatal-warnings",
   "-language:higherKinds",
   "-deprecation",
   "-unchecked",
@@ -219,7 +217,6 @@ ThisBuild / scalacOptions ++= Seq(
   case Some((3, _)) => Seq(
     "-source",
     "3.0",
-//    "-new-syntax",
     "-language:adhocExtensions",
     "-indent",
     "-Xcheck-macros",
