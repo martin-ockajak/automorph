@@ -278,5 +278,5 @@ ThisBuild / scmInfo := Some(ScmInfo(
 ThisBuild / releaseVcsSign := true
 ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
 ThisBuild / versionScheme := Some("semver-spec")
-ThisBuild / publishTo := Some(MavenCache("local-maven", file("target/maven-relases")))
+//ThisBuild / publishTo := Some(MavenCache("local-maven", file("target/maven-relases")))
 
