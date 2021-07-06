@@ -16,7 +16,7 @@ way to invoke and expose remote APIs.
 * **Boilerplate free** - even advanced use requires only a few lines of code
 * **Dependency free** - core implementation depends on [SLF4J API](http://www.slf4j.org/) only
 
-# Quick Start
+# Quickstart
 
 Exposing and invoking remote JSON-RPC API over HTTP.
 
