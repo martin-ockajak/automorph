@@ -4,7 +4,7 @@ import automorph.spi.{Backend, Transport}
 import automorph.transport.http.SttpTransport.HttpContext
 import java.io.IOException
 import scala.collection.immutable.ArraySeq
-import sttp.client3.{Identity, PartialRequest, Request, Response, SttpApi, SttpBackend, basicRequest}
+import sttp.client3.{basicRequest, Identity, PartialRequest, Request, Response, SttpApi, SttpBackend}
 import sttp.model.{Header, Method, Uri}
 
 /**
@@ -48,22 +48,25 @@ final case class SttpTransport[Effect[_]](
     request: ArraySeq.ofByte,
     context: Option[HttpContext]
   ): Request[Either[String, String], Any] =
-    context.getOrElse(HttpContext(basicRequest)).partialRequest.copy[Identity, Either[String, String], Any](
+    context.getOrElse(HttpContext()).partialRequest.copy[Identity, Either[String, String], Any](
       uri = url,
       method = method
     ).contentType(contentType).header(Header.accept(contentType)).body(request.unsafeArray)
 }
 
 case object SttpTransport {
+
   /**
    * HTTP request context.
    *
    * @see [[https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_2.13/latest/sttp/client3/RequestT.html API]]
    * @param partialRequest partially constructed request
    */
-  case class HttpContext(partialRequest: PartialRequest[Either[String, String], Any])
+  case class HttpContext(
+    partialRequest: PartialRequest[Either[String, String], Any] = basicRequest
+  )
 
   case object HttpContext {
-    implicit val defaultContext: HttpContext = HttpContext(basicRequest)
+    implicit val defaultContext: HttpContext = HttpContext()
   }
 }

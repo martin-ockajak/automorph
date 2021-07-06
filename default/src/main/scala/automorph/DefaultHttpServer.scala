@@ -17,15 +17,13 @@ case object DefaultHttpServer {
   /**
    * Create a JSON-RPC server using the specified ''backend'' plugin.
    *
-   * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
-   *
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
    * @see [[https://undertow.io HTTP Server Documentation]]
    * @param backend effect backend plugin
    * @param runEffect effect execution function
    * @param bindApis function to bind APIs to the underlying JSON-RPC handler
    * @param port port to listen on for HTTP connections
-   * @param urlPath HTTP handler URL path
+   * @param urlPath HTTP URL path (default: /)
    * @param builder Undertow web server builder
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
    * @tparam Effect effect type
@@ -35,24 +33,22 @@ case object DefaultHttpServer {
     backend: Backend[Effect],
     runEffect: Effect[Any] => Unit,
     bindApis: BindApis[Effect],
-    port: Int = 8080,
+    port: Int,
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   ): DefaultServer = {
-    val handler = bindApis(DefaultHandler(backend))
+    val defaultHandler = DefaultHandler[Effect, HttpServerExchange](backend)
+    val handler = bindApis(defaultHandler)
     UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
   }
-
   /**
    * Create an asynchonous JSON-RPC request handler with defined request `Context` type.
-   *
-   * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
    * @param bindApis function to bind APIs to the underlying JSON-RPC handler
    * @param port port to listen on for HTTP connections
-   * @param urlPath HTTP handler URL path
+   * @param urlPath HTTP URL path (default: /)
    * @param builder Undertow web server builder
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
    * @param executionContext execution context
@@ -60,13 +56,14 @@ case object DefaultHttpServer {
    */
   def async(
     bindApis: BindApis[Future],
-    port: Int = 8080,
+    port: Int,
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   )(implicit executionContext: ExecutionContext): DefaultServer = {
     Seq(executionContext)
-    val handler = bindApis(DefaultHandler.async())
+    val defaultHandler = DefaultHandler.async[HttpServerExchange]()
+    val handler = bindApis(defaultHandler)
     val runEffect = (_: Future[Any]) => ()
     UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
   }
@@ -79,7 +76,7 @@ case object DefaultHttpServer {
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
    * @param bindApis function to bind APIs to the underlying JSON-RPC handler
    * @param port port to listen on for HTTP connections
-   * @param urlPath HTTP handler URL path
+   * @param urlPath HTTP URL path (default: /)
    * @param builder Undertow web server builder
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
    * @param executionContext execution context
@@ -87,12 +84,13 @@ case object DefaultHttpServer {
    */
   def sync(
     bindApis: BindApis[Identity],
-    port: Int = 8080,
+    port: Int,
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   ): DefaultServer = {
-    val handler = bindApis(DefaultHandler.sync())
+    val defaultHandler = DefaultHandler.sync[HttpServerExchange]()
+    val handler = bindApis(defaultHandler)
     val runEffect = (_: Identity[Any]) => ()
     UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
   }

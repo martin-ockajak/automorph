@@ -12,19 +12,17 @@ import scala.jdk.CollectionConverters.ListHasAsScala
 /**
  * HTTP server based on Undertow web server.
  *
- * Default port to listen for HTTP connections: 8080
- *
  * @see [[https://undertow.io/ Documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor Create an Undertow web server using the specified HTTP handler.
  * @param httpHandler HTTP handler
  * @param port port to listen on for HTTP connections
- * @param urlPath HTTP handler URL path
+ * @param urlPath HTTP URL path (default: /)
  * @param builder Undertow web server builder
  */
 final case class UndertowServer(
   httpHandler: HttpHandler,
-  port: Int = 8080,
+  port: Int,
   urlPath: String = "/",
   builder: Undertow.Builder = defaultBuilder
 ) extends AutoCloseable with Logging {
