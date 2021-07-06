@@ -25,7 +25,7 @@ jobs:
         os: [ubuntu-latest]
 #        scala: [2.13.6, 3.0.0]
         scala: [3.0.0]
-        java: [adopt@11]
+        java: [11]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout current branch (full)
@@ -37,6 +37,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: ${{ matrix.java }}
+          distribution: 'adopt'
 
       - name: Cache sbt
         uses: actions/cache@v2
