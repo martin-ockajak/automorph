@@ -897,7 +897,7 @@ private[jsonrpc] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Co
    * @return JSON-RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](argumentsByName: Boolean): Api =
+  inline def bind[Api <: AnyRef](argumentsByName: Boolean = true): Api =
     // Generate API method bindings
     val methodBindings = ClientBindings.generate[Node, ExactCodec, Effect, Context, Api](codec)
 

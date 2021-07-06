@@ -641,7 +641,7 @@ private[jsonrpc] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Co
    * @return JSON-RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](argumentsByName: Boolean): Api = macro ClientMeta.bindMacro[Node, ExactCodec, Effect, Context, Api]
+  def bind[Api <: AnyRef](argumentsByName: Boolean = true): Api = macro ClientMeta.bindMacro[Node, ExactCodec, Effect, Context, Api]
 }
 
 object ClientMeta {
