@@ -1,7 +1,5 @@
 package jsonrpc.protocol
 
-import java.io.IOException
-
 /**
  * JSON-RPC error types with codes.
  *
@@ -55,28 +53,6 @@ object ErrorType {
     message: String,
     cause: Throwable
   ) extends RuntimeException(message, cause)
-
-  /** Mapping of standard exception types to JSON-RPC errors. */
-  val fromException: Map[Class[_ <: Throwable], ErrorType] = Map(
-    classOf[ParseErrorException] -> ErrorType.ParseError,
-    classOf[InvalidRequestException] -> ErrorType.InvalidRequest,
-    classOf[MethodNotFoundException] -> ErrorType.MethodNotFound,
-    classOf[IllegalArgumentException] -> ErrorType.InvalidParams,
-    classOf[InternalErrorException] -> ErrorType.InternalError,
-    classOf[IOException] -> ErrorType.IOError
-  ).withDefaultValue(ErrorType.ApplicationError).asInstanceOf[Map[Class[_ <: Throwable], ErrorType]]
-
-  /** Mapping of JSON-RPC errors to standard exception types. */
-  def toException(code: Int, message: String): Throwable = code match {
-    case ErrorType.ParseError.code => ParseErrorException(message, None.orNull)
-    case ErrorType.InvalidRequest.code => InvalidRequestException(message, None.orNull)
-    case ErrorType.MethodNotFound.code => MethodNotFoundException(message, None.orNull)
-    case ErrorType.InvalidParams.code => new IllegalArgumentException(message, None.orNull)
-    case ErrorType.InternalError.code => InternalErrorException(message, None.orNull)
-    case ErrorType.IOError.code => new IOException(message, None.orNull)
-    case _ if code < ErrorType.ApplicationError.code => InternalErrorException(message, None.orNull)
-    case _ => new RuntimeException(message, None.orNull)
-  }
 
   /**
    * Return specified mandatory property value or throw an exception if it is missing.

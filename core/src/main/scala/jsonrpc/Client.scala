@@ -1,8 +1,9 @@
 package jsonrpc
 
+import java.io.IOException
 import jsonrpc.client.ClientMeta
 import jsonrpc.log.Logging
-import jsonrpc.protocol.ErrorType.{InvalidResponseException, ParseErrorException}
+import jsonrpc.protocol.ErrorType.{InternalErrorException, InvalidRequestException, InvalidResponseException, MethodNotFoundException, ParseErrorException}
 import jsonrpc.protocol.{ErrorType, Request, Response}
 import jsonrpc.spi.Message.Params
 import jsonrpc.spi.{Backend, Codec, Message, Transport}
@@ -115,7 +116,7 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context] (
           error => raiseError(error, formedRequest),
           validResponse =>
             validResponse.value.fold(
-              error => raiseError(ErrorType.toException(error.code, error.message), formedRequest),
+              error => raiseError(Client.toException(error.code, error.message), formedRequest),
               result =>
                 // Decode result
                 Try(decodeResult(result)).toEither.fold(
@@ -159,6 +160,23 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context] (
 }
 
 case object Client {
+  /**
+   * Map JSON-RPC errors to exceptions.
+   *
+   * @param code JSON-RPC error code
+   * @param message error message
+   * @return exception
+   */
+  def toException(code: Int, message: String): Throwable = code match {
+    case ErrorType.ParseError.code => ParseErrorException(message, None.orNull)
+    case ErrorType.InvalidRequest.code => InvalidRequestException(message, None.orNull)
+    case ErrorType.MethodNotFound.code => MethodNotFoundException(message, None.orNull)
+    case ErrorType.InvalidParams.code => new IllegalArgumentException(message, None.orNull)
+    case ErrorType.InternalError.code => InternalErrorException(message, None.orNull)
+    case ErrorType.IOError.code => new IOException(message, None.orNull)
+    case _ if code < ErrorType.ApplicationError.code => InternalErrorException(message, None.orNull)
+    case _ => new RuntimeException(message, None.orNull)
+  }
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with empty request `Context` type.
