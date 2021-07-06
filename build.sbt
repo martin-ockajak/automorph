@@ -29,7 +29,6 @@ lazy val root = project.in(file(".")).aggregate(
   name := "json-rpc",
   description := "JSON-RPC client & server",
   publish / skip := true,
-//  crossScalaVersions := Seq.empty
 ).enablePlugins(ScalaUnidocPlugin)
 
 
@@ -248,6 +247,7 @@ ThisBuild / javacOptions ++= Seq(
 
 // Analyze
 scalastyleConfig := baseDirectory.value / "project" / "scalastyle.xml"
+Compile / scalastyleSources ++= (Compile / unmanagedSourceDirectories).value
 scalastyleFailOnError := true
 lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 testScalastyle := (Test / scalastyle).toTask("").value
