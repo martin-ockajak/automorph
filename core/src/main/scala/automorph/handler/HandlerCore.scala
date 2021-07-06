@@ -1,10 +1,11 @@
 package automorph.handler
 
 import automorph.handler.{HandlerMethod, HandlerResult}
-import automorph.protocol.ErrorType.{MethodNotFoundException, ParseErrorException}
-import automorph.protocol.{Request, Response, ResponseError}
+import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
+import automorph.protocol.{ErrorType, Request, Response, ResponseError}
 import automorph.spi.{Codec, Message}
 import automorph.{Handler, JsonRpcError}
+import java.io.IOException
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -42,9 +43,17 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
     )
   }
 
-  override def toString: String = {
+  /**
+   * Create a copy of this handler with specified exception to JSON-RPC error mapping.
+   *
+   * @param exceptionToError exception class to JSON-RPC error type mapping
+   * @return JSON-RPC server with the specified exceptions to JSON-RPC errors mapping
+   */
+  def mapExceptions(exceptionToError: Class[_ <: Throwable] => ErrorType): Handler[Node, ExactCodec, Effect, Context] =
+    copy(exceptionToError = exceptionToError)
+
+  override def toString: String =
     s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Backend: ${backend.getClass.getName}, Bound methods: ${methodBindings.size})"
-  }
 
   /**
    * Invoke bound method specified in a request.
@@ -147,7 +156,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
       case JsonRpcError(message, code, data, _) => ResponseError(code, message, data.asInstanceOf[Option[Node]])
       case _ =>
         // Assemble error details
-        val code = mapException(error.getClass).code
+        val code = exceptionToError(error.getClass).code
         val trace = ResponseError.trace(error)
         val message = trace.headOption.getOrElse("Unknown error")
         val data = Some(encodeStrings(trace.drop(1).toList))
@@ -177,4 +186,22 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
       message => backend.pure(Some(message))
     )
   }
+}
+
+object HandlerCore {
+
+  /**
+   * Default exception class to JSON-RPC error type mapping.
+   *
+   * @param exceptionClass exception class
+   * @return JSON-RPC error type
+   */
+  def defaultMapException(exceptionClass: Class[_ <: Throwable]): ErrorType = Map(
+    classOf[ParseErrorException] -> ErrorType.ParseError,
+    classOf[InvalidRequestException] -> ErrorType.InvalidRequest,
+    classOf[MethodNotFoundException] -> ErrorType.MethodNotFound,
+    classOf[IllegalArgumentException] -> ErrorType.InvalidParams,
+    classOf[InternalErrorException] -> ErrorType.InternalError,
+    classOf[IOException] -> ErrorType.IOError
+  ).withDefaultValue(ErrorType.ApplicationError).asInstanceOf[Map[Class[_ <: Throwable], ErrorType]](exceptionClass)
 }

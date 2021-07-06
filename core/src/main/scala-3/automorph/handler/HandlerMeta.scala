@@ -31,7 +31,7 @@ private[automorph] trait HandlerMeta[Node, ExactCodec <: Codec[Node], Effect[_],
    *
    * @param api API instance
    * @tparam Api API type (only member methods of this type are exposed)
-   * @return JSON-RPC server with the additional API bindings
+   * @return JSON-RPC server with added API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef](api: Api): Handler[Node, ExactCodec, Effect, Context] =
@@ -54,7 +54,7 @@ private[automorph] trait HandlerMeta[Node, ExactCodec <: Codec[Node], Effect[_],
    * @param api API instance
    * @param mapName mapping of method name to its exposed names (empty result causes the method not to be exposed)
    * @tparam Api API type (only member methods of this type are exposed)
-   * @return JSON-RPC server with the additional API bindings
+   * @return JSON-RPC server with added API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef](

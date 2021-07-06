@@ -22,7 +22,7 @@ import scala.util.{Random, Try}
  * @param codec message codec plugin
  * @param backend effect backend plugin
  * @param transport message transport plugin
- * @param mapError mapping of JSON-RPC errors to exceptions
+ * @param errorToException mapping of JSON-RPC errors to exceptions
  * @tparam Node message format node representation type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
@@ -32,10 +32,19 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context] (
   codec: ExactCodec,
   backend: Backend[Effect],
   transport: Transport[Effect, Context],
-  mapError: (Int, String) => Throwable = defaultMapError
+  protected val errorToException: (Int, String) => Throwable = defaultMapError
 ) extends ClientMeta[Node, ExactCodec, Effect, Context] with CannotEqual with Logging {
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
+
+  /**
+   * Create a copy of this client with specified JSON-RPC error to exception mapping.
+   *
+   * @param errorToException JSON-RPC error to exception mapping
+   * @return JSON-RPC server with the specified JSON-RPC error to exception mapping
+   */
+  def mapErrors(errorToException: (Int, String) => Throwable): Client[Node, ExactCodec, Effect, Context] =
+    copy(errorToException = errorToException)
 
   /**
    * Perform a method call using specified arguments.
@@ -119,7 +128,7 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context] (
           error => raiseError(error, formedRequest),
           validResponse =>
             validResponse.value.fold(
-              error => raiseError(mapError(error.code, error.message), formedRequest),
+              error => raiseError(errorToException(error.code, error.message), formedRequest),
               result =>
                 // Decode result
                 Try(decodeResult(result)).toEither.fold(
@@ -173,7 +182,6 @@ case object Client {
    * @param codec message codec plugin
    * @param backend effect backend plugin
    * @param transport message transport plugin
-   * @param mapError mapping of JSON-RPC errors to exceptions
    * @tparam Node message format node representation type
    * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
@@ -182,12 +190,11 @@ case object Client {
   def noContext[Node, ExactCodec <: Codec[Node], Effect[_]](
     codec: ExactCodec,
     backend: Backend[Effect],
-    transport: Transport[Effect, NoContext.Value],
-    mapError: (Int, String) => Throwable = defaultMapError
-  ): Client[Node, ExactCodec, Effect, NoContext.Value] = new Client(codec, backend, transport, mapError)
+    transport: Transport[Effect, NoContext.Value]
+  ): Client[Node, ExactCodec, Effect, NoContext.Value] = Client(codec, backend, transport)
 
   /**
-   * Default mapping of JSON-RPC errors to exceptions.
+   * Default JSON-RPC error to exception mapping.
    *
    * @param code error code
    * @param message error message
