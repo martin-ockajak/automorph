@@ -1,9 +1,8 @@
 package jsonrpc.handler
 
-import java.io.IOException
 import jsonrpc.handler.{HandlerMethod, HandlerResult}
-import jsonrpc.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
-import jsonrpc.protocol.{ErrorType, Request, Response, ResponseError}
+import jsonrpc.protocol.ErrorType.{MethodNotFoundException, ParseErrorException}
+import jsonrpc.protocol.{Request, Response, ResponseError}
 import jsonrpc.spi.{Codec, Message}
 import jsonrpc.{Handler, JsonRpcError}
 import scala.collection.immutable.ArraySeq
@@ -148,7 +147,7 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
       case JsonRpcError(message, code, data, _) => ResponseError(code, message, data.asInstanceOf[Option[Node]])
       case _ =>
         // Assemble error details
-        val code = HandlerCore.fromException(error.getClass).code
+        val code = mapException(error.getClass).code
         val trace = ResponseError.trace(error)
         val message = trace.headOption.getOrElse("Unknown error")
         val data = Some(encodeStrings(trace.drop(1).toList))
@@ -178,16 +177,4 @@ private[jsonrpc] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], C
       message => backend.pure(Some(message))
     )
   }
-}
-
-private[jsonrpc] object HandlerCore {
-  /** Map exceptions types to JSON-RPC errors. */
-  val fromException: Map[Class[_ <: Throwable], ErrorType] = Map(
-    classOf[ParseErrorException] -> ErrorType.ParseError,
-    classOf[InvalidRequestException] -> ErrorType.InvalidRequest,
-    classOf[MethodNotFoundException] -> ErrorType.MethodNotFound,
-    classOf[IllegalArgumentException] -> ErrorType.InvalidParams,
-    classOf[InternalErrorException] -> ErrorType.InternalError,
-    classOf[IOException] -> ErrorType.IOError
-  ).withDefaultValue(ErrorType.ApplicationError).asInstanceOf[Map[Class[_ <: Throwable], ErrorType]]
 }

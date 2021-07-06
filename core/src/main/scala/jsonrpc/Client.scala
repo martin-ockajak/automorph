@@ -1,6 +1,7 @@
 package jsonrpc
 
 import java.io.IOException
+import jsonrpc.Client.defaultMapError
 import jsonrpc.client.ClientMeta
 import jsonrpc.log.Logging
 import jsonrpc.protocol.ErrorType.{InternalErrorException, InvalidRequestException, InvalidResponseException, MethodNotFoundException, ParseErrorException}
@@ -21,6 +22,7 @@ import scala.util.{Random, Try}
  * @param codec message codec plugin
  * @param backend effect backend plugin
  * @param transport message transport plugin
+ * @param mapError mapping of JSON-RPC errors to exceptions
  * @tparam Node message format node representation type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
@@ -29,7 +31,8 @@ import scala.util.{Random, Try}
 final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context] (
   codec: ExactCodec,
   backend: Backend[Effect],
-  transport: Transport[Effect, Context]
+  transport: Transport[Effect, Context],
+  mapError: (Int, String) => Throwable = defaultMapError
 ) extends ClientMeta[Node, ExactCodec, Effect, Context] with CannotEqual with Logging {
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
@@ -116,7 +119,7 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context] (
           error => raiseError(error, formedRequest),
           validResponse =>
             validResponse.value.fold(
-              error => raiseError(Client.toException(error.code, error.message), formedRequest),
+              error => raiseError(mapError(error.code, error.message), formedRequest),
               result =>
                 // Decode result
                 Try(decodeResult(result)).toEither.fold(
@@ -160,23 +163,6 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context] (
 }
 
 case object Client {
-  /**
-   * Map JSON-RPC errors to exceptions.
-   *
-   * @param code JSON-RPC error code
-   * @param message error message
-   * @return exception
-   */
-  def toException(code: Int, message: String): Throwable = code match {
-    case ErrorType.ParseError.code => ParseErrorException(message, None.orNull)
-    case ErrorType.InvalidRequest.code => InvalidRequestException(message, None.orNull)
-    case ErrorType.MethodNotFound.code => MethodNotFoundException(message, None.orNull)
-    case ErrorType.InvalidParams.code => new IllegalArgumentException(message, None.orNull)
-    case ErrorType.InternalError.code => InternalErrorException(message, None.orNull)
-    case ErrorType.IOError.code => new IOException(message, None.orNull)
-    case _ if code < ErrorType.ApplicationError.code => InternalErrorException(message, None.orNull)
-    case _ => new RuntimeException(message, None.orNull)
-  }
 
   /**
    * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with empty request `Context` type.
@@ -187,6 +173,7 @@ case object Client {
    * @param codec message codec plugin
    * @param backend effect backend plugin
    * @param transport message transport plugin
+   * @param mapError mapping of JSON-RPC errors to exceptions
    * @tparam Node message format node representation type
    * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
@@ -195,6 +182,25 @@ case object Client {
   def noContext[Node, ExactCodec <: Codec[Node], Effect[_]](
     codec: ExactCodec,
     backend: Backend[Effect],
-    transport: Transport[Effect, NoContext.Value]
-  ): Client[Node, ExactCodec, Effect, NoContext.Value] = new Client(codec, backend, transport)
+    transport: Transport[Effect, NoContext.Value],
+    mapError: (Int, String) => Throwable
+  ): Client[Node, ExactCodec, Effect, NoContext.Value] = new Client(codec, backend, transport, mapError)
+
+  /**
+   * Default mapping of JSON-RPC errors to exceptions.
+   *
+   * @param code error code
+   * @param message error message
+   * @return exception
+   */
+  def defaultMapError(code: Int, message: String): Throwable = code match {
+    case ErrorType.ParseError.code => ParseErrorException(message, None.orNull)
+    case ErrorType.InvalidRequest.code => InvalidRequestException(message, None.orNull)
+    case ErrorType.MethodNotFound.code => MethodNotFoundException(message, None.orNull)
+    case ErrorType.InvalidParams.code => new IllegalArgumentException(message, None.orNull)
+    case ErrorType.InternalError.code => InternalErrorException(message, None.orNull)
+    case ErrorType.IOError.code => new IOException(message, None.orNull)
+    case _ if code < ErrorType.ApplicationError.code => InternalErrorException(message, None.orNull)
+    case _ => new RuntimeException(message, None.orNull)
+  }
 }

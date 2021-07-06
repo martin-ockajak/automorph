@@ -50,15 +50,15 @@ private[jsonrpc] trait HandlerMeta[Node, ExactCodec <: Codec[Node], Effect[_], C
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
-   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `exposedNames` function.
+   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `mapName` function.
    *
    * @param api API instance
-   * @param exposedNames create exposed method names from its actual name (empty result causes the method not to be exposed)
+   * @param mapName mapping of method name to its exposed names (empty result causes the method not to be exposed)
    * @tparam Api API type (only member methods of this type are exposed)
    * @return JSON-RPC server with the additional API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api, exposedNames: String => Seq[String]): Handler[Node, ExactCodec, Effect, Context] =
+  def bind[Api <: AnyRef](api: Api, mapName: String => Seq[String]): Handler[Node, ExactCodec, Effect, Context] =
     macro HandlerMeta.bindMacro[Node, ExactCodec, Effect, Context, Api]
 }
 
@@ -94,7 +94,7 @@ case object HandlerMeta {
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     api: c.Expr[Api],
-    exposedNames: c.Expr[String => Seq[String]]
+    mapName: c.Expr[String => Seq[String]]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, ExactCodec, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
@@ -106,7 +106,7 @@ case object HandlerMeta {
       ${c.prefix}.copy(methodBindings = ${c.prefix}.methodBindings ++ jsonrpc.handler.HandlerBindings
         .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.backend, $api)
         .flatMap { case (methodName, method) =>
-          $exposedNames(methodName).map(_ -> method)
+          $mapName(methodName).map(_ -> method)
         }
       )
     """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Context]]]
