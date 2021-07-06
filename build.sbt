@@ -276,7 +276,6 @@ ThisBuild / githubWorkflowPublish := Seq(WorkflowStep.Sbt(List("ci-release")))
 
 // Release
 ThisBuild / releaseCrossBuild := true
-ThisBuild / homepage := Some(url("https://github.com/jsonrpc/jsonrpc"))
 ThisBuild / scmInfo := Some(ScmInfo(
   url("https://github.com/jsonrpc/jsonrpc"),
   "scm:git:git@github.com:jsonrpc/jsonrpc.git"
