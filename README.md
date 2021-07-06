@@ -28,7 +28,7 @@ libraryDependencies += "io.automorph" %% "automorph-default" % "1.0.0"
 
 ## API
 
-Define an *API* class:
+Define an API class:
 
 ```scala
 import scala.concurrent.Future
@@ -43,7 +43,7 @@ val api = new Api()
 
 ## Server
 
-Expose the remote *API*:
+Expose the remote API:
 
 ```scala
 // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
@@ -55,7 +55,7 @@ server.close()
 
 ## Client
 
-Invoke the remote *API*:
+Invoke the remote API:
 
 ```scala
 // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
