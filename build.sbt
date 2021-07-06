@@ -265,6 +265,10 @@ ScalaUnidoc / unidoc / scalacOptions += "-Ymacro-expand:none"
 //)
 
 
+// Continuous Integration
+ThisBuild / githubWorkflowPublishTargetBranches := Seq()
+
+
 // Release
 ThisBuild / releaseCrossBuild := true
 ThisBuild / homepage := Some(url("https://github.com/jsonrpc/jsonrpc"))
