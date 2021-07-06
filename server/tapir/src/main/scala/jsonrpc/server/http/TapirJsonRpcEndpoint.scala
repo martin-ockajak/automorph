@@ -60,7 +60,6 @@ case object TapirJsonRpcEndpoint extends Logging {
         val request = Request(paths, queryParams, headers, cookies, clientIp)
         val client = clientAddress(request.clientIp)
         logger.debug("Received HTTP request", Map("Client" -> client))
-        backend.pure(Right(Array[Byte]()))
 
         // Process the request
         implicit val usingContext = request
