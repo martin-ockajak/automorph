@@ -70,7 +70,7 @@ val apiProxy = client.bindByName[Api]
 val proxyResult = apiProxy.hello("world") // : Future[String]
 
 // Direct call
-val directResult: Future[String] = client.callByName("hello", "thing" -> "world")
+val directResult = client.callByName[String, String]("hello", "thing" -> "world") // : Future[String]
 
 // Direct notification
 client.notifyByName("hello", "thing" -> "world") // : Future[Unit]
