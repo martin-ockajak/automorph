@@ -104,4 +104,8 @@ case object UrlConnectionTransport {
     connectTimeout: Int = 30000,
     readTimeout: Int = 30000
   )
+
+  case object HttpContext {
+    implicit val defaultContext: HttpContext = HttpContext()
+  }
 }
