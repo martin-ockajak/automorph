@@ -47,7 +47,7 @@ val api = new Api()
 Expose the remote *API*:
 
 ```scala
-// Create and start JSON-RPC over HTTP server listening on port 80 for requests with URL path '/api'
+// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = automorph.DefaultHttpServer.async(_.bind(api), 80, "/api")
 
 // Stop the server
@@ -59,7 +59,7 @@ server.close()
 Invoke the remote *API*:
 
 ```scala
-// Create JSON-RPC over HTTP client sending POST request to 'http://localhost/api'
+// Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
 val client = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
 
 // Proxy call
