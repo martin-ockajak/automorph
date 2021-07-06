@@ -1,19 +1,18 @@
 # Overview
 
-**Automorph** is a [Scala](https://www.scala-lang.org/) [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for effortlessly invoking
-and exposing remote APIs.
+**Automorph** is a [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless way to invoke and expose remote APIs.
 
 # Features
 
 * **Simple** - generate JSON-RPC bindings automatically from public methods of existing API classes
-* **Extensible** - automatically derive or implement serialization logic for arbitrary data types
 * **Modular** - freely combine various plugins to integrate with other libraries
+* **Extensible** - automatically derive or implement serialization logic for arbitrary data types
 * **Flexible** - customize mapping of JSON-RPC method names and error codes
-* **Type safe** - validate bound API classes during compilation
-* **Performant** - generate optimized API binding code during compilation
-* **Compatible** - support for [Scala 2.12](https://www.scala-lang.org/news/2.12.0/), [Scala 2.13](https://www.scala-lang.org/news/2.13.0) and [Scala 3](https://dotty.epfl.ch/)
-* **No boilerplate** - even advanced use requires only a few lines of code
-* **No dependencies** - core implementation depends on [SLF4J API](http://www.slf4j.org/) only
+* **Safe** - type checks bound API classes during compilation
+* **Fast** - generates optimized API binding code during compilation
+* **Compatible** - available for [Scala 2.12](https://www.scala-lang.org/news/2.12.0/), [Scala 2.13](https://www.scala-lang.org/news/2.13.0) and [Scala 3](https://dotty.epfl.ch/)
+* **Boilerplate free** - even advanced use requires only a few lines of code
+* **Dependency free** - core implementation depends on [SLF4J API](http://www.slf4j.org/) only
 
 # Quick Start
 
