@@ -32,7 +32,7 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
     errorToException,
     argumentNames.zip(argumentValues),
     Option.when(argumentNames.size == argumentValues.size)(encodedArguments).getOrElse {
-      throw IllegalArgumentException("Invalid number of argument names")
+      throw IllegalArgumentException(s"Supplied ${argumentNames.size} argument names instead of ${argumentValues.size} required")
     }
   )
 
