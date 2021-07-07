@@ -6,7 +6,7 @@ way to invoke and expose remote APIs.
 # Features
 
 * **Powerful** - generate JSON-RPC bindings directly from public methods of your API classes
-* **Modular** - combine various plugins to match your API effect type and integrate with other libraries
+* **Modular** - combine integrations with other libraries to match your API effect type, data format and transport protocol
 * **Clean** - access underlying protocol details without polluting your API abstractions
 * **Safe** - type checks bound API classes during compilation
 * **Fast** - generates optimized API binding code during compilation
