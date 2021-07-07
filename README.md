@@ -3,10 +3,19 @@ way to invoke and expose remote APIs.
 
 - [Features](#features)
 - [Quickstart](#quickstart)
-- [Integrations](#integrations)
-- [Architecture](#architecture)
-- [Examples](#examples)
-- [Inspired by](#inspirations)
+  * [Build](#build)
+  * [Synchronous](#synchronous)
+  * [Asynchronous](#asynchronous)
+  * [Custom Effect Type](#custom-effect-type)
+- [Integration](#integration)
+  * [Backend](#backend)
+  * [Codec](#codec)
+  * [Transport](#transport)
+  * [Server](#server-3)
+- [Documentation](#documentation)
+  - [Architecture](#architecture)
+  - [Scaladoc](#scaladoc)
+- [Inspiration](#inspiration)
 
 # Features
 
@@ -196,9 +205,7 @@ val customApiProxy = customClient.bind[CustomApi] // CustomApi
 customApiProxy.hello("world", 1) // : Task[String]
 ```
 
-## [API Documentation](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
-
-# Integrations
+# Integration
 
 *Automorph* supports integration with various libraries via plugins published in different artifacts.
 
@@ -249,9 +256,11 @@ Remote endpoint server plugins:
 | [FinagleJsonRpcService](https://www.javadoc.io/doc/io.automorph/automorph-finagle_2.13/latest/automorph/server/http/FinagleJsonRpcService.html) | [automorph-finagle](https://mvnrepository.com/artifact/io.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) |[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [NanoHttpdServer](https://www.javadoc.io/doc/io.automorph/automorph-standard_2.13/latest/automorph/server/http/NanoHttpdServer.html) | [automorph-standard](https://mvnrepository.com/artifact/io.automorph/automorph-standard) | [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd) |[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 
-# Architecture
+# Documentation
 
-## [Client](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/automorph/Client.html)
+## Architecture
+
+### [Client](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/automorph/Client.html)
 
 The client provides automatic creation of transparent proxy instances for remote JSON-RPC endpoints defined by existing API classes. Additionally, it also
 supports direct calls and notifications of remote API methods.
@@ -273,7 +282,7 @@ Depends on:
   '-------'    '---------'
 ```
 
-## Handler
+### Handler
 
 The handler provides automatic creation of remote JSON-RPC endpoint bindings for existing API instances and subsequent processing JSON-RPC requests.
 
@@ -293,9 +302,9 @@ Depends on:
             '---------'    '-------'
 ```
 
-# Examples
+### [Scaladoc](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
 
-# Inspirations
+# Inspiration
 
 * [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
 * [Autowire](https://github.com/lihaoyi/autowire)
