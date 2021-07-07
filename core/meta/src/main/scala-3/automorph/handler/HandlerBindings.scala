@@ -120,15 +120,15 @@ private[automorph] case object HandlerBindings:
       ${
         // Create the method argument lists by decoding corresponding argument nodes into values
         //   List(List(
-        //     Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
+        //     (Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
         //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
         //       case result => result
-        //     }.get
+        //     }).get
         //     ...
-        //     Try(codec.decode[ParameterNType](argumentNodes(N))) match {
+        //     (Try(codec.decode[ParameterNType](argumentNodes(N))) match {
         //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
         //       case result => result
-        //     }.get
+        //     }).get
         //   )): List[List[ParameterXType]]
         val arguments = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>

@@ -126,15 +126,15 @@ case object HandlerBindings {
       (argumentNodes: Seq[$nodeType], context: $contextType) => ${
       // Create the method argument lists by decoding corresponding argument nodes into values
       //   List(List(
-      //     Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
+      //     (Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
       //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
       //       case result => result
-      //     }.get
+      //     }).get
       //     ...
-      //     Try(codec.decode[ParameterNType](argumentNodes(N))) match {
+      //     (Try(codec.decode[ParameterNType](argumentNodes(N))) match {
       //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
       //       case result => result
-      //     }.get
+      //     }).get
       //   )): List[List[ParameterXType]]
       val arguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
         parameters.toList.zipWithIndex.map { case (parameter, index) =>
@@ -143,11 +143,11 @@ case object HandlerBindings {
             q"context"
           } else {
             q"""
-              scala.util.Try($codec.decode[${parameter.dataType}](argumentNodes(${argumentIndex}))) match {
+              (scala.util.Try($codec.decode[${parameter.dataType}](argumentNodes(${argumentIndex}))) match {
                 case scala.util.Failure(error) =>
                   scala.util.Failure(InvalidRequestException("Invalid argument: " + $argumentIndex, error))
                 case result => result
-              }.get
+              }).get
              """
           }
         }
