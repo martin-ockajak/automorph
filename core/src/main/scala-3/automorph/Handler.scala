@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.handler.HandlerCore.defaultMapException
+import automorph.handler.HandlerCore.defaultExceptionToError
 import automorph.handler.{HandlerCore, HandlerBind, HandlerBinding}
 import automorph.log.Logging
 import automorph.protocol.ErrorType
@@ -54,7 +54,7 @@ case object Handler:
     backend: Backend[Effect]
   ): Handler[Node, ExactCodec, Effect, Context] =
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
-    Handler(codec, backend, Map.empty, defaultMapException, encodeStrings, codec.encode(None))
+    Handler(codec, backend, Map.empty, defaultExceptionToError, encodeStrings, codec.encode(None))
 
   /**
    * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with empty request `Context` type.
@@ -74,4 +74,4 @@ case object Handler:
     backend: Backend[Effect]
   ): Handler[Node, ExactCodec, Effect, NoContext.Value] =
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
-    Handler(codec, backend, Map.empty, defaultMapException, encodeStrings, codec.encode(None))
+    Handler(codec, backend, Map.empty, defaultExceptionToError, encodeStrings, codec.encode(None))

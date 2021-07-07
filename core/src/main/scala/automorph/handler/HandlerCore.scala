@@ -196,7 +196,7 @@ object HandlerCore {
    * @param exceptionClass exception class
    * @return JSON-RPC error type
    */
-  def defaultMapException(exceptionClass: Class[_ <: Throwable]): ErrorType = Map(
+  def defaultExceptionToError(exceptionClass: Class[_ <: Throwable]): ErrorType = Map(
     classOf[ParseErrorException] -> ErrorType.ParseError,
     classOf[InvalidRequestException] -> ErrorType.InvalidRequest,
     classOf[MethodNotFoundException] -> ErrorType.MethodNotFound,
