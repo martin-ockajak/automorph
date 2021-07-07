@@ -24,6 +24,8 @@ lazy val root = project.in(file(".")).aggregate(
   finagle,
   tapir,
 
+  openApi,
+
   default
 ).settings(
   name := "json-rpc",
@@ -172,6 +174,16 @@ lazy val tapir = (project in file("server/tapir")).dependsOn(
   name := "json-rpc-tapir",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.18.0-M18"
+  )
+)
+
+// OpenAPI
+lazy val openApi = project.dependsOn(
+  core
+).settings(
+  name := "json-rpc-open-api",
+  libraryDependencies ++= Seq(
+    "com.lihaoyi" %% "upickle" % "1.4.0"
   )
 )
 
