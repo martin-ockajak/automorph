@@ -26,7 +26,7 @@ way to invoke and expose remote APIs.
 
 Exposing and invoking remote JSON-RPC API over HTTP.
 
-## Build
+## Dependencies
 
 Add the following to your `build.sbt` file:
 
