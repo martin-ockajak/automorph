@@ -6,14 +6,14 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /**
- * JSON-RPC handler layer code generation.
+ * Handler method bindings code generation.
  *
  * @tparam Node message format node representation type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerMeta[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
+private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
   this: Handler[Node, ExactCodec, Effect, Context] =>
 
   type HandlerType = Handler[Node, ExactCodec, Effect, Context]
@@ -38,7 +38,7 @@ private[automorph] trait HandlerMeta[Node, ExactCodec <: Codec[Node], Effect[_],
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   def bind[Api <: AnyRef](api: Api): HandlerType =
-    macro HandlerMeta.bindMacro[Node, ExactCodec, Effect, Context, Api]
+    macro HandlerBind.bindMacro[Node, ExactCodec, Effect, Context, Api]
 
   /**
    * Create a copy of this handler with generated method bindings for all valid public methods of the specified API.
@@ -61,10 +61,10 @@ private[automorph] trait HandlerMeta[Node, ExactCodec <: Codec[Node], Effect[_],
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   def bind[Api <: AnyRef](api: Api, mapName: String => Seq[String]): HandlerType =
-    macro HandlerMeta.bindMacro[Node, ExactCodec, Effect, Context, Api]
+    macro HandlerBind.bindMacro[Node, ExactCodec, Effect, Context, Api]
 }
 
-case object HandlerMeta {
+case object HandlerBind {
 
   def bindMacro[
     Node: c.WeakTypeTag,

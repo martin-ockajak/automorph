@@ -5,14 +5,14 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /**
- * JSON-RPC client layer code generation.
+ * Client method bindings code generation.
  *
  * @tparam Node message format node representation type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
+private[automorph] trait ClientBind[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
   this: ClientCore[Node, ExactCodec, Effect, Context] =>
 
   /**
@@ -33,10 +33,10 @@ private[automorph] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], 
    * @return JSON-RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef]: Api = macro ClientMeta.bindMacro[Node, ExactCodec, Effect, Context, Api]
+  def bind[Api <: AnyRef]: Api = macro ClientBind.bindMacro[Node, ExactCodec, Effect, Context, Api]
 }
 
-object ClientMeta {
+object ClientBind {
 
   def bindMacro[
     Node: c.WeakTypeTag,

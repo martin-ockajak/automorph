@@ -7,14 +7,14 @@ import scala.compiletime.summonInline
 import scala.reflect.ClassTag
 
 /**
- * JSON-RPC client layer code generation.
+ * Client method bindings code generation.
  *
  * @tparam Node message format node representation type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait ClientMeta[Node, ExactCodec <: Codec[Node], Effect[_], Context]:
+private[automorph] trait ClientBind[Node, ExactCodec <: Codec[Node], Effect[_], Context]:
   this: ClientCore[Node, ExactCodec, Effect, Context] =>
 
   /**

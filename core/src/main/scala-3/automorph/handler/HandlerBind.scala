@@ -5,14 +5,14 @@ import automorph.handler.HandlerBindings
 import automorph.spi.{Backend, Codec}
 
 /**
- * JSON-RPC handler layer code generation.
+ * Handler method bindings code generation.
  *
  * @tparam Node message format node representation type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerMeta[Node, ExactCodec <: Codec[Node], Effect[_], Context]:
+private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_], Context]:
   this: Handler[Node, ExactCodec, Effect, Context] =>
 
   type HandlerType = Handler[Node, ExactCodec, Effect, Context]
