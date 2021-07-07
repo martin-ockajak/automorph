@@ -6,6 +6,8 @@ import automorph.spi.{Backend, Codec}
 import automorph.util.{Method, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
 import scala.util.Try
+import scala.util.Success
+import scala.util.Failure
 
 /** JSON-RPC handler layer bindings code generation. */
 private[automorph] case object HandlerBindings:
@@ -118,11 +120,15 @@ private[automorph] case object HandlerBindings:
       ${
         // Create the method argument lists by decoding corresponding argument nodes into values
         //   List(List(
-        //     Try(codec.decode[Parameter0Type](argumentNodes(0)))
-        //       .recover { case error => throw InvalidRequestException("Invalid argument", error) }.get,
+        //     Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
+        //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
+        //       case result => result
+        //     }.get
         //     ...
-        //     Try(codec.decode[ParameterNType](argumentNodes(N))
-        //       .recover { case error => throw InvalidRequestException("Invalid argument", error) }.get OR context
+        //     Try(codec.decode[ParameterNType](argumentNodes(N))) match {
+        //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
+        //       case result => result
+        //     }.get
         //   )): List[List[ParameterXType]]
         val arguments = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
@@ -131,13 +137,15 @@ private[automorph] case object HandlerBindings:
             if argumentIndex == lastArgumentIndex && methodUsesContext[Context](ref)(method) then
               'context.asTerm
             else
-              val decodeCall =
-                call(ref.q, codec.asTerm, "decode", List(parameter.dataType), List(List(argumentNode.asTerm)))
+              val decodeArguments = List(List(argumentNode.asTerm))
+              val decodeCall = call(ref.q, codec.asTerm, "decode", List(parameter.dataType), decodeArguments)
               parameter.dataType.asType match
                 case '[argumentType] => '{
-                    Try(${ decodeCall.asExprOf[argumentType] }).recover { case error =>
-                      throw InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error)
-                    }.get
+                    (Try(${ decodeCall.asExprOf[argumentType] }) match
+                      case Failure(error) =>
+                        Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
+                      case result => result
+                    ).get
                   }.asTerm
           }
         ).asInstanceOf[List[List[Term]]]

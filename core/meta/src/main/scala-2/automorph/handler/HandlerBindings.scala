@@ -126,11 +126,15 @@ case object HandlerBindings {
       (argumentNodes: Seq[$nodeType], context: $contextType) => ${
       // Create the method argument lists by decoding corresponding argument nodes into values
       //   List(List(
-      //     Try(codec.decode[Parameter0Type](argumentNodes(0)))
-      //       .recover { case error => throw InvalidRequestException("Invalid argument", error) }.get,
+      //     Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
+      //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
+      //       case result => result
+      //     }.get
       //     ...
-      //     Try(codec.decode[ParameterNType](argumentNodes(N))
-      //       .recover { case error => throw InvalidRequestException("Invalid argument", error) }.get OR context
+      //     Try(codec.decode[ParameterNType](argumentNodes(N))) match {
+      //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
+      //       case result => result
+      //     }.get
       //   )): List[List[ParameterXType]]
       val arguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
         parameters.toList.zipWithIndex.map { case (parameter, index) =>
@@ -139,10 +143,11 @@ case object HandlerBindings {
             q"context"
           } else {
             q"""
-              scala.util.Try($codec.decode[${parameter.dataType}](argumentNodes(${argumentIndex})))
-               .recover { case error =>
-                 throw automorph.protocol.ErrorType.InvalidRequestException("Invalid argument: " + $argumentIndex, error)
-               }.get
+              scala.util.Try($codec.decode[${parameter.dataType}](argumentNodes(${argumentIndex}))) match {
+                case scala.util.Failure(error) =>
+                  scala.util.Failure(InvalidRequestException("Invalid argument: " + $argumentIndex, error))
+                case result => result
+              }.get
              """
           }
         }
