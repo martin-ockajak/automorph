@@ -5,7 +5,7 @@ import automorph.util.CannotEqual
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
+case class MethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   methodName: String,
   argumentNames: Option[Seq[String]],
   codec: ExactCodec,
@@ -16,7 +16,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   protected val encodedArguments: Seq[Node]
 ) extends ClientCore[Node, ExactCodec, Effect, Context] with CannotEqual {
 
-  type Method = MethodInvoker[Node, ExactCodec, Effect, Context]
+  type Method = MethodProxy[Node, ExactCodec, Effect, Context]
 
   override def namedArguments: Boolean = argumentNames.isDefined
 
@@ -61,7 +61,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def args[T1](p1: T1): Method = macro MethodInvoker.argsMacro[Method, T1]
+  def args[T1](p1: T1): Method = macro MethodProxy.argsMacro[Method, T1]
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -71,7 +71,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def args[T1, T2](p1: T1, p2: T2): Method = macro MethodInvoker.argsMacro[Method, T1, T2]
+  def args[T1, T2](p1: T1, p2: T2): Method = macro MethodProxy.argsMacro[Method, T1, T2]
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -81,7 +81,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): Method = macro MethodInvoker.argsMacro[Method, T1, T2, T3]
+  def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): Method = macro MethodProxy.argsMacro[Method, T1, T2, T3]
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -92,7 +92,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @return method invoker with specified method arguments
    */
   def args[T1, T2, T3, T4](p1: T1, p2: T2, p3: T3, p4: T4): Method =
-    macro MethodInvoker.argsMacro[Method, T1, T2, T3, T4]
+    macro MethodProxy.argsMacro[Method, T1, T2, T3, T4]
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -103,7 +103,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @return method invoker with specified method arguments
    */
   def args[T1, T2, T3, T4, T5](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5): Method =
-    macro MethodInvoker.argsMacro[Method, T1, T2, T3, T4, T5]
+    macro MethodProxy.argsMacro[Method, T1, T2, T3, T4, T5]
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -114,7 +114,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @return method invoker with specified method arguments
    */
   def args[T1, T2, T3, T4, T5, T6](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6): Method =
-    macro MethodInvoker.argsMacro[Method, T1, T2, T3, T4, T5, T6]
+    macro MethodProxy.argsMacro[Method, T1, T2, T3, T4, T5, T6]
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -125,7 +125,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @return method invoker with specified method arguments
    */
   def args[T1, T2, T3, T4, T5, T6, T7](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6, p7: T7): Method =
-    macro MethodInvoker.argsMacro[Method, T1, T2, T3, T4, T5, T6, T7]
+    macro MethodProxy.argsMacro[Method, T1, T2, T3, T4, T5, T6, T7]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -145,7 +145,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def namedArgs[T1](p1: (String, T1)): Method = macro MethodInvoker.namedArgsMacro[Method, T1]
+  def namedArgs[T1](p1: (String, T1)): Method = macro MethodProxy.namedArgsMacro[Method, T1]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -155,7 +155,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def namedArgs[T1, T2](p1: (String, T1), p2: (String, T2)): Method = macro MethodInvoker.namedArgsMacro[Method, T1, T2]
+  def namedArgs[T1, T2](p1: (String, T1), p2: (String, T2)): Method = macro MethodProxy.namedArgsMacro[Method, T1, T2]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -166,7 +166,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @return method invoker with specified method arguments
    */
   def namedArgs[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3)): Method =
-    macro MethodInvoker.namedArgsMacro[Method, T1, T2, T3]
+    macro MethodProxy.namedArgsMacro[Method, T1, T2, T3]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -177,7 +177,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @return method invoker with specified method arguments
    */
   def namedArgs[T1, T2, T3, T4](p1: (String, T1), p2: (String, T2), p3: (String, T3), p4: (String, T4)): Method =
-    macro MethodInvoker.namedArgsMacro[Method, T1, T2, T3, T4]
+    macro MethodProxy.namedArgsMacro[Method, T1, T2, T3, T4]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -193,7 +193,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
     p3: (String, T3),
     p4: (String, T4),
     p5: (String, T5)
-  ): Method = macro MethodInvoker.namedArgsMacro[Method, T1, T2, T3, T4, T5]
+  ): Method = macro MethodProxy.namedArgsMacro[Method, T1, T2, T3, T4, T5]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -210,7 +210,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
     p4: (String, T4),
     p5: (String, T5),
     p6: (String, T6)
-  ): Method = macro MethodInvoker.namedArgsMacro[Method, T1, T2, T3, T4, T5, T6]
+  ): Method = macro MethodProxy.namedArgsMacro[Method, T1, T2, T3, T4, T5, T6]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -228,7 +228,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
     p5: (String, T5),
     p6: (String, T6),
     p7: (String, T7)
-  ): Method = macro MethodInvoker.namedArgsMacro[Method, T1, T2, T3, T4, T5, T6, T7]
+  ): Method = macro MethodProxy.namedArgsMacro[Method, T1, T2, T3, T4, T5, T6, T7]
 
   /**
    * Send a remote JSON-RPC method ''call'' request with specified result type extracted from the response.
@@ -239,7 +239,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @param context request context
    * @return result value
    */
-  def call[R](implicit context: Context): Effect[R] = macro MethodInvoker.callMacro[Effect, Context, R]
+  def call[R](implicit context: Context): Effect[R] = macro MethodProxy.callMacro[Effect, Context, R]
 
   /**
    * Send a remote JSON-RPC method ''notification'' request disregarding the response.
@@ -256,14 +256,14 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
     s"${this.getClass.getName}(Method: $methodName, Arguments names: $argumentNames, Arguments: $argumentValues)"
 }
 
-case object MethodInvoker {
+case object MethodProxy {
 
-  def argsMacro[MethodInvokerType, T1: c.WeakTypeTag](c: blackbox.Context)(
+  def argsMacro[MethodProxyType, T1: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[T1]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1), encodedArguments = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1)
@@ -271,13 +271,13 @@ case object MethodInvoker {
     """)
   }
 
-  def argsMacro[MethodInvokerType, T1: c.WeakTypeTag, T2: c.WeakTypeTag](c: blackbox.Context)(
+  def argsMacro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[T1],
     p2: c.Expr[T2]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2), encodedArguments = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
@@ -286,14 +286,14 @@ case object MethodInvoker {
     """)
   }
 
-  def argsMacro[MethodInvokerType, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag](c: blackbox.Context)(
+  def argsMacro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[T1],
     p2: c.Expr[T2],
     p3: c.Expr[T3]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3), encodedArguments = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
@@ -304,7 +304,7 @@ case object MethodInvoker {
   }
 
   def argsMacro[
-    MethodInvokerType,
+    MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
     T3: c.WeakTypeTag,
@@ -314,10 +314,10 @@ case object MethodInvoker {
     p2: c.Expr[T2],
     p3: c.Expr[T3],
     p4: c.Expr[T4]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3, $p4), encodedArguments = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
@@ -329,7 +329,7 @@ case object MethodInvoker {
   }
 
   def argsMacro[
-    MethodInvokerType,
+    MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
     T3: c.WeakTypeTag,
@@ -341,10 +341,10 @@ case object MethodInvoker {
     p3: c.Expr[T3],
     p4: c.Expr[T4],
     p5: c.Expr[T5]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3, $p4, $p5), encodedArguments = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
@@ -357,7 +357,7 @@ case object MethodInvoker {
   }
 
   def argsMacro[
-    MethodInvokerType,
+    MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
     T3: c.WeakTypeTag,
@@ -371,10 +371,10 @@ case object MethodInvoker {
     p4: c.Expr[T4],
     p5: c.Expr[T5],
     p6: c.Expr[T6]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3, $p4, $p5, $p6), encodedArguments = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
@@ -388,7 +388,7 @@ case object MethodInvoker {
   }
 
   def argsMacro[
-    MethodInvokerType,
+    MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
     T3: c.WeakTypeTag,
@@ -404,10 +404,10 @@ case object MethodInvoker {
     p5: c.Expr[T5],
     p6: c.Expr[T6],
     p7: c.Expr[T7]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3, $p4, $p5, $p6, $p7), encodedArguments = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
@@ -421,12 +421,12 @@ case object MethodInvoker {
     """)
   }
 
-  def namedArgsMacro[MethodInvokerType, T1: c.WeakTypeTag](c: blackbox.Context)(
+  def namedArgsMacro[MethodProxyType, T1: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[(String, T1)]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentNames = Some(Seq($p1._1)),
         argumentValues = Seq($p1._2),
@@ -436,13 +436,13 @@ case object MethodInvoker {
     """)
   }
 
-  def namedArgsMacro[MethodInvokerType, T1: c.WeakTypeTag, T2: c.WeakTypeTag](c: blackbox.Context)(
+  def namedArgsMacro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[(String, T1)],
     p2: c.Expr[(String, T2)]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentNames = Some(Seq($p1._1, $p2._1)),
         argumentValues = Seq($p1._2, $p2._2),
@@ -453,14 +453,14 @@ case object MethodInvoker {
     """)
   }
 
-  def namedArgsMacro[MethodInvokerType, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag](c: blackbox.Context)(
+  def namedArgsMacro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[(String, T1)],
     p2: c.Expr[(String, T2)],
     p3: c.Expr[(String, T3)]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentNames = Some(Seq($p1._1, $p2._1, $p3._1)),
         argumentValues = Seq($p1._2, $p2._2, $p3._2),
@@ -473,7 +473,7 @@ case object MethodInvoker {
   }
 
   def namedArgsMacro[
-    MethodInvokerType,
+    MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
     T3: c.WeakTypeTag,
@@ -483,10 +483,10 @@ case object MethodInvoker {
     p2: c.Expr[(String, T2)],
     p3: c.Expr[(String, T3)],
     p4: c.Expr[(String, T4)]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentNames = Some(Seq($p1._1, $p2._1, $p3._1, $p4._1)),
         argumentValues = Seq($p1._2, $p2._2, $p3._2, $p4._2),
@@ -500,7 +500,7 @@ case object MethodInvoker {
   }
 
   def namedArgsMacro[
-    MethodInvokerType,
+    MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
     T3: c.WeakTypeTag,
@@ -512,10 +512,10 @@ case object MethodInvoker {
     p3: c.Expr[(String, T3)],
     p4: c.Expr[(String, T4)],
     p5: c.Expr[(String, T5)]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentNames = Some(Seq($p1._1, $p2._1, $p3._1, $p4._1, $p5._1)),
         argumentValues = Seq($p1._2, $p2._2, $p3._2, $p4._2, $p5._2),
@@ -530,7 +530,7 @@ case object MethodInvoker {
   }
 
   def namedArgsMacro[
-    MethodInvokerType,
+    MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
     T3: c.WeakTypeTag,
@@ -544,10 +544,10 @@ case object MethodInvoker {
     p4: c.Expr[(String, T4)],
     p5: c.Expr[(String, T5)],
     p6: c.Expr[(String, T6)]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentNames = Some(Seq($p1._1, $p2._1, $p3._1, $p4._1, $p5._1, $p6._1)),
         argumentValues = Seq($p1._2, $p2._2, $p3._2, $p4._2, $p5._2, $p6._2),
@@ -563,7 +563,7 @@ case object MethodInvoker {
   }
 
   def namedArgsMacro[
-    MethodInvokerType,
+    MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
     T3: c.WeakTypeTag,
@@ -579,10 +579,10 @@ case object MethodInvoker {
     p5: c.Expr[(String, T5)],
     p6: c.Expr[(String, T6)],
     p7: c.Expr[(String, T7)]
-  ): c.Expr[MethodInvokerType] = {
+  ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[MethodInvokerType](q"""
+    c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentNames = Some(Seq($p1._1, $p2._1, $p3._1, $p4._1, $p5._1, $p6._1, $p7._1)),
         argumentValues = Seq($p1._2, $p2._2, $p3._2, $p4._2, $p5._2, $p6._2, $p7._2),

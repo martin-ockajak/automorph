@@ -26,7 +26,6 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
         val codec = UpickleJsonCodec(CodecClientHandlerSpec)
         val handler = Handler[Value, UpickleJsonCodec[CodecClientHandlerSpec.type], Effect, Context](codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
-        println(handler)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client = Client(codec, backend, transport)
         val clients = Seq(client, client.positional)

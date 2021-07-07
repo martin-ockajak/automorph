@@ -3,7 +3,7 @@ package automorph.client
 import automorph.spi.{Backend, Codec, Transport}
 import automorph.util.CannotEqual
 
-case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
+case class MethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   methodName: String,
   argumentNames: Option[Seq[String]],
   codec: ExactCodec,
@@ -14,7 +14,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   protected val encodedArguments: Seq[Node]
 ) extends ClientCore[Node, ExactCodec, Effect, Context] with CannotEqual:
 
-  type Method = MethodInvoker[Node, ExactCodec, Effect, Context]
+  type Method = MethodProxy[Node, ExactCodec, Effect, Context]
 
   override def namedArguments: Boolean = argumentNames.isDefined
 
