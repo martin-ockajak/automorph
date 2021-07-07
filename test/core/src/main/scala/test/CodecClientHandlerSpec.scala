@@ -84,7 +84,6 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
           (method, p1) => client.method(method).namedArgs(p1).tell
         )
       }, {
-        import ArgonautJsonCodec.noneCodecJson
         implicit lazy val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
           (v: Enum.Enum) => jNumber(Enum.toOrdinal(v)),
           cursor => cursor.focus.as[Int].map(Enum.fromOrdinal)
