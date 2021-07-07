@@ -1,6 +1,6 @@
 package automorph.handler
 
-import automorph.handler.{HandlerMethod, HandlerResult}
+import automorph.handler.{HandlerBinding, HandlerResult}
 import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
 import automorph.protocol.{ErrorType, Request, Response, ResponseError}
 import automorph.spi.{Codec, Message}
@@ -118,7 +118,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
    */
   private def extractArguments(
     validRequest: Request[Node],
-    handlerMethod: HandlerMethod[Node, Effect, Context]
+    handlerMethod: HandlerBinding[Node, Effect, Context]
   ): Seq[Node] = {
     // Adjust expected method parameters if it uses context as its last parameter
     val parameters = handlerMethod.paramNames.dropRight(if (handlerMethod.usesContext) 1 else 0)

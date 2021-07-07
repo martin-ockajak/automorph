@@ -28,7 +28,7 @@ case object HandlerBindings {
     codec: ExactCodec,
     backend: Backend[Effect],
     api: Api
-  ): Map[String, HandlerMethod[Node, Effect, Context]] = macro generateMacro[Node, ExactCodec, Effect, Context, Api]
+  ): Map[String, HandlerBinding[Node, Effect, Context]] = macro generateMacro[Node, ExactCodec, Effect, Context, Api]
 
   def generateMacro[
     Node: c.WeakTypeTag,
@@ -40,7 +40,7 @@ case object HandlerBindings {
     codec: c.Expr[ExactCodec],
     backend: c.Expr[Backend[Effect]],
     api: c.Expr[Api]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, HandlerBinding[Node, Effect, Context]]] = {
     import c.universe.Quasiquote
     val ref = Reflection[c.type](c)
 
@@ -57,14 +57,14 @@ case object HandlerBindings {
 
     // Generate bound API method bindings
     val handlerMethods = validMethods.map { method =>
-      q"${method.name} -> ${generateHandlerMethod[c.type, Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)}"
+      q"${method.name} -> ${generateBinding[c.type, Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)}"
     }
-    c.Expr[Map[String, HandlerMethod[Node, Effect, Context]]](q"""
+    c.Expr[Map[String, HandlerBinding[Node, Effect, Context]]](q"""
       Seq(..$handlerMethods).toMap
     """)
   }
 
-  private def generateHandlerMethod[
+  private def generateBinding[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
     ExactCodec <: Codec[Node]: ref.c.WeakTypeTag,
@@ -76,7 +76,7 @@ case object HandlerBindings {
     codec: ref.c.Expr[ExactCodec],
     backend: ref.c.Expr[Backend[Effect]],
     api: ref.c.Expr[Api]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[HandlerMethod[Node, Effect, Context]] = {
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[HandlerBinding[Node, Effect, Context]] = {
     import ref.c.universe.Quasiquote
 
     val invoke = generateInvoke[C, Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)
@@ -84,8 +84,8 @@ case object HandlerBindings {
     implicit val methodLift = methodLiftable(ref)
     Seq(methodLift)
 //        ${method.lift}
-    ref.c.Expr[HandlerMethod[Node, Effect, Context]](q"""
-      automorph.handler.HandlerMethod(
+    ref.c.Expr[HandlerBinding[Node, Effect, Context]](q"""
+      automorph.handler.HandlerBinding(
         $invoke,
         ${method.lift.name},
         ${method.lift.resultType},

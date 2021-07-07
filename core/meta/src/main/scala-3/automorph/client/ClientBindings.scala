@@ -1,6 +1,6 @@
 package automorph.client
 
-import automorph.client.ClientMethod
+import automorph.client.ClientBinding
 import automorph.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.Codec
 import automorph.util.Reflection
@@ -24,7 +24,7 @@ private[automorph] case object ClientBindings:
    */
   inline def generate[Node, ExactCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
     codec: ExactCodec
-  ): Map[String, ClientMethod[Node]] =
+  ): Map[String, ClientBinding[Node]] =
     ${ generateMacro[Node, ExactCodec, Effect, Context, Api]('codec) }
 
   private def generateMacro[
@@ -33,7 +33,7 @@ private[automorph] case object ClientBindings:
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
-  ](codec: Expr[ExactCodec])(using quotes: Quotes): Expr[Map[String, ClientMethod[Node]]] =
+  ](codec: Expr[ExactCodec])(using quotes: Quotes): Expr[Map[String, ClientBinding[Node]]] =
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -48,26 +48,26 @@ private[automorph] case object ClientBindings:
     val clientMethods = Expr.ofSeq(validMethods.map { method =>
       '{
         ${ Expr(method.name) } -> ${
-          generateClientMethod[Node, ExactCodec, Effect, Context, Api](ref)(method, codec)
+          generateBinding[Node, ExactCodec, Effect, Context, Api](ref)(method, codec)
         }
       }
     })
     '{ $clientMethods.toMap }
 
-  private def generateClientMethod[
+  private def generateBinding[
     Node: Type,
     ExactCodec <: Codec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
-  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[ExactCodec]): Expr[ClientMethod[Node]] =
+  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[ExactCodec]): Expr[ClientBinding[Node]] =
     given Quotes = ref.q
 
     val encodeArguments = generateEncodeArguments[Node, ExactCodec, Context](ref)(method, codec)
     val decodeResult = generateDecodeResult[Node, ExactCodec, Effect](ref)(method, codec)
     logBoundMethod[Api](ref)(method, encodeArguments, decodeResult)
     '{
-      ClientMethod(
+      ClientBinding(
 //        ${ Expr(method.lift) },
         $encodeArguments,
         $decodeResult,

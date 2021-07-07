@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.handler.{HandlerCore, HandlerMeta, HandlerMethod}
+import automorph.handler.{HandlerCore, HandlerMeta, HandlerBinding}
 import automorph.log.Logging
 import automorph.protocol.ErrorType
 import automorph.spi.{Backend, Codec}
@@ -26,7 +26,7 @@ import scala.reflect.macros.blackbox
 final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   codec: ExactCodec,
   backend: Backend[Effect],
-  methodBindings: Map[String, HandlerMethod[Node, Effect, Context]],
+  methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val exceptionToError: Class[_ <: Throwable] => ErrorType,
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node

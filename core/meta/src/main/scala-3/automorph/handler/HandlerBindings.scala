@@ -29,7 +29,7 @@ private[automorph] case object HandlerBindings:
     codec: ExactCodec,
     backend: Backend[Effect],
     api: Api
-  ): Map[String, HandlerMethod[Node, Effect, Context]] =
+  ): Map[String, HandlerBinding[Node, Effect, Context]] =
     ${ generateMacro[Node, ExactCodec, Effect, Context, Api]('codec, 'backend, 'api) }
 
   private def generateMacro[
@@ -42,7 +42,7 @@ private[automorph] case object HandlerBindings:
     codec: Expr[ExactCodec],
     backend: Expr[Backend[Effect]],
     api: Expr[Api]
-  )(using quotes: Quotes): Expr[Map[String, HandlerMethod[Node, Effect, Context]]] =
+  )(using quotes: Quotes): Expr[Map[String, HandlerBinding[Node, Effect, Context]]] =
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -57,13 +57,13 @@ private[automorph] case object HandlerBindings:
     val handlerMethods = Expr.ofSeq(validMethods.map { method =>
       '{
         ${ Expr(method.name) } -> ${
-          generateHandlerMethod[Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)
+          generateBinding[Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)
         }
       }
     })
     '{ $handlerMethods.toMap }
 
-  private def generateHandlerMethod[
+  private def generateBinding[
     Node: Type,
     ExactCodec <: Codec[Node]: Type,
     Effect[_]: Type,
@@ -74,13 +74,13 @@ private[automorph] case object HandlerBindings:
     codec: Expr[ExactCodec],
     backend: Expr[Backend[Effect]],
     api: Expr[Api]
-  ): Expr[HandlerMethod[Node, Effect, Context]] =
+  ): Expr[HandlerBinding[Node, Effect, Context]] =
     given Quotes = ref.q
 
     val invoke = generateInvoke[Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)
     logBoundMethod[Api](ref)(method, invoke)
     '{
-      HandlerMethod(
+      HandlerBinding(
 //        ${ Expr(method.lift) },
         $invoke,
         ${ Expr(method.lift.name) },

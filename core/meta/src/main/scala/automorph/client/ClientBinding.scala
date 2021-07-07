@@ -15,7 +15,7 @@ import automorph.util.Method
  * @param usesContext true if the last parameter of the bound method is contextual
  * @tparam Node message format node representation type
  */
-final case class ClientMethod[Node](
+final case class ClientBinding[Node](
 //  method: Method,
   encodeArguments: Seq[Any] => Seq[Node],
   decodeResult: Node => Any,

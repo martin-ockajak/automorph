@@ -1,6 +1,6 @@
 package automorph.client
 
-import automorph.client.ClientMethod
+import automorph.client.ClientBinding
 import automorph.protocol.MethodBindings.{methodSignature, methodLiftable, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.Codec
 import automorph.util.Reflection
@@ -25,7 +25,7 @@ case object ClientBindings {
    */
   def generate[Node, ExactCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
     codec: ExactCodec
-  ): Map[String, ClientMethod[Node]] = macro generateMacro[Node, ExactCodec, Effect, Context, Api]
+  ): Map[String, ClientBinding[Node]] = macro generateMacro[Node, ExactCodec, Effect, Context, Api]
 
   def generateMacro[
     Node: c.WeakTypeTag,
@@ -35,7 +35,7 @@ case object ClientBindings {
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(codec: c.Expr[ExactCodec])(implicit
     effectType: c.WeakTypeTag[Effect[_]]
-  ): c.Expr[Map[String, ClientMethod[Node]]] = {
+  ): c.Expr[Map[String, ClientBinding[Node]]] = {
     import c.universe.Quasiquote
     val ref = Reflection[c.type](c)
 
@@ -52,14 +52,14 @@ case object ClientBindings {
 
     // Generate bound API method bindings
     val clientMethods = validMethods.map { method =>
-      q"${method.name} -> ${generateClientMethod[c.type, Node, ExactCodec, Effect, Context, Api](ref)(method, codec)}"
+      q"${method.name} -> ${generateBinding[c.type, Node, ExactCodec, Effect, Context, Api](ref)(method, codec)}"
     }
-    c.Expr[Map[String, ClientMethod[Node]]](q"""
+    c.Expr[Map[String, ClientBinding[Node]]](q"""
       Seq(..$clientMethods).toMap
     """)
   }
 
-  private def generateClientMethod[
+  private def generateBinding[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
     ExactCodec <: Codec[Node]: ref.c.WeakTypeTag,
@@ -69,7 +69,7 @@ case object ClientBindings {
   ](ref: Reflection[C])(
     method: ref.RefMethod,
     codec: ref.c.Expr[ExactCodec]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[ClientMethod[Node]] = {
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[ClientBinding[Node]] = {
     import ref.c.universe.Quasiquote
 
     val encodeArguments = generateEncodeArguments[C, Node, ExactCodec, Context](ref)(method, codec)
@@ -78,8 +78,8 @@ case object ClientBindings {
     implicit val methodLift = methodLiftable(ref)
     Seq(methodLift)
 //        ${method.lift},
-    ref.c.Expr[ClientMethod[Node]](q"""
-      automorph.client.ClientMethod(
+    ref.c.Expr[ClientBinding[Node]](q"""
+      automorph.client.ClientBinding(
         $encodeArguments,
         $decodeResult,
         ${method.lift.name},
