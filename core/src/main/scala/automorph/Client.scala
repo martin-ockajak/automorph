@@ -1,16 +1,12 @@
 package automorph
 
-import java.io.IOException
 import automorph.Client.defaultMapError
-import automorph.client.ClientMeta
-import automorph.log.Logging
-import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, InvalidResponseException, MethodNotFoundException, ParseErrorException}
-import automorph.protocol.{ErrorType, Request, Response}
-import automorph.spi.Message.Params
-import automorph.spi.{Backend, Codec, Message, Transport}
+import automorph.client.{ClientCore, ClientMeta, MethodInvoker}
+import automorph.protocol.ErrorType
+import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
+import automorph.spi.{Backend, Codec, Transport}
 import automorph.util.{CannotEqual, NoContext}
-import scala.collection.immutable.ArraySeq
-import scala.util.{Random, Try}
+import java.io.IOException
 
 /**
  * JSON-RPC client.
@@ -28,14 +24,41 @@ import scala.util.{Random, Try}
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context] (
+final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   codec: ExactCodec,
   backend: Backend[Effect],
   transport: Transport[Effect, Context],
+  namedArguments: Boolean = true,
   protected val errorToException: (Int, String) => Throwable = defaultMapError
-) extends ClientMeta[Node, ExactCodec, Effect, Context] with CannotEqual with Logging {
+) extends ClientCore[Node, ExactCodec, Effect, Context]
+  with ClientMeta[Node, ExactCodec, Effect, Context]
+  with CannotEqual {
 
-  private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
+  type ClientType = Client[Node, ExactCodec, Effect, Context]
+  type MethodInvokerType = MethodInvoker[Node, ExactCodec, Effect, Context]
+
+  /**
+   * Create a method invoker with specified method name.
+   *
+   * @param methodName method name
+   * @return method invoker with specified method name
+   */
+  def method(methodName: String): MethodInvokerType =
+    MethodInvoker(methodName, Option.when(namedArguments)(Seq()), codec, backend, transport, errorToException, Seq(), Seq())
+
+  /**
+   * Create a copy of this client passing method arguments ''by name''.
+   *
+   * @return client method invoker passing method arguments ''by name''
+   */
+  def named: ClientType = copy(namedArguments = false)
+
+  /**
+   * Create a copy of this client passing method arguments ''by position''.
+   *
+   * @return client method invoker passing method arguments ''by position''
+   */
+  def positional: ClientType = copy(namedArguments = true)
 
   /**
    * Create a copy of this client with specified JSON-RPC error to exception mapping.
@@ -43,132 +66,11 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context] (
    * @param errorToException JSON-RPC error to exception mapping
    * @return JSON-RPC server with the specified JSON-RPC error to exception mapping
    */
-  def mapErrors(errorToException: (Int, String) => Throwable): Client[Node, ExactCodec, Effect, Context] =
+  def mapErrors(errorToException: (Int, String) => Throwable): ClientType =
     copy(errorToException = errorToException)
-
-  /**
-   * Perform a method call using specified arguments.
-   *
-   * Optional request context is used as a last method argument.
-   *
-   * @param methodName method name
-   * @param arguments method arguments
-   * @param context request context
-   * @param decodeResult result decoding function
-   * @tparam R result type
-   * @return result value
-   */
-  def performCall[R](
-    method: String,
-    arguments: Params[Node],
-    context: Option[Context],
-    decodeResult: Node => R
-  ): Effect[R] = {
-    val id = Some(Right[BigDecimal, String](Math.abs(random.nextLong()).toString))
-    val formedRequest = Request(id, method, arguments).formed
-    logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
-    backend.flatMap(
-      // Serialize request
-      serialize(formedRequest),
-      (rawRequest: ArraySeq.ofByte) =>
-        // Send request
-        backend.flatMap(
-          transport.call(rawRequest, context),
-          // Process response
-          rawResponse => processResponse[R](rawResponse, formedRequest, decodeResult)
-        )
-    )
-  }
-
-  /**
-   * Perform a method notification using specified arguments.
-   *
-   * Optional request context is used as a last method argument.
-   *
-   * @param methodName method name
-   * @param arguments method arguments
-   * @param context request context
-   * @tparam R result type
-   * @return nothing
-   */
-  def performNotify(methodName: String, arguments: Params[Node], context: Option[Context]): Effect[Unit] = {
-    val formedRequest = Request(None, methodName, arguments).formed
-    backend.flatMap(
-      // Serialize request
-      serialize(formedRequest),
-      // Send request
-      (rawRequest: ArraySeq.ofByte) => transport.notify(rawRequest, context)
-    )
-  }
 
   override def toString: String =
     s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Backend: ${backend.getClass.getName}, Transport: ${transport.getClass.getName})"
-
-  /**
-   * Process a method call response.
-   *
-   * @param rawResponse raw response
-   * @param formedRequest formed request
-   * @param decodeResult result decoding function
-   * @tparam R result type
-   * @return result value
-   */
-  private def processResponse[R](
-    rawResponse: ArraySeq.ofByte,
-    formedRequest: Message[Node],
-    decodeResult: Node => R
-  ): Effect[R] =
-    // Deserialize response
-    Try(codec.deserialize(rawResponse)).toEither.fold(
-      error => raiseError(ParseErrorException("Invalid response format", error), formedRequest) ,
-      formedResponse => {
-        // Validate response
-        logger.trace(s"Received JSON-RPC response:\n${codec.format(formedResponse)}")
-        Try(Response(formedResponse)).toEither.fold(
-          error => raiseError(error, formedRequest),
-          validResponse =>
-            validResponse.value.fold(
-              error => raiseError(errorToException(error.code, error.message), formedRequest),
-              result =>
-                // Decode result
-                Try(decodeResult(result)).toEither.fold(
-                  error => raiseError(InvalidResponseException("Invalid result", error), formedRequest),
-                  result => {
-                    logger.info(s"Performed JSON-RPC request", formedRequest.properties)
-                    backend.pure(result)
-                  }
-                )
-            )
-        )
-      }
-    )
-
-  /**
-   * Serialize JSON-RPC message.
-   *
-   * @param formedRequest formed request
-   * @return serialized response
-   */
-  private def serialize(formedRequest: Message[Node]): Effect[ArraySeq.ofByte] = {
-    logger.trace(s"Sending JSON-RPC request:\n${codec.format(formedRequest)}")
-    Try(codec.serialize(formedRequest)).toEither.fold(
-      error => raiseError(ParseErrorException("Invalid request format", error), formedRequest),
-      message => backend.pure(message)
-    )
-  }
-
-  /**
-   * Create an error effect from an exception.
-   *
-   * @param error exception
-   * @param requestMessage request message
-   * @tparam T effectful value type
-   * @return error value
-   */
-  private def raiseError[T](error: Throwable, requestMessage: Message[Node]): Effect[T] = {
-    logger.error(s"Failed to perform JSON-RPC request", error, requestMessage.properties)
-    backend.failed(error)
-  }
 }
 
 case object Client {

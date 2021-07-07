@@ -30,24 +30,24 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
         codec.getClass,
         client,
         handler,
-        Seq(client.bindByName[SimpleApiType], client.bindByPosition[SimpleApiType]),
-        Seq(client.bindByName[ComplexApiType], client.bindByPosition[ComplexApiType]),
-        Seq(client.bindByName[InvalidApiType], client.bindByPosition[InvalidApiType]),
+        Seq(client.bind[SimpleApiType], client.positional.bind[SimpleApiType]),
+        Seq(client.bind[ComplexApiType], client.positional.bind[ComplexApiType]),
+        Seq(client.bind[InvalidApiType], client.positional.bind[InvalidApiType]),
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByPosition(method, p1)
+          client.method(method).args(p1).call
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByName(method, p1)
+          client.method(method).namedArgs(p1).call
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByPosition(method, p1)
+          client.method(method).args(p1).tell
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByName(method, p1)
+          client.method(method).namedArgs(p1).tell
         }
       )
     }, {
@@ -61,24 +61,24 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
         codec.getClass,
         client,
         handler,
-        Seq(client.bindByName[SimpleApiType], client.bindByPosition[SimpleApiType]),
-        Seq(client.bindByName[ComplexApiType], client.bindByPosition[ComplexApiType]),
-        Seq(client.bindByName[InvalidApiType], client.bindByPosition[InvalidApiType]),
+        Seq(client.bind[SimpleApiType], client.positional.bind[SimpleApiType]),
+        Seq(client.bind[ComplexApiType], client.positional.bind[ComplexApiType]),
+        Seq(client.bind[InvalidApiType], client.positional.bind[InvalidApiType]),
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByPosition(method, p1)
+          client.method(method).args(p1).call
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByName(method, p1)
+          client.method(method).namedArgs(p1).call
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByPosition(method, p1)
+          client.method(method).args(p1).tell
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByName(method, p1)
+          client.method(method).namedArgs(p1).tell
         }
       )
     }, {
@@ -96,24 +96,24 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
         codec.getClass,
         client,
         handler,
-        Seq(client.bindByName[SimpleApiType], client.bindByPosition[SimpleApiType]),
-        Seq(client.bindByName[ComplexApiType], client.bindByPosition[ComplexApiType]),
-        Seq(client.bindByName[InvalidApiType], client.bindByPosition[InvalidApiType]),
+        Seq(client.bind[SimpleApiType], client.positional.bind[SimpleApiType]),
+        Seq(client.bind[ComplexApiType], client.positional.bind[ComplexApiType]),
+        Seq(client.bind[InvalidApiType], client.positional.bind[InvalidApiType]),
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByPosition(method, p1)
+          client.method(method).args(p1).call
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByName(method, p1)
+          client.method(method).namedArgs(p1).call
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByPosition(method, p1)
+          client.method(method).args(p1).tell
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByName(method, p1)
+          client.method(method).namedArgs(p1).tell
         }
       )
     }, {
@@ -168,24 +168,24 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
         codec.getClass,
         client,
         handler,
-        Seq(client.bindByName[SimpleApiType], client.bindByPosition[SimpleApiType]),
-        Seq(client.bindByName[ComplexApiType], client.bindByPosition[ComplexApiType]),
-        Seq(client.bindByName[InvalidApiType], client.bindByPosition[InvalidApiType]),
+        Seq(client.bind[SimpleApiType], client.positional.bind[SimpleApiType]),
+        Seq(client.bind[ComplexApiType], client.positional.bind[ComplexApiType]),
+        Seq(client.bind[InvalidApiType], client.positional.bind[InvalidApiType]),
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByPosition(method, p1)
+          client.method(method).args(p1).call
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.callByName(method, p1)
+          client.method(method).namedArgs(p1).call
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByPosition(method, p1)
+          client.method(method).args(p1).tell
         },
         (method, p1, context) => {
           implicit val usingContext = context
-          client.notifyByName(method, p1)
+          client.method(method).namedArgs(p1).tell
         }
       )
     }

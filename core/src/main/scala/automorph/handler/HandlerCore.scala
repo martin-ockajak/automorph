@@ -16,7 +16,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
   private val unknownId = "[unknown]"
 
   /**
-   * Invoke a bound ''method'' based on a JSON-RPC ''request'' and its ''context'' and return a JSON-RPC ''response''.
+   * Process a JSON-RPC ''request'' by invoking a bound ''method'' based on and its ''context'' and return a JSON-RPC ''response''.
    *
    * @param request request message
    * @param context request context
@@ -83,8 +83,8 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
         effect =>
           backend.flatMap(
             effect,
-            // Process result
             (outcome: Either[Throwable, Node]) =>
+              // Process result
               outcome.fold(
                 error => errorResponse(error, formedRequest),
                 result => {

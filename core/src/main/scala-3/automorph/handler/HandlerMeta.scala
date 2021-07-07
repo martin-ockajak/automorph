@@ -15,6 +15,8 @@ import automorph.spi.{Backend, Codec}
 private[automorph] trait HandlerMeta[Node, ExactCodec <: Codec[Node], Effect[_], Context]:
   this: Handler[Node, ExactCodec, Effect, Context] =>
 
+  type HandlerType = Handler[Node, ExactCodec, Effect, Context]
+
   /**
    * Create a copy of this handler with generated method bindings for all valid public methods of the specified API.
    *
@@ -34,8 +36,7 @@ private[automorph] trait HandlerMeta[Node, ExactCodec <: Codec[Node], Effect[_],
    * @return JSON-RPC server with added API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](api: Api): Handler[Node, ExactCodec, Effect, Context] =
-    bind(api, name => Seq(name))
+  inline def bind[Api <: AnyRef](api: Api): HandlerType = bind(api, name => Seq(name))
 
   /**
    * Create a copy of this handler with generated method bindings for all valid public methods of the specified API.
@@ -57,10 +58,7 @@ private[automorph] trait HandlerMeta[Node, ExactCodec <: Codec[Node], Effect[_],
    * @return JSON-RPC server with added API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](
-    api: Api,
-    mapName: String => Seq[String]
-  ): Handler[Node, ExactCodec, Effect, Context] =
+  inline def bind[Api <: AnyRef](api: Api, mapName: String => Seq[String]): HandlerType =
     copy(methodBindings =
       methodBindings ++ HandlerBindings.generate[Node, ExactCodec, Effect, Context, Api](codec, backend, api).flatMap {
         (methodName, method) => mapName(methodName).map(_ -> method)

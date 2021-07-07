@@ -1,6 +1,6 @@
 package automorph.protocol
 
-import automorph.protocol.ErrorType.{InvalidRequestException, mandatory}
+import automorph.protocol.ErrorType.InvalidRequestException
 import automorph.spi.Message
 import automorph.spi.Message.{Id, Params, version}
 
@@ -41,4 +41,17 @@ private[automorph] case object Request {
     val params = message.params.getOrElse(Right(Map.empty[String, Node]))
     Request(id, method, params)
   }
+
+  /**
+   * Return specified mandatory property value or throw an exception if it is missing.
+   *
+   * @param value property value
+   * @param name property name
+   * @tparam T property type
+   * @return property value
+   * @throws InvalidRequestException if the property value is missing
+   */
+  private[automorph] def mandatory[T](value: Option[T], name: String): T = value.getOrElse(
+    throw ErrorType.InvalidRequestException(s"Missing message property: $name", None.orNull)
+  )
 }

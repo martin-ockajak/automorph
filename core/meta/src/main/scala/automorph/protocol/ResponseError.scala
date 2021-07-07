@@ -1,6 +1,6 @@
 package automorph.protocol
 
-import automorph.protocol.ErrorType.mandatory
+import automorph.protocol.Response.mandatory
 import automorph.spi.MessageError
 
 

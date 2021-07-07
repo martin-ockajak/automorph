@@ -18,14 +18,14 @@ object QuickstartExample extends App {
   val client = DefaultHttpClient.async("http://localhost/api", "POST")
 
   // Proxy call
-  val apiProxy = client.bindByName[Api]
-  val proxyResult = apiProxy.hello("world") // : Future[String]
+  val apiProxy = client.bind[Api]
+  apiProxy.hello("world") // : Future[String]
 
-  // Direct call
-  val directResult = client.callByName[String, String]("hello", "thing" -> "world")
+  // Direct call with named arguments
+  client.method("hello").namedArgs("thing" -> "world").call[String] // : Future[String]
 
-  // Direct notification
-  client.notifyByName("hello", "thing" -> "world") // : Future[Unit]
+  // Direct notification with positional arguments
+  client.method("hello").args("world").tell // : Future[Unit]
 
   // Stop the server
   server.close()

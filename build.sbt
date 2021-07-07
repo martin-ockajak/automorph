@@ -49,14 +49,15 @@ lazy val spi = project.settings(
 )
 lazy val coreMeta = (project in file("core/meta")).dependsOn(
   spi
+).settings(
+  libraryDependencies ++= Seq(
+    "org.slf4j" % "slf4j-api" % "1.7.31"
+  )
 )
 lazy val core = project.dependsOn(
   coreMeta, testBase % Test
 ).settings(
   name := "json-rpc-core",
-  libraryDependencies ++= Seq(
-    "org.slf4j" % "slf4j-api" % "1.7.31"
-  ),
   Compile / packageBin / mappings ++= (coreMeta / Compile / packageBin / mappings).value,
   Compile / packageSrc / mappings ++= (coreMeta / Compile / packageSrc / mappings).value
 )
