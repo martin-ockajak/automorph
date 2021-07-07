@@ -83,7 +83,7 @@ private[automorph] case object HandlerBindings:
     logBoundMethod[Api](ref)(method, invoke)
     '{
       HandlerBinding(
-//        ${ Expr(method.lift) },
+        ${ Expr(method.lift) },
         $invoke,
         ${ Expr(method.lift.name) },
         ${ Expr(method.lift.resultType) },

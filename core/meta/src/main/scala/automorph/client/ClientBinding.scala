@@ -16,7 +16,7 @@ import automorph.util.Method
  * @tparam Node message format node representation type
  */
 final case class ClientBinding[Node](
-//  method: Method,
+  method: Method,
   encodeArguments: Seq[Any] => Seq[Node],
   decodeResult: Node => Any,
   name: String,

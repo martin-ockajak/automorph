@@ -83,9 +83,9 @@ case object HandlerBindings {
     logBoundMethod[C, Api](ref)(method, invoke)
     implicit val methodLift = methodLiftable(ref)
     Seq(methodLift)
-//        ${method.lift}
     ref.c.Expr[HandlerBinding[Node, Effect, Context]](q"""
       automorph.handler.HandlerBinding(
+        ${method.lift},
         $invoke,
         ${method.lift.name},
         ${method.lift.resultType},

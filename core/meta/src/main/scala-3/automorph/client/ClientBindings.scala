@@ -68,7 +68,7 @@ private[automorph] case object ClientBindings:
     logBoundMethod[Api](ref)(method, encodeArguments, decodeResult)
     '{
       ClientBinding(
-//        ${ Expr(method.lift) },
+        ${ Expr(method.lift) },
         $encodeArguments,
         $decodeResult,
         ${ Expr(method.lift.name) },

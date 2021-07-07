@@ -77,9 +77,9 @@ case object ClientBindings {
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
     implicit val methodLift = methodLiftable(ref)
     Seq(methodLift)
-//        ${method.lift},
     ref.c.Expr[ClientBinding[Node]](q"""
       automorph.client.ClientBinding(
+        ${method.lift},
         $encodeArguments,
         $decodeResult,
         ${method.lift.name},

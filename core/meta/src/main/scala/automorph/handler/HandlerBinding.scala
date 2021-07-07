@@ -17,7 +17,7 @@ import automorph.util.Method
  * @tparam Context request context type
  */
 final case class HandlerBinding[Node, Effect[_], Context](
-//  method: Method,
+  method: Method,
   invoke: (Seq[Node], Context) => Effect[Node],
   name: String,
   resultType: String,
