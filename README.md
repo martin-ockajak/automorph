@@ -4,6 +4,7 @@
 way to invoke and expose remote APIs.
 
 [![Tests](https://github.com/martin-ockajak/automorph/workflows/Tests/badge.svg)](https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
+[![Artifacts](https://img.shields.io/maven-central/v/io.automorph/automorph-core_2.13.svg)](https://mvnrepository.com/artifact/io.automorph)
 
 - [Features](#features)
 - [Quickstart](#quickstart)
