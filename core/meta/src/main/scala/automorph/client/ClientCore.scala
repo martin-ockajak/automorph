@@ -12,8 +12,6 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
 
   def codec: ExactCodec
 
-  def namedArguments: Boolean
-
   protected def backend: Backend[Effect]
 
   protected def transport: Transport[Effect, Context]

@@ -28,14 +28,13 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client = Client(codec, backend, transport)
-        val clients = Seq(client, client.positional)
         CodecFixture(
           codec.getClass,
           client,
           handler,
-          clients.map(_.bind[SimpleApiType]),
-          clients.map(_.bind[ComplexApiType]),
-          clients.map(_.bind[InvalidApiType]),
+          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
+          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
+          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
           (method, p1) => client.method(method).positional.args(p1).call,
           (method, p1) => client.method(method).args(p1).call,
           (method, p1) => client.method(method).positional.args(p1).tell,
@@ -47,14 +46,13 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client = Client(codec, backend, transport)
-        val clients = Seq(client, client.positional)
         CodecFixture(
           codec.getClass,
           client,
           handler,
-          clients.map(_.bind[SimpleApiType]),
-          clients.map(_.bind[ComplexApiType]),
-          clients.map(_.bind[InvalidApiType]),
+          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
+          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
+          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
           (method, p1) => client.method(method).positional.args(p1).call,
           (method, p1) => client.method(method).args(p1).call,
           (method, p1) => client.method(method).positional.args(p1).tell,
@@ -70,14 +68,13 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client = Client(codec, backend, transport)
-        val clients = Seq(client, client.positional)
         CodecFixture(
           codec.getClass,
           client,
           handler,
-          clients.map(_.bind[SimpleApiType]),
-          clients.map(_.bind[ComplexApiType]),
-          clients.map(_.bind[InvalidApiType]),
+          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
+          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
+          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
           (method, p1) => client.method(method).positional.args(p1).call,
           (method, p1) => client.method(method).args(p1).call,
           (method, p1) => client.method(method).positional.args(p1).tell,
@@ -129,14 +126,13 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client = Client(codec, backend, transport)
-        val clients = Seq(client, client.positional)
         CodecFixture(
           codec.getClass,
           client,
           handler,
-          clients.map(_.bind[SimpleApiType]),
-          clients.map(_.bind[ComplexApiType]),
-          clients.map(_.bind[InvalidApiType]),
+          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
+          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
+          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
           (method, p1) => client.method(method).positional.args(p1).call,
           (method, p1) => client.method(method).args(p1).call,
           (method, p1) => client.method(method).positional.args(p1).tell,

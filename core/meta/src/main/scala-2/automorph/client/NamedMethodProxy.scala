@@ -18,8 +18,6 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
   type PositionalMethod = PositionalMethodProxy[Node, ExactCodec, Effect, Context]
   type NamedMethod = NamedMethodProxy[Node, ExactCodec, Effect, Context]
 
-  override def namedArguments: Boolean = true
-
   /**
    * Create a copy of this method invoker without argument names passing method arguments ''by position''.
    *
@@ -158,7 +156,7 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
    * @return nothing
    */
   def tell(implicit context: Context): Effect[Unit] =
-    notify(methodName, argumentValues.map(_._1), encodedArguments, Some(context))
+    notify(methodName, Some(argumentValues.map(_._1)), encodedArguments, Some(context))
 
   override def toString: String =
     s"${this.getClass.getName}(Method: $methodName, Arguments: $argumentValues)"

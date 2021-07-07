@@ -38,7 +38,7 @@ private[automorph] case object MethodBindings {
           ..${v.typeParameters},
           ${v.public},
           ${v.available},
-          ${v.documentation},
+          ${v.documentation}
         )
       """
     }

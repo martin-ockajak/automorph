@@ -18,8 +18,6 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
   type PositionalMethod = PositionalMethodProxy[Node, ExactCodec, Effect, Context]
   type NamedMethod = NamedMethodProxy[Node, ExactCodec, Effect, Context]
 
-  override def namedArguments: Boolean = false
-
   /**
    * Create a copy of this method invoker passing method arguments ''by name'' with specified argument names.
    *
@@ -148,7 +146,7 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
     s"${this.getClass.getName}(Method: $methodName, Arguments: $argumentValues)"
 }
 
-case object NamedMethodProxy {
+case object PositionalMethodProxy {
 
   def argsMacro[MethodProxyType, T1: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[T1]

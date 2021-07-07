@@ -28,7 +28,6 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   codec: ExactCodec,
   backend: Backend[Effect],
   transport: Transport[Effect, Context],
-  namedArguments: Boolean = true,
   protected val errorToException: (Int, String) => Throwable = defaultErrorToException
 ) extends ClientCore[Node, ExactCodec, Effect, Context]
   with ClientBind[Node, ExactCodec, Effect, Context]
@@ -45,20 +44,6 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    */
   def method(methodName: String): NamedMethod =
     NamedMethodProxy(methodName, codec, backend, transport, errorToException, Seq(), Seq())
-
-  /**
-   * Create a copy of this client passing method arguments ''by name''.
-   *
-   * @return client method invoker passing method arguments ''by name''
-   */
-  def named: ThisClient = copy(namedArguments = false)
-
-  /**
-   * Create a copy of this client passing method arguments ''by position''.
-   *
-   * @return client method invoker passing method arguments ''by position''
-   */
-  def positional: ThisClient = copy(namedArguments = true)
 
   /**
    * Create a copy of this client with specified JSON-RPC error to exception mapping.
