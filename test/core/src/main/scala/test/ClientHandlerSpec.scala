@@ -32,10 +32,10 @@ trait ClientHandlerSpec extends BaseSpec {
     simpleApis: Seq[SimpleApiType],
     complexApis: Seq[ComplexApiType],
     invalidApis: Seq[InvalidApiType],
-    callByPosition: (String, String, Context) => Effect[String],
-    callByName: (String, (String, String), Context) => Effect[String],
-    notifyByPosition: (String, String, Context) => Effect[Unit],
-    notifyByName: (String, (String, String), Context) => Effect[Unit]
+    positionalCall: (String, String, Context) => Effect[String],
+    namedCall: (String, (String, String), Context) => Effect[String],
+    positionalNotify: (String, String, Context) => Effect[Unit],
+    namedNotify: (String, (String, String), Context) => Effect[Unit]
   )
 
   implicit def arbitraryContext: Arbitrary[Context]
@@ -175,13 +175,13 @@ trait ClientHandlerSpec extends BaseSpec {
               "Positional" in {
                 check { (a0: String, context: Context) =>
                   val expected = run(simpleApiInstance.test(a0))
-                  run(fixture.callByPosition("test", a0, context)) == expected
+                  run(fixture.positionalCall("test", a0, context)) == expected
                 }
               }
               "Named" in {
                 check { (a0: String, context: Context) =>
                   val expected = run(simpleApiInstance.test(a0))
-                  run(fixture.callByName("test", "test" -> a0, context)) == expected
+                  run(fixture.namedCall("test", "test" -> a0, context)) == expected
                 }
               }
             }
@@ -190,13 +190,13 @@ trait ClientHandlerSpec extends BaseSpec {
             "Simple API" - {
               "Positional" in {
                 check { (a0: String, context: Context) =>
-                  run(fixture.notifyByPosition("test", a0, context))
+                  run(fixture.positionalNotify("test", a0, context))
                   true
                 }
               }
               "Named" in {
                 check { (a0: String, context: Context) =>
-                  run(fixture.notifyByName("test", "test" -> a0, context))
+                  run(fixture.namedNotify("test", "test" -> a0, context))
                   true
                 }
               }
