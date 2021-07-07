@@ -49,11 +49,11 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
    * @param exceptionToError exception class to JSON-RPC error type mapping
    * @return JSON-RPC server with the specified exceptions to JSON-RPC errors mapping
    */
-  def mapExceptions(exceptionToError: Class[_ <: Throwable] => ErrorType): Handler[Node, ExactCodec, Effect, Context] =
+  def mapExceptions(exceptionToError: Class[_ <: Throwable] => ErrorType): ThisHandler =
     copy(exceptionToError = exceptionToError)
 
   override def toString: String =
-    s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Backend: ${backend.getClass.getName}, Bound methods: ${methodBindings.size})"
+    s"${this.getClass.getName}(codec = ${codec.getClass.getName}, backend = ${backend.getClass.getName})"
 
   /**
    * Invoke bound method specified in a request.

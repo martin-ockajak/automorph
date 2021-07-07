@@ -70,7 +70,7 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
     copy(errorToException = errorToException)
 
   override def toString: String =
-    s"${this.getClass.getName}(Codec: ${codec.getClass.getName}, Backend: ${backend.getClass.getName}, Transport: ${transport.getClass.getName})"
+    s"${this.getClass.getName}(codec = ${codec.getClass.getName}, backend = ${backend.getClass.getName}, transport = ${transport.getClass.getName})"
 }
 
 case object Client {
