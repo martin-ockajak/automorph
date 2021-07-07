@@ -26,7 +26,7 @@ way to invoke and expose remote APIs.
 
 Exposing and invoking remote JSON-RPC API over HTTP.
 
-## Dependencies
+## Build
 
 Add the following to your `build.sbt` file:
 
@@ -135,9 +135,9 @@ hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
-## Custom
+## Custom effect type
 
-### Build
+### Dependencies
 
 Add the following to your `build.sbt` file:
 
