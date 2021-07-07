@@ -26,7 +26,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
   def processRequest[Data: Bytes](request: Data)(implicit context: Context): Effect[HandlerResult[Data]] = {
     // Deserialize request
     val rawRequest = implicitly[Bytes[Data]].from(request)
-    Try(codec.deserialize(rawRequest)).toEither.fold(
+    Try(codec.deserialize(rawRequest)).fold(
       error =>
         errorResponse(
           ParseErrorException("Invalid request format", error),
@@ -35,7 +35,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
       formedRequest => {
         // Validate request
         logger.trace(s"Received JSON-RPC request:\n${codec.format(formedRequest)}")
-        Try(Request(formedRequest)).toEither.fold(
+        Try(Request(formedRequest)).fold(
           error => errorResponse(error, formedRequest),
           validRequest => invokeMethod(formedRequest, validRequest, context)
         )
@@ -78,7 +78,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
       val arguments = extractArguments(validRequest, handlerMethod)
 
       // Invoke method
-      Try(backend.either(handlerMethod.invoke(arguments, context))).toEither.fold(
+      Try(backend.either(handlerMethod.invoke(arguments, context))).fold(
         error => errorResponse(error, formedRequest),
         effect =>
           backend.flatMap(
@@ -182,7 +182,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
    */
   private def serialize(formedResponse: Message[Node]): Effect[Option[ArraySeq.ofByte]] = {
     logger.trace(s"Sending JSON-RPC response:\n${codec.format(formedResponse)}")
-    Try(codec.serialize(formedResponse)).toEither.fold(
+    Try(codec.serialize(formedResponse)).fold(
       error => backend.failed(ParseErrorException("Invalid response format", error)),
       message => backend.pure(Some(message))
     )
