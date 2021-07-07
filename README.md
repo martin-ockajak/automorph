@@ -66,14 +66,14 @@ Invoke the remote API:
 val client = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
 
 // Proxy call
-val apiProxy = client.bindByName[Api]
-val proxyResult = apiProxy.hello("world") // : Future[String]
+val apiProxy = client.bind[Api]
+apiProxy.hello("world") // : Future[String]
 
-// Direct call
-val directResult = client.callByName[String, String]("hello", "thing" -> "world") // : Future[String]
+// Direct call passing arguments by name
+client.method("hello").namedArgs("thing" -> "world").call[String] // : Future[String]
 
-// Direct notification
-client.notifyByName("hello", "thing" -> "world") // : Future[Unit]
+// Direct notification passing arguments by position
+client.method("hello").args("world").tell // : Future[Unit]
 
 ```
 

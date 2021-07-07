@@ -21,10 +21,10 @@ object QuickstartExample extends App {
   val apiProxy = client.bind[Api]
   apiProxy.hello("world") // : Future[String]
 
-  // Direct call with named arguments
+  // Direct call passing arguments by name
   client.method("hello").namedArgs("thing" -> "world").call[String] // : Future[String]
 
-  // Direct notification with positional arguments
+  // Direct notification passing arguments by position
   client.method("hello").args("world").tell // : Future[Unit]
 
   // Stop the server
