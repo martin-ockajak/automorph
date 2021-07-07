@@ -34,8 +34,8 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   with ClientBind[Node, ExactCodec, Effect, Context]
   with CannotEqual {
 
-  type ClientType = Client[Node, ExactCodec, Effect, Context]
-  type MethodInvokerType = MethodInvoker[Node, ExactCodec, Effect, Context]
+  type ThisClient = Client[Node, ExactCodec, Effect, Context]
+  type Method = MethodInvoker[Node, ExactCodec, Effect, Context]
 
   /**
    * Create a method invoker with specified method name.
@@ -43,7 +43,7 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @param methodName method name
    * @return method invoker with specified method name
    */
-  def method(methodName: String): MethodInvokerType =
+  def method(methodName: String): Method =
     MethodInvoker(methodName, Option.when(namedArguments)(Seq()), codec, backend, transport, errorToException, Seq(), Seq())
 
   /**
@@ -51,14 +51,14 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return client method invoker passing method arguments ''by name''
    */
-  def named: ClientType = copy(namedArguments = false)
+  def named: ThisClient = copy(namedArguments = false)
 
   /**
    * Create a copy of this client passing method arguments ''by position''.
    *
    * @return client method invoker passing method arguments ''by position''
    */
-  def positional: ClientType = copy(namedArguments = true)
+  def positional: ThisClient = copy(namedArguments = true)
 
   /**
    * Create a copy of this client with specified JSON-RPC error to exception mapping.
@@ -66,7 +66,7 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @param errorToException JSON-RPC error to exception mapping
    * @return JSON-RPC server with the specified JSON-RPC error to exception mapping
    */
-  def mapErrors(errorToException: (Int, String) => Throwable): ClientType =
+  def mapErrors(errorToException: (Int, String) => Throwable): ThisClient =
     copy(errorToException = errorToException)
 
   override def toString: String =

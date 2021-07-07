@@ -16,7 +16,7 @@ import scala.reflect.macros.blackbox
 private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
   this: Handler[Node, ExactCodec, Effect, Context] =>
 
-  type HandlerType = Handler[Node, ExactCodec, Effect, Context]
+  type ThisHandler = Handler[Node, ExactCodec, Effect, Context]
 
   /**
    * Create a copy of this handler with generated method bindings for all valid public methods of the specified API.
@@ -37,7 +37,7 @@ private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_],
    * @return JSON-RPC server with added API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api): HandlerType =
+  def bind[Api <: AnyRef](api: Api): ThisHandler =
     macro HandlerBind.basicBindMacro[Node, ExactCodec, Effect, Context, Api]
 
   /**
@@ -60,7 +60,7 @@ private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_],
    * @return JSON-RPC server with added API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api, mapName: String => Seq[String]): HandlerType =
+  def bind[Api <: AnyRef](api: Api, mapName: String => Seq[String]): ThisHandler =
     macro HandlerBind.bindMacro[Node, ExactCodec, Effect, Context, Api]
 }
 

@@ -16,7 +16,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   protected val encodedArguments: Seq[Node]
 ) extends ClientCore[Node, ExactCodec, Effect, Context] with CannotEqual {
 
-  type MethodInvokerType = MethodInvoker[Node, ExactCodec, Effect, Context]
+  type Method = MethodInvoker[Node, ExactCodec, Effect, Context]
 
   override def namedArguments: Boolean = argumentNames.isDefined
 
@@ -26,7 +26,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @param methodName method name
    * @return method invoker with specified method name
    */
-  def method(methodName: String): MethodInvokerType = copy(methodName = methodName)
+  def method(methodName: String): Method = copy(methodName = methodName)
 
   /**
    * Create a copy of this method invoker with specified argument names passing method arguments ''by name''.
@@ -34,14 +34,14 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @param argumentNames method argument names
    * @return method invoker with specified argument names passing method arguments ''by name''
    */
-  def named(argumentNames: String*): MethodInvokerType = copy(argumentNames = Some(argumentNames))
+  def named(argumentNames: String*): Method = copy(argumentNames = Some(argumentNames))
 
   /**
    * Create a copy of this method invoker without argument names passing method arguments ''by position''.
    *
    * @return method invoker without argument names passing method arguments ''by position''
    */
-  def positional: MethodInvokerType = copy(argumentNames = None)
+  def positional: Method = copy(argumentNames = None)
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -51,10 +51,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def args(): MethodInvokerType = copy(
-    argumentValues = Seq(),
-    encodedArguments = Seq()
-  )
+  def args(): Method = copy(argumentValues = Seq(), encodedArguments = Seq())
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -64,7 +61,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def args[T1](p1: T1): MethodInvokerType = macro MethodInvoker.argsMacro[MethodInvokerType, T1]
+  def args[T1](p1: T1): Method = macro MethodInvoker.argsMacro[Method, T1]
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -74,7 +71,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def args[T1, T2](p1: T1, p2: T2): MethodInvokerType = macro MethodInvoker.argsMacro[MethodInvokerType, T1, T2]
+  def args[T1, T2](p1: T1, p2: T2): Method = macro MethodInvoker.argsMacro[Method, T1, T2]
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -84,7 +81,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): MethodInvokerType = macro MethodInvoker.argsMacro[MethodInvokerType, T1, T2, T3]
+  def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): Method = macro MethodInvoker.argsMacro[Method, T1, T2, T3]
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -94,8 +91,8 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def args[T1, T2, T3, T4](p1: T1, p2: T2, p3: T3, p4: T4): MethodInvokerType =
-    macro MethodInvoker.argsMacro[MethodInvokerType, T1, T2, T3, T4]
+  def args[T1, T2, T3, T4](p1: T1, p2: T2, p3: T3, p4: T4): Method =
+    macro MethodInvoker.argsMacro[Method, T1, T2, T3, T4]
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -105,8 +102,8 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def args[T1, T2, T3, T4, T5](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5): MethodInvokerType =
-    macro MethodInvoker.argsMacro[MethodInvokerType, T1, T2, T3, T4, T5]
+  def args[T1, T2, T3, T4, T5](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5): Method =
+    macro MethodInvoker.argsMacro[Method, T1, T2, T3, T4, T5]
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -116,8 +113,8 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def args[T1, T2, T3, T4, T5, T6](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6): MethodInvokerType =
-    macro MethodInvoker.argsMacro[MethodInvokerType, T1, T2, T3, T4, T5, T6]
+  def args[T1, T2, T3, T4, T5, T6](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6): Method =
+    macro MethodInvoker.argsMacro[Method, T1, T2, T3, T4, T5, T6]
 
   /**
    * Create a copy of this method invoker with specified argument values.
@@ -127,8 +124,8 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def args[T1, T2, T3, T4, T5, T6, T7](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6, p7: T7): MethodInvokerType =
-    macro MethodInvoker.argsMacro[MethodInvokerType, T1, T2, T3, T4, T5, T6, T7]
+  def args[T1, T2, T3, T4, T5, T6, T7](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6, p7: T7): Method =
+    macro MethodInvoker.argsMacro[Method, T1, T2, T3, T4, T5, T6, T7]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -138,11 +135,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def namedArgs(): MethodInvokerType = copy(
-    argumentNames = Some(Seq()),
-    argumentValues = Seq(),
-    encodedArguments = Seq()
-  )
+  def namedArgs(): Method = copy(argumentNames = Some(Seq()), argumentValues = Seq(), encodedArguments = Seq())
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -152,7 +145,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def namedArgs[T1](p1: (String, T1)): MethodInvokerType = macro MethodInvoker.namedArgsMacro[MethodInvokerType, T1]
+  def namedArgs[T1](p1: (String, T1)): Method = macro MethodInvoker.namedArgsMacro[Method, T1]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -162,8 +155,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def namedArgs[T1, T2](p1: (String, T1), p2: (String, T2)): MethodInvokerType =
-    macro MethodInvoker.namedArgsMacro[MethodInvokerType, T1, T2]
+  def namedArgs[T1, T2](p1: (String, T1), p2: (String, T2)): Method = macro MethodInvoker.namedArgsMacro[Method, T1, T2]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -173,8 +165,8 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def namedArgs[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3)): MethodInvokerType =
-    macro MethodInvoker.namedArgsMacro[MethodInvokerType, T1, T2, T3]
+  def namedArgs[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3)): Method =
+    macro MethodInvoker.namedArgsMacro[Method, T1, T2, T3]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -184,12 +176,8 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    *
    * @return method invoker with specified method arguments
    */
-  def namedArgs[T1, T2, T3, T4](
-    p1: (String, T1),
-    p2: (String, T2),
-    p3: (String, T3),
-    p4: (String, T4)
-  ): MethodInvokerType = macro MethodInvoker.namedArgsMacro[MethodInvokerType, T1, T2, T3, T4]
+  def namedArgs[T1, T2, T3, T4](p1: (String, T1), p2: (String, T2), p3: (String, T3), p4: (String, T4)): Method =
+    macro MethodInvoker.namedArgsMacro[Method, T1, T2, T3, T4]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -205,7 +193,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
     p3: (String, T3),
     p4: (String, T4),
     p5: (String, T5)
-  ): MethodInvokerType = macro MethodInvoker.namedArgsMacro[MethodInvokerType, T1, T2, T3, T4, T5]
+  ): Method = macro MethodInvoker.namedArgsMacro[Method, T1, T2, T3, T4, T5]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -222,7 +210,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
     p4: (String, T4),
     p5: (String, T5),
     p6: (String, T6)
-  ): MethodInvokerType = macro MethodInvoker.namedArgsMacro[MethodInvokerType, T1, T2, T3, T4, T5, T6]
+  ): Method = macro MethodInvoker.namedArgsMacro[Method, T1, T2, T3, T4, T5, T6]
 
   /**
    * Create a copy of this method invoker with specified argument names and values.
@@ -240,7 +228,7 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
     p5: (String, T5),
     p6: (String, T6),
     p7: (String, T7)
-  ): MethodInvokerType = macro MethodInvoker.namedArgsMacro[MethodInvokerType, T1, T2, T3, T4, T5, T6, T7]
+  ): Method = macro MethodInvoker.namedArgsMacro[Method, T1, T2, T3, T4, T5, T6, T7]
 
   /**
    * Send a remote JSON-RPC method ''call'' request with specified result type extracted from the response.
