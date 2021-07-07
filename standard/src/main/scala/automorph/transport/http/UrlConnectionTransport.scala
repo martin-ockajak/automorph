@@ -6,6 +6,7 @@ import automorph.backend.IdentityBackend.Identity
 import automorph.spi.{Backend, Transport}
 import automorph.transport.http.UrlConnectionTransport.Request
 import scala.collection.immutable.ArraySeq
+import automorph.handler.Bytes.inputStreamBytes
 import scala.util.{Try, Using}
 
 /**
@@ -19,8 +20,7 @@ import scala.util.{Try, Using}
  */
 final case class UrlConnectionTransport(
   url: URL,
-  contentType: String,
-  bufferSize: Int = 4096
+  contentType: String
 ) extends Transport[Identity, Request] {
 
   private val contentLengthHeader = "Content-Length"
@@ -31,15 +31,7 @@ final case class UrlConnectionTransport(
 
   override def call(request: ArraySeq.ofByte, context: Option[Request]): Identity[ArraySeq.ofByte] = {
     val connection = send(request, context)
-    Using.resource(connection.getInputStream) { inputStream =>
-      val outputStream = new ByteArrayOutputStream()
-      val buffer = Array.ofDim[Byte](bufferSize)
-      LazyList.iterate(inputStream.read(buffer)) { length =>
-        outputStream.write(buffer, 0, length)
-        inputStream.read(buffer)
-      }.takeWhile(_ >= 0).take(maxReadIterations)
-      new ArraySeq.ofByte(buffer)
-    }
+    Using.resource(connection.getInputStream)(inputStreamBytes.from)
   }
 
   override def notify(request: ArraySeq.ofByte, context: Option[Request]): Identity[Unit] =
@@ -77,8 +69,12 @@ final case class UrlConnectionTransport(
       connection.setRequestProperty(key, null)
     }
 
+  /**
+   * Open new HTTP connections.
+   *
+   * @return HTTP connection
+   */
   private def connect(): HttpURLConnection = {
-    // Open new HTTP connection
     val connection = url.openConnection().asInstanceOf[HttpURLConnection]
     connection.setDoOutput(true)
     connection
