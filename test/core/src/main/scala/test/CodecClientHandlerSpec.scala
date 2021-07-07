@@ -37,9 +37,9 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
           clients.map(_.bind[ComplexApiType]),
           clients.map(_.bind[InvalidApiType]),
           (method, p1) => client.method(method).args(p1).call,
-          (method, p1) => client.method(method).namedArgs(p1).call,
+          (method, p1) => client.method(method).named().args(p1).call,
           (method, p1) => client.method(method).args(p1).tell,
-          (method, p1) => client.method(method).namedArgs(p1).tell
+          (method, p1) => client.method(method).named().args(p1).tell
         )
       }, {
         val codec = UpickleMessagePackCodec(CodecClientHandlerSpec)
@@ -56,9 +56,9 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
           clients.map(_.bind[ComplexApiType]),
           clients.map(_.bind[InvalidApiType]),
           (method, p1) => client.method(method).args(p1).call,
-          (method, p1) => client.method(method).namedArgs(p1).call,
+          (method, p1) => client.method(method).named().args(p1).call,
           (method, p1) => client.method(method).args(p1).tell,
-          (method, p1) => client.method(method).namedArgs(p1).tell
+          (method, p1) => client.method(method).named().args(p1).tell
         )
       }, {
         implicit lazy val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
@@ -79,9 +79,9 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
           clients.map(_.bind[ComplexApiType]),
           clients.map(_.bind[InvalidApiType]),
           (method, p1) => client.method(method).args(p1).call,
-          (method, p1) => client.method(method).namedArgs(p1).call,
+          (method, p1) => client.method(method).named().args(p1).call,
           (method, p1) => client.method(method).args(p1).tell,
-          (method, p1) => client.method(method).namedArgs(p1).tell
+          (method, p1) => client.method(method).named().args(p1).tell
         )
       }, {
         implicit lazy val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
@@ -138,9 +138,9 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
           clients.map(_.bind[ComplexApiType]),
           clients.map(_.bind[InvalidApiType]),
           (method, p1) => client.method(method).args(p1).call,
-          (method, p1) => client.method(method).namedArgs(p1).call,
+          (method, p1) => client.method(method).named().args(p1).call,
           (method, p1) => client.method(method).args(p1).tell,
-          (method, p1) => client.method(method).namedArgs(p1).tell
+          (method, p1) => client.method(method).named().args(p1).tell
         )
       }
     )

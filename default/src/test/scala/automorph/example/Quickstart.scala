@@ -23,7 +23,7 @@ object Quickstart extends App {
   apiProxy.hello("world") // : Future[String]
 
   // Direct call passing arguments by name
-  client.method("hello").namedArgs("thing" -> "world").call[String] // : Future[String]
+  client.method("hello").named().args("thing" -> "world").call[String] // : Future[String]
 
   // Direct notification passing arguments by position
   client.method("hello").args("world").tell // : Future[Unit]

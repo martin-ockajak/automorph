@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.Client.defaultErrorToException
-import automorph.client.{ClientCore, ClientBind, MethodProxy}
+import automorph.client.{ClientCore, ClientBind, PositionalMethodProxy}
 import automorph.protocol.ErrorType
 import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
 import automorph.spi.{Backend, Codec, Transport}
@@ -35,7 +35,7 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   with CannotEqual {
 
   type ThisClient = Client[Node, ExactCodec, Effect, Context]
-  type Method = MethodProxy[Node, ExactCodec, Effect, Context]
+  type PositionalMethod = PositionalMethodProxy[Node, ExactCodec, Effect, Context]
 
   /**
    * Create a method invoker with specified method name.
@@ -43,8 +43,8 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @param methodName method name
    * @return method invoker with specified method name
    */
-  def method(methodName: String): Method =
-    MethodProxy(methodName, Option.when(namedArguments)(Seq()), codec, backend, transport, errorToException, Seq(), Seq())
+  def method(methodName: String): PositionalMethod =
+    PositionalMethodProxy(methodName, codec, backend, transport, errorToException, Seq(), Seq())
 
   /**
    * Create a copy of this client passing method arguments ''by name''.
