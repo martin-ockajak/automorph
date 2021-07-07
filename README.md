@@ -70,11 +70,10 @@ val apiProxy = client.bind[Api]
 apiProxy.hello("world") // : Future[String]
 
 // Direct call passing arguments by name
-client.method("hello").namedArgs("thing" -> "world").call[String] // : Future[String]
+client.method("hello").args("thing" -> "world").call[String] // : Future[String]
 
 // Direct notification passing arguments by position
-client.method("hello").args("world").tell // : Future[Unit]
-
+client.method("hello").positional.args("world").tell // : Future[Unit]
 ```
 
 ## [API Documentation](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
