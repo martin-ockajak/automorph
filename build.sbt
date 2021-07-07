@@ -202,8 +202,11 @@ lazy val default = project.dependsOn(
 // Examples
 lazy val examples = project.dependsOn(
   default, zio
+).settings(
+  libraryDependencies ++= Seq(
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.3.9"
+  )
 )
-
 // Test
 lazy val testBase = (project in file("test/base")).dependsOn(
   spi

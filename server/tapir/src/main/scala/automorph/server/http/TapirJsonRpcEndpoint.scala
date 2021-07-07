@@ -18,7 +18,6 @@ import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, 
  *
  * @see [[https://tapir.softwaremill.com Documentation]]
  * @param handler JSON-RPC request handler
- * @param runEffect asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
  * @tparam Node message format node representation type
  * @tparam ExactCodec message codec plugin type

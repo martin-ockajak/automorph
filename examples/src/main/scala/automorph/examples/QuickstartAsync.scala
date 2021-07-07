@@ -18,7 +18,7 @@ object QuickstartAsync extends App {
   val asyncClient = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
 
   // Call the remote API method via proxy
-  val asyncApiProxy = asyncClient.bind[AsyncApi]
+  val asyncApiProxy = asyncClient.bind[AsyncApi] // AsyncApi
   asyncApiProxy.hello("world", 1) // : Future[String]
 
   // Call a remote API method passing the arguments by name

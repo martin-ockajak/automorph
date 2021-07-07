@@ -30,7 +30,7 @@ import automorph.protocol.ErrorType
  */
 final case class FinagleJsonRpcService[Node, ExactCodec <: Codec[Node], Effect[_]](
   handler: Handler[Node, ExactCodec, Effect, Request],
-  runEffect: Effect[Any] => Unit,
+  runEffect: Effect[Any] => Any,
   errorStatus: Int => Status = defaultErrorStatus
 ) extends Service[Request, Response] with Logging {
 

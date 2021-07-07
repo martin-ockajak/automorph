@@ -31,7 +31,7 @@ case object DefaultHttpServer {
    */
   def apply[Effect[_]](
     backend: Backend[Effect],
-    runEffect: Effect[Any] => Unit,
+    runEffect: Effect[Any] => Any,
     bindApis: BindApis[Effect],
     port: Int,
     urlPath: String = "/",

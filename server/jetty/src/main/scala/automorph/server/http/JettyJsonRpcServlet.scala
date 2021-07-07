@@ -29,7 +29,7 @@ import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
  */
 final case class JettyJsonRpcServlet[Node, ExactCodec <: Codec[Node], Effect[_]](
   handler: Handler[Node, ExactCodec, Effect, HttpServletRequest],
-  runEffect: Effect[Any] => Unit,
+  runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpServlet with Logging {
 
@@ -55,6 +55,7 @@ final case class JettyJsonRpcServlet[Node, ExactCodec <: Codec[Node], Effect[_]]
         }
       )
     ))
+    ()
   }
 
   private def serverError(error: Throwable, response: HttpServletResponse, client: String): Unit = {

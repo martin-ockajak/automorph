@@ -82,7 +82,7 @@ class AsyncApi {
   def hello(some: String, n: Int): Future[String] = Future.successful(s"Hello $some $n!")
 }
 
-val asyncApi = new AsyncApi() // AsyncApi
+val asyncApi = new AsyncApi()
 
 ```
 
@@ -107,7 +107,7 @@ Invoke the remote API:
 val asyncClient = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
 
 // Call the remote API method
-val asyncApiProxy = asyncClient.bind[AsyncApi]
+val asyncApiProxy = asyncClient.bind[AsyncApi] // AsyncApi
 asyncApiProxy.hello("world", 1) // : Future[String]
 ```
 
@@ -128,6 +128,67 @@ hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 
 // Notify a remote API method passing the arguments by position
 hello.positional.args("world", 1).tell // Future[Unit]
+```
+
+## Custom
+
+### Build
+
+Add the following to your `build.sbt` file:
+
+```scala
+libraryDependencies ++= Seq(
+  "io.automorph" %% "automorph-default" % "1.0.0",
+  "io.automorph" %% "automorph-zio" % "1.0.0",
+  "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.3.9"
+)
+```
+
+### API
+
+Define an API class:
+
+```scala
+import zio.{Runtime, Task}
+
+class CustomApi {
+  def hello(some: String, n: Int): Task[String] = Task.succeed(s"Hello $some $n!")
+}
+
+val customApi = new CustomApi()
+```
+
+### Server
+
+Expose the remote API:
+
+```scala
+// Custom effectful computation backend plugin
+val backend = automorph.backend.ZioBackend[Any]()
+val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
+
+// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+val customServer = automorph.DefaultHttpServer(backend, runEffect, _.bind(customApi), 80, "/api")
+
+// Stop the server
+customServer.close()
+```
+
+### Client
+
+Invoke the remote API:
+
+```scala
+import org.asynchttpclient.DefaultAsyncHttpClient
+import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
+
+// Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
+val sttpBackend = AsyncHttpClientZioBackend.usingClient(Runtime.default, DefaultAsyncHttpClient())
+val customClient = automorph.DefaultHttpClient("http://localhost/api", "POST", backend, sttpBackend)
+
+// Call the remote API method via proxy
+val customApiProxy = customClient.bind[CustomApi] // CustomApi
+customApiProxy.hello("world", 1) // : Task[String]
 ```
 
 ## [API Documentation](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)

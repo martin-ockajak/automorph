@@ -30,7 +30,7 @@ import scala.util.Try
  */
 final case class UndertowJsonRpcHandler[Node, ExactCodec <: Codec[Node], Effect[_]](
   handler: Handler[Node, ExactCodec, Effect, HttpServerExchange],
-  runEffect: Effect[Any] => Unit,
+  runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpHandler with Logging {
 
@@ -60,6 +60,7 @@ final case class UndertowJsonRpcHandler[Node, ExactCodec <: Codec[Node], Effect[
                 }
               )
           ))
+          ()
         }
       })
       ()
