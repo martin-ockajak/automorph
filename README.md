@@ -5,7 +5,7 @@ way to invoke and expose remote APIs.
 
 [![Tests][Badge-Tests-Icon]][Badge-Tests-Page]
 [![Tests][Badge-Tests-Icon]][Badge-Tests-Page]
-[![Tests]([Badge-Tests-Icon])]([Badge-Tests-Page])
+[![Tests][Badge-Tests-Icon]][Badge-Tests-Page]
 
 - [Features](#features)
 - [Quickstart](#quickstart)
