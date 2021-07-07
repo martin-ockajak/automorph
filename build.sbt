@@ -178,7 +178,7 @@ lazy val tapir = (project in file("server/tapir")).dependsOn(
 )
 
 // OpenAPI
-lazy val openApi = project.dependsOn(
+lazy val openApi = (project in file("openapi")).dependsOn(
   core
 ).settings(
   name := "json-rpc-open-api",
