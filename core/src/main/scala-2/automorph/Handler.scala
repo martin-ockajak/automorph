@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.handler.{HandlerCore, HandlerBind, HandlerBinding}
+import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
 import automorph.protocol.ErrorType
 import automorph.spi.{Backend, Codec}
@@ -54,18 +54,15 @@ case object Handler {
     codec: ExactCodec,
     backend: Backend[Effect]
   ): Handler[Node, ExactCodec, Effect, Context] =
-  macro applyMacro[Node, ExactCodec, Effect, Context]
+    macro applyMacro[Node, ExactCodec, Effect, Context]
 
-  def applyMacro[
-    Node: c.WeakTypeTag,
-    ExactCodec <: Codec[Node]: c.WeakTypeTag,
-    Effect[_],
-    Context: c.WeakTypeTag
-  ](c: blackbox.Context)(
+  def applyMacro[Node: c.WeakTypeTag, ExactCodec <: Codec[Node]: c.WeakTypeTag, Effect[_], Context: c.WeakTypeTag](
+    c: blackbox.Context
+  )(
     codec: c.Expr[ExactCodec],
     backend: c.Expr[Backend[Effect]]
   ): c.Expr[Handler[Node, ExactCodec, Effect, Context]] = {
-    import c.universe.{Quasiquote, weakTypeOf}
+    import c.universe.{weakTypeOf, Quasiquote}
     Seq(weakTypeOf[Node], weakTypeOf[ExactCodec], weakTypeOf[Context])
 
     c.Expr[Any](q"""
@@ -91,17 +88,13 @@ case object Handler {
     codec: ExactCodec,
     backend: Backend[Effect]
   ): Handler[Node, ExactCodec, Effect, NoContext.Value] =
-  macro noContextMacro[Node, ExactCodec, Effect]
+    macro noContextMacro[Node, ExactCodec, Effect]
 
-  def noContextMacro[
-    Node: c.WeakTypeTag,
-    ExactCodec <: Codec[Node]: c.WeakTypeTag,
-    Effect[_]
-  ](c: blackbox.Context)(
+  def noContextMacro[Node: c.WeakTypeTag, ExactCodec <: Codec[Node]: c.WeakTypeTag, Effect[_]](c: blackbox.Context)(
     codec: c.Expr[ExactCodec],
     backend: c.Expr[Backend[Effect]]
   ): c.Expr[Handler[Node, ExactCodec, Effect, NoContext.Value]] = {
-    import c.universe.{Quasiquote, weakTypeOf}
+    import c.universe.{weakTypeOf, Quasiquote}
     Seq(weakTypeOf[Node], weakTypeOf[ExactCodec])
 
     c.Expr[Any](q"""
