@@ -3,12 +3,8 @@
 **Automorph** is a [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless
 way to invoke and expose remote APIs.
 
-| CI | Releases | Issues | | Scaladoc | Scaladex |
-| --- | --- | --- | --- |
-| ![CI][Badge-CI] | [![Releases][Badge-SonatypeReleases]][Link-SonatypeReleases] |  [![Average time to resolve an issue][Badge-IsItMaintained]][Link-IsItMaintained] |
-
-| --- | --- |
-| [![Badge-Scaladoc]][Link-Scaladoc] | [![Badge-Scaladex-page]][Link-Scaladex-page]
+[![Tests][Badge-Tests-Icon]][Badge-Tests-Page]
+[![Tests][Badge-Tests-Icon]][Badge-Tests-Page]
 
 - [Features](#features)
 - [Quickstart](#quickstart)
@@ -318,3 +314,7 @@ Depends on:
 * [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
 * [Autowire](https://github.com/lihaoyi/autowire)
 * [STTP](https://github.com/softwaremill/sttp)
+
+
+[Badge-Tests-Icon]: https://github.com/martin-ockajak/automorph/workflows/Tests/badge.svg
+[Badge-Stage-Page]: https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml
