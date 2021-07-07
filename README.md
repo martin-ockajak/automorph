@@ -7,9 +7,9 @@ way to invoke and expose remote APIs.
 
 * **Simple** - generate JSON-RPC bindings directly from public methods of your API classes
 * **Modular** - combine various plugins to match your API effect type and integrate with other libraries
-* **Flexible** - access underlying protocol details while maintaining your API abstraction
+* **Flexible** - customize JSON-RPC method names and error codes
 * **Extensible** - automatically derive or manually implement serialization of arbitrary data types
-* **Customizable** - adjust JSON-RPC method names and error codes
+* **Clean** - access underlying protocol details while maintaining your API abstraction
 * **Safe** - type checks bound API classes during compilation
 * **Fast** - generates optimized API binding code during compilation
 * **Compatible** - available for [Scala 2.12](https://www.scala-lang.org/news/2.12.0/), [Scala 2.13](https://www.scala-lang.org/news/2.13.0)
