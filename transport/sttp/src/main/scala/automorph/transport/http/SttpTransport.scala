@@ -48,10 +48,8 @@ final case class SttpTransport[Effect[_]](
     request: ArraySeq.ofByte,
     context: Option[Request]
   ): Request[Either[String, String], Any] =
-    context.getOrElse(Request()).partial.copy[Identity, Either[String, String], Any](
-      uri = url,
-      method = method
-    ).contentType(contentType).header(Header.accept(contentType)).body(request.unsafeArray)
+    context.getOrElse(Request()).partial.method(method, url).contentType(contentType)
+      .header(Header.accept(contentType)).body(request.unsafeArray)
 }
 
 case object SttpTransport {
