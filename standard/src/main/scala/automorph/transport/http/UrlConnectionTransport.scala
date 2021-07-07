@@ -1,9 +1,8 @@
 package automorph.transport.http
 
-import java.io.ByteArrayOutputStream
 import java.net.{HttpURLConnection, URL}
 import automorph.backend.IdentityBackend.Identity
-import automorph.spi.{Backend, Transport}
+import automorph.spi.Transport
 import automorph.transport.http.UrlConnectionTransport.RequestProperties
 import scala.collection.immutable.ArraySeq
 import automorph.handler.Bytes.inputStreamBytes
@@ -26,7 +25,6 @@ final case class UrlConnectionTransport(
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
-  private val maxReadIterations = 1024 * 1024
 
   override def call(
     request: ArraySeq.ofByte,
@@ -34,13 +32,13 @@ final case class UrlConnectionTransport(
     context: Option[RequestProperties]
   ): Identity[ArraySeq.ofByte] = {
     val connection = send(request, mediaType, context)
-    Using.resource(connection.getInputStream)(inputStreamBytes.from)
+    Using.resource(connection.getInputStream)(inputStreamBytes.from(_))
   }
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Identity[Unit] =
     send(request, mediaType, context)
 
-  private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): HttpURLConnection = {
+  private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Identity[Unit] = {
     val connection = connect()
     val outputStream = connection.getOutputStream
     context.foreach(setProperties(connection, request, mediaType, _))
@@ -48,7 +46,7 @@ final case class UrlConnectionTransport(
     context.foreach(clearProperties(connection, _))
     outputStream.close()
     trySend.get
-    connection
+    ()
   }
 
   private def setProperties(

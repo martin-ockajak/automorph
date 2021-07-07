@@ -2,16 +2,15 @@ package test
 
 import argonaut.Argonaut.jNumber
 import argonaut.{Argonaut, CodecJson}
-import io.circe.generic.auto._
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder, Json}
 import automorph.codec.common.UpickleCustom
 import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, UpickleJsonCodec}
 import automorph.codec.messagepack.UpickleMessagePackCodec
-import automorph.spi.{Backend, Codec, Transport}
+import automorph.spi.Transport
 import automorph.transport.local.HandlerTransport
 import automorph.{Client, Handler}
-import scala.util.Try
+import io.circe.generic.auto._
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.{Decoder, Encoder, Json}
 import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, SimpleApiImpl}
 import ujson.Value
 import upack.Msg

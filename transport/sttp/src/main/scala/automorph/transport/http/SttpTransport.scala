@@ -4,7 +4,7 @@ import automorph.spi.{Backend, Transport}
 import automorph.transport.http.SttpTransport.RequestProperties
 import java.io.IOException
 import scala.collection.immutable.ArraySeq
-import sttp.client3.{basicRequest, Identity, PartialRequest, Request, Response, SttpApi, SttpBackend}
+import sttp.client3.{basicRequest, PartialRequest, Request, Response, SttpApi, SttpBackend}
 import sttp.model.{MediaType, Header, Method, Uri}
 
 /**
