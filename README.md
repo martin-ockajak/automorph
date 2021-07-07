@@ -4,7 +4,7 @@
 way to invoke and expose remote APIs.
 
 [![Tests][Badge-Tests-Icon]][Badge-Tests-Page]
-[![Tests](https://github.com/softwaremill/sttp/workflows/CI/badge.svg)](https://github.com/softwaremill/sttp/actions?query=workflow%3A%22CI%22)
+[![Tests](https://github.com/martin-ockajak/automorph/workflows/Tests/badge.svg)](https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
 
 - [Features](#features)
 - [Quickstart](#quickstart)
