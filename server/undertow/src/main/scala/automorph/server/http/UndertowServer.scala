@@ -36,7 +36,7 @@ final case class UndertowServer(
     val pathHandler = Handlers.path(ResponseCodeHandler.HANDLE_404).addPrefixPath(urlPath, httpHandler)
 
     // Configure the web server
-    val undertow = builder.addHttpListener(8080, "0.0.0.0").setHandler(pathHandler).build()
+    val undertow = builder.addHttpListener(port, "0.0.0.0").setHandler(pathHandler).build()
 
     // Start the web server
     undertow.getListenerInfo.asScala.foreach { listener =>

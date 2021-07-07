@@ -105,7 +105,7 @@ case object NanoHttpdServer {
   def apply[Node, ExactCodec <: Codec[Node], Effect[_]](
     handler: Handler[Node, ExactCodec, Effect, IHTTPSession],
     effectRunSync: Effect[Response] => Response,
-    port: Int = 8080,
+    port: Int,
     readTimeout: Int = 5000,
     errorStatus: Int => Status = defaultErrorStatus
   ): NanoHttpdServer[Node, ExactCodec, Effect] = {
