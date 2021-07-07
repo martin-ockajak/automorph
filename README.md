@@ -3,7 +3,7 @@
 **Automorph** is a [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless
 way to invoke and expose remote APIs.
 
-[![Tests](https://github.com/martin-ockajak/automorph/workflows/Tests/badge.svg)](https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
+[![Build](https://github.com/martin-ockajak/automorph/workflows/Build/badge.svg)](https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
 [![Releases](https://img.shields.io/maven-central/v/io.automorph/automorph-core_2.13.svg)](https://mvnrepository.com/artifact/io.automorph)
 
 - [Features](#features)
