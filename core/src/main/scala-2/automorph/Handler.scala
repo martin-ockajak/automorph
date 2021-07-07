@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.handler.{HandlerCore, HandlerMeta, HandlerBinding}
+import automorph.handler.{HandlerCore, HandlerBind, HandlerBinding}
 import automorph.log.Logging
 import automorph.protocol.ErrorType
 import automorph.spi.{Backend, Codec}
@@ -31,7 +31,7 @@ final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
 ) extends HandlerCore[Node, ExactCodec, Effect, Context]
-  with HandlerMeta[Node, ExactCodec, Effect, Context]
+  with HandlerBind[Node, ExactCodec, Effect, Context]
   with CannotEqual
   with Logging
 

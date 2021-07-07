@@ -103,6 +103,85 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   )
 
   /**
+   * Create a copy of this method invoker with specified argument values.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   *
+   * @return method invoker with specified method arguments
+   */
+  inline def args[T1, T2, T3, T4](p1: T1, p2: T2, p3: T3, p4: T4): MethodInvokerType = copy(
+    argumentValues = Seq(p1, p2, p3, p4),
+    encodedArguments = Seq(
+      codec.encode(p1),
+      codec.encode(p2),
+      codec.encode(p3),
+      codec.encode(p4)
+    )
+  )
+
+  /**
+   * Create a copy of this method invoker with specified argument values.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   *
+   * @return method invoker with specified method arguments
+   */
+  inline def args[T1, T2, T3, T4, T5](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5): MethodInvokerType = copy(
+    argumentValues = Seq(p1, p2, p3, p4, p5),
+    encodedArguments = Seq(
+      codec.encode(p1),
+      codec.encode(p2),
+      codec.encode(p3),
+      codec.encode(p4),
+      codec.encode(p5)
+    )
+  )
+
+  /**
+   * Create a copy of this method invoker with specified argument values.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   *
+   * @return method invoker with specified method arguments
+   */
+  inline def args[T1, T2, T3, T4, T5, T6](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6): MethodInvokerType = copy(
+    argumentValues = Seq(p1, p2, p3, p4, p5, p6),
+    encodedArguments = Seq(
+      codec.encode(p1),
+      codec.encode(p2),
+      codec.encode(p3),
+      codec.encode(p4),
+      codec.encode(p5),
+      codec.encode(p6)
+    )
+  )
+
+  /**
+   * Create a copy of this method invoker with specified argument values.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   *
+   * @return method invoker with specified method arguments
+   */
+  inline def args[T1, T2, T3, T4, T5, T6, T7](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6, p7: T7): MethodInvokerType =
+    copy(
+      argumentValues = Seq(p1, p2, p3, p4, p5, p6, p7),
+      encodedArguments = Seq(
+        codec.encode(p1),
+        codec.encode(p2),
+        codec.encode(p3),
+        codec.encode(p4),
+        codec.encode(p5),
+        codec.encode(p6),
+        codec.encode(p7)
+      )
+    )
+
+  /**
    * Create a copy of this method invoker with specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
@@ -166,6 +245,118 @@ case class MethodInvoker[Node, ExactCodec <: Codec[Node], Effect[_], Context](
       codec.encode(p3._2)
     )
   )
+
+  /**
+   * Create a copy of this method invoker with specified argument names and values.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   *
+   * @return method invoker with specified method arguments
+   */
+  inline def namedArgs[T1, T2, T3, T4](
+    p1: (String, T1),
+    p2: (String, T2),
+    p3: (String, T3),
+    p4: (String, T4)
+  ): MethodInvokerType =
+    copy(
+      argumentNames = Some(Seq(p1._1, p2._1, p3._1, p4._1)),
+      argumentValues = Seq(p1._2, p2._2, p3._2, p4._2),
+      encodedArguments = Seq(
+        codec.encode(p1._2),
+        codec.encode(p2._2),
+        codec.encode(p3._2),
+        codec.encode(p4._2)
+      )
+    )
+
+  /**
+   * Create a copy of this method invoker with specified argument names and values.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   *
+   * @return method invoker with specified method arguments
+   */
+  inline def namedArgs[T1, T2, T3, T4, T5](
+    p1: (String, T1),
+    p2: (String, T2),
+    p3: (String, T3),
+    p4: (String, T4),
+    p5: (String, T5)
+  ): MethodInvokerType =
+    copy(
+      argumentNames = Some(Seq(p1._1, p2._1, p3._1, p4._1, p5._1)),
+      argumentValues = Seq(p1._2, p2._2, p3._2, p4._2, p5._2),
+      encodedArguments = Seq(
+        codec.encode(p1._2),
+        codec.encode(p2._2),
+        codec.encode(p3._2),
+        codec.encode(p4._2),
+        codec.encode(p5._2)
+      )
+    )
+
+  /**
+   * Create a copy of this method invoker with specified argument names and values.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   *
+   * @return method invoker with specified method arguments
+   */
+  inline def namedArgs[T1, T2, T3, T4, T5, T6](
+    p1: (String, T1),
+    p2: (String, T2),
+    p3: (String, T3),
+    p4: (String, T4),
+    p5: (String, T5),
+    p6: (String, T6)
+  ): MethodInvokerType =
+    copy(
+      argumentNames = Some(Seq(p1._1, p2._1, p3._1, p4._1, p5._1, p6._1)),
+      argumentValues = Seq(p1._2, p2._2, p3._2, p4._2, p5._2, p6._2),
+      encodedArguments = Seq(
+        codec.encode(p1._2),
+        codec.encode(p2._2),
+        codec.encode(p3._2),
+        codec.encode(p4._2),
+        codec.encode(p5._2),
+        codec.encode(p6._2)
+      )
+    )
+
+  /**
+   * Create a copy of this method invoker with specified argument names and values.
+   *
+   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   *
+   * @return method invoker with specified method arguments
+   */
+  inline def namedArgs[T1, T2, T3, T4, T5, T6, T7](
+    p1: (String, T1),
+    p2: (String, T2),
+    p3: (String, T3),
+    p4: (String, T4),
+    p5: (String, T5),
+    p6: (String, T6),
+    p7: (String, T7)
+  ): MethodInvokerType =
+    copy(
+      argumentNames = Some(Seq(p1._1, p2._1, p3._1, p4._1, p5._1, p6._1, p7._1)),
+      argumentValues = Seq(p1._2, p2._2, p3._2, p4._2, p5._2, p6._2, p7._2),
+      encodedArguments = Seq(
+        codec.encode(p1._2),
+        codec.encode(p2._2),
+        codec.encode(p3._2),
+        codec.encode(p4._2),
+        codec.encode(p5._2),
+        codec.encode(p6._2),
+        codec.encode(p7._2)
+      )
+    )
 
   /**
    * Send a remote JSON-RPC method ''call'' request with specified result type extracted from the response.
