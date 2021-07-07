@@ -1,4 +1,4 @@
-![automorph](https://github.com/martin-ockajak/automorph/raw/master/project/logo.jpg)
+![automorph](https://github.com/martin-ockajak/automorph/raw/main/project/logo.jpg)
 
 **Automorph** is a [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless
 way to invoke and expose remote APIs.
