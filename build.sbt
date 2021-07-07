@@ -144,7 +144,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
   )
 )
 lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
-  spi, testCore % Test, standard % Test
+  spi, core, testCore % Test, standard % Test
 ).settings(
   name := "json-rpc-rabbitmq",
   libraryDependencies ++= Seq(
