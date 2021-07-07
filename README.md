@@ -5,7 +5,7 @@ way to invoke and expose remote APIs.
 
 [![Tests][Badge-Tests-Icon]][Badge-Tests-Page]
 [![Tests][Badge-Tests-Icon]][Badge-Tests-Page]
-[![Tests](https://github.com/martin-ockajak/automorph/workflows/Tests/badge.svg)](https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
+[![Tests]([Badge-Tests-Icon])]([Badge-Tests-Page])
 
 - [Features](#features)
 - [Quickstart](#quickstart)
