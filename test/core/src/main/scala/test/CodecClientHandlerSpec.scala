@@ -26,13 +26,14 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
       val transport =
         customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
       val client = Client(codec, backend, transport)
+      val clients = Seq(client, client.positional)
       CodecFixture(
         codec.getClass,
         client,
         handler,
-        Seq(client.bind[SimpleApiType], client.positional.bind[SimpleApiType]),
-        Seq(client.bind[ComplexApiType], client.positional.bind[ComplexApiType]),
-        Seq(client.bind[InvalidApiType], client.positional.bind[InvalidApiType]),
+        clients.map(_.bind[SimpleApiType]),
+        clients.map(_.bind[ComplexApiType]),
+        clients.map(_.bind[InvalidApiType]),
         (method, p1, context) => {
           implicit val usingContext = context
           client.method(method).args(p1).call
@@ -57,13 +58,14 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
       val transport =
         customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
       val client = Client(codec, backend, transport)
+      val clients = Seq(client, client.positional)
       CodecFixture(
         codec.getClass,
         client,
         handler,
-        Seq(client.bind[SimpleApiType], client.positional.bind[SimpleApiType]),
-        Seq(client.bind[ComplexApiType], client.positional.bind[ComplexApiType]),
-        Seq(client.bind[InvalidApiType], client.positional.bind[InvalidApiType]),
+        clients.map(_.bind[SimpleApiType]),
+        clients.map(_.bind[ComplexApiType]),
+        clients.map(_.bind[InvalidApiType]),
         (method, p1, context) => {
           implicit val usingContext = context
           client.method(method).args(p1).call
@@ -92,13 +94,14 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
       val transport =
         customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
       val client = Client(codec, backend, transport)
+      val clients = Seq(client, client.positional)
       CodecFixture(
         codec.getClass,
         client,
         handler,
-        Seq(client.bind[SimpleApiType], client.positional.bind[SimpleApiType]),
-        Seq(client.bind[ComplexApiType], client.positional.bind[ComplexApiType]),
-        Seq(client.bind[InvalidApiType], client.positional.bind[InvalidApiType]),
+        clients.map(_.bind[SimpleApiType]),
+        clients.map(_.bind[ComplexApiType]),
+        clients.map(_.bind[InvalidApiType]),
         (method, p1, context) => {
           implicit val usingContext = context
           client.method(method).args(p1).call
@@ -164,13 +167,14 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
       val transport =
         customTransport.getOrElse(HandlerTransport(handler, backend, arbitraryContext.arbitrary.sample.get))
       val client = Client(codec, backend, transport)
+      val clients = Seq(client, client.positional)
       CodecFixture(
         codec.getClass,
         client,
         handler,
-        Seq(client.bind[SimpleApiType], client.positional.bind[SimpleApiType]),
-        Seq(client.bind[ComplexApiType], client.positional.bind[ComplexApiType]),
-        Seq(client.bind[InvalidApiType], client.positional.bind[InvalidApiType]),
+        clients.map(_.bind[SimpleApiType]),
+        clients.map(_.bind[ComplexApiType]),
+        clients.map(_.bind[InvalidApiType]),
         (method, p1, context) => {
           implicit val usingContext = context
           client.method(method).args(p1).call
