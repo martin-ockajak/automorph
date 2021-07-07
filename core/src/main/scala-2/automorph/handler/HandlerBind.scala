@@ -38,7 +38,7 @@ private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_],
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   def bind[Api <: AnyRef](api: Api): HandlerType =
-    macro HandlerBind.bindMacro[Node, ExactCodec, Effect, Context, Api]
+    macro HandlerBind.basicBindMacro[Node, ExactCodec, Effect, Context, Api]
 
   /**
    * Create a copy of this handler with generated method bindings for all valid public methods of the specified API.
@@ -66,7 +66,7 @@ private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_],
 
 case object HandlerBind {
 
-  def bindMacro[
+  def basicBindMacro[
     Node: c.WeakTypeTag,
     ExactCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
