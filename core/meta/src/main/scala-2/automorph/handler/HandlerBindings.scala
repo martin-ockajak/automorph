@@ -144,8 +144,9 @@ case object HandlerBindings {
           } else {
             q"""
               (scala.util.Try($codec.decode[${parameter.dataType}](argumentNodes(${argumentIndex}))) match {
-                case scala.util.Failure(error) =>
-                  scala.util.Failure(automorph.protocol.ErrorType.InvalidRequestException("Invalid argument: " + $argumentIndex, error))
+                case scala.util.Failure(error) => scala.util.Failure(
+                  automorph.protocol.ErrorType.InvalidRequestException("Invalid argument: " + $argumentIndex, error)
+                )
                 case result => result
               }).get
              """
