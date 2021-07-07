@@ -1,3 +1,5 @@
 package automorph.handler
 
-case class OpenApi()
+case class OpenApi(
+
+)
