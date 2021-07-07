@@ -69,7 +69,7 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[ExactCodec], weakTypeOf[Context])
 
     c.Expr[Any](q"""
-      new automorph.Handler($codec, $backend, Map.empty, automorph.handler.HandlerCore.defaultMapException,
+      new automorph.Handler($codec, $backend, Map.empty, automorph.handler.HandlerCore.defaultExceptionToError,
         value => $codec.encode[List[String]](value), $codec.encode(None))
     """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Context]]]
   }
