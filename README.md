@@ -3,19 +3,19 @@ way to invoke and expose remote APIs.
 
 - [Features](#features)
 - [Quickstart](#quickstart)
-  * [Build](#build)
-  * [Synchronous](#synchronous)
-  * [Asynchronous](#asynchronous)
-  * [Custom Effect Type](#custom-effect-type)
+  - [Build](#build)
+  - [Synchronous](#synchronous)
+  - [Asynchronous](#asynchronous)
+  - [Custom Effect Type](#custom-effect-type)
 - [Integration](#integration)
-  * [Backend](#backend)
-  * [Codec](#codec)
-  * [Transport](#transport)
-  * [Server](#server-3)
+  - [Backend](#backend)
+  - [Codec](#codec)
+  - [Transport](#transport)
+  - [Server](#server-3)
 - [Documentation](#documentation)
   - [Architecture](#architecture)
   - [Scaladoc](#scaladoc)
-- [Inspiration](#inspiration)
+  - [Inspiration](#inspiration)
 
 # Features
 
@@ -304,7 +304,7 @@ Depends on:
 
 ### [Scaladoc](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
 
-# Inspiration
+### Inspiration
 
 * [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
 * [Autowire](https://github.com/lihaoyi/autowire)
