@@ -1,10 +1,11 @@
-package automorph
+package automorph.example
 
+import automorph.{DefaultHttpClient, DefaultHttpServer}
 import io.undertow.server.HttpServerExchange
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object QuickstartExample extends App {
+object Quickstart extends App {
   class Api {
     def hello(thing: String): Future[String] = Future.successful(s"Hello $thing!")
   }
