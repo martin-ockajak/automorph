@@ -250,7 +250,7 @@ case class MethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @return nothing
    */
   def tell(implicit context: Context): Effect[Unit] =
-    performNotify(methodName, argumentNames, encodedArguments, Some(context))
+    notify(methodName, argumentNames, encodedArguments, Some(context))
 
   override def toString: String =
     s"${this.getClass.getName}(Method: $methodName, Arguments names: $argumentNames, Arguments: $argumentValues)"
@@ -604,7 +604,7 @@ case object MethodProxy {
     import c.universe.{Quasiquote, weakTypeOf}
 
     c.Expr[Effect[R]](q"""
-      ${c.prefix}.performCall(
+      ${c.prefix}.call(
         ${c.prefix}.methodName,
         ${c.prefix}.argumentNames,
         ${c.prefix}.encodedArguments,

@@ -360,7 +360,7 @@ case class MethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @return result value
    */
   inline def call[R](using context: Context): Effect[R] =
-    performCall(methodName, argumentNames, encodedArguments, codec.decode[R](_), Some(context))
+    call(methodName, argumentNames, encodedArguments, codec.decode[R](_), Some(context))
 
   /**
    * Send a remote JSON-RPC method ''notification'' request disregarding the response.
@@ -371,7 +371,7 @@ case class MethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @return nothing
    */
   def tell(using context: Context): Effect[Unit] =
-    performNotify(methodName, argumentNames, encodedArguments, Some(context))
+    notify(methodName, argumentNames, encodedArguments, Some(context))
 
   override def toString: String =
     s"${this.getClass.getName}(Method: $methodName, Arguments names: $argumentNames, Arguments: $argumentValues)"

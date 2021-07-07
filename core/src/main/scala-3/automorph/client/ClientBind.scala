@@ -61,6 +61,6 @@ private[automorph] trait ClientBind[Node, ExactCodec <: Codec[Node], Effect[_], 
           val argumentNames = Option.when(namedArguments)(parameterNames)
 
           // Perform the API call
-          performCall(method.getName, argumentNames, encodedArguments, resultNode => clientMethod.decodeResult(resultNode), context)
+          call(method.getName, argumentNames, encodedArguments, resultNode => clientMethod.decodeResult(resultNode), context)
         }.getOrElse(throw UnsupportedOperationException(s"Invalid method: ${method.getName}"))
     ).asInstanceOf[Api]

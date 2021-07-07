@@ -35,7 +35,7 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
    * @tparam R result type
    * @return result value
    */
-  def performCall[R](
+  def call[R](
     methodName: String,
     argumentNames: Option[Seq[String]],
     encodedArguments: Seq[Node],
@@ -71,7 +71,7 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
    * @tparam R result type
    * @return nothing
    */
-  protected def performNotify(
+  protected def notify(
     methodName: String,
     argumentNames: Option[Seq[String]],
     encodedArguments: Seq[Node],
