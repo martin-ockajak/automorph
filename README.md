@@ -1,15 +1,12 @@
-- [Overview](#overview)
+**Automorph** is a [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for [Scala](https://www.scala-lang.org/) providing an easy
+way to invoke and expose remote APIs.
+
 - [Features](#features)
 - [Quickstart](#quickstart)
 - [Integrations](#integrations)
 - [Architecture](#architecture)
 - [Examples](#examples)
 - [Inspired by](#inspired-by)
-
-# Overview
-
-**Automorph** is a [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for [Scala](https://www.scala-lang.org/) providing an easy
-way to invoke and expose remote APIs.
 
 # Features
 
