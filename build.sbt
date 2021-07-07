@@ -18,6 +18,7 @@ lazy val root = project.in(file(".")).aggregate(
   scalaz,
 
   sttp,
+  rabbitmq,
 
   undertow,
   jetty,
@@ -140,6 +141,14 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % "3.3.9",
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.9" % Test
+  )
+)
+lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
+  spi, testCore % Test, standard % Test
+).settings(
+  name := "json-rpc-rabbitmq",
+  libraryDependencies ++= Seq(
+    "com.rabbitmq" % "amqp-client" % "5.12.0"
   )
 )
 

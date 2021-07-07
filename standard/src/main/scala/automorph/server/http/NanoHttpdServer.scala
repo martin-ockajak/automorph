@@ -1,13 +1,12 @@
 package automorph.server.http
 
 import automorph.Handler
-import automorph.handler.HandlerResult
+import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.server.http.NanoHTTPD.Response.Status
 import automorph.server.http.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
-import automorph.spi.Codec
-import automorph.handler.Bytes
+import automorph.spi.{Codec, Server}
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -30,7 +29,7 @@ final case class NanoHttpdServer[Node, ExactCodec <: Codec[Node], Effect[_]] pri
   port: Int,
   readTimeout: Int,
   errorStatus: Int => Status
-) extends NanoHTTPD(port) with AutoCloseable with Logging {
+) extends NanoHTTPD(port) with Server with Logging {
 
   private val HeaderXForwardedFor = "X-Forwarded-For"
   private val backend = handler.backend

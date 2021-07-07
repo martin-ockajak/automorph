@@ -1,12 +1,13 @@
 package automorph.server.http
 
-import io.undertow.server.handlers.ResponseCodeHandler
+import automorph.log.Logging
+import automorph.server.http.UndertowServer.defaultBuilder
+import automorph.spi.Server
 import io.undertow.server.HttpHandler
+import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.{Handlers, Undertow}
 import java.lang.Runtime
 import java.net.InetSocketAddress
-import automorph.server.http.UndertowServer.defaultBuilder
-import automorph.log.Logging
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
@@ -25,7 +26,7 @@ final case class UndertowServer(
   port: Int,
   urlPath: String = "/",
   builder: Undertow.Builder = defaultBuilder
-) extends AutoCloseable with Logging {
+) extends Server with Logging {
 
   private val undertow = start()
 
