@@ -1,6 +1,13 @@
 **Automorph** is a [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless
 way to invoke and expose remote APIs.
 
+| CI | Releases | Issues | | Scaladoc | Scaladex |
+| --- | --- | --- | --- |
+| ![CI][Badge-CI] | [![Releases][Badge-SonatypeReleases]][Link-SonatypeReleases] |  [![Average time to resolve an issue][Badge-IsItMaintained]][Link-IsItMaintained] |
+
+| --- | --- |
+| [![Badge-Scaladoc]][Link-Scaladoc] | [![Badge-Scaladex-page]][Link-Scaladex-page]
+
 - [Features](#features)
 - [Quickstart](#quickstart)
   - [Build](#build)
