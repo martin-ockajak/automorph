@@ -18,6 +18,8 @@ import upack.Msg
 
 trait CodecClientHandlerSpec extends ClientHandlerSpec {
 
+  def customTransport: Option[Transport[Effect, Context]] = None
+
   def codecFixtures: Seq[CodecFixture] = Seq(
     {
       val codec = UpickleJsonCodec(CodecClientHandlerSpec)
@@ -194,8 +196,6 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
       )
     }
   )
-
-  def customTransport: Option[Transport[Effect, Context]] = None
 }
 
 object CodecClientHandlerSpec extends UpickleCustom {
