@@ -6,7 +6,7 @@ way to invoke and expose remote APIs.
 - [Integrations](#integrations)
 - [Architecture](#architecture)
 - [Examples](#examples)
-- [Inspired by](#inspired-by)
+- [Inspired by](#inspirations)
 
 # Features
 
@@ -295,7 +295,7 @@ Depends on:
 
 # Examples
 
-# Inspired by
+# Inspirations
 
 * [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
 * [Autowire](https://github.com/lihaoyi/autowire)
