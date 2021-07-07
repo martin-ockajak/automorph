@@ -35,10 +35,12 @@ final case class UrlConnectionTransport(
     Using.resource(connection.getInputStream)(inputStreamBytes.from(_))
   }
 
-  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Identity[Unit] =
+  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Identity[Unit] = {
     send(request, mediaType, context)
+    ()
+  }
 
-  private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Identity[Unit] = {
+  private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): HttpURLConnection = {
     val connection = connect()
     val outputStream = connection.getOutputStream
     context.foreach(setProperties(connection, request, mediaType, _))
@@ -46,7 +48,7 @@ final case class UrlConnectionTransport(
     context.foreach(clearProperties(connection, _))
     outputStream.close()
     trySend.get
-    ()
+    connection
   }
 
   private def setProperties(
