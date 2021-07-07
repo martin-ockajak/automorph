@@ -15,7 +15,7 @@ way to invoke and expose remote APIs.
 * **Compatible** - available for [Scala 2.12](https://www.scala-lang.org/news/2.12.0/), [Scala 2.13](https://www.scala-lang.org/news/2.13.0)
   and [Scala 3](https://dotty.epfl.ch/)
 * **Boilerplate free** - even advanced use-cases require only a few lines of code
-* **Dependency free** - core implementation depends on [SLF4J API](http://www.slf4j.org/) only
+* **Dependency free** - core logic depends on [SLF4J API](http://www.slf4j.org/) only
 
 # Quickstart
 
