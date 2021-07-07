@@ -29,7 +29,48 @@ Add the following to your `build.sbt` file:
 libraryDependencies += "io.automorph" %% "automorph-default" % "1.0.0"
 ```
 
-## API
+## Synchronous
+
+### API
+
+Define an API class:
+
+```scala
+class SyncApi {
+  def hello(some: String, n: Int): String = s"Hello $some $n!"
+}
+
+val syncApi = new SyncApi()
+```
+
+### Server
+
+Expose the remote API:
+
+```scala
+// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+val syncServer = automorph.DefaultHttpServer.sync(_.bind(syncApi), 80, "/api")
+
+// Stop the server
+syncServer.close()
+```
+
+### Client
+
+Invoke the remote API:
+
+```scala
+// Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
+val syncClient = automorph.DefaultHttpClient.sync("http://localhost/api", "POST")
+
+// Call the remote API method
+val syncApiProxy = syncClient.bind[SyncApi] // SyncApi
+syncApiProxy.hello("world", 1) // : String
+```
+
+## Asynchronous
+
+### API
 
 Define an API class:
 
@@ -37,43 +78,56 @@ Define an API class:
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class Api {
-  def hello(thing: String): Future[String] = Future.successful(s"Hello $thing!")
+class AsyncApi {
+  def hello(some: String, n: Int): Future[String] = Future.successful(s"Hello $some $n!")
 }
 
-val api = new Api()
+val asyncApi = new AsyncApi() // AsyncApi
 
 ```
 
-## Server
+### Server
 
 Expose the remote API:
 
 ```scala
-// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = automorph.DefaultHttpServer.async(_.bind(api), 80, "/api")
+  // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+val asyncServer = automorph.DefaultHttpServer.async(_.bind(asyncApi), 80, "/api")
 
 // Stop the server
-server.close()
+asyncServer.close()
 ```
 
-## Client
+### Client
 
 Invoke the remote API:
 
 ```scala
-// Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
-val client = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
+  // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
+val asyncClient = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
 
-// Proxy call
-val apiProxy = client.bind[Api]
-apiProxy.hello("world") // : Future[String]
+// Call the remote API method
+val asyncApiProxy = asyncClient.bind[AsyncApi]
+asyncApiProxy.hello("world", 1) // : Future[String]
+```
 
-// Direct call passing arguments by name
-client.method("hello").args("thing" -> "world").call[String] // : Future[String]
+### Dynamic Client
 
-// Direct notification passing arguments by position
-client.method("hello").positional.args("world").tell // : Future[Unit]
+Invoke a remote API dynamically:
+```scala
+
+// Call a remote API method passing the arguments by name
+val hello = asyncClient.method("hello")
+hello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
+
+// Call a remote API method passing the arguments by position
+hello.positional.args("world", 1).call[String] // Future[String]
+
+// Notify a remote API method passing the arguments by name
+hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
+
+// Notify a remote API method passing the arguments by position
+hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
 ## [API Documentation](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
