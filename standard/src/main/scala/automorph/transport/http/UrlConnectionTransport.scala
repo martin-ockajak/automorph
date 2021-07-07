@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream
 import java.net.{HttpURLConnection, URL}
 import automorph.backend.IdentityBackend.Identity
 import automorph.spi.{Backend, Transport}
-import automorph.transport.http.UrlConnectionTransport.HttpProperties
+import automorph.transport.http.UrlConnectionTransport.Request
 import scala.collection.immutable.ArraySeq
 import scala.util.{Try, Using}
 
@@ -21,7 +21,7 @@ final case class UrlConnectionTransport(
   url: URL,
   contentType: String,
   bufferSize: Int = 4096
-) extends Transport[Identity, HttpProperties] {
+) extends Transport[Identity, Request] {
 
   private val contentLengthHeader = "Content-Length"
   private val contentTypeHeader = "Content-Type"
@@ -29,7 +29,7 @@ final case class UrlConnectionTransport(
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   private val maxReadIterations = 1024 * 1024
 
-  override def call(request: ArraySeq.ofByte, context: Option[HttpProperties]): Identity[ArraySeq.ofByte] = {
+  override def call(request: ArraySeq.ofByte, context: Option[Request]): Identity[ArraySeq.ofByte] = {
     val connection = send(request, context)
     Using.resource(connection.getInputStream) { inputStream =>
       val outputStream = new ByteArrayOutputStream()
@@ -42,10 +42,10 @@ final case class UrlConnectionTransport(
     }
   }
 
-  override def notify(request: ArraySeq.ofByte, context: Option[HttpProperties]): Identity[Unit] =
+  override def notify(request: ArraySeq.ofByte, context: Option[Request]): Identity[Unit] =
     send(request, context)
 
-  private def send(request: ArraySeq.ofByte, context: Option[HttpProperties]): HttpURLConnection = {
+  private def send(request: ArraySeq.ofByte, context: Option[Request]): HttpURLConnection = {
     val connection = connect()
     val outputStream = connection.getOutputStream
     context.foreach(setProperties(connection, request, _))
@@ -56,7 +56,7 @@ final case class UrlConnectionTransport(
     connection
   }
 
-  private def setProperties(connection: HttpURLConnection, request: ArraySeq.ofByte, context: HttpProperties): Unit = {
+  private def setProperties(connection: HttpURLConnection, request: ArraySeq.ofByte, context: Request): Unit = {
     // Validate HTTP request properties
     require(httpMethods.contains(context.method), s"Invalid HTTP method: ${context.method}")
 
@@ -72,7 +72,7 @@ final case class UrlConnectionTransport(
     }
   }
 
-  private def clearProperties(connection: HttpURLConnection, context: HttpProperties): Unit =
+  private def clearProperties(connection: HttpURLConnection, context: Request): Unit =
     context.headers.foreach { case (key, _) =>
       connection.setRequestProperty(key, null)
     }
@@ -97,7 +97,7 @@ case object UrlConnectionTransport {
    * @param connectTimeout connection timeout (milliseconds)
    * @param readTimeout read timeout (milliseconds)
    */
-  case class HttpProperties(
+  case class Request(
     method: String = "POST",
     headers: Map[String, String] = Map.empty,
     followRedirects: Boolean = true,
@@ -105,7 +105,7 @@ case object UrlConnectionTransport {
     readTimeout: Int = 30000
   )
 
-  case object HttpProperties {
-    implicit val defaultContext: HttpProperties = HttpProperties()
+  case object Request {
+    implicit val defaultContext: Request = Request()
   }
 }

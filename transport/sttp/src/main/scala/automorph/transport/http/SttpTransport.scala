@@ -1,7 +1,7 @@
 package automorph.transport.http
 
 import automorph.spi.{Backend, Transport}
-import automorph.transport.http.SttpTransport.HttpProperties
+import automorph.transport.http.SttpTransport.Request
 import java.io.IOException
 import scala.collection.immutable.ArraySeq
 import sttp.client3.{basicRequest, Identity, PartialRequest, Request, Response, SttpApi, SttpBackend}
@@ -25,9 +25,9 @@ final case class SttpTransport[Effect[_]](
   method: Method,
   contentType: String,
   sttpBackend: SttpBackend[Effect, _]
-) extends Transport[Effect, HttpProperties] with SttpApi {
+) extends Transport[Effect, Request] with SttpApi {
 
-  override def call(request: ArraySeq.ofByte, context: Option[HttpProperties]): Effect[ArraySeq.ofByte] = {
+  override def call(request: ArraySeq.ofByte, context: Option[Request]): Effect[ArraySeq.ofByte] = {
     val httpRequest = setupHttpRequest(request, context).response(asByteArray)
     backend.flatMap(
       httpRequest.send(sttpBackend),
@@ -39,16 +39,16 @@ final case class SttpTransport[Effect[_]](
     )
   }
 
-  override def notify(request: ArraySeq.ofByte, context: Option[HttpProperties]): Effect[Unit] = {
+  override def notify(request: ArraySeq.ofByte, context: Option[Request]): Effect[Unit] = {
     val httpRequest = setupHttpRequest(request, context).response(ignore)
     backend.map(httpRequest.send(sttpBackend), (_: Response[Unit]) => ())
   }
 
   private def setupHttpRequest(
     request: ArraySeq.ofByte,
-    context: Option[HttpProperties]
+    context: Option[Request]
   ): Request[Either[String, String], Any] =
-    context.getOrElse(HttpProperties()).partialRequest.copy[Identity, Either[String, String], Any](
+    context.getOrElse(Request()).partial.copy[Identity, Either[String, String], Any](
       uri = url,
       method = method
     ).contentType(contentType).header(Header.accept(contentType)).body(request.unsafeArray)
@@ -60,13 +60,13 @@ case object SttpTransport {
    * HTTP request context.
    *
    * @see [[https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_2.13/latest/sttp/client3/RequestT.html API]]
-   * @param partialRequest partially constructed request
+   * @param partial partially constructed request
    */
-  case class HttpProperties(
-    partialRequest: PartialRequest[Either[String, String], Any] = basicRequest
+  case class Request(
+    partial: PartialRequest[Either[String, String], Any] = basicRequest
   )
 
-  case object HttpProperties {
-    implicit val defaultContext: HttpProperties = HttpProperties()
+  case object Request {
+    implicit val defaultContext: Request = Request()
   }
 }
