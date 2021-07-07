@@ -3,9 +3,10 @@ package automorph.transport.http
 import automorph.spi.{Backend, Transport}
 import automorph.transport.http.SttpTransport.RequestProperties
 import java.io.IOException
+import java.net.URL
 import scala.collection.immutable.ArraySeq
-import sttp.client3.{basicRequest, PartialRequest, Request, Response, SttpApi, SttpBackend}
-import sttp.model.{MediaType, Header, Method, Uri}
+import sttp.client3.{PartialRequest, Request, Response, SttpApi, SttpBackend, basicRequest}
+import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
  * STTP HTTP transport using the specified STTP backend.
@@ -19,11 +20,13 @@ import sttp.model.{MediaType, Header, Method, Uri}
  * @tparam Effect effect type
  */
 final case class SttpTransport[Effect[_]](
-  url: Uri,
-  method: Method,
+  url: String,
+  method: String,
   backend: Backend[Effect],
   sttpBackend: SttpBackend[Effect, _]
 ) extends Transport[Effect, RequestProperties] with SttpApi {
+  private val uri = Uri.unsafeParse(url)
+  private val httpMethod = Method.unsafeApply(method)
 
   override def call(
     request: ArraySeq.ofByte,
@@ -53,7 +56,7 @@ final case class SttpTransport[Effect[_]](
   ): Request[Either[String, String], Any] = {
     val contentType = MediaType.unsafeParse(mediaType)
     val requestProperties = context.getOrElse(RequestProperties())
-    requestProperties.partial.method(requestProperties.method.getOrElse(method), url)
+    requestProperties.partial.method(requestProperties.method.getOrElse(httpMethod), uri)
       .contentType(contentType).header(Header.accept(contentType)).body(request.unsafeArray)
   }
 }

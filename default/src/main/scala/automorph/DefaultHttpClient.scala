@@ -8,9 +8,8 @@ import automorph.codec.json.UpickleJsonCodec
 import automorph.spi.Backend
 import automorph.transport.http.SttpTransport
 import scala.concurrent.{ExecutionContext, Future}
-import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
-import sttp.model.{Method, Uri}
+import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 
 case object DefaultHttpClient {
 
@@ -34,7 +33,7 @@ case object DefaultHttpClient {
     sttpBackend: SttpBackend[Effect, _]
   ): DefaultClient[Effect] = {
     val codec = UpickleJsonCodec()
-    val transport = SttpTransport(Uri(url), Method.unsafeApply(httpMethod), backend, sttpBackend)
+    val transport = SttpTransport(url, httpMethod, backend, sttpBackend)
     Client(codec, backend, transport)
   }
 
