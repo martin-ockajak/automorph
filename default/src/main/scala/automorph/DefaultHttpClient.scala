@@ -20,21 +20,21 @@ case object DefaultHttpClient {
    * The client can be used to perform JSON-RPC calls and notifications.
    *
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
-   * @param backend effect backend plugin
    * @param url endpoint URL
    * @param httpMethod HTTP method
+   * @param backend effect backend plugin
    * @param sttpBackend HTTP client backend
    * @tparam Effect effect type
    * @return JSON-RPC over HTTP client
    */
   def apply[Effect[_]](
-    backend: Backend[Effect],
-    sttpBackend: SttpBackend[Effect, _],
     url: String,
     httpMethod: String
+    backend: Backend[Effect],
+    sttpBackend: SttpBackend[Effect, _]
   ): DefaultClient[Effect] = {
     val codec = UpickleJsonCodec()
-    val transport = SttpTransport(backend, Uri(url), Method.unsafeApply(httpMethod), codec.mediaType, sttpBackend)
+    val transport = SttpTransport(Uri(url), Method.unsafeApply(httpMethod), backend, sttpBackend)
     Client(codec, backend, transport)
   }
 
@@ -53,7 +53,7 @@ case object DefaultHttpClient {
   def async(url: String, httpMethod: String)(implicit
     executionContext: ExecutionContext
   ): DefaultClient[Future] =
-    DefaultHttpClient(FutureBackend(), AsyncHttpClientFutureBackend(), url, httpMethod)
+    DefaultHttpClient(url, httpMethod, FutureBackend(), AsyncHttpClientFutureBackend())
 
   /**
    * Create a asynchronous JSON-RPC over HTTP client.
@@ -68,6 +68,6 @@ case object DefaultHttpClient {
    */
   def sync(url: String, httpMethod: String): DefaultClient[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
-    DefaultHttpClient(IdentityBackend(), HttpURLConnectionBackend(), url, httpMethod)
+    DefaultHttpClient(url, httpMethod, IdentityBackend(), HttpURLConnectionBackend())
   }
 }

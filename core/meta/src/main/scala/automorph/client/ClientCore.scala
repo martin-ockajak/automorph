@@ -52,7 +52,7 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
       (rawRequest: ArraySeq.ofByte) =>
         // Send request
         backend.flatMap(
-          transport.call(rawRequest, context),
+          transport.call(rawRequest, codec.mediaType, context),
           // Process response
           rawResponse => processResponse[R](rawResponse, formedRequest, decodeResultNode)
         )
@@ -83,7 +83,7 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
       // Serialize request
       serialize(formedRequest),
       // Send request
-      (rawRequest: ArraySeq.ofByte) => transport.notify(rawRequest, context)
+      (rawRequest: ArraySeq.ofByte) => transport.notify(rawRequest, codec.mediaType, context)
     )
   }
 

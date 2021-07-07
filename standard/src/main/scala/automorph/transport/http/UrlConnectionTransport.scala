@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream
 import java.net.{HttpURLConnection, URL}
 import automorph.backend.IdentityBackend.Identity
 import automorph.spi.{Backend, Transport}
-import automorph.transport.http.UrlConnectionTransport.Request
+import automorph.transport.http.UrlConnectionTransport.RequestProperties
 import scala.collection.immutable.ArraySeq
 import automorph.handler.Bytes.inputStreamBytes
 import scala.util.{Try, Using}
@@ -14,14 +14,13 @@ import scala.util.{Try, Using}
  *
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @param url HTTP endpoint URL
- * @param contentType HTTP request Content-Type
- * @param bufferSize input stream reading buffer size
+ * @param method HTTP method
  * @tparam Effect effect type
  */
 final case class UrlConnectionTransport(
   url: URL,
-  contentType: String
-) extends Transport[Identity, Request] {
+  method: String
+) extends Transport[Identity, RequestProperties] {
 
   private val contentLengthHeader = "Content-Length"
   private val contentTypeHeader = "Content-Type"
@@ -29,18 +28,22 @@ final case class UrlConnectionTransport(
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   private val maxReadIterations = 1024 * 1024
 
-  override def call(request: ArraySeq.ofByte, context: Option[Request]): Identity[ArraySeq.ofByte] = {
-    val connection = send(request, context)
+  override def call(
+    request: ArraySeq.ofByte,
+    mediaType: String,
+    context: Option[RequestProperties]
+  ): Identity[ArraySeq.ofByte] = {
+    val connection = send(request, mediaType, context)
     Using.resource(connection.getInputStream)(inputStreamBytes.from)
   }
 
-  override def notify(request: ArraySeq.ofByte, context: Option[Request]): Identity[Unit] =
-    send(request, context)
+  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Identity[Unit] =
+    send(request, mediaType, context)
 
-  private def send(request: ArraySeq.ofByte, context: Option[Request]): HttpURLConnection = {
+  private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): HttpURLConnection = {
     val connection = connect()
     val outputStream = connection.getOutputStream
-    context.foreach(setProperties(connection, request, _))
+    context.foreach(setProperties(connection, request, mediaType, _))
     val trySend = Try(outputStream.write(request.unsafeArray))
     context.foreach(clearProperties(connection, _))
     outputStream.close()
@@ -48,15 +51,21 @@ final case class UrlConnectionTransport(
     connection
   }
 
-  private def setProperties(connection: HttpURLConnection, request: ArraySeq.ofByte, context: Request): Unit = {
+  private def setProperties(
+    connection: HttpURLConnection,
+    request: ArraySeq.ofByte,
+    mediaType: String,
+    context: RequestProperties
+  ): Unit = {
     // Validate HTTP request properties
-    require(httpMethods.contains(context.method), s"Invalid HTTP method: ${context.method}")
+    val httpMethod = context.method.getOrElse(method)
+    require(httpMethods.contains(httpMethod), s"Invalid HTTP method: $httpMethod")
 
     // Set HTTP request context
     connection.setRequestProperty(contentLengthHeader, request.size.toString)
-    connection.setRequestProperty(contentTypeHeader, contentType)
-    connection.setRequestProperty(acceptHeader, contentType)
-    connection.setRequestMethod(context.method)
+    connection.setRequestProperty(contentTypeHeader, mediaType)
+    connection.setRequestProperty(acceptHeader, mediaType)
+    connection.setRequestMethod(httpMethod)
     connection.setConnectTimeout(context.connectTimeout)
     connection.setReadTimeout(context.readTimeout)
     context.headers.foreach { case (key, value) =>
@@ -64,7 +73,7 @@ final case class UrlConnectionTransport(
     }
   }
 
-  private def clearProperties(connection: HttpURLConnection, context: Request): Unit =
+  private def clearProperties(connection: HttpURLConnection, context: RequestProperties): Unit =
     context.headers.foreach { case (key, _) =>
       connection.setRequestProperty(key, null)
     }
@@ -93,15 +102,15 @@ case object UrlConnectionTransport {
    * @param connectTimeout connection timeout (milliseconds)
    * @param readTimeout read timeout (milliseconds)
    */
-  case class Request(
-    method: String = "POST",
+  case class RequestProperties(
+    method: Option[String] = None,
     headers: Map[String, String] = Map.empty,
     followRedirects: Boolean = true,
     connectTimeout: Int = 30000,
     readTimeout: Int = 30000
   )
 
-  case object Request {
-    implicit val defaultContext: Request = Request()
+  case object RequestProperties {
+    implicit val defaultContext: RequestProperties = RequestProperties()
   }
 }

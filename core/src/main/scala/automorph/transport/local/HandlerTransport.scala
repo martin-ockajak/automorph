@@ -23,7 +23,7 @@ case class HandlerTransport[Node, ExactCodec <: Codec[Node], Effect[_], Context]
   defaultContext: Context
 ) extends Transport[Effect, Context] {
 
-  def call(request: ArraySeq.ofByte, context: Option[Context]): Effect[ArraySeq.ofByte] = {
+  def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
     implicit val usingContext = context.getOrElse(defaultContext)
     backend.flatMap(
       handler.processRequest(request),
@@ -32,7 +32,7 @@ case class HandlerTransport[Node, ExactCodec <: Codec[Node], Effect[_], Context]
     )
   }
 
-  def notify(request: ArraySeq.ofByte, context: Option[Context]): Effect[Unit] = {
+  def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
     implicit val usingContext = context.getOrElse(defaultContext)
     backend.map(
       handler.processRequest(request),
