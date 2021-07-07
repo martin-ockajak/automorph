@@ -26,7 +26,9 @@ lazy val root = project.in(file(".")).aggregate(
 
   openApi,
 
-  default
+  default,
+
+  examples
 ).settings(
   name := "json-rpc",
   description := "JSON-RPC client & server",
@@ -195,6 +197,11 @@ lazy val default = project.dependsOn(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.9"
   )
+)
+
+// Examples
+lazy val examples = project.dependsOn(
+  default, zio
 )
 
 // Test

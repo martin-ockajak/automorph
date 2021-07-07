@@ -1,10 +1,10 @@
 package automorph.example
 
-import automorph.example.QuickstartSync.syncApiProxy
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object QuickstartAsync extends App {
+
   class AsyncApi {
     def hello(some: String, n: Int): Future[String] = Future.successful(s"Hello $some $n!")
   }

@@ -1,6 +1,7 @@
 package automorph.example
 
 object QuickstartSync extends App {
+
   class SyncApi {
     def hello(some: String, n: Int): String = s"Hello $some $n!"
   }
