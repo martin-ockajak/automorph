@@ -121,22 +121,23 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
     handlerMethod: HandlerBinding[Node, Effect, Context]
   ): Seq[Node] = {
     // Adjust expected method parameters if it uses context as its last parameter
-    val parameters = handlerMethod.paramNames.dropRight(if (handlerMethod.usesContext) 1 else 0)
+    val parameters = handlerMethod.method.parameters.flatten
+    val parameterNames = parameters.map(_.name).dropRight(if (handlerMethod.usesContext) 1 else 0)
     validRequest.params.fold(
       arguments =>
         // Arguments by position
-        if (arguments.size > parameters.size) {
-          throw new IllegalArgumentException(s"Redundant arguments: ${arguments.size - parameters.size}")
+        if (arguments.size > parameterNames.size) {
+          throw new IllegalArgumentException(s"Redundant arguments: ${arguments.size - parameterNames.size}")
         } else {
-          arguments ++ Seq.fill(parameters.size - arguments.size)(encodedNone)
+          arguments ++ Seq.fill(parameterNames.size - arguments.size)(encodedNone)
         },
       namedArguments => {
         // Arguments by name
-        val redundantArguments = namedArguments.keys.toSeq.diff(parameters)
+        val redundantArguments = namedArguments.keys.toSeq.diff(parameterNames)
         if (redundantArguments.nonEmpty) {
           throw new IllegalArgumentException(s"Redundant arguments: ${redundantArguments.mkString(", ")}")
         } else {
-          parameters.map(name => namedArguments.get(name).getOrElse(encodedNone))
+          parameterNames.map(name => namedArguments.get(name).getOrElse(encodedNone))
         }
       }
     )

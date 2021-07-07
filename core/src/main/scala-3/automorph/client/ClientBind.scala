@@ -57,7 +57,8 @@ private[automorph] trait ClientBind[Node, ExactCodec <: Codec[Node], Effect[_], 
 
           // Encode method arguments
           val encodedArguments = clientMethod.encodeArguments(argumentValues)
-          val argumentNames = Option.when(namedArguments)(clientMethod.paramNames)
+          val parameterNames = clientMethod.method.parameters.flatten.map(_.name)
+          val argumentNames = Option.when(namedArguments)(parameterNames)
 
           // Perform the API call
           performCall(method.getName, argumentNames, encodedArguments, resultNode => clientMethod.decodeResult(resultNode), context)

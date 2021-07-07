@@ -87,10 +87,6 @@ case object HandlerBindings {
       automorph.handler.HandlerBinding(
         ${method.lift},
         $invoke,
-        ${method.lift.name},
-        ${method.lift.resultType},
-        ..${method.lift.parameters.flatMap(_.map(_.name))},
-        ..${method.lift.parameters.flatMap(_.map(_.dataType))},
         ${methodUsesContext[C, Context](ref)(method)}
       )
     """)

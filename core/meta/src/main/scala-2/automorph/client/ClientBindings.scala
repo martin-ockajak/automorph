@@ -82,10 +82,6 @@ case object ClientBindings {
         ${method.lift},
         $encodeArguments,
         $decodeResult,
-        ${method.lift.name},
-        ${method.lift.resultType},
-        Seq(..${method.lift.parameters.flatMap(_.map(_.name))}),
-        Seq(..${method.lift.parameters.flatMap(_.map(_.dataType))}),
         ${methodUsesContext[C, Context](ref)(method)}
       )
     """)

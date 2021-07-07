@@ -85,10 +85,6 @@ private[automorph] case object HandlerBindings:
       HandlerBinding(
         ${ Expr(method.lift) },
         $invoke,
-        ${ Expr(method.lift.name) },
-        ${ Expr(method.lift.resultType) },
-        ${ Expr(method.lift.parameters.flatMap(_.map(_.name))) },
-        ${ Expr(method.lift.parameters.flatMap(_.map(_.dataType))) },
         ${ Expr(methodUsesContext[Context](ref)(method)) }
       )
     }

@@ -71,10 +71,6 @@ private[automorph] case object ClientBindings:
         ${ Expr(method.lift) },
         $encodeArguments,
         $decodeResult,
-        ${ Expr(method.lift.name) },
-        ${ Expr(method.lift.resultType) },
-        ${ Expr(method.lift.parameters.flatMap(_.map(_.name))) },
-        ${ Expr(method.lift.parameters.flatMap(_.map(_.dataType))) },
         ${ Expr(methodUsesContext[Context](ref)(method)) }
       )
     }
