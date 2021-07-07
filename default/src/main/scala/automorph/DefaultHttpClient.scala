@@ -29,7 +29,7 @@ case object DefaultHttpClient {
    */
   def apply[Effect[_]](
     url: String,
-    httpMethod: String
+    httpMethod: String,
     backend: Backend[Effect],
     sttpBackend: SttpBackend[Effect, _]
   ): DefaultClient[Effect] = {

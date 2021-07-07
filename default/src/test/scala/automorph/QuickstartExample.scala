@@ -17,6 +17,7 @@ object QuickstartExample extends App {
   // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
   val client = DefaultHttpClient.async("http://localhost/api", "POST")
 
+
   // Proxy call
   val apiProxy = client.bind[Api]
   apiProxy.hello("world") // : Future[String]
