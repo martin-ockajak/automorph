@@ -14,7 +14,7 @@ import scala.collection.immutable.ArraySeq
  *
  * @see [[https://github.com/NanoHttpd/nanohttpd Documentation]]
  * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
- * @constructor Create an NanoHTTPD web server using the specified JSON-RPC request ''handler''.
+ * @constructor Creates an NanoHTTPD web server using the specified JSON-RPC request ''handler''.
  * @param handler JSON-RPC request handler
  * @param runEffectSync synchronous effect execution function
  * @param port port to listen on for HTTP connections

@@ -20,7 +20,7 @@ import automorph.protocol.ErrorType
  *
  * @see [[https://twitter.github.io/finagle/ Documentation]]
  * @see [[https://twitter.github.io/finagle/docs/com/twitter/finagle/ API]]
- * @constructor Create a JSON-RPC service for Finagle RPC system using the specified JSON-RPC request ''handler''.
+ * @constructor Creates a JSON-RPC service for Finagle RPC system using the specified JSON-RPC request ''handler''.
  * @param handler JSON-RPC request handler
  * @param runEffect asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function

@@ -17,7 +17,7 @@ import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, 
  * The response returned by the JSON-RPC handler is used as HTTP response body.
  *
  * @see [[https://tapir.softwaremill.com Documentation]]
- * @constructor Create a JSON-RPC service for Finagle RPC system using the specified JSON-RPC request ''handler''.
+ * @constructor Creates a JSON-RPC service for Finagle RPC system using the specified JSON-RPC request ''handler''.
  * @param handler JSON-RPC request handler
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
  * @tparam Node message format node representation type

@@ -15,7 +15,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  *
  * @see [[https://undertow.io/ Documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
- * @constructor Create an Undertow web server using the specified HTTP handler.
+ * @constructor Creates an Undertow web server using the specified HTTP handler.
  * @param httpHandler HTTP handler
  * @param port port to listen on for HTTP connections
  * @param urlPath HTTP URL path (default: /)

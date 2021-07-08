@@ -12,6 +12,7 @@ import scala.util.{Try, Using}
  * URL connection transport using HTTP as message transport protocol.
  *
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
+ * @constructor Creates an URL connection transport using HTTP as message transport protocol.
  * @param url HTTP endpoint URL
  * @param method HTTP method
  * @tparam Effect effect type

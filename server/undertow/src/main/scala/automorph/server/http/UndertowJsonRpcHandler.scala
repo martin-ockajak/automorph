@@ -20,7 +20,7 @@ import scala.util.Try
  *
  * @see [[https://undertow.io/ Documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
- * @constructor Create a JSON-RPC handler for Undertow web server using the specified JSON-RPC request ''handler''.
+ * @constructor Creates a JSON-RPC handler for Undertow web server using the specified JSON-RPC request ''handler''.
  * @param handler JSON-RPC request handler
  * @param runEffect effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
