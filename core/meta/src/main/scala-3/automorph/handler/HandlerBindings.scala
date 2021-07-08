@@ -20,7 +20,7 @@ private[automorph] case object HandlerBindings:
    * @param codec message format codec plugin
    * @param backend effect backend plugin
    * @param api API instance
-   * @tparam Node message format node representation type
+   * @tparam Node message node type
    * @tparam ExactCodec message format codec type
    * @tparam Effect effect type
    * @tparam Context request context type

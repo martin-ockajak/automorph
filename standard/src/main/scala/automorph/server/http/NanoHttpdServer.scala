@@ -20,7 +20,7 @@ import scala.collection.immutable.ArraySeq
  * @param port port to listen on for HTTP connections
  * @param readTimeout HTTP connection read timeout (milliseconds)
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
- * @tparam Node message format node representation type
+ * @tparam Node message node type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  */
@@ -98,7 +98,7 @@ case object NanoHttpdServer {
    * @param port port to listen on for HTTP connections
    * @param readTimeout HTTP connection read timeout (milliseconds)
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
-   * @tparam Node message format node representation type
+   * @tparam Node message node type
    * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    */

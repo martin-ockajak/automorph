@@ -12,7 +12,7 @@ import scala.util.{Random, Try}
 /**
  * JSON-RPC client core logic.
  *
- * @tparam Node message format node representation type
+ * @tparam Node message node type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type

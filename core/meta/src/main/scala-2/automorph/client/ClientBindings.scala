@@ -16,7 +16,7 @@ case object ClientBindings {
    * Generate client bindings for all valid public methods of an API type.
    *
    * @param codec message format codec plugin
-   * @tparam Node message format node representation type
+   * @tparam Node message node type
    * @tparam ExactCodec message format codec type
    * @tparam Effect effect type
    * @tparam Context request context type

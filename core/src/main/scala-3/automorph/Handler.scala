@@ -13,7 +13,7 @@ import automorph.util.{CannotEqual, NoContext}
  * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @constructor Creates a new JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context` type.
+ * @constructor Creates a new JSON-RPC request handler with specified request `Context` type plus specified ''codec'' and ''backend'' plugins.
  * @param codec hierarchical message format codec plugin
  * @param backend effectful computation backend plugin
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
@@ -37,7 +37,7 @@ final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
 case object Handler:
 
   /**
-   * Creates a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context` type.
+   * Creates a JSON-RPC request handler with specified request `Context` type plus specified ''codec'' and ''backend'' plugins.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
@@ -57,7 +57,7 @@ case object Handler:
     Handler(codec, backend, Map.empty, defaultExceptionToError, encodeStrings, codec.encode(None))
 
   /**
-   * Creates a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with empty request `Context` type.
+   * Creates a JSON-RPC request handler with empty request context plus specified specified ''codec'' and ''backend'' plugins.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *

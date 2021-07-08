@@ -24,7 +24,7 @@ import scala.util.Try
  * @param handler JSON-RPC request handler
  * @param runEffect effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
- * @tparam Node message format node representation type
+ * @tparam Node message node type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  */

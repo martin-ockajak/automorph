@@ -61,7 +61,7 @@ object Message {
  * @param code error code
  * @param message error description
  * @param data additional error information
- * @tparam Node message node representation type
+ * @tparam Node message node type
  */
 final case class MessageError[Node](
   code: Option[Int],

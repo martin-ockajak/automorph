@@ -8,7 +8,7 @@ import automorph.util.Method
  * @param method method descriptor
  * @param invoke bound method invocation function
  * @param usesContext true if the last parameter of the bound method is contextual
- * @tparam Node message format node representation type
+ * @tparam Node message node type
  * @tparam Effect effect type
  * @tparam Context request context type
  */

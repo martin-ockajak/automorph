@@ -12,7 +12,7 @@ import scala.collection.immutable.ArraySeq
  * @param handler JSON-RPC request handler layer
  * @param backend effect backend plugin
  * @param defaultContext default request context
- * @tparam Node message format node representation type
+ * @tparam Node message node type
  * @tparam ExactCodec message format codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type

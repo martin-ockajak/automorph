@@ -20,7 +20,7 @@ import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, 
  * @constructor Creates a JSON-RPC service for Finagle RPC system using the specified JSON-RPC request ''handler''.
  * @param handler JSON-RPC request handler
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
- * @tparam Node message format node representation type
+ * @tparam Node message node type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  */
@@ -39,7 +39,7 @@ case object TapirJsonRpcEndpoint extends Logging {
    * @param handler JSON-RPC request handler
    * @param method HTTP method to server
    * @param errorStatus JSON-RPC error code to HTTP status code mapping function
-   * @tparam Node message format node representation type
+   * @tparam Node message node type
    * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    * @return Tapir HTTP server endpoint

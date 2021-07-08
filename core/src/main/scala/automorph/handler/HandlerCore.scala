@@ -13,7 +13,7 @@ import scala.util.Try
 /**
  * JSON-RPC request handler core logic.
  *
- * @tparam Node message format node representation type
+ * @tparam Node message node type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
