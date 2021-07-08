@@ -7,11 +7,12 @@ import automorph.spi.{Backend, Codec, Transport}
 import scala.collection.immutable.ArraySeq
 
 /**
- * Local handler transport.
+ * Local handler transport passing requests directly to specified ''handler'' using specified ''backend''.
  *
  * @param handler JSON-RPC request handler layer
  * @param backend effect backend plugin
  * @param defaultContext default request context
+ * @constructor Creates a local handler transport passing requests directly to specified ''handler'' using specified ''backend''.
  * @tparam Node message node type
  * @tparam ExactCodec message format codec plugin type
  * @tparam Effect effect type
