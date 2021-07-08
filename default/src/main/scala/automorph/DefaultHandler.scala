@@ -4,12 +4,10 @@ import automorph.DefaultTypes.DefaultHandler
 import automorph.Handler
 import automorph.backend.IdentityBackend.Identity
 import automorph.backend.{FutureBackend, IdentityBackend}
-import automorph.codec.common.UpickleCustom
 import automorph.codec.json.UpickleJsonCodec
 import automorph.spi.Backend
 import automorph.util.EmptyContext
 import scala.concurrent.{ExecutionContext, Future}
-import ujson.Value
 
 case object DefaultHandler {
 
