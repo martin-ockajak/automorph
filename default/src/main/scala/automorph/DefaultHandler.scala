@@ -14,7 +14,7 @@ import ujson.Value
 case object DefaultHandler {
 
   /**
-   * Create a JSON-RPC request handler using the specified ''backend'' plugin with defined request `Context` type.
+   * Creates a JSON-RPC request handler using the specified ''backend'' plugin with defined request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
@@ -28,7 +28,7 @@ case object DefaultHandler {
     Handler(UpickleJsonCodec(), backend)
 
   /**
-   * Create an asynchonous JSON-RPC request handler with defined request `Context` type.
+   * Creates an asynchronous JSON-RPC request handler with defined request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
@@ -40,7 +40,7 @@ case object DefaultHandler {
     Handler(UpickleJsonCodec(), FutureBackend())
 
   /**
-   * Create a synchonous JSON-RPC request handler with defined request `Context` type.
+   * Creates a synchronous JSON-RPC request handler with defined request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
@@ -51,7 +51,7 @@ case object DefaultHandler {
     Handler(UpickleJsonCodec(), IdentityBackend())
 
   /**
-   * Create a JSON-RPC request handler using the specified ''backend'' plugin with empty request `Context` type.
+   * Creates a JSON-RPC request handler using the specified ''backend'' plugin with empty request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
@@ -64,7 +64,7 @@ case object DefaultHandler {
     Handler.noContext(UpickleJsonCodec(), backend)
 
   /**
-   * Create an asynchonous JSON-RPC request handler with empty request `Context` type.
+   * Creates an asynchronous JSON-RPC request handler with empty request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
@@ -76,7 +76,7 @@ case object DefaultHandler {
     Handler.noContext(UpickleJsonCodec(), FutureBackend())
 
   /**
-   * Create a synchonous JSON-RPC request handler with empty request `Context` type.
+   * Creates a synchronous JSON-RPC request handler with empty request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *

@@ -15,7 +15,7 @@ import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 case object DefaultHttpClient {
 
   /**
-   * Create a JSON-RPC over HTTP client using the specified ''backend'' plugin.
+   * Creates a JSON-RPC over HTTP client using the specified ''backend'' plugin.
    *
    * The client can be used to perform JSON-RPC calls and notifications.
    *
@@ -39,7 +39,7 @@ case object DefaultHttpClient {
   }
 
   /**
-   * Create an asynchronous JSON-RPC over HTTP client.
+   * Creates an asynchronous JSON-RPC over HTTP client.
    *
    * The client can be used to perform JSON-RPC calls and notifications.
    *
@@ -56,7 +56,7 @@ case object DefaultHttpClient {
     DefaultHttpClient(url, httpMethod, FutureBackend(), AsyncHttpClientFutureBackend())
 
   /**
-   * Create a asynchronous JSON-RPC over HTTP client.
+   * Creates a asynchronous JSON-RPC over HTTP client.
    *
    * The client can be used to perform JSON-RPC calls and notifications.
    *

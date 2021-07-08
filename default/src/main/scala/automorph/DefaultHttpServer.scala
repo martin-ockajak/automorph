@@ -15,7 +15,7 @@ case object DefaultHttpServer {
   type BindApis[Effect[_]] = DefaultHandler[Effect, HttpServerExchange] => DefaultHandler[Effect, HttpServerExchange]
 
   /**
-   * Create a JSON-RPC server using the specified ''backend'' plugin.
+   * Creates a JSON-RPC server using the specified ''backend'' plugin.
    *
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
    * @see [[https://undertow.io HTTP Server Documentation]]
@@ -43,7 +43,7 @@ case object DefaultHttpServer {
   }
 
   /**
-   * Create an asynchonous JSON-RPC request handler with defined request `Context` type.
+   * Creates an asynchronous JSON-RPC request handler with defined request `Context` type.
    *
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
    * @param bindApis function to bind APIs to the underlying JSON-RPC handler
@@ -68,7 +68,7 @@ case object DefaultHttpServer {
   }
 
   /**
-   * Create a synchonous JSON-RPC request handler with defined request `Context` type.
+   * Creates a synchronous JSON-RPC request handler with defined request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
