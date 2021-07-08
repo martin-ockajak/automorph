@@ -10,7 +10,7 @@ package automorph.spi
 trait Backend[Effect[_]] {
 
   /**
-   * Lift a value into a new effect of given type.
+   * Lifts a value into a new effect of specified type.
    *
    * @param value an existing value
    * @tparam T effectful value type
@@ -19,7 +19,7 @@ trait Backend[Effect[_]] {
   def pure[T](value: T): Effect[T]
 
   /**
-   * Lift an exception into a new effect of given type.
+   * Lifts an exception into a new effect of specified type.
    *
    * @param exception exception
    * @tparam T effectful value type
@@ -28,10 +28,10 @@ trait Backend[Effect[_]] {
   def failed[T](exception: Throwable): Effect[T]
 
   /**
-   * Transform an effect by applying an effectful function to its value.
+   * Creates a new effect by applying an effectful function to an effect's value.
    *
    * @param value effectful value
-   * @param function function applied to the effectful value returning a new effect
+   * @param function effectful function applied to the specified effect's value
    * @tparam T effectful value type
    * @tparam R effectful function result type
    * @return effect containing the transformed value
@@ -39,7 +39,7 @@ trait Backend[Effect[_]] {
   def flatMap[T, R](value: Effect[T], function: T => Effect[R]): Effect[R]
 
   /**
-   * Transform an effect by lifting any errors into its value.
+   * Creates a new effect by lifting an effect's errors into a value.
    *
    * The resulting effect cannot fail.
    *
@@ -50,13 +50,13 @@ trait Backend[Effect[_]] {
   def either[T](value: Effect[T]): Effect[Either[Throwable, T]]
 
   /**
-   * Transform an effect by applying a function to its value.
+   * Creates a new effect by applying a function to an effect's value.
    *
    * @param effect effectful value
-   * @param function function applied to the effectful value
+   * @param function function applied to the specified effect's value
    * @tparam T effectful value type
    * @tparam R function result type
-   * @return effectful transformed value
+   * @return transformed effectful value
    */
   def map[T, R](effect: Effect[T], function: T => R): Effect[R] =
     flatMap(effect, (value: T) => pure(function(value)))

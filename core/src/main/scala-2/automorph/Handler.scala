@@ -14,11 +14,11 @@ import scala.reflect.macros.blackbox
  * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
  *
  * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
- * @constructor Create a new JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context` type.
- * @param codec message codec plugin
- * @param backend effect backend plugin
- * @param exceptionToError mapping of exception class to JSON-RPC error type
- * @tparam Node message format node representation type
+ * @constructor Creates a new JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context` type.
+ * @param codec hierarchical message format codec plugin
+ * @param backend effectful computation backend plugin
+ * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
+ * @tparam Node message node type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
@@ -38,14 +38,14 @@ final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
 case object Handler {
 
   /**
-   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context` type.
+   * Creates a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
-   * @param codec message codec plugin
-   * @param backend effect backend plugin
-   * @tparam Node message format node representation type
+   * @param codec hierarchical message format codec plugin
+   * @param backend effectful computation backend plugin
+   * @tparam Node message node type
    * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler
@@ -72,14 +72,14 @@ case object Handler {
   }
 
   /**
-   * Create a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with empty request `Context` type.
+   * Creates a JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with empty request `Context` type.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
-   * @param codec hierarchical message codec plugin
-   * @param backend effect backend plugin
-   * @tparam Node message format node representation type
+   * @param codec hierarchical message format codec plugin
+   * @param backend effectful computation backend plugin
+   * @tparam Node message node type
    * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler

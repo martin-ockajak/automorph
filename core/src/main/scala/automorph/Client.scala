@@ -14,12 +14,12 @@ import java.io.IOException
  * The client can be used to perform JSON-RPC calls and notifications.
  *
  * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
- * @constructor Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with defined request `Context` type.
- * @param codec message codec plugin
- * @param backend effect backend plugin
- * @param transport message transport plugin
- * @param errorToException mapping of JSON-RPC errors to exceptions
- * @tparam Node message format node representation type
+ * @constructor Creates a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with defined request `Context` type.
+ * @param codec hierarchical message format codec plugin
+ * @param backend effectful computation backend plugin
+ * @param transport message transport protocol plugin
+ * @param errorToException maps a JSON-RPC error to a corresponding exception
+ * @tparam Node message node type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
@@ -37,21 +37,21 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   type NamedMethod = NamedMethodProxy[Node, ExactCodec, Effect, Context]
 
   /**
-   * Create a method invoker with specified method name.
+   * Creates a method proxy with specified method name.
    *
    * @param methodName method name
-   * @return method invoker with specified method name
+   * @return method proxy with specified method name
    */
   def method(methodName: String): NamedMethod =
     NamedMethodProxy(methodName, codec, backend, transport, errorToException, Seq(), Seq())
 
   /**
-   * Create a copy of this client with specified JSON-RPC error to exception mapping.
+   * Creates a copy of this client with specified JSON-RPC error to exception mapping.
    *
-   * @param errorToException JSON-RPC error to exception mapping
+   * @param errorToException maps a JSON-RPC error to a corresponding exception
    * @return JSON-RPC server with the specified JSON-RPC error to exception mapping
    */
-  def mapErrors(errorToException: (Int, String) => Throwable): ThisClient =
+  def errorMapping(errorToException: (Int, String) => Throwable): ThisClient =
     copy(errorToException = errorToException)
 
   override def toString: String =
@@ -61,15 +61,15 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
 case object Client {
 
   /**
-   * Create a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with empty request `Context` type.
+   * Creates a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with empty request `Context` type.
    *
    * The client can be used to perform JSON-RPC calls and notifications.
    *
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
-   * @param codec message codec plugin
-   * @param backend effect backend plugin
-   * @param transport message transport plugin
-   * @tparam Node message format node representation type
+   * @param codec hierarchical message format codec plugin
+   * @param backend effectful computation backend plugin
+   * @param transport message transport protocol plugin
+   * @tparam Node message node type
    * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    * @return JSON-RPC client
@@ -81,7 +81,7 @@ case object Client {
   ): Client[Node, ExactCodec, Effect, NoContext.Value] = Client(codec, backend, transport)
 
   /**
-   * Default JSON-RPC error to exception mapping.
+   * Maps a JSON-RPC error to a corresponding default exception.
    *
    * @param code error code
    * @param message error message

@@ -10,14 +10,21 @@ import java.io.IOException
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
-/** JSON-RPC request handler core. */
+/**
+ * JSON-RPC request handler core logic.
+ *
+ * @tparam Node message format node representation type
+ * @tparam ExactCodec message codec plugin type
+ * @tparam Effect effect type
+ * @tparam Context request context type
+ */
 private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
   this: Handler[Node, ExactCodec, Effect, Context] =>
 
   private val unknownId = "[unknown]"
 
   /**
-   * Process a JSON-RPC ''request'' by invoking a bound ''method'' based on and its ''context'' and return a JSON-RPC ''response''.
+   * Processes a JSON-RPC ''request'' by invoking a bound ''method'' based on and its ''context'' and return a JSON-RPC ''response''.
    *
    * @param request request message
    * @param context request context
@@ -45,19 +52,19 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
   }
 
   /**
-   * Create a copy of this handler with specified exception to JSON-RPC error mapping.
+   * Creates a copy of this handler with specified exception to JSON-RPC error mapping.
    *
-   * @param exceptionToError exception class to JSON-RPC error type mapping
-   * @return JSON-RPC server with the specified exceptions to JSON-RPC errors mapping
+   * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
+   * @return JSON-RPC request handler
    */
-  def mapExceptions(exceptionToError: Class[_ <: Throwable] => ErrorType): ThisHandler =
+  def exceptionMapping(exceptionToError: Class[_ <: Throwable] => ErrorType): ThisHandler =
     copy(exceptionToError = exceptionToError)
 
   override def toString: String =
     s"${this.getClass.getName}(codec = ${codec.getClass.getName}, backend = ${backend.getClass.getName})"
 
   /**
-   * Invoke bound method specified in a request.
+   * Invokes bound method specified in a request.
    *
    * Optional request context is used as a last method argument.
    *
@@ -65,7 +72,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
    * @param validRequest valid request
    * @param context request context
    * @tparam Data message data type
-   * @return bound method invocation outcome
+   * @return bound method invocation result
    */
   private def invokeMethod[Data: Bytes](
     formedRequest: Message[Node],
@@ -109,7 +116,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
   }
 
   /**
-   * Validata and extract specified bound method arguments from a request.
+   * Validates and extracts specified bound method arguments from a request.
    *
    * Optional request context is used as a last method argument.
    *
@@ -145,7 +152,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
   }
 
   /**
-   * Create an error response for a request.
+   * Creates an error response for a request.
    *
    * @param error exception
    * @param formedRequest formed request
@@ -176,7 +183,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
   }
 
   /**
-   * Serialize JSON-RPC message.
+   * Serializes a JSON-RPC message.
    *
    * @param formedResponse formed response
    * @return serialized response
@@ -193,7 +200,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
 object HandlerCore {
 
   /**
-   * Default exception class to JSON-RPC error type mapping.
+   * Maps an exception class to a corresponding default JSON-RPC error type.
    *
    * @param exceptionClass exception class
    * @return JSON-RPC error type

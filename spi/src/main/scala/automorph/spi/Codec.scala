@@ -14,12 +14,12 @@ trait Codec[Node] extends CodecMeta[Node] {
   /**
    * Message format media (MIME) type.
    *
-   * @return message format media (MIME) type
+   * @return media (MIME) type
    */
   def mediaType: String
 
   /**
-   * Serialize a message as binary data.
+   * Serializes a message as binary data.
    *
    * @param message message
    * @return binary data in the specific format
@@ -27,7 +27,7 @@ trait Codec[Node] extends CodecMeta[Node] {
   def serialize(message: Message[Node]): ArraySeq.ofByte
 
   /**
-   * Deserialize a message from binary data.
+   * Deserializes a message from binary data.
    *
    * @param data binary data in the specific format
    * @return message
@@ -35,7 +35,7 @@ trait Codec[Node] extends CodecMeta[Node] {
   def deserialize(data: ArraySeq.ofByte): Message[Node]
 
   /**
-   * Format a message as text.
+   * Formats a message as text.
    *
    * @param message message
    * @return message in textual form

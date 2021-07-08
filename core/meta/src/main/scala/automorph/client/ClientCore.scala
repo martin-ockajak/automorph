@@ -9,8 +9,21 @@ import automorph.util.Extensions.TryOps
 import scala.collection.immutable.ArraySeq
 import scala.util.{Random, Try}
 
+/**
+ * JSON-RPC client core logic.
+ *
+ * @tparam Node message format node representation type
+ * @tparam ExactCodec message codec plugin type
+ * @tparam Effect effect type
+ * @tparam Context request context type
+ */
 trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Logging {
 
+  /**
+   * Hierarchical data format codec plugin.
+   *
+   * @return codec plugin
+   */
   def codec: ExactCodec
 
   protected def backend: Backend[Effect]
@@ -22,7 +35,7 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   /**
-   * Perform a method call using specified arguments.
+   * Performs a method call using specified arguments.
    *
    * Optional request context is used as a last method argument.
    *
@@ -59,7 +72,7 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
   }
 
   /**
-   * Perform a method notification using specified arguments.
+   * Performs a method notification using specified arguments.
    *
    * Optional request context is used as a last method argument.
    *
@@ -87,7 +100,7 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
   }
 
   /**
-   * Create method invocation argument nodes.
+   * Creates method invocation argument nodes.
    *
    * @param argumentNames argument names
    * @param encodedArguments encoded arguments
@@ -99,7 +112,7 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
     }.getOrElse(Left(encodedArguments.toList))
 
   /**
-   * Process a method call response.
+   * Processes a method call response.
    *
    * @param rawResponse raw response
    * @param formedRequest formed request
@@ -138,7 +151,7 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
     )
 
   /**
-   * Serialize JSON-RPC message.
+   * Serializes a JSON-RPC message.
    *
    * @param formedRequest formed request
    * @return serialized response
@@ -152,7 +165,7 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
   }
 
   /**
-   * Create an error effect from an exception.
+   * Creates an error effect from an exception.
    *
    * @param error exception
    * @param requestMessage request message

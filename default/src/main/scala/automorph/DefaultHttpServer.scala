@@ -19,7 +19,7 @@ case object DefaultHttpServer {
    *
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
    * @see [[https://undertow.io HTTP Server Documentation]]
-   * @param backend effect backend plugin
+   * @param backend effectful computation backend plugin
    * @param runEffect effect execution function
    * @param bindApis function to bind APIs to the underlying JSON-RPC handler
    * @param port port to listen on for HTTP connections
@@ -62,7 +62,7 @@ case object DefaultHttpServer {
   )(implicit executionContext: ExecutionContext): DefaultServer = {
     Seq(executionContext)
     val handler = bindApis(DefaultHandler.async())
-    val runEffect = (_: Future[Any]) => ()
+    val runEffect = (_: Future[Any]) =>
     UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
   }
 

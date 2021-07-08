@@ -22,7 +22,7 @@ case object DefaultHttpClient {
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
    * @param url HTTP endpoint URL
    * @param httpMethod HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
-   * @param backend effect backend plugin
+   * @param backend effectful computation backend plugin
    * @param sttpBackend HTTP client backend
    * @tparam Effect effect type
    * @return JSON-RPC over HTTP client

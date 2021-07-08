@@ -19,7 +19,7 @@ case object DefaultHandler {
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
-   * @param backend effect backend plugin
+   * @param backend effectful computation backend plugin
    * @tparam Effect effect type
    * @tparam Context request context type
    * @return JSON-RPC request handler

@@ -12,7 +12,7 @@ import automorph.spi.MessageType
  * @param params invoked method argument values by position or by name
  * @param result succesful call result value
  * @param error failed call error details
- * @tparam Node message node representation type
+ * @tparam Node message node type
  */
 final case class Message[Node](
   automorph: Option[String],

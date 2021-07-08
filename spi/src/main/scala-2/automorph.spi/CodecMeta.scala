@@ -5,7 +5,7 @@ import scala.annotation.nowarn
 @nowarn
 trait CodecMeta[Node] {
   /**
-   * Encode a value as a node.
+   * Encodes a value as a node.
    *
    * @param value value of given type
    * @tparam T value type
@@ -14,11 +14,11 @@ trait CodecMeta[Node] {
   def encode[T](value: T): Node = throw new UnsupportedOperationException("Macro not implemented")
 
   /**
-   * Decode a value from a node.
+   * Decodes a value from a node.
    *
    * @param node message format node
    * @tparam T value type
-   * @return value of given type
+   * @return value of the specified type
    */
   def decode[T](node: Node): T = throw new UnsupportedOperationException("Macro not implemented")
 }
