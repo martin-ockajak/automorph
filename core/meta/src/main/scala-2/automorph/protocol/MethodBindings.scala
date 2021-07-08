@@ -138,10 +138,10 @@ private[automorph] case object MethodBindings {
       } else {
         // Returns the effect type
         val effectType = ref.c.weakTypeOf[Effect].typeConstructor
-        val resultEffectType = method.resultType.typeArgs.nonEmpty && effectType =:= method.resultType.typeConstructor
+        val matchingResultType = method.resultType.typeArgs.nonEmpty && effectType =:= method.resultType.typeConstructor
 
         // FIXME - determine concrete result type constructor instead of an abstract one
-        if (!resultEffectType && false) {
+        if (!matchingResultType && false) {
           Left(s"Bound API method '$signature' must return the specified effect type '${effectType.typeSymbol.fullName}'")
         } else {
           Right(method)

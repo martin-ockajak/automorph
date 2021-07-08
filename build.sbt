@@ -1,5 +1,5 @@
 // Project
-ThisBuild / organization := "io.json-rpc"
+ThisBuild / organization := "io.automorph"
 ThisBuild / homepage := Some(url("https://github.com/martin-ockajak/automorph"))
 ThisBuild / licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / developers := List()
@@ -31,7 +31,7 @@ lazy val root = project.in(file(".")).aggregate(
 
   examples
 ).settings(
-  name := "json-rpc",
+  name := "automorph",
   description := "JSON-RPC client & server",
   publish / skip := true,
 ).enablePlugins(ScalaUnidocPlugin)
@@ -41,7 +41,7 @@ lazy val root = project.in(file(".")).aggregate(
 
 // Basic
 lazy val spi = project.settings(
-  name := "json-rpc-spi"
+  name := "automorph-spi"
 ).settings(
   libraryDependencies ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
@@ -62,21 +62,21 @@ lazy val coreMeta = (project in file("core/meta")).dependsOn(
 lazy val core = project.dependsOn(
   coreMeta, testBase % Test
 ).settings(
-  name := "json-rpc-core",
+  name := "automorph-core",
   Compile / packageBin / mappings ++= (coreMeta / Compile / packageBin / mappings).value,
   Compile / packageSrc / mappings ++= (coreMeta / Compile / packageSrc / mappings).value
 )
 lazy val standard = project.dependsOn(
   core, testCore % Test
 ).settings(
-  name := "json-rpc-standard"
+  name := "automorph-standard"
 )
 
 // Codec
 lazy val upickle = (project in file("codec/upickle")).dependsOn(
   spi, testBase % Test
 ).settings(
-  name := "json-rpc-upickle",
+  name := "automorph-upickle",
   libraryDependencies ++= Seq(
     "com.lihaoyi" %% "upickle" % "1.4.0"
   )
@@ -84,7 +84,7 @@ lazy val upickle = (project in file("codec/upickle")).dependsOn(
 lazy val circe = (project in file("codec/circe")).dependsOn(
   spi, testBase % Test
 ).settings(
-  name := "json-rpc-circe",
+  name := "automorph-circe",
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-parser" % "0.14.1",
     "io.circe" %% "circe-generic" % "0.14.1"
@@ -93,7 +93,7 @@ lazy val circe = (project in file("codec/circe")).dependsOn(
 lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
   spi, testBase % Test
 ).settings(
-  name := "json-rpc-argonaut",
+  name := "automorph-argonaut",
   libraryDependencies ++= Seq(
     "io.argonaut" %% "argonaut" % "6.3.6"
   )
@@ -103,7 +103,7 @@ lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
 lazy val zio = (project in file("backend/zio")).dependsOn(
   spi, testCore % Test
 ).settings(
-  name := "json-rpc-zio",
+  name := "automorph-zio",
   libraryDependencies ++= Seq(
     "dev.zio" %% "zio" % "1.0.9"
   )
@@ -111,7 +111,7 @@ lazy val zio = (project in file("backend/zio")).dependsOn(
 lazy val monix = (project in file("backend/monix")).dependsOn(
   spi, testCore % Test
 ).settings(
-  name := "json-rpc-monix",
+  name := "automorph-monix",
   libraryDependencies ++= Seq(
     "io.monix" %% "monix-eval" % "3.4.0"
   )
@@ -119,7 +119,7 @@ lazy val monix = (project in file("backend/monix")).dependsOn(
 lazy val catsEffect = (project in file("backend/cats-effect")).dependsOn(
   spi, testCore % Test
 ).settings(
-  name := "json-rpc-cats-effect",
+  name := "automorph-cats-effect",
   libraryDependencies ++= Seq(
     "org.typelevel" %% "cats-effect" % "3.1.1"
   )
@@ -127,7 +127,7 @@ lazy val catsEffect = (project in file("backend/cats-effect")).dependsOn(
 lazy val scalaz = (project in file("backend/scalaz")).dependsOn(
   spi, testCore % Test
 ).settings(
-  name := "json-rpc-scalaz",
+  name := "automorph-scalaz",
   libraryDependencies ++= Seq(
     "org.scalaz" %% "scalaz-effect" % "7.4.0-M7"
   )
@@ -137,7 +137,7 @@ lazy val scalaz = (project in file("backend/scalaz")).dependsOn(
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
   spi, testCore % Test, standard % Test
 ).settings(
-  name := "json-rpc-sttp",
+  name := "automorph-sttp",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % "3.3.9",
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.9" % Test
@@ -150,7 +150,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
 lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
   spi, core, testCore % Test, standard % Test
 ).settings(
-  name := "json-rpc-rabbitmq",
+  name := "automorph-rabbitmq",
   libraryDependencies ++= Seq(
     "com.rabbitmq" % "amqp-client" % "5.12.0"
   )
@@ -160,7 +160,7 @@ lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
 lazy val undertow = (project in file("server/undertow")).dependsOn(
   core, testCore % Test, standard % Test
 ).settings(
-  name := "json-rpc-undertow",
+  name := "automorph-undertow",
   libraryDependencies ++= Seq(
     "io.undertow" % "undertow-core" % "2.2.8.Final",
     "com.lihaoyi" %% "cask" % "0.7.11" % Test
@@ -169,7 +169,7 @@ lazy val undertow = (project in file("server/undertow")).dependsOn(
 lazy val jetty = (project in file("server/jetty")).dependsOn(
   core, testCore % Test, standard % Test
 ).settings(
-  name := "json-rpc-jetty",
+  name := "automorph-jetty",
   libraryDependencies ++= Seq(
     "org.eclipse.jetty" % "jetty-servlet" % "11.0.6",
     "commons-io" % "commons-io" % "2.10.0"
@@ -178,7 +178,7 @@ lazy val jetty = (project in file("server/jetty")).dependsOn(
 lazy val finagle = (project in file("server/finagle")).dependsOn(
   core, testCore % Test, standard % Test
 ).settings(
-  name := "json-rpc-finagle",
+  name := "automorph-finagle",
   libraryDependencies ++= Seq(
     ("com.twitter" % "finagle-http" % "21.6.0").cross(CrossVersion.for3Use2_13)
   )
@@ -186,7 +186,7 @@ lazy val finagle = (project in file("server/finagle")).dependsOn(
 lazy val tapir = (project in file("server/tapir")).dependsOn(
   core, testCore % Test, standard % Test
 ).settings(
-  name := "json-rpc-tapir",
+  name := "automorph-tapir",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.18.0-M18"
   )
@@ -196,7 +196,7 @@ lazy val tapir = (project in file("server/tapir")).dependsOn(
 lazy val openApi = (project in file("openapi")).dependsOn(
   core
 ).settings(
-  name := "json-rpc-open-api",
+  name := "automorph-open-api",
   libraryDependencies ++= Seq(
     "com.lihaoyi" %% "upickle" % "1.4.0"
   )
@@ -206,7 +206,7 @@ lazy val openApi = (project in file("openapi")).dependsOn(
 lazy val default = project.dependsOn(
   upickle, standard, undertow, sttp
 ).settings(
-  name := "json-rpc-default",
+  name := "automorph-default",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.9"
   )
