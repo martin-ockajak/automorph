@@ -137,12 +137,12 @@ private[automorph] case object MethodBindings {
         Left(s"Bound API method '$signature' must be callable at runtime")
       } else {
         // Returns the effect type
-        val effectType = ref.c.weakTypeOf[Effect].typeConstructor
-        val matchingResultType = method.resultType.typeArgs.nonEmpty && effectType =:= method.resultType.typeConstructor
+        val effectTypeConstructor = ref.c.weakTypeOf[Effect].dealias.typeConstructor
+        val matchingResultType = method.resultType.typeArgs.nonEmpty && method.resultType.dealias.typeConstructor <:< effectTypeConstructor
 
         // FIXME - determine concrete result type constructor instead of an abstract one
         if (!matchingResultType && false) {
-          Left(s"Bound API method '$signature' must return the specified effect type '${effectType.typeSymbol.fullName}'")
+          Left(s"Bound API method '$signature' must return the specified effect type '${effectTypeConstructor.typeSymbol.fullName}'")
         } else {
           Right(method)
         }

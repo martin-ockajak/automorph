@@ -101,10 +101,21 @@ private[automorph] case object MethodBindings:
    * @return wrapped type
    */
   def unwrapType[Wrapper[_]: Type](q: Quotes)(wrappedType: q.reflect.TypeRepr): q.reflect.TypeRepr =
-    wrappedType match
-      case appliedType: q.reflect.AppliedType if appliedType.tycon =:= q.reflect.TypeRepr.of[Wrapper].dealias =>
-        appliedType.args.last
-      case otherType => otherType
+    resultType(q)(q.reflect.TypeRepr.of[Wrapper].dealias).dealias match
+      case wrapperType: q.reflect.AppliedType =>
+        val wrapperTypeParamIndex = wrapperType.args.indexWhere {
+          case _: q.reflect.ParamRef => true
+          case _ => false
+        }
+        if wrapperTypeParamIndex >= 0 then
+          wrappedType.dealias match
+            case appliedType: q.reflect.AppliedType if appliedType.tycon <:< wrapperType.tycon =>
+              val x = appliedType.args(wrapperTypeParamIndex)
+              println(s"UNWRAPPPED: ${x.show}")
+              x
+            case _ => wrappedType
+        else wrappedType
+      case _ =>wrappedType
 
   /**
    * Creates a method signature.
@@ -142,21 +153,24 @@ private[automorph] case object MethodBindings:
     // Callable at runtime
     else if !method.available then
       Left(s"Bound API method '$signature' must be callable at runtime")
+
+    // Returns the effect type
     else
-      // Returns the effect type
-      val effectType =
-        TypeRepr.of[Effect] match
-          case lambdaType: LambdaType => lambdaType.resType
-          case otherType => otherType
+      val effectType = resultType(ref.q)(TypeRepr.of[Effect])
       val matchingResultType =
-        effectType match
+        effectType.dealias match
           case appliedEffectType: AppliedType =>
-            method.resultType match
+            method.resultType.dealias match
               case resultType: AppliedType =>
-                resultType.tycon =:= appliedEffectType.tycon
+                resultType.tycon <:< appliedEffectType.tycon
               case _ => false
           case _ => true
       if !matchingResultType then
         Left(s"Bound API method '$signature' must return the specified effect type '${effectType.show}'")
       else
         Right(method)
+
+  private def resultType(q: Quotes)(someType: q.reflect.TypeRepr): q.reflect.TypeRepr =
+    someType match
+      case lambdaType: q.reflect.LambdaType => lambdaType.resType
+      case otherType => otherType
