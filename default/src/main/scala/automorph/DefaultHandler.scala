@@ -24,9 +24,8 @@ case object DefaultHandler {
    * @tparam Context request context type
    * @return JSON-RPC request handler
    */
-  def apply[Effect[_], Context](backend: Backend[Effect]): DefaultHandler[Effect, Context] = {
+  def apply[Effect[_], Context](backend: Backend[Effect]): DefaultHandler[Effect, Context] =
     Handler(UpickleJsonCodec(), backend)
-  }
 
   /**
    * Create an asynchonous JSON-RPC request handler with defined request `Context` type.
