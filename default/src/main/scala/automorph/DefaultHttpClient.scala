@@ -32,11 +32,8 @@ case object DefaultHttpClient {
     httpMethod: String,
     backend: Backend[Effect],
     sttpBackend: SttpBackend[Effect, _]
-  ): DefaultClient[Effect] = {
-    val codec = UpickleJsonCodec()
-    val transport = SttpTransport(new URL(url), httpMethod, backend, sttpBackend)
-    Client(codec, backend, transport)
-  }
+  ): DefaultClient[Effect] =
+    Client(UpickleJsonCodec(), backend, SttpTransport(new URL(url), httpMethod, backend, sttpBackend))
 
   /**
    * Creates an asynchronous JSON-RPC client using HTTP as message transport protocol and 'Future' as an effect type.

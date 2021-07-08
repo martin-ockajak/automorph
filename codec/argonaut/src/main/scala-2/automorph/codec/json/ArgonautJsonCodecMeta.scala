@@ -10,11 +10,9 @@ import scala.reflect.macros.blackbox.Context
  */
 private[automorph] trait ArgonautJsonCodecMeta extends Codec[Json] {
 
-  override def encode[T](value: T): Json =
-    macro ArgonautJsonCodecMeta.encodeExpr[T]
+  override def encode[T](value: T): Json = macro ArgonautJsonCodecMeta.encodeExpr[T]
 
-  override def decode[T](node: Json): T =
-    macro ArgonautJsonCodecMeta.decodeExpr[T]
+  override def decode[T](node: Json): T = macro ArgonautJsonCodecMeta.decodeExpr[T]
 }
 
 private[automorph] object ArgonautJsonCodecMeta {

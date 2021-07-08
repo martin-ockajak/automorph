@@ -1,6 +1,6 @@
 package automorph.codec.json
 
-import automorph.codec.common.UpickleCustom
+import automorph.codec.common.{DefaultUpickleCustom, UpickleCustom}
 import automorph.spi.Message
 import scala.collection.immutable.ArraySeq
 import ujson.Value
@@ -15,7 +15,7 @@ import ujson.Value
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
 final case class UpickleJsonCodec[Custom <: UpickleCustom](
-  custom: Custom = new UpickleCustom {}
+  custom: Custom = DefaultUpickleCustom
 ) extends UpickleJsonCodecMeta[Custom] {
 
   import custom._

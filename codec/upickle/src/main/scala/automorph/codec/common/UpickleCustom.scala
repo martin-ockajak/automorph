@@ -124,3 +124,5 @@ trait UpickleCustom extends AttributeTagged {
     override def visitNull(index: Int) = throw new Abort(expectedMsg + " got null")
   }
 }
+
+object DefaultUpickleCustom extends UpickleCustom
