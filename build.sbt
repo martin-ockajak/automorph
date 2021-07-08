@@ -171,7 +171,7 @@ lazy val jetty = (project in file("server/jetty")).dependsOn(
 ).settings(
   name := "json-rpc-jetty",
   libraryDependencies ++= Seq(
-    "org.eclipse.jetty" % "jetty-servlet" % "11.0.5",
+    "org.eclipse.jetty" % "jetty-servlet" % "11.0.6",
     "commons-io" % "commons-io" % "2.10.0"
   )
 )
