@@ -1,8 +1,8 @@
 package test.backend
 
-import base.BaseSpec
 import automorph.spi.Backend
 import scala.util.{Failure, Success, Try}
+import test.base.BaseSpec
 
 /**
  * Backend test.

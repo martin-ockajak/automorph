@@ -1,10 +1,10 @@
 package test.codec
 
-import base.BaseSpec
 import java.nio.charset.StandardCharsets
 import automorph.spi.{Codec, Message}
 import org.scalacheck.Arbitrary
 import test.Generators
+import test.base.BaseSpec
 
 /**
  * Codec test.

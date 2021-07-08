@@ -1,4 +1,4 @@
-package base
+package test.base
 
 import scala.util.{Try, Using}
 

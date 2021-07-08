@@ -1,6 +1,5 @@
 package test
 
-import base.BaseSpec
 import automorph.backend.IdentityBackend
 import automorph.backend.IdentityBackend.Identity
 import automorph.codec.common.UpickleCustom
@@ -8,6 +7,7 @@ import automorph.codec.json.UpickleJsonCodec
 import automorph.transport.local.HandlerTransport
 import automorph.util.NoContext
 import automorph.{Client, Handler}
+import test.base.BaseSpec
 import ujson.Value
 
 class NoContextClientHandlerSpec extends BaseSpec {

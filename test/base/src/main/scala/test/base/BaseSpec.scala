@@ -1,4 +1,4 @@
-package base
+package test.base
 
 import org.scalatest.freespec.AnyFreeSpecLike
 import org.scalatest.matchers.should.Matchers

@@ -1,6 +1,5 @@
 package test.server.http
 
-import base.BaseSpec
 import io.undertow.Handlers
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.handlers.BlockingHandler
@@ -10,6 +9,7 @@ import automorph.backend.IdentityBackend.Identity
 import automorph.codec.common.UpickleCustom
 import automorph.codec.json.UpickleJsonCodec
 import automorph.server.http.UndertowJsonRpcHandler
+import test.base.BaseSpec
 import ujson.Value
 
 class CaskServerSpec extends BaseSpec {

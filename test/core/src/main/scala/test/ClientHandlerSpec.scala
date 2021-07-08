@@ -1,12 +1,12 @@
 package test
 
-import base.BaseSpec
-import automorph.{Client, Handler}
 import automorph.protocol.ErrorType.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
 import automorph.spi.Backend
+import automorph.{Client, Handler}
 import org.scalacheck.Arbitrary
 import scala.util.Try
 import test.Generators.arbitraryRecord
+import test.base.BaseSpec
 import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, SimpleApiImpl}
 
 /**
