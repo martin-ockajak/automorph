@@ -5,13 +5,13 @@ package automorph.util
  *
  * @tparam T empty context value type
  */
-final case class NoContext[T]()
+final case class EmptyContext[T]()
 
-case object NoContext {
+case object EmptyContext {
 
   /** Empty context value type */
-  type Value = NoContext[NoContext.type]
+  type Value = EmptyContext[EmptyContext.type]
 
   /** Implicit empty context value instance */
-  implicit val value: Value = NoContext[NoContext.type]()
+  implicit val value: Value = EmptyContext[EmptyContext.type]()
 }

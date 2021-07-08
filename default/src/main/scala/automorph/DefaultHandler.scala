@@ -7,7 +7,7 @@ import automorph.backend.{FutureBackend, IdentityBackend}
 import automorph.codec.common.UpickleCustom
 import automorph.codec.json.UpickleJsonCodec
 import automorph.spi.Backend
-import automorph.util.NoContext
+import automorph.util.EmptyContext
 import scala.concurrent.{ExecutionContext, Future}
 import ujson.Value
 
@@ -60,8 +60,8 @@ case object DefaultHandler {
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  def noContext[Effect[_]](backend: Backend[Effect]): DefaultHandler[Effect, NoContext.Value] =
-    Handler.noContext(UpickleJsonCodec(), backend)
+  def withoutContext[Effect[_]](backend: Backend[Effect]): DefaultHandler[Effect, EmptyContext.Value] =
+    Handler.withoutContext(UpickleJsonCodec(), backend)
 
   /**
    * Creates an asynchronous JSON-RPC request handler with empty request context and 'Future' as an effect type.
@@ -72,8 +72,8 @@ case object DefaultHandler {
    * @param executionContext execution context
    * @return asynchronous JSON-RPC request handler
    */
-  def asyncNoContext()(implicit executionContext: ExecutionContext): DefaultHandler[Future, NoContext.Value] =
-    Handler.noContext(UpickleJsonCodec(), FutureBackend())
+  def asyncWithoutContext()(implicit executionContext: ExecutionContext): DefaultHandler[Future, EmptyContext.Value] =
+    Handler.withoutContext(UpickleJsonCodec(), FutureBackend())
 
   /**
    * Creates a synchronous JSON-RPC request handler with empty request context and identity as an effect type.
@@ -84,6 +84,6 @@ case object DefaultHandler {
    * @param executionContext execution context
    * @return asynchronous JSON-RPC request handler
    */
-  def syncNoContext(): DefaultHandler[Identity, NoContext.Value] =
-    Handler.noContext(UpickleJsonCodec(), IdentityBackend())
+  def syncWithoutContext(): DefaultHandler[Identity, EmptyContext.Value] =
+    Handler.withoutContext(UpickleJsonCodec(), IdentityBackend())
 }

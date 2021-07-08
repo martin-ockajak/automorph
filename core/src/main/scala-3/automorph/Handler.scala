@@ -5,7 +5,7 @@ import automorph.handler.{HandlerCore, HandlerBind, HandlerBinding}
 import automorph.log.Logging
 import automorph.protocol.ErrorType
 import automorph.spi.{Backend, Codec}
-import automorph.util.{CannotEqual, NoContext}
+import automorph.util.{CannotEqual, EmptyContext}
 
 /**
  * JSON-RPC request handler.
@@ -69,9 +69,9 @@ case object Handler:
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  inline def noContext[Node, ExactCodec <: Codec[Node], Effect[_]](
+  inline def withoutContext[Node, ExactCodec <: Codec[Node], Effect[_]](
     codec: ExactCodec,
     backend: Backend[Effect]
-  ): Handler[Node, ExactCodec, Effect, NoContext.Value] =
+  ): Handler[Node, ExactCodec, Effect, EmptyContext.Value] =
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
     Handler(codec, backend, Map.empty, defaultExceptionToError, encodeStrings, codec.encode(None))

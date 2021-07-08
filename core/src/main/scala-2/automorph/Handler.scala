@@ -4,7 +4,7 @@ import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
 import automorph.protocol.ErrorType
 import automorph.spi.{Backend, Codec}
-import automorph.util.{CannotEqual, NoContext}
+import automorph.util.{CannotEqual, EmptyContext}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -69,11 +69,11 @@ case object Handler {
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  def noContext[Node, ExactCodec <: Codec[Node], Effect[_]](
+  def withoutContext[Node, ExactCodec <: Codec[Node], Effect[_]](
     codec: ExactCodec,
     backend: Backend[Effect]
-  ): Handler[Node, ExactCodec, Effect, NoContext.Value] =
-    macro noContextMacro[Node, ExactCodec, Effect]
+  ): Handler[Node, ExactCodec, Effect, EmptyContext.Value] =
+    macro withoutContextMacro[Node, ExactCodec, Effect]
 
   def applyMacro[Node: c.WeakTypeTag, ExactCodec <: Codec[Node]: c.WeakTypeTag, Effect[_], Context: c.WeakTypeTag](
     c: blackbox.Context
@@ -90,16 +90,16 @@ case object Handler {
     """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Context]]]
   }
 
-  def noContextMacro[Node: c.WeakTypeTag, ExactCodec <: Codec[Node]: c.WeakTypeTag, Effect[_]](c: blackbox.Context)(
+  def withoutContextMacro[Node: c.WeakTypeTag, ExactCodec <: Codec[Node]: c.WeakTypeTag, Effect[_]](c: blackbox.Context)(
     codec: c.Expr[ExactCodec],
     backend: c.Expr[Backend[Effect]]
-  ): c.Expr[Handler[Node, ExactCodec, Effect, NoContext.Value]] = {
+  ): c.Expr[Handler[Node, ExactCodec, Effect, EmptyContext.Value]] = {
     import c.universe.{weakTypeOf, Quasiquote}
     Seq(weakTypeOf[Node], weakTypeOf[ExactCodec])
 
     c.Expr[Any](q"""
       automorph.Handler($codec, $backend, Map.empty, automorph.handler.HandlerCore.defaultExceptionToError,
         value => $codec.encode[List[String]](value), $codec.encode(None))
-    """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, NoContext.Value]]]
+    """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, EmptyContext.Value]]]
   }
 }

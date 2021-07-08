@@ -5,7 +5,7 @@ import automorph.client.{ClientCore, ClientBind, NamedMethodProxy}
 import automorph.protocol.ErrorType
 import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
 import automorph.spi.{Backend, Codec, Transport}
-import automorph.util.{CannotEqual, NoContext}
+import automorph.util.{CannotEqual, EmptyContext}
 import java.io.IOException
 
 /**
@@ -74,11 +74,11 @@ case object Client {
    * @tparam Effect effect type
    * @return JSON-RPC client
    */
-  def noContext[Node, ExactCodec <: Codec[Node], Effect[_]](
+  def withoutContext[Node, ExactCodec <: Codec[Node], Effect[_]](
     codec: ExactCodec,
     backend: Backend[Effect],
-    transport: Transport[Effect, NoContext.Value]
-  ): Client[Node, ExactCodec, Effect, NoContext.Value] = Client(codec, backend, transport)
+    transport: Transport[Effect, EmptyContext.Value]
+  ): Client[Node, ExactCodec, Effect, EmptyContext.Value] = Client(codec, backend, transport)
 
   /**
    * Maps a JSON-RPC error to a corresponding default exception.
