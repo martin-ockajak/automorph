@@ -43,7 +43,7 @@ final case class Method(
  *
  * @param name name
  * @param dataType type
- * @param contextual true if the parameter is implicit
+ * @param contextual true if this parameter is implicit
  */
 final case class Parameter(
   name: String,

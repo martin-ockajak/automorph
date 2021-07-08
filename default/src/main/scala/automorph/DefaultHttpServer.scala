@@ -41,6 +41,7 @@ case object DefaultHttpServer {
     val handler = bindApis(DefaultHandler(backend))
     UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
   }
+
   /**
    * Create an asynchonous JSON-RPC request handler with defined request `Context` type.
    *
@@ -62,7 +63,7 @@ case object DefaultHttpServer {
   )(implicit executionContext: ExecutionContext): DefaultServer = {
     Seq(executionContext)
     val handler = bindApis(DefaultHandler.async())
-    val runEffect = (_: Future[Any]) =>
+    val runEffect = (_: Future[Any]) => ()
     UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
   }
 
