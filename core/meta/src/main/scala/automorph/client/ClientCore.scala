@@ -5,6 +5,7 @@ import automorph.protocol.ErrorType.{InvalidResponseException, ParseErrorExcepti
 import automorph.protocol.{Request, Response}
 import automorph.spi.Message.Params
 import automorph.spi.{Backend, Codec, Message, Transport}
+import automorph.util.TryOps
 import scala.collection.immutable.ArraySeq
 import scala.util.{Random, Try}
 
@@ -112,19 +113,19 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
     decodeResult: Node => R
   ): Effect[R] =
     // Deserialize response
-    Try(codec.deserialize(rawResponse)).fold(
+    Try(codec.deserialize(rawResponse)).pureFold(
       error => raiseError(ParseErrorException("Invalid response format", error), formedRequest),
       formedResponse => {
         // Validate response
         logger.trace(s"Received JSON-RPC response:\n${codec.format(formedResponse)}")
-        Try(Response(formedResponse)).fold(
+        Try(Response(formedResponse)).pureFold(
           error => raiseError(error, formedRequest),
           validResponse =>
             validResponse.value.fold(
               error => raiseError(errorToException(error.code, error.message), formedRequest),
               result =>
                 // Decode result
-                Try(decodeResult(result)).fold(
+                Try(decodeResult(result)).pureFold(
                   error => raiseError(InvalidResponseException("Invalid result", error), formedRequest),
                   result => {
                     logger.info(s"Performed JSON-RPC request", formedRequest.properties)
@@ -144,7 +145,7 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
    */
   private def serialize(formedRequest: Message[Node]): Effect[ArraySeq.ofByte] = {
     logger.trace(s"Sending JSON-RPC request:\n${codec.format(formedRequest)}")
-    Try(codec.serialize(formedRequest)).fold(
+    Try(codec.serialize(formedRequest)).pureFold(
       error => raiseError(ParseErrorException("Invalid request format", error), formedRequest),
       message => backend.pure(message)
     )

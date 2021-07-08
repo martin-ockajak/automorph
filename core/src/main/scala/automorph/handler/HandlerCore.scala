@@ -4,6 +4,7 @@ import automorph.handler.{HandlerBinding, HandlerResult}
 import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
 import automorph.protocol.{ErrorType, Request, Response, ResponseError}
 import automorph.spi.{Codec, Message}
+import automorph.util.TryOps
 import automorph.{Handler, JsonRpcError}
 import java.io.IOException
 import scala.collection.immutable.ArraySeq
@@ -26,7 +27,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
   def processRequest[Data: Bytes](request: Data)(implicit context: Context): Effect[HandlerResult[Data]] = {
     // Deserialize request
     val rawRequest = implicitly[Bytes[Data]].from(request)
-    Try(codec.deserialize(rawRequest)).fold(
+    Try(codec.deserialize(rawRequest)).pureFold(
       error =>
         errorResponse(
           ParseErrorException("Invalid request format", error),
@@ -35,7 +36,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
       formedRequest => {
         // Validate request
         logger.trace(s"Received JSON-RPC request:\n${codec.format(formedRequest)}")
-        Try(Request(formedRequest)).fold(
+        Try(Request(formedRequest)).pureFold(
           error => errorResponse(error, formedRequest),
           validRequest => invokeMethod(formedRequest, validRequest, context)
         )
@@ -78,7 +79,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
       val arguments = extractArguments(validRequest, handlerMethod)
 
       // Invoke method
-      Try(backend.either(handlerMethod.invoke(arguments, context))).fold(
+      Try(backend.either(handlerMethod.invoke(arguments, context))).pureFold(
         error => errorResponse(error, formedRequest),
         effect =>
           backend.flatMap(
@@ -182,7 +183,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
    */
   private def serialize(formedResponse: Message[Node]): Effect[Option[ArraySeq.ofByte]] = {
     logger.trace(s"Sending JSON-RPC response:\n${codec.format(formedResponse)}")
-    Try(codec.serialize(formedResponse)).fold(
+    Try(codec.serialize(formedResponse)).pureFold(
       error => backend.failed(ParseErrorException("Invalid response format", error)),
       message => backend.pure(Some(message))
     )
