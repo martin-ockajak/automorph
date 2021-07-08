@@ -4,9 +4,9 @@ import automorph.backend.TryBackend
 import automorph.spi.Backend
 import org.scalacheck.Arbitrary
 import scala.util.Try
-import test.CodecClientHandlerSpec
+import test.CodecCoreSpec
 
-class TryLocalSpec extends CodecClientHandlerSpec {
+class TryLocalSpec extends CodecCoreSpec {
 
   type Effect[T] = Try[T]
   type Context = Short

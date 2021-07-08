@@ -5,9 +5,9 @@ import automorph.spi.Backend
 import org.scalacheck.Arbitrary
 import scala.util.Try
 import scalaz.effect.IO
-import test.CodecClientHandlerSpec
+import test.CodecCoreSpec
 
-class ScalazLocalSpec extends CodecClientHandlerSpec {
+class ScalazLocalSpec extends CodecCoreSpec {
 
   type Effect[T] = IO[T]
   type Context = Short

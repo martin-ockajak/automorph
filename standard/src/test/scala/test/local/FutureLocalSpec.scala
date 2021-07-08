@@ -5,9 +5,9 @@ import automorph.spi.Backend
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import test.CodecClientHandlerSpec
+import test.CodecCoreSpec
 
-class FutureLocalSpec extends CodecClientHandlerSpec {
+class FutureLocalSpec extends CodecCoreSpec {
 
   type Effect[T] = Future[T]
   type Context = Short

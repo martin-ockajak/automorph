@@ -17,7 +17,7 @@ import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, 
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-trait ClientHandlerSpec extends BaseSpec {
+trait CoreSpec extends BaseSpec {
 
   type Effect[_]
   type Context

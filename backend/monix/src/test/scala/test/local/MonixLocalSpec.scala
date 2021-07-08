@@ -6,9 +6,9 @@ import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import org.scalacheck.Arbitrary
 import scala.concurrent.duration.Duration
-import test.CodecClientHandlerSpec
+import test.CodecCoreSpec
 
-class MonixLocalSpec extends CodecClientHandlerSpec {
+class MonixLocalSpec extends CodecCoreSpec {
 
   type Effect[T] = Task[T]
   type Context = Short

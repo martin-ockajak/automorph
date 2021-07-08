@@ -15,7 +15,7 @@ import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, 
 import ujson.Value
 import upack.Msg
 
-trait CodecClientHandlerSpec extends ClientHandlerSpec {
+trait CodecCoreSpec extends CoreSpec {
 
   def customTransport: Option[Transport[Effect, Context]] = None
 
@@ -23,8 +23,8 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
     implicit val usingContext: Context = contextValue
     Seq(
       {
-        val codec = UpickleJsonCodec(CodecClientHandlerSpec)
-        val handler = Handler[Value, UpickleJsonCodec[CodecClientHandlerSpec.type], Effect, Context](codec, backend)
+        val codec = UpickleJsonCodec(CodecCoreSpec)
+        val handler = Handler[Value, UpickleJsonCodec[CodecCoreSpec.type], Effect, Context](codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client = Client(codec, backend, transport)
@@ -41,8 +41,8 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
           (method, p1) => client.method(method).args(p1).tell
         )
       }, {
-        val codec = UpickleMessagePackCodec(CodecClientHandlerSpec)
-        val handler = Handler[Msg, UpickleMessagePackCodec[CodecClientHandlerSpec.type], Effect, Context](codec, backend)
+        val codec = UpickleMessagePackCodec(CodecCoreSpec)
+        val handler = Handler[Msg, UpickleMessagePackCodec[CodecCoreSpec.type], Effect, Context](codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client = Client(codec, backend, transport)
@@ -145,7 +145,7 @@ trait CodecClientHandlerSpec extends ClientHandlerSpec {
   private def contextValue: Context = arbitraryContext.arbitrary.sample.get
 }
 
-object CodecClientHandlerSpec extends UpickleCustom {
+object CodecCoreSpec extends UpickleCustom {
 
   implicit def enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
     value => Enum.toOrdinal(value),
