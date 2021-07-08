@@ -48,7 +48,7 @@ case object DefaultHandler {
    * @return synchronous JSON-RPC request handler
    */
   def sync[Context](): DefaultHandler[Identity, Context] =
-    Handler[Value, UpickleJsonCodec[UpickleCustom], Identity, Context](UpickleJsonCodec(), IdentityBackend())
+    Handler(UpickleJsonCodec(), IdentityBackend())
 
   /**
    * Create a JSON-RPC request handler using the specified ''backend'' plugin with empty request `Context` type.
