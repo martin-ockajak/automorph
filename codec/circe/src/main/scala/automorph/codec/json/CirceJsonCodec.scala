@@ -8,7 +8,7 @@ import automorph.spi.{Message, MessageError}
 import scala.collection.immutable.ArraySeq
 
 /**
- * Circe JSON codec plugin.
+ * Circe codec plugin using JSON as message format.
  *
  * @see [[https://circe.github.io/circe Documentation]]
  * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]

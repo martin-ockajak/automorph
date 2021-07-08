@@ -10,9 +10,10 @@ import automorph.spi.{Codec, Server}
 import scala.collection.immutable.ArraySeq
 
 /**
- * HTTP server based on NanoHTTPD web server.
+ * JSON-RPC server based on NanoHTTPD web server using HTTP as message transport protocol.
  *
  * @see [[https://github.com/NanoHttpd/nanohttpd Documentation]]
+ * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
  * @constructor Create an NanoHTTPD web server using the specified JSON-RPC request ''handler''.
  * @param handler JSON-RPC request handler
  * @param runEffectSync synchronous effect execution function

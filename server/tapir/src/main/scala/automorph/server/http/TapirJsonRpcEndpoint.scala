@@ -11,12 +11,13 @@ import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode}
 
 /**
- * JSON-RPC HTTP endpoint for Tapir endpoint generator.
+ * JSON-RPC endpoint for Tapir endpoint generator using HTTP as message transport protocol.
  *
  * The endpoint interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
  * The response returned by the JSON-RPC handler is used as HTTP response body.
  *
  * @see [[https://tapir.softwaremill.com Documentation]]
+ * @constructor Create a JSON-RPC service for Finagle RPC system using the specified JSON-RPC request ''handler''.
  * @param handler JSON-RPC request handler
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
  * @tparam Node message format node representation type

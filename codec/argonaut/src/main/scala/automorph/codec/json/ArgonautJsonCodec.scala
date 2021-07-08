@@ -7,7 +7,7 @@ import automorph.spi.{Message, MessageError}
 import scala.collection.immutable.ArraySeq
 
 /**
- * Argonaut JSON codec plugin.
+ * Argonaut codec plugin using JSON as message format.
  *
  * @see [[http://argonaut.io/doc/]]
  * @see [[http://argonaut.io/scaladocs/#argonaut.Json Node type]]

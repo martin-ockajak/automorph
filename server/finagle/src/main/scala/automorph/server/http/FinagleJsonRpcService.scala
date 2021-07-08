@@ -13,14 +13,14 @@ import automorph.spi.Codec
 import automorph.protocol.ErrorType
 
 /**
- * JSON-RPC over HTTP service for Finagle RPC system.
+ * JSON-RPC service for Finagle RPC system using HTTP as message transport protocol.
  *
  * The service interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
  * The response returned by the JSON-RPC handler is used as HTTP response body.
  *
  * @see [[https://twitter.github.io/finagle/ Documentation]]
  * @see [[https://twitter.github.io/finagle/docs/com/twitter/finagle/ API]]
- * @constructor Create a JSON-RPC over HTTP service for Finagle RPC system using the specified JSON-RPC request ''handler''.
+ * @constructor Create a JSON-RPC service for Finagle RPC system using the specified JSON-RPC request ''handler''.
  * @param handler JSON-RPC request handler
  * @param runEffect asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function

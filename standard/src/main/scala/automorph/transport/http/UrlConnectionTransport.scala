@@ -9,7 +9,7 @@ import automorph.handler.Bytes.inputStreamBytes
 import scala.util.{Try, Using}
 
 /**
- * URL connection HTTP transport.
+ * URL connection transport using HTTP as message transport protocol.
  *
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @param url HTTP endpoint URL

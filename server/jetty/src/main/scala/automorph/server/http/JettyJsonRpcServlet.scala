@@ -12,7 +12,7 @@ import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
 
 /**
- * JSON-RPC HTTP servlet for Jetty web server.
+ * JSON-RPC servlet for Jetty web server using HTTP as message transport protocol.
  *
  * The servlet interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
  * The response returned by the JSON-RPC handler is used as HTTP response body.
