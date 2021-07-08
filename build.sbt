@@ -141,7 +141,11 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % "3.3.9",
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.9" % Test
-  )
+  ),
+//  apiMappings += (
+//    (unmanagedBase.value / "core_3-3.3.9.jar") -> 
+//      url("https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_2.13/latest/")
+//  )
 )
 lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
   spi, core, testCore % Test, standard % Test
@@ -291,10 +295,6 @@ ThisBuild / autoAPIMappings := true
 apiURL := Some(url("https://javadoc.io/doc/io.jsonrpc/jsonrpc-core_3/latest"))
 ScalaUnidoc / unidoc / scalacOptions += "-Ymacro-expand:none"
 //Compile / doc / scalacOptions ++= Seq("-groups", "-implicits")
-//apiMappings += (
-//  (unmanagedBase.value / "cats-effect.jar") -> 
-//    url("https://example.org/api/")
-//)
 
 
 // Continuous Integration
