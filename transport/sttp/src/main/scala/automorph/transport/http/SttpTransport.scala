@@ -20,12 +20,12 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @tparam Effect effect type
  */
 final case class SttpTransport[Effect[_]](
-  url: String,
+  url: URL,
   method: String,
   backend: Backend[Effect],
   sttpBackend: SttpBackend[Effect, _]
 ) extends Transport[Effect, RequestProperties] {
-  private val uri = Uri.unsafeParse(url)
+  private val uri = Uri(url.toURI)
   private val httpMethod = Method.unsafeApply(method)
 
   override def call(

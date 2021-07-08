@@ -5,7 +5,7 @@ import automorph.protocol.ErrorType.{InvalidResponseException, ParseErrorExcepti
 import automorph.protocol.{Request, Response}
 import automorph.spi.Message.Params
 import automorph.spi.{Backend, Codec, Message, Transport}
-import automorph.util.TryOps
+import automorph.util.Extensions.TryOps
 import scala.collection.immutable.ArraySeq
 import scala.util.{Random, Try}
 

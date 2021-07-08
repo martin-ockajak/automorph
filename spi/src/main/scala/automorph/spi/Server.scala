@@ -1,8 +1,5 @@
 package automorph.spi
 
-import automorph.spi.Message
-import scala.collection.immutable.ArraySeq
-
 /**
  * Endpoint server plugin.
  *

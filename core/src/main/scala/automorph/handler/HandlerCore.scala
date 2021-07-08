@@ -4,7 +4,7 @@ import automorph.handler.{HandlerBinding, HandlerResult}
 import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
 import automorph.protocol.{ErrorType, Request, Response, ResponseError}
 import automorph.spi.{Codec, Message}
-import automorph.util.TryOps
+import automorph.util.Extensions.TryOps
 import automorph.{Handler, JsonRpcError}
 import java.io.IOException
 import scala.collection.immutable.ArraySeq

@@ -34,7 +34,7 @@ private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_],
    * @param api API instance
    * @tparam Api API type (only member methods of this type are exposed)
    * @return JSON-RPC server with added API bindings
-   * @throws IllegalArgumentException if invalid public methods are found in the API type
+   * @throws scala.IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef](api: Api): ThisHandler = bind(api, name => Seq(name))
 
