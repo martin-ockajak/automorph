@@ -19,7 +19,7 @@ private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_],
   type ThisHandler = Handler[Node, ExactCodec, Effect, Context]
 
   /**
-   * Create a copy of this handler with generated method bindings for all valid public methods of the specified API.
+   * Creates a copy of this handler with generated method bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -41,7 +41,7 @@ private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_],
     macro HandlerBind.basicBindMacro[Node, ExactCodec, Effect, Context, Api]
 
   /**
-   * Create a copy of this handler with generated method bindings for all valid public methods of the specified API.
+   * Creates a copy of this handler with generated method bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime

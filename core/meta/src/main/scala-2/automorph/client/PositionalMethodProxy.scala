@@ -19,10 +19,10 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
   type NamedMethod = NamedMethodProxy[Node, ExactCodec, Effect, Context]
 
   /**
-   * Create a copy of this method invoker passing method arguments ''by name'' with specified argument names.
+   * Creates a copy of this method proxy passing method arguments ''by name'' with specified argument names.
    *
    * @param argumentNames method argument names
-   * @return method invoker passing method arguments ''by name''
+   * @return method proxy
    */
   def named(argumentNames: String*): NamedMethod = NamedMethodProxy(
     methodName,
@@ -37,91 +37,91 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
   )
 
   /**
-   * Create a copy of this method invoker with specified argument values.
+   * Creates a copy of this method proxy with specified argument values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   def args(): PositionalMethod = copy(argumentValues = Seq(), encodedArguments = Seq())
 
   /**
-   * Create a copy of this method invoker with specified argument values.
+   * Creates a copy of this method proxy with specified argument values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   def args[T1](p1: T1): PositionalMethod = macro PositionalMethodProxy.argsMacro[PositionalMethod, T1]
 
   /**
-   * Create a copy of this method invoker with specified argument values.
+   * Creates a copy of this method proxy with specified argument values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   def args[T1, T2](p1: T1, p2: T2): PositionalMethod = macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2]
 
   /**
-   * Create a copy of this method invoker with specified argument values.
+   * Creates a copy of this method proxy with specified argument values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): PositionalMethod = macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2, T3]
 
   /**
-   * Create a copy of this method invoker with specified argument values.
+   * Creates a copy of this method proxy with specified argument values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   def args[T1, T2, T3, T4](p1: T1, p2: T2, p3: T3, p4: T4): PositionalMethod =
     macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2, T3, T4]
 
   /**
-   * Create a copy of this method invoker with specified argument values.
+   * Creates a copy of this method proxy with specified argument values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   def args[T1, T2, T3, T4, T5](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5): PositionalMethod =
     macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2, T3, T4, T5]
 
   /**
-   * Create a copy of this method invoker with specified argument values.
+   * Creates a copy of this method proxy with specified argument values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   def args[T1, T2, T3, T4, T5, T6](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6): PositionalMethod =
     macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2, T3, T4, T5, T6]
 
   /**
-   * Create a copy of this method invoker with specified argument values.
+   * Creates a copy of this method proxy with specified argument values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   def args[T1, T2, T3, T4, T5, T6, T7](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6, p7: T7): PositionalMethod =
     macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2, T3, T4, T5, T6, T7]
 
   /**
-   * Send a remote JSON-RPC method ''call'' request with specified result type extracted from the response.
+   * Sends a remote JSON-RPC method ''call'' request with specified result type extracted from the response.
    *
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
@@ -132,7 +132,7 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
   def call[R](implicit context: Context): Effect[R] = macro NamedMethodProxy.callMacro[Effect, Context, R]
 
   /**
-   * Send a remote JSON-RPC method ''notification'' request disregarding the response.
+   * Sends a remote JSON-RPC method ''notification'' request disregarding the response.
    *
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *

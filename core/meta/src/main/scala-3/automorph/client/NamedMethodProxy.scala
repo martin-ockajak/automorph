@@ -17,9 +17,9 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
   type NamedMethod = NamedMethodProxy[Node, ExactCodec, Effect, Context]
 
   /**
-   * Create a copy of this method invoker without argument names passing method arguments ''by position''.
+   * Creates a copy of this method proxy without argument names passing method arguments ''by position''.
    *
-   * @return method invoker without argument names passing method arguments ''by position''
+   * @return method proxy without argument names passing method arguments ''by position''
    */
   def positional: PositionalMethod = PositionalMethodProxy(
     methodName,
@@ -32,12 +32,12 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
   )
 
   /**
-   * Create a copy of this method invoker with specified argument names and values.
+   * Creates a copy of this method proxy with specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   def args(): NamedMethod = copy(
     argumentValues = Seq(),
@@ -45,12 +45,12 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
   )
 
   /**
-   * Create a copy of this method invoker with specified argument names and values.
+   * Creates a copy of this method proxy with specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   inline def args[T1](p1: (String, T1)): NamedMethod = copy(
     argumentValues = Seq(p1),
@@ -60,12 +60,12 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
   )
 
   /**
-   * Create a copy of this method invoker with specified argument names and values.
+   * Creates a copy of this method proxy with specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   inline def args[T1, T2](p1: (String, T1), p2: (String, T2)): NamedMethod = copy(
     argumentValues = Seq(p1, p2),
@@ -76,12 +76,12 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
   )
 
   /**
-   * Create a copy of this method invoker with specified argument names and values.
+   * Creates a copy of this method proxy with specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   inline def args[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3)): NamedMethod = copy(
     argumentValues = Seq(p1, p2, p3),
@@ -93,12 +93,12 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
   )
 
   /**
-   * Create a copy of this method invoker with specified argument names and values.
+   * Creates a copy of this method proxy with specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   inline def args[T1, T2, T3, T4](
     p1: (String, T1),
@@ -117,12 +117,12 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
     )
 
   /**
-   * Create a copy of this method invoker with specified argument names and values.
+   * Creates a copy of this method proxy with specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   inline def args[T1, T2, T3, T4, T5](
     p1: (String, T1),
@@ -143,12 +143,12 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
     )
 
   /**
-   * Create a copy of this method invoker with specified argument names and values.
+   * Creates a copy of this method proxy with specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   inline def args[T1, T2, T3, T4, T5, T6](
     p1: (String, T1),
@@ -171,12 +171,12 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
     )
 
   /**
-   * Create a copy of this method invoker with specified argument names and values.
+   * Creates a copy of this method proxy with specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
    * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
    *
-   * @return method invoker with specified method arguments
+   * @return method proxy
    */
   inline def args[T1, T2, T3, T4, T5, T6, T7](
     p1: (String, T1),
@@ -201,7 +201,7 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
     )
 
   /**
-   * Send a remote JSON-RPC method ''call'' request with specified result type extracted from the response.
+   * Sends a remote JSON-RPC method ''call'' request with specified result type extracted from the response.
    *
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
@@ -213,7 +213,7 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
     call(methodName, Some(argumentValues.map(_._1)), encodedArguments, codec.decode[R](_), Some(context))
 
   /**
-   * Send a remote JSON-RPC method ''notification'' request disregarding the response.
+   * Sends a remote JSON-RPC method ''notification'' request disregarding the response.
    *
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *

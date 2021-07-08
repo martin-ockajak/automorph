@@ -16,7 +16,7 @@ private[automorph] trait ClientBind[Node, ExactCodec <: Codec[Node], Effect[_], 
   this: ClientCore[Node, ExactCodec, Effect, Context] =>
 
   /**
-   * Create a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
+   * Creates a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -37,7 +37,7 @@ ne
   def bind[Api <: AnyRef]: Api = macro ClientBind.bindNamedMacro[Node, ExactCodec, Effect, Context, Api]
 
   /**
-   * Create a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
+   * Creates a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -57,7 +57,7 @@ ne
    def bindPositional[Api <: AnyRef]: Api = macro ClientBind.bindPositionalMacro[Node, ExactCodec, Effect, Context, Api]
 
   /**
-   * Create a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
+   * Creates a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
