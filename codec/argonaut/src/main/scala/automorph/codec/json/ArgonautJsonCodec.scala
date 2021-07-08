@@ -11,6 +11,7 @@ import scala.collection.immutable.ArraySeq
  *
  * @see [[http://argonaut.io/doc/]]
  * @see [[http://argonaut.io/scaladocs/#argonaut.Json Node type]]
+ * @constructor Creates an Argonaut codec plugin using JSON as message format.
  */
 final case class ArgonautJsonCodec() extends ArgonautJsonCodecMeta {
 

@@ -5,10 +5,11 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
 /**
- * Future effect asynchronous backend plugin.
+ * Asynchronous backend plugin using Future as an effect type.
  *
  * @see [[https://docs.scala-lang.org/overviews/core/futures.html Documentation]]
  * @see Effect type: [[scala.concurrent.Future]]
+ * @constructor Creates an asynchronous backend plugin using `Future` as an effect type.
  * @param executionContext execution context
  */
 final case class FutureBackend()(implicit executionContext: ExecutionContext) extends Backend[Future] {

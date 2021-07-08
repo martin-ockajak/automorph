@@ -4,10 +4,11 @@ import automorph.spi.Backend
 import scala.util.{Failure, Success, Try}
 
 /**
- * Try effect synchronous backend plugin.
+ * Synchronous backend plugin using `Try` as an effect type.
  *
  * @see [[https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html Documentation]]
  * @see Effect type: [[scala.util.Try]]
+ * @constructor Creates a synchronous backend plugin using ''Try'' as an effect type.
  */
 final case class TryBackend() extends Backend[Try] {
 

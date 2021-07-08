@@ -4,10 +4,11 @@ import cats.effect.IO
 import automorph.spi.Backend
 
 /**
- * Cats Effect effect backend plugin.
+ * Cats Effect backend plugin.
  *
  * @see [[https://typelevel.org/cats-effect/ Documentation]]
  * @see [[https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html Effect type]]
+ * @constructor Creates a Cats Effect backend plugin using `IO` as an effect type.
  */
 final case class CatsEffectBackend() extends Backend[IO] {
 

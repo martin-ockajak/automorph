@@ -4,11 +4,12 @@ import automorph.backend.IdentityBackend.Identity
 import automorph.spi.Backend
 
 /**
- * Identity synchronous backend plugin.
+ * Synchronous backend plugin using identity as an effect type.
  *
- * Represents direct use of plain values without wrapping them in an effect.
+ * Represents direct use of computed values without wrapping them in an effect.
  *
  * Effect type: original value type
+ * @constructor Creates a synchronous backend plugin using identity as an effect type.
  */
 final case class IdentityBackend() extends Backend[Identity] {
 
