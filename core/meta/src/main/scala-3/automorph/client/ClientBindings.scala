@@ -12,7 +12,7 @@ private[automorph] case object ClientBindings:
   private val debugProperty = "automorph.macro.debug"
 
   /**
-   * Generate client bindings for all valid public methods of an API type.
+   * Generates client bindings for all valid public methods of an API type.
    *
    * @param codec message format codec plugin
    * @tparam Node message node type

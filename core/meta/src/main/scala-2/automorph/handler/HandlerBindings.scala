@@ -12,7 +12,7 @@ case object HandlerBindings {
   private val debugProperty = "automorph.macro.debug"
 
   /**
-   * Generate handler bindings for all valid public methods of an API type.
+   * Generates handler bindings for all valid public methods of an API type.
    *
    * @param codec message format codec plugin
    * @param backend effect backend plugin

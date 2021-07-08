@@ -36,7 +36,7 @@ private[automorph] case object MethodBindings:
     }
 
   /**
-   * Detect valid API methods in the specified API type.
+   * Detects valid API methods in an API type.
    *
    * @param ref reflection
    * @tparam ApiType API type
@@ -80,7 +80,7 @@ private[automorph] case object MethodBindings:
     )
 
   /**
-   * Determine whether a method uses request context as its parameter.
+   * Determines whether a method uses request context as its parameter.
    *
    * @param ref reflection context
    * @param method method descriptor
@@ -93,7 +93,7 @@ private[automorph] case object MethodBindings:
     }
 
   /**
-   * Extract type wrapped in the specified wrapper type.
+   * Extracts type wrapped in a wrapper type.
    *
    * @param q quotation context
    * @param wrappedType wrapped type
@@ -107,7 +107,7 @@ private[automorph] case object MethodBindings:
       case otherType => otherType
 
   /**
-   * Create API method signature.
+   * Creates a method signature.
    *
    * @param ref reflection context
    * @param method method descriptor
@@ -120,7 +120,7 @@ private[automorph] case object MethodBindings:
     s"${TypeRepr.of[ApiType].show(using Printer.TypeReprCode)}.${method.lift.signature}"
 
   /**
-   * Determine whether a method is a valid API method.
+   * Determines whether a method is a valid API method.
    *
    * @param ref reflection context
    * @param method method descriptor
