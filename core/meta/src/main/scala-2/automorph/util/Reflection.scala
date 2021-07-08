@@ -46,7 +46,7 @@ private[automorph] final case class Reflection[C <: Context](c: C) {
   }
 
   /**
-   * Describe class methods within quoted context.
+   * Describes class methods within quoted context.
    *
    * @param classType class type representation
    * @return quoted class method descriptors

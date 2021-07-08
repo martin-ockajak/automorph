@@ -41,7 +41,7 @@ final private[automorph] case class Reflection(q: Quotes):
     )
 
   /**
-   * Describe class methods within quoted context.
+   * Describes class methods within quoted context.
    *
    * @param classType class type representation
    * @return quoted class method descriptors
