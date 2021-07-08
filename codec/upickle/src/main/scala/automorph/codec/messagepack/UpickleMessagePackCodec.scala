@@ -6,10 +6,11 @@ import scala.collection.immutable.ArraySeq
 import upack.Msg
 
 /**
- * UPickle codec plugin using MessagePack as message format.
+ * uPickle codec plugin using MessagePack as message format.
  *
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[http://com-lihaoyi.github.io/upickle/#uPack Node type]]
+ * @constructor Creates a uPickle codec plugin using MessagePack as message format.
  * @param custom customized Upickle reader and writer implicits instance
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */

@@ -6,10 +6,11 @@ import scala.collection.immutable.ArraySeq
 import ujson.Value
 
 /**
- * UPickle codec plugin using JSON as message format.
+ * uPickle codec plugin using JSON as message format.
  *
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[http://com-lihaoyi.github.io/upickle/#uJson Node type]]
+ * @constructor Creates an uPickle codec plugin using JSON as message format.
  * @param custom customized Upickle reader and writer implicits instance
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */

@@ -6,6 +6,7 @@ import zio.RIO
 /**
  * ZIO effect backend plugin.
  *
+ * @constructor Creates a ZIO effect backend plugin.
  * @see [[https://zio.dev/ Documentation]]
  * @see [[https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html Effect type]]
  * @tparam Environment ZIO environment type

@@ -9,11 +9,11 @@ import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArray
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
- * STTP transport using HTTP as message transport protocol with the specified STTP backend.
+ * STTP transport plugin using HTTP as message transport protocol with the specified STTP backend.
  *
  * @see [[https://sttp.softwaremill.com/en/latest/ Documentation]]
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
- * @constructor Creates an STTP transport using HTTP as message transport protocol with the specified STTP backend.
+ * @constructor Creates an STTP transport plugin using HTTP as message transport protocol with the specified STTP backend.
  * @param url endpoint URL
  * @param backend effect backend plugin
  * @param method HTTP method
