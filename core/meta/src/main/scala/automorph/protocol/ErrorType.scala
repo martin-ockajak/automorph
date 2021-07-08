@@ -1,9 +1,9 @@
 package automorph.protocol
 
 /**
- * JSON-RPC error types with codes.
+ * JSON-RPC error type with code.
  *
- * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  */
 sealed abstract class ErrorType(val code: Int) {
   def name: String = toString
@@ -12,7 +12,7 @@ sealed abstract class ErrorType(val code: Int) {
 /**
  * JSON-RPC error types with codes.
  *
- * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  */
 object ErrorType {
 

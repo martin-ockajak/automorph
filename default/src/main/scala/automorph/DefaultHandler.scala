@@ -18,7 +18,7 @@ case object DefaultHandler {
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param backend effectful computation backend plugin
    * @tparam Effect effect type
    * @tparam Context request context type
@@ -32,7 +32,7 @@ case object DefaultHandler {
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param executionContext execution context
    * @return asynchronous JSON-RPC request handler
    */
@@ -44,7 +44,7 @@ case object DefaultHandler {
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @return synchronous JSON-RPC request handler
    */
   def sync[Context](): DefaultHandler[Identity, Context] =
@@ -55,7 +55,7 @@ case object DefaultHandler {
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param backend effect backend plugin
    * @tparam Effect effect type
    * @return JSON-RPC request handler
@@ -68,7 +68,7 @@ case object DefaultHandler {
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param executionContext execution context
    * @return asynchronous JSON-RPC request handler
    */
@@ -80,7 +80,7 @@ case object DefaultHandler {
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param executionContext execution context
    * @return asynchronous JSON-RPC request handler
    */

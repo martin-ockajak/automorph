@@ -7,11 +7,11 @@ import automorph.spi.Message.{Id, Params, version}
 /**
  * JSON-RPC request.
  *
- * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param id call identifier, a request without and identifier is considered to be a notification
  * @param method invoked method name
  * @param params invoked method argument values by position or by name
- * @tparam Node message node representation type
+ * @tparam Node message node type
  */
 private[automorph] final case class Request[Node](
   id: Option[Id],

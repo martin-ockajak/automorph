@@ -19,7 +19,7 @@ case object DefaultHttpClient {
    *
    * The client can be used to perform JSON-RPC calls and notifications.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param url HTTP endpoint URL
    * @param httpMethod HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @param backend effectful computation backend plugin
@@ -43,7 +43,7 @@ case object DefaultHttpClient {
    *
    * The client can be used to perform JSON-RPC calls and notifications.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url HTTP endpoint URL
    * @param httpMethod HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
@@ -60,7 +60,7 @@ case object DefaultHttpClient {
    *
    * The client can be used to perform JSON-RPC calls and notifications.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url HTTP endpoint URL
    * @param httpMethod HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)

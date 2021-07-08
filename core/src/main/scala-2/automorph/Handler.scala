@@ -13,7 +13,7 @@ import scala.reflect.macros.blackbox
  *
  * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
  *
- * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Creates a new JSON-RPC request handler using the specified ''codec'' and ''backend'' plugins with defined request `Context` type.
  * @param codec hierarchical message format codec plugin
  * @param backend effectful computation backend plugin
@@ -42,7 +42,7 @@ case object Handler {
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec hierarchical message format codec plugin
    * @param backend effectful computation backend plugin
    * @tparam Node message node type
@@ -76,7 +76,7 @@ case object Handler {
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec hierarchical message format codec plugin
    * @param backend effectful computation backend plugin
    * @tparam Node message node type

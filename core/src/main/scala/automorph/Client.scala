@@ -13,7 +13,7 @@ import java.io.IOException
  *
  * The client can be used to perform JSON-RPC calls and notifications.
  *
- * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Creates a JSON-RPC client using the specified ''codec'', ''backend'' and ''transport'' plugins with defined request `Context` type.
  * @param codec hierarchical message format codec plugin
  * @param backend effectful computation backend plugin
@@ -65,7 +65,7 @@ case object Client {
    *
    * The client can be used to perform JSON-RPC calls and notifications.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec hierarchical message format codec plugin
    * @param backend effectful computation backend plugin
    * @param transport message transport protocol plugin

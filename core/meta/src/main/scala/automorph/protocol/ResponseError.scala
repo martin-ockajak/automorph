@@ -7,11 +7,11 @@ import automorph.spi.MessageError
 /**
  * JSON-RPC call response error.
  *
- * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param code error code
  * @param message error description
  * @param data additional error information
- * @tparam Node message node representation type
+ * @tparam Node message node type
  */
 private[automorph] final case class ResponseError[Node](
   code: Int,

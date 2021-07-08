@@ -7,10 +7,10 @@ import automorph.spi.Message.{Id, version}
 /**
  * JSON-RPC call response.
  *
- * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param id call identifier
  * @param value response value, either a result or an error
- * @tparam Node message node representation type
+ * @tparam Node message node type
  */
 private[automorph] final case class Response[Node](
   id: Id,

@@ -5,9 +5,9 @@ import automorph.spi.Message
 /**
  * JSON-RPC handler request processing result.
  *
- * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param response response message
- * @param id call identifier, a request without and identifier is considered to be a notification
+ * @param id call identifier (a request without and identifier is considered to be a notification)
  * @param method invoked method name
  * @param errorCode failed call error code
  * @tparam Data message data type

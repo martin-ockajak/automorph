@@ -17,7 +17,7 @@ case object DefaultHttpServer {
   /**
    * Creates a JSON-RPC server using the specified ''backend'' plugin.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @see [[https://undertow.io HTTP Server Documentation]]
    * @param backend effectful computation backend plugin
    * @param runEffect effect execution function
@@ -45,7 +45,7 @@ case object DefaultHttpServer {
   /**
    * Creates an asynchronous JSON-RPC request handler with defined request `Context` type.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param bindApis function to bind APIs to the underlying JSON-RPC handler
    * @param port port to listen on for HTTP connections
    * @param urlPath HTTP URL path (default: /)
@@ -72,7 +72,7 @@ case object DefaultHttpServer {
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
-   * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param bindApis function to bind APIs to the underlying JSON-RPC handler
    * @param port port to listen on for HTTP connections
    * @param urlPath HTTP URL path (default: /)

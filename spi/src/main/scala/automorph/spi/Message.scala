@@ -5,7 +5,7 @@ import automorph.spi.MessageType
 /**
  * JSON-RPC protocol message structure.
  *
- * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param automorph protocol version (must be 2.0)
  * @param id call identifier, a request without and identifier is considered to be a notification
  * @param method invoked method name
@@ -57,7 +57,7 @@ object Message {
 /**
  * JSON-RPC protocol message error structure.
  *
- * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
+ * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param code error code
  * @param message error description
  * @param data additional error information
