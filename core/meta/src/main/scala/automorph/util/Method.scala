@@ -7,9 +7,9 @@ package automorph.util
  * @param resultType result type
  * @param parameters parameters
  * @param typeParameters type parameters
- * @param public true if the method is publicly accessible
- * @param available true if the method can be called
- * @param documentation documentation
+ * @param public true if this method is publicly accessible
+ * @param available true if it possible to call this method
+ * @param documentation documentation (Scaladoc)
  */
 final case class Method(
   name: String,
