@@ -5,7 +5,7 @@ import automorph.transport.http.SttpTransport.RequestProperties
 import java.io.IOException
 import java.net.URL
 import scala.collection.immutable.ArraySeq
-import sttp.client3.{PartialRequest, Request, Response, SttpApi, SttpBackend, basicRequest}
+import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArray, basicRequest, ignore}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
@@ -24,7 +24,7 @@ final case class SttpTransport[Effect[_]](
   method: String,
   backend: Backend[Effect],
   sttpBackend: SttpBackend[Effect, _]
-) extends Transport[Effect, RequestProperties] with SttpApi {
+) extends Transport[Effect, RequestProperties] {
   private val uri = Uri.unsafeParse(url)
   private val httpMethod = Method.unsafeApply(method)
 
