@@ -19,8 +19,8 @@ case object DefaultHttpClient {
    * The client can be used to perform JSON-RPC calls and notifications.
    *
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
-   * @param url endpoint URL
-   * @param httpMethod HTTP method
+   * @param url HTTP endpoint URL
+   * @param httpMethod HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @param backend effect backend plugin
    * @param sttpBackend HTTP client backend
    * @tparam Effect effect type
@@ -44,8 +44,8 @@ case object DefaultHttpClient {
    *
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
-   * @param url endpoint URL
-   * @param httpMethod HTTP method
+   * @param url HTTP endpoint URL
+   * @param httpMethod HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @param executionContext execution context
    * @return asynchronous JSON-RPC over HTTP client
    */
@@ -61,8 +61,8 @@ case object DefaultHttpClient {
    *
    * @see [[https://www.automorph.org/specification JSON-RPC protocol specification]]
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
-   * @param url endpoint URL
-   * @param httpMethod HTTP method
+   * @param url HTTP endpoint URL
+   * @param httpMethod HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @return synchronous JSON-RPC over HTTP client
    */
   def sync(url: String, httpMethod: String): DefaultClient[Identity] = {
