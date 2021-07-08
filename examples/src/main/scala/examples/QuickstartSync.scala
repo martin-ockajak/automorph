@@ -1,4 +1,4 @@
-package automorph.example
+package examples
 
 object QuickstartSync extends App {
 

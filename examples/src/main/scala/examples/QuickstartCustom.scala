@@ -1,4 +1,4 @@
-//package automorph.example
+//package examples
 //
 //import zio.{Runtime, Task}
 //import org.asynchttpclient.DefaultAsyncHttpClient

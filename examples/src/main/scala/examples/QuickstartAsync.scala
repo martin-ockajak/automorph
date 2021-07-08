@@ -1,4 +1,4 @@
-package automorph.example
+package examples
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
