@@ -1,6 +1,6 @@
 package examples
 
-object QuickstartSync extends App {
+object Synchronous extends App {
 
   class SyncApi {
     def hello(some: String, n: Int): String = s"Hello $some $n!"
