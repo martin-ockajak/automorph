@@ -7,8 +7,8 @@ import scala.reflect.macros.blackbox
 
 case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   methodName: String,
-  private val core: ClientCore[Node, ExactCodec, Effect, Context],
-  private val argumentValues: Seq[Any],
+  core: ClientCore[Node, ExactCodec, Effect, Context],
+  val argumentValues: Seq[Any],
   private val encodedArguments: Seq[Node]
 ) extends CannotEqual {
 
@@ -48,7 +48,7 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
    *
    * @return method proxy
    */
-  def args[T1](p1: T1): PositionalMethod = macro PositionalMethodProxy.argsMacro[PositionalMethod, T1]
+  def args[T1](p1: T1): PositionalMethod = macro PositionalMethodProxy.args1Macro[PositionalMethod, T1]
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -58,7 +58,7 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
    *
    * @return method proxy
    */
-  def args[T1, T2](p1: T1, p2: T2): PositionalMethod = macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2]
+  def args[T1, T2](p1: T1, p2: T2): PositionalMethod = macro PositionalMethodProxy.args2Macro[PositionalMethod, T1, T2]
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -69,7 +69,7 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
    * @return method proxy
    */
   def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): PositionalMethod =
-    macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2, T3]
+    macro PositionalMethodProxy.args3Macro[PositionalMethod, T1, T2, T3]
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -80,7 +80,7 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
    * @return method proxy
    */
   def args[T1, T2, T3, T4](p1: T1, p2: T2, p3: T3, p4: T4): PositionalMethod =
-    macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2, T3, T4]
+    macro PositionalMethodProxy.args4Macro[PositionalMethod, T1, T2, T3, T4]
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -91,7 +91,7 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
    * @return method proxy
    */
   def args[T1, T2, T3, T4, T5](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5): PositionalMethod =
-    macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2, T3, T4, T5]
+    macro PositionalMethodProxy.args5Macro[PositionalMethod, T1, T2, T3, T4, T5]
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -102,7 +102,7 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
    * @return method proxy
    */
   def args[T1, T2, T3, T4, T5, T6](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6): PositionalMethod =
-    macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2, T3, T4, T5, T6]
+    macro PositionalMethodProxy.args6Macro[PositionalMethod, T1, T2, T3, T4, T5, T6]
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -113,7 +113,7 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
    * @return method proxy
    */
   def args[T1, T2, T3, T4, T5, T6, T7](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6, p7: T7): PositionalMethod =
-    macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2, T3, T4, T5, T6, T7]
+    macro PositionalMethodProxy.args7Macro[PositionalMethod, T1, T2, T3, T4, T5, T6, T7]
 
   /**
    * Sends a remote JSON-RPC method ''call'' request with specified result type extracted from the response.
@@ -143,7 +143,7 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
 
 case object PositionalMethodProxy {
 
-  def argsMacro[MethodProxyType, T1: c.WeakTypeTag](c: blackbox.Context)(
+  def args1Macro[MethodProxyType, T1: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[T1]
   ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
@@ -156,7 +156,7 @@ case object PositionalMethodProxy {
     """)
   }
 
-  def argsMacro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag](c: blackbox.Context)(
+  def args2Macro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[T1],
     p2: c.Expr[T2]
   ): c.Expr[MethodProxyType] = {
@@ -171,7 +171,7 @@ case object PositionalMethodProxy {
     """)
   }
 
-  def argsMacro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag](c: blackbox.Context)(
+  def args3Macro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[T1],
     p2: c.Expr[T2],
     p3: c.Expr[T3]
@@ -188,7 +188,7 @@ case object PositionalMethodProxy {
     """)
   }
 
-  def argsMacro[
+  def args4Macro[
     MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
@@ -213,7 +213,7 @@ case object PositionalMethodProxy {
     """)
   }
 
-  def argsMacro[
+  def args5Macro[
     MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
@@ -241,7 +241,7 @@ case object PositionalMethodProxy {
     """)
   }
 
-  def argsMacro[
+  def args6Macro[
     MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
@@ -272,7 +272,7 @@ case object PositionalMethodProxy {
     """)
   }
 
-  def argsMacro[
+  def args7Macro[
     MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
@@ -303,163 +303,6 @@ case object PositionalMethodProxy {
           ${c.prefix}.core.codec.encode[${weakTypeOf[T6]}]($p6),
           ${c.prefix}.core.codec.encode[${weakTypeOf[T7]}]($p7)
       ))
-    """)
-  }
-
-  def namedArgsMacro[MethodProxyType, T1: c.WeakTypeTag](c: blackbox.Context)(
-    p1: c.Expr[(String, T1)]
-  ): c.Expr[MethodProxyType] = {
-    import c.universe.{Quasiquote, weakTypeOf}
-
-    c.Expr[MethodProxyType](q"""
-      ${c.prefix}.copy(
-        argumentNames = Some(Seq($p1._1)),
-        argumentValues = Seq($p1._2),
-        encodedArguments = Seq(
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1)
-      ))
-    """)
-  }
-
-  def namedArgsMacro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag](c: blackbox.Context)(
-    p1: c.Expr[(String, T1)],
-    p2: c.Expr[(String, T2)]
-  ): c.Expr[MethodProxyType] = {
-    import c.universe.{Quasiquote, weakTypeOf}
-
-    c.Expr[MethodProxyType](q"""
-      ${c.prefix}.copy(
-        argumentNames = Some(Seq($p1._1, $p2._1)),
-        argumentValues = Seq($p1._2, $p2._2),
-        encodedArguments = Seq(
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2)
-      ))
-    """)
-  }
-
-  def namedArgsMacro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag](c: blackbox.Context)(
-    p1: c.Expr[(String, T1)],
-    p2: c.Expr[(String, T2)],
-    p3: c.Expr[(String, T3)]
-  ): c.Expr[MethodProxyType] = {
-    import c.universe.{Quasiquote, weakTypeOf}
-
-    c.Expr[MethodProxyType](q"""
-      ${c.prefix}.copy(
-        argumentNames = Some(Seq($p1._1, $p2._1, $p3._1)),
-        argumentValues = Seq($p1._2, $p2._2, $p3._2),
-        encodedArguments = Seq(
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3)
-      ))
-    """)
-  }
-
-  def namedArgsMacro[
-    MethodProxyType,
-    T1: c.WeakTypeTag,
-    T2: c.WeakTypeTag,
-    T3: c.WeakTypeTag,
-    T4: c.WeakTypeTag
-  ](c: blackbox.Context)(
-    p1: c.Expr[(String, T1)],
-    p2: c.Expr[(String, T2)],
-    p3: c.Expr[(String, T3)],
-    p4: c.Expr[(String, T4)]
-  ): c.Expr[MethodProxyType] = {
-    import c.universe.{Quasiquote, weakTypeOf}
-
-    c.Expr[MethodProxyType](q"""
-      ${c.prefix}.copy(
-        argumentNames = Some(Seq($p1._1, $p2._1, $p3._1, $p4._1)),
-        argumentValues = Seq($p1._2, $p2._2, $p3._2, $p4._2),
-        encodedArguments = Seq(
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T4]}]($p4)
-      ))
-    """)
-  }
-
-  def namedArgsMacro[
-    MethodProxyType,
-    T1: c.WeakTypeTag,
-    T2: c.WeakTypeTag,
-    T3: c.WeakTypeTag,
-    T4: c.WeakTypeTag,
-    T5: c.WeakTypeTag
-  ](c: blackbox.Context)(
-    p1: c.Expr[(String, T1)],
-    p2: c.Expr[(String, T2)],
-    p3: c.Expr[(String, T3)],
-    p4: c.Expr[(String, T4)],
-    p5: c.Expr[(String, T5)]
-  ): c.Expr[MethodProxyType] = {
-    import c.universe.{Quasiquote, weakTypeOf}
-
-    c.Expr[MethodProxyType](q"""
-      ${c.prefix}.copy(
-        argumentNames = Some(Seq($p1._1, $p2._1, $p3._1, $p4._1, $p5._1)),
-        argumentValues = Seq($p1._2, $p2._2, $p3._2, $p4._2, $p5._2),
-        encodedArguments = Seq(
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T4]}]($p4),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T5]}]($p5)
-      ))
-    """)
-  }
-
-  def namedArgsMacro[
-    MethodProxyType,
-    T1: c.WeakTypeTag,
-    T2: c.WeakTypeTag,
-    T3: c.WeakTypeTag,
-    T4: c.WeakTypeTag,
-    T5: c.WeakTypeTag,
-    T6: c.WeakTypeTag
-  ](c: blackbox.Context)(
-    p1: c.Expr[(String, T1)],
-    p2: c.Expr[(String, T2)],
-    p3: c.Expr[(String, T3)],
-    p4: c.Expr[(String, T4)],
-    p5: c.Expr[(String, T5)],
-    p6: c.Expr[(String, T6)]
-  ): c.Expr[MethodProxyType] = {
-    import c.universe.{Quasiquote, weakTypeOf}
-
-    c.Expr[MethodProxyType](q"""
-      ${c.prefix}.copy(
-        argumentNames = Some(Seq($p1._1, $p2._1, $p3._1, $p4._1, $p5._1, $p6._1)),
-        argumentValues = Seq($p1._2, $p2._2, $p3._2, $p4._2, $p5._2, $p6._2),
-        encodedArguments = Seq(
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T4]}]($p4),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T5]}]($p5),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T6]}]($p6)
-      ))
-    """)
-  }
-
-  def callMacro[Effect[_], Context, R: c.WeakTypeTag](c: blackbox.Context)(
-    context: c.Expr[Context]
-  )(implicit resultType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
-    import c.universe.{Quasiquote, weakTypeOf}
-
-    c.Expr[Effect[R]](q"""
-      ${c.prefix}.core.call(
-        ${c.prefix}.methodName,
-        None,
-        ${c.prefix}.encodedArguments,
-        ${c.prefix}.core.codec.decode[${weakTypeOf[R]}](_),
-        Some($context)
-      )
     """)
   }
 }

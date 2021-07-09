@@ -7,8 +7,8 @@ import scala.reflect.macros.blackbox
 
 case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   methodName: String,
-  private val core: ClientCore[Node, ExactCodec, Effect, Context],
-  private val argumentValues: Seq[(String, Any)],
+  core: ClientCore[Node, ExactCodec, Effect, Context],
+  val argumentValues: Seq[(String, Any)],
   private val encodedArguments: Seq[Node]
 ) extends CannotEqual {
 
@@ -45,7 +45,7 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
    *
    * @return method proxy
    */
-  def args[T1](p1: (String, T1)): NamedMethod = macro NamedMethodProxy.argsMacro[NamedMethod, T1]
+  def args[T1](p1: (String, T1)): NamedMethod = macro NamedMethodProxy.args1Macro[NamedMethod, T1]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
@@ -56,7 +56,7 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
    * @return method proxy
    */
   def args[T1, T2](p1: (String, T1), p2: (String, T2)): NamedMethod =
-    macro NamedMethodProxy.argsMacro[NamedMethod, T1, T2]
+    macro NamedMethodProxy.args2Macro[NamedMethod, T1, T2]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
@@ -67,7 +67,7 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
    * @return method proxy
    */
   def args[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3)): NamedMethod =
-    macro NamedMethodProxy.argsMacro[NamedMethod, T1, T2, T3]
+    macro NamedMethodProxy.args3Macro[NamedMethod, T1, T2, T3]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
@@ -78,7 +78,7 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
    * @return method proxy
    */
   def args[T1, T2, T3, T4](p1: (String, T1), p2: (String, T2), p3: (String, T3), p4: (String, T4)): NamedMethod =
-    macro NamedMethodProxy.argsMacro[NamedMethod, T1, T2, T3, T4]
+    macro NamedMethodProxy.args4Macro[NamedMethod, T1, T2, T3, T4]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
@@ -94,7 +94,7 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
     p3: (String, T3),
     p4: (String, T4),
     p5: (String, T5)
-  ): NamedMethod = macro NamedMethodProxy.argsMacro[NamedMethod, T1, T2, T3, T4, T5]
+  ): NamedMethod = macro NamedMethodProxy.args5Macro[NamedMethod, T1, T2, T3, T4, T5]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
@@ -111,7 +111,7 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
     p4: (String, T4),
     p5: (String, T5),
     p6: (String, T6)
-  ): NamedMethod = macro NamedMethodProxy.argsMacro[NamedMethod, T1, T2, T3, T4, T5, T6]
+  ): NamedMethod = macro NamedMethodProxy.args6Macro[NamedMethod, T1, T2, T3, T4, T5, T6]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
@@ -129,7 +129,7 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
     p5: (String, T5),
     p6: (String, T6),
     p7: (String, T7)
-  ): NamedMethod = macro NamedMethodProxy.argsMacro[NamedMethod, T1, T2, T3, T4, T5, T6, T7]
+  ): NamedMethod = macro NamedMethodProxy.args7Macro[NamedMethod, T1, T2, T3, T4, T5, T6, T7]
 
   /**
    * Sends a remote JSON-RPC method ''call'' request with specified result type extracted from the response.
@@ -159,7 +159,7 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
 
 case object NamedMethodProxy {
 
-  def argsMacro[MethodProxyType, T1: c.WeakTypeTag](c: blackbox.Context)(
+  def args1Macro[MethodProxyType, T1: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[(String, T1)]
   ): c.Expr[MethodProxyType] = {
     import c.universe.{Quasiquote, weakTypeOf}
@@ -173,7 +173,7 @@ case object NamedMethodProxy {
     """)
   }
 
-  def argsMacro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag](c: blackbox.Context)(
+  def args2Macro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[(String, T1)],
     p2: c.Expr[(String, T2)]
   ): c.Expr[MethodProxyType] = {
@@ -189,7 +189,7 @@ case object NamedMethodProxy {
     """)
   }
 
-  def argsMacro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag](c: blackbox.Context)(
+  def args3Macro[MethodProxyType, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[(String, T1)],
     p2: c.Expr[(String, T2)],
     p3: c.Expr[(String, T3)]
@@ -207,7 +207,7 @@ case object NamedMethodProxy {
     """)
   }
 
-  def argsMacro[
+  def args4Macro[
     MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
@@ -233,7 +233,7 @@ case object NamedMethodProxy {
     """)
   }
 
-  def argsMacro[
+  def args5Macro[
     MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
@@ -262,7 +262,7 @@ case object NamedMethodProxy {
     """)
   }
 
-  def argsMacro[
+  def args6Macro[
     MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
@@ -294,7 +294,7 @@ case object NamedMethodProxy {
     """)
   }
 
-  def argsMacro[
+  def args7Macro[
     MethodProxyType,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
