@@ -248,7 +248,7 @@ val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : String
 ```
 
-## Asynchronous
+## [Asynchronous](/blob/main/examples/src/main/scala/examples/Asynchronous.scala)
 
 ### API
 
