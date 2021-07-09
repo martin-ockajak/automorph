@@ -1,6 +1,5 @@
 package examples
 
-import io.undertow.server.HttpServerExchange
 import zio.{Runtime, Task}
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
