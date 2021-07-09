@@ -8,8 +8,8 @@ import scala.reflect.macros.blackbox
 case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   methodName: String,
   core: ClientCore[Node, ExactCodec, Effect, Context],
-  val argumentValues: Seq[Any],
-  private val encodedArguments: Seq[Node]
+  argumentValues: Seq[Any],
+  encodedArguments: Seq[Node]
 ) extends CannotEqual {
 
   type PositionalMethod = PositionalMethodProxy[Node, ExactCodec, Effect, Context]
@@ -303,6 +303,22 @@ case object PositionalMethodProxy {
           ${c.prefix}.core.codec.encode[${weakTypeOf[T6]}]($p6),
           ${c.prefix}.core.codec.encode[${weakTypeOf[T7]}]($p7)
       ))
+    """)
+  }
+
+  def callMacro[Effect[_], Context, R: c.WeakTypeTag](c: blackbox.Context)(
+    context: c.Expr[Context]
+  )(implicit resultType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
+    import c.universe.{Quasiquote, weakTypeOf}
+
+    c.Expr[Effect[R]](q"""
+      ${c.prefix}.core.call(
+        ${c.prefix}.methodName,
+        None,
+        ${c.prefix}.encodedArguments,
+        ${c.prefix}.core.codec.decode[${weakTypeOf[R]}](_),
+        Some($context)
+      )
     """)
   }
 }
