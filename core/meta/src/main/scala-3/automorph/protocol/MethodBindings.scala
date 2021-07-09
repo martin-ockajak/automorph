@@ -110,12 +110,10 @@ private[automorph] case object MethodBindings:
         if wrapperTypeParamIndex >= 0 then
           wrappedType.dealias match
             case appliedType: q.reflect.AppliedType if appliedType.tycon <:< wrapperType.tycon =>
-              val x = appliedType.args(wrapperTypeParamIndex)
-              println(s"UNWRAPPPED: ${x.show}")
-              x
+              appliedType.args(wrapperTypeParamIndex)
             case _ => wrappedType
         else wrappedType
-      case _ =>wrappedType
+      case _ => wrappedType
 
   /**
    * Creates a method signature.
