@@ -16,9 +16,9 @@ private[automorph] case object MethodBindings {
   def methodLiftable[C <: blackbox.Context](ref: Reflection[C]): ref.c.universe.Liftable[Method] =
     new ref.c.universe.Liftable[Method] {
 
-      import ref.c.universe.{Quasiquote, Tree}
+      import ref.c.universe.{Liftable, Quasiquote, Tree}
 
-      implicit val parameterLiftable = new ref.c.universe.Liftable[Parameter] {
+      implicit val parameterLiftable = new Liftable[Parameter] {
 
         override def apply(v: Parameter): Tree = q"""
           automorph.util.Parameter(
@@ -34,8 +34,8 @@ private[automorph] case object MethodBindings {
         automorph.util.Method(
           ${v.name},
           ${v.resultType},
-          ..${v.parameters.map(values => q"..$values")},
-          ..${v.typeParameters},
+          Seq(..${v.parameters.map(values => q"Seq(..$values)")}),
+          Seq(..${v.typeParameters}),
           ${v.public},
           ${v.available},
           ${v.documentation}
@@ -94,13 +94,12 @@ private[automorph] case object MethodBindings {
    */
   def unwrapType[C <: blackbox.Context, Wrapper: ref.c.WeakTypeTag](ref: Reflection[C])(
     wrappedType: ref.c.Type
-  ): ref.c.Type = {
+  ): ref.c.Type =
     if (wrappedType.typeArgs.nonEmpty && wrappedType.typeConstructor =:= ref.c.weakTypeOf[Wrapper].dealias) {
       wrappedType.typeArgs.last
     } else {
       wrappedType
     }
-  }
 
   /**
    * Creates a method signature.
