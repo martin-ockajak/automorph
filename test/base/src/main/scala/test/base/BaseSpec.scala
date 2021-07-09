@@ -6,7 +6,7 @@ import org.scalatest.{AppendedClues, BeforeAndAfterAll, BeforeAndAfterEach, Opti
 import org.scalatestplus.scalacheck.Checkers
 
 /**
- * Base hierarchical test.
+ * Base structured test.
  *
  * Included functionality:
  * - optional values retrieval support

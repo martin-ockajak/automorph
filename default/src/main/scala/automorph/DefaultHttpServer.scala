@@ -16,19 +16,22 @@ case object DefaultHttpServer {
   type BindApis[Effect[_]] = DefaultServerHandler[Effect] => DefaultServerHandler[Effect]
 
   /**
-   * Creates a JSON-RPC server using HTTP as message transport protocol with specified ''backend'' plugin.
+   * Creates a default server using HTTP as message transport protocol with specified ''backend'' plugin.
    *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+   * The server can be used to receive and reply to requests using specific message transport protocol
+   * while invoking server to process them.
+   *
+   * @see [[https://www.jsonrpc.org/specification protocol specification]]
    * @see [[https://undertow.io HTTP Server Documentation]]
    * @param backend effectful computation backend plugin
    * @param runEffect effect execution function
-   * @param bindApis function to bind APIs to the underlying JSON-RPC handler
+   * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param urlPath HTTP URL path (default: /)
    * @param builder Undertow web server builder
-   * @param errorStatus JSON-RPC error code to HTTP status mapping function
+   * @param errorStatus error code to HTTP status mapping function
    * @tparam Effect effect type
-   * @return JSON-RPC request handler
+   * @return server
    */
   def apply[Effect[_]](
     backend: Backend[Effect],
@@ -44,16 +47,19 @@ case object DefaultHttpServer {
   }
 
   /**
-   * Creates an asynchronous JSON-RPC server using HTTP as message transport protocol and 'Future' as an effect type.
+   * Creates a default asynchronous server using HTTP as message transport protocol and 'Future' as an effect type.
    *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param bindApis function to bind APIs to the underlying JSON-RPC handler
+   * The server can be used to receive and reply to requests using specific message transport protocol
+   * while invoking server to process them.
+   *
+   * @see [[https://www.jsonrpc.org/specification protocol specification]]
+   * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param urlPath HTTP URL path (default: /)
    * @param builder Undertow web server builder
-   * @param errorStatus JSON-RPC error code to HTTP status mapping function
+   * @param errorStatus error code to HTTP status mapping function
    * @param executionContext execution context
-   * @return asynchronous JSON-RPC request handler
+   * @return asynchronous server
    */
   def async(
     bindApis: BindApis[Future],
@@ -69,18 +75,19 @@ case object DefaultHttpServer {
   }
 
   /**
-   * Creates a synchronous JSON-RPC server using HTTP as message transport protocol and identity as an effect type.
+   * Creates a default synchronous server using HTTP as message transport protocol and identity as an effect type.
    *
-   * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
+   * The server can be used to receive and reply to requests using specific message transport protocol
+   * while invoking server to process them.
    *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param bindApis function to bind APIs to the underlying JSON-RPC handler
+   * @see [[https://www.jsonrpc.org/specification protocol specification]]
+   * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param urlPath HTTP URL path (default: /)
    * @param builder Undertow web server builder
-   * @param errorStatus JSON-RPC error code to HTTP status mapping function
+   * @param errorStatus error code to HTTP status mapping function
    * @param executionContext execution context
-   * @return synchronous JSON-RPC request handler
+   * @return synchronous server
    */
   def sync(
     bindApis: BindApis[Identity],

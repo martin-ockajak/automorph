@@ -15,7 +15,7 @@ import scala.reflect.macros.blackbox
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Creates a new JSON-RPC request handler with specified request `Context` type plus specified ''codec'' and ''backend'' plugins.
- * @param codec hierarchical message format codec plugin
+ * @param codec structured message format codec plugin
  * @param backend effectful computation backend plugin
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
  * @tparam Node message node type
@@ -43,7 +43,7 @@ case object Handler {
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec hierarchical message format codec plugin
+   * @param codec structured message format codec plugin
    * @param backend effectful computation backend plugin
    * @tparam Node message node type
    * @tparam ExactCodec message codec plugin type
@@ -62,7 +62,7 @@ case object Handler {
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec hierarchical message format codec plugin
+   * @param codec structured message format codec plugin
    * @param backend effectful computation backend plugin
    * @tparam Node message node type
    * @tparam ExactCodec message codec plugin type

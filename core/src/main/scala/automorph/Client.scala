@@ -15,7 +15,7 @@ import java.io.IOException
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Creates a JSON-RPC client with specified request `Context` type plus ''codec'', ''backend'' and ''transport'' plugins.
- * @param codec hierarchical message format codec plugin
+ * @param codec structured message format codec plugin
  * @param backend effectful computation backend plugin
  * @param transport message transport protocol plugin
  * @param errorToException maps a JSON-RPC error to a corresponding exception
@@ -67,7 +67,7 @@ case object Client {
    * The client can be used to perform JSON-RPC calls and notifications.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec hierarchical message format codec plugin
+   * @param codec structured message format codec plugin
    * @param backend effectful computation backend plugin
    * @param transport message transport protocol plugin
    * @tparam Node message node type

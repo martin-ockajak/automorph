@@ -4,7 +4,7 @@ import zio.{Runtime, Task}
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 
-object QuickstartCustom extends App {
+object QuickstartCustomEffect extends App {
 
   class CustomApi {
     def hello(some: String, n: Int): Task[String] = Task.succeed(s"Hello $some $n!")
