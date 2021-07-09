@@ -160,9 +160,9 @@ case object HandlerBindings {
       // Create encode result function
       //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
       val resultValueType = unwrapType[C, Effect[_]](ref)(method.resultType.dealias).dealias
-//      println(s"Result type: ${method.resultType.dealias}")
-//      println(s"Effect type: ${weakTypeOf[Effect[_]].dealias}")
-//      println(s"Result value type: $resultValueType")
+      println(s"Result type: ${method.resultType.dealias}")
+      println(s"Effect type: ${weakTypeOf[Effect[_]].dealias}")
+      println(s"Result value type: $resultValueType")
       val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result)"
 
       // Create the effect mapping call using the method call and the encode result function
