@@ -14,7 +14,8 @@ import scala.reflect.macros.blackbox
  * @tparam Context request context type
  */
 private[automorph] trait ClientBind[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
-  this: ClientCore[Node, ExactCodec, Effect, Context] =>
+
+  def core: ClientCore[Node, ExactCodec, Effect, Context]
 
   /**
    * Creates a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
@@ -75,7 +76,7 @@ object ClientBind {
         ${weakTypeOf[Effect[_]]},
         ${weakTypeOf[Context]},
         ${weakTypeOf[Api]}
-      ](${c.prefix}, true)
+      ](${c.prefix}.core, true)
     """)
   }
 
@@ -95,12 +96,12 @@ object ClientBind {
         ${weakTypeOf[Effect[_]]},
         ${weakTypeOf[Context]},
         ${weakTypeOf[Api]}
-      ](${c.prefix}, false)
+      ](${c.prefix}.core, false)
     """)
   }
 
   def generalBind[Node, ExactCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
-    client: ClientCore[Node, ExactCodec, Effect, Context],
+    clientCore: ClientCore[Node, ExactCodec, Effect, Context],
     namedArguments: Boolean
   ): Api = macro generalBindMacro[Node, ExactCodec, Effect, Context, Api]
 
@@ -111,7 +112,7 @@ object ClientBind {
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
-    client: c.Expr[ClientCore[Node, ExactCodec, Effect, Context]],
+    clientCore: c.Expr[ClientCore[Node, ExactCodec, Effect, Context]],
     namedArguments: c.Expr[Boolean]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Api] = {
     import c.universe.{Quasiquote, weakTypeOf}
@@ -122,7 +123,7 @@ object ClientBind {
     val apiType = weakTypeOf[Api]
     c.Expr[Api](q"""
       // Generate API method bindings
-      val codec = $client.codec
+      val codec = $clientCore.codec
       val methodBindings =
         automorph.client.ClientBindings.generate[$nodeType, $codecType, $effectType, $contextType, $apiType](codec)
 
@@ -148,7 +149,7 @@ object ClientBind {
             val argumentNames = Option.when($namedArguments)(parameterNames)
 
             // Perform the API call
-            $client.performCall(method.getName, argumentNames, encodedArguments, resultNode => clientMethod.decodeResult(resultNode), context)
+            $clientCore.call(method.getName, argumentNames, encodedArguments, resultNode => clientMethod.decodeResult(resultNode), context)
           }.getOrElse(throw new UnsupportedOperationException("Invalid method: " + method.getName))
       ).asInstanceOf[$apiType]
     """)

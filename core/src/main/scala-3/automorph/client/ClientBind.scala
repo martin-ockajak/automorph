@@ -15,7 +15,8 @@ import scala.reflect.ClassTag
  * @tparam Context request context type
  */
 private[automorph] trait ClientBind[Node, ExactCodec <: Codec[Node], Effect[_], Context]:
-  this: ClientCore[Node, ExactCodec, Effect, Context] =>
+
+  def core: ClientCore[Node, ExactCodec, Effect, Context]
 
   /**
    * Creates a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
@@ -36,7 +37,7 @@ private[automorph] trait ClientBind[Node, ExactCodec <: Codec[Node], Effect[_], 
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef]: Api =
-    ClientBind.generalBind[Node, ExactCodec, Effect, Context, Api](this, namedArguments = true)
+    ClientBind.generalBind[Node, ExactCodec, Effect, Context, Api](core, namedArguments = true)
 
   /**
    * Creates a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
@@ -57,16 +58,16 @@ private[automorph] trait ClientBind[Node, ExactCodec <: Codec[Node], Effect[_], 
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bindPositional[Api <: AnyRef]: Api =
-    ClientBind.generalBind[Node, ExactCodec, Effect, Context, Api](this, namedArguments = false)
+    ClientBind.generalBind[Node, ExactCodec, Effect, Context, Api](core, namedArguments = false)
 
 object ClientBind:
 
   inline def generalBind[Node, ExactCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
-    client: ClientCore[Node, ExactCodec, Effect, Context],
+    clientCore: ClientCore[Node, ExactCodec, Effect, Context],
     namedArguments: Boolean
   ): Api =
     // Generate API method bindings
-    val methodBindings = ClientBindings.generate[Node, ExactCodec, Effect, Context, Api](client.codec)
+    val methodBindings = ClientBindings.generate[Node, ExactCodec, Effect, Context, Api](clientCore.codec)
 
     // Create API proxy instance
     val classTag = summonInline[ClassTag[Api]]
@@ -90,7 +91,7 @@ object ClientBind:
           val argumentNames = Option.when(namedArguments)(parameterNames)
 
           // Perform the API call
-          client.call(
+          clientCore.call(
             method.getName,
             argumentNames,
             encodedArguments,

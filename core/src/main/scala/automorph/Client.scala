@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.Client.defaultErrorToException
-import automorph.client.{ClientCore, ClientBind, NamedMethodProxy}
+import automorph.client.{ClientBind, ClientCore, NamedMethodProxy}
 import automorph.protocol.ErrorType
 import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
 import automorph.spi.{Backend, Codec, Transport}
@@ -29,12 +29,14 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   backend: Backend[Effect],
   transport: Transport[Effect, Context],
   protected val errorToException: (Int, String) => Throwable = defaultErrorToException
-) extends ClientCore[Node, ExactCodec, Effect, Context]
-  with ClientBind[Node, ExactCodec, Effect, Context]
-  with CannotEqual {
+) extends ClientBind[Node, ExactCodec, Effect, Context] with CannotEqual {
 
   type ThisClient = Client[Node, ExactCodec, Effect, Context]
   type NamedMethod = NamedMethodProxy[Node, ExactCodec, Effect, Context]
+
+  val core = ClientCore(codec, backend, transport, errorToException)
+
+//  private val core = Clien
 
   /**
    * Creates a method proxy with specified method name.
@@ -42,8 +44,7 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
    * @param methodName method name
    * @return method proxy with specified method name
    */
-  def method(methodName: String): NamedMethod =
-    NamedMethodProxy(methodName, codec, backend, transport, errorToException, Seq(), Seq())
+  def method(methodName: String): NamedMethod = NamedMethodProxy(methodName, core, Seq(), Seq())
 
   /**
    * Creates a copy of this client with specified JSON-RPC error to exception mapping.

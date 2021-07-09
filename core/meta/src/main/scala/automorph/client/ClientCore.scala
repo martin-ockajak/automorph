@@ -12,25 +12,21 @@ import scala.util.{Random, Try}
 /**
  * JSON-RPC client core logic.
  *
+ * @param codec hierarchical message format codec plugin
+ * @param backend effectful computation backend plugin
+ * @param transport message transport protocol plugin
+ * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @tparam Node message node type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Logging {
-
-  /**
-   * Hierarchical data format codec plugin.
-   *
-   * @return codec plugin
-   */
-  def codec: ExactCodec
-
-  protected def backend: Backend[Effect]
-
-  protected def transport: Transport[Effect, Context]
-
-  protected def errorToException: (Int, String) => Throwable
+case class ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] private[automorph] (
+  codec: ExactCodec,
+  private val backend: Backend[Effect],
+  private val transport: Transport[Effect, Context],
+  private val errorToException: (Int, String) => Throwable
+) extends Logging {
 
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
@@ -83,7 +79,7 @@ trait ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] extends Lo
    * @tparam R result type
    * @return nothing
    */
-  protected def notify(
+  private[automorph] def notify(
     methodName: String,
     argumentNames: Option[Seq[String]],
     encodedArguments: Seq[Node],
