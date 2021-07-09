@@ -202,6 +202,13 @@ Invoke the remote API:
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 
+// Custom effectful computation backend plugin
+val backend = automorph.backend.ZioBackend[Any]()
+val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
+
+// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+val customServer = automorph.DefaultHttpServer(backend, runEffect, _.bind(customApi), 80, "/api")
+
 // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
 val sttpBackend = AsyncHttpClientZioBackend.usingClient(Runtime.default, DefaultAsyncHttpClient())
 val customClient = automorph.DefaultHttpClient("http://localhost/api", "POST", backend, sttpBackend)
@@ -209,6 +216,9 @@ val customClient = automorph.DefaultHttpClient("http://localhost/api", "POST", b
 // Call the remote API method via proxy
 val customApiProxy = customClient.bind[CustomApi] // CustomApi
 customApiProxy.hello("world", 1) // : Task[String]
+
+// Stop the server
+customServer.close()
 ```
 
 # Integration
