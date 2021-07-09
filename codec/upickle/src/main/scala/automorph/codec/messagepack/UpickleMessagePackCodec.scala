@@ -39,3 +39,8 @@ final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
   override def format(message: Message[Msg]): String =
     custom.write(UpickleMessage.fromSpi(message), indent)
 }
+
+case object UpickleMessagePackCodec {
+  /** Message node type. */
+  type Node = Msg
+}

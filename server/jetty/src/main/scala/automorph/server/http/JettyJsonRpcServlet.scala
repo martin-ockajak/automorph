@@ -84,6 +84,8 @@ final case class JettyJsonRpcServlet[Node, ExactCodec <: Codec[Node], Effect[_]]
 }
 
 case object JettyJsonRpcServlet {
+  /** Request context type. */
+  type Context = HttpServletRequest
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus = Map(

@@ -20,3 +20,12 @@ final case class ScalazBackend() extends Backend[IO] {
 
   override def either[T](value: IO[T]): IO[Either[Throwable, T]] = value.catchLeft.map(_.toEither)
 }
+
+case object ScalazBackend {
+  /**
+   * Effect type.
+   *
+   * @tparam T value type
+   */
+  type Effect[T] = IO[T]
+}

@@ -23,5 +23,17 @@ final case class IdentityBackend() extends Backend[Identity] {
 }
 
 case object IdentityBackend {
+  /**
+   * Effect type.
+   *
+   * @tparam T value type
+   */
+  type Effect[T] = Identity[T]
+
+  /**
+   * Identity type.
+   *
+   * @tparam T value type
+   */
   type Identity[T] = T
 }

@@ -38,3 +38,8 @@ final case class UpickleJsonCodec[Custom <: UpickleCustom](
   override def format(message: Message[Value]): String =
     custom.write(UpickleMessage.fromSpi(message), indent)
 }
+
+case object UpickleJsonCodec {
+  /** Message node type. */
+  type Node = Value
+}

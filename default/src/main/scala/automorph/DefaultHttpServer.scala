@@ -1,8 +1,6 @@
 package automorph
 
 import io.undertow.Undertow
-import io.undertow.server.HttpServerExchange
-import automorph.DefaultTypes.{DefaultHandler, DefaultServer}
 import automorph.backend.IdentityBackend.Identity
 import automorph.server.http.UndertowJsonRpcHandler.defaultErrorStatus
 import automorph.server.http.UndertowServer.defaultBuilder
@@ -12,8 +10,15 @@ import scala.concurrent.{ExecutionContext, Future}
 
 case object DefaultHttpServer {
 
-  type DefaultServerHandler[Effect[_]] = DefaultHandler[Effect, HttpServerExchange]
-  type BindApis[Effect[_]] = DefaultServerHandler[Effect] => DefaultServerHandler[Effect]
+  /**
+   * Default server request handler type.
+   *
+   * @tparam Effect effec type
+   */
+  type Handler[Effect[_]] = DefaultHandler.Type[Effect, UndertowServer.Context]
+
+  /** Default server type. */
+  type Type = UndertowServer
 
   /**
    * Creates a default server using HTTP as message transport protocol with specified ''backend'' plugin.
@@ -36,13 +41,13 @@ case object DefaultHttpServer {
   def apply[Effect[_]](
     backend: Backend[Effect],
     runEffect: Effect[Any] => Any,
-    bindApis: BindApis[Effect],
+    bindApis: Handler[Effect] => Handler[Effect],
     port: Int,
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
-  ): DefaultServer = {
-    val handler = bindApis(DefaultHandler[Effect, HttpServerExchange](backend))
+  ): Type = {
+    val handler = bindApis(DefaultHandler[Effect, UndertowServer.Context](backend))
     UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
   }
 
@@ -62,12 +67,12 @@ case object DefaultHttpServer {
    * @return asynchronous server
    */
   def async(
-    bindApis: BindApis[Future],
+    bindApis: Handler[Future] => Handler[Future],
     port: Int,
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
-  )(implicit executionContext: ExecutionContext): DefaultServer = {
+  )(implicit executionContext: ExecutionContext): Type = {
     Seq(executionContext)
     val handler = bindApis(DefaultHandler.async())
     val runEffect = (_: Future[Any]) => ()
@@ -90,12 +95,12 @@ case object DefaultHttpServer {
    * @return synchronous server
    */
   def sync(
-    bindApis: BindApis[Identity],
+    bindApis: Handler[Identity] => Handler[Identity],
     port: Int,
     urlPath: String = "/",
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
-  ): DefaultServer = {
+  ): Type = {
     val handler = bindApis(DefaultHandler.sync())
     val runEffect = (_: Identity[Any]) => ()
     UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)

@@ -27,6 +27,7 @@ way to invoke and expose remote APIs.
   - [Asynchronous](#asynchronous)
   - [Custom effect backend](#custom-effect-backend)
   - [Custom message transport](#custom-message-transport)
+  - [Custom message codec](#custom-message-codec)
 
 # Features
 
@@ -357,6 +358,12 @@ apiProxy.hello("world", 1) // : Task[String]
 
 ## [Custom message transport](/examples/src/main/scala/examples/CustomTransport.scala)
 
+### Dependencies
+
+```scala
+libraryDependencies += "io.automorph" %% "automorph-default" % "1.0.0"
+```
+
 ### API
 
 ```scala
@@ -370,8 +377,76 @@ val api = new Api()
 ### Server
 
 ```scala
+import automorph.backend.IdentityBackend.Identity
+import automorph.server.http.NanoHttpdServer
+import automorph.{Client, DefaultBackend, DefaultCodec, Handler}
+
 // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = automorph.DefaultHttpServer.sync(_.bind(api), 80, "/api")
+val backend = DefaultBackend.sync
+val runEffect = (effect: Identity[NanoHttpdServer.Response]) => effect
+val codec = DefaultCodec()
+val handler = Handler[DefaultCodec.Node, codec.type, Identity, NanoHttpdServer.Context](codec, backend)
+val server = NanoHttpdServer(handler.bind(api), runEffect, 80)
+
+// Stop the server
+server.close()
+```
+
+### Client
+
+```scala
+import automorph.transport.http.UrlConnectionTransport
+import java.net.URL
+
+// Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+val transport = UrlConnectionTransport(new URL("http://localhost/api"), "POST")
+val client: Client[DefaultCodec.Node, codec.type, Identity, UrlConnectionTransport.Context] =
+  Client(codec, backend, transport)
+
+// Call the remote API method via proxy
+val apiProxy = client.bind[Api] // Api
+apiProxy.hello("world", 1) // : String
+```
+
+## [Custom message codec](/examples/src/main/scala/examples/CustomCodec.scala)
+
+### Dependencies
+
+```scala
+libraryDependencies ++= Seq(
+  "io.automorph" %% "automorph-default" % "1.0.0",
+  "io.automorph" %% "automorph-circe" % "1.0.0"
+)
+```
+
+### API
+
+```scala
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+// Define an API type and create API instance
+case class Record(values: List[String])
+class Api {
+  def hello(some: String, n: Int): Future[Record] = Future.successful(Record(List("Hello", some, n.toString)))
+}
+val api = new Api()
+```
+
+### Server
+
+```scala
+import automorph.codec.json.CirceJsonCodec
+import automorph.server.http.{UndertowJsonRpcHandler, UndertowServer}
+import automorph.{Client, DefaultBackend, DefaultHttpTransport, Handler}
+import io.circe.generic.auto._
+
+// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+val backend = DefaultBackend.async
+val runEffect = (effect: Future[_]) => effect
+val codec = CirceJsonCodec()
+val handler = Handler[CirceJsonCodec.Node, codec.type, Future, UndertowJsonRpcHandler.Context](codec, backend)
+val server = UndertowServer(UndertowJsonRpcHandler(handler.bind(api), runEffect), 80, "/api")
 
 // Stop the server
 server.close()
@@ -381,8 +456,9 @@ server.close()
 
 ```scala
 // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
-val transport = UrlConnectionTransport(new URL("http://localhost/api"), "POST")
-val client = automorph.Client(automorph.DefaultCodec(), automorph.DefaultBackend.sync, transport)
+val clientTransport = DefaultHttpTransport.async("http://localhost/api", "POST")
+val client: Client[CirceJsonCodec.Node, codec.type, Future, DefaultHttpTransport.Context] =
+  Client(codec, backend, clientTransport)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api

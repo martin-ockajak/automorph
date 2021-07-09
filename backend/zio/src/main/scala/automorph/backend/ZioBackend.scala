@@ -17,7 +17,17 @@ final case class ZioBackend[Environment]() extends Backend[({ type Effect[T] = R
 
   override def failed[T](exception: Throwable): RIO[Environment, T] = RIO.fail(exception)
 
-  override def flatMap[T, R](value: RIO[Environment, T], function: T => RIO[Environment, R]): RIO[Environment, R] = value.flatMap(function)
+  override def flatMap[T, R](value: RIO[Environment, T], function: T => RIO[Environment, R]): RIO[Environment, R] =
+    value.flatMap(function)
 
   override def either[T](value: RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] = value.either
+}
+
+case object ZioBackend {
+  /**
+   * Effect type constructor.
+   *
+   * @tparam Environment ZIO environment
+   */
+  type Effect[Environment] = ({ type ExactEffect[T] = RIO[Environment, T] })#ExactEffect[Environment]
 }

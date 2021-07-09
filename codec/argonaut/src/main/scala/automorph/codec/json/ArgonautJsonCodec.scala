@@ -50,6 +50,8 @@ final case class ArgonautJsonCodec() extends ArgonautJsonCodecMeta {
 }
 
 case object ArgonautJsonCodec {
+  /** Message node type. */
+  type Node = Json
 
   implicit lazy val noneCodecJson: CodecJson[None.type] = CodecJson(
     (v: None.type) => jNull,

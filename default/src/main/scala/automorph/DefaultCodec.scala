@@ -1,9 +1,15 @@
 package automorph
 
-import automorph.DefaultTypes.DefaultCodec
+import automorph.codec.common.DefaultUpickleCustom
 import automorph.codec.json.UpickleJsonCodec
 
 case object DefaultCodec {
+
+  /** Default message node type. */
+  type Node = UpickleJsonCodec.Node
+
+  /** Default message codec plugin type. */
+  type Type = UpickleJsonCodec[DefaultUpickleCustom.type]
 
   /**
    * Creates a default structured message format codec plugin.
@@ -11,5 +17,5 @@ case object DefaultCodec {
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @return codec plugin
    */
-  def apply(): DefaultCodec = UpickleJsonCodec()
+  def apply(): Type = UpickleJsonCodec()
 }

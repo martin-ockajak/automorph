@@ -22,3 +22,12 @@ final case class FutureBackend()(implicit executionContext: ExecutionContext) ex
 
   override def either[T](effect: Future[T]): Future[Either[Throwable, T]] = effect.transform(value => Success(value.toEither))
 }
+
+case object FutureBackend {
+  /**
+   * Effect type.
+   *
+   * @tparam T value type
+   */
+  type Effect[T] = Future[T]
+}

@@ -20,3 +20,12 @@ final case class TryBackend() extends Backend[Try] {
 
   override def either[T](value: Try[T]): Try[Either[Throwable, T]] = Success(value.toEither)
 }
+
+case object TryBackend {
+  /**
+   * Effect type.
+   *
+   * @tparam T value type
+   */
+  type Effect[T] = Try[T]
+}

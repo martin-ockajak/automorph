@@ -1,9 +1,12 @@
 package examples
 
+import automorph.backend.IdentityBackend.Identity
+import automorph.server.http.NanoHttpdServer
 import automorph.transport.http.UrlConnectionTransport
+import automorph.{Client, DefaultBackend, DefaultCodec, Handler}
 import java.net.URL
 
-object QuickstartSyncCodec extends App {
+object CustomTransport extends App {
 
   // Define an API type and create API instance
   class Api {
@@ -12,15 +15,20 @@ object QuickstartSyncCodec extends App {
   val api = new Api()
 
   // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val server = automorph.DefaultHttpServer.sync(_.bind(api), 80, "/api")
+  val backend = DefaultBackend.sync
+  val runEffect = (effect: Identity[NanoHttpdServer.Response]) => effect
+  val codec = DefaultCodec()
+  val handler = Handler[DefaultCodec.Node, codec.type, Identity, NanoHttpdServer.Context](codec, backend)
+  val server = NanoHttpdServer(handler.bind(api), runEffect, 80)
 
   // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
   val transport = UrlConnectionTransport(new URL("http://localhost/api"), "POST")
-  val client = automorph.Client(automorph.DefaultCodec(), automorph.DefaultBackend.sync, transport)
+  val client: Client[DefaultCodec.Node, codec.type, Identity, UrlConnectionTransport.Context] =
+    Client(codec, backend, transport)
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api
-  apiProxy.hello("world", 1) // : Future[String]
+  apiProxy.hello("world", 1) // : String
 
   // Stop the server
   server.close()

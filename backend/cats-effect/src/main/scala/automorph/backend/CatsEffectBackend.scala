@@ -20,3 +20,12 @@ final case class CatsEffectBackend() extends Backend[IO] {
 
   override def either[T](value: IO[T]): IO[Either[Throwable, T]] = value.attempt
 }
+
+case object CatsEffectBackend {
+  /**
+   * Effect type.
+   *
+   * @tparam T value type
+   */
+  type Effect[T] = IO[T]
+}

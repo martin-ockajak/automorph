@@ -42,3 +42,8 @@ final case class CirceJsonCodec() extends CirceJsonCodecMeta {
   override def format(message: Message[Json]): String =
     message.asJson.spaces2
 }
+
+case object CirceJsonCodec {
+  /** Message node type. */
+  type Node = Json
+}

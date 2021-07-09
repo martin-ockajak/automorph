@@ -104,6 +104,8 @@ final case class UndertowJsonRpcHandler[Node, ExactCodec <: Codec[Node], Effect[
 }
 
 case object UndertowJsonRpcHandler {
+  /** Request context type. */
+  type Context = HttpServerExchange
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus = Map(

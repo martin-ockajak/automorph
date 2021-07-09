@@ -20,3 +20,12 @@ final case class MonixBackend() extends Backend[Task] {
 
   override def either[T](value: Task[T]): Task[Either[Throwable, T]] = value.attempt
 }
+
+case object MonixBackend {
+  /**
+   * Effect type.
+   *
+   * @tparam T value type
+   */
+  type Effect[T] = Task[T]
+}

@@ -91,6 +91,8 @@ final case class FinagleJsonRpcService[Node, ExactCodec <: Codec[Node], Effect[_
 }
 
 case object FinagleJsonRpcService {
+  /** Request context type. */
+  type Context = Request
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus = Map(

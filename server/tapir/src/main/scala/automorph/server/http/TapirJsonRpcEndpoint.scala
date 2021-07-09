@@ -25,7 +25,10 @@ import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, 
  * @tparam Effect effect type
  */
 case object TapirJsonRpcEndpoint extends Logging {
+  /** Request context type. */
+  type Context = Request
 
+  /** Endpoint request type. */
   type RequestType = (Array[Byte], List[String], QueryParams, List[Header], List[Cookie], Option[String])
 
   /**

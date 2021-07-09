@@ -92,6 +92,8 @@ final case class UrlConnectionTransport(
 }
 
 case object UrlConnectionTransport {
+  /** Request context type. */
+  type Context = RequestProperties
 
   /**
    * HTTP request context.

@@ -63,6 +63,8 @@ final case class SttpTransport[Effect[_]](
 }
 
 case object SttpTransport {
+  /** Request context type. */
+  type Context = RequestProperties
 
   /**
    * HTTP request context.

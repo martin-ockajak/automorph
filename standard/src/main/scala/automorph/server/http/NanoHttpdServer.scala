@@ -88,13 +88,18 @@ final case class NanoHttpdServer[Node, ExactCodec <: Codec[Node], Effect[_]] pri
 }
 
 case object NanoHttpdServer {
+  /** Request context type. */
+  type Context = IHTTPSession
+
+  /** Request type. */
+  type Response = automorph.server.http.NanoHTTPD.Response
 
   /**
    * Create an NanoHTTPD web server using the specified JSON-RPC request ''handler''.
    *
    * @see [[https://github.com/NanoHttpd/nanohttpd Documentation]]
    * @param handler JSON-RPC request handler
-   * @param effectRunSync synchronous effect execution function
+   * @param runEffectSync synchronous effect execution function
    * @param port port to listen on for HTTP connections
    * @param readTimeout HTTP connection read timeout (milliseconds)
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
@@ -104,12 +109,12 @@ case object NanoHttpdServer {
    */
   def apply[Node, ExactCodec <: Codec[Node], Effect[_]](
     handler: Handler[Node, ExactCodec, Effect, IHTTPSession],
-    effectRunSync: Effect[Response] => Response,
+    runEffectSync: Effect[Response] => Response,
     port: Int,
     readTimeout: Int = 5000,
     errorStatus: Int => Status = defaultErrorStatus
   ): NanoHttpdServer[Node, ExactCodec, Effect] = {
-    val server = new NanoHttpdServer(handler, effectRunSync, port, readTimeout, errorStatus)
+    val server = new NanoHttpdServer(handler, runEffectSync, port, readTimeout, errorStatus)
     server.start()
     server
   }

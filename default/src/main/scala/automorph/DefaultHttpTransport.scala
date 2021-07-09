@@ -1,8 +1,7 @@
 package automorph
 
-import automorph.DefaultTypes.DefaultTransport
 import automorph.backend.IdentityBackend.Identity
-import automorph.spi.Backend
+import automorph.spi.{Backend, Transport}
 import automorph.transport.http.SttpTransport
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
@@ -10,6 +9,15 @@ import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
 import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 
 case object DefaultHttpTransport {
+  /**
+   * Default message transport type.
+   *
+   * @tparam Effect effect type
+   */
+  type Type[Effect[_]] = Transport[Effect, SttpTransport.Context]
+
+  /** Request context type. */
+  type Context = SttpTransport.Context
 
   /**
    * Creates a default message transport protocol plugin using HTTP as transport protocol.
@@ -29,7 +37,7 @@ case object DefaultHttpTransport {
     method: String,
     backend: Backend[Effect],
     sttpBackend: SttpBackend[Effect, _]
-  ): DefaultTransport[Effect] = SttpTransport(new URL(url), method, backend, sttpBackend)
+  ): Type[Effect] = SttpTransport(new URL(url), method, backend, sttpBackend)
 
   /**
    * Creates a default message transport protocol plugin using HTTP  as transport protocol and 'Future' as an effect type.
@@ -45,7 +53,7 @@ case object DefaultHttpTransport {
    */
   def async(url: String, method: String)(implicit
     executionContext: ExecutionContext
-  ): DefaultTransport[Future] = DefaultHttpTransport(url, method, DefaultBackend.async, AsyncHttpClientFutureBackend())
+  ): Type[Future] = DefaultHttpTransport(url, method, DefaultBackend.async, AsyncHttpClientFutureBackend())
 
   /**
    * Creates a default message transport protocol plugin using HTTP  as transport protocol and identity as an effect type.
@@ -58,7 +66,7 @@ case object DefaultHttpTransport {
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @return synchronous transport plugin
    */
-  def sync(url: String, method: String): DefaultTransport[Identity] = {
+  def sync(url: String, method: String): Type[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
     DefaultHttpTransport(url, method, DefaultBackend.sync, HttpURLConnectionBackend())
   }

@@ -3,7 +3,7 @@ package automorph.server.http
 import automorph.log.Logging
 import automorph.server.http.UndertowServer.defaultBuilder
 import automorph.spi.Server
-import io.undertow.server.HttpHandler
+import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.{Handlers, Undertow}
 import java.lang.Runtime
@@ -58,6 +58,8 @@ final case class UndertowServer(
 }
 
 case object UndertowServer {
+  /** Request context type. */
+  type Context = HttpServerExchange
 
   /**
    * Default Undertow web server builder providing the following settings:
