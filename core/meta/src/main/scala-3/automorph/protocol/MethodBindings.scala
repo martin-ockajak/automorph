@@ -101,19 +101,21 @@ private[automorph] case object MethodBindings:
    * @return wrapped type
    */
   def unwrapType[Wrapper[_]: Type](q: Quotes)(wrappedType: q.reflect.TypeRepr): q.reflect.TypeRepr =
-    resultType(q)(q.reflect.TypeRepr.of[Wrapper].dealias).dealias match
-      case wrapperType: q.reflect.AppliedType =>
-        val wrapperTypeParamIndex = wrapperType.args.indexWhere {
-          case _: q.reflect.ParamRef => true
-          case _ => false
-        }
-        if wrapperTypeParamIndex >= 0 then
-          wrappedType.dealias match
-            case appliedType: q.reflect.AppliedType if appliedType.tycon <:< wrapperType.tycon =>
-              appliedType.args(wrapperTypeParamIndex)
-            case _ => wrappedType
-        else wrappedType
-      case _ => wrappedType
+    val (wrapperTypeConstructor, wrapperTypeParamIndex) =
+      resultType(q)(q.reflect.TypeRepr.of[Wrapper].dealias).dealias match
+        case wrapperType: q.reflect.AppliedType =>
+          (wrapperType.tycon, wrapperType.args.indexWhere {
+            case _: q.reflect.ParamRef => true
+            case _ => false
+          })
+        case wrapperType: q.reflect.TypeRef => (wrapperType, 0)
+        case wrapperType => (wrapperType, -1)
+    if wrapperTypeParamIndex >= 0 then
+      wrappedType.dealias match
+        case appliedType: q.reflect.AppliedType if appliedType.tycon <:< wrapperTypeConstructor =>
+          appliedType.args(wrapperTypeParamIndex)
+        case _ => wrappedType
+    else wrappedType
 
   /**
    * Creates a method signature.
