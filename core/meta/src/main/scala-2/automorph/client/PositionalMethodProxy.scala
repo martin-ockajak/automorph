@@ -124,7 +124,7 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
    * @param context request context
    * @return result value
    */
-  def call[R](implicit context: Context): Effect[R] = macro NamedMethodProxy.callMacro[Effect, Context, R]
+  def call[R](implicit context: Context): Effect[R] = macro PositionalMethodProxy.callMacro[Effect, Context, R]
 
   /**
    * Sends a remote JSON-RPC method ''notification'' request disregarding the response.
