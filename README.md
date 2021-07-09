@@ -39,7 +39,7 @@ way to invoke and expose remote APIs.
 
 # Quickstart
 
-Exposing and invoking remote JSON-RPC API over HTTP.
+Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
 ## Build
 
