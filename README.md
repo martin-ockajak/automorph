@@ -42,7 +42,7 @@ way to invoke and expose remote APIs.
 * **Boilerplate free** - even advanced use-cases require only a few lines of code
 * **Dependency free** - core logic depends on [SLF4J API](http://www.slf4j.org/) only
 
-# Quickstart
+## [Quickstart](/examples/src/main/scala/examples/Asynchronous.scala)
 
 Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
@@ -215,7 +215,7 @@ Depends on:
 
 # Examples
 
-## Synchronous
+## [Synchronous](/examples/src/main/scala/examples/Synchronous.scala)
 
 ### API
 
@@ -302,7 +302,7 @@ hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
-## Custom effect backend
+## [Custom effect backend](/examples/src/main/scala/examples/CustomBackend.scala)
 
 ### Dependencies
 
@@ -355,7 +355,7 @@ val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : Task[String]
 ```
 
-## Custom message transport
+## [Custom message transport](/examples/src/main/scala/examples/CustomTransport.scala)
 
 ### API
 
