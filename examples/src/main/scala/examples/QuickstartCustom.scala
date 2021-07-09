@@ -1,5 +1,6 @@
 package examples
 
+import io.undertow.server.HttpServerExchange
 import zio.{Runtime, Task}
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
@@ -17,6 +18,7 @@ object QuickstartCustom extends App {
   val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
 
   // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+//  val customServer = automorph.DefaultHttpServer(backend, runEffect, (handler: automorph.DefaultTypes.DefaultHandler[Task, HttpServerExchange]) => handler.bind(customApi), 80, "/api")
   val customServer = automorph.DefaultHttpServer(backend, runEffect, _.bind(customApi), 80, "/api")
 
   // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'

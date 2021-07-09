@@ -12,7 +12,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 case object DefaultHttpServer {
 
-  type BindApis[Effect[_]] = DefaultHandler[Effect, HttpServerExchange] => DefaultHandler[Effect, HttpServerExchange]
+  type DefaultServerHandler[Effect[_]] = DefaultHandler[Effect, HttpServerExchange]
+  type BindApis[Effect[_]] = DefaultServerHandler[Effect] => DefaultServerHandler[Effect]
 
   /**
    * Creates a JSON-RPC server using HTTP as message transport protocol with specified ''backend'' plugin.
@@ -38,7 +39,7 @@ case object DefaultHttpServer {
     builder: Undertow.Builder = defaultBuilder,
     errorStatus: Int => Int = defaultErrorStatus
   ): DefaultServer = {
-    val handler = bindApis(DefaultHandler(backend))
+    val handler = bindApis(DefaultHandler[Effect, HttpServerExchange](backend))
     UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
   }
 
