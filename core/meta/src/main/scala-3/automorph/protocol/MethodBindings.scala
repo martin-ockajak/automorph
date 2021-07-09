@@ -103,12 +103,17 @@ private[automorph] case object MethodBindings:
   def unwrapType[Wrapper[_]: Type](q: Quotes)(wrappedType: q.reflect.TypeRepr): q.reflect.TypeRepr =
     val (wrapperTypeConstructor, wrapperTypeParamIndex) =
       resultType(q)(q.reflect.TypeRepr.of[Wrapper].dealias).dealias match
-        case wrapperType: q.reflect.AppliedType =>
-          (wrapperType.tycon, wrapperType.args.indexWhere {
-            case _: q.reflect.ParamRef => true
-            case _ => false
-          })
+        // Find constructor and type parameter index for an applied type
+        case wrapperType: q.reflect.AppliedType => (
+            wrapperType.tycon,
+            wrapperType.args.indexWhere {
+              case _: q.reflect.ParamRef => true
+              case _ => false
+            }
+          )
+        // Assume type reference to be single parameter type constructor
         case wrapperType: q.reflect.TypeRef => (wrapperType, 0)
+        // Keep any other types wrapped
         case wrapperType => (wrapperType, -1)
     if wrapperTypeParamIndex >= 0 then
       wrappedType.dealias match

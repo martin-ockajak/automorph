@@ -92,8 +92,9 @@ private[automorph] case object MethodBindings {
    * @tparam C macro context type
    * @return wrapped type
    */
-  def unwrapType[C <: blackbox.Context, Wrapper: ref.c.WeakTypeTag](ref: Reflection[C])(wrappedType: ref.c.Type)
-    : ref.c.Type =
+  def unwrapType[C <: blackbox.Context, Wrapper: ref.c.WeakTypeTag](ref: Reflection[C])(
+    wrappedType: ref.c.Type
+  ): ref.c.Type =
     if (wrappedType.typeArgs.nonEmpty && wrappedType.typeConstructor =:= ref.c.weakTypeOf[Wrapper].dealias) {
       wrappedType.typeArgs.last
     } else {
@@ -138,7 +139,8 @@ private[automorph] case object MethodBindings {
       } else {
         // Returns the effect type
         val effectTypeConstructor = ref.c.weakTypeOf[Effect].dealias.typeConstructor
-        val matchingResultType = method.resultType.typeArgs.nonEmpty && method.resultType.dealias.typeConstructor <:< effectTypeConstructor
+        val matchingResultType =
+          method.resultType.typeArgs.nonEmpty && method.resultType.dealias.typeConstructor <:< effectTypeConstructor
 
         // FIXME - determine concrete result type constructor instead of an abstract one
         if (!matchingResultType && false) {
