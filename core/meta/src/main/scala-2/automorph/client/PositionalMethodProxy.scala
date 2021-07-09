@@ -68,7 +68,8 @@ case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Con
    *
    * @return method proxy
    */
-  def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): PositionalMethod = macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2, T3]
+  def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): PositionalMethod =
+    macro PositionalMethodProxy.argsMacro[PositionalMethod, T1, T2, T3]
 
   /**
    * Creates a copy of this method proxy with specified argument values.

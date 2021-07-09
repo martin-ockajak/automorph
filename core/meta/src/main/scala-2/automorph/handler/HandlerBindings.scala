@@ -154,6 +154,7 @@ case object HandlerBindings {
       //   api.method(arguments ...): Effect[ResultValueType]
 //      val apiMethodCall = q"$api.${method.symbol}${arguments.map(argumentList => q"(..$argumentList)")}"
       val apiMethodCall = q"$api.${method.symbol}(..${arguments.head})"
+      println(ref.c.universe.showCode(apiMethodCall))
 
       // Create encode result function
       //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
@@ -173,7 +174,7 @@ case object HandlerBindings {
   private def logBoundMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: Reflection[C])(
     method: ref.RefMethod,
     invoke: ref.c.Expr[Any]
-  ): Unit = Option(System.getProperty(debugProperty)).orElse(Some("")).foreach { _ =>
+  ): Unit = Option(System.getProperty(debugProperty)).foreach { _ =>
     println(
       s"""${methodSignature[C, Api](ref)(method)} =
         |  ${ref.c.universe.showCode(invoke.tree)}

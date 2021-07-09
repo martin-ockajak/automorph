@@ -55,7 +55,8 @@ case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context]
    *
    * @return method proxy
    */
-  def args[T1, T2](p1: (String, T1), p2: (String, T2)): NamedMethod = macro NamedMethodProxy.argsMacro[NamedMethod, T1, T2]
+  def args[T1, T2](p1: (String, T1), p2: (String, T2)): NamedMethod =
+    macro NamedMethodProxy.argsMacro[NamedMethod, T1, T2]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
