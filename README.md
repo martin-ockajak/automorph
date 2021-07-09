@@ -53,108 +53,92 @@ libraryDependencies += "io.automorph" %% "automorph-default" % "1.0.0"
 
 ### API
 
-Define an API class:
-
 ```scala
-class SyncApi {
+// Define an API type and create API instance
+class Api {
   def hello(some: String, n: Int): String = s"Hello $some $n!"
 }
-
-val syncApi = new SyncApi()
+val api = new Api()
 ```
 
 ### Server
 
-Expose the remote API:
-
 ```scala
-// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-val syncServer = automorph.DefaultHttpServer.sync(_.bind(syncApi), 80, "/api")
+  // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+val server = automorph.DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
 // Stop the server
-syncServer.close()
+server.close()
 ```
 
 ### Client
 
-Invoke the remote API:
-
 ```scala
-// Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
-val syncClient = automorph.DefaultHttpClient.sync("http://localhost/api", "POST")
+// Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+val client = automorph.DefaultHttpClient.sync("http://localhost/api", "POST")
 
-// Call the remote API method
-val syncApiProxy = syncClient.bind[SyncApi] // SyncApi
-syncApiProxy.hello("world", 1) // : String
+// Call the remote API method via proxy
+val apiProxy = client.bind[Api] // Api
+apiProxy.hello("world", 1) // : String
 ```
 
 ## Asynchronous
 
 ### API
 
-Define an API class:
-
 ```scala
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class AsyncApi {
+// Define an API type and create API instance
+class Api {
   def hello(some: String, n: Int): Future[String] = Future.successful(s"Hello $some $n!")
 }
-
-val asyncApi = new AsyncApi()
+val api = new Api()
 
 ```
 
 ### Server
 
-Expose the remote API:
-
 ```scala
-  // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-val asyncServer = automorph.DefaultHttpServer.async(_.bind(asyncApi), 80, "/api")
+// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+val server = automorph.DefaultHttpServer.async(_.bind(api), 80, "/api")
 
 // Stop the server
-asyncServer.close()
+server.close()
 ```
 
 ### Client
 
-Invoke the remote API:
-
 ```scala
-  // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
-val asyncClient = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
+// Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+val client = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
 
-// Call the remote API method
-val asyncApiProxy = asyncClient.bind[AsyncApi] // AsyncApi
-asyncApiProxy.hello("world", 1) // : Future[String]
+// Call the remote API method via proxy
+val apiProxy = client.bind[Api] // Api
+apiProxy.hello("world", 1) // : Future[String]
 ```
 
 ### Dynamic Client
 
-Invoke a remote API dynamically:
 ```scala
-
-// Call a remote API method passing the arguments by name
-val hello = asyncClient.method("hello")
+// Call a remote API method dynamically passing the arguments by name
+val hello = client.method("hello")
 hello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
 
-// Call a remote API method passing the arguments by position
+// Call a remote API method dynamically passing the arguments by position
 hello.positional.args("world", 1).call[String] // Future[String]
 
-// Notify a remote API method passing the arguments by name
+// Notify a remote API method dynamically passing the arguments by name
 hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 
-// Notify a remote API method passing the arguments by position
+// Notify a remote API method dynamically passing the arguments by position
 hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
-## Custom effect type
+## Custom effect backend
 
 ### Dependencies
-
-Add the following to your `build.sbt` file:
 
 ```scala
 libraryDependencies ++= Seq(
@@ -166,21 +150,17 @@ libraryDependencies ++= Seq(
 
 ### API
 
-Define an API class:
-
 ```scala
 import zio.{Runtime, Task}
 
-class CustomApi {
+// Define an API type and create API instance
+class Api {
   def hello(some: String, n: Int): Task[String] = Task.succeed(s"Hello $some $n!")
 }
-
-val customApi = new CustomApi()
+val api = new Api()
 ```
 
 ### Server
-
-Expose the remote API:
 
 ```scala
 // Custom effectful computation backend plugin
@@ -188,37 +168,59 @@ val backend = automorph.backend.ZioBackend[Any]()
 val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
 
 // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-val customServer = automorph.DefaultHttpServer(backend, runEffect, _.bind(customApi), 80, "/api")
+val server = automorph.DefaultHttpServer(backend, runEffect, _.bind(api), 80, "/api")
 
 // Stop the server
-customServer.close()
+server.close()
 ```
 
 ### Client
-
-Invoke the remote API:
 
 ```scala
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 
-// Custom effectful computation backend plugin
-val backend = automorph.backend.ZioBackend[Any]()
-val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
-
-// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-val customServer = automorph.DefaultHttpServer(backend, runEffect, _.bind(customApi), 80, "/api")
-
-// Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
-val sttpBackend = AsyncHttpClientZioBackend.usingClient(Runtime.default, DefaultAsyncHttpClient())
-val customClient = automorph.DefaultHttpClient("http://localhost/api", "POST", backend, sttpBackend)
+// Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+val sttpBackend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
+val client = automorph.DefaultHttpClient("http://localhost/api", "POST", backend, sttpBackend)
 
 // Call the remote API method via proxy
-val customApiProxy = customClient.bind[CustomApi] // CustomApi
-customApiProxy.hello("world", 1) // : Task[String]
+val apiProxy = client.bind[Api] // Api
+apiProxy.hello("world", 1) // : Task[String]
+```
+
+## Custom message transport
+
+### API
+
+```scala
+// Define an API type and create API instance
+class Api {
+  def hello(some: String, n: Int): String = s"Hello $some $n!"
+}
+val api = new Api()
+```
+
+### Server
+
+```scala
+// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+val server = automorph.DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
 // Stop the server
-customServer.close()
+server.close()
+```
+
+### Client
+
+```scala
+// Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+val transport = UrlConnectionTransport(new URL("http://localhost/api"), "POST")
+val client = automorph.Client(automorph.DefaultCodec(), automorph.DefaultBackend.sync, transport)
+
+// Call the remote API method via proxy
+val apiProxy = client.bind[Api] // Api
+apiProxy.hello("world", 1) // : Future[String]
 ```
 
 # Integration
