@@ -153,8 +153,6 @@ private[automorph] case object HandlerBindings:
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
         val resultValueType = unwrapType[Effect](ref.q)(method.resultType).dealias
-        println("XXXXXXXXXXXXX")
-        println(resultValueType.show)
         val encodeResult = resultValueType.asType match
           case '[resultType] => '{ (result: resultType) =>
               ${

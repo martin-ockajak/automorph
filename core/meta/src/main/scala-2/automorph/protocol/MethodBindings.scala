@@ -94,12 +94,13 @@ private[automorph] case object MethodBindings {
    */
   def unwrapType[C <: blackbox.Context, Wrapper: ref.c.WeakTypeTag](ref: Reflection[C])(
     wrappedType: ref.c.Type
-  ): ref.c.Type =
+  ): ref.c.Type = {
     if (wrappedType.typeArgs.nonEmpty && wrappedType.typeConstructor =:= ref.c.weakTypeOf[Wrapper].dealias) {
       wrappedType.typeArgs.last
     } else {
       wrappedType
     }
+  }
 
   /**
    * Creates a method signature.
