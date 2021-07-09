@@ -20,7 +20,7 @@ object QuickstartCustom extends App {
   val customServer = automorph.DefaultHttpServer(backend, runEffect, _.bind(customApi), 80, "/api")
 
   // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
-  val sttpBackend = AsyncHttpClientZioBackend.usingClient(Runtime.default, DefaultAsyncHttpClient())
+  val sttpBackend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
   val customClient = automorph.DefaultHttpClient("http://localhost/api", "POST", backend, sttpBackend)
 
   // Call the remote API method via proxy

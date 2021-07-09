@@ -152,14 +152,15 @@ case object HandlerBindings {
 
       // Create the API method call using the decoded arguments
       //   api.method(arguments ...): Effect[ResultValueType]
-      val apiMethodCall = q"$api.${method.symbol}(..$arguments)"
+//      val apiMethodCall = q"$api.${method.symbol}${arguments.map(argumentList => q"(..$argumentList)")}"
+      val apiMethodCall = q"$api.${method.symbol}(..${arguments.head})"
 
       // Create encode result function
       //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
       val resultValueType = unwrapType[C, Effect[_]](ref)(method.resultType.dealias).dealias
-      println(s"Result type: ${method.resultType.dealias}")
-      println(s"Effect type: ${weakTypeOf[Effect[_]].dealias}")
-      println(s"Result value type: $resultValueType")
+//      println(s"Result type: ${method.resultType.dealias}")
+//      println(s"Effect type: ${weakTypeOf[Effect[_]].dealias}")
+//      println(s"Result value type: $resultValueType")
       val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result)"
 
       // Create the effect mapping call using the method call and the encode result function
