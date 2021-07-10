@@ -125,7 +125,9 @@ hello.positional.args("world", 1).tell // Future[Unit]
 
 ## [Backend](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/Backend.html)
 
-Effectful computation plugins:
+Effectful computation plugins.
+
+The underlying runtime must support monadic composition of effects.
 
 | Class | Artifact | Library | Effect Type |
 | ---- | --- | --- | --- |
@@ -139,7 +141,9 @@ Effectful computation plugins:
 
 ## [Codec](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/Codec.html)
 
-Structered message data format plugins:
+Structured message format codec plugins.
+
+The underlying format must support storing arbitrarily nested structures of basic data types.
 
 | Class | Artifact | Library | Node Type |
 | ---- | --- | --- | --- |
@@ -150,11 +154,11 @@ Structered message data format plugins:
 
 ## [Transport](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/Transport.html)
 
-Message transport plugins.
+Message transport protocol plugins.
 
 ### Client transport
 
-Message transport plugins used by the RPC client to send requests and receive responses to and from a remote endpoint.:
+Message transport plugins used by the RPC client to send requests and receive responses to and from a remote endpoint.
 
 | Class | Artifact | Library | Protocol |
 | ---- | --- | --- | --- |
