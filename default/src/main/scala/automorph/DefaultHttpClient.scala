@@ -30,13 +30,13 @@ case object DefaultHttpClient {
    * @param backend effectful computation backend plugin
    * @param transport message transport protocol plugin
    * @tparam Effect effect type
-   * @tparam Context request context type
+   * @tparam RequestContext request context type
    * @return client
    */
-  def apply[Effect[_], Context](
+  def apply[Effect[_], RequestContext](
     backend: Backend[Effect],
-    transport: Transport[Effect, Context]
-  ): Client[DefaultCodec.Node, DefaultCodec.Type, Effect, Context] = Client(UpickleJsonCodec(), backend, transport)
+    transport: Transport[Effect, RequestContext]
+  ): Client[DefaultCodec.Node, DefaultCodec.Type, Effect, RequestContext] = Client(UpickleJsonCodec(), backend, transport)
 
   /**
    * Creates a default JSON-RPC client using HTTP as message transport protocol with specified ''backend'' plugin.

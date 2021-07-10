@@ -1,6 +1,7 @@
 package automorph.protocol
 
 import automorph.util.{Method, Parameter, Reflection}
+import scala.annotation.nowarn
 import scala.reflect.macros.blackbox
 
 /** Method bindings introspection. */
@@ -92,14 +93,37 @@ private[automorph] case object MethodBindings {
    * @tparam C macro context type
    * @return wrapped type
    */
-  def unwrapType[C <: blackbox.Context, Wrapper: ref.c.WeakTypeTag](ref: Reflection[C])(
-    wrappedType: ref.c.Type
-  ): ref.c.Type =
-    if (wrappedType.typeArgs.nonEmpty && wrappedType.typeConstructor =:= ref.c.weakTypeOf[Wrapper].dealias) {
-      wrappedType.typeArgs.last
-    } else {
-      wrappedType
+  @nowarn
+  def unwrapType[C <: blackbox.Context, Wrapper: c.WeakTypeTag](c: C)(someType: c.Type): c.Type = {
+    import c.universe.TypeRef
+
+    val wrapperType = resultType(c)(c.weakTypeOf[Wrapper])
+    val (wrapperTypeConstructor, wrapperTypeParameterIndex) = wrapperType match {
+      case typeRef: TypeRef =>
+        if (wrapperType.typeArgs.nonEmpty) {
+          // Find constructor and type parameter index for an applied type
+          (
+            wrapperType.typeConstructor,
+            wrapperType.typeArgs.indexWhere {
+              case typeRef: TypeRef => typeRef.sym.isAbstract &&
+                  !(typeRef =:= c.typeOf[Any] || typeRef <:< c.typeOf[AnyRef] || typeRef <:< c.typeOf[AnyVal])
+              case _ => false
+            }
+          )
+        } else {
+          // Assume type reference to be single parameter type constructor
+          (wrapperType, 0)
+        }
+      // Keep any other types wrapped
+      case _ => (wrapperType, -1)
     }
+    if (
+      wrapperTypeParameterIndex >= 0 &&
+      someType.typeConstructor == wrapperTypeConstructor
+    ) {
+      someType.typeArgs(wrapperTypeParameterIndex)
+    } else someType
+  }
 
   /**
    * Creates a method signature.
@@ -151,4 +175,18 @@ private[automorph] case object MethodBindings {
       }
     }
   }
+
+  /**
+   * Determine result type if specified type is a lambda type.
+   *
+   * @param q quotation context
+   * @param someType some type
+   * @return result type
+   */
+  @nowarn
+  private def resultType[C <: blackbox.Context](c: C)(someType: c.Type): c.Type =
+    someType.dealias match {
+      case polyType: c.universe.PolyType => polyType.resultType.dealias
+      case _ => someType.dealias
+    }
 }

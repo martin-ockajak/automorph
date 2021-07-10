@@ -96,31 +96,33 @@ private[automorph] case object MethodBindings:
    * Extracts type wrapped in a wrapper type.
    *
    * @param q quotation context
-   * @param wrappedType wrapped type
+   * @param someType wrapped type
    * @tparam Wrapper wrapper type
    * @return wrapped type
    */
-  def unwrapType[Wrapper[_]: Type](q: Quotes)(wrappedType: q.reflect.TypeRepr): q.reflect.TypeRepr =
-    val (wrapperTypeConstructor, wrapperTypeParamIndex) =
-      resultType(q)(q.reflect.TypeRepr.of[Wrapper].dealias).dealias match
+  def unwrapType[Wrapper[_]: Type](q: Quotes)(someType: q.reflect.TypeRepr): q.reflect.TypeRepr =
+    import q.reflect.{AppliedType, ParamRef, TypeRef, TypeRepr}
+
+    val (wrapperTypeConstructor, wrapperTypeParameterIndex) =
+      resultType(q)(TypeRepr.of[Wrapper]) match
         // Find constructor and type parameter index for an applied type
         case wrapperType: q.reflect.AppliedType => (
             wrapperType.tycon,
             wrapperType.args.indexWhere {
-              case _: q.reflect.ParamRef => true
+              case _: ParamRef => true
               case _ => false
             }
           )
         // Assume type reference to be single parameter type constructor
-        case wrapperType: q.reflect.TypeRef => (wrapperType, 0)
+        case wrapperType: TypeRef => (wrapperType, 0)
         // Keep any other types wrapped
         case wrapperType => (wrapperType, -1)
-    if wrapperTypeParamIndex >= 0 then
-      wrappedType.dealias match
-        case appliedType: q.reflect.AppliedType if appliedType.tycon <:< wrapperTypeConstructor =>
-          appliedType.args(wrapperTypeParamIndex)
-        case _ => wrappedType
-    else wrappedType
+    if wrapperTypeParameterIndex >= 0 then
+      someType.dealias match
+        case appliedType: AppliedType if appliedType.tycon <:< wrapperTypeConstructor =>
+          appliedType.args(wrapperTypeParameterIndex)
+        case _ => someType
+    else someType
 
   /**
    * Creates a method signature.
@@ -175,7 +177,14 @@ private[automorph] case object MethodBindings:
       else
         Right(method)
 
+  /**
+   * Determine result type if specified type is a lambda type.
+   *
+   * @param q quotation context
+   * @param someType some type
+   * @return result type
+   */
   private def resultType(q: Quotes)(someType: q.reflect.TypeRepr): q.reflect.TypeRepr =
-    someType match
-      case lambdaType: q.reflect.LambdaType => lambdaType.resType
-      case otherType => otherType
+    someType.dealias match
+      case lambdaType: q.reflect.LambdaType => lambdaType.resType.dealias
+      case _ => someType.dealias
