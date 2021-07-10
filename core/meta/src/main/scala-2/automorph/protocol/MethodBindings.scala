@@ -100,11 +100,14 @@ private[automorph] case object MethodBindings {
     val wrapperType = resultType(c)(c.weakTypeOf[Wrapper])
     val (wrapperTypeConstructor, wrapperTypeParameterIndex) = wrapperType match {
       case typeRef: TypeRef =>
-        if (wrapperType.typeArgs.nonEmpty) {
+        val expandedType = if (typeRef.typeArgs.nonEmpty) typeRef else {
+          typeRef.etaExpand.resultType.dealias
+        }
+        if (expandedType.typeArgs.nonEmpty) {
           // Find constructor and type parameter index for an applied type
           (
-            wrapperType.typeConstructor,
-            wrapperType.typeArgs.indexWhere {
+            expandedType.typeConstructor,
+            expandedType.typeArgs.indexWhere {
               case typeRef: TypeRef => typeRef.sym.isAbstract &&
                   !(typeRef =:= c.typeOf[Any] || typeRef <:< c.typeOf[AnyRef] || typeRef <:< c.typeOf[AnyVal])
               case _ => false
@@ -112,16 +115,16 @@ private[automorph] case object MethodBindings {
           )
         } else {
           // Assume type reference to be single parameter type constructor
-          (wrapperType, 0)
+          (expandedType, 0)
         }
       // Keep any other types wrapped
       case _ => (wrapperType, -1)
     }
     if (
       wrapperTypeParameterIndex >= 0 &&
-      someType.typeConstructor == wrapperTypeConstructor
+      someType.dealias.typeConstructor <:< wrapperTypeConstructor
     ) {
-      someType.typeArgs(wrapperTypeParameterIndex)
+      someType.dealias.typeArgs(wrapperTypeParameterIndex)
     } else someType
   }
 

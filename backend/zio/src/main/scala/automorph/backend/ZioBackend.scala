@@ -29,5 +29,5 @@ case object ZioBackend {
    *
    * @tparam Environment ZIO environment
    */
-  type Effect[Environment] = ({ type ExactEffect[T] = RIO[Environment, T] })#ExactEffect[Environment]
+  type TaskEffect[T] = RIO[Any, T]
 }

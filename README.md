@@ -476,12 +476,14 @@ val api = new Api()
 ### Server
 
 ```scala
+import automorph.backend.ZioBackend
+
 // Custom effectful computation backend plugin
 val backend = automorph.backend.ZioBackend[Any]()
 val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
 
 // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = automorph.DefaultHttpServer(backend, runEffect, _.bind(api), 80, "/api")
+val server = automorph.DefaultHttpServer[ZioBackend.TaskEffect](backend, runEffect, _.bind(api), 80, "/api")
 
 // Stop the server
 server.close()
