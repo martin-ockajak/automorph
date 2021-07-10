@@ -36,8 +36,6 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
 
   val core = ClientCore(codec, backend, transport, errorToException)
 
-//  private val core = Clien
-
   /**
    * Creates a method proxy with specified method name.
    *
