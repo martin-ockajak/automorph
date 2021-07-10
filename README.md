@@ -1,13 +1,16 @@
 ![automorph](https://github.com/martin-ockajak/automorph/raw/main/project/logo.jpg)
 
-**Automorph** is a [JSON-RPC](https://www.jsonrpc.org/specification) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless
-way to invoke and expose remote APIs.
+**Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless
+way to invoke and expose remote APIs while supporting multiple RPC protocols such as [JSON-RPC](https://www.jsonrpc.org/specification) and highly standardized form of [REST](https://en.wikipedia.org/wiki/Representational_state_transfer).
 
 [![Build](https://github.com/martin-ockajak/automorph/workflows/Build/badge.svg)](https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
 [![Releases](https://img.shields.io/maven-central/v/io.automorph/automorph-core_2.13.svg)](https://mvnrepository.com/artifact/io.automorph)
 [![Scaladoc](https://javadoc-badge.appspot.com/io.automorph/automorph-core_2.13.svg?label=scaladoc)](https://javadoc.io/doc/io.automorph/automorph-core_2.13/latest/automorph/)
 
-- [Features](#features)
+- [Overview](#overview)
+  - [Goals](#goals)
+  - [Features](#features)
+  - [Inspiration](#inspiration)
 - [Quickstart](#quickstart)
   - [Build](#build)
   - [API](#api)
@@ -24,7 +27,6 @@ way to invoke and expose remote APIs.
 - [Documentation](#documentation)
   - [Architecture](#architecture)
   - [Scaladoc](#scaladoc)
-  - [Inspiration](#inspiration)
 - [Examples](#examples)
   - [Synchronous](#synchronous)
   - [Asynchronous](#asynchronous)
@@ -34,7 +36,15 @@ way to invoke and expose remote APIs.
   - [Custom message transport](#custom-message-transport)
   - [Custom message codec](#custom-message-codec)
 
-# Features
+# Overview
+
+## Goals
+
+* Provide a definitive RPC solution for Scala ecosystem
+* Require minimal effort and disruption of existing codebase
+* Encourage use of standard interoperability protocols
+
+## Features
 
 * **Powerful** - generate JSON-RPC bindings directly from public methods of your API classes
 * **Modular** - combine integration plugins to match your API effect type, message format and transport protocol
@@ -48,7 +58,13 @@ way to invoke and expose remote APIs.
 * **Boilerplate free** - even advanced use-cases require only a few lines of code
 * **Dependency free** - core logic depends on [SLF4J API](http://www.slf4j.org/) only
 
-## [Quickstart](/examples/src/main/scala/examples/Asynchronous.scala)
+## Inspiration
+
+* [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
+* [Autowire](https://github.com/lihaoyi/autowire)
+* [STTP](https://github.com/softwaremill/sttp)
+
+# [Quickstart](/examples/src/main/scala/examples/Asynchronous.scala)
 
 Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
@@ -236,12 +252,6 @@ Depends on:
 ```
 
 ### [Scaladoc](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
-
-### Inspiration
-
-* [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
-* [Autowire](https://github.com/lihaoyi/autowire)
-* [STTP](https://github.com/softwaremill/sttp)
 
 # Examples
 
