@@ -32,7 +32,7 @@ object MethodAlias extends App {
 
   // Call the remote API method via proxy
   client.method("test.regular").args("add" -> true, "n" -> 1).call[Double] // 2
-  client.method("aliased").args("value" -> "").tell // Unit
+  client.method("aliased").args("value" -> "").tell // ()
   Try(client.method("omitted").args().call[String]) // Failure
 
   // Stop the server
