@@ -12,6 +12,7 @@ way to invoke and expose remote APIs while supporting multiple RPC protocols suc
   - [Features](#features)
   - [Inspiration](#inspiration)
 - [Quickstart](#quickstart)
+  - [Scaladoc](#scaladoc)
   - [Build](#build)
   - [API](#api)
   - [Server](#server)
@@ -24,9 +25,7 @@ way to invoke and expose remote APIs while supporting multiple RPC protocols suc
     - [Client transport](#client-transport)
     - [Endpoint transport](#endpoint-transport)
     - [Server transport](#server-transport)
-- [Documentation](#documentation)
-  - [Architecture](#architecture)
-  - [Scaladoc](#scaladoc)
+- [Architecture](#architecture)
 - [Examples](#examples)
   - [Synchronous](#synchronous)
   - [Asynchronous](#asynchronous)
@@ -68,6 +67,7 @@ way to invoke and expose remote APIs while supporting multiple RPC protocols suc
 
 Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
+## [Scaladoc](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
 
 ## Build
 
@@ -205,11 +205,9 @@ Message transport plugins used to passively receive and reply to requests using 
 | [JettyJsonRpcServlet](https://www.javadoc.io/doc/io.automorph/automorph-jetty_2.13/latest/automorph/server/http/JettyJsonRpcServlet.html) | [automorph-jetty](https://mvnrepository.com/artifact/io.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) |[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [FinagleJsonRpcService](https://www.javadoc.io/doc/io.automorph/automorph-finagle_2.13/latest/automorph/server/http/FinagleJsonRpcService.html) | [automorph-finagle](https://mvnrepository.com/artifact/io.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) |[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 
-# Documentation
+# Architecture
 
-## Architecture
-
-### [Client](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/automorph/Client.html)
+## [Client](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/automorph/Client.html)
 
 The client provides automatic creation of transparent proxy instances for remote JSON-RPC endpoints defined by existing API classes. Additionally, it also
 supports direct calls and notifications of remote API methods.
@@ -231,7 +229,7 @@ Depends on:
   '-------'    '---------'
 ```
 
-### Handler
+## Handler
 
 The handler provides automatic creation of remote JSON-RPC endpoint bindings for existing API instances and subsequent processing JSON-RPC requests.
 
@@ -250,8 +248,6 @@ Depends on:
             | Backend |    | Codec |
             '---------'    '-------'
 ```
-
-### [Scaladoc](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
 
 # Examples
 
