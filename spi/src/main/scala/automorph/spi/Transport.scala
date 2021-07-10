@@ -5,7 +5,7 @@ import scala.collection.immutable.ArraySeq
 /**
  * Message transport protocol plugin.
  *
- * The transport can be used by a JSON-RPC client to send requests and receive responses to and from a remote endpoint.
+ * Used by the RPC client to send requests and receive responses to and from a remote endpoint.
  *
  * @tparam Effect effect type
  * @tparam Context request context type

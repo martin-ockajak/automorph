@@ -9,9 +9,9 @@ import automorph.util.{CannotEqual, EmptyContext}
 import java.io.IOException
 
 /**
- * JSON-RPC client.
+ * Automorph RPC client.
  *
- * The client can be used to perform JSON-RPC calls and notifications.
+ * Used to perform RPC calls and notifications.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Creates a JSON-RPC client with specified request `Context` type plus ''codec'', ''backend'' and ''transport'' plugins.

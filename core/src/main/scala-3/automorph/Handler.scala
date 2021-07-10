@@ -8,9 +8,9 @@ import automorph.spi.{Backend, Codec}
 import automorph.util.{CannotEqual, EmptyContext}
 
 /**
- * JSON-RPC request handler.
+ * Automorph RPC request handler.
  *
- * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
+ * Used by an RPC server to invoke bound API methods based on incoming RPC requests.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Creates a new JSON-RPC request handler with specified request `Context` type plus specified ''codec'' and ''backend'' plugins.
