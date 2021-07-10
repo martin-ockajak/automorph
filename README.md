@@ -18,9 +18,9 @@ way to invoke and expose remote APIs.
   - [Effect backend](#backend)
   - [Message codec](#codec)
   - [Message transport](#transport)
-    - [Client](#client-2)
-    - [Endpoint](#endpoint)
-    - [Server](#server-2)
+    - [Client transport](#client-transport)
+    - [Endpoint transport](#endpoint-transport)
+    - [Server transport](#server-transport)
 - [Documentation](#documentation)
   - [Architecture](#architecture)
   - [Scaladoc](#scaladoc)
@@ -152,7 +152,7 @@ Structered message data format plugins:
 
 Message transport plugins.
 
-### Client
+### Client transport
 
 Message transport plugins used by the RPC client to send requests and receive responses to and from a remote endpoint.:
 
@@ -163,7 +163,7 @@ Message transport plugins used by the RPC client to send requests and receive re
 | [JettyJsonRpcServlet](https://www.javadoc.io/doc/io.automorph/automorph-jetty_2.13/latest/automorph/server/http/JettyJsonRpcServlet.html) | [automorph-jetty](https://mvnrepository.com/artifact/io.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) |[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [FinagleJsonRpcService](https://www.javadoc.io/doc/io.automorph/automorph-finagle_2.13/latest/automorph/server/http/FinagleJsonRpcService.html) | [automorph-finagle](https://mvnrepository.com/artifact/io.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) |[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 
-## Server
+## Server transport
 
 Message transport plugins used to actively receive and reply to requests using specific message transport protocol while invoking RPC request handler to process them.
 
@@ -172,7 +172,7 @@ Message transport plugins used to actively receive and reply to requests using s
 | [UndertowServer](https://www.javadoc.io/doc/io.automorph/automorph-undertow_2.13/latest/automorph/server/http/UndertowServer.html) (Default) | [automorph-undertow](https://mvnrepository.com/artifact/io.automorph/automorph-undertow) | [Undertow](https://undertow.io/) |[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [NanoHttpdServer](https://www.javadoc.io/doc/io.automorph/automorph-standard_2.13/latest/automorph/server/http/NanoHttpdServer.html) | [automorph-standard](https://mvnrepository.com/artifact/io.automorph/automorph-standard) | [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd) |[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 
-## Endpoint
+## Endpoint transport
 
 Message transport plugins used to passively receive and reply to requests using specific message transport protocol from an active server while invoking RPC request handler to process them.
 
