@@ -28,6 +28,8 @@ way to invoke and expose remote APIs.
 - [Examples](#examples)
   - [Synchronous](#synchronous)
   - [Asynchronous](#asynchronous)
+  - [Request context](#request-context)
+  - [Method alias](#method-alias)
   - [Custom effect backend](#custom-effect-backend)
   - [Custom message transport](#custom-message-transport)
   - [Custom message codec](#custom-message-codec)
@@ -330,6 +332,62 @@ hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
+## [Request context](/examples/src/main/scala/examples/RequestContext.scala)
+
+### API
+
+```scala
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import automorph.DefaultHttpClient
+import automorph.DefaultHttpServer
+
+// Define server API type and create API instance
+class ServerApi {
+  import DefaultHttpServer.Context
+
+  // Consume request context provided by the server transport
+  def requestMetaData(message: String)(implicit context: Context): Future[List[String]] = Future.successful(
+    List(message, context.getRequestPath, context.getRequestHeaders.get("X-Test").peek)
+  )
+}
+val api = new ServerApi()
+
+// Define client view of the server API
+trait ClientApi {
+  import DefaultHttpClient.Context
+
+  // Supply requets context used by the client transport
+  def requestMetaData(message: String)(implicit context: Context): Future[List[String]]
+}
+```
+
+### Server
+
+```scala
+// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+val server = DefaultHttpServer.async(_.bind(api), 80, "/api")
+
+// Stop the server
+server.close()
+```
+
+### Client
+
+```scala
+  // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+val client = DefaultHttpClient.async("http://localhost/api", "POST")
+
+// Create request context for the client
+val apiProxy = client.bind[ClientApi] // Api
+val defaultContext = client.defaultContext
+implicit val context: DefaultHttpClient.Context = defaultContext.copy(partial = defaultContext.partial.header("X-Test", "valid"))
+
+// Call the remote API method via proxy
+apiProxy.requestMetaData("test") // : Future(List("test", "/api", "valid"))
+apiProxy.requestMetaData("test")(context) // : Future(List("test", "/api", "valid"))
+```
+
 ## [Method alias](/examples/src/main/scala/examples/MethodAlias.scala)
 
 ### API
@@ -386,62 +444,6 @@ val client = automorph.DefaultHttpClient.sync("http://localhost/api", "POST")
 client.method("test.regular").args("add" -> true, "n" -> 1).call[Double] // 2
 client.method("aliased").args("value" -> "").tell // Unit
 Try(client.method("omitted").args().call[String]) // Failure
-```
-
-## [Request context](/examples/src/main/scala/examples/RequestContext.scala)
-
-### API
-
-```scala
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import automorph.DefaultHttpClient
-import automorph.DefaultHttpServer
-
-// Define server API type and create API instance
-class ServerApi {
-  import DefaultHttpServer.Context
-
-  // Consume request context provided by the server transport
-  def requestMetaData(message: String)(implicit context: Context): Future[List[String]] = Future.successful(
-    List(message, context.getRequestPath, context.getRequestHeaders.get("X-Test").peek)
-  )
-}
-val api = new ServerApi()
-
-// Define client view of the server API
-trait ClientApi {
-  import DefaultHttpClient.Context
-
-  // Supply requets context used by the client transport
-  def requestMetaData(message: String)(implicit context: Context): Future[List[String]]
-}
-```
-
-### Server
-
-```scala
-// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = DefaultHttpServer.async(_.bind(api), 80, "/api")
-
-// Stop the server
-server.close()
-```
-
-### Client
-
-```scala
-  // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
-val client = DefaultHttpClient.async("http://localhost/api", "POST")
-
-// Create request context for the client
-val apiProxy = client.bind[ClientApi] // Api
-val defaultContext = client.defaultContext
-implicit val context: DefaultHttpClient.Context = defaultContext.copy(partial = defaultContext.partial.header("X-Test", "valid"))
-
-// Call the remote API method via proxy
-apiProxy.requestMetaData("test") // : Future(List("test", "/api", "valid"))
-apiProxy.requestMetaData("test")(context) // : Future(List("test", "/api", "valid"))
 ```
 
 ## [Custom effect backend](/examples/src/main/scala/examples/CustomBackend.scala)
