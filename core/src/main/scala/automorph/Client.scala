@@ -45,6 +45,13 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   def method(methodName: String): NamedMethod = NamedMethodProxy(methodName, core, Seq(), Seq())
 
   /**
+   * Create default request context.
+   *
+   * @return request context
+   */
+  def defaultContext: Context = transport.defaultContext
+
+  /**
    * Creates a copy of this client with specified JSON-RPC error to exception mapping.
    *
    * @param errorToException maps a JSON-RPC error to a corresponding exception

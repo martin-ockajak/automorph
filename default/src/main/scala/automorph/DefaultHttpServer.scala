@@ -10,15 +10,18 @@ import scala.concurrent.{ExecutionContext, Future}
 
 case object DefaultHttpServer {
 
+  /** Default server type. */
+  type Type = UndertowServer
+
+  /** Request context type. */
+  type Context = UndertowServer.Context
+
   /**
    * Default server request handler type.
    *
    * @tparam Effect effec type
    */
   type Handler[Effect[_]] = DefaultHandler.Type[Effect, UndertowServer.Context]
-
-  /** Default server type. */
-  type Type = UndertowServer
 
   /**
    * Creates a default server using HTTP as message transport protocol with specified ''backend'' plugin.

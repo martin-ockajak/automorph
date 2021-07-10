@@ -5,7 +5,7 @@ import automorph.transport.http.SttpTransport.RequestProperties
 import java.io.IOException
 import java.net.URL
 import scala.collection.immutable.ArraySeq
-import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArray, basicRequest, ignore}
+import sttp.client3.{asByteArray, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
@@ -26,6 +26,7 @@ final case class SttpTransport[Effect[_]](
   backend: Backend[Effect],
   sttpBackend: SttpBackend[Effect, _]
 ) extends Transport[Effect, RequestProperties] {
+
   private val uri = Uri(url.toURI)
   private val httpMethod = Method.unsafeApply(method)
 
@@ -50,19 +51,22 @@ final case class SttpTransport[Effect[_]](
     backend.map(httpRequest.send(sttpBackend), (_: Response[Unit]) => ())
   }
 
+  override def defaultContext: RequestProperties = RequestProperties.defaultContext
+
   private def setupHttpRequest(
     request: ArraySeq.ofByte,
     mediaType: String,
     context: Option[RequestProperties]
   ): Request[Either[String, String], Any] = {
     val contentType = MediaType.unsafeParse(mediaType)
-    val requestProperties = context.getOrElse(RequestProperties())
-    requestProperties.partial.method(requestProperties.method.getOrElse(httpMethod), uri)
+    val requestProperties = context.getOrElse(defaultContext)
+    requestProperties.partial.method(requestProperties.partial.method.getOrElse(httpMethod), uri)
       .contentType(contentType).header(Header.accept(contentType)).body(request.unsafeArray)
   }
 }
 
 case object SttpTransport {
+
   /** Request context type. */
   type Context = RequestProperties
 
@@ -74,7 +78,6 @@ case object SttpTransport {
    * @param partial partially constructed request
    */
   case class RequestProperties(
-    method: Option[Method] = None,
     partial: PartialRequest[Either[String, String], Any] = basicRequest
   )
 

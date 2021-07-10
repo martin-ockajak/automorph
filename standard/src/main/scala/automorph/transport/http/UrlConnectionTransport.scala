@@ -41,6 +41,8 @@ final case class UrlConnectionTransport(
     ()
   }
 
+  override def defaultContext: RequestProperties = RequestProperties.defaultContext.copy(method = Some(method))
+
   private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): HttpURLConnection = {
     val connection = connect()
     val outputStream = connection.getOutputStream
@@ -92,6 +94,7 @@ final case class UrlConnectionTransport(
 }
 
 case object UrlConnectionTransport {
+
   /** Request context type. */
   type Context = RequestProperties
 

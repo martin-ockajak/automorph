@@ -18,6 +18,9 @@ case object DefaultHttpClient {
    */
   type Type[Effect[_]] = Client[DefaultCodec.Node, DefaultCodec.Type, Effect, SttpTransport.Context]
 
+  /** Request context type. */
+  type Context = SttpTransport.Context
+
   /**
    * Creates a default JSON-RPC client using HTTP as message transport protocol with specified ''backend'' plugin.
    *

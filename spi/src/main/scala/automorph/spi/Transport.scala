@@ -35,4 +35,11 @@ trait Transport[Effect[_], Context] {
    * @return nothing
    */
   def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit]
+
+  /**
+   * Create default request context.
+   *
+   * @return request context
+   */
+  def defaultContext: Context
 }
