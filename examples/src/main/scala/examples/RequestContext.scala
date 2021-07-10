@@ -32,10 +32,12 @@ object RequestContext extends App {
   // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
   val client = DefaultHttpClient.async("http://localhost/api", "POST")
 
-  // Create request context for the client
+  // Create context for requests sent by the client
   val apiProxy = client.bind[ClientApi] // Api
   val defaultContext = client.defaultContext
-  implicit val context: DefaultHttpClient.Context = defaultContext.copy(partial = defaultContext.partial.header("X-Test", "valid"))
+  implicit val context: DefaultHttpClient.Context = defaultContext.copy(
+    partial = defaultContext.partial.header("X-Test", "valid")
+  )
 
   // Call the remote API method via proxy
   apiProxy.requestMetaData("test") // : Future(List("test", "/api", "valid"))
