@@ -50,17 +50,17 @@ private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_],
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
-   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `mapName` function.
+   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `mapMethodName` function.
    *
    * @param api API instance
-   * @param mapName mapping of method name to its exposed names (empty result causes the method not to be exposed)
+   * @param mapMethodName mapping of method name to its exposed names (empty result causes the method not to be exposed)
    * @tparam Api API type (only member methods of this type are exposed)
    * @return JSON-RPC server with added API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](api: Api, mapName: String => Seq[String]): ThisHandler =
+  inline def bind[Api <: AnyRef](api: Api, mapMethodName: String => Seq[String]): ThisHandler =
     copy(methodBindings =
       methodBindings ++ HandlerBindings.generate[Node, ExactCodec, Effect, Context, Api](codec, backend, api).flatMap {
-        (methodName, method) => mapName(methodName).map(_ -> method)
+        (methodName, method) => mapMethodName(methodName).map(_ -> method)
       }
     )
