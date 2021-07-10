@@ -8,7 +8,7 @@ import scala.reflect.macros.blackbox.Context
  * @tparam C macro context type
  * @param c macro context
  */
-private[automorph] final case class Reflection[C <: Context](c: C) {
+final private[automorph] case class Reflection[C <: Context](c: C) {
 
   // All meta-programming data types are path-dependent on the compiler-generated reflection context
   import c.universe._
@@ -18,9 +18,7 @@ private[automorph] final case class Reflection[C <: Context](c: C) {
     dataType: Type,
     contextual: Boolean
   ) {
-
-    def lift: Parameter =
-      Parameter(name, show(dataType), contextual)
+    def lift: Parameter = Parameter(name, show(dataType), contextual)
   }
 
   case class RefMethod(
@@ -33,16 +31,15 @@ private[automorph] final case class Reflection[C <: Context](c: C) {
     symbol: Symbol
   ) {
 
-    def lift: Method =
-      Method(
-        name,
-        show(resultType),
-        parameters.map(_.map(_.lift)),
-        typeParameters.map(_.lift),
-        public = public,
-        available = available,
-        documentation = None
-      )
+    def lift: Method = Method(
+      name,
+      show(resultType),
+      parameters.map(_.map(_.lift)),
+      typeParameters.map(_.lift),
+      public = public,
+      available = available,
+      documentation = None
+    )
   }
 
   /**
@@ -59,7 +56,7 @@ private[automorph] final case class Reflection[C <: Context](c: C) {
       RefParameter(typeSymbol.name.toString, typeSymbol.toType.finalResultType, false)
     }
     val parameters = methodSymbol.paramLists.map(_.map { parameter =>
-      RefParameter(parameter.name.toString, parameter.typeSignature, false)
+      RefParameter(parameter.name.toString, parameter.typeSignature, parameter.isImplicit)
     })
     RefMethod(
       methodSymbol.name.toString,
