@@ -498,12 +498,6 @@ apiProxy.hello("world", 1) // : Task[String]
 
 ## [Custom message transport](/examples/src/main/scala/examples/CustomTransport.scala)
 
-### Dependencies
-
-```scala
-libraryDependencies += "io.automorph" %% "automorph-default" % "1.0.0"
-```
-
 ### API
 
 ```scala
