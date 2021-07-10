@@ -6,8 +6,8 @@ object MethodAlias extends App {
 
   // Define an API type and create API instance
   class Api {
-    // Exposed as 'test.regular'
-    def regular(add: Boolean, n: Double): Double = if (add) n + 1 else n - 1
+    // Exposed as 'test.multiParams'
+    def multiParams(add: Boolean)(n: Double): Double = if (add) n + 1 else n - 1
 
     // Exposed as 'original' and 'aliased'
     def original(value: Option[String]): String = value.getOrElse("")
@@ -31,7 +31,7 @@ object MethodAlias extends App {
   val client = automorph.DefaultHttpClient.sync("http://localhost/api", "POST")
 
   // Call the remote API method via proxy
-  client.method("test.regular").args("add" -> true, "n" -> 1).call[Double] // 2
+  client.method("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
   client.method("aliased").args("value" -> None).tell // ()
   Try(client.method("omitted").args().call[String]) // Failure
 

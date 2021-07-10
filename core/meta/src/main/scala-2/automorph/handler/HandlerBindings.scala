@@ -152,10 +152,7 @@ case object HandlerBindings {
 
       // Create the API method call using the decoded arguments
       //   api.method(arguments ...): Effect[ResultValueType]
-      // FIXME - multiple argument lists
-//      val apiMethodCall = q"$api.${method.symbol}${arguments.map(argumentList => q"(..$argumentList)")}"
-      val apiMethodCall = q"$api.${method.symbol}(..${arguments.head})"
-//      println(ref.c.universe.showCode(apiMethodCall))
+      val apiMethodCall = q"$api.${method.symbol}(...$arguments)"
 
       // Create encode result function
       //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
