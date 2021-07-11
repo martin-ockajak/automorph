@@ -149,7 +149,9 @@ object ClientBind {
             val argumentNames = Option.when($namedArguments)(parameterNames)
 
             // Perform the API call
-            $clientCore.call(method.getName, argumentNames, encodedArguments, resultNode => clientMethod.decodeResult(resultNode), context)
+            $clientCore.call(method.getName, argumentNames, encodedArguments, resultNode =>
+              clientMethod.decodeResult(resultNode),
+            context)
           }.getOrElse(throw new UnsupportedOperationException("Invalid method: " + method.getName))
       ).asInstanceOf[$apiType]
     """)
