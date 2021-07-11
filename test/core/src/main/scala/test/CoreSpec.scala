@@ -1,7 +1,7 @@
 package test
 
 import automorph.protocol.ErrorType.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
-import automorph.spi.Backend
+import automorph.spi.{Backend, Codec}
 import automorph.{Client, Handler}
 import org.scalacheck.Arbitrary
 import scala.util.Try
@@ -27,8 +27,8 @@ trait CoreSpec extends BaseSpec {
 
   case class CodecFixture(
     codec: Class[_],
-    client: Client[_, _, Effect, Context],
-    handler: Handler[_, _, Effect, Context],
+    client: Client[_, _ <: Codec[_], Effect, Context],
+    handler: Handler[_,  _ <: Codec[_], Effect, Context],
     simpleApis: Seq[SimpleApiType],
     complexApis: Seq[ComplexApiType],
     invalidApis: Seq[InvalidApiType],
