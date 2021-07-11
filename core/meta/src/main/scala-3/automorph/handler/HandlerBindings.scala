@@ -56,14 +56,14 @@ private[automorph] case object HandlerBindings:
         )
 
     // Generate bound API method bindings
-    val handlerMethods = Expr.ofSeq(validMethods.map { method =>
+    val handlerBindings = Expr.ofSeq(validMethods.map { method =>
       '{
         ${ Expr(method.name) } -> ${
           generateBinding[Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)
         }
       }
     })
-    '{ $handlerMethods.toMap }
+    '{ $handlerBindings.toMap }
 
   private def generateBinding[
     Node: Type,

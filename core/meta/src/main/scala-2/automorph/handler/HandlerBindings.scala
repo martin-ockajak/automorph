@@ -56,11 +56,11 @@ case object HandlerBindings {
     }
 
     // Generate bound API method bindings
-    val handlerMethods = validMethods.map { method =>
+    val handlerBindings = validMethods.map { method =>
       q"${method.name} -> ${generateBinding[c.type, Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)}"
     }
     c.Expr[Map[String, HandlerBinding[Node, Effect, Context]]](q"""
-      Seq(..$handlerMethods).toMap
+      Seq(..$handlerBindings).toMap
     """)
   }
 

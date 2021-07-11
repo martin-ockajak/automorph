@@ -133,24 +133,24 @@ object ClientBind {
         Array(classOf[$apiType]),
         (_, method, arguments) =>
           // Lookup bindings for the specified method
-          methodBindings.get(method.getName).map { clientMethod =>
+          methodBindings.get(method.getName).map { clientBinding =>
             // Adjust expected method parameters if it uses context as its last parameter
             val callArguments = Option(arguments).getOrElse(Array.empty[AnyRef])
             val (argumentValues, context) =
-              if (clientMethod.usesContext && callArguments.nonEmpty) {
+              if (clientBinding.usesContext && callArguments.nonEmpty) {
                 callArguments.dropRight(1).toSeq -> Some(callArguments.last.asInstanceOf[$contextType])
               } else {
                 callArguments.toSeq -> None
               }
 
             // Encode method arguments
-            val encodedArguments = clientMethod.encodeArguments(argumentValues)
-            val parameterNames = clientMethod.method.parameters.flatten.map(_.name)
+            val encodedArguments = clientBinding.encodeArguments(argumentValues)
+            val parameterNames = clientBinding.method.parameters.flatten.map(_.name)
             val argumentNames = Option.when($namedArguments)(parameterNames)
 
             // Perform the API call
             $clientCore.call(method.getName, argumentNames, encodedArguments, resultNode =>
-              clientMethod.decodeResult(resultNode), context)
+              clientBinding.decodeResult(resultNode), context)
           }.getOrElse(throw new UnsupportedOperationException("Invalid method: " + method.getName))
       ).asInstanceOf[$apiType]
     """)
