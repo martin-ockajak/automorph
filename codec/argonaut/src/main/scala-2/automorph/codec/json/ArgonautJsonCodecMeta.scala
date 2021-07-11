@@ -21,6 +21,7 @@ private[automorph] object ArgonautJsonCodecMeta {
     import c.universe.Quasiquote
 
     c.Expr[Json](q"""
+      import argonaut.Argonaut.ToJsonIdentity
       implicit val noneCodecJson: argonaut.CodecJson[None.type] = automorph.codec.json.ArgonautJsonCodec.noneCodecJson
       $value.asJson
     """)
