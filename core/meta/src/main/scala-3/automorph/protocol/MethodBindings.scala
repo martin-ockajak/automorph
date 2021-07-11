@@ -59,7 +59,7 @@ private[automorph] case object MethodBindings:
     methods.map(method => validateApiMethod[ApiType, Effect](ref)(method))
 
   /**
-   * Create instance method call term.
+   * Creates a method call term.
    *
    * @param quotes quototation context
    * @param instance instance term
