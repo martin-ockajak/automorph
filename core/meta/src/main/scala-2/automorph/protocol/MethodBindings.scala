@@ -83,7 +83,8 @@ private[automorph] case object MethodBindings {
     ref: Reflection[C]
   )(method: ref.RefMethod): Boolean =
     method.parameters.flatten.lastOption.exists { parameter =>
-      parameter.contextual && parameter.dataType =:= ref.c.weakTypeOf[Context]
+      parameter.contextual &&
+      (parameter.dataType =:= ref.c.weakTypeOf[Context] || Option(System.getProperty(testProperty)).isDefined)
     }
 
   /**
