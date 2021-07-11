@@ -10,10 +10,8 @@ import automorph.transport.local.HandlerTransport
 import automorph.{Client, Handler}
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Decoder, Encoder}
 import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, SimpleApiImpl}
-import ujson.Value
-import upack.Msg
 
 trait CodecCoreSpec extends CoreSpec {
 
