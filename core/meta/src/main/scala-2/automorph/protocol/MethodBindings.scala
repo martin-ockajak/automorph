@@ -187,7 +187,7 @@ private[automorph] case object MethodBindings {
   }
 
   /**
-   * Determine result type if specified type is a lambda type.
+   * Determines result type if specified type is a lambda type.
    *
    * @param q quotation context
    * @param someType some type
