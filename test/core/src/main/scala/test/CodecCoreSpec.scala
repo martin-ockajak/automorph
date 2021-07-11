@@ -24,10 +24,11 @@ trait CodecCoreSpec extends CoreSpec {
     Seq(
       {
         val codec = UpickleJsonCodec(CodecCoreSpec)
-        val handler = Handler[Value, UpickleJsonCodec[CodecCoreSpec.type], Effect, Context](codec, backend)
+        val handler = Handler[UpickleJsonCodec.Node, UpickleJsonCodec[CodecCoreSpec.type], Effect, Context](codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
-        val client = Client[Value, UpickleJsonCodec[CodecCoreSpec.type], Effect, Context](codec, backend, transport)
+        val client: Client[UpickleJsonCodec.Node, UpickleJsonCodec[CodecCoreSpec.type], Effect, Context] =
+          Client(codec, backend, transport)
         CodecFixture(
           codec.getClass,
           client,
@@ -42,10 +43,11 @@ trait CodecCoreSpec extends CoreSpec {
         )
       }, {
         val codec = UpickleMessagePackCodec(CodecCoreSpec)
-        val handler = Handler[Msg, UpickleMessagePackCodec[CodecCoreSpec.type], Effect, Context](codec, backend)
+        val handler = Handler[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[CodecCoreSpec.type], Effect, Context](codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
-        val client = Client[Msg, UpickleMessagePackCodec[CodecCoreSpec.type], Effect, Context](codec, backend, transport)
+        val client: Client[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[CodecCoreSpec.type], Effect, Context] =
+          Client(codec, backend, transport)
         CodecFixture(
           codec.getClass,
           client,
@@ -64,10 +66,11 @@ trait CodecCoreSpec extends CoreSpec {
         implicit lazy val structureEncoder: Encoder[Structure] = deriveEncoder[Structure]
         implicit lazy val structureDecoder: Decoder[Structure] = deriveDecoder[Structure]
         val codec = CirceJsonCodec()
-        val handler = Handler[Json, CirceJsonCodec, Effect, Context](codec, backend)
+        val handler = Handle[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context]r(codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
-        val client = Client[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context](codec, backend, transport)
+        val client: Client[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context] =
+          Client(codec, backend, transport)
         CodecFixture(
           codec.getClass,
           client,
@@ -122,11 +125,11 @@ trait CodecCoreSpec extends CoreSpec {
             "none"
           )
         val codec = ArgonautJsonCodec()
-        val handler = Handler[argonaut.Json, ArgonautJsonCodec, Effect, Context](codec, backend)
+        val handler = Handler[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context](codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
-        val client = Client[argonaut.Json, ArgonautJsonCodec, Effect, Context](codec, backend, transport)
-        CodecFixture(
+        val client: Client[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context] =
+          Client(codec, backend, transport) CodecFixture(
           codec.getClass,
           client,
           handler,
