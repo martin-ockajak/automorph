@@ -70,15 +70,16 @@ case object ClientBindings {
     method: ref.RefMethod,
     codec: ref.c.Expr[ExactCodec]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[ClientBinding[Node]] = {
-    import ref.c.universe.Quasiquote
+    import ref.c.universe.{Quasiquote, weakTypeOf}
 
+    val nodeType = weakTypeOf[Node]
     val encodeArguments = generateEncodeArguments[C, Node, ExactCodec, Context](ref)(method, codec)
     val decodeResult = generateDecodeResult[C, Node, ExactCodec, Effect](ref)(method, codec)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
     implicit val methodLift = methodLiftable(ref)
     Seq(methodLift)
     ref.c.Expr[ClientBinding[Node]](q"""
-      automorph.client.ClientBinding(
+      automorph.client.ClientBinding[$nodeType](
         ${method.lift},
         $encodeArguments,
         $decodeResult,
