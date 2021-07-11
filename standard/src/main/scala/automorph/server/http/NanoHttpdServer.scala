@@ -21,11 +21,10 @@ import scala.collection.immutable.ArraySeq
  * @param readTimeout HTTP connection read timeout (milliseconds)
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
  * @tparam Node message node type
- * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  */
-final case class NanoHttpdServer[Node, ExactCodec <: Codec[Node], Effect[_]] private (
-  handler: Handler[Node, ExactCodec, Effect, IHTTPSession],
+final case class NanoHttpdServer[Node, Effect[_]] private (
+  handler: Handler[Node, _ <: Codec[Node], Effect, IHTTPSession],
   runEffectSync: Effect[Response] => Response,
   port: Int,
   readTimeout: Int,
@@ -104,16 +103,15 @@ case object NanoHttpdServer {
    * @param readTimeout HTTP connection read timeout (milliseconds)
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
    * @tparam Node message node type
-   * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    */
-  def apply[Node, ExactCodec <: Codec[Node], Effect[_]](
-    handler: Handler[Node, ExactCodec, Effect, IHTTPSession],
+  def apply[Node, Effect[_]](
+    handler: Handler[Node, _ <: Codec[Node], Effect, IHTTPSession],
     runEffectSync: Effect[Response] => Response,
     port: Int,
     readTimeout: Int = 5000,
     errorStatus: Int => Status = defaultErrorStatus
-  ): NanoHttpdServer[Node, ExactCodec, Effect] = {
+  ): NanoHttpdServer[Node, Effect] = {
     val server = new NanoHttpdServer(handler, runEffectSync, port, readTimeout, errorStatus)
     server.start()
     server

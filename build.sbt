@@ -264,6 +264,7 @@ ThisBuild / scalacOptions ++= Seq(
     "120"
   )
   case _ => Seq(
+    "-language:existentials",
     "-Xlint",
     "-Wconf:site=[^.]+\\.codec\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
     "-Wextra-implicit",

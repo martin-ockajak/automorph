@@ -43,12 +43,11 @@ case object TapirJsonRpcEndpoint extends Logging {
    * @param method HTTP method to server
    * @param errorStatus JSON-RPC error code to HTTP status code mapping function
    * @tparam Node message node type
-   * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
    * @return Tapir HTTP server endpoint
    */
-  def apply[Node, ExactCodec <: Codec[Node], Effect[_]](
-    handler: Handler[Node, ExactCodec, Effect, Request],
+  def apply[Node, Effect[_]](
+    handler: Handler[Node, _ <: Codec[Node], Effect, Request],
     method: Method,
     errorStatus: Int => StatusCode = defaultErrorStatus
   ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {

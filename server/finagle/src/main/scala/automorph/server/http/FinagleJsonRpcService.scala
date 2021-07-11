@@ -25,11 +25,10 @@ import automorph.protocol.ErrorType
  * @param runEffect asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
  * @tparam Node message node type
- * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  */
-final case class FinagleJsonRpcService[Node, ExactCodec <: Codec[Node], Effect[_]](
-  handler: Handler[Node, ExactCodec, Effect, Request],
+final case class FinagleJsonRpcService[Node, Effect[_]](
+  handler: Handler[Node, _ <: Codec[Node], Effect, Request],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Status = defaultErrorStatus
 ) extends Service[Request, Response] with Logging {

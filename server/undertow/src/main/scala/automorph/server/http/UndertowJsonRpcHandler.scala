@@ -25,11 +25,10 @@ import scala.util.Try
  * @param runEffect effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
  * @tparam Node message node type
- * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  */
-final case class UndertowJsonRpcHandler[Node, ExactCodec <: Codec[Node], Effect[_]](
-  handler: Handler[Node, ExactCodec, Effect, HttpServerExchange],
+final case class UndertowJsonRpcHandler[Node, Effect[_]](
+  handler: Handler[Node, _ <: Codec[Node], Effect, HttpServerExchange],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpHandler with Logging {

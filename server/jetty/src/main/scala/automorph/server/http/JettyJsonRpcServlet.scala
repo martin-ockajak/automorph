@@ -23,12 +23,11 @@ import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
  * @param handler JSON-RPC request handler
  * @param runEffect asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
- * @tparam Node message node type
  * @tparam ExactCodec message codec plugin type
  * @tparam Effect effect type
  */
-final case class JettyJsonRpcServlet[Node, ExactCodec <: Codec[Node], Effect[_]](
-  handler: Handler[Node, ExactCodec, Effect, HttpServletRequest],
+final case class JettyJsonRpcServlet[Node, Effect[_]](
+  handler: Handler[Node, _ <: Codec[Node], Effect, HttpServletRequest],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpServlet with Logging {
