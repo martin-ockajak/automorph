@@ -150,8 +150,8 @@ object ClientBind {
 
             // Perform the API call
             $clientCore.call(method.getName, argumentNames, encodedArguments, resultNode =>
-              clientMethod.decodeResult(resultNode),
-            context)
+              clientMethod.decodeResult(resultNode)
+            , context)
           }.getOrElse(throw new UnsupportedOperationException("Invalid method: " + method.getName))
       ).asInstanceOf[$apiType]
     """)
