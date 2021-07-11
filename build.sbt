@@ -3,6 +3,10 @@ ThisBuild / organization := "io.automorph"
 ThisBuild / homepage := Some(url("https://github.com/martin-ockajak/automorph"))
 ThisBuild / licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / developers := List()
+ThisBuild / initialize ~= { _ =>
+//  System.setProperty("automorph.macro.debug", "true")
+  System.setProperty("automorph.macro.test", "true")
+}
 
 lazy val root = project.in(file(".")).aggregate(
   core,

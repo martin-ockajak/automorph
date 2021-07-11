@@ -27,7 +27,7 @@ trait CodecCoreSpec extends CoreSpec {
         val handler = Handler[Value, UpickleJsonCodec[CodecCoreSpec.type], Effect, Context](codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
-        val client = Client(codec, backend, transport)
+        val client = Client[Value, UpickleJsonCodec[CodecCoreSpec.type], Effect, Context](codec, backend, transport)
         CodecFixture(
           codec.getClass,
           client,
@@ -45,7 +45,7 @@ trait CodecCoreSpec extends CoreSpec {
         val handler = Handler[Msg, UpickleMessagePackCodec[CodecCoreSpec.type], Effect, Context](codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
-        val client = Client(codec, backend, transport)
+        val client = Client[Msg, UpickleMessagePackCodec[CodecCoreSpec.type], Effect, Context](codec, backend, transport)
         CodecFixture(
           codec.getClass,
           client,
@@ -67,7 +67,7 @@ trait CodecCoreSpec extends CoreSpec {
         val handler = Handler[Json, CirceJsonCodec, Effect, Context](codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
-        val client = Client(codec, backend, transport)
+        val client = Client[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context](codec, backend, transport)
         CodecFixture(
           codec.getClass,
           client,
@@ -125,7 +125,7 @@ trait CodecCoreSpec extends CoreSpec {
         val handler = Handler[argonaut.Json, ArgonautJsonCodec, Effect, Context](codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
-        val client = Client(codec, backend, transport)
+        val client = Client[argonaut.Json, ArgonautJsonCodec, Effect, Context](codec, backend, transport)
         CodecFixture(
           codec.getClass,
           client,
