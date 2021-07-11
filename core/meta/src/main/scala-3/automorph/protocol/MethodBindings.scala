@@ -114,7 +114,7 @@ private[automorph] case object MethodBindings:
             }
           )
         // Assume type reference to be single parameter type constructor
-        case wrapperType: TypeRef => (wrapperType.finalResultType.dealias, 0)
+        case wrapperType: TypeRef => (wrapperType.dealias, 0)
         // Keep any other types wrapped
         case wrapperType => (wrapperType, -1)
     if wrapperTypeParameterIndex >= 0 then

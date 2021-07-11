@@ -66,7 +66,7 @@ trait CodecCoreSpec extends CoreSpec {
         implicit lazy val structureEncoder: Encoder[Structure] = deriveEncoder[Structure]
         implicit lazy val structureDecoder: Decoder[Structure] = deriveDecoder[Structure]
         val codec = CirceJsonCodec()
-        val handler = Handle[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context]r(codec, backend)
+        val handler = Handler[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context](codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client: Client[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context] =
@@ -129,7 +129,8 @@ trait CodecCoreSpec extends CoreSpec {
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client: Client[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context] =
-          Client(codec, backend, transport) CodecFixture(
+          Client(codec, backend, transport)
+        CodecFixture(
           codec.getClass,
           client,
           handler,
