@@ -14,7 +14,7 @@ case object DefaultHttpClient {
   /**
    * Default client type.
    *
-   * @tparam Effect effec type
+   * @tparam Effect effect type
    */
   type Type[Effect[_]] = Client[DefaultCodec.Node, DefaultCodec.Type, Effect, SttpTransport.Context]
 
@@ -27,7 +27,7 @@ case object DefaultHttpClient {
    * The client can be used to perform JSON-RPC calls and notifications.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param backend effectful computation backend plugin
+   * @param backend effect system plugin
    * @param transport message transport protocol plugin
    * @tparam Effect effect type
    * @tparam RequestContext request context type
@@ -46,7 +46,7 @@ case object DefaultHttpClient {
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
-   * @param backend effectful computation backend plugin
+   * @param backend effect system plugin
    * @param sttpBackend HTTP client backend
    * @tparam Effect effect type
    * @return client

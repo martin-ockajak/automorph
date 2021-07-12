@@ -15,7 +15,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
  * @constructor Creates an STTP transport plugin using HTTP as message transport protocol with the specified STTP backend.
  * @param url endpoint URL
- * @param backend effect backend plugin
+ * @param backend effect system plugin
  * @param method HTTP method
  * @param sttpBackend STTP backend
  * @tparam Effect effect type

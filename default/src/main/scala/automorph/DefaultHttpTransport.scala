@@ -27,7 +27,7 @@ case object DefaultHttpTransport {
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
-   * @param backend effectful computation backend plugin
+   * @param backend effect system plugin
    * @param sttpBackend HTTP client backend
    * @tparam Effect effect type
    * @return transport plugin

@@ -19,7 +19,7 @@ way to invoke and expose remote APIs while supporting multiple RPC protocols suc
   - [Client](#client)
   - [Dynamic Client](#dynamic-client)
 - [Integration](#integration)
-  - [Effect backend](#backend)
+  - [Effect system](#effect-system)
   - [Message codec](#codec)
   - [Message transport](#transport)
     - [Client transport](#client-transport)
@@ -45,13 +45,13 @@ way to invoke and expose remote APIs while supporting multiple RPC protocols suc
 
 ## Features
 
-* **Powerful** - generate JSON-RPC bindings directly from public methods of your API classes
-* **Modular** - combine integration plugins to match your API effect type, message format and transport protocol
-* **Clean** - access underlying protocol details without polluting your API abstractions
+* **Powerful** - generate client and server bindings directly from public methods of your API classes
+* **Modular** - combine integration plugins to match your chosen effect type, message format and message transport protocol
+* **Clean** - access request and response metadata without polluting your API abstractions
 * **Safe** - type checks bound API classes during compilation
 * **Fast** - generates optimized API binding code during compilation
-* **Flexible** - customize JSON-RPC method names and error codes
-* **Extensible** - automatically derive or manually implement serialization of arbitrary data types
+* **Flexible** - customize remote API method names and error mapping
+* **Extensible** - automatically derive or implement serialization of arbitrary data types
 * **Compatible** - available for [Scala 2.12](https://www.scala-lang.org/news/2.12.0/), [Scala 2.13](https://www.scala-lang.org/news/2.13.0)
   and [Scala 3](https://dotty.epfl.ch/)
 * **Boilerplate free** - even advanced use-cases require only a few lines of code
@@ -141,7 +141,7 @@ hello.positional.args("world", 1).tell // Future[Unit]
 
 *Automorph* supports integration with various libraries via plugins published in different artifacts.
 
-## [Backend](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/Backend.html)
+## [Effect system](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/Backend.html)
 
 Effectful computation plugins.
 

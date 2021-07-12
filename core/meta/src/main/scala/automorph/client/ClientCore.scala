@@ -13,7 +13,7 @@ import scala.util.{Random, Try}
  * JSON-RPC client core logic.
  *
  * @param codec structured message format codec plugin
- * @param backend effectful computation backend plugin
+ * @param backend effect system plugin
  * @param transport message transport protocol plugin
  * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @tparam Node message node type

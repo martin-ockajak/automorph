@@ -16,7 +16,7 @@ import scala.reflect.macros.blackbox
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Creates a new JSON-RPC request handler with specified request `Context` type plus specified ''codec'' and ''backend'' plugins.
  * @param codec structured message format codec plugin
- * @param backend effectful computation backend plugin
+ * @param backend effect system plugin
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
  * @tparam Node message node type
  * @tparam ExactCodec message codec plugin type
@@ -38,7 +38,7 @@ final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
 case object Handler {
 
   /** Handler with arbitrary codec. */
-//  type AnyCodec[Effect[_], Context] = ({ type SomeHandler[Node <: AnyRef] = Handler[Node, Codec[Node], Effect, Context] })#SomeHandler[_ <: AnyRef]
+  type AnyCodec[Effect[_], Context] = Handler[Node, Codec[Node], Effect, Context] forSome { type Node }
 
   /**
    * Creates a JSON-RPC request handler with specified request `Context` type plus specified ''codec'' and ''backend'' plugins.
@@ -47,7 +47,7 @@ case object Handler {
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec structured message format codec plugin
-   * @param backend effectful computation backend plugin
+   * @param backend effect system plugin
    * @tparam Node message node type
    * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type
@@ -66,7 +66,7 @@ case object Handler {
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec structured message format codec plugin
-   * @param backend effectful computation backend plugin
+   * @param backend effect system plugin
    * @tparam Node message node type
    * @tparam ExactCodec message codec plugin type
    * @tparam Effect effect type

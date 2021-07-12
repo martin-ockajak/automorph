@@ -15,7 +15,7 @@ case object HandlerBindings {
    * Generates handler bindings for all valid public methods of an API type.
    *
    * @param codec message format codec plugin
-   * @param backend effect backend plugin
+   * @param backend effect system plugin
    * @param api API instance
    * @tparam Node message node type
    * @tparam ExactCodec message format codec type

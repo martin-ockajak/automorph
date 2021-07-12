@@ -31,7 +31,7 @@ case object DefaultHttpServer {
    *
    * @see [[https://www.jsonrpc.org/specification protocol specification]]
    * @see [[https://undertow.io HTTP Server Documentation]]
-   * @param backend effectful computation backend plugin
+   * @param backend effect system plugin
    * @param runEffect effect execution function
    * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections

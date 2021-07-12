@@ -16,7 +16,7 @@ case object DefaultHandler {
    * The handler can be used by a server to invoke bound API methods based on incoming requests.
    *
    * @see [[https://www.jsonrpc.org/specification protocol specification]]
-   * @param backend effectful computation backend plugin
+   * @param backend effect system plugin
    * @tparam Effect effect type
    * @tparam Context request context type
    * @return request handler

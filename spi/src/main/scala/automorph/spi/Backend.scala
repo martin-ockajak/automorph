@@ -1,7 +1,7 @@
 package automorph.spi
 
 /**
- * Effectful computation backend plugin.
+ * Effect system backend plugin.
  *
  * The underlying runtime must support monadic composition of effects.
  *

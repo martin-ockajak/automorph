@@ -10,7 +10,7 @@ import scala.collection.immutable.ArraySeq
  * Local handler transport passing requests directly to specified ''handler'' using specified ''backend''.
  *
  * @param handler JSON-RPC request handler layer
- * @param backend effect backend plugin
+ * @param backend effect system plugin
  * @param defaultContext default request context
  * @constructor Creates a local handler transport passing requests directly to specified ''handler'' using specified ''backend''.
  * @tparam Node message node type
