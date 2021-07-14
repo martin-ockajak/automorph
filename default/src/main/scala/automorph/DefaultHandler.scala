@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.backend.IdentityBackend.Identity
+import automorph.system.IdentityBackend.Identity
 import automorph.spi.EffectSystem
 import automorph.util.EmptyContext
 import scala.concurrent.{ExecutionContext, Future}

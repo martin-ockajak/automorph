@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.backend.IdentityBackend.Identity
+import automorph.system.IdentityBackend.Identity
 import automorph.codec.json.UpickleJsonCodec
 import automorph.spi.{EffectSystem, ClientMessageTransport}
 import automorph.transport.http.client.SttpTransport

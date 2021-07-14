@@ -3,10 +3,10 @@ package test.transport.http.server
 import io.undertow.Handlers
 import io.undertow.server.handlers.BlockingHandler
 import automorph.Handler
-import automorph.backend.IdentityBackend
-import automorph.backend.IdentityBackend.Identity
 import automorph.codec.json.UpickleJsonCodec
 import automorph.transport.http.endpoint.UndertowJsonRpcHandler
+import automorph.system.IdentityBackend
+import automorph.system.IdentityBackend.Identity
 import test.base.BaseSpec
 import ujson.Value
 

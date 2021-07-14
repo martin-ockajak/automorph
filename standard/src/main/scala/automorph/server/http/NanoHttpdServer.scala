@@ -31,7 +31,7 @@ final case class NanoHttpdServer[Effect[_]] private (
 ) extends NanoHTTPD(port) with Logging with ServerMessageTransport {
 
   private val HeaderXForwardedFor = "X-Forwarded-For"
-  private val backend = handler.backend
+  private val system = handler.backend
 
   override def start(): Unit = {
     logger.info("Listening for connections", Map("Port" -> port.toString))
@@ -45,8 +45,8 @@ final case class NanoHttpdServer[Effect[_]] private (
 
     // Process the request
     implicit val usingContext: IHTTPSession = session
-    runEffectSync(backend.map(
-      backend.either(handler.processRequest(request)),
+    runEffectSync(system.map(
+      system.either(handler.processRequest(request)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) => handlerResult.fold(
         error => createServerError(error, session),
         result => {

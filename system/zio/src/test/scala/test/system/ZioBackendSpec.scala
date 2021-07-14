@@ -1,6 +1,6 @@
-package test.backend
+package test.system
 
-import automorph.backend.ZioBackend
+import automorph.system.ZioBackend
 import automorph.spi.EffectSystem
 import scala.util.Try
 import zio.{RIO, Runtime, ZEnv}

@@ -32,7 +32,7 @@ final case class JettyJsonRpcServlet[Node, Effect[_]](
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpServlet with Logging with EndpointMessageTransport {
 
-  private val backend = handler.backend
+  private val system = handler.backend
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     // Receive the request
@@ -42,8 +42,8 @@ final case class JettyJsonRpcServlet[Node, Effect[_]](
 
     // Process the request
     implicit val usingContext: HttpServletRequest = request
-    runEffect(backend.map(
-      backend.either(handler.processRequest(requestMessage)),
+    runEffect(system.map(
+      system.either(handler.processRequest(requestMessage)),
       (handlerResult: Either[Throwable, HandlerResult[InputStream]]) => handlerResult.fold(
         error => serverError(error, response, client),
         result => {

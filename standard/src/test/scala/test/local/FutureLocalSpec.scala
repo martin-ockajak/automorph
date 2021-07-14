@@ -1,6 +1,6 @@
 package test.local
 
-import automorph.backend.FutureBackend
+import automorph.system.FutureBackend
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -1,6 +1,6 @@
 package test.local
 
-import automorph.backend.TryBackend
+import automorph.system.TryBackend
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import scala.util.Try

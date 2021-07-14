@@ -1,4 +1,4 @@
-package test.backend
+package test.system
 
 import automorph.spi.EffectSystem
 import scala.util.{Failure, Success, Try}

@@ -1,8 +1,8 @@
 package examples
 
-import automorph.backend.IdentityBackend.Identity
 import automorph.transport.http.server.NanoHttpdServer
 import automorph.transport.http.client.UrlConnectionTransport
+import automorph.system.IdentityBackend.Identity
 import automorph.{Client, DefaultBackend, DefaultCodec, Handler}
 import java.net.URL
 

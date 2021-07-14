@@ -1,7 +1,7 @@
-package test.backend
+package test.system
 
-import automorph.backend.IdentityBackend
-import automorph.backend.IdentityBackend.Identity
+import automorph.system.IdentityBackend
+import automorph.system.IdentityBackend.Identity
 import automorph.spi.EffectSystem
 import scala.util.Try
 

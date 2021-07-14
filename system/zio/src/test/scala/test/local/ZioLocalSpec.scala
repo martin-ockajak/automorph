@@ -1,6 +1,6 @@
 package test.local
 
-import automorph.backend.ZioBackend
+import automorph.system.ZioBackend
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import test.CodecCoreSpec

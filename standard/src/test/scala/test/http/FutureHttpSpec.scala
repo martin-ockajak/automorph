@@ -1,6 +1,6 @@
 //package test.http
 //
-//import automorph.backend.FutureBackend
+//import automorph.system.FutureBackend
 //import automorph.server.http.NanoHttpdServer
 //import automorph.spi.Backend
 //import org.scalacheck.Arbitrary

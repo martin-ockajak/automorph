@@ -33,7 +33,7 @@ final case class FinagleJsonRpcService[Node, Effect[_]](
   errorStatus: Int => Status = defaultErrorStatus
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
 
-  private val backend = handler.backend
+  private val system = handler.backend
 
   override def apply(request: Request): Future[Response] = {
     // Receive the request
@@ -43,8 +43,8 @@ final case class FinagleJsonRpcService[Node, Effect[_]](
 
     // Process the request
     implicit val usingContext: Request = request
-    runAsFuture(backend.map(
-      backend.either(handler.processRequest(requestMessage)),
+    runAsFuture(system.map(
+      system.either(handler.processRequest(requestMessage)),
       (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) => handlerResult.fold(
         error => serverError(error, request),
         result => {
@@ -81,7 +81,7 @@ final case class FinagleJsonRpcService[Node, Effect[_]](
 
   private def runAsFuture[T](value: Effect[T]): Future[T] = {
     val promise = Promise[T]()
-    runEffect(backend.map(backend.either(value), (outcome: Either[Throwable, T]) => outcome.fold(
+    runEffect(system.map(system.either(value), (outcome: Either[Throwable, T]) => outcome.fold(
       error => promise.setException(error),
       result => promise.setValue(result)
     )))

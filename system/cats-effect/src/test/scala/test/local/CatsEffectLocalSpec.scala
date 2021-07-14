@@ -2,7 +2,7 @@ package test.local
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import automorph.backend.CatsEffectBackend
+import automorph.system.CatsEffectBackend
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import test.CodecCoreSpec

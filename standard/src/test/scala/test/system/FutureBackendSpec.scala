@@ -1,6 +1,6 @@
-package test.backend
+package test.system
 
-import automorph.backend.FutureBackend
+import automorph.system.FutureBackend
 import automorph.spi.EffectSystem
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

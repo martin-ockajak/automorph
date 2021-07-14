@@ -1,6 +1,6 @@
 package examples
 
-import automorph.backend.ZioBackend
+import automorph.system.ZioBackend
 import zio.{Runtime, Task}
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend

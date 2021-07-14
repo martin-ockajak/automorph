@@ -1,6 +1,6 @@
-package automorph.backend
+package automorph.system
 
-import automorph.backend.IdentityBackend.Identity
+import automorph.system.IdentityBackend.Identity
 import automorph.spi.EffectSystem
 
 /**

@@ -1,6 +1,6 @@
-package test.backend
+package test.system
 
-import automorph.backend.TryBackend
+import automorph.system.TryBackend
 import automorph.spi.EffectSystem
 import scala.util.Try
 

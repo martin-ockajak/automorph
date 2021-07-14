@@ -1,4 +1,4 @@
-package automorph.backend
+package automorph.system
 
 import cats.effect.IO
 import automorph.spi.EffectSystem

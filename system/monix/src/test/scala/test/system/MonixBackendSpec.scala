@@ -1,6 +1,6 @@
-package test.backend
+package test.system
 
-import automorph.backend.MonixBackend
+import automorph.system.MonixBackend
 import automorph.spi.EffectSystem
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global

@@ -1,7 +1,7 @@
 package automorph
 
-import automorph.backend.IdentityBackend.Identity
-import automorph.backend.{FutureBackend, IdentityBackend}
+import automorph.system.IdentityBackend.Identity
+import automorph.system.{FutureBackend, IdentityBackend}
 import automorph.spi.EffectSystem
 import scala.concurrent.{ExecutionContext, Future}
 

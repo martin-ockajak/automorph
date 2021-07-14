@@ -1,7 +1,7 @@
 package automorph.transport.http.client
 
 import java.net.{HttpURLConnection, URL}
-import automorph.backend.IdentityBackend.Identity
+import automorph.system.IdentityBackend.Identity
 import automorph.spi.ClientMessageTransport
 import automorph.transport.http.client.UrlConnectionTransport.RequestProperties
 import scala.collection.immutable.ArraySeq

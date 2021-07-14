@@ -1,8 +1,8 @@
-package test.backend
+package test.system
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import automorph.backend.CatsEffectBackend
+import automorph.system.CatsEffectBackend
 import automorph.spi.EffectSystem
 import scala.util.Try
 

@@ -1,7 +1,7 @@
 package test
 
-import automorph.backend.IdentityBackend
-import automorph.backend.IdentityBackend.Identity
+import automorph.system.IdentityBackend
+import automorph.system.IdentityBackend.Identity
 import automorph.codec.common.UpickleCustom
 import automorph.codec.json.UpickleJsonCodec
 import automorph.transport.local.client.HandlerTransport

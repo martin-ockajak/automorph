@@ -1,4 +1,4 @@
-package automorph.backend
+package automorph.system
 
 import automorph.spi.EffectSystem
 import scala.concurrent.{ExecutionContext, Future}

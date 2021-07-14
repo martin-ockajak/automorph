@@ -32,7 +32,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
-  private val backend = handler.backend
+  private val system = handler.backend
 
   private val receiveCallback = new Receiver.FullBytesCallback {
 
@@ -45,8 +45,8 @@ final case class UndertowJsonRpcHandler[Effect[_]](
         override def run(): Unit = {
           // Process the request
           implicit val usingContext: HttpServerExchange = exchange
-          runEffect(backend.map(
-            backend.either(handler.processRequest(requestMessage)),
+          runEffect(system.map(
+            system.either(handler.processRequest(requestMessage)),
             (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
               handlerResult.fold(
                 error => sendServerError(error, exchange),
