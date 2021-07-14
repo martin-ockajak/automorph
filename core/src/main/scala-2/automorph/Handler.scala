@@ -38,7 +38,7 @@ final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
 case object Handler {
 
   /** Handler with arbitrary codec. */
-  type AnyCodec[Effect[_], Context] = Handler[Node, Codec[Node], Effect, Context] forSome { type Node }
+  type AnyCodec[Effect[_], Context] = Handler[Node, _ <: Codec[Node], Effect, Context] forSome { type Node }
 
   /**
    * Creates a JSON-RPC request handler with specified request `Context` type plus specified ''codec'' and ''backend'' plugins.
