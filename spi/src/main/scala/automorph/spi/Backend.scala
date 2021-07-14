@@ -1,9 +1,9 @@
 package automorph.spi
 
 /**
- * Effect system backend plugin.
+ * Computational effect system plugin.
  *
- * The underlying runtime must support monadic composition of effects.
+ * The underlying runtime must support monadic composition of effectful values.
  *
  * @tparam Effect effect type (similar to IO Monad in Haskell)
  */

@@ -4,7 +4,7 @@ import automorph.spi.Message
 import scala.collection.immutable.ArraySeq
 
 /**
- * Structured message format codec plugin.
+ * Structured message format serialization-deserialization plugin.
  *
  * The underlying format must support storing arbitrarily nested structures of basic data types.
  *

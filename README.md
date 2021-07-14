@@ -20,11 +20,11 @@ way to invoke and expose remote APIs while supporting multiple RPC protocols suc
   - [Dynamic Client](#dynamic-client)
 - [Integration](#integration)
   - [Effect system](#effect-system)
-  - [Message codec](#codec)
-  - [Message transport](#transport)
-    - [Client transport](#client-transport)
-    - [Endpoint transport](#endpoint-transport)
-    - [Server transport](#server-transport)
+  - [Message format](#message-format)
+  - [Message transport](#message-transport)
+    - [Client message transport](#client-message-transport)
+    - [Endpoint message transport](#endpoint-mesage-transport)
+    - [Server message transport](#server-message-transport)
 - [Architecture](#architecture)
 - [Examples](#examples)
   - [Synchronous](#synchronous)
@@ -141,11 +141,11 @@ hello.positional.args("world", 1).tell // Future[Unit]
 
 *Automorph* supports integration with various libraries via plugins published in different artifacts.
 
-## [Effect system](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/Backend.html)
+## [Effect system](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html)
 
-Effectful computation plugins.
+Computational effect system plugins.
 
-The underlying runtime must support monadic composition of effects.
+The underlying runtime must support monadic composition of effectful values.
 
 | Class | Artifact | Library | Effect Type |
 | ---- | --- | --- | --- |
@@ -157,9 +157,9 @@ The underlying runtime must support monadic composition of effects.
 | [CatsEffectBackend](https://www.javadoc.io/doc/io.automorph/automorph-cats-effect_2.13/latest/automorph/backend/CatsEffectBackend.html) | [automorph-cats-effect](https://mvnrepository.com/artifact/io.automorph/automorph-cats-effect) | [Cats Effect](https://typelevel.org/cats-effect/) | [IO](https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html) |
 | [ScalazBackend](https://www.javadoc.io/doc/io.automorph/automorph-scalaz_2.13/latest/automorph/backend/ScalazBackend.html) | [automorph-scalaz](https://mvnrepository.com/artifact/io.automorph/automorph-scalaz) | [Scalaz](https://github.com/scalaz) | [IO](https://www.javadoc.io/doc/org.scalaz/scalaz_2.13/latest/scalaz/effect/IO.html) |
 
-## [Codec](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/Codec.html)
+## [Message format](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html)
 
-Structured message format codec plugins.
+Structured message format serialization/deserialization plugins.
 
 The underlying format must support storing arbitrarily nested structures of basic data types.
 
@@ -170,13 +170,15 @@ The underlying format must support storing arbitrarily nested structures of basi
 | [CirceJsonCodec](https://www.javadoc.io/doc/io.automorph/automorph-circe_2.13/latest/automorph/codec/json/CirceJsonCodec.html) | [automorph-circe](https://mvnrepository.com/artifact/io.automorph/automorph-circe) | [Circe](https://circe.github.io/circe) |[Json](https://circe.github.io/circe/api/io/circe/Json.html) |
 | [ArgonautJsonCodec](https://www.javadoc.io/doc/io.automorph/automorph-argonaut_2.13/latest/automorph/codec/json/ArgonautJsonCodec.html) | [automorph-argonaut](https://mvnrepository.com/artifact/io.automorph/automorph-argonaut) | [Argonaut](http://argonaut.io/doc/) |[Json](http://argonaut.io/scaladocs/#argonaut.Json) |
 
-## [Transport](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/Transport.html)
+## [Mesage transport](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/MessageTransport.html)
 
 Message transport protocol plugins.
 
-### Client transport
+### Client message transport
 
-Message transport plugins used by the RPC client to send requests and receive responses to and from a remote endpoint.
+Message transport protocol plugins.
+
+The underlying transport protocol must support implementation of request-response pattern.
 
 | Class | Artifact | Library | Protocol |
 | ---- | --- | --- | --- |
@@ -185,7 +187,7 @@ Message transport plugins used by the RPC client to send requests and receive re
 | [JettyJsonRpcServlet](https://www.javadoc.io/doc/io.automorph/automorph-jetty_2.13/latest/automorph/server/http/JettyJsonRpcServlet.html) | [automorph-jetty](https://mvnrepository.com/artifact/io.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) |[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [FinagleJsonRpcService](https://www.javadoc.io/doc/io.automorph/automorph-finagle_2.13/latest/automorph/server/http/FinagleJsonRpcService.html) | [automorph-finagle](https://mvnrepository.com/artifact/io.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) |[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 
-## Server transport
+## Server message transport
 
 Message transport plugins used to actively receive and reply to requests using specific message transport protocol while invoking RPC request handler to process them.
 
@@ -194,7 +196,7 @@ Message transport plugins used to actively receive and reply to requests using s
 | [UndertowServer](https://www.javadoc.io/doc/io.automorph/automorph-undertow_2.13/latest/automorph/server/http/UndertowServer.html) (Default) | [automorph-undertow](https://mvnrepository.com/artifact/io.automorph/automorph-undertow) | [Undertow](https://undertow.io/) |[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [NanoHttpdServer](https://www.javadoc.io/doc/io.automorph/automorph-standard_2.13/latest/automorph/server/http/NanoHttpdServer.html) | [automorph-standard](https://mvnrepository.com/artifact/io.automorph/automorph-standard) | [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd) |[HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 
-## Endpoint transport
+## Endpoint message transport
 
 Message transport plugins used to passively receive and reply to requests using specific message transport protocol from an active server while invoking RPC request handler to process them.
 
