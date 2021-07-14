@@ -1,6 +1,6 @@
 package automorph.client
 
-import automorph.spi.Codec
+import automorph.spi.MessageFormat
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -12,7 +12,7 @@ import scala.reflect.macros.blackbox
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait ClientBind[Node, ActualCodec <: Codec[Node], Effect[_], Context] {
+private[automorph] trait ClientBind[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context] {
 
   def core: ClientCore[Node, ActualCodec, Effect, Context]
 
@@ -61,7 +61,7 @@ ne
 object ClientBind {
   def bindNamedMacro[
     Node: c.WeakTypeTag,
-    ActualCodec <: Codec[Node]: c.WeakTypeTag,
+    ActualCodec <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
@@ -81,7 +81,7 @@ object ClientBind {
 
   def bindPositionalMacro[
     Node: c.WeakTypeTag,
-    ActualCodec <: Codec[Node]: c.WeakTypeTag,
+    ActualCodec <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
@@ -99,14 +99,14 @@ object ClientBind {
     """)
   }
 
-  def generalBind[Node, ActualCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
+  def generalBind[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
     clientCore: ClientCore[Node, ActualCodec, Effect, Context],
     namedArguments: Boolean
   ): Api = macro generalBindMacro[Node, ActualCodec, Effect, Context, Api]
 
   def generalBindMacro[
     Node: c.WeakTypeTag,
-    ActualCodec <: Codec[Node]: c.WeakTypeTag,
+    ActualCodec <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag

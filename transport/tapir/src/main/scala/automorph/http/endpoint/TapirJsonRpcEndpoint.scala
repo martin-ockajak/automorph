@@ -4,7 +4,7 @@ import automorph.Handler
 import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
-import automorph.spi.{Codec, EndpointMessageTransport}
+import automorph.spi.{MessageFormat, EndpointMessageTransport}
 import sttp.model.headers.Cookie
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
@@ -41,7 +41,7 @@ case object TapirJsonRpcEndpoint extends Logging with EndpointMessageTransport {
    * @return Tapir HTTP server endpoint
    */
   def apply[Node, Effect[_]](
-    handler: Handler[Node, _ <: Codec[Node], Effect, Request],
+    handler: Handler[Node, _ <: MessageFormat[Node], Effect, Request],
     method: Method,
     errorStatus: Int => StatusCode = defaultErrorStatus
   ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {

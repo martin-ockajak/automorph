@@ -2,7 +2,7 @@ package automorph.client
 
 import automorph.client.ClientBinding
 import automorph.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
-import automorph.spi.Codec
+import automorph.spi.MessageFormat
 import automorph.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
 
@@ -16,24 +16,24 @@ private[automorph] case object ClientBindings:
    *
    * @param codec message format codec plugin
    * @tparam Node message node type
-   * @tparam ActualCodec message format codec type
+   * @tparam ActualMessageFormat message format codec type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to client method bindings
    */
-  inline def generate[Node, ActualCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
-    codec: ActualCodec
+  inline def generate[Node, ActualMessageFormat <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
+    codec: ActualMessageFormat
   ): Map[String, ClientBinding[Node]] =
-    ${ generateMacro[Node, ActualCodec, Effect, Context, Api]('codec) }
+    ${ generateMacro[Node, ActualMessageFormat, Effect, Context, Api]('codec) }
 
   private def generateMacro[
     Node: Type,
-    ActualCodec <: Codec[Node]: Type,
+    ActualMessageFormat <: MessageFormat[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
-  ](codec: Expr[ActualCodec])(using quotes: Quotes): Expr[Map[String, ClientBinding[Node]]] =
+  ](codec: Expr[ActualMessageFormat])(using quotes: Quotes): Expr[Map[String, ClientBinding[Node]]] =
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -48,7 +48,7 @@ private[automorph] case object ClientBindings:
     val clientMethods = Expr.ofSeq(validMethods.map { method =>
       '{
         ${ Expr(method.name) } -> ${
-          generateBinding[Node, ActualCodec, Effect, Context, Api](ref)(method, codec)
+          generateBinding[Node, ActualMessageFormat, Effect, Context, Api](ref)(method, codec)
         }
       }
     })
@@ -56,15 +56,15 @@ private[automorph] case object ClientBindings:
 
   private def generateBinding[
     Node: Type,
-    ActualCodec <: Codec[Node]: Type,
+    ActualMessageFormat <: MessageFormat[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
-  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[ActualCodec]): Expr[ClientBinding[Node]] =
+  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[ActualMessageFormat]): Expr[ClientBinding[Node]] =
     given Quotes = ref.q
 
-    val encodeArguments = generateEncodeArguments[Node, ActualCodec, Context](ref)(method, codec)
-    val decodeResult = generateDecodeResult[Node, ActualCodec, Effect](ref)(method, codec)
+    val encodeArguments = generateEncodeArguments[Node, ActualMessageFormat, Context](ref)(method, codec)
+    val decodeResult = generateDecodeResult[Node, ActualMessageFormat, Effect](ref)(method, codec)
     logBoundMethod[Api](ref)(method, encodeArguments, decodeResult)
     '{
       ClientBinding(
@@ -75,9 +75,9 @@ private[automorph] case object ClientBindings:
       )
     }
 
-  private def generateEncodeArguments[Node: Type, ActualCodec <: Codec[Node]: Type, Context: Type](ref: Reflection)(
+  private def generateEncodeArguments[Node: Type, ActualMessageFormat <: MessageFormat[Node]: Type, Context: Type](ref: Reflection)(
     method: ref.RefMethod,
-    codec: Expr[ActualCodec]
+    codec: Expr[ActualMessageFormat]
   ): Expr[Seq[Any] => Seq[Node]] =
     import ref.q.reflect.{Term, asTerm}
     given Quotes = ref.q
@@ -115,9 +115,9 @@ private[automorph] case object ClientBindings:
       }
     }
 
-  private def generateDecodeResult[Node: Type, ActualCodec <: Codec[Node]: Type, Effect[_]: Type](ref: Reflection)(
+  private def generateDecodeResult[Node: Type, ActualMessageFormat <: MessageFormat[Node]: Type, Effect[_]: Type](ref: Reflection)(
     method: ref.RefMethod,
-    codec: Expr[ActualCodec]
+    codec: Expr[ActualMessageFormat]
   ): Expr[Node => Any] =
     import ref.q.reflect.asTerm
     given Quotes = ref.q

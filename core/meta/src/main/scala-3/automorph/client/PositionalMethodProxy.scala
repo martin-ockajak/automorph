@@ -1,9 +1,9 @@
 package automorph.client
 
-import automorph.spi.Codec
+import automorph.spi.MessageFormat
 import automorph.util.CannotEqual
 
-case class PositionalMethodProxy[Node, ActualCodec <: Codec[Node], Effect[_], Context] (
+case class PositionalMethodProxy[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context] (
   methodName: String,
   private val core: ClientCore[Node, ActualCodec, Effect, Context],
   private val argumentValues: Seq[Any],

@@ -2,11 +2,11 @@ package automorph.codec.json
 
 import argonaut.Argonaut.ToJsonIdentity
 import argonaut.{CodecJson, DecodeJson, EncodeJson, Json}
-import automorph.spi.Codec
+import automorph.spi.MessageFormat
 import scala.compiletime.summonInline
 
 /** Argonaut JSON codec plugin code generation. */
-private[automorph] trait ArgonautJsonCodecMeta extends Codec[Json]:
+private[automorph] trait ArgonautJsonCodecMeta extends MessageFormat[Json]:
 
   override inline def encode[T](value: T): Json =
     import ArgonautJsonCodec.noneCodecJson

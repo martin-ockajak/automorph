@@ -2,7 +2,7 @@ package automorph.handler
 
 import automorph.Handler
 import automorph.handler.HandlerBindings
-import automorph.spi.{EffectSystem, Codec}
+import automorph.spi.{EffectSystem, MessageFormat}
 
 /**
  * Handler method bindings code generation.
@@ -12,7 +12,7 @@ import automorph.spi.{EffectSystem, Codec}
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerBind[Node, ActualCodec <: Codec[Node], Effect[_], Context]:
+private[automorph] trait HandlerBind[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context]:
   this: Handler[Node, ActualCodec, Effect, Context] =>
 
   type ThisHandler = Handler[Node, ActualCodec, Effect, Context]

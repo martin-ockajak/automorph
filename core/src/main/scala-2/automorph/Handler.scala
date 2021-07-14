@@ -3,7 +3,7 @@ package automorph
 import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
 import automorph.protocol.ErrorType
-import automorph.spi.{EffectSystem, Codec}
+import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.util.{CannotEqual, EmptyContext}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -23,7 +23,7 @@ import scala.reflect.macros.blackbox
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Handler[Node, ActualCodec <: Codec[Node], Effect[_], Context](
+final case class Handler[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context](
   codec: ActualCodec,
   backend: EffectSystem[Effect],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
@@ -38,7 +38,7 @@ final case class Handler[Node, ActualCodec <: Codec[Node], Effect[_], Context](
 case object Handler {
 
   /** Handler with arbitrary codec. */
-  type AnyCodec[Effect[_], Context] = Handler[Node, _ <: Codec[Node], Effect, Context] forSome { type Node }
+  type AnyCodec[Effect[_], Context] = Handler[Node, _ <: MessageFormat[Node], Effect, Context] forSome { type Node }
 
   /**
    * Creates a JSON-RPC request handler with specified request `Context` type plus specified ''codec'' and ''backend'' plugins.
@@ -53,7 +53,7 @@ case object Handler {
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  def apply[Node, ActualCodec <: Codec[Node], Effect[_], Context](
+  def apply[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context](
     codec: ActualCodec,
     backend: EffectSystem[Effect]
   ): Handler[Node, ActualCodec, Effect, Context] =
@@ -72,13 +72,13 @@ case object Handler {
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  def withoutContext[Node, ActualCodec <: Codec[Node], Effect[_]](
+  def withoutContext[Node, ActualCodec <: MessageFormat[Node], Effect[_]](
     codec: ActualCodec,
     backend: EffectSystem[Effect]
   ): Handler[Node, ActualCodec, Effect, EmptyContext.Value] =
     macro withoutContextMacro[Node, ActualCodec, Effect]
 
-  def applyMacro[Node: c.WeakTypeTag, ActualCodec <: Codec[Node]: c.WeakTypeTag, Effect[_], Context: c.WeakTypeTag](
+  def applyMacro[Node: c.WeakTypeTag, ActualCodec <: MessageFormat[Node]: c.WeakTypeTag, Effect[_], Context: c.WeakTypeTag](
     c: blackbox.Context
   )(
     codec: c.Expr[ActualCodec],
@@ -93,7 +93,7 @@ case object Handler {
     """).asInstanceOf[c.Expr[Handler[Node, ActualCodec, Effect, Context]]]
   }
 
-  def withoutContextMacro[Node: c.WeakTypeTag, ActualCodec <: Codec[Node]: c.WeakTypeTag, Effect[_]](c: blackbox.Context)(
+  def withoutContextMacro[Node: c.WeakTypeTag, ActualCodec <: MessageFormat[Node]: c.WeakTypeTag, Effect[_]](c: blackbox.Context)(
     codec: c.Expr[ActualCodec],
     backend: c.Expr[EffectSystem[Effect]]
   ): c.Expr[Handler[Node, ActualCodec, Effect, EmptyContext.Value]] = {

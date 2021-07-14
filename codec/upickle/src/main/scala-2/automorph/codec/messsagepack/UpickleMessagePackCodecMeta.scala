@@ -1,7 +1,7 @@
 package automorph.codec.messagepack
 
 import automorph.codec.common.UpickleCustom
-import automorph.spi.Codec
+import automorph.spi.MessageFormat
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 import upack.Msg
@@ -11,7 +11,7 @@ import upack.Msg
  *
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends Codec[Msg] {
+trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends MessageFormat[Msg] {
 
   override def encode[T](value: T): Msg = macro UpickleMessagePackCodecMeta.encode[T]
 

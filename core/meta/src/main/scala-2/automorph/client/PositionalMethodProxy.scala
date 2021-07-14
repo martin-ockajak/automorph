@@ -1,11 +1,11 @@
 package automorph.client
 
-import automorph.spi.Codec
+import automorph.spi.MessageFormat
 import automorph.util.CannotEqual
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-case class PositionalMethodProxy[Node, ActualCodec <: Codec[Node], Effect[_], Context](
+case class PositionalMethodProxy[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context](
   methodName: String,
   core: ClientCore[Node, ActualCodec, Effect, Context],
   argumentValues: Seq[Any],

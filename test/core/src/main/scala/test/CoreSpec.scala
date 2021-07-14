@@ -1,7 +1,7 @@
 package test
 
 import automorph.protocol.ErrorType.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
-import automorph.spi.{EffectSystem, Codec}
+import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.{Client, Handler}
 import org.scalacheck.Arbitrary
 import scala.util.Try
@@ -23,9 +23,9 @@ trait CoreSpec extends BaseSpec {
   type ComplexApiType = ComplexApi[Effect, Context]
   type InvalidApiType = InvalidApi[Effect]
 
-  case class CodecFixture(
+  case class MessageFormatFixture(
     codec: Class[_],
-    client: Client[_, _ <: Codec[_], Effect, Context],
+    client: Client[_, _ <: MessageFormat[_], Effect, Context],
     handler: Handler.AnyCodec[Effect, Context],
     simpleApis: Seq[SimpleApiType],
     complexApis: Seq[ComplexApiType],
@@ -42,7 +42,7 @@ trait CoreSpec extends BaseSpec {
 
   def run[T](effect: Effect[T]): T
 
-  def codecFixtures: Seq[CodecFixture]
+  def codecFixtures: Seq[MessageFormatFixture]
 
   val simpleApiInstance: SimpleApiType = SimpleApiImpl(backend)
   val complexApiInstance: ComplexApiType = ComplexApiImpl(backend)
@@ -51,7 +51,7 @@ trait CoreSpec extends BaseSpec {
 
   "" - {
     codecFixtures.lastOption.foreach { fixture =>
-      fixture.codec.getSimpleName.replaceAll("Codec$", "") - {
+      fixture.codec.getSimpleName.replaceAll("MessageFormat$", "") - {
         "Proxy" - {
           "Call" - {
             "Simple API" - {

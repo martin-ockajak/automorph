@@ -1,14 +1,14 @@
 package automorph.codec.json
 
 import io.circe.Json
-import automorph.spi.Codec
+import automorph.spi.MessageFormat
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /**
  * Circe JSON codec plugin code generation.
  */
-private[automorph] trait CirceJsonCodecMeta extends Codec[Json] {
+private[automorph] trait CirceJsonCodecMeta extends MessageFormat[Json] {
 
   override def encode[T](value: T): Json = macro CirceJsonCodecMeta.encodeExpr[T]
 

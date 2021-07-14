@@ -1,7 +1,7 @@
 package automorph.handler
 
 import automorph.Handler
-import automorph.spi.Codec
+import automorph.spi.MessageFormat
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -13,7 +13,7 @@ import scala.reflect.macros.blackbox
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerBind[Node, ActualCodec <: Codec[Node], Effect[_], Context] {
+private[automorph] trait HandlerBind[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context] {
   this: Handler[Node, ActualCodec, Effect, Context] =>
 
   type ThisHandler = Handler[Node, ActualCodec, Effect, Context]
@@ -68,7 +68,7 @@ case object HandlerBind {
 
   def basicBindMacro[
     Node: c.WeakTypeTag,
-    ActualCodec <: Codec[Node]: c.WeakTypeTag,
+    ActualCodec <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
@@ -90,7 +90,7 @@ case object HandlerBind {
 
   def bindMacro[
     Node: c.WeakTypeTag,
-    ActualCodec <: Codec[Node]: c.WeakTypeTag,
+    ActualCodec <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag

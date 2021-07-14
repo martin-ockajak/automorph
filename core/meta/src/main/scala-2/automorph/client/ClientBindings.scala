@@ -1,7 +1,7 @@
 package automorph.client
 
 import automorph.protocol.MethodBindings.{methodLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
-import automorph.spi.Codec
+import automorph.spi.MessageFormat
 import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -22,13 +22,13 @@ case object ClientBindings {
    * @tparam Api API type
    * @return mapping of method names to client method bindings
    */
-  def generate[Node, ActualCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
+  def generate[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
     codec: ActualCodec
   ): Map[String, ClientBinding[Node]] = macro generateMacro[Node, ActualCodec, Effect, Context, Api]
 
   def generateMacro[
     Node: c.WeakTypeTag,
-    ActualCodec <: Codec[Node]: c.WeakTypeTag,
+    ActualCodec <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
@@ -61,7 +61,7 @@ case object ClientBindings {
   private def generateBinding[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    ActualCodec <: Codec[Node]: ref.c.WeakTypeTag,
+    ActualCodec <: MessageFormat[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
     Api: ref.c.WeakTypeTag
@@ -90,7 +90,7 @@ case object ClientBindings {
   private def generateEncodeArguments[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    ActualCodec <: Codec[Node]: ref.c.WeakTypeTag,
+    ActualCodec <: MessageFormat[Node]: ref.c.WeakTypeTag,
     Context: ref.c.WeakTypeTag
   ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[ActualCodec]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}
@@ -130,7 +130,7 @@ case object ClientBindings {
   private def generateDecodeResult[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    ActualCodec <: Codec[Node]: ref.c.WeakTypeTag,
+    ActualCodec <: MessageFormat[Node]: ref.c.WeakTypeTag,
     Effect[_]
   ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[ActualCodec])(implicit
     effectType: ref.c.WeakTypeTag[Effect[_]]

@@ -4,7 +4,7 @@ import automorph.Client.defaultErrorToException
 import automorph.client.{ClientBind, ClientCore, NamedMethodProxy}
 import automorph.protocol.ErrorType
 import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
-import automorph.spi.{EffectSystem, Codec, ClientMessageTransport}
+import automorph.spi.{EffectSystem, MessageFormat, ClientMessageTransport}
 import automorph.util.{CannotEqual, EmptyContext}
 import java.io.IOException
 
@@ -24,7 +24,7 @@ import java.io.IOException
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Client[Node, ActualCodec <: Codec[Node], Effect[_], Context](
+final case class Client[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context](
   codec: ActualCodec,
   backend: EffectSystem[Effect],
   transport: ClientMessageTransport[Effect, Context],
@@ -80,7 +80,7 @@ case object Client {
    * @tparam Effect effect type
    * @return JSON-RPC client
    */
-  def withoutContext[Node, ActualCodec <: Codec[Node], Effect[_]](
+  def withoutContext[Node, ActualCodec <: MessageFormat[Node], Effect[_]](
     codec: ActualCodec,
     backend: EffectSystem[Effect],
     transport: ClientMessageTransport[Effect, EmptyContext.Value]

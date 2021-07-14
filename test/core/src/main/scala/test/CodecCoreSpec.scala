@@ -16,7 +16,7 @@ trait CodecCoreSpec extends CoreSpec {
 
   def customTransport: Option[ClientMessageTransport[Effect, Context]] = None
 
-  def codecFixtures: Seq[CodecFixture] = {
+  def codecFixtures: Seq[MessageFormatFixture] = {
     implicit val usingContext: Context = contextValue
     Seq(
       {
@@ -26,7 +26,7 @@ trait CodecCoreSpec extends CoreSpec {
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client: Client[UpickleJsonCodec.Node, UpickleJsonCodec[CodecCoreSpec.type], Effect, Context] =
           Client(codec, backend, transport)
-        CodecFixture(
+        MessageFormatFixture(
           codec.getClass,
           client,
           handler,
@@ -45,7 +45,7 @@ trait CodecCoreSpec extends CoreSpec {
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client: Client[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[CodecCoreSpec.type], Effect, Context] =
           Client(codec, backend, transport)
-        CodecFixture(
+        MessageFormatFixture(
           codec.getClass,
           client,
           handler,
@@ -68,7 +68,7 @@ trait CodecCoreSpec extends CoreSpec {
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client: Client[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context] =
           Client(codec, backend, transport)
-        CodecFixture(
+        MessageFormatFixture(
           codec.getClass,
           client,
           handler,
@@ -127,7 +127,7 @@ trait CodecCoreSpec extends CoreSpec {
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client: Client[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context] =
           Client(codec, backend, transport)
-        CodecFixture(
+        MessageFormatFixture(
           codec.getClass,
           client,
           handler,

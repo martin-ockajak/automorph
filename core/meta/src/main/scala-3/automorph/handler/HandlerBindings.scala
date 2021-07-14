@@ -2,7 +2,7 @@ package automorph.handler
 
 import automorph.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
 import automorph.protocol.ErrorType.InvalidRequestException
-import automorph.spi.{EffectSystem, Codec}
+import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.util.{Method, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
 import scala.util.Try
@@ -21,27 +21,27 @@ private[automorph] case object HandlerBindings:
    * @param backend effect system plugin
    * @param api API instance
    * @tparam Node message node type
-   * @tparam ActualCodec message format codec type
+   * @tparam ActualMessageFormat message format codec type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to handler method bindings
    */
-  inline def generate[Node, ActualCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
-    codec: ActualCodec,
+  inline def generate[Node, ActualMessageFormat <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
+    codec: ActualMessageFormat,
     backend: EffectSystem[Effect],
     api: Api
   ): Map[String, HandlerBinding[Node, Effect, Context]] =
-    ${ generateMacro[Node, ActualCodec, Effect, Context, Api]('codec, 'backend, 'api) }
+    ${ generateMacro[Node, ActualMessageFormat, Effect, Context, Api]('codec, 'backend, 'api) }
 
   private def generateMacro[
     Node: Type,
-    ActualCodec <: Codec[Node]: Type,
+    ActualMessageFormat <: MessageFormat[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
   ](
-    codec: Expr[ActualCodec],
+    codec: Expr[ActualMessageFormat],
     backend: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   )(using quotes: Quotes): Expr[Map[String, HandlerBinding[Node, Effect, Context]]] =
@@ -59,7 +59,7 @@ private[automorph] case object HandlerBindings:
     val handlerBindings = Expr.ofSeq(validMethods.map { method =>
       '{
         ${ Expr(method.name) } -> ${
-          generateBinding[Node, ActualCodec, Effect, Context, Api](ref)(method, codec, backend, api)
+          generateBinding[Node, ActualMessageFormat, Effect, Context, Api](ref)(method, codec, backend, api)
         }
       }
     })
@@ -67,19 +67,19 @@ private[automorph] case object HandlerBindings:
 
   private def generateBinding[
     Node: Type,
-    ActualCodec <: Codec[Node]: Type,
+    ActualMessageFormat <: MessageFormat[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
   ](ref: Reflection)(
     method: ref.RefMethod,
-    codec: Expr[ActualCodec],
+    codec: Expr[ActualMessageFormat],
     backend: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[HandlerBinding[Node, Effect, Context]] =
     given Quotes = ref.q
 
-    val invoke = generateInvoke[Node, ActualCodec, Effect, Context, Api](ref)(method, codec, backend, api)
+    val invoke = generateInvoke[Node, ActualMessageFormat, Effect, Context, Api](ref)(method, codec, backend, api)
     logBoundMethod[Api](ref)(method, invoke)
     '{
       HandlerBinding(
@@ -91,13 +91,13 @@ private[automorph] case object HandlerBindings:
 
   private def generateInvoke[
     Node: Type,
-    ActualCodec <: Codec[Node]: Type,
+    ActualMessageFormat <: MessageFormat[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
   ](ref: Reflection)(
     method: ref.RefMethod,
-    codec: Expr[ActualCodec],
+    codec: Expr[ActualMessageFormat],
     backend: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =

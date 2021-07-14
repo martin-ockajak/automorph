@@ -2,7 +2,7 @@ package automorph.handler
 
 import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
 import automorph.protocol.{ErrorType, Request, Response, ResponseError}
-import automorph.spi.{Codec, Message}
+import automorph.spi.{MessageFormat, Message}
 import automorph.util.Extensions.TryOps
 import automorph.{Handler, JsonRpcError}
 import java.io.IOException
@@ -17,7 +17,7 @@ import scala.util.Try
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerCore[Node, ActualCodec <: Codec[Node], Effect[_], Context] {
+private[automorph] trait HandlerCore[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context] {
   this: Handler[Node, ActualCodec, Effect, Context] =>
 
   private val unknownId = "[unknown]"

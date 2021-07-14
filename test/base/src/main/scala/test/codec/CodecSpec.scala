@@ -1,7 +1,7 @@
 package test.codec
 
 import java.nio.charset.StandardCharsets
-import automorph.spi.{Codec, Message}
+import automorph.spi.{MessageFormat, Message}
 import org.scalacheck.Arbitrary
 import test.Generators
 import test.base.BaseSpec
@@ -14,7 +14,7 @@ import test.base.BaseSpec
 trait CodecSpec extends BaseSpec {
 
   type Node
-  type ActualCodec <: Codec[Node]
+  type ActualCodec <: MessageFormat[Node]
 
   def codec: ActualCodec
 

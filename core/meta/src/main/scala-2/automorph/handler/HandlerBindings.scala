@@ -1,7 +1,7 @@
 package automorph.handler
 
 import automorph.protocol.MethodBindings.{methodLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
-import automorph.spi.{EffectSystem, Codec}
+import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -24,7 +24,7 @@ case object HandlerBindings {
    * @tparam Api API type
    * @return mapping of method names to handler method bindings
    */
-  def generate[Node, ActualCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
+  def generate[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
     codec: ActualCodec,
     backend: EffectSystem[Effect],
     api: Api
@@ -32,7 +32,7 @@ case object HandlerBindings {
 
   def generateMacro[
     Node: c.WeakTypeTag,
-    ActualCodec <: Codec[Node]: c.WeakTypeTag,
+    ActualCodec <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
@@ -67,7 +67,7 @@ case object HandlerBindings {
   private def generateBinding[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    ActualCodec <: Codec[Node]: ref.c.WeakTypeTag,
+    ActualCodec <: MessageFormat[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
     Api: ref.c.WeakTypeTag
@@ -95,7 +95,7 @@ case object HandlerBindings {
   private def generateInvoke[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    ActualCodec <: Codec[Node]: ref.c.WeakTypeTag,
+    ActualCodec <: MessageFormat[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
     Api
