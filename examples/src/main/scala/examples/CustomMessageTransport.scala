@@ -6,7 +6,7 @@ import automorph.transport.http.client.UrlConnectionTransport
 import automorph.{Client, DefaultBackend, DefaultCodec, Handler}
 import java.net.URL
 
-object CustomTransport extends App {
+object CustomMessageTransport extends App {
 
   // Define an API type and create API instance
   class Api {
