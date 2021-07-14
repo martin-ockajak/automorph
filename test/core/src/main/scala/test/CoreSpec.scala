@@ -26,7 +26,7 @@ trait CoreSpec extends BaseSpec {
   case class CodecFixture(
     codec: Class[_],
     client: Client[_, _ <: Codec[_], Effect, Context],
-    handler: Handler[_, _ <: Codec[_], Effect, Context],
+    handler: Handler.AnyCodec[Effect, Context],
     simpleApis: Seq[SimpleApiType],
     complexApis: Seq[ComplexApiType],
     invalidApis: Seq[InvalidApiType],
