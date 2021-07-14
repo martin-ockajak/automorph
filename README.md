@@ -174,11 +174,13 @@ The underlying format must support storing arbitrarily nested structures of basi
 
 Message transport protocol plugins.
 
+The underlying transport protocol must support implementation of request-response pattern.
+
 ### Client message transport
 
-Message transport protocol plugins.
+Client message transport protocol plugins.
 
-The underlying transport protocol must support implementation of request-response pattern.
+Used by the RPC client to send requests and receive responses to and from a remote endpoint.
 
 | Class | Artifact | Library | Protocol |
 | ---- | --- | --- | --- |

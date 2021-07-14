@@ -1,12 +1,10 @@
 package test.server.http
 
 import io.undertow.Handlers
-import io.undertow.server.HttpServerExchange
 import io.undertow.server.handlers.BlockingHandler
 import automorph.Handler
 import automorph.backend.IdentityBackend
 import automorph.backend.IdentityBackend.Identity
-import automorph.codec.common.UpickleCustom
 import automorph.codec.json.UpickleJsonCodec
 import automorph.server.http.UndertowJsonRpcHandler
 import test.base.BaseSpec
@@ -28,10 +26,9 @@ object CaskServer extends cask.MainRoutes {
 
   val apiPath = "/api"
 
-  override def defaultHandler = {
+  override def defaultHandler: BlockingHandler = {
     val codec = UpickleJsonCodec()
-    val httpHandler: UndertowJsonRpcHandler[Value, Identity] =
-      UndertowJsonRpcHandler(Handler(codec, IdentityBackend()).bind(Api), (_: Any) => ())
+    val httpHandler = UndertowJsonRpcHandler(Handler(codec, IdentityBackend()).bind(Api), (_: Any) => ())
     val pathHandler = Handlers.path(super.defaultHandler).addPrefixPath(apiPath, httpHandler)
     new BlockingHandler(pathHandler)
   }

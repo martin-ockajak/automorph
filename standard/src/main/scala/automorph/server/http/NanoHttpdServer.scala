@@ -6,7 +6,7 @@ import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.server.http.NanoHTTPD.Response.Status
 import automorph.server.http.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
-import automorph.spi.Server
+import automorph.spi.ServerMessageTransport
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -28,7 +28,7 @@ final case class NanoHttpdServer[Effect[_]] private (
   port: Int,
   readTimeout: Int,
   errorStatus: Int => Status
-) extends NanoHTTPD(port) with Server with Logging {
+) extends NanoHTTPD(port) with ServerMessageTransport with Logging {
 
   private val HeaderXForwardedFor = "X-Forwarded-For"
   private val backend = handler.backend

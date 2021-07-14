@@ -2,7 +2,7 @@ package automorph.server.http
 
 import automorph.log.Logging
 import automorph.server.http.UndertowServer.defaultBuilder
-import automorph.spi.Server
+import automorph.spi.ServerMessageTransport
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.{Handlers, Undertow}
@@ -26,7 +26,7 @@ final case class UndertowServer(
   port: Int,
   urlPath: String = "/",
   builder: Undertow.Builder = defaultBuilder
-) extends Server with Logging {
+) extends ServerMessageTransport with Logging {
 
   private val undertow = start()
 
