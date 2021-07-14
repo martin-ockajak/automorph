@@ -4,7 +4,7 @@ import automorph.Client.defaultErrorToException
 import automorph.client.{ClientBind, ClientCore, NamedMethodProxy}
 import automorph.protocol.ErrorType
 import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
-import automorph.spi.{Backend, Codec, ClientTransport}
+import automorph.spi.{Backend, Codec, ClientMessageTransport}
 import automorph.util.{CannotEqual, EmptyContext}
 import java.io.IOException
 
@@ -27,7 +27,7 @@ import java.io.IOException
 final case class Client[Node, ActualCodec <: Codec[Node], Effect[_], Context](
   codec: ActualCodec,
   backend: Backend[Effect],
-  transport: ClientTransport[Effect, Context],
+  transport: ClientMessageTransport[Effect, Context],
   protected val errorToException: (Int, String) => Throwable = defaultErrorToException
 ) extends ClientBind[Node, ActualCodec, Effect, Context] with CannotEqual {
 
@@ -83,7 +83,7 @@ case object Client {
   def withoutContext[Node, ActualCodec <: Codec[Node], Effect[_]](
     codec: ActualCodec,
     backend: Backend[Effect],
-    transport: ClientTransport[Effect, EmptyContext.Value]
+    transport: ClientMessageTransport[Effect, EmptyContext.Value]
   ): Client[Node, ActualCodec, Effect, EmptyContext.Value] = Client(codec, backend, transport)
 
   /**

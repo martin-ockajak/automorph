@@ -8,4 +8,4 @@ package automorph.spi
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-trait Transport[Effect[_], Context]
+trait MessageTransport[Effect[_], Context]

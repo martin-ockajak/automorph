@@ -1,6 +1,6 @@
 package automorph.transport.http
 
-import automorph.spi.{Backend, ClientTransport}
+import automorph.spi.{Backend, ClientMessageTransport}
 import automorph.transport.http.SttpTransport.RequestProperties
 import java.io.IOException
 import java.net.URL
@@ -25,7 +25,7 @@ final case class SttpTransport[Effect[_]](
   method: String,
   backend: Backend[Effect],
   sttpBackend: SttpBackend[Effect, _]
-) extends ClientTransport[Effect, RequestProperties] {
+) extends ClientMessageTransport[Effect, RequestProperties] {
 
   private val uri = Uri(url.toURI)
   private val httpMethod = Method.unsafeApply(method)

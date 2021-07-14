@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.backend.IdentityBackend.Identity
-import automorph.spi.{Backend, ClientTransport}
+import automorph.spi.{Backend, ClientMessageTransport}
 import automorph.transport.http.SttpTransport
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
@@ -14,7 +14,7 @@ case object DefaultHttpTransport {
    *
    * @tparam Effect effect type
    */
-  type Type[Effect[_]] = ClientTransport[Effect, SttpTransport.Context]
+  type Type[Effect[_]] = ClientMessageTransport[Effect, SttpTransport.Context]
 
   /** Request context type. */
   type Context = SttpTransport.Context

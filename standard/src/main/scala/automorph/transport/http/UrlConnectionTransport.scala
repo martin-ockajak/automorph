@@ -2,7 +2,7 @@ package automorph.transport.http
 
 import java.net.{HttpURLConnection, URL}
 import automorph.backend.IdentityBackend.Identity
-import automorph.spi.ClientTransport
+import automorph.spi.ClientMessageTransport
 import automorph.transport.http.UrlConnectionTransport.RequestProperties
 import scala.collection.immutable.ArraySeq
 import automorph.handler.Bytes.inputStreamBytes
@@ -19,7 +19,7 @@ import scala.util.{Try, Using}
 final case class UrlConnectionTransport(
   url: URL,
   method: String
-) extends ClientTransport[Identity, RequestProperties] {
+) extends ClientMessageTransport[Identity, RequestProperties] {
 
   private val contentLengthHeader = "Content-Length"
   private val contentTypeHeader = "Content-Type"

@@ -3,7 +3,7 @@ package automorph.transport.local
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.protocol.ErrorType.InvalidResponseException
-import automorph.spi.{Backend, Codec, ClientTransport}
+import automorph.spi.{Backend, Codec, ClientMessageTransport}
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -22,7 +22,7 @@ case class HandlerTransport[Node, ActualCodec <: Codec[Node], Effect[_], Context
   handler: Handler[Node, ActualCodec, Effect, Context],
   backend: Backend[Effect],
   defaultContext: Context
-) extends ClientTransport[Effect, Context] {
+) extends ClientMessageTransport[Effect, Context] {
 
   def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
     implicit val usingContext = context.getOrElse(defaultContext)
