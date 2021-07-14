@@ -76,7 +76,7 @@ lazy val standard = project.dependsOn(
 )
 
 // Codec
-lazy val upickle = (project in file("codec/upickle")).dependsOn(
+lazy val upickle = (project in file("format/upickle")).dependsOn(
   spi, testBase % Test
 ).settings(
   name := "automorph-upickle",
@@ -84,7 +84,7 @@ lazy val upickle = (project in file("codec/upickle")).dependsOn(
     "com.lihaoyi" %% "upickle" % "1.4.0"
   )
 )
-lazy val circe = (project in file("codec/circe")).dependsOn(
+lazy val circe = (project in file("format/circe")).dependsOn(
   spi, testBase % Test
 ).settings(
   name := "automorph-circe",
@@ -93,7 +93,7 @@ lazy val circe = (project in file("codec/circe")).dependsOn(
     "io.circe" %% "circe-generic" % "0.14.1"
   )
 )
-lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
+lazy val argonaut = (project in file("format/argonaut")).dependsOn(
   spi, testBase % Test
 ).settings(
   name := "automorph-argonaut",
@@ -103,7 +103,7 @@ lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
 )
 
 // Effect
-lazy val zio = (project in file("backend/zio")).dependsOn(
+lazy val zio = (project in file("system/zio")).dependsOn(
   spi, testCore % Test
 ).settings(
   name := "automorph-zio",
@@ -111,7 +111,7 @@ lazy val zio = (project in file("backend/zio")).dependsOn(
     "dev.zio" %% "zio" % "1.0.9"
   )
 )
-lazy val monix = (project in file("backend/monix")).dependsOn(
+lazy val monix = (project in file("system/monix")).dependsOn(
   spi, testCore % Test
 ).settings(
   name := "automorph-monix",
@@ -119,7 +119,7 @@ lazy val monix = (project in file("backend/monix")).dependsOn(
     "io.monix" %% "monix-eval" % "3.4.0"
   )
 )
-lazy val catsEffect = (project in file("backend/cats-effect")).dependsOn(
+lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
   spi, testCore % Test
 ).settings(
   name := "automorph-cats-effect",
@@ -127,7 +127,7 @@ lazy val catsEffect = (project in file("backend/cats-effect")).dependsOn(
     "org.typelevel" %% "cats-effect" % "3.1.1"
   )
 )
-lazy val scalaz = (project in file("backend/scalaz")).dependsOn(
+lazy val scalaz = (project in file("system/scalaz")).dependsOn(
   spi, testCore % Test
 ).settings(
   name := "automorph-scalaz",
@@ -265,7 +265,7 @@ ThisBuild / scalacOptions ++= Seq(
   case _ => Seq(
     "-language:existentials",
     "-Xlint",
-    "-Wconf:site=[^.]+\\.codec\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
+    "-Wconf:site=[^.]+\\.format\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
     "-Wextra-implicit",
     "-Wnumeric-widen",
     "-Wvalue-discard",
