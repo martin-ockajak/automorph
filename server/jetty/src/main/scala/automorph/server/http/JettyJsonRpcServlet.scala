@@ -23,7 +23,7 @@ import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
  * @param handler JSON-RPC request handler
  * @param runEffect asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
- * @tparam ExactCodec message codec plugin type
+ * @tparam Node message node type
  * @tparam Effect effect type
  */
 final case class JettyJsonRpcServlet[Node, Effect[_]](
@@ -41,7 +41,7 @@ final case class JettyJsonRpcServlet[Node, Effect[_]](
     val requestMessage: InputStream = request.getInputStream
 
     // Process the request
-    implicit val usingContext = request
+    implicit val usingContext: HttpServletRequest = request
     runEffect(backend.map(
       backend.either(handler.processRequest(requestMessage)),
       (handlerResult: Either[Throwable, HandlerResult[InputStream]]) => handlerResult.fold(
@@ -76,7 +76,7 @@ final case class JettyJsonRpcServlet[Node, Effect[_]](
 
   private def clientAddress(request: HttpServletRequest): String = {
     Option(request.getHeader(HttpHeader.X_FORWARDED_FOR.name)).flatMap(_.split(",", 2).headOption).getOrElse {
-      val address = request.getRemoteAddr.toString.split("/", 2).reverse.head
+      val address = request.getRemoteAddr.split("/", 2).reverse.head
       address.replaceAll("/", "").split(":").init.mkString(":")
     }
   }
@@ -87,7 +87,7 @@ case object JettyJsonRpcServlet {
   type Context = HttpServletRequest
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultErrorStatus = Map(
+  val defaultErrorStatus: Int => Int = Map(
     ErrorType.ParseError -> HttpStatus.BAD_REQUEST_400,
     ErrorType.InvalidRequest -> HttpStatus.BAD_REQUEST_400,
     ErrorType.MethodNotFound -> HttpStatus.NOT_IMPLEMENTED_501,

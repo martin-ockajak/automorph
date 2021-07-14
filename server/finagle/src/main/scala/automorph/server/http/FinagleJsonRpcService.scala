@@ -42,7 +42,7 @@ final case class FinagleJsonRpcService[Node, Effect[_]](
     val requestMessage = Buf.ByteArray.Owned.extract(request.content)
 
     // Process the request
-    implicit val usingContext = request
+    implicit val usingContext: Request = request
     runAsFuture(backend.map(
       backend.either(handler.processRequest(requestMessage)),
       (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) => handlerResult.fold(
@@ -94,7 +94,7 @@ case object FinagleJsonRpcService {
   type Context = Request
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultErrorStatus = Map(
+  val defaultErrorStatus: Int => Status = Map(
     ErrorType.ParseError -> Status.BadRequest,
     ErrorType.InvalidRequest -> Status.BadRequest,
     ErrorType.MethodNotFound -> Status.NotImplemented,

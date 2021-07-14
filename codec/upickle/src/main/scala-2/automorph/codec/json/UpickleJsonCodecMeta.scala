@@ -3,7 +3,7 @@ package automorph.codec.json
 import automorph.codec.common.UpickleCustom
 import automorph.spi.Codec
 import scala.language.experimental.macros
-import scala.reflect.macros.blackbox.Context
+import scala.reflect.macros.blackbox
 import ujson.Value
 
 /**
@@ -20,7 +20,7 @@ trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends Codec[Value] {
 
 object UpickleJsonCodecMeta {
 
-  def encode[T: c.WeakTypeTag](c: Context)(value: c.Expr[T]): c.Expr[Value] = {
+  def encode[T: c.WeakTypeTag](c: blackbox.Context)(value: c.Expr[T]): c.Expr[Value] = {
     import c.universe.Quasiquote
 
     c.Expr[Value](q"""
@@ -28,7 +28,7 @@ object UpickleJsonCodecMeta {
     """)
   }
 
-  def decode[T: c.WeakTypeTag](c: Context)(node: c.Expr[Value]): c.Expr[T] = {
+  def decode[T: c.WeakTypeTag](c: blackbox.Context)(node: c.Expr[Value]): c.Expr[T] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[T](q"""

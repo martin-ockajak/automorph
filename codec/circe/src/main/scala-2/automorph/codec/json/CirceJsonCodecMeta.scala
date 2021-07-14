@@ -3,7 +3,7 @@ package automorph.codec.json
 import io.circe.Json
 import automorph.spi.Codec
 import scala.language.experimental.macros
-import scala.reflect.macros.blackbox.Context
+import scala.reflect.macros.blackbox
 
 /**
  * Circe JSON codec plugin code generation.
@@ -17,7 +17,7 @@ private[automorph] trait CirceJsonCodecMeta extends Codec[Json] {
 
 private[automorph] object CirceJsonCodecMeta {
 
-  def encodeExpr[T: c.WeakTypeTag](c: Context)(value: c.Expr[T]): c.Expr[Json] = {
+  def encodeExpr[T: c.WeakTypeTag](c: blackbox.Context)(value: c.Expr[T]): c.Expr[Json] = {
     import c.universe.Quasiquote
 
     c.Expr[Json](q"""
@@ -26,7 +26,7 @@ private[automorph] object CirceJsonCodecMeta {
     """)
   }
 
-  def decodeExpr[T: c.WeakTypeTag](c: Context)(node: c.Expr[Json]): c.Expr[T] = {
+  def decodeExpr[T: c.WeakTypeTag](c: blackbox.Context)(node: c.Expr[Json]): c.Expr[T] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[T](q"""

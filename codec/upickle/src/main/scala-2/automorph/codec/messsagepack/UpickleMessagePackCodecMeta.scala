@@ -3,7 +3,7 @@ package automorph.codec.messagepack
 import automorph.codec.common.UpickleCustom
 import automorph.spi.Codec
 import scala.language.experimental.macros
-import scala.reflect.macros.blackbox.Context
+import scala.reflect.macros.blackbox
 import upack.Msg
 
 /**
@@ -20,7 +20,7 @@ trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends Codec[Msg] {
 
 object UpickleMessagePackCodecMeta {
 
-  def encode[T](c: Context)(value: c.Expr[T]): c.Expr[Msg] = {
+  def encode[T](c: blackbox.Context)(value: c.Expr[T]): c.Expr[Msg] = {
     import c.universe.Quasiquote
 
     c.Expr[Msg](q"""
@@ -28,7 +28,7 @@ object UpickleMessagePackCodecMeta {
     """)
   }
 
-  def decode[T: c.WeakTypeTag](c: Context)(node: c.Expr[Msg]): c.Expr[T] = {
+  def decode[T: c.WeakTypeTag](c: blackbox.Context)(node: c.Expr[Msg]): c.Expr[T] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[T](q"""

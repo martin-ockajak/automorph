@@ -17,12 +17,6 @@ import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, 
  * The response returned by the JSON-RPC handler is used as HTTP response body.
  *
  * @see [[https://tapir.softwaremill.com Documentation]]
- * @constructor Creates a JSON-RPC service for Finagle RPC system using the specified JSON-RPC request ''handler''.
- * @param handler JSON-RPC request handler
- * @param errorStatus JSON-RPC error code to HTTP status code mapping function
- * @tparam Node message node type
- * @tparam ExactCodec message codec plugin type
- * @tparam Effect effect type
  */
 case object TapirJsonRpcEndpoint extends Logging {
   /** Request context type. */
@@ -64,7 +58,7 @@ case object TapirJsonRpcEndpoint extends Logging {
         logger.debug("Received HTTP request", Map("Client" -> client))
 
         // Process the request
-        implicit val usingContext = request
+        implicit val usingContext: Request = request
         backend.map(
           backend.either(handler.processRequest(requestMessage)),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
@@ -97,7 +91,7 @@ case object TapirJsonRpcEndpoint extends Logging {
     clientIp.getOrElse("[unknown]")
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultErrorStatus = Map(
+  val defaultErrorStatus: Int => StatusCode = Map(
     ErrorType.ParseError -> StatusCode.BadRequest,
     ErrorType.InvalidRequest -> StatusCode.BadRequest,
     ErrorType.MethodNotFound -> StatusCode.NotImplemented,
@@ -113,7 +107,6 @@ case object TapirJsonRpcEndpoint extends Logging {
 /**
  * Tapir endpoint HTTP request context.
  *
- * @param method HTTP method
  * @param paths URL path components separated by '/'
  * @param queryParams URL query parameters
  * @param headers HTTP headers

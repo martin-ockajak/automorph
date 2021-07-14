@@ -8,7 +8,6 @@ import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.server.http.UndertowJsonRpcHandler.defaultErrorStatus
-import automorph.spi.Codec
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -28,7 +27,7 @@ import scala.util.Try
  * @tparam Effect effect type
  */
 final case class UndertowJsonRpcHandler[Node, Effect[_]](
-  handler: Handler[Node, _ <: Codec[Node], Effect, HttpServerExchange],
+  handler: Handler.AnyCodec[Effect, HttpServerExchange],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpHandler with Logging {
@@ -45,7 +44,7 @@ final case class UndertowJsonRpcHandler[Node, Effect[_]](
 
         override def run(): Unit = {
           // Process the request
-          implicit val usingContext = exchange
+          implicit val usingContext: HttpServerExchange = exchange
           runEffect(backend.map(
             backend.either(handler.processRequest(requestMessage)),
             (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>

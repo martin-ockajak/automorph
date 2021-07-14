@@ -54,7 +54,7 @@ case object ArgonautJsonCodec {
   type Node = Json
 
   implicit lazy val noneCodecJson: CodecJson[None.type] = CodecJson(
-    (v: None.type) => jNull,
+    (_: None.type) => jNull,
     cursor => if (cursor.focus.isNull) DecodeResult.ok(None) else DecodeResult.fail("Not a null", cursor.history)
   )
 }

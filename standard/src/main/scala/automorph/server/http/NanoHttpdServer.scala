@@ -45,7 +45,7 @@ final case class NanoHttpdServer[Node, Effect[_]] private (
     val request = Bytes.inputStreamBytes.from(session.getInputStream)
 
     // Process the request
-    implicit val usingContext = session
+    implicit val usingContext: IHTTPSession = session
     runEffectSync(backend.map(
       backend.either(handler.processRequest(request)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) => handlerResult.fold(
@@ -118,7 +118,7 @@ case object NanoHttpdServer {
   }
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultErrorStatus = Map(
+  val defaultErrorStatus: Int => Status = Map(
     ErrorType.ParseError -> Status.BAD_REQUEST,
     ErrorType.InvalidRequest -> Status.BAD_REQUEST,
     ErrorType.MethodNotFound -> Status.NOT_IMPLEMENTED,
