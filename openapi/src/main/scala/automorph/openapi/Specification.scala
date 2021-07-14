@@ -1,4 +1,4 @@
-package automorph
+package automorph.openapi
 
 case class Specification(
   xSendDefaults: Boolean,
