@@ -6,7 +6,7 @@ import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.server.http.NanoHTTPD.Response.Status
 import automorph.server.http.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
-import automorph.spi.{Codec, Server}
+import automorph.spi.Server
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -20,11 +20,10 @@ import scala.collection.immutable.ArraySeq
  * @param port port to listen on for HTTP connections
  * @param readTimeout HTTP connection read timeout (milliseconds)
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
- * @tparam Node message node type
  * @tparam Effect effect type
  */
-final case class NanoHttpdServer[Node, Effect[_]] private (
-  handler: Handler[Node, _ <: Codec[Node], Effect, IHTTPSession],
+final case class NanoHttpdServer[Effect[_]] private (
+  handler: Handler.AnyCodec[Effect, IHTTPSession],
   runEffectSync: Effect[Response] => Response,
   port: Int,
   readTimeout: Int,
@@ -102,16 +101,15 @@ case object NanoHttpdServer {
    * @param port port to listen on for HTTP connections
    * @param readTimeout HTTP connection read timeout (milliseconds)
    * @param errorStatus JSON-RPC error code to HTTP status mapping function
-   * @tparam Node message node type
    * @tparam Effect effect type
    */
-  def apply[Node, Effect[_]](
-    handler: Handler[Node, _ <: Codec[Node], Effect, IHTTPSession],
+  def apply[Effect[_]](
+    handler: Handler.AnyCodec[Effect, IHTTPSession],
     runEffectSync: Effect[Response] => Response,
     port: Int,
     readTimeout: Int = 5000,
     errorStatus: Int => Status = defaultErrorStatus
-  ): NanoHttpdServer[Node, Effect] = {
+  ): NanoHttpdServer[Effect] = {
     val server = new NanoHttpdServer(handler, runEffectSync, port, readTimeout, errorStatus)
     server.start()
     server
