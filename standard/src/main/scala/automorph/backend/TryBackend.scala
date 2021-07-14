@@ -1,6 +1,6 @@
 package automorph.backend
 
-import automorph.spi.Backend
+import automorph.spi.EffectSystem
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -10,7 +10,7 @@ import scala.util.{Failure, Success, Try}
  * @see Effect type: [[scala.util.Try]]
  * @constructor Creates a synchronous backend plugin using ''Try'' as an effect type.
  */
-final case class TryBackend() extends Backend[Try] {
+final case class TryBackend() extends EffectSystem[Try] {
 
   override def pure[T](value: T): Try[T] = Success(value)
 

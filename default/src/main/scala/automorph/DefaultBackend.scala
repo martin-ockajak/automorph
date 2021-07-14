@@ -2,7 +2,7 @@ package automorph
 
 import automorph.backend.IdentityBackend.Identity
 import automorph.backend.{FutureBackend, IdentityBackend}
-import automorph.spi.Backend
+import automorph.spi.EffectSystem
 import scala.concurrent.{ExecutionContext, Future}
 
 case object DefaultBackend {
@@ -13,10 +13,10 @@ case object DefaultBackend {
   type AsyncEffect[T] = Identity[T]
 
   /** Default synchronous effectful computation backend plugin type. */
-  type SyncType = Backend[Future]
+  type SyncType = EffectSystem[Future]
 
   /** Default asynchronous effectful computation backend plugin type. */
-  type AsyncType = Backend[Identity]
+  type AsyncType = EffectSystem[Identity]
 
   /**
    * creates a default asynchronous effectful computation backend plugin using 'future' as an effect type.

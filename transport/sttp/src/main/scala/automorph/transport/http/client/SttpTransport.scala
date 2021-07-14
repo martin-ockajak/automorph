@@ -1,6 +1,6 @@
 package automorph.transport.http.client
 
-import automorph.spi.{Backend, ClientMessageTransport}
+import automorph.spi.{EffectSystem, ClientMessageTransport}
 import automorph.transport.http.client.SttpTransport.RequestProperties
 import java.io.IOException
 import java.net.URL
@@ -23,7 +23,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
 final case class SttpTransport[Effect[_]](
   url: URL,
   method: String,
-  backend: Backend[Effect],
+  backend: EffectSystem[Effect],
   sttpBackend: SttpBackend[Effect, _]
 ) extends ClientMessageTransport[Effect, RequestProperties] {
 

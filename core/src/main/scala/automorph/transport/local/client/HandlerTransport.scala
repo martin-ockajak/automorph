@@ -3,7 +3,7 @@ package automorph.transport.local.client
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.protocol.ErrorType.InvalidResponseException
-import automorph.spi.{Backend, ClientMessageTransport, Codec}
+import automorph.spi.{EffectSystem, ClientMessageTransport, Codec}
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -20,7 +20,7 @@ import scala.collection.immutable.ArraySeq
  */
 case class HandlerTransport[Node, ActualCodec <: Codec[Node], Effect[_], Context](
   handler: Handler[Node, ActualCodec, Effect, Context],
-  backend: Backend[Effect],
+  backend: EffectSystem[Effect],
   defaultContext: Context
 ) extends ClientMessageTransport[Effect, Context] {
 

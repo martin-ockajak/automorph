@@ -1,7 +1,7 @@
 package automorph.backend
 
 import automorph.backend.IdentityBackend.Identity
-import automorph.spi.Backend
+import automorph.spi.EffectSystem
 
 /**
  * Synchronous backend plugin using identity as an effect type.
@@ -11,7 +11,7 @@ import automorph.spi.Backend
  * Effect type: original value type
  * @constructor Creates a synchronous backend plugin using identity as an effect type.
  */
-final case class IdentityBackend() extends Backend[Identity] {
+final case class IdentityBackend() extends EffectSystem[Identity] {
 
   override def pure[T](value: T): T = value
 

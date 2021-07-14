@@ -1,13 +1,13 @@
 package test
 
-import automorph.spi.Backend
+import automorph.spi.EffectSystem
 
 trait SimpleApi[Effect[_]] {
 
   def test(test: String): Effect[String]
 }
 
-final case class SimpleApiImpl[Effect[_]](backend: Backend[Effect]) extends SimpleApi[Effect] {
+final case class SimpleApiImpl[Effect[_]](backend: EffectSystem[Effect]) extends SimpleApi[Effect] {
 
   override def test(test: String): Effect[String] = backend.pure(test)
 }
@@ -38,7 +38,7 @@ trait ComplexApi[Effect[_], Context] {
   protected def protectedMethod(): Unit
 }
 
-final case class ComplexApiImpl[Effect[_], Context](backend: Backend[Effect]) extends ComplexApi[Effect, Context] {
+final case class ComplexApiImpl[Effect[_], Context](backend: EffectSystem[Effect]) extends ComplexApi[Effect, Context] {
 
   override def method0(): Effect[Unit] = backend.pure(())
 
@@ -95,7 +95,7 @@ trait InvalidApi[Effect[_]] {
   def method4(p0: BigDecimal, p1: String, p2: String): Effect[String]
 }
 
-final case class InvalidApiImpl[Effect[_]](backend: Backend[Effect]) extends InvalidApi[Effect] {
+final case class InvalidApiImpl[Effect[_]](backend: EffectSystem[Effect]) extends InvalidApi[Effect] {
 
   def nomethod(p0: String): Effect[Unit] = backend.pure(())
 

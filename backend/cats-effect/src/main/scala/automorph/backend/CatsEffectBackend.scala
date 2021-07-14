@@ -1,7 +1,7 @@
 package automorph.backend
 
 import cats.effect.IO
-import automorph.spi.Backend
+import automorph.spi.EffectSystem
 
 /**
  * Cats Effect backend plugin.
@@ -10,7 +10,7 @@ import automorph.spi.Backend
  * @see [[https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html Effect type]]
  * @constructor Creates a Cats Effect backend plugin using `IO` as an effect type.
  */
-final case class CatsEffectBackend() extends Backend[IO] {
+final case class CatsEffectBackend() extends EffectSystem[IO] {
 
   override def pure[T](value: T): IO[T] = IO.pure(value)
 

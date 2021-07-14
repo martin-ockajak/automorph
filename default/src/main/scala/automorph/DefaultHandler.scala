@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.backend.IdentityBackend.Identity
-import automorph.spi.Backend
+import automorph.spi.EffectSystem
 import automorph.util.EmptyContext
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -20,7 +20,7 @@ case object DefaultHandler {
    * @tparam Context request context type
    * @return request handler
    */
-  def apply[Effect[_], Context](backend: Backend[Effect]): Type[Effect, Context] =
+  def apply[Effect[_], Context](backend: EffectSystem[Effect]): Type[Effect, Context] =
     Handler(DefaultCodec(), backend)
 
   /**
@@ -55,7 +55,7 @@ case object DefaultHandler {
    * @tparam Effect effect type
    * @return request handler
    */
-  def withoutContext[Effect[_]](backend: Backend[Effect]): Type[Effect, EmptyContext.Value] =
+  def withoutContext[Effect[_]](backend: EffectSystem[Effect]): Type[Effect, EmptyContext.Value] =
     Handler.withoutContext(DefaultCodec(), backend)
 
   /**

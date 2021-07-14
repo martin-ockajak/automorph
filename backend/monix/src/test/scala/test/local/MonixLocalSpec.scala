@@ -1,7 +1,7 @@
 package test.local
 
 import automorph.backend.MonixBackend
-import automorph.spi.Backend
+import automorph.spi.EffectSystem
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import org.scalacheck.Arbitrary
@@ -15,7 +15,7 @@ class MonixLocalSpec extends CodecCoreSpec {
 
   override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
-  override lazy val backend: Backend[Effect] = MonixBackend()
+  override lazy val backend: EffectSystem[Effect] = MonixBackend()
 
   override def run[T](effect: Effect[T]): T = effect.runSyncUnsafe(Duration.Inf)
 }

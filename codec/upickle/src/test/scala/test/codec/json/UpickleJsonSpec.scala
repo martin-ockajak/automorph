@@ -8,12 +8,12 @@ import test.codec.CodecSpec
 import test.{Enum, Record, Structure}
 import ujson.{Arr, Bool, Num, Obj, Str, Value}
 
-class UpickleJsonCodecSpec extends CodecSpec {
+class UpickleJsonSpec extends CodecSpec {
 
   type Node = Value
-  type ActualCodec = UpickleJsonCodec[UpickleJsonCodecSpec.type]
+  type ActualCodec = UpickleJsonCodec[UpickleJsonSpec.type]
 
-  override def codec: ActualCodec = UpickleJsonCodec(UpickleJsonCodecSpec)
+  override def codec: ActualCodec = UpickleJsonCodec(UpickleJsonSpec)
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
@@ -42,7 +42,7 @@ class UpickleJsonCodecSpec extends CodecSpec {
   }
 }
 
-object UpickleJsonCodecSpec extends UpickleCustom {
+object UpickleJsonSpec extends UpickleCustom {
 
   implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
     value => Enum.toOrdinal(value),

@@ -4,7 +4,7 @@ import automorph.handler.HandlerCore.defaultExceptionToError
 import automorph.handler.{HandlerCore, HandlerBind, HandlerBinding}
 import automorph.log.Logging
 import automorph.protocol.ErrorType
-import automorph.spi.{Backend, Codec}
+import automorph.spi.{EffectSystem, Codec}
 import automorph.util.{CannotEqual, EmptyContext}
 
 /**
@@ -24,7 +24,7 @@ import automorph.util.{CannotEqual, EmptyContext}
  */
 final case class Handler[Node, ActualCodec <: Codec[Node], Effect[_], Context](
   codec: ActualCodec,
-  backend: Backend[Effect],
+  backend: EffectSystem[Effect],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val exceptionToError: Class[_ <: Throwable] => ErrorType,
   protected val encodeStrings: List[String] => Node,
@@ -54,7 +54,7 @@ case object Handler:
    */
   inline def apply[Node, ActualCodec <: Codec[Node], Effect[_], Context](
     codec: ActualCodec,
-    backend: Backend[Effect]
+    backend: EffectSystem[Effect]
   ): Handler[Node, ActualCodec, Effect, Context] =
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
     Handler(codec, backend, Map.empty, defaultExceptionToError, encodeStrings, codec.encode(None))
@@ -74,7 +74,7 @@ case object Handler:
    */
   inline def withoutContext[Node, ActualCodec <: Codec[Node], Effect[_]](
     codec: ActualCodec,
-    backend: Backend[Effect]
+    backend: EffectSystem[Effect]
   ): Handler[Node, ActualCodec, Effect, EmptyContext.Value] =
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
     Handler(codec, backend, Map.empty, defaultExceptionToError, encodeStrings, codec.encode(None))

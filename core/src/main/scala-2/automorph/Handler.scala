@@ -3,7 +3,7 @@ package automorph
 import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
 import automorph.protocol.ErrorType
-import automorph.spi.{Backend, Codec}
+import automorph.spi.{EffectSystem, Codec}
 import automorph.util.{CannotEqual, EmptyContext}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -25,7 +25,7 @@ import scala.reflect.macros.blackbox
  */
 final case class Handler[Node, ActualCodec <: Codec[Node], Effect[_], Context](
   codec: ActualCodec,
-  backend: Backend[Effect],
+  backend: EffectSystem[Effect],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val exceptionToError: Class[_ <: Throwable] => ErrorType,
   protected val encodeStrings: List[String] => Node,
@@ -55,7 +55,7 @@ case object Handler {
    */
   def apply[Node, ActualCodec <: Codec[Node], Effect[_], Context](
     codec: ActualCodec,
-    backend: Backend[Effect]
+    backend: EffectSystem[Effect]
   ): Handler[Node, ActualCodec, Effect, Context] =
     macro applyMacro[Node, ActualCodec, Effect, Context]
 
@@ -74,7 +74,7 @@ case object Handler {
    */
   def withoutContext[Node, ActualCodec <: Codec[Node], Effect[_]](
     codec: ActualCodec,
-    backend: Backend[Effect]
+    backend: EffectSystem[Effect]
   ): Handler[Node, ActualCodec, Effect, EmptyContext.Value] =
     macro withoutContextMacro[Node, ActualCodec, Effect]
 
@@ -82,7 +82,7 @@ case object Handler {
     c: blackbox.Context
   )(
     codec: c.Expr[ActualCodec],
-    backend: c.Expr[Backend[Effect]]
+    backend: c.Expr[EffectSystem[Effect]]
   ): c.Expr[Handler[Node, ActualCodec, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
     Seq(weakTypeOf[Node], weakTypeOf[ActualCodec], weakTypeOf[Context])
@@ -95,7 +95,7 @@ case object Handler {
 
   def withoutContextMacro[Node: c.WeakTypeTag, ActualCodec <: Codec[Node]: c.WeakTypeTag, Effect[_]](c: blackbox.Context)(
     codec: c.Expr[ActualCodec],
-    backend: c.Expr[Backend[Effect]]
+    backend: c.Expr[EffectSystem[Effect]]
   ): c.Expr[Handler[Node, ActualCodec, Effect, EmptyContext.Value]] = {
     import c.universe.{weakTypeOf, Quasiquote}
     Seq(weakTypeOf[Node], weakTypeOf[ActualCodec])

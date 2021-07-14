@@ -1,7 +1,7 @@
 package test.local
 
 import automorph.backend.TryBackend
-import automorph.spi.Backend
+import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import scala.util.Try
 import test.CodecCoreSpec
@@ -15,5 +15,5 @@ class TryLocalSpec extends CodecCoreSpec {
 
   override def run[T](effect: Effect[T]): T = effect.get
 
-  override def backend: Backend[Effect] = TryBackend()
+  override def backend: EffectSystem[Effect] = TryBackend()
 }

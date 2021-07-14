@@ -4,7 +4,7 @@ import automorph.log.Logging
 import automorph.protocol.ErrorType.{InvalidResponseException, ParseErrorException}
 import automorph.protocol.{Request, Response}
 import automorph.spi.Message.Params
-import automorph.spi.{Backend, Codec, Message, ClientMessageTransport}
+import automorph.spi.{EffectSystem, Codec, Message, ClientMessageTransport}
 import automorph.util.Extensions.TryOps
 import scala.collection.immutable.ArraySeq
 import scala.util.{Random, Try}
@@ -23,7 +23,7 @@ import scala.util.{Random, Try}
  */
 case class ClientCore[Node, ActualCodec <: Codec[Node], Effect[_], Context] private[automorph] (
   codec: ActualCodec,
-  private val backend: Backend[Effect],
+  private val backend: EffectSystem[Effect],
   private val transport: ClientMessageTransport[Effect, Context],
   private val errorToException: (Int, String) => Throwable
 ) extends Logging {

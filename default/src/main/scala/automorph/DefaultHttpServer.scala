@@ -6,7 +6,7 @@ import automorph.transport.http.endpoint.UndertowJsonRpcHandler.defaultErrorStat
 import automorph.transport.http.server.UndertowServer.defaultBuilder
 import automorph.transport.http.endpoint.UndertowJsonRpcHandler
 import automorph.transport.http.server.UndertowServer
-import automorph.spi.Backend
+import automorph.spi.EffectSystem
 import scala.concurrent.{ExecutionContext, Future}
 
 case object DefaultHttpServer {
@@ -43,7 +43,7 @@ case object DefaultHttpServer {
    * @return server
    */
   def apply[Effect[_]](
-    backend: Backend[Effect],
+    backend: EffectSystem[Effect],
     runEffect: Effect[Any] => Any,
     bindApis: Handler[Effect] => Handler[Effect],
     port: Int,

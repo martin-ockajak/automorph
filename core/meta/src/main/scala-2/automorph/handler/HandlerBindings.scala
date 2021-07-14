@@ -1,7 +1,7 @@
 package automorph.handler
 
 import automorph.protocol.MethodBindings.{methodLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
-import automorph.spi.{Backend, Codec}
+import automorph.spi.{EffectSystem, Codec}
 import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -26,7 +26,7 @@ case object HandlerBindings {
    */
   def generate[Node, ActualCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
     codec: ActualCodec,
-    backend: Backend[Effect],
+    backend: EffectSystem[Effect],
     api: Api
   ): Map[String, HandlerBinding[Node, Effect, Context]] = macro generateMacro[Node, ActualCodec, Effect, Context, Api]
 
@@ -38,7 +38,7 @@ case object HandlerBindings {
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     codec: c.Expr[ActualCodec],
-    backend: c.Expr[Backend[Effect]],
+    backend: c.Expr[EffectSystem[Effect]],
     api: c.Expr[Api]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, HandlerBinding[Node, Effect, Context]]] = {
     import c.universe.Quasiquote
@@ -74,7 +74,7 @@ case object HandlerBindings {
   ](ref: Reflection[C])(
     method: ref.RefMethod,
     codec: ref.c.Expr[ActualCodec],
-    backend: ref.c.Expr[Backend[Effect]],
+    backend: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[HandlerBinding[Node, Effect, Context]] = {
     import ref.c.universe.{Liftable, Quasiquote}
@@ -102,7 +102,7 @@ case object HandlerBindings {
   ](ref: Reflection[C])(
     method: ref.RefMethod,
     codec: ref.c.Expr[ActualCodec],
-    backend: ref.c.Expr[Backend[Effect]],
+    backend: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}

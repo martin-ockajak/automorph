@@ -2,7 +2,7 @@ package automorph.handler
 
 import automorph.Handler
 import automorph.handler.HandlerBindings
-import automorph.spi.{Backend, Codec}
+import automorph.spi.{EffectSystem, Codec}
 
 /**
  * Handler method bindings code generation.

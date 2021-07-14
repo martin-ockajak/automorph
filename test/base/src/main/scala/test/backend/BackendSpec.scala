@@ -1,6 +1,6 @@
 package test.backend
 
-import automorph.spi.Backend
+import automorph.spi.EffectSystem
 import scala.util.{Failure, Success, Try}
 import test.base.BaseSpec
 
@@ -17,7 +17,7 @@ trait BackendSpec[Effect[_]] extends BaseSpec {
 
   case class TestException(message: String) extends RuntimeException(message)
 
-  def effect: Backend[Effect]
+  def effect: EffectSystem[Effect]
 
   def run[T](effect: Effect[T]): Either[Throwable, T]
 

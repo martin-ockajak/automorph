@@ -1,6 +1,6 @@
 package automorph.backend
 
-import automorph.spi.Backend
+import automorph.spi.EffectSystem
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
@@ -12,7 +12,7 @@ import scala.util.Success
  * @constructor Creates an asynchronous backend plugin using `Future` as an effect type.
  * @param executionContext execution context
  */
-final case class FutureBackend()(implicit executionContext: ExecutionContext) extends Backend[Future] {
+final case class FutureBackend()(implicit executionContext: ExecutionContext) extends EffectSystem[Future] {
 
   override def pure[T](value: T): Future[T] = Future.successful(value)
 

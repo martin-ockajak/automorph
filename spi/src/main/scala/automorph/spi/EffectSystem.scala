@@ -7,7 +7,7 @@ package automorph.spi
  *
  * @tparam Effect effect type (similar to IO Monad in Haskell)
  */
-trait Backend[Effect[_]] {
+trait EffectSystem[Effect[_]] {
 
   /**
    * Lifts a value into a new effect of specified type.

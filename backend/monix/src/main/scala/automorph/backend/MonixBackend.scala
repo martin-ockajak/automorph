@@ -1,6 +1,6 @@
 package automorph.backend
 
-import automorph.spi.Backend
+import automorph.spi.EffectSystem
 import monix.eval.Task
 
 /**
@@ -10,7 +10,7 @@ import monix.eval.Task
  * @see [[https://monix.io/api/current/monix/eval/Task.html Effect type]]
  * @constructor Creates a Monix backend plugin using `Task` as an effect type.
  */
-final case class MonixBackend() extends Backend[Task] {
+final case class MonixBackend() extends EffectSystem[Task] {
 
   override def pure[T](value: T): Task[T] = Task.pure(value)
 

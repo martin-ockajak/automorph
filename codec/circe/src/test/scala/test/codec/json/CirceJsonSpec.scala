@@ -9,7 +9,7 @@ import test.Generators.arbitraryRecord
 import test.codec.CodecSpec
 import test.{Enum, Record, Structure}
 
-class CirceJsonCodecSpec extends CodecSpec {
+class CirceJsonSpec extends CodecSpec {
 
   type Node = Json
   type ActualCodec = CirceJsonCodec

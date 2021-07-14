@@ -2,7 +2,7 @@ package automorph.handler
 
 import automorph.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
 import automorph.protocol.ErrorType.InvalidRequestException
-import automorph.spi.{Backend, Codec}
+import automorph.spi.{EffectSystem, Codec}
 import automorph.util.{Method, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
 import scala.util.Try
@@ -29,7 +29,7 @@ private[automorph] case object HandlerBindings:
    */
   inline def generate[Node, ActualCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
     codec: ActualCodec,
-    backend: Backend[Effect],
+    backend: EffectSystem[Effect],
     api: Api
   ): Map[String, HandlerBinding[Node, Effect, Context]] =
     ${ generateMacro[Node, ActualCodec, Effect, Context, Api]('codec, 'backend, 'api) }
@@ -42,7 +42,7 @@ private[automorph] case object HandlerBindings:
     Api <: AnyRef: Type
   ](
     codec: Expr[ActualCodec],
-    backend: Expr[Backend[Effect]],
+    backend: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   )(using quotes: Quotes): Expr[Map[String, HandlerBinding[Node, Effect, Context]]] =
     val ref = Reflection(quotes)
@@ -74,7 +74,7 @@ private[automorph] case object HandlerBindings:
   ](ref: Reflection)(
     method: ref.RefMethod,
     codec: Expr[ActualCodec],
-    backend: Expr[Backend[Effect]],
+    backend: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[HandlerBinding[Node, Effect, Context]] =
     given Quotes = ref.q
@@ -98,7 +98,7 @@ private[automorph] case object HandlerBindings:
   ](ref: Reflection)(
     method: ref.RefMethod,
     codec: Expr[ActualCodec],
-    backend: Expr[Backend[Effect]],
+    backend: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
     import ref.q.reflect.{asTerm, Term, TypeRepr}

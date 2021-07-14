@@ -8,7 +8,7 @@ import test.Generators.arbitraryRecord
 import test.codec.CodecSpec
 import test.{Enum, Record, Structure}
 
-class ArgonautJsonCodecSpec extends CodecSpec {
+class ArgonautJsonSpec extends CodecSpec {
 
   type Node = Json
   type ActualCodec = ArgonautJsonCodec

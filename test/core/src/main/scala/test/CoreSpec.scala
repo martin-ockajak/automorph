@@ -1,7 +1,7 @@
 package test
 
 import automorph.protocol.ErrorType.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
-import automorph.spi.{Backend, Codec}
+import automorph.spi.{EffectSystem, Codec}
 import automorph.{Client, Handler}
 import org.scalacheck.Arbitrary
 import scala.util.Try
@@ -38,7 +38,7 @@ trait CoreSpec extends BaseSpec {
 
   implicit def arbitraryContext: Arbitrary[Context]
 
-  def backend: Backend[Effect]
+  def backend: EffectSystem[Effect]
 
   def run[T](effect: Effect[T]): T
 

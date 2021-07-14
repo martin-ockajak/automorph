@@ -1,6 +1,6 @@
 package automorph.backend
 
-import automorph.spi.Backend
+import automorph.spi.EffectSystem
 import zio.RIO
 
 /**
@@ -11,7 +11,7 @@ import zio.RIO
  * @constructor Creates a ZIO backend plugin using `RIO` as an effect type.
  * @tparam Environment ZIO environment type
  */
-final case class ZioBackend[Environment]() extends Backend[({ type Effect[T] = RIO[Environment, T] })#Effect] {
+final case class ZioBackend[Environment]() extends EffectSystem[({ type Effect[T] = RIO[Environment, T] })#Effect] {
 
   override def pure[T](value: T): RIO[Environment, T] = RIO.succeed(value)
 
