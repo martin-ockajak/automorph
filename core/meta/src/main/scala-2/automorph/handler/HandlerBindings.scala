@@ -1,8 +1,8 @@
 package automorph.handler
 
-import automorph.protocol.MethodBindings.{methodSignature, methodLiftable, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodBindings.{methodLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.{Backend, Codec}
-import automorph.util.Reflection
+import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -77,11 +77,11 @@ case object HandlerBindings {
     backend: ref.c.Expr[Backend[Effect]],
     api: ref.c.Expr[Api]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[HandlerBinding[Node, Effect, Context]] = {
-    import ref.c.universe.Quasiquote
+    import ref.c.universe.{Liftable, Quasiquote}
 
     val invoke = generateInvoke[C, Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)
     logBoundMethod[C, Api](ref)(method, invoke)
-    implicit val methodLift = methodLiftable(ref)
+    implicit val methodLift: Liftable[Method] = methodLiftable(ref)
     Seq(methodLift)
     ref.c.Expr[HandlerBinding[Node, Effect, Context]](q"""
       automorph.handler.HandlerBinding(
@@ -139,7 +139,7 @@ case object HandlerBindings {
             q"context"
           } else {
             q"""
-              (scala.util.Try($codec.decode[${parameter.dataType}](argumentNodes(${argumentIndex}))) match {
+              (scala.util.Try($codec.decode[${parameter.dataType}](argumentNodes($argumentIndex))) match {
                 case scala.util.Failure(error) => scala.util.Failure(
                   automorph.protocol.ErrorType.InvalidRequestException("Invalid argument: " + $argumentIndex, error)
                 )

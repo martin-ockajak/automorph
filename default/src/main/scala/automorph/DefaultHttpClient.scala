@@ -1,6 +1,5 @@
 package automorph
 
-import automorph.{Client, DefaultCodec}
 import automorph.backend.IdentityBackend.Identity
 import automorph.codec.json.UpickleJsonCodec
 import automorph.spi.{Backend, Transport}

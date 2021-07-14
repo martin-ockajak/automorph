@@ -34,7 +34,7 @@ final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
   type ThisClient = Client[Node, ExactCodec, Effect, Context]
   type NamedMethod = NamedMethodProxy[Node, ExactCodec, Effect, Context]
 
-  val core = ClientCore(codec, backend, transport, errorToException)
+  val core: ClientCore[Node, ExactCodec, Effect, Context] = ClientCore(codec, backend, transport, errorToException)
 
   /**
    * Creates a method proxy with specified method name.

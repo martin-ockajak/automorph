@@ -53,6 +53,6 @@ private[automorph] case object Response {
    * @throws InvalidResponseException if the property value is missing
    */
   private[automorph] def mandatory[T](value: Option[T], name: String): T = value.getOrElse(
-    throw ErrorType.InvalidResponseException(s"Missing message property: $name", None.orNull)
+    throw InvalidResponseException(s"Missing message property: $name", None.orNull)
   )
 }

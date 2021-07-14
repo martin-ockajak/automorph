@@ -13,5 +13,5 @@ import org.slf4j.LoggerFactory
  * MDC concept description: http://logback.qos.ch/manual/mdc.html
  */
 private[automorph] trait Logging {
-  protected val logger = Logger(LoggerFactory.getLogger(getClass))
+  protected val logger: Logger = Logger(LoggerFactory.getLogger(getClass))
 }

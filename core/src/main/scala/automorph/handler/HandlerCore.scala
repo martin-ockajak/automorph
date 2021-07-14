@@ -1,6 +1,5 @@
 package automorph.handler
 
-import automorph.handler.{HandlerBinding, HandlerResult}
 import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
 import automorph.protocol.{ErrorType, Request, Response, ResponseError}
 import automorph.spi.{Codec, Message}

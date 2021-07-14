@@ -18,7 +18,7 @@ object Extensions {
     }
 
     /**
-     * Applies ''onException'' on `Failure`` or ''onSuccess'' on `Success`.
+     * Applies ''onException'' on `Failure` or ''onSuccess'' on `Success`.
      *
      * @param onFailure function to apply if this is a `Success`
      * @param onSuccess function to apply if this is a `Failure`

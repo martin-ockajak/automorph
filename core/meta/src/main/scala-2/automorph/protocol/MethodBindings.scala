@@ -21,16 +21,14 @@ private[automorph] case object MethodBindings {
 
       import ref.c.universe.{Liftable, Quasiquote, Tree}
 
-      implicit val parameterLiftable = new Liftable[Parameter] {
-
-        override def apply(v: Parameter): Tree = q"""
+      implicit val parameterLiftable: Liftable[Parameter] = (v: Parameter) =>
+        q"""
           automorph.util.Parameter(
             ${v.name},
             ${v.dataType},
             ${v.contextual}
           )
         """
-      }
       Seq(parameterLiftable)
 
       override def apply(v: Method): Tree = q"""
@@ -90,15 +88,14 @@ private[automorph] case object MethodBindings {
   /**
    * Extracts type wrapped in a wrapper type.
    *
-   * @param ref reflection context
-   * @param wrapperType wrapper type
-   * @param wrappedType wrapped type
+   * @param c macro context
+   * @param someType wrapped type
    * @tparam C macro context type
    * @return wrapped type
    */
   @nowarn
   def unwrapType[C <: blackbox.Context, Wrapper: c.WeakTypeTag](c: C)(someType: c.Type): c.Type = {
-    import c.universe.{TypeRef, TypeSymbol}
+    import c.universe.TypeRef
 
     val wrapperType = resultType(c)(c.weakTypeOf[Wrapper])
     val (wrapperTypeConstructor, wrapperTypeParameterIndex) = wrapperType match {
@@ -189,8 +186,9 @@ private[automorph] case object MethodBindings {
   /**
    * Determines result type if specified type is a lambda type.
    *
-   * @param q quotation context
+   * @param c macro context
    * @param someType some type
+   * @tparam C macro context type
    * @return result type
    */
   @nowarn

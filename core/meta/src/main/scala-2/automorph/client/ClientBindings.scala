@@ -1,9 +1,8 @@
 package automorph.client
 
-import automorph.client.ClientBinding
-import automorph.protocol.MethodBindings.{methodSignature, methodLiftable, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodBindings.{methodLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.Codec
-import automorph.util.Reflection
+import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -70,13 +69,13 @@ case object ClientBindings {
     method: ref.RefMethod,
     codec: ref.c.Expr[ExactCodec]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[ClientBinding[Node]] = {
-    import ref.c.universe.{Quasiquote, weakTypeOf}
+    import ref.c.universe.{Liftable, Quasiquote, weakTypeOf}
 
     val nodeType = weakTypeOf[Node]
     val encodeArguments = generateEncodeArguments[C, Node, ExactCodec, Context](ref)(method, codec)
     val decodeResult = generateDecodeResult[C, Node, ExactCodec, Effect](ref)(method, codec)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
-    implicit val methodLift = methodLiftable(ref)
+    implicit val methodLift: Liftable[Method] = methodLiftable(ref)
     Seq(methodLift)
     ref.c.Expr[ClientBinding[Node]](q"""
       automorph.client.ClientBinding[$nodeType](

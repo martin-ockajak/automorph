@@ -53,7 +53,7 @@ final private[automorph] case class Reflection[C <: Context](c: C) {
 
   private def method(methodSymbol: MethodSymbol): RefMethod = {
     val typeParameters = methodSymbol.typeParams.map(_.asType).map { typeSymbol =>
-      RefParameter(typeSymbol.name.toString, typeSymbol.toType.finalResultType, false)
+      RefParameter(typeSymbol.name.toString, typeSymbol.toType.finalResultType, contextual = false)
     }
     val parameters = methodSymbol.paramLists.map(_.map { parameter =>
       RefParameter(parameter.name.toString, parameter.typeSignature, parameter.isImplicit)

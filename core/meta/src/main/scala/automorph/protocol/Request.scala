@@ -52,6 +52,6 @@ private[automorph] case object Request {
    * @throws InvalidRequestException if the property value is missing
    */
   private[automorph] def mandatory[T](value: Option[T], name: String): T = value.getOrElse(
-    throw ErrorType.InvalidRequestException(s"Missing message property: $name", None.orNull)
+    throw InvalidRequestException(s"Missing message property: $name", None.orNull)
   )
 }

@@ -2,7 +2,7 @@ package automorph.handler
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
 import java.nio.ByteBuffer
-import java.nio.charset.StandardCharsets
+import java.nio.charset.{Charset, StandardCharsets}
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -34,7 +34,7 @@ trait Bytes[T] {
 object Bytes {
 
 
-  /** `ArraySeq.ofByte' <-> byte sequence converter. */
+  /** `ArraySeq.ofByte` <-> byte sequence converter. */
   implicit val arraySeqOfByteBytes: Bytes[ArraySeq.ofByte] = new Bytes[ArraySeq.ofByte] {
 
     override def to(bytes: ArraySeq.ofByte): ArraySeq.ofByte = bytes
@@ -54,7 +54,7 @@ object Bytes {
   implicit val stringBytes: Bytes[String] = new Bytes[String] {
 
     /** String character set */
-    val charset = StandardCharsets.UTF_8
+    val charset: Charset = StandardCharsets.UTF_8
 
     override def to(bytes: ArraySeq.ofByte): String = new String(bytes.unsafeArray, charset)
 
@@ -71,7 +71,7 @@ object Bytes {
         new ArraySeq.ofByte(data.array)
       } else {
         val array = Array.ofDim[Byte](data.remaining)
-        data.get(array, 0, array.size)
+        data.get(array, 0, array.length)
         new ArraySeq.ofByte(array)
       }
     }

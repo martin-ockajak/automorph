@@ -1,6 +1,5 @@
 package automorph
 
-import automorph.Handler
 import automorph.backend.IdentityBackend.Identity
 import automorph.spi.Backend
 import automorph.util.EmptyContext
@@ -77,7 +76,6 @@ case object DefaultHandler {
    * The handler can be used by a server to invoke bound API methods based on incoming requests.
    *
    * @see [[https://www.jsonrpc.org/specification protocol specification]]
-   * @param executionContext execution context
    * @return asynchronous request handler
    */
   def syncWithoutContext(): Type[Identity, EmptyContext.Value] =

@@ -76,7 +76,6 @@ case class ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] priva
    * @param argumentNames argument names
    * @param encodedArguments method argument nodes
    * @param context request context
-   * @tparam R result type
    * @return nothing
    */
   private[automorph] def notify(

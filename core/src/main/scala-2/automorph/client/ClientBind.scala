@@ -1,6 +1,5 @@
 package automorph.client
 
-import automorph.client.ClientCore
 import automorph.spi.Codec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox

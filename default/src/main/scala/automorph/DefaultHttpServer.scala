@@ -94,7 +94,6 @@ case object DefaultHttpServer {
    * @param urlPath HTTP URL path (default: /)
    * @param builder Undertow web server builder
    * @param errorStatus error code to HTTP status mapping function
-   * @param executionContext execution context
    * @return synchronous server
    */
   def sync(
