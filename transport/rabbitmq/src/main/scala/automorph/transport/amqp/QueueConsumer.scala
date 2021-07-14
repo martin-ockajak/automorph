@@ -1,4 +1,4 @@
-//package com.archilogic.jsonrpc.amqp.rabitmq
+//package com.archilogic.jsonrpc.amqp
 //
 //import java.nio.charset.StandardCharsets
 //

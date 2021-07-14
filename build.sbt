@@ -161,7 +161,7 @@ lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
 )
 
 // Server
-lazy val undertow = (project in file("server/undertow")).dependsOn(
+lazy val undertow = (project in file("transport/undertow")).dependsOn(
   core, testCore % Test, standard % Test
 ).settings(
   name := "automorph-undertow",
@@ -170,7 +170,7 @@ lazy val undertow = (project in file("server/undertow")).dependsOn(
     "com.lihaoyi" %% "cask" % "0.7.11" % Test
   )
 )
-lazy val jetty = (project in file("server/jetty")).dependsOn(
+lazy val jetty = (project in file("transport/jetty")).dependsOn(
   core, testCore % Test, standard % Test
 ).settings(
   name := "automorph-jetty",
@@ -179,7 +179,7 @@ lazy val jetty = (project in file("server/jetty")).dependsOn(
     "commons-io" % "commons-io" % "2.10.0"
   )
 )
-lazy val finagle = (project in file("server/finagle")).dependsOn(
+lazy val finagle = (project in file("transport/finagle")).dependsOn(
   core, testCore % Test, standard % Test
 ).settings(
   name := "automorph-finagle",
@@ -187,7 +187,7 @@ lazy val finagle = (project in file("server/finagle")).dependsOn(
     ("com.twitter" % "finagle-http" % "21.6.0").cross(CrossVersion.for3Use2_13)
   )
 )
-lazy val tapir = (project in file("server/tapir")).dependsOn(
+lazy val tapir = (project in file("transport/tapir")).dependsOn(
   core, testCore % Test, standard % Test
 ).settings(
   name := "automorph-tapir",
