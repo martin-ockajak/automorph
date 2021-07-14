@@ -5,9 +5,9 @@ import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import test.CodecCoreSpec
+import test.FormatCoreSpec
 
-class FutureLocalSpec extends CodecCoreSpec {
+class FutureLocalSpec extends FormatCoreSpec {
 
   type Effect[T] = Future[T]
   type Context = Short

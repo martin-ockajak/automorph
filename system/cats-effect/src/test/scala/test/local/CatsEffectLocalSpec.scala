@@ -5,9 +5,9 @@ import cats.effect.unsafe.implicits.global
 import automorph.system.CatsEffectBackend
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
-import test.CodecCoreSpec
+import test.FormatCoreSpec
 
-class CatsEffectLocalSpec extends CodecCoreSpec {
+class CatsEffectLocalSpec extends FormatCoreSpec {
 
   type Effect[T] = IO[T]
   type Context = Short

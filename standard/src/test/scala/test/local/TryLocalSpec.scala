@@ -4,9 +4,9 @@ import automorph.system.TryBackend
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import scala.util.Try
-import test.CodecCoreSpec
+import test.FormatCoreSpec
 
-class TryLocalSpec extends CodecCoreSpec {
+class TryLocalSpec extends FormatCoreSpec {
 
   type Effect[T] = Try[T]
   type Context = Short

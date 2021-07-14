@@ -3,10 +3,10 @@ package test.local
 import automorph.system.ZioBackend
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
-import test.CodecCoreSpec
+import test.FormatCoreSpec
 import zio.{RIO, Runtime, ZEnv}
 
-class ZioLocalSpec extends CodecCoreSpec {
+class ZioLocalSpec extends FormatCoreSpec {
 
   private lazy val runtime = Runtime.default.withReportFailure(_ => ())
 

@@ -7,17 +7,17 @@ import automorph.codec.json.UpickleJsonCodec
 import automorph.transport.local.client.HandlerTransport
 import automorph.util.EmptyContext
 import automorph.{Client, Handler}
-import ujson.Value
+import test.base.BaseSpec
 
-class EmptyContextClientHandlerSpec extends BaseSpec {
+class EmptyContextCoreSpec extends BaseSpec {
 
   "" - {
     "Construct" in {
       val codec = UpickleJsonCodec[UpickleCustom]()
       val backend = IdentityBackend()
-      val handler = Handler.noContext[Value, codec.type, Identity](codec, backend)
+      val handler = Handler.withoutContext(codec, backend)
       val handlerTransport = HandlerTransport(handler, backend, EmptyContext.value)
-      val client = Client.noContext[Value, codec.type, Identity](codec, backend, handlerTransport)
+      val client = Client.withoutContext(codec, backend, handlerTransport)
       client
 //      val result: String = client.callByPosition("test", 0)
 //      val result: String = client.callByName("test", "foo" -> 0)

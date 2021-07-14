@@ -1,4 +1,4 @@
-//package test.http
+//package test.transport.http
 //
 //import automorph.system.FutureBackend
 //import automorph.server.http.NanoHttpdServer

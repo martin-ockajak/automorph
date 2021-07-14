@@ -12,21 +12,21 @@ import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
-trait CodecCoreSpec extends CoreSpec {
+trait FormatCoreSpec extends CoreSpec {
 
   def customTransport: Option[ClientMessageTransport[Effect, Context]] = None
 
-  def codecFixtures: Seq[MessageFormatFixture] = {
+  def codecFixtures: Seq[FormatFixture] = {
     implicit val usingContext: Context = contextValue
     Seq(
       {
-        val codec = UpickleJsonCodec(CodecCoreSpec)
-        val handler = Handler[UpickleJsonCodec.Node, UpickleJsonCodec[CodecCoreSpec.type], Effect, Context](codec, backend)
+        val codec = UpickleJsonCodec(FormatCoreSpec)
+        val handler = Handler[UpickleJsonCodec.Node, UpickleJsonCodec[FormatCoreSpec.type], Effect, Context](codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
-        val client: Client[UpickleJsonCodec.Node, UpickleJsonCodec[CodecCoreSpec.type], Effect, Context] =
+        val client: Client[UpickleJsonCodec.Node, UpickleJsonCodec[FormatCoreSpec.type], Effect, Context] =
           Client(codec, backend, transport)
-        MessageFormatFixture(
+        FormatFixture(
           codec.getClass,
           client,
           handler,
@@ -39,13 +39,13 @@ trait CodecCoreSpec extends CoreSpec {
           (method, p1) => client.method(method).args(p1).tell
         )
       }, {
-        val codec = UpickleMessagePackCodec(CodecCoreSpec)
-        val handler = Handler[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[CodecCoreSpec.type], Effect, Context](codec, backend)
+        val codec = UpickleMessagePackCodec(FormatCoreSpec)
+        val handler = Handler[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[FormatCoreSpec.type], Effect, Context](codec, backend)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
-        val client: Client[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[CodecCoreSpec.type], Effect, Context] =
+        val client: Client[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[FormatCoreSpec.type], Effect, Context] =
           Client(codec, backend, transport)
-        MessageFormatFixture(
+        FormatFixture(
           codec.getClass,
           client,
           handler,
@@ -68,7 +68,7 @@ trait CodecCoreSpec extends CoreSpec {
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client: Client[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context] =
           Client(codec, backend, transport)
-        MessageFormatFixture(
+        FormatFixture(
           codec.getClass,
           client,
           handler,
@@ -127,7 +127,7 @@ trait CodecCoreSpec extends CoreSpec {
         val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
         val client: Client[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context] =
           Client(codec, backend, transport)
-        MessageFormatFixture(
+        FormatFixture(
           codec.getClass,
           client,
           handler,
@@ -146,7 +146,7 @@ trait CodecCoreSpec extends CoreSpec {
   private def contextValue: Context = arbitraryContext.arbitrary.sample.get
 }
 
-object CodecCoreSpec extends UpickleCustom {
+object FormatCoreSpec extends UpickleCustom {
 
   implicit def enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
     value => Enum.toOrdinal(value),

@@ -23,8 +23,8 @@ trait CoreSpec extends BaseSpec {
   type ComplexApiType = ComplexApi[Effect, Context]
   type InvalidApiType = InvalidApi[Effect]
 
-  case class MessageFormatFixture(
-    codec: Class[_],
+  case class FormatFixture(
+    format: Class[_],
     client: Client[_, _ <: MessageFormat[_], Effect, Context],
     handler: Handler.AnyCodec[Effect, Context],
     simpleApis: Seq[SimpleApiType],
@@ -42,7 +42,7 @@ trait CoreSpec extends BaseSpec {
 
   def run[T](effect: Effect[T]): T
 
-  def codecFixtures: Seq[MessageFormatFixture]
+  def codecFixtures: Seq[FormatFixture]
 
   val simpleApiInstance: SimpleApiType = SimpleApiImpl(backend)
   val complexApiInstance: ComplexApiType = ComplexApiImpl(backend)
@@ -51,7 +51,7 @@ trait CoreSpec extends BaseSpec {
 
   "" - {
     codecFixtures.lastOption.foreach { fixture =>
-      fixture.codec.getSimpleName.replaceAll("MessageFormat$", "") - {
+      fixture.format.getSimpleName.replaceAll("MessageFormat$", "") - {
         "Proxy" - {
           "Call" - {
             "Simple API" - {

@@ -4,9 +4,9 @@ import automorph.system.IdentityBackend
 import automorph.system.IdentityBackend.Identity
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
-import test.CodecCoreSpec
+import test.FormatCoreSpec
 
-class IdentityLocalSpec extends CodecCoreSpec {
+class IdentityLocalSpec extends FormatCoreSpec {
 
   type Effect[T] = Identity[T]
   type Context = Short
