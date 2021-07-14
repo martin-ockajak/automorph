@@ -63,7 +63,7 @@ way to invoke and expose remote APIs while supporting multiple RPC protocols suc
 * [Autowire](https://github.com/lihaoyi/autowire)
 * [STTP](https://github.com/softwaremill/sttp)
 
-# [Quickstart](/examples/src/main/scala/examples/Asynchronous.scala)
+# [Quickstart](/examples/src/test/scala/examples/Asynchronous.scala)
 
 Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
@@ -260,7 +260,7 @@ Depends on:
 
 # Examples
 
-## [Synchronous](/examples/src/main/scala/examples/Synchronous.scala)
+## [Synchronous](/examples/src/test/scala/examples/Synchronous.scala)
 
 ### API
 
@@ -293,7 +293,7 @@ val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : String
 ```
 
-## [Asynchronous](/examples/src/main/scala/examples/Asynchronous.scala)
+## [Asynchronous](/examples/src/test/scala/examples/Asynchronous.scala)
 
 ### API
 
@@ -347,7 +347,7 @@ hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
-## [Request context](/examples/src/main/scala/examples/RequestContext.scala)
+## [Request context](/examples/src/test/scala/examples/RequestContext.scala)
 
 ### API
 
@@ -400,7 +400,7 @@ apiProxy.requestMetaData("test")(context) // List("test", "/api", "valid")
 client.method("requestMetaData").args("message" -> "test").call[List[String]] //  List("test", "/api", "valid")
 ```
 
-## [Method alias](/examples/src/main/scala/examples/MethodAlias.scala)
+## [Method alias](/examples/src/test/scala/examples/MethodAlias.scala)
 
 ### API
 
@@ -458,7 +458,7 @@ client.method("aliased").args("value" -> None).tell // ()
 Try(client.method("omitted").args().call[String]) // Failure
 ```
 
-## [Custom effect system](/examples/src/main/scala/examples/CustomEffectSystem.scala)
+## [Custom effect system](/examples/src/test/scala/examples/CustomEffectSystem.scala)
 
 ### Dependencies
 
@@ -513,7 +513,7 @@ val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : Task[String]
 ```
 
-## [Custom message transport](/examples/src/main/scala/examples/CustomMessageTransport.scala)
+## [Custom message transport](/examples/src/test/scala/examples/CustomMessageTransport.scala)
 
 ### API
 
@@ -559,7 +559,7 @@ val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : String
 ```
 
-## [Custom message format](/examples/src/main/scala/examples/CustomMessageFormat.scala)
+## [Custom message format](/examples/src/test/scala/examples/CustomMessageFormat.scala)
 
 ### Dependencies
 
