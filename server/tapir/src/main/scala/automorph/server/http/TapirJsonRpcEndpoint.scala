@@ -4,7 +4,7 @@ import automorph.Handler
 import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
-import automorph.spi.Codec
+import automorph.spi.{Codec, EndpointMessageTransport}
 import sttp.model.headers.Cookie
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
@@ -18,7 +18,7 @@ import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, 
  *
  * @see [[https://tapir.softwaremill.com Documentation]]
  */
-case object TapirJsonRpcEndpoint extends Logging {
+case object TapirJsonRpcEndpoint extends Logging with EndpointMessageTransport {
   /** Request context type. */
   type Context = Request
 

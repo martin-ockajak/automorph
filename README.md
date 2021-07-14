@@ -191,7 +191,10 @@ Used by the RPC client to send requests and receive responses to and from a remo
 
 ## Server message transport
 
-Message transport plugins used to actively receive and reply to requests using specific message transport protocol while invoking RPC request handler to process them.
+Server message transport protocol plugins.
+
+Used to actively receive and reply to requests using specific message transport protocol
+while invoking RPC request handler to process them.
 
 | Class | Artifact | Library | Protocol |
 | ---- | --- | --- | --- |
@@ -200,7 +203,9 @@ Message transport plugins used to actively receive and reply to requests using s
 
 ## Endpoint message transport
 
-Message transport plugins used to passively receive and reply to requests using specific message transport protocol from an active server while invoking RPC request handler to process them.
+Endpoint message transport protocol plugins.
+  
+Used to passively receive and reply to requests using specific message transport protocol from an active server while invoking RPC request handler to process them.
 
 | Class | Artifact | Library | Protocol |
 | ---- | --- | --- | --- |

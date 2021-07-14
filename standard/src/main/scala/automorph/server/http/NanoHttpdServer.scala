@@ -28,7 +28,7 @@ final case class NanoHttpdServer[Effect[_]] private (
   port: Int,
   readTimeout: Int,
   errorStatus: Int => Status
-) extends NanoHTTPD(port) with ServerMessageTransport with Logging {
+) extends NanoHTTPD(port) with Logging with ServerMessageTransport {
 
   private val HeaderXForwardedFor = "X-Forwarded-For"
   private val backend = handler.backend

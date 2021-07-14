@@ -9,7 +9,7 @@ import automorph.handler.HandlerResult
 import automorph.protocol.ResponseError
 import automorph.log.Logging
 import automorph.server.http.FinagleJsonRpcService.defaultErrorStatus
-import automorph.spi.Codec
+import automorph.spi.{Codec, EndpointMessageTransport}
 import automorph.protocol.ErrorType
 
 /**
@@ -31,7 +31,7 @@ final case class FinagleJsonRpcService[Node, Effect[_]](
   handler: Handler[Node, _ <: Codec[Node], Effect, Request],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Status = defaultErrorStatus
-) extends Service[Request, Response] with Logging {
+) extends Service[Request, Response] with Logging with EndpointMessageTransport {
 
   private val backend = handler.backend
 

@@ -25,7 +25,7 @@ final case class UndertowServer(
   port: Int,
   urlPath: String = "/",
   builder: Undertow.Builder = defaultBuilder
-) extends ServerMessageTransport with Logging {
+) extends Logging with ServerMessageTransport {
 
   private val undertow = start()
 

@@ -7,7 +7,7 @@ import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.server.http.JettyJsonRpcServlet.defaultErrorStatus
-import automorph.spi.Codec
+import automorph.spi.{Codec, EndpointMessageTransport}
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
 
@@ -30,7 +30,7 @@ final case class JettyJsonRpcServlet[Node, Effect[_]](
   handler: Handler[Node, _ <: Codec[Node], Effect, HttpServletRequest],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
-) extends HttpServlet with Logging {
+) extends HttpServlet with Logging with EndpointMessageTransport {
 
   private val backend = handler.backend
 
