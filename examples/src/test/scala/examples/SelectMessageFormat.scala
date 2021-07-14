@@ -8,7 +8,7 @@ import io.circe.generic.auto._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object CustomMessageFormat extends App {
+object SelectMessageFormat extends App {
 
   // Define an API type and create API instance
   case class Record(values: List[String])

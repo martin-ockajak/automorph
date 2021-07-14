@@ -5,7 +5,7 @@ import zio.{Runtime, Task}
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 
-object CustomEffectSystem extends App {
+object SelectEffectSystem extends App {
 
   // Define an API type and create API instance
   class Api {

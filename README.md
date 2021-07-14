@@ -31,9 +31,9 @@ way to invoke and expose remote APIs while supporting multiple RPC protocols suc
   - [Asynchronous](#asynchronous)
   - [Request context](#request-context)
   - [Method alias](#method-alias)
-  - [Custom effect system](#custom-effect-system)
-  - [Custom message transport](#custom-message-transport)
-  - [Custom message format](#custom-message-format)
+  - [Select effect system](#select-effect-system)
+  - [Select message transport](#select-message-transport)
+  - [Select message format](#select-message-format)
 
 # Overview
 
@@ -458,7 +458,7 @@ client.method("aliased").args("value" -> None).tell // ()
 Try(client.method("omitted").args().call[String]) // Failure
 ```
 
-## [Custom effect system](/examples/src/test/scala/examples/CustomEffectSystem.scala)
+## [Select effect system](/examples/src/test/scala/examples/SelectEffectSystem.scala)
 
 ### Dependencies
 
@@ -487,7 +487,7 @@ val api = new Api()
 ```scala
 import automorph.backend.ZioBackend
 
-// Custom effectful computation backend plugin
+// Create computational effect system
 val backend = automorph.backend.ZioBackend[Any]()
 val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
 
@@ -513,7 +513,7 @@ val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : Task[String]
 ```
 
-## [Custom message transport](/examples/src/test/scala/examples/CustomMessageTransport.scala)
+## [Select message transport](/examples/src/test/scala/examples/SelectMessageTransport.scala)
 
 ### API
 
@@ -559,7 +559,7 @@ val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : String
 ```
 
-## [Custom message format](/examples/src/test/scala/examples/CustomMessageFormat.scala)
+## [Select message format](/examples/src/test/scala/examples/SelectMessageFormat.scala)
 
 ### Dependencies
 
