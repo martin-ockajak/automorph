@@ -4,9 +4,9 @@ import automorph.Handler
 import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
+import automorph.spi.ServerMessageTransport
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
-import automorph.spi.ServerMessageTransport
 import scala.collection.immutable.ArraySeq
 
 /**
