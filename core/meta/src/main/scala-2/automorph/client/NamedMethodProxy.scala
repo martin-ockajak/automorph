@@ -5,15 +5,15 @@ import automorph.util.CannotEqual
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-case class NamedMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context](
+case class NamedMethodProxy[Node, ActualCodec <: Codec[Node], Effect[_], Context](
   methodName: String,
-  core: ClientCore[Node, ExactCodec, Effect, Context],
+  core: ClientCore[Node, ActualCodec, Effect, Context],
   argumentValues: Seq[(String, Any)],
   encodedArguments: Seq[Node]
 ) extends CannotEqual {
 
-  type PositionalMethod = PositionalMethodProxy[Node, ExactCodec, Effect, Context]
-  type NamedMethod = NamedMethodProxy[Node, ExactCodec, Effect, Context]
+  type PositionalMethod = PositionalMethodProxy[Node, ActualCodec, Effect, Context]
+  type NamedMethod = NamedMethodProxy[Node, ActualCodec, Effect, Context]
 
   /**
    * Creates a copy of this method proxy without argument names passing method arguments ''by position''.

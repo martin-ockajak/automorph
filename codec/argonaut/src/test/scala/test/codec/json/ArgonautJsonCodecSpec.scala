@@ -11,9 +11,9 @@ import test.{Enum, Record, Structure}
 class ArgonautJsonCodecSpec extends CodecSpec {
 
   type Node = Json
-  type ExactCodec = ArgonautJsonCodec
+  type ActualCodec = ArgonautJsonCodec
 
-  override def codec: ExactCodec = ArgonautJsonCodec()
+  override def codec: ActualCodec = ArgonautJsonCodec()
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(

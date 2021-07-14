@@ -20,21 +20,21 @@ import java.io.IOException
  * @param transport message transport protocol plugin
  * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @tparam Node message node type
- * @tparam ExactCodec message codec plugin type
+ * @tparam ActualCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Client[Node, ExactCodec <: Codec[Node], Effect[_], Context](
-  codec: ExactCodec,
+final case class Client[Node, ActualCodec <: Codec[Node], Effect[_], Context](
+  codec: ActualCodec,
   backend: Backend[Effect],
   transport: Transport[Effect, Context],
   protected val errorToException: (Int, String) => Throwable = defaultErrorToException
-) extends ClientBind[Node, ExactCodec, Effect, Context] with CannotEqual {
+) extends ClientBind[Node, ActualCodec, Effect, Context] with CannotEqual {
 
-  type ThisClient = Client[Node, ExactCodec, Effect, Context]
-  type NamedMethod = NamedMethodProxy[Node, ExactCodec, Effect, Context]
+  type ThisClient = Client[Node, ActualCodec, Effect, Context]
+  type NamedMethod = NamedMethodProxy[Node, ActualCodec, Effect, Context]
 
-  val core: ClientCore[Node, ExactCodec, Effect, Context] = ClientCore(codec, backend, transport, errorToException)
+  val core: ClientCore[Node, ActualCodec, Effect, Context] = ClientCore(codec, backend, transport, errorToException)
 
   /**
    * Creates a method proxy with specified method name.
@@ -76,15 +76,15 @@ case object Client {
    * @param backend effect system plugin
    * @param transport message transport protocol plugin
    * @tparam Node message node type
-   * @tparam ExactCodec message codec plugin type
+   * @tparam ActualCodec message codec plugin type
    * @tparam Effect effect type
    * @return JSON-RPC client
    */
-  def withoutContext[Node, ExactCodec <: Codec[Node], Effect[_]](
-    codec: ExactCodec,
+  def withoutContext[Node, ActualCodec <: Codec[Node], Effect[_]](
+    codec: ActualCodec,
     backend: Backend[Effect],
     transport: Transport[Effect, EmptyContext.Value]
-  ): Client[Node, ExactCodec, Effect, EmptyContext.Value] = Client(codec, backend, transport)
+  ): Client[Node, ActualCodec, Effect, EmptyContext.Value] = Client(codec, backend, transport)
 
   /**
    * Maps a JSON-RPC error to a corresponding default exception.

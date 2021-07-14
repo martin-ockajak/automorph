@@ -8,14 +8,14 @@ import automorph.spi.{Backend, Codec}
  * Handler method bindings code generation.
  *
  * @tparam Node message node type
- * @tparam ExactCodec message codec plugin type
+ * @tparam ActualCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_], Context]:
-  this: Handler[Node, ExactCodec, Effect, Context] =>
+private[automorph] trait HandlerBind[Node, ActualCodec <: Codec[Node], Effect[_], Context]:
+  this: Handler[Node, ActualCodec, Effect, Context] =>
 
-  type ThisHandler = Handler[Node, ExactCodec, Effect, Context]
+  type ThisHandler = Handler[Node, ActualCodec, Effect, Context]
 
   /**
    * Creates a copy of this handler with generated method bindings for all valid public methods of the specified API.
@@ -60,7 +60,7 @@ private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_],
    */
   inline def bind[Api <: AnyRef](api: Api, mapMethodName: String => Seq[String]): ThisHandler =
     copy(methodBindings =
-      methodBindings ++ HandlerBindings.generate[Node, ExactCodec, Effect, Context, Api](codec, backend, api).flatMap {
+      methodBindings ++ HandlerBindings.generate[Node, ActualCodec, Effect, Context, Api](codec, backend, api).flatMap {
         (methodName, method) => mapMethodName(methodName).map(_ -> method)
       }
     )

@@ -14,12 +14,12 @@ import scala.collection.immutable.ArraySeq
  * @param defaultContext default request context
  * @constructor Creates a local handler transport passing requests directly to specified ''handler'' using specified ''backend''.
  * @tparam Node message node type
- * @tparam ExactCodec message format codec plugin type
+ * @tparam ActualCodec message format codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-case class HandlerTransport[Node, ExactCodec <: Codec[Node], Effect[_], Context](
-  handler: Handler[Node, ExactCodec, Effect, Context],
+case class HandlerTransport[Node, ActualCodec <: Codec[Node], Effect[_], Context](
+  handler: Handler[Node, ActualCodec, Effect, Context],
   backend: Backend[Effect],
   defaultContext: Context
 ) extends Transport[Effect, Context] {

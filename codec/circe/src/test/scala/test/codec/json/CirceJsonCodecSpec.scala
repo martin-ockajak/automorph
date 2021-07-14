@@ -12,9 +12,9 @@ import test.{Enum, Record, Structure}
 class CirceJsonCodecSpec extends CodecSpec {
 
   type Node = Json
-  type ExactCodec = CirceJsonCodec
+  type ActualCodec = CirceJsonCodec
 
-  override def codec: ExactCodec = CirceJsonCodec()
+  override def codec: ActualCodec = CirceJsonCodec()
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(

@@ -8,13 +8,13 @@ import scala.reflect.macros.blackbox
  * Client method bindings code generation.
  *
  * @tparam Node message node type
- * @tparam ExactCodec message codec plugin type
+ * @tparam ActualCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait ClientBind[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
+private[automorph] trait ClientBind[Node, ActualCodec <: Codec[Node], Effect[_], Context] {
 
-  def core: ClientCore[Node, ExactCodec, Effect, Context]
+  def core: ClientCore[Node, ActualCodec, Effect, Context]
 
   /**
    * Creates a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
@@ -35,7 +35,7 @@ ne
    * @return JSON-RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef]: Api = macro ClientBind.bindNamedMacro[Node, ExactCodec, Effect, Context, Api]
+  def bind[Api <: AnyRef]: Api = macro ClientBind.bindNamedMacro[Node, ActualCodec, Effect, Context, Api]
 
   /**
    * Creates a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
@@ -55,13 +55,13 @@ ne
    * @return JSON-RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bindPositional[Api <: AnyRef]: Api = macro ClientBind.bindPositionalMacro[Node, ExactCodec, Effect, Context, Api]
+  def bindPositional[Api <: AnyRef]: Api = macro ClientBind.bindPositionalMacro[Node, ActualCodec, Effect, Context, Api]
 }
 
 object ClientBind {
   def bindNamedMacro[
     Node: c.WeakTypeTag,
-    ExactCodec <: Codec[Node]: c.WeakTypeTag,
+    ActualCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
@@ -71,7 +71,7 @@ object ClientBind {
     c.Expr[Api](q"""
       automorph.client.ClientBind.generalBind[
         ${weakTypeOf[Node]},
-        ${weakTypeOf[ExactCodec]},
+        ${weakTypeOf[ActualCodec]},
         ${weakTypeOf[Effect[_]]},
         ${weakTypeOf[Context]},
         ${weakTypeOf[Api]}
@@ -81,7 +81,7 @@ object ClientBind {
 
   def bindPositionalMacro[
     Node: c.WeakTypeTag,
-    ExactCodec <: Codec[Node]: c.WeakTypeTag,
+    ActualCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
@@ -91,7 +91,7 @@ object ClientBind {
     c.Expr[Api](q"""
       automorph.client.ClientBind.generalBind[
         ${weakTypeOf[Node]},
-        ${weakTypeOf[ExactCodec]},
+        ${weakTypeOf[ActualCodec]},
         ${weakTypeOf[Effect[_]]},
         ${weakTypeOf[Context]},
         ${weakTypeOf[Api]}
@@ -99,25 +99,25 @@ object ClientBind {
     """)
   }
 
-  def generalBind[Node, ExactCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
-    clientCore: ClientCore[Node, ExactCodec, Effect, Context],
+  def generalBind[Node, ActualCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
+    clientCore: ClientCore[Node, ActualCodec, Effect, Context],
     namedArguments: Boolean
-  ): Api = macro generalBindMacro[Node, ExactCodec, Effect, Context, Api]
+  ): Api = macro generalBindMacro[Node, ActualCodec, Effect, Context, Api]
 
   def generalBindMacro[
     Node: c.WeakTypeTag,
-    ExactCodec <: Codec[Node]: c.WeakTypeTag,
+    ActualCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
-    clientCore: c.Expr[ClientCore[Node, ExactCodec, Effect, Context]],
+    clientCore: c.Expr[ClientCore[Node, ActualCodec, Effect, Context]],
     namedArguments: c.Expr[Boolean]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Api] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
     val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[ExactCodec]
+    val codecType = weakTypeOf[ActualCodec]
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Api](q"""

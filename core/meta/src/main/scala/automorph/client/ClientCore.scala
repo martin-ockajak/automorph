@@ -17,12 +17,12 @@ import scala.util.{Random, Try}
  * @param transport message transport protocol plugin
  * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @tparam Node message node type
- * @tparam ExactCodec message codec plugin type
+ * @tparam ActualCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-case class ClientCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] private[automorph] (
-  codec: ExactCodec,
+case class ClientCore[Node, ActualCodec <: Codec[Node], Effect[_], Context] private[automorph] (
+  codec: ActualCodec,
   private val backend: Backend[Effect],
   private val transport: Transport[Effect, Context],
   private val errorToException: (Int, String) => Throwable

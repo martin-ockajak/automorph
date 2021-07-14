@@ -13,9 +13,9 @@ import upack.{Arr, Bool, Float64, Msg, Obj, Str}
 class UpickleMessagePackSpec extends CodecSpec {
 
   type Node = Msg
-  type ExactCodec = UpickleMessagePackCodec[UpickleMessagePackCodecSpec.type]
+  type ActualCodec = UpickleMessagePackCodec[UpickleMessagePackCodecSpec.type]
 
-  override def codec: ExactCodec = UpickleMessagePackCodec(UpickleMessagePackCodecSpec)
+  override def codec: ActualCodec = UpickleMessagePackCodec(UpickleMessagePackCodecSpec)
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(

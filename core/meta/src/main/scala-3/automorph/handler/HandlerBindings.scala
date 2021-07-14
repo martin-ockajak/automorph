@@ -21,27 +21,27 @@ private[automorph] case object HandlerBindings:
    * @param backend effect system plugin
    * @param api API instance
    * @tparam Node message node type
-   * @tparam ExactCodec message format codec type
+   * @tparam ActualCodec message format codec type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to handler method bindings
    */
-  inline def generate[Node, ExactCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
-    codec: ExactCodec,
+  inline def generate[Node, ActualCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
+    codec: ActualCodec,
     backend: Backend[Effect],
     api: Api
   ): Map[String, HandlerBinding[Node, Effect, Context]] =
-    ${ generateMacro[Node, ExactCodec, Effect, Context, Api]('codec, 'backend, 'api) }
+    ${ generateMacro[Node, ActualCodec, Effect, Context, Api]('codec, 'backend, 'api) }
 
   private def generateMacro[
     Node: Type,
-    ExactCodec <: Codec[Node]: Type,
+    ActualCodec <: Codec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
   ](
-    codec: Expr[ExactCodec],
+    codec: Expr[ActualCodec],
     backend: Expr[Backend[Effect]],
     api: Expr[Api]
   )(using quotes: Quotes): Expr[Map[String, HandlerBinding[Node, Effect, Context]]] =
@@ -59,7 +59,7 @@ private[automorph] case object HandlerBindings:
     val handlerBindings = Expr.ofSeq(validMethods.map { method =>
       '{
         ${ Expr(method.name) } -> ${
-          generateBinding[Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)
+          generateBinding[Node, ActualCodec, Effect, Context, Api](ref)(method, codec, backend, api)
         }
       }
     })
@@ -67,19 +67,19 @@ private[automorph] case object HandlerBindings:
 
   private def generateBinding[
     Node: Type,
-    ExactCodec <: Codec[Node]: Type,
+    ActualCodec <: Codec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
   ](ref: Reflection)(
     method: ref.RefMethod,
-    codec: Expr[ExactCodec],
+    codec: Expr[ActualCodec],
     backend: Expr[Backend[Effect]],
     api: Expr[Api]
   ): Expr[HandlerBinding[Node, Effect, Context]] =
     given Quotes = ref.q
 
-    val invoke = generateInvoke[Node, ExactCodec, Effect, Context, Api](ref)(method, codec, backend, api)
+    val invoke = generateInvoke[Node, ActualCodec, Effect, Context, Api](ref)(method, codec, backend, api)
     logBoundMethod[Api](ref)(method, invoke)
     '{
       HandlerBinding(
@@ -91,13 +91,13 @@ private[automorph] case object HandlerBindings:
 
   private def generateInvoke[
     Node: Type,
-    ExactCodec <: Codec[Node]: Type,
+    ActualCodec <: Codec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
   ](ref: Reflection)(
     method: ref.RefMethod,
-    codec: Expr[ExactCodec],
+    codec: Expr[ActualCodec],
     backend: Expr[Backend[Effect]],
     api: Expr[Api]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =

@@ -16,24 +16,24 @@ private[automorph] case object ClientBindings:
    *
    * @param codec message format codec plugin
    * @tparam Node message node type
-   * @tparam ExactCodec message format codec type
+   * @tparam ActualCodec message format codec type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to client method bindings
    */
-  inline def generate[Node, ExactCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
-    codec: ExactCodec
+  inline def generate[Node, ActualCodec <: Codec[Node], Effect[_], Context, Api <: AnyRef](
+    codec: ActualCodec
   ): Map[String, ClientBinding[Node]] =
-    ${ generateMacro[Node, ExactCodec, Effect, Context, Api]('codec) }
+    ${ generateMacro[Node, ActualCodec, Effect, Context, Api]('codec) }
 
   private def generateMacro[
     Node: Type,
-    ExactCodec <: Codec[Node]: Type,
+    ActualCodec <: Codec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
-  ](codec: Expr[ExactCodec])(using quotes: Quotes): Expr[Map[String, ClientBinding[Node]]] =
+  ](codec: Expr[ActualCodec])(using quotes: Quotes): Expr[Map[String, ClientBinding[Node]]] =
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -48,7 +48,7 @@ private[automorph] case object ClientBindings:
     val clientMethods = Expr.ofSeq(validMethods.map { method =>
       '{
         ${ Expr(method.name) } -> ${
-          generateBinding[Node, ExactCodec, Effect, Context, Api](ref)(method, codec)
+          generateBinding[Node, ActualCodec, Effect, Context, Api](ref)(method, codec)
         }
       }
     })
@@ -56,15 +56,15 @@ private[automorph] case object ClientBindings:
 
   private def generateBinding[
     Node: Type,
-    ExactCodec <: Codec[Node]: Type,
+    ActualCodec <: Codec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
-  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[ExactCodec]): Expr[ClientBinding[Node]] =
+  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[ActualCodec]): Expr[ClientBinding[Node]] =
     given Quotes = ref.q
 
-    val encodeArguments = generateEncodeArguments[Node, ExactCodec, Context](ref)(method, codec)
-    val decodeResult = generateDecodeResult[Node, ExactCodec, Effect](ref)(method, codec)
+    val encodeArguments = generateEncodeArguments[Node, ActualCodec, Context](ref)(method, codec)
+    val decodeResult = generateDecodeResult[Node, ActualCodec, Effect](ref)(method, codec)
     logBoundMethod[Api](ref)(method, encodeArguments, decodeResult)
     '{
       ClientBinding(
@@ -75,9 +75,9 @@ private[automorph] case object ClientBindings:
       )
     }
 
-  private def generateEncodeArguments[Node: Type, ExactCodec <: Codec[Node]: Type, Context: Type](ref: Reflection)(
+  private def generateEncodeArguments[Node: Type, ActualCodec <: Codec[Node]: Type, Context: Type](ref: Reflection)(
     method: ref.RefMethod,
-    codec: Expr[ExactCodec]
+    codec: Expr[ActualCodec]
   ): Expr[Seq[Any] => Seq[Node]] =
     import ref.q.reflect.{Term, asTerm}
     given Quotes = ref.q
@@ -115,9 +115,9 @@ private[automorph] case object ClientBindings:
       }
     }
 
-  private def generateDecodeResult[Node: Type, ExactCodec <: Codec[Node]: Type, Effect[_]: Type](ref: Reflection)(
+  private def generateDecodeResult[Node: Type, ActualCodec <: Codec[Node]: Type, Effect[_]: Type](ref: Reflection)(
     method: ref.RefMethod,
-    codec: Expr[ExactCodec]
+    codec: Expr[ActualCodec]
   ): Expr[Node => Any] =
     import ref.q.reflect.asTerm
     given Quotes = ref.q

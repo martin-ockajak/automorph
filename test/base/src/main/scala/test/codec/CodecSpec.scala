@@ -14,9 +14,9 @@ import test.base.BaseSpec
 trait CodecSpec extends BaseSpec {
 
   type Node
-  type ExactCodec <: Codec[Node]
+  type ActualCodec <: Codec[Node]
 
-  def codec: ExactCodec
+  def codec: ActualCodec
 
   implicit def arbitraryNode: Arbitrary[Node]
 

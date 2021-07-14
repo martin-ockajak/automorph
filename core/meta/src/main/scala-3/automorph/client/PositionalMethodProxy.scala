@@ -3,15 +3,15 @@ package automorph.client
 import automorph.spi.Codec
 import automorph.util.CannotEqual
 
-case class PositionalMethodProxy[Node, ExactCodec <: Codec[Node], Effect[_], Context] (
+case class PositionalMethodProxy[Node, ActualCodec <: Codec[Node], Effect[_], Context] (
   methodName: String,
-  private val core: ClientCore[Node, ExactCodec, Effect, Context],
+  private val core: ClientCore[Node, ActualCodec, Effect, Context],
   private val argumentValues: Seq[Any],
   private val encodedArguments: Seq[Node]
 ) extends CannotEqual:
 
-  type PositionalMethod = PositionalMethodProxy[Node, ExactCodec, Effect, Context]
-  type NamedMethod = NamedMethodProxy[Node, ExactCodec, Effect, Context]
+  type PositionalMethod = PositionalMethodProxy[Node, ActualCodec, Effect, Context]
+  type NamedMethod = NamedMethodProxy[Node, ActualCodec, Effect, Context]
 
   /**
    * Creates a copy of this method proxy passing method arguments ''by name'' with specified argument names.

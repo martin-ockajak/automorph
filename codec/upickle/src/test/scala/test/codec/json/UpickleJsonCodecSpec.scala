@@ -11,9 +11,9 @@ import ujson.{Arr, Bool, Num, Obj, Str, Value}
 class UpickleJsonCodecSpec extends CodecSpec {
 
   type Node = Value
-  type ExactCodec = UpickleJsonCodec[UpickleJsonCodecSpec.type]
+  type ActualCodec = UpickleJsonCodec[UpickleJsonCodecSpec.type]
 
-  override def codec: ExactCodec = UpickleJsonCodec(UpickleJsonCodecSpec)
+  override def codec: ActualCodec = UpickleJsonCodec(UpickleJsonCodecSpec)
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(

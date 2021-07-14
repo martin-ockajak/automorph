@@ -18,19 +18,19 @@ import automorph.util.{CannotEqual, EmptyContext}
  * @param backend effect system plugin
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
  * @tparam Node message node type
- * @tparam ExactCodec message codec plugin type
+ * @tparam ActualCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Handler[Node, ExactCodec <: Codec[Node], Effect[_], Context](
-  codec: ExactCodec,
+final case class Handler[Node, ActualCodec <: Codec[Node], Effect[_], Context](
+  codec: ActualCodec,
   backend: Backend[Effect],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val exceptionToError: Class[_ <: Throwable] => ErrorType,
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
-) extends HandlerCore[Node, ExactCodec, Effect, Context]
-  with HandlerBind[Node, ExactCodec, Effect, Context]
+) extends HandlerCore[Node, ActualCodec, Effect, Context]
+  with HandlerBind[Node, ActualCodec, Effect, Context]
   with CannotEqual
   with Logging
 
@@ -48,14 +48,14 @@ case object Handler:
    * @param codec structured message format codec plugin
    * @param backend effect system plugin
    * @tparam Node message node type
-   * @tparam ExactCodec message codec plugin type
+   * @tparam ActualCodec message codec plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  inline def apply[Node, ExactCodec <: Codec[Node], Effect[_], Context](
-    codec: ExactCodec,
+  inline def apply[Node, ActualCodec <: Codec[Node], Effect[_], Context](
+    codec: ActualCodec,
     backend: Backend[Effect]
-  ): Handler[Node, ExactCodec, Effect, Context] =
+  ): Handler[Node, ActualCodec, Effect, Context] =
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
     Handler(codec, backend, Map.empty, defaultExceptionToError, encodeStrings, codec.encode(None))
 
@@ -68,13 +68,13 @@ case object Handler:
    * @param codec structured message format codec plugin
    * @param backend effect system plugin
    * @tparam Node message node type
-   * @tparam ExactCodec message codec plugin type
+   * @tparam ActualCodec message codec plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  inline def withoutContext[Node, ExactCodec <: Codec[Node], Effect[_]](
-    codec: ExactCodec,
+  inline def withoutContext[Node, ActualCodec <: Codec[Node], Effect[_]](
+    codec: ActualCodec,
     backend: Backend[Effect]
-  ): Handler[Node, ExactCodec, Effect, EmptyContext.Value] =
+  ): Handler[Node, ActualCodec, Effect, EmptyContext.Value] =
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
     Handler(codec, backend, Map.empty, defaultExceptionToError, encodeStrings, codec.encode(None))

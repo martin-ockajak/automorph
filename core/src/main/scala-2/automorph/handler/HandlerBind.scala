@@ -9,14 +9,14 @@ import scala.reflect.macros.blackbox
  * Handler method bindings code generation.
  *
  * @tparam Node message node type
- * @tparam ExactCodec message codec plugin type
+ * @tparam ActualCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
-  this: Handler[Node, ExactCodec, Effect, Context] =>
+private[automorph] trait HandlerBind[Node, ActualCodec <: Codec[Node], Effect[_], Context] {
+  this: Handler[Node, ActualCodec, Effect, Context] =>
 
-  type ThisHandler = Handler[Node, ExactCodec, Effect, Context]
+  type ThisHandler = Handler[Node, ActualCodec, Effect, Context]
 
   /**
    * Creates a copy of this handler with generated method bindings for all valid public methods of the specified API.
@@ -38,7 +38,7 @@ private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_],
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   def bind[Api <: AnyRef](api: Api): ThisHandler =
-    macro HandlerBind.basicBindMacro[Node, ExactCodec, Effect, Context, Api]
+    macro HandlerBind.basicBindMacro[Node, ActualCodec, Effect, Context, Api]
 
   /**
    * Creates a copy of this handler with generated method bindings for all valid public methods of the specified API.
@@ -61,47 +61,47 @@ private[automorph] trait HandlerBind[Node, ExactCodec <: Codec[Node], Effect[_],
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   def bind[Api <: AnyRef](api: Api, mapName: String => Seq[String]): ThisHandler =
-    macro HandlerBind.bindMacro[Node, ExactCodec, Effect, Context, Api]
+    macro HandlerBind.bindMacro[Node, ActualCodec, Effect, Context, Api]
 }
 
 case object HandlerBind {
 
   def basicBindMacro[
     Node: c.WeakTypeTag,
-    ExactCodec <: Codec[Node]: c.WeakTypeTag,
+    ActualCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     api: c.Expr[Api]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, ExactCodec, Effect, Context]] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, ActualCodec, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[ExactCodec]
+    val codecType = weakTypeOf[ActualCodec]
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
       ${c.prefix}.copy(methodBindings = ${c.prefix}.methodBindings ++ automorph.handler.HandlerBindings
         .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.backend, $api)
       )
-    """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Context]]]
+    """).asInstanceOf[c.Expr[Handler[Node, ActualCodec, Effect, Context]]]
   }
 
   def bindMacro[
     Node: c.WeakTypeTag,
-    ExactCodec <: Codec[Node]: c.WeakTypeTag,
+    ActualCodec <: Codec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     api: c.Expr[Api],
     mapName: c.Expr[String => Seq[String]]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, ExactCodec, Effect, Context]] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, ActualCodec, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[ExactCodec]
+    val codecType = weakTypeOf[ActualCodec]
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
@@ -111,6 +111,6 @@ case object HandlerBind {
           $mapName(methodName).map(_ -> method)
         }
       )
-    """).asInstanceOf[c.Expr[Handler[Node, ExactCodec, Effect, Context]]]
+    """).asInstanceOf[c.Expr[Handler[Node, ActualCodec, Effect, Context]]]
   }
 }

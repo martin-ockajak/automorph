@@ -13,12 +13,12 @@ import scala.util.Try
  * JSON-RPC request handler core logic.
  *
  * @tparam Node message node type
- * @tparam ExactCodec message codec plugin type
+ * @tparam ActualCodec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_], Context] {
-  this: Handler[Node, ExactCodec, Effect, Context] =>
+private[automorph] trait HandlerCore[Node, ActualCodec <: Codec[Node], Effect[_], Context] {
+  this: Handler[Node, ActualCodec, Effect, Context] =>
 
   private val unknownId = "[unknown]"
 
