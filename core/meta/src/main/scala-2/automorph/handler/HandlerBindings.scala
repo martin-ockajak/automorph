@@ -84,10 +84,9 @@ case object HandlerBindings {
     implicit val methodLift: Liftable[Method] = methodLiftable(ref)
     Seq(methodLift)
     ref.c.Expr[HandlerBinding[Node, Effect, Context]](q"""
-      lazy val doInvoke = $invoke
       automorph.handler.HandlerBinding(
         ${method.lift},
-        doInvoke,
+        $invoke,
         ${methodUsesContext[C, Context](ref)(method)}
       )
     """)
