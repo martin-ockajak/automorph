@@ -22,12 +22,11 @@ lazy val root = project.in(file(".")).aggregate(
   scalaz,
 
   sttp,
-  rabbitmq,
-
+  tapir,
   undertow,
   jetty,
   finagle,
-  tapir,
+  rabbitmq,
 
   openApi,
 
