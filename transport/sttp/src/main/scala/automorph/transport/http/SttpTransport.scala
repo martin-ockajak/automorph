@@ -74,7 +74,6 @@ case object SttpTransport {
    * HTTP request context.
    *
    * @see [[https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_2.13/latest/sttp/client3/RequestT.html API]]
-   * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @param partial partially constructed request
    */
   case class RequestProperties(
