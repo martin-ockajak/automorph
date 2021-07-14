@@ -2,7 +2,7 @@ package automorph
 
 import automorph.backend.IdentityBackend.Identity
 import automorph.codec.json.UpickleJsonCodec
-import automorph.spi.{Backend, Transport}
+import automorph.spi.{Backend, ClientTransport}
 import automorph.transport.http.SttpTransport
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,7 +34,7 @@ case object DefaultHttpClient {
    */
   def apply[Effect[_], RequestContext](
     backend: Backend[Effect],
-    transport: Transport[Effect, RequestContext]
+    transport: ClientTransport[Effect, RequestContext]
   ): Client[DefaultCodec.Node, DefaultCodec.Type, Effect, RequestContext] = Client(UpickleJsonCodec(), backend, transport)
 
   /**

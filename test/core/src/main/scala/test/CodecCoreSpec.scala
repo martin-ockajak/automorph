@@ -5,7 +5,7 @@ import argonaut.{Argonaut, CodecJson}
 import automorph.codec.common.UpickleCustom
 import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, UpickleJsonCodec}
 import automorph.codec.messagepack.UpickleMessagePackCodec
-import automorph.spi.Transport
+import automorph.spi.ClientTransport
 import automorph.transport.local.HandlerTransport
 import automorph.{Client, Handler}
 import io.circe.generic.auto._
@@ -14,7 +14,7 @@ import io.circe.{Decoder, Encoder}
 
 trait CodecCoreSpec extends CoreSpec {
 
-  def customTransport: Option[Transport[Effect, Context]] = None
+  def customTransport: Option[ClientTransport[Effect, Context]] = None
 
   def codecFixtures: Seq[CodecFixture] = {
     implicit val usingContext: Context = contextValue
