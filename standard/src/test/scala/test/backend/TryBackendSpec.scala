@@ -3,7 +3,6 @@ package test.backend
 import automorph.backend.TryBackend
 import automorph.spi.Backend
 import scala.util.Try
-import test.backend.BackendSpec
 
 class TryBackendSpec extends BackendSpec[Try] {
   def effect: Backend[Try] = TryBackend()

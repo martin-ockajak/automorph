@@ -4,7 +4,6 @@ import automorph.backend.ScalazBackend
 import automorph.spi.Backend
 import scala.util.Try
 import scalaz.effect.IO
-import test.backend.BackendSpec
 
 class ScalazBackendSpec extends BackendSpec[IO] {
   def effect: Backend[IO] = ScalazBackend()

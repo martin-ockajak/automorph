@@ -1,6 +1,5 @@
 package test
 
-import base.BaseSpec
 import automorph.backend.IdentityBackend
 import automorph.backend.IdentityBackend.Identity
 import automorph.codec.common.UpickleCustom
@@ -10,7 +9,7 @@ import automorph.util.EmptyContext
 import automorph.{Client, Handler}
 import ujson.Value
 
-class VoidContextClientHandlerSpec extends BaseSpec {
+class EmptyContextClientHandlerSpec extends BaseSpec {
 
   "" - {
     "Construct" in {

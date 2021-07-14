@@ -7,19 +7,17 @@ import org.scalacheck.Arbitrary
 import scala.util.Try
 import test.Generators.arbitraryRecord
 import test.base.BaseSpec
-import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, SimpleApiImpl}
 
 /**
  * Main client -> handler API method invocation test.
  *
  * Checks the results of remote method invocations against identical local invocations.
- *
- * @tparam Effect effect type
- * @tparam Context request context type
  */
 trait CoreSpec extends BaseSpec {
 
+  /** Effect type. */
   type Effect[_]
+  /** Request context type. */
   type Context
   type SimpleApiType = SimpleApi[Effect]
   type ComplexApiType = ComplexApi[Effect, Context]
@@ -28,7 +26,7 @@ trait CoreSpec extends BaseSpec {
   case class CodecFixture(
     codec: Class[_],
     client: Client[_, _ <: Codec[_], Effect, Context],
-    handler: Handler[_,  _ <: Codec[_], Effect, Context],
+    handler: Handler[_, _ <: Codec[_], Effect, Context],
     simpleApis: Seq[SimpleApiType],
     complexApis: Seq[ComplexApiType],
     invalidApis: Seq[InvalidApiType],

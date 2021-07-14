@@ -6,7 +6,6 @@ import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.util.Try
-import test.backend.BackendSpec
 
 class MonixBackendSpec extends BackendSpec[Task] {
   def effect: Backend[Task] = MonixBackend()

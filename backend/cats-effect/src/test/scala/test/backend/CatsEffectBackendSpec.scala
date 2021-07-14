@@ -5,7 +5,6 @@ import cats.effect.unsafe.implicits.global
 import automorph.backend.CatsEffectBackend
 import automorph.spi.Backend
 import scala.util.Try
-import test.backend.BackendSpec
 
 class CatsEffectBackendSpec extends BackendSpec[IO] {
   def effect: Backend[IO] = CatsEffectBackend()

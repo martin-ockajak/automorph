@@ -11,7 +11,6 @@ import automorph.{Client, Handler}
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
-import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, SimpleApi, SimpleApiImpl}
 
 trait CodecCoreSpec extends CoreSpec {
 
@@ -87,7 +86,7 @@ trait CodecCoreSpec extends CoreSpec {
           cursor => cursor.focus.as[Int].map(Enum.fromOrdinal)
         )
         implicit lazy val structureCodecJson: CodecJson[Structure] =
-          Argonaut.codec1(Structure.apply, (v: Structure) => (v.value))("value")
+          Argonaut.codec1(Structure.apply, (v: Structure) => v.value)("value")
         implicit lazy val recordCodecJson: CodecJson[Record] =
           Argonaut.codec13(
             Record.apply,

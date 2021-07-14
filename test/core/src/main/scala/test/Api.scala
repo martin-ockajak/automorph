@@ -50,7 +50,7 @@ final case class ComplexApiImpl[Effect[_], Context](backend: Backend[Effect]) ex
     backend.pure(p2.getOrElse(List(0)).map(number => (p1 + p0 + number).toString))
 
   override def method4(p0: BigDecimal, p1: Byte, p2: Map[String, Int], p3: Option[String]): Effect[Long] =
-    backend.pure(p0.sign.toLong + p1 + p2.values.sum + p3.map(_.size).getOrElse(0))
+    backend.pure(p0.sign.toLong + p1 + p2.values.sum + p3.map(_.length).getOrElse(0))
 
   override def method5(p0: Boolean, p1: Short)(p2: List[Int]): Effect[Map[String, String]] =
     backend.pure(Map(
@@ -63,14 +63,14 @@ final case class ComplexApiImpl[Effect[_], Context](backend: Backend[Effect]) ex
     backend.pure(Some((p0.double + p1).toString))
 
   override def method7(p0: Record, p1: Boolean)(implicit context: Context): Effect[Int] = p0.int match {
-    case Some(int) if p1 => backend.pure(int + context.toString.size)
+    case Some(int) if p1 => backend.pure(int + context.toString.length)
     case _ => backend.pure(0)
   }
 
   override def method8(p0: Record, p1: String, p2: Option[Double])(implicit context: Context): Effect[Record] =
     backend.pure(p0.copy(
       string = s"${p0.string} - $p1",
-      long = p0.long + implicitly[Context].toString.size,
+      long = p0.long + implicitly[Context].toString.length,
       double = p2.getOrElse(0.1),
       enumeration = Enum.fromOrdinal(1)
     ))

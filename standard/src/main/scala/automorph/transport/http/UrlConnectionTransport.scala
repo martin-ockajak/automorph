@@ -15,7 +15,6 @@ import scala.util.{Try, Using}
  * @constructor Creates an URL connection transport plugin using HTTP as message transport protocol.
  * @param url HTTP endpoint URL
  * @param method HTTP method
- * @tparam Effect effect type
  */
 final case class UrlConnectionTransport(
   url: URL,
@@ -33,7 +32,7 @@ final case class UrlConnectionTransport(
     context: Option[RequestProperties]
   ): Identity[ArraySeq.ofByte] = {
     val connection = send(request, mediaType, context)
-    Using.resource(connection.getInputStream)(inputStreamBytes.from(_))
+    Using.resource(connection.getInputStream)(inputStreamBytes.from)
   }
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Identity[Unit] = {

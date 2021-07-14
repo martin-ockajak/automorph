@@ -4,7 +4,6 @@ import automorph.backend.IdentityBackend
 import automorph.backend.IdentityBackend.Identity
 import automorph.spi.Backend
 import scala.util.Try
-import test.backend.BackendSpec
 
 class IdentityBackendSpec extends BackendSpec[Identity] {
   def effect: Backend[Identity] = IdentityBackend()

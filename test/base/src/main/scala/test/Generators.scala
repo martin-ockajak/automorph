@@ -1,7 +1,7 @@
 package test
 
 import automorph.spi.{Message, MessageError}
-import org.scalacheck.Arbitrary.{arbBool, arbByte, arbContainer, arbDouble, arbEnum, arbFloat, arbInt, arbLong, arbOption, arbShort, arbString, arbitrary}
+import org.scalacheck.Arbitrary.{arbBool, arbByte, arbContainer, arbDouble, arbFloat, arbInt, arbLong, arbOption, arbShort, arbString, arbitrary}
 import org.scalacheck.{Arbitrary, Gen}
 import test.Enum.Enum
 

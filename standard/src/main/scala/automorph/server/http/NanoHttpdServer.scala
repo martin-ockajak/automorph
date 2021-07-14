@@ -117,7 +117,7 @@ case object NanoHttpdServer {
     server
   }
 
-  /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
+  /** Error propagating mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus: Int => Status = Map(
     ErrorType.ParseError -> Status.BAD_REQUEST,
     ErrorType.InvalidRequest -> Status.BAD_REQUEST,
