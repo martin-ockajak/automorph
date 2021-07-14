@@ -6,4 +6,4 @@ package automorph.spi
  * Used to passively receive and reply to requests using specific message transport protocol
  * from an active server while invoking RPC request handler to process them
  */
-trait EndpointMessageTransport
+trait EndpointMessageTransport extends MessageTransport
