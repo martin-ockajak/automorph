@@ -1,4 +1,4 @@
-![automorph](https://github.com/martin-ockajak/automorph/raw/main/project/logo.jpg)
+![automorph](https://github.com/martin-ockajak/automorph/raw/main/project/images/logo.jpg)
 
 **Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless
 way to invoke and expose remote APIs while supporting multiple RPC protocols such as [JSON-RPC](https://www.jsonrpc.org/specification) and highly standardized form of [REST](https://en.wikipedia.org/wiki/Representational_state_transfer).
