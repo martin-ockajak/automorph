@@ -1,11 +1,11 @@
-package automorph.transport.http
+package automorph.transport.http.client
 
 import automorph.spi.{Backend, ClientMessageTransport}
-import automorph.transport.http.SttpTransport.RequestProperties
+import automorph.transport.http.client.SttpTransport.RequestProperties
 import java.io.IOException
 import java.net.URL
 import scala.collection.immutable.ArraySeq
-import sttp.client3.{asByteArray, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
+import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArray, basicRequest, ignore}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**

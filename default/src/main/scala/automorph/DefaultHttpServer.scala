@@ -2,9 +2,10 @@ package automorph
 
 import io.undertow.Undertow
 import automorph.backend.IdentityBackend.Identity
-import automorph.server.http.UndertowJsonRpcHandler.defaultErrorStatus
-import automorph.server.http.UndertowServer.defaultBuilder
-import automorph.server.http.{UndertowJsonRpcHandler, UndertowServer}
+import automorph.transport.http.endpoint.UndertowJsonRpcHandler.defaultErrorStatus
+import automorph.transport.http.server.UndertowServer.defaultBuilder
+import automorph.transport.http.endpoint.UndertowJsonRpcHandler
+import automorph.transport.http.server.UndertowServer
 import automorph.spi.Backend
 import scala.concurrent.{ExecutionContext, Future}
 

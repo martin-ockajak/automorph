@@ -1,4 +1,4 @@
-package test.server.http
+package test.transport.http.server
 
 import io.undertow.Handlers
 import io.undertow.server.handlers.BlockingHandler
@@ -6,7 +6,7 @@ import automorph.Handler
 import automorph.backend.IdentityBackend
 import automorph.backend.IdentityBackend.Identity
 import automorph.codec.json.UpickleJsonCodec
-import automorph.server.http.UndertowJsonRpcHandler
+import automorph.transport.http.endpoint.UndertowJsonRpcHandler
 import test.base.BaseSpec
 import ujson.Value
 

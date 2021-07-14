@@ -1,4 +1,4 @@
-package automorph.server.http
+package automorph.transport.http.endpoint
 
 import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
@@ -7,7 +7,7 @@ import automorph.Handler
 import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
-import automorph.server.http.UndertowJsonRpcHandler.defaultErrorStatus
+import automorph.transport.http.endpoint.UndertowJsonRpcHandler.defaultErrorStatus
 import automorph.spi.EndpointMessageTransport
 import scala.collection.immutable.ArraySeq
 import scala.util.Try

@@ -1,7 +1,8 @@
 package examples
 
 import automorph.codec.json.CirceJsonCodec
-import automorph.server.http.{UndertowJsonRpcHandler, UndertowServer}
+import automorph.transport.http.endpoint.UndertowJsonRpcHandler
+import automorph.transport.http.server.UndertowServer
 import automorph.{Client, DefaultBackend, DefaultHttpTransport, Handler}
 import io.circe.generic.auto._
 import scala.concurrent.ExecutionContext.Implicits.global

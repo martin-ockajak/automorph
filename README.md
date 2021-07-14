@@ -31,9 +31,9 @@ way to invoke and expose remote APIs while supporting multiple RPC protocols suc
   - [Asynchronous](#asynchronous)
   - [Request context](#request-context)
   - [Method alias](#method-alias)
-  - [Custom effect backend](#custom-effect-backend)
+  - [Custom effect system](#custom-effect-system)
   - [Custom message transport](#custom-message-transport)
-  - [Custom message codec](#custom-message-codec)
+  - [Custom message format](#custom-message-format)
 
 # Overview
 
@@ -458,7 +458,7 @@ client.method("aliased").args("value" -> None).tell // ()
 Try(client.method("omitted").args().call[String]) // Failure
 ```
 
-## [Custom effect backend](/examples/src/main/scala/examples/CustomBackend.scala)
+## [Custom effect system](/examples/src/main/scala/examples/CustomEffectSystem.scala)
 
 ### Dependencies
 
@@ -513,7 +513,7 @@ val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : Task[String]
 ```
 
-## [Custom message transport](/examples/src/main/scala/examples/CustomTransport.scala)
+## [Custom message transport](/examples/src/main/scala/examples/CustomMessageTransport.scala)
 
 ### API
 
@@ -529,7 +529,7 @@ val api = new Api()
 
 ```scala
 import automorph.backend.IdentityBackend.Identity
-import automorph.server.http.NanoHttpdServer
+import automorph.transport.http.server.NanoHttpdServer
 import automorph.{Client, DefaultBackend, DefaultCodec, Handler}
 
 // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
@@ -546,7 +546,7 @@ server.close()
 ### Client
 
 ```scala
-import automorph.transport.http.UrlConnectionTransport
+import automorph.transport.http.client.UrlConnectionTransport
 import java.net.URL
 
 // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
@@ -559,7 +559,7 @@ val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : String
 ```
 
-## [Custom message codec](/examples/src/main/scala/examples/CustomCodec.scala)
+## [Custom message format](/examples/src/main/scala/examples/CustomMessageFormat.scala)
 
 ### Dependencies
 
@@ -588,7 +588,8 @@ val api = new Api()
 
 ```scala
 import automorph.codec.json.CirceJsonCodec
-import automorph.server.http.{UndertowJsonRpcHandler, UndertowServer}
+import automorph.transport.http.endpoint.UndertowJsonRpcHandler
+import automorph.transport.http.server.UndertowServer
 import automorph.{Client, DefaultBackend, DefaultHttpTransport, Handler}
 import io.circe.generic.auto._
 

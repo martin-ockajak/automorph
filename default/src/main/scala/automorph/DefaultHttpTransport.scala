@@ -2,7 +2,7 @@ package automorph
 
 import automorph.backend.IdentityBackend.Identity
 import automorph.spi.{Backend, ClientMessageTransport}
-import automorph.transport.http.SttpTransport
+import automorph.transport.http.client.SttpTransport
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend

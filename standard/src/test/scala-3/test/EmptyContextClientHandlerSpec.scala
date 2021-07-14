@@ -4,11 +4,10 @@ import automorph.backend.IdentityBackend
 import automorph.backend.IdentityBackend.Identity
 import automorph.codec.common.UpickleCustom
 import automorph.codec.json.UpickleJsonCodec
-import automorph.transport.local.HandlerTransport
+import automorph.transport.local.client.HandlerTransport
 import automorph.util.EmptyContext
 import automorph.{Client, Handler}
 import test.base.BaseSpec
-import ujson.Value
 
 class EmptyContextClientHandlerSpec extends BaseSpec {
 

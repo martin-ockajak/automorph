@@ -1,4 +1,4 @@
-package automorph.server.http;
+package automorph.transport.http.server;
 
 /*
  * #%L
@@ -33,10 +33,10 @@ package automorph.server.http;
  * #L%
  */
 
-import automorph.server.http.NanoHTTPD.ClientHandler;
-import automorph.server.http.NanoHTTPD.CookieHandler;
-import automorph.server.http.NanoHTTPD.Response.IStatus;
-import automorph.server.http.NanoHTTPD.Response.Status;
+import automorph.transport.http.server.NanoHTTPD.ClientHandler;
+import automorph.transport.http.server.NanoHTTPD.CookieHandler;
+import automorph.transport.http.server.NanoHTTPD.Response.IStatus;
+import automorph.transport.http.server.NanoHTTPD.Response.Status;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

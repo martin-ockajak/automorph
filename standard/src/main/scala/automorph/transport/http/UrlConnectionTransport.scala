@@ -1,9 +1,9 @@
-package automorph.transport.http
+package automorph.transport.http.client
 
 import java.net.{HttpURLConnection, URL}
 import automorph.backend.IdentityBackend.Identity
 import automorph.spi.ClientMessageTransport
-import automorph.transport.http.UrlConnectionTransport.RequestProperties
+import automorph.transport.http.client.UrlConnectionTransport.RequestProperties
 import scala.collection.immutable.ArraySeq
 import automorph.handler.Bytes.inputStreamBytes
 import scala.util.{Try, Using}

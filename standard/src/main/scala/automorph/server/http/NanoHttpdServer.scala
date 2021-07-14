@@ -1,11 +1,11 @@
-package automorph.server.http
+package automorph.transport.http.server
 
 import automorph.Handler
 import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
-import automorph.server.http.NanoHTTPD.Response.Status
-import automorph.server.http.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
+import automorph.transport.http.server.NanoHTTPD.Response.Status
+import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.spi.ServerMessageTransport
 import scala.collection.immutable.ArraySeq
 
@@ -90,7 +90,7 @@ case object NanoHttpdServer {
   type Context = IHTTPSession
 
   /** Request type. */
-  type Response = automorph.server.http.NanoHTTPD.Response
+  type Response = automorph.transport.http.server.NanoHTTPD.Response
 
   /**
    * Create an NanoHTTPD web server using the specified JSON-RPC request ''handler''.

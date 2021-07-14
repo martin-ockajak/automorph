@@ -1,9 +1,9 @@
-package automorph.transport.local
+package automorph.transport.local.client
 
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.protocol.ErrorType.InvalidResponseException
-import automorph.spi.{Backend, Codec, ClientMessageTransport}
+import automorph.spi.{Backend, ClientMessageTransport, Codec}
 import scala.collection.immutable.ArraySeq
 
 /**

@@ -1,7 +1,7 @@
-package automorph.server.http
+package automorph.transport.http.server
 
 import automorph.log.Logging
-import automorph.server.http.UndertowServer.defaultBuilder
+import automorph.transport.http.server.UndertowServer.defaultBuilder
 import automorph.spi.ServerMessageTransport
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.server.handlers.ResponseCodeHandler

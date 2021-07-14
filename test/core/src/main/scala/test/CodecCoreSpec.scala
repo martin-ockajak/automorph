@@ -6,7 +6,7 @@ import automorph.codec.common.UpickleCustom
 import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, UpickleJsonCodec}
 import automorph.codec.messagepack.UpickleMessagePackCodec
 import automorph.spi.ClientMessageTransport
-import automorph.transport.local.HandlerTransport
+import automorph.transport.local.client.HandlerTransport
 import automorph.{Client, Handler}
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
