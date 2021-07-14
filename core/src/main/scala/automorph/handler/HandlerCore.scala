@@ -145,7 +145,7 @@ private[automorph] trait HandlerCore[Node, ExactCodec <: Codec[Node], Effect[_],
         if (redundantArguments.nonEmpty) {
           throw new IllegalArgumentException(s"Redundant arguments: ${redundantArguments.mkString(", ")}")
         } else {
-          parameterNames.map(name => namedArguments.get(name).getOrElse(encodedNone))
+          parameterNames.map(name => namedArguments.getOrElse(name, encodedNone))
         }
       }
     )
