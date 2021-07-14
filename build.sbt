@@ -43,7 +43,7 @@ lazy val root = project.in(file(".")).aggregate(
 // Dependencies
 
 // Basic
-lazy val spi = project.settings(
+lazy val spi = (project in file("common/spi")).settings(
   name := "automorph-spi"
 ).settings(
   libraryDependencies ++= {
@@ -55,19 +55,19 @@ lazy val spi = project.settings(
     }
   }
 )
-lazy val coreMeta = (project in file("core/meta")).dependsOn(
+lazy val meta = (project in file("common/meta")).dependsOn(
   spi
 ).settings(
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-api" % "1.7.31"
   )
 )
-lazy val core = project.dependsOn(
-  coreMeta, testBase % Test
+lazy val core = (project in file("common/core")).dependsOn(
+  meta, testBase % Test
 ).settings(
   name := "automorph-core",
-  Compile / packageBin / mappings ++= (coreMeta / Compile / packageBin / mappings).value,
-  Compile / packageSrc / mappings ++= (coreMeta / Compile / packageSrc / mappings).value
+  Compile / packageBin / mappings ++= (meta / Compile / packageBin / mappings).value,
+  Compile / packageSrc / mappings ++= (meta / Compile / packageSrc / mappings).value
 )
 lazy val standard = project.dependsOn(
   core, testCore % Test
@@ -196,7 +196,7 @@ lazy val tapir = (project in file("transport/tapir")).dependsOn(
 )
 
 // OpenAPI
-lazy val openApi = (project in file("openapi")).dependsOn(
+lazy val openApi = (project in file("common/openapi")).dependsOn(
   core
 ).settings(
   name := "automorph-open-api",
@@ -216,7 +216,7 @@ lazy val default = project.dependsOn(
 )
 
 // Examples
-lazy val examples = project.dependsOn(
+lazy val examples = (project in file("test/examples")).dependsOn(
   default, circe, zio
 ).settings(
   libraryDependencies ++= Seq(
