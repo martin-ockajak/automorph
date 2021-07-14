@@ -6,7 +6,6 @@ import automorph.spi.ServerMessageTransport
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.{Handlers, Undertow}
-import java.lang.Runtime
 import java.net.InetSocketAddress
 import scala.jdk.CollectionConverters.ListHasAsScala
 
@@ -67,7 +66,7 @@ case object UndertowServer {
    * - Worker threads: number of CPU cores
    * - HTTP listener port: 8080
    */
-  val defaultBuilder = Undertow.builder()
+  val defaultBuilder: Undertow.Builder = Undertow.builder()
     .setIoThreads(Runtime.getRuntime.availableProcessors * 2)
     .setWorkerThreads(Runtime.getRuntime.availableProcessors)
 }

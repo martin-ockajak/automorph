@@ -12,7 +12,7 @@ import scala.collection.immutable.ArraySeq
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-trait ClientMessageTransport[Effect[_], Context] extends MessageTransport[Effect, Context] {
+trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
 
   /**
    * Sends a ''request'' to a remote endpoint and retrieves the ''response''.
