@@ -1,7 +1,7 @@
 package test
 
 import automorph.protocol.ErrorType.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
-import automorph.spi.{EffectSystem, MessageFormat}
+import automorph.spi.EffectSystem
 import automorph.{Client, Handler}
 import org.scalacheck.Arbitrary
 import scala.util.Try
@@ -25,7 +25,7 @@ trait CoreSpec extends BaseSpec {
 
   case class FormatFixture(
     format: Class[_],
-    client: Client[_, _ <: MessageFormat[_], Effect, Context],
+    client: Client.AnyFormat[Effect, Context],
     handler: Handler.AnyFormat[Effect, Context],
     simpleApis: Seq[SimpleApiType],
     complexApis: Seq[ComplexApiType],

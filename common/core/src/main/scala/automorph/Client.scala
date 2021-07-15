@@ -31,7 +31,9 @@ final case class Client[Node, ActualFormat <: MessageFormat[Node], Effect[_], Co
   protected val errorToException: (Int, String) => Throwable = defaultErrorToException
 ) extends ClientBind[Node, ActualFormat, Effect, Context] with CannotEqual {
 
+  /** This client type. */
   type ThisClient = Client[Node, ActualFormat, Effect, Context]
+  /** Named method proxy type. */
   type NamedMethod = NamedMethodProxy[Node, ActualFormat, Effect, Context]
 
   val core: ClientCore[Node, ActualFormat, Effect, Context] = ClientCore(format, system, transport, errorToException)
@@ -65,6 +67,9 @@ final case class Client[Node, ActualFormat <: MessageFormat[Node], Effect[_], Co
 }
 
 case object Client {
+
+  /** Handler with arbitrary format. */
+  type AnyFormat[Effect[_], Context] = Client[_, _, Effect, Context]
 
   /**
    * Creates a JSON-RPC client with empty request context and specified ''format'', ''system'' and ''transport'' plugins.

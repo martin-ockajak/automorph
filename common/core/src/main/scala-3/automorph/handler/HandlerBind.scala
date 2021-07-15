@@ -15,6 +15,7 @@ import automorph.spi.{EffectSystem, MessageFormat}
 private[automorph] trait HandlerBind[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context]:
   this: Handler[Node, ActualFormat, Effect, Context] =>
 
+  /** This handler type. */
   type ThisHandler = Handler[Node, ActualFormat, Effect, Context]
 
   /**

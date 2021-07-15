@@ -10,7 +10,9 @@ case class NamedMethodProxy[Node, ActualFormat <: MessageFormat[Node], Effect[_]
   private val encodedArguments: Seq[Node]
 ) extends CannotEqual:
 
+  /** Positional method proxy type. */
   type PositionalMethod = PositionalMethodProxy[Node, ActualFormat, Effect, Context]
+  /** Named method proxy type. */
   type NamedMethod = NamedMethodProxy[Node, ActualFormat, Effect, Context]
 
   /**
