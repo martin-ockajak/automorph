@@ -10,7 +10,7 @@ import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFix
 import scala.collection.immutable.ArraySeq
 
 /**
- * JSON-RPC server based on NanoHTTPD web server using HTTP as message transport protocol.
+ * NanoHTTPD web server server transport using HTTP as message transport protocol.
  *
  * @see [[https://github.com/NanoHttpd/nanohttpd Documentation]]
  * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]

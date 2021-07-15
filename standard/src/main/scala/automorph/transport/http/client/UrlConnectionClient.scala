@@ -3,20 +3,20 @@ package automorph.transport.http.client
 import automorph.handler.Bytes.inputStreamBytes
 import automorph.spi.ClientMessageTransport
 import automorph.system.IdentityBackend.Identity
-import automorph.transport.http.client.UrlConnectionTransport.RequestProperties
+import automorph.transport.http.client.UrlConnectionClient.RequestProperties
 import java.net.{HttpURLConnection, URL}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Try, Using}
 
 /**
- * URL connection transport plugin using HTTP as message transport protocol.
+ * URL connection client transport plugin using HTTP as message transport protocol.
  *
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @constructor Creates an URL connection transport plugin using HTTP as message transport protocol.
  * @param url HTTP endpoint URL
  * @param method HTTP method
  */
-final case class UrlConnectionTransport(
+final case class UrlConnectionClient(
   url: URL,
   method: String
 ) extends ClientMessageTransport[Identity, RequestProperties] {
@@ -92,7 +92,7 @@ final case class UrlConnectionTransport(
   }
 }
 
-case object UrlConnectionTransport {
+case object UrlConnectionClient {
 
   /** Request context type. */
   type Context = RequestProperties

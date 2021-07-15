@@ -6,13 +6,13 @@ import automorph.Handler
 import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
-import automorph.transport.http.endpoint.JettyJsonRpcServlet.defaultErrorStatus
+import automorph.transport.http.endpoint.JettyServletEndpoint.defaultErrorStatus
 import automorph.spi.{MessageFormat, EndpointMessageTransport}
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
 
 /**
- * JSON-RPC servlet for Jetty web server using HTTP as message transport protocol.
+ * Jetty web server endpoint transport using HTTP as message transport protocol.
  *
  * The servlet interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
  * The response returned by the JSON-RPC handler is used as HTTP response body.
@@ -26,7 +26,7 @@ import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
  * @tparam Node message node type
  * @tparam Effect effect type
  */
-final case class JettyJsonRpcServlet[Node, Effect[_]](
+final case class JettyServletEndpoint[Node, Effect[_]](
   handler: Handler[Node, _ <: MessageFormat[Node], Effect, HttpServletRequest],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
@@ -82,7 +82,7 @@ final case class JettyJsonRpcServlet[Node, Effect[_]](
   }
 }
 
-case object JettyJsonRpcServlet {
+case object JettyServletEndpoint {
   /** Request context type. */
   type Context = HttpServletRequest
 

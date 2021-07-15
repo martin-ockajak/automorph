@@ -11,14 +11,14 @@ import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode}
 
 /**
- * JSON-RPC endpoint for Tapir endpoint generator using HTTP as message transport protocol.
+ * Tapir endpoint generator endpoint transport using HTTP as message transport protocol.
  *
  * The endpoint interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
  * The response returned by the JSON-RPC handler is used as HTTP response body.
  *
  * @see [[https://tapir.softwaremill.com Documentation]]
  */
-case object TapirJsonRpcEndpoint extends Logging with EndpointMessageTransport {
+case object TapirEndpoint extends Logging with EndpointMessageTransport {
   /** Request context type. */
   type Context = Request
 

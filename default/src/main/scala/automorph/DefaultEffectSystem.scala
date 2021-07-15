@@ -5,7 +5,7 @@ import automorph.system.{FutureBackend, IdentityBackend}
 import automorph.spi.EffectSystem
 import scala.concurrent.{ExecutionContext, Future}
 
-case object DefaultBackend {
+case object DefaultEffectSystem {
   /** Default synchronous effect type. */
   type SyncEffect[T] = Future[T]
 

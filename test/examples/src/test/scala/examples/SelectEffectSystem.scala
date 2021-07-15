@@ -14,15 +14,15 @@ object SelectEffectSystem extends App {
   val api = new Api()
 
   // Custom effectful computation backend plugin
-  val backend = ZioBackend[Any]()
+  val system = ZioBackend[Any]()
   val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
 
   // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val server = automorph.DefaultHttpServer[ZioBackend.TaskEffect](backend, runEffect, _.bind(api), 80, "/api")
+  val server = automorph.DefaultHttpServer[ZioBackend.TaskEffect](system, runEffect, _.bind(api), 80, "/api")
 
   // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val sttpBackend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
-  val client = automorph.DefaultHttpClient("http://localhost/api", "POST", backend, sttpBackend)
+  val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
+  val client = automorph.DefaultHttpClient("http://localhost/api", "POST", system, backend)
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api

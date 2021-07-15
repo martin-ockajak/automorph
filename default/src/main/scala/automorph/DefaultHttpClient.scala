@@ -3,7 +3,7 @@ package automorph
 import automorph.system.IdentityBackend.Identity
 import automorph.codec.json.UpickleJsonCodec
 import automorph.spi.{EffectSystem, ClientMessageTransport}
-import automorph.transport.http.client.SttpTransport
+import automorph.transport.http.client.SttpClient
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
@@ -15,10 +15,10 @@ case object DefaultHttpClient {
    *
    * @tparam Effect effect type
    */
-  type Type[Effect[_]] = Client[DefaultCodec.Node, DefaultCodec.Type, Effect, SttpTransport.Context]
+  type Type[Effect[_]] = Client[DefaultMessageFormat.Node, DefaultMessageFormat.Type, Effect, SttpClient.Context]
 
   /** Request context type. */
-  type Context = SttpTransport.Context
+  type Context = SttpClient.Context
 
   /**
    * Creates a default JSON-RPC client using HTTP as message transport protocol with specified ''backend'' plugin.
@@ -35,7 +35,7 @@ case object DefaultHttpClient {
   def apply[Effect[_], RequestContext](
     backend: EffectSystem[Effect],
     transport: ClientMessageTransport[Effect, RequestContext]
-  ): Client[DefaultCodec.Node, DefaultCodec.Type, Effect, RequestContext] = Client(UpickleJsonCodec(), backend, transport)
+  ): Client[DefaultMessageFormat.Node, DefaultMessageFormat.Type, Effect, RequestContext] = Client(UpickleJsonCodec(), backend, transport)
 
   /**
    * Creates a default JSON-RPC client using HTTP as message transport protocol with specified ''backend'' plugin.
@@ -55,7 +55,7 @@ case object DefaultHttpClient {
     method: String,
     backend: EffectSystem[Effect],
     sttpBackend: SttpBackend[Effect, _]
-  ): Type[Effect] = DefaultHttpClient(backend, SttpTransport(new URL(url), method, backend, sttpBackend))
+  ): Type[Effect] = DefaultHttpClient(backend, SttpClient(new URL(url), method, backend, sttpBackend))
 
   /**
    * Creates a default asynchronous JSON-RPC client using HTTP as message transport protocol and 'Future' as an effect type.
@@ -71,7 +71,7 @@ case object DefaultHttpClient {
    */
   def async(url: String, method: String)(implicit
     executionContext: ExecutionContext
-  ): Type[Future] = DefaultHttpClient(url, method, DefaultBackend.async, AsyncHttpClientFutureBackend())
+  ): Type[Future] = DefaultHttpClient(url, method, DefaultEffectSystem.async, AsyncHttpClientFutureBackend())
 
   /**
    * Creates a default asynchronous JSON-RPC client using HTTP as message transport protocol and identity as an effect type.
@@ -86,6 +86,6 @@ case object DefaultHttpClient {
    */
   def sync(url: String, method: String): Type[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
-    DefaultHttpClient(url, method, DefaultBackend.sync, HttpURLConnectionBackend())
+    DefaultHttpClient(url, method, DefaultEffectSystem.sync, HttpURLConnectionBackend())
   }
 }

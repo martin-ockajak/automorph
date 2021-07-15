@@ -1,7 +1,7 @@
 package automorph.transport.http.client
 
 import automorph.spi.{EffectSystem, ClientMessageTransport}
-import automorph.transport.http.client.SttpTransport.RequestProperties
+import automorph.transport.http.client.SttpClient.RequestProperties
 import java.io.IOException
 import java.net.URL
 import scala.collection.immutable.ArraySeq
@@ -9,7 +9,7 @@ import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArray
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
- * STTP transport plugin using HTTP as message transport protocol with the specified STTP backend.
+ * STTP client transport plugin using HTTP as message transport protocol with the specified STTP backend.
  *
  * @see [[https://sttp.softwaremill.com/en/latest/ Documentation]]
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
@@ -20,7 +20,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @param backend STTP backend
  * @tparam Effect effect type
  */
-final case class SttpTransport[Effect[_]](
+final case class SttpClient[Effect[_]](
   url: URL,
   method: String,
   system: EffectSystem[Effect],
@@ -65,7 +65,7 @@ final case class SttpTransport[Effect[_]](
   }
 }
 
-case object SttpTransport {
+case object SttpClient {
 
   /** Request context type. */
   type Context = RequestProperties

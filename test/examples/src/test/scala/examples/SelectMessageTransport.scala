@@ -1,9 +1,9 @@
 package examples
 
 import automorph.transport.http.server.NanoHttpdServer
-import automorph.transport.http.client.UrlConnectionTransport
+import automorph.transport.http.client.UrlConnectionClient
 import automorph.system.IdentityBackend.Identity
-import automorph.{Client, DefaultBackend, DefaultCodec, Handler}
+import automorph.{Client, DefaultEffectSystem, DefaultMessageFormat, Handler}
 import java.net.URL
 
 object SelectMessageTransport extends App {
@@ -15,16 +15,16 @@ object SelectMessageTransport extends App {
   val api = new Api()
 
   // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val backend = DefaultBackend.sync
+  val system = DefaultEffectSystem.sync
   val runEffect = (effect: Identity[NanoHttpdServer.Response]) => effect
-  val codec = DefaultCodec()
-  val handler = Handler[DefaultCodec.Node, codec.type, Identity, NanoHttpdServer.Context](codec, backend)
+  val format = DefaultMessageFormat()
+  val handler = Handler[DefaultMessageFormat.Node, format.type, Identity, NanoHttpdServer.Context](format, system)
   val server = NanoHttpdServer(handler.bind(api), runEffect, 80)
 
   // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val transport = UrlConnectionTransport(new URL("http://localhost/api"), "POST")
-  val client: Client[DefaultCodec.Node, codec.type, Identity, UrlConnectionTransport.Context] =
-    Client(codec, backend, transport)
+  val clientTransport = UrlConnectionClient(new URL("http://localhost/api"), "POST")
+  val client: Client[DefaultMessageFormat.Node, format.type, Identity, UrlConnectionClient.Context] =
+    Client(format, system, clientTransport)
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api

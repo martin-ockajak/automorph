@@ -7,7 +7,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 case object DefaultHandler {
   /** Default requet handler type. */
-  type Type[Effect[_], Context] = Handler[DefaultCodec.Node, DefaultCodec.Type, Effect, Context]
+  type Type[Effect[_], Context] = Handler[DefaultMessageFormat.Node, DefaultMessageFormat.Type, Effect, Context]
 
   /**
    * Creates a default request handler with specified request `Context` type and specified ''backend'' plugin and.
@@ -21,7 +21,7 @@ case object DefaultHandler {
    * @return request handler
    */
   def apply[Effect[_], Context](backend: EffectSystem[Effect]): Type[Effect, Context] =
-    Handler(DefaultCodec(), backend)
+    Handler(DefaultMessageFormat(), backend)
 
   /**
    * Creates a default asynchronous request handler with specified request `Context` type and 'Future' as an effect type.
@@ -33,7 +33,7 @@ case object DefaultHandler {
    * @return asynchronous request handler
    */
   def async[Context]()(implicit executionContext: ExecutionContext): Type[Future, Context] =
-    Handler(DefaultCodec(), DefaultBackend.async)
+    Handler(DefaultMessageFormat(), DefaultEffectSystem.async)
 
   /**
    * Creates a default synchronous request handler with specified request `Context` type and identity as an effect type.
@@ -43,7 +43,7 @@ case object DefaultHandler {
    * @see [[https://www.jsonrpc.org/specification protocol specification]]
    * @return synchronous request handler
    */
-  def sync[Context](): Type[Identity, Context] = Handler(DefaultCodec(), DefaultBackend.sync)
+  def sync[Context](): Type[Identity, Context] = Handler(DefaultMessageFormat(), DefaultEffectSystem.sync)
 
   /**
    * Creates a default request handler with empty request context and specified ''backend'' plugin.
@@ -56,7 +56,7 @@ case object DefaultHandler {
    * @return request handler
    */
   def withoutContext[Effect[_]](backend: EffectSystem[Effect]): Type[Effect, EmptyContext.Value] =
-    Handler.withoutContext(DefaultCodec(), backend)
+    Handler.withoutContext(DefaultMessageFormat(), backend)
 
   /**
    * Creates a default asynchronous request handler with empty request context and 'Future' as an effect type.
@@ -68,7 +68,7 @@ case object DefaultHandler {
    * @return asynchronous request handler
    */
   def asyncWithoutContext()(implicit executionContext: ExecutionContext): Type[Future, EmptyContext.Value] =
-    Handler.withoutContext(DefaultCodec(), DefaultBackend.async)
+    Handler.withoutContext(DefaultMessageFormat(), DefaultEffectSystem.async)
 
   /**
    * Creates a default synchronous request handler with empty request context and identity as an effect type.
@@ -79,5 +79,5 @@ case object DefaultHandler {
    * @return asynchronous request handler
    */
   def syncWithoutContext(): Type[Identity, EmptyContext.Value] =
-    Handler.withoutContext(DefaultCodec(), DefaultBackend.sync)
+    Handler.withoutContext(DefaultMessageFormat(), DefaultEffectSystem.sync)
 }

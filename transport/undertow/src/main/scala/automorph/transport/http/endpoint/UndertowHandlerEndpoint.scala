@@ -7,13 +7,13 @@ import automorph.Handler
 import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
-import automorph.transport.http.endpoint.UndertowJsonRpcHandler.defaultErrorStatus
+import automorph.transport.http.endpoint.UndertowHandlerEndpoint.defaultErrorStatus
 import automorph.spi.EndpointMessageTransport
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
 /**
- * JSON-RPC handler for Undertow web server using HTTP as message transport protocol.
+ * Undertow web server endpoint transport using HTTP as message transport protocol.
  *
  * The handler interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
  * The response returned by the JSON-RPC handler is used as HTTP response body.
@@ -26,7 +26,7 @@ import scala.util.Try
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
  * @tparam Effect effect type
  */
-final case class UndertowJsonRpcHandler[Effect[_]](
+final case class UndertowHandlerEndpoint[Effect[_]](
   handler: Handler.AnyCodec[Effect, HttpServerExchange],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
@@ -101,7 +101,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
   }
 }
 
-case object UndertowJsonRpcHandler {
+case object UndertowHandlerEndpoint {
   /** Request context type. */
   type Context = HttpServerExchange
 

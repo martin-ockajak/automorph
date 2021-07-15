@@ -8,12 +8,12 @@ import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.protocol.ResponseError
 import automorph.log.Logging
-import automorph.transport.http.endpoint.FinagleJsonRpcService.defaultErrorStatus
+import automorph.transport.http.endpoint.FinagleServiceEndpoint.defaultErrorStatus
 import automorph.spi.{MessageFormat, EndpointMessageTransport}
 import automorph.protocol.ErrorType
 
 /**
- * JSON-RPC service for Finagle RPC system using HTTP as message transport protocol.
+ * Finagle RPC system endpoint transport using HTTP as message transport protocol.
  *
  * The service interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
  * The response returned by the JSON-RPC handler is used as HTTP response body.
@@ -27,7 +27,7 @@ import automorph.protocol.ErrorType
  * @tparam Node message node type
  * @tparam Effect effect type
  */
-final case class FinagleJsonRpcService[Node, Effect[_]](
+final case class FinagleServiceEndpoint[Node, Effect[_]](
   handler: Handler[Node, _ <: MessageFormat[Node], Effect, Request],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Status = defaultErrorStatus
@@ -89,7 +89,7 @@ final case class FinagleJsonRpcService[Node, Effect[_]](
   }
 }
 
-case object FinagleJsonRpcService {
+case object FinagleServiceEndpoint {
   /** Request context type. */
   type Context = Request
 

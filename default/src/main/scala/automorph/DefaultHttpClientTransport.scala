@@ -2,22 +2,22 @@ package automorph
 
 import automorph.system.IdentityBackend.Identity
 import automorph.spi.{EffectSystem, ClientMessageTransport}
-import automorph.transport.http.client.SttpTransport
+import automorph.transport.http.client.SttpClient
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
 import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
 import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 
-case object DefaultHttpTransport {
+case object DefaultHttpClientTransport {
   /**
    * Default message transport type.
    *
    * @tparam Effect effect type
    */
-  type Type[Effect[_]] = ClientMessageTransport[Effect, SttpTransport.Context]
+  type Type[Effect[_]] = ClientMessageTransport[Effect, SttpClient.Context]
 
   /** Request context type. */
-  type Context = SttpTransport.Context
+  type Context = SttpClient.Context
 
   /**
    * Creates a default message transport protocol plugin using HTTP as transport protocol.
@@ -37,7 +37,7 @@ case object DefaultHttpTransport {
     method: String,
     backend: EffectSystem[Effect],
     sttpBackend: SttpBackend[Effect, _]
-  ): Type[Effect] = SttpTransport(new URL(url), method, backend, sttpBackend)
+  ): Type[Effect] = SttpClient(new URL(url), method, backend, sttpBackend)
 
   /**
    * Creates a default message transport protocol plugin using HTTP  as transport protocol and 'Future' as an effect type.
@@ -53,7 +53,7 @@ case object DefaultHttpTransport {
    */
   def async(url: String, method: String)(implicit
     executionContext: ExecutionContext
-  ): Type[Future] = DefaultHttpTransport(url, method, DefaultBackend.async, AsyncHttpClientFutureBackend())
+  ): Type[Future] = DefaultHttpClientTransport(url, method, DefaultEffectSystem.async, AsyncHttpClientFutureBackend())
 
   /**
    * Creates a default message transport protocol plugin using HTTP  as transport protocol and identity as an effect type.
@@ -68,6 +68,6 @@ case object DefaultHttpTransport {
    */
   def sync(url: String, method: String): Type[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
-    DefaultHttpTransport(url, method, DefaultBackend.sync, HttpURLConnectionBackend())
+    DefaultHttpClientTransport(url, method, DefaultEffectSystem.sync, HttpURLConnectionBackend())
   }
 }

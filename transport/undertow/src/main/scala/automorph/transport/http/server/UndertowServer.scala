@@ -10,7 +10,7 @@ import java.net.InetSocketAddress
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
- * JSON-RPC server based on Undertow web server using HTTP as message transport protocol.
+ * Undertow web server server transport using HTTP as message transport protocol.
  *
  * @see [[https://undertow.io/ Documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]

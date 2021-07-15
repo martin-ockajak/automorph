@@ -3,7 +3,7 @@ package automorph
 import automorph.codec.common.DefaultUpickleCustom
 import automorph.codec.json.UpickleJsonCodec
 
-case object DefaultCodec {
+case object DefaultMessageFormat {
 
   /** Default message node type. */
   type Node = UpickleJsonCodec.Node

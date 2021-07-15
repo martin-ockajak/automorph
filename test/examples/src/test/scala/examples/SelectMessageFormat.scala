@@ -1,9 +1,9 @@
 package examples
 
 import automorph.codec.json.CirceJsonCodec
-import automorph.transport.http.endpoint.UndertowJsonRpcHandler
+import automorph.transport.http.endpoint.UndertowHandlerEndpoint
 import automorph.transport.http.server.UndertowServer
-import automorph.{Client, DefaultBackend, DefaultHttpTransport, Handler}
+import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, Handler}
 import io.circe.generic.auto._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -18,16 +18,16 @@ object SelectMessageFormat extends App {
   val api = new Api()
 
   // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val backend = DefaultBackend.async
+  val system = DefaultEffectSystem.async
   val runEffect = (effect: Future[_]) => effect
-  val codec = CirceJsonCodec()
-  val handler = Handler[CirceJsonCodec.Node, codec.type, Future, UndertowJsonRpcHandler.Context](codec, backend)
-  val server = UndertowServer(UndertowJsonRpcHandler(handler.bind(api), runEffect), 80, "/api")
+  val format = CirceJsonCodec()
+  val handler = Handler[CirceJsonCodec.Node, format.type, Future, UndertowHandlerEndpoint.Context](format, system)
+  val server = UndertowServer(UndertowHandlerEndpoint(handler.bind(api), runEffect), 80, "/api")
 
   // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val clientTransport = DefaultHttpTransport.async("http://localhost/api", "POST")
-  val client: Client[CirceJsonCodec.Node, codec.type, Future, DefaultHttpTransport.Context] =
-    Client(codec, backend, clientTransport)
+  val clientTransport = DefaultHttpClientTransport.async("http://localhost/api", "POST")
+  val client: Client[CirceJsonCodec.Node, format.type, Future, DefaultHttpClientTransport.Context] =
+    Client(format, system, clientTransport)
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api

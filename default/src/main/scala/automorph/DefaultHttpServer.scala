@@ -2,9 +2,9 @@ package automorph
 
 import io.undertow.Undertow
 import automorph.system.IdentityBackend.Identity
-import automorph.transport.http.endpoint.UndertowJsonRpcHandler.defaultErrorStatus
+import automorph.transport.http.endpoint.UndertowHandlerEndpoint.defaultErrorStatus
 import automorph.transport.http.server.UndertowServer.defaultBuilder
-import automorph.transport.http.endpoint.UndertowJsonRpcHandler
+import automorph.transport.http.endpoint.UndertowHandlerEndpoint
 import automorph.transport.http.server.UndertowServer
 import automorph.spi.EffectSystem
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,7 +52,7 @@ case object DefaultHttpServer {
     errorStatus: Int => Int = defaultErrorStatus
   ): Type = {
     val handler = bindApis(DefaultHandler[Effect, UndertowServer.Context](backend))
-    UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
+    UndertowServer(UndertowHandlerEndpoint(handler, runEffect, errorStatus), port, urlPath, builder)
   }
 
   /**
@@ -80,7 +80,7 @@ case object DefaultHttpServer {
     Seq(executionContext)
     val handler = bindApis(DefaultHandler.async())
     val runEffect = (_: Future[Any]) => ()
-    UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
+    UndertowServer(UndertowHandlerEndpoint(handler, runEffect, errorStatus), port, urlPath, builder)
   }
 
   /**
@@ -106,6 +106,6 @@ case object DefaultHttpServer {
   ): Type = {
     val handler = bindApis(DefaultHandler.sync())
     val runEffect = (_: Identity[Any]) => ()
-    UndertowServer(UndertowJsonRpcHandler(handler, runEffect, errorStatus), port, urlPath, builder)
+    UndertowServer(UndertowHandlerEndpoint(handler, runEffect, errorStatus), port, urlPath, builder)
   }
 }
