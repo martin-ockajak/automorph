@@ -12,18 +12,18 @@ import scala.util.{Random, Try}
 /**
  * JSON-RPC client core logic.
  *
- * @param codec structured message format codec plugin
- * @param backend effect system plugin
- * @param transport message transport protocol plugin
+ * @param format message format plugin
+ * @param system effect system plugin
+ * @param transport message transport plugin
  * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @tparam Node message node type
- * @tparam ActualCodec message codec plugin type
+ * @tparam ActualFormat message format plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-case class ClientCore[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context] private[automorph] (
-  codec: ActualCodec,
-  private val backend: EffectSystem[Effect],
+case class ClientCore[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context] private[automorph] (
+  format: ActualFormat,
+  private val system: EffectSystem[Effect],
   private val transport: ClientMessageTransport[Effect, Context],
   private val errorToException: (Int, String) => Throwable
 ) extends Logging {
@@ -54,13 +54,13 @@ case class ClientCore[Node, ActualCodec <: MessageFormat[Node], Effect[_], Conte
     val id = Some(Right[BigDecimal, String](Math.abs(random.nextLong()).toString))
     val formedRequest = Request(id, methodName, argumentNodes).formed
     logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
-    backend.flatMap(
+    system.flatMap(
       // Serialize request
       serialize(formedRequest),
       (rawRequest: ArraySeq.ofByte) =>
         // Send request
-        backend.flatMap(
-          transport.call(rawRequest, codec.mediaType, context),
+        system.flatMap(
+          transport.call(rawRequest, format.mediaType, context),
           // Process response
           rawResponse => processResponse[R](rawResponse, formedRequest, decodeResultNode)
         )
@@ -86,11 +86,11 @@ case class ClientCore[Node, ActualCodec <: MessageFormat[Node], Effect[_], Conte
   ): Effect[Unit] = {
     val argumentNodes = createArgumentNodes(argumentNames, encodedArguments)
     val formedRequest = Request(None, methodName, argumentNodes).formed
-    backend.flatMap(
+    system.flatMap(
       // Serialize request
       serialize(formedRequest),
       // Send request
-      (rawRequest: ArraySeq.ofByte) => transport.notify(rawRequest, codec.mediaType, context)
+      (rawRequest: ArraySeq.ofByte) => transport.notify(rawRequest, format.mediaType, context)
     )
   }
 
@@ -121,11 +121,11 @@ case class ClientCore[Node, ActualCodec <: MessageFormat[Node], Effect[_], Conte
     decodeResult: Node => R
   ): Effect[R] =
     // Deserialize response
-    Try(codec.deserialize(rawResponse)).pureFold(
+    Try(format.deserialize(rawResponse)).pureFold(
       error => raiseError(ParseErrorException("Invalid response format", error), formedRequest),
       formedResponse => {
         // Validate response
-        logger.trace(s"Received JSON-RPC response:\n${codec.format(formedResponse)}")
+        logger.trace(s"Received JSON-RPC response:\n${format.format(formedResponse)}")
         Try(Response(formedResponse)).pureFold(
           error => raiseError(error, formedRequest),
           validResponse =>
@@ -137,7 +137,7 @@ case class ClientCore[Node, ActualCodec <: MessageFormat[Node], Effect[_], Conte
                   error => raiseError(InvalidResponseException("Invalid result", error), formedRequest),
                   result => {
                     logger.info(s"Performed JSON-RPC request", formedRequest.properties)
-                    backend.pure(result)
+                    system.pure(result)
                   }
                 )
             )
@@ -152,10 +152,10 @@ case class ClientCore[Node, ActualCodec <: MessageFormat[Node], Effect[_], Conte
    * @return serialized response
    */
   private def serialize(formedRequest: Message[Node]): Effect[ArraySeq.ofByte] = {
-    logger.trace(s"Sending JSON-RPC request:\n${codec.format(formedRequest)}")
-    Try(codec.serialize(formedRequest)).pureFold(
+    logger.trace(s"Sending JSON-RPC request:\n${format.format(formedRequest)}")
+    Try(format.serialize(formedRequest)).pureFold(
       error => raiseError(ParseErrorException("Invalid request format", error), formedRequest),
-      message => backend.pure(message)
+      message => system.pure(message)
     )
   }
 
@@ -169,6 +169,6 @@ case class ClientCore[Node, ActualCodec <: MessageFormat[Node], Effect[_], Conte
    */
   private def raiseError[T](error: Throwable, requestMessage: Message[Node]): Effect[T] = {
     logger.error(s"Failed to perform JSON-RPC request", error, requestMessage.properties)
-    backend.failed(error)
+    system.failed(error)
   }
 }

@@ -17,32 +17,32 @@ private[automorph] case object HandlerBindings:
   /**
    * Generates handler bindings for all valid public methods of an API type.
    *
-   * @param codec message format codec plugin
-   * @param backend effect system plugin
+   * @param format message format plugin
+   * @param system effect system plugin
    * @param api API instance
    * @tparam Node message node type
-   * @tparam ActualMessageFormat message format codec type
+   * @tparam ActualFormat message format plugin type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to handler method bindings
    */
-  inline def generate[Node, ActualMessageFormat <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
-    codec: ActualMessageFormat,
-    backend: EffectSystem[Effect],
+  inline def generate[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
+    format: ActualFormat,
+    system: EffectSystem[Effect],
     api: Api
   ): Map[String, HandlerBinding[Node, Effect, Context]] =
-    ${ generateMacro[Node, ActualMessageFormat, Effect, Context, Api]('codec, 'backend, 'api) }
+    ${ generateMacro[Node, ActualFormat, Effect, Context, Api]('format, 'system, 'api) }
 
   private def generateMacro[
     Node: Type,
-    ActualMessageFormat <: MessageFormat[Node]: Type,
+    ActualFormat <: MessageFormat[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
   ](
-    codec: Expr[ActualMessageFormat],
-    backend: Expr[EffectSystem[Effect]],
+    format: Expr[ActualFormat],
+    system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   )(using quotes: Quotes): Expr[Map[String, HandlerBinding[Node, Effect, Context]]] =
     val ref = Reflection(quotes)
@@ -59,7 +59,7 @@ private[automorph] case object HandlerBindings:
     val handlerBindings = Expr.ofSeq(validMethods.map { method =>
       '{
         ${ Expr(method.name) } -> ${
-          generateBinding[Node, ActualMessageFormat, Effect, Context, Api](ref)(method, codec, backend, api)
+          generateBinding[Node, ActualFormat, Effect, Context, Api](ref)(method, format, system, api)
         }
       }
     })
@@ -67,19 +67,19 @@ private[automorph] case object HandlerBindings:
 
   private def generateBinding[
     Node: Type,
-    ActualMessageFormat <: MessageFormat[Node]: Type,
+    ActualFormat <: MessageFormat[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
   ](ref: Reflection)(
     method: ref.RefMethod,
-    codec: Expr[ActualMessageFormat],
-    backend: Expr[EffectSystem[Effect]],
+    format: Expr[ActualFormat],
+    system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[HandlerBinding[Node, Effect, Context]] =
     given Quotes = ref.q
 
-    val invoke = generateInvoke[Node, ActualMessageFormat, Effect, Context, Api](ref)(method, codec, backend, api)
+    val invoke = generateInvoke[Node, ActualFormat, Effect, Context, Api](ref)(method, format, system, api)
     logBoundMethod[Api](ref)(method, invoke)
     '{
       HandlerBinding(
@@ -91,14 +91,14 @@ private[automorph] case object HandlerBindings:
 
   private def generateInvoke[
     Node: Type,
-    ActualMessageFormat <: MessageFormat[Node]: Type,
+    ActualFormat <: MessageFormat[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
   ](ref: Reflection)(
     method: ref.RefMethod,
-    codec: Expr[ActualMessageFormat],
-    backend: Expr[EffectSystem[Effect]],
+    format: Expr[ActualFormat],
+    system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
     import ref.q.reflect.{asTerm, Term, TypeRepr}
@@ -116,12 +116,12 @@ private[automorph] case object HandlerBindings:
       ${
         // Create the method argument lists by decoding corresponding argument nodes into values
         //   List(List(
-        //     (Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
+        //     (Try(format.decode[Parameter0Type](argumentNodes(0))) match {
         //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
         //       case result => result
         //     }).get
         //     ...
-        //     (Try(codec.decode[ParameterNType](argumentNodes(N))) match {
+        //     (Try(format.decode[ParameterNType](argumentNodes(N))) match {
         //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
         //       case result => result
         //     }).get
@@ -134,7 +134,7 @@ private[automorph] case object HandlerBindings:
               'context.asTerm
             else
               val decodeArguments = List(List(argumentNode.asTerm))
-              val decodeCall = call(ref.q, codec.asTerm, "decode", List(parameter.dataType), decodeArguments)
+              val decodeCall = call(ref.q, format.asTerm, "decode", List(parameter.dataType), decodeArguments)
               parameter.dataType.asType match
                 case '[argumentType] => '{
                     (Try(${ decodeCall.asExprOf[argumentType] }) match
@@ -151,19 +151,19 @@ private[automorph] case object HandlerBindings:
         val apiMethodCall = call(ref.q, api.asTerm, method.name, List.empty, arguments)
 
         // Create encode result function
-        //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
+        //   (result: ResultValueType) => Node = format.encode[ResultValueType](result)
         val resultValueType = unwrapType[Effect](ref.q)(method.resultType).dealias
         val encodeResult = resultValueType.asType match
           case '[resultType] => '{ (result: resultType) =>
               ${
-                call(ref.q, codec.asTerm, "encode", List(resultValueType), List(List('{ result }.asTerm))).asExprOf[Node]
+                call(ref.q, format.asTerm, "encode", List(resultValueType), List(List('{ result }.asTerm))).asExprOf[Node]
               }
             }
 
         // Create the effect mapping call using the method call and the encode result function
-        //   backend.map(methodCall, encodeResult): Effect[Node]
+        //   system.map(methodCall, encodeResult): Effect[Node]
         val mapArguments = List(List(apiMethodCall, encodeResult.asTerm))
-        call(ref.q, backend.asTerm, "map", List(resultValueType, TypeRepr.of[Node]), mapArguments).asExprOf[Effect[Node]]
+        call(ref.q, system.asTerm, "map", List(resultValueType, TypeRepr.of[Node]), mapArguments).asExprOf[Effect[Node]]
       }
     }
 

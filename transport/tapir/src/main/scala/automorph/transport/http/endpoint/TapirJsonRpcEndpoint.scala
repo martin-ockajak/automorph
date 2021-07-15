@@ -45,9 +45,9 @@ case object TapirJsonRpcEndpoint extends Logging with EndpointMessageTransport {
     method: Method,
     errorStatus: Int => StatusCode = defaultErrorStatus
   ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {
-    val system = handler.backend
-    val contentType = Header.contentType(MediaType.parse(handler.codec.mediaType).getOrElse {
-      throw new IllegalArgumentException(s"Invalid content type: ${handler.codec.mediaType}")
+    val system = handler.system
+    val contentType = Header.contentType(MediaType.parse(handler.format.mediaType).getOrElse {
+      throw new IllegalArgumentException(s"Invalid content type: ${handler.format.mediaType}")
     })
     endpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(cookies).in(clientIp)
       .out(byteArrayBody).out(header(contentType)).out(statusCode)

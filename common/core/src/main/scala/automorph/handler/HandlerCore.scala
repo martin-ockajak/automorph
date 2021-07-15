@@ -13,12 +13,12 @@ import scala.util.Try
  * JSON-RPC request handler core logic.
  *
  * @tparam Node message node type
- * @tparam ActualCodec message codec plugin type
+ * @tparam ActualFormat message format plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerCore[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context] {
-  this: Handler[Node, ActualCodec, Effect, Context] =>
+private[automorph] trait HandlerCore[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context] {
+  this: Handler[Node, ActualFormat, Effect, Context] =>
 
   private val unknownId = "[unknown]"
 
@@ -33,7 +33,7 @@ private[automorph] trait HandlerCore[Node, ActualCodec <: MessageFormat[Node], E
   def processRequest[Data: Bytes](request: Data)(implicit context: Context): Effect[HandlerResult[Data]] = {
     // Deserialize request
     val rawRequest = implicitly[Bytes[Data]].from(request)
-    Try(codec.deserialize(rawRequest)).pureFold(
+    Try(format.deserialize(rawRequest)).pureFold(
       error =>
         errorResponse(
           ParseErrorException("Invalid request format", error),
@@ -41,7 +41,7 @@ private[automorph] trait HandlerCore[Node, ActualCodec <: MessageFormat[Node], E
         ),
       formedRequest => {
         // Validate request
-        logger.trace(s"Received JSON-RPC request:\n${codec.format(formedRequest)}")
+        logger.trace(s"Received JSON-RPC request:\n${format.format(formedRequest)}")
         Try(Request(formedRequest)).pureFold(
           error => errorResponse(error, formedRequest),
           validRequest => invokeMethod(formedRequest, validRequest, context)
@@ -60,7 +60,7 @@ private[automorph] trait HandlerCore[Node, ActualCodec <: MessageFormat[Node], E
     copy(exceptionToError = exceptionToError)
 
   override def toString: String =
-    s"${this.getClass.getName}(codec = ${codec.getClass.getName}, backend = ${backend.getClass.getName})"
+    s"${this.getClass.getName}(format = ${format.getClass.getName}, system = ${system.getClass.getName})"
 
   /**
    * Invokes bound method specified in a request.
@@ -85,10 +85,10 @@ private[automorph] trait HandlerCore[Node, ActualCodec <: MessageFormat[Node], E
       val arguments = extractArguments(validRequest, handlerMethod)
 
       // Invoke method
-      Try(backend.either(handlerMethod.invoke(arguments, context))).pureFold(
+      Try(system.either(handlerMethod.invoke(arguments, context))).pureFold(
         error => errorResponse(error, formedRequest),
         effect =>
-          backend.flatMap(
+          system.flatMap(
             effect,
             (outcome: Either[Throwable, Node]) =>
               // Process result
@@ -96,12 +96,12 @@ private[automorph] trait HandlerCore[Node, ActualCodec <: MessageFormat[Node], E
                 error => errorResponse(error, formedRequest),
                 result => {
                   validRequest.id.foreach(_ => logger.info(s"Processed JSON-RPC request", formedRequest.properties))
-                  backend.map(
+                  system.map(
                     // Serialize response
                     validRequest.id.map { id =>
                       val validResponse = Response(id, Right(result))
                       serialize(validResponse.formed)
-                    }.getOrElse(backend.pure(None)),
+                    }.getOrElse(system.pure(None)),
                     (rawResponse: Option[ArraySeq.ofByte]) =>
                       HandlerResult(rawResponse.map(implicitly[Bytes[Data]].to), formedRequest.id, formedRequest.method, None)
                   )
@@ -170,12 +170,12 @@ private[automorph] trait HandlerCore[Node, ActualCodec <: MessageFormat[Node], E
         val data = Some(encodeStrings(trace.drop(1).toList))
         ResponseError(code, message, data)
     }
-    backend.map(
+    system.map(
       formedRequest.id.map { id =>
         // Serialize response
         val validResponse = Response[Node](id, Left(responseError))
         serialize(validResponse.formed)
-      }.getOrElse(backend.pure(None)),
+      }.getOrElse(system.pure(None)),
       (rawResponse: Option[ArraySeq.ofByte]) =>
         HandlerResult(rawResponse.map(implicitly[Bytes[Data]].to), formedRequest.id, formedRequest.method, Some(responseError.code))
     )
@@ -188,10 +188,10 @@ private[automorph] trait HandlerCore[Node, ActualCodec <: MessageFormat[Node], E
    * @return serialized response
    */
   private def serialize(formedResponse: Message[Node]): Effect[Option[ArraySeq.ofByte]] = {
-    logger.trace(s"Sending JSON-RPC response:\n${codec.format(formedResponse)}")
-    Try(codec.serialize(formedResponse)).pureFold(
-      error => backend.failed(ParseErrorException("Invalid response format", error)),
-      message => backend.pure(Some(message))
+    logger.trace(s"Sending JSON-RPC response:\n${format.format(formedResponse)}")
+    Try(format.serialize(formedResponse)).pureFold(
+      error => system.failed(ParseErrorException("Invalid response format", error)),
+      message => system.pure(Some(message))
     )
   }
 }

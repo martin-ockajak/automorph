@@ -32,7 +32,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
-  private val system = handler.backend
+  private val system = handler.system
 
   private val receiveCallback = new Receiver.FullBytesCallback {
 
@@ -85,7 +85,7 @@ final case class UndertowJsonRpcHandler[Effect[_]](
     logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
     if (exchange.isResponseChannelAvailable) {
       exchange.setStatusCode(statusCode).getResponseSender.send(Bytes.byteBufferBytes.to(message))
-      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.codec.mediaType)
+      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.format.mediaType)
       logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
     } else {
       logger.error("HTTP response channel not available", Map("Client" -> client, "Status" -> statusCode.toString))

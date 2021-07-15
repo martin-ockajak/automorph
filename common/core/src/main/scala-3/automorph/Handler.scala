@@ -13,68 +13,68 @@ import automorph.util.{CannotEqual, EmptyContext}
  * Used by an RPC server to invoke bound API methods based on incoming RPC requests.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @constructor Creates a new JSON-RPC request handler with specified request `Context` type plus specified ''codec'' and ''backend'' plugins.
- * @param codec structured message format codec plugin
- * @param backend effect system plugin
+ * @constructor Creates a new JSON-RPC request handler with specified request `Context` type plus specified ''format'' and ''system'' plugins.
+ * @param format message format plugin
+ * @param system effect system plugin
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
  * @tparam Node message node type
- * @tparam ActualMessageFormat message codec plugin type
+ * @tparam ActualFormat message format plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Handler[Node, ActualMessageFormat <: MessageFormat[Node], Effect[_], Context](
-  codec: ActualMessageFormat,
-  backend: EffectSystem[Effect],
+final case class Handler[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context](
+  format: ActualFormat,
+  system: EffectSystem[Effect],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val exceptionToError: Class[_ <: Throwable] => ErrorType,
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
-) extends HandlerCore[Node, ActualMessageFormat, Effect, Context]
-  with HandlerBind[Node, ActualMessageFormat, Effect, Context]
+) extends HandlerCore[Node, ActualFormat, Effect, Context]
+  with HandlerBind[Node, ActualFormat, Effect, Context]
   with CannotEqual
   with Logging
 
 case object Handler:
 
-  /** Handler with arbitrary codec. */
+  /** Handler with arbitrary format. */
   type AnyCodec[Effect[_], Context] = Handler[_, _, Effect, Context]
 
   /**
-   * Creates a JSON-RPC request handler with specified request `Context` type plus specified ''codec'' and ''backend'' plugins.
+   * Creates a JSON-RPC request handler with specified request `Context` type plus specified ''format'' and ''system'' plugins.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec structured message format codec plugin
-   * @param backend effect system plugin
+   * @param format message format plugin
+   * @param system effect system plugin
    * @tparam Node message node type
-   * @tparam ActualMessageFormat message codec plugin type
+   * @tparam ActualFormat message format plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  inline def apply[Node, ActualMessageFormat <: MessageFormat[Node], Effect[_], Context](
-    codec: ActualMessageFormat,
-    backend: EffectSystem[Effect]
-  ): Handler[Node, ActualMessageFormat, Effect, Context] =
-    val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
-    Handler(codec, backend, Map.empty, defaultExceptionToError, encodeStrings, codec.encode(None))
+  inline def apply[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context](
+    format: ActualFormat,
+    system: EffectSystem[Effect]
+  ): Handler[Node, ActualFormat, Effect, Context] =
+    val encodeStrings = (value: List[String]) => format.encode[List[String]](value)
+    Handler(format, system, Map.empty, defaultExceptionToError, encodeStrings, format.encode(None))
 
   /**
-   * Creates a JSON-RPC request handler with empty request context plus specified specified ''codec'' and ''backend'' plugins.
+   * Creates a JSON-RPC request handler with empty request context plus specified specified ''format'' and ''system'' plugins.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec structured message format codec plugin
-   * @param backend effect system plugin
+   * @param format message format plugin
+   * @param system effect system plugin
    * @tparam Node message node type
-   * @tparam ActualMessageFormat message codec plugin type
+   * @tparam ActualFormat message format plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  inline def withoutContext[Node, ActualMessageFormat <: MessageFormat[Node], Effect[_]](
-    codec: ActualMessageFormat,
-    backend: EffectSystem[Effect]
-  ): Handler[Node, ActualMessageFormat, Effect, EmptyContext.Value] =
-    val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
-    Handler(codec, backend, Map.empty, defaultExceptionToError, encodeStrings, codec.encode(None))
+  inline def withoutContext[Node, ActualFormat <: MessageFormat[Node], Effect[_]](
+    format: ActualFormat,
+    system: EffectSystem[Effect]
+  ): Handler[Node, ActualFormat, Effect, EmptyContext.Value] =
+    val encodeStrings = (value: List[String]) => format.encode[List[String]](value)
+    Handler(format, system, Map.empty, defaultExceptionToError, encodeStrings, format.encode(None))

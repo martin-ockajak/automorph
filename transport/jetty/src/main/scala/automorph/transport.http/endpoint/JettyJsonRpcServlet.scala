@@ -32,7 +32,7 @@ final case class JettyJsonRpcServlet[Node, Effect[_]](
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpServlet with Logging with EndpointMessageTransport {
 
-  private val system = handler.backend
+  private val system = handler.system
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     // Receive the request
@@ -67,7 +67,7 @@ final case class JettyJsonRpcServlet[Node, Effect[_]](
   private def sendResponse(message: InputStream, response: HttpServletResponse, status: Int, client: String): Unit = {
     logger.debug("Sending HTTP response", Map("Client" -> client, "Status" -> status.toString))
     response.setStatus(status)
-    response.setContentType(handler.codec.mediaType)
+    response.setContentType(handler.format.mediaType)
     val outputStream = response.getOutputStream
     IOUtils.copy(message, outputStream)
     outputStream.flush()

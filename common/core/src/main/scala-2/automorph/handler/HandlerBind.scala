@@ -9,14 +9,14 @@ import scala.reflect.macros.blackbox
  * Handler method bindings code generation.
  *
  * @tparam Node message node type
- * @tparam ActualCodec message codec plugin type
+ * @tparam ActualFormat message format plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerBind[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context] {
-  this: Handler[Node, ActualCodec, Effect, Context] =>
+private[automorph] trait HandlerBind[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context] {
+  this: Handler[Node, ActualFormat, Effect, Context] =>
 
-  type ThisHandler = Handler[Node, ActualCodec, Effect, Context]
+  type ThisHandler = Handler[Node, ActualFormat, Effect, Context]
 
   /**
    * Creates a copy of this handler with generated method bindings for all valid public methods of the specified API.
@@ -38,7 +38,7 @@ private[automorph] trait HandlerBind[Node, ActualCodec <: MessageFormat[Node], E
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   def bind[Api <: AnyRef](api: Api): ThisHandler =
-    macro HandlerBind.basicBindMacro[Node, ActualCodec, Effect, Context, Api]
+    macro HandlerBind.basicBindMacro[Node, ActualFormat, Effect, Context, Api]
 
   /**
    * Creates a copy of this handler with generated method bindings for all valid public methods of the specified API.
@@ -61,56 +61,56 @@ private[automorph] trait HandlerBind[Node, ActualCodec <: MessageFormat[Node], E
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   def bind[Api <: AnyRef](api: Api, mapName: String => Seq[String]): ThisHandler =
-    macro HandlerBind.bindMacro[Node, ActualCodec, Effect, Context, Api]
+    macro HandlerBind.bindMacro[Node, ActualFormat, Effect, Context, Api]
 }
 
 case object HandlerBind {
 
   def basicBindMacro[
     Node: c.WeakTypeTag,
-    ActualCodec <: MessageFormat[Node]: c.WeakTypeTag,
+    ActualFormat <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     api: c.Expr[Api]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, ActualCodec, Effect, Context]] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, ActualFormat, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[ActualCodec]
+    val formatType = weakTypeOf[ActualFormat]
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
       ${c.prefix}.copy(methodBindings = ${c.prefix}.methodBindings ++ automorph.handler.HandlerBindings
-        .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.backend, $api)
+        .generate[$nodeType, $formatType, $effectType, $contextType, $apiType](${c.prefix}.format, ${c.prefix}.system, $api)
       )
-    """).asInstanceOf[c.Expr[Handler[Node, ActualCodec, Effect, Context]]]
+    """).asInstanceOf[c.Expr[Handler[Node, ActualFormat, Effect, Context]]]
   }
 
   def bindMacro[
     Node: c.WeakTypeTag,
-    ActualCodec <: MessageFormat[Node]: c.WeakTypeTag,
+    ActualFormat <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     api: c.Expr[Api],
     mapName: c.Expr[String => Seq[String]]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, ActualCodec, Effect, Context]] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, ActualFormat, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[ActualCodec]
+    val formatType = weakTypeOf[ActualFormat]
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
       ${c.prefix}.copy(methodBindings = ${c.prefix}.methodBindings ++ automorph.handler.HandlerBindings
-        .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.backend, $api)
+        .generate[$nodeType, $formatType, $effectType, $contextType, $apiType](${c.prefix}.format, ${c.prefix}.system, $api)
         .flatMap { case (methodName, method) =>
           $mapName(methodName).map(_ -> method)
         }
       )
-    """).asInstanceOf[c.Expr[Handler[Node, ActualCodec, Effect, Context]]]
+    """).asInstanceOf[c.Expr[Handler[Node, ActualFormat, Effect, Context]]]
   }
 }

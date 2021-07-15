@@ -14,95 +14,95 @@ import scala.reflect.macros.blackbox
  * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @constructor Creates a new JSON-RPC request handler with specified request `Context` type plus specified ''codec'' and ''backend'' plugins.
- * @param codec structured message format codec plugin
- * @param backend effect system plugin
+ * @constructor Creates a new JSON-RPC request handler with specified request `Context` type plus specified ''format'' and ''system'' plugins.
+ * @param format message format plugin
+ * @param system effect system plugin
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
  * @tparam Node message node type
- * @tparam ActualCodec message codec plugin type
+ * @tparam ActualFormat message format plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Handler[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context](
-  codec: ActualCodec,
-  backend: EffectSystem[Effect],
+final case class Handler[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context](
+  format: ActualFormat,
+  system: EffectSystem[Effect],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val exceptionToError: Class[_ <: Throwable] => ErrorType,
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
-) extends HandlerCore[Node, ActualCodec, Effect, Context]
-  with HandlerBind[Node, ActualCodec, Effect, Context]
+) extends HandlerCore[Node, ActualFormat, Effect, Context]
+  with HandlerBind[Node, ActualFormat, Effect, Context]
   with CannotEqual
   with Logging
 
 case object Handler {
 
-  /** Handler with arbitrary codec. */
+  /** Handler with arbitrary format. */
   type AnyCodec[Effect[_], Context] = Handler[Node, _ <: MessageFormat[Node], Effect, Context] forSome { type Node }
 
   /**
-   * Creates a JSON-RPC request handler with specified request `Context` type plus specified ''codec'' and ''backend'' plugins.
+   * Creates a JSON-RPC request handler with specified request `Context` type plus specified ''format'' and ''system'' plugins.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec structured message format codec plugin
-   * @param backend effect system plugin
+   * @param format message format plugin
+   * @param system effect system plugin
    * @tparam Node message node type
-   * @tparam ActualCodec message codec plugin type
+   * @tparam ActualFormat message format plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  def apply[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context](
-    codec: ActualCodec,
-    backend: EffectSystem[Effect]
-  ): Handler[Node, ActualCodec, Effect, Context] =
-    macro applyMacro[Node, ActualCodec, Effect, Context]
+  def apply[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context](
+    format: ActualFormat,
+    system: EffectSystem[Effect]
+  ): Handler[Node, ActualFormat, Effect, Context] =
+    macro applyMacro[Node, ActualFormat, Effect, Context]
 
   /**
-   * Creates a JSON-RPC request handler with empty request context plus specified specified ''codec'' and ''backend'' plugins.
+   * Creates a JSON-RPC request handler with empty request context plus specified specified ''format'' and ''system'' plugins.
    *
    * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec structured message format codec plugin
-   * @param backend effect system plugin
+   * @param format message format plugin
+   * @param system effect system plugin
    * @tparam Node message node type
-   * @tparam ActualCodec message codec plugin type
+   * @tparam ActualFormat message format plugin type
    * @tparam Effect effect type
    * @return JSON-RPC request handler
    */
-  def withoutContext[Node, ActualCodec <: MessageFormat[Node], Effect[_]](
-    codec: ActualCodec,
-    backend: EffectSystem[Effect]
-  ): Handler[Node, ActualCodec, Effect, EmptyContext.Value] =
-    macro withoutContextMacro[Node, ActualCodec, Effect]
+  def withoutContext[Node, ActualFormat <: MessageFormat[Node], Effect[_]](
+    format: ActualFormat,
+    system: EffectSystem[Effect]
+  ): Handler[Node, ActualFormat, Effect, EmptyContext.Value] =
+    macro withoutContextMacro[Node, ActualFormat, Effect]
 
-  def applyMacro[Node: c.WeakTypeTag, ActualCodec <: MessageFormat[Node]: c.WeakTypeTag, Effect[_], Context: c.WeakTypeTag](
+  def applyMacro[Node: c.WeakTypeTag, ActualFormat <: MessageFormat[Node]: c.WeakTypeTag, Effect[_], Context: c.WeakTypeTag](
     c: blackbox.Context
   )(
-    codec: c.Expr[ActualCodec],
-    backend: c.Expr[EffectSystem[Effect]]
-  ): c.Expr[Handler[Node, ActualCodec, Effect, Context]] = {
+    format: c.Expr[ActualFormat],
+    system: c.Expr[EffectSystem[Effect]]
+  ): c.Expr[Handler[Node, ActualFormat, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
-    Seq(weakTypeOf[Node], weakTypeOf[ActualCodec], weakTypeOf[Context])
+    Seq(weakTypeOf[Node], weakTypeOf[ActualFormat], weakTypeOf[Context])
 
     c.Expr[Any](q"""
-      new automorph.Handler($codec, $backend, Map.empty, automorph.handler.HandlerCore.defaultExceptionToError,
-        value => $codec.encode[List[String]](value), $codec.encode(None))
-    """).asInstanceOf[c.Expr[Handler[Node, ActualCodec, Effect, Context]]]
+      new automorph.Handler($format, $system, Map.empty, automorph.handler.HandlerCore.defaultExceptionToError,
+        value => $format.encode[List[String]](value), $format.encode(None))
+    """).asInstanceOf[c.Expr[Handler[Node, ActualFormat, Effect, Context]]]
   }
 
-  def withoutContextMacro[Node: c.WeakTypeTag, ActualCodec <: MessageFormat[Node]: c.WeakTypeTag, Effect[_]](c: blackbox.Context)(
-    codec: c.Expr[ActualCodec],
-    backend: c.Expr[EffectSystem[Effect]]
-  ): c.Expr[Handler[Node, ActualCodec, Effect, EmptyContext.Value]] = {
+  def withoutContextMacro[Node: c.WeakTypeTag, ActualFormat <: MessageFormat[Node]: c.WeakTypeTag, Effect[_]](c: blackbox.Context)(
+    format: c.Expr[ActualFormat],
+    system: c.Expr[EffectSystem[Effect]]
+  ): c.Expr[Handler[Node, ActualFormat, Effect, EmptyContext.Value]] = {
     import c.universe.{weakTypeOf, Quasiquote}
-    Seq(weakTypeOf[Node], weakTypeOf[ActualCodec])
+    Seq(weakTypeOf[Node], weakTypeOf[ActualFormat])
 
     c.Expr[Any](q"""
-      automorph.Handler($codec, $backend, Map.empty, automorph.handler.HandlerCore.defaultExceptionToError,
-        value => $codec.encode[List[String]](value), $codec.encode(None))
-    """).asInstanceOf[c.Expr[Handler[Node, ActualCodec, Effect, EmptyContext.Value]]]
+      automorph.Handler($format, $system, Map.empty, automorph.handler.HandlerCore.defaultExceptionToError,
+        value => $format.encode[List[String]](value), $format.encode(None))
+    """).asInstanceOf[c.Expr[Handler[Node, ActualFormat, Effect, EmptyContext.Value]]]
   }
 }

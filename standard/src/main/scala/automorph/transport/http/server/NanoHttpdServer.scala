@@ -31,7 +31,7 @@ final case class NanoHttpdServer[Effect[_]] private (
 ) extends NanoHTTPD(port) with Logging with ServerMessageTransport {
 
   private val HeaderXForwardedFor = "X-Forwarded-For"
-  private val system = handler.backend
+  private val system = handler.system
 
   override def start(): Unit = {
     logger.info("Listening for connections", Map("Port" -> port.toString))
@@ -70,7 +70,7 @@ final case class NanoHttpdServer[Effect[_]] private (
     val client = clientAddress(session)
     logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> status.getRequestStatus.toString))
     val inputStream = Bytes.inputStreamBytes.to(message)
-    val response = newFixedLengthResponse(status, handler.codec.mediaType, inputStream, message.size.toLong)
+    val response = newFixedLengthResponse(status, handler.format.mediaType, inputStream, message.size.toLong)
     logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> status.getRequestStatus.toString))
     response
   }

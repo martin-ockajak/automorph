@@ -14,25 +14,25 @@ case object ClientBindings {
   /**
    * Generates client bindings for all valid public methods of an API type.
    *
-   * @param codec message format codec plugin
+   * @param format message format plugin
    * @tparam Node message node type
-   * @tparam ActualCodec message format codec type
+   * @tparam ActualFormat message format plugin type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to client method bindings
    */
-  def generate[Node, ActualCodec <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
-    codec: ActualCodec
-  ): Map[String, ClientBinding[Node]] = macro generateMacro[Node, ActualCodec, Effect, Context, Api]
+  def generate[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
+    format: ActualFormat
+  ): Map[String, ClientBinding[Node]] = macro generateMacro[Node, ActualFormat, Effect, Context, Api]
 
   def generateMacro[
     Node: c.WeakTypeTag,
-    ActualCodec <: MessageFormat[Node]: c.WeakTypeTag,
+    ActualFormat <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
-  ](c: blackbox.Context)(codec: c.Expr[ActualCodec])(implicit
+  ](c: blackbox.Context)(format: c.Expr[ActualFormat])(implicit
     effectType: c.WeakTypeTag[Effect[_]]
   ): c.Expr[Map[String, ClientBinding[Node]]] = {
     import c.universe.Quasiquote
@@ -51,7 +51,7 @@ case object ClientBindings {
 
     // Generate bound API method bindings
     val clientMethods = validMethods.map { method =>
-      q"${method.name} -> ${generateBinding[c.type, Node, ActualCodec, Effect, Context, Api](ref)(method, codec)}"
+      q"${method.name} -> ${generateBinding[c.type, Node, ActualFormat, Effect, Context, Api](ref)(method, format)}"
     }
     c.Expr[Map[String, ClientBinding[Node]]](q"""
       Seq(..$clientMethods).toMap
@@ -61,19 +61,19 @@ case object ClientBindings {
   private def generateBinding[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    ActualCodec <: MessageFormat[Node]: ref.c.WeakTypeTag,
+    ActualFormat <: MessageFormat[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
     Api: ref.c.WeakTypeTag
   ](ref: Reflection[C])(
     method: ref.RefMethod,
-    codec: ref.c.Expr[ActualCodec]
+    format: ref.c.Expr[ActualFormat]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[ClientBinding[Node]] = {
     import ref.c.universe.{Liftable, Quasiquote, weakTypeOf}
 
     val nodeType = weakTypeOf[Node]
-    val encodeArguments = generateEncodeArguments[C, Node, ActualCodec, Context](ref)(method, codec)
-    val decodeResult = generateDecodeResult[C, Node, ActualCodec, Effect](ref)(method, codec)
+    val encodeArguments = generateEncodeArguments[C, Node, ActualFormat, Context](ref)(method, format)
+    val decodeResult = generateDecodeResult[C, Node, ActualFormat, Effect](ref)(method, format)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
     implicit val methodLift: Liftable[Method] = methodLiftable(ref)
     Seq(methodLift)
@@ -90,11 +90,11 @@ case object ClientBindings {
   private def generateEncodeArguments[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    ActualCodec <: MessageFormat[Node]: ref.c.WeakTypeTag,
+    ActualFormat <: MessageFormat[Node]: ref.c.WeakTypeTag,
     Context: ref.c.WeakTypeTag
-  ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[ActualCodec]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
+  ](ref: Reflection[C])(method: ref.RefMethod, format: ref.c.Expr[ActualFormat]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}
-    (weakTypeOf[Node], weakTypeOf[ActualCodec])
+    (weakTypeOf[Node], weakTypeOf[ActualFormat])
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
@@ -108,14 +108,14 @@ case object ClientBindings {
       (arguments: Seq[Any]) => ${
       // Create the method argument lists by encoding corresponding argument values into nodes
       //   List(
-      //     codec.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
+      //     format.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
       //     ...
-      //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
+      //     format.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
       //   ): List[Node]
       val argumentNodes = method.parameters.toList.zip(parameterListOffsets).flatMap { case (parameters, offset) =>
         parameters.toList.zipWithIndex.flatMap { case (parameter, index) =>
           Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[C, Context](ref)(method)) {
-            q"$codec.encode[${parameter.dataType}](arguments(${offset + index}).asInstanceOf[${parameter.dataType}])"
+            q"$format.encode[${parameter.dataType}](arguments(${offset + index}).asInstanceOf[${parameter.dataType}])"
           }
         }
       }
@@ -130,20 +130,20 @@ case object ClientBindings {
   private def generateDecodeResult[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    ActualCodec <: MessageFormat[Node]: ref.c.WeakTypeTag,
+    ActualFormat <: MessageFormat[Node]: ref.c.WeakTypeTag,
     Effect[_]
-  ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[ActualCodec])(implicit
+  ](ref: Reflection[C])(method: ref.RefMethod, format: ref.c.Expr[ActualFormat])(implicit
     effectType: ref.c.WeakTypeTag[Effect[_]]
   ): ref.c.Expr[Node => Any] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}
-    (weakTypeOf[Node], weakTypeOf[ActualCodec])
+    (weakTypeOf[Node], weakTypeOf[ActualFormat])
 
     // Create decode result function
-    //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
+    //   (resultNode: Node) => ResultValueType = format.dencode[ResultValueType](resultNode)
     val nodeType = weakTypeOf[Node]
     val resultValueType = unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
     ref.c.Expr[Node => Any](q"""
-      (resultNode: $nodeType) => $codec.decode[$resultValueType](resultNode)
+      (resultNode: $nodeType) => $format.decode[$resultValueType](resultNode)
     """)
   }
 
