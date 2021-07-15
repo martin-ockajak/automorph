@@ -3,7 +3,7 @@ package test
 import automorph.client.ClientBind
 import automorph.protocol.ErrorType.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
 import automorph.spi.EffectSystem
-import automorph.{Client, Handler}
+import automorph.Handler
 import org.scalacheck.Arbitrary
 import scala.util.Try
 import test.Generators.arbitraryRecord
