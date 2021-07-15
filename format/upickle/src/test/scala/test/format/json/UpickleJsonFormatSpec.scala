@@ -1,37 +1,37 @@
-package test.codec.messagepack
+package test.codec.json
 
 import automorph.codec.common.UpickleCustom
-import automorph.codec.messagepack.UpickleMessagePackCodec
+import automorph.codec.json.UpickleJsonFormat
 import org.scalacheck.{Arbitrary, Gen}
-import scala.annotation.nowarn
-import scala.collection.mutable.LinkedHashMap
 import test.Generators.arbitraryRecord
-import test.codec.CodecSpec
+import test.codec.FormatSpec
 import test.{Enum, Record, Structure}
-import upack.{Arr, Bool, Float64, Msg, Obj, Str}
+import ujson.{Arr, Bool, Num, Obj, Str, Value}
 
-class UpickleMessagePackSpec extends CodecSpec {
+class UpickleJsonFormatSpec extends FormatSpec {
 
-  type Node = Msg
-  type ActualCodec = UpickleMessagePackCodec[UpickleMessagePackCodecSpec.type]
+  type Node = Value
+  type ActualFormat = UpickleJsonFormat[UpickleJsonFormatSpec.type]
 
-  override def codec: ActualCodec = UpickleMessagePackCodec(UpickleMessagePackCodecSpec)
+  override def codec: ActualFormat = UpickleJsonFormat(UpickleJsonFormatSpec)
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
       Gen.resultOf(Str(_)),
-      Gen.resultOf(Float64(_)),
+      Gen.resultOf(Num(_)),
       Gen.resultOf(Bool(_)),
       Gen.listOfN[Node](2, recurse).map(Arr(_: _*)),
-      Gen.mapOfN(2, Gen.zip(Gen.resultOf[String, Msg](Str(_)), recurse)).map(values => Obj(LinkedHashMap.from(values)))
+      Gen.mapOfN(2, Gen.zip(Arbitrary.arbitrary[String], recurse)).map(Obj.from)
     )
   ))
 
   private lazy val custom = codec.custom
   implicit private lazy val recordRw: custom.ReadWriter[Record] = custom.macroRW
-  Seq(recordRw)
 
   "" - {
+    "TEST" in {
+      val encode = (x: List[String]) => codec.encode(x)
+    }
     "Encode / Decode" in {
       check { (record: Record) =>
         val encodedValue = codec.encode(record)
@@ -42,13 +42,11 @@ class UpickleMessagePackSpec extends CodecSpec {
   }
 }
 
-object UpickleMessagePackCodecSpec extends UpickleCustom {
+object UpickleJsonFormatSpec extends UpickleCustom {
 
   implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
     value => Enum.toOrdinal(value),
     number => Enum.fromOrdinal(number)
   )
-
-  @nowarn
   implicit lazy val structureRw: ReadWriter[Structure] = macroRW
 }

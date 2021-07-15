@@ -7,16 +7,16 @@ import test.Generators
 import test.base.BaseSpec
 
 /**
- * Codec test.
+ * Format test.
  *
  * Checks message serialization, deserialization and formatting.
  */
-trait CodecSpec extends BaseSpec {
+trait FormatSpec extends BaseSpec {
 
   type Node
-  type ActualCodec <: MessageFormat[Node]
+  type ActualFormat <: MessageFormat[Node]
 
-  def codec: ActualCodec
+  def codec: ActualFormat
 
   implicit def arbitraryNode: Arbitrary[Node]
 

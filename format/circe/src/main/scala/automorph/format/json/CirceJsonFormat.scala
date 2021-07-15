@@ -14,7 +14,7 @@ import scala.collection.immutable.ArraySeq
  * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
  * @constructor Creates a Circe codec plugin using JSON as message format.
  */
-final case class CirceJsonCodec() extends CirceJsonCodecMeta {
+final case class CirceJsonFormat() extends CirceJsonFormatMeta {
 
   private val charset = StandardCharsets.UTF_8
 
@@ -43,7 +43,7 @@ final case class CirceJsonCodec() extends CirceJsonCodecMeta {
     message.asJson.spaces2
 }
 
-case object CirceJsonCodec {
+case object CirceJsonFormat {
   /** Message node type. */
   type Node = Json
 }

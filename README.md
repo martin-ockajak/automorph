@@ -594,8 +594,8 @@ import io.circe.generic.auto._
 // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
 val system = DefaultEffectSystem.async
 val runEffect = (effect: Future[_]) => effect
-val format = CirceJsonCodec()
-val handler = Handler[CirceJsonCodec.Node, format.type, Future, UndertowHandlerEndpoint.Context](format, system)
+val format = CirceJsonFormat()
+val handler = Handler[CirceJsonFormat.Node, format.type, Future, UndertowHandlerEndpoint.Context](format, system)
 val server = UndertowServer(UndertowHandlerEndpoint(handler.bind(api), runEffect), 80, "/api")
 
 // Stop the server
@@ -607,7 +607,7 @@ server.close()
 ```scala
   // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
 val transport = DefaultHttpClientTransport.async("http://localhost/api", "POST")
-val client: Client[CirceJsonCodec.Node, format.type, Future, DefaultHttpClientTransport.Context] =
+val client: Client[CirceJsonFormat.Node, format.type, Future, DefaultHttpClientTransport.Context] =
   Client(format, system, transport)
 
 // Call the remote API method via proxy

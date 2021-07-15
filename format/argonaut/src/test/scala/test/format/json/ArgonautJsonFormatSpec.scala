@@ -2,18 +2,18 @@ package test.codec.json
 
 import argonaut.Argonaut.{jArray, jBool, jNumber, jString, jObjectAssocList, ToJsonIdentity}
 import argonaut.{Argonaut, CodecJson, Json}
-import automorph.codec.json.ArgonautJsonCodec
+import automorph.codec.json.ArgonautJsonFormat
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
-import test.codec.CodecSpec
+import test.codec.FormatSpec
 import test.{Enum, Record, Structure}
 
-class ArgonautJsonSpec extends CodecSpec {
+class ArgonautJsonFormatSpec extends FormatSpec {
 
   type Node = Json
-  type ActualCodec = ArgonautJsonCodec
+  type ActualFormat = ArgonautJsonFormat
 
-  override def codec: ActualCodec = ArgonautJsonCodec()
+  override def codec: ActualFormat = ArgonautJsonFormat()
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(

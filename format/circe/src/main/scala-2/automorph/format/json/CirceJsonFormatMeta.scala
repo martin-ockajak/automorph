@@ -8,14 +8,14 @@ import scala.reflect.macros.blackbox
 /**
  * Circe JSON codec plugin code generation.
  */
-private[automorph] trait CirceJsonCodecMeta extends MessageFormat[Json] {
+private[automorph] trait CirceJsonFormatMeta extends MessageFormat[Json] {
 
-  override def encode[T](value: T): Json = macro CirceJsonCodecMeta.encodeExpr[T]
+  override def encode[T](value: T): Json = macro CirceJsonFormatMeta.encodeExpr[T]
 
-  override def decode[T](node: Json): T = macro CirceJsonCodecMeta.decodeExpr[T]
+  override def decode[T](node: Json): T = macro CirceJsonFormatMeta.decodeExpr[T]
 }
 
-private[automorph] object CirceJsonCodecMeta {
+private[automorph] object CirceJsonFormatMeta {
 
   def encodeExpr[T: c.WeakTypeTag](c: blackbox.Context)(value: c.Expr[T]): c.Expr[Json] = {
     import c.universe.Quasiquote

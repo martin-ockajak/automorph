@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.system.IdentityBackend.Identity
-import automorph.codec.json.UpickleJsonCodec
+import automorph.codec.json.UpickleJsonFormat
 import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.client.SttpClient
 import java.net.URL
@@ -37,7 +37,7 @@ case object DefaultHttpClient {
     backend: EffectSystem[Effect],
     transport: ClientMessageTransport[Effect, RequestContext]
   ): Client[DefaultMessageFormat.Node, DefaultMessageFormat.Type, Effect, RequestContext] =
-    Client(UpickleJsonCodec(), backend, transport)
+    Client(UpickleJsonFormat(), backend, transport)
 
   /**
    * Creates a default JSON-RPC client using HTTP as message transport protocol with specified ''backend'' plugin.

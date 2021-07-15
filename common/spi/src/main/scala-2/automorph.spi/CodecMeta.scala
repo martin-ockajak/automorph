@@ -3,7 +3,7 @@ package automorph.spi
 import scala.annotation.nowarn
 
 @nowarn
-trait CodecMeta[Node] {
+trait FormatMeta[Node] {
   /**
    * Encodes a value as a node.
    *

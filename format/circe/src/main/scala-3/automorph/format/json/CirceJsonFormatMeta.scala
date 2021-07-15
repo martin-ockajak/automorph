@@ -8,7 +8,7 @@ import scala.compiletime.summonInline
 /**
  * Circe JSON codec plugin code generation.
  */
-private[automorph] trait CirceJsonCodecMeta extends MessageFormat[Json]:
+private[automorph] trait CirceJsonFormatMeta extends MessageFormat[Json]:
 
   override inline def encode[T](value: T): Json =
     value.asJson(using summonInline[Encoder[T]])

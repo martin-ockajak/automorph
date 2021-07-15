@@ -26,7 +26,7 @@ trait CoreSpec extends BaseSpec {
   case class FormatFixture(
     format: Class[_],
     client: Client[_, _ <: MessageFormat[_], Effect, Context],
-    handler: Handler.AnyCodec[Effect, Context],
+    handler: Handler.AnyFormat[Effect, Context],
     simpleApis: Seq[SimpleApiType],
     complexApis: Seq[ComplexApiType],
     invalidApis: Seq[InvalidApiType],

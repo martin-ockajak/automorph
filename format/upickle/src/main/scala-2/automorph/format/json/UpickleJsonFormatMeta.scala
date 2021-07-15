@@ -11,14 +11,14 @@ import ujson.Value
  *
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-trait UpickleJsonCodecMeta[Custom <: UpickleCustom] extends MessageFormat[Value] {
+trait UpickleJsonFormatMeta[Custom <: UpickleCustom] extends MessageFormat[Value] {
 
-  override def encode[T](value: T): Value = macro UpickleJsonCodecMeta.encode[T]
+  override def encode[T](value: T): Value = macro UpickleJsonFormatMeta.encode[T]
 
-  override def decode[T](node: Value): T = macro UpickleJsonCodecMeta.decode[T]
+  override def decode[T](node: Value): T = macro UpickleJsonFormatMeta.decode[T]
 }
 
-object UpickleJsonCodecMeta {
+object UpickleJsonFormatMeta {
 
   def encode[T: c.WeakTypeTag](c: blackbox.Context)(value: c.Expr[T]): c.Expr[Value] = {
     import c.universe.Quasiquote

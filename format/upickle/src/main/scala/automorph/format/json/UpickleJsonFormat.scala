@@ -14,9 +14,9 @@ import ujson.Value
  * @param custom customized Upickle reader and writer implicits instance
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-final case class UpickleJsonCodec[Custom <: UpickleCustom](
+final case class UpickleJsonFormat[Custom <: UpickleCustom](
   custom: Custom = DefaultUpickleCustom
-) extends UpickleJsonCodecMeta[Custom] {
+) extends UpickleJsonFormatMeta[Custom] {
 
   import custom._
 
@@ -39,7 +39,7 @@ final case class UpickleJsonCodec[Custom <: UpickleCustom](
     custom.write(UpickleMessage.fromSpi(message), indent)
 }
 
-case object UpickleJsonCodec {
+case object UpickleJsonFormat {
   /** Message node type. */
   type Node = Value
 }

@@ -3,7 +3,7 @@ package test
 import automorph.system.IdentityBackend
 import automorph.system.IdentityBackend.Identity
 import automorph.codec.common.UpickleCustom
-import automorph.codec.json.UpickleJsonCodec
+import automorph.codec.json.UpickleJsonFormat
 import automorph.transport.local.client.HandlerTransport
 import automorph.util.EmptyContext
 import automorph.{Client, Handler}
@@ -13,7 +13,7 @@ class EmptyContextCoreSpec extends BaseSpec {
 
   "" - {
     "Construct" in {
-      val codec = UpickleJsonCodec[UpickleCustom]()
+      val codec = UpickleJsonFormat[UpickleCustom]()
       val backend = IdentityBackend()
       val handler = Handler.noContext[Value, codec.type, Identity](codec, backend)
       val handlerTransport = HandlerTransport(handler, backend, EmptyContext.value)

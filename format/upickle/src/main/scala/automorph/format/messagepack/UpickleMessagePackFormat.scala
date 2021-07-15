@@ -14,9 +14,9 @@ import upack.Msg
  * @param custom customized Upickle reader and writer implicits instance
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
+final case class UpickleMessagePackFormat[Custom <: UpickleCustom](
   custom: Custom = DefaultUpickleCustom
-) extends UpickleMessagePackCodecMeta[Custom] {
+) extends UpickleMessagePackFormatMeta[Custom] {
 
   import custom._
 
@@ -40,7 +40,7 @@ final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
     custom.write(UpickleMessage.fromSpi(message), indent)
 }
 
-case object UpickleMessagePackCodec {
+case object UpickleMessagePackFormat {
   /** Message node type. */
   type Node = Msg
 }

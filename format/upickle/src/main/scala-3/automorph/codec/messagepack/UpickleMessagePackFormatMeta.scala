@@ -10,7 +10,7 @@ import upack.Msg
  *
  * @tparam Custom custom Upickle reader and writer implicits instance type
  */
-private[automorph] trait UpickleMessagePackCodecMeta[Custom <: UpickleCustom] extends MessageFormat[Msg]:
+private[automorph] trait UpickleMessagePackFormatMeta[Custom <: UpickleCustom] extends MessageFormat[Msg]:
 
   val custom: Custom
 

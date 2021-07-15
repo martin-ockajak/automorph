@@ -38,7 +38,7 @@ final case class Handler[Node, ActualFormat <: MessageFormat[Node], Effect[_], C
 case object Handler {
 
   /** Handler with arbitrary format. */
-  type AnyCodec[Effect[_], Context] = Handler[Node, _ <: MessageFormat[Node], Effect, Context] forSome { type Node }
+  type AnyFormat[Effect[_], Context] = Handler[Node, _ <: MessageFormat[Node], Effect, Context] forSome { type Node }
 
   /**
    * Creates a JSON-RPC request handler with specified request `Context` type plus specified ''format'' and ''system'' plugins.

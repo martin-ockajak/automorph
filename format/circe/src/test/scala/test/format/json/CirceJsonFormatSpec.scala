@@ -3,18 +3,18 @@ package test.codec.json
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Json}
-import automorph.codec.json.CirceJsonCodec
+import automorph.codec.json.CirceJsonFormat
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
-import test.codec.CodecSpec
+import test.codec.FormatSpec
 import test.{Enum, Record, Structure}
 
-class CirceJsonSpec extends CodecSpec {
+class CirceJsonFormatSpec extends FormatSpec {
 
   type Node = Json
-  type ActualCodec = CirceJsonCodec
+  type ActualFormat = CirceJsonFormat
 
-  override def codec: ActualCodec = CirceJsonCodec()
+  override def codec: ActualFormat = CirceJsonFormat()
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(

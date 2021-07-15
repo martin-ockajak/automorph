@@ -1,6 +1,6 @@
 package automorph.spi
 
-trait CodecMeta[Node]:
+trait FormatMeta[Node]:
   /**
    * Encodes a value as a message format node.
    *

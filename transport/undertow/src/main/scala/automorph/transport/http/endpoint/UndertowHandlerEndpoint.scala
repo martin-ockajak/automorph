@@ -27,7 +27,7 @@ import scala.util.Try
  * @tparam Effect effect type
  */
 final case class UndertowHandlerEndpoint[Effect[_]](
-  handler: Handler.AnyCodec[Effect, HttpServerExchange],
+  handler: Handler.AnyFormat[Effect, HttpServerExchange],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpHandler with Logging with EndpointMessageTransport {

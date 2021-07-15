@@ -6,9 +6,9 @@
 //import org.scalacheck.Arbitrary
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
-//import test.CodecClientHandlerSpec
+//import test.FormatClientHandlerSpec
 //
-//class FutureHttpSpec extends CodecClientHandlerSpec {
+//class FutureHttpSpec extends FormatClientHandlerSpec {
 //
 //  type Effect[T] = Future[T]
 //  type Context = Short

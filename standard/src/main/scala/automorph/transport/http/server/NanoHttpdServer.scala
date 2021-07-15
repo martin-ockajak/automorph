@@ -23,7 +23,7 @@ import scala.collection.immutable.ArraySeq
  * @tparam Effect effect type
  */
 final case class NanoHttpdServer[Effect[_]] private (
-  handler: Handler.AnyCodec[Effect, IHTTPSession],
+  handler: Handler.AnyFormat[Effect, IHTTPSession],
   runEffectSync: Effect[Response] => Response,
   port: Int,
   readTimeout: Int,
@@ -104,7 +104,7 @@ case object NanoHttpdServer {
    * @tparam Effect effect type
    */
   def apply[Effect[_]](
-    handler: Handler.AnyCodec[Effect, IHTTPSession],
+    handler: Handler.AnyFormat[Effect, IHTTPSession],
     runEffectSync: Effect[Response] => Response,
     port: Int,
     readTimeout: Int = 5000,
