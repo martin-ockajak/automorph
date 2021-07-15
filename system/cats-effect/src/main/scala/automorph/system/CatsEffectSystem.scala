@@ -10,7 +10,7 @@ import automorph.spi.EffectSystem
  * @see [[https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html Effect type]]
  * @constructor Creates a Cats Effect backend plugin using `IO` as an effect type.
  */
-final case class CatsEffectBackend() extends EffectSystem[IO] {
+final case class CatsEffectSystem() extends EffectSystem[IO] {
 
   override def pure[T](value: T): IO[T] = IO.pure(value)
 
@@ -21,7 +21,7 @@ final case class CatsEffectBackend() extends EffectSystem[IO] {
   override def either[T](value: IO[T]): IO[Either[Throwable, T]] = value.attempt
 }
 
-case object CatsEffectBackend {
+case object CatsEffectSystem {
   /**
    * Effect type.
    *

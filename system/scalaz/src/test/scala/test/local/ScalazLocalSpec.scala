@@ -1,6 +1,6 @@
 package test.local
 
-import automorph.system.ScalazBackend
+import automorph.system.ScalazSystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import scala.util.Try
@@ -14,7 +14,7 @@ class ScalazLocalSpec extends FormatCoreSpec {
 
   override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
-  override lazy val backend: EffectSystem[Effect] = ScalazBackend()
+  override lazy val backend: EffectSystem[Effect] = ScalazSystem()
 
   override def run[T](effect: Effect[T]): T = effect.unsafePerformIO()
 }

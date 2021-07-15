@@ -2,12 +2,12 @@ package test.system
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import automorph.system.CatsEffectBackend
+import automorph.system.CatsEffectSystem
 import automorph.spi.EffectSystem
 import scala.util.Try
 
-class CatsEffectBackendSpec extends BackendSpec[IO] {
-  def effect: EffectSystem[IO] = CatsEffectBackend()
+class CatsEffectSystemSpec extends SystemSpec[IO] {
+  def effect: EffectSystem[IO] = CatsEffectSystem()
 
   def run[T](effect: IO[T]): Either[Throwable, T] = Try(effect.unsafeRunSync()).toEither
 }

@@ -231,9 +231,9 @@ Depends on:
         '--------'     '-----------'
          |      |       |
          v      v       v
-  .-------.    .---------.
-  | Format |    | Backend |
-  '-------'    '---------'
+  .--------.    .--------.
+  | Format |    | System |
+  '--------'    '--------'
 ```
 
 ## Handler
@@ -251,9 +251,9 @@ Depends on:
      '--------'     '---------'
              |       |      |
              v       v      v
-            .---------.    .-------.
-            | Backend |    | Format |
-            '---------'    '-------'
+            .--------.    .--------.
+            | System |    | Format |
+            '--------'    '--------'
 ```
 
 # Examples
@@ -483,14 +483,14 @@ val api = new Api()
 ### Server
 
 ```scala
-import automorph.system.ZioBackend
+import automorph.system.ZioSystem
 
 // Custom effectful computation backend plugin
-val system = ZioBackend[Any]()
+val system = ZioSystem[Any]()
 val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
 
 // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = automorph.DefaultHttpServer[ZioBackend.TaskEffect](system, runEffect, _.bind(api), 80, "/api")
+val server = automorph.DefaultHttpServer[ZioSystem.TaskEffect](system, runEffect, _.bind(api), 80, "/api")
 
 // Stop the server
 server.close()
@@ -526,9 +526,9 @@ val api = new Api()
 ### Server
 
 ```scala
-import automorph.system.IdentityBackend.Identity
+import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.server.NanoHttpdServer
-import automorph.{Client, DefaultBackend, DefaultFormat, Handler}
+import automorph.{Client, DefaultSystem, DefaultFormat, Handler}
 
 // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
 val system = DefaultEffectSystem.sync
@@ -588,7 +588,7 @@ val api = new Api()
 import automorph.format.json.CirceJsonFormat
 import automorph.transport.http.endpoint.UndertowJsonRpcHandler
 import automorph.transport.http.server.UndertowServer
-import automorph.{Client, DefaultBackend, DefaultHttpTransport, Handler}
+import automorph.{Client, DefaultSystem, DefaultHttpTransport, Handler}
 import io.circe.generic.auto._
 
 // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'

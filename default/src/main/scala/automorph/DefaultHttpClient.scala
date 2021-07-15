@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.system.IdentityBackend.Identity
+import automorph.system.IdentitySystem.Identity
 import automorph.codec.json.UpickleJsonFormat
 import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.client.SttpClient
@@ -48,7 +48,7 @@ case object DefaultHttpClient {
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @param backend effect system plugin
-   * @param sttpBackend HTTP client backend
+   * @param sttpSystem HTTP client backend
    * @tparam Effect effect type
    * @return client
    */
@@ -56,8 +56,8 @@ case object DefaultHttpClient {
     url: String,
     method: String,
     backend: EffectSystem[Effect],
-    sttpBackend: SttpBackend[Effect, _]
-  ): Type[Effect] = DefaultHttpClient(backend, SttpClient(new URL(url), method, backend, sttpBackend))
+    sttpSystem: SttpBackend[Effect, _]
+  ): Type[Effect] = DefaultHttpClient(backend, SttpClient(new URL(url), method, backend, sttpSystem))
 
   /**
    * Creates a default asynchronous JSON-RPC client using HTTP as message transport protocol and 'Future' as an effect type.

@@ -1,6 +1,6 @@
 package automorph.system
 
-import automorph.system.IdentityBackend.Identity
+import automorph.system.IdentitySystem.Identity
 import automorph.spi.EffectSystem
 
 /**
@@ -11,7 +11,7 @@ import automorph.spi.EffectSystem
  * Effect type: original value type
  * @constructor Creates a synchronous backend plugin using identity as an effect type.
  */
-final case class IdentityBackend() extends EffectSystem[Identity] {
+final case class IdentitySystem() extends EffectSystem[Identity] {
 
   override def pure[T](value: T): T = value
 
@@ -22,7 +22,7 @@ final case class IdentityBackend() extends EffectSystem[Identity] {
   override def either[T](value: T): Either[Throwable, T] = Right(value)
 }
 
-case object IdentityBackend {
+case object IdentitySystem {
   /**
    * Effect type.
    *

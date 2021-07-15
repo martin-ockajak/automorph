@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.system.IdentityBackend.Identity
+import automorph.system.IdentitySystem.Identity
 import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.client.SttpClient
 import java.net.URL
@@ -29,7 +29,7 @@ case object DefaultHttpClientTransport {
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @param backend effect system plugin
-   * @param sttpBackend HTTP client backend
+   * @param sttpSystem HTTP client backend
    * @tparam Effect effect type
    * @return transport plugin
    */
@@ -37,8 +37,8 @@ case object DefaultHttpClientTransport {
     url: String,
     method: String,
     backend: EffectSystem[Effect],
-    sttpBackend: SttpBackend[Effect, _]
-  ): Type[Effect] = SttpClient(new URL(url), method, backend, sttpBackend)
+    sttpSystem: SttpBackend[Effect, _]
+  ): Type[Effect] = SttpClient(new URL(url), method, backend, sttpSystem)
 
   /**
    * Creates a default message transport protocol plugin using HTTP  as transport protocol and 'Future' as an effect type.

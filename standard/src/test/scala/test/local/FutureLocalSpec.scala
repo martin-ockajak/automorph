@@ -1,6 +1,6 @@
 package test.local
 
-import automorph.system.FutureBackend
+import automorph.system.FutureSystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -14,7 +14,7 @@ class FutureLocalSpec extends FormatCoreSpec {
 
   override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
-  override lazy val backend: EffectSystem[Effect] = FutureBackend()
+  override lazy val backend: EffectSystem[Effect] = FutureSystem()
 
   override def run[T](effect: Effect[T]): T = await(effect)
 }

@@ -10,7 +10,7 @@ import scala.util.{Failure, Success, Try}
  * @see Effect type: [[scala.util.Try]]
  * @constructor Creates a synchronous backend plugin using ''Try'' as an effect type.
  */
-final case class TryBackend() extends EffectSystem[Try] {
+final case class TrySystem() extends EffectSystem[Try] {
 
   override def pure[T](value: T): Try[T] = Success(value)
 
@@ -21,7 +21,7 @@ final case class TryBackend() extends EffectSystem[Try] {
   override def either[T](value: Try[T]): Try[Either[Throwable, T]] = Success(value.toEither)
 }
 
-case object TryBackend {
+case object TrySystem {
   /**
    * Effect type.
    *

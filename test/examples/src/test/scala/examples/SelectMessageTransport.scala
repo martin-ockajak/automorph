@@ -2,7 +2,7 @@ package examples
 
 import automorph.transport.http.server.NanoHttpdServer
 import automorph.transport.http.client.UrlConnectionClient
-import automorph.system.IdentityBackend.Identity
+import automorph.system.IdentitySystem.Identity
 import automorph.{Client, DefaultEffectSystem, DefaultMessageFormat, Handler}
 import java.net.URL
 

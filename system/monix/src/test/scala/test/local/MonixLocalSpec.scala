@@ -1,6 +1,6 @@
 package test.local
 
-import automorph.system.MonixBackend
+import automorph.system.MonixSystem
 import automorph.spi.EffectSystem
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
@@ -15,7 +15,7 @@ class MonixLocalSpec extends FormatCoreSpec {
 
   override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
-  override lazy val backend: EffectSystem[Effect] = MonixBackend()
+  override lazy val backend: EffectSystem[Effect] = MonixSystem()
 
   override def run[T](effect: Effect[T]): T = effect.runSyncUnsafe(Duration.Inf)
 }

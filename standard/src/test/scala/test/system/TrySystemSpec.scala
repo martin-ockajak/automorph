@@ -1,11 +1,11 @@
 package test.system
 
-import automorph.system.TryBackend
+import automorph.system.TrySystem
 import automorph.spi.EffectSystem
 import scala.util.Try
 
-class TryBackendSpec extends BackendSpec[Try] {
-  def effect: EffectSystem[Try] = TryBackend()
+class TrySystemSpec extends SystemSpec[Try] {
+  def effect: EffectSystem[Try] = TrySystem()
 
   def run[T](effect: Try[T]): Either[Throwable, T] = effect.toEither
 }

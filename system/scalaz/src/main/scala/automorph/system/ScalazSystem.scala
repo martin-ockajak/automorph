@@ -10,7 +10,7 @@ import scalaz.effect.IO
  * @see [[https://www.javadoc.io/doc/org.scalaz/scalaz_2.13/latest/scalaz/effect/IO.html Effect type]]
  * @constructor Creates a Scalaz backend plugin using `IO` as an effect type.
  */
-final case class ScalazBackend() extends EffectSystem[IO] {
+final case class ScalazSystem() extends EffectSystem[IO] {
 
   override def pure[T](value: T): IO[T] = IO(value)
 
@@ -21,7 +21,7 @@ final case class ScalazBackend() extends EffectSystem[IO] {
   override def either[T](value: IO[T]): IO[Either[Throwable, T]] = value.catchLeft.map(_.toEither)
 }
 
-case object ScalazBackend {
+case object ScalazSystem {
   /**
    * Effect type.
    *

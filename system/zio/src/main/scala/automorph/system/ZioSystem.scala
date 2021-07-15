@@ -11,7 +11,7 @@ import zio.RIO
  * @constructor Creates a ZIO backend plugin using `RIO` as an effect type.
  * @tparam Environment ZIO environment type
  */
-final case class ZioBackend[Environment]() extends EffectSystem[({ type Effect[T] = RIO[Environment, T] })#Effect] {
+final case class ZioSystem[Environment]() extends EffectSystem[({ type Effect[T] = RIO[Environment, T] })#Effect] {
 
   override def pure[T](value: T): RIO[Environment, T] = RIO.succeed(value)
 
@@ -23,7 +23,7 @@ final case class ZioBackend[Environment]() extends EffectSystem[({ type Effect[T
   override def either[T](value: RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] = value.either
 }
 
-case object ZioBackend {
+case object ZioSystem {
   /**
    * Effect type constructor.
    *

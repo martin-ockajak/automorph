@@ -5,13 +5,13 @@ import scala.util.{Failure, Success, Try}
 import test.base.BaseSpec
 
 /**
- * Backend test.
+ * System test.
  *
  * Checks effect type operations.
  *
  * @tparam Effect effect type
  */
-trait BackendSpec[Effect[_]] extends BaseSpec {
+trait SystemSpec[Effect[_]] extends BaseSpec {
   private val text = "test"
   private val number = 0
 

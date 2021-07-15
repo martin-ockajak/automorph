@@ -1,6 +1,6 @@
 package test.local
 
-import automorph.system.TryBackend
+import automorph.system.TrySystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import scala.util.Try
@@ -15,5 +15,5 @@ class TryLocalSpec extends FormatCoreSpec {
 
   override def run[T](effect: Effect[T]): T = effect.get
 
-  override def backend: EffectSystem[Effect] = TryBackend()
+  override def backend: EffectSystem[Effect] = TrySystem()
 }

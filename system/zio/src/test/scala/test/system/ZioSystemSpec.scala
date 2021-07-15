@@ -1,14 +1,14 @@
 package test.system
 
-import automorph.system.ZioBackend
+import automorph.system.ZioSystem
 import automorph.spi.EffectSystem
 import scala.util.Try
 import zio.{RIO, Runtime, ZEnv}
 
-class ZioBackendSpec extends BackendSpec[({ type Effect[T] = RIO[ZEnv, T] })#Effect] {
+class ZioSystemSpec extends SystemSpec[({ type Effect[T] = RIO[ZEnv, T] })#Effect] {
   private lazy val runtime = Runtime.default.withReportFailure(_ => ())
 
-  def effect: EffectSystem[({ type Effect[T] = RIO[ZEnv, T] })#Effect] = ZioBackend[ZEnv]()
+  def effect: EffectSystem[({ type Effect[T] = RIO[ZEnv, T] })#Effect] = ZioSystem[ZEnv]()
 
   def run[T](effect: RIO[ZEnv, T]): Either[Throwable, T] = Try(runtime.unsafeRunTask(effect)).toEither
 }

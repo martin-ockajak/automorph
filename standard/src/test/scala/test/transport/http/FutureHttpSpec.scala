@@ -2,7 +2,7 @@
 //
 //import automorph.system.FutureBackend
 //import automorph.server.http.NanoHttpdServer
-//import automorph.spi.Backend
+//import automorph.spi.System
 //import org.scalacheck.Arbitrary
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
@@ -20,7 +20,7 @@
 //
 //  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 //
-//  override lazy val backend: Backend[Effect] = FutureBackend()
+//  override lazy val backend: System[Effect] = FutureBackend()
 //
 //  override def run[T](effect: Effect[T]): T = await(effect)
 //

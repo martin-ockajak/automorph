@@ -1,12 +1,12 @@
 package test.system
 
-import automorph.system.ScalazBackend
+import automorph.system.ScalazSystem
 import automorph.spi.EffectSystem
 import scala.util.Try
 import scalaz.effect.IO
 
-class ScalazBackendSpec extends BackendSpec[IO] {
-  def effect: EffectSystem[IO] = ScalazBackend()
+class ScalazSystemSpec extends SystemSpec[IO] {
+  def effect: EffectSystem[IO] = ScalazSystem()
 
   def run[T](effect: IO[T]): Either[Throwable, T] = Try(effect.unsafePerformIO()).toEither
 }

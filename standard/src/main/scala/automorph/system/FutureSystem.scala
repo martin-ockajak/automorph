@@ -12,7 +12,7 @@ import scala.util.Success
  * @constructor Creates an asynchronous backend plugin using `Future` as an effect type.
  * @param executionContext execution context
  */
-final case class FutureBackend()(implicit executionContext: ExecutionContext) extends EffectSystem[Future] {
+final case class FutureSystem()(implicit executionContext: ExecutionContext) extends EffectSystem[Future] {
 
   override def pure[T](value: T): Future[T] = Future.successful(value)
 
@@ -23,7 +23,7 @@ final case class FutureBackend()(implicit executionContext: ExecutionContext) ex
   override def either[T](effect: Future[T]): Future[Either[Throwable, T]] = effect.transform(value => Success(value.toEither))
 }
 
-case object FutureBackend {
+case object FutureSystem {
   /**
    * Effect type.
    *

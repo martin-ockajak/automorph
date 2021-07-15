@@ -1,7 +1,7 @@
 package automorph
 
 import io.undertow.Undertow
-import automorph.system.IdentityBackend.Identity
+import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.endpoint.UndertowHandlerEndpoint.defaultErrorStatus
 import automorph.transport.http.server.UndertowServer.defaultBuilder
 import automorph.transport.http.endpoint.UndertowHandlerEndpoint
