@@ -6,6 +6,7 @@ import automorph.util.EmptyContext
 import scala.concurrent.{ExecutionContext, Future}
 
 case object DefaultHandler {
+
   /** Default requet handler type. */
   type Type[Effect[_], Context] = Handler[DefaultMessageFormat.Node, DefaultMessageFormat.Type, Effect, Context]
 

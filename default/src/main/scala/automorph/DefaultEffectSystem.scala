@@ -6,6 +6,7 @@ import automorph.spi.EffectSystem
 import scala.concurrent.{ExecutionContext, Future}
 
 case object DefaultEffectSystem {
+
   /** Default synchronous effect type. */
   type SyncEffect[T] = Future[T]
 

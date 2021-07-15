@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.system.IdentityBackend.Identity
-import automorph.spi.{EffectSystem, ClientMessageTransport}
+import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.client.SttpClient
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
@@ -9,6 +9,7 @@ import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
 import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 
 case object DefaultHttpClientTransport {
+
   /**
    * Default message transport type.
    *

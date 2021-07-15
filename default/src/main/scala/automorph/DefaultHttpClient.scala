@@ -2,7 +2,7 @@ package automorph
 
 import automorph.system.IdentityBackend.Identity
 import automorph.codec.json.UpickleJsonCodec
-import automorph.spi.{EffectSystem, ClientMessageTransport}
+import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.client.SttpClient
 import java.net.URL
 import scala.concurrent.{ExecutionContext, Future}
@@ -10,6 +10,7 @@ import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
 import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 
 case object DefaultHttpClient {
+
   /**
    * Default client type.
    *
@@ -35,7 +36,8 @@ case object DefaultHttpClient {
   def apply[Effect[_], RequestContext](
     backend: EffectSystem[Effect],
     transport: ClientMessageTransport[Effect, RequestContext]
-  ): Client[DefaultMessageFormat.Node, DefaultMessageFormat.Type, Effect, RequestContext] = Client(UpickleJsonCodec(), backend, transport)
+  ): Client[DefaultMessageFormat.Node, DefaultMessageFormat.Type, Effect, RequestContext] =
+    Client(UpickleJsonCodec(), backend, transport)
 
   /**
    * Creates a default JSON-RPC client using HTTP as message transport protocol with specified ''backend'' plugin.
