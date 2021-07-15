@@ -1,6 +1,6 @@
 package test.format.json
 
-import argonaut.Argonaut.{jArray, jBool, jNumber, jString, jObjectAssocList, ToJsonIdentity}
+import argonaut.Argonaut.{jArray, jBool, jNumber, jString, jObjectAssocList}
 import argonaut.{Argonaut, CodecJson, Json}
 import automorph.format.json.ArgonautJsonFormat
 import org.scalacheck.{Arbitrary, Gen}
