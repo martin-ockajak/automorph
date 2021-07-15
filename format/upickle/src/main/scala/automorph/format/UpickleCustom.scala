@@ -1,4 +1,4 @@
-package automorph.codec.common
+package automorph.format
 
 import upickle.AttributeTagged
 import upickle.core.{Abort, Util}

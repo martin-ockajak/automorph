@@ -1,4 +1,4 @@
-package automorph.codec.json
+package automorph.format.json
 
 import automorph.spi.{Message, MessageError}
 import ujson.Value

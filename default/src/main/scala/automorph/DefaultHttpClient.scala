@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.system.IdentitySystem.Identity
-import automorph.codec.json.UpickleJsonFormat
+import automorph.format.json.UpickleJsonFormat
 import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.client.SttpClient
 import java.net.URL

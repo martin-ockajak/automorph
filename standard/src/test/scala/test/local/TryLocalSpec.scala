@@ -15,5 +15,5 @@ class TryLocalSpec extends FormatCoreSpec {
 
   override def run[T](effect: Effect[T]): T = effect.get
 
-  override def backend: EffectSystem[Effect] = TrySystem()
+  override def system: EffectSystem[Effect] = TrySystem()
 }

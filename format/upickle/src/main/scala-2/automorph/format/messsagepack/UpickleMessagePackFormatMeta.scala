@@ -1,13 +1,13 @@
-package automorph.codec.messagepack
+package automorph.format.messagepack
 
-import automorph.codec.common.UpickleCustom
+import automorph.format.UpickleCustom
 import automorph.spi.MessageFormat
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 import upack.Msg
 
 /**
- * UPickle MessagePack codec plugin code generation.
+ * UPickle MessagePack format plugin code generation.
  *
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */

@@ -6,7 +6,7 @@ import automorph.spi.EffectSystem
 import scala.util.Try
 
 class IdentitySystemSpec extends SystemSpec[Identity] {
-  def effect: EffectSystem[Identity] = IdentitySystem()
+  def system: EffectSystem[Identity] = IdentitySystem()
 
   def run[T](effect: Identity[T]): Either[Throwable, T] = Try(effect).toEither
 }

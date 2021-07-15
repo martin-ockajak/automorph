@@ -14,7 +14,7 @@ class ScalazLocalSpec extends FormatCoreSpec {
 
   override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
-  override lazy val backend: EffectSystem[Effect] = ScalazSystem()
+  override lazy val system: EffectSystem[Effect] = ScalazSystem()
 
   override def run[T](effect: Effect[T]): T = effect.unsafePerformIO()
 }

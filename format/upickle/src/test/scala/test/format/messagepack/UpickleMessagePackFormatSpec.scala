@@ -1,12 +1,12 @@
-package test.codec.messagepack
+package test.format.messagepack
 
-import automorph.codec.common.UpickleCustom
-import automorph.codec.messagepack.UpickleMessagePackFormat
+import automorph.format.messagepack.UpickleMessagePackFormat
+import automorph.format.UpickleCustom
 import org.scalacheck.{Arbitrary, Gen}
 import scala.annotation.nowarn
 import scala.collection.mutable.LinkedHashMap
 import test.Generators.arbitraryRecord
-import test.codec.FormatSpec
+import test.format.FormatSpec
 import test.{Enum, Record, Structure}
 import upack.{Arr, Bool, Float64, Msg, Obj, Str}
 
@@ -15,7 +15,7 @@ class UpickleMessagePackSpec extends FormatSpec {
   type Node = Msg
   type ActualFormat = UpickleMessagePackFormat[UpickleMessagePackFormatSpec.type]
 
-  override def codec: ActualFormat = UpickleMessagePackFormat(UpickleMessagePackFormatSpec)
+  override def format: ActualFormat = UpickleMessagePackFormat(UpickleMessagePackFormatSpec)
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
@@ -27,15 +27,15 @@ class UpickleMessagePackSpec extends FormatSpec {
     )
   ))
 
-  private lazy val custom = codec.custom
+  private lazy val custom = format.custom
   implicit private lazy val recordRw: custom.ReadWriter[Record] = custom.macroRW
   Seq(recordRw)
 
   "" - {
     "Encode / Decode" in {
       check { (record: Record) =>
-        val encodedValue = codec.encode(record)
-        val decodedValue = codec.decode[Record](encodedValue)
+        val encodedValue = format.encode(record)
+        val decodedValue = format.decode[Record](encodedValue)
         decodedValue.equals(record)
       }
     }

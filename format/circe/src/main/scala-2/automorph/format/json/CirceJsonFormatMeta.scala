@@ -1,4 +1,4 @@
-package automorph.codec.json
+package automorph.format.json
 
 import io.circe.Json
 import automorph.spi.MessageFormat
@@ -6,7 +6,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /**
- * Circe JSON codec plugin code generation.
+ * Circe JSON format plugin code generation.
  */
 private[automorph] trait CirceJsonFormatMeta extends MessageFormat[Json] {
 

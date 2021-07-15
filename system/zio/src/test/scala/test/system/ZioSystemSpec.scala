@@ -8,7 +8,7 @@ import zio.{RIO, Runtime, ZEnv}
 class ZioSystemSpec extends SystemSpec[({ type Effect[T] = RIO[ZEnv, T] })#Effect] {
   private lazy val runtime = Runtime.default.withReportFailure(_ => ())
 
-  def effect: EffectSystem[({ type Effect[T] = RIO[ZEnv, T] })#Effect] = ZioSystem[ZEnv]()
+  def system: EffectSystem[({ type Effect[T] = RIO[ZEnv, T] })#Effect] = ZioSystem[ZEnv]()
 
   def run[T](effect: RIO[ZEnv, T]): Either[Throwable, T] = Try(runtime.unsafeRunTask(effect)).toEither
 }

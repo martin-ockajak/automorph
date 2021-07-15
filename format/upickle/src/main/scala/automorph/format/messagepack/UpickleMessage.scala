@@ -1,4 +1,4 @@
-package automorph.codec.messagepack
+package automorph.format.messagepack
 
 import automorph.spi.{Message, MessageError}
 import upack.Msg

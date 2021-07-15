@@ -5,7 +5,7 @@ import scala.util.{Failure, Success, Try}
 import test.base.BaseSpec
 
 /**
- * System test.
+ * Effect system test.
  *
  * Checks effect type operations.
  *
@@ -17,31 +17,31 @@ trait SystemSpec[Effect[_]] extends BaseSpec {
 
   case class TestException(message: String) extends RuntimeException(message)
 
-  def effect: EffectSystem[Effect]
+  def system: EffectSystem[Effect]
 
   def run[T](effect: Effect[T]): Either[Throwable, T]
 
   "" - {
     "Pure" in {
-      val outcome = effect.pure(text)
+      val outcome = system.pure(text)
       run(outcome).should(equal(Right(text)))
     }
     "Failed" in {
-      Try(effect.failed(TestException(text))) match {
+      Try(system.failed(TestException(text))) match {
         case Success(outcome) => run(outcome).should(equal(Left(TestException(text))))
         case Failure(error) => error.should(equal(TestException(text)))
       }
     }
     "Map" in {
-      val outcome = effect.map(effect.pure(text), (result: String) => s"$result$number")
+      val outcome = system.map(system.pure(text), (result: String) => s"$result$number")
       run(outcome).should(equal(Right(s"$text$number")))
     }
     "Flatmap" in {
-      val outcome = effect.flatMap(effect.pure(text), (result: String) => effect.pure(s"$result$number"))
+      val outcome = system.flatMap(system.pure(text), (result: String) => system.pure(s"$result$number"))
       run(outcome).should(equal(Right(s"$text$number")))
     }
     "Either" in {
-      val outcome = effect.either(effect.pure(text))
+      val outcome = system.either(system.pure(text))
       run(outcome).should(equal(Right(Right(text))))
     }
   }

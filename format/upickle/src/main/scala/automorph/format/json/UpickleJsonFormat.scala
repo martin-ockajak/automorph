@@ -1,16 +1,16 @@
-package automorph.codec.json
+package automorph.format.json
 
-import automorph.codec.common.{DefaultUpickleCustom, UpickleCustom}
+import automorph.format.{DefaultUpickleCustom, UpickleCustom}
 import automorph.spi.Message
 import scala.collection.immutable.ArraySeq
 import ujson.Value
 
 /**
- * uPickle codec plugin using JSON as message format.
+ * uPickle message format plugin using JSON as message format.
  *
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[http://com-lihaoyi.github.io/upickle/#uJson Node type]]
- * @constructor Creates an uPickle codec plugin using JSON as message format.
+ * @constructor Creates an uPickle format plugin using JSON as message format.
  * @param custom customized Upickle reader and writer implicits instance
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */

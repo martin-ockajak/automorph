@@ -1,4 +1,4 @@
-package automorph.codec.json
+package automorph.format.json
 
 import argonaut.Json
 import automorph.spi.MessageFormat
@@ -6,7 +6,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /**
- * Argonaut JSON codec plugin code generation.
+ * Argonaut JSON format plugin code generation.
  */
 private[automorph] trait ArgonautJsonFormatMeta extends MessageFormat[Json] {
 
@@ -22,7 +22,7 @@ private[automorph] object ArgonautJsonFormatMeta {
 
     c.Expr[Json](q"""
       import argonaut.Argonaut.ToJsonIdentity
-      implicit val noneCodecJson: argonaut.CodecJson[None.type] = automorph.codec.json.ArgonautJsonFormat.noneCodecJson
+      implicit val noneCodecJson: argonaut.CodecJson[None.type] = automorph.format.json.ArgonautJsonFormat.noneCodecJson
       $value.asJson
     """)
   }
@@ -32,7 +32,7 @@ private[automorph] object ArgonautJsonFormatMeta {
 
     c.Expr[T](q"""
       import argonaut.Argonaut.ToJsonIdentity
-      implicit val noneCodecJson: argonaut.CodecJson[None.type] = automorph.codec.json.ArgonautJsonFormat.noneCodecJson
+      implicit val noneCodecJson: argonaut.CodecJson[None.type] = automorph.format.json.ArgonautJsonFormat.noneCodecJson
       $node.as[${weakTypeOf[T]}].fold(
         (errorMessage, _) => throw new IllegalArgumentException(errorMessage),
         identity

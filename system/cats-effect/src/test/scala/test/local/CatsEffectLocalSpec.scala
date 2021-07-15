@@ -14,7 +14,7 @@ class CatsEffectLocalSpec extends FormatCoreSpec {
 
   override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
-  override lazy val backend: EffectSystem[Effect] = CatsEffectSystem()
+  override lazy val system: EffectSystem[Effect] = CatsEffectSystem()
 
   override def run[T](effect: Effect[T]): T = effect.unsafeRunSync()
 }

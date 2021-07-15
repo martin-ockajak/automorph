@@ -1,4 +1,4 @@
-package automorph.codec.json
+package automorph.format.json
 
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
@@ -8,11 +8,11 @@ import automorph.spi.{Message, MessageError}
 import scala.collection.immutable.ArraySeq
 
 /**
- * Circe codec plugin using JSON as message format.
+ * Circe message format plugin using JSON as message format.
  *
  * @see [[https://circe.github.io/circe Documentation]]
  * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
- * @constructor Creates a Circe codec plugin using JSON as message format.
+ * @constructor Creates a Circe format plugin using JSON as message format.
  */
 final case class CirceJsonFormat() extends CirceJsonFormatMeta {
 

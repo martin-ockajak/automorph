@@ -2,9 +2,9 @@ package test
 
 import argonaut.Argonaut.jNumber
 import argonaut.{Argonaut, CodecJson}
-import automorph.codec.common.UpickleCustom
-import automorph.codec.json.{ArgonautJsonFormat, CirceJsonFormat, UpickleJsonFormat}
-import automorph.codec.messagepack.UpickleMessagePackFormat
+import automorph.format.UpickleCustom
+import automorph.format.json.{ArgonautJsonFormat, CirceJsonFormat, UpickleJsonFormat}
+import automorph.format.messagepack.UpickleMessagePackFormat
 import automorph.spi.ClientMessageTransport
 import automorph.transport.local.client.HandlerTransport
 import automorph.{Client, Handler}
@@ -16,18 +16,18 @@ trait FormatCoreSpec extends CoreSpec {
 
   def customTransport: Option[ClientMessageTransport[Effect, Context]] = None
 
-  def codecFixtures: Seq[FormatFixture] = {
+  def formatFixtures: Seq[FormatFixture] = {
     implicit val usingContext: Context = contextValue
     Seq(
       {
-        val codec = UpickleJsonFormat(FormatCoreSpec)
-        val handler = Handler[UpickleJsonFormat.Node, UpickleJsonFormat[FormatCoreSpec.type], Effect, Context](codec, backend)
+        val format = UpickleJsonFormat(FormatCoreSpec)
+        val handler = Handler[UpickleJsonFormat.Node, UpickleJsonFormat[FormatCoreSpec.type], Effect, Context](format, system)
           .bind(simpleApiInstance).bind(complexApiInstance)
-        val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
+        val transport = customTransport.getOrElse(HandlerTransport(handler, system, contextValue))
         val client: Client[UpickleJsonFormat.Node, UpickleJsonFormat[FormatCoreSpec.type], Effect, Context] =
-          Client(codec, backend, transport)
+          Client(format, system, transport)
         FormatFixture(
-          codec.getClass,
+          format.getClass,
           client,
           handler,
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
@@ -39,14 +39,14 @@ trait FormatCoreSpec extends CoreSpec {
           (method, p1) => client.method(method).args(p1).tell
         )
       }, {
-        val codec = UpickleMessagePackFormat(FormatCoreSpec)
-        val handler = Handler[UpickleMessagePackFormat.Node, UpickleMessagePackFormat[FormatCoreSpec.type], Effect, Context](codec, backend)
+        val format = UpickleMessagePackFormat(FormatCoreSpec)
+        val handler = Handler[UpickleMessagePackFormat.Node, UpickleMessagePackFormat[FormatCoreSpec.type], Effect, Context](format, system)
           .bind(simpleApiInstance).bind(complexApiInstance)
-        val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
+        val transport = customTransport.getOrElse(HandlerTransport(handler, system, contextValue))
         val client: Client[UpickleMessagePackFormat.Node, UpickleMessagePackFormat[FormatCoreSpec.type], Effect, Context] =
-          Client(codec, backend, transport)
+          Client(format, system, transport)
         FormatFixture(
-          codec.getClass,
+          format.getClass,
           client,
           handler,
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
@@ -62,14 +62,14 @@ trait FormatCoreSpec extends CoreSpec {
         implicit lazy val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
         implicit lazy val structureEncoder: Encoder[Structure] = deriveEncoder[Structure]
         implicit lazy val structureDecoder: Decoder[Structure] = deriveDecoder[Structure]
-        val codec = CirceJsonFormat()
-        val handler = Handler[CirceJsonFormat.Node, CirceJsonFormat, Effect, Context](codec, backend)
+        val format = CirceJsonFormat()
+        val handler = Handler[CirceJsonFormat.Node, CirceJsonFormat, Effect, Context](format, system)
           .bind(simpleApiInstance).bind(complexApiInstance)
-        val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
+        val transport = customTransport.getOrElse(HandlerTransport(handler, system, contextValue))
         val client: Client[CirceJsonFormat.Node, CirceJsonFormat, Effect, Context] =
-          Client(codec, backend, transport)
+          Client(format, system, transport)
         FormatFixture(
-          codec.getClass,
+          format.getClass,
           client,
           handler,
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
@@ -121,14 +121,14 @@ trait FormatCoreSpec extends CoreSpec {
             "structure",
             "none"
           )
-        val codec = ArgonautJsonFormat()
-        val handler = Handler[ArgonautJsonFormat.Node, ArgonautJsonFormat, Effect, Context](codec, backend)
+        val format = ArgonautJsonFormat()
+        val handler = Handler[ArgonautJsonFormat.Node, ArgonautJsonFormat, Effect, Context](format, system)
           .bind(simpleApiInstance).bind(complexApiInstance)
-        val transport = customTransport.getOrElse(HandlerTransport(handler, backend, contextValue))
+        val transport = customTransport.getOrElse(HandlerTransport(handler, system, contextValue))
         val client: Client[ArgonautJsonFormat.Node, ArgonautJsonFormat, Effect, Context] =
-          Client(codec, backend, transport)
+          Client(format, system, transport)
         FormatFixture(
-          codec.getClass,
+          format.getClass,
           client,
           handler,
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),

@@ -1,11 +1,11 @@
-package test.codec.json
+package test.format.json
 
 import argonaut.Argonaut.{jArray, jBool, jNumber, jString, jObjectAssocList, ToJsonIdentity}
 import argonaut.{Argonaut, CodecJson, Json}
-import automorph.codec.json.ArgonautJsonFormat
+import automorph.format.json.ArgonautJsonFormat
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
-import test.codec.FormatSpec
+import test.format.FormatSpec
 import test.{Enum, Record, Structure}
 
 class ArgonautJsonFormatSpec extends FormatSpec {
@@ -13,7 +13,7 @@ class ArgonautJsonFormatSpec extends FormatSpec {
   type Node = Json
   type ActualFormat = ArgonautJsonFormat
 
-  override def codec: ActualFormat = ArgonautJsonFormat()
+  override def format: ActualFormat = ArgonautJsonFormat()
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
@@ -71,8 +71,8 @@ class ArgonautJsonFormatSpec extends FormatSpec {
   "" - {
     "Encode / Decode" in {
       check { (record: Record) =>
-        val encodedValue = codec.encode(record)
-        val decodedValue = codec.decode[Record](encodedValue)
+        val encodedValue = format.encode(record)
+        val decodedValue = format.decode[Record](encodedValue)
         decodedValue.equals(record)
       }
     }

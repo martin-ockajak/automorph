@@ -6,7 +6,7 @@ import scala.util.Try
 import scalaz.effect.IO
 
 class ScalazSystemSpec extends SystemSpec[IO] {
-  def effect: EffectSystem[IO] = ScalazSystem()
+  def system: EffectSystem[IO] = ScalazSystem()
 
   def run[T](effect: IO[T]): Either[Throwable, T] = Try(effect.unsafePerformIO()).toEither
 }

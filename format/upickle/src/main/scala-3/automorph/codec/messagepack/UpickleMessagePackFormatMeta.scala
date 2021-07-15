@@ -1,12 +1,12 @@
-package automorph.codec.messagepack
+package automorph.format.messagepack
 
-import automorph.codec.common.UpickleCustom
+import automorph.format.UpickleCustom
 import automorph.spi.MessageFormat
 import scala.compiletime.summonInline
 import upack.Msg
 
 /**
- * UPickle JSON codec plugin code generation.
+ * UPickle JSON format plugin code generation.
  *
  * @tparam Custom custom Upickle reader and writer implicits instance type
  */

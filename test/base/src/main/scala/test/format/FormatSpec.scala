@@ -1,4 +1,4 @@
-package test.codec
+package test.format
 
 import java.nio.charset.StandardCharsets
 import automorph.spi.{MessageFormat, Message}
@@ -7,7 +7,7 @@ import test.Generators
 import test.base.BaseSpec
 
 /**
- * Format test.
+ * Message format test.
  *
  * Checks message serialization, deserialization and formatting.
  */
@@ -16,7 +16,7 @@ trait FormatSpec extends BaseSpec {
   type Node
   type ActualFormat <: MessageFormat[Node]
 
-  def codec: ActualFormat
+  def format: ActualFormat
 
   implicit def arbitraryNode: Arbitrary[Node]
 
@@ -27,15 +27,15 @@ trait FormatSpec extends BaseSpec {
 
     "Serialize / Deserialize" in {
       check { (message: Message[Node]) =>
-        val rawMessage = codec.serialize(message)
-        val formedMessage = codec.deserialize(rawMessage)
+        val rawMessage = format.serialize(message)
+        val formedMessage = format.deserialize(rawMessage)
         formedMessage.equals(message)
       }
     }
     "Format" in {
       check { (message: Message[Node]) =>
-        val formattedMessage = codec.format(message)
-        val rawMessage = codec.serialize(message)
+        val formattedMessage = format.format(message)
+        val rawMessage = format.serialize(message)
         formattedMessage.getBytes(charset).length > rawMessage.size
       }
     }

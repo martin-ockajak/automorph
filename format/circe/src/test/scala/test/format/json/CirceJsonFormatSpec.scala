@@ -1,12 +1,12 @@
-package test.codec.json
+package test.format.json
 
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Json}
-import automorph.codec.json.CirceJsonFormat
+import automorph.format.json.CirceJsonFormat
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
-import test.codec.FormatSpec
+import test.format.FormatSpec
 import test.{Enum, Record, Structure}
 
 class CirceJsonFormatSpec extends FormatSpec {
@@ -14,7 +14,7 @@ class CirceJsonFormatSpec extends FormatSpec {
   type Node = Json
   type ActualFormat = CirceJsonFormat
 
-  override def codec: ActualFormat = CirceJsonFormat()
+  override def format: ActualFormat = CirceJsonFormat()
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
@@ -34,8 +34,8 @@ class CirceJsonFormatSpec extends FormatSpec {
   "" - {
     "Encode / Decode" in {
       check { (record: Record) =>
-        val encodedValue = codec.encode(record)
-        val decodedValue = codec.decode[Record](encodedValue)
+        val encodedValue = format.encode(record)
+        val decodedValue = format.decode[Record](encodedValue)
         decodedValue.equals(record)
       }
     }

@@ -3,7 +3,7 @@ package test.transport.http.server
 import io.undertow.Handlers
 import io.undertow.server.handlers.BlockingHandler
 import automorph.Handler
-import automorph.codec.json.UpickleJsonFormat
+import automorph.format.json.UpickleJsonFormat
 import automorph.transport.http.endpoint.UndertowHandlerEndpoint
 import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity

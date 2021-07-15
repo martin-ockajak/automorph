@@ -38,19 +38,19 @@ trait CoreSpec extends BaseSpec {
 
   implicit def arbitraryContext: Arbitrary[Context]
 
-  def backend: EffectSystem[Effect]
+  def system: EffectSystem[Effect]
 
   def run[T](effect: Effect[T]): T
 
-  def codecFixtures: Seq[FormatFixture]
+  def formatFixtures: Seq[FormatFixture]
 
-  val simpleApiInstance: SimpleApiType = SimpleApiImpl(backend)
-  val complexApiInstance: ComplexApiType = ComplexApiImpl(backend)
-  val invalidApiInstance: InvalidApiType = InvalidApiImpl(backend)
+  val simpleApiInstance: SimpleApiType = SimpleApiImpl(system)
+  val complexApiInstance: ComplexApiType = ComplexApiImpl(system)
+  val invalidApiInstance: InvalidApiType = InvalidApiImpl(system)
   val apiNames = Seq("Named", "Positional")
 
   "" - {
-    codecFixtures.lastOption.foreach { fixture =>
+    formatFixtures.lastOption.foreach { fixture =>
       fixture.format.getSimpleName.replaceAll("MessageFormat$", "") - {
         "Proxy" - {
           "Call" - {

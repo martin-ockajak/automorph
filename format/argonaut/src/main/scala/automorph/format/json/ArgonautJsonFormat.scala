@@ -1,4 +1,4 @@
-package automorph.codec.json
+package automorph.format.json
 
 import argonaut.Argonaut.{jNull, StringToParseWrap, ToJsonIdentity}
 import argonaut.{Argonaut, CodecJson, DecodeResult, Json}
@@ -7,7 +7,7 @@ import automorph.spi.{Message, MessageError}
 import scala.collection.immutable.ArraySeq
 
 /**
- * Argonaut codec plugin using JSON as message format.
+ * Argonaut message format plugin using JSON as message format.
  *
  * @see [[http://argonaut.io/doc/]]
  * @see [[http://argonaut.io/scaladocs/#argonaut.Json Node type]]

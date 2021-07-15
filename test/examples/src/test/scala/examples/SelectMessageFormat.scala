@@ -1,6 +1,6 @@
 package examples
 
-import automorph.codec.json.CirceJsonFormat
+import automorph.format.json.CirceJsonFormat
 import automorph.transport.http.endpoint.UndertowHandlerEndpoint
 import automorph.transport.http.server.UndertowServer
 import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, Handler}

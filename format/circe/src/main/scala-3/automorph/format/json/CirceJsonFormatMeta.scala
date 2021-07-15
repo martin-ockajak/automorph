@@ -1,4 +1,4 @@
-package automorph.codec.json
+package automorph.format.json
 
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.syntax.EncoderOps
@@ -6,7 +6,7 @@ import automorph.spi.MessageFormat
 import scala.compiletime.summonInline
 
 /**
- * Circe JSON codec plugin code generation.
+ * Circe JSON format plugin code generation.
  */
 private[automorph] trait CirceJsonFormatMeta extends MessageFormat[Json]:
 
