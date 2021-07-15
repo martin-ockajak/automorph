@@ -155,7 +155,7 @@ lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
 ).settings(
   name := "automorph-rabbitmq",
   libraryDependencies ++= Seq(
-    "com.rabbitmq" % "amqp-client" % "5.12.0"
+    "com.rabbitmq" % "amqp-client" % "5.13.0"
   )
 )
 
@@ -175,7 +175,7 @@ lazy val jetty = (project in file("transport/jetty")).dependsOn(
   name := "automorph-jetty",
   libraryDependencies ++= Seq(
     "org.eclipse.jetty" % "jetty-servlet" % "11.0.6",
-    "commons-io" % "commons-io" % "2.10.0"
+    "commons-io" % "commons-io" % "2.11.0"
   )
 )
 lazy val finagle = (project in file("transport/finagle")).dependsOn(
