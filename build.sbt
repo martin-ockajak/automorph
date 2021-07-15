@@ -297,8 +297,16 @@ Test / test := ((Test / test) dependsOn testScalastyle).value
 
 // Documentation
 ThisBuild / autoAPIMappings := true
-apiURL := Some(url("https://javadoc.io/doc/io.jsonrpc/jsonrpc-core_3/latest"))
-ScalaUnidoc / unidoc / scalacOptions += "-Ymacro-expand:none"
+apiURL := Some(url("https://javadoc.io/doc/io.automorph/automorph-core_3/latest"))
+ScalaUnidoc / unidoc / scalacOptions ++= Seq(
+  "-Ymacro-expand:none",
+  "-groups",
+  "-implicits",
+  "-doc-source-url",
+  scmInfo.value.get.browseUrl + "/tree/main${FILE_PATH}.scala",
+  "-sourcepath",
+  (LocalRootProject / baseDirectory).value.getAbsolutePath
+)
 //Compile / doc / scalacOptions ++= Seq("-groups", "-implicits")
 
 
@@ -312,8 +320,8 @@ ThisBuild / githubWorkflowPublish := Seq(WorkflowStep.Sbt(List("ci-release")))
 // Release
 ThisBuild / releaseCrossBuild := true
 ThisBuild / scmInfo := Some(ScmInfo(
-  url("https://github.com/jsonrpc/jsonrpc"),
-  "scm:git:git@github.com:jsonrpc/jsonrpc.git"
+  url("https://github.com/martin-ockajak/automorph"),
+  "scm:git:git@github.com/martin-ockajak/automorph.git"
 ))
 ThisBuild / releaseVcsSign := true
 ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
