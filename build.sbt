@@ -137,16 +137,17 @@ lazy val scalaz = (project in file("system/scalaz")).dependsOn(
 )
 
 // Transport
+val sttpVersion = "3.3.11"
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
   spi, testCore % Test, standard % Test
 ).settings(
   name := "automorph-sttp",
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "core" % "3.3.9",
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.9" % Test
+    "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test
   ),
 //  apiMappings += (
-//    (unmanagedBase.value / "core_3-3.3.9.jar") -> 
+//    (unmanagedBase.value / s"core_3-${sttpVersion}.jar") -> 
 //      url("https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_2.13/latest/")
 //  )
 )
@@ -191,7 +192,7 @@ lazy val tapir = (project in file("transport/tapir")).dependsOn(
 ).settings(
   name := "automorph-tapir",
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.18.0-M18"
+    "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.18.0"
   )
 )
 
@@ -211,7 +212,7 @@ lazy val default = project.dependsOn(
 ).settings(
   name := "automorph-default",
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.9"
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion
   )
 )
 
@@ -220,7 +221,7 @@ lazy val examples = (project in file("test/examples")).dependsOn(
   default, circe, zio
 ).settings(
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.3.9"
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion
   )
 )
 // Test
