@@ -22,9 +22,9 @@ object SelectMessageTransport extends App {
   val server = NanoHttpdServer(handler.bind(api), runEffect, 80)
 
   // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val clientTransport = UrlConnectionClient(new URL("http://localhost/api"), "POST")
+  val transport = UrlConnectionClient(new URL("http://localhost/api"), "POST")
   val client: Client[DefaultMessageFormat.Node, format.type, Identity, UrlConnectionClient.Context] =
-    Client(format, system, clientTransport)
+    Client(format, system, transport)
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api

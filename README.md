@@ -485,8 +485,8 @@ val api = new Api()
 ```scala
 import automorph.system.ZioBackend
 
-// Create computational effect system
-val system = automorph.system.ZioBackend[Any]()
+// Custom effectful computation backend plugin
+val system = ZioBackend[Any]()
 val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
 
 // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
@@ -503,8 +503,8 @@ import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 
 // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
-val system = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
-val client = automorph.DefaultHttpClient("http://localhost/api", "POST", system, system)
+val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
+val client = automorph.DefaultHttpClient("http://localhost/api", "POST", system, backend)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
@@ -531,10 +531,10 @@ import automorph.transport.http.server.NanoHttpdServer
 import automorph.{Client, DefaultBackend, DefaultFormat, Handler}
 
 // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-val system = DefaultBackend.sync
+val system = DefaultEffectSystem.sync
 val runEffect = (effect: Identity[NanoHttpdServer.Response]) => effect
-val format = DefaultFormat()
-val handler = Handler[DefaultFormat.Node, format.type, Identity, NanoHttpdServer.Context](format, system)
+val format = DefaultMessageFormat()
+val handler = Handler[DefaultMessageFormat.Node, format.type, Identity, NanoHttpdServer.Context](format, system)
 val server = NanoHttpdServer(handler.bind(api), runEffect, 80)
 
 // Stop the server
@@ -548,8 +548,8 @@ import automorph.transport.http.client.UrlConnectionTransport
 import java.net.URL
 
 // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
-val transport = UrlConnectionTransport(new URL("http://localhost/api"), "POST")
-val client: Client[DefaultFormat.Node, format.type, Identity, UrlConnectionTransport.Context] =
+val transport = UrlConnectionClient(new URL("http://localhost/api"), "POST")
+val client: Client[DefaultMessageFormat.Node, format.type, Identity, UrlConnectionClient.Context] =
   Client(format, system, transport)
 
 // Call the remote API method via proxy
@@ -592,11 +592,11 @@ import automorph.{Client, DefaultBackend, DefaultHttpTransport, Handler}
 import io.circe.generic.auto._
 
 // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-val system = DefaultBackend.async
+val system = DefaultEffectSystem.async
 val runEffect = (effect: Future[_]) => effect
-val format = CirceJsonFormat()
-val handler = Handler[CirceJsonFormat.Node, format.type, Future, UndertowJsonRpcHandler.Context](format, system)
-val server = UndertowServer(UndertowJsonRpcHandler(handler.bind(api), runEffect), 80, "/api")
+val format = CirceJsonCodec()
+val handler = Handler[CirceJsonCodec.Node, format.type, Future, UndertowHandlerEndpoint.Context](format, system)
+val server = UndertowServer(UndertowHandlerEndpoint(handler.bind(api), runEffect), 80, "/api")
 
 // Stop the server
 server.close()
@@ -605,10 +605,10 @@ server.close()
 ### Client
 
 ```scala
-// Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
-val clientTransport = DefaultHttpTransport.async("http://localhost/api", "POST")
-val client: Client[CirceJsonFormat.Node, format.type, Future, DefaultHttpTransport.Context] =
-  Client(format, system, clientTransport)
+  // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+val transport = DefaultHttpClientTransport.async("http://localhost/api", "POST")
+val client: Client[CirceJsonCodec.Node, format.type, Future, DefaultHttpClientTransport.Context] =
+  Client(format, system, transport)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
