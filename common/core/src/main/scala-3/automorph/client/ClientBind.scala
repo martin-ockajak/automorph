@@ -1,5 +1,6 @@
 package automorph.client
 
+import automorph.Client
 import automorph.client.{ClientBindings, ClientCore}
 import automorph.spi.MessageFormat
 import java.lang.reflect.Proxy
@@ -61,6 +62,9 @@ private[automorph] trait ClientBind[Node, ActualFormat <: MessageFormat[Node], E
     ClientBind.generalBind[Node, ActualFormat, Effect, Context, Api](core, namedArguments = false)
 
 object ClientBind:
+
+  /** Client with arbitrary format. */
+  type AnyFormat[Effect[_], Context] = Client[_, _, Effect, Context]
 
   inline def generalBind[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
     clientCore: ClientCore[Node, ActualFormat, Effect, Context],

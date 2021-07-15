@@ -1,5 +1,6 @@
 package automorph.client
 
+import automorph.Client
 import automorph.spi.MessageFormat
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -59,6 +60,9 @@ ne
 }
 
 object ClientBind {
+  /** Client with arbitrary format. */
+  type AnyFormat[Effect[_], Context] = Client[Node, _ <: MessageFormat[Node], Effect, Context] forSome { type Node }
+
   def bindNamedMacro[
     Node: c.WeakTypeTag,
     ActualFormat <: MessageFormat[Node]: c.WeakTypeTag,

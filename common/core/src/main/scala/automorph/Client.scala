@@ -68,9 +68,6 @@ final case class Client[Node, ActualFormat <: MessageFormat[Node], Effect[_], Co
 
 case object Client {
 
-  /** Handler with arbitrary format. */
-  type AnyFormat[Effect[_], Context] = Client[_, _, Effect, Context]
-
   /**
    * Creates a JSON-RPC client with empty request context and specified ''format'', ''system'' and ''transport'' plugins.
    *
