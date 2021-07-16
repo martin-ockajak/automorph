@@ -7,35 +7,38 @@ import java.net.URL
 import scala.util.Try
 
 /** Common RabbitMQ functionality. */
-object RabbitMqCommon extends Logging {
+private[automorph] object RabbitMqCommon extends Logging {
+
+  /** Default direct AMQP message exchange name. */
+  val defaultDirectExchange: String = ""
 
   /**
-   * Initialize AMQP server connection.
+   * Initialize AMQP broker connection.
    *
-   * @param url AMQP server URL
-   * @param addresses broker hostnames and ports for connection attempts
-   * @param clientName client name
-   * @return AMQP server connection, virtual host
+   * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
+   * @param addresses broker hostnames and ports for reconnection attempts
+   * @param connectionFactory connection factory
+   * @param connectionName connection name
+   * @return AMQP broker connection, virtual host
    */
-  def setupConnection(
+  def connect(
     url: URL,
     addresses: Seq[Address],
-    clientName: String,
-    connectionFactory: ConnectionFactory
-  ): Try[(Connection, String)] = {
-    // initialize connection
+    connectionFactory: ConnectionFactory,
+    connectionName: String
+  ): Try[Connection] = {
     val urlText = url.toExternalForm
-    logger.debug(s"Connecting to RabbitMQ broker: $urlText")
     connectionFactory.setUri(url.toURI)
+    logger.debug(s"Connecting to RabbitMQ broker: $urlText")
     Try {
-      val connection =
-        if (addresses.nonEmpty) {
-          connectionFactory.newConnection(addresses.toArray, clientName)
-        } else {
-          connectionFactory.newConnection(clientName)
-        }
+      if (addresses.nonEmpty) {
+        connectionFactory.newConnection(addresses.toArray, connectionName)
+      } else {
+        connectionFactory.newConnection(connectionName)
+      }
+    }.map { connection =>
       logger.info(s"Connected to RabbitMQ broker: $urlText")
-      (connection, connectionFactory.getVirtualHost)
+      connection
     }.mapFailure { error =>
       logger.error(s"Failed to connect to RabbitMQ broker: $urlText", error)
       error
