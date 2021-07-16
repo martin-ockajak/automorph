@@ -6,7 +6,7 @@ import automorph.system.IdentitySystem.Identity
 import automorph.{Client, DefaultEffectSystem, DefaultMessageFormat, Handler}
 import java.net.URL
 
-object SelectMessageTransport extends App {
+object ChooseMessageTransport extends App {
 
   // Define an API type and create API instance
   class Api {
@@ -32,4 +32,12 @@ object SelectMessageTransport extends App {
 
   // Stop the server
   server.close()
+}
+
+class ChooseMessageTransport extends test.base.BaseSpec {
+  "" - {
+    "Test" ignore {
+      ChooseMessageTransport.main(Array())
+    }
+  }
 }

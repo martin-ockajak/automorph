@@ -37,3 +37,11 @@ object Asynchronous extends App {
   // Stop the server
   server.close()
 }
+
+class Asynchronous extends test.base.BaseSpec {
+  "" - {
+    "Test" ignore {
+      Asynchronous.main(Array())
+    }
+  }
+}

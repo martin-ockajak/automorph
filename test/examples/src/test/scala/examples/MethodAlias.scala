@@ -38,3 +38,12 @@ object MethodAlias extends App {
   // Stop the server
   server.close()
 }
+
+class MethodAlias extends test.base.BaseSpec {
+  "" - {
+    "Test" ignore {
+      MethodAlias.main(Array())
+    }
+  }
+}
+

@@ -31,9 +31,9 @@ way to invoke and expose remote APIs while supporting multiple RPC protocols suc
   - [Asynchronous](#asynchronous)
   - [Request context](#request-context)
   - [Method alias](#method-alias)
-  - [Select effect system](#select-effect-system)
-  - [Select message transport](#select-message-transport)
-  - [Select message format](#select-message-format)
+  - [Choose effect system](#choose-effect-system)
+  - [Choose message transport](#choose-message-transport)
+  - [Choose message format](#choose-message-format)
 
 # Overview
 
@@ -456,7 +456,7 @@ client.method("aliased").args("value" -> None).tell // ()
 Try(client.method("omitted").args().call[String]) // Failure
 ```
 
-## [Select effect system](/examples/src/test/scala/examples/SelectEffectSystem.scala)
+## [Choose effect system](/examples/src/test/scala/examples/ChooseEffectSystem.scala)
 
 ### Dependencies
 
@@ -511,7 +511,7 @@ val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : Task[String]
 ```
 
-## [Select message transport](/examples/src/test/scala/examples/SelectMessageTransport.scala)
+## [Choose message transport](/examples/src/test/scala/examples/ChooseMessageTransport.scala)
 
 ### API
 
@@ -557,7 +557,7 @@ val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : String
 ```
 
-## [Select message format](/examples/src/test/scala/examples/SelectMessageFormat.scala)
+## [Choose message format](/examples/src/test/scala/examples/ChooseMessageFormat.scala)
 
 ### Dependencies
 

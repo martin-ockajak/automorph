@@ -21,3 +21,11 @@ object Synchronous extends App {
   // Stop the server
   server.close()
 }
+
+class Synchronous extends test.base.BaseSpec {
+  "" - {
+    "Test" ignore {
+      Synchronous.main(Array())
+    }
+  }
+}

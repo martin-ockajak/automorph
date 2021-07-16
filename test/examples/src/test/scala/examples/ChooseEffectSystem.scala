@@ -5,7 +5,7 @@ import zio.{Runtime, Task}
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 
-object SelectEffectSystem extends App {
+object ChooseEffectSystem extends App {
 
   // Define an API type and create API instance
   class Api {
@@ -30,4 +30,12 @@ object SelectEffectSystem extends App {
 
   // Stop the server
   server.close()
+}
+
+class ChooseEffectSystem extends test.base.BaseSpec {
+  "" - {
+    "Test" ignore {
+      ChooseEffectSystem.main(Array())
+    }
+  }
 }

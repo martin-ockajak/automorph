@@ -8,7 +8,7 @@ import io.circe.generic.auto._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object SelectMessageFormat extends App {
+object ChooseMessageFormat extends App {
 
   // Define an API type and create API instance
   case class Record(values: List[String])
@@ -35,4 +35,12 @@ object SelectMessageFormat extends App {
 
   // Stop the server
   server.close()
+}
+
+class ChooseMessageFormat extends test.base.BaseSpec {
+  "" - {
+    "Test" ignore {
+      ChooseMessageFormat.main(Array())
+    }
+  }
 }

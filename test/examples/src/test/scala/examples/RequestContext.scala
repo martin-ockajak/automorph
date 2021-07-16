@@ -41,3 +41,11 @@ object RequestContext extends App {
   // Stop the server
   server.close()
 }
+
+class RequestContext extends test.base.BaseSpec {
+  "" - {
+    "Test" ignore {
+      RequestContext.main(Array())
+    }
+  }
+}
