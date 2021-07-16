@@ -1,4 +1,4 @@
-package examples
+package test.examples
 
 import automorph.format.json.CirceJsonFormat
 import automorph.transport.http.endpoint.UndertowHandlerEndpoint

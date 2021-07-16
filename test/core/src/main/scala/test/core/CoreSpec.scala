@@ -1,13 +1,14 @@
-package test
+package test.core
 
+import automorph.Handler
 import automorph.client.ClientBind
 import automorph.protocol.ErrorType.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
 import automorph.spi.EffectSystem
-import automorph.Handler
 import org.scalacheck.Arbitrary
 import scala.util.Try
 import test.Generators.arbitraryRecord
 import test.base.BaseSpec
+import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, Record, SimpleApi, SimpleApiImpl}
 
 /**
  * Main client -> handler API method invocation test.

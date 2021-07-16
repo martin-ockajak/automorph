@@ -4,7 +4,7 @@ import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
-import test.FormatCoreSpec
+import test.core.FormatCoreSpec
 
 class IdentityLocalSpec extends FormatCoreSpec {
 

@@ -1,4 +1,4 @@
-package examples
+package test.examples
 
 import automorph.system.ZioSystem
 import zio.{Runtime, Task}

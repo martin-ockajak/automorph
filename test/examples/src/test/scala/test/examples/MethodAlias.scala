@@ -1,4 +1,4 @@
-package examples
+package test.examples
 
 import scala.util.Try
 

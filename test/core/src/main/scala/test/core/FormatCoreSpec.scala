@@ -1,4 +1,4 @@
-package test
+package test.core
 
 import argonaut.Argonaut.jNumber
 import argonaut.{Argonaut, CodecJson}
@@ -11,6 +11,8 @@ import automorph.{Client, Handler}
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
+import test.core.{CoreSpec, FormatCoreSpec}
+import test.{Enum, Record, Structure}
 
 trait FormatCoreSpec extends CoreSpec {
 

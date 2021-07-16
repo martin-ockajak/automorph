@@ -5,7 +5,7 @@ import cats.effect.unsafe.implicits.global
 import automorph.system.CatsEffectSystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
-import test.FormatCoreSpec
+import test.core.FormatCoreSpec
 
 class CatsEffectLocalSpec extends FormatCoreSpec {
 

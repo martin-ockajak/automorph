@@ -1,6 +1,7 @@
 package test
 
 import automorph.spi.EffectSystem
+import test.{ComplexApi, Enum, InvalidApi, Record, SimpleApi}
 
 trait SimpleApi[Effect[_]] {
 

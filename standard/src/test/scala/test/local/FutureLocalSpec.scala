@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import test.FormatCoreSpec
+import test.core.FormatCoreSpec
 
 class FutureLocalSpec extends FormatCoreSpec {
 

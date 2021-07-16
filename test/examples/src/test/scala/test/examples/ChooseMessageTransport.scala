@@ -1,4 +1,4 @@
-package examples
+package test.examples
 
 import automorph.transport.http.server.NanoHttpdServer
 import automorph.transport.http.client.UrlConnectionClient

@@ -1,4 +1,4 @@
-package examples
+package test.examples
 
 object Synchronous extends App {
 

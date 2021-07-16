@@ -3,7 +3,7 @@ package test.local
 import automorph.system.ZioSystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
-import test.FormatCoreSpec
+import test.core.FormatCoreSpec
 import zio.{RIO, Runtime, ZEnv}
 
 class ZioLocalSpec extends FormatCoreSpec {

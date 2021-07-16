@@ -4,7 +4,7 @@ import automorph.system.TrySystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import scala.util.Try
-import test.FormatCoreSpec
+import test.core.FormatCoreSpec
 
 class TryLocalSpec extends FormatCoreSpec {
 
