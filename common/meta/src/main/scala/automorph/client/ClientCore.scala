@@ -21,7 +21,7 @@ import scala.util.{Random, Try}
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-case class ClientCore[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context] private[automorph] (
+private[automorph] case class ClientCore[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context] private[automorph] (
   format: ActualFormat,
   private val system: EffectSystem[Effect],
   private val transport: ClientMessageTransport[Effect, Context],

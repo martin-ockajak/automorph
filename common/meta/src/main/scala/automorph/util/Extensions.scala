@@ -2,7 +2,7 @@ package automorph.util
 
 import scala.util.{Failure, Success, Try}
 
-object Extensions {
+private[automorph] object Extensions {
 
   implicit final class TryOps[T](private val value: Try[T]) {
 
