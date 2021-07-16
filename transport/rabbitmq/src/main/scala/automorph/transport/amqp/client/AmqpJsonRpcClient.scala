@@ -1,11 +1,11 @@
-//package com.archilogic.jsonrpc.amqp
+//package automorph.transport.amqp.client
 //
 //import java.net.InetAddress
 //
-//import com.archilogic.jsonrpc.core.BaseJsonRpcClient
+//import automorph.transport.jsonrpc.core.BaseJsonRpcClient
 //import com.rabbitmq.client.AMQP.BasicProperties
 //import com.rabbitmq.client.{AMQP, QueueingConsumer}
-//import com.typesafe.scalalogging.StrictLogging
+//import automorph.log.Logging
 //
 //import scala.concurrent.{ExecutionContext, Future}
 //import scala.concurrent.duration.FiniteDuration

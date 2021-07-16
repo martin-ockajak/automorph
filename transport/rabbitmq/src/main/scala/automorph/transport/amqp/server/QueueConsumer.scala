@@ -1,14 +1,13 @@
-//package com.archilogic.jsonrpc.amqp
+//package automorph.transport.amqp.server
 //
-//import java.nio.charset.StandardCharsets
-//
-//import com.archilogic.jsonrpc.{JsonRpcMessage, JsonRpcServer}
+//import automorph.log.Logging
+//import automorph.transport.amqp.RabbitMqCommon
 //import com.rabbitmq.client.AMQP.BasicProperties
 //import com.rabbitmq.client.{Channel, DefaultConsumer, Envelope}
-//import com.typesafe.scalalogging.StrictLogging
+//import java.nio.charset.StandardCharsets
 //
 //class QueueConsumer(channel: Channel, virtualHost: String, applicationId: String, jsonRpcServer: JsonRpcServer)
-//  extends DefaultConsumer(channel) with StrictLogging {
+//  extends DefaultConsumer(channel) with Logging {
 //  private val clientIdPrefix = {
 //    val connection = channel.getConnection
 //    "amqp://" + connection.getAddress.getHostName + ":" + connection.getPort + "/" + virtualHost + "?"

@@ -1,4 +1,4 @@
-//package com.archilogic.jsonrpc.amqp
+//package automorph.transport.amqp.endpoint
 //
 //import java.net.InetAddress
 //
