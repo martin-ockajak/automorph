@@ -1,5 +1,6 @@
 package automorph.handler
 
+import automorph.log.MacroLogger
 import automorph.protocol.MethodBindings.{methodLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.util.{Method, Reflection}
@@ -8,8 +9,6 @@ import scala.reflect.macros.blackbox
 
 /** JSON-RPC handler layer bindings code generation. */
 case object HandlerBindings {
-
-  private val debugProperty = "macro.debug"
 
   /**
    * Generates handler bindings for all valid public methods of an API type.
@@ -171,11 +170,9 @@ case object HandlerBindings {
   private def logBoundMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: Reflection[C])(
     method: ref.RefMethod,
     invoke: ref.c.Expr[Any]
-  ): Unit = Option(System.getProperty(debugProperty)).foreach { _ =>
-    println(
-      s"""${methodSignature[C, Api](ref)(method)} =
-        |  ${ref.c.universe.showCode(invoke.tree)}
-        |""".stripMargin
-    )
-  }
+  ): Unit = MacroLogger.debug(
+    s"""${methodSignature[C, Api](ref)(method)} =
+      |  ${ref.c.universe.showCode(invoke.tree)}
+      |""".stripMargin
+  )
 }

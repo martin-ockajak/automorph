@@ -1,5 +1,6 @@
 package automorph.client
 
+import automorph.log.MacroLogger
 import automorph.client.ClientBinding
 import automorph.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.MessageFormat
@@ -8,8 +9,6 @@ import scala.quoted.{Expr, Quotes, Type}
 
 /** JSON-RPC client layer bindings code generation. */
 private[automorph] case object ClientBindings:
-
-  private val debugProperty = "macro.debug"
 
   /**
    * Generates client bindings for all valid public methods of an API type.
@@ -138,11 +137,9 @@ private[automorph] case object ClientBindings:
   ): Unit =
     import ref.q.reflect.{Printer, asTerm}
 
-    Option(System.getProperty(debugProperty)).foreach(_ =>
-      println(
-        s"""${methodSignature[Api](ref)(method)} =
-          |  ${encodeArguments.asTerm.show(using Printer.TreeShortCode)}
-          |  ${decodeResult.asTerm.show(using Printer.TreeShortCode)}
-          |""".stripMargin
-      )
+    MacroLogger.debug(
+      s"""${methodSignature[Api](ref)(method)} =
+         |  ${encodeArguments.asTerm.show(using Printer.TreeShortCode)}
+         |  ${decodeResult.asTerm.show(using Printer.TreeShortCode)}
+         |""".stripMargin
     )

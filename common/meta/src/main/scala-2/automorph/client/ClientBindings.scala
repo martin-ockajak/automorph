@@ -1,5 +1,6 @@
 package automorph.client
 
+import automorph.log.MacroLogger
 import automorph.protocol.MethodBindings.{methodLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.MessageFormat
 import automorph.util.{Method, Reflection}
@@ -8,8 +9,6 @@ import scala.reflect.macros.blackbox
 
 /** JSON-RPC client layer bindings code generation. */
 case object ClientBindings {
-
-  private val debugProperty = "macro.debug"
 
   /**
    * Generates client bindings for all valid public methods of an API type.
@@ -69,7 +68,7 @@ case object ClientBindings {
     method: ref.RefMethod,
     format: ref.c.Expr[ActualFormat]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[ClientBinding[Node]] = {
-    import ref.c.universe.{Liftable, Quasiquote, weakTypeOf}
+    import ref.c.universe.{weakTypeOf, Liftable, Quasiquote}
 
     val nodeType = weakTypeOf[Node]
     val encodeArguments = generateEncodeArguments[C, Node, ActualFormat, Context](ref)(method, format)
@@ -151,12 +150,10 @@ case object ClientBindings {
     method: ref.RefMethod,
     encodeArguments: ref.c.Expr[Any],
     decodeResult: ref.c.Expr[Any]
-  ): Unit = Option(System.getProperty(debugProperty)).foreach { _ =>
-    println(
-      s"""${methodSignature[C, Api](ref)(method)} =
-        |  ${ref.c.universe.showCode(encodeArguments.tree)}
-        |  ${ref.c.universe.showCode(decodeResult.tree)}
-        |""".stripMargin
-    )
-  }
+  ): Unit = MacroLogger.debug(
+    s"""${methodSignature[C, Api](ref)(method)} =
+      |  ${ref.c.universe.showCode(encodeArguments.tree)}
+      |  ${ref.c.universe.showCode(decodeResult.tree)}
+      |""".stripMargin
+  )
 }

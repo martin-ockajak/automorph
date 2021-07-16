@@ -1,18 +1,15 @@
 package automorph.handler
 
-import automorph.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
+import automorph.log.MacroLogger
 import automorph.protocol.ErrorType.InvalidRequestException
+import automorph.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.util.{Method, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
-import scala.util.Try
-import scala.util.Success
-import scala.util.Failure
+import scala.util.{Failure, Success, Try}
 
 /** JSON-RPC handler layer bindings code generation. */
 private[automorph] case object HandlerBindings:
-
-  private val debugProperty = "macro.debug"
 
   /**
    * Generates handler bindings for all valid public methods of an API type.
@@ -101,7 +98,7 @@ private[automorph] case object HandlerBindings:
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
-    import ref.q.reflect.{asTerm, Term, TypeRepr}
+    import ref.q.reflect.{Term, TypeRepr, asTerm}
     given Quotes = ref.q
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -168,12 +165,10 @@ private[automorph] case object HandlerBindings:
     }
 
   private def logBoundMethod[Api: Type](ref: Reflection)(method: ref.RefMethod, invoke: Expr[Any]): Unit =
-    import ref.q.reflect.{asTerm, Printer}
+    import ref.q.reflect.{Printer, asTerm}
 
-    Option(System.getProperty(debugProperty)).foreach(_ =>
-      println(
-        s"""${methodSignature[Api](ref)(method)} =
-          |  ${invoke.asTerm.show(using Printer.TreeShortCode)}
-          |""".stripMargin
-      )
+    MacroLogger.debug(
+      s"""${methodSignature[Api](ref)(method)} =
+         |  ${invoke.asTerm.show(using Printer.TreeShortCode)}
+         |""".stripMargin
     )
