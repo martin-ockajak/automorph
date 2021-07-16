@@ -12,7 +12,7 @@ import scala.util.Failure
 /** JSON-RPC handler layer bindings code generation. */
 private[automorph] case object HandlerBindings:
 
-  private val debugProperty = "automorph.macro.debug"
+  private val debugProperty = "macro.debug"
 
   /**
    * Generates handler bindings for all valid public methods of an API type.

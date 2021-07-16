@@ -9,7 +9,7 @@ import scala.reflect.macros.blackbox
 /** JSON-RPC handler layer bindings code generation. */
 case object HandlerBindings {
 
-  private val debugProperty = "automorph.macro.debug"
+  private val debugProperty = "macro.debug"
 
   /**
    * Generates handler bindings for all valid public methods of an API type.

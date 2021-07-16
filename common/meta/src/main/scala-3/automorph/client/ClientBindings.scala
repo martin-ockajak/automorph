@@ -9,7 +9,7 @@ import scala.quoted.{Expr, Quotes, Type}
 /** JSON-RPC client layer bindings code generation. */
 private[automorph] case object ClientBindings:
 
-  private val debugProperty = "automorph.macro.debug"
+  private val debugProperty = "macro.debug"
 
   /**
    * Generates client bindings for all valid public methods of an API type.
