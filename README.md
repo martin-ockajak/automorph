@@ -227,14 +227,14 @@ Depends on:
 * [Client message transport](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/ClientMessageTransport.html)
 
 ```
-        .--------.     .-----------.
-        | Client | --> | Transport |
-        '--------'     '-----------'
-         |      |       |
-         v      v       v
-  .--------.    .--------.
-  | Format |    | System |
-  '--------'    '--------'
+                  .--------.     .--------------------------.
+                  | Client | --> | Client message transport |
+                  '--------'     '--------------------------'
+                   |     |             |
+                   v     v             v
+   .----------------.   .---------------.
+   | Message format |   | Effect system |
+   '----------------'   '---------------'
 ```
 
 ## Handler
@@ -247,14 +247,14 @@ Depends on:
 * [Message format](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html)
 
 ```
-     .--------.     .---------.
-     | Server | --> | Handler |
-     '--------'     '---------'
-             |       |      |
-             v       v      v
-            .--------.    .--------.
-            | System |    | Format |
-            '--------'    '--------'
+   .--------------------------.     .---------.
+   | Server message transport | --> | Handler |
+   '--------------------------'     '---------'
+                        |            |      |
+                        v            v      v
+                      .---------------.    .----------------.
+                      | Effect system |    | Message format |
+                      '---------------'    '----------------'
 ```
 
 # Examples
