@@ -64,7 +64,10 @@ final case class RabbitMqClient(
           envelope: Envelope,
           properties: BasicProperties,
           body: Array[Byte]
-        ): Unit = promise.success(ArraySeq.ofByte(body))
+        ): Unit = {
+          logger.debug("Received AMQP response", Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> body.length))
+          promise.success(ArraySeq.ofByte(body))
+        }
       }
       channel.basicConsume(directReplyToQueue, true, consumer)
       logger.trace("Sending AMQP request", Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> request.length))
