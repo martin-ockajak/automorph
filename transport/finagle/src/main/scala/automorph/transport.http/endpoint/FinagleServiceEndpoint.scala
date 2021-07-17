@@ -9,7 +9,7 @@ import automorph.handler.HandlerResult
 import automorph.protocol.ResponseError
 import automorph.log.Logging
 import automorph.transport.http.endpoint.FinagleServiceEndpoint.defaultErrorStatus
-import automorph.spi.{MessageFormat, EndpointMessageTransport}
+import automorph.spi.{EndpointMessageTransport, MessageFormat}
 import automorph.protocol.ErrorType
 
 /**
@@ -38,58 +38,70 @@ final case class FinagleServiceEndpoint[Node, Effect[_]](
   override def apply(request: Request): Future[Response] = {
     // Receive the request
     val client = clientAddress(request)
-    logger.debug("Received HTTP request", Map("Client" -> client))
+    logger.debug("Received HTTP request", Map("Client" -> client, "Size" -> request.content.length))
     val requestMessage = Buf.ByteArray.Owned.extract(request.content)
 
     // Process the request
     implicit val usingContext: Request = request
     runAsFuture(system.map(
       system.either(handler.processRequest(requestMessage)),
-      (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) => handlerResult.fold(
-        error => serverError(error, request),
-        result => {
-          // Send the response
-          val response = result.response.getOrElse(Array[Byte]())
-          val status = result.errorCode.map(errorStatus).getOrElse(Status.Ok)
-          val message = Reader.fromBuf(Buf.ByteArray.Owned(response))
-          createResponse(message, status, request)
-        }
-      )
+      (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
+        handlerResult.fold(
+          error => serverError(error, request),
+          result => {
+            // Send the response
+            val response = result.response.getOrElse(Array[Byte]())
+            val status = result.errorCode.map(errorStatus).getOrElse(Status.Ok)
+            val message = Reader.fromBuf(Buf.ByteArray.Owned(response))
+            createResponse(message, status, request)
+          }
+        )
     ))
   }
 
   private def serverError(error: Throwable, request: Request): Response = {
     val message = Reader.fromBuf(Buf.Utf8(ResponseError.trace(error).mkString("\n")))
     val status = Status.InternalServerError
-    logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(request)))
+    logger.error(
+      "Failed to process HTTP request",
+      error,
+      Map("Client" -> clientAddress(request), "Size" -> request.content.length)
+    )
     createResponse(message, status, request)
   }
 
   private def createResponse(message: Reader[Buf], status: Status, request: Request): Response = {
     val response = Response(request.version, status, message)
     response.contentType = handler.format.mediaType
-    logger.debug("Sending HTTP response", Map("Client" -> clientAddress(request), "Status" -> status.code.toString))
+    logger.debug(
+      "Sending HTTP response",
+      Map("Client" -> clientAddress(request), "Status" -> status.code, "Size" -> response.content.length)
+    )
     response
   }
 
-  private def clientAddress(request: Request): String = {
+  private def clientAddress(request: Request): String =
     request.xForwardedFor.flatMap(_.split(",", 2).headOption).getOrElse {
       val address = request.remoteAddress.toString.split("/", 2).reverse.head
       address.replaceAll("/", "").split(":").init.mkString(":")
     }
-  }
 
   private def runAsFuture[T](value: Effect[T]): Future[T] = {
     val promise = Promise[T]()
-    runEffect(system.map(system.either(value), (outcome: Either[Throwable, T]) => outcome.fold(
-      error => promise.setException(error),
-      result => promise.setValue(result)
-    )))
+    runEffect(system.map(
+      system.either(value),
+      (outcome: Either[Throwable, T]) =>
+        outcome.fold(
+          error => promise.setException(error),
+          result => promise.setValue(result)
+        )
+    ))
     promise
   }
 }
 
 case object FinagleServiceEndpoint {
+
   /** Request context type. */
   type Context = Request
 

@@ -4,10 +4,11 @@ import automorph.log.Logging
 import automorph.protocol.ErrorType.{InvalidResponseException, ParseErrorException}
 import automorph.protocol.{Request, Response}
 import automorph.spi.Message.Params
-import automorph.spi.{EffectSystem, MessageFormat, Message, ClientMessageTransport}
+import automorph.spi.{ClientMessageTransport, EffectSystem, Message, MessageFormat}
 import automorph.util.Extensions.TryOps
+import automorph.util.MessageId
 import scala.collection.immutable.ArraySeq
-import scala.util.{Random, Try}
+import scala.util.Try
 
 /**
  * JSON-RPC client core logic.
@@ -21,14 +22,17 @@ import scala.util.{Random, Try}
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] case class ClientCore[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context] private[automorph] (
+private[automorph] case class ClientCore[
+  Node,
+  ActualFormat <: MessageFormat[Node],
+  Effect[_],
+  Context
+] private[automorph] (
   format: ActualFormat,
   private val system: EffectSystem[Effect],
   private val transport: ClientMessageTransport[Effect, Context],
   private val errorToException: (Int, String) => Throwable
 ) extends Logging {
-
-  private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   /**
    * Performs a method call using specified arguments.
@@ -51,7 +55,7 @@ private[automorph] case class ClientCore[Node, ActualFormat <: MessageFormat[Nod
     context: Option[Context]
   ): Effect[R] = {
     val argumentNodes = createArgumentNodes(argumentNames, encodedArguments)
-    val id = Some(Right[BigDecimal, String](Math.abs(random.nextLong()).toString))
+    val id = Some(Right[BigDecimal, String](MessageId.next))
     val formedRequest = Request(id, methodName, argumentNodes).formed
     logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
     system.flatMap(

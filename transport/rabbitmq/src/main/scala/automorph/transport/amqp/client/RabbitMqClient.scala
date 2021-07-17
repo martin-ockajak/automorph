@@ -4,39 +4,77 @@ import automorph.log.Logging
 import automorph.spi.ClientMessageTransport
 import automorph.transport.amqp.RabbitMqCommon.{connect, defaultDirectExchange}
 import automorph.transport.amqp.client.RabbitMqClient.RequestProperties
+import automorph.util.MessageId
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.{AMQP, Address, Connection, ConnectionFactory}
+import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
+import java.io.IOException
 import java.net.{InetAddress, URL}
 import scala.collection.immutable.ArraySeq
-import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Success, Try, Using}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future, Promise}
+import scala.util.{Failure, Random, Success, Try}
 
 /**
  * RabbitMQ client transport plugin using AMQP as message transport protocol.
  *
  * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
  * @param routingKey AMQP routing key (typically a queue name)
- * @param exchange AMQP message exchange name
- * @param applicationId AMQP message application identifier
+ * @param exchangeName AMQP message exchange name
+ * @param exchangeName AMQP message exchange type (DIRECT, FANOUT, HEADERS, TOPIC)
  * @param addresses broker hostnames and ports for reconnection attempts
- * @tparam Effect effect type
+ * @param executionContext execution context
  */
-final case class RabbitMqClient[Effect[_]](
+final case class RabbitMqClient(
   url: URL,
   routingKey: String,
-  exchange: String = defaultDirectExchange,
-  addresses: Seq[Address] = Seq(),
-  applicationId: String = InetAddress.getLocalHost.getHostName
+  exchangeName: String = defaultDirectExchange,
+  exchangeType: BuiltinExchangeType = BuiltinExchangeType.DIRECT,
+  addresses: Seq[Address] = Seq()
 )(implicit executionContext: ExecutionContext)
-  extends ClientMessageTransport[Effect, RequestProperties] with AutoCloseable with Logging {
+  extends ClientMessageTransport[Future, RequestProperties] with AutoCloseable with Logging {
 
-  private val directExchange = "direct"
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
   private lazy val connection = setupConnection()
+  private lazy val threadChannel = ThreadLocal.withInitial(() => openChannel(connection))
   private val timeout = 0
 
-//  override def sendCallRequest(requestMessage: Array[Byte]): Future[Array[Byte]] =
+  override def call(
+    request: ArraySeq.ofByte,
+    mediaType: String,
+    context: Option[RequestProperties]
+  ): Future[ArraySeq.ofByte] = {
+    val properties = setupProperties(mediaType, context)
+    send(request, properties)
+  }
+
+  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Future[Unit] = {
+    val properties = setupProperties(mediaType, context)
+    send(request, properties).map(_ => ())
+  }
+
+  private def send(request: ArraySeq.ofByte, properties: BasicProperties): Future[ArraySeq.ofByte] =
+    threadChannel.get.flatMap { channel =>
+      val promise = Promise[ArraySeq.ofByte]()
+      val consumer = new DefaultConsumer(channel) {
+
+        override def handleDelivery(
+          consumerTag: String,
+          envelope: Envelope,
+          properties: BasicProperties,
+          body: Array[Byte]
+        ): Unit = promise.success(ArraySeq.ofByte(body))
+      }
+      channel.basicConsume(directReplyToQueue, true, consumer)
+      channel.basicPublish(exchangeName, routingKey, properties, request.unsafeArray)
+      promise.future
+    }
+
+  private def setupProperties(mediaType: String, context: Option[RequestProperties]): BasicProperties = {
+    val properties = context.getOrElse(defaultContext).basic
+    properties.builder().contentType(mediaType).correlationId(MessageId.next).build
+  }
+
+  //  override def sendCallRequest(requestMessage: Array[Byte]): Future[Array[Byte]] =
 //    Future {
 //      val channel = connection.createChannel()
 //      try {
@@ -57,51 +95,42 @@ final case class RabbitMqClient[Effect[_]](
 //        Try(channel.close())
 //      }
 //    }
-//
-//  override def sendNotifyRequest(requestMessage: Array[Byte]): Future[Unit] =
-//    Future {
-//      val channel = connection.createChannel()
-//      try {
-//        channel.basicPublish(exchange, routingKey, true, null, requestMessage)
-//      } finally {
-//        channel.close()
-//      }
-//    }
-
-  override def call(
-    request: ArraySeq.ofByte,
-    mediaType: String,
-    context: Option[RequestProperties]
-  ): Effect[ArraySeq.ofByte] = ???
-
-  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Effect[Unit] =
-    ???
 
   override def defaultContext: RequestProperties = RequestProperties.defaultContext
 
-  private def setupConnection(): Try[Connection] = {
+  private def openChannel(connection: Future[Connection]): Future[Channel] =
+    connection.map(_.createChannel()).map { channel =>
+      Option(channel).getOrElse {
+        throw new IOException("No AMQP connection channel available")
+      }
+    }
+
+  private def setupConnection(): Future[Connection] = {
     val connectionFactory = new ConnectionFactory
-    connect(url, Seq(), connectionFactory, getClass.getName).flatMap { connection =>
-      if (exchange != defaultDirectExchange) {
-        Using(connection.createChannel()) { channel =>
-          channel.exchangeDeclare(exchange, directExchange, false)
+    val clientName = s"${InetAddress.getLocalHost.getHostName}/${getClass.getName}"
+    Future(connect(url, Seq(), connectionFactory, clientName)).flatMap { connection =>
+      if (exchangeName != defaultDirectExchange) {
+        threadChannel.get().map { channel =>
+          channel.exchangeDeclare(exchangeName, exchangeType, false)
           connection
         }
       } else {
-        Success(connection)
+        Future.successful(connection)
       }
     }
   }
 
-  override def close(): Unit = connection.foreach(_.abort(AMQP.CONNECTION_FORCED, "Terminated", timeout))
+  override def close(): Unit =
+    Await.result(connection.map(_.abort(AMQP.CONNECTION_FORCED, "Terminated", timeout)), Duration.Inf)
 }
 
 case object RabbitMqClient {
 
   case class RequestProperties(
+    basic: BasicProperties
   )
 
   case object RequestProperties {
-    implicit val defaultContext: RequestProperties = RequestProperties()
+    implicit val defaultContext: RequestProperties = RequestProperties(BasicProperties())
   }
 }

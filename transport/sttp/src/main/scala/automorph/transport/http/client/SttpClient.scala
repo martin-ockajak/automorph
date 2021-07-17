@@ -1,6 +1,7 @@
 package automorph.transport.http.client
 
-import automorph.spi.{EffectSystem, ClientMessageTransport}
+import automorph.log.Logging
+import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.client.SttpClient.RequestProperties
 import java.io.IOException
 import java.net.URL
@@ -25,10 +26,11 @@ final case class SttpClient[Effect[_]](
   method: String,
   system: EffectSystem[Effect],
   backend: SttpBackend[Effect, _]
-) extends ClientMessageTransport[Effect, RequestProperties] {
+) extends ClientMessageTransport[Effect, RequestProperties] with Logging {
 
   private val uri = Uri(url.toURI)
   private val httpMethod = Method.unsafeApply(method)
+  private val urlText = url.toExternalForm
 
   override def call(
     request: ArraySeq.ofByte,
@@ -37,21 +39,36 @@ final case class SttpClient[Effect[_]](
   ): Effect[ArraySeq.ofByte] = {
     val httpRequest = setupHttpRequest(request, mediaType, context).response(asByteArray)
     system.flatMap(
-      httpRequest.send(backend),
+      send[Either[String, Array[Byte]]](httpRequest, request.length),
       (response: Response[Either[String, Array[Byte]]]) =>
         response.body.fold(
-          error => system.failed(new IOException(error)),
-          response => system.pure(new ArraySeq.ofByte(response))
+          error => {
+            val exception = new IOException(error)
+            logger.error("Failed to receive HTTP response", exception, Map("URL" -> urlText))
+            system.failed(exception)
+          },
+          message => {
+            logger.debug("Received HTTP response", Map("URL" -> urlText, "Status" -> response.code, "Size" -> request.length))
+            system.pure(new ArraySeq.ofByte(message))
+          }
         )
     )
   }
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Effect[Unit] = {
     val httpRequest = setupHttpRequest(request, mediaType, context).response(ignore)
-    system.map(httpRequest.send(backend), (_: Response[Unit]) => ())
+    system.map(send[Unit](httpRequest, request.length), (_: Response[Unit]) => ())
   }
 
   override def defaultContext: RequestProperties = RequestProperties.defaultContext
+
+  private def send[R](request: Request[R, Any], size: Int): Effect[Response[R]] = {
+    logger.trace("Sending HTTP request", Map("URL" -> urlText, "Method" -> request.method, "Size" -> size))
+    system.map(request.send(backend), (response: Response[R]) => {
+      logger.debug("Sent HTTP request", Map("URL" -> urlText, "Method" -> request.method, "Size" -> size))
+      response
+    })
+  }
 
   private def setupHttpRequest(
     request: ArraySeq.ofByte,

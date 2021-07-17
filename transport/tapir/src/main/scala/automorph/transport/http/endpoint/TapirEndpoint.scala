@@ -4,7 +4,7 @@ import automorph.Handler
 import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
-import automorph.spi.{MessageFormat, EndpointMessageTransport}
+import automorph.spi.{EndpointMessageTransport, MessageFormat}
 import sttp.model.headers.Cookie
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
@@ -19,6 +19,7 @@ import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, 
  * @see [[https://tapir.softwaremill.com Documentation]]
  */
 case object TapirEndpoint extends Logging with EndpointMessageTransport {
+
   /** Request context type. */
   type Context = Request
 
@@ -55,7 +56,7 @@ case object TapirEndpoint extends Logging with EndpointMessageTransport {
         // Receive the request
         val request = Request(paths, queryParams, headers, cookies, clientIp)
         val client = clientAddress(request.clientIp)
-        logger.debug("Received HTTP request", Map("Client" -> client))
+        logger.debug("Received HTTP request", Map("Client" -> client, "Size" -> requestMessage.length))
 
         // Process the request
         implicit val usingContext: Request = request
@@ -63,7 +64,7 @@ case object TapirEndpoint extends Logging with EndpointMessageTransport {
           system.either(handler.processRequest(requestMessage)),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
             handlerResult.fold(
-              error => Right(serverError(error, client)),
+              error => Right(serverError(error, requestMessage, client)),
               result => {
                 // Send the response
                 val message = result.response.getOrElse(Array[Byte]())
@@ -75,15 +76,15 @@ case object TapirEndpoint extends Logging with EndpointMessageTransport {
       }
   }
 
-  private def serverError(error: Throwable, client: String): (Array[Byte], StatusCode) = {
+  private def serverError(error: Throwable, request: Array[Byte], client: String): (Array[Byte], StatusCode) = {
     val message = Bytes.stringBytes.from(ResponseError.trace(error).mkString("\n")).unsafeArray
     val status = StatusCode.InternalServerError
-    logger.error("Failed to process HTTP request", error, Map("Client" -> client))
+    logger.error("Failed to process HTTP request", error, Map("Client" -> client, "Size" -> request.length))
     createResponse(message, status, client)
   }
 
   private def createResponse(message: Array[Byte], status: StatusCode, client: String): (Array[Byte], StatusCode) = {
-    logger.debug("Sending HTTP response", Map("Client" -> client, "Status" -> status.toString))
+    logger.debug("Sending HTTP response", Map("Client" -> client, "Status" -> status, "Size" -> message.length))
     (message, status)
   }
 

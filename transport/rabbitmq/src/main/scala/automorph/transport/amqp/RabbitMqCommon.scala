@@ -26,22 +26,20 @@ private[automorph] object RabbitMqCommon extends Logging {
     addresses: Seq[Address],
     connectionFactory: ConnectionFactory,
     connectionName: String
-  ): Try[Connection] = {
+  ): Connection = {
     val urlText = url.toExternalForm
     connectionFactory.setUri(url.toURI)
     logger.debug(s"Connecting to RabbitMQ broker: $urlText")
-    Try {
-      if (addresses.nonEmpty) {
-        connectionFactory.newConnection(addresses.toArray, connectionName)
-      } else {
-        connectionFactory.newConnection(connectionName)
-      }
-    }.map { connection =>
+    Try(if (addresses.nonEmpty) {
+      connectionFactory.newConnection(addresses.toArray, connectionName)
+    } else {
+      connectionFactory.newConnection(connectionName)
+    }).map { connection =>
       logger.info(s"Connected to RabbitMQ broker: $urlText")
       connection
     }.mapFailure { error =>
       logger.error(s"Failed to connect to RabbitMQ broker: $urlText", error)
       error
-    }
+    }.get
   }
 }

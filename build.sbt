@@ -139,7 +139,7 @@ lazy val scalaz = (project in file("system/scalaz")).dependsOn(
 // Transport
 val sttpVersion = "3.3.11"
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
-  spi, testCore % Test, standard % Test
+  core, testCore % Test, standard % Test
 ).settings(
   name := "automorph-sttp",
   libraryDependencies ++= Seq(

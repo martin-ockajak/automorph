@@ -6,7 +6,7 @@ import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.ServerMessageTransport
 import automorph.transport.http.server.NanoHTTPD.Response.Status
-import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
+import automorph.transport.http.server.NanoHTTPD.{newFixedLengthResponse, IHTTPSession, Response}
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -34,7 +34,7 @@ final case class NanoHttpdServer[Effect[_]] private (
   private val system = handler.system
 
   override def start(): Unit = {
-    logger.info("Listening for connections", Map("Port" -> port.toString))
+    logger.info("Listening for connections", Map("Port" -> port))
     super.start()
   }
 
@@ -42,36 +42,48 @@ final case class NanoHttpdServer[Effect[_]] private (
     // Receive the request
     logger.trace("Receiving HTTP request", Map("Client" -> clientAddress(session)))
     val request = Bytes.inputStreamBytes.from(session.getInputStream)
+    logger.debug("Received HTTP request", Map("Client" -> clientAddress(session), "Size" -> request.length))
 
     // Process the request
     implicit val usingContext: IHTTPSession = session
     runEffectSync(system.map(
       system.either(handler.processRequest(request)),
-      (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) => handlerResult.fold(
-        error => createServerError(error, session),
-        result => {
-          // Send the response
-          val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
-          val status = result.errorCode.map(errorStatus).getOrElse(Status.OK)
-          createResponse(response, status, session)
-        }
-      )
+      (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
+        handlerResult.fold(
+          error => serverError(error, request, session),
+          result => {
+            // Send the response
+            val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
+            val status = result.errorCode.map(errorStatus).getOrElse(Status.OK)
+            createResponse(response, status, session)
+          }
+        )
     ))
   }
 
-  private def createServerError(error: Throwable, session: IHTTPSession): Response = {
+  private def serverError(error: Throwable, request: ArraySeq.ofByte, session: IHTTPSession): Response = {
     val status = Status.INTERNAL_ERROR
     val message = Bytes.stringBytes.from(ResponseError.trace(error).mkString("\n"))
-    logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(session)))
+    logger.error(
+      "Failed to process HTTP request",
+      error,
+      Map("Client" -> clientAddress(session), "Size" -> request.length)
+    )
     createResponse(message, status, session)
   }
 
   private def createResponse(message: ArraySeq.ofByte, status: Status, session: IHTTPSession): Response = {
     val client = clientAddress(session)
-    logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> status.getRequestStatus.toString))
+    logger.trace(
+      "Sending HTTP response",
+      Map("Client" -> client, "Status" -> status.getRequestStatus, "Size" -> message.length)
+    )
     val inputStream = Bytes.inputStreamBytes.to(message)
     val response = newFixedLengthResponse(status, handler.format.mediaType, inputStream, message.size.toLong)
-    logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> status.getRequestStatus.toString))
+    logger.debug(
+      "Sent HTTP response",
+      Map("Client" -> client, "Status" -> status.getRequestStatus, "Size" -> message.length)
+    )
     response
   }
 
@@ -86,6 +98,7 @@ final case class NanoHttpdServer[Effect[_]] private (
 }
 
 case object NanoHttpdServer {
+
   /** Request context type. */
   type Context = IHTTPSession
 

@@ -1,14 +1,16 @@
 package automorph.transport.http.endpoint
 
-import io.undertow.io.Receiver
-import io.undertow.server.{HttpHandler, HttpServerExchange}
-import io.undertow.util.{Headers, StatusCodes}
 import automorph.Handler
 import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
-import automorph.transport.http.endpoint.UndertowHandlerEndpoint.defaultErrorStatus
 import automorph.spi.EndpointMessageTransport
+import automorph.transport.http.endpoint.UndertowHandlerEndpoint.defaultErrorStatus
+import automorph.util.Extensions.TryOps
+import io.undertow.io.Receiver
+import java.io.IOException
+import io.undertow.server.{HttpHandler, HttpServerExchange}
+import io.undertow.util.{Headers, StatusCodes}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -38,7 +40,7 @@ final case class UndertowHandlerEndpoint[Effect[_]](
 
     override def handle(exchange: HttpServerExchange, request: Array[Byte]): Unit = {
       val client = clientAddress(exchange)
-      logger.debug("Received HTTP request", Map("Client" -> client))
+      logger.debug("Received HTTP request", Map("Client" -> client, "Size" -> request.length))
       val requestMessage = Bytes.byteArrayBytes.from(request)
       exchange.dispatch(new Runnable {
 
@@ -49,7 +51,7 @@ final case class UndertowHandlerEndpoint[Effect[_]](
             system.either(handler.processRequest(requestMessage)),
             (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
               handlerResult.fold(
-                error => sendServerError(error, exchange),
+                error => sendServerError(error, exchange, Some(requestMessage)),
                 result => {
                   // Send the response
                   val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
@@ -69,26 +71,47 @@ final case class UndertowHandlerEndpoint[Effect[_]](
     // Receive the request
     logger.trace("Receiving HTTP request", Map("Client" -> clientAddress(exchange)))
     Try(exchange.getRequestReceiver.receiveFullBytes(receiveCallback)).recover { case error =>
-      sendServerError(error, exchange)
+      sendServerError(error, exchange, None)
     }.get
   }
 
-  private def sendServerError(error: Throwable, exchange: HttpServerExchange): Unit = {
+  private def sendServerError(
+    error: Throwable,
+    exchange: HttpServerExchange,
+    request: Option[ArraySeq.ofByte]
+  ): Unit = {
     val message = Bytes.stringBytes.from(ResponseError.trace(error).mkString("\n"))
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
-    logger.error("Failed to process HTTP request", error, Map("Client" -> clientAddress(exchange)))
+    logger.error(
+      "Failed to process HTTP request",
+      error,
+      Map("Client" -> clientAddress(exchange)) ++ request.flatMap(request => Option("Size" -> request.length))
+    )
     sendResponse(message, statusCode, exchange)
   }
 
   private def sendResponse(message: ArraySeq.ofByte, statusCode: Int, exchange: HttpServerExchange): Unit = {
     val client = clientAddress(exchange)
-    logger.trace("Sending HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
-    if (exchange.isResponseChannelAvailable) {
-      exchange.setStatusCode(statusCode).getResponseSender.send(Bytes.byteBufferBytes.to(message))
+    logger.trace(
+      "Sending HTTP response",
+      Map("Client" -> client, "Status" -> statusCode, "Size" -> message.length)
+    )
+    Try {
+      if (exchange.isResponseChannelAvailable) {
+        throw new IOException("Response channel not available")
+      }
       exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.format.mediaType)
-      logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> statusCode.toString))
-    } else {
-      logger.error("HTTP response channel not available", Map("Client" -> client, "Status" -> statusCode.toString))
+      exchange.setStatusCode(statusCode).getResponseSender.send(Bytes.byteBufferBytes.to(message))
+      logger.debug(
+        "Sent HTTP response",
+        Map("Client" -> client, "Status" -> statusCode, "Size" -> message.length)
+      )
+    }.mapFailure { error =>
+      logger.error(
+        "Failed to send HTTP response", error,
+        Map("Client" -> client, "Status" -> statusCode, "Size" -> message.length)
+      )
+      throw error
     }
   }
 
@@ -102,6 +125,7 @@ final case class UndertowHandlerEndpoint[Effect[_]](
 }
 
 case object UndertowHandlerEndpoint {
+
   /** Request context type. */
   type Context = HttpServerExchange
 

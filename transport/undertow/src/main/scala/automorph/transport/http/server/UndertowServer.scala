@@ -45,7 +45,7 @@ final case class UndertowServer(
       ) ++ (listener.getAddress match {
         case address: InetSocketAddress => Map(
             "Host" -> address.getHostString,
-            "Port" -> address.getPort.toString
+            "Port" -> address.getPort
           )
         case _ => Map()
       })

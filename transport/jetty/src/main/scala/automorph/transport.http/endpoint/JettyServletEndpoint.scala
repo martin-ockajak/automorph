@@ -37,7 +37,7 @@ final case class JettyServletEndpoint[Node, Effect[_]](
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     // Receive the request
     val client = clientAddress(request)
-    logger.debug("Received HTTP request", Map("Client" -> client))
+    logger.trace("Receiving HTTP request", Map("Client" -> client))
     val requestMessage: InputStream = request.getInputStream
 
     // Process the request
@@ -65,13 +65,13 @@ final case class JettyServletEndpoint[Node, Effect[_]](
   }
 
   private def sendResponse(message: InputStream, response: HttpServletResponse, status: Int, client: String): Unit = {
-    logger.debug("Sending HTTP response", Map("Client" -> client, "Status" -> status.toString))
+    logger.debug("Sending HTTP response", Map("Client" -> client, "Status" -> status))
     response.setStatus(status)
     response.setContentType(handler.format.mediaType)
     val outputStream = response.getOutputStream
     IOUtils.copy(message, outputStream)
     outputStream.flush()
-    logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> status.toString))
+    logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> status))
   }
 
   private def clientAddress(request: HttpServletRequest): String = {

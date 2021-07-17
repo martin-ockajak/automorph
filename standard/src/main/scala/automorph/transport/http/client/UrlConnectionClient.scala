@@ -1,9 +1,11 @@
 package automorph.transport.http.client
 
 import automorph.handler.Bytes.inputStreamBytes
+import automorph.log.Logging
 import automorph.spi.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.client.UrlConnectionClient.RequestProperties
+import automorph.util.Extensions.TryOps
 import java.net.{HttpURLConnection, URL}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Try, Using}
@@ -19,12 +21,13 @@ import scala.util.{Try, Using}
 final case class UrlConnectionClient(
   url: URL,
   method: String
-) extends ClientMessageTransport[Identity, RequestProperties] {
+) extends ClientMessageTransport[Identity, RequestProperties] with Logging {
 
   private val contentLengthHeader = "Content-Length"
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
+  private val urlText = url.toExternalForm
 
   override def call(
     request: ArraySeq.ofByte,
@@ -32,7 +35,17 @@ final case class UrlConnectionClient(
     context: Option[RequestProperties]
   ): Identity[ArraySeq.ofByte] = {
     val connection = send(request, mediaType, context)
-    Using.resource(connection.getInputStream)(inputStreamBytes.from)
+    logger.trace("Receiving HTTP response", Map("URL" -> urlText))
+    Try(Using.resource(connection.getInputStream)(inputStreamBytes.from)).pureFold(
+      error => {
+        logger.error("Failed to receive HTTP response", error, Map("URL" -> urlText))
+        throw error
+      },
+      response => {
+        logger.debug("Received HTTP response", Map("URL" -> urlText, "Status" -> connection.getResponseCode, "Size" -> response.length))
+        response
+      }
+    )
   }
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Identity[Unit] = {
@@ -43,13 +56,23 @@ final case class UrlConnectionClient(
   override def defaultContext: RequestProperties = RequestProperties.defaultContext.copy(method = Some(method))
 
   private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): HttpURLConnection = {
+    logger.trace("Sending HTTP request", Map("URL" -> urlText, "Size" -> request.length))
     val connection = connect()
     val outputStream = connection.getOutputStream
-    context.foreach(setProperties(connection, request, mediaType, _))
-    val trySend = Try(outputStream.write(request.unsafeArray))
-    context.foreach(clearProperties(connection, _))
-    outputStream.close()
-    trySend.get
+    val httpMethod = setProperties(connection, request, mediaType, context)
+    val trySend = Using(outputStream)(_.write(request.unsafeArray))
+    clearProperties(connection, context)
+    trySend.pureFold(
+      error => {
+        logger.error(
+          "Failed to send HTTP request",
+          error,
+          Map("URL" -> urlText, "Method" -> httpMethod, "Size" -> request.length)
+        )
+        throw error
+      },
+      _ => logger.debug("Sent HTTP request", Map("URL" -> urlText, "Method" -> httpMethod, "Size" -> request.length))
+    )
     connection
   }
 
@@ -57,28 +80,30 @@ final case class UrlConnectionClient(
     connection: HttpURLConnection,
     request: ArraySeq.ofByte,
     mediaType: String,
-    context: RequestProperties
-  ): Unit = {
+    context: Option[RequestProperties]
+  ): String = {
     // Validate HTTP request properties
-    val httpMethod = context.method.getOrElse(method)
+    val requestProperties = context.getOrElse(defaultContext)
+    val httpMethod = requestProperties.method.getOrElse(method)
     require(httpMethods.contains(httpMethod), s"Invalid HTTP method: $httpMethod")
 
-    // Set HTTP request context
+    // Set HTTP request requestProperties
+    requestProperties.headers.foreach { case (key, value) =>
+      connection.setRequestProperty(key, value)
+    }
     connection.setRequestProperty(contentLengthHeader, request.size.toString)
     connection.setRequestProperty(contentTypeHeader, mediaType)
     connection.setRequestProperty(acceptHeader, mediaType)
     connection.setRequestMethod(httpMethod)
-    connection.setConnectTimeout(context.connectTimeout)
-    connection.setReadTimeout(context.readTimeout)
-    context.headers.foreach { case (key, value) =>
-      connection.setRequestProperty(key, value)
-    }
+    connection.setConnectTimeout(requestProperties.connectTimeout)
+    connection.setReadTimeout(requestProperties.readTimeout)
+    httpMethod
   }
 
-  private def clearProperties(connection: HttpURLConnection, context: RequestProperties): Unit =
-    context.headers.foreach { case (key, _) =>
+  private def clearProperties(connection: HttpURLConnection, context: Option[RequestProperties]): Unit =
+    context.foreach(_.headers.foreach { case (key, _) =>
       connection.setRequestProperty(key, null)
-    }
+    })
 
   /**
    * Open new HTTP connections.
