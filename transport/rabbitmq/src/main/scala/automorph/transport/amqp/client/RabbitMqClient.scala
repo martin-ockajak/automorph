@@ -70,14 +70,18 @@ final case class RabbitMqClient(
       logger.trace("Sending AMQP request", Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> request.length))
       Try(channel.basicPublish(exchangeName, routingKey, properties, request.unsafeArray)).pureFold(
         error => {
-          logger.error("Failed to send AMQP request", error, Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> request.length))
+          logger.error(
+            "Failed to send AMQP request",
+            error,
+            Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> request.length)
+          )
+          Future.failed(error)
         },
         _ => {
-          
+          logger.debug("Sent AMQP request", Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> request.length))
+          promise.future
         }
       )
-      logger.debug("Sent AMQP request", Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> request.length))
-      promise.future
     }
 
   private def setupProperties(mediaType: String, context: Option[RequestProperties]): BasicProperties = {
