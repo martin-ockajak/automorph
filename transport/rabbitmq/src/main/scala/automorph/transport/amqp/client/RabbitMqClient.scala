@@ -8,6 +8,7 @@ import automorph.util.MessageId
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.io.IOException
+import automorph.util.Extensions.TryOps
 import java.net.{InetAddress, URL}
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.duration.Duration
@@ -36,6 +37,7 @@ final case class RabbitMqClient(
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
   private lazy val connection = setupConnection()
   private lazy val threadChannel = ThreadLocal.withInitial(() => openChannel(connection))
+  private val urlText = url.toExternalForm
   private val timeout = 0
 
   override def call(
@@ -65,7 +67,16 @@ final case class RabbitMqClient(
         ): Unit = promise.success(ArraySeq.ofByte(body))
       }
       channel.basicConsume(directReplyToQueue, true, consumer)
-      channel.basicPublish(exchangeName, routingKey, properties, request.unsafeArray)
+      logger.trace("Sending AMQP request", Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> request.length))
+      Try(channel.basicPublish(exchangeName, routingKey, properties, request.unsafeArray)).pureFold(
+        error => {
+          logger.error("Failed to send AMQP request", error, Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> request.length))
+        },
+        _ => {
+          
+        }
+      )
+      logger.debug("Sent AMQP request", Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> request.length))
       promise.future
     }
 

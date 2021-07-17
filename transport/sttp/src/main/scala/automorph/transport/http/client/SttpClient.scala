@@ -64,10 +64,16 @@ final case class SttpClient[Effect[_]](
 
   private def send[R](request: Request[R, Any], size: Int): Effect[Response[R]] = {
     logger.trace("Sending HTTP request", Map("URL" -> urlText, "Method" -> request.method, "Size" -> size))
-    system.map(request.send(backend), (response: Response[R]) => {
-      logger.debug("Sent HTTP request", Map("URL" -> urlText, "Method" -> request.method, "Size" -> size))
-      response
-    })
+    system.flatMap(system.either(request.send(backend)), (result: Either[Throwable, Response[R]]) => result.fold(
+      error => {
+        logger.error("Failed to send HTTP request", error, Map("URL" -> urlText, "Method" -> request.method, "Size" -> size))
+        system.failed(error)
+      },
+      response => {
+        logger.debug("Sent HTTP request", Map("URL" -> urlText, "Method" -> request.method, "Size" -> size))
+        system.pure(response)
+      }
+    ))
   }
 
   private def setupHttpRequest(
