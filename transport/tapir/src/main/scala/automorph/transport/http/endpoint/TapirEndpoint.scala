@@ -11,10 +11,10 @@ import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode}
 
 /**
- * Tapir endpoint generator endpoint transport using HTTP as message transport protocol.
+ * Tapir endpoint endpoint transport plugin using HTTP as message transport protocol.
  *
- * The endpoint interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
- * The response returned by the JSON-RPC handler is used as HTTP response body.
+ * The endpoint interprets HTTP request body as a JSON-RPC request and processes it using the specified RPC handler.
+ * The response returned by the RPC handler is used as HTTP response body.
  *
  * @see [[https://tapir.softwaremill.com Documentation]]
  */
@@ -27,14 +27,14 @@ case object TapirEndpoint extends Logging with EndpointMessageTransport {
   type RequestType = (Array[Byte], List[String], QueryParams, List[Header], List[Cookie], Option[String])
 
   /**
-   * Create a JSON-RPC HTTP server endpoint for Tapir endpoint generator using the specified JSON-RPC request ''handler''.
+   * Creates a Tapir endpoint with the specified RPC request ''handler''.
    *
-   * The endpoint interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
-   * The response returned by the JSON-RPC handler is used as HTTP response body.
+   * The endpoint interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
+   * The response returned by the RPC handler is used as HTTP response body.
    *
    * @see [[https://tapir.softwaremill.com/ Documentation]]
    * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
-   * @param handler JSON-RPC request handler
+   * @param handler RPC request handler
    * @param method HTTP method to server
    * @param errorStatus JSON-RPC error code to HTTP status code mapping function
    * @tparam Node message node type

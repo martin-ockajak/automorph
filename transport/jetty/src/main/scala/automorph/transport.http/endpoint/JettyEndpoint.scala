@@ -12,15 +12,15 @@ import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
 
 /**
- * Jetty web server endpoint transport using HTTP as message transport protocol.
+ * Jetty web server endpoint transport plugin using HTTP as message transport protocol.
  *
- * The servlet interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
- * The response returned by the JSON-RPC handler is used as HTTP response body.
+ * The servlet interprets HTTP request body as an RPC request and processes it with the specified RPC handler.
+ * The response returned by the RPC handler is used as HTTP response body.
  *
  * @see [[https://www.eclipse.org/jetty/ Documentation]]
  * @see [[https://www.eclipse.org/jetty/javadoc/jetty-11/index.html API]]
- * @constructor Create a JSON-RPC HTTP servlet for Jetty web server using the specified JSON-RPC request ''handler''.
- * @param handler JSON-RPC request handler
+ * @constructor Creates a Jetty web server RPC servlet with the specified RPC request ''handler''.
+ * @param handler RPC request handler
  * @param runEffect asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
  * @tparam Node message node type

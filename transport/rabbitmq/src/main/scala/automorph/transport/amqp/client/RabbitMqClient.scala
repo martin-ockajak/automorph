@@ -18,6 +18,7 @@ import scala.concurrent.{Await, ExecutionContext, Future, Promise}
  *
  * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
  * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
+ * @constructor Creates a RabbitMQ client transport plugin.
  * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
  * @param routingKey AMQP routing key (typically a queue name)
  * @param exchangeName AMQP message exchange name

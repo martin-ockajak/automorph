@@ -10,12 +10,12 @@ import automorph.transport.http.server.NanoHTTPD.{newFixedLengthResponse, IHTTPS
 import scala.collection.immutable.ArraySeq
 
 /**
- * NanoHTTPD web server server transport using HTTP as message transport protocol.
+ * NanoHTTPD web server transport plugin using HTTP as message transport protocol.
  *
  * @see [[https://github.com/NanoHttpd/nanohttpd Documentation]]
  * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
- * @constructor Creates an NanoHTTPD web server using the specified JSON-RPC request ''handler''.
- * @param handler JSON-RPC request handler
+ * @constructor Creates a NanoHTTPD web server with the specified RPC request ''handler''.
+ * @param handler RPC request handler
  * @param runEffectSync synchronous effect execution function
  * @param port port to listen on for HTTP connections
  * @param readTimeout HTTP connection read timeout (milliseconds)
@@ -106,10 +106,11 @@ case object NanoHttpdServer {
   type Response = automorph.transport.http.server.NanoHTTPD.Response
 
   /**
-   * Create an NanoHTTPD web server using the specified JSON-RPC request ''handler''.
+   * Creates a NanoHTTPD web server with the specified RPC request ''handler''.
    *
    * @see [[https://github.com/NanoHttpd/nanohttpd Documentation]]
-   * @param handler JSON-RPC request handler
+   * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
+   * @param handler RPC request handler
    * @param runEffectSync synchronous effect execution function
    * @param port port to listen on for HTTP connections
    * @param readTimeout HTTP connection read timeout (milliseconds)

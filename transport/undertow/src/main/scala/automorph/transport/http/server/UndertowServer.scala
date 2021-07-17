@@ -10,11 +10,11 @@ import java.net.InetSocketAddress
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
- * Undertow web server server transport using HTTP as message transport protocol.
+ * Undertow web server transport plugin using HTTP as message transport protocol.
  *
  * @see [[https://undertow.io/ Documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
- * @constructor Creates an Undertow web server using the specified HTTP handler.
+ * @constructor Creates an Undertow web server with the specified HTTP handler.
  * @param httpHandler HTTP handler
  * @param port port to listen on for HTTP connections
  * @param urlPath HTTP URL path (default: /)

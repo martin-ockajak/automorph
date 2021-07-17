@@ -10,16 +10,13 @@ import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 /**
- * RabbitMQ client transport plugin using AMQP as message transport protocol.
+ * RabbitMQ server transport plugin using AMQP as message transport protocol.
  *
  * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
  * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
- * @constructor Creates an NanoHTTPD web server using the specified JSON-RPC request ''handler''.
- * @param handler JSON-RPC request handler
+ * @constructor Creates a RabbitMQ server transport plugin.
+ * @param handler RPC request handler
  * @param runEffectSync synchronous effect execution function
- * @param port port to listen on for HTTP connections
- * @param readTimeout HTTP connection read timeout (milliseconds)
- * @param errorStatus JSON-RPC error code to HTTP status mapping function
  * @tparam Effect effect type
  */
 final case class RabbitMqServer[Effect[_]] (

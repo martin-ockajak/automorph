@@ -13,15 +13,15 @@ import automorph.spi.{EndpointMessageTransport, MessageFormat}
 import automorph.protocol.ErrorType
 
 /**
- * Finagle RPC system endpoint transport using HTTP as message transport protocol.
+ * Finagle RPC system endpoint transport plugin using HTTP as message transport protocol.
  *
- * The service interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
- * The response returned by the JSON-RPC handler is used as HTTP response body.
+ * The service interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
+ * The response returned by the RPC handler is used as HTTP response body.
  *
  * @see [[https://twitter.github.io/finagle/ Documentation]]
  * @see [[https://twitter.github.io/finagle/docs/com/twitter/finagle/ API]]
- * @constructor Creates a JSON-RPC service for Finagle RPC system using the specified JSON-RPC request ''handler''.
- * @param handler JSON-RPC request handler
+ * @constructor Creates a Finagle RPC system RPC service with the specified RPC request ''handler''.
+ * @param handler RPC request handler
  * @param runEffect asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
  * @tparam Node message node type
