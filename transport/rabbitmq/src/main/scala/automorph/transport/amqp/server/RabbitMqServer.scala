@@ -1,13 +1,41 @@
-//package automorph.transport.amqp.server
-//
-//import java.net.InetAddress
-//
-//import com.archilogic.jsonrpc.core.BaseJsonRpcServer
-//import com.rabbitmq.client.AMQP
-//import automorph.log.Logging
-//
-//import scala.concurrent.ExecutionContext
-//import scala.concurrent.duration.FiniteDuration
+package automorph.transport.amqp.server
+
+import automorph.log.Logging
+import automorph.spi.ServerMessageTransport
+import automorph.transport.amqp.RabbitMqCommon.{applicationId, connect, defaultDirectExchange}
+import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory}
+import java.io.IOException
+import java.net.URL
+import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.concurrent.{Await, ExecutionContext, Future}
+
+/**
+ * RabbitMQ client transport plugin using AMQP as message transport protocol.
+ *
+ * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
+ * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
+ * @constructor Creates an NanoHTTPD web server using the specified JSON-RPC request ''handler''.
+ * @param handler JSON-RPC request handler
+ * @param runEffectSync synchronous effect execution function
+ * @param port port to listen on for HTTP connections
+ * @param readTimeout HTTP connection read timeout (milliseconds)
+ * @param errorStatus JSON-RPC error code to HTTP status mapping function
+ * @tparam Effect effect type
+ */
+final case class RabbitMqServer[Effect[_]] (
+  url: URL,
+  routingKey: String,
+  exchangeName: String = defaultDirectExchange,
+  exchangeType: BuiltinExchangeType = BuiltinExchangeType.DIRECT,
+  addresses: Seq[Address] = Seq()
+)(implicit executionContext: ExecutionContext)
+  extends AutoCloseable with Logging with ServerMessageTransport {
+  private lazy val connection = setupConnection()
+  private lazy val threadChannel = ThreadLocal.withInitial(() => openChannel(connection))
+  private val clientId = applicationId(getClass.getName)
+//class AmqpJsonRpcServer(url: String, requestTimeout: FiniteDuration, queueNames: Traversable[String], prefetchCount: Int = 0,
+//  durable: Boolean = false, exclusive: Boolean = false, autoDelete: Boolean = false, applicationId: String = InetAddress.getLocalHost.getHostName)
+//  setupQueueConsumers()
 //
 ///**
 //  * JSON-RPC over AMQP server based on RabbitMQ client.
@@ -21,19 +49,31 @@
 //  * @param durable declare durable queues which will survive AMQP server restart
 //  * @param exclusive declare exclusive queues accessible only to this connection
 //  * @param autoDelete declare autodelete queues which are deleted once they are no longer in use
-//  * @param applicationId AMQP message application identifier
-//  * @param executionContext execution context
 //  */
-//class AmqpJsonRpcServer(url: String, requestTimeout: FiniteDuration, queueNames: Traversable[String], prefetchCount: Int = 0,
-//  durable: Boolean = false, exclusive: Boolean = false, autoDelete: Boolean = false, applicationId: String = InetAddress.getLocalHost.getHostName)
-//  (implicit executionContext: ExecutionContext) extends BaseJsonRpcServer()(executionContext) with StrictLogging {
-//  private val (connection, virtualHost) = RabbitMqCommon.setupConnection(url, requestTimeout)
-//  setupQueueConsumers()
-//
-//  override def close(): Unit = {
-//    connection.abort(AMQP.CONNECTION_FORCED, "Terminated", requestTimeout.toMillis.toInt)
-//  }
-//
+
+  override def close(): Unit = Await.result(connection, Duration.Inf).abort(AMQP.CONNECTION_FORCED, "Terminated")
+
+  private def openChannel(connection: Future[Connection]): Future[Channel] =
+    connection.map(_.createChannel()).map { channel =>
+      Option(channel).getOrElse {
+        throw new IOException("No AMQP connection channel available")
+      }
+    }
+
+  private def setupConnection(): Future[Connection] = {
+    val connectionFactory = new ConnectionFactory
+    Future(connect(url, Seq(), connectionFactory, clientId)).flatMap { connection =>
+      if (exchangeName != defaultDirectExchange) {
+        threadChannel.get().map { channel =>
+          channel.exchangeDeclare(exchangeName, exchangeType, false)
+          connection
+        }
+      } else {
+        Future.successful(connection)
+      }
+    }
+  }
+
 //  private def setupQueueConsumers(): Unit = {
 //    logger.info(s"Consuming messages from queues: ${queueNames.mkString(", ")}")
 //    for (queueName <- queueNames) yield {
@@ -47,4 +87,4 @@
 //        new QueueConsumer(channel, virtualHost, applicationId, this))
 //    }
 //  }
-//}
+}

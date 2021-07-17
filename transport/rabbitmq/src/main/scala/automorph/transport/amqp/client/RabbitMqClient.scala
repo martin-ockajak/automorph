@@ -16,6 +16,8 @@ import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 /**
  * RabbitMQ client transport plugin using AMQP as message transport protocol.
  *
+ * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
+ * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
  * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
  * @param routingKey AMQP routing key (typically a queue name)
  * @param exchangeName AMQP message exchange name
@@ -30,7 +32,7 @@ final case class RabbitMqClient(
   exchangeType: BuiltinExchangeType = BuiltinExchangeType.DIRECT,
   addresses: Seq[Address] = Seq()
 )(implicit executionContext: ExecutionContext)
-  extends ClientMessageTransport[Future, RequestProperties] with AutoCloseable with Logging {
+  extends AutoCloseable with Logging with ClientMessageTransport[Future, RequestProperties] {
 
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
   private lazy val connection = setupConnection()
