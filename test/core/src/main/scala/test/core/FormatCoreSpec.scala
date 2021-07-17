@@ -11,7 +11,7 @@ import automorph.{Client, Handler}
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
-import test.core.{CoreSpec, FormatCoreSpec}
+import test.core.CoreSpec
 import test.{Enum, Record, Structure}
 
 trait FormatCoreSpec extends CoreSpec {

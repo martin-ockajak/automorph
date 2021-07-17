@@ -12,7 +12,6 @@ import java.net.URL
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future, Promise}
-import scala.util.{Failure, Random, Success, Try}
 
 /**
  * RabbitMQ client transport plugin using AMQP as message transport protocol.
@@ -121,7 +120,7 @@ final case class RabbitMqClient(
         "Received AMQP response",
         Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> body.length)
       )
-      promise.success(ArraySeq.ofByte(body))
+      promise.success(new ArraySeq.ofByte(body))
     }
   }
 }
@@ -133,6 +132,6 @@ case object RabbitMqClient {
   )
 
   case object RequestProperties {
-    implicit val defaultContext: RequestProperties = RequestProperties(BasicProperties())
+    implicit val defaultContext: RequestProperties = RequestProperties(new BasicProperties)
   }
 }
