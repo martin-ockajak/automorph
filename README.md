@@ -98,7 +98,7 @@ Expose the API via JSON-RPC over HTTP(S).
 ### Server
 
 ```scala
-// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = automorph.DefaultHttpServer.async(_.bind(api), 80, "/api")
 
 // Stop the server
@@ -110,7 +110,7 @@ server.close()
 Invoke the API via JSON-RPC over HTTP(S).
 
 ```scala
-// Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val client = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
 
 // Call the remote API method via proxy
@@ -217,7 +217,7 @@ Used to passively receive and reply to requests using specific message transport
 
 ## [Client](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/automorph/Client.html)
 
-The client provides automatic creation of transparent proxy instances for remote JSON-RPC endpoints defined by existing API classes. Additionally, it also
+The client provides automatic creation of transparent proxy instances for remote RPC endpoints defined by existing API classes. Additionally, it also
 supports direct calls and notifications of remote API methods.
 
 Depends on:
@@ -239,7 +239,7 @@ Depends on:
 
 ## Handler
 
-The handler provides automatic creation of remote JSON-RPC endpoint bindings for existing API instances and subsequent processing JSON-RPC requests.
+The handler provides automatic creation of remote RPC endpoint bindings for existing API instances and subsequent processing RPC requests.
 
 Depends on:
 
@@ -274,7 +274,7 @@ val api = new Api()
 ### Server
 
 ```scala
-  // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = automorph.DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
 // Stop the server
@@ -284,7 +284,7 @@ server.close()
 ### Client
 
 ```scala
-// Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val client = automorph.DefaultHttpClient.sync("http://localhost/api", "POST")
 
 // Call the remote API method via proxy
@@ -311,7 +311,7 @@ val api = new Api()
 ### Server
 
 ```scala
-// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = automorph.DefaultHttpServer.async(_.bind(api), 80, "/api")
 
 // Stop the server
@@ -321,7 +321,7 @@ server.close()
 ### Client
 
 ```scala
-// Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val client = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
 
 // Call the remote API method via proxy
@@ -373,7 +373,7 @@ trait ClientApi {
 ### Server
 
 ```scala
-// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = automorph.DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
 // Stop the server
@@ -383,7 +383,7 @@ server.close()
 ### Client
 
 ```scala
-// Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val client = automorph.DefaultHttpClient.sync("http://localhost/api", "POST")
 
 // Create context for requests sent by the client
@@ -436,7 +436,7 @@ val mapMethodName = (name: String) => name match {
   case other => Seq(s"test.$other")
 }
 
-// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = automorph.DefaultHttpServer.sync(_.bind(api, mapMethodName(_)), 80, "/api")
 
 // Stop the server
@@ -448,7 +448,7 @@ server.close()
 ```scala
 import scala.util.Try
 
-// Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val client = automorph.DefaultHttpClient.sync("http://localhost/api", "POST")
 
 // Call the remote API method via proxy
@@ -490,7 +490,7 @@ import automorph.system.ZioSystem
 val system = ZioSystem[Any]()
 val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
 
-// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = automorph.DefaultHttpServer[ZioSystem.TaskEffect](system, runEffect, _.bind(api), 80, "/api")
 
 // Stop the server
@@ -503,7 +503,7 @@ server.close()
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 
-// Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
 val client = automorph.DefaultHttpClient("http://localhost/api", "POST", system, backend)
 
@@ -531,7 +531,7 @@ import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.server.NanoHttpdServer
 import automorph.{Client, DefaultSystem, DefaultFormat, Handler}
 
-// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val system = DefaultEffectSystem.sync
 val runEffect = (effect: Identity[NanoHttpdServer.Response]) => effect
 val format = DefaultMessageFormat()
@@ -548,7 +548,7 @@ server.close()
 import automorph.transport.http.client.UrlConnectionTransport
 import java.net.URL
 
-// Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val transport = UrlConnectionClient(new URL("http://localhost/api"), "POST")
 val client: Client[DefaultMessageFormat.Node, format.type, Identity, UrlConnectionClient.Context] =
   Client(format, system, transport)
@@ -592,7 +592,7 @@ import automorph.transport.http.server.UndertowServer
 import automorph.{Client, DefaultSystem, DefaultHttpTransport, Handler}
 import io.circe.generic.auto._
 
-// Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val system = DefaultEffectSystem.async
 val runEffect = (effect: Future[_]) => effect
 val format = CirceJsonFormat()
@@ -606,7 +606,7 @@ server.close()
 ### Client
 
 ```scala
-  // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+  // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val transport = DefaultHttpClientTransport.async("http://localhost/api", "POST")
 val client: Client[CirceJsonFormat.Node, format.type, Future, DefaultHttpClientTransport.Context] =
   Client(format, system, transport)

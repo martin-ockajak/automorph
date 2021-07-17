@@ -14,14 +14,14 @@ object ChooseMessageTransport extends App {
   }
   val api = new Api()
 
-  // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
   val system = DefaultEffectSystem.sync
   val runEffect = (effect: Identity[NanoHttpdServer.Response]) => effect
   val format = DefaultMessageFormat()
   val handler = Handler[DefaultMessageFormat.Node, format.type, Identity, NanoHttpdServer.Context](format, system)
   val server = NanoHttpdServer(handler.bind(api), runEffect, 80)
 
-  // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+  // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
   val transport = UrlConnectionClient(new URL("http://localhost/api"), "POST")
   val client: Client[DefaultMessageFormat.Node, format.type, Identity, UrlConnectionClient.Context] =
     Client(format, system, transport)

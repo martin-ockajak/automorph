@@ -17,14 +17,14 @@ object ChooseMessageFormat extends App {
   }
   val api = new Api()
 
-  // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
   val system = DefaultEffectSystem.async
   val runEffect = (effect: Future[_]) => effect
   val format = CirceJsonFormat()
   val handler = Handler[CirceJsonFormat.Node, format.type, Future, UndertowEndpoint.Context](format, system)
   val server = UndertowServer(UndertowEndpoint(handler.bind(api), runEffect), 80, "/api")
 
-  // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+  // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
   val transport = DefaultHttpClientTransport.async("http://localhost/api", "POST")
   val client: Client[CirceJsonFormat.Node, format.type, Future, DefaultHttpClientTransport.Context] =
     Client(format, system, transport)

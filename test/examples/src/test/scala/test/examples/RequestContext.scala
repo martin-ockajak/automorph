@@ -20,10 +20,10 @@ object RequestContext extends App {
     def requestMetaData(message: String)(implicit context: Context): List[String]
   }
 
-  // Create and start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
   val server = automorph.DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
-  // Create JSON-RPC client for sending HTTP POST requests to 'http://localhost/api'
+  // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
   val client = automorph.DefaultHttpClient.sync("http://localhost/api", "POST")
 
   // Create context for requests sent by the client
