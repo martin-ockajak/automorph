@@ -3,7 +3,7 @@ package automorph.transport.amqp
 import automorph.log.Logging
 import automorph.util.Extensions.TryOps
 import com.rabbitmq.client.{Address, Connection, ConnectionFactory}
-import java.net.URL
+import java.net.{InetAddress, URL}
 import scala.util.Try
 
 /** Common RabbitMQ functionality. */
@@ -42,4 +42,12 @@ private[automorph] object RabbitMqCommon extends Logging {
       error
     }.get
   }
+
+  /**
+   * Returns application identifier combining the local host name with specified application name.
+   *
+   * @param applicationName application name
+   * @return application identifier
+   */
+  def applicationId(applicationName: String): String = s"${InetAddress.getLocalHost.getHostName}/$applicationName"
 }
