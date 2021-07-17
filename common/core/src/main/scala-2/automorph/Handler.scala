@@ -9,12 +9,12 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /**
- * JSON-RPC request handler.
+ * RPC request handler.
  *
- * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
+ * The handler can be used by a RPC server to invoke bound API methods based on incoming RPC requests.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @constructor Creates a new JSON-RPC request handler with specified request `Context` type plus specified ''format'' and ''system'' plugins.
+ * @constructor Creates a new RPC request handler with specified request `Context` type plus specified ''format'' and ''system'' plugins.
  * @param format message format plugin
  * @param system effect system plugin
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
@@ -41,9 +41,9 @@ case object Handler {
   type AnyFormat[Effect[_], Context] = Handler[Node, _ <: MessageFormat[Node], Effect, Context] forSome { type Node }
 
   /**
-   * Creates a JSON-RPC request handler with specified request `Context` type plus specified ''format'' and ''system'' plugins.
+   * Creates a RPC request handler with specified request `Context` type plus specified ''format'' and ''system'' plugins.
    *
-   * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
+   * The handler can be used by a RPC server to invoke bound API methods based on incoming RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param format message format plugin
@@ -51,7 +51,7 @@ case object Handler {
    * @tparam Node message node type
    * @tparam ActualFormat message format plugin type
    * @tparam Effect effect type
-   * @return JSON-RPC request handler
+   * @return RPC request handler
    */
   def apply[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context](
     format: ActualFormat,
@@ -60,9 +60,9 @@ case object Handler {
     macro applyMacro[Node, ActualFormat, Effect, Context]
 
   /**
-   * Creates a JSON-RPC request handler with empty request context plus specified specified ''format'' and ''system'' plugins.
+   * Creates a RPC request handler with empty request context plus specified specified ''format'' and ''system'' plugins.
    *
-   * The handler can be used by a JSON-RPC server to invoke bound API methods based on incoming JSON-RPC requests.
+   * The handler can be used by a RPC server to invoke bound API methods based on incoming RPC requests.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param format message format plugin
@@ -70,7 +70,7 @@ case object Handler {
    * @tparam Node message node type
    * @tparam ActualFormat message format plugin type
    * @tparam Effect effect type
-   * @return JSON-RPC request handler
+   * @return RPC request handler
    */
   def withoutContext[Node, ActualFormat <: MessageFormat[Node], Effect[_]](
     format: ActualFormat,

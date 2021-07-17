@@ -14,7 +14,7 @@ import java.io.IOException
  * Used to perform RPC calls and notifications.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @constructor Creates a JSON-RPC client with specified request `Context` type plus ''format'', ''system'' and ''transport'' plugins.
+ * @constructor Creates a RPC client with specified request `Context` type plus ''format'', ''system'' and ''transport'' plugins.
  * @param format message format plugin
  * @param system effect system plugin
  * @param transport message transport plugin
@@ -47,7 +47,7 @@ final case class Client[Node, ActualFormat <: MessageFormat[Node], Effect[_], Co
   def method(methodName: String): NamedMethod = NamedMethodProxy(methodName, core, Seq(), Seq())
 
   /**
-   * Create default request context.
+   * Creates default request context.
    *
    * @return request context
    */
@@ -69,9 +69,9 @@ final case class Client[Node, ActualFormat <: MessageFormat[Node], Effect[_], Co
 case object Client {
 
   /**
-   * Creates a JSON-RPC client with empty request context and specified ''format'', ''system'' and ''transport'' plugins.
+   * Creates a RPC client with empty request context and specified ''format'', ''system'' and ''transport'' plugins.
    *
-   * The client can be used to perform JSON-RPC calls and notifications.
+   * The client can be used to perform RPC calls and notifications.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param format structured message format format plugin
@@ -80,7 +80,7 @@ case object Client {
    * @tparam Node message node type
    * @tparam ActualFormat message format plugin type
    * @tparam Effect effect type
-   * @return JSON-RPC client
+   * @return RPC client
    */
   def withoutContext[Node, ActualFormat <: MessageFormat[Node], Effect[_]](
     format: ActualFormat,

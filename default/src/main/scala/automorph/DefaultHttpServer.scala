@@ -25,7 +25,7 @@ case object DefaultHttpServer {
   type Handler[Effect[_]] = DefaultHandler.Type[Effect, UndertowServer.Context]
 
   /**
-   * Creates a default server using HTTP as message transport protocol with specified ''backend'' plugin.
+   * Creates a default RPC server using HTTP as message transport protocol with specified ''backend'' plugin.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -40,7 +40,7 @@ case object DefaultHttpServer {
    * @param builder Undertow web server builder
    * @param errorStatus error code to HTTP status mapping function
    * @tparam Effect effect type
-   * @return server
+   * @return RPC server
    */
   def apply[Effect[_]](
     backend: EffectSystem[Effect],
@@ -56,7 +56,7 @@ case object DefaultHttpServer {
   }
 
   /**
-   * Creates a default asynchronous server using HTTP as message transport protocol and 'Future' as an effect type.
+   * Creates a default asynchronous RPC server using HTTP as message transport protocol and 'Future' as an effect type.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -68,7 +68,7 @@ case object DefaultHttpServer {
    * @param builder Undertow web server builder
    * @param errorStatus error code to HTTP status mapping function
    * @param executionContext execution context
-   * @return asynchronous server
+   * @return asynchronous RPC server
    */
   def async(
     bindApis: Handler[Future] => Handler[Future],
@@ -84,7 +84,7 @@ case object DefaultHttpServer {
   }
 
   /**
-   * Creates a default synchronous server using HTTP as message transport protocol and identity as an effect type.
+   * Creates a default synchronous RPC server using HTTP as message transport protocol and identity as an effect type.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -95,7 +95,7 @@ case object DefaultHttpServer {
    * @param urlPath HTTP URL path (default: /)
    * @param builder Undertow web server builder
    * @param errorStatus error code to HTTP status mapping function
-   * @return synchronous server
+   * @return synchronous RPC server
    */
   def sync(
     bindApis: Handler[Identity] => Handler[Identity],

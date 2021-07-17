@@ -22,16 +22,16 @@ case object DefaultHttpClient {
   type Context = SttpClient.Context
 
   /**
-   * Creates a default JSON-RPC client using HTTP as message transport protocol with specified ''backend'' plugin.
+   * Creates a default RPC client using HTTP as message transport protocol with specified ''backend'' plugin.
    *
-   * The client can be used to perform JSON-RPC calls and notifications.
+   * The client can be used to perform RPC calls and notifications.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param backend effect system plugin
    * @param transport message transport protocol plugin
    * @tparam Effect effect type
    * @tparam RequestContext request context type
-   * @return client
+   * @return RPC client
    */
   def apply[Effect[_], RequestContext](
     backend: EffectSystem[Effect],
@@ -40,9 +40,9 @@ case object DefaultHttpClient {
     Client(UpickleJsonFormat(), backend, transport)
 
   /**
-   * Creates a default JSON-RPC client using HTTP as message transport protocol with specified ''backend'' plugin.
+   * Creates a default RPC client using HTTP as message transport protocol with specified ''backend'' plugin.
    *
-   * The client can be used to perform JSON-RPC calls and notifications.
+   * The client can be used to perform RPC calls and notifications.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param url HTTP endpoint URL
@@ -50,7 +50,7 @@ case object DefaultHttpClient {
    * @param backend effect system plugin
    * @param sttpSystem HTTP client backend
    * @tparam Effect effect type
-   * @return client
+   * @return RPC client
    */
   def apply[Effect[_]](
     url: String,
@@ -60,31 +60,31 @@ case object DefaultHttpClient {
   ): Type[Effect] = DefaultHttpClient(backend, SttpClient(new URL(url), method, backend, sttpSystem))
 
   /**
-   * Creates a default asynchronous JSON-RPC client using HTTP as message transport protocol and 'Future' as an effect type.
+   * Creates a default asynchronous RPC client using HTTP as message transport protocol and 'Future' as an effect type.
    *
-   * The client can be used to perform JSON-RPC calls and notifications.
+   * The client can be used to perform RPC calls and notifications.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @param executionContext execution context
-   * @return asynchronous client
+   * @return asynchronous RPC client
    */
   def async(url: String, method: String)(implicit
     executionContext: ExecutionContext
   ): Type[Future] = DefaultHttpClient(url, method, DefaultEffectSystem.async, AsyncHttpClientFutureBackend())
 
   /**
-   * Creates a default asynchronous JSON-RPC client using HTTP as message transport protocol and identity as an effect type.
+   * Creates a default asynchronous RPC client using HTTP as message transport protocol and identity as an effect type.
    *
-   * The client can be used to perform JSON-RPC calls and notifications.
+   * The client can be used to perform RPC calls and notifications.
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
-   * @return synchronous client
+   * @return synchronous RPC client
    */
   def sync(url: String, method: String): Type[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
