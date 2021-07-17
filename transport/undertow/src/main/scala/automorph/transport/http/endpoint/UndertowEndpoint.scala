@@ -5,7 +5,7 @@ import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.EndpointMessageTransport
-import automorph.transport.http.endpoint.UndertowHandlerEndpoint.defaultErrorStatus
+import automorph.transport.http.endpoint.UndertowEndpoint.defaultErrorStatus
 import automorph.util.Extensions.TryOps
 import io.undertow.io.Receiver
 import java.io.IOException
@@ -28,7 +28,7 @@ import scala.util.Try
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
  * @tparam Effect effect type
  */
-final case class UndertowHandlerEndpoint[Effect[_]](
+final case class UndertowEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, HttpServerExchange],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
@@ -124,7 +124,7 @@ final case class UndertowHandlerEndpoint[Effect[_]](
   }
 }
 
-case object UndertowHandlerEndpoint {
+case object UndertowEndpoint {
 
   /** Request context type. */
   type Context = HttpServerExchange

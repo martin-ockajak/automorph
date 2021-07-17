@@ -6,7 +6,7 @@ import automorph.Handler
 import automorph.handler.{Bytes, HandlerResult}
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
-import automorph.transport.http.endpoint.JettyServletEndpoint.defaultErrorStatus
+import automorph.transport.http.endpoint.JettyEndpoint.defaultErrorStatus
 import automorph.spi.{MessageFormat, EndpointMessageTransport}
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
@@ -26,7 +26,7 @@ import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
  * @tparam Node message node type
  * @tparam Effect effect type
  */
-final case class JettyServletEndpoint[Node, Effect[_]](
+final case class JettyEndpoint[Node, Effect[_]](
   handler: Handler[Node, _ <: MessageFormat[Node], Effect, HttpServletRequest],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
@@ -82,7 +82,7 @@ final case class JettyServletEndpoint[Node, Effect[_]](
   }
 }
 
-case object JettyServletEndpoint {
+case object JettyEndpoint {
   /** Request context type. */
   type Context = HttpServletRequest
 

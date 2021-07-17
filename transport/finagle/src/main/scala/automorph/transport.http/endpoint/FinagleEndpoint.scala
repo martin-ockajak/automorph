@@ -8,7 +8,7 @@ import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.protocol.ResponseError
 import automorph.log.Logging
-import automorph.transport.http.endpoint.FinagleServiceEndpoint.defaultErrorStatus
+import automorph.transport.http.endpoint.FinagleEndpoint.defaultErrorStatus
 import automorph.spi.{EndpointMessageTransport, MessageFormat}
 import automorph.protocol.ErrorType
 
@@ -27,7 +27,7 @@ import automorph.protocol.ErrorType
  * @tparam Node message node type
  * @tparam Effect effect type
  */
-final case class FinagleServiceEndpoint[Node, Effect[_]](
+final case class FinagleEndpoint[Node, Effect[_]](
   handler: Handler[Node, _ <: MessageFormat[Node], Effect, Request],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Status = defaultErrorStatus
@@ -100,7 +100,7 @@ final case class FinagleServiceEndpoint[Node, Effect[_]](
   }
 }
 
-case object FinagleServiceEndpoint {
+case object FinagleEndpoint {
 
   /** Request context type. */
   type Context = Request
