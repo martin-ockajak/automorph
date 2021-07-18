@@ -38,9 +38,9 @@ final case class RabbitMqClient(
 )(implicit executionContext: ExecutionContext)
   extends AutoCloseable with Logging with ClientMessageTransport[Future, RequestProperties] {
 
-  private val directReplyToQueue = "amq.rabbitmq.reply-to"
   private lazy val connection = createConnection()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
+  private val directReplyToQueue = "amq.rabbitmq.reply-to"
   private val urlText = url.toExternalForm
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
   private val callResults = TrieMap[String, Promise[ArraySeq.ofByte]]()
