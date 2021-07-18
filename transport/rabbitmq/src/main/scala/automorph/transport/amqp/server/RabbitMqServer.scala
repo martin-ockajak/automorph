@@ -15,12 +15,15 @@ import scala.concurrent.{Await, ExecutionContext, Future}
  * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
  * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
  * @constructor Creates a RabbitMQ server transport plugin.
+ * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
+ * @param queueNames names of queues to consume messages from
  * @param handler RPC request handler
  * @param runEffectSync synchronous effect execution function
  * @tparam Effect effect type
  */
 final case class RabbitMqServer[Effect[_]] (
   url: URL,
+  queueNames: Seq[String],
   routingKey: String,
   exchangeName: String = defaultDirectExchange,
   exchangeType: BuiltinExchangeType = BuiltinExchangeType.DIRECT,
@@ -40,8 +43,6 @@ final case class RabbitMqServer[Effect[_]] (
 //  * Interprets AMQP messages as JSON-RPC requests.
 //  * Publishes responses to default exchange and uses 'reply-to' request property as routing key.
 //  * @param url AMQP server URL in following format: amqp[s]://[username:password@]host[:port][/virtual host]
-//  * @param requestTimeout request timeout
-//  * @param queueNames names of queues to consume messages from
 //  * @param prefetchCount maximum number of concurrently processed requests, set to 0 for unlimited
 //  * @param durable declare durable queues which will survive AMQP server restart
 //  * @param exclusive declare exclusive queues accessible only to this connection

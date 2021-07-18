@@ -9,6 +9,7 @@ import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.io.IOException
 import java.net.URL
+import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future, Promise}
@@ -22,7 +23,7 @@ import scala.concurrent.{Await, ExecutionContext, Future, Promise}
  * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
  * @param routingKey AMQP routing key (typically a queue name)
  * @param exchangeName AMQP message exchange name
- * @param exchangeName AMQP message exchange type (DIRECT, FANOUT, HEADERS, TOPIC)
+ * @param exchangeType AMQP message exchange type (DIRECT, FANOUT, HEADERS, TOPIC)
  * @param addresses broker hostnames and ports for reconnection attempts
  * @param executionContext execution context
  */
@@ -37,9 +38,10 @@ final case class RabbitMqClient(
 
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
   private lazy val connection = setupConnection()
-  private lazy val threadChannel = ThreadLocal.withInitial(() => openChannel(connection))
+  private lazy val threadConsumer = ThreadLocal.withInitial(() => createConsumer(connection))
   private val urlText = url.toExternalForm
   private val clientId = applicationId(getClass.getName)
+  private val callResults = TrieMap[String, Promise[ArraySeq.ofByte]]()
 
   override def call(
     request: ArraySeq.ofByte,
@@ -47,9 +49,8 @@ final case class RabbitMqClient(
     context: Option[RequestProperties]
   ): Future[ArraySeq.ofByte] = {
     val properties = setupProperties(mediaType, context)
-    val promise = Promise[ArraySeq.ofByte]()
-    val consumer = (channel: Channel) => ResponseConsumer(channel, promise)
-    send(request, properties, Some(consumer)).flatMap(_ => promise.future)
+    val result = Promise[ArraySeq.ofByte]()
+    send(request, properties, Some(result)).flatMap(_ => result.future)
   }
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Future[Unit] = {
@@ -64,21 +65,42 @@ final case class RabbitMqClient(
   private def send(
     request: ArraySeq.ofByte,
     properties: BasicProperties,
-    consumer: Option[Channel => ResponseConsumer]
+    result: Option[Promise[ArraySeq.ofByte]]
   ): Future[Unit] =
-    threadChannel.get.flatMap { channel =>
-      consumer.foreach(actualConsumer => channel.basicConsume(directReplyToQueue, true, actualConsumer(channel)))
-      logger.trace("Sending AMQP request", Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> request.length))
-      Future(channel.basicPublish(exchangeName, routingKey, true, false, properties, request.unsafeArray)).transform(
-        _ => {
-          logger.debug("Sent AMQP request", Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> request.length))
-          ()
-        },
+    threadConsumer.get.flatMap { consumer =>
+      logger.trace(
+        "Sending AMQP request",
+        Map(
+          "URL" -> urlText,
+          "Routing key" -> routingKey,
+          "Correlation ID" -> properties.getCorrelationId,
+          "Size" -> request.length
+        )
+      )
+      result.foreach(callResults.put(properties.getCorrelationId, _))
+      Future(
+        consumer.channel.basicPublish(exchangeName, routingKey, true, false, properties, request.unsafeArray)
+      ).transform(
+        _ =>
+          logger.debug(
+            "Sent AMQP request",
+            Map(
+              "URL" -> urlText,
+              "Routing key" -> routingKey,
+              "Correlation ID" -> properties.getCorrelationId,
+              "Size" -> request.length
+            )
+          ),
         error => {
           logger.error(
             "Failed to send AMQP request",
             error,
-            Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> request.length)
+            Map(
+              "URL" -> urlText,
+              "Routing key" -> routingKey,
+              "Correlation ID" -> properties.getCorrelationId,
+              "Size" -> request.length
+            )
           )
           error
         }
@@ -89,19 +111,21 @@ final case class RabbitMqClient(
     context.getOrElse(defaultContext).basic.builder().replyTo(directReplyToQueue).correlationId(MessageId.next)
       .contentType(mediaType).appId(clientId).build
 
-  private def openChannel(connection: Future[Connection]): Future[Channel] =
+  private def createConsumer(connection: Future[Connection]): Future[ResponseConsumer] =
     connection.map(_.createChannel()).map { channel =>
-      Option(channel).getOrElse {
+      val consumer = ResponseConsumer(Option(channel).getOrElse {
         throw new IOException("No AMQP connection channel available")
-      }
+      })
+      consumer.channel.basicConsume(directReplyToQueue, true, consumer)
+      consumer
     }
 
   private def setupConnection(): Future[Connection] = {
     val connectionFactory = new ConnectionFactory
     Future(connect(url, Seq(), connectionFactory, clientId)).flatMap { connection =>
       if (exchangeName != defaultDirectExchange) {
-        threadChannel.get().map { channel =>
-          channel.exchangeDeclare(exchangeName, exchangeType, false)
+        threadConsumer.get().map { consumer =>
+          consumer.channel.exchangeDeclare(exchangeName, exchangeType, false)
           connection
         }
       } else {
@@ -110,8 +134,7 @@ final case class RabbitMqClient(
     }
   }
 
-  final private case class ResponseConsumer(channel: Channel, promise: Promise[ArraySeq.ofByte])
-    extends DefaultConsumer(channel) {
+  final private case class ResponseConsumer(channel: Channel) extends DefaultConsumer(channel) {
 
     override def handleDelivery(
       consumerTag: String,
@@ -121,9 +144,16 @@ final case class RabbitMqClient(
     ): Unit = {
       logger.debug(
         "Received AMQP response",
-        Map("URL" -> urlText, "Routing key" -> routingKey, "Size" -> body.length)
+        Map(
+          "URL" -> urlText,
+          "Routing key" -> routingKey,
+          "Correlation ID" -> properties.getCorrelationId,
+          "Size" -> body.length
+        )
       )
-      promise.success(new ArraySeq.ofByte(body))
+      callResults.get(properties.getCorrelationId).foreach { promise =>
+        promise.success(new ArraySeq.ofByte(body))
+      }
     }
   }
 }
