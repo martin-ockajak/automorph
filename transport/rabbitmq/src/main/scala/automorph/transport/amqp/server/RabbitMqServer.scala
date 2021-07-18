@@ -2,12 +2,13 @@ package automorph.transport.amqp.server
 
 import automorph.log.Logging
 import automorph.spi.ServerMessageTransport
-import automorph.transport.amqp.RabbitMqCommon.{applicationId, connect, defaultDirectExchange}
+import automorph.transport.amqp.RabbitMqCommon
 import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory}
 import java.io.IOException
 import java.net.URL
 import scala.concurrent.duration.{Duration, FiniteDuration}
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Using
 
 /**
  * RabbitMQ server transport plugin using AMQP as message transport protocol.
@@ -25,14 +26,13 @@ final case class RabbitMqServer[Effect[_]] (
   url: URL,
   queueNames: Seq[String],
   routingKey: String,
-  exchangeName: String = defaultDirectExchange,
+  exchangeName: String = RabbitMqCommon.defaultDirectExchange,
   exchangeType: BuiltinExchangeType = BuiltinExchangeType.DIRECT,
   addresses: Seq[Address] = Seq()
 )(implicit executionContext: ExecutionContext)
   extends AutoCloseable with Logging with ServerMessageTransport {
-  private lazy val connection = setupConnection()
-  private lazy val threadChannel = ThreadLocal.withInitial(() => openChannel(connection))
-  private val clientId = applicationId(getClass.getName)
+  private lazy val connection = createConnection()
+  private val clientId = RabbitMqCommon.applicationId(getClass.getName)
 //class AmqpJsonRpcServer(url: String, requestTimeout: FiniteDuration, queueNames: Traversable[String], prefetchCount: Int = 0,
 //  durable: Boolean = false, exclusive: Boolean = false, autoDelete: Boolean = false, applicationId: String = InetAddress.getLocalHost.getHostName)
 //  setupQueueConsumers()
@@ -49,27 +49,16 @@ final case class RabbitMqServer[Effect[_]] (
 //  * @param autoDelete declare autodelete queues which are deleted once they are no longer in use
 //  */
 
-  override def close(): Unit = Await.result(connection, Duration.Inf).abort(AMQP.CONNECTION_FORCED, "Terminated")
+  override def close(): Unit = connection.abort(AMQP.CONNECTION_FORCED, "Terminated")
 
-  private def openChannel(connection: Future[Connection]): Future[Channel] =
-    connection.map(_.createChannel()).map { channel =>
-      Option(channel).getOrElse {
-        throw new IOException("No AMQP connection channel available")
-      }
-    }
-
-  private def setupConnection(): Future[Connection] = {
-    val connectionFactory = new ConnectionFactory
-    Future(connect(url, Seq(), connectionFactory, clientId)).flatMap { connection =>
-      if (exchangeName != defaultDirectExchange) {
-        threadChannel.get().map { channel =>
-          channel.exchangeDeclare(exchangeName, exchangeType, false)
-          connection
-        }
-      } else {
-        Future.successful(connection)
-      }
-    }
+  private def createConnection(): Connection = {
+    val connection = RabbitMqCommon.connect(url, Seq(), new ConnectionFactory, clientId)
+    Option.when(exchangeName != RabbitMqCommon.defaultDirectExchange) {
+      Using(connection.createChannel()) { channel =>
+        channel.exchangeDeclare(exchangeName, exchangeType, false)
+        connection
+      }.get
+    }.getOrElse(connection)
   }
 
 //  private def setupQueueConsumers(): Unit = {

@@ -2,7 +2,8 @@ package automorph.transport.amqp
 
 import automorph.log.Logging
 import automorph.util.Extensions.TryOps
-import com.rabbitmq.client.{Address, Connection, ConnectionFactory}
+import com.rabbitmq.client.{AMQP, Address, Channel, Connection, ConnectionFactory, DefaultConsumer}
+import java.io.IOException
 import java.net.{InetAddress, URL}
 import scala.util.Try
 
@@ -19,7 +20,7 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @param addresses broker hostnames and ports for reconnection attempts
    * @param connectionFactory connection factory
    * @param connectionName connection name
-   * @return AMQP broker connection, virtual host
+   * @return AMQP broker connection
    */
   def connect(
     url: URL,
@@ -44,10 +45,33 @@ private[automorph] object RabbitMqCommon extends Logging {
   }
 
   /**
+   * Close AMQP broker connection.
+   *
+   * @param connection AMQP broker connection
+   */
+  def disconnect(connection: Connection): Unit = connection.abort(AMQP.CONNECTION_FORCED, "Terminated")
+
+  /**
    * Returns application identifier combining the local host name with specified application name.
    *
    * @param applicationName application name
    * @return application identifier
    */
   def applicationId(applicationName: String): String = s"${InetAddress.getLocalHost.getHostName}/$applicationName"
+
+  /**
+   * Creates thread-local AMQP message consumer for specified connection,
+   *
+   * @param connection AMQP broker connection
+   * @param createConsumer AMQP message consumer creation function
+   * @tparam T AMQP message consumer type
+   * @return thread-local AMQP message consumer
+   */
+  def threadLocalConsumer[T <: DefaultConsumer](connection: Connection, createConsumer: Channel => T): ThreadLocal[T] =
+    ThreadLocal.withInitial { () =>
+      val channel = connection.createChannel()
+      createConsumer(Option(channel).getOrElse {
+        throw new IOException("No AMQP connection channel available")
+      })
+    }
 }
