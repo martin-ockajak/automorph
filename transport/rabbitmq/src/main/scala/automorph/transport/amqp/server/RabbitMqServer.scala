@@ -1,11 +1,14 @@
 package automorph.transport.amqp.server
 
+import automorph.Handler
 import automorph.log.Logging
 import automorph.spi.ServerMessageTransport
 import automorph.transport.amqp.RabbitMqCommon
-import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory}
+import com.rabbitmq.client.AMQP.BasicProperties
+import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.io.IOException
 import java.net.URL
+import scala.collection.immutable.ArraySeq
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Using
@@ -16,21 +19,25 @@ import scala.util.Using
  * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
  * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
  * @constructor Creates a RabbitMQ server transport plugin.
- * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
- * @param queueNames names of queues to consume messages from
  * @param handler RPC request handler
- * @param runEffectSync synchronous effect execution function
+ * @param runEffect effect execution function
+ * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
+ * @param queues names of queues to consume messages from
+ * @param addresses broker hostnames and ports for reconnection attempts
+ * @param connectionFactory AMQP broker connection factory
  * @tparam Effect effect type
  */
-final case class RabbitMqServer[Effect[_]] (
+final case class RabbitMqServer[Effect[_]](
+  handler: Handler.AnyFormat[Effect, BasicProperties],
+  runEffect: Effect[Any] => Any,
   url: URL,
-  queueNames: Seq[String],
-  routingKey: String,
+  queues: Seq[String],
   exchangeName: String = RabbitMqCommon.defaultDirectExchange,
-  exchangeType: BuiltinExchangeType = BuiltinExchangeType.DIRECT,
-  addresses: Seq[Address] = Seq()
+  addresses: Seq[Address] = Seq(),
+  connectionFactory: ConnectionFactory = new ConnectionFactory
 )(implicit executionContext: ExecutionContext)
   extends AutoCloseable with Logging with ServerMessageTransport {
+
   private lazy val connection = createConnection()
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
 //class AmqpJsonRpcServer(url: String, requestTimeout: FiniteDuration, queueNames: Traversable[String], prefetchCount: Int = 0,
@@ -51,15 +58,35 @@ final case class RabbitMqServer[Effect[_]] (
 
   override def close(): Unit = connection.abort(AMQP.CONNECTION_FORCED, "Terminated")
 
-  private def createConnection(): Connection = {
-    val connection = RabbitMqCommon.connect(url, Seq(), new ConnectionFactory, clientId)
-    Option.when(exchangeName != RabbitMqCommon.defaultDirectExchange) {
-      Using(connection.createChannel()) { channel =>
-        channel.exchangeDeclare(exchangeName, exchangeType, false)
-        connection
-      }.get
-    }.getOrElse(connection)
+  private def createConsumer(channel: Channel): DefaultConsumer = {
+    val consumer = new DefaultConsumer(channel) {
+
+      override def handleDelivery(
+        consumerTag: String,
+        envelope: Envelope,
+        properties: BasicProperties,
+        body: Array[Byte]
+      ): Unit = {
+        logger.debug(
+          "Received AMQP request",
+          Map(
+            "Routing key" -> envelope.getRoutingKey,
+            "Correlation ID" -> properties.getCorrelationId,
+            "Size" -> body.length
+          )
+        )
+//        callResults.get(properties.getCorrelationId).foreach { promise =>
+//          promise.success(new ArraySeq.ofByte(body))
+//        }
+      }
+    }
+    queues.foreach { queue =>
+      consumer.getChannel.basicConsume(queue, true, consumer)
+    }
+    consumer
   }
+
+  private def createConnection(): Connection = RabbitMqCommon.connect(url, Seq(), clientId, connectionFactory)
 
 //  private def setupQueueConsumers(): Unit = {
 //    logger.info(s"Consuming messages from queues: ${queueNames.mkString(", ")}")

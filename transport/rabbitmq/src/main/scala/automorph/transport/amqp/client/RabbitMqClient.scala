@@ -19,22 +19,24 @@ import scala.util.{Try, Using}
 /**
  * RabbitMQ client transport plugin using AMQP as message transport protocol.
  *
+ * The client uses default AMQP exchange
+ *
  * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
  * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
  * @constructor Creates a RabbitMQ client transport plugin.
  * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
  * @param routingKey AMQP routing key (typically a queue name)
- * @param exchangeName AMQP message exchange name
- * @param exchangeType AMQP message exchange type (DIRECT, FANOUT, HEADERS, TOPIC)
+ * @param exchange direct non-durable AMQP message exchange name
  * @param addresses broker hostnames and ports for reconnection attempts
+ * @param connectionFactory AMQP broker connection factory
  * @param executionContext execution context
  */
 final case class RabbitMqClient(
   url: URL,
   routingKey: String,
-  exchangeName: String = RabbitMqCommon.defaultDirectExchange,
-  exchangeType: BuiltinExchangeType = BuiltinExchangeType.DIRECT,
-  addresses: Seq[Address] = Seq()
+  exchange: String = RabbitMqCommon.defaultDirectExchange,
+  addresses: Seq[Address] = Seq(),
+  connectionFactory: ConnectionFactory = new ConnectionFactory
 )(implicit executionContext: ExecutionContext)
   extends AutoCloseable with Logging with ClientMessageTransport[Future, RequestProperties] {
 
@@ -81,7 +83,7 @@ final case class RabbitMqClient(
     )
     result.foreach(callResults.put(properties.getCorrelationId, _))
     Try {
-      consumer.getChannel.basicPublish(exchangeName, routingKey, true, false, properties, request.unsafeArray)
+      consumer.getChannel.basicPublish(exchange, routingKey, true, false, properties, request.unsafeArray)
       logger.debug(
         "Sent AMQP request",
         Map(
@@ -138,10 +140,10 @@ final case class RabbitMqClient(
   }
 
   private def createConnection(): Connection = {
-    val connection = RabbitMqCommon.connect(url, Seq(), new ConnectionFactory, clientId)
-    Option.when(exchangeName != RabbitMqCommon.defaultDirectExchange) {
+    val connection = RabbitMqCommon.connect(url, Seq(), clientId, connectionFactory)
+    Option.when(exchange != RabbitMqCommon.defaultDirectExchange) {
       Using(connection.createChannel()) { channel =>
-        channel.exchangeDeclare(exchangeName, exchangeType, false)
+        channel.exchangeDeclare(exchange, BuiltinExchangeType.DIRECT, false)
         connection
       }.get
     }.getOrElse(connection)

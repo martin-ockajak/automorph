@@ -19,22 +19,22 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
    * @param addresses broker hostnames and ports for reconnection attempts
    * @param connectionFactory connection factory
-   * @param connectionName connection name
+   * @param name connection name
    * @return AMQP broker connection
    */
   def connect(
     url: URL,
     addresses: Seq[Address],
-    connectionFactory: ConnectionFactory,
-    connectionName: String
+    name: String,
+    connectionFactory: ConnectionFactory
   ): Connection = {
     val urlText = url.toExternalForm
     connectionFactory.setUri(url.toURI)
     logger.debug(s"Connecting to RabbitMQ broker: $urlText")
     Try(if (addresses.nonEmpty) {
-      connectionFactory.newConnection(addresses.toArray, connectionName)
+      connectionFactory.newConnection(addresses.toArray, name)
     } else {
-      connectionFactory.newConnection(connectionName)
+      connectionFactory.newConnection(name)
     }).map { connection =>
       logger.info(s"Connected to RabbitMQ broker: $urlText")
       connection
