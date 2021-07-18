@@ -19,7 +19,9 @@ import scala.util.{Try, Using}
 /**
  * RabbitMQ client transport plugin using AMQP as message transport protocol.
  *
- * The client uses the supplied RPC request as outgoing AMQP message body and returns incoming AMQP message body as a result.
+ * The client uses the supplied RPC request as AMQP request message body and returns AMQP response message body as a result.
+ * AMQP request messages are published to the specified exchange using ``direct reply-to``mechanism.
+ * AMQP response messages are consumed using ``direct reply-to``mechanism and automatically acknowledged.
  *
  * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
  * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
@@ -43,9 +45,9 @@ final case class RabbitMqClient(
   private lazy val connection = createConnection()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
+  private val urlText = url.toExternalForm
   private val callResults = TrieMap[String, Promise[ArraySeq.ofByte]]()
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
-  private val urlText = url.toExternalForm
 
   override def call(
     request: ArraySeq.ofByte,
@@ -71,7 +73,6 @@ final case class RabbitMqClient(
     properties: BasicProperties,
     result: Option[Promise[ArraySeq.ofByte]]
   ): Future[Unit] = Future {
-    val consumer = threadConsumer.get
     logger.trace(
       "Sending AMQP request",
       Map(
@@ -81,7 +82,12 @@ final case class RabbitMqClient(
         "Size" -> request.length
       )
     )
+    val consumer = threadConsumer.get
+
+    // Retain result promise if available
     result.foreach(callResults.put(properties.getCorrelationId, _))
+
+    // Send the request
     Try {
       consumer.getChannel.basicPublish(exchange, routingKey, true, false, properties, request.unsafeArray)
       logger.debug(
