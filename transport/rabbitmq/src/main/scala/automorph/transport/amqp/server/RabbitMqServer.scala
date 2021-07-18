@@ -79,11 +79,11 @@ final case class RabbitMqServer[Effect[_]](
           system.either(handler.processRequest(body)),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
             handlerResult.fold(
-              error => sendServerError(error, body, envelope.getRoutingKey, properties),
+              error => sendServerError(error, body, properties, envelope.getRoutingKey),
               result => {
                 // Send the response
                 val response = result.response.getOrElse(Array[Byte]())
-                sendResponse(response, envelope.getRoutingKey, properties)
+                sendResponse(response, properties)
               }
             )
         ))
@@ -98,8 +98,8 @@ final case class RabbitMqServer[Effect[_]](
   private def sendServerError(
     error: Throwable,
     request: Array[Byte],
-    routingKey: String,
-    properties: BasicProperties
+    properties: BasicProperties,
+    routingKey: String
   ): Unit = {
     val message = Bytes.stringBytes.from(ResponseError.trace(error).mkString("\n")).unsafeArray
     logger.debug(
@@ -112,27 +112,30 @@ final case class RabbitMqServer[Effect[_]](
         "Size" -> request.length
       )
     )
-    sendResponse(message, routingKey, properties)
+    sendResponse(message, properties)
   }
 
-  private def sendResponse(message: Array[Byte], routingKey: String, properties: BasicProperties): Unit = {
+  private def sendResponse(message: Array[Byte], properties: BasicProperties): Unit = {
     logger.trace(
       "Sending AMQP request",
       Map(
         "URL" -> urlText,
-        "Routing key" -> routingKey,
+        "Routing key" -> properties.getReplyTo,
         "Correlation ID" -> properties.getCorrelationId,
         "Size" -> message.length
       )
     )
     val consumer = threadConsumer.get
     Try {
+      val routingKey = Option(properties.getReplyTo).getOrElse {
+        throw new IllegalArgumentException("Missing request header: reply-to")
+      }
       consumer.getChannel.basicPublish(exchange, routingKey, true, false, properties, message)
       logger.debug(
         "Sent AMQP request",
         Map(
           "URL" -> urlText,
-          "Routing key" -> routingKey,
+          "Routing key" -> properties.getReplyTo,
           "Correlation ID" -> properties.getCorrelationId,
           "Size" -> message.length
         )
@@ -143,7 +146,7 @@ final case class RabbitMqServer[Effect[_]](
         error,
         Map(
           "URL" -> urlText,
-          "Routing key" -> routingKey,
+          "Routing key" -> properties.getReplyTo,
           "Correlation ID" -> properties.getCorrelationId,
           "Size" -> message.length
         )
