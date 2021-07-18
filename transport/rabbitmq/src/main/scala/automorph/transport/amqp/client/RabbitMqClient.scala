@@ -19,7 +19,7 @@ import scala.util.{Try, Using}
 /**
  * RabbitMQ client transport plugin using AMQP as message transport protocol.
  *
- * The client uses default AMQP exchange
+ * The client uses the supplied RPC request as outgoing AMQP message body and returns incoming AMQP message body as a result.
  *
  * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
  * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]

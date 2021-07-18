@@ -12,6 +12,9 @@ import scala.collection.immutable.ArraySeq
 /**
  * NanoHTTPD web server transport plugin using HTTP as message transport protocol.
  *
+ * The server interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
+ * The response returned by the RPC handler is used as HTTP response body.
+ *
  * @see [[https://github.com/NanoHttpd/nanohttpd Documentation]]
  * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
  * @constructor Creates a NanoHTTPD web server with the specified RPC request ''handler''.

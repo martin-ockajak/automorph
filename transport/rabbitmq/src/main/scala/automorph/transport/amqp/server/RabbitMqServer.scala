@@ -16,13 +16,16 @@ import scala.util.Using
 /**
  * RabbitMQ server transport plugin using AMQP as message transport protocol.
  *
+ * The server interprets incoming AMQP message body as an RPC request and processes it using the specified RPC handler.
+ * The response returned by the RPC handler is used as outgoing AMQP message body.
+ *
  * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
  * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
  * @constructor Creates a RabbitMQ server transport plugin.
  * @param handler RPC request handler
  * @param runEffect effect execution function
  * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
- * @param queues names of queues to consume messages from
+ * @param queues names of non-durable exclusive queues to consume messages from
  * @param addresses broker hostnames and ports for reconnection attempts
  * @param connectionFactory AMQP broker connection factory
  * @tparam Effect effect type
@@ -32,7 +35,6 @@ final case class RabbitMqServer[Effect[_]](
   runEffect: Effect[Any] => Any,
   url: URL,
   queues: Seq[String],
-  exchangeName: String = RabbitMqCommon.defaultDirectExchange,
   addresses: Seq[Address] = Seq(),
   connectionFactory: ConnectionFactory = new ConnectionFactory
 )(implicit executionContext: ExecutionContext)
@@ -50,10 +52,6 @@ final case class RabbitMqServer[Effect[_]](
 //  * Interprets AMQP messages as JSON-RPC requests.
 //  * Publishes responses to default exchange and uses 'reply-to' request property as routing key.
 //  * @param url AMQP server URL in following format: amqp[s]://[username:password@]host[:port][/virtual host]
-//  * @param prefetchCount maximum number of concurrently processed requests, set to 0 for unlimited
-//  * @param durable declare durable queues which will survive AMQP server restart
-//  * @param exclusive declare exclusive queues accessible only to this connection
-//  * @param autoDelete declare autodelete queues which are deleted once they are no longer in use
 //  */
 
   override def close(): Unit = connection.abort(AMQP.CONNECTION_FORCED, "Terminated")

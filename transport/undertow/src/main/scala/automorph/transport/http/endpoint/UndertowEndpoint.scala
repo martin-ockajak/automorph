@@ -17,8 +17,8 @@ import scala.util.Try
 /**
  * Undertow web server endpoint transport plugin using HTTP as message transport protocol.
  *
- * The handler interprets HTTP request body as a JSON-RPC request and processes it using the specified JSON-RPC handler.
- * The response returned by the JSON-RPC handler is used as HTTP response body.
+ * The handler interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
+ * The response returned by the RPC handler is used as HTTP response body.
  *
  * @see [[https://undertow.io/ Documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]

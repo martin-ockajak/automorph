@@ -13,7 +13,7 @@ import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, 
 /**
  * Tapir endpoint endpoint transport plugin using HTTP as message transport protocol.
  *
- * The endpoint interprets HTTP request body as a JSON-RPC request and processes it using the specified RPC handler.
+ * The endpoint interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
  * The response returned by the RPC handler is used as HTTP response body.
  *
  * @see [[https://tapir.softwaremill.com Documentation]]

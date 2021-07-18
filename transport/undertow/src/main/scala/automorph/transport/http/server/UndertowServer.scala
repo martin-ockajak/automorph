@@ -12,10 +12,12 @@ import scala.jdk.CollectionConverters.ListHasAsScala
 /**
  * Undertow web server transport plugin using HTTP as message transport protocol.
  *
+ * The processs HTTP requests starting with specified URL path using the specified HTTP handler.
+ *
  * @see [[https://undertow.io/ Documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor Creates an Undertow web server with the specified HTTP handler.
- * @param httpHandler HTTP handler
+ * @param httpHandler HTTP handler (e.g. UndertowEndpoint)
  * @param port port to listen on for HTTP connections
  * @param urlPath HTTP URL path (default: /)
  * @param builder Undertow web server builder

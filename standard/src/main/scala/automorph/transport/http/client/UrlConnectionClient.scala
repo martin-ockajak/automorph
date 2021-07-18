@@ -13,6 +13,8 @@ import scala.util.{Try, Using}
 /**
  * URL connection client transport plugin using HTTP as message transport protocol.
  *
+ * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
+ *
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @constructor Creates an URL connection client transport plugin.
  * @param url HTTP endpoint URL
