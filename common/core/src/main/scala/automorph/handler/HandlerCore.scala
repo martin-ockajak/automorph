@@ -2,7 +2,8 @@ package automorph.handler
 
 import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
 import automorph.protocol.{ErrorType, Request, Response, ResponseError}
-import automorph.spi.{MessageFormat, Message}
+import automorph.spi.{Message, MessageFormat}
+import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import automorph.{Handler, JsonRpcError}
 import java.io.IOException

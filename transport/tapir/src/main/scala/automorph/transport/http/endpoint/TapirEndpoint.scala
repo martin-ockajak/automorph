@@ -1,10 +1,11 @@
 package automorph.transport.http.endpoint
 
 import automorph.Handler
-import automorph.handler.{Bytes, HandlerResult}
+import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.{EndpointMessageTransport, MessageFormat}
+import automorph.util.Bytes
 import sttp.model.headers.Cookie
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
@@ -27,7 +28,7 @@ case object TapirEndpoint extends Logging with EndpointMessageTransport {
   type RequestType = (Array[Byte], List[String], QueryParams, List[Header], List[Cookie], Option[String])
 
   /**
-   * Creates a Tapir endpoint with the specified RPC request ''handler''.
+   * Creates a Tapir HTTP endpoint with the specified RPC request ''handler''.
    *
    * The endpoint interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
    * The response returned by the RPC handler is used as HTTP response body.
@@ -39,7 +40,7 @@ case object TapirEndpoint extends Logging with EndpointMessageTransport {
    * @param errorStatus JSON-RPC error code to HTTP status code mapping function
    * @tparam Node message node type
    * @tparam Effect effect type
-   * @return Tapir HTTP server endpoint
+   * @return Tapir HTTP endpoint
    */
   def apply[Node, Effect[_]](
     handler: Handler[Node, _ <: MessageFormat[Node], Effect, Request],
@@ -77,9 +78,9 @@ case object TapirEndpoint extends Logging with EndpointMessageTransport {
   }
 
   private def serverError(error: Throwable, request: Array[Byte], client: String): (Array[Byte], StatusCode) = {
-    val message = Bytes.stringBytes.from(ResponseError.trace(error).mkString("\n")).unsafeArray
-    val status = StatusCode.InternalServerError
     logger.error("Failed to process HTTP request", error, Map("Client" -> client, "Size" -> request.length))
+    val message = Bytes.string.from(ResponseError.trace(error).mkString("\n")).unsafeArray
+    val status = StatusCode.InternalServerError
     createResponse(message, status, client)
   }
 

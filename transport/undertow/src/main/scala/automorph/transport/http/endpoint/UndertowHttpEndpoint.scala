@@ -1,16 +1,17 @@
 package automorph.transport.http.endpoint
 
 import automorph.Handler
-import automorph.handler.{Bytes, HandlerResult}
+import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.EndpointMessageTransport
-import automorph.transport.http.endpoint.UndertowEndpoint.defaultErrorStatus
+import automorph.transport.http.endpoint.UndertowHttpEndpoint.defaultErrorStatus
+import automorph.util.{Bytes, Network}
 import automorph.util.Extensions.TryOps
 import io.undertow.io.Receiver
-import java.io.IOException
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, StatusCodes}
+import java.io.IOException
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -22,36 +23,35 @@ import scala.util.Try
  *
  * @see [[https://undertow.io/ Documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
- * @constructor Creates an Undertow web server RPC handler with the specified RPC request ''handler''.
+ * @constructor Creates an Undertow web server HTTP handler with the specified RPC request ''handler''.
  * @param handler RPC request handler
  * @param runEffect effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
  * @tparam Effect effect type
  */
-final case class UndertowEndpoint[Effect[_]](
+final case class UndertowHttpEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, HttpServerExchange],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
   private val system = handler.system
-
   private val receiveCallback = new Receiver.FullBytesCallback {
 
-    override def handle(exchange: HttpServerExchange, request: Array[Byte]): Unit = {
+    override def handle(exchange: HttpServerExchange, message: Array[Byte]): Unit = {
       val client = clientAddress(exchange)
-      logger.debug("Received HTTP request", Map("Client" -> client, "Size" -> request.length))
-      val requestMessage = Bytes.byteArrayBytes.from(request)
+      logger.debug("Received HTTP request", Map("Client" -> client, "Size" -> message.length))
+      val request = Bytes.byteArray.from(message)
       exchange.dispatch(new Runnable {
 
         override def run(): Unit = {
           // Process the request
           implicit val usingContext: HttpServerExchange = exchange
           runEffect(system.map(
-            system.either(handler.processRequest(requestMessage)),
+            system.either(handler.processRequest(request)),
             (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
               handlerResult.fold(
-                error => sendServerError(error, exchange, Some(requestMessage)),
+                error => sendServerError(error, exchange, Some(request)),
                 result => {
                   // Send the response
                   val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
@@ -80,13 +80,13 @@ final case class UndertowEndpoint[Effect[_]](
     exchange: HttpServerExchange,
     request: Option[ArraySeq.ofByte]
   ): Unit = {
-    val message = Bytes.stringBytes.from(ResponseError.trace(error).mkString("\n"))
-    val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
     logger.error(
       "Failed to process HTTP request",
       error,
       Map("Client" -> clientAddress(exchange)) ++ request.flatMap(request => Option("Size" -> request.length))
     )
+    val message = Bytes.string.from(ResponseError.trace(error).mkString("\n"))
+    val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
     sendResponse(message, statusCode, exchange)
   }
 
@@ -101,7 +101,7 @@ final case class UndertowEndpoint[Effect[_]](
         throw new IOException("Response channel not available")
       }
       exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.format.mediaType)
-      exchange.setStatusCode(statusCode).getResponseSender.send(Bytes.byteBufferBytes.to(message))
+      exchange.setStatusCode(statusCode).getResponseSender.send(Bytes.byteBuffer.to(message))
       logger.debug(
         "Sent HTTP response",
         Map("Client" -> client, "Status" -> statusCode, "Size" -> message.length)
@@ -117,14 +117,12 @@ final case class UndertowEndpoint[Effect[_]](
 
   private def clientAddress(exchange: HttpServerExchange): String = {
     val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)
-    forwardedFor.flatMap(_.split(",", 2).headOption).getOrElse {
-      val address = exchange.getSourceAddress.toString.split("/", 2).reverse.head
-      address.replaceAll("/", "").split(":").init.mkString(":")
-    }
+    val address = exchange.getSourceAddress.toString
+    Network.address(forwardedFor, address)
   }
 }
 
-case object UndertowEndpoint {
+case object UndertowHttpEndpoint {
 
   /** Request context type. */
   type Context = HttpServerExchange

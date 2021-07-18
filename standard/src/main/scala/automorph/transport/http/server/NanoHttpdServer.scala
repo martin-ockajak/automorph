@@ -1,12 +1,13 @@
 package automorph.transport.http.server
 
 import automorph.Handler
-import automorph.handler.{Bytes, HandlerResult}
+import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.ServerMessageTransport
 import automorph.transport.http.server.NanoHTTPD.Response.Status
-import automorph.transport.http.server.NanoHTTPD.{newFixedLengthResponse, IHTTPSession, Response}
+import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
+import automorph.util.{Bytes, Network}
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -17,7 +18,7 @@ import scala.collection.immutable.ArraySeq
  *
  * @see [[https://github.com/NanoHttpd/nanohttpd Documentation]]
  * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
- * @constructor Creates a NanoHTTPD web server with the specified RPC request ''handler''.
+ * @constructor Creates a NanoHTTPD HTTP server with the specified RPC request ''handler''.
  * @param handler RPC request handler
  * @param runEffectSync synchronous effect execution function
  * @param port port to listen on for HTTP connections
@@ -44,7 +45,7 @@ final case class NanoHttpdServer[Effect[_]] private (
   override def serve(session: IHTTPSession): Response = {
     // Receive the request
     logger.trace("Receiving HTTP request", Map("Client" -> clientAddress(session)))
-    val request = Bytes.inputStreamBytes.from(session.getInputStream)
+    val request = Bytes.inputStream.from(session.getInputStream)
     logger.debug("Received HTTP request", Map("Client" -> clientAddress(session), "Size" -> request.length))
 
     // Process the request
@@ -65,13 +66,13 @@ final case class NanoHttpdServer[Effect[_]] private (
   }
 
   private def serverError(error: Throwable, request: ArraySeq.ofByte, session: IHTTPSession): Response = {
-    val status = Status.INTERNAL_ERROR
-    val message = Bytes.stringBytes.from(ResponseError.trace(error).mkString("\n"))
     logger.error(
       "Failed to process HTTP request",
       error,
       Map("Client" -> clientAddress(session), "Size" -> request.length)
     )
+    val status = Status.INTERNAL_ERROR
+    val message = Bytes.string.from(ResponseError.trace(error).mkString("\n"))
     createResponse(message, status, session)
   }
 
@@ -81,7 +82,7 @@ final case class NanoHttpdServer[Effect[_]] private (
       "Sending HTTP response",
       Map("Client" -> client, "Status" -> status.getRequestStatus, "Size" -> message.length)
     )
-    val inputStream = Bytes.inputStreamBytes.to(message)
+    val inputStream = Bytes.inputStream.to(message)
     val response = newFixedLengthResponse(status, handler.format.mediaType, inputStream, message.size.toLong)
     logger.debug(
       "Sent HTTP response",
@@ -92,9 +93,8 @@ final case class NanoHttpdServer[Effect[_]] private (
 
   private def clientAddress(session: IHTTPSession): String = {
     val forwardedFor = Option(session.getHeaders.get(HeaderXForwardedFor))
-    forwardedFor.map(_.split(",", 2)(0)).getOrElse {
-      session.getRemoteHostName
-    }
+    val address = session.getRemoteHostName
+    Network.address(forwardedFor, address)
   }
 
   override def close(): Unit = stop()

@@ -1,10 +1,10 @@
 package automorph.transport.http.client
 
-import automorph.handler.Bytes.inputStreamBytes
 import automorph.log.Logging
 import automorph.spi.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.client.UrlConnectionClient.RequestProperties
+import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.{HttpURLConnection, URL}
 import scala.collection.immutable.ArraySeq
@@ -38,7 +38,7 @@ final case class UrlConnectionClient(
   ): Identity[ArraySeq.ofByte] = {
     val connection = send(request, mediaType, context)
     logger.trace("Receiving HTTP response", Map("URL" -> urlText))
-    Try(Using.resource(connection.getInputStream)(inputStreamBytes.from)).pureFold(
+    Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).pureFold(
       error => {
         logger.error("Failed to receive HTTP response", error, Map("URL" -> urlText))
         throw error

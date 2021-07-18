@@ -1,13 +1,14 @@
 package automorph.transport.http.endpoint
 
-import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import java.io.{ByteArrayInputStream, InputStream}
 import automorph.Handler
-import automorph.handler.{Bytes, HandlerResult}
+import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
+import automorph.spi.{EndpointMessageTransport, MessageFormat}
 import automorph.transport.http.endpoint.JettyEndpoint.defaultErrorStatus
-import automorph.spi.{MessageFormat, EndpointMessageTransport}
+import automorph.util.{Bytes, Network}
+import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
+import java.io.{ByteArrayInputStream, InputStream}
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
 
@@ -19,7 +20,7 @@ import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
  *
  * @see [[https://www.eclipse.org/jetty/ Documentation]]
  * @see [[https://www.eclipse.org/jetty/javadoc/jetty-11/index.html API]]
- * @constructor Creates a Jetty web server RPC servlet with the specified RPC request ''handler''.
+ * @constructor Creates a Jetty web server HTTP servlet with the specified RPC request ''handler''.
  * @param handler RPC request handler
  * @param runEffect asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
@@ -58,9 +59,9 @@ final case class JettyEndpoint[Node, Effect[_]](
   }
 
   private def serverError(error: Throwable, response: HttpServletResponse, client: String): Unit = {
-    val message = Bytes.inputStreamBytes.to(Bytes.stringBytes.from(ResponseError.trace(error).mkString("\n")))
-    val status = HttpStatus.INTERNAL_SERVER_ERROR_500
     logger.error("Failed to process HTTP request", error, Map("Client" -> client))
+    val message = Bytes.inputStream.to(Bytes.string.from(ResponseError.trace(error).mkString("\n")))
+    val status = HttpStatus.INTERNAL_SERVER_ERROR_500
     sendResponse(message, response, status, client)
   }
 
@@ -75,10 +76,9 @@ final case class JettyEndpoint[Node, Effect[_]](
   }
 
   private def clientAddress(request: HttpServletRequest): String = {
-    Option(request.getHeader(HttpHeader.X_FORWARDED_FOR.name)).flatMap(_.split(",", 2).headOption).getOrElse {
-      val address = request.getRemoteAddr.split("/", 2).reverse.head
-      address.replaceAll("/", "").split(":").init.mkString(":")
-    }
+    val forwardedFor = Option(request.getHeader(HttpHeader.X_FORWARDED_FOR.name))
+    val address = request.getRemoteAddr
+    Network.address(forwardedFor, address)
   }
 }
 

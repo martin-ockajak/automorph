@@ -1,4 +1,4 @@
-package automorph.handler
+package automorph.util
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
 import java.nio.ByteBuffer
@@ -35,7 +35,7 @@ object Bytes {
 
 
   /** `ArraySeq.ofByte` <-> byte sequence converter. */
-  implicit val arraySeqOfByteBytes: Bytes[ArraySeq.ofByte] = new Bytes[ArraySeq.ofByte] {
+  implicit val arraySeqOfByte: Bytes[ArraySeq.ofByte] = new Bytes[ArraySeq.ofByte] {
 
     override def to(bytes: ArraySeq.ofByte): ArraySeq.ofByte = bytes
 
@@ -43,7 +43,7 @@ object Bytes {
   }
 
   /** `Array[Byte]` <-> byte sequence converter. */
-  implicit val byteArrayBytes: Bytes[Array[Byte]] = new Bytes[Array[Byte]] {
+  implicit val byteArray: Bytes[Array[Byte]] = new Bytes[Array[Byte]] {
 
     override def to(bytes: ArraySeq.ofByte): Array[Byte] = bytes.unsafeArray
 
@@ -51,7 +51,7 @@ object Bytes {
   }
 
   /** `String` <-> byte sequence converter. */
-  implicit val stringBytes: Bytes[String] = new Bytes[String] {
+  implicit val string: Bytes[String] = new Bytes[String] {
 
     /** String character set */
     val charset: Charset = StandardCharsets.UTF_8
@@ -62,7 +62,7 @@ object Bytes {
   }
 
   /** `ByteBuffer` <-> byte sequence converter. */
-  implicit val byteBufferBytes: Bytes[ByteBuffer] = new Bytes[ByteBuffer] {
+  implicit val byteBuffer: Bytes[ByteBuffer] = new Bytes[ByteBuffer] {
 
     override def to(bytes: ArraySeq.ofByte): ByteBuffer = ByteBuffer.wrap(bytes.unsafeArray)
 
@@ -78,7 +78,7 @@ object Bytes {
   }
 
   /** `InputStream` <-> byte sequence converter. */
-  implicit val inputStreamBytes: Bytes[InputStream] = new Bytes[InputStream] {
+  implicit val inputStream: Bytes[InputStream] = new Bytes[InputStream] {
 
     /** Input stream reading buffer size. */
     val bufferSize = 4096

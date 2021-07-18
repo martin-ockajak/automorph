@@ -1,16 +1,16 @@
 package automorph.transport.http.endpoint
 
+import automorph.Handler
+import automorph.handler.HandlerResult
+import automorph.log.Logging
+import automorph.protocol.{ErrorType, ResponseError}
+import automorph.spi.{EndpointMessageTransport, MessageFormat}
+import automorph.transport.http.endpoint.FinagleEndpoint.defaultErrorStatus
+import automorph.util.{Bytes, Network}
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise}
-import automorph.Handler
-import automorph.handler.HandlerResult
-import automorph.protocol.ResponseError
-import automorph.log.Logging
-import automorph.transport.http.endpoint.FinagleEndpoint.defaultErrorStatus
-import automorph.spi.{EndpointMessageTransport, MessageFormat}
-import automorph.protocol.ErrorType
 
 /**
  * Finagle RPC system endpoint transport plugin using HTTP as message transport protocol.
@@ -20,7 +20,7 @@ import automorph.protocol.ErrorType
  *
  * @see [[https://twitter.github.io/finagle/ Documentation]]
  * @see [[https://twitter.github.io/finagle/docs/com/twitter/finagle/ API]]
- * @constructor Creates a Finagle RPC system RPC service with the specified RPC request ''handler''.
+ * @constructor Creates a Finagle RPC system HTTP service with the specified RPC request ''handler''.
  * @param handler RPC request handler
  * @param runEffect asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
@@ -60,13 +60,13 @@ final case class FinagleEndpoint[Node, Effect[_]](
   }
 
   private def serverError(error: Throwable, request: Request): Response = {
-    val message = Reader.fromBuf(Buf.Utf8(ResponseError.trace(error).mkString("\n")))
-    val status = Status.InternalServerError
     logger.error(
       "Failed to process HTTP request",
       error,
       Map("Client" -> clientAddress(request), "Size" -> request.content.length)
     )
+    val message = Reader.fromBuf(Buf.Utf8(ResponseError.trace(error).mkString("\n")))
+    val status = Status.InternalServerError
     createResponse(message, status, request)
   }
 
@@ -80,11 +80,11 @@ final case class FinagleEndpoint[Node, Effect[_]](
     response
   }
 
-  private def clientAddress(request: Request): String =
-    request.xForwardedFor.flatMap(_.split(",", 2).headOption).getOrElse {
-      val address = request.remoteAddress.toString.split("/", 2).reverse.head
-      address.replaceAll("/", "").split(":").init.mkString(":")
-    }
+  private def clientAddress(request: Request): String = {
+    val forwardedFor = request.xForwardedFor
+    val address = request.remoteAddress.toString
+    Network.address(forwardedFor, address)
+  }
 
   private def runAsFuture[T](value: Effect[T]): Future[T] = {
     val promise = Promise[T]()
