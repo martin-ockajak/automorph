@@ -39,8 +39,8 @@ final case class HttpProperties[Source](
 
   def cookies: Map[String, Option[String]] = (headers(headerCookie) ++ headers(headerSetCookie)).map { header =>
     header.split("=", 2).map(_.trim) match {
-      case Array(name) => name -> None
       case Array(name, value) => name -> Some(value)
+      case _ => name -> None
     }
   }.toMap
 
@@ -97,8 +97,8 @@ final case class HttpProperties[Source](
 
   private def auth(method: String): Option[String] =
     headers(headerAuthorization).find(_.trim.startsWith(method)).flatMap(_.split(" ") match {
-      case Array(_) => None
       case Array(_, value) => Some(value)
+      case _ => None
     })
 
   private def cookies(values: Seq[(String, String)], set: Boolean): HttpProperties[Source] = {

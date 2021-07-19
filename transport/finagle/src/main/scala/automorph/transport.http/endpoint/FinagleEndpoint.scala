@@ -4,10 +4,10 @@ import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
-import automorph.spi.{EndpointMessageTransport, MessageFormat}
+import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.HttpProperties
 import automorph.transport.http.endpoint.FinagleEndpoint.{Context, defaultErrorStatus}
-import automorph.util.{Bytes, Network}
+import automorph.util.Network
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}

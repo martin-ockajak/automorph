@@ -4,7 +4,7 @@ import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
-import automorph.spi.{EndpointMessageTransport, MessageFormat}
+import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.HttpProperties
 import automorph.transport.http.endpoint.JettyEndpoint.{Context, defaultErrorStatus}
 import automorph.util.{Bytes, Network}
