@@ -5,7 +5,8 @@ import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.{EndpointMessageTransport, MessageFormat}
-import automorph.transport.http.endpoint.FinagleEndpoint.defaultErrorStatus
+import automorph.transport.http.HttpProperties
+import automorph.transport.http.endpoint.FinagleEndpoint.{Context, defaultErrorStatus}
 import automorph.util.{Bytes, Network}
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
@@ -24,11 +25,10 @@ import com.twitter.util.{Future, Promise}
  * @param handler RPC request handler
  * @param runEffect asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
- * @tparam Node message node type
  * @tparam Effect effect type
  */
 final case class FinagleEndpoint[Node, Effect[_]](
-  handler: Handler[Node, _ <: MessageFormat[Node], Effect, Request],
+  handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Status = defaultErrorStatus
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
@@ -42,7 +42,7 @@ final case class FinagleEndpoint[Node, Effect[_]](
     val requestMessage = Buf.ByteArray.Owned.extract(request.content)
 
     // Process the request
-    implicit val usingContext: Request = request
+    implicit val usingContext: Context= createContext(request)
     runAsFuture(system.map(
       system.either(handler.processRequest(requestMessage)),
       (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
@@ -80,6 +80,16 @@ final case class FinagleEndpoint[Node, Effect[_]](
     response
   }
 
+  private def createContext(request: Request): Context =
+    HttpProperties(
+      source = Some(request),
+      method = Some(request.method.name),
+      scheme = request.uri,
+      path = request.path,
+      query = request.uri,
+      headers = request.headerMap.iterator.toSeq
+    )
+
   private def clientAddress(request: Request): String = {
     val forwardedFor = request.xForwardedFor
     val address = request.remoteAddress.toString
@@ -103,7 +113,7 @@ final case class FinagleEndpoint[Node, Effect[_]](
 case object FinagleEndpoint {
 
   /** Request context type. */
-  type Context = Request
+  type Context = HttpProperties[Request]
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus: Int => Status = Map(

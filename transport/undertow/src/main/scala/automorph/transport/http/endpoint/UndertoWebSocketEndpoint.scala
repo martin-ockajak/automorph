@@ -13,6 +13,7 @@ import io.undertow.websockets.core.{AbstractReceiveListener, BufferedBinaryMessa
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHandshakeHandler}
 import java.io.IOException
+import java.net.URI
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.util.Try
@@ -153,9 +154,10 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         HttpProperties(
           source = Some(Right(exchange)),
           scheme = exchange.getRequestScheme,
-          path = exchange.getQueryString,
+          path = new URI(exchange.getRequestURI).getPath,
           query = exchange.getQueryString,
-          headers = headers
+          headers = headers,
+          webSocket = true
         )
       }
 

@@ -5,10 +5,14 @@ import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.ServerMessageTransport
+import automorph.transport.http.HttpProperties
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
+import automorph.transport.http.server.NanoHttpdServer.Context
 import automorph.util.{Bytes, Network}
+import java.net.URI
 import scala.collection.immutable.ArraySeq
+import scala.jdk.CollectionConverters.MapHasAsScala
 
 /**
  * NanoHTTPD web server transport plugin using HTTP as message transport protocol.
@@ -27,7 +31,7 @@ import scala.collection.immutable.ArraySeq
  * @tparam Effect effect type
  */
 final case class NanoHttpdServer[Effect[_]] private (
-  handler: Handler.AnyFormat[Effect, IHTTPSession],
+  handler: Handler.AnyFormat[Effect, Context],
   runEffectSync: Effect[Response] => Response,
   port: Int,
   readTimeout: Int,
@@ -49,7 +53,7 @@ final case class NanoHttpdServer[Effect[_]] private (
     logger.debug("Received HTTP request", Map("Client" -> clientAddress(session), "Size" -> request.length))
 
     // Process the request
-    implicit val usingContext: IHTTPSession = session
+    implicit val usingContext: Context = createContext(session)
     runEffectSync(system.map(
       system.either(handler.processRequest(request)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
@@ -91,6 +95,18 @@ final case class NanoHttpdServer[Effect[_]] private (
     response
   }
 
+  private def createContext(session: IHTTPSession): Context = {
+    val uri = new URI(session.getUri)
+    HttpProperties(
+      source = Some(session),
+      method = Some(session.getMethod.name),
+      scheme = uri.getScheme,
+      path = uri.getPath,
+      query = session.getQueryParameterString,
+      headers = session.getHeaders.asScala.toSeq
+    )
+  }
+
   private def clientAddress(session: IHTTPSession): String = {
     val forwardedFor = Option(session.getHeaders.get(HeaderXForwardedFor))
     val address = session.getRemoteHostName
@@ -103,7 +119,7 @@ final case class NanoHttpdServer[Effect[_]] private (
 case object NanoHttpdServer {
 
   /** Request context type. */
-  type Context = IHTTPSession
+  type Context = HttpProperties[IHTTPSession]
 
   /** Request type. */
   type Response = automorph.transport.http.server.NanoHTTPD.Response
@@ -121,7 +137,7 @@ case object NanoHttpdServer {
    * @tparam Effect effect type
    */
   def apply[Effect[_]](
-    handler: Handler.AnyFormat[Effect, IHTTPSession],
+    handler: Handler.AnyFormat[Effect, Context],
     runEffectSync: Effect[Response] => Response,
     port: Int,
     readTimeout: Int = 5000,

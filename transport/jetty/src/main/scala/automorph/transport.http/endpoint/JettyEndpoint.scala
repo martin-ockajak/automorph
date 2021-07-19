@@ -5,12 +5,14 @@ import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.{EndpointMessageTransport, MessageFormat}
-import automorph.transport.http.endpoint.JettyEndpoint.defaultErrorStatus
+import automorph.transport.http.HttpProperties
+import automorph.transport.http.endpoint.JettyEndpoint.{Context, defaultErrorStatus}
 import automorph.util.{Bytes, Network}
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import java.io.{ByteArrayInputStream, InputStream}
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
+import scala.jdk.CollectionConverters.EnumerationHasAsScala
 
 /**
  * Jetty web server endpoint transport plugin using HTTP as message transport protocol.
@@ -24,11 +26,10 @@ import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
  * @param handler RPC request handler
  * @param runEffect asynchronous effect execution function
  * @param errorStatus JSON-RPC error code to HTTP status code mapping function
- * @tparam Node message node type
  * @tparam Effect effect type
  */
-final case class JettyEndpoint[Node, Effect[_]](
-  handler: Handler[Node, _ <: MessageFormat[Node], Effect, HttpServletRequest],
+final case class JettyEndpoint[Effect[_]](
+  handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpServlet with Logging with EndpointMessageTransport {
@@ -42,7 +43,7 @@ final case class JettyEndpoint[Node, Effect[_]](
     val requestMessage: InputStream = request.getInputStream
 
     // Process the request
-    implicit val usingContext: HttpServletRequest = request
+    implicit val usingContext: Context = createContext(request)
     runEffect(system.map(
       system.either(handler.processRequest(requestMessage)),
       (handlerResult: Either[Throwable, HandlerResult[InputStream]]) => handlerResult.fold(
@@ -75,6 +76,20 @@ final case class JettyEndpoint[Node, Effect[_]](
     logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> status))
   }
 
+  private def createContext(request: HttpServletRequest): Context = {
+    val headers = request.getHeaderNames.asScala.flatMap { name =>
+      request.getHeaders(name).asScala.map(value => name -> value)
+    }.toSeq
+    HttpProperties(
+      source = Some(request),
+      method = Some(request.getMethod),
+      scheme = request.getScheme,
+      path = request.getServletPath,
+      query = request.getQueryString,
+      headers = headers
+    )
+  }
+
   private def clientAddress(request: HttpServletRequest): String = {
     val forwardedFor = Option(request.getHeader(HttpHeader.X_FORWARDED_FOR.name))
     val address = request.getRemoteAddr
@@ -84,7 +99,7 @@ final case class JettyEndpoint[Node, Effect[_]](
 
 case object JettyEndpoint {
   /** Request context type. */
-  type Context = HttpServletRequest
+  type Context = HttpProperties[HttpServletRequest]
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus: Int => Int = Map(

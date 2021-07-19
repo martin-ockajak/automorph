@@ -15,7 +15,7 @@ final case class HttpProperties[Source](
   headers: Seq[(String, String)] = Seq(),
   followRedirects: Boolean = true,
   readTimeout: Duration = FiniteDuration(30, TimeUnit.SECONDS),
-  webSocket: Boolean = false
+  webSocket: Boolean = false,
 ) {
 
   private val charset = StandardCharsets.UTF_8

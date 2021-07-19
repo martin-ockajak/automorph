@@ -5,6 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.{EndpointMessageTransport, MessageFormat}
+import automorph.transport.http.HttpProperties
 import automorph.util.Bytes
 import sttp.model.headers.Cookie
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
@@ -22,7 +23,7 @@ import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, 
 case object TapirEndpoint extends Logging with EndpointMessageTransport {
 
   /** Request context type. */
-  type Context = Request
+  type Context = HttpProperties[Unit]
 
   /** Endpoint request type. */
   type RequestType = (Array[Byte], List[String], QueryParams, List[Header], List[Cookie], Option[String])
@@ -43,7 +44,7 @@ case object TapirEndpoint extends Logging with EndpointMessageTransport {
    * @return Tapir HTTP endpoint
    */
   def apply[Node, Effect[_]](
-    handler: Handler[Node, _ <: MessageFormat[Node], Effect, Request],
+    handler: Handler[Node, _ <: MessageFormat[Node], Effect, Context],
     method: Method,
     errorStatus: Int => StatusCode = defaultErrorStatus
   ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {
@@ -55,12 +56,11 @@ case object TapirEndpoint extends Logging with EndpointMessageTransport {
       .out(byteArrayBody).out(header(contentType)).out(statusCode)
       .serverLogic { case (requestMessage, paths, queryParams, headers, cookies, clientIp) =>
         // Receive the request
-        val request = Request(paths, queryParams, headers, cookies, clientIp)
-        val client = clientAddress(request.clientIp)
+        val client = clientAddress(clientIp)
         logger.debug("Received HTTP request", Map("Client" -> client, "Size" -> requestMessage.length))
 
         // Process the request
-        implicit val usingContext: Request = request
+        implicit val usingContext: Context = createContext(method, paths, queryParams, headers)
         system.map(
           system.either(handler.processRequest(requestMessage)),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
@@ -89,6 +89,21 @@ case object TapirEndpoint extends Logging with EndpointMessageTransport {
     (message, status)
   }
 
+  private def createContext(
+    method: Method,
+    paths: List[String],
+    queryParams: QueryParams,
+    headers: List[Header],
+  ): Context = {
+    HttpProperties(
+      source = Some(()),
+      method = Some(method.method),
+      path = paths.mkString("/"),
+      query = queryParams.toString,
+      headers = headers.map(header => header.name -> header.value).toSeq
+    )
+  }
+
   private def clientAddress(clientIp: Option[String]): String =
     clientIp.getOrElse("[unknown]")
 
@@ -105,19 +120,3 @@ case object TapirEndpoint extends Logging with EndpointMessageTransport {
     errorType.code -> status
   }
 }
-
-/**
- * Tapir endpoint HTTP request context.
- *
- * @param paths URL path components separated by '/'
- * @param queryParams URL query parameters
- * @param headers HTTP headers
- * @param cookies HTTP cookies
- */
-final case class Request(
-  paths: List[String],
-  queryParams: QueryParams,
-  headers: List[Header],
-  cookies: List[Cookie],
-  clientIp: Option[String]
-)
