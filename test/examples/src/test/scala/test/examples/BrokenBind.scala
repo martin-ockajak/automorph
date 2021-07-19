@@ -8,12 +8,12 @@ trait BrokenBind[Effect[_]] {
 
   def system: EffectSystem[Effect]
 
-  private val brokenApiInstance: BrokenApi[Effect] = BrokenApiImpl()
-//  private val brokenApiInstance: BrokenApiImpl[Effect] = BrokenApiImpl()
+  private val brokenApi: BrokenApi[Effect] = BrokenApiImpl()
+//  private val brokenApi: BrokenApiImpl[Effect] = BrokenApiImpl()
 
   private val handler = DefaultHandler[Effect, Unit](system)
-    .bind(brokenApiInstance)
-    .bind(brokenApiInstance)
+    .bind(brokenApi)
+    .bind(brokenApi)
 }
 
 trait BrokenApi[Effect[_]] {
