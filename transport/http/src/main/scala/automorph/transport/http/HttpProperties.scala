@@ -1,6 +1,5 @@
 package automorph.transport.http
 
-import java.net.HttpURLConnection
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 import java.util.concurrent.TimeUnit

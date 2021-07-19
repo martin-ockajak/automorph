@@ -10,12 +10,12 @@ import automorph.transport.http.endpoint.UndertowHttpEndpoint.{defaultErrorStatu
 import automorph.util.Extensions.TryOps
 import automorph.util.{Bytes, Network}
 import io.undertow.io.Receiver
-import io.undertow.server.{HttpHandler, HttpServerExchange, HttpUpgradeListener}
-import io.undertow.util.{AttachmentKey, Headers, StatusCodes}
+import io.undertow.server.{HttpHandler, HttpServerExchange}
+import io.undertow.util.{Headers, StatusCodes}
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import java.io.IOException
 import scala.collection.immutable.ArraySeq
-import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala, MapHasAsScala}
+import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 import scala.util.Try
 
 /**
@@ -117,10 +117,10 @@ final case class UndertowHttpEndpoint[Effect[_]](
         Map("Client" -> client, "Status" -> statusCode, "Size" -> message.length)
       )
       throw error
-    }
+    }.get
   }
 
-  private def createContext(exchange: HttpServerExchange): Context =
+  private def createContext(exchange: HttpServerExchange): Context = {
     val headers = exchange.getRequestHeaders.asScala.flatMap { headerValues =>
       headerValues.iterator.asScala.map(value => headerValues.getHeaderName.toString -> value)
     }.toSeq
@@ -132,6 +132,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
       query = exchange.getQueryString,
       headers = headers
     )
+  }
 
   private def clientAddress(exchange: HttpServerExchange): String = {
     val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)

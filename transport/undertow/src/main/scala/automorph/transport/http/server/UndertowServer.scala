@@ -4,7 +4,7 @@ import automorph.log.Logging
 import automorph.transport.http.server.UndertowServer.defaultBuilder
 import automorph.spi.ServerMessageTransport
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
-import io.undertow.server.{HttpHandler, HttpServerExchange}
+import io.undertow.server.HttpHandler
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.{Handlers, Undertow}
 import java.net.InetSocketAddress

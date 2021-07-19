@@ -12,11 +12,9 @@ import io.undertow.util.Headers
 import io.undertow.websockets.core.{AbstractReceiveListener, BufferedBinaryMessage, BufferedTextMessage, WebSocketCallback, WebSocketChannel, WebSockets}
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHandshakeHandler}
-import java.io.IOException
 import java.net.URI
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
-import scala.util.Try
 
 /**
  * Undertow web server endpoint transport plugin using WebSocket as message transport protocol.
@@ -83,7 +81,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
 
       override def onFullBinaryMessage(channel: WebSocketChannel, message: BufferedBinaryMessage): Unit = {
         val data = message.getData
-        val request = Bytes.byteBuffer.from(WebSockets.mergeBuffers(data.getResource*))
+        val request = Bytes.byteBuffer.from(WebSockets.mergeBuffers(data.getResource: _*))
         handle(exchange, request, channel, () => data.discard())
       }
 
@@ -107,6 +105,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
                 // Send the response
                 val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
                 sendResponse(response, exchange, channel)
+                discardMessage
               }
             )
         ))

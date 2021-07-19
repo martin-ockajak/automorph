@@ -91,7 +91,7 @@ final case class SttpClient[Effect[_]](
   }
 
   private def createRequest(properties: Context): PartialRequest[Either[String, String], Any] = {
-    basicRequest.headers((properties.headers.map { case (name, value) => Header(name, value) })*)
+    basicRequest.headers((properties.headers.map { case (name, value) => Header(name, value) }): _*)
       .followRedirects(properties.followRedirects).readTimeout(properties.readTimeout)
   }
 }
