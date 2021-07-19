@@ -10,14 +10,13 @@ trait BrokenBind[Effect[_], Context] {
   def system: EffectSystem[Effect]
 
   private val brokenApiInstance: BrokenApi[Effect] = BrokenApiImpl(system)
-  private val emptyApiInstance: EmptyApi = EmptyApi()
 
   private val handler = Handler[UpickleJsonFormat.Node, UpickleJsonFormat[DefaultUpickleCustom.type], Effect, Context](
     UpickleJsonFormat(),
     system
   )
     .bind(brokenApiInstance)
-    .bind(emptyApiInstance)
+    .bind(EmptyApi())
 }
 
 trait BrokenApi[Effect[_]] {
