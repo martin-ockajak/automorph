@@ -63,9 +63,34 @@ private[automorph] trait HandlerBind[Node, ActualFormat <: MessageFormat[Node], 
    */
   def bind[Api <: AnyRef](api: Api, mapName: String => Seq[String]): ThisHandler =
     macro HandlerBind.bindMacro[Node, ActualFormat, Effect, Context, Api]
+
+  def brokenBind[Api <: AnyRef](api: Api): ThisHandler =
+    macro HandlerBind.brokenBindMacro[Node, ActualFormat, Effect, Context, Api]
 }
 
 case object HandlerBind {
+
+  def brokenBindMacro[
+    Node: c.WeakTypeTag,
+    ActualFormat <: MessageFormat[Node]: c.WeakTypeTag,
+    Effect[_],
+    Context: c.WeakTypeTag,
+    Api <: AnyRef: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    api: c.Expr[Api]
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, ActualFormat, Effect, Context]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+
+    val nodeType = weakTypeOf[Node]
+    val formatType = weakTypeOf[ActualFormat]
+    val contextType = weakTypeOf[Context]
+    val apiType = weakTypeOf[Api]
+    c.Expr[Any](q"""
+      ${c.prefix}.copy(methodBindings = ${c.prefix}.methodBindings ++ automorph.handler.HandlerBindings
+        .generate[$nodeType, $formatType, $effectType, $contextType, $apiType](${c.prefix}.format, ${c.prefix}.system, $api)
+      )
+    """).asInstanceOf[c.Expr[Handler[Node, ActualFormat, Effect, Context]]]
+  }
 
   def basicBindMacro[
     Node: c.WeakTypeTag,

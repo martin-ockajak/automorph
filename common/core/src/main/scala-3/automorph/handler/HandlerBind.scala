@@ -65,3 +65,5 @@ private[automorph] trait HandlerBind[Node, ActualFormat <: MessageFormat[Node], 
         (methodName, method) => mapMethodName(methodName).map(_ -> method)
       }
     )
+
+  inline def brokenBind[Api <: AnyRef](api: Api): ThisHandler = ???
