@@ -4,14 +4,17 @@ import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.ResponseError
+import automorph.transport.http.HttpProperties
+import automorph.transport.http.endpoint.UndertowWebSocketEndpoint.Context
 import automorph.util.{Bytes, Network}
-import io.undertow.server.HttpHandler
+import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.Headers
-import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHandshakeHandler}
 import io.undertow.websockets.core.{AbstractReceiveListener, BufferedBinaryMessage, BufferedTextMessage, WebSocketCallback, WebSocketChannel, WebSockets}
 import io.undertow.websockets.spi.WebSocketHttpExchange
+import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHandshakeHandler}
 import java.io.IOException
 import scala.collection.immutable.ArraySeq
+import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.util.Try
 
 /**
@@ -37,13 +40,18 @@ case object UndertoWebSocketEndpoint {
    * @tparam Effect effect type
    */
   def apply[Effect[_]](
-    handler: Handler.AnyFormat[Effect, WebSocketHttpExchange],
+    handler: Handler.AnyFormat[Effect, Context],
     runEffect: Effect[Any] => Any,
     next: HttpHandler
   ): WebSocketProtocolHandshakeHandler = {
     val webSocketCallback = UndertowWebSocketCallback(handler, runEffect)
     new WebSocketProtocolHandshakeHandler(webSocketCallback, next)
   }
+}
+
+case object UndertowWebSocketEndpoint {
+  /** Request context type. */
+  type Context = HttpProperties[Either[HttpServerExchange, WebSocketHttpExchange]]
 }
 
 /**
@@ -60,7 +68,7 @@ case object UndertoWebSocketEndpoint {
  * @tparam Effect effect type
  */
 final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
-  handler: Handler.AnyFormat[Effect, WebSocketHttpExchange],
+  handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any
 ) extends WebSocketConnectionCallback with AutoCloseable with Logging {
 
@@ -90,7 +98,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         logger.debug("Received HTTP request", Map("Client" -> client, "Size" -> request.length))
 
         // Process the request
-        implicit val usingContext: WebSocketHttpExchange = exchange
+        implicit val usingContext: Context = createContext(exchange)
         runEffect(system.map(
           system.either(handler.processRequest(request)),
           (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
@@ -136,6 +144,19 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
             logger.error("Failed to send HTTP response", throwable, Map("Client" -> client, "Size" -> message.length))
         }
         WebSockets.sendBinary(Bytes.byteBuffer.to(message), channel, callback, ())
+      }
+
+      private def createContext(exchange: WebSocketHttpExchange): Context = {
+        val headers = exchange.getRequestHeaders.asScala.view.mapValues(_.asScala).flatMap { case (name, values) =>
+          values.map(value => name -> value)
+        }.toSeq
+        HttpProperties(
+          source = Some(Right(exchange)),
+          scheme = exchange.getRequestScheme,
+          path = exchange.getQueryString,
+          query = exchange.getQueryString,
+          headers = headers
+        )
       }
 
       private def clientAddress(exchange: WebSocketHttpExchange): String = {

@@ -5,21 +5,17 @@ import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.EndpointMessageTransport
-import automorph.transport.http.endpoint.UndertowHttpEndpoint.defaultErrorStatus
-import automorph.util.{Bytes, Network}
+import automorph.transport.http.HttpProperties
+import automorph.transport.http.endpoint.UndertowHttpEndpoint.{defaultErrorStatus, Context}
 import automorph.util.Extensions.TryOps
-import io.undertow.connector.ByteBufferPool
+import automorph.util.{Bytes, Network}
 import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange, HttpUpgradeListener}
 import io.undertow.util.{AttachmentKey, Headers, StatusCodes}
-import io.undertow.websockets.core.WebSocketChannel
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import java.io.IOException
-import java.nio.ByteBuffer
-import java.security.Principal
-import java.util
-import org.xnio.{IoFuture, OptionMap}
 import scala.collection.immutable.ArraySeq
+import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala, MapHasAsScala}
 import scala.util.Try
 
 /**
@@ -37,7 +33,7 @@ import scala.util.Try
  * @tparam Effect effect type
  */
 final case class UndertowHttpEndpoint[Effect[_]](
-  handler: Handler.AnyFormat[Effect, HttpServerExchange],
+  handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any,
   errorStatus: Int => Int = defaultErrorStatus
 ) extends HttpHandler with Logging with EndpointMessageTransport {
@@ -54,7 +50,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
 
         override def run(): Unit = {
           // Process the request
-          implicit val usingContext: HttpServerExchange = exchange
+          implicit val usingContext: Context = createContext(exchange)
           runEffect(system.map(
             system.either(handler.processRequest(request)),
             (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
@@ -124,6 +120,18 @@ final case class UndertowHttpEndpoint[Effect[_]](
     }
   }
 
+  private def createContext(exchange: HttpServerExchange): Context =
+    val headers = exchange.getRequestHeaders.asScala.flatMap { headerValues =>
+      headerValues.iterator.asScala.map(value => headerValues.getHeaderName.toString -> value)
+    }.toSeq
+    HttpProperties(
+      source = Some(Left(exchange)),
+      scheme = exchange.getRequestScheme,
+      path = exchange.getRequestPath,
+      query = exchange.getQueryString,
+      headers = headers
+    )
+
   private def clientAddress(exchange: HttpServerExchange): String = {
     val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)
     val address = exchange.getSourceAddress.toString
@@ -134,7 +142,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
 case object UndertowHttpEndpoint {
 
   /** Request context type. */
-  type Context = HttpServerExchange
+  type Context = HttpProperties[Either[HttpServerExchange, WebSocketHttpExchange]]
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus = Map(
@@ -148,6 +156,4 @@ case object UndertowHttpEndpoint {
   ).withDefaultValue(StatusCodes.INTERNAL_SERVER_ERROR).map { case (errorType, statusCode) =>
     errorType.code -> statusCode
   }
-  
-  
 }

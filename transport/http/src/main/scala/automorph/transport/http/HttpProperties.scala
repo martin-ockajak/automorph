@@ -9,6 +9,9 @@ import scala.concurrent.duration.{Duration, FiniteDuration}
 final case class HttpProperties[Source](
   source: Option[Source] = None,
   method: Option[String] = None,
+  scheme: String = "",
+  path: String = "",
+  query: String = "",
   headers: Seq[(String, String)] = Seq(),
   followRedirects: Boolean = true,
   readTimeout: Duration = FiniteDuration(30, TimeUnit.SECONDS),
@@ -66,9 +69,17 @@ final case class HttpProperties[Source](
 
   def header(name: String, value: String): HttpProperties[Source] = header(name, value, false)
 
-  def header(name: String, value: String, replace: Boolean = false): HttpProperties[Source] = {
+  def header(name: String, value: String, replace: Boolean): HttpProperties[Source] = {
     val originalHeaders = if (replace) headers.filter(_._1 != name) else headers
     copy(headers = originalHeaders :+ (name -> value))
+  }
+
+  def headers(values: (String, String)*): HttpProperties[Source] =
+    headers(values, false)
+
+  def headers(values: Seq[(String, String)], replace: Boolean): HttpProperties[Source] = {
+    val originalHeaders = if (replace) headers.filter { case (name, _) => !values.contains(name) } else headers
+    copy(headers = originalHeaders ++ values)
   }
 
   def proxyAuthBasic(user: String, password: String): HttpProperties[Source] = {

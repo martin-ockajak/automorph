@@ -79,13 +79,13 @@ private[automorph] object RabbitMqCommon extends Logging {
     }
 
   /**
-   * Converts message properties to standard AMQP properties.
+   * Converts message properties to request context.
    *
    * @param properties message properties
    * @tparam Source properties source type
-   * @return AMQP properties
+   * @return request context
    */
-  def amqpPropeties(properties: BasicProperties): AmqpProperties[BasicProperties] =
+  def context(properties: BasicProperties): AmqpProperties[BasicProperties] =
     AmqpProperties(
       Some(properties),
       Option(properties.getContentType),

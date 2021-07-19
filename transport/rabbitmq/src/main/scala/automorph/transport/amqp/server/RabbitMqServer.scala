@@ -76,7 +76,7 @@ final case class RabbitMqServer[Effect[_]](
         )
 
         // Process the request
-        implicit val usingContext: AmqpProperties[BasicProperties] = RabbitMqCommon.amqpPropeties(properties)
+        implicit val usingContext: AmqpProperties[BasicProperties] = RabbitMqCommon.context(properties)
         runEffect(system.map(
           system.either(handler.processRequest(body)),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>

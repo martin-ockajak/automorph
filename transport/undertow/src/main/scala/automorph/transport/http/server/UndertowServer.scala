@@ -3,6 +3,7 @@ package automorph.transport.http.server
 import automorph.log.Logging
 import automorph.transport.http.server.UndertowServer.defaultBuilder
 import automorph.spi.ServerMessageTransport
+import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.{Handlers, Undertow}
@@ -60,7 +61,7 @@ final case class UndertowServer(
 
 case object UndertowServer {
   /** Request context type. */
-  type Context = HttpServerExchange
+  type Context = UndertowHttpEndpoint.Context
 
   /**
    * Default Undertow web server builder providing the following settings:
