@@ -74,10 +74,9 @@ final case class HttpProperties[Source](
   def proxyAuthBearer(token: String): HttpProperties[Source] =
     header(headerProxyAuthorization, s"$authorizationBearer $token")
 
-  def auth(method: String): Option[String] =
+  private def auth(method: String): Option[String] =
     headers(headerAuthorization).find(_.trim.startsWith(method)).flatMap(_.split(" ") match {
       case Array(_) => None
       case Array(_, value) => Some(value)
     })
-
 }
