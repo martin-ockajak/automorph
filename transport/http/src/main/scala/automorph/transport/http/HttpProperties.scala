@@ -17,6 +17,7 @@ final case class HttpProperties[Source](
   private val headerAuthorization = "Authorization"
   private val headerContentLength = "Content-Length"
   private val headerContentType = "Content-Type"
+  private val headerCookie = "Cookie"
   private val headerProxyAuthorization = "Proxy-Authorization"
   private val headerSetCookie = "Set-Cookie"
 
@@ -30,7 +31,7 @@ final case class HttpProperties[Source](
 
   def contentLength: Option[String] = header(headerContentLength)
 
-  def cookies: Map[String, Option[String]] = headers(headerSetCookie).map { header =>
+  def cookies: Map[String, Option[String]] = (headers(headerCookie) ++ headers(headerSetCookie)).map { header =>
     header.split("=", 2).map(_.trim) match {
       case Array(name) => name -> None
       case Array(name, value) => name -> Some(value)
@@ -45,13 +46,6 @@ final case class HttpProperties[Source](
 
   def proxyAuthorization: Option[String] = header(headerProxyAuthorization)
 
-  def header(name: String, value: String): HttpProperties[Source] = header(name, value, false)
-
-  def header(name: String, value: String, replace: Boolean = false): HttpProperties[Source] = {
-    val originalHeaders = if (replace) headers.filter(_._1 != name) else headers
-    copy(headers = originalHeaders :+ (name -> value))
-  }
-
   def authBasic(user: String, password: String): HttpProperties[Source] = {
     val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
     header(headerAuthorization, s"$authorizationBasic $value")
@@ -62,6 +56,16 @@ final case class HttpProperties[Source](
 
   def authBearer(token: String): HttpProperties[Source] =
     header(headerAuthorization, s"$authorizationBearer $token")
+
+  def cookies(values: (String, String)*): HttpProperties[Source] =
+    cookies(values, false)
+
+  def header(name: String, value: String): HttpProperties[Source] = header(name, value, false)
+
+  def header(name: String, value: String, replace: Boolean = false): HttpProperties[Source] = {
+    val originalHeaders = if (replace) headers.filter(_._1 != name) else headers
+    copy(headers = originalHeaders :+ (name -> value))
+  }
 
   def proxyAuthBasic(user: String, password: String): HttpProperties[Source] = {
     val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
@@ -74,9 +78,18 @@ final case class HttpProperties[Source](
   def proxyAuthBearer(token: String): HttpProperties[Source] =
     header(headerProxyAuthorization, s"$authorizationBearer $token")
 
+  def setCookies(values: (String, String)*): HttpProperties[Source] =
+    cookies(values, true)
+
   private def auth(method: String): Option[String] =
     headers(headerAuthorization).find(_.trim.startsWith(method)).flatMap(_.split(" ") match {
       case Array(_) => None
       case Array(_, value) => Some(value)
     })
+
+  private def cookies(values: Seq[(String, String)], set: Boolean): HttpProperties[Source] = {
+    val headerName = if (set) headerSetCookie else headerCookie
+    val headerValue = (headers(headerName) ++ values.map { case (name, value) => s"$name=$value" }).mkString("; ")
+    header(headerName, headerValue, true)
+  }
 }
