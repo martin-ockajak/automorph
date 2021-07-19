@@ -1,8 +1,8 @@
 package test.examples
 
 import automorph.DefaultHandler
-import automorph.system.IdentitySystem.Identity
 import automorph.spi.EffectSystem
+import automorph.system.IdentitySystem.Identity
 
 trait BrokenBind[Effect[_]] {
 
