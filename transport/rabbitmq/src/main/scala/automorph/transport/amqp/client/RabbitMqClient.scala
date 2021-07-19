@@ -2,14 +2,15 @@ package automorph.transport.amqp.client
 
 import automorph.log.Logging
 import automorph.spi.ClientMessageTransport
-import automorph.transport.amqp.{AmqpProperties, RabbitMqCommon}
 import automorph.transport.amqp.client.RabbitMqClient.Context
+import automorph.transport.amqp.{AmqpProperties, RabbitMqCommon}
 import automorph.util.Extensions.TryOps
 import automorph.util.MessageId
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, Consumer, DefaultConsumer, Envelope}
 import java.io.IOException
 import java.net.URL
+import java.util.Date
 import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.duration.Duration
@@ -120,8 +121,16 @@ final case class RabbitMqClient(
     new BasicProperties().builder()
       .contentEncoding(properties.contentEncoding.orNull)
       .headers(properties.headers.asJava)
+//      .deliveryMode(properties.deliveryMode.orNull)
+//      .priority(properties.priority.orNull)
+      .expiration(properties.expiration.orNull)
+      .messageId(properties.messageId.orNull)
+      .timestamp(properties.timestamp.map(Date.from).orNull)
+      .`type`(properties.`type`.orNull)
+      .userId(properties.userId.orNull)
+      .appId(properties.appId.getOrElse(clientId))
       .replyTo(directReplyToQueue).contentType(mediaType)
-      .correlationId(MessageId.next).appId(clientId).build
+      .correlationId(MessageId.next).build
   }
 
   private def createConsumer(channel: Channel): DefaultConsumer = {
