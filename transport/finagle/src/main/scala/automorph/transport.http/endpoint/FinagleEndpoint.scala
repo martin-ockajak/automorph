@@ -12,6 +12,7 @@ import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise}
+import java.net.URI
 
 /**
  * Finagle RPC system endpoint transport plugin using HTTP as message transport protocol.
@@ -80,15 +81,17 @@ final case class FinagleEndpoint[Node, Effect[_]](
     response
   }
 
-  private def createContext(request: Request): Context =
+  private def createContext(request: Request): Context = {
+    val uri = new URI(request.uri)
     HttpProperties(
       source = Some(request),
       method = Some(request.method.name),
-      scheme = request.uri,
-      path = request.path,
-      query = request.uri,
+      scheme = Some(uri.getScheme),
+      path = Some(request.path),
+      query = Some(uri.getQuery),
       headers = request.headerMap.iterator.toSeq
     )
+  }
 
   private def clientAddress(request: Request): String = {
     val forwardedFor = request.xForwardedFor

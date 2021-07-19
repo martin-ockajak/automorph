@@ -127,9 +127,9 @@ final case class UndertowHttpEndpoint[Effect[_]](
     HttpProperties(
       source = Some(Left(exchange)),
       method = Some(exchange.getRequestMethod.toString),
-      scheme = exchange.getRequestScheme,
-      path = exchange.getRequestPath,
-      query = exchange.getQueryString,
+      scheme = Some(exchange.getRequestScheme),
+      path = Some(exchange.getRequestPath),
+      query = Some(exchange.getQueryString),
       headers = headers
     )
   }

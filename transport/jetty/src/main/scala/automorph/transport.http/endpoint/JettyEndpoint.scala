@@ -83,9 +83,9 @@ final case class JettyEndpoint[Effect[_]](
     HttpProperties(
       source = Some(request),
       method = Some(request.getMethod),
-      scheme = request.getScheme,
-      path = request.getServletPath,
-      query = request.getQueryString,
+      scheme = Some(request.getScheme),
+      path = Some(request.getServletPath),
+      query = Some(request.getQueryString),
       headers = headers
     )
   }

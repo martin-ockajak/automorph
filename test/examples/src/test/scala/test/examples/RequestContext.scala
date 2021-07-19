@@ -8,7 +8,7 @@ object RequestContext extends App {
 
     // Use request context provided by the server transport
     def requestMetaData(message: String)(implicit context: Context): List[String] =
-      List(message, context.path, context.header("X-Test").getOrElse(""))
+      List(Some(message), context.path, context.header("X-Test")).flatten
   }
   val api = new ServerApi()
 

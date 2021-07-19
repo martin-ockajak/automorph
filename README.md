@@ -359,7 +359,7 @@ class ServerApi {
 
   // Use request context provided by the server transport
   def requestMetaData(message: String)(implicit context: Context): List[String] =
-    List(message, context.getRequestPath, context.getRequestHeaders.get("X-Test").peek)
+    List(Some(message), context.path, context.header("X-Test")).flatten
 }
 val api = new ServerApi()
 

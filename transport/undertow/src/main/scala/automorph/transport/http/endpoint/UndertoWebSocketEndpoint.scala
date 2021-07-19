@@ -150,9 +150,9 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         }.toSeq
         HttpProperties(
           source = Some(Right(exchange)),
-          scheme = exchange.getRequestScheme,
-          path = new URI(exchange.getRequestURI).getPath,
-          query = exchange.getQueryString,
+          scheme = Some(exchange.getRequestScheme),
+          path = Some(new URI(exchange.getRequestURI).getPath),
+          query = Some(exchange.getQueryString),
           headers = headers,
           webSocket = true
         )

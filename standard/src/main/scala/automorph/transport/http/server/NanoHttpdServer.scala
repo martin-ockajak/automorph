@@ -100,9 +100,9 @@ final case class NanoHttpdServer[Effect[_]] private (
     HttpProperties(
       source = Some(session),
       method = Some(session.getMethod.name),
-      scheme = uri.getScheme,
-      path = uri.getPath,
-      query = session.getQueryParameterString,
+      scheme = Some(uri.getScheme),
+      path = Some(uri.getPath),
+      query = Some(session.getQueryParameterString),
       headers = session.getHeaders.asScala.toSeq
     )
   }

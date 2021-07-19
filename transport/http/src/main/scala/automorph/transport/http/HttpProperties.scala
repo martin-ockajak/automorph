@@ -8,9 +8,9 @@ import scala.concurrent.duration.{Duration, FiniteDuration}
 final case class HttpProperties[Source](
   source: Option[Source] = None,
   method: Option[String] = None,
-  scheme: String = "",
-  path: String = "",
-  query: String = "",
+  scheme: Option[String] = None,
+  path: Option[String] =None,
+  query: Option[String] = None,
   headers: Seq[(String, String)] = Seq(),
   followRedirects: Boolean = true,
   readTimeout: Duration = FiniteDuration(30, TimeUnit.SECONDS),

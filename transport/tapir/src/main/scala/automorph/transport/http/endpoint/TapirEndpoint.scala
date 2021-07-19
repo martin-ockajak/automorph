@@ -98,8 +98,8 @@ case object TapirEndpoint extends Logging with EndpointMessageTransport {
     HttpProperties(
       source = Some(()),
       method = Some(method.method),
-      path = paths.mkString("/"),
-      query = queryParams.toString,
+      path = Some(paths.mkString("/")),
+      query = Some(queryParams.toString),
       headers = headers.map(header => header.name -> header.value).toSeq
     )
   }
