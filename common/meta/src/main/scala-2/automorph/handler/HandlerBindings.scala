@@ -114,12 +114,7 @@ case object HandlerBindings {
         parameters.toList.zipWithIndex.map { case (parameter, index) =>
           val argumentIndex = offset + index
           q"""
-            (scala.util.Try($format.decode[${parameter.dataType}](argumentNodes($argumentIndex))) match {
-              case scala.util.Failure(error) => scala.util.Failure(
-                automorph.protocol.ErrorType.InvalidRequestException("Invalid argument: " + $argumentIndex, error)
-              )
-              case result => result
-            }).get
+            $format.decode[${parameter.dataType}](argumentNodes($argumentIndex))
            """
         }
       }
