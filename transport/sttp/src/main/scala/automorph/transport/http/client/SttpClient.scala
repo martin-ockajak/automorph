@@ -96,7 +96,9 @@ final case class SttpClient[Effect[_]](
   ): Request[Either[String, String], Any] = {
     val contentType = MediaType.unsafeParse(mediaType)
     val properties = context.getOrElse(defaultContext)
-    basicRequest.method(properties.method.map(Method.unsafeApply).getOrElse(httpMethod), uri)
+    val requestMethod = properties.method.map(Method.unsafeApply).getOrElse(httpMethod)
+    val requestUrl = properties.url.map(Uri(_)).getOrElse(uri)
+    basicRequest.method(requestMethod, requestUrl)
       .contentType(contentType).header(Header.accept(contentType)).body(request.unsafeArray)
       .followRedirects(properties.followRedirects).readTimeout(properties.readTimeout)
       .headers(properties.headers.map { case (name, value) => Header(name, value) }: _*)

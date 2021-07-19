@@ -60,11 +60,12 @@ final case class UrlConnectionClient(
 
   private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): HttpURLConnection = {
     logger.trace("Sending HTTP request", Map("URL" -> url, "Size" -> request.length))
-    val connection = connect()
+    val properties = context.getOrElse(defaultContext)
+    val connection = connect(properties)
     val outputStream = connection.getOutputStream
-    val httpMethod = setProperties(connection, request, mediaType, context)
+    val httpMethod = setProperties(connection, request, mediaType, properties)
     val trySend = Using(outputStream)(_.write(request.unsafeArray))
-    clearProperties(connection, context)
+    clearProperties(connection, properties)
     trySend.pureFold(
       error => {
         logger.error(
@@ -83,9 +84,8 @@ final case class UrlConnectionClient(
     connection: HttpURLConnection,
     request: ArraySeq.ofByte,
     mediaType: String,
-    context: Option[Context]
+    properties: Context
   ): String = {
-    val properties = context.getOrElse(defaultContext)
     val httpMethod = properties.method.getOrElse(method)
     require(httpMethods.contains(httpMethod), s"Invalid HTTP method: $httpMethod")
     connection.setRequestMethod(httpMethod)
@@ -101,17 +101,13 @@ final case class UrlConnectionClient(
     httpMethod
   }
 
-  private def clearProperties(connection: HttpURLConnection, context: Option[Context]): Unit =
-    context.foreach(_.headers.foreach { case (key, _) =>
+  private def clearProperties(connection: HttpURLConnection, properties: Context): Unit =
+    properties.headers.foreach { case (key, _) =>
       connection.setRequestProperty(key, null)
-    })
+    }
 
-  /**
-   * Open new HTTP connections.
-   *
-   * @return HTTP connection
-   */
-  private def connect(): HttpURLConnection = {
+  private def connect(properties: Context): HttpURLConnection = {
+    val connectionUrl = properties.url.getOrElse(url)
     val connection = url.toURL.openConnection().asInstanceOf[HttpURLConnection]
     connection.setDoOutput(true)
     connection
