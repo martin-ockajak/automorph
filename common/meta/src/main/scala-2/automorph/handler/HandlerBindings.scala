@@ -31,15 +31,7 @@ case object HandlerBindings {
     val ref = Reflection[c.type](c)
 
     // Detect and validate public methods in the API type
-    val apiMethods = validApiMethods[c.type, Api, Effect[_]](ref)
-    val validMethods = apiMethods.flatMap(_.swap.toOption) match {
-      case Seq() => apiMethods.flatMap(_.toOption)
-      case errors =>
-        ref.c.abort(
-          ref.c.enclosingPosition,
-          s"Failed to bind API methods:\n${errors.map(error => s"  $error").mkString("\n")}"
-        )
-    }
+    val validMethods = validApiMethods[c.type, Api, Effect[_]](ref).map(_.getOrElse(???))
 
     // Generate bound API method bindings
     val handlerBindings = validMethods.map { method =>
