@@ -10,8 +10,8 @@ trait BrokenBindSpec[Effect[_], Context] extends BaseSpec {
 
   def system: EffectSystem[Effect]
 
-  val simpleApiInstance: SimpleApi[Effect] = SimpleApiImpl(system)
-  val complexApiInstance: ComplexApi[Effect, Context] = ComplexApiImpl(system)
+  private val simpleApiInstance: SimpleApi[Effect] = SimpleApiImpl(system)
+  private val complexApiInstance: ComplexApi[Effect, Context] = ComplexApiImpl(system)
 
   private val handler = Handler[UpickleJsonFormat.Node, UpickleJsonFormat[DefaultUpickleCustom.type], Effect, Context](
     UpickleJsonFormat(),
