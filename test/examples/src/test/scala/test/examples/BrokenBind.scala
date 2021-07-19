@@ -1,9 +1,6 @@
 package test.examples
 
-import automorph.Handler
 import automorph.DefaultHandler
-import automorph.format.DefaultUpickleCustom
-import automorph.format.json.UpickleJsonFormat
 import automorph.spi.EffectSystem
 
 trait BrokenBind[Effect[_], Context] {
