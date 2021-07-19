@@ -9,7 +9,7 @@ import automorph.util.MessageId
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, Consumer, DefaultConsumer, Envelope}
 import java.io.IOException
-import java.net.URL
+import java.net.URI
 import java.util.Date
 import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
@@ -36,7 +36,7 @@ import scala.util.{Try, Using}
  * @param executionContext execution context
  */
 final case class RabbitMqClient(
-  url: URL,
+  url: URI,
   routingKey: String,
   exchange: String = RabbitMqCommon.defaultDirectExchange,
   addresses: Seq[Address] = Seq(),
@@ -47,7 +47,6 @@ final case class RabbitMqClient(
   private lazy val connection = createConnection()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
-  private val urlText = url.toExternalForm
   private val callResults = TrieMap[String, Promise[ArraySeq.ofByte]]()
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
 
@@ -78,7 +77,7 @@ final case class RabbitMqClient(
     logger.trace(
       "Sending AMQP request",
       Map(
-        "URL" -> urlText,
+        "URL" -> url,
         "Routing key" -> routingKey,
         "Correlation ID" -> properties.getCorrelationId,
         "Size" -> request.length
@@ -95,7 +94,7 @@ final case class RabbitMqClient(
       logger.debug(
         "Sent AMQP request",
         Map(
-          "URL" -> urlText,
+          "URL" -> url,
           "Routing key" -> routingKey,
           "Correlation ID" -> properties.getCorrelationId,
           "Size" -> request.length
@@ -106,7 +105,7 @@ final case class RabbitMqClient(
         "Failed to send AMQP request",
         error,
         Map(
-          "URL" -> urlText,
+          "URL" -> url,
           "Routing key" -> routingKey,
           "Correlation ID" -> properties.getCorrelationId,
           "Size" -> request.length
@@ -147,7 +146,7 @@ final case class RabbitMqClient(
         logger.debug(
           "Received AMQP response",
           Map(
-            "URL" -> urlText,
+            "URL" -> url,
             "Routing key" -> routingKey,
             "Correlation ID" -> properties.getCorrelationId,
             "Size" -> body.length
@@ -163,7 +162,7 @@ final case class RabbitMqClient(
   }
 
   private def createConnection(): Connection = {
-    val connection = RabbitMqCommon.connect(url, Seq(), clientId, connectionFactory)
+    val connection = RabbitMqCommon.connect(url.toURL, Seq(), clientId, connectionFactory)
     Option.when(exchange != RabbitMqCommon.defaultDirectExchange) {
       Using(connection.createChannel()) { channel =>
         channel.exchangeDeclare(exchange, BuiltinExchangeType.DIRECT, false)
