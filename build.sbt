@@ -61,6 +61,7 @@ lazy val spi = (project in file("common/spi")).settings(
 lazy val meta = (project in file("common/meta")).dependsOn(
   spi
 ).settings(
+  name := "automorph-meta",
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-api" % "1.7.31"
   )
@@ -68,9 +69,7 @@ lazy val meta = (project in file("common/meta")).dependsOn(
 lazy val core = (project in file("common/core")).dependsOn(
   meta, testBase % Test
 ).settings(
-  name := "automorph-core",
-  Compile / packageBin / mappings ++= (meta / Compile / packageBin / mappings).value,
-  Compile / packageSrc / mappings ++= (meta / Compile / packageSrc / mappings).value
+  name := "automorph-core"
 )
 lazy val standard = project.dependsOn(
   http, core, testCore % Test
