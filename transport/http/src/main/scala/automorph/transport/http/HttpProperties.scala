@@ -37,10 +37,11 @@ final case class HttpProperties[Source](
 
   def contentLength: Option[String] = header(headerContentLength)
 
-  def cookies: Map[String, Option[String]] = (headers(headerCookie) ++ headers(headerSetCookie)).map { header =>
+  def cookies: Map[String, Option[String]] = (headers(headerCookie) ++ headers(headerSetCookie)).flatMap { header =>
     header.split("=", 2).map(_.trim) match {
-      case Array(name, value) => name -> Some(value)
-      case _ => name -> None
+      case Array(name, value) => Some(name -> Some(value))
+      case Array(name) => Some(name -> None)
+      case _ => None
     }
   }.toMap
 
