@@ -127,6 +127,7 @@ case object HandlerBindings {
       // Create the API method call using the decoded arguments
       //   api.method(arguments ...): Effect[ResultValueType]
       val apiMethodCall = q"$api.${method.symbol}(...$arguments)"
+      println(ref.c.universe.showCode(apiMethodCall))
 
       // Create encode result function
       //   (result: ResultValueType) => Node = format.encode[ResultValueType](result)
