@@ -21,5 +21,5 @@ trait BrokenApi[Effect[_]] {
 
 final case class BrokenApiImpl[Effect[_]](backend: EffectSystem[Effect]) extends BrokenApi[Effect] {
 
-  override def test(test: String): Effect[String] = backend.pure(test)
+  def test(test: String): Effect[String] = backend.pure(test)
 }
