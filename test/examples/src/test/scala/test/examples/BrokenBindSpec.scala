@@ -13,9 +13,10 @@ trait BrokenBindSpec[Effect[_], Context] extends BaseSpec {
   val simpleApiInstance: SimpleApi[Effect] = SimpleApiImpl(system)
   val complexApiInstance: ComplexApi[Effect, Context] = ComplexApiImpl(system)
 
-  private val handler = {
-    Handler[UpickleJsonFormat.Node, UpickleJsonFormat[DefaultUpickleCustom.type], Effect, Context](UpickleJsonFormat(), system)
-      .bind(simpleApiInstance)
-      .bind(complexApiInstance)
-  }
+  private val handler = Handler[UpickleJsonFormat.Node, UpickleJsonFormat[DefaultUpickleCustom.type], Effect, Context](
+    UpickleJsonFormat(),
+    system
+  )
+    .bind(simpleApiInstance)
+    .bind(complexApiInstance)
 }
