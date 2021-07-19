@@ -4,7 +4,7 @@ import io.undertow.Undertow
 import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.defaultErrorStatus
 import automorph.transport.http.server.UndertowServer.defaultBuilder
-import automorph.transport.http.endpoint.UndertowHttpEndpoint
+import automorph.transport.http.endpoint.{UndertowHttpEndpoint, UndertowWebSocketEndpoint}
 import automorph.transport.http.server.UndertowServer
 import automorph.spi.EffectSystem
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,7 +52,9 @@ case object DefaultHttpServer {
     errorStatus: Int => Int = defaultErrorStatus
   ): Type = {
     val handler = bindApis(DefaultHandler[Effect, UndertowServer.Context](backend))
-    UndertowServer(UndertowHttpEndpoint(handler, runEffect, errorStatus), port, urlPath, builder)
+    val httpHandler = UndertowHttpEndpoint(handler, runEffect, errorStatus)
+    val webSocketHandler = UndertowWebSocketEndpoint(handler, runEffect, httpHandler)
+    UndertowServer(webSocketHandler, port, urlPath, builder)
   }
 
   /**
@@ -80,7 +82,9 @@ case object DefaultHttpServer {
     Seq(executionContext)
     val handler = bindApis(DefaultHandler.async())
     val runEffect = (_: Future[Any]) => ()
-    UndertowServer(UndertowHttpEndpoint(handler, runEffect, errorStatus), port, urlPath, builder)
+    val httpHandler = UndertowHttpEndpoint(handler, runEffect, errorStatus)
+    val webSocketHandler = UndertowWebSocketEndpoint(handler, runEffect, httpHandler)
+    UndertowServer(webSocketHandler, port, urlPath, builder)
   }
 
   /**
@@ -106,6 +110,8 @@ case object DefaultHttpServer {
   ): Type = {
     val handler = bindApis(DefaultHandler.sync())
     val runEffect = (_: Identity[Any]) => ()
-    UndertowServer(UndertowHttpEndpoint(handler, runEffect, errorStatus), port, urlPath, builder)
+    val httpHandler = UndertowHttpEndpoint(handler, runEffect, errorStatus)
+    val webSocketHandler = UndertowWebSocketEndpoint(handler, runEffect, httpHandler)
+    UndertowServer(webSocketHandler, port, urlPath, builder)
   }
 }
