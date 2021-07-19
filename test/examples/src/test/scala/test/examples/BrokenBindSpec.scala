@@ -15,6 +15,7 @@ trait BrokenBindSpec[Effect[_], Context] extends BaseSpec {
 
   private val handler = {
     Handler[UpickleJsonFormat.Node, UpickleJsonFormat[DefaultUpickleCustom.type], Effect, Context](UpickleJsonFormat(), system)
-      .bind(simpleApiInstance).bind(complexApiInstance)
+      .bind(simpleApiInstance)
+      .bind(complexApiInstance)
   }
 }
