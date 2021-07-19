@@ -28,7 +28,7 @@ object RequestContext extends App {
 
   // Create context for requests sent by the client
   val apiProxy = client.bind[ClientApi] // Api
-  val defaultContext = client.defaultContext
+  val defaultContext = client.context
   implicit val context: automorph.DefaultHttpClient.Context = defaultContext.copy(
     partial = defaultContext.partial.header("X-Test", "valid")
   )

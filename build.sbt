@@ -21,6 +21,9 @@ lazy val root = project.in(file(".")).aggregate(
   catsEffect,
   scalaz,
 
+  http,
+  amqp,
+
   sttp,
   tapir,
   undertow,
@@ -138,8 +141,10 @@ lazy val scalaz = (project in file("system/scalaz")).dependsOn(
 
 // Transport
 val sttpVersion = "3.3.11"
+lazy val http = (project in file("transport/http"))
+lazy val amqp = (project in file("transport/amqp"))
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
-  core, testCore % Test, standard % Test
+  http, core, testCore % Test, standard % Test
 ).settings(
   name := "automorph-sttp",
   libraryDependencies ++= Seq(
@@ -152,7 +157,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
 //  )
 )
 lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
-  spi, core, testCore % Test, standard % Test
+  amqp, core, testCore % Test, standard % Test
 ).settings(
   name := "automorph-rabbitmq",
   libraryDependencies ++= Seq(
@@ -162,7 +167,7 @@ lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
 
 // Server
 lazy val undertow = (project in file("transport/undertow")).dependsOn(
-  core, testCore % Test, standard % Test
+  http, core, testCore % Test, standard % Test
 ).settings(
   name := "automorph-undertow",
   libraryDependencies ++= Seq(
@@ -171,7 +176,7 @@ lazy val undertow = (project in file("transport/undertow")).dependsOn(
   )
 )
 lazy val jetty = (project in file("transport/jetty")).dependsOn(
-  core, testCore % Test, standard % Test
+  http, core, testCore % Test, standard % Test
 ).settings(
   name := "automorph-jetty",
   libraryDependencies ++= Seq(
@@ -180,7 +185,7 @@ lazy val jetty = (project in file("transport/jetty")).dependsOn(
   )
 )
 lazy val finagle = (project in file("transport/finagle")).dependsOn(
-  core, testCore % Test, standard % Test
+  http, core, testCore % Test, standard % Test
 ).settings(
   name := "automorph-finagle",
   libraryDependencies ++= Seq(
@@ -188,7 +193,7 @@ lazy val finagle = (project in file("transport/finagle")).dependsOn(
   )
 )
 lazy val tapir = (project in file("transport/tapir")).dependsOn(
-  core, testCore % Test, standard % Test
+  http, core, testCore % Test, standard % Test
 ).settings(
   name := "automorph-tapir",
   libraryDependencies ++= Seq(

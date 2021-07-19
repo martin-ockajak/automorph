@@ -24,7 +24,7 @@ case class HandlerTransport[Node, ActualFormat <: MessageFormat[Node], Effect[_]
   defaultContext: Context
 ) extends ClientMessageTransport[Effect, Context] {
 
-  def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
+  override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
     implicit val usingContext = context.getOrElse(defaultContext)
     backend.flatMap(
       handler.processRequest(request),
@@ -33,7 +33,7 @@ case class HandlerTransport[Node, ActualFormat <: MessageFormat[Node], Effect[_]
     )
   }
 
-  def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
+  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
     implicit val usingContext = context.getOrElse(defaultContext)
     backend.map(
       handler.processRequest(request),

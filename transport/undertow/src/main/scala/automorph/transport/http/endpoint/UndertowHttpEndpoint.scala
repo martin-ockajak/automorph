@@ -8,10 +8,17 @@ import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.defaultErrorStatus
 import automorph.util.{Bytes, Network}
 import automorph.util.Extensions.TryOps
+import io.undertow.connector.ByteBufferPool
 import io.undertow.io.Receiver
-import io.undertow.server.{HttpHandler, HttpServerExchange}
-import io.undertow.util.{Headers, StatusCodes}
+import io.undertow.server.{HttpHandler, HttpServerExchange, HttpUpgradeListener}
+import io.undertow.util.{AttachmentKey, Headers, StatusCodes}
+import io.undertow.websockets.core.WebSocketChannel
+import io.undertow.websockets.spi.WebSocketHttpExchange
 import java.io.IOException
+import java.nio.ByteBuffer
+import java.security.Principal
+import java.util
+import org.xnio.{IoFuture, OptionMap}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -36,6 +43,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
   private val system = handler.system
+
   private val receiveCallback = new Receiver.FullBytesCallback {
 
     override def handle(exchange: HttpServerExchange, message: Array[Byte]): Unit = {
@@ -108,7 +116,8 @@ final case class UndertowHttpEndpoint[Effect[_]](
       )
     }.mapFailure { error =>
       logger.error(
-        "Failed to send HTTP response", error,
+        "Failed to send HTTP response",
+        error,
         Map("Client" -> client, "Status" -> statusCode, "Size" -> message.length)
       )
       throw error

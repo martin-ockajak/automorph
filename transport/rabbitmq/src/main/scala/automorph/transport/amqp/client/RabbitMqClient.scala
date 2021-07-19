@@ -2,8 +2,8 @@ package automorph.transport.amqp.client
 
 import automorph.log.Logging
 import automorph.spi.ClientMessageTransport
-import automorph.transport.amqp.RabbitMqCommon
-import automorph.transport.amqp.client.RabbitMqClient.RequestProperties
+import automorph.transport.amqp.{AmqpProperties, RabbitMqCommon}
+import automorph.transport.amqp.client.RabbitMqClient.Context
 import automorph.util.Extensions.TryOps
 import automorph.util.MessageId
 import com.rabbitmq.client.AMQP.BasicProperties
@@ -40,7 +40,7 @@ final case class RabbitMqClient(
   addresses: Seq[Address] = Seq(),
   connectionFactory: ConnectionFactory = new ConnectionFactory
 )(implicit executionContext: ExecutionContext)
-  extends AutoCloseable with Logging with ClientMessageTransport[Future, RequestProperties] {
+  extends AutoCloseable with Logging with ClientMessageTransport[Future, Context] {
 
   private lazy val connection = createConnection()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
@@ -52,19 +52,19 @@ final case class RabbitMqClient(
   override def call(
     request: ArraySeq.ofByte,
     mediaType: String,
-    context: Option[RequestProperties]
+    context: Option[Context]
   ): Future[ArraySeq.ofByte] = {
     val properties = setupProperties(mediaType, context)
     val result = Promise[ArraySeq.ofByte]()
     send(request, properties, Some(result)).flatMap(_ => result.future)
   }
 
-  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Future[Unit] = {
+  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Future[Unit] = {
     val properties = setupProperties(mediaType, context)
     send(request, properties, None)
   }
 
-  override def defaultContext: RequestProperties = RequestProperties.defaultContext
+  override def defaultContext: Context = RabbitMqClient.defaultContext
 
   override def close(): Unit = RabbitMqCommon.disconnect(connection)
 
@@ -114,9 +114,11 @@ final case class RabbitMqClient(
     }.get
   }
 
-  private def setupProperties(mediaType: String, context: Option[RequestProperties]): BasicProperties =
-    context.getOrElse(defaultContext).basic.builder().replyTo(directReplyToQueue)
-      .correlationId(MessageId.next).contentType(mediaType).appId(clientId).build
+  private def setupProperties(mediaType: String, context: Option[Context]): BasicProperties = {
+    val properties = context.getOrElse(defaultContext).source.getOrElse(new BasicProperties)
+    properties.builder().replyTo(directReplyToQueue).contentType(mediaType)
+      .correlationId(MessageId.next).appId(clientId).build
+  }
 
   private def createConsumer(channel: Channel): DefaultConsumer = {
     val consumer = new DefaultConsumer(channel) {
@@ -157,12 +159,7 @@ final case class RabbitMqClient(
 }
 
 case object RabbitMqClient {
+  type Context = AmqpProperties[BasicProperties]
 
-  case class RequestProperties(
-    basic: BasicProperties
-  )
-
-  case object RequestProperties {
-    implicit val defaultContext: RequestProperties = RequestProperties(new BasicProperties)
-  }
+  implicit val defaultContext: Context = AmqpProperties()
 }

@@ -1,10 +1,13 @@
 package automorph.transport.amqp
 
 import automorph.log.Logging
+import automorph.transport.amqp.AmqpProperties
 import automorph.util.Extensions.TryOps
+import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{AMQP, Address, Channel, Connection, ConnectionFactory, DefaultConsumer}
 import java.io.IOException
 import java.net.{InetAddress, URL}
+import scala.jdk.CollectionConverters.MapHasAsScala
 import scala.util.Try
 
 /** Common RabbitMQ functionality. */
@@ -74,4 +77,29 @@ private[automorph] object RabbitMqCommon extends Logging {
         throw new IOException("No AMQP connection channel available")
       })
     }
+
+  /**
+   * Converts message properties to standard AMQP properties.
+   *
+   * @param properties message properties
+   * @tparam Source properties source type
+   * @return AMQP properties
+   */
+  def amqpPropeties(properties: BasicProperties): AmqpProperties[BasicProperties] =
+    AmqpProperties(
+      Some(properties),
+      Option(properties.getContentType),
+      Option(properties.getContentEncoding),
+      Option(properties.getHeaders).map(headers => Map.from(headers.asScala)).getOrElse(Map()),
+      Option(properties.getDeliveryMode),
+      Option(properties.getPriority),
+      Option(properties.getCorrelationId),
+      Option(properties.getReplyTo),
+      Option(properties.getExpiration),
+      Option(properties.getMessageId),
+      Option(properties.getTimestamp).map(_.toInstant),
+      Option(properties.getType),
+      Option(properties.getUserId),
+      Option(properties.getAppId)
+    )
 }

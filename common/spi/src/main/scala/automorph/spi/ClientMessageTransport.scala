@@ -39,7 +39,7 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
   def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit]
 
   /**
-   * Create default request context.
+   * Creates default request context.
    *
    * @return request context
    */

@@ -51,7 +51,7 @@ final case class Client[Node, ActualFormat <: MessageFormat[Node], Effect[_], Co
    *
    * @return request context
    */
-  def defaultContext: Context = transport.defaultContext
+  def context: Context = transport.defaultContext
 
   /**
    * Creates a copy of this client with specified JSON-RPC error to exception mapping.
