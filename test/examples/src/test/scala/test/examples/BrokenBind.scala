@@ -6,7 +6,8 @@ import automorph.system.IdentitySystem.Identity
 
 trait BrokenBind {
 
-  type Effect[_]
+  type Effect[T] = Identity[T]
+//  type Effect[_]
 
   def system: EffectSystem[Effect]
 
