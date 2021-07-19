@@ -4,9 +4,8 @@ import automorph.Handler
 import automorph.format.DefaultUpickleCustom
 import automorph.format.json.UpickleJsonFormat
 import automorph.spi.EffectSystem
-import test.base.BaseSpec
 
-trait BrokenBindSpec[Effect[_], Context] extends BaseSpec {
+trait BrokenBind[Effect[_], Context] {
 
   def system: EffectSystem[Effect]
 
