@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 case object DefaultHttpServer {
 
   /** Default server type. */
-  type Type = UndertowServer
+  type Type[Effect[_]] = UndertowServer[Effect]
 
   /** Request context type. */
   type Context = UndertowServer.Context
@@ -32,29 +32,30 @@ case object DefaultHttpServer {
    *
    * @see [[https://www.jsonrpc.org/specification protocol specification]]
    * @see [[https://undertow.io HTTP Server Documentation]]
-   * @param backend effect system plugin
+   * @param system effect system plugin
+   * @param handler RPC request handler
    * @param runEffect effect execution function
    * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
-   * @param urlPath HTTP URL path (default: /)
-   * @param builder Undertow web server builder
+   * @param path HTTP URL path (default: /)
    * @param errorStatus error code to HTTP status mapping function
+   * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
+   * @param builder Undertow web server builder
    * @tparam Effect effect type
    * @return RPC server
    */
   def apply[Effect[_]](
-    backend: EffectSystem[Effect],
+    system: EffectSystem[Effect],
     runEffect: Effect[Any] => Any,
     bindApis: Handler[Effect] => Handler[Effect],
     port: Int,
-    urlPath: String = "/",
-    builder: Undertow.Builder = defaultBuilder,
-    errorStatus: Int => Int = defaultErrorStatus
-  ): Type = {
-    val handler = bindApis(DefaultHandler[Effect, UndertowServer.Context](backend))
-    val httpHandler = UndertowHttpEndpoint(handler, runEffect, errorStatus)
-    val webSocketHandler = UndertowWebSocketEndpoint(handler, runEffect, httpHandler)
-    UndertowServer(webSocketHandler, port, urlPath, builder)
+    path: String = "/",
+    errorStatus: Int => Int = defaultErrorStatus,
+    webSocket: Boolean = true,
+    builder: Undertow.Builder = defaultBuilder
+  ): Type[Effect] = {
+    val handler = bindApis(DefaultHandler[Effect, UndertowServer.Context](system))
+    UndertowServer(handler, runEffect, port, path, errorStatus, webSocket, builder)
   }
 
   /**
@@ -66,25 +67,25 @@ case object DefaultHttpServer {
    * @see [[https://www.jsonrpc.org/specification protocol specification]]
    * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
-   * @param urlPath HTTP URL path (default: /)
-   * @param builder Undertow web server builder
+   * @param path HTTP URL path (default: /)
    * @param errorStatus error code to HTTP status mapping function
+   * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
+   * @param builder Undertow web server builder
    * @param executionContext execution context
    * @return asynchronous RPC server
    */
   def async(
     bindApis: Handler[Future] => Handler[Future],
     port: Int,
-    urlPath: String = "/",
-    builder: Undertow.Builder = defaultBuilder,
-    errorStatus: Int => Int = defaultErrorStatus
-  )(implicit executionContext: ExecutionContext): Type = {
+    path: String = "/",
+    errorStatus: Int => Int = defaultErrorStatus,
+    webSocket: Boolean = true,
+    builder: Undertow.Builder = defaultBuilder
+  )(implicit executionContext: ExecutionContext): Type[Future] = {
     Seq(executionContext)
     val handler = bindApis(DefaultHandler.async())
     val runEffect = (_: Future[Any]) => ()
-    val httpHandler = UndertowHttpEndpoint(handler, runEffect, errorStatus)
-    val webSocketHandler = UndertowWebSocketEndpoint(handler, runEffect, httpHandler)
-    UndertowServer(webSocketHandler, port, urlPath, builder)
+    UndertowServer(handler, runEffect, port, path, errorStatus, webSocket, builder)
   }
 
   /**
@@ -96,22 +97,22 @@ case object DefaultHttpServer {
    * @see [[https://www.jsonrpc.org/specification protocol specification]]
    * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
-   * @param urlPath HTTP URL path (default: /)
-   * @param builder Undertow web server builder
+   * @param path HTTP URL path (default: /)
    * @param errorStatus error code to HTTP status mapping function
+   * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
+   * @param builder Undertow web server builder
    * @return synchronous RPC server
    */
   def sync(
     bindApis: Handler[Identity] => Handler[Identity],
     port: Int,
-    urlPath: String = "/",
-    builder: Undertow.Builder = defaultBuilder,
-    errorStatus: Int => Int = defaultErrorStatus
-  ): Type = {
+    path: String = "/",
+    errorStatus: Int => Int = defaultErrorStatus,
+    webSocket: Boolean = true,
+    builder: Undertow.Builder = defaultBuilder
+  ): Type[Identity] = {
     val handler = bindApis(DefaultHandler.sync())
     val runEffect = (_: Identity[Any]) => ()
-    val httpHandler = UndertowHttpEndpoint(handler, runEffect, errorStatus)
-    val webSocketHandler = UndertowWebSocketEndpoint(handler, runEffect, httpHandler)
-    UndertowServer(webSocketHandler, port, urlPath, builder)
+    UndertowServer(handler, runEffect, port, path, errorStatus, webSocket, builder)
   }
 }

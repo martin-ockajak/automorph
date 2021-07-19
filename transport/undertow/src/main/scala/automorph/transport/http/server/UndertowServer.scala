@@ -1,9 +1,11 @@
 package automorph.transport.http.server
 
+import automorph.Handler
 import automorph.log.Logging
-import automorph.transport.http.server.UndertowServer.defaultBuilder
 import automorph.spi.ServerMessageTransport
-import automorph.transport.http.endpoint.UndertowHttpEndpoint
+import automorph.transport.http.endpoint.UndertowHttpEndpoint.defaultErrorStatus
+import automorph.transport.http.endpoint.{UndertowHttpEndpoint, UndertowWebSocketEndpoint}
+import automorph.transport.http.server.UndertowServer.{Context, defaultBuilder}
 import io.undertow.server.HttpHandler
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.{Handlers, Undertow}
@@ -18,15 +20,22 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see [[https://undertow.io/ Documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor Creates an Undertow HTTP server with the specified HTTP handler.
- * @param httpHandler HTTP handler (e.g. UndertowEndpoint)
+ * @param handler RPC request handler
+ * @param runEffect effect execution function
  * @param port port to listen on for HTTP connections
- * @param urlPath HTTP URL path (default: /)
+ * @param path HTTP URL path (default: /)
+ * @param errorStatus JSON-RPC error code to HTTP status mapping function
+ * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
  * @param builder Undertow web server builder
+ * @tparam Effect effect type
  */
-final case class UndertowServer(
-  httpHandler: HttpHandler,
+final case class UndertowServer[Effect[_]](
+  handler: Handler.AnyFormat[Effect, Context],
+  runEffect: Effect[Any] => Any,
   port: Int,
-  urlPath: String = "/",
+  path: String = "/",
+  errorStatus: Int => Int = defaultErrorStatus,
+  webSocket: Boolean = true,
   builder: Undertow.Builder = defaultBuilder
 ) extends Logging with ServerMessageTransport {
 
@@ -36,7 +45,13 @@ final case class UndertowServer(
 
   private def start(): Undertow = {
     // Configure the request handler
-    val pathHandler = Handlers.path(ResponseCodeHandler.HANDLE_404).addPrefixPath(urlPath, httpHandler)
+    val httpHandler = UndertowHttpEndpoint(handler, runEffect, errorStatus)
+    val webSocketHandler = if (webSocket) {
+      UndertowWebSocketEndpoint(handler, runEffect, httpHandler)
+    } else {
+      httpHandler
+    }
+    val pathHandler = Handlers.path(ResponseCodeHandler.HANDLE_404).addPrefixPath(path, webSocketHandler)
 
     // Configure the web server
     val undertow = builder.addHttpListener(port, "0.0.0.0").setHandler(pathHandler).build()

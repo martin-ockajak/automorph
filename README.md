@@ -604,7 +604,7 @@ val system = DefaultEffectSystem.async
 val runEffect = (effect: Future[_]) => effect
 val format = CirceJsonFormat()
 val handler = Handler[CirceJsonFormat.Node, format.type, Future, UndertowHandlerEndpoint.Context](format, system)
-val server = UndertowServer(UndertowHandlerEndpoint(handler.bind(api), runEffect), 80, "/api")
+val server = UndertowServer(handler.bind(api), runEffect, 80, "/api")
 
 // Stop the server
 server.close()
