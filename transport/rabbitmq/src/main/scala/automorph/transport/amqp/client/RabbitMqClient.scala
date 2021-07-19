@@ -14,6 +14,7 @@ import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.jdk.CollectionConverters.MapHasAsJava
 import scala.util.{Try, Using}
 
 /**
@@ -115,8 +116,11 @@ final case class RabbitMqClient(
   }
 
   private def setupProperties(mediaType: String, context: Option[Context]): BasicProperties = {
-    val properties = context.getOrElse(defaultContext).source.getOrElse(new BasicProperties)
-    properties.builder().replyTo(directReplyToQueue).contentType(mediaType)
+    val properties = context.getOrElse(defaultContext)
+    new BasicProperties().builder()
+      .contentEncoding(properties.contentEncoding.orNull)
+      .headers(properties.headers.asJava)
+      .replyTo(directReplyToQueue).contentType(mediaType)
       .correlationId(MessageId.next).appId(clientId).build
   }
 

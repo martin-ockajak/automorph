@@ -148,4 +148,6 @@ case object UndertowHttpEndpoint {
   ).withDefaultValue(StatusCodes.INTERNAL_SERVER_ERROR).map { case (errorType, statusCode) =>
     errorType.code -> statusCode
   }
+  
+  
 }
