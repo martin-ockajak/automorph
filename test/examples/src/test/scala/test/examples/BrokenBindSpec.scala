@@ -6,12 +6,7 @@ import automorph.format.json.UpickleJsonFormat
 import automorph.spi.EffectSystem
 import test.base.BaseSpec
 
-trait BrokenBindSpec extends BaseSpec {
-
-  /** Effect type. */
-  type Effect[_]
-  /** Request context type. */
-  type Context
+trait BrokenBindSpec[Effect[_], Context] extends BaseSpec {
 
   def system: EffectSystem[Effect]
 
