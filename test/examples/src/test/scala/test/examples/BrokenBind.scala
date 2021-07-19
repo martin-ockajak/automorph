@@ -18,10 +18,10 @@ trait BrokenBind[Effect[_]] {
 
 trait BrokenApi[Effect[_]] {
 
-  def test(test: String): Effect[String]
+  def test(test: String): Effect[Unit]
 }
 
 final case class BrokenApiImpl[Effect[_]]() extends BrokenApi[Effect] {
 
-  def test(test: String): Effect[String] = ???
+  def test(test: String): Effect[Unit] = ???
 }
