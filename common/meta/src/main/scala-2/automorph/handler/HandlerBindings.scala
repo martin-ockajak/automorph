@@ -113,18 +113,14 @@ case object HandlerBindings {
       val arguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
         parameters.toList.zipWithIndex.map { case (parameter, index) =>
           val argumentIndex = offset + index
-          if (argumentIndex == lastArgumentIndex && methodUsesContext[C, Context](ref)(method)) {
-            q"context"
-          } else {
-            q"""
-              (scala.util.Try($format.decode[${parameter.dataType}](argumentNodes($argumentIndex))) match {
-                case scala.util.Failure(error) => scala.util.Failure(
-                  automorph.protocol.ErrorType.InvalidRequestException("Invalid argument: " + $argumentIndex, error)
-                )
-                case result => result
-              }).get
-             """
-          }
+          q"""
+            (scala.util.Try($format.decode[${parameter.dataType}](argumentNodes($argumentIndex))) match {
+              case scala.util.Failure(error) => scala.util.Failure(
+                automorph.protocol.ErrorType.InvalidRequestException("Invalid argument: " + $argumentIndex, error)
+              )
+              case result => result
+            }).get
+           """
         }
       }
 
