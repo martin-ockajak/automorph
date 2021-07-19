@@ -32,7 +32,6 @@ lazy val root = project.in(file(".")).aggregate(
   rabbitmq,
 
   openApi,
-
   default,
 
   examples
