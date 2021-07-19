@@ -27,7 +27,7 @@ final case class HttpProperties[Source](
   method: Option[String] = None,
   scheme: Option[String] = None,
   authority: Option[String] = None,
-  path: Option[String] =None,
+  path: Option[String] = None,
   query: Option[String] = None,
   fragment: Option[String] = None,
   headers: Seq[(String, String)] = Seq(),
@@ -36,8 +36,8 @@ final case class HttpProperties[Source](
 ) {
 
   private val charset = StandardCharsets.UTF_8
-  private val authorizationBasic = "Basic"
-  private val authorizationBearer = "Bearer"
+  private val headerAuthorizationBasic = "Basic"
+  private val headerAuthorizationBearer = "Bearer"
   private val headerAuthorization = "Authorization"
   private val headerContentLength = "Content-Length"
   private val headerContentType = "Content-Type"
@@ -45,16 +45,22 @@ final case class HttpProperties[Source](
   private val headerProxyAuthorization = "Proxy-Authorization"
   private val headerSetCookie = "Set-Cookie"
 
+  /** `Authorization` header value. */
   def authorization: Option[String] = header(headerAuthorization)
 
-  def authBasic: Option[String] = auth(authorizationBasic)
+  /** `Authorization: Basic` header value. */
+  def authorizationBasic: Option[String] = authorization(headerAuthorization, headerAuthorizationBasic)
 
-  def authBearer: Option[String] = auth(authorizationBearer)
+  /** `Authorization: Bearer` header value. */
+  def authorizationBearer: Option[String] = authorization(headerAuthorization, headerAuthorizationBearer)
 
+  /** `Content-Type` header value. */
   def contentType: Option[String] = header(headerContentType)
 
+  /** `Content-Length` header value. */
   def contentLength: Option[String] = header(headerContentLength)
 
+  /** Cookie names and values. */
   def cookies: Map[String, Option[String]] = (headers(headerCookie) ++ headers(headerSetCookie)).flatMap { header =>
     header.split("=", 2).map(_.trim) match {
       case Array(name, value) => Some(name -> Some(value))
@@ -63,14 +69,40 @@ final case class HttpProperties[Source](
     }
   }.toMap
 
+  /**
+   * Cookie value.
+   *
+   * @param name cookie name
+   * @return cookie value
+   */
   def cookie(name: String): Option[String] = cookies.get(name).flatten
 
+  /**
+   * First header value.
+   *
+   * @param name header name
+   * @return first header value
+   */
   def header(name: String): Option[String] = headers.find(_._1 == name).map(_._2)
 
+  /**
+   * Header values.
+   *
+   * @param name header name
+   * @return header values
+   */
   def headers(name: String): Seq[String] = headers.filter(_._1 == name).map(_._2)
 
+  /** `Proxy-Authorization` header value. */
   def proxyAuthorization: Option[String] = header(headerProxyAuthorization)
 
+  /** `Proxy-Authorization: Basic` header value. */
+  def proxyAuthorizationBasic: Option[String] = authorization(headerProxyAuthorization, headerAuthorizationBasic)
+
+  /** `Proxy-Authorization: Bearer` header value. */
+  def proxyAuthorizationBearer: Option[String] = authorization(headerProxyAuthorization, headerAuthorizationBearer)
+
+  /** Request URL. */
   def url: Option[URI] = (scheme, authority, path, query, fragment) match {
     case (Some(scheme), Some(authority), Some(path), query, fragment) =>
       Some(new URI(scheme, authority, path, query.orNull, fragment.orNull))
@@ -79,14 +111,14 @@ final case class HttpProperties[Source](
 
   def authBasic(user: String, password: String): HttpProperties[Source] = {
     val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
-    header(headerAuthorization, s"$authorizationBasic $value")
+    header(headerAuthorization, s"$headerAuthorizationBasic $value")
   }
 
   def authBasic(token: String): HttpProperties[Source] =
-    header(headerAuthorization, s"$authorizationBasic $token")
+    header(headerAuthorization, s"$headerAuthorizationBasic $token")
 
   def authBearer(token: String): HttpProperties[Source] =
-    header(headerAuthorization, s"$authorizationBearer $token")
+    header(headerAuthorization, s"$headerAuthorizationBearer $token")
 
   def cookies(values: (String, String)*): HttpProperties[Source] =
     cookies(values, false)
@@ -102,20 +134,22 @@ final case class HttpProperties[Source](
     headers(values, false)
 
   def headers(values: Seq[(String, String)], replace: Boolean): HttpProperties[Source] = {
-    val originalHeaders = if (replace) headers.filter { case (name, _) => !values.contains(name) } else headers
+    val originalHeaders =
+      if (replace) headers.filter { case (name, _) => !values.contains(name) }
+      else headers
     copy(headers = originalHeaders ++ values)
   }
 
   def proxyAuthBasic(user: String, password: String): HttpProperties[Source] = {
     val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
-    header(headerProxyAuthorization, s"$authorizationBasic $value")
+    header(headerProxyAuthorization, s"$headerAuthorizationBasic $value")
   }
 
   def proxyAuthBasic(token: String): HttpProperties[Source] =
-    header(headerProxyAuthorization, s"$authorizationBasic $token")
+    header(headerProxyAuthorization, s"$headerAuthorizationBasic $token")
 
   def proxyAuthBearer(token: String): HttpProperties[Source] =
-    header(headerProxyAuthorization, s"$authorizationBearer $token")
+    header(headerProxyAuthorization, s"$headerAuthorizationBearer $token")
 
   def setCookies(values: (String, String)*): HttpProperties[Source] =
     cookies(values, true)
@@ -131,8 +165,8 @@ final case class HttpProperties[Source](
       fragment = Some(url.getFragment)
     )
 
-  private def auth(method: String): Option[String] =
-    headers(headerAuthorization).find(_.trim.startsWith(method)).flatMap(_.split(" ") match {
+  private def authorization(header: String, method: String): Option[String] =
+    headers(header).find(_.trim.startsWith(method)).flatMap(_.split(" ") match {
       case Array(_, value) => Some(value)
       case _ => None
     })
