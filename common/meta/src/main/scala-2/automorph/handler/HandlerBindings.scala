@@ -113,9 +113,11 @@ case object HandlerBindings {
       val arguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
         parameters.toList.zipWithIndex.map { case (parameter, index) =>
           val argumentIndex = offset + index
-          q"""
+          val decode = q"""
             $format.decode[${parameter.dataType}](argumentNodes($argumentIndex))
            """
+          println(ref.c.universe.showCode(decode))
+          decode
         }
       }
 
