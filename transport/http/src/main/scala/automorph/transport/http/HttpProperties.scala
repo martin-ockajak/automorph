@@ -6,6 +6,22 @@ import java.util.Base64
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.{Duration, FiniteDuration}
 
+/**
+ * HTTP message properties.
+ *
+ * @see [[https://datatracker.ietf.org/doc/html/rfc7232 HTTP specification]]
+ * @param source source properties provided by the specific message transport plugin
+ * @param method request method
+ * @param scheme request URL scheme
+ * @param authority request URL authority
+ * @param path request URL path
+ * @param query request URL query
+ * @param fragment request URL fragment
+ * @param headers message headers
+ * @param followRedirects automatically follow redirects if true
+ * @param readTimeout response read timeout
+ * @tparam Source specific message transport plugin source properties type
+ */
 final case class HttpProperties[Source](
   source: Option[Source] = None,
   method: Option[String] = None,
@@ -16,8 +32,7 @@ final case class HttpProperties[Source](
   fragment: Option[String] = None,
   headers: Seq[(String, String)] = Seq(),
   followRedirects: Boolean = true,
-  readTimeout: Duration = FiniteDuration(30, TimeUnit.SECONDS),
-  webSocket: Boolean = false,
+  readTimeout: Duration = FiniteDuration(30, TimeUnit.SECONDS)
 ) {
 
   private val charset = StandardCharsets.UTF_8

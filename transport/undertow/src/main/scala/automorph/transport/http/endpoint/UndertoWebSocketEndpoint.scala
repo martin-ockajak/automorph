@@ -149,8 +149,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         }.toSeq
         HttpProperties(
           source = Some(Right(exchange)),
-          headers = headers,
-          webSocket = true
+          headers = headers
         ).url(exchange.getRequestURI)
       }
 

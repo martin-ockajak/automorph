@@ -2,13 +2,14 @@ package automorph.transport.http.client
 
 import automorph.log.Logging
 import automorph.spi.ClientMessageTransport
-import automorph.transport.http.client.UrlConnectionClient.Context
 import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.HttpProperties
+import automorph.transport.http.client.UrlConnectionClient.Context
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.{HttpURLConnection, URI}
 import scala.collection.immutable.ArraySeq
+import scala.concurrent.duration.Duration
 import scala.util.{Try, Using}
 
 /**
@@ -90,7 +91,10 @@ final case class UrlConnectionClient(
     require(httpMethods.contains(httpMethod), s"Invalid HTTP method: $httpMethod")
     connection.setRequestMethod(httpMethod)
     connection.setConnectTimeout(properties.readTimeout.toMillis.toInt)
-    connection.setReadTimeout(properties.readTimeout.toMillis.toInt)
+    connection.setReadTimeout(properties.readTimeout match {
+      case Duration.Inf => 0
+      case duration => duration.toMillis.toInt
+    })
     connection.setRequestProperty(contentLengthHeader, request.size.toString)
     connection.setRequestProperty(contentTypeHeader, mediaType)
     connection.setRequestProperty(acceptHeader, mediaType)
