@@ -12,13 +12,11 @@ trait BrokenBindSpec extends BaseSpec {
   type Effect[_]
   /** Request context type. */
   type Context
-  type SimpleApiType = SimpleApi[Effect]
-  type ComplexApiType = ComplexApi[Effect, Context]
 
   def system: EffectSystem[Effect]
 
-  val simpleApiInstance: SimpleApiType = SimpleApiImpl(system)
-  val complexApiInstance: ComplexApiType = ComplexApiImpl(system)
+  val simpleApiInstance: SimpleApi[Effect] = SimpleApiImpl(system)
+  val complexApiInstance: ComplexApi[Effect, Context] = ComplexApiImpl(system)
 
   def handler: Handler.AnyFormat[Effect, Context] = {
     Handler[UpickleJsonFormat.Node, UpickleJsonFormat[DefaultUpickleCustom.type], Effect, Context](UpickleJsonFormat(), system)
