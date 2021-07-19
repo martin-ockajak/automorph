@@ -18,7 +18,7 @@ trait FormatCoreSpec extends CoreSpec {
 
   def customTransport: Option[ClientMessageTransport[Effect, Context]] = None
 
-  def formatFixtures: Seq[FormatFixture] = {
+  override def formatFixtures: Seq[FormatFixture] = {
     implicit val usingContext: Context = contextValue
     Seq(
       {
