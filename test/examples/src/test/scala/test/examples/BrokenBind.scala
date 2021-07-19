@@ -3,13 +3,13 @@ package test.examples
 import automorph.DefaultHandler
 import automorph.spi.EffectSystem
 
-trait BrokenBind[Effect[_], Context] {
+trait BrokenBind[Effect[_]] {
 
   def system: EffectSystem[Effect]
 
   private val brokenApiInstance: BrokenApi[Effect] = BrokenApiImpl()
 
-  private val handler = DefaultHandler[Effect, Context](system)
+  private val handler = DefaultHandler[Effect, Unit](system)
     .bind(brokenApiInstance)
     .bind(brokenApiInstance)
 }
