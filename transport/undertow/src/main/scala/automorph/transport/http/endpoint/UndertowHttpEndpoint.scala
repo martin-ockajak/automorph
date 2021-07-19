@@ -127,11 +127,8 @@ final case class UndertowHttpEndpoint[Effect[_]](
     HttpProperties(
       source = Some(Left(exchange)),
       method = Some(exchange.getRequestMethod.toString),
-      scheme = Some(exchange.getRequestScheme),
-      path = Some(exchange.getRequestPath),
-      query = Some(exchange.getQueryString),
       headers = headers
-    )
+    ).url(exchange.getRequestURI)
   }
 
   private def clientAddress(exchange: HttpServerExchange): String = {

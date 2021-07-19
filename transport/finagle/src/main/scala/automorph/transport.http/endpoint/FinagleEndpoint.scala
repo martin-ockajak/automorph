@@ -6,13 +6,12 @@ import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.HttpProperties
-import automorph.transport.http.endpoint.FinagleEndpoint.{Context, defaultErrorStatus}
+import automorph.transport.http.endpoint.FinagleEndpoint.{defaultErrorStatus, Context}
 import automorph.util.Network
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise}
-import java.net.URI
 
 /**
  * Finagle RPC system endpoint transport plugin using HTTP as message transport protocol.
@@ -43,7 +42,7 @@ final case class FinagleEndpoint[Node, Effect[_]](
     val requestMessage = Buf.ByteArray.Owned.extract(request.content)
 
     // Process the request
-    implicit val usingContext: Context= createContext(request)
+    implicit val usingContext: Context = createContext(request)
     runAsFuture(system.map(
       system.either(handler.processRequest(requestMessage)),
       (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
@@ -81,17 +80,11 @@ final case class FinagleEndpoint[Node, Effect[_]](
     response
   }
 
-  private def createContext(request: Request): Context = {
-    val uri = new URI(request.uri)
-    HttpProperties(
-      source = Some(request),
-      method = Some(request.method.name),
-      scheme = Some(uri.getScheme),
-      path = Some(request.path),
-      query = Some(uri.getQuery),
-      headers = request.headerMap.iterator.toSeq
-    )
-  }
+  private def createContext(request: Request): Context = HttpProperties(
+    source = Some(request),
+    method = Some(request.method.name),
+    headers = request.headerMap.iterator.toSeq
+  ).url(request.uri)
 
   private def clientAddress(request: Request): String = {
     val forwardedFor = request.xForwardedFor

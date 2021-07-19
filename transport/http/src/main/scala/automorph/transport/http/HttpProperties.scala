@@ -1,5 +1,6 @@
 package automorph.transport.http
 
+import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 import java.util.concurrent.TimeUnit
@@ -9,8 +10,10 @@ final case class HttpProperties[Source](
   source: Option[Source] = None,
   method: Option[String] = None,
   scheme: Option[String] = None,
+  authority: Option[String] = None,
   path: Option[String] =None,
   query: Option[String] = None,
+  fragment: Option[String] = None,
   headers: Seq[(String, String)] = Seq(),
   followRedirects: Boolean = true,
   readTimeout: Duration = FiniteDuration(30, TimeUnit.SECONDS),
@@ -52,6 +55,12 @@ final case class HttpProperties[Source](
   def headers(name: String): Seq[String] = headers.filter(_._1 == name).map(_._2)
 
   def proxyAuthorization: Option[String] = header(headerProxyAuthorization)
+
+  def url: Option[URI] = (scheme, authority, path, query, fragment) match {
+    case (Some(scheme), Some(authority), Some(path), query, fragment) =>
+      Some(new URI(scheme, authority, path, query.orNull, fragment.orNull))
+    case _ => None
+  }
 
   def authBasic(user: String, password: String): HttpProperties[Source] = {
     val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
@@ -95,6 +104,17 @@ final case class HttpProperties[Source](
 
   def setCookies(values: (String, String)*): HttpProperties[Source] =
     cookies(values, true)
+
+  def url(url: String): HttpProperties[Source] = this.url(new URI(url))
+
+  def url(url: URI): HttpProperties[Source] =
+    copy(
+      scheme = Some(url.getScheme),
+      authority = Some(url.getAuthority),
+      path = Some(url.getPath),
+      query = Some(url.getQuery),
+      fragment = Some(url.getFragment)
+    )
 
   private def auth(method: String): Option[String] =
     headers(headerAuthorization).find(_.trim.startsWith(method)).flatMap(_.split(" ") match {

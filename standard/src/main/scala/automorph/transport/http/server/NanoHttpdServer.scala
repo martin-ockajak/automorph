@@ -10,7 +10,6 @@ import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.transport.http.server.NanoHttpdServer.Context
 import automorph.util.{Bytes, Network}
-import java.net.URI
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.MapHasAsScala
 
@@ -96,15 +95,11 @@ final case class NanoHttpdServer[Effect[_]] private (
   }
 
   private def createContext(session: IHTTPSession): Context = {
-    val uri = new URI(session.getUri)
     HttpProperties(
       source = Some(session),
       method = Some(session.getMethod.name),
-      scheme = Some(uri.getScheme),
-      path = Some(uri.getPath),
-      query = Some(session.getQueryParameterString),
       headers = session.getHeaders.asScala.toSeq
-    )
+    ).url(session.getUri)
   }
 
   private def clientAddress(session: IHTTPSession): String = {
