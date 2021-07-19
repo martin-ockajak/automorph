@@ -13,11 +13,7 @@ final case class SimpleApiImpl[Effect[_]](backend: EffectSystem[Effect]) extends
 }
 
 trait ComplexApi[Effect[_], Context] {
-
-  def method(p0: String): Effect[Unit]
 }
 
 final case class ComplexApiImpl[Effect[_], Context](backend: EffectSystem[Effect]) extends ComplexApi[Effect, Context] {
-
-  override def method(p0: String): Effect[Unit] = backend.pure(())
 }
