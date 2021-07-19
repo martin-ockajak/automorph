@@ -3,11 +3,15 @@ package automorph.transport.http
 import java.net.HttpURLConnection
 import java.nio.charset.StandardCharsets
 import java.util.Base64
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.{Duration, FiniteDuration}
 
 final case class HttpProperties[Source](
   source: Option[Source] = None,
   method: Option[String] = None,
   headers: Seq[(String, String)] = Seq(),
+  followRedirects: Boolean = true,
+  readTimeout: Duration = FiniteDuration(30, TimeUnit.SECONDS),
   webSocket: Boolean = false
 ) {
 

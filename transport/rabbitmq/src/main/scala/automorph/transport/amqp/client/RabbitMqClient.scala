@@ -159,6 +159,7 @@ final case class RabbitMqClient(
 }
 
 case object RabbitMqClient {
+  /** Request context type. */
   type Context = AmqpProperties[BasicProperties]
 
   implicit val defaultContext: Context = AmqpProperties()

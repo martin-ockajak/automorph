@@ -29,9 +29,7 @@ object RequestContext extends App {
   // Create context for requests sent by the client
   val apiProxy = client.bind[ClientApi] // Api
   val defaultContext = client.context
-  implicit val context: automorph.DefaultHttpClient.Context = defaultContext.copy(
-    partial = defaultContext.partial.header("X-Test", "valid")
-  )
+  implicit val context: automorph.DefaultHttpClient.Context = defaultContext.header("X-Test", "valid")
 
   // Call the remote API method via proxy
   apiProxy.requestMetaData("test") // List("test", "/api", "valid")

@@ -73,7 +73,7 @@ lazy val core = (project in file("common/core")).dependsOn(
   Compile / packageSrc / mappings ++= (meta / Compile / packageSrc / mappings).value
 )
 lazy val standard = project.dependsOn(
-  core, testCore % Test
+  http, core, testCore % Test
 ).settings(
   name := "automorph-standard"
 )

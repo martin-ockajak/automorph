@@ -2,8 +2,9 @@ package automorph.transport.http.client
 
 import automorph.log.Logging
 import automorph.spi.ClientMessageTransport
+import automorph.transport.http.client.UrlConnectionClient.Context
 import automorph.system.IdentitySystem.Identity
-import automorph.transport.http.client.UrlConnectionClient.RequestProperties
+import automorph.transport.http.HttpProperties
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.{HttpURLConnection, URL}
@@ -23,7 +24,7 @@ import scala.util.{Try, Using}
 final case class UrlConnectionClient(
   url: URL,
   method: String
-) extends ClientMessageTransport[Identity, RequestProperties] with Logging {
+) extends ClientMessageTransport[Identity, Context] with Logging {
 
   private val contentLengthHeader = "Content-Length"
   private val contentTypeHeader = "Content-Type"
@@ -34,7 +35,7 @@ final case class UrlConnectionClient(
   override def call(
     request: ArraySeq.ofByte,
     mediaType: String,
-    context: Option[RequestProperties]
+    context: Option[Context]
   ): Identity[ArraySeq.ofByte] = {
     val connection = send(request, mediaType, context)
     logger.trace("Receiving HTTP response", Map("URL" -> urlText))
@@ -50,14 +51,14 @@ final case class UrlConnectionClient(
     )
   }
 
-  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Identity[Unit] = {
+  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Identity[Unit] = {
     send(request, mediaType, context)
     ()
   }
 
-  override def defaultContext: RequestProperties = RequestProperties.defaultContext.copy(method = Some(method))
+  override def defaultContext: Context = UrlConnectionClient.defaultContext.copy(method = Some(method))
 
-  private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): HttpURLConnection = {
+  private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): HttpURLConnection = {
     logger.trace("Sending HTTP request", Map("URL" -> urlText, "Size" -> request.length))
     val connection = connect()
     val outputStream = connection.getOutputStream
@@ -82,27 +83,27 @@ final case class UrlConnectionClient(
     connection: HttpURLConnection,
     request: ArraySeq.ofByte,
     mediaType: String,
-    context: Option[RequestProperties]
+    context: Option[Context]
   ): String = {
     // Validate HTTP request properties
-    val requestProperties = context.getOrElse(defaultContext)
-    val httpMethod = requestProperties.method.getOrElse(method)
+    val properties = context.getOrElse(defaultContext)
+    val httpMethod = properties.method.getOrElse(method)
     require(httpMethods.contains(httpMethod), s"Invalid HTTP method: $httpMethod")
 
     // Set HTTP request requestProperties
-    requestProperties.headers.foreach { case (key, value) =>
+    properties.headers.foreach { case (key, value) =>
       connection.setRequestProperty(key, value)
     }
     connection.setRequestProperty(contentLengthHeader, request.size.toString)
     connection.setRequestProperty(contentTypeHeader, mediaType)
     connection.setRequestProperty(acceptHeader, mediaType)
     connection.setRequestMethod(httpMethod)
-    connection.setConnectTimeout(requestProperties.connectTimeout)
-    connection.setReadTimeout(requestProperties.readTimeout)
+    connection.setConnectTimeout(properties.readTimeout.toMillis.toInt)
+    connection.setReadTimeout(properties.readTimeout.toMillis.toInt)
     httpMethod
   }
 
-  private def clearProperties(connection: HttpURLConnection, context: Option[RequestProperties]): Unit =
+  private def clearProperties(connection: HttpURLConnection, context: Option[Context]): Unit =
     context.foreach(_.headers.foreach { case (key, _) =>
       connection.setRequestProperty(key, null)
     })
@@ -122,27 +123,7 @@ final case class UrlConnectionClient(
 case object UrlConnectionClient {
 
   /** Request context type. */
-  type Context = RequestProperties
+  type Context = HttpProperties[HttpURLConnection]
 
-  /**
-   * HTTP request context.
-   *
-   * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html Documentation]]
-   * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
-   * @param headers HTTP headers
-   * @param followRedirects automatically follow HTTP redirects
-   * @param connectTimeout connection timeout (milliseconds)
-   * @param readTimeout read timeout (milliseconds)
-   */
-  case class RequestProperties(
-    method: Option[String] = None,
-    headers: Map[String, String] = Map.empty,
-    followRedirects: Boolean = true,
-    connectTimeout: Int = 30000,
-    readTimeout: Int = 30000
-  )
-
-  case object RequestProperties {
-    implicit val defaultContext: RequestProperties = RequestProperties()
-  }
+  implicit val defaultContext: Context = HttpProperties()
 }

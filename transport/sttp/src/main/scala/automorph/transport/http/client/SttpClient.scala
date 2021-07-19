@@ -2,7 +2,8 @@ package automorph.transport.http.client
 
 import automorph.log.Logging
 import automorph.spi.{ClientMessageTransport, EffectSystem}
-import automorph.transport.http.client.SttpClient.RequestProperties
+import automorph.transport.http.HttpProperties
+import automorph.transport.http.client.SttpClient.Context
 import java.io.IOException
 import java.net.URL
 import scala.collection.immutable.ArraySeq
@@ -28,7 +29,7 @@ final case class SttpClient[Effect[_]](
   method: String,
   system: EffectSystem[Effect],
   backend: SttpBackend[Effect, _]
-) extends ClientMessageTransport[Effect, RequestProperties] with Logging {
+) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val uri = Uri(url.toURI)
   private val httpMethod = Method.unsafeApply(method)
@@ -37,7 +38,7 @@ final case class SttpClient[Effect[_]](
   override def call(
     request: ArraySeq.ofByte,
     mediaType: String,
-    context: Option[RequestProperties]
+    context: Option[Context]
   ): Effect[ArraySeq.ofByte] = {
     val httpRequest = setupHttpRequest(request, mediaType, context).response(asByteArray)
     system.flatMap(
@@ -57,12 +58,12 @@ final case class SttpClient[Effect[_]](
     )
   }
 
-  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[RequestProperties]): Effect[Unit] = {
+  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
     val httpRequest = setupHttpRequest(request, mediaType, context).response(ignore)
     system.map(send[Unit](httpRequest, request.length), (_: Response[Unit]) => ())
   }
 
-  override def defaultContext: RequestProperties = RequestProperties.defaultContext
+  override def defaultContext: Context = SttpClient.defaultContext
 
   private def send[R](request: Request[R, Any], size: Int): Effect[Response[R]] = {
     logger.trace("Sending HTTP request", Map("URL" -> urlText, "Method" -> request.method, "Size" -> size))
@@ -81,31 +82,24 @@ final case class SttpClient[Effect[_]](
   private def setupHttpRequest(
     request: ArraySeq.ofByte,
     mediaType: String,
-    context: Option[RequestProperties]
+    context: Option[Context]
   ): Request[Either[String, String], Any] = {
     val contentType = MediaType.unsafeParse(mediaType)
-    val requestProperties = context.getOrElse(defaultContext)
-    requestProperties.partial.method(requestProperties.partial.method.getOrElse(httpMethod), uri)
+    val properties = context.getOrElse(defaultContext)
+    createRequest(properties).method(properties.method.map(Method.unsafeApply).getOrElse(httpMethod), uri)
       .contentType(contentType).header(Header.accept(contentType)).body(request.unsafeArray)
+  }
+
+  private def createRequest(properties: Context): PartialRequest[Either[String, String], Any] = {
+    basicRequest.headers((properties.headers.map { case (name, value) => Header(name, value) })*)
+      .followRedirects(properties.followRedirects).readTimeout(properties.readTimeout)
   }
 }
 
 case object SttpClient {
 
   /** Request context type. */
-  type Context = RequestProperties
+  type Context = HttpProperties[PartialRequest[Either[String, String], Any]]
 
-  /**
-   * HTTP request context.
-   *
-   * @see [[https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_2.13/latest/sttp/client3/RequestT.html API]]
-   * @param partial partially constructed request
-   */
-  case class RequestProperties(
-    partial: PartialRequest[Either[String, String], Any] = basicRequest
-  )
-
-  case object RequestProperties {
-    implicit val defaultContext: RequestProperties = RequestProperties()
-  }
+  implicit val defaultContext: Context = HttpProperties()
 }

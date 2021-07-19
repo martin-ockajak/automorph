@@ -1,5 +1,6 @@
 package test.examples
 
+import automorph.transport.http.client.SttpClient.defaultContext
 import scala.util.Try
 
 object MethodAlias extends App {
