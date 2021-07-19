@@ -7,7 +7,7 @@ import scala.reflect.macros.blackbox
 /** Method bindings introspection. */
 private[automorph] case object MethodBindings {
 
-  private val testProperty = "automorph.macro.test"
+  private val testProperty = "macro.test"
 
   /**
    * Creates method quoted tree converter.
