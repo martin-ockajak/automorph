@@ -10,7 +10,7 @@ trait BrokenBind[Effect[_], Context] {
   def system: EffectSystem[Effect]
 
   private val brokenApiInstance: BrokenApi[Effect] = BrokenApiImpl(system)
-  private val emptyApiInstance: EmptyApi[Effect] = EmptyApiImpl(system)
+  private val emptyApiInstance: EmptyApi = EmptyApiImpl()
 
   private val handler = Handler[UpickleJsonFormat.Node, UpickleJsonFormat[DefaultUpickleCustom.type], Effect, Context](
     UpickleJsonFormat(),
@@ -30,6 +30,6 @@ final case class BrokenApiImpl[Effect[_]](backend: EffectSystem[Effect]) extends
   override def test(test: String): Effect[String] = backend.pure(test)
 }
 
-trait EmptyApi[Effect[_]]
+trait EmptyApi
 
-final case class EmptyApiImpl[Effect[_]](backend: EffectSystem[Effect]) extends EmptyApi[Effect]
+final case class EmptyApiImpl() extends EmptyApi
