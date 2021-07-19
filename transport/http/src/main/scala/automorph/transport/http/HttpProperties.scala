@@ -22,11 +22,9 @@ final case class HttpProperties[Source](
 
   def authorization: Option[String] = header(headerAuthorization)
 
-  def authBasic: Option[String] =
-    headers(headerAuthorization).find(_.trim.startsWith(authorizationBasic)).flatMap(_.split(" ") match {
-      case Array(_) => None
-      case Array(_, value) => Some(value)
-    })
+  def authBasic: Option[String] = auth(authorizationBasic)
+
+  def authBearer: Option[String] = auth(authorizationBearer)
 
   def contentType: Option[String] = header(headerContentType)
 
@@ -75,4 +73,11 @@ final case class HttpProperties[Source](
 
   def proxyAuthBearer(token: String): HttpProperties[Source] =
     header(headerProxyAuthorization, s"$authorizationBearer $token")
+
+  def auth(method: String): Option[String] =
+    headers(headerAuthorization).find(_.trim.startsWith(method)).flatMap(_.split(" ") match {
+      case Array(_) => None
+      case Array(_, value) => Some(value)
+    })
+
 }
