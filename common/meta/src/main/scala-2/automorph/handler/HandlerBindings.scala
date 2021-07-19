@@ -90,7 +90,6 @@ case object HandlerBindings {
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
       indices :+ (indices.last + size)
     }
-    val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
     // Create invoke function
     //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
