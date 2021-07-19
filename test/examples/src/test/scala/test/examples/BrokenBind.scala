@@ -4,7 +4,9 @@ import automorph.DefaultHandler
 import automorph.spi.EffectSystem
 import automorph.system.IdentitySystem.Identity
 
-trait BrokenBind[Effect[_]] {
+trait BrokenBind {
+
+  type Effect[_]
 
   def system: EffectSystem[Effect]
 
