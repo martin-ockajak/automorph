@@ -1,6 +1,7 @@
 package test.examples
 
 import automorph.Handler
+import automorph.DefaultHandler
 import automorph.format.DefaultUpickleCustom
 import automorph.format.json.UpickleJsonFormat
 import automorph.spi.EffectSystem
@@ -11,10 +12,7 @@ trait BrokenBind[Effect[_], Context] {
 
   private val brokenApiInstance: BrokenApi[Effect] = BrokenApiImpl(system)
 
-  private val handler = Handler[UpickleJsonFormat.Node, UpickleJsonFormat[DefaultUpickleCustom.type], Effect, Context](
-    UpickleJsonFormat(),
-    system
-  )
+  private val handler = DefaultHandler[Effect, Context](system)
     .bind(brokenApiInstance)
     .bind(EmptyApi())
 }
