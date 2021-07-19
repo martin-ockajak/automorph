@@ -1,21 +1,19 @@
 package automorph
 
-import automorph.format.json.UpickleJsonFormat
-import automorph.format.DefaultUpickleCustom
+import automorph.format.json.CirceJsonFormat
 
 case object DefaultMessageFormat {
 
   /** Default message node type. */
-  type Node = UpickleJsonFormat.Node
+  type Node = CirceJsonFormat.Node
 
   /** Default message format plugin type. */
-  type Type = UpickleJsonFormat[DefaultUpickleCustom.type]
+  type Type = CirceJsonFormat
 
   /**
    * Creates a default structured message format format plugin.
    *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @return format plugin
+   * @return message format plugin
    */
-  def apply(): Type = UpickleJsonFormat()
+  def apply(): Type = CirceJsonFormat()
 }

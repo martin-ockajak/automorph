@@ -1,10 +1,7 @@
 package test.examples
 
-import automorph.format.json.CirceJsonFormat
-import automorph.transport.http.endpoint.UndertowHttpEndpoint
-import automorph.transport.http.server.UndertowServer
-import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, Handler}
-import io.circe.generic.auto._
+import automorph.format.messagepack.UpickleMessagePackFormat
+import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, Handler}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -17,17 +14,22 @@ object ChooseMessageFormat extends App {
   }
   val api = new Api()
 
-  // Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Create message format and custom data type serializer/deserializer
+  val format = UpickleMessagePackFormat()
+  implicit def recordRw: format.custom.ReadWriter[Record] = format.custom.macroRW
+
+  // Create effect system plugin
   val system = DefaultEffectSystem.async
   val runEffect = (effect: Future[_]) => effect
-  val format = CirceJsonFormat()
-  val handler = Handler[CirceJsonFormat.Node, format.type, Future, UndertowHttpEndpoint.Context](format, system)
-  val server = UndertowServer(handler.bind(api), runEffect, 80, "/api")
+
+  // Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+  val handler = Handler[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpServer.Context](format, system)
+  val server = DefaultHttpServer(handler.bind(api), runEffect, 80, "/api")
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
   val url = new java.net.URI("http://localhost/api")
   val transport = DefaultHttpClientTransport.async(url, "POST")
-  val client: Client[CirceJsonFormat.Node, format.type, Future, DefaultHttpClientTransport.Context] =
+  val client: Client[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpClientTransport.Context] =
     Client(format, system, transport)
 
   // Call the remote API method via proxy

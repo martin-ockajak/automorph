@@ -1,9 +1,7 @@
 package automorph
 
 import automorph.system.IdentitySystem.Identity
-import automorph.format.json.UpickleJsonFormat
 import automorph.spi.{ClientMessageTransport, EffectSystem}
-import automorph.transport.http.client.SttpClient
 import java.net.URI
 import scala.concurrent.{ExecutionContext, Future}
 import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
@@ -16,55 +14,53 @@ case object DefaultHttpClient {
    *
    * @tparam Effect effect type
    */
-  type Type[Effect[_]] = Client[DefaultMessageFormat.Node, DefaultMessageFormat.Type, Effect, SttpClient.Context]
+  type Type[Effect[_]] = Client[DefaultMessageFormat.Node, DefaultMessageFormat.Type, Effect, Context]
 
   /** Request context type. */
-  type Context = SttpClient.Context
+  type Context = DefaultHttpClientTransport.Context
 
   /**
    * Creates a default RPC client using HTTP as message transport protocol with specified ''backend'' plugin.
    *
    * The client can be used to perform RPC calls and notifications.
    *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param backend effect system plugin
+   * @param system effect system plugin
    * @param transport message transport protocol plugin
    * @tparam Effect effect type
    * @tparam RequestContext request context type
    * @return RPC client
    */
   def apply[Effect[_], RequestContext](
-    backend: EffectSystem[Effect],
+    system: EffectSystem[Effect],
     transport: ClientMessageTransport[Effect, RequestContext]
   ): Client[DefaultMessageFormat.Node, DefaultMessageFormat.Type, Effect, RequestContext] =
-    Client(UpickleJsonFormat(), backend, transport)
+    Client(DefaultMessageFormat(), system, transport)
 
   /**
    * Creates a default RPC client using HTTP as message transport protocol with specified ''backend'' plugin.
    *
    * The client can be used to perform RPC calls and notifications.
    *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+   * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
-   * @param backend effect system plugin
-   * @param sttpSystem HTTP client backend
+   * @param system effect system plugin
+   * @param backend HTTP client backend
    * @tparam Effect effect type
    * @return RPC client
    */
   def apply[Effect[_]](
     url: URI,
     method: String,
-    backend: EffectSystem[Effect],
-    sttpSystem: SttpBackend[Effect, _]
-  ): Type[Effect] = DefaultHttpClient(backend, SttpClient(url, method, backend, sttpSystem))
+    system: EffectSystem[Effect],
+    backend: SttpBackend[Effect, _]
+  ): Type[Effect] = DefaultHttpClient(system, DefaultHttpClientTransport(url, method, system, backend))
 
   /**
    * Creates a default asynchronous RPC client using HTTP as message transport protocol and 'Future' as an effect type.
    *
    * The client can be used to perform RPC calls and notifications.
    *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
@@ -80,7 +76,6 @@ case object DefaultHttpClient {
    *
    * The client can be used to perform RPC calls and notifications.
    *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @see [[https://sttp.softwaremill.com/en/latest/index.html HTTP Client Documentation]]
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)

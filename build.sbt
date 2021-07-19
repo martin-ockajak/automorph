@@ -11,8 +11,8 @@ ThisBuild / initialize ~= { _ =>
 lazy val root = project.in(file(".")).aggregate(
   core,
 
-  upickle,
   circe,
+  upickle,
   argonaut,
 
   standard,
@@ -77,21 +77,22 @@ lazy val standard = project.dependsOn(
 )
 
 // Codec
+val circeVersion = "0.14.1"
+lazy val circe = (project in file("format/circe")).dependsOn(
+  spi, testBase % Test
+).settings(
+  name := "automorph-circe",
+  libraryDependencies ++= Seq(
+    "io.circe" %% "circe-parser" % circeVersion,
+    "io.circe" %% "circe-generic" % circeVersion
+  )
+)
 lazy val upickle = (project in file("format/upickle")).dependsOn(
   spi, testBase % Test
 ).settings(
   name := "automorph-upickle",
   libraryDependencies ++= Seq(
     "com.lihaoyi" %% "upickle" % "1.4.0"
-  )
-)
-lazy val circe = (project in file("format/circe")).dependsOn(
-  spi, testBase % Test
-).settings(
-  name := "automorph-circe",
-  libraryDependencies ++= Seq(
-    "io.circe" %% "circe-parser" % "0.14.1",
-    "io.circe" %% "circe-generic" % "0.14.1"
   )
 )
 lazy val argonaut = (project in file("format/argonaut")).dependsOn(
@@ -201,17 +202,14 @@ lazy val tapir = (project in file("transport/tapir")).dependsOn(
 
 // OpenAPI
 lazy val openApi = (project in file("common/openapi")).dependsOn(
-  core
+  core, circe
 ).settings(
-  name := "automorph-open-api",
-  libraryDependencies ++= Seq(
-    "com.lihaoyi" %% "upickle" % "1.4.0"
-  )
+  name := "automorph-open-api"
 )
 
 // Default
 lazy val default = project.dependsOn(
-  upickle, standard, undertow, sttp
+  circe, standard, undertow, sttp
 ).settings(
   name := "automorph-default",
   libraryDependencies ++= Seq(
@@ -221,7 +219,7 @@ lazy val default = project.dependsOn(
 
 // Examples
 lazy val examples = (project in file("test/examples")).dependsOn(
-  default, circe, zio, testBase % Test
+  default, upickle, zio, testBase % Test
 ).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion

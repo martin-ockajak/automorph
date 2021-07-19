@@ -20,16 +20,16 @@ case object DefaultEffectSystem {
   type AsyncType = EffectSystem[Identity]
 
   /**
-   * creates a default asynchronous effectful computation backend plugin using 'future' as an effect type.
+   * Creates a default asynchronous effect system plugin using `Future` as an effect type.
    *
-   * @return asynchronous backend plugin
+   * @return asynchronous effect system plugin
    */
   def async(implicit executionContext: ExecutionContext): SyncType = FutureSystem()
 
   /**
-   * creates a default synchronous effectful computation backend plugin using 'future' as an effect type.
+   * Creates a default synchronous effect system plugin using `Identity` as an effect type.
    *
-   * @return asynchronous backend plugin
+   * @return synchronous effect system plugin
    */
   def sync: AsyncType = IdentitySystem()
 }

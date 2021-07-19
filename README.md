@@ -166,9 +166,9 @@ The underlying format must support storing arbitrarily nested structures of basi
 
 | Class | Artifact | Library | Node Type | Format |
 | ---- | --- | --- | --- | --- |
-| [UpickleJsonFormat](https://www.javadoc.io/doc/io.automorph/automorph-upickle_2.13/latest/automorph/format/json/UpickleJsonFormat.html) (Default) | [automorph-upickle](https://mvnrepository.com/artifact/io.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Value](http://com-lihaoyi.github.io/upickle/#uJson) | [JSON](https://www.json.org/) |
+| [CirceJsonFormat](https://www.javadoc.io/doc/io.automorph/automorph-circe_2.13/latest/automorph/format/json/CirceJsonFormat.html) (Default) | [automorph-circe](https://mvnrepository.com/artifact/io.automorph/automorph-circe) | [Circe](https://circe.github.io/circe) |[Json](https://circe.github.io/circe/api/io/circe/Json.html) | [JSON](https://www.json.org/) |
+| [UpickleJsonFormat](https://www.javadoc.io/doc/io.automorph/automorph-upickle_2.13/latest/automorph/format/json/UpickleJsonFormat.html) | [automorph-upickle](https://mvnrepository.com/artifact/io.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Value](http://com-lihaoyi.github.io/upickle/#uJson) | [JSON](https://www.json.org/) |
 | [UpickleMessagePackFormat](https://www.javadoc.io/doc/io.automorph/automorph-upickle_2.13/latest/automorph/format/messagepack/UpickleMessagePackFormat.html) | [automorph-upickle](https://mvnrepository.com/artifact/io.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Msg](http://com-lihaoyi.github.io/upickle/#uPack) | [MessagePack](https://msgpack.org/) |
-| [CirceJsonFormat](https://www.javadoc.io/doc/io.automorph/automorph-circe_2.13/latest/automorph/format/json/CirceJsonFormat.html) | [automorph-circe](https://mvnrepository.com/artifact/io.automorph/automorph-circe) | [Circe](https://circe.github.io/circe) |[Json](https://circe.github.io/circe/api/io/circe/Json.html) | [JSON](https://www.json.org/) |
 | [ArgonautJsonFormat](https://www.javadoc.io/doc/io.automorph/automorph-argonaut_2.13/latest/automorph/format/json/ArgonautJsonFormat.html) | [automorph-argonaut](https://mvnrepository.com/artifact/io.automorph/automorph-argonaut) | [Argonaut](http://argonaut.io/doc/) |[Json](http://argonaut.io/scaladocs/#argonaut.Json) | [JSON](https://www.json.org/) |
 
 ## [Message transport](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/MessageTransport.html)
@@ -490,13 +490,14 @@ val api = new Api()
 
 ```scala
 import automorph.system.ZioSystem
+import automorph.{DefaultHttpClient, DefaultHttpServer}
 
-// Custom effectful computation backend plugin
+// Create effect system plugin
 val system = ZioSystem[Any]()
 val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
 
 // Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = automorph.DefaultHttpServer[ZioSystem.TaskEffect](system, runEffect, _.bind(api), 80, "/api")
+val server = DefaultHttpServer.system[ZioSystem.TaskEffect](system, runEffect, _.bind(api), 80, "/api")
 
 // Stop the server
 server.close()
@@ -511,7 +512,7 @@ import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val url = new java.net.URI("http://localhost/api")
 val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
-val client = automorph.DefaultHttpClient(url, "POST", system, backend)
+val client = DefaultHttpClient(url, "POST", system, backend)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
@@ -537,9 +538,11 @@ import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.server.NanoHttpdServer
 import automorph.{Client, DefaultSystem, DefaultFormat, Handler}
 
-// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Create effect system plugin
 val system = DefaultEffectSystem.sync
 val runEffect = (effect: Identity[NanoHttpdServer.Response]) => effect
+
+// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val format = DefaultMessageFormat()
 val handler = Handler[DefaultMessageFormat.Node, format.type, Identity, NanoHttpdServer.Context](format, system)
 val server = NanoHttpdServer(handler.bind(api), runEffect, 80)
@@ -593,18 +596,20 @@ val api = new Api()
 ### Server
 
 ```scala
-import automorph.format.json.CirceJsonFormat
-import automorph.transport.http.endpoint.UndertowJsonRpcHandler
-import automorph.transport.http.server.UndertowServer
-import automorph.{Client, DefaultSystem, DefaultHttpTransport, Handler}
-import io.circe.generic.auto._
+import automorph.format.messagepack.UpickleMessagePackFormat
+import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, Handler}
 
-// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Create message format and custom data type serializer/deserializer
+val format = UpickleMessagePackFormat()
+implicit def recordRw: format.custom.ReadWriter[Record] = format.custom.macroRW
+
+// Create effect system plugin
 val system = DefaultEffectSystem.async
 val runEffect = (effect: Future[_]) => effect
-val format = CirceJsonFormat()
-val handler = Handler[CirceJsonFormat.Node, format.type, Future, UndertowHandlerEndpoint.Context](format, system)
-val server = UndertowServer(handler.bind(api), runEffect, 80, "/api")
+
+// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+val handler = Handler[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpServer.Context](format, system)
+val server = DefaultHttpServer(handler.bind(api), runEffect, 80, "/api")
 
 // Stop the server
 server.close()
