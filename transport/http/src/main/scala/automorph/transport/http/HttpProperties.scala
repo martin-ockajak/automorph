@@ -109,53 +109,143 @@ final case class HttpProperties[Source](
     case _ => None
   }
 
-  def authBasic(user: String, password: String): HttpProperties[Source] = {
+  /**
+   * Set `Authorization: Basic` header value.
+   *
+   * @param user user
+   * @param password password
+   * @return HTTP properties
+   */
+  def authorizationBasic(user: String, password: String): HttpProperties[Source] = {
     val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
     header(headerAuthorization, s"$headerAuthorizationBasic $value")
   }
 
-  def authBasic(token: String): HttpProperties[Source] =
+  /**
+   * Set `Authorization: Basic` header value.
+   *
+   * @param token authentication token
+   * @return HTTP properties
+   */
+  def authorizationBasic(token: String): HttpProperties[Source] =
     header(headerAuthorization, s"$headerAuthorizationBasic $token")
 
-  def authBearer(token: String): HttpProperties[Source] =
+  /**
+   * Set `Authorization: Bearer` header value.
+   *
+   * @param token authentication token
+   * @return HTTP properties
+   */
+  def authorizationBearer(token: String): HttpProperties[Source] =
     header(headerAuthorization, s"$headerAuthorizationBearer $token")
 
-  def cookies(values: (String, String)*): HttpProperties[Source] =
-    cookies(values, false)
+  /**
+   * Set request cookies.
+   *
+   * @param entries cookie names and values
+   * @return HTTP properties
+   */
+  def cookies(entries: (String, String)*): HttpProperties[Source] =
+    cookies(entries, false)
 
+  /**
+   * Add message header.
+   *
+   * @param name header name
+   * @param value header value
+   * @return HTTP properties
+   */
   def header(name: String, value: String): HttpProperties[Source] = header(name, value, false)
 
+  /**
+   * Add or replace message header.
+   *
+   * @param name header name
+   * @param value header value
+   * @param replace replace all existing headers with the specied name
+   * @return HTTP properties
+   */
   def header(name: String, value: String, replace: Boolean): HttpProperties[Source] = {
     val originalHeaders = if (replace) headers.filter(_._1 != name) else headers
     copy(headers = originalHeaders :+ (name -> value))
   }
 
-  def headers(values: (String, String)*): HttpProperties[Source] =
-    headers(values, false)
+  /**
+   * Set message headers.
+   *
+   * @param entries header names and values
+   * @return HTTP properties
+   */
+  def headers(entries: (String, String)*): HttpProperties[Source] =
+    headers(entries, false)
 
-  def headers(values: Seq[(String, String)], replace: Boolean): HttpProperties[Source] = {
+  /**
+   * Set message headers.
+   *
+   * @param entries header names and values
+   * @param replace replace all existing headers with specified names
+   * @return HTTP properties
+   */
+  def headers(entries: Seq[(String, String)], replace: Boolean): HttpProperties[Source] = {
     val originalHeaders =
-      if (replace) headers.filter { case (name, _) => !values.contains(name) }
+      if (replace) headers.filter { case (name, _) => !entries.contains(name) }
       else headers
-    copy(headers = originalHeaders ++ values)
+    copy(headers = originalHeaders ++ entries)
   }
 
+  /**
+   * Set `Proxy-Authorization: Basic` header value.
+   *
+   * @param user user
+   * @param password password
+   * @return HTTP properties
+   */
   def proxyAuthBasic(user: String, password: String): HttpProperties[Source] = {
     val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
     header(headerProxyAuthorization, s"$headerAuthorizationBasic $value")
   }
 
+  /**
+   * Set `Proxy-Authorization: Basic` header value.
+   *
+   * @param token authentication token
+   * @return HTTP properties
+   */
   def proxyAuthBasic(token: String): HttpProperties[Source] =
     header(headerProxyAuthorization, s"$headerAuthorizationBasic $token")
 
+  /**
+   * Set `Proxy-Authorization: Bearer` header value.
+   *
+   * @param token authentication token
+   * @return HTTP properties
+   */
   def proxyAuthBearer(token: String): HttpProperties[Source] =
     header(headerProxyAuthorization, s"$headerAuthorizationBearer $token")
 
+  /**
+   * Set response cookies.
+   *
+   * @param entries cookie names and values
+   * @return HTTP properties
+   */
   def setCookies(values: (String, String)*): HttpProperties[Source] =
     cookies(values, true)
 
+  /**
+   * Set request URL.
+   *
+   * @param url URL
+   * @return HTTP properties
+   */
   def url(url: String): HttpProperties[Source] = this.url(new URI(url))
 
+  /**
+   * Set request URL.
+   *
+   * @param url URL
+   * @return HTTP properties
+   */
   def url(url: URI): HttpProperties[Source] =
     copy(
       scheme = Some(url.getScheme),
