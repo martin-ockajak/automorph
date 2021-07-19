@@ -31,6 +31,7 @@ final case class UrlConnectionClient(
   private val acceptHeader = "Accept"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   private val urlText = url.toExternalForm
+  require(httpMethods.contains(method), s"Invalid HTTP method: $method")
 
   override def call(
     request: ArraySeq.ofByte,
@@ -85,21 +86,18 @@ final case class UrlConnectionClient(
     mediaType: String,
     context: Option[Context]
   ): String = {
-    // Validate HTTP request properties
     val properties = context.getOrElse(defaultContext)
     val httpMethod = properties.method.getOrElse(method)
     require(httpMethods.contains(httpMethod), s"Invalid HTTP method: $httpMethod")
-
-    // Set HTTP request requestProperties
-    properties.headers.foreach { case (key, value) =>
-      connection.setRequestProperty(key, value)
-    }
-    connection.setRequestProperty(contentLengthHeader, request.size.toString)
-    connection.setRequestProperty(contentTypeHeader, mediaType)
-    connection.setRequestProperty(acceptHeader, mediaType)
     connection.setRequestMethod(httpMethod)
     connection.setConnectTimeout(properties.readTimeout.toMillis.toInt)
     connection.setReadTimeout(properties.readTimeout.toMillis.toInt)
+    connection.setRequestProperty(contentLengthHeader, request.size.toString)
+    connection.setRequestProperty(contentTypeHeader, mediaType)
+    connection.setRequestProperty(acceptHeader, mediaType)
+    properties.headers.foreach { case (key, value) =>
+      connection.setRequestProperty(key, value)
+    }
     httpMethod
   }
 

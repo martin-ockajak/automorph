@@ -7,7 +7,7 @@ import automorph.transport.http.client.SttpClient.Context
 import java.io.IOException
 import java.net.URL
 import scala.collection.immutable.ArraySeq
-import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArray, basicRequest, ignore}
+import sttp.client3.{asByteArray, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
@@ -40,7 +40,7 @@ final case class SttpClient[Effect[_]](
     mediaType: String,
     context: Option[Context]
   ): Effect[ArraySeq.ofByte] = {
-    val httpRequest = setupHttpRequest(request, mediaType, context).response(asByteArray)
+    val httpRequest = createRequest(request, mediaType, context).response(asByteArray)
     system.flatMap(
       send[Either[String, Array[Byte]]](httpRequest, request.length),
       (response: Response[Either[String, Array[Byte]]]) =>
@@ -51,7 +51,10 @@ final case class SttpClient[Effect[_]](
             system.failed(exception)
           },
           message => {
-            logger.debug("Received HTTP response", Map("URL" -> urlText, "Status" -> response.code, "Size" -> request.length))
+            logger.debug(
+              "Received HTTP response",
+              Map("URL" -> urlText, "Status" -> response.code, "Size" -> request.length)
+            )
             system.pure(new ArraySeq.ofByte(message))
           }
         )
@@ -59,7 +62,7 @@ final case class SttpClient[Effect[_]](
   }
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
-    val httpRequest = setupHttpRequest(request, mediaType, context).response(ignore)
+    val httpRequest = createRequest(request, mediaType, context).response(ignore)
     system.map(send[Unit](httpRequest, request.length), (_: Response[Unit]) => ())
   }
 
@@ -67,32 +70,37 @@ final case class SttpClient[Effect[_]](
 
   private def send[R](request: Request[R, Any], size: Int): Effect[Response[R]] = {
     logger.trace("Sending HTTP request", Map("URL" -> urlText, "Method" -> request.method, "Size" -> size))
-    system.flatMap(system.either(request.send(backend)), (result: Either[Throwable, Response[R]]) => result.fold(
-      error => {
-        logger.error("Failed to send HTTP request", error, Map("URL" -> urlText, "Method" -> request.method, "Size" -> size))
-        system.failed(error)
-      },
-      response => {
-        logger.debug("Sent HTTP request", Map("URL" -> urlText, "Method" -> request.method, "Size" -> size))
-        system.pure(response)
-      }
-    ))
+    system.flatMap(
+      system.either(request.send(backend)),
+      (result: Either[Throwable, Response[R]]) =>
+        result.fold(
+          error => {
+            logger.error(
+              "Failed to send HTTP request",
+              error,
+              Map("URL" -> urlText, "Method" -> request.method, "Size" -> size)
+            )
+            system.failed(error)
+          },
+          response => {
+            logger.debug("Sent HTTP request", Map("URL" -> urlText, "Method" -> request.method, "Size" -> size))
+            system.pure(response)
+          }
+        )
+    )
   }
 
-  private def setupHttpRequest(
+  private def createRequest(
     request: ArraySeq.ofByte,
     mediaType: String,
     context: Option[Context]
   ): Request[Either[String, String], Any] = {
     val contentType = MediaType.unsafeParse(mediaType)
     val properties = context.getOrElse(defaultContext)
-    createRequest(properties).method(properties.method.map(Method.unsafeApply).getOrElse(httpMethod), uri)
+    basicRequest.method(properties.method.map(Method.unsafeApply).getOrElse(httpMethod), uri)
       .contentType(contentType).header(Header.accept(contentType)).body(request.unsafeArray)
-  }
-
-  private def createRequest(properties: Context): PartialRequest[Either[String, String], Any] = {
-    basicRequest.headers((properties.headers.map { case (name, value) => Header(name, value) }): _*)
       .followRedirects(properties.followRedirects).readTimeout(properties.readTimeout)
+      .headers(properties.headers.map { case (name, value) => Header(name, value) }: _*)
   }
 }
 

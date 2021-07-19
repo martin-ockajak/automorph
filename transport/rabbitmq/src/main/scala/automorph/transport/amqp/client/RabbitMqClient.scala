@@ -119,6 +119,10 @@ final case class RabbitMqClient(
   private def createProperties(mediaType: String, context: Option[Context]): BasicProperties = {
     val properties = context.getOrElse(defaultContext)
     new BasicProperties().builder()
+      .replyTo(properties.replyTo.getOrElse(directReplyToQueue))
+      .correlationId(properties.correlationId.getOrElse(MessageId.next))
+      .contentType(properties.contentType.getOrElse(mediaType))
+      .appId(properties.appId.getOrElse(clientId))
       .contentEncoding(properties.contentEncoding.orNull)
       .headers(properties.headers.asJava)
       .deliveryMode(properties.deliveryMode.map(new Integer(_)).orNull)
@@ -128,9 +132,7 @@ final case class RabbitMqClient(
       .timestamp(properties.timestamp.map(Date.from).orNull)
       .`type`(properties.`type`.orNull)
       .userId(properties.userId.orNull)
-      .appId(properties.appId.getOrElse(clientId))
-      .replyTo(directReplyToQueue).contentType(mediaType)
-      .correlationId(MessageId.next).build
+      .build
   }
 
   private def createConsumer(channel: Channel): DefaultConsumer = {
