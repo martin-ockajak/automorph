@@ -111,7 +111,8 @@ Invoke the API via JSON-RPC over HTTP(S).
 
 ```scala
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-val client = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
+val url = new java.net.URI("http://localhost/api")
+val client = automorph.DefaultHttpClient.async(url, "POST")
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
@@ -287,7 +288,8 @@ server.close()
 
 ```scala
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-val client = automorph.DefaultHttpClient.sync("http://localhost/api", "POST")
+val url = new java.net.URI("http://localhost/api")
+val client = automorph.DefaultHttpClient.sync(url, "POST")
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
@@ -324,7 +326,8 @@ server.close()
 
 ```scala
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-val client = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
+val url = new java.net.URI("http://localhost/api")
+val client = automorph.DefaultHttpClient.async(url, "POST")
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
@@ -386,7 +389,8 @@ server.close()
 
 ```scala
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-val client = automorph.DefaultHttpClient.sync("http://localhost/api", "POST")
+val url = new java.net.URI("http://localhost/api")
+val client = automorph.DefaultHttpClient.sync(url, "POST")
 
 // Create context for requests sent by the client
 val apiProxy = client.bind[ClientApi] // Api
@@ -449,7 +453,8 @@ server.close()
 import scala.util.Try
 
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-val client = automorph.DefaultHttpClient.sync("http://localhost/api", "POST")
+val url = new java.net.URI("http://localhost/api")
+val client = automorph.DefaultHttpClient.sync(url, "POST")
 
 // Call the remote API method via proxy
 client.method("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
@@ -504,8 +509,9 @@ import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
+val url = new java.net.URI("http://localhost/api")
 val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
-val client = automorph.DefaultHttpClient("http://localhost/api", "POST", system, backend)
+val client = automorph.DefaultHttpClient(url, "POST", system, backend)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
@@ -546,10 +552,11 @@ server.close()
 
 ```scala
 import automorph.transport.http.client.UrlConnectionTransport
-import java.net.URL
+import java.net.URI
 
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-val transport = UrlConnectionClient(new URL("http://localhost/api"), "POST")
+val url = new java.net.URI("http://localhost/api")
+val transport = UrlConnectionClient(url, "POST")
 val client: Client[DefaultMessageFormat.Node, format.type, Identity, UrlConnectionClient.Context] =
   Client(format, system, transport)
 

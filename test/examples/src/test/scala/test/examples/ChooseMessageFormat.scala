@@ -25,7 +25,8 @@ object ChooseMessageFormat extends App {
   val server = UndertowServer(UndertowHttpEndpoint(handler.bind(api), runEffect), 80, "/api")
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val transport = DefaultHttpClientTransport.async("http://localhost/api", "POST")
+  val url = new java.net.URI("http://localhost/api")
+  val transport = DefaultHttpClientTransport.async(url, "POST")
   val client: Client[CirceJsonFormat.Node, format.type, Future, DefaultHttpClientTransport.Context] =
     Client(format, system, transport)
 

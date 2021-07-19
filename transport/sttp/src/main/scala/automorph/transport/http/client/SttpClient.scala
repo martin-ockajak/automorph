@@ -5,7 +5,7 @@ import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.HttpProperties
 import automorph.transport.http.client.SttpClient.Context
 import java.io.IOException
-import java.net.URL
+import java.net.URI
 import scala.collection.immutable.ArraySeq
 import sttp.client3.{asByteArray, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
 import sttp.model.{Header, MediaType, Method, Uri}
@@ -25,15 +25,14 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @tparam Effect effect type
  */
 final case class SttpClient[Effect[_]](
-  url: URL,
+  url: URI,
   method: String,
   system: EffectSystem[Effect],
   backend: SttpBackend[Effect, _]
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
-  private val uri = Uri(url.toURI)
+  private val uri = Uri(url)
   private val httpMethod = Method.unsafeApply(method)
-  private val urlText = url.toExternalForm
 
   override def call(
     request: ArraySeq.ofByte,
@@ -47,13 +46,13 @@ final case class SttpClient[Effect[_]](
         response.body.fold(
           error => {
             val exception = new IOException(error)
-            logger.error("Failed to receive HTTP response", exception, Map("URL" -> urlText))
+            logger.error("Failed to receive HTTP response", exception, Map("URL" -> url))
             system.failed(exception)
           },
           message => {
             logger.debug(
               "Received HTTP response",
-              Map("URL" -> urlText, "Status" -> response.code, "Size" -> request.length)
+              Map("URL" -> url, "Status" -> response.code, "Size" -> request.length)
             )
             system.pure(new ArraySeq.ofByte(message))
           }
@@ -69,7 +68,7 @@ final case class SttpClient[Effect[_]](
   override def defaultContext: Context = SttpClient.defaultContext
 
   private def send[R](request: Request[R, Any], size: Int): Effect[Response[R]] = {
-    logger.trace("Sending HTTP request", Map("URL" -> urlText, "Method" -> request.method, "Size" -> size))
+    logger.trace("Sending HTTP request", Map("URL" -> url, "Method" -> request.method, "Size" -> size))
     system.flatMap(
       system.either(request.send(backend)),
       (result: Either[Throwable, Response[R]]) =>
@@ -78,12 +77,12 @@ final case class SttpClient[Effect[_]](
             logger.error(
               "Failed to send HTTP request",
               error,
-              Map("URL" -> urlText, "Method" -> request.method, "Size" -> size)
+              Map("URL" -> url, "Method" -> request.method, "Size" -> size)
             )
             system.failed(error)
           },
           response => {
-            logger.debug("Sent HTTP request", Map("URL" -> urlText, "Method" -> request.method, "Size" -> size))
+            logger.debug("Sent HTTP request", Map("URL" -> url, "Method" -> request.method, "Size" -> size))
             system.pure(response)
           }
         )

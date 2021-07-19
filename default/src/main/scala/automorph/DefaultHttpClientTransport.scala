@@ -3,7 +3,7 @@ package automorph
 import automorph.system.IdentitySystem.Identity
 import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.client.SttpClient
-import java.net.URL
+import java.net.URI
 import scala.concurrent.{ExecutionContext, Future}
 import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
 import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
@@ -34,11 +34,11 @@ case object DefaultHttpClientTransport {
    * @return transport plugin
    */
   def apply[Effect[_]](
-    url: String,
+    url: URI,
     method: String,
     backend: EffectSystem[Effect],
     sttpSystem: SttpBackend[Effect, _]
-  ): Type[Effect] = SttpClient(new URL(url), method, backend, sttpSystem)
+  ): Type[Effect] = SttpClient(url, method, backend, sttpSystem)
 
   /**
    * Creates a default message transport protocol plugin using HTTP  as transport protocol and 'Future' as an effect type.
@@ -52,7 +52,7 @@ case object DefaultHttpClientTransport {
    * @param executionContext execution context
    * @return asynchronous transport plugin
    */
-  def async(url: String, method: String)(implicit
+  def async(url: URI, method: String)(implicit
     executionContext: ExecutionContext
   ): Type[Future] = DefaultHttpClientTransport(url, method, DefaultEffectSystem.async, AsyncHttpClientFutureBackend())
 
@@ -67,7 +67,7 @@ case object DefaultHttpClientTransport {
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @return synchronous transport plugin
    */
-  def sync(url: String, method: String): Type[Identity] = {
+  def sync(url: URI, method: String): Type[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
     DefaultHttpClientTransport(url, method, DefaultEffectSystem.sync, HttpURLConnectionBackend())
   }

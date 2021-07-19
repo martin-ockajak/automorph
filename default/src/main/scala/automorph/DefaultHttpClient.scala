@@ -4,7 +4,7 @@ import automorph.system.IdentitySystem.Identity
 import automorph.format.json.UpickleJsonFormat
 import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.client.SttpClient
-import java.net.URL
+import java.net.URI
 import scala.concurrent.{ExecutionContext, Future}
 import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
 import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
@@ -53,11 +53,11 @@ case object DefaultHttpClient {
    * @return RPC client
    */
   def apply[Effect[_]](
-    url: String,
+    url: URI,
     method: String,
     backend: EffectSystem[Effect],
     sttpSystem: SttpBackend[Effect, _]
-  ): Type[Effect] = DefaultHttpClient(backend, SttpClient(new URL(url), method, backend, sttpSystem))
+  ): Type[Effect] = DefaultHttpClient(backend, SttpClient(url, method, backend, sttpSystem))
 
   /**
    * Creates a default asynchronous RPC client using HTTP as message transport protocol and 'Future' as an effect type.
@@ -71,7 +71,7 @@ case object DefaultHttpClient {
    * @param executionContext execution context
    * @return asynchronous RPC client
    */
-  def async(url: String, method: String)(implicit
+  def async(url: URI, method: String)(implicit
     executionContext: ExecutionContext
   ): Type[Future] = DefaultHttpClient(url, method, DefaultEffectSystem.async, AsyncHttpClientFutureBackend())
 
@@ -86,7 +86,7 @@ case object DefaultHttpClient {
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @return synchronous RPC client
    */
-  def sync(url: String, method: String): Type[Identity] = {
+  def sync(url: URI, method: String): Type[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
     DefaultHttpClient(url, method, DefaultEffectSystem.sync, HttpURLConnectionBackend())
   }

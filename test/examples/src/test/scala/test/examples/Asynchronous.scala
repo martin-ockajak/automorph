@@ -16,7 +16,8 @@ object Asynchronous extends App {
   val server = automorph.DefaultHttpServer.async(_.bind(api), 80, "/api")
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val client = automorph.DefaultHttpClient.async("http://localhost/api", "POST")
+  val url = new java.net.URI("http://localhost/api")
+  val client = automorph.DefaultHttpClient.async(url, "POST")
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api

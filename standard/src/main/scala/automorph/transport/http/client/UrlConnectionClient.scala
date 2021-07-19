@@ -7,7 +7,7 @@ import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.HttpProperties
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
-import java.net.{HttpURLConnection, URL}
+import java.net.{HttpURLConnection, URI}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Try, Using}
 
@@ -22,7 +22,7 @@ import scala.util.{Try, Using}
  * @param method HTTP method
  */
 final case class UrlConnectionClient(
-  url: URL,
+  url: URI,
   method: String
 ) extends ClientMessageTransport[Identity, Context] with Logging {
 
@@ -30,7 +30,6 @@ final case class UrlConnectionClient(
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
-  private val urlText = url.toExternalForm
   require(httpMethods.contains(method), s"Invalid HTTP method: $method")
 
   override def call(
@@ -39,14 +38,14 @@ final case class UrlConnectionClient(
     context: Option[Context]
   ): Identity[ArraySeq.ofByte] = {
     val connection = send(request, mediaType, context)
-    logger.trace("Receiving HTTP response", Map("URL" -> urlText))
+    logger.trace("Receiving HTTP response", Map("URL" -> url))
     Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).pureFold(
       error => {
-        logger.error("Failed to receive HTTP response", error, Map("URL" -> urlText))
+        logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
         throw error
       },
       response => {
-        logger.debug("Received HTTP response", Map("URL" -> urlText, "Status" -> connection.getResponseCode, "Size" -> response.length))
+        logger.debug("Received HTTP response", Map("URL" -> url, "Status" -> connection.getResponseCode, "Size" -> response.length))
         response
       }
     )
@@ -60,7 +59,7 @@ final case class UrlConnectionClient(
   override def defaultContext: Context = UrlConnectionClient.defaultContext.copy(method = Some(method))
 
   private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): HttpURLConnection = {
-    logger.trace("Sending HTTP request", Map("URL" -> urlText, "Size" -> request.length))
+    logger.trace("Sending HTTP request", Map("URL" -> url, "Size" -> request.length))
     val connection = connect()
     val outputStream = connection.getOutputStream
     val httpMethod = setProperties(connection, request, mediaType, context)
@@ -71,11 +70,11 @@ final case class UrlConnectionClient(
         logger.error(
           "Failed to send HTTP request",
           error,
-          Map("URL" -> urlText, "Method" -> httpMethod, "Size" -> request.length)
+          Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length)
         )
         throw error
       },
-      _ => logger.debug("Sent HTTP request", Map("URL" -> urlText, "Method" -> httpMethod, "Size" -> request.length))
+      _ => logger.debug("Sent HTTP request", Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length))
     )
     connection
   }
@@ -95,6 +94,7 @@ final case class UrlConnectionClient(
     connection.setRequestProperty(contentLengthHeader, request.size.toString)
     connection.setRequestProperty(contentTypeHeader, mediaType)
     connection.setRequestProperty(acceptHeader, mediaType)
+    properties.path.getOrElse(url.getPath)
     properties.headers.foreach { case (key, value) =>
       connection.setRequestProperty(key, value)
     }
@@ -112,7 +112,7 @@ final case class UrlConnectionClient(
    * @return HTTP connection
    */
   private def connect(): HttpURLConnection = {
-    val connection = url.openConnection().asInstanceOf[HttpURLConnection]
+    val connection = url.toURL.openConnection().asInstanceOf[HttpURLConnection]
     connection.setDoOutput(true)
     connection
   }
