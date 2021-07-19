@@ -11,7 +11,7 @@ trait BrokenBind[Effect[_], Context] {
 
   private val handler = DefaultHandler[Effect, Context](system)
     .bind(brokenApiInstance)
-    .bind(EmptyApi())
+    .bind(brokenApiInstance)
 }
 
 trait BrokenApi[Effect[_]] {
@@ -23,5 +23,3 @@ final case class BrokenApiImpl[Effect[_]](backend: EffectSystem[Effect]) extends
 
   override def test(test: String): Effect[String] = backend.pure(test)
 }
-
-final case class EmptyApi()
