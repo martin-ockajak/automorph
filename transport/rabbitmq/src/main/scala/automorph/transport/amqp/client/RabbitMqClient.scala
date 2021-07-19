@@ -56,13 +56,13 @@ final case class RabbitMqClient(
     mediaType: String,
     context: Option[Context]
   ): Future[ArraySeq.ofByte] = {
-    val properties = setupProperties(mediaType, context)
+    val properties = createProperties(mediaType, context)
     val result = Promise[ArraySeq.ofByte]()
     send(request, properties, Some(result)).flatMap(_ => result.future)
   }
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Future[Unit] = {
-    val properties = setupProperties(mediaType, context)
+    val properties = createProperties(mediaType, context)
     send(request, properties, None)
   }
 
@@ -116,7 +116,7 @@ final case class RabbitMqClient(
     }.get
   }
 
-  private def setupProperties(mediaType: String, context: Option[Context]): BasicProperties = {
+  private def createProperties(mediaType: String, context: Option[Context]): BasicProperties = {
     val properties = context.getOrElse(defaultContext)
     new BasicProperties().builder()
       .contentEncoding(properties.contentEncoding.orNull)
