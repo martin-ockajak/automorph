@@ -10,6 +10,46 @@ import scala.reflect.macros.blackbox
 /** JSON-RPC handler layer bindings code generation. */
 case object HandlerBindings {
 
+  def brokenGenerate[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
+    format: ActualFormat,
+    system: EffectSystem[Effect],
+    api: Api
+  ): Map[String, HandlerBinding[Node, Effect, Context]] = macro brokenGenerateMacro[Node, ActualFormat, Effect, Context, Api]
+
+  def brokenGenerateMacro[
+    Node: c.WeakTypeTag,
+    ActualFormat <: MessageFormat[Node]: c.WeakTypeTag,
+    Effect[_],
+    Context: c.WeakTypeTag,
+    Api <: AnyRef: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    format: c.Expr[ActualFormat],
+    system: c.Expr[EffectSystem[Effect]],
+    api: c.Expr[Api]
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, HandlerBinding[Node, Effect, Context]]] = {
+    import c.universe.Quasiquote
+    val ref = Reflection[c.type](c)
+
+    // Detect and validate public methods in the API type
+    val apiMethods = validApiMethods[c.type, Api, Effect[_]](ref)
+    val validMethods = apiMethods.flatMap(_.swap.toOption) match {
+      case Seq() => apiMethods.flatMap(_.toOption)
+      case errors =>
+        ref.c.abort(
+          ref.c.enclosingPosition,
+          s"Failed to bind API methods:\n${errors.map(error => s"  $error").mkString("\n")}"
+        )
+    }
+
+    // Generate bound API method bindings
+    val handlerBindings = validMethods.map { method =>
+      q"${method.name} -> ${generateBinding[c.type, Node, ActualFormat, Effect, Context, Api](ref)(method, format, system, api)}"
+    }
+    c.Expr[Map[String, HandlerBinding[Node, Effect, Context]]](q"""
+      Seq(..$handlerBindings).toMap
+    """)
+  }
+
   /**
    * Generates handler bindings for all valid public methods of an API type.
    *

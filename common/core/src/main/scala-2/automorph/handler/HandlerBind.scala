@@ -87,7 +87,7 @@ case object HandlerBind {
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
       automorph.handler.HandlerBindings
-        .generate[$nodeType, $formatType, $effectType, $contextType, $apiType](${c.prefix}.format, ${c.prefix}.system, $api)
+        .brokenGenerate[$nodeType, $formatType, $effectType, $contextType, $apiType](${c.prefix}.format, ${c.prefix}.system, $api)
       ${c.prefix}
     """).asInstanceOf[c.Expr[Handler[Node, ActualFormat, Effect, Context]]]
   }
