@@ -52,9 +52,9 @@ Supported technical standards:
 
 ## Goals
 
-* Provide a definitive RPC solution for Scala ecosystem
-* Strive for easiest possible integration with existing applications
-* Encourage use of standard interoperability protocols
+* Provide a **definitive RPC solution** for Scala ecosystem
+* Strive for **easiest possible integration** with existing applications
+* Encourage use of **standard interoperability protocols**
 
 ## Features
 
