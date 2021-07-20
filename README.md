@@ -74,7 +74,7 @@ way to invoke and expose remote APIs while supporting [JSON-RPC](https://www.jso
 * [Autowire](https://github.com/lihaoyi/autowire)
 * [STTP](https://github.com/softwaremill/sttp)
 
-# [Quickstart](/examples/src/test/scala/examples/Asynchronous.scala)
+# [Quickstart](/test/examples/src/test/scala/test/examples/Asynchronous.scala)
 
 Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
@@ -276,7 +276,7 @@ Depends on:
 
 # Examples
 
-## [Synchronous](/examples/src/test/scala/examples/Synchronous.scala)
+## [Synchronous](/test/examples/src/test/scala/test/examples/Synchronous.scala)
 
 ### API
 
@@ -313,7 +313,7 @@ apiProxy.hello("world", 1) // : String
 client.close()
 ```
 
-## [Asynchronous](/examples/src/test/scala/examples/Asynchronous.scala)
+## [Asynchronous](/test/examples/src/test/scala/test/examples/Asynchronous.scala)
 
 ### API
 
@@ -371,7 +371,7 @@ hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
-## [Request context](/examples/src/test/scala/examples/RequestContext.scala)
+## [Request context](/test/examples/src/test/scala/test/examples/RequestContext.scala)
 
 ### API
 
@@ -426,7 +426,7 @@ client.method("requestMetaData").args("message" -> "test").call[List[String]] //
 client.close()
 ```
 
-## [Method alias](/examples/src/test/scala/examples/MethodAlias.scala)
+## [Method alias](/test/examples/src/test/scala/test/examples/MethodAlias.scala)
 
 ### API
 
@@ -488,7 +488,7 @@ Try(client.method("omitted").args().call[String]) // Failure
 client.close()
 ```
 
-## [Choose effect system](/examples/src/test/scala/examples/ChooseEffectSystem.scala)
+## [Choose effect system](/test/examples/src/test/scala/test/examples/ChooseEffectSystem.scala)
 
 ### Dependencies
 
@@ -548,7 +548,7 @@ apiProxy.hello("world", 1) // : Task[String]
 client.close()
 ```
 
-## [Choose message transport](/examples/src/test/scala/examples/ChooseMessageTransport.scala)
+## [Choose message transport](/test/examples/src/test/scala/test/examples/ChooseMessageTransport.scala)
 
 ### API
 
@@ -600,7 +600,7 @@ apiProxy.hello("world", 1) // : String
 client.close()
 ```
 
-## [Choose message format](/examples/src/test/scala/examples/ChooseMessageFormat.scala)
+## [Choose message format](/test/examples/src/test/scala/test/examples/ChooseMessageFormat.scala)
 
 ### Dependencies
 
