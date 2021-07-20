@@ -315,6 +315,7 @@ ScalaUnidoc / unidoc / scalacOptions ++= Seq(
 // Site
 enablePlugins(LaikaPlugin)
 laikaTheme := laika.helium.Helium.defaults.build
+laikaExtensions := Seq(laika.markdown.github.GitHubFlavor, laika.parse.code.SyntaxHighlighting)
 laikaIncludeAPI := true
 Laika / sourceDirectories := Seq(baseDirectory.value / "doc")
 laikaSite / target := target.value / "site"
