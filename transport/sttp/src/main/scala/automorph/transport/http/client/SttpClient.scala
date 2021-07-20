@@ -22,25 +22,25 @@ import sttp.ws.WebSocket
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
  * @constructor Creates an STTP client transport plugin with the specified STTP backend.
  * @param url endpoint URL
- * @param method HTTP method, upgrade the HTTP connection to WebSocket protocol if empty
+ * @param method HTTP method
  * @param system effect system plugin
  * @param method HTTP method
  * @param backend STTP backend
+ * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
  * @tparam Effect effect type
  */
 final case class SttpClient[Effect[_]](
   url: URI,
-  method: Option[String],
-  webSocket: Boolean,
+  method: String,
   system: EffectSystem[Effect],
-  backend: SttpBackend[Effect, capabilities.Effect[Effect] with WebSockets]
+  backend: SttpBackend[Effect, capabilities.Effect[Effect] with WebSockets],
+  webSocket: Boolean = false
 ) extends ClientMessageTransport[Effect, Context] with AutoCloseable with Logging {
 
   type Capabilities = capabilities.Effect[Effect] with WebSockets
 
   private val uri = Uri(url)
-  private val configuredMethod = method.map(Method.unsafeApply)
-  private val webSocketMethod = Method.GET
+  private val defaultMethod = Method.unsafeApply(method)
 
   override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
     val httpRequest = createHttpRequest(request, mediaType, context)
@@ -104,14 +104,17 @@ final case class SttpClient[Effect[_]](
   ): Request[Array[Byte], Capabilities] = {
     val contentType = MediaType.unsafeParse(mediaType)
     val properties = context.getOrElse(defaultContext)
-    val requestMethod = properties.method.map(Method.unsafeApply).orElse(configuredMethod)
+    val requestMethod = properties.method.map(Method.unsafeApply).getOrElse(defaultMethod)
     val requestUrl = properties.url.map(Uri(_)).getOrElse(uri)
-    val httpRequest = basicRequest.contentType(contentType).header(Header.accept(contentType))
+    val httpRequest = basicRequest.method(requestMethod, requestUrl)
+      .contentType(contentType).header(Header.accept(contentType))
       .followRedirects(properties.followRedirects).readTimeout(properties.readTimeout)
       .headers(properties.headers.map { case (name, value) => Header(name, value) }: _*)
       .body(request.unsafeArray)
-    requestMethod.map(httpMethod => httpRequest.method(httpMethod, requestUrl).response(asByteArrayAlways)).getOrElse {
-      httpRequest.method(webSocketMethod, requestUrl).response(asWebSocketAlways(sendWebSocket(request)))
+    if (webSocket) {
+      httpRequest.response(asWebSocketAlways(sendWebSocket(request)))
+    } else {
+      httpRequest.response(asByteArrayAlways)
     }
   }
 }
