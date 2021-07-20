@@ -323,6 +323,11 @@ val site = taskKey[Unit]("Generates documentation web site.")
 site := {}
 site := site.dependsOn(laikaSite).value
 
+// Deployment
+enablePlugins(GhpagesPlugin)
+git.remoteRepo := "git@github.com:martin-ockajak/automorph.git"
+ghpagesNoJekyll := true
+
 
 // Continuous Integration
 ThisBuild / githubWorkflowPublishTargetBranches := Seq()
