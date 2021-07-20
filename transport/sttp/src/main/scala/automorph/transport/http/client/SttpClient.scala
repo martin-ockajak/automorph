@@ -3,14 +3,13 @@ package automorph.transport.http.client
 import automorph.log.Logging
 import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.HttpProperties
-import automorph.transport.http.client.SttpClient.{Context, WebSocketSupport}
+import automorph.transport.http.client.SttpClient.{Context, WebSocket}
 import automorph.util.Bytes
 import java.net.URI
 import scala.collection.immutable.ArraySeq
 import sttp.capabilities.WebSockets
-import sttp.client3.{Identity, PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
+import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, Identity, PartialRequest, Request, Response, SttpBackend}
 import sttp.model.{Header, MediaType, Method, Uri}
-import sttp.ws.WebSocket
 
 /**
  * STTP client transport plugin using HTTP as message transport protocol with the specified STTP backend.
@@ -32,16 +31,16 @@ final case class SttpClient[Effect[_]](
   url: URI,
   method: String,
   system: EffectSystem[Effect],
-  backend: SttpBackend[Effect, WebSocketSupport[Effect]],
+  backend: SttpBackend[Effect, WebSocket[Effect]],
   webSocket: Boolean = false
 ) extends ClientMessageTransport[Effect, Context] with AutoCloseable with Logging {
 
   private val defaultUrl = Uri(url)
   private val defaultMethod = Method.unsafeApply(method)
+  private val protocol = if (webSocket) "WebSocket" else "HTTP"
 
   override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
     val httpRequest = createHttpRequest(request, mediaType, context)
-    val protocol = if (webSocket) "WebSocket" else "HTTP"
     system.flatMap(
       system.either(send(httpRequest, request)),
       (response: Either[Throwable, Response[Array[Byte]]]) =>
@@ -70,11 +69,7 @@ final case class SttpClient[Effect[_]](
 
   override def close(): Unit = backend.close()
 
-  private def send[R](
-    httpRequest: Request[R, WebSocketSupport[Effect]],
-    request: ArraySeq.ofByte
-  ): Effect[Response[R]] = {
-    val protocol = if (webSocket) "WebSocket" else "HTTP"
+  private def send[R](httpRequest: Request[R, WebSocket[Effect]], request: ArraySeq.ofByte): Effect[Response[R]] = {
     logger.trace(
       s"Sending $protocol httpRequest",
       Map("URL" -> url, "Method" -> httpRequest.method, "Size" -> request.size)
@@ -102,14 +97,14 @@ final case class SttpClient[Effect[_]](
     )
   }
 
-  private def sendWebSocket(request: ArraySeq.ofByte): WebSocket[Effect] => Effect[Array[Byte]] =
+  private def sendWebSocket(request: ArraySeq.ofByte): sttp.ws.WebSocket[Effect] => Effect[Array[Byte]] =
     webSocket => system.flatMap(webSocket.sendBinary(request.unsafeArray), _ => webSocket.receiveBinary(true))
 
   private def createHttpRequest(
     request: ArraySeq.ofByte,
     mediaType: String,
     context: Option[Context]
-  ): Request[Array[Byte], WebSocketSupport[Effect]] = {
+  ): Request[Array[Byte], WebSocket[Effect]] = {
     val contentType = MediaType.unsafeParse(mediaType)
     val properties = context.getOrElse(defaultContext)
     val requestMethod = properties.method.map(Method.unsafeApply).getOrElse(defaultMethod)
@@ -129,7 +124,7 @@ final case class SttpClient[Effect[_]](
 case object SttpClient {
 
   /** STTP backend WebSocker support capabilities type. */
-  type WebSocketSupport[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
+  type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
 
   /** Request context type. */
   type Context = HttpProperties[PartialRequest[Either[String, String], Any]]
