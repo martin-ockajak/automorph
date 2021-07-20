@@ -8,7 +8,7 @@ import automorph.util.Bytes
 import java.net.URI
 import scala.collection.immutable.ArraySeq
 import sttp.capabilities.WebSockets
-import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, Identity, PartialRequest, Request, Response, SttpBackend}
+import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
