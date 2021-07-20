@@ -3,7 +3,7 @@ package automorph.transport.http.client
 import automorph.log.Logging
 import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.HttpProperties
-import automorph.transport.http.client.SttpClient.Context
+import automorph.transport.http.client.SttpClient.{Context, WebSocketSupport}
 import sttp.capabilities.WebSockets
 import automorph.util.Bytes
 import java.net.URI
@@ -33,11 +33,10 @@ final case class SttpClient[Effect[_]](
   url: URI,
   method: String,
   system: EffectSystem[Effect],
-  backend: SttpBackend[Effect, capabilities.Effect[Effect] with WebSockets],
+  backend: SttpBackend[Effect, WebSocketSupport[Effect]],
   webSocket: Boolean = false
 ) extends ClientMessageTransport[Effect, Context] with AutoCloseable with Logging {
 
-  private type Capabilities = capabilities.Effect[Effect] with WebSockets
   private val uri = Uri(url)
   private val defaultMethod = Method.unsafeApply(method)
 
@@ -72,7 +71,10 @@ final case class SttpClient[Effect[_]](
 
   override def close(): Unit = backend.close()
 
-  private def send[R](httpRequest: Request[R, Capabilities], request: ArraySeq.ofByte): Effect[Response[R]] = {
+  private def send[R](
+    httpRequest: Request[R, WebSocketSupport[Effect]],
+    request: ArraySeq.ofByte
+  ): Effect[Response[R]] = {
     val protocol = if (webSocket) "WebSocket" else "HTTP"
     logger.trace(
       s"Sending $protocol httpRequest",
@@ -108,7 +110,7 @@ final case class SttpClient[Effect[_]](
     request: ArraySeq.ofByte,
     mediaType: String,
     context: Option[Context]
-  ): Request[Array[Byte], Capabilities] = {
+  ): Request[Array[Byte], WebSocketSupport[Effect]] = {
     val contentType = MediaType.unsafeParse(mediaType)
     val properties = context.getOrElse(defaultContext)
     val requestMethod = properties.method.map(Method.unsafeApply).getOrElse(defaultMethod)
@@ -126,6 +128,9 @@ final case class SttpClient[Effect[_]](
 }
 
 case object SttpClient {
+
+  /** STTP backend WebSocker support capabilities type. */
+  type WebSocketSupport[Effect[_]] = capabilities.Effect[Effect] with WebSockets
 
   /** Request context type. */
   type Context = HttpProperties[PartialRequest[Either[String, String], Any]]
