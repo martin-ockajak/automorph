@@ -310,6 +310,7 @@ ScalaUnidoc / unidoc / scalacOptions ++= Seq(
   "-sourcepath",
   (LocalRootProject / baseDirectory).value.getAbsolutePath
 )
+//Compile / doc / scalacOptions ++= Seq("-groups", "-implicits")
 
 // Site
 enablePlugins(LaikaPlugin)
@@ -317,7 +318,9 @@ laikaTheme := laika.helium.Helium.defaults.build
 laikaIncludeAPI := true
 Laika / sourceDirectories := Seq(baseDirectory.value / "doc")
 laikaSite / target := target.value / "site"
-//Compile / doc / scalacOptions ++= Seq("-groups", "-implicits")
+val site = taskKey[Unit]("Generates documentation web site.")
+site := {}
+site := site.dependsOn(laikaSite).value
 
 
 // Continuous Integration
