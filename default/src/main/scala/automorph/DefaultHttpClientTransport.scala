@@ -21,14 +21,14 @@ case object DefaultHttpClientTransport {
   type Context = SttpClient.Context
 
   /**
-   * Creates a default message transport protocol plugin using HTTP as transport protocol.
+   * Creates a default client message transport protocol plugin using HTTP as transport protocol.
    *
    * The transport can be used by a JSON-RPC client to send requests and receive responses to and from a remote endpoint.
    *
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @param system effect system plugin
-   * @param backend HTTP client backend
+   * @param backend client message transport backend
    * @tparam Effect effect type
    * @return transport plugin
    */
@@ -40,7 +40,7 @@ case object DefaultHttpClientTransport {
   ): Type[Effect] = DefaultHttpClientTransport(url, method, system, backend)
 
   /**
-   * Creates a default message transport protocol plugin using HTTP  as transport protocol and 'Future' as an effect type.
+   * Creates a default client message transport protocol plugin using HTTP  as transport protocol and 'Future' as an effect type.
    *
    * The transport can be used by a JSON-RPC client to send requests and receive responses to and from a remote endpoint.
    *
@@ -54,7 +54,7 @@ case object DefaultHttpClientTransport {
     DefaultHttpClientTransport(url, method, DefaultEffectSystem.async, AsyncHttpClientFutureBackend())
 
   /**
-   * Creates a default message transport protocol plugin using HTTP  as transport protocol and identity as an effect type.
+   * Creates a default client message transport protocol plugin using HTTP  as transport protocol and identity as an effect type.
    *
    * The transport can be used by a JSON-RPC client to send requests and receive responses to and from a remote endpoint.
    *

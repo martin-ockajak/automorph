@@ -23,7 +23,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @param method HTTP method
  * @param system effect system plugin
  * @param method HTTP method
- * @param backend STTP backend
+ * @param backend client message transport backend
  * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
  * @tparam Effect effect type
  */
@@ -123,7 +123,7 @@ final case class SttpClient[Effect[_]](
 
 case object SttpClient {
 
-  /** STTP backend WebSocket capabilities type. */
+  /** Client message transport backend WebSocket capabilities type. */
   type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
 
   /** Request context type. */

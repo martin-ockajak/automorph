@@ -3,7 +3,7 @@ package automorph.spi
 import scala.collection.immutable.ArraySeq
 
 /**
- * Message transport protocol plugin.
+ * Client message transport protocol plugin.
  *
  * The underlying transport protocol must support implementation of request-response pattern.
  *
