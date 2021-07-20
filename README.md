@@ -189,7 +189,7 @@ The underlying format must support storing arbitrarily nested structures of basi
 
 Message transport protocol plugins.
 
-The underlying transport protocol must support implementation of request-response pattern.
+The underlying transport protocol must support request/response communication pattern.
 
 ### [Client transport](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/ClientMessageTransport.html)
 
