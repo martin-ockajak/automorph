@@ -319,7 +319,7 @@ laikaExtensions := Seq(laika.markdown.github.GitHubFlavor, laika.parse.code.Synt
 laikaIncludeAPI := true
 Laika / sourceDirectories := Seq(baseDirectory.value / "doc")
 laikaSite / target := target.value / "site"
-val site = taskKey[Unit]("Generates documentation web site.")
+val site = taskKey[Unit]("Generates documentation website.")
 site := {}
 site := site.dependsOn(laikaSite).value
 
@@ -327,6 +327,9 @@ site := site.dependsOn(laikaSite).value
 enablePlugins(GhpagesPlugin)
 siteSourceDirectory := target.value / "site"
 git.remoteRepo := "git@github.com:martin-ockajak/automorph.git"
+val deploySite = taskKey[Unit]("Deploys documentation website.")
+deploySite := {}
+deploySite := site.dependsOn(site, ghpagesPushSite).value
 
 
 // Continuous Integration
