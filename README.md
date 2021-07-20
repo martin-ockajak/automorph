@@ -85,7 +85,7 @@ Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 Add the following to your `build.sbt` file:
 
 ```scala
-libraryDependencies += "io.automorph" %% "automorph-default" % "1.0.0"
+libraryDependencies += "io.automorph" %% "automorph-default" % "0.0.1"
 ```
 
 ### API
@@ -494,8 +494,8 @@ client.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.automorph" %% "automorph-default" % "1.0.0",
-  "io.automorph" %% "automorph-zio" % "1.0.0",
+  "io.automorph" %% "automorph-default" % "0.0.1",
+  "io.automorph" %% "automorph-zio" % "0.0.1",
   "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.3.9"
 )
 ```
@@ -606,8 +606,8 @@ client.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.automorph" %% "automorph-default" % "1.0.0",
-  "io.automorph" %% "automorph-circe" % "1.0.0"
+  "io.automorph" %% "automorph-default" % "0.0.1",
+  "io.automorph" %% "automorph-circe" % "0.0.1"
 )
 ```
 
