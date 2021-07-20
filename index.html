@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Laika 0.17.1 + Helium Theme" />
+    <title>Integration</title>
+    
+    
+      <meta name="description" content="Remote procedure call client and server library for Scala "/>
+    
+    
+    
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700">
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+    
+    <link rel="stylesheet" type="text/css" href="helium/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="helium/laika-helium.css" />
+    <script src="helium/laika-helium.js"></script>
+    
+    <script> /* for avoiding page load transitions */ </script>
+  </head>
+
+  <body>
+
+    <header id="top-bar">
+
+      <div class="row">
+        <a id="nav-icon">
+          <i class="icofont-laika">&#xefa2;</i>
+        </a>
+        
+      </div>
+  
+      <a href="README"><i class="icofont-laika" title="Home">&#xef47;</i></a>
+      
+      <span class="row"></span>
+      
+    </header>
+
+    <nav id="sidebar">
+
+      <ul class="nav-list">
+        <li class="level1"><a href="overview/index.html">Overview</a></li>
+        <li class="level1"><a href="quickstart/index.html"><a href="quickstart/index.html#quickstart">Quickstart</a></a></li>
+      </ul>
+      
+    </nav>
+
+    <div id="container">
+
+      <nav id="page-nav">
+        <p class="header"><a href="#">Integration</a></p>
+        
+        <ul class="nav-list">
+          <li class="level1"><a href="#effect-system"><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html">Effect system</a></a></li>
+          <li class="level1"><a href="#message-format"><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html">Message format</a></a></li>
+          <li class="level1"><a href="#message-transport"><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/MessageTransport.html">Message transport</a></a></li>
+          <li class="level2"><a href="#client-transport"><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/ClientMessageTransport.html">Client transport</a></a></li>
+          <li class="level2"><a href="#server-transport"><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/ServerMessageTransport.html">Server transport</a></a></li>
+          <li class="level2"><a href="#endpoint-transport"><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/EndpointMessageTransport.html">Endpoint transport</a></a></li>
+          <li class="level1"><a href="#architecture">Architecture</a></li>
+          <li class="level2"><a href="#client"><a href="https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/automorph/Client.html">Client</a></a></li>
+          <li class="level2"><a href="#handler">Handler</a></li>
+        </ul>
+        
+        <p class="footer"></p>
+      </nav>
+
+      <main class="content">
+
+        <p><img src="https://github.com/martin-ockajak/automorph/raw/main/project/images/logo.jpg" alt="automorph"></p>
+        <p><strong>Automorph</strong> is an <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> client and server library for <a href="https://www.scala-lang.org/">Scala</a> providing an effortless
+        way to invoke and expose remote APIs using <a href="https://www.jsonrpc.org/specification">JSON-RPC</a> and <a href="https://en.wikipedia.org/wiki/Representational_state_transfer">REST-RPC</a> protocols.</p>
+        <h1 id="integration" class="title">Integration</h1>
+        <p><em>Automorph</em> supports integration with various libraries via plugins published in different artifacts.</p>
+        
+        <h2 id="effect-system" class="section"><a class="anchor-link left" href="#effect-system"><i class="icofont-laika">&#xef71;</i></a><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html">Effect system</a></h2>
+        <p>Computational effect system plugins.</p>
+        <p>The underlying runtime must support monadic composition of effectful values.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Artifact</th>
+              <th>Library</th>
+              <th>Effect Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-standard_2.13/latest/automorph/system/FutureSystem.html">FutureSystem</a> (Default)</td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-standard">automorph-standard</a></td>
+              <td><a href="https://docs.scala-lang.org/overviews/core/futures.html">Standard</a></td>
+              <td><a href="https://www.scala-lang.org/api/current/scala/concurrent/Future.html">Future</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-standard_2.13/latest/automorph/system/TrySystem.html">TrySystem</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-standard">automorph-standard</a></td>
+              <td><a href="https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html">Standard</a></td>
+              <td><a href="https://www.scala-lang.org/api/2.13.6/scala/util/Try.html">Try</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem.html">IdentitySystem</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-standard">automorph-standard</a></td>
+              <td><a href="https://www.scala-lang.org/">Standard</a></td>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem$$Identity.html">Identity</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-zio_2.13/latest/automorph/system/ZioSystem.html">ZioSystem</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-zio">automorph-zio</a></td>
+              <td><a href="https://zio.dev/">ZIO</a></td>
+              <td><a href="https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html">RIO</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-monix_2.13/latest/automorph/system/MonixSystem.html">MonixSystem</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-monix">automorph-monix</a></td>
+              <td><a href="https://monix.io/">Monix</a></td>
+              <td><a href="https://monix.io/api/current/monix/eval/Task.html">Task</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-cats-effect_2.13/latest/automorph/system/CatsEffectSystem.html">CatsEffectSystem</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-cats-effect">automorph-cats-effect</a></td>
+              <td><a href="https://typelevel.org/cats-effect/">Cats Effect</a></td>
+              <td><a href="https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html">IO</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-scalaz_2.13/latest/automorph/system/ScalazSystem.html">ScalazSystem</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-scalaz">automorph-scalaz</a></td>
+              <td><a href="https://github.com/scalaz">Scalaz</a></td>
+              <td><a href="https://www.javadoc.io/doc/org.scalaz/scalaz_2.13/latest/scalaz/effect/IO.html">IO</a></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <h2 id="message-format" class="section"><a class="anchor-link left" href="#message-format"><i class="icofont-laika">&#xef71;</i></a><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html">Message format</a></h2>
+        <p>Structured message format serialization/deserialization plugins.</p>
+        <p>The underlying format must support storing arbitrarily nested structures of basic data types.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Artifact</th>
+              <th>Library</th>
+              <th>Node Type</th>
+              <th>Format</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-circe_2.13/latest/automorph/format/json/CirceJsonFormat.html">CirceJsonFormat</a> (Default)</td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-circe">automorph-circe</a></td>
+              <td><a href="https://circe.github.io/circe">Circe</a></td>
+              <td><a href="https://circe.github.io/circe/api/io/circe/Json.html">Json</a></td>
+              <td><a href="https://www.json.org/">JSON</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-upickle_2.13/latest/automorph/format/json/UpickleJsonFormat.html">UpickleJsonFormat</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-upickle">automorph-upickle</a></td>
+              <td><a href="https://github.com/com-lihaoyi/upickle">uPickle</a></td>
+              <td><a href="http://com-lihaoyi.github.io/upickle/#uJson">Value</a></td>
+              <td><a href="https://www.json.org/">JSON</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-upickle_2.13/latest/automorph/format/messagepack/UpickleMessagePackFormat.html">UpickleMessagePackFormat</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-upickle">automorph-upickle</a></td>
+              <td><a href="https://github.com/com-lihaoyi/upickle">uPickle</a></td>
+              <td><a href="http://com-lihaoyi.github.io/upickle/#uPack">Msg</a></td>
+              <td><a href="https://msgpack.org/">MessagePack</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-argonaut_2.13/latest/automorph/format/json/ArgonautJsonFormat.html">ArgonautJsonFormat</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-argonaut">automorph-argonaut</a></td>
+              <td><a href="http://argonaut.io/doc/">Argonaut</a></td>
+              <td><a href="http://argonaut.io/scaladocs/#argonaut.Json">Json</a></td>
+              <td><a href="https://www.json.org/">JSON</a></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <h2 id="message-transport" class="section"><a class="anchor-link left" href="#message-transport"><i class="icofont-laika">&#xef71;</i></a><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/MessageTransport.html">Message transport</a></h2>
+        <p>Message transport protocol plugins.</p>
+        <p>The underlying transport protocol must support request/response messaging pattern.</p>
+        
+        <h3 id="client-transport" class="section"><a class="anchor-link left" href="#client-transport"><i class="icofont-laika">&#xef71;</i></a><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/ClientMessageTransport.html">Client transport</a></h3>
+        <p>Client message transport protocol plugins.</p>
+        <p>Used by the RPC client to send requests and receive responses to and from a remote endpoint.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Artifact</th>
+              <th>Library</th>
+              <th>Effect Type</th>
+              <th>Protocol</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-sttp_2.13/latest/automorph/transport/http/client/SttpClient.html">SttpClient</a> (Default)</td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-sttp">automorph-sttp</a></td>
+              <td><a href="https://sttp.softwaremill.com/en/latest/">STTP</a> -&gt; <a href="https://sttp.softwaremill.com/en/latest/backends/summary.html">Akka HTTP, AsyncHttpClient, HttpClient, OkHttp</a></td>
+              <td><em>All</em></td>
+              <td><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a>, <a href="https://en.wikipedia.org/wiki/WebSocket">WebSocket</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-standard_2.13/latest/automorph/transport/http/client/HttpUrlConnectionClient.html">HttpUrlConnectionClient</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-standard">automorph-standard</a></td>
+              <td><a href="https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html">Standard</a></td>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem$$Identity.html">Identity</a></td>
+              <td><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-rabbitmq_2.13/latest/automorph/transport/amqp/client/RabbitMqClient.html">RabbitMqClient</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-rabbitmq">automorph-rabbitmq</a></td>
+              <td><a href="https://www.rabbitmq.com/java-client.html">RabbitMq</a></td>
+              <td><a href="https://www.scala-lang.org/api/current/scala/concurrent/Future.html">Future</a></td>
+              <td><a href="https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol">AMQP</a></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <h3 id="server-transport" class="section"><a class="anchor-link left" href="#server-transport"><i class="icofont-laika">&#xef71;</i></a><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/ServerMessageTransport.html">Server transport</a></h3>
+        <p>Server message transport protocol plugins.</p>
+        <p>Used to actively receive and reply to requests using specific message transport protocol
+        while invoking RPC request handler to process them.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Artifact</th>
+              <th>Library</th>
+              <th>Effect Type</th>
+              <th>Protocol</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-undertow_2.13/latest/automorph/transport/http/server/UndertowServer.html">UndertowServer</a> (Default)</td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-undertow">automorph-undertow</a></td>
+              <td><a href="https://undertow.io/">Undertow</a></td>
+              <td><em>All</em></td>
+              <td><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a>, <a href="https://en.wikipedia.org/wiki/WebSocket">WebSocket</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-standard_2.13/latest/automorph/transport/http/server/NanoHttpdServer.html">NanoHttpdServer</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-standard">automorph-standard</a></td>
+              <td><a href="https://github.com/NanoHttpd/nanohttpd">NanoHTTPD</a></td>
+              <td><em>All</em></td>
+              <td><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-rabbitmq_2.13/latest/automorph/transport/amqp/server/RabbitMqServer.html">RabbitMqServer</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-rabbitmq">automorph-rabbitmq</a></td>
+              <td><a href="https://www.rabbitmq.com/java-client.html">RabbitMq</a></td>
+              <td><em>All</em></td>
+              <td><a href="https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol">AMQP</a></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <h3 id="endpoint-transport" class="section"><a class="anchor-link left" href="#endpoint-transport"><i class="icofont-laika">&#xef71;</i></a><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/EndpointMessageTransport.html">Endpoint transport</a></h3>
+        <p>Endpoint message transport protocol plugins.</p>
+        <p>Used to passively receive and reply to requests using specific message transport protocol from an active server while invoking RPC request handler to process them.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Artifact</th>
+              <th>Library</th>
+              <th>Effect Type</th>
+              <th>Protocol</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-undertow_2.13/latest/automorph/transport/http/endpoint/UndertowHttpEndpoint.html">UndertowHttpEndpoint</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-undertow">automorph-undertow</a></td>
+              <td><a href="https://undertow.io/">Undertow</a></td>
+              <td><em>All</em></td>
+              <td><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-undertow_2.13/latest/automorph/transport/websocket/endpoint/UndertowWebSocketEndpoint.html">UndertowWebSocketEndpoint</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-undertow">automorph-undertow</a></td>
+              <td><a href="https://undertow.io/">Undertow</a></td>
+              <td><em>All</em></td>
+              <td><a href="https://en.wikipedia.org/wiki/WebSocket">WebSocket</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-tapir_2.13/latest/automorph/transport/http/endpoint/TapirHttpEndpoint.html">TapirHttpEndpoint</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-tapir">automorph-tapir</a></td>
+              <td><a href="https://tapir.softwaremill.com/">Tapir</a> -&gt; <a href="https://tapir.softwaremill.com/en/latest/server/akkahttp.html">Akka HTTP</a>, <a href="https://tapir.softwaremill.com/en/latest/server/finatra.html">Finatra</a>, <a href="https://tapir.softwaremill.com/en/latest/server/http4s.html">http4s</a>, <a href="https://tapir.softwaremill.com/en/latest/server/play.html">Play</a>, <a href="https://tapir.softwaremill.com/en/latest/server/vertx.html">Vert.X</a>, <a href="https://tapir.softwaremill.com/en/latest/server/ziohttp.html">ZIO Http</a></td>
+              <td><em>All</em></td>
+              <td><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-jetty_2.13/latest/automorph/transport/http/endpoint/JettyEndpoint.html">JettyEndpoint</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-jetty">automorph-jetty</a></td>
+              <td><a href="https://www.eclipse.org/jetty/">Jetty</a></td>
+              <td><em>All</em></td>
+              <td><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a></td>
+            </tr>
+            <tr>
+              <td><a href="https://www.javadoc.io/doc/io.automorph/automorph-finagle_2.13/latest/automorph/transport/http/endpoint/FinagleEndpoint.html">FinagleEndpoint</a></td>
+              <td><a href="https://mvnrepository.com/artifact/io.automorph/automorph-finagle">automorph-finagle</a></td>
+              <td><a href="https://twitter.github.io/finagle/">Finagle</a></td>
+              <td><em>All</em></td>
+              <td><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a></td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <h1 id="architecture" class="section"><a class="anchor-link left" href="#architecture"><i class="icofont-laika">&#xef71;</i></a>Architecture</h1>
+        
+        <h2 id="client" class="section"><a class="anchor-link left" href="#client"><i class="icofont-laika">&#xef71;</i></a><a href="https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/automorph/Client.html">Client</a></h2>
+        <p>The client provides automatic creation of transparent proxy instances for remote RPC endpoints defined by existing API classes. Additionally, it also
+        supports direct calls and notifications of remote API methods.</p>
+        <p>Depends on:</p>
+        <ul>
+          <li><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html">Effect system</a></li>
+          <li><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html">Message format</a></li>
+          <li><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/ClientMessageTransport.html">Client message transport</a></li>
+        </ul>
+        <pre><code>                  .--------.     .--------------------------.
+                  | Client | --&gt; | Client message transport |
+                  &#39;--------&#39;     &#39;--------------------------&#39;
+                   |     |             |
+                   v     v             v
+   .----------------.   .---------------.
+   | Message format |   | Effect system |
+   &#39;----------------&#39;   &#39;---------------&#39;</code></pre>
+        
+        <h2 id="handler" class="section"><a class="anchor-link left" href="#handler"><i class="icofont-laika">&#xef71;</i></a>Handler</h2>
+        <p>The handler provides automatic creation of remote RPC endpoint bindings for existing API instances and subsequent processing RPC requests.</p>
+        <p>Depends on:</p>
+        <ul>
+          <li><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html">Effect system</a></li>
+          <li><a href="https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html">Message format</a></li>
+        </ul>
+        <pre><code>   .--------------------------.     .---------.
+   | Server message transport | --&gt; | Handler |
+   &#39;--------------------------&#39;     &#39;---------&#39;
+                        |            |      |
+                        v            v      v
+                      .---------------.    .----------------.
+                      | Effect system |    | Message format |
+                      &#39;---------------&#39;    &#39;----------------&#39;</code></pre>
+
+      </main>
+
+    </div>
+
+  </body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="Laika 0.17.1 + Helium Theme" />
+    <title><a href="#quickstart">Quickstart</a></title>
+    
+    
+      <meta name="description" content="Remote procedure call client and server library for Scala "/>
+    
+    
+    
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700">
+    
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/tonsky/FiraCode@1.207/distr/fira_code.css">
+    
+    <link rel="stylesheet" type="text/css" href="../helium/icofont.min.css" />
+    <link rel="stylesheet" type="text/css" href="../helium/laika-helium.css" />
+    <script src="../helium/laika-helium.js"></script>
+    
+    <script> /* for avoiding page load transitions */ </script>
+  </head>
+
+  <body>
+
+    <header id="top-bar">
+
+      <div class="row">
+        <a id="nav-icon">
+          <i class="icofont-laika">&#xefa2;</i>
+        </a>
+        
+      </div>
+  
+      <a href="../README"><i class="icofont-laika" title="Home">&#xef47;</i></a>
+      
+      <span class="row"></span>
+      
+    </header>
+
+    <nav id="sidebar">
+
+      <ul class="nav-list">
+        <li class="level1"><a href="../overview/index.html">Overview</a></li>
+        <li class="level1 active"><a href="#"><a href="#quickstart">Quickstart</a></a></li>
+      </ul>
+      
+    </nav>
+
+    <div id="container">
+
+      <nav id="page-nav">
+        <p class="header"><a href="#"><a href="#quickstart">Quickstart</a></a></p>
+        
+        <ul class="nav-list">
+          <li class="level1"><a href="#scaladoc"><a href="https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/">Scaladoc</a></a></li>
+          <li class="level1"><a href="#build">Build</a></li>
+          <li class="level2"><a href="#api">API</a></li>
+          <li class="level2"><a href="#server">Server</a></li>
+          <li class="level2"><a href="#client">Client</a></li>
+          <li class="level2"><a href="#dynamic-client">Dynamic Client</a></li>
+        </ul>
+        
+        <p class="footer"></p>
+      </nav>
+
+      <main class="content">
+
+        <h1 id="quickstart" class="title"><a href="#quickstart">Quickstart</a></h1>
+        <p>Exposing and invoking a JSON-RPC API using HTTP as transport protocol.</p>
+        
+        <h2 id="scaladoc" class="section"><a class="anchor-link left" href="#scaladoc"><i class="icofont-laika">&#xef71;</i></a><a href="https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/">Scaladoc</a></h2>
+        
+        <h2 id="build" class="section"><a class="anchor-link left" href="#build"><i class="icofont-laika">&#xef71;</i></a>Build</h2>
+        <p>Add the following to your <code>build.sbt</code> file:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">libraryDependencies</span><span> += </span><span class="string-literal">&quot;io.automorph&quot;</span><span> %% </span><span class="string-literal">&quot;automorph-default&quot;</span><span> % </span><span class="string-literal">&quot;0.0.1&quot;</span></code></pre>
+        
+        <h3 id="api" class="section"><a class="anchor-link left" href="#api"><i class="icofont-laika">&#xef71;</i></a>API</h3>
+        <p>Take an existing asynchronous API:</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="keyword">import</span><span> </span><span class="identifier">scala</span><span>.</span><span class="identifier">concurrent</span><span>.</span><span class="type-name">ExecutionContext</span><span>.</span><span class="type-name">Implicits</span><span>.</span><span class="identifier">global</span><span>
+</span><span class="keyword">import</span><span> </span><span class="identifier">scala</span><span>.</span><span class="identifier">concurrent</span><span>.</span><span class="type-name">Future</span><span>
+
+</span><span class="comment">// Define an API type and create API instance
+</span><span class="keyword">class</span><span> </span><span class="type-name">Api</span><span> {
+  </span><span class="keyword">def</span><span> </span><span class="declaration-name">hello</span><span>(</span><span class="identifier">some</span><span>: </span><span class="type-name">String</span><span>, </span><span class="identifier">n</span><span>: </span><span class="type-name">Int</span><span>): </span><span class="type-name">Future</span><span>[</span><span class="type-name">String</span><span>] = </span><span class="type-name">Future</span><span>.</span><span class="identifier">successful</span><span>(</span><span class="string-literal">s&quot;Hello </span><span class="substitution">$some</span><span class="string-literal"> </span><span class="substitution">$n</span><span class="string-literal">!&quot;</span><span>)
+}
+</span><span class="keyword">val</span><span> </span><span class="identifier">api</span><span> = </span><span class="keyword">new</span><span> </span><span class="type-name">Api</span><span>()</span></code></pre>
+        <p>Expose the API via JSON-RPC over HTTP(S).</p>
+        
+        <h3 id="server" class="section"><a class="anchor-link left" href="#server"><i class="icofont-laika">&#xef71;</i></a>Server</h3>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">// Start RPC server listening on port 80 for HTTP requests with URL path &#39;/api&#39;
+</span><span class="keyword">val</span><span> </span><span class="identifier">server</span><span> = </span><span class="identifier">automorph</span><span>.</span><span class="type-name">DefaultHttpServer</span><span>.</span><span class="identifier">async</span><span>(</span><span class="identifier">_</span><span>.</span><span class="identifier">bind</span><span>(</span><span class="identifier">api</span><span>), </span><span class="number-literal">80</span><span>, </span><span class="string-literal">&quot;/api&quot;</span><span>)
+
+</span><span class="comment">// Stop the server
+</span><span class="identifier">server</span><span>.</span><span class="identifier">close</span><span>()</span></code></pre>
+        
+        <h3 id="client" class="section"><a class="anchor-link left" href="#client"><i class="icofont-laika">&#xef71;</i></a>Client</h3>
+        <p>Invoke the API via JSON-RPC over HTTP(S).</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="comment">// Create RPC client for sending HTTP POST requests to &#39;http://localhost/api&#39;
+</span><span class="keyword">val</span><span> </span><span class="identifier">url</span><span> = </span><span class="keyword">new</span><span> </span><span class="identifier">java</span><span>.</span><span class="identifier">net</span><span>.</span><span class="type-name">URI</span><span>(</span><span class="string-literal">&quot;http://localhost/api&quot;</span><span>)
+</span><span class="keyword">val</span><span> </span><span class="identifier">client</span><span> = </span><span class="identifier">automorph</span><span>.</span><span class="type-name">DefaultHttpClient</span><span>.</span><span class="identifier">async</span><span>(</span><span class="identifier">url</span><span>, </span><span class="string-literal">&quot;POST&quot;</span><span>)
+
+</span><span class="comment">// Call the remote API method via proxy
+</span><span class="keyword">val</span><span> </span><span class="identifier">apiProxy</span><span> = </span><span class="identifier">client</span><span>.</span><span class="identifier">bind</span><span>[</span><span class="type-name">Api</span><span>] </span><span class="comment">// Api
+</span><span class="identifier">apiProxy</span><span>.</span><span class="identifier">hello</span><span>(</span><span class="string-literal">&quot;world&quot;</span><span>, </span><span class="number-literal">1</span><span>) </span><span class="comment">// : Future[String]</span></code></pre>
+        
+        <h3 id="dynamic-client" class="section"><a class="anchor-link left" href="#dynamic-client"><i class="icofont-laika">&#xef71;</i></a>Dynamic Client</h3>
+        <p>Invoke the API dynamically without definition via JSON-RPC over HTTP(S).</p>
+        <pre><code class="nohighlight"><span class="comment">// Call a remote API method dynamically passing the arguments by name
+</span><span class="keyword">val</span><span> </span><span class="identifier">hello</span><span> = </span><span class="identifier">client</span><span>.</span><span class="identifier">method</span><span>(</span><span class="string-literal">&quot;hello&quot;</span><span>)
+</span><span class="identifier">hello</span><span>.</span><span class="identifier">args</span><span>(</span><span class="string-literal">&quot;some&quot;</span><span> -&gt; </span><span class="string-literal">&quot;world&quot;</span><span>, </span><span class="string-literal">&quot;n&quot;</span><span> -&gt; </span><span class="number-literal">1</span><span>).</span><span class="identifier">call</span><span>[</span><span class="type-name">String</span><span>] </span><span class="comment">// Future[String]
+</span><span>
+</span><span class="comment">// Call a remote API method dynamically passing the arguments by position
+</span><span class="identifier">hello</span><span>.</span><span class="identifier">positional</span><span>.</span><span class="identifier">args</span><span>(</span><span class="string-literal">&quot;world&quot;</span><span>, </span><span class="number-literal">1</span><span>).</span><span class="identifier">call</span><span>[</span><span class="type-name">String</span><span>] </span><span class="comment">// Future[String]
+</span><span>
+</span><span class="comment">// Notify a remote API method dynamically passing the arguments by name
+</span><span class="identifier">hello</span><span>.</span><span class="identifier">args</span><span>(</span><span class="string-literal">&quot;some&quot;</span><span> -&gt; </span><span class="string-literal">&quot;world&quot;</span><span>, </span><span class="string-literal">&quot;n&quot;</span><span> -&gt; </span><span class="number-literal">1</span><span>).</span><span class="identifier">tell</span><span> </span><span class="comment">// Future[Unit]
+</span><span>
+</span><span class="comment">// Notify a remote API method dynamically passing the arguments by position
+</span><span class="identifier">hello</span><span>.</span><span class="identifier">positional</span><span>.</span><span class="identifier">args</span><span>(</span><span class="string-literal">&quot;world&quot;</span><span>, </span><span class="number-literal">1</span><span>).</span><span class="identifier">tell</span><span> </span><span class="comment">// Future[Unit]
+</span><span>
+</span><span class="comment">// Close the client
+</span><span class="identifier">client</span><span>.</span><span class="identifier">close</span><span>()</span></code></pre>
+
+      </main>
+
+    </div>
+
+  </body>
+</html>
