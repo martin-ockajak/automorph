@@ -4,7 +4,7 @@ import automorph.log.Logging
 import automorph.spi.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.HttpProperties
-import automorph.transport.http.client.UrlConnectionClient.Context
+import automorph.transport.http.client.HttpUrlConnectionClient.Context
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.{HttpURLConnection, URI}
@@ -22,7 +22,7 @@ import scala.util.{Try, Using}
  * @param url HTTP endpoint URL
  * @param method HTTP method
  */
-final case class UrlConnectionClient(
+final case class HttpUrlConnectionClient(
   url: URI,
   method: String
 ) extends ClientMessageTransport[Identity, Context] with Logging {
@@ -57,7 +57,7 @@ final case class UrlConnectionClient(
     ()
   }
 
-  override def defaultContext: Context = UrlConnectionClient.defaultContext.copy(method = Some(method))
+  override def defaultContext: Context = HttpUrlConnectionClient.defaultContext.copy(method = Some(method))
 
   override def close(): Unit = ()
 
@@ -120,7 +120,7 @@ final case class UrlConnectionClient(
   }
 }
 
-case object UrlConnectionClient {
+case object HttpUrlConnectionClient {
 
   /** Request context type. */
   type Context = HttpProperties[HttpURLConnection]

@@ -1,7 +1,7 @@
 package test.examples
 
 import automorph.transport.http.server.NanoHttpdServer
-import automorph.transport.http.client.UrlConnectionClient
+import automorph.transport.http.client.HttpUrlConnectionClient
 import automorph.system.IdentitySystem.Identity
 import automorph.{Client, DefaultEffectSystem, DefaultMessageFormat, Handler}
 import java.net.URI
@@ -24,8 +24,8 @@ object ChooseMessageTransport extends App {
   val server = NanoHttpdServer(handler.bind(api), runEffect, 80)
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val transport = UrlConnectionClient(new URI("http://localhost/api"), "POST")
-  val client: Client[DefaultMessageFormat.Node, format.type, Identity, UrlConnectionClient.Context] =
+  val transport = HttpUrlConnectionClient(new URI("http://localhost/api"), "POST")
+  val client: Client[DefaultMessageFormat.Node, format.type, Identity, HttpUrlConnectionClient.Context] =
     Client(format, system, transport)
 
   // Call the remote API method via proxy
