@@ -8,8 +8,8 @@ way to invoke and expose remote APIs while supporting [JSON-RPC](https://www.jso
 [![Scaladoc](https://javadoc-badge.appspot.com/io.automorph/automorph-core_2.13.svg?label=scaladoc)](https://javadoc.io/doc/io.automorph/automorph-core_2.13/latest/automorph/)
 
 - [Overview](#overview)
-  - [Goals](#goals)
   - [Standards](#standards)
+  - [Goals](#goals)
   - [Features](#features)
   - [Inspiration](#inspiration)
 - [Quickstart](#quickstart)
@@ -38,12 +38,6 @@ way to invoke and expose remote APIs while supporting [JSON-RPC](https://www.jso
 
 # Overview
 
-## Goals
-
-* Provide a definitive RPC solution for Scala ecosystem
-* Strive for easiest possible integration with existing applications
-* Encourage use of standard interoperability protocols
-
 ## Standards
 
 Supported technical standards:
@@ -55,6 +49,13 @@ Supported technical standards:
 * [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
 * [JSON](https://www.json.org/)
 * [MessagePack](https://msgpack.org/)
+
+## Goals
+
+* Provide a definitive RPC solution for Scala ecosystem
+* Strive for easiest possible integration with existing applications
+* Encourage use of standard interoperability protocols
+
 ## Features
 
 * **Powerful** - generate client and server bindings directly from public methods of your API classes
@@ -68,7 +69,6 @@ Supported technical standards:
   and [Scala 3](https://dotty.epfl.ch/)
 * **Boilerplate free** - even advanced use-cases require only a few lines of code
 * **Dependency free** - core logic depends on [SLF4J API](http://www.slf4j.org/) only
-
 
 ## Inspiration
 
