@@ -327,7 +327,6 @@ site := site.dependsOn(laikaSite).value
 enablePlugins(GhpagesPlugin)
 siteSourceDirectory := target.value / "site"
 git.remoteRepo := "git@github.com:martin-ockajak/automorph.git"
-ghpagesNoJekyll := true
 
 
 // Continuous Integration
