@@ -37,7 +37,7 @@ final case class SttpClient[Effect[_]](
   webSocket: Boolean = false
 ) extends ClientMessageTransport[Effect, Context] with AutoCloseable with Logging {
 
-  private val uri = Uri(url)
+  private val defaultUrl = Uri(url)
   private val defaultMethod = Method.unsafeApply(method)
 
   override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
@@ -114,7 +114,7 @@ final case class SttpClient[Effect[_]](
     val contentType = MediaType.unsafeParse(mediaType)
     val properties = context.getOrElse(defaultContext)
     val requestMethod = properties.method.map(Method.unsafeApply).getOrElse(defaultMethod)
-    val requestUrl = properties.url.map(Uri(_)).getOrElse(uri)
+    val requestUrl = properties.url.map(Uri(_)).getOrElse(defaultUrl)
     val httpRequest = basicRequest.method(requestMethod, requestUrl)
       .contentType(contentType).header(Header.accept(contentType))
       .followRedirects(properties.followRedirects).readTimeout(properties.readTimeout)
