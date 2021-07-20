@@ -1,7 +1,7 @@
 ![automorph](https://github.com/martin-ockajak/automorph/raw/main/project/images/logo.jpg)
 
 **Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless
-way to invoke and expose remote APIs while supporting multiple RPC protocols such as [JSON-RPC](https://www.jsonrpc.org/specification) and highly standardized form of [REST](https://en.wikipedia.org/wiki/Representational_state_transfer).
+way to invoke and expose remote APIs while supporting [JSON-RPC](https://www.jsonrpc.org/specification) and [REST-RPC](https://en.wikipedia.org/wiki/Representational_state_transfer) remote call protocols.
 
 [![Build](https://github.com/martin-ockajak/automorph/workflows/Build/badge.svg)](https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
 [![Releases](https://img.shields.io/maven-central/v/io.automorph/automorph-core_2.13.svg)](https://mvnrepository.com/artifact/io.automorph)
@@ -40,8 +40,20 @@ way to invoke and expose remote APIs while supporting multiple RPC protocols suc
 ## Goals
 
 * Provide a definitive RPC solution for Scala ecosystem
-* Require minimal effort and disruption of existing codebase
+* Strive for easiest possible integration with existing applications
 * Encourage use of standard interoperability protocols
+
+## Standards
+
+Supported technical standards:
+
+* [JSON-RPC](https://www.jsonrpc.org/specification)
+* [REST-RPC](https://en.wikipedia.org/wiki/Representational_state_transfer)
+* [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)
+* [WebSocket](https://en.wikipedia.org/wiki/WebSocket)
+* [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
+* [JSON](https://www.json.org/)
+* [MessagePack](https://msgpack.org/)
 
 ## Features
 
