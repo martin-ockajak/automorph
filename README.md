@@ -8,8 +8,8 @@ way to invoke and expose remote APIs while supporting [JSON-RPC](https://www.jso
 [![Scaladoc](https://javadoc-badge.appspot.com/io.automorph/automorph-core_2.13.svg?label=scaladoc)](https://javadoc.io/doc/io.automorph/automorph-core_2.13/latest/automorph/)
 
 - [Overview](#overview)
-  - [Standards](#standards)
   - [Goals](#goals)
+  - [Standards](#standards)
   - [Features](#features)
   - [Inspiration](#inspiration)
 - [Quickstart](#quickstart)
@@ -38,9 +38,13 @@ way to invoke and expose remote APIs while supporting [JSON-RPC](https://www.jso
 
 # Overview
 
-## Standards
+## Goals
 
-Supported technical standards:
+* Provide a **definitive RPC solution** for Scala ecosystem
+* Strive for **easiest possible integration** with existing applications
+* Encourage use of **appropriate technical standards** for system interoperability
+
+## Standards
 
 * [JSON-RPC](https://www.jsonrpc.org/specification)
 * [REST-RPC](https://en.wikipedia.org/wiki/Representational_state_transfer)
@@ -49,12 +53,6 @@ Supported technical standards:
 * [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
 * [JSON](https://www.json.org/)
 * [MessagePack](https://msgpack.org/)
-
-## Goals
-
-* Provide a **definitive RPC solution** for Scala ecosystem
-* Strive for **easiest possible integration** with existing applications
-* Encourage use of **standard interoperability protocols**
 
 ## Features
 
