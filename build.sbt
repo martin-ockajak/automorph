@@ -37,10 +37,9 @@ lazy val root = project.in(file(".")).aggregate(
   examples
 ).settings(
   name := "automorph",
-  description := "JSON-RPC client & server",
-  publish / skip := true,
-).enablePlugins(ScalaUnidocPlugin)
-
+  description := "Remote procedure call client and server library for Scala ",
+  publish / skip := true
+)
 
 // Dependencies
 
@@ -297,6 +296,9 @@ Test / test := ((Test / test) dependsOn testScalastyle).value
 
 
 // Documentation
+
+// API
+enablePlugins(ScalaUnidocPlugin)
 ThisBuild / autoAPIMappings := true
 apiURL := Some(url("https://javadoc.io/doc/io.automorph/automorph-core_3/latest"))
 ScalaUnidoc / unidoc / scalacOptions ++= Seq(
@@ -308,6 +310,13 @@ ScalaUnidoc / unidoc / scalacOptions ++= Seq(
   "-sourcepath",
   (LocalRootProject / baseDirectory).value.getAbsolutePath
 )
+
+// Site
+enablePlugins(LaikaPlugin)
+laikaTheme := laika.helium.Helium.defaults.build
+laikaIncludeAPI := true
+Laika / sourceDirectories := Seq(baseDirectory.value / "doc")
+laikaSite / target := target.value / "site"
 //Compile / doc / scalacOptions ++= Seq("-groups", "-implicits")
 
 
