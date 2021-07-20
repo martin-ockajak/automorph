@@ -37,8 +37,7 @@ final case class SttpClient[Effect[_]](
   webSocket: Boolean = false
 ) extends ClientMessageTransport[Effect, Context] with AutoCloseable with Logging {
 
-  type Capabilities = capabilities.Effect[Effect] with WebSockets
-
+  private type Capabilities = capabilities.Effect[Effect] with WebSockets
   private val uri = Uri(url)
   private val defaultMethod = Method.unsafeApply(method)
 
@@ -75,7 +74,10 @@ final case class SttpClient[Effect[_]](
 
   private def send[R](httpRequest: Request[R, Capabilities], request: ArraySeq.ofByte): Effect[Response[R]] = {
     val protocol = if (webSocket) "WebSocket" else "HTTP"
-    logger.trace(s"Sending $protocol httpRequest", Map("URL" -> url, "Method" -> httpRequest.method, "Size" -> request.size))
+    logger.trace(
+      s"Sending $protocol httpRequest",
+      Map("URL" -> url, "Method" -> httpRequest.method, "Size" -> request.size)
+    )
     system.flatMap(
       system.either(httpRequest.send(backend)),
       (result: Either[Throwable, Response[R]]) =>
@@ -89,7 +91,10 @@ final case class SttpClient[Effect[_]](
             system.failed(error)
           },
           response => {
-            logger.debug(s"Sent $protocol httpRequest", Map("URL" -> url, "Method" -> httpRequest.method, "Size" -> request.size))
+            logger.debug(
+              s"Sent $protocol httpRequest",
+              Map("URL" -> url, "Method" -> httpRequest.method, "Size" -> request.size)
+            )
             system.pure(response)
           }
         )
