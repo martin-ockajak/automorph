@@ -9,8 +9,8 @@ way to invoke and expose remote APIs while supporting [JSON-RPC](https://www.jso
 
 - [Overview](#overview)
   - [Goals](#goals)
-  - [Features](#features)
   - [Standards](#standards)
+  - [Features](#features)
   - [Inspiration](#inspiration)
 - [Quickstart](#quickstart)
   - [Scaladoc](#scaladoc)
@@ -44,6 +44,17 @@ way to invoke and expose remote APIs while supporting [JSON-RPC](https://www.jso
 * Strive for easiest possible integration with existing applications
 * Encourage use of standard interoperability protocols
 
+## Standards
+
+Supported technical standards:
+
+* [JSON-RPC](https://www.jsonrpc.org/specification)
+* [REST-RPC](https://en.wikipedia.org/wiki/Representational_state_transfer)
+* [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)
+* [WebSocket](https://en.wikipedia.org/wiki/WebSocket)
+* [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
+* [JSON](https://www.json.org/)
+* [MessagePack](https://msgpack.org/)
 ## Features
 
 * **Powerful** - generate client and server bindings directly from public methods of your API classes
@@ -58,17 +69,6 @@ way to invoke and expose remote APIs while supporting [JSON-RPC](https://www.jso
 * **Boilerplate free** - even advanced use-cases require only a few lines of code
 * **Dependency free** - core logic depends on [SLF4J API](http://www.slf4j.org/) only
 
-## Standards
-
-Supported technical standards:
-
-* [JSON-RPC](https://www.jsonrpc.org/specification)
-* [REST-RPC](https://en.wikipedia.org/wiki/Representational_state_transfer)
-* [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)
-* [WebSocket](https://en.wikipedia.org/wiki/WebSocket)
-* [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
-* [JSON](https://www.json.org/)
-* [MessagePack](https://msgpack.org/)
 
 ## Inspiration
 
