@@ -123,7 +123,7 @@ final case class SttpClient[Effect[_]](
 
 case object SttpClient {
 
-  /** STTP backend WebSocker support capabilities type. */
+  /** STTP backend WebSocket capabilities type. */
   type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
 
   /** Request context type. */
