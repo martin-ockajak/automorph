@@ -4,12 +4,11 @@ import automorph.log.Logging
 import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.HttpProperties
 import automorph.transport.http.client.SttpClient.{Context, WebSocketSupport}
-import sttp.capabilities.WebSockets
 import automorph.util.Bytes
 import java.net.URI
 import scala.collection.immutable.ArraySeq
-import sttp.capabilities
-import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, Identity, PartialRequest, Request, Response, SttpBackend}
+import sttp.capabilities.WebSockets
+import sttp.client3.{Identity, PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
 import sttp.model.{Header, MediaType, Method, Uri}
 import sttp.ws.WebSocket
 
@@ -130,7 +129,7 @@ final case class SttpClient[Effect[_]](
 case object SttpClient {
 
   /** STTP backend WebSocker support capabilities type. */
-  type WebSocketSupport[Effect[_]] = capabilities.Effect[Effect] with WebSockets
+  type WebSocketSupport[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
 
   /** Request context type. */
   type Context = HttpProperties[PartialRequest[Either[String, String], Any]]
