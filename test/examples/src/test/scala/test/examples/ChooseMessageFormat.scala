@@ -36,6 +36,9 @@ object ChooseMessageFormat extends App {
   val apiProxy = client.bind[Api] // Api
   apiProxy.hello("world", 1) // : Future[String]
 
+  // Close the client
+  client.close()
+
   // Stop the server
   server.close()
 }

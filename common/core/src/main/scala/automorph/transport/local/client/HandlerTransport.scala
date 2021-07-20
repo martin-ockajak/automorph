@@ -40,4 +40,6 @@ case class HandlerTransport[Node, ActualFormat <: MessageFormat[Node], Effect[_]
       (_: HandlerResult[ArraySeq.ofByte]) => ()
     )
   }
+
+  override def close(): Unit = ()
 }

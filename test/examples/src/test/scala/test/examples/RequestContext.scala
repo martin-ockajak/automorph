@@ -37,6 +37,9 @@ object RequestContext extends App {
   apiProxy.requestMetaData("test")(context) // List("test", "/api", "valid")
   client.method("requestMetaData").args("message" -> "test").call[List[String]] //  List("test", "/api", "valid")
 
+  // Close the client
+  client.close()
+
   // Stop the server
   server.close()
 }

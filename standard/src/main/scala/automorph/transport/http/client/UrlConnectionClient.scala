@@ -59,6 +59,8 @@ final case class UrlConnectionClient(
 
   override def defaultContext: Context = UrlConnectionClient.defaultContext.copy(method = Some(method))
 
+  override def close(): Unit = ()
+
   private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): HttpURLConnection = {
     logger.trace("Sending HTTP request", Map("URL" -> url, "Size" -> request.length))
     val properties = context.getOrElse(defaultContext)

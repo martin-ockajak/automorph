@@ -36,6 +36,9 @@ object Asynchronous extends App {
   // Notify a remote API method dynamically passing the arguments by position
   hello.positional.args("world", 1).tell // Future[Unit]
 
+  // Close the client
+  client.close()
+
   // Stop the server
   server.close()
 }

@@ -4,11 +4,14 @@ import automorph.log.Logging
 import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.HttpProperties
 import automorph.transport.http.client.SttpClient.Context
-import java.io.IOException
+import sttp.capabilities.WebSockets
+import automorph.util.Bytes
 import java.net.URI
 import scala.collection.immutable.ArraySeq
-import sttp.client3.{asByteArray, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
+import sttp.capabilities
+import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, Identity, PartialRequest, Request, Response, SttpBackend}
 import sttp.model.{Header, MediaType, Method, Uri}
+import sttp.ws.WebSocket
 
 /**
  * STTP client transport plugin using HTTP as message transport protocol with the specified STTP backend.
@@ -19,6 +22,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
  * @constructor Creates an STTP client transport plugin with the specified STTP backend.
  * @param url endpoint URL
+ * @param method HTTP method, upgrade the HTTP connection to WebSocket protocol if empty
  * @param system effect system plugin
  * @param method HTTP method
  * @param backend STTP backend
@@ -26,48 +30,49 @@ import sttp.model.{Header, MediaType, Method, Uri}
  */
 final case class SttpClient[Effect[_]](
   url: URI,
-  method: String,
+  method: Option[String],
+  webSocket: Boolean,
   system: EffectSystem[Effect],
-  backend: SttpBackend[Effect, _]
-) extends ClientMessageTransport[Effect, Context] with Logging {
+  backend: SttpBackend[Effect, capabilities.Effect[Effect] with WebSockets]
+) extends ClientMessageTransport[Effect, Context] with AutoCloseable with Logging {
+
+  type Capabilities = capabilities.Effect[Effect] with WebSockets
 
   private val uri = Uri(url)
-  private val httpMethod = Method.unsafeApply(method)
+  private val configuredMethod = method.map(Method.unsafeApply)
+  private val webSocketMethod = Method.GET
 
-  override def call(
-    request: ArraySeq.ofByte,
-    mediaType: String,
-    context: Option[Context]
-  ): Effect[ArraySeq.ofByte] = {
-    val httpRequest = createRequest(request, mediaType, context).response(asByteArray)
+  override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
+    val httpRequest = createHttpRequest(request, mediaType, context)
     system.flatMap(
-      send[Either[String, Array[Byte]]](httpRequest, request.length),
-      (response: Response[Either[String, Array[Byte]]]) =>
-        response.body.fold(
+      system.either(send(httpRequest, request.length)),
+      (response: Either[Throwable, Response[Array[Byte]]]) =>
+        response.fold(
           error => {
-            val exception = new IOException(error)
-            logger.error("Failed to receive HTTP response", exception, Map("URL" -> url))
-            system.failed(exception)
+            logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
+            system.failed(error)
           },
           message => {
             logger.debug(
               "Received HTTP response",
-              Map("URL" -> url, "Status" -> response.code, "Size" -> request.length)
+              Map("URL" -> url, "Status" -> message.code, "Size" -> message.body.length)
             )
-            system.pure(new ArraySeq.ofByte(message))
+            system.pure(Bytes.byteArray.from(message.body))
           }
         )
     )
   }
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
-    val httpRequest = createRequest(request, mediaType, context).response(ignore)
-    system.map(send[Unit](httpRequest, request.length), (_: Response[Unit]) => ())
+    val httpRequest = createHttpRequest(request, mediaType, context).response(ignore)
+    system.map(send(httpRequest, request.length), (_: Response[Unit]) => ())
   }
 
   override def defaultContext: Context = SttpClient.defaultContext
 
-  private def send[R](request: Request[R, Any], size: Int): Effect[Response[R]] = {
+  override def close(): Unit = backend.close()
+
+  private def send[R](request: Request[R, Capabilities], size: Int): Effect[Response[R]] = {
     logger.trace("Sending HTTP request", Map("URL" -> url, "Method" -> request.method, "Size" -> size))
     system.flatMap(
       system.either(request.send(backend)),
@@ -89,19 +94,25 @@ final case class SttpClient[Effect[_]](
     )
   }
 
-  private def createRequest(
+  private def sendWebSocket(request: ArraySeq.ofByte): WebSocket[Effect] => Effect[Array[Byte]] =
+    webSocket => system.flatMap(webSocket.sendBinary(request.unsafeArray), _ => webSocket.receiveBinary(true))
+
+  private def createHttpRequest(
     request: ArraySeq.ofByte,
     mediaType: String,
     context: Option[Context]
-  ): Request[Either[String, String], Any] = {
+  ): Request[Array[Byte], Capabilities] = {
     val contentType = MediaType.unsafeParse(mediaType)
     val properties = context.getOrElse(defaultContext)
-    val requestMethod = properties.method.map(Method.unsafeApply).getOrElse(httpMethod)
+    val requestMethod = properties.method.map(Method.unsafeApply).orElse(configuredMethod)
     val requestUrl = properties.url.map(Uri(_)).getOrElse(uri)
-    basicRequest.method(requestMethod, requestUrl)
-      .contentType(contentType).header(Header.accept(contentType)).body(request.unsafeArray)
+    val httpRequest = basicRequest.contentType(contentType).header(Header.accept(contentType))
       .followRedirects(properties.followRedirects).readTimeout(properties.readTimeout)
       .headers(properties.headers.map { case (name, value) => Header(name, value) }: _*)
+      .body(request.unsafeArray)
+    requestMethod.map(httpMethod => httpRequest.method(httpMethod, requestUrl).response(asByteArrayAlways)).getOrElse {
+      httpRequest.method(webSocketMethod, requestUrl).response(asWebSocketAlways(sendWebSocket(request)))
+    }
   }
 }
 

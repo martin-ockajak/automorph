@@ -37,6 +37,9 @@ object MethodAlias extends App {
   client.method("aliased").args("value" -> None).tell // ()
   Try(client.method("omitted").args().call[String]) // Failure
 
+  // Close the client
+  client.close()
+
   // Stop the server
   server.close()
 }

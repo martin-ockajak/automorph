@@ -136,6 +136,9 @@ hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 
 // Notify a remote API method dynamically passing the arguments by position
 hello.positional.args("world", 1).tell // Future[Unit]
+
+// Close the client
+client.close()
 ```
 
 # Integration
@@ -185,7 +188,7 @@ Used by the RPC client to send requests and receive responses to and from a remo
 
 | Class | Artifact | Library | Effect Type | Protocol |
 | ---- | --- | --- | --- | --- |
-| [SttpClient](https://www.javadoc.io/doc/io.automorph/automorph-sttp_2.13/latest/automorph/transport/http/client/SttpClient.html) (Default) | [automorph-sttp](https://mvnrepository.com/artifact/io.automorph/automorph-sttp) | [STTP](https://sttp.softwaremill.com/en/latest/) -> [Akka HTTP, AsyncHttpClient, Armeria, Finagle, HttpClient, Http4s, OkHttp](https://sttp.softwaremill.com/en/latest/backends/summary.html)| *All* | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [SttpClient](https://www.javadoc.io/doc/io.automorph/automorph-sttp_2.13/latest/automorph/transport/http/client/SttpClient.html) (Default) | [automorph-sttp](https://mvnrepository.com/artifact/io.automorph/automorph-sttp) | [STTP](https://sttp.softwaremill.com/en/latest/) -> [Akka HTTP, AsyncHttpClient, HttpClient, Http4s, OkHttp](https://sttp.softwaremill.com/en/latest/backends/summary.html)| *All* | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 | [UrlConnectionClient](https://www.javadoc.io/doc/io.automorph/automorph-standard_2.13/latest/automorph/transport/http/client/UrlConnectionClient.html) | [automorph-standard](https://mvnrepository.com/artifact/io.automorph/automorph-standard) | [Standard](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html) | [Identity](https://www.javadoc.io/doc/io.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem$$Identity.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [RabbitMqClient](https://www.javadoc.io/doc/io.automorph/automorph-rabbitmq_2.13/latest/automorph/transport/amqp/client/RabbitMqClient.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/io.automorph/automorph-rabbitmq) | [RabbitMq](https://www.rabbitmq.com/java-client.html) | [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
 
@@ -294,6 +297,9 @@ val client = automorph.DefaultHttpClient.sync(url, "POST")
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : String
+
+// Close the client
+client.close()
 ```
 
 ## [Asynchronous](/examples/src/test/scala/examples/Asynchronous.scala)
@@ -332,6 +338,9 @@ val client = automorph.DefaultHttpClient.async(url, "POST")
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : Future[String]
+
+// Close the client
+client.close()
 ```
 
 ### Dynamic Client
@@ -401,6 +410,9 @@ implicit val context: automorph.DefaultHttpClient.Context = defaultContext.heade
 apiProxy.requestMetaData("test") // List("test", "/api", "valid")
 apiProxy.requestMetaData("test")(context) // List("test", "/api", "valid")
 client.method("requestMetaData").args("message" -> "test").call[List[String]] //  List("test", "/api", "valid")
+
+// Close the client
+client.close()
 ```
 
 ## [Method alias](/examples/src/test/scala/examples/MethodAlias.scala)
@@ -460,6 +472,9 @@ val client = automorph.DefaultHttpClient.sync(url, "POST")
 client.method("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
 client.method("aliased").args("value" -> None).tell // ()
 Try(client.method("omitted").args().call[String]) // Failure
+
+// Close the client
+client.close()
 ```
 
 ## [Choose effect system](/examples/src/test/scala/examples/ChooseEffectSystem.scala)
@@ -517,6 +532,9 @@ val client = DefaultHttpClient(url, "POST", system, backend)
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : Task[String]
+
+// Close the client
+client.close()
 ```
 
 ## [Choose message transport](/examples/src/test/scala/examples/ChooseMessageTransport.scala)
@@ -566,6 +584,9 @@ val client: Client[DefaultMessageFormat.Node, format.type, Identity, UrlConnecti
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : String
+
+// Close the client
+client.close()
 ```
 
 ## [Choose message format](/examples/src/test/scala/examples/ChooseMessageFormat.scala)
@@ -626,4 +647,7 @@ val client: Client[CirceJsonFormat.Node, format.type, Future, DefaultHttpClientT
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : Future[String]
+
+// Close the client
+client.close()
 ```

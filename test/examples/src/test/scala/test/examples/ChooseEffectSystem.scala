@@ -30,6 +30,9 @@ object ChooseEffectSystem extends App {
   val apiProxy = client.bind[Api] // Api
   apiProxy.hello("world", 1) // : Task[String]
 
+  // Close the client
+  client.close()
+
   // Stop the server
   server.close()
 }

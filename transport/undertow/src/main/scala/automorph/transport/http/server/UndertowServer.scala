@@ -25,7 +25,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @param port port to listen on for HTTP connections
  * @param path HTTP URL path (default: /)
  * @param errorStatus JSON-RPC error code to HTTP status mapping function
- * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
+ * @param webSocket allow upgrade of HTTP connections to WebSocket protocol if true, use HTTP only if false
  * @param builder Undertow web server builder
  * @tparam Effect effect type
  */

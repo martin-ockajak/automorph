@@ -29,7 +29,7 @@ final case class Client[Node, ActualFormat <: MessageFormat[Node], Effect[_], Co
   system: EffectSystem[Effect],
   transport: ClientMessageTransport[Effect, Context],
   protected val errorToException: (Int, String) => Throwable = defaultErrorToException
-) extends ClientBind[Node, ActualFormat, Effect, Context] with CannotEqual {
+) extends ClientBind[Node, ActualFormat, Effect, Context] with AutoCloseable with CannotEqual {
 
   /** This client type. */
   type ThisClient = Client[Node, ActualFormat, Effect, Context]
@@ -61,6 +61,8 @@ final case class Client[Node, ActualFormat <: MessageFormat[Node], Effect[_], Co
    */
   def errorMapping(errorToException: (Int, String) => Throwable): ThisClient =
     copy(errorToException = errorToException)
+
+  override def close(): Unit = transport.close()
 
   override def toString: String =
     s"${this.getClass.getName}(format = ${format.getClass.getName}, system = ${system.getClass.getName}, transport = ${transport.getClass.getName})"
