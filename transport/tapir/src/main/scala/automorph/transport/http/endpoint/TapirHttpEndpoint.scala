@@ -20,7 +20,7 @@ import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, 
  *
  * @see [[https://tapir.softwaremill.com Documentation]]
  */
-case object TapirEndpoint extends Logging with EndpointMessageTransport {
+case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 
   /** Request context type. */
   type Context = HttpProperties[Unit]
