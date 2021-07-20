@@ -1,11 +1,12 @@
-package automorph.transport.http.endpoint
+package automorph.transport.websocket.endpoint
 
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.ResponseError
 import automorph.transport.http.HttpProperties
-import automorph.transport.http.endpoint.UndertowWebSocketEndpoint.Context
+import automorph.transport.http.endpoint.UndertowWebSocketCallback
+import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
 import automorph.util.{Bytes, Network}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.Headers

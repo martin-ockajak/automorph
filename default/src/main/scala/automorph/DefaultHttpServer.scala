@@ -4,7 +4,7 @@ import io.undertow.Undertow
 import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.defaultErrorStatus
 import automorph.transport.http.server.UndertowServer.{defaultBuilder, Context}
-import automorph.transport.http.endpoint.{UndertowHttpEndpoint, UndertowWebSocketEndpoint}
+import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import automorph.transport.http.server.UndertowServer
 import automorph.spi.EffectSystem
 import scala.concurrent.{ExecutionContext, Future}
