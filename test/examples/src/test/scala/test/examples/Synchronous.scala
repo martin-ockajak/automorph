@@ -8,7 +8,7 @@ object Synchronous extends App {
   }
   val api = new Api()
 
-  // Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
   val server = automorph.DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'

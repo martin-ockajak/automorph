@@ -22,7 +22,7 @@ object ChooseMessageFormat extends App {
   val system = DefaultEffectSystem.async
   val runEffect = (effect: Future[_]) => effect
 
-  // Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
   val handler = Handler[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpServer.Context](format, system)
   val server = DefaultHttpServer(handler.bind(api), runEffect, 80, "/api")
 

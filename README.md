@@ -109,7 +109,7 @@ Expose the API via JSON-RPC over HTTP(S).
 ### Server
 
 ```scala
-// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = automorph.DefaultHttpServer.async(_.bind(api), 80, "/api")
 
 // Stop the server
@@ -291,7 +291,7 @@ val api = new Api()
 ### Server
 
 ```scala
-  // Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = automorph.DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
 // Stop the server
@@ -332,7 +332,7 @@ val api = new Api()
 ### Server
 
 ```scala
-// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = automorph.DefaultHttpServer.async(_.bind(api), 80, "/api")
 
 // Stop the server
@@ -398,7 +398,7 @@ trait ClientApi {
 ### Server
 
 ```scala
-// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = automorph.DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
 // Stop the server
@@ -463,7 +463,7 @@ val mapMethodName = (name: String) => name match {
   case other => Seq(s"test.$other")
 }
 
-// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = automorph.DefaultHttpServer.sync(_.bind(api, mapMethodName(_)), 80, "/api")
 
 // Stop the server
@@ -522,7 +522,7 @@ import automorph.{DefaultHttpClient, DefaultHttpServer}
 val system = ZioSystem[Any]()
 val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
 
-// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = DefaultHttpServer.system[ZioSystem.TaskEffect](system, runEffect, _.bind(api), 80, "/api")
 
 // Stop the server
@@ -571,7 +571,7 @@ import automorph.{Client, DefaultSystem, DefaultFormat, Handler}
 val system = DefaultEffectSystem.sync
 val runEffect = (effect: Identity[NanoHttpdServer.Response]) => effect
 
-// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val format = DefaultMessageFormat()
 val handler = Handler[DefaultMessageFormat.Node, format.type, Identity, NanoHttpdServer.Context](format, system)
 val server = NanoHttpdServer(handler.bind(api), runEffect, 80)
@@ -639,7 +639,7 @@ implicit def recordRw: format.custom.ReadWriter[Record] = format.custom.macroRW
 val system = DefaultEffectSystem.async
 val runEffect = (effect: Future[_]) => effect
 
-// Create and start RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val handler = Handler[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpServer.Context](format, system)
 val server = DefaultHttpServer(handler.bind(api), runEffect, 80, "/api")
 
