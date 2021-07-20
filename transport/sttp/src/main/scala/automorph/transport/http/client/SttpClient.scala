@@ -44,17 +44,18 @@ final case class SttpClient[Effect[_]](
 
   override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
     val httpRequest = createHttpRequest(request, mediaType, context)
+    val protocol = if (webSocket) "WebSocket" else "HTTP"
     system.flatMap(
-      system.either(send(httpRequest, request.length)),
+      system.either(send(httpRequest, request)),
       (response: Either[Throwable, Response[Array[Byte]]]) =>
         response.fold(
           error => {
-            logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
+            logger.error(s"Failed to receive $protocol response", error, Map("URL" -> url))
             system.failed(error)
           },
           message => {
             logger.debug(
-              "Received HTTP response",
+              s"Received $protocol response",
               Map("URL" -> url, "Status" -> message.code, "Size" -> message.body.length)
             )
             system.pure(Bytes.byteArray.from(message.body))
@@ -65,29 +66,30 @@ final case class SttpClient[Effect[_]](
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
     val httpRequest = createHttpRequest(request, mediaType, context).response(ignore)
-    system.map(send(httpRequest, request.length), (_: Response[Unit]) => ())
+    system.map(send(httpRequest, request), (_: Response[Unit]) => ())
   }
 
   override def defaultContext: Context = SttpClient.defaultContext
 
   override def close(): Unit = backend.close()
 
-  private def send[R](request: Request[R, Capabilities], size: Int): Effect[Response[R]] = {
-    logger.trace("Sending HTTP request", Map("URL" -> url, "Method" -> request.method, "Size" -> size))
+  private def send[R](httpRequest: Request[R, Capabilities], request: ArraySeq.ofByte): Effect[Response[R]] = {
+    val protocol = if (webSocket) "WebSocket" else "HTTP"
+    logger.trace(s"Sending $protocol httpRequest", Map("URL" -> url, "Method" -> httpRequest.method, "Size" -> request.size))
     system.flatMap(
-      system.either(request.send(backend)),
+      system.either(httpRequest.send(backend)),
       (result: Either[Throwable, Response[R]]) =>
         result.fold(
           error => {
             logger.error(
-              "Failed to send HTTP request",
+              s"Failed to send $protocol httpRequest",
               error,
-              Map("URL" -> url, "Method" -> request.method, "Size" -> size)
+              Map("URL" -> url, "Method" -> httpRequest.method, "Size" -> request.size)
             )
             system.failed(error)
           },
           response => {
-            logger.debug("Sent HTTP request", Map("URL" -> url, "Method" -> request.method, "Size" -> size))
+            logger.debug(s"Sent $protocol httpRequest", Map("URL" -> url, "Method" -> httpRequest.method, "Size" -> request.size))
             system.pure(response)
           }
         )
@@ -110,11 +112,10 @@ final case class SttpClient[Effect[_]](
       .contentType(contentType).header(Header.accept(contentType))
       .followRedirects(properties.followRedirects).readTimeout(properties.readTimeout)
       .headers(properties.headers.map { case (name, value) => Header(name, value) }: _*)
-      .body(request.unsafeArray)
     if (webSocket) {
       httpRequest.response(asWebSocketAlways(sendWebSocket(request)))
     } else {
-      httpRequest.response(asByteArrayAlways)
+      httpRequest.body(request.unsafeArray).response(asByteArrayAlways)
     }
   }
 }
