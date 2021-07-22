@@ -7,7 +7,6 @@ import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.defaultErrorStatus
 import automorph.transport.http.server.UndertowServer.{Context, defaultBuilder}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
-import io.undertow.server.HttpHandler
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.{Handlers, Undertow}
 import java.net.InetSocketAddress

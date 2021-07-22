@@ -67,7 +67,10 @@ final case class SttpClient[Effect[_]](
 
   override def defaultContext: Context = SttpClient.defaultContext
 
-  override def close(): Unit = backend.close()
+  override def close(): Unit = {
+    backend.close()
+    ()
+  }
 
   private def send[R](httpRequest: Request[R, WebSocket[Effect]], request: ArraySeq.ofByte): Effect[Response[R]] = {
     logger.trace(
@@ -98,7 +101,7 @@ final case class SttpClient[Effect[_]](
   }
 
   private def sendWebSocket(request: ArraySeq.ofByte): sttp.ws.WebSocket[Effect] => Effect[Array[Byte]] =
-    webSocket => system.flatMap(webSocket.sendBinary(request.unsafeArray), _ => webSocket.receiveBinary(true))
+    webSocket => system.flatMap(webSocket.sendBinary(request.unsafeArray), (_: Unit) => webSocket.receiveBinary(true))
 
   private def createHttpRequest(
     request: ArraySeq.ofByte,
