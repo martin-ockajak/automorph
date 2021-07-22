@@ -154,8 +154,6 @@ client.close()
 
 # Integration
 
-*Automorph* supports integration with various libraries via plugins published in different artifacts.
-
 ## [Effect system](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html)
 
 Computational effect system plugins.

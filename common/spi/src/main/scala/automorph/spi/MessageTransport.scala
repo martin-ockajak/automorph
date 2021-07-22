@@ -1,7 +1,7 @@
 package automorph.spi
 
 /**
- * Message transport protocol plugin.
+ * Binary message transport protocol plugin.
  *
  * The underlying transport protocol must support request/response messaging pattern.
  */

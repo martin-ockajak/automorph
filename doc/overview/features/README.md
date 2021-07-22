@@ -1,30 +1,4 @@
-# Overview
-
-## Goals
-
-* Provide a **definitive RPC solution** for Scala ecosystem
-* Strive for **easiest possible integration** with existing applications
-* Encourage use of **appropriate technical standards** for system interoperability
-
-## Standards
-
-### RPC protocols
-
-* [JSON-RPC](https://www.jsonrpc.org/specification)
-* [REST-RPC](https://en.wikipedia.org/wiki/Representational_state_transfer)
-
-### Transport protocols
-
-* [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)
-* [WebSocket](https://en.wikipedia.org/wiki/WebSocket)
-* [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
-
-### Message formats
-
-* [JSON](https://www.json.org/)
-* [MessagePack](https://msgpack.org/)
-
-## Features
+# Features
 
 * **Powerful** - generate client and server bindings directly from public methods of your API classes
 * **Modular** - combine integration plugins to match your chosen effect type, message format and message transport protocol
@@ -38,9 +12,5 @@
 * **Boilerplate free** - even advanced use-cases require only a few lines of code
 * **Dependency free** - core logic depends on [SLF4J API](http://www.slf4j.org/) only
 
-## Inspiration
-
-* [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
-* [Autowire](https://github.com/lihaoyi/autowire)
-* [STTP](https://github.com/softwaremill/sttp)
+*Automorph* supports integration with various libraries via plugins published in different artifacts.
 

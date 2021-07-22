@@ -1,4 +1,4 @@
-# [Quickstart]
+# Quickstart
 
 Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 

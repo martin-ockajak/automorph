@@ -314,7 +314,16 @@ ScalaUnidoc / unidoc / scalacOptions ++= Seq(
 
 // Site
 enablePlugins(LaikaPlugin)
-laikaTheme := laika.helium.Helium.defaults.build
+import laika.helium.config._
+import laika.ast.LengthUnit._
+//laikaTheme := laika.helium.Helium.defaults.site.layout(
+//  contentWidth = vw(60),
+//  navigationWidth = vw(40),
+//  defaultBlockSpacing = px(10),
+//  defaultLineHeight = 1.5,
+//  anchorPlacement = AnchorPlacement.Right
+//).build
+laikaTheme := laika.theme.Theme.empty
 laikaExtensions := Seq(laika.markdown.github.GitHubFlavor, laika.parse.code.SyntaxHighlighting)
 laikaIncludeAPI := true
 Laika / sourceDirectories := Seq(baseDirectory.value / "doc")
