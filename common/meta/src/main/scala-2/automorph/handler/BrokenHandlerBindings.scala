@@ -8,21 +8,8 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /** JSON-RPC handler layer bindings code generation. */
-case object HandlerBindings {
+case object BrokenHandlerBindings {
 
-  /**
-   * Generates handler bindings for all valid public methods of an API type.
-   *
-   * @param format message format plugin
-   * @param system effect system plugin
-   * @param api API instance
-   * @tparam Node message node type
-   * @tparam ActualFormat message format plugin type
-   * @tparam Effect effect type
-   * @tparam Context request context type
-   * @tparam Api API type
-   * @return mapping of method names to handler method bindings
-   */
   def generate[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
     format: ActualFormat,
     system: EffectSystem[Effect],
@@ -44,15 +31,7 @@ case object HandlerBindings {
     val ref = Reflection[c.type](c)
 
     // Detect and validate public methods in the API type
-    val apiMethods = validApiMethods[c.type, Api, Effect[_]](ref)
-    val validMethods = apiMethods.flatMap(_.swap.toOption) match {
-      case Seq() => apiMethods.flatMap(_.toOption)
-      case errors =>
-        ref.c.abort(
-          ref.c.enclosingPosition,
-          s"Failed to bind API methods:\n${errors.map(error => s"  $error").mkString("\n")}"
-        )
-    }
+    val validMethods = validApiMethods[c.type, Api, Effect[_]](ref).map(_.getOrElse(???))
 
     // Generate bound API method bindings
     val handlerBindings = validMethods.map { method =>
@@ -111,7 +90,6 @@ case object HandlerBindings {
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
       indices :+ (indices.last + size)
     }
-    val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
     // Create invoke function
     //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
@@ -134,24 +112,18 @@ case object HandlerBindings {
       val arguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
         parameters.toList.zipWithIndex.map { case (parameter, index) =>
           val argumentIndex = offset + index
-          if (argumentIndex == lastArgumentIndex && methodUsesContext[C, Context](ref)(method)) {
-            q"context"
-          } else {
-            q"""
-              (scala.util.Try($format.decode[${parameter.dataType}](argumentNodes($argumentIndex))) match {
-                case scala.util.Failure(error) => scala.util.Failure(
-                  automorph.protocol.ErrorType.InvalidRequestException("Invalid argument: " + $argumentIndex, error)
-                )
-                case result => result
-              }).get
-             """
-          }
+          val decode = q"""
+            $format.decode[${parameter.dataType}](argumentNodes($argumentIndex))
+           """
+          println(ref.c.universe.showCode(decode))
+          decode
         }
       }
 
       // Create the API method call using the decoded arguments
       //   api.method(arguments ...): Effect[ResultValueType]
       val apiMethodCall = q"$api.${method.symbol}(...$arguments)"
+      println(ref.c.universe.showCode(apiMethodCall))
 
       // Create encode result function
       //   (result: ResultValueType) => Node = format.encode[ResultValueType](result)
@@ -161,8 +133,8 @@ case object HandlerBindings {
       // Create the effect mapping call using the method call and the encode result function
       //   system.map(methodCall, encodeResult): Effect[Node]
       q"$system.map($apiMethodCall, $encodeResult)"
-//      arguments.flatten.foreach(println(ref.c.universe.showCode(_)))
-//      q"null.asInstanceOf[$effectType[$resultValueType]]"
+      //      arguments.flatten.foreach(println(ref.c.universe.showCode(_)))
+      //      q"null.asInstanceOf[$effectType[$resultValueType]]"
     }
     """)
   }
