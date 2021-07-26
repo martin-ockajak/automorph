@@ -75,18 +75,20 @@ case object Generator {
 
   private def toPaths(methods: Map[String, Method], rpc: Boolean): Paths = methods.map { case (name, method) =>
     val path = s"/${name.replace('.', '/')}"
-    val pathItem = if (rpc) jsonRpcPathItem(method) else restRpcPathItem(method)
+    val summary = toSummary(method.documentation)
+    val description = method.documentation
+    val requestBody = if (rpc) jsonRpcRequestBody(method) else restRpcRequestBody(method)
+    val operation = Operation(requestBody = Some(requestBody))
+    val pathItem = PathItem(post = Some(operation), summary = summary, description = description)
     path -> pathItem
   }
 
-  private def jsonRpcPathItem(method: Method): PathItem = {
-    val summary = toSummary(method.documentation)
-    PathItem(summary = summary, description = method.documentation)
+  private def jsonRpcRequestBody(method: Method): RequestBody = {
+    RequestBody(content = Map())
   }
 
-  private def restRpcPathItem(method: Method): PathItem = {
-    val summary = toSummary(method.documentation)
-    PathItem(summary = summary, description = method.documentation)
+  private def restRpcRequestBody(method: Method): RequestBody = {
+    RequestBody(content = Map())
   }
 
   private def toSummary(scaladoc: Option[String]): Option[String] = scaladoc.flatMap { doc =>
