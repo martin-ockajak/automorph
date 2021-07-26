@@ -40,7 +40,8 @@ case object Generator {
   ): Specification = Specification(
     paths = Some(toPaths(methods, true)),
     info = Info(title = title, version = version),
-    servers = toServers(serverUrls)
+    servers = toServers(serverUrls),
+    components = toComponents()
   )
 
   /**
@@ -68,7 +69,8 @@ case object Generator {
   ): Specification = Specification(
     paths = Some(toPaths(methods, false)),
     info = Info(title = title, version = version),
-    servers = toServers(serverUrls)
+    servers = toServers(serverUrls),
+    components = toComponents()
   )
 
   private def methodSchema(method: Method): Schema = {
@@ -92,7 +94,12 @@ case object Generator {
 
   private def toPaths(methods: Map[String, Method], rpc: Boolean): Paths = methods.map { case (name, method) =>
     val path = s"/${name.replace('.', '/')}"
-    val summary = toSummary(method.documentation)
+    val summary = method.documentation.flatMap { doc =>
+      doc.split('\n').find {
+        case scaladocMarkup(_*) => true
+        case _ => false
+      }
+    }
     val description = method.documentation
     val schema = if (rpc) jsonRpcSchema(method) else restRpcSchema(method)
     val mediaType = MediaType(schema = Some(schema))
@@ -100,13 +107,6 @@ case object Generator {
     val operation = Operation(requestBody = Some(requestBody))
     val pathItem = PathItem(post = Some(operation), summary = summary, description = description)
     path -> pathItem
-  }
-
-  private def toSummary(scaladoc: Option[String]): Option[String] = scaladoc.flatMap { doc =>
-    doc.split('\n').find {
-      case scaladocMarkup(_*) => true
-      case _ => false
-    }
   }
 
   private def toComponents(): Option[Components] = None
