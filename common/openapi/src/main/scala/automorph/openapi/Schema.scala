@@ -1,5 +1,7 @@
 package automorph.openapi
 
+import automorph.openapi.Schema.Properties
+
 final case class Schema(
   title: Option[String],
   `type`: String,

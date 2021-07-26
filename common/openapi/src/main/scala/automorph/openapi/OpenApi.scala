@@ -1,5 +1,7 @@
 package automorph.openapi
 
+import automorph.openapi.OpenApi.{Components, Paths}
+
 /**
  * Open API specification.
  *
