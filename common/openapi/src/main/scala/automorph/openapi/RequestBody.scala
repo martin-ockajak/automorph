@@ -4,8 +4,8 @@ import RequestBody.Content
 
 final case class RequestBody(
   content: Content,
-  required: Option[Boolean],
-  description: Option[String]
+  required: Option[Boolean] = None,
+  description: Option[String] = None
 )
 
 case object RequestBody {

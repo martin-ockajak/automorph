@@ -1,11 +1,11 @@
 package automorph.openapi
 
 final case class PathItem(
-  get: Option[Operation],
-  put: Option[Operation],
-  post: Option[Operation],
-  delete: Option[Operation],
-  parameters: Option[List[Parameter]],
-  summary: Option[String],
-  description: Option[String]
+  get: Option[Operation] = None,
+  put: Option[Operation] = None,
+  post: Option[Operation] = None,
+  delete: Option[Operation] = None,
+  parameters: Option[List[Parameter]] = None,
+  summary: Option[String] = None,
+  description: Option[String] = None
 )

@@ -5,14 +5,14 @@ import automorph.openapi.OpenApi.{Components, Paths}
 /**
  * Open API specification.
  *
- * @see https://swagger.io/specification/
+ * @see https://github.com/OAI/OpenAPI-Specification
  */
 final case class OpenApi(
   openapi: String = "3.1.0",
   info: Info,
-  servers: List[Server],
-  paths: Paths,
-  components: Components
+  servers: Option[List[Server]] = None,
+  paths: Option[Paths] = None,
+  components: Option[Components] = None
 )
 
 case object OpenApi {

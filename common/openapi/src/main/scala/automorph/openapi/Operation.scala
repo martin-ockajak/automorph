@@ -1,8 +1,8 @@
 package automorph.openapi
 
 final case class Operation(
-  requestBody: RequestBody,
-  responses: Map[String, Response],
-  summary: Option[String],
-  description: Option[String]
+  requestBody: Option[RequestBody] = None,
+  responses: Option[Map[String, Response]] = None,
+  summary: Option[String] = None,
+  description: Option[String] = None
 )

@@ -4,7 +4,7 @@ import automorph.spi.Message
 import automorph.format.json.CirceJsonFormat.Node
 
 final case class Example (
-  summary: Option[String],
-  description: Option[String],
-  value: Message[Node]
+  summary: Option[String] = None,
+  description: Option[String] = None,
+  value: Option[Message[Node]] = None
 )
