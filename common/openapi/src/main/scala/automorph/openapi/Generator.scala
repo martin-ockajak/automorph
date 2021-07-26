@@ -10,6 +10,7 @@ import automorph.util.Method
  */
 case object Generator {
 
+  private val contentType = "application/json"
   private val scaladocMarkup = "^[/\\* ]*$".r
 
   /**
@@ -77,18 +78,19 @@ case object Generator {
     val path = s"/${name.replace('.', '/')}"
     val summary = toSummary(method.documentation)
     val description = method.documentation
-    val requestBody = if (rpc) jsonRpcRequestBody(method) else restRpcRequestBody(method)
+    val mediaType = if (rpc) jsonRpcMediaType(method) else restRpcMediaType(method)
+    val requestBody = RequestBody(content = Map(contentType -> mediaType))
     val operation = Operation(requestBody = Some(requestBody))
     val pathItem = PathItem(post = Some(operation), summary = summary, description = description)
     path -> pathItem
   }
 
-  private def jsonRpcRequestBody(method: Method): RequestBody = {
-    RequestBody(content = Map())
+  private def jsonRpcMediaType(method: Method): MediaType = {
+    MediaType()
   }
 
-  private def restRpcRequestBody(method: Method): RequestBody = {
-    RequestBody(content = Map())
+  private def restRpcMediaType(method: Method): MediaType = {
+    MediaType()
   }
 
   private def toSummary(scaladoc: Option[String]): Option[String] = scaladoc.flatMap { doc =>
