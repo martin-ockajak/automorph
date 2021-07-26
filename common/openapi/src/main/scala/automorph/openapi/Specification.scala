@@ -1,13 +1,13 @@
 package automorph.openapi
 
-import automorph.openapi.OpenApi.{Components, Paths}
+import automorph.openapi.Specification.{Components, Paths}
 
 /**
  * Open API specification.
  *
  * @see https://github.com/OAI/OpenAPI-Specification
  */
-final case class OpenApi(
+final case class Specification(
   openapi: String = "3.1.0",
   info: Info,
   servers: Option[List[Server]] = None,
@@ -15,7 +15,7 @@ final case class OpenApi(
   components: Option[Components] = None
 )
 
-case object OpenApi {
+case object Specification {
   type Paths = Map[String, PathItem]
   type Components = Map[String, Schema]
 }

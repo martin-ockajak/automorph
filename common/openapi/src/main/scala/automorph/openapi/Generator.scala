@@ -15,7 +15,7 @@ case object Generator {
    * @param info OpenAPI Info object
    * @return OpenAPI specification
    */
-  def jsonRpc(methods: Map[String, Method], info: Info): OpenApi = ???
+  def jsonRpc(methods: Map[String, Method], info: Info): Specification = ???
 
   /**
    * Generate OpenAPI specification for given API methods.
@@ -25,7 +25,7 @@ case object Generator {
    * @param version API specification version
    * @return OpenAPI specification
    */
-  def jsonRpc(methods: Map[String, Method], title: String, version: String): OpenApi =
+  def jsonRpc(methods: Map[String, Method], title: String, version: String): Specification =
     jsonRpc(methods, Info(title = title, version = version))
 
   /**
@@ -35,7 +35,7 @@ case object Generator {
    * @param info OpenAPI Info object
    * @return OpenAPI specification
    */
-  def restRpc(methods: Map[String, Method], info: Info): OpenApi = ???
+  def restRpc(methods: Map[String, Method], info: Info): Specification = ???
 
   /**
    * Generate OpenAPI specification for given API methods.
@@ -45,6 +45,6 @@ case object Generator {
    * @param version API specification version
    * @return OpenAPI specification
    */
-  def restRpc(methods: Map[String, Method], title: String, version: String): OpenApi =
+  def restRpc(methods: Map[String, Method], title: String, version: String): Specification =
     restRpc(methods, Info(title = title, version = version))
 }
