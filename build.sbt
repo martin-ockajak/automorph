@@ -31,7 +31,7 @@ lazy val root = project.in(file(".")).aggregate(
   finagle,
   rabbitmq,
 
-  openApi,
+  openapi,
   default,
 
   examples
@@ -200,7 +200,7 @@ lazy val tapir = (project in file("transport/tapir")).dependsOn(
 )
 
 // OpenAPI
-lazy val openApi = (project in file("common/openapi")).dependsOn(
+lazy val openapi = (project in file("common/openapi")).dependsOn(
   core, circe
 ).settings(
   name := "automorph-open-api"
