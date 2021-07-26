@@ -14,6 +14,7 @@ case object Generator {
   private val objectType = "object"
   private val contentType = "application/json"
   private val jsonRpcRequestTitle = "JSON-RPC request"
+  private val jsonRpcRequestDescription = jsonRpcRequestTitle
   private val scaladocMarkup = "^[/\\* ]*$".r
 
   /**
@@ -86,7 +87,7 @@ case object Generator {
         case Array() => None
         case lines => Some(lines.mkString(" "))
       })
-      parameter.name -> Property(`type` = parameter.dataType, description = description)
+      parameter.name -> Schema(`type` = Some(parameter.dataType), description = description)
     }.toMap
     Schema(title = Some(method.name), `type` = Some(objectType), properties = Some(properties))
   }
@@ -94,13 +95,13 @@ case object Generator {
   private def jsonRpcSchema(method: Method): Schema = {
     val parametersSchema = toParametersSchema(method)
     val properties = Map(
-      "jsonrpc" -> Property("string", None, Some("jsonrpc"), Some("Protocol version (must be 2.0)")),
-      "method" -> Property("string", None, Some("method"), Some("Invoked method name")),
-      "params" -> Property("object", None, Some("params"), Some("invoked method argument values position by name")),
-      "id" -> Property("integer", None, Some("id"), Some("Call identifier, a request without and identifier is considered to be a notification")),
+      "jsonrpc" -> Schema(Some("string"), Some("jsonrpc"), Some("Protocol version (must be 2.0)")),
+      "method" -> Schema(Some("string"), Some("method"), Some("Invoked method name")),
+      "params" -> Schema(Some("object"), Some("params"), Some("invoked method argument values position by name")),
+      "id" -> Schema(Some("integer"), Some("id"), Some("Call identifier, a request without and identifier is considered to be a notification")),
     )
     val required = List("jsonrpc", "method", "params")
-    Schema(Some(jsonRpcRequestTitle), `type` = Some(objectType), properties = Some(properties), required = Some(required))
+    Schema(Some(objectType), Some(jsonRpcRequestTitle), Some(jsonRpcRequestTitle), Some(properties), Some(required))
   }
 
   private def restRpcSchema(method: Method): Schema = toParametersSchema(method)
