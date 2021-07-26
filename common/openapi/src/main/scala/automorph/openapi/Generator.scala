@@ -12,8 +12,9 @@ import javax.swing.plaf.synth.SynthCheckBoxMenuItemUI
  */
 case object Generator {
 
-  private val objectType = "object"
   private val contentType = "application/json"
+  private val objectType = "object"
+  private val httpStatusCodeOk = 200.toString
   private val jsonRpcRequestTitle = "Request"
   private val jsonRpcRequestDescription = "JSON-RPC request"
   private val argumentsDescription = "Invoked method argument values by name"
@@ -152,9 +153,15 @@ case object Generator {
     val description = method.documentation
     val requestSchema = if (rpc) jsonRpcRequestSchema(method) else restRpcRequestSchema(method)
 //    val responseSchema = if (rpc) jsonRpcResponseSchema(method) else restRpcResponseSchema(method)
-    val mediaType = MediaType(schema = Some(requestSchema))
-    val requestBody = RequestBody(content = Map(contentType -> mediaType), required = Some(true))
-    val operation = Operation(requestBody = Some(requestBody))
+    val requestMediaType = MediaType(schema = Some(requestSchema))
+    val resultMediaType = MediaType(schema = Some(requestSchema))
+    val errorMediaType = MediaType(schema = Some(requestSchema))
+    val requestBody = RequestBody(content = Map(contentType -> requestMediaType), required = Some(true))
+    val responses = Map(
+      "default" -> Response("Failed method invocation error information", Some(Map(contentType -> errorMediaType))),
+      httpStatusCodeOk -> Response("Succesful method invocation result", Some(Map(contentType -> resultMediaType)))
+    )
+    val operation = Operation(requestBody = Some(requestBody), responses = Some(responses))
     val pathItem = PathItem(post = Some(operation), summary = summary, description = description)
     path -> pathItem
   }
