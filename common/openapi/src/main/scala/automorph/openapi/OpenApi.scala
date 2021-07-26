@@ -6,11 +6,9 @@ package automorph.openapi
  * @see https://swagger.io/specification/
  */
 final case class Specification(
-  xSendDefaults: Boolean = true,
-  openapi: String = "3.0.0",
+  openapi: String = "3.1.0",
   info: Info,
-  paths: Paths,
-  xApiId: String
+  paths: Paths
 )
 
 case object Specification {
