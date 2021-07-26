@@ -169,7 +169,7 @@ lazy val undertow = (project in file("transport/undertow")).dependsOn(
 ).settings(
   name := "automorph-undertow",
   libraryDependencies ++= Seq(
-    "io.undertow" % "undertow-core" % "2.2.8.Final",
+    "io.undertow" % "undertow-core" % "2.2.9.Final",
     "com.lihaoyi" %% "cask" % "0.7.11" % Test
   )
 )
