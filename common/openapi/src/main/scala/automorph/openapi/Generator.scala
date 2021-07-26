@@ -13,8 +13,11 @@ case object Generator {
 
   private val objectType = "object"
   private val contentType = "application/json"
+  private val jsonRpcRequestTitle = "Request"
   private val jsonRpcRequestDescription = "JSON-RPC request"
+  private val argumentsDescription = "Invoked method argument values by name"
   private val scaladocMarkup = "^[/\\* ]*$".r
+  private val optionTypePrefix = s"${classOf[Option[Unit]].getName}"
 
   /**
    * Generate OpenAPI paths for given API methods.
@@ -74,29 +77,34 @@ case object Generator {
     components = toComponents()
   )
 
-  private def toParametersSchema(method: Method): Schema = {
-    val properties = method.parameters.flatten.map { parameter =>
+  private def parameterSchemas(method: Method): Map[String, Schema] =
+    method.parameters.flatten.map { parameter =>
       val parameterTag = s"${method.name} "
-      val description = method.documentation.flatMap(_.split('\n').flatMap { line =>
-        line.split('@') match {
-          case Array(prefix, tag, rest @ _*) if tag.startsWith(parameterTag) => Some((tag +: rest).mkString("@").trim)
-          case _ => None
-        }
-      } match {
-        case Array() => None
-        case lines => Some(lines.mkString(" "))
-      })
-      parameter.name -> Schema(`type` = Some(parameter.dataType), description = description)
+      val description = method.documentation.flatMap { doc =>
+        maybe(doc.split('\n').flatMap { line =>
+          line.split('@') match {
+            case Array(prefix, tag, rest @ _*) if tag.startsWith(parameterTag) => Some((tag +: rest).mkString("@").trim)
+            case _ => None
+          }
+        })
+      }.map(_.mkString(" "))
+      parameter.name -> Schema(Some(parameter.dataType), Some(parameter.name), description)
     }.toMap
-    Schema(title = Some(method.name), `type` = Some(objectType), properties = Some(properties))
-  }
+
+  private def requiredParameters(method: Method): List[String] =
+    method.parameters.flatten.filter(_.dataType.startsWith(optionTypePrefix)).map(_.name).toList
 
   private def jsonRpcSchema(method: Method): Schema = {
-    val parametersSchema = toParametersSchema(method)
     val properties = Map(
       "jsonrpc" -> Schema(Some("string"), Some("jsonrpc"), Some("Protocol version (must be 2.0)")),
       "method" -> Schema(Some("string"), Some("method"), Some("Invoked method name")),
-      "params" -> Schema(Some("object"), Some("params"), Some("invoked method argument values position by name")),
+      "params" -> Schema(
+        Some(objectType),
+        Some(method.name),
+        Some(argumentsDescription),
+        maybe(parameterSchemas(method)),
+        maybe(requiredParameters(method))
+      ),
       "id" -> Schema(
         Some("integer"),
         Some("id"),
@@ -104,15 +112,20 @@ case object Generator {
       )
     )
     val required = List("jsonrpc", "method", "params")
-    Schema(Some(objectType), Some(method.name), Some(jsonRpcRequestDescription), Some(properties), Some(required))
+    Schema(
+      Some(objectType),
+      Some(jsonRpcRequestTitle),
+      Some(jsonRpcRequestDescription),
+      maybe(properties),
+      maybe(required)
+    )
   }
 
-  private def restRpcSchema(method: Method): Schema = toParametersSchema(method)
+  private def restRpcSchema(method: Method): Schema =
+    Schema(Some(objectType), Some(method.name), Some(argumentsDescription), maybe(parameterSchemas(method)))
 
-  private def toServers(serverUrls: Seq[String]): Option[Servers] = serverUrls match {
-    case Seq() => None
-    case someServers => Some(serverUrls.map(url => Server(url = url)).toList)
-  }
+  private def toServers(serverUrls: Seq[String]): Option[Servers] =
+    maybe(serverUrls.map(url => Server(url = url)).toList)
 
   private def toPaths(methods: Map[String, Method], rpc: Boolean): Paths = methods.map { case (name, method) =>
     val path = s"/${name.replace('.', '/')}"
@@ -130,4 +143,6 @@ case object Generator {
   }
 
   private def toComponents(): Option[Components] = None
+
+  private def maybe[T <: Iterable[_]](iterable: T): Option[T] = if (iterable.isEmpty) None else Some(iterable)
 }
