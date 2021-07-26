@@ -10,6 +10,7 @@ import automorph.util.Method
  */
 case object Generator {
 
+  private val objectType = "object"
   private val contentType = "application/json"
   private val parametersTitle = "Parameters"
   private val scaladocMarkup = "^[/\\* ]*$".r
@@ -79,7 +80,7 @@ case object Generator {
   }
 
   private def methodSchema(method: Method): Schema = {
-    Schema(title = Some(parametersTitle))
+    Schema(title = Some(parametersTitle), `type` = Some(objectType))
   }
 
   private def toServers(serverUrls: Seq[String]): Option[Servers] = serverUrls match {
