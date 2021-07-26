@@ -10,8 +10,8 @@ import automorph.spi.MessageType
  * @param id call identifier, a request without and identifier is considered to be a notification
  * @param method invoked method name
  * @param params invoked method argument values by position or by name
- * @param result succesful call result value
- * @param error failed call error details
+ * @param result succesful method call result value
+ * @param error failed method call error details
  * @tparam Node message node type
  */
 final case class Message[Node](
