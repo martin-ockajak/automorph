@@ -1,7 +1,7 @@
 package test.local
 
-import automorph.system.FutureSystem
 import automorph.spi.EffectSystem
+import automorph.system.FutureSystem
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

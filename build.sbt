@@ -201,7 +201,7 @@ lazy val tapir = (project in file("transport/tapir")).dependsOn(
 
 // OpenAPI
 lazy val openapi = (project in file("common/openapi")).dependsOn(
-  core, circe
+  core, circe, testCore % Test, standard % Test
 ).settings(
   name := "automorph-open-api"
 )
