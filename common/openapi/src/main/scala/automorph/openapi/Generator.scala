@@ -20,7 +20,7 @@ case object Generator {
    */
   def jsonRpc(methods: Map[String, Method], info: Info, serverUrls: Seq[String] = Seq()): Specification = {
     val servers = createServers(serverUrls)
-    val paths = createJsonRpcPaths(methods)
+    val paths = createPaths(methods, true)
     val components = createComponents()
     Specification(info = info, servers = servers, paths = paths, components = components)
   }
@@ -49,7 +49,7 @@ case object Generator {
    */
   def restRpc(methods: Map[String, Method], info: Info, serverUrls: Seq[String] = Seq()): Specification = {
     val servers = createServers(serverUrls)
-    val paths = createJsonRpcPaths(methods)
+    val paths = createPaths(methods, false)
     val components = createComponents()
     Specification(info = info, servers = servers, paths = paths, components = components)
   }
@@ -73,11 +73,23 @@ case object Generator {
     case Seq(urls: _*) => Some(urls.map(url => Server(url = url)).toList.toList)
   }
 
-  private def createJsonRpcPaths(methods: Map[String, Method]): Option[Paths] =
-    None
+  private def createPaths(methods: Map[String, Method], rpc: Boolean): Option[Paths] = methods match {
+    case noMethods if noMethods.isEmpty => None
+    case actualMethods =>
+      Some(actualMethods.map { case (name, method) =>
+        val path = s"/${name.replace('.', '/')}"
+        val pathItem = if (rpc) jsonRpcPathItem(method) else restRpcPathItem(method)
+        path -> pathItem
+      }.toMap)
+  }
 
-  private def createRestRpcPaths(methods: Map[String, Method]): Option[Paths] =
-    None
+  private def jsonRpcPathItem(method: Method): PathItem = {
+    PathItem()
+  }
+
+  private def restRpcPathItem(method: Method): PathItem = {
+    PathItem()
+  }
 
   private def createComponents(): Option[Components] = None
 }
