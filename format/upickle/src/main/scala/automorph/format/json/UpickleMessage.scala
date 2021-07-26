@@ -33,7 +33,7 @@ private[automorph] final case class UpickleMessage(
 private[automorph] object UpickleMessage {
 
   def fromSpi(v: Message[Value]): UpickleMessage = UpickleMessage(
-    v.automorph,
+    v.jsonrpc,
     v.id,
     v.method,
     v.params,

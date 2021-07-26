@@ -25,7 +25,7 @@ final case class ArgonautJsonFormat() extends ArgonautJsonFormatMeta {
     )
 
   implicit private lazy val messageCodecJson: CodecJson[Message[Json]] =
-    Argonaut.codec6(Message.apply[Json], (v: Message[Json]) => (v.automorph, v.id, v.method, v.params, v.result, v.error))(
+    Argonaut.codec6(Message.apply[Json], (v: Message[Json]) => (v.jsonrpc, v.id, v.method, v.params, v.result, v.error))(
       "automorph",
       "id",
       "method",

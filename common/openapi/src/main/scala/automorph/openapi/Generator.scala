@@ -2,6 +2,7 @@ package automorph.openapi
 
 import automorph.openapi.Specification.{Components, Paths, Servers}
 import automorph.util.Method
+import javax.swing.plaf.synth.SynthCheckBoxMenuItemUI
 
 /**
  * Open API specification generator.
@@ -12,6 +13,7 @@ case object Generator {
 
   private val objectType = "object"
   private val contentType = "application/json"
+  private val jsonRpcRequestTitle = "JSON-RPC request"
   private val scaladocMarkup = "^[/\\* ]*$".r
 
   /**
@@ -72,7 +74,7 @@ case object Generator {
     components = toComponents()
   )
 
-  private def methodSchema(method: Method): Schema = {
+  private def toParametersSchema(method: Method): Schema = {
     val properties = method.parameters.flatten.map { parameter =>
       val parameterTag = s"${method.name} "
       val description = method.documentation.flatMap(_.split('\n').flatMap { line =>
@@ -89,11 +91,19 @@ case object Generator {
     Schema(title = Some(method.name), `type` = Some(objectType), properties = Some(properties))
   }
 
-  private def jsonRpcSchema(method: Method): Schema =
-    methodSchema(method)
+  private def jsonRpcSchema(method: Method): Schema = {
+    val parametersSchema = toParametersSchema(method)
+    val properties = Map(
+      "jsonrpc" -> Property("string", None, Some("jsonrpc"), Some("Protocol version (must be 2.0)")),
+      "method" -> Property("string", None, Some("method"), Some("Invoked method name")),
+      "params" -> Property("object", None, Some("params"), Some("invoked method argument values position by name")),
+      "id" -> Property("integer", None, Some("id"), Some("Call identifier, a request without and identifier is considered to be a notification")),
+    )
+    val required = List("jsonrpc", "method", "params")
+    Schema(Some(jsonRpcRequestTitle), `type` = Some(objectType), properties = Some(properties), required = Some(required))
+  }
 
-  private def restRpcSchema(method: Method): Schema =
-    methodSchema(method)
+  private def restRpcSchema(method: Method): Schema = toParametersSchema(method)
 
   private def toServers(serverUrls: Seq[String]): Option[Servers] = serverUrls match {
     case Seq() => None

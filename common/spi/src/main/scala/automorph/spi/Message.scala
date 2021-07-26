@@ -6,7 +6,7 @@ import automorph.spi.MessageType
  * JSON-RPC protocol message structure.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @param automorph protocol version (must be 2.0)
+ * @param jsonrpc protocol version (must be 2.0)
  * @param id call identifier, a request without and identifier is considered to be a notification
  * @param method invoked method name
  * @param params invoked method argument values by position or by name
@@ -15,7 +15,7 @@ import automorph.spi.MessageType
  * @tparam Node message node type
  */
 final case class Message[Node](
-  automorph: Option[String],
+  jsonrpc: Option[String],
   id: Option[Either[BigDecimal, String]],
   method: Option[String],
   params: Option[Message.Params[Node]],
