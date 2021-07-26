@@ -71,16 +71,18 @@ case object Generator {
     servers = toServers(serverUrls)
   )
 
-  private def jsonRpcMediaType(method: Method): MediaType = {
-    MediaType(schema = Some(methodSchema(method)))
-  }
-
-  private def restRpcMediaType(method: Method): MediaType = {
-    MediaType(schema = Some(methodSchema(method)))
-  }
-
   private def methodSchema(method: Method): Schema = {
+    method.parameters.flatten.map { parameter =>
+    }
     Schema(title = Some(parametersTitle), `type` = Some(objectType))
+  }
+
+  private def jsonRpcSchema(method: Method): Schema = {
+    methodSchema(method)
+  }
+
+  private def restRpcSchema(method: Method): Schema = {
+    methodSchema(method)
   }
 
   private def toServers(serverUrls: Seq[String]): Option[Servers] = serverUrls match {
@@ -92,7 +94,8 @@ case object Generator {
     val path = s"/${name.replace('.', '/')}"
     val summary = toSummary(method.documentation)
     val description = method.documentation
-    val mediaType = if (rpc) jsonRpcMediaType(method) else restRpcMediaType(method)
+    val schema = if (rpc) jsonRpcSchema(method) else restRpcSchema(method)
+    val mediaType = MediaType(schema = Some(schema))
     val requestBody = RequestBody(content = Map(contentType -> mediaType), required = Some(true))
     val operation = Operation(requestBody = Some(requestBody))
     val pathItem = PathItem(post = Some(operation), summary = summary, description = description)
