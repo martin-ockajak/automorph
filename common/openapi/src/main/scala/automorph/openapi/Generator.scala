@@ -97,7 +97,11 @@ case object Generator {
       "jsonrpc" -> Schema(Some("string"), Some("jsonrpc"), Some("Protocol version (must be 2.0)")),
       "method" -> Schema(Some("string"), Some("method"), Some("Invoked method name")),
       "params" -> Schema(Some("object"), Some("params"), Some("invoked method argument values position by name")),
-      "id" -> Schema(Some("integer"), Some("id"), Some("Call identifier, a request without and identifier is considered to be a notification")),
+      "id" -> Schema(
+        Some("integer"),
+        Some("id"),
+        Some("Call identifier, a request without and identifier is considered to be a notification")
+      )
     )
     val required = List("jsonrpc", "method", "params")
     Schema(Some(objectType), Some(method.name), Some(jsonRpcRequestDescription), Some(properties), Some(required))
