@@ -2,6 +2,7 @@ package automorph.openapi
 
 import automorph.openapi.Specification.{Components, Paths, Servers}
 import automorph.util.Method
+import automorph.util.Parameter
 import javax.swing.plaf.synth.SynthCheckBoxMenuItemUI
 
 /**
@@ -78,18 +79,20 @@ case object Generator {
   )
 
   private def parameterSchemas(method: Method): Map[String, Schema] =
-    method.parameters.flatten.map { parameter =>
-      val parameterTag = s"${method.name} "
-      val description = method.documentation.flatMap { doc =>
-        maybe(doc.split('\n').flatMap { line =>
-          line.split('@') match {
-            case Array(prefix, tag, rest @ _*) if tag.startsWith(parameterTag) => Some((tag +: rest).mkString("@").trim)
-            case _ => None
-          }
-        })
-      }.map(_.mkString(" "))
-      parameter.name -> Schema(Some(parameter.dataType), Some(parameter.name), description)
-    }.toMap
+    method.parameters.flatten.map(parameter => parameter.name -> parameterSchema(parameter, method.documentation)).toMap
+
+  private def parameterSchema(parameter: Parameter, scaladoc: Option[String]): Schema = {
+    val parameterTag = s"${parameter.name} "
+    val description = scaladoc.flatMap { doc =>
+      maybe(doc.split('\n').flatMap { line =>
+        line.split('@') match {
+          case Array(prefix, tag, rest @ _*) if tag.startsWith(parameterTag) => Some((tag +: rest).mkString("@").trim)
+          case _ => None
+        }
+      })
+    }.map(_.mkString(" "))
+    Schema(Some(parameter.dataType), Some(parameter.name), description)
+  }
 
   private def requiredParameters(method: Method): List[String] =
     method.parameters.flatten.filter(_.dataType.startsWith(optionTypePrefix)).map(_.name).toList
