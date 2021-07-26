@@ -11,6 +11,7 @@ import automorph.util.Method
 case object Generator {
 
   private val contentType = "application/json"
+  private val parametersTitle = "Parameters"
   private val scaladocMarkup = "^[/\\* ]*$".r
 
   /**
@@ -70,11 +71,15 @@ case object Generator {
   )
 
   private def jsonRpcMediaType(method: Method): MediaType = {
-    MediaType()
+    MediaType(schema = Some(methodSchema(method)))
   }
 
   private def restRpcMediaType(method: Method): MediaType = {
-    MediaType()
+    MediaType(schema = Some(methodSchema(method)))
+  }
+
+  private def methodSchema(method: Method): Schema = {
+    Schema(title = Some(parametersTitle))
   }
 
   private def toServers(serverUrls: Seq[String]): Option[Servers] = serverUrls match {
