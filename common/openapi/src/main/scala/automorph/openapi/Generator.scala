@@ -1,5 +1,6 @@
 package automorph.openapi
 
+import automorph.openapi.Specification.{Components, Paths, Servers}
 import automorph.util.Method
 
 /**
@@ -19,7 +20,9 @@ case object Generator {
    */
   def jsonRpc(methods: Map[String, Method], info: Info, serverUrls: Seq[String] = Seq()): Specification = {
     val servers = createServers(serverUrls)
-    Specification(info = info, servers = servers)
+    val paths = createJsonRpcPaths(methods)
+    val components = createComponents()
+    Specification(info = info, servers = servers, paths = paths, components = components)
   }
 
   /**
@@ -46,7 +49,9 @@ case object Generator {
    */
   def restRpc(methods: Map[String, Method], info: Info, serverUrls: Seq[String] = Seq()): Specification = {
     val servers = createServers(serverUrls)
-    Specification(info = info, servers = servers)
+    val paths = createJsonRpcPaths(methods)
+    val components = createComponents()
+    Specification(info = info, servers = servers, paths = paths, components = components)
   }
 
   /**
@@ -63,8 +68,16 @@ case object Generator {
     version: String
   ): Specification = restRpc(methods, Info(title = title, version = version))
 
-  private def createServers(serverUrls: Seq[String]): Option[List[Server]] = serverUrls match {
+  private def createServers(serverUrls: Seq[String]): Option[Servers] = serverUrls match {
     case Seq() => None
     case Seq(urls: _*) => Some(urls.map(url => Server(url = url)).toList.toList)
   }
+
+  private def createJsonRpcPaths(methods: Map[String, Method]): Option[Paths] =
+    None
+
+  private def createRestRpcPaths(methods: Map[String, Method]): Option[Paths] =
+    None
+
+  private def createComponents(): Option[Components] = None
 }
