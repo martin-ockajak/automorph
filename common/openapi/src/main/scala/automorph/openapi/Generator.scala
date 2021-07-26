@@ -69,6 +69,14 @@ case object Generator {
     servers = toServers(serverUrls)
   )
 
+  private def jsonRpcMediaType(method: Method): MediaType = {
+    MediaType()
+  }
+
+  private def restRpcMediaType(method: Method): MediaType = {
+    MediaType()
+  }
+
   private def toServers(serverUrls: Seq[String]): Option[Servers] = serverUrls match {
     case Seq() => None
     case someServers => Some(serverUrls.map(url => Server(url = url)).toList)
@@ -83,14 +91,6 @@ case object Generator {
     val operation = Operation(requestBody = Some(requestBody))
     val pathItem = PathItem(post = Some(operation), summary = summary, description = description)
     path -> pathItem
-  }
-
-  private def jsonRpcMediaType(method: Method): MediaType = {
-    MediaType()
-  }
-
-  private def restRpcMediaType(method: Method): MediaType = {
-    MediaType()
   }
 
   private def toSummary(scaladoc: Option[String]): Option[String] = scaladoc.flatMap { doc =>
