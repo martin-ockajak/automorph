@@ -33,11 +33,8 @@ case object Generator {
    * @param version API specification version
    * @return OpenAPI specification
    */
-  def jsonRpc(
-    methods: Map[String, Method],
-    title: String,
-    version: String
-  ): Specification = jsonRpc(methods, Info(title = title, version = version))
+  def jsonRpc(methods: Map[String, Method], title: String, version: String): Specification =
+    jsonRpc(methods, Info(title = title, version = version))
 
   /**
    * Generate OpenAPI specification for given API methods.
@@ -62,11 +59,8 @@ case object Generator {
    * @param version API specification version
    * @return OpenAPI specification
    */
-  def restRpc(
-    methods: Map[String, Method],
-    title: String,
-    version: String
-  ): Specification = restRpc(methods, Info(title = title, version = version))
+  def restRpc(methods: Map[String, Method], title: String, version: String): Specification =
+    restRpc(methods, Info(title = title, version = version))
 
   private def createServers(serverUrls: Seq[String]): Option[Servers] = serverUrls match {
     case Seq() => None
@@ -83,13 +77,11 @@ case object Generator {
       }.toMap)
   }
 
-  private def jsonRpcPathItem(method: Method): PathItem = {
+  private def jsonRpcPathItem(method: Method): PathItem =
     PathItem()
-  }
 
-  private def restRpcPathItem(method: Method): PathItem = {
+  private def restRpcPathItem(method: Method): PathItem =
     PathItem()
-  }
 
   private def createComponents(): Option[Components] = None
 }
