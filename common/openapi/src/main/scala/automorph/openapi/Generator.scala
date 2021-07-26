@@ -87,7 +87,7 @@ case object Generator {
     val summary = toSummary(method.documentation)
     val description = method.documentation
     val mediaType = if (rpc) jsonRpcMediaType(method) else restRpcMediaType(method)
-    val requestBody = RequestBody(content = Map(contentType -> mediaType))
+    val requestBody = RequestBody(content = Map(contentType -> mediaType), required = Some(true))
     val operation = Operation(requestBody = Some(requestBody))
     val pathItem = PathItem(post = Some(operation), summary = summary, description = description)
     path -> pathItem
