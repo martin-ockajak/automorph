@@ -12,7 +12,6 @@ case object Generator {
 
   private val objectType = "object"
   private val contentType = "application/json"
-  private val parametersTitle = "Parameters"
   private val scaladocMarkup = "^[/\\* ]*$".r
 
   /**
@@ -74,18 +73,27 @@ case object Generator {
   )
 
   private def methodSchema(method: Method): Schema = {
-    method.parameters.flatten.map { parameter =>
-    }
-    Schema(title = Some(parametersTitle), `type` = Some(objectType))
+    val properties = method.parameters.flatten.map { parameter =>
+      val parameterTag = s"${method.name} "
+      val description = method.documentation.flatMap(_.split('\n').flatMap { line =>
+        line.split('@') match {
+          case Array(prefix, tag, rest @ _*) if tag.startsWith(parameterTag) => Some((tag +: rest).mkString("@").trim)
+          case _ => None
+        }
+      } match {
+        case Array() => None
+        case lines => Some(lines.mkString(" "))
+      })
+      parameter.name -> Property(`type` = parameter.dataType, description = description)
+    }.toMap
+    Schema(title = Some(method.name), `type` = Some(objectType), properties = Some(properties))
   }
 
-  private def jsonRpcSchema(method: Method): Schema = {
+  private def jsonRpcSchema(method: Method): Schema =
     methodSchema(method)
-  }
 
-  private def restRpcSchema(method: Method): Schema = {
+  private def restRpcSchema(method: Method): Schema =
     methodSchema(method)
-  }
 
   private def toServers(serverUrls: Seq[String]): Option[Servers] = serverUrls match {
     case Seq() => None
@@ -94,12 +102,10 @@ case object Generator {
 
   private def toPaths(methods: Map[String, Method], rpc: Boolean): Paths = methods.map { case (name, method) =>
     val path = s"/${name.replace('.', '/')}"
-    val summary = method.documentation.flatMap { doc =>
-      doc.split('\n').find {
-        case scaladocMarkup(_*) => true
-        case _ => false
-      }
-    }
+    val summary = method.documentation.flatMap(_.split('\n').find {
+      case scaladocMarkup(_*) => true
+      case _ => false
+    }.map(_.trim))
     val description = method.documentation
     val schema = if (rpc) jsonRpcSchema(method) else restRpcSchema(method)
     val mediaType = MediaType(schema = Some(schema))
