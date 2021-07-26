@@ -34,12 +34,11 @@ case object Generator {
     title: String,
     version: String,
     serverUrls: Seq[String]
-  ): Specification =
-    Specification(
-      paths = Some(toPaths(methods, true)),
-      info = Info(title = title, version = version),
-      servers = toServers(serverUrls)
-    )
+  ): Specification = Specification(
+    paths = Some(toPaths(methods, true)),
+    info = Info(title = title, version = version),
+    servers = toServers(serverUrls)
+  )
 
   /**
    * Generate OpenAPI paths for given API methods.
@@ -63,12 +62,11 @@ case object Generator {
     title: String,
     version: String,
     serverUrls: Seq[String]
-  ): Specification =
-    Specification(
-      paths = Some(toPaths(methods, false)),
-      info = Info(title = title, version = version),
-      servers = toServers(serverUrls)
-    )
+  ): Specification = Specification(
+    paths = Some(toPaths(methods, false)),
+    info = Info(title = title, version = version),
+    servers = toServers(serverUrls)
+  )
 
   private def toServers(serverUrls: Seq[String]): Option[Servers] = serverUrls match {
     case Seq() => None
