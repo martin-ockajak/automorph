@@ -97,7 +97,7 @@ case object Generator {
   private def requiredParameters(method: Method): List[String] =
     method.parameters.flatten.filter(_.dataType.startsWith(optionTypePrefix)).map(_.name).toList
 
-  private def jsonRpcSchema(method: Method): Schema = {
+  private def jsonRpcRequestSchema(method: Method): Schema = {
     val properties = Map(
       "jsonrpc" -> Schema(Some("string"), Some("jsonrpc"), Some("Protocol version (must be 2.0)")),
       "method" -> Schema(Some("string"), Some("method"), Some("Invoked method name")),
@@ -124,8 +124,21 @@ case object Generator {
     )
   }
 
-  private def restRpcSchema(method: Method): Schema =
+  private def restRpcRequestSchema(method: Method): Schema =
     Schema(Some(objectType), Some(method.name), Some(argumentsDescription), maybe(parameterSchemas(method)))
+
+//  private def jsonRpcResponseSchema(method: Method): Schema = {
+//    Schema(
+//      Some(objectType),
+//      Some(jsonRpcResponseTitle),
+//      Some(jsonRpcResponseDescription),
+//      maybe(properties),
+//      maybe(required)
+//    )
+//  }
+//
+//  private def restRpcResponseSchema(method: Method): Schema =
+//    Schema(Some(objectType), Some(method.name), Some(argumentsDescription), maybe(parameterSchemas(method)))
 
   private def toServers(serverUrls: Seq[String]): Option[Servers] =
     maybe(serverUrls.map(url => Server(url = url)).toList)
@@ -137,8 +150,9 @@ case object Generator {
       case _ => false
     }.map(_.trim))
     val description = method.documentation
-    val schema = if (rpc) jsonRpcSchema(method) else restRpcSchema(method)
-    val mediaType = MediaType(schema = Some(schema))
+    val requestSchema = if (rpc) jsonRpcRequestSchema(method) else restRpcRequestSchema(method)
+//    val responseSchema = if (rpc) jsonRpcResponseSchema(method) else restRpcResponseSchema(method)
+    val mediaType = MediaType(schema = Some(requestSchema))
     val requestBody = RequestBody(content = Map(contentType -> mediaType), required = Some(true))
     val operation = Operation(requestBody = Some(requestBody))
     val pathItem = PathItem(post = Some(operation), summary = summary, description = description)
