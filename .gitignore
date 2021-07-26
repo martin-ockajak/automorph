@@ -1,6 +1,6 @@
 # Build
 target
-dist/*
+dist
 
 # Tools
 *.swp
