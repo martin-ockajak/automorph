@@ -10,6 +10,8 @@ import automorph.util.Method
  */
 case object Generator {
 
+  private val scaladocMarkup = "^[/\\* ]*$".r
+
   /**
    * Generate OpenAPI paths for given API methods.
    *
@@ -80,10 +82,17 @@ case object Generator {
   }
 
   private def jsonRpcPathItem(method: Method): PathItem =
-    PathItem()
+    PathItem(summary = toSummary(method.documentation), description = method.documentation)
 
   private def restRpcPathItem(method: Method): PathItem =
-    PathItem()
+    PathItem(summary = toSummary(method.documentation), description = method.documentation)
+
+  private def toSummary(scaladoc: Option[String]): Option[String] = scaladoc.flatMap { doc =>
+    doc.split('\n').find {
+      case scaladocMarkup(_*) => true
+      case _ => false
+    }
+  }
 
   private def toComponents(): Option[Components] = None
 }
