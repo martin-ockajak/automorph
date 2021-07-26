@@ -15,14 +15,13 @@ case object Generator {
    *
    * @param methods named API methods
    * @param info OpenAPI Info object
-   * @param serverUrls server URLs
+   * @param servers OpenAPI Server objects
    * @return OpenAPI specification
    */
-  def jsonRpc(methods: Map[String, Method], info: Info, serverUrls: Seq[String] = Seq()): Specification = {
-    val servers = createServers(serverUrls)
-    val paths = createPaths(methods, true)
-    val components = createComponents()
-    Specification(info = info, servers = servers, paths = paths, components = components)
+  def jsonRpc(methods: Map[String, Method], info: Info, servers: Seq[Server]): Specification = {
+    val paths = toPaths(methods, true)
+    val components = toComponents()
+    Specification(info = info, servers = toServers(servers), paths = paths, components = components)
   }
 
   /**
@@ -31,24 +30,24 @@ case object Generator {
    * @param methods named API methods
    * @param title API title
    * @param version API specification version
+   * @param serverUrls API server URL
    * @return OpenAPI specification
    */
-  def jsonRpc(methods: Map[String, Method], title: String, version: String): Specification =
-    jsonRpc(methods, Info(title = title, version = version))
+  def jsonRpc(methods: Map[String, Method], title: String, version: String, serverUrls: Seq[String]): Specification =
+    jsonRpc(methods, Info(title = title, version = version), toServers(serverUrls))
 
   /**
    * Generate OpenAPI specification for given API methods.
    *
    * @param methods named API methods
    * @param info OpenAPI Info object
-   * @param serverUrls server URLs
+   * @param servers OpenAPI Server objects
    * @return OpenAPI specification
    */
-  def restRpc(methods: Map[String, Method], info: Info, serverUrls: Seq[String] = Seq()): Specification = {
-    val servers = createServers(serverUrls)
-    val paths = createPaths(methods, false)
-    val components = createComponents()
-    Specification(info = info, servers = servers, paths = paths, components = components)
+  def restRpc(methods: Map[String, Method], info: Info, servers: Seq[Server]): Specification = {
+    val paths = toPaths(methods, false)
+    val components = toComponents()
+    Specification(info = info, servers = toServers(servers), paths = paths, components = components)
   }
 
   /**
@@ -57,20 +56,23 @@ case object Generator {
    * @param methods named API methods
    * @param title API title
    * @param version API specification version
+   * @param serverUrls API server URL
    * @return OpenAPI specification
    */
-  def restRpc(methods: Map[String, Method], title: String, version: String): Specification =
-    restRpc(methods, Info(title = title, version = version))
+  def restRpc(methods: Map[String, Method], title: String, version: String, serverUrls: Seq[String]): Specification =
+    restRpc(methods, Info(title = title, version = version), toServers(serverUrls))
 
-  private def createServers(serverUrls: Seq[String]): Option[Servers] = serverUrls match {
+  private def toServers(serverUrls: Seq[String]): Seq[Server] = serverUrls.map(url => Server(url = url))
+
+  private def toServers(servers: Seq[Server]): Option[Servers] = servers match {
     case Seq() => None
-    case Seq(urls: _*) => Some(urls.map(url => Server(url = url)).toList.toList)
+    case someServers => Some(someServers.toList)
   }
 
-  private def createPaths(methods: Map[String, Method], rpc: Boolean): Option[Paths] = methods match {
+  private def toPaths(methods: Map[String, Method], rpc: Boolean): Option[Paths] = methods match {
     case noMethods if noMethods.isEmpty => None
-    case actualMethods =>
-      Some(actualMethods.map { case (name, method) =>
+    case someMethods =>
+      Some(someMethods.map { case (name, method) =>
         val path = s"/${name.replace('.', '/')}"
         val pathItem = if (rpc) jsonRpcPathItem(method) else restRpcPathItem(method)
         path -> pathItem
@@ -83,5 +85,5 @@ case object Generator {
   private def restRpcPathItem(method: Method): PathItem =
     PathItem()
 
-  private def createComponents(): Option[Components] = None
+  private def toComponents(): Option[Components] = None
 }
