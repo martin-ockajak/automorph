@@ -81,11 +81,15 @@ case object Generator {
     path -> pathItem
   }
 
-  private def jsonRpcPathItem(method: Method): PathItem =
-    PathItem(summary = toSummary(method.documentation), description = method.documentation)
+  private def jsonRpcPathItem(method: Method): PathItem = {
+    val summary = toSummary(method.documentation)
+    PathItem(summary = summary, description = method.documentation)
+  }
 
-  private def restRpcPathItem(method: Method): PathItem =
-    PathItem(summary = toSummary(method.documentation), description = method.documentation)
+  private def restRpcPathItem(method: Method): PathItem = {
+    val summary = toSummary(method.documentation)
+    PathItem(summary = summary, description = method.documentation)
+  }
 
   private def toSummary(scaladoc: Option[String]): Option[String] = scaladoc.flatMap { doc =>
     doc.split('\n').find {
