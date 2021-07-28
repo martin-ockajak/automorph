@@ -23,7 +23,7 @@ class GeneratorSpec extends BaseSpec {
       val methods = handler.methodBindings.view.mapValues(_.method).toMap
       val specification = Generator.jsonRpcSpec(methods, "Test", "0.0", Seq("http://localhost:80/api"))
       println(specification)
-//      println(specification.asJson.spaces2)
+//      println(Generator.json(specification))
     }
   }
 }

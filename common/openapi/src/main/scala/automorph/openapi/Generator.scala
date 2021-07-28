@@ -1,8 +1,11 @@
 package automorph.openapi
 
 import automorph.openapi.Specification.{Components, Paths, Servers}
-import automorph.util.Method
-import automorph.util.Parameter
+import automorph.util.{Method, Parameter}
+import io.circe.generic.auto._
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Encoder}
 import javax.swing.plaf.synth.SynthCheckBoxMenuItemUI
 
 /**
@@ -23,6 +26,10 @@ case object Generator {
   private val argumentsDescription = "Invoked method argument values by name"
   private val scaladocMarkup = "^[/\\* ]*$".r
   private val optionTypePrefix = s"${classOf[Option[Unit]].getName}"
+//  implicit private val pathsEncoder: Encoder[Paths] = Encoder.encodeMap
+//  implicit private val pathsDecoder: Decoder[Paths] = Decoder.decodeMap
+//  implicit private val componentsEncoder: Encoder[Components] = Encoder.encodeMap
+//  implicit private val componentsDecoder: Decoder[Components] = Decoder.decodeMap
 
   /**
    * Generate OpenAPI paths for given API methods.
@@ -81,6 +88,17 @@ case object Generator {
     servers = toServers(serverUrls),
     components = toComponents()
   )
+
+  /**
+   * Serialize OpenAPI specification into JSON format.
+   *
+   * @param specification OpenApi specification
+   * @return OpenAPI specification in JSON format
+   */
+  def json(specification: Specification): String = {
+//    specification.asJson.spaces2
+    ???
+  }
 
   private def parameterSchemas(method: Method): Map[String, Schema] =
     method.parameters.flatten.map { parameter =>
@@ -198,11 +216,12 @@ case object Generator {
     maybe(serverUrls.map(url => Server(url = url)).toList)
 
   private def toPaths(methods: Map[String, Method], rpc: Boolean): Paths = methods.map { case (name, method) =>
-    val (requestSchema, resultSchema, errorSchema) = if (rpc) {
-      (jsonRpcRequestSchema(method), jsonRpcResultSchema(method), jsonRpcErrorSchema)
-    } else {
-      (restRpcRequestSchema(method), restRpcResultSchema(method), restRpcErrorSchema)
-    }
+    val (requestSchema, resultSchema, errorSchema) =
+      if (rpc) {
+        (jsonRpcRequestSchema(method), jsonRpcResultSchema(method), jsonRpcErrorSchema)
+      } else {
+        (restRpcRequestSchema(method), restRpcResultSchema(method), restRpcErrorSchema)
+      }
     val requestMediaType = MediaType(schema = Some(requestSchema))
     val resultMediaType = MediaType(schema = Some(resultSchema))
     val errorMediaType = MediaType(schema = Some(errorSchema))
