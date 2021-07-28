@@ -5,7 +5,7 @@ import automorph.util.{Method, Parameter}
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
-import io.circe.{Decoder, Encoder}
+import io.circe.{Decoder, Encoder, Json}
 import javax.swing.plaf.synth.SynthCheckBoxMenuItemUI
 
 /**
@@ -26,6 +26,11 @@ case object Generator {
   private val argumentsDescription = "Invoked method argument values by name"
   private val scaladocMarkup = "^[/\\* ]*$".r
   private val optionTypePrefix = s"${classOf[Option[Unit]].getName}"
+//  implicit private val pathsEncoder: Encoder[Paths] = new Encoder[Paths] {
+//    def apply(v: Paths): Json = Json.obj((v.map { case (key, value) =>
+//      key -> value.asJson
+//    }.toSeq)*)
+//  }
 //  implicit private val pathsEncoder: Encoder[Paths] = Encoder.encodeMap
 //  implicit private val pathsDecoder: Decoder[Paths] = Decoder.decodeMap
 //  implicit private val componentsEncoder: Encoder[Components] = Encoder.encodeMap
@@ -96,6 +101,7 @@ case object Generator {
    * @return OpenAPI specification in JSON format
    */
   def json(specification: Specification): String = {
+//    PathItem().asJson
 //    specification.asJson.spaces2
     ???
   }
