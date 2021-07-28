@@ -1,6 +1,7 @@
 package automorph.openapi
 
 import automorph.openapi.Specification.{Components, Paths, Servers}
+import automorph.openapi.Schema.Properties
 import automorph.util.{Method, Parameter}
 import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -35,6 +36,8 @@ case object Generator {
 //  implicit private val pathsDecoder: Decoder[Paths] = Decoder.decodeMap
 //  implicit private val componentsEncoder: Encoder[Components] = Encoder.encodeMap
 //  implicit private val componentsDecoder: Decoder[Components] = Decoder.decodeMap
+//    implicit private val propertiesEncoder: Encoder[Properties] = Encoder.encodeMap
+//    implicit private val propertiesDecoder: Decoder[Properties] = Decoder.decodeMap
 
   /**
    * Generate OpenAPI paths for given API methods.
@@ -101,7 +104,7 @@ case object Generator {
    * @return OpenAPI specification in JSON format
    */
   def json(specification: Specification): String = {
-//    PathItem().asJson
+//    Schema().asJson
 //    specification.asJson.spaces2
     ???
   }
