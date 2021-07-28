@@ -324,6 +324,7 @@ ScalaUnidoc / unidoc / scalacOptions ++= Seq(
 
 // Site settings
 enablePlugins(LaikaPlugin)
+import laika.theme.config._
 import laika.helium.config._
 import laika.ast.LengthUnit._
 laikaTheme := laika.helium.Helium.defaults.all.metadata(
@@ -331,11 +332,18 @@ laikaTheme := laika.helium.Helium.defaults.all.metadata(
   description = Some("Remote procedure call client and server library for Scala"),
   version = Some(version.value),
   language = Some("en")
+).all.themeColors(
+  primary = Color.hex("007c99"),
+  secondary = Color.hex("931813"),
+  primaryDark = Color.hex("095269"),
+  primaryMedium = Color.hex("a7d4de"),
+  primaryLight = Color.hex("ebf6f7"),
+  text = Color.hex("5f3f3f")
 ).site.layout(
   contentWidth = vw(60),
   navigationWidth = vw(10),
-  defaultBlockSpacing = px(10),
-  defaultLineHeight = 1.8,
+  defaultBlockSpacing = px(20),
+  defaultLineHeight = 1.5,
   anchorPlacement = AnchorPlacement.Right
 ).site.topNavigationBar(
   links = Seq(
