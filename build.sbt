@@ -1,14 +1,24 @@
 // Project
-ThisBuild / organization := "io.automorph"
-ThisBuild / homepage := Some(url("https://github.com/martin-ockajak/automorph"))
+
+// Repository
+val projectName = "automorph"
+val repositoryPath = s"martin-ockajak/${projectName}"
+val repositoryUrl = s"https://github.com/${repositoryPath}"
+val documentationUrl = repositoryUrl
+
+// Metadata
+ThisBuild / organization := s"io.${name.value}"
+ThisBuild / homepage := Some(url(repositoryUrl))
 ThisBuild / licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / developers := List()
-ThisBuild / initialize ~= { _ =>
-//  System.setProperty("macro.debug", "true")
-  System.setProperty("macro.test", "true")
-}
+Global / onChangedBuildSource := ReloadOnSourceChanges
 
-lazy val root = project.in(file(".")).aggregate(
+// Structure
+lazy val root = project.in(file(".")).settings(
+  name := projectName,
+  description := "Remote procedure call client and server library for Scala ",
+  publish / skip := true
+).aggregate(
   core,
 
   circe,
@@ -35,17 +45,13 @@ lazy val root = project.in(file(".")).aggregate(
   default,
 
   examples
-).settings(
-  name := "automorph",
-  description := "Remote procedure call client and server library for Scala ",
-  publish / skip := true
 )
 
 // Dependencies
 
 // Basic
 lazy val spi = (project in file("common/spi")).settings(
-  name := "automorph-spi"
+  name := s"$projectName-spi"
 ).settings(
   libraryDependencies ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
@@ -59,28 +65,32 @@ lazy val spi = (project in file("common/spi")).settings(
 lazy val meta = (project in file("common/meta")).dependsOn(
   spi
 ).settings(
-  name := "automorph-meta",
+  name := "${projectName}-meta",
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-api" % "1.7.31"
-  )
+  ),
+  initialize ~= { _ =>
+//    System.setProperty("macro.debug", "true")
+    System.setProperty("macro.test", "true")
+  }
 )
 lazy val core = (project in file("common/core")).dependsOn(
   meta, testBase % Test
 ).settings(
-  name := "automorph-core"
+  name := "${projectName}-core"
 )
 lazy val standard = project.dependsOn(
   http, core, testCore % Test
 ).settings(
-  name := "automorph-standard"
+  name := "${projectName}-standard"
 )
 
 // Codec
 val circeVersion = "0.14.1"
-lazy val circe = (project in file("format/circe")).dependsOn(
+lazy val circe = (project in file(s"format/circe")).dependsOn(
   spi, testBase % Test
 ).settings(
-  name := "automorph-circe",
+  name := s"${projectName}-circe",
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-parser" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion
@@ -89,7 +99,7 @@ lazy val circe = (project in file("format/circe")).dependsOn(
 lazy val upickle = (project in file("format/upickle")).dependsOn(
   spi, testBase % Test
 ).settings(
-  name := "automorph-upickle",
+  name := "${projectName}-upickle",
   libraryDependencies ++= Seq(
     "com.lihaoyi" %% "upickle" % "1.4.0"
   )
@@ -97,7 +107,7 @@ lazy val upickle = (project in file("format/upickle")).dependsOn(
 lazy val argonaut = (project in file("format/argonaut")).dependsOn(
   spi, testBase % Test
 ).settings(
-  name := "automorph-argonaut",
+  name := "${projectName}-argonaut",
   libraryDependencies ++= Seq(
     "io.argonaut" %% "argonaut" % "6.3.6"
   )
@@ -107,7 +117,7 @@ lazy val argonaut = (project in file("format/argonaut")).dependsOn(
 lazy val zio = (project in file("system/zio")).dependsOn(
   spi, testCore % Test
 ).settings(
-  name := "automorph-zio",
+  name := "${projectName}-zio",
   libraryDependencies ++= Seq(
     "dev.zio" %% "zio" % "1.0.10"
   )
@@ -115,7 +125,7 @@ lazy val zio = (project in file("system/zio")).dependsOn(
 lazy val monix = (project in file("system/monix")).dependsOn(
   spi, testCore % Test
 ).settings(
-  name := "automorph-monix",
+  name := "${projectName}-monix",
   libraryDependencies ++= Seq(
     "io.monix" %% "monix-eval" % "3.4.0"
   )
@@ -123,7 +133,7 @@ lazy val monix = (project in file("system/monix")).dependsOn(
 lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
   spi, testCore % Test
 ).settings(
-  name := "automorph-cats-effect",
+  name := "${projectName}-cats-effect",
   libraryDependencies ++= Seq(
     "org.typelevel" %% "cats-effect" % "3.2.0"
   )
@@ -131,7 +141,7 @@ lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
 lazy val scalaz = (project in file("system/scalaz")).dependsOn(
   spi, testCore % Test
 ).settings(
-  name := "automorph-scalaz",
+  name := "${projectName}-scalaz",
   libraryDependencies ++= Seq(
     "org.scalaz" %% "scalaz-effect" % "7.4.0-M7"
   )
@@ -144,7 +154,7 @@ lazy val amqp = (project in file("transport/amqp"))
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
   http, core, testCore % Test, standard % Test
 ).settings(
-  name := "automorph-sttp",
+  name := "${projectName}-sttp",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test
@@ -157,7 +167,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
 lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
   amqp, core, testCore % Test, standard % Test
 ).settings(
-  name := "automorph-rabbitmq",
+  name := "${projectName}-rabbitmq",
   libraryDependencies ++= Seq(
     "com.rabbitmq" % "amqp-client" % "5.13.0"
   )
@@ -167,7 +177,7 @@ lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
 lazy val undertow = (project in file("transport/undertow")).dependsOn(
   http, core, testCore % Test, standard % Test
 ).settings(
-  name := "automorph-undertow",
+  name := "${projectName}-undertow",
   libraryDependencies ++= Seq(
     "io.undertow" % "undertow-core" % "2.2.9.Final",
     "com.lihaoyi" %% "cask" % "0.7.11" % Test
@@ -176,7 +186,7 @@ lazy val undertow = (project in file("transport/undertow")).dependsOn(
 lazy val jetty = (project in file("transport/jetty")).dependsOn(
   http, core, testCore % Test, standard % Test
 ).settings(
-  name := "automorph-jetty",
+  name := "${projectName}-jetty",
   libraryDependencies ++= Seq(
     "org.eclipse.jetty" % "jetty-servlet" % "11.0.6",
     "commons-io" % "commons-io" % "2.11.0"
@@ -185,7 +195,7 @@ lazy val jetty = (project in file("transport/jetty")).dependsOn(
 lazy val finagle = (project in file("transport/finagle")).dependsOn(
   http, core, testCore % Test, standard % Test
 ).settings(
-  name := "automorph-finagle",
+  name := "${projectName}-finagle",
   libraryDependencies ++= Seq(
     ("com.twitter" % "finagle-http" % "21.6.0").cross(CrossVersion.for3Use2_13)
   )
@@ -193,7 +203,7 @@ lazy val finagle = (project in file("transport/finagle")).dependsOn(
 lazy val tapir = (project in file("transport/tapir")).dependsOn(
   http, core, testCore % Test, standard % Test
 ).settings(
-  name := "automorph-tapir",
+  name := "${projectName}-tapir",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.18.1"
   )
@@ -203,14 +213,14 @@ lazy val tapir = (project in file("transport/tapir")).dependsOn(
 lazy val openapi = (project in file("common/openapi")).dependsOn(
   core, circe, testCore % Test, standard % Test
 ).settings(
-  name := "automorph-open-api"
+  name := "${projectName}-open-api"
 )
 
 // Default
 lazy val default = project.dependsOn(
   circe, standard, undertow, sttp
 ).settings(
-  name := "automorph-default",
+  name := "${projectName}-default",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion
   )
@@ -300,7 +310,7 @@ Test / test := ((Test / test) dependsOn testScalastyle).value
 // API
 enablePlugins(ScalaUnidocPlugin)
 ThisBuild / autoAPIMappings := true
-apiURL := Some(url("https://javadoc.io/doc/io.automorph/automorph-core_3/latest"))
+apiURL := Some(url(s"https://javadoc.io/doc/${organization.value}/${projectName}-core_3/latest"))
 ScalaUnidoc / unidoc / scalacOptions ++= Seq(
   "-Ymacro-expand:none",
   "-groups",
@@ -312,30 +322,52 @@ ScalaUnidoc / unidoc / scalacOptions ++= Seq(
 )
 //Compile / doc / scalacOptions ++= Seq("-groups", "-implicits")
 
-// Site
+// Site settings
 enablePlugins(LaikaPlugin)
 import laika.helium.config._
 import laika.ast.LengthUnit._
-//laikaTheme := laika.helium.Helium.defaults.site.layout(
-//  contentWidth = vw(60),
-//  navigationWidth = vw(40),
-//  defaultBlockSpacing = px(10),
-//  defaultLineHeight = 1.5,
-//  anchorPlacement = AnchorPlacement.Right
-//).build
-laikaTheme := laika.theme.Theme.empty
+laikaTheme := laika.helium.Helium.defaults.all.metadata(
+  title = Some("Automorph"),
+  description = Some("Remote procedure call client and server library for Scala"),
+  version = Some(version.value),
+  language = Some("en")
+).site.layout(
+  contentWidth = vw(60),
+  navigationWidth = vw(10),
+  defaultBlockSpacing = px(10),
+  defaultLineHeight = 1.8,
+  anchorPlacement = AnchorPlacement.Right
+).site.topNavigationBar(
+  links = Seq(
+    IconLink.external(repositoryUrl, HeliumIcon.github),
+    IconLink.external(s"${documentationUrl}/api", HeliumIcon.api),
+    IconLink.external(s"https://mvnrepository.com/artifact/${organization.value}", HeliumIcon.download)
+  )
+).build
 laikaExtensions := Seq(laika.markdown.github.GitHubFlavor, laika.parse.code.SyntaxHighlighting)
 laikaIncludeAPI := true
+
+// Site tasks
 Laika / sourceDirectories := Seq(baseDirectory.value / "doc")
+val deleteSite = taskKey[Unit]("Deletes generated documentation website.")
+deleteSite := {
+  IO.delete((laikaSite / target).value)
+}
+laikaSite := laikaSite.dependsOn(deleteSite).value
 laikaSite / target := target.value / "site"
 val site = taskKey[Unit]("Generates documentation website.")
+site / fileInputs ++= Seq(
+  baseDirectory.value.toGlob / "doc" / ** / "*.md",
+  baseDirectory.value.toGlob / "doc" / ** / "*.conf"
+)
 site := {}
 site := site.dependsOn(laikaSite).value
 
 // Deployment
+val repositoryShell = s"git@github.com:${repositoryPath}.git"
 enablePlugins(GhpagesPlugin)
 siteSourceDirectory := target.value / "site"
-git.remoteRepo := "git@github.com:martin-ockajak/automorph.git"
+git.remoteRepo := repositoryShell
 val deploySite = taskKey[Unit]("Deploys documentation website.")
 deploySite := {}
 deploySite := site.dependsOn(site, ghpagesPushSite).value
@@ -351,8 +383,8 @@ ThisBuild / githubWorkflowPublish := Seq(WorkflowStep.Sbt(List("ci-release")))
 // Release
 ThisBuild / releaseCrossBuild := true
 ThisBuild / scmInfo := Some(ScmInfo(
-  url("https://github.com/martin-ockajak/automorph"),
-  "scm:git:git@github.com/martin-ockajak/automorph.git"
+  url(repositoryUrl),
+  s"scm:${repositoryShell}"
 ))
 ThisBuild / releaseVcsSign := true
 ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
