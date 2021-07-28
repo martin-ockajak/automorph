@@ -109,7 +109,7 @@ lazy val zio = (project in file("system/zio")).dependsOn(
 ).settings(
   name := "automorph-zio",
   libraryDependencies ++= Seq(
-    "dev.zio" %% "zio" % "1.0.9"
+    "dev.zio" %% "zio" % "1.0.10"
   )
 )
 lazy val monix = (project in file("system/monix")).dependsOn(
@@ -125,7 +125,7 @@ lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
 ).settings(
   name := "automorph-cats-effect",
   libraryDependencies ++= Seq(
-    "org.typelevel" %% "cats-effect" % "3.1.1"
+    "org.typelevel" %% "cats-effect" % "3.2.0"
   )
 )
 lazy val scalaz = (project in file("system/scalaz")).dependsOn(
@@ -138,7 +138,7 @@ lazy val scalaz = (project in file("system/scalaz")).dependsOn(
 )
 
 // Transport
-val sttpVersion = "3.3.11"
+val sttpVersion = "3.3.12"
 lazy val http = (project in file("transport/http"))
 lazy val amqp = (project in file("transport/amqp"))
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
@@ -195,7 +195,7 @@ lazy val tapir = (project in file("transport/tapir")).dependsOn(
 ).settings(
   name := "automorph-tapir",
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.18.0"
+    "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.18.1"
   )
 )
 
