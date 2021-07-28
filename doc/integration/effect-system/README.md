@@ -1,9 +1,5 @@
 # Effect system
 
-@:navigationTree {
-  entries = [ ]
-}
-
 Computational [effect system](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html) plugins.
 
 The underlying runtime must support monadic composition of effectful values.

@@ -327,25 +327,31 @@ enablePlugins(LaikaPlugin)
 import laika.theme.config._
 import laika.helium.config._
 import laika.ast.LengthUnit._
+import laika.ast.Path._
 laikaTheme := laika.helium.Helium.defaults.all.metadata(
   title = Some("Automorph"),
   description = Some("Remote procedure call client and server library for Scala"),
   version = Some(version.value),
   language = Some("en")
 ).all.themeColors(
-  primary = Color.hex("007c99"),
+  primary = Color.hex("007C99"),
   secondary = Color.hex("931813"),
   primaryDark = Color.hex("095269"),
-  primaryMedium = Color.hex("a7d4de"),
-  primaryLight = Color.hex("ebf6f7"),
-  text = Color.hex("5f3f3f")
+  primaryMedium = Color.hex("A7D4DE"),
+  primaryLight = Color.hex("EBF6F7"),
+  text = Color.hex("5F3F3F")
 ).site.layout(
-  contentWidth = vw(60),
-  navigationWidth = vw(10),
+  contentWidth = vw(85),
+  navigationWidth = vw(15),
   defaultBlockSpacing = px(20),
   defaultLineHeight = 1.5,
   anchorPlacement = AnchorPlacement.Right
 ).site.topNavigationBar(
+  logo = Some(Logo.internal(
+    path = Root / "images/logo.jpg", 
+    alt = Some("Homepage"), 
+    title = Some("Home")
+  )),
   links = Seq(
     IconLink.external(repositoryUrl, HeliumIcon.github),
     IconLink.external(s"${documentationUrl}/api", HeliumIcon.api),
@@ -366,7 +372,8 @@ laikaSite / target := target.value / "site"
 val site = taskKey[Unit]("Generates documentation website.")
 site / fileInputs ++= Seq(
   baseDirectory.value.toGlob / "doc" / ** / "*.md",
-  baseDirectory.value.toGlob / "doc" / ** / "*.conf"
+  baseDirectory.value.toGlob / "doc" / ** / "*.conf",
+  baseDirectory.value.toGlob / "doc" / ** / "*.jpg"
 )
 site := {}
 site := site.dependsOn(laikaSite).value
