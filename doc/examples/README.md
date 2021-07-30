@@ -175,13 +175,13 @@ val context = client.context
   .authorizationBearer("value")
 
 // Call the remote API method via proxy supplying the request context directly
-apiProxy.useMetadata("test")(context) // "test, "/api", "valid"
-client.method("useMetadata").args("message" -> "test").call[String] // "test", "/api", "valid"
+apiProxy.useMetadata("test")(context) // "test, /api, valid"
+client.method("useMetadata").args("message" -> "test").call[String] // "test, /api, valid"
 
 // Call the remote API method via proxy supplying the request context as an implicit argument
 implicit lazy val implicitContext: automorph.DefaultHttpClient.Context = context
 apiProxy.useMetadata("test") // "test, /api, valid"
-client.method("useMetadata").args("message" -> "test").call[String] // "test", "/api", "valid"
+client.method("useMetadata").args("message" -> "test").call[String] // "test, /api, valid"
 
 // Close the client
 client.close()
