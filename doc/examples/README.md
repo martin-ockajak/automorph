@@ -41,7 +41,7 @@ val client = automorph.DefaultHttpClient.sync(url, "POST")
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // : String
+apiProxy.hello("world", 1) // String
 
 // Close the client
 client.close()
@@ -92,7 +92,7 @@ val client = automorph.DefaultHttpClient.async(url, "POST")
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // : Future[String]
+apiProxy.hello("world", 1) // Future[String]
 
 // Close the client
 client.close()
@@ -179,13 +179,13 @@ val context = client.context
   .authorizationBearer("value")
 
 // Call the remote API method via proxy supplying the request context directly
-apiProxy.useMetadata("test")(context) // "test, /api, valid"
-client.method("useMetadata").args("message" -> "test").call[String] // "test, /api, valid"
+apiProxy.useMetadata("test")(context) // String
+client.method("useMetadata").args("message" -> "test").call[String] // String
 
 // Call the remote API method via proxy supplying the request context as an implicit argument
 implicit lazy val implicitContext: automorph.DefaultHttpClient.Context = context
-apiProxy.useMetadata("test") // "test, /api, valid"
-client.method("useMetadata").args("message" -> "test").call[String] // "test, /api, valid"
+apiProxy.useMetadata("test") // String
+client.method("useMetadata").args("message" -> "test").call[String] // String
 
 // Close the client
 client.close()
@@ -325,7 +325,7 @@ val client = DefaultHttpClient.async(url, "POST").errorMapping(errorToException)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // : Future[String]
+apiProxy.hello("world", 1) // Future[String]
 
 // Close the client
 client.close()
@@ -402,7 +402,7 @@ val client = DefaultHttpClient(url, "POST", backend, system)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // : Task[String]
+apiProxy.hello("world", 1) // Task[String]
 
 // Close the client
 client.close()
@@ -465,7 +465,7 @@ val client = Client[UpickleMessagePackFormat.Node, format.type, Future, DefaultH
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // : Future[String]
+apiProxy.hello("world", 1) // Future[String]
 
 // Close the client
 client.close()
@@ -520,7 +520,7 @@ val client = DefaultClient.sync(transport)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // : String
+apiProxy.hello("world", 1) // String
 
 // Close the client
 client.close()
@@ -571,7 +571,7 @@ val client = DefaultHttpClient.sync(url, "POST")
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // : String
+apiProxy.hello("world", 1) // String
 
 // Close the client
 client.close()
@@ -630,7 +630,7 @@ val client = DefaultHttpClient.async(url, "POST")
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // : Future[String]
+apiProxy.hello("world", 1) // Future[String]
 
 // Close the client
 client.close()

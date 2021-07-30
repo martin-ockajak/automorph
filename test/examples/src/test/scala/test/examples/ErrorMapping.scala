@@ -38,7 +38,7 @@ object ErrorMapping extends App {
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api
-  apiProxy.hello("world", 1) // : Future[String]
+  apiProxy.hello("world", 1) // Future[String]
 
   // Call a remote API method dynamically passing the arguments by name
   val hello = client.method("hello")

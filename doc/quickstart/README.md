@@ -51,7 +51,7 @@ val client = automorph.DefaultHttpClient.async(url, "POST")
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // : Future[String]
+apiProxy.hello("world", 1) // Future[String]
 ```
 
 ## Dynamic Client

@@ -21,7 +21,7 @@ object ServerMessageTransport extends App {
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api
-  apiProxy.hello("world", 1) // : String
+  apiProxy.hello("world", 1) // String
 
   // Close the client
   client.close()

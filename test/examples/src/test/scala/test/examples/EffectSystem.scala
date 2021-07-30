@@ -28,7 +28,7 @@ object EffectSystem extends App {
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api
-  apiProxy.hello("world", 1) // : Task[String]
+  apiProxy.hello("world", 1) // Task[String]
 
   // Close the client
   client.close()
