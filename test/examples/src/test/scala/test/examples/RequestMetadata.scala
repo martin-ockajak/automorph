@@ -41,11 +41,11 @@ object RequestMetadata extends App {
     .cookies("Test" -> "value")
     .authorizationBearer("value")
 
-  // Call the remote API method via proxy supplying the request context directly
+  // Call the remote API method via proxy with request context supplied directly
   apiProxy.useMetadata("test")(context) // String
   client.method("useMetadata").args("message" -> "test").call[String] // String
 
-  // Call the remote API method via proxy supplying the request context as an implicit argument
+  // Call the remote API method via proxy with request context suplied implictly
   implicit lazy val implicitContext: automorph.DefaultHttpClient.Context = context
   apiProxy.useMetadata("test") // String
   client.method("useMetadata").args("message" -> "test").call[String] // String
