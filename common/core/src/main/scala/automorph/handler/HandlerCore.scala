@@ -57,7 +57,7 @@ private[automorph] trait HandlerCore[Node, ActualFormat <: MessageFormat[Node], 
    * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
    * @return JSON-RPC request handler
    */
-  def exceptionMapping(exceptionToError: Class[_ <: Throwable] => ErrorType): ThisHandler =
+  def errorMapping(exceptionToError: Throwable => ErrorType): ThisHandler =
     copy(exceptionToError = exceptionToError)
 
   override def toString: String =
@@ -165,7 +165,7 @@ private[automorph] trait HandlerCore[Node, ActualFormat <: MessageFormat[Node], 
       case JsonRpcError(message, code, data, _) => ResponseError(code, message, data.asInstanceOf[Option[Node]])
       case _ =>
         // Assemble error details
-        val code = exceptionToError(error.getClass).code
+        val code = exceptionToError(error).code
         val trace = ResponseError.trace(error)
         val message = trace.headOption.getOrElse("Unknown error")
         val data = Some(encodeStrings(trace.drop(1).toList))
@@ -197,20 +197,21 @@ private[automorph] trait HandlerCore[Node, ActualFormat <: MessageFormat[Node], 
   }
 }
 
-object HandlerCore {
+private[automorph] object HandlerCore {
 
   /**
    * Maps an exception class to a corresponding default JSON-RPC error type.
    *
-   * @param exceptionClass exception class
+   * @param exception exception class
    * @return JSON-RPC error type
    */
-  def defaultExceptionToError(exceptionClass: Class[_ <: Throwable]): ErrorType = Map(
-    classOf[ParseErrorException] -> ErrorType.ParseError,
-    classOf[InvalidRequestException] -> ErrorType.InvalidRequest,
-    classOf[MethodNotFoundException] -> ErrorType.MethodNotFound,
-    classOf[IllegalArgumentException] -> ErrorType.InvalidParams,
-    classOf[InternalErrorException] -> ErrorType.InternalError,
-    classOf[IOException] -> ErrorType.IOError
-  ).withDefaultValue(ErrorType.ApplicationError).asInstanceOf[Map[Class[_ <: Throwable], ErrorType]](exceptionClass)
+  def defaultErrorMapping(exception: Throwable): ErrorType = exception match {
+    case _: ParseErrorException => ErrorType.ParseError
+    case _: InvalidRequestException => ErrorType.InvalidRequest
+    case _: MethodNotFoundException => ErrorType.MethodNotFound
+    case _: IllegalArgumentException => ErrorType.InvalidParams
+    case _: InternalErrorException => ErrorType.InternalError
+    case _: IOException => ErrorType.IOError
+    case _ => ErrorType.ApplicationError
+  }
 }

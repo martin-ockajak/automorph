@@ -27,8 +27,7 @@ final case class Handler[Node, ActualFormat <: MessageFormat[Node], Effect[_], C
   format: ActualFormat,
   system: EffectSystem[Effect],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
-  protected val exceptionToError: Class[_ <: Throwable] => ErrorType,
-  protected val encodeStrings: List[String] => Node,
+  protected val exceptionToError: Throwable => Node,
   protected val encodedNone: Node
 ) extends HandlerCore[Node, ActualFormat, Effect, Context]
   with HandlerBind[Node, ActualFormat, Effect, Context]
@@ -80,6 +79,14 @@ case object Handler {
   ): Handler[Node, ActualFormat, Effect, EmptyContext.Value] =
     macro withoutContextMacro[Node, ActualFormat, Effect]
 
+  /**
+   * Maps an exception class to a corresponding default JSON-RPC error type.
+   *
+   * @param exception exception class
+   * @return JSON-RPC error type
+   */
+  def defaultErrorMapping(exception: Throwable): ErrorType = HandlerCore.defaultErrorMapping(exception)
+
   def applyMacro[Node: c.WeakTypeTag, ActualFormat <: MessageFormat[Node]: c.WeakTypeTag, Effect[_], Context: c.WeakTypeTag](
     c: blackbox.Context
   )(
@@ -90,7 +97,7 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[ActualFormat], weakTypeOf[Context])
 
     c.Expr[Any](q"""
-      new automorph.Handler($format, $system, Map.empty, automorph.handler.HandlerCore.defaultExceptionToError,
+      new automorph.Handler($format, $system, Map.empty, automorph.handler.Handler.defaultErrorMapping,
         value => $format.encode[List[String]](value), $format.encode(None))
     """).asInstanceOf[c.Expr[Handler[Node, ActualFormat, Effect, Context]]]
   }
@@ -103,7 +110,7 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[ActualFormat])
 
     c.Expr[Any](q"""
-      automorph.Handler($format, $system, Map.empty, automorph.handler.HandlerCore.defaultExceptionToError,
+      automorph.Handler($format, $system, Map.empty, automorph.handler.Handler.defaultErrorMapping,
         value => $format.encode[List[String]](value), $format.encode(None))
     """).asInstanceOf[c.Expr[Handler[Node, ActualFormat, Effect, EmptyContext.Value]]]
   }

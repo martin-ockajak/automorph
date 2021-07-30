@@ -2,7 +2,7 @@ package test.examples
 
 import automorph.transport.http.client.SttpClient.defaultContext
 
-object MethodAlias extends App {
+object MethodMapping extends App {
 
   // Define an API type and create API instance
   class Api {
@@ -17,15 +17,15 @@ object MethodAlias extends App {
   }
   val api = new Api()
 
-  // Customize method names
-  val mapMethodName = (name: String) => name match {
+  // Customize method name mapping
+  val methodAliases = (name: String) => name match {
     case "original" => Seq("original", "aliased")
     case "omitted" => Seq()
     case other => Seq(s"test.$other")
   }
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val server = automorph.DefaultHttpServer.sync(_.bind(api, mapMethodName(_)), 80, "/api")
+  val server = automorph.DefaultHttpServer.sync(_.bind(api, methodAliases(_)), 80, "/api")
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
   val url = new java.net.URI("http://localhost/api")
@@ -43,10 +43,10 @@ object MethodAlias extends App {
   server.close()
 }
 
-class MethodAlias extends test.base.BaseSpec {
+class MethodMapping extends test.base.BaseSpec {
   "" - {
     "Test" ignore {
-      MethodAlias.main(Array())
+      MethodMapping.main(Array())
     }
   }
 }

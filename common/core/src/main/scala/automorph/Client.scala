@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.Client.defaultErrorToException
+import automorph.Client.defaultErrorMapping
 import automorph.client.{ClientBind, ClientCore, NamedMethodProxy}
 import automorph.protocol.ErrorType
 import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
@@ -28,7 +28,7 @@ final case class Client[Node, ActualFormat <: MessageFormat[Node], Effect[_], Co
   format: ActualFormat,
   system: EffectSystem[Effect],
   transport: ClientMessageTransport[Effect, Context],
-  protected val errorToException: (Int, String) => Throwable = defaultErrorToException
+  protected val errorToException: (Int, String) => Throwable = defaultErrorMapping
 ) extends ClientBind[Node, ActualFormat, Effect, Context] with AutoCloseable with CannotEqual {
 
   /** This client type. */
@@ -97,7 +97,7 @@ case object Client {
    * @param message error message
    * @return exception
    */
-  def defaultErrorToException(code: Int, message: String): Throwable = code match {
+  def defaultErrorMapping(code: Int, message: String): Throwable = code match {
     case ErrorType.ParseError.code => ParseErrorException(message, None.orNull)
     case ErrorType.InvalidRequest.code => InvalidRequestException(message, None.orNull)
     case ErrorType.MethodNotFound.code => MethodNotFoundException(message, None.orNull)

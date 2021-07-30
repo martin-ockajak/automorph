@@ -1,11 +1,13 @@
 package automorph
 
-import automorph.handler.HandlerCore.defaultExceptionToError
-import automorph.handler.{HandlerCore, HandlerBind, HandlerBinding}
+import automorph.handler.HandlerCore.defaultErrorMapping
+import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
 import automorph.protocol.ErrorType
+import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
 import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.util.{CannotEqual, EmptyContext}
+import java.io.IOException
 
 /**
  * Automorph RPC request handler.
@@ -26,7 +28,7 @@ final case class Handler[Node, ActualFormat <: MessageFormat[Node], Effect[_], C
   format: ActualFormat,
   system: EffectSystem[Effect],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
-  protected val exceptionToError: Class[_ <: Throwable] => ErrorType,
+  protected val exceptionToError: Throwable => ErrorType,
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
 ) extends HandlerCore[Node, ActualFormat, Effect, Context]
@@ -58,7 +60,7 @@ case object Handler:
     system: EffectSystem[Effect]
   ): Handler[Node, ActualFormat, Effect, Context] =
     val encodeStrings = (value: List[String]) => format.encode[List[String]](value)
-    Handler(format, system, Map.empty, defaultExceptionToError, encodeStrings, format.encode(None))
+    Handler(format, system, Map.empty, defaultErrorMapping, encodeStrings, format.encode(None))
 
   /**
    * Creates a RPC request handler with empty request context plus specified specified ''format'' and ''system'' plugins.
@@ -79,4 +81,12 @@ case object Handler:
     system: EffectSystem[Effect]
   ): Handler[Node, ActualFormat, Effect, EmptyContext.Value] =
     val encodeStrings = (value: List[String]) => format.encode[List[String]](value)
-    Handler(format, system, Map.empty, defaultExceptionToError, encodeStrings, format.encode(None))
+    Handler(format, system, Map.empty, defaultErrorMapping, encodeStrings, format.encode(None))
+
+  /**
+   * Maps an exception class to a corresponding default JSON-RPC error type.
+   *
+   * @param exception exception class
+   * @return JSON-RPC error type
+   */
+  def defaultErrorMapping(exception: Throwable): ErrorType = HandlerCore.defaultErrorMapping(exception)

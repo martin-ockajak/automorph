@@ -187,9 +187,9 @@ client.method("requestMetaData").args("message" -> "test").call[List[String]] //
 client.close()
 ```
 
-## [Method alias]
+## [Method mapping]
 
-* [Source](/test/examples/src/test/scala/test/examples/MethodAlias.scala)
+* [Source](/test/examples/src/test/scala/test/examples/MethodMapping.scala)
 
 **Dependencies**
 
@@ -259,6 +259,91 @@ Try(client.method("omitted").args().call[String]) // Failure
 client.close()
 ```
 
+## [Error mapping]
+
+* [Source](/test/examples/src/test/scala/test/examples/ErrorMapping.scala)
+
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "io.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
+**API**
+
+```scala
+import automorph.protocol.ErrorType
+import automorph.{Client, DefaultHttpClient, DefaultHttpServer, Handler}
+import java.sql.SQLException
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+// Define an API type and create API instance
+class Api {
+  def hello(some: String, n: Int): Future[String] = Future.successful(s"Hello $some $n!")
+}
+val api = new Api()
+
+```
+
+**Server**
+
+```scala
+// Customize default server error mapping
+val exceptionToError = (exception: Throwable) =>
+  Handler.defaultErrorMapping(exception) match {
+    case ErrorType.ApplicationError if exception.isInstanceOf[SQLException] => ErrorType.InvalidRequest
+    case error => error
+  }
+
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
+val server = DefaultHttpServer.async(_.bind(api).errorMapping(exceptionToError), 80, "/api")
+
+// Stop the server
+server.close()
+```
+
+**Client**
+
+```scala
+// Customize default client error mapping
+val errorToException = (code: Int, message: String) =>
+  Client.defaultErrorMapping(code, message) match {
+    case _: ErrorType.InvalidRequestException if message.toUpperCase.contains("SQL") => new SQLException(message)
+    case exception => exception
+  }
+
+// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
+val url = new java.net.URI("http://localhost/api")
+val client = DefaultHttpClient.async(url, "POST").errorMapping(errorToException)
+
+// Call the remote API method via proxy
+val apiProxy = client.bind[Api] // Api
+apiProxy.hello("world", 1) // : Future[String]
+
+// Close the client
+client.close()
+```
+
+**Dynamic Client**
+
+```scala
+// Call a remote API method dynamically passing the arguments by name
+val hello = client.method("hello")
+hello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
+
+// Call a remote API method dynamically passing the arguments by position
+hello.positional.args("world", 1).call[String] // Future[String]
+
+// Notify a remote API method dynamically passing the arguments by name
+hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
+
+// Notify a remote API method dynamically passing the arguments by position
+hello.positional.args("world", 1).tell // Future[Unit]
+```
+
 ## [Effect system]
 
 * [Source](/test/examples/src/test/scala/test/examples/EffectSystem.scala)
@@ -314,6 +399,69 @@ val client = DefaultHttpClient(url, "POST", backend, system)
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : Task[String]
+
+// Close the client
+client.close()
+```
+
+## [Message format]
+
+* [Source](/test/examples/src/test/scala/test/examples/MessageFormat.scala)
+
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "io.automorph" %% "automorph-default" % "0.0.1",
+  "io.automorph" %% "automorph-upickle" % "0.0.1"
+)
+```
+
+**API**
+
+```scala
+import automorph.format.messagepack.UpickleMessagePackFormat
+import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, Handler}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+// Define an API type and create API instance
+case class Record(values: List[String])
+class Api {
+  def hello(some: String, n: Int): Future[Record] = Future.successful(Record(List("Hello", some, n.toString)))
+}
+val api = new Api()
+```
+
+**Server**
+
+```scala
+// Create message format and custom data type serializer/deserializer
+val format = UpickleMessagePackFormat()
+implicit def recordRw: format.custom.ReadWriter[Record] = format.custom.macroRW
+
+// Create an effect system plugin
+val system = DefaultEffectSystem.async
+
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
+val handler = Handler[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpServer.Context](format, system)
+val server = DefaultHttpServer(handler.bind(api), identity, 80, "/api")
+
+// Stop the server
+server.close()
+```
+
+**Client**
+
+```scala
+// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
+val url = new java.net.URI("http://localhost/api")
+val transport = DefaultHttpClientTransport.async(url, "POST")
+val client = Client[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpClientTransport.Context](format, system, transport)
+
+// Call the remote API method via proxy
+val apiProxy = client.bind[Api] // Api
+apiProxy.hello("world", 1) // : Future[String]
 
 // Close the client
 client.close()
@@ -475,69 +623,6 @@ server.stop()
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val url = new java.net.URI("http://localhost/api")
 val client = DefaultHttpClient.async(url, "POST")
-
-// Call the remote API method via proxy
-val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // : Future[String]
-
-// Close the client
-client.close()
-```
-
-## [Message format]
-
-* [Source](/test/examples/src/test/scala/test/examples/MessageFormat.scala)
-
-**Dependencies**
-
-```scala
-libraryDependencies ++= Seq(
-  "io.automorph" %% "automorph-default" % "0.0.1",
-  "io.automorph" %% "automorph-upickle" % "0.0.1"
-)
-```
-
-**API**
-
-```scala
-import automorph.format.messagepack.UpickleMessagePackFormat
-import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, Handler}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
-// Define an API type and create API instance
-case class Record(values: List[String])
-class Api {
-  def hello(some: String, n: Int): Future[Record] = Future.successful(Record(List("Hello", some, n.toString)))
-}
-val api = new Api()
-```
-
-**Server**
-
-```scala
-// Create message format and custom data type serializer/deserializer
-val format = UpickleMessagePackFormat()
-implicit def recordRw: format.custom.ReadWriter[Record] = format.custom.macroRW
-
-// Create an effect system plugin
-val system = DefaultEffectSystem.async
-
-// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val handler = Handler[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpServer.Context](format, system)
-val server = DefaultHttpServer(handler.bind(api), identity, 80, "/api")
-
-// Stop the server
-server.close()
-```
-
-**Client**
-
-```scala
-// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-val url = new java.net.URI("http://localhost/api")
-val transport = DefaultHttpClientTransport.async(url, "POST")
-val client = Client[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpClientTransport.Context](format, system, transport)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api

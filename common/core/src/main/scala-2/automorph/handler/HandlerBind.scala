@@ -53,15 +53,15 @@ private[automorph] trait HandlerBind[Node, ActualFormat <: MessageFormat[Node], 
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
-   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `mapName` function.
+   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `methodAliases` function.
    *
    * @param api API instance
-   * @param mapName mapping of method name to its exposed names (empty result causes the method not to be exposed)
+   * @param methodAliases mapping of method name to its exposed names (empty result causes the method not to be exposed)
    * @tparam Api API type (only member methods of this type are exposed)
    * @return JSON-RPC server with added API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api, mapName: String => Seq[String]): ThisHandler =
+  def bind[Api <: AnyRef](api: Api, methodAliases: String => Seq[String]): ThisHandler =
     macro HandlerBind.bindMacro[Node, ActualFormat, Effect, Context, Api]
 
   def brokenBind[Api <: AnyRef](api: Api): ThisHandler =
@@ -122,7 +122,7 @@ case object HandlerBind {
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     api: c.Expr[Api],
-    mapName: c.Expr[String => Seq[String]]
+    methodAliases: c.Expr[String => Seq[String]]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, ActualFormat, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
@@ -134,7 +134,7 @@ case object HandlerBind {
       ${c.prefix}.copy(methodBindings = ${c.prefix}.methodBindings ++ automorph.handler.HandlerBindings
         .generate[$nodeType, $formatType, $effectType, $contextType, $apiType](${c.prefix}.format, ${c.prefix}.system, $api)
         .flatMap { case (methodName, method) =>
-          $mapName(methodName).map(_ -> method)
+          $methodAliases(methodName).map(_ -> method)
         }
       )
     """).asInstanceOf[c.Expr[Handler[Node, ActualFormat, Effect, Context]]]
