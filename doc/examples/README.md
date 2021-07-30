@@ -136,10 +136,10 @@ class ServerApi {
   import automorph.DefaultHttpServer.Context
 
   // Use HTTP request metadata context provided by the message transport
-  def useMetadata(message: String)(implicit context: Context): String = Seq(
+  def useMetadata(message: String)(implicit request: Context): String = Seq(
     Some(message),
-    context.path,
-    context.header("X-Test")
+    request.path,
+    request.header("X-Test")
   ).flatten.mkString(",")
 }
 val api = new ServerApi()
@@ -174,20 +174,20 @@ val client = automorph.DefaultHttpClient.sync(url, "POST")
 val apiProxy = client.bind[ClientApi] // Api
 
 // Create HTTP request metadata context
-val context = client.context
+val request = client.context
   .queryParameters("test" -> "value")
   .headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
   .cookies("Test" -> "value")
   .authorizationBearer("value")
 
 // Call the remote API method via proxy with request context supplied directly
-apiProxy.useMetadata("test")(context) // String
+apiProxy.useMetadata("test")(request) // String
 
 // Call the remote API method dynamically with request context supplied directly
 client.method("useMetadata").args("message" -> "test").call[String] // String
 
 // Call the remote API method via proxy with request context supplied implictly
-implicit lazy val implicitContext: automorph.DefaultHttpClient.Context = context
+implicit lazy val implicitRequest: automorph.DefaultHttpClient.Context = request
 apiProxy.useMetadata("test") // String
 
 // Call the remote API method dynamically with request context supplied implictly
