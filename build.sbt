@@ -333,7 +333,7 @@ laikaTheme := laika.helium.Helium.defaults.all.metadata(
   version = Some(version.value),
   language = Some("en")
 ).all.themeColors(
-  primary = Color.hex("125D98"),
+  primary = Color.hex("11698E"),
   secondary = Color.hex("39A2DB"),
   primaryDark = Color.hex("095269"),
   primaryMedium = Color.hex("A7D4DE"),
