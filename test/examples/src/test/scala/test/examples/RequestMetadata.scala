@@ -7,8 +7,8 @@ object RequestMetadata extends App {
     import automorph.DefaultHttpServer.Context
 
     // Use request context provided by the server transport
-    def requestMetaData(message: String)(implicit context: Context): List[String] =
-      List(Some(message), context.path, context.header("X-Test")).flatten
+    def requestMetaData(message: String)(implicit context: Context): String =
+      List(Some(message), context.path, context.header("X-Test")).mkString(",")
   }
   val api = new ServerApi()
 
@@ -17,7 +17,7 @@ object RequestMetadata extends App {
     import automorph.DefaultHttpClient.Context
 
     // Supply request context used by the client transport
-    def requestMetaData(message: String)(implicit context: Context): List[String]
+    def requestMetaData(message: String)(implicit context: Context): String
   }
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
@@ -31,18 +31,18 @@ object RequestMetadata extends App {
   val apiProxy = client.bind[ClientApi] // Api
   val context = client.context
     .queryParameters("test" -> "value")
-    .headers("X-Test" -> "value")
+    .headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
     .cookies("Test" -> "value")
     .authorizationBearer("value")
 
   // Call the remote API method via proxy supplying the request context directly
-  apiProxy.requestMetaData("test")(context) // List("test", "/api", "valid")
-  client.method("requestMetaData").args("message" -> "test").call[List[String]] //  List("test", "/api", "valid")
+  apiProxy.requestMetaData("test")(context) // "test, "/api", "valid"
+  client.method("requestMetaData").args("message" -> "test").call[String] //  "test", "/api", "valid"
 
   // Call the remote API method via proxy supplying the request context as an implicit argument
   implicit lazy val implicitContext: automorph.DefaultHttpClient.Context = context
   apiProxy.requestMetaData("test") // List("test", "/api", "valid")
-  client.method("requestMetaData").args("message" -> "test").call[List[String]] //  List("test", "/api", "valid")
+  client.method("requestMetaData").args("message" -> "test").call[String] //  "test", "/api", "valid"
 
   // Close the client
   client.close()
