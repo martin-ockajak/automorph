@@ -99,9 +99,9 @@ hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
-## [Request context]
+## [Request metadata]
 
-* [Source](/test/examples/src/test/scala/test/examples/RequestContext.scala)
+* [Source](/test/examples/src/test/scala/test/examples/RequestMetadata.scala)
 
 **API**
 
@@ -142,14 +142,21 @@ server.close()
 val url = new java.net.URI("http://localhost/api")
 val client = automorph.DefaultHttpClient.sync(url, "POST")
 
-// Create context for requests sent by the client
+// Create client request context specifying HTTP request meta-data
 val apiProxy = client.bind[ClientApi] // Api
-val defaultContext = client.defaultContext
-implicit val context: automorph.DefaultHttpClient.Context = defaultContext.header("X-Test", "valid")
+val context = client.context
+  .queryParameters("test" -> "value")
+  .headers("X-Test" -> "value")
+  .cookies("Test" -> "value")
+  .authorizationBearer("value")
 
-// Call the remote API method via proxy
-apiProxy.requestMetaData("test") // List("test", "/api", "valid")
+// Call the remote API method via proxy supplying the request context directly
 apiProxy.requestMetaData("test")(context) // List("test", "/api", "valid")
+client.method("requestMetaData").args("message" -> "test").call[List[String]](context) //  List("test", "/api", "valid")
+
+// Call the remote API method via proxy supplying the request context as an implicit argument
+implicit lazy val implicitContext: automorph.DefaultHttpClient.Context = context
+apiProxy.requestMetaData("test") // List("test", "/api", "valid")
 client.method("requestMetaData").args("message" -> "test").call[List[String]] //  List("test", "/api", "valid")
 
 // Close the client
@@ -237,7 +244,12 @@ libraryDependencies ++= Seq(
 **API**
 
 ```scala
+import automorph.system.ZioSystem
+import automorph.{DefaultHttpClient, DefaultHttpServer}
+import org.asynchttpclient.DefaultAsyncHttpClient
+import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio.{Runtime, Task}
+import zio.Runtime.default.unsafeRunTask
 
 // Define an API type and create API instance
 class Api {
@@ -249,15 +261,11 @@ val api = new Api()
 **Server**
 
 ```scala
-import automorph.system.ZioSystem
-import automorph.{DefaultHttpClient, DefaultHttpServer}
-
 // Create an effect system plugin
 val system = ZioSystem[Any]()
-val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
 
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = DefaultHttpServer.system[ZioSystem.TaskEffect](system, runEffect, _.bind(api), 80, "/api")
+val server = DefaultHttpServer.system(system, unsafeRunTask, _.bind(api), 80, "/api")
 
 // Stop the server
 server.close()
@@ -266,13 +274,10 @@ server.close()
 **Client**
 
 ```scala
-import org.asynchttpclient.DefaultAsyncHttpClient
-import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val url = new java.net.URI("http://localhost/api")
 val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
-val client = DefaultHttpClient(url, "POST", system, backend)
+val client = DefaultHttpClient(url, "POST", backend, system)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
@@ -282,13 +287,16 @@ apiProxy.hello("world", 1) // : Task[String]
 client.close()
 ```
 
-## [Selected message transport]
+## [Selected client message transport]
 
-* [Source](/test/examples/src/test/scala/test/examples/SelectedMessageTransport.scala)
+* [Source](/test/examples/src/test/scala/test/examples/SelectedClientMessageTransport.scala)
 
 **API**
 
 ```scala
+import automorph.transport.http.client.HttpUrlConnectionClient
+import automorph.{DefaultClient, DefaultHttpServer}
+
 // Define an API type and create API instance
 class Api {
   def hello(some: String, n: Int): String = s"Hello $some $n!"
@@ -303,14 +311,8 @@ import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.server.NanoHttpdServer
 import automorph.{Client, DefaultSystem, DefaultFormat, Handler}
 
-// Create an effect system plugin
-val system = DefaultEffectSystem.sync
-val runEffect = (effect: Identity[NanoHttpdServer.Response]) => effect
-
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val format = DefaultMessageFormat()
-val handler = Handler[DefaultMessageFormat.Node, format.type, Identity, NanoHttpdServer.Context](format, system)
-val server = NanoHttpdServer(handler.bind(api), runEffect, 80)
+val server = DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
 // Stop the server
 server.close()
@@ -319,14 +321,53 @@ server.close()
 **Client**
 
 ```scala
-import automorph.transport.http.client.HttpUrlConnectionClient
-import java.net.URI
-
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val url = new java.net.URI("http://localhost/api")
 val transport = HttpUrlConnectionClient(url, "POST")
-val client: Client[DefaultMessageFormat.Node, format.type, Identity, HttpUrlConnectionClient.Context] =
-  Client(format, system, transport)
+val client = DefaultClient.sync(transport)
+
+// Call the remote API method via proxy
+val apiProxy = client.bind[Api] // Api
+apiProxy.hello("world", 1) // : String
+
+// Close the client
+client.close()
+```
+
+## [Selected server message transport]
+
+* [Source](/test/examples/src/test/scala/test/examples/SelectedServerMessageTransport.scala)
+
+**API**
+
+```scala
+import automorph.transport.http.server.NanoHttpdServer
+import automorph.{DefaultHandler, DefaultHttpClient}
+
+// Define an API type and create API instance
+class Api {
+  def hello(some: String, n: Int): String = s"Hello $some $n!"
+}
+val api = new Api()
+```
+
+**Server**
+
+```scala
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
+val handler = DefaultHandler.sync[NanoHttpdServer.Context]
+val server = NanoHttpdServer(handler.bind(api), identity, 80)
+
+// Stop the server
+server.close()
+```
+
+**Client**
+
+```scala
+// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
+val url = new java.net.URI("http://localhost/api")
+val client = DefaultHttpClient.sync(url, "POST")
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
@@ -352,6 +393,8 @@ libraryDependencies ++= Seq(
 **API**
 
 ```scala
+import automorph.format.messagepack.UpickleMessagePackFormat
+import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, Handler}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -366,20 +409,16 @@ val api = new Api()
 **Server**
 
 ```scala
-import automorph.format.messagepack.UpickleMessagePackFormat
-import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, Handler}
-
 // Create message format and custom data type serializer/deserializer
 val format = UpickleMessagePackFormat()
 implicit def recordRw: format.custom.ReadWriter[Record] = format.custom.macroRW
 
 // Create an effect system plugin
 val system = DefaultEffectSystem.async
-val runEffect = (effect: Future[_]) => effect
 
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val handler = Handler[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpServer.Context](format, system)
-val server = DefaultHttpServer(handler.bind(api), runEffect, 80, "/api")
+val server = DefaultHttpServer(handler.bind(api), identity, 80, "/api")
 
 // Stop the server
 server.close()
@@ -388,10 +427,10 @@ server.close()
 **Client**
 
 ```scala
-  // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-val transport = DefaultHttpClientTransport.async("http://localhost/api", "POST")
-val client: Client[CirceJsonFormat.Node, format.type, Future, DefaultHttpClientTransport.Context] =
-  Client(format, system, transport)
+// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
+val url = new java.net.URI("http://localhost/api")
+val transport = DefaultHttpClientTransport.async(url, "POST")
+val client = Client[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpClientTransport.Context](format, system, transport)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api

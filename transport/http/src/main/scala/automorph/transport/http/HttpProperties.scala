@@ -186,10 +186,9 @@ final case class HttpProperties[Source](
    * @param replace replace all existing headers with specified names
    * @return HTTP properties
    */
-  def headers(entries: Seq[(String, String)], replace: Boolean): HttpProperties[Source] = {
-    val originalHeaders =
-      if (replace) headers.filter { case (name, _) => !entries.contains(name) }
-      else headers
+  def headers(entries: Iterable[(String, String)], replace: Boolean): HttpProperties[Source] = {
+    val entryNames = entries.map { case (name, _) => name }.toSet
+    val originalHeaders = if (replace) headers.filter { case (name, _) => !entryNames.contains(name) } else headers
     copy(headers = originalHeaders ++ entries)
   }
 
@@ -222,6 +221,25 @@ final case class HttpProperties[Source](
    */
   def proxyAuthBearer(token: String): HttpProperties[Source] =
     header(headerProxyAuthorization, s"$headerAuthorizationBearer $token")
+
+  /**
+   * Set request URL query string.
+   *
+   * @param value URL query string
+   * @return HTTP properties
+   */
+  def query(value: String): HttpProperties[Source] = this.copy(query = Some(value))
+
+  /**
+   * Set request URL query parameters.
+   *
+   * @param entries query parameter names and values
+   * @return HTTP properties
+   */
+  def queryParameters(entries: (String, String)*): HttpProperties[Source] = {
+    val components = entries.map { case (name, value) => s"$name=$value" }
+    query(s"?${components.mkString("&")}")
+  }
 
   /**
    * Set response cookies.
@@ -261,7 +279,7 @@ final case class HttpProperties[Source](
       case _ => None
     })
 
-  private def cookies(values: Seq[(String, String)], set: Boolean): HttpProperties[Source] = {
+  private def cookies(values: Iterable[(String, String)], set: Boolean): HttpProperties[Source] = {
     val headerName = if (set) headerSetCookie else headerCookie
     val headerValue = (headers(headerName) ++ values.map { case (name, value) => s"$name=$value" }).mkString("; ")
     header(headerName, headerValue, true)

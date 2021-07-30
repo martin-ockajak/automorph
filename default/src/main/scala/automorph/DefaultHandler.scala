@@ -48,7 +48,7 @@ case object DefaultHandler {
    * @tparam Context request context type
    * @return synchronous RPC request handler
    */
-  def sync[Context](): Type[Identity, Context] = Handler(DefaultMessageFormat(), DefaultEffectSystem.sync)
+  def sync[Context]: Type[Identity, Context] = Handler(DefaultMessageFormat(), DefaultEffectSystem.sync)
 
   /**
    * Creates a default request RPC handler with empty request context and specified effect ''system'' plugin.

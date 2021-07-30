@@ -1,6 +1,6 @@
 package test.examples
 
-object RequestContext extends App {
+object RequestMetadata extends App {
 
   // Define server API type and create API instance
   class ServerApi {
@@ -27,14 +27,21 @@ object RequestContext extends App {
   val url = new java.net.URI("http://localhost/api")
   val client = automorph.DefaultHttpClient.sync(url, "POST")
 
-  // Create context for requests sent by the client
+  // Create client request context specifying HTTP request meta-data
   val apiProxy = client.bind[ClientApi] // Api
-  val defaultContext = client.context
-  implicit val context: automorph.DefaultHttpClient.Context = defaultContext.header("X-Test", "valid")
+  val context = client.context
+    .queryParameters("test" -> "value")
+    .headers("X-Test" -> "value")
+    .cookies("Test" -> "value")
+    .authorizationBearer("value")
 
-  // Call the remote API method via proxy
-  apiProxy.requestMetaData("test") // List("test", "/api", "valid")
+  // Call the remote API method via proxy supplying the request context directly
   apiProxy.requestMetaData("test")(context) // List("test", "/api", "valid")
+  client.method("requestMetaData").args("message" -> "test").call[List[String]] //  List("test", "/api", "valid")
+
+  // Call the remote API method via proxy supplying the request context as an implicit argument
+  implicit lazy val implicitContext: automorph.DefaultHttpClient.Context = context
+  apiProxy.requestMetaData("test") // List("test", "/api", "valid")
   client.method("requestMetaData").args("message" -> "test").call[List[String]] //  List("test", "/api", "valid")
 
   // Close the client
@@ -44,10 +51,10 @@ object RequestContext extends App {
   server.close()
 }
 
-class RequestContext extends test.base.BaseSpec {
+class RequestMetadata extends test.base.BaseSpec {
   "" - {
     "Test" ignore {
-      RequestContext.main(Array())
+      RequestMetadata.main(Array())
     }
   }
 }

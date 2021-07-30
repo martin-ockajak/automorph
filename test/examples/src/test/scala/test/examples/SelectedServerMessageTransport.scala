@@ -1,11 +1,7 @@
 package test.examples
 
-import automorph.system.IdentitySystem.Identity
-import automorph.transport.http.client.HttpUrlConnectionClient
 import automorph.transport.http.server.NanoHttpdServer
-import automorph.{DefaultEffectSystem, DefaultHandler, DefaultHttpClient, DefaultMessageFormat}
-import scala.concurrent.ExecutionContext.Implicits.global
-import test.examples.Asynchronous.api
+import automorph.{DefaultHandler, DefaultHttpClient}
 
 object SelectedServerMessageTransport extends App {
 
@@ -15,11 +11,8 @@ object SelectedServerMessageTransport extends App {
   }
   val api = new Api()
 
-  // Create an effect system plugin
-  val system = DefaultEffectSystem.sync
-
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val handler = DefaultHandler[Identity, NanoHttpdServer.Context](system)
+  val handler = DefaultHandler.sync[NanoHttpdServer.Context]
   val server = NanoHttpdServer(handler.bind(api), identity, 80)
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'

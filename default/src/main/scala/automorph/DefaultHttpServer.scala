@@ -133,7 +133,7 @@ case object DefaultHttpServer {
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
   ): Type[Identity] = {
-    val handler = bindApis(DefaultHandler.sync())
+    val handler = bindApis(DefaultHandler.sync)
     val runEffect = (_: Identity[Any]) => ()
     DefaultHttpServer(handler, runEffect, port, path, errorStatus, webSocket, builder)
   }
