@@ -51,7 +51,7 @@ Used by the RPC client to send requests and receive responses to and from a remo
 
 ### Server
 
-[Server message transport]((https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/ServerMessageTransport.html)) protocol plugins.
+[Server message transport](https://www.javadoc.io/doc/io.automorph/automorph-spi_2.13/latest/automorph/spi/ServerMessageTransport.html) protocol plugins.
 
 Used to actively receive and reply to requests using specific message transport protocol
 while invoking RPC request handler to process them.
