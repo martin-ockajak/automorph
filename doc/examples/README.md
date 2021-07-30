@@ -136,7 +136,7 @@ class ServerApi {
 
   // Use request context provided by the server transport
   def useMetadata(message: String)(implicit context: Context): String =
-    List(Some(message), context.path, context.header("X-Test")).mkString(",")
+    Seq(Some(message), context.path, context.header("X-Test")).mkString(",")
 }
 val api = new ServerApi()
 
@@ -180,7 +180,7 @@ client.method("useMetadata").args("message" -> "test").call[String] //  "test", 
 
 // Call the remote API method via proxy supplying the request context as an implicit argument
 implicit lazy val implicitContext: automorph.DefaultHttpClient.Context = context
-apiProxy.useMetadata("test") // List("test", "/api", "valid")
+apiProxy.useMetadata("test") // "test, /api, valid"
 client.method("useMetadata").args("message" -> "test").call[String] //  "test", "/api", "valid"
 
 // Close the client
