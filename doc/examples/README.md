@@ -135,7 +135,7 @@ class ServerApi {
 
   import automorph.DefaultHttpServer.Context
 
-  // Use HTTP request metadata context provided by the server or endpoint message transport
+  // Use HTTP request metadata context provided by the message transport
   def useMetadata(message: String)(implicit context: Context): String = Seq(
     Some(message),
     context.path,
