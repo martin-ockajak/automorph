@@ -175,7 +175,7 @@ val apiProxy = client.bind[ClientApi] // Api
 
 // Create HTTP request metadata context
 val request = client.context
-  .queryParameters("test" -> "value")
+  .parameters("test" -> "value")
   .headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
   .cookies("Test" -> "value")
   .authorizationBearer("value")

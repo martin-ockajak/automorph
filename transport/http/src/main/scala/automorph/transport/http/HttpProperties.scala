@@ -236,7 +236,7 @@ final case class HttpProperties[Source](
    * @param entries query parameter names and values
    * @return HTTP properties
    */
-  def queryParameters(entries: (String, String)*): HttpProperties[Source] = {
+  def parameters(entries: (String, String)*): HttpProperties[Source] = {
     val components = entries.map { case (name, value) => s"$name=$value" }
     query(s"?${components.mkString("&")}")
   }
