@@ -5,12 +5,12 @@ import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, Defau
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object SelectedMessageFormat extends App {
+object MessageFormat extends App {
 
   // Define an API type and create API instance
   case class Record(values: List[String])
   class Api {
-    def hello(some: String, n: Int): Future[Record] = Future.successful(Record(List("Hello", some, n.toString)))
+    def hello(some: String, n: Int): Future[Record] = Future(Record(List("Hello", some, n.toString)))
   }
   val api = new Api()
 
@@ -41,10 +41,10 @@ object SelectedMessageFormat extends App {
   server.close()
 }
 
-class SelectedMessageFormat extends test.base.BaseSpec {
+class MessageFormat extends test.base.BaseSpec {
   "" - {
     "Test" ignore {
-      SelectedMessageFormat.main(Array())
+      MessageFormat.main(Array())
     }
   }
 }

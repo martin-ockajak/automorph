@@ -8,7 +8,7 @@ object Asynchronous extends App {
 
   // Define an API type and create API instance
   class Api {
-    def hello(some: String, n: Int): Future[String] = Future.successful(s"Hello $some $n!")
+    def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
   }
   val api = new Api()
 

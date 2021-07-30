@@ -37,7 +37,7 @@ case object DefaultHandler {
    * @tparam Context request context type
    * @return asynchronous RPC request handler
    */
-  def async[Context]()(implicit executionContext: ExecutionContext): Type[Future, Context] =
+  def async[Context](implicit executionContext: ExecutionContext): Type[Future, Context] =
     Handler(DefaultMessageFormat(), DefaultEffectSystem.async)
 
   /**

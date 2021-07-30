@@ -7,11 +7,11 @@ import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio.{Runtime, Task}
 import zio.Runtime.default.unsafeRunTask
 
-object SelectedEffectSystem extends App {
+object EffectSystem extends App {
 
   // Define an API type and create API instance
   class Api {
-    def hello(some: String, n: Int): Task[String] = Task.succeed(s"Hello $some $n!")
+    def hello(some: String, n: Int): Task[String] = Task(s"Hello $some $n!")
   }
   val api = new Api()
 
@@ -37,10 +37,10 @@ object SelectedEffectSystem extends App {
   server.close()
 }
 
-class SelectedEffectSystem extends test.base.BaseSpec {
+class EffectSystem extends test.base.BaseSpec {
   "" - {
     "Test" ignore {
-      SelectedEffectSystem.main(Array())
+      EffectSystem.main(Array())
     }
   }
 }

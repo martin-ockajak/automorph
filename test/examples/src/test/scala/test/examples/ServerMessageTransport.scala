@@ -1,9 +1,9 @@
 package test.examples
 
-import automorph.transport.http.client.HttpUrlConnectionClient
-import automorph.{DefaultClient, DefaultHttpServer}
+import automorph.transport.http.server.NanoHttpdServer
+import automorph.{DefaultHandler, DefaultHttpClient}
 
-object SelectedClientMessageTransport extends App {
+object ServerMessageTransport extends App {
 
   // Define an API type and create API instance
   class Api {
@@ -12,12 +12,12 @@ object SelectedClientMessageTransport extends App {
   val api = new Api()
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val server = DefaultHttpServer.sync(_.bind(api), 80, "/api")
+  val handler = DefaultHandler.sync[NanoHttpdServer.Context]
+  val server = NanoHttpdServer(handler.bind(api), identity, 80)
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
   val url = new java.net.URI("http://localhost/api")
-  val transport = HttpUrlConnectionClient(url, "POST")
-  val client = DefaultClient.sync(transport)
+  val client = DefaultHttpClient.sync(url, "POST")
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api
@@ -30,10 +30,10 @@ object SelectedClientMessageTransport extends App {
   server.close()
 }
 
-class SelectedClientMessageTransport extends test.base.BaseSpec {
+class ServerMessageTransport extends test.base.BaseSpec {
   "" - {
     "Test" ignore {
-      SelectedClientMessageTransport.main(Array())
+      ServerMessageTransport.main(Array())
     }
   }
 }

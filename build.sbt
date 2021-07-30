@@ -179,8 +179,7 @@ lazy val undertow = (project in file("transport/undertow")).dependsOn(
 ).settings(
   name := "${projectName}-undertow",
   libraryDependencies ++= Seq(
-    "io.undertow" % "undertow-core" % "2.2.9.Final",
-    "com.lihaoyi" %% "cask" % "0.7.11" % Test
+    "io.undertow" % "undertow-core" % "2.2.9.Final"
   )
 )
 lazy val jetty = (project in file("transport/jetty")).dependsOn(
@@ -231,7 +230,7 @@ lazy val examples = (project in file("test/examples")).dependsOn(
   default, upickle, zio, testBase % Test
 ).settings(
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test
   )
 )
 // Test

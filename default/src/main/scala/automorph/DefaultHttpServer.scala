@@ -106,7 +106,7 @@ case object DefaultHttpServer {
     builder: Undertow.Builder = defaultBuilder
   )(implicit executionContext: ExecutionContext): Type[Future] = {
     Seq(executionContext)
-    val handler = bindApis(DefaultHandler.async())
+    val handler = bindApis(DefaultHandler.async)
     val runEffect = (_: Future[Any]) => ()
     DefaultHttpServer(handler, runEffect, port, path, errorStatus, webSocket, builder)
   }

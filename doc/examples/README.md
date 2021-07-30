@@ -4,6 +4,14 @@
 
 * [Source](/test/examples/src/test/scala/test/examples/Synchronous.scala)
 
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "io.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
 **API**
 
 ```scala
@@ -42,6 +50,14 @@ client.close()
 ## [Asynchronous]
 
 * [Source](/test/examples/src/test/scala/test/examples/Asynchronous.scala)
+
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "io.automorph" %% "automorph-default" % "0.0.1"
+)
+```
 
 **API**
 
@@ -102,6 +118,14 @@ hello.positional.args("world", 1).tell // Future[Unit]
 ## [Request metadata]
 
 * [Source](/test/examples/src/test/scala/test/examples/RequestMetadata.scala)
+
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "io.automorph" %% "automorph-default" % "0.0.1"
+)
+```
 
 **API**
 
@@ -167,6 +191,14 @@ client.close()
 
 * [Source](/test/examples/src/test/scala/test/examples/MethodAlias.scala)
 
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "io.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
 **API**
 
 ```scala
@@ -227,9 +259,9 @@ Try(client.method("omitted").args().call[String]) // Failure
 client.close()
 ```
 
-## [Selected effect system]
+## [Effect system]
 
-* [Source](/test/examples/src/test/scala/test/examples/SelectedEffectSystem.scala)
+* [Source](/test/examples/src/test/scala/test/examples/EffectSystem.scala)
 
 **Dependencies**
 
@@ -287,9 +319,17 @@ apiProxy.hello("world", 1) // : Task[String]
 client.close()
 ```
 
-## [Selected client message transport]
+## [Client message transport]
 
-* [Source](/test/examples/src/test/scala/test/examples/SelectedClientMessageTransport.scala)
+* [Source](/test/examples/src/test/scala/test/examples/ClientMessageTransport.scala)
+
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "io.automorph" %% "automorph-default" % "0.0.1"
+)
+```
 
 **API**
 
@@ -334,9 +374,17 @@ apiProxy.hello("world", 1) // : String
 client.close()
 ```
 
-## [Selected server message transport]
+## [Server message transport]
 
-* [Source](/test/examples/src/test/scala/test/examples/SelectedServerMessageTransport.scala)
+* [Source](/test/examples/src/test/scala/test/examples/ServerMessageTransport.scala)
+
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "io.automorph" %% "automorph-default" % "0.0.1"
+)
+```
 
 **API**
 
@@ -377,16 +425,75 @@ apiProxy.hello("world", 1) // : String
 client.close()
 ```
 
-## [Selected message format]
+## [Endpoint message transport]
 
-* [Source](/test/examples/src/test/scala/test/examples/SelectedMessageFormat.scala)
+* [Source](/test/examples/src/test/scala/test/examples/EndpointMessageTransport.scala)
+
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "io.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
+**API**
+
+```scala
+import io.undertow.{Handlers, Undertow}
+import automorph.{DefaultHandler, DefaultHttpClient}
+import automorph.transport.http.endpoint.UndertowHttpEndpoint
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+// Define an API type and create API instance
+class Api {
+  def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+}
+val api = new Api()
+```
+
+**Server**
+
+```scala
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
+val handler = DefaultHandler.async[UndertowHttpEndpoint.Context]
+val endpoint = UndertowHttpEndpoint(handler.bind(api), identity)
+val pathHandler = Handlers.path().addPrefixPath("/api", endpoint)
+val server = Undertow.builder()
+  .addHttpListener(80, "0.0.0.0")
+  .setHandler(pathHandler)
+  .build()
+
+// Stop the server
+server.stop()
+```
+
+**Client**
+
+```scala
+// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
+val url = new java.net.URI("http://localhost/api")
+val client = DefaultHttpClient.async(url, "POST")
+
+// Call the remote API method via proxy
+val apiProxy = client.bind[Api] // Api
+apiProxy.hello("world", 1) // : Future[String]
+
+// Close the client
+client.close()
+```
+
+## [Message format]
+
+* [Source](/test/examples/src/test/scala/test/examples/MessageFormat.scala)
 
 **Dependencies**
 
 ```scala
 libraryDependencies ++= Seq(
   "io.automorph" %% "automorph-default" % "0.0.1",
-  "io.automorph" %% "automorph-circe" % "0.0.1"
+  "io.automorph" %% "automorph-upickle" % "0.0.1"
 )
 ```
 
