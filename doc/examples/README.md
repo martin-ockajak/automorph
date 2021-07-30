@@ -130,13 +130,17 @@ libraryDependencies ++= Seq(
 **API**
 
 ```scala
-// Define server API type and create API instance
+  // Define server API type and create API instance
 class ServerApi {
+
   import automorph.DefaultHttpServer.Context
 
   // Use request context provided by the server transport
-  def useMetadata(message: String)(implicit context: Context): String =
-    Seq(Some(message), context.path, context.header("X-Test")).mkString(",")
+  def useMetadata(message: String)(implicit context: Context): String = Seq(
+    Some(message),
+    context.path,
+    context.header("X-Test")
+  ).flatten.mkString(",")
 }
 val api = new ServerApi()
 

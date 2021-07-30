@@ -4,16 +4,21 @@ object RequestMetadata extends App {
 
   // Define server API type and create API instance
   class ServerApi {
+
     import automorph.DefaultHttpServer.Context
 
     // Use request context provided by the server transport
-    def useMetadata(message: String)(implicit context: Context): String =
-      Seq(Some(message), context.path, context.header("X-Test")).mkString(",")
+    def useMetadata(message: String)(implicit context: Context): String = Seq(
+      Some(message),
+      context.path,
+      context.header("X-Test")
+    ).flatten.mkString(",")
   }
   val api = new ServerApi()
 
   // Define client view of the server API
   trait ClientApi {
+
     import automorph.DefaultHttpClient.Context
 
     // Supply request context used by the client transport
@@ -29,6 +34,7 @@ object RequestMetadata extends App {
 
   // Create client request context specifying HTTP request meta-data
   val apiProxy = client.bind[ClientApi] // Api
+
   val context = client.context
     .queryParameters("test" -> "value")
     .headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
