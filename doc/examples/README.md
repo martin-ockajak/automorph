@@ -180,11 +180,15 @@ val context = client.context
 
 // Call the remote API method via proxy with request context supplied directly
 apiProxy.useMetadata("test")(context) // String
+
+// Call the remote API method dynamically with request context supplied directly
 client.method("useMetadata").args("message" -> "test").call[String] // String
 
 // Call the remote API method via proxy with request context supplied implictly
 implicit lazy val implicitContext: automorph.DefaultHttpClient.Context = context
 apiProxy.useMetadata("test") // String
+
+// Call the remote API method dynamically with request context supplied implictly
 client.method("useMetadata").args("message" -> "test").call[String] // String
 
 // Close the client
