@@ -21,8 +21,8 @@ object RequestMetadata extends App {
 
     import automorph.DefaultHttpClient.Context
 
-    // Supply request context used by the client transport
-    def useMetadata(message: String)(implicit context: Context): String
+    // Recognize HTTP request metadata context defined by the message transport
+    def useMetadata(message: String)(implicit request: Context): String
   }
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
