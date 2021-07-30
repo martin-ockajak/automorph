@@ -135,7 +135,7 @@ class ServerApi {
 
   import automorph.DefaultHttpServer.Context
 
-  // Use HTTP request metadata context provided by the message transport
+  // Use HTTP request metadata context provided by the message transport plugin
   def useMetadata(message: String)(implicit request: Context): String = Seq(
     Some(message),
     request.path,
@@ -148,7 +148,7 @@ val api = new ServerApi()
 trait ClientApi {
   import automorph.DefaultHttpClient.Context
 
-  // Recognize HTTP request metadata context defined by the message transport
+  // Recognize HTTP request metadata context defined by the message transport plugin
   def useMetadata(message: String)(implicit request: Context): String
 }
 ```
