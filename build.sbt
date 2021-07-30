@@ -333,11 +333,11 @@ laikaTheme := laika.helium.Helium.defaults.all.metadata(
   version = Some(version.value),
   language = Some("en")
 ).all.themeColors(
-  primary = Color.hex("007C99"),
-  secondary = Color.hex("931813"),
+  primary = Color.hex("558776"),
+  secondary = Color.hex("39A2DB"),
   primaryDark = Color.hex("095269"),
   primaryMedium = Color.hex("A7D4DE"),
-  primaryLight = Color.hex("EBF6F7"),
+  primaryLight = Color.hex("E8F0F2"),
   text = Color.hex("5F3F3F")
 ).site.layout(
   contentWidth = vw(85),
