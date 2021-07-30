@@ -51,6 +51,7 @@ case object Handler {
    * @tparam Node message node type
    * @tparam ActualFormat message format plugin type
    * @tparam Effect effect type
+   * @tparam Context request context type
    * @return RPC request handler
    */
   def apply[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context](
@@ -70,6 +71,7 @@ case object Handler {
    * @tparam Node message node type
    * @tparam ActualFormat message format plugin type
    * @tparam Effect effect type
+   * @tparam Context request context type
    * @return RPC request handler
    */
   def withoutContext[Node, ActualFormat <: MessageFormat[Node], Effect[_]](

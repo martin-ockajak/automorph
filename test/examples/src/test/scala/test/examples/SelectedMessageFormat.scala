@@ -5,7 +5,7 @@ import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, Defau
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object ChooseMessageFormat extends App {
+object SelectedMessageFormat extends App {
 
   // Define an API type and create API instance
   case class Record(values: List[String])
@@ -18,19 +18,17 @@ object ChooseMessageFormat extends App {
   val format = UpickleMessagePackFormat()
   implicit def recordRw: format.custom.ReadWriter[Record] = format.custom.macroRW
 
-  // Create effect system plugin
+  // Create an effect system plugin
   val system = DefaultEffectSystem.async
-  val runEffect = (effect: Future[_]) => effect
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
   val handler = Handler[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpServer.Context](format, system)
-  val server = DefaultHttpServer(handler.bind(api), runEffect, 80, "/api")
+  val server = DefaultHttpServer(handler.bind(api), identity, 80, "/api")
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
   val url = new java.net.URI("http://localhost/api")
   val transport = DefaultHttpClientTransport.async(url, "POST")
-  val client: Client[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpClientTransport.Context] =
-    Client(format, system, transport)
+  val client = Client[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpClientTransport.Context](format, system, transport)
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api
@@ -43,10 +41,10 @@ object ChooseMessageFormat extends App {
   server.close()
 }
 
-class ChooseMessageFormat extends test.base.BaseSpec {
+class SelectedMessageFormat extends test.base.BaseSpec {
   "" - {
     "Test" ignore {
-      ChooseMessageFormat.main(Array())
+      SelectedMessageFormat.main(Array())
     }
   }
 }

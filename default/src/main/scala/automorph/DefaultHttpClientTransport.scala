@@ -21,26 +21,26 @@ case object DefaultHttpClientTransport {
   type Context = SttpClient.Context
 
   /**
-   * Creates a default client message transport protocol plugin using HTTP as transport protocol.
+   * Creates a default client message transport protocol plugin using HTTP as messge transport protocol with specified effect ''system'' plugin.
    *
    * The transport can be used by a JSON-RPC client to send requests and receive responses to and from a remote endpoint.
    *
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
-   * @param system effect system plugin
    * @param backend client message transport backend
+   * @param system effect system plugin
    * @tparam Effect effect type
    * @return transport plugin
    */
   def apply[Effect[_]](
     url: URI,
     method: String,
-    system: EffectSystem[Effect],
-    backend: SttpBackend[Effect, _]
-  ): Type[Effect] = DefaultHttpClientTransport(url, method, system, backend)
+    backend: SttpBackend[Effect, _],
+    system: EffectSystem[Effect]
+  ): Type[Effect] = DefaultHttpClientTransport(url, method, backend, system)
 
   /**
-   * Creates a default client message transport protocol plugin using HTTP  as transport protocol and 'Future' as an effect type.
+   * Creates a default client message transport protocol plugin using HTTP as message transport protocol and 'Future' as an effect type.
    *
    * The transport can be used by a JSON-RPC client to send requests and receive responses to and from a remote endpoint.
    *
@@ -51,10 +51,10 @@ case object DefaultHttpClientTransport {
    * @return asynchronous transport plugin
    */
   def async(url: URI, method: String)(implicit executionContext: ExecutionContext): Type[Future] =
-    DefaultHttpClientTransport(url, method, DefaultEffectSystem.async, AsyncHttpClientFutureBackend())
+    DefaultHttpClientTransport(url, method, AsyncHttpClientFutureBackend(), DefaultEffectSystem.async)
 
   /**
-   * Creates a default client message transport protocol plugin using HTTP  as transport protocol and identity as an effect type.
+   * Creates a default client message transport protocol plugin using HTTP as message transport protocol and identity as an effect type.
    *
    * The transport can be used by a JSON-RPC client to send requests and receive responses to and from a remote endpoint.
    *
@@ -65,6 +65,6 @@ case object DefaultHttpClientTransport {
    */
   def sync(url: URI, method: String): Type[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
-    DefaultHttpClientTransport(url, method, DefaultEffectSystem.sync, HttpURLConnectionBackend())
+    DefaultHttpClientTransport(url, method, HttpURLConnectionBackend(), DefaultEffectSystem.sync)
   }
 }

@@ -7,7 +7,7 @@ way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/sp
 
 # [Overview](overview/README.md)
 
-# [Quickstart](overview/quickstart/README.md)
+# [Quickstart](quickstart/README.md)
 
 # [Integration](integration/README.md)
 

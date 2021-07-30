@@ -2,8 +2,6 @@
 
 Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
-## [Scaladoc](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
-
 ## Build
 
 Add the following to your `build.sbt` file:
@@ -12,7 +10,7 @@ Add the following to your `build.sbt` file:
 libraryDependencies += "io.automorph" %% "automorph-default" % "0.0.1"
 ```
 
-### API
+## API
 
 Take an existing asynchronous API:
 
@@ -30,7 +28,7 @@ val api = new Api()
 
 Expose the API via JSON-RPC over HTTP(S).
 
-### Server
+## Server
 
 ```scala
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
@@ -40,7 +38,7 @@ val server = automorph.DefaultHttpServer.async(_.bind(api), 80, "/api")
 server.close()
 ```
 
-### Client
+## Static Client
 
 Invoke the API via JSON-RPC over HTTP(S).
 
@@ -54,7 +52,7 @@ val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // : Future[String]
 ```
 
-### Dynamic Client
+## Dynamic Client
 
 Invoke the API dynamically without definition via JSON-RPC over HTTP(S).
 
@@ -75,3 +73,5 @@ hello.positional.args("world", 1).tell // Future[Unit]
 // Close the client
 client.close()
 ```
+
+## [Scaladoc](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)

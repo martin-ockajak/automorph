@@ -1,7 +1,6 @@
 package test.examples
 
 import automorph.transport.http.client.SttpClient.defaultContext
-import scala.util.Try
 
 object MethodAlias extends App {
 
@@ -35,7 +34,7 @@ object MethodAlias extends App {
   // Call the remote API method via proxy
   client.method("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
   client.method("aliased").args("value" -> None).tell // ()
-  Try(client.method("omitted").args().call[String]) // Failure
+  util.Try(client.method("omitted").args().call[String]) // Failure
 
   // Close the client
   client.close()

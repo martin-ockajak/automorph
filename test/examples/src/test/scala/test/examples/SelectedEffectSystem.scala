@@ -5,8 +5,9 @@ import automorph.{DefaultHttpClient, DefaultHttpServer}
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio.{Runtime, Task}
+import zio.Runtime.default.unsafeRunTask
 
-object ChooseEffectSystem extends App {
+object SelectedEffectSystem extends App {
 
   // Define an API type and create API instance
   class Api {
@@ -14,17 +15,16 @@ object ChooseEffectSystem extends App {
   }
   val api = new Api()
 
-  // Create effect system plugin
+  // Create an effect system plugin
   val system = ZioSystem[Any]()
-  val runEffect = (effect: Task[_]) => Runtime.default.unsafeRunTask(effect)
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val server = DefaultHttpServer.system[ZioSystem.TaskEffect](system, runEffect, _.bind(api), 80, "/api")
+  val server = DefaultHttpServer.system(system, unsafeRunTask, _.bind(api), 80, "/api")
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
   val url = new java.net.URI("http://localhost/api")
   val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
-  val client = DefaultHttpClient(url, "POST", system, backend)
+  val client = DefaultHttpClient(url, "POST", backend, system)
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api
@@ -37,10 +37,10 @@ object ChooseEffectSystem extends App {
   server.close()
 }
 
-class ChooseEffectSystem extends test.base.BaseSpec {
+class SelectedEffectSystem extends test.base.BaseSpec {
   "" - {
     "Test" ignore {
-      ChooseEffectSystem.main(Array())
+      SelectedEffectSystem.main(Array())
     }
   }
 }
