@@ -2,6 +2,8 @@
 
 Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
+* [Scaladoc](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
+
 ## Build
 
 Add the following to your `build.sbt` file:
@@ -73,5 +75,3 @@ hello.positional.args("world", 1).tell // Future[Unit]
 // Close the client
 client.close()
 ```
-
-## [Scaladoc](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
