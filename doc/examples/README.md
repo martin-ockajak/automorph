@@ -135,7 +135,7 @@ class ServerApi {
 
   import automorph.DefaultHttpServer.Context
 
-  // Use request context provided by the server transport
+  // Use HTTP request metadata context provided by the server or endpoint message transport
   def useMetadata(message: String)(implicit context: Context): String = Seq(
     Some(message),
     context.path,
@@ -172,6 +172,8 @@ val client = automorph.DefaultHttpClient.sync(url, "POST")
 
 // Create client request context specifying HTTP request meta-data
 val apiProxy = client.bind[ClientApi] // Api
+
+// Create HTTP request metadata context
 val context = client.context
   .queryParameters("test" -> "value")
   .headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
