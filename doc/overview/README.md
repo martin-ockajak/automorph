@@ -1,5 +1,11 @@
 # Overview
 
+## Goals
+
+* Provide a **definitive RPC solution** for Scala ecosystem
+* Strive for **easiest possible integration** with existing applications
+* Encourage use of **appropriate technical standards** for system interoperability
+
 ## Features
 
 * **Powerful** - generate client and server bindings directly from public methods of your API classes
@@ -14,15 +20,7 @@
 * **Boilerplate free** - even advanced use-cases require only a few lines of code
 * **Dependency free** - core logic depends on [SLF4J API](http://www.slf4j.org/) only
 
-*Automorph* supports integration with various libraries via plugins published in different artifacts.
-
-## Goals
-
-* Provide a **definitive RPC solution** for Scala ecosystem
-* Strive for **easiest possible integration** with existing applications
-* Encourage use of **appropriate technical standards** for system interoperability
-
-## Standards
+## Supported standards
 
 ### RPC protocols
 
@@ -40,7 +38,7 @@
 * [JSON](https://www.json.org/)
 * [MessagePack](https://msgpack.org/)
 
-## Inspiration
+## Inspired by
 
 * [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
 * [Autowire](https://github.com/lihaoyi/autowire)
