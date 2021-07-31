@@ -65,7 +65,7 @@ lazy val spi = (project in file("common/spi")).settings(
 lazy val meta = (project in file("common/meta")).dependsOn(
   spi
 ).settings(
-  name := "${projectName}-meta",
+  name := s"$projectName-meta",
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-api" % "1.7.31"
   ),
@@ -77,19 +77,19 @@ lazy val meta = (project in file("common/meta")).dependsOn(
 lazy val core = (project in file("common/core")).dependsOn(
   meta, testBase % Test
 ).settings(
-  name := "${projectName}-core"
+  name := s"$projectName-core"
 )
 
 // Effect system
 lazy val standard = (project in file(s"system/standard")).dependsOn(
   http, core, testCore % Test
 ).settings(
-  name := "${projectName}-standard"
+  name := s"$projectName-standard"
 )
 lazy val zio = (project in file("system/zio")).dependsOn(
   spi, testCore % Test
 ).settings(
-  name := "${projectName}-zio",
+  name := s"$projectName-zio",
   libraryDependencies ++= Seq(
     "dev.zio" %% "zio" % "1.0.10"
   )
@@ -97,7 +97,7 @@ lazy val zio = (project in file("system/zio")).dependsOn(
 lazy val monix = (project in file("system/monix")).dependsOn(
   spi, testCore % Test
 ).settings(
-  name := "${projectName}-monix",
+  name := s"$projectName-monix",
   libraryDependencies ++= Seq(
     "io.monix" %% "monix-eval" % "3.4.0"
   )
@@ -105,7 +105,7 @@ lazy val monix = (project in file("system/monix")).dependsOn(
 lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
   spi, testCore % Test
 ).settings(
-  name := "${projectName}-cats-effect",
+  name := s"$projectName-cats-effect",
   libraryDependencies ++= Seq(
     "org.typelevel" %% "cats-effect" % "3.2.1"
   )
@@ -113,7 +113,7 @@ lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
 lazy val scalaz = (project in file("system/scalaz")).dependsOn(
   spi, testCore % Test
 ).settings(
-  name := "${projectName}-scalaz",
+  name := s"$projectName-scalaz",
   libraryDependencies ++= Seq(
     "org.scalaz" %% "scalaz-effect" % "7.4.0-M7"
   )
@@ -124,7 +124,7 @@ val circeVersion = "0.14.1"
 lazy val circe = (project in file(s"format/circe")).dependsOn(
   spi, testBase % Test
 ).settings(
-  name := s"${projectName}-circe",
+  name := s"$projectName-circe",
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-parser" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion
@@ -133,7 +133,7 @@ lazy val circe = (project in file(s"format/circe")).dependsOn(
 lazy val upickle = (project in file("format/upickle")).dependsOn(
   spi, testBase % Test
 ).settings(
-  name := "${projectName}-upickle",
+  name := s"$projectName-upickle",
   libraryDependencies ++= Seq(
     "com.lihaoyi" %% "upickle" % "1.4.0"
   )
@@ -141,7 +141,7 @@ lazy val upickle = (project in file("format/upickle")).dependsOn(
 lazy val argonaut = (project in file("format/argonaut")).dependsOn(
   spi, testBase % Test
 ).settings(
-  name := "${projectName}-argonaut",
+  name := s"$projectName-argonaut",
   libraryDependencies ++= Seq(
     "io.argonaut" %% "argonaut" % "6.3.6"
   )
@@ -154,7 +154,7 @@ lazy val amqp = (project in file("transport/amqp"))
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
   http, core, testCore % Test, standard % Test
 ).settings(
-  name := "${projectName}-sttp",
+  name := s"$projectName-sttp",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test
@@ -167,7 +167,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
 lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
   amqp, core, testCore % Test, standard % Test
 ).settings(
-  name := "${projectName}-rabbitmq",
+  name := s"$projectName-rabbitmq",
   libraryDependencies ++= Seq(
     "com.rabbitmq" % "amqp-client" % "5.13.0"
   )
@@ -177,7 +177,7 @@ lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
 lazy val undertow = (project in file("transport/undertow")).dependsOn(
   http, core, testCore % Test, standard % Test
 ).settings(
-  name := "${projectName}-undertow",
+  name := s"$projectName-undertow",
   libraryDependencies ++= Seq(
     "io.undertow" % "undertow-core" % "2.2.9.Final"
   )
@@ -185,7 +185,7 @@ lazy val undertow = (project in file("transport/undertow")).dependsOn(
 lazy val jetty = (project in file("transport/jetty")).dependsOn(
   http, core, testCore % Test, standard % Test
 ).settings(
-  name := "${projectName}-jetty",
+  name := s"$projectName-jetty",
   libraryDependencies ++= Seq(
     "org.eclipse.jetty" % "jetty-servlet" % "11.0.6",
     "commons-io" % "commons-io" % "2.11.0"
@@ -194,7 +194,7 @@ lazy val jetty = (project in file("transport/jetty")).dependsOn(
 lazy val finagle = (project in file("transport/finagle")).dependsOn(
   http, core, testCore % Test, standard % Test
 ).settings(
-  name := "${projectName}-finagle",
+  name := s"$projectName-finagle",
   libraryDependencies ++= Seq(
     ("com.twitter" % "finagle-http" % "21.6.0").cross(CrossVersion.for3Use2_13)
   )
@@ -202,7 +202,7 @@ lazy val finagle = (project in file("transport/finagle")).dependsOn(
 lazy val tapir = (project in file("transport/tapir")).dependsOn(
   http, core, testCore % Test, standard % Test
 ).settings(
-  name := "${projectName}-tapir",
+  name := s"$projectName-tapir",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.18.1"
   )
@@ -212,14 +212,14 @@ lazy val tapir = (project in file("transport/tapir")).dependsOn(
 lazy val openapi = (project in file("common/openapi")).dependsOn(
   core, circe, testCore % Test, standard % Test
 ).settings(
-  name := "${projectName}-open-api"
+  name := s"$projectName-open-api"
 )
 
 // Default
 lazy val default = project.dependsOn(
   circe, standard, undertow, sttp
 ).settings(
-  name := "${projectName}-default",
+  name := s"$projectName-default",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion
   )
@@ -309,7 +309,7 @@ Test / test := ((Test / test) dependsOn testScalastyle).value
 // API
 enablePlugins(ScalaUnidocPlugin)
 ThisBuild / autoAPIMappings := true
-apiURL := Some(url(s"https://javadoc.io/doc/${organization.value}/${projectName}-core_3/latest"))
+apiURL := Some(url(s"https://javadoc.io/doc/${organization.value}/$projectName-core_3/latest"))
 ScalaUnidoc / unidoc / scalacOptions ++= Seq(
   "-Ymacro-expand:none",
   "-groups",
