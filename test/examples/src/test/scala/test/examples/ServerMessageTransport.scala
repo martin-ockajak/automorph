@@ -1,4 +1,4 @@
-package test.examples
+package test.example
 
 import automorph.transport.http.server.NanoHttpdServer
 import automorph.{DefaultHandler, DefaultHttpClient}
