@@ -6,7 +6,7 @@ import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.endpoint.UndertowHttpEndpoint.{defaultErrorStatus, Context}
+import automorph.transport.http.endpoint.UndertowHttpEndpoint.{defaultErrorStatusCode, Context}
 import automorph.util.Extensions.TryOps
 import automorph.util.{Bytes, Network}
 import io.undertow.io.Receiver
@@ -29,13 +29,13 @@ import scala.util.Try
  * @constructor Creates an Undertow web server HTTP handler with the specified RPC request ''handler''.
  * @param handler RPC request handler
  * @param runEffect effect execution function
- * @param errorStatus JSON-RPC error code to HTTP status mapping function
+ * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
  * @tparam Effect effect type
  */
 final case class UndertowHttpEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any,
-  errorStatus: Int => Int = defaultErrorStatus
+  errorStatusCode: Int => Int = defaultErrorStatusCode
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
   private val system = handler.system
@@ -59,7 +59,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
                 result => {
                   // Send the response
                   val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
-                  val statusCode = result.errorCode.map(errorStatus).getOrElse(StatusCodes.OK)
+                  val statusCode = result.errorCode.map(errorStatusCode).getOrElse(StatusCodes.OK)
                   sendResponse(response, statusCode, exchange)
                 }
               )
@@ -144,7 +144,7 @@ case object UndertowHttpEndpoint {
   type Context = Http[Either[HttpServerExchange, WebSocketHttpExchange]]
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultErrorStatus = Map(
+  val defaultErrorStatusCode = Map(
     ErrorType.ParseError -> StatusCodes.BAD_REQUEST,
     ErrorType.InvalidRequest -> StatusCodes.BAD_REQUEST,
     ErrorType.MethodNotFound -> StatusCodes.NOT_IMPLEMENTED,

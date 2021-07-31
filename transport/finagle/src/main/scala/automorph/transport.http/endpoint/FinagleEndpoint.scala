@@ -6,7 +6,7 @@ import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.endpoint.FinagleEndpoint.{defaultErrorStatus, Context}
+import automorph.transport.http.endpoint.FinagleEndpoint.{defaultErrorStatusCode, Context}
 import automorph.util.Network
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
@@ -24,13 +24,13 @@ import com.twitter.util.{Future, Promise}
  * @constructor Creates a Finagle RPC system HTTP service with the specified RPC request ''handler''.
  * @param handler RPC request handler
  * @param runEffect asynchronous effect execution function
- * @param errorStatus JSON-RPC error code to HTTP status code mapping function
+ * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
  * @tparam Effect effect type
  */
-final case class FinagleEndpoint[Node, Effect[_]](
+final case class FinagleEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any,
-  errorStatus: Int => Status = defaultErrorStatus
+  errorStatusCode: Int => Status = defaultErrorStatusCode
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
 
   private val system = handler.system
@@ -51,7 +51,7 @@ final case class FinagleEndpoint[Node, Effect[_]](
           result => {
             // Send the response
             val response = result.response.getOrElse(Array[Byte]())
-            val status = result.errorCode.map(errorStatus).getOrElse(Status.Ok)
+            val status = result.errorCode.map(errorStatusCode).getOrElse(Status.Ok)
             val message = Reader.fromBuf(Buf.ByteArray.Owned(response))
             createResponse(message, status, request)
           }
@@ -112,7 +112,7 @@ case object FinagleEndpoint {
   type Context = Http[Request]
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultErrorStatus: Int => Status = Map(
+  val defaultErrorStatusCode: Int => Status = Map(
     ErrorType.ParseError -> Status.BadRequest,
     ErrorType.InvalidRequest -> Status.BadRequest,
     ErrorType.MethodNotFound -> Status.NotImplemented,

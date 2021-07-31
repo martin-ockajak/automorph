@@ -38,15 +38,14 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
    * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
    * @param handler RPC request handler
    * @param method HTTP method to server
-   * @param errorStatus JSON-RPC error code to HTTP status code mapping function
-   * @tparam Node message node type
+   * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
    * @tparam Effect effect type
    * @return Tapir HTTP endpoint
    */
-  def apply[Node, Effect[_]](
-    handler: Handler[Node, _ <: MessageFormat[Node], Effect, Context],
+  def apply[Effect[_]](
+    handler: Handler.AnyFormat[Effect, Context],
     method: Method,
-    errorStatus: Int => StatusCode = defaultErrorStatus
+    errorStatus: Int => StatusCode = defaultErrorStatusCode
   ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     val system = handler.system
     val contentType = Header.contentType(MediaType.parse(handler.format.mediaType).getOrElse {
@@ -108,7 +107,7 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     clientIp.getOrElse("[unknown]")
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultErrorStatus: Int => StatusCode = Map(
+  val defaultErrorStatusCode: Int => StatusCode = Map(
     ErrorType.ParseError -> StatusCode.BadRequest,
     ErrorType.InvalidRequest -> StatusCode.BadRequest,
     ErrorType.MethodNotFound -> StatusCode.NotImplemented,

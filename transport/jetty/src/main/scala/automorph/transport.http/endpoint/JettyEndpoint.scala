@@ -6,7 +6,7 @@ import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.endpoint.JettyEndpoint.{Context, defaultErrorStatus}
+import automorph.transport.http.endpoint.JettyEndpoint.{Context, defaultErrorStatusCode}
 import automorph.util.{Bytes, Network}
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import java.io.{ByteArrayInputStream, InputStream}
@@ -25,13 +25,13 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
  * @constructor Creates a Jetty web server HTTP servlet with the specified RPC request ''handler''.
  * @param handler RPC request handler
  * @param runEffect asynchronous effect execution function
- * @param errorStatus JSON-RPC error code to HTTP status code mapping function
+ * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
  * @tparam Effect effect type
  */
 final case class JettyEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any,
-  errorStatus: Int => Int = defaultErrorStatus
+  errorStatusCode: Int => Int = defaultErrorStatusCode
 ) extends HttpServlet with Logging with EndpointMessageTransport {
 
   private val system = handler.system
@@ -51,7 +51,7 @@ final case class JettyEndpoint[Effect[_]](
         result => {
           // Send the response
           val message = result.response.getOrElse(new ByteArrayInputStream(Array()))
-          val status = result.errorCode.map(errorStatus).getOrElse(HttpStatus.OK_200)
+          val status = result.errorCode.map(errorStatusCode).getOrElse(HttpStatus.OK_200)
           sendResponse(message, response, status, client)
         }
       )
@@ -99,7 +99,7 @@ case object JettyEndpoint {
   type Context = Http[HttpServletRequest]
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultErrorStatus: Int => Int = Map(
+  val defaultErrorStatusCode: Int => Int = Map(
     ErrorType.ParseError -> HttpStatus.BAD_REQUEST_400,
     ErrorType.InvalidRequest -> HttpStatus.BAD_REQUEST_400,
     ErrorType.MethodNotFound -> HttpStatus.NOT_IMPLEMENTED_501,

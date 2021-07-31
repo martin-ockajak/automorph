@@ -26,7 +26,7 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  * @param runEffectSync synchronous effect execution function
  * @param port port to listen on for HTTP connections
  * @param readTimeout HTTP connection read timeout (milliseconds)
- * @param errorStatus JSON-RPC error code to HTTP status mapping function
+ * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
  * @tparam Effect effect type
  */
 final case class NanoHttpdServer[Effect[_]] private (
@@ -34,7 +34,7 @@ final case class NanoHttpdServer[Effect[_]] private (
   runEffectSync: Effect[Response] => Response,
   port: Int,
   readTimeout: Int,
-  errorStatus: Int => Status
+  errorStatusCode: Int => Status
 ) extends NanoHTTPD(port) with Logging with ServerMessageTransport {
 
   private val HeaderXForwardedFor = "X-Forwarded-For"
@@ -61,7 +61,7 @@ final case class NanoHttpdServer[Effect[_]] private (
           result => {
             // Send the response
             val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
-            val status = result.errorCode.map(errorStatus).getOrElse(Status.OK)
+            val status = result.errorCode.map(errorStatusCode).getOrElse(Status.OK)
             createResponse(response, status, session)
           }
         )
@@ -128,7 +128,7 @@ case object NanoHttpdServer {
    * @param runEffectSync synchronous effect execution function
    * @param port port to listen on for HTTP connections
    * @param readTimeout HTTP connection read timeout (milliseconds)
-   * @param errorStatus JSON-RPC error code to HTTP status mapping function
+   * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
    * @tparam Effect effect type
    */
   def apply[Effect[_]](
@@ -136,9 +136,9 @@ case object NanoHttpdServer {
     runEffectSync: Effect[Response] => Response,
     port: Int,
     readTimeout: Int = 5000,
-    errorStatus: Int => Status = defaultErrorStatus
+    errorStatusCode: Int => Status = defaultErrorStatus
   ): NanoHttpdServer[Effect] = {
-    val server = new NanoHttpdServer(handler, runEffectSync, port, readTimeout, errorStatus)
+    val server = new NanoHttpdServer(handler, runEffectSync, port, readTimeout, errorStatusCode)
     server.start()
     server
   }
