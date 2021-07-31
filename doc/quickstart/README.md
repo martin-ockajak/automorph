@@ -2,14 +2,14 @@
 
 Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
-* [Scaladoc](https://www.javadoc.io/doc/io.automorph/automorph-core_2.13/latest/)
+* [Scaladoc](https://www.javadoc.io/doc/org.automorph/automorph-core_2.13/latest/)
 
 ## Build
 
 Add the following to your `build.sbt` file:
 
 ```scala
-libraryDependencies += "io.automorph" %% "automorph-default" % "0.0.1"
+libraryDependencies += "org.automorph" %% "automorph-default" % "0.0.1"
 ```
 
 ## API

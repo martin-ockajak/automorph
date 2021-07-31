@@ -8,7 +8,7 @@
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "0.0.1"
 )
 ```
 
@@ -55,7 +55,7 @@ client.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "0.0.1"
 )
 ```
 
@@ -123,7 +123,7 @@ hello.positional.args("world", 1).tell // Future[Unit]
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "0.0.1"
 )
 ```
 
@@ -205,7 +205,7 @@ client.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "0.0.1"
 )
 ```
 
@@ -275,7 +275,7 @@ client.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "0.0.1"
 )
 ```
 
@@ -360,8 +360,8 @@ hello.positional.args("world", 1).tell // Future[Unit]
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.automorph" %% "automorph-default" % "0.0.1",
-  "io.automorph" %% "automorph-zio" % "0.0.1",
+  "org.automorph" %% "automorph-default" % "0.0.1",
+  "org.automorph" %% "automorph-zio" % "0.0.1",
   "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.3.9"
 )
 ```
@@ -420,8 +420,8 @@ client.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.automorph" %% "automorph-default" % "0.0.1",
-  "io.automorph" %% "automorph-upickle" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "0.0.1",
+  "org.automorph" %% "automorph-upickle" % "0.0.1"
 )
 ```
 
@@ -483,7 +483,7 @@ client.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "0.0.1"
 )
 ```
 
@@ -538,7 +538,7 @@ client.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "0.0.1"
 )
 ```
 
@@ -589,7 +589,7 @@ client.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "0.0.1"
 )
 ```
 
