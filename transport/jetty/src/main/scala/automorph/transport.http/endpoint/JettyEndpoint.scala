@@ -6,7 +6,7 @@ import automorph.log.Logging
 import automorph.protocol.ResponseError
 import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.endpoint.JettyEndpoint.{Context, defaultErrorStatusCode}
+import automorph.transport.http.endpoint.JettyEndpoint.Context
 import automorph.util.{Bytes, Network}
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import java.io.{ByteArrayInputStream, InputStream}
@@ -31,7 +31,7 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
 final case class JettyEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any,
-  errorStatusCode: Int => Int = defaultErrorStatusCode
+  errorStatusCode: Int => Int = Http.defaultErrorStatusCode
 ) extends HttpServlet with Logging with EndpointMessageTransport {
 
   private val system = handler.system
@@ -97,7 +97,4 @@ final case class JettyEndpoint[Effect[_]](
 case object JettyEndpoint {
   /** Request context type. */
   type Context = Http[HttpServletRequest]
-
-  /** Default JSON-RPC error to HTTP status code mapping. */
-  val defaultErrorStatusCode: Int => Int = Http.defaultErrorStatusCode
 }

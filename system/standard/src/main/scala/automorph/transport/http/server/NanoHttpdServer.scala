@@ -6,6 +6,7 @@ import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.ServerMessageTransport
 import automorph.transport.http.Http
+import automorph.transport.http.Http
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.transport.http.server.NanoHttpdServer.Context
@@ -34,7 +35,7 @@ final case class NanoHttpdServer[Effect[_]] private (
   runEffectSync: Effect[Response] => Response,
   port: Int,
   readTimeout: Int,
-  errorStatusCode: Int => Status
+  errorStatusCode: Int => Int = Http.defaultErrorStatusCode
 ) extends NanoHTTPD(port) with Logging with ServerMessageTransport {
 
   private val HeaderXForwardedFor = "X-Forwarded-For"
@@ -61,7 +62,7 @@ final case class NanoHttpdServer[Effect[_]] private (
           result => {
             // Send the response
             val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
-            val status = result.errorCode.map(errorStatusCode).getOrElse(Status.OK)
+            val status = result.errorCode.map(errorStatusCode).map(Status.lookup).getOrElse(Status.OK)
             createResponse(response, status, session)
           }
         )
@@ -136,23 +137,10 @@ case object NanoHttpdServer {
     runEffectSync: Effect[Response] => Response,
     port: Int,
     readTimeout: Int = 5000,
-    errorStatusCode: Int => Status = defaultErrorStatus
+    errorStatusCode: Int => Int = Http.defaultErrorStatusCode
   ): NanoHttpdServer[Effect] = {
     val server = new NanoHttpdServer(handler, runEffectSync, port, readTimeout, errorStatusCode)
     server.start()
     server
-  }
-
-  /** Error propagating mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultErrorStatus: Int => Status = Map(
-    ErrorType.ParseError -> Status.BAD_REQUEST,
-    ErrorType.InvalidRequest -> Status.BAD_REQUEST,
-    ErrorType.MethodNotFound -> Status.NOT_IMPLEMENTED,
-    ErrorType.InvalidParams -> Status.BAD_REQUEST,
-    ErrorType.InternalError -> Status.INTERNAL_ERROR,
-    ErrorType.IOError -> Status.INTERNAL_ERROR,
-    ErrorType.ApplicationError -> Status.INTERNAL_ERROR
-  ).withDefaultValue(Status.INTERNAL_ERROR).map { case (errorType, status) =>
-    errorType.code -> status
   }
 }

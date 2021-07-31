@@ -45,7 +45,7 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
   def apply[Effect[_]](
     handler: Handler.AnyFormat[Effect, Context],
     method: Method,
-    errorStatus: Int => StatusCode = defaultErrorStatusCode
+    errorStatusCode: Int => Int = Http.defaultErrorStatusCode
   ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     val system = handler.system
     val contentType = Header.contentType(MediaType.parse(handler.format.mediaType).getOrElse {
@@ -68,7 +68,7 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
               result => {
                 // Send the response
                 val message = result.response.getOrElse(Array[Byte]())
-                val status = result.errorCode.map(errorStatus).getOrElse(StatusCode.Ok)
+                val status = result.errorCode.map(errorStatusCode).map(StatusCode.apply).getOrElse(StatusCode.Ok)
                 Right(createResponse(message, status, client))
               }
             )
@@ -103,9 +103,5 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     )
   }
 
-  private def clientAddress(clientIp: Option[String]): String =
-    clientIp.getOrElse("[unknown]")
-
-  /** Default JSON-RPC error to HTTP status code mapping. */
-  val defaultErrorStatusCode: Int => StatusCode = error => StatusCode(Http.defaultErrorStatusCode(error))
+  private def clientAddress(clientIp: Option[String]): String = clientIp.getOrElse("[unknown]")
 }

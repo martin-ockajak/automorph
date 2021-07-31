@@ -6,7 +6,7 @@ import automorph.log.Logging
 import automorph.protocol.ResponseError
 import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.endpoint.FinagleEndpoint.{defaultErrorStatusCode, Context}
+import automorph.transport.http.endpoint.FinagleEndpoint.Context
 import automorph.util.Network
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
@@ -30,7 +30,7 @@ import com.twitter.util.{Future, Promise}
 final case class FinagleEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any,
-  errorStatusCode: Int => Status = defaultErrorStatusCode
+  errorStatusCode: Int => Int = Http.defaultErrorStatusCode
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
 
   private val system = handler.system
@@ -51,7 +51,7 @@ final case class FinagleEndpoint[Effect[_]](
           result => {
             // Send the response
             val response = result.response.getOrElse(Array[Byte]())
-            val status = result.errorCode.map(errorStatusCode).getOrElse(Status.Ok)
+            val status = result.errorCode.map(errorStatusCode).map(Status.apply).getOrElse(Status.Ok)
             val message = Reader.fromBuf(Buf.ByteArray.Owned(response))
             createResponse(message, status, request)
           }
@@ -110,7 +110,4 @@ case object FinagleEndpoint {
 
   /** Request context type. */
   type Context = Http[Request]
-
-  /** Default JSON-RPC error to HTTP status code mapping. */
-  val defaultErrorStatusCode: Int => Status = error => Status(Http.defaultErrorStatusCode(error))
 }

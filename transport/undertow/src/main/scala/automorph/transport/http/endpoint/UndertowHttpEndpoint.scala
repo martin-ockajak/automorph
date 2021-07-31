@@ -6,7 +6,7 @@ import automorph.log.Logging
 import automorph.protocol.ResponseError
 import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.endpoint.UndertowHttpEndpoint.{defaultErrorStatusCode, Context}
+import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
 import automorph.util.Extensions.TryOps
 import automorph.util.{Bytes, Network}
 import io.undertow.io.Receiver
@@ -35,7 +35,7 @@ import scala.util.Try
 final case class UndertowHttpEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any,
-  errorStatusCode: Int => Int = defaultErrorStatusCode
+  errorStatusCode: Int => Int = Http.defaultErrorStatusCode
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
   private val system = handler.system
@@ -142,7 +142,4 @@ case object UndertowHttpEndpoint {
 
   /** Request context type. */
   type Context = Http[Either[HttpServerExchange, WebSocketHttpExchange]]
-
-  /** Default JSON-RPC error to HTTP status code mapping. */
-  val defaultErrorStatusCode: Int => Int = Http.defaultErrorStatusCode
 }
