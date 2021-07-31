@@ -67,7 +67,7 @@ import scala.concurrent.Future
 
 // Define an API type and create API instance
 class Api {
-  def hello(some: String, n: Int): Future[String] = Future.successful(s"Hello $some $n!")
+  def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
 }
 val api = new Api()
 
@@ -292,7 +292,7 @@ import scala.concurrent.Future
 
 // Define an API type and create API instance
 class Api {
-  def hello(some: String, n: Int): Future[String] = Future.successful(s"Hello $some $n!")
+  def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
 }
 val api = new Api()
 
@@ -438,7 +438,7 @@ import scala.concurrent.Future
 // Define an API type and create API instance
 case class Record(values: List[String])
 class Api {
-  def hello(some: String, n: Int): Future[Record] = Future.successful(Record(List("Hello", some, n.toString)))
+  def hello(some: String, n: Int): Future[Record] = Future(Record(List("Hello", some, n.toString)))
 }
 val api = new Api()
 ```
