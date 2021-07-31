@@ -14,7 +14,8 @@ import automorph.spi.Message.{Id, version}
  */
 private[automorph] final case class Response[Node](
   id: Id,
-  value: Either[ResponseError[Node], Node]
+  result: Option[Node],
+  error: Option[ResponseError[Node]]
 ) {
 
   def formed: Message[Node] = Message[Node](
@@ -22,8 +23,8 @@ private[automorph] final case class Response[Node](
     id = Some(id),
     method = None,
     params = None,
-    result = value.toOption,
-    error = value.swap.toOption.map(_.formed)
+    result = result,
+    error = error.map(_.formed)
   )
 }
 
@@ -36,10 +37,10 @@ private[automorph] case object Response {
     }
     val id = mandatory(message.id, "id")
     message.result.map { result =>
-      Response(id, Right(result))
+      Response(id, Some(result), None)
     }.getOrElse {
       val error = mandatory(message.error, "error")
-      Response(id, Left(ResponseError(error)))
+      Response(id, None, Some(ResponseError(error)))
     }
   }
 

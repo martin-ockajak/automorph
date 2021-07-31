@@ -100,7 +100,7 @@ private[automorph] trait HandlerCore[Node, ActualFormat <: MessageFormat[Node], 
                   system.map(
                     // Serialize response
                     validRequest.id.map { id =>
-                      val validResponse = Response(id, Right(result))
+                      val validResponse = Response(id, Some(result), None)
                       serialize(validResponse.formed)
                     }.getOrElse(system.pure(None)),
                     (rawResponse: Option[ArraySeq.ofByte]) =>
@@ -174,7 +174,7 @@ private[automorph] trait HandlerCore[Node, ActualFormat <: MessageFormat[Node], 
     system.map(
       formedRequest.id.map { id =>
         // Serialize response
-        val validResponse = Response[Node](id, Left(responseError))
+        val validResponse = Response[Node](id, None, Some(responseError))
         serialize(validResponse.formed)
       }.getOrElse(system.pure(None)),
       (rawResponse: Option[ArraySeq.ofByte]) =>

@@ -133,9 +133,10 @@ private[automorph] case class ClientCore[
         Try(Response(formedResponse)).pureFold(
           error => raiseError(error, formedRequest),
           validResponse =>
-            validResponse.value.fold(
-              error => raiseError(errorToException(error.code, error.message), formedRequest),
-              result =>
+            validResponse.error.fold(
+              validResponse.result.fold {
+                raiseError(InvalidResponseException("Invalid result", None.orNull), formedRequest)
+              } { result =>
                 // Decode result
                 Try(decodeResult(result)).pureFold(
                   error => raiseError(InvalidResponseException("Invalid result", error), formedRequest),
@@ -144,7 +145,10 @@ private[automorph] case class ClientCore[
                     system.pure(result)
                   }
                 )
-            )
+              }
+            ) { error =>
+              raiseError(errorToException(error.code, error.message), formedRequest)
+            }
         )
       }
     )
