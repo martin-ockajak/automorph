@@ -107,7 +107,7 @@ lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
 ).settings(
   name := "${projectName}-cats-effect",
   libraryDependencies ++= Seq(
-    "org.typelevel" %% "cats-effect" % "3.2.0"
+    "org.typelevel" %% "cats-effect" % "3.2.1"
   )
 )
 lazy val scalaz = (project in file("system/scalaz")).dependsOn(
