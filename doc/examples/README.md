@@ -254,8 +254,6 @@ server.close()
 **Client**
 
 ```scala
-import scala.util.Try
-
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val url = new java.net.URI("http://localhost/api")
 val client = automorph.DefaultHttpClient.sync(url, "POST")
@@ -263,7 +261,7 @@ val client = automorph.DefaultHttpClient.sync(url, "POST")
 // Call the remote API method via proxy
 client.method("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
 client.method("aliased").args("value" -> None).tell // ()
-Try(client.method("omitted").args().call[String]) // Failure
+util.Try(client.method("omitted").args().call[String]) // Failure
 
 // Close the client
 client.close()
