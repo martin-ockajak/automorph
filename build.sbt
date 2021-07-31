@@ -82,7 +82,7 @@ lazy val core = (project in file("common/core")).dependsOn(
 
 // Effect system
 lazy val standard = (project in file(s"system/standard")).dependsOn(
-  http, core, testCore % Test
+  http, testCore % Test
 ).settings(
   name := s"$projectName-standard"
 )
@@ -148,11 +148,13 @@ lazy val argonaut = (project in file("format/argonaut")).dependsOn(
 )
 
 // Message transport
-val sttpVersion = "3.3.12"
-lazy val http = (project in file("transport/http"))
+lazy val http = (project in file("transport/http")).dependsOn(
+  core
+)
 lazy val amqp = (project in file("transport/amqp"))
+val sttpVersion = "3.3.12"
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
-  http, core, testCore % Test, standard % Test
+  http, testCore % Test, standard % Test
 ).settings(
   name := s"$projectName-sttp",
   libraryDependencies ++= Seq(
@@ -175,7 +177,7 @@ lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
 
 // Server
 lazy val undertow = (project in file("transport/undertow")).dependsOn(
-  http, core, testCore % Test, standard % Test
+  http, testCore % Test, standard % Test
 ).settings(
   name := s"$projectName-undertow",
   libraryDependencies ++= Seq(
@@ -183,7 +185,7 @@ lazy val undertow = (project in file("transport/undertow")).dependsOn(
   )
 )
 lazy val jetty = (project in file("transport/jetty")).dependsOn(
-  http, core, testCore % Test, standard % Test
+  http, testCore % Test, standard % Test
 ).settings(
   name := s"$projectName-jetty",
   libraryDependencies ++= Seq(
@@ -192,7 +194,7 @@ lazy val jetty = (project in file("transport/jetty")).dependsOn(
   )
 )
 lazy val finagle = (project in file("transport/finagle")).dependsOn(
-  http, core, testCore % Test, standard % Test
+  http, testCore % Test, standard % Test
 ).settings(
   name := s"$projectName-finagle",
   libraryDependencies ++= Seq(
@@ -200,7 +202,7 @@ lazy val finagle = (project in file("transport/finagle")).dependsOn(
   )
 )
 lazy val tapir = (project in file("transport/tapir")).dependsOn(
-  http, core, testCore % Test, standard % Test
+  http, testCore % Test, standard % Test
 ).settings(
   name := s"$projectName-tapir",
   libraryDependencies ++= Seq(

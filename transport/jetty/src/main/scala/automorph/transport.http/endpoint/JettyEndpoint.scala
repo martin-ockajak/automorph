@@ -3,7 +3,7 @@ package automorph.transport.http.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.{ErrorType, ResponseError}
+import automorph.protocol.ResponseError
 import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.JettyEndpoint.{Context, defaultErrorStatusCode}
@@ -98,16 +98,6 @@ case object JettyEndpoint {
   /** Request context type. */
   type Context = Http[HttpServletRequest]
 
-  /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultErrorStatusCode: Int => Int = Map(
-    ErrorType.ParseError -> HttpStatus.BAD_REQUEST_400,
-    ErrorType.InvalidRequest -> HttpStatus.BAD_REQUEST_400,
-    ErrorType.MethodNotFound -> HttpStatus.NOT_IMPLEMENTED_501,
-    ErrorType.InvalidParams -> HttpStatus.BAD_REQUEST_400,
-    ErrorType.InternalError -> HttpStatus.INTERNAL_SERVER_ERROR_500,
-    ErrorType.IOError -> HttpStatus.INTERNAL_SERVER_ERROR_500,
-    ErrorType.ApplicationError -> HttpStatus.INTERNAL_SERVER_ERROR_500
-  ).withDefaultValue(HttpStatus.INTERNAL_SERVER_ERROR_500).map { case (errorType, status) =>
-    errorType.code -> status
-  }
+  /** Default JSON-RPC error to HTTP status code mapping. */
+  val defaultErrorStatusCode: Int => Int = Http.defaultErrorStatusCode
 }

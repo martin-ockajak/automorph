@@ -1,5 +1,6 @@
 package automorph.transport.http
 
+import automorph.protocol.ErrorType
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.Base64
@@ -289,5 +290,21 @@ final case class Http[Source](
         case _ => None
       }
     }.toMap
+  }
+}
+
+case object Http {
+
+  /** Default JSON-RPC error to HTTP status code mapping. */
+  val defaultErrorStatusCode: Int => Int = Map(
+    ErrorType.ParseError -> 400,
+    ErrorType.InvalidRequest -> 400,
+    ErrorType.MethodNotFound -> 501,
+    ErrorType.InvalidParams -> 400,
+    ErrorType.InternalError -> 500,
+    ErrorType.IOError -> 500,
+    ErrorType.ApplicationError -> 500
+  ).withDefaultValue(500).map { case (errorType, statusCode) =>
+    errorType.code -> statusCode
   }
 }

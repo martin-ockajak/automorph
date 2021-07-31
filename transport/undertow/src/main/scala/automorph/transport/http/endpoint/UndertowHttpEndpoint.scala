@@ -3,7 +3,7 @@ package automorph.transport.http.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.{ErrorType, ResponseError}
+import automorph.protocol.ResponseError
 import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.{defaultErrorStatusCode, Context}
@@ -143,16 +143,6 @@ case object UndertowHttpEndpoint {
   /** Request context type. */
   type Context = Http[Either[HttpServerExchange, WebSocketHttpExchange]]
 
-  /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultErrorStatusCode = Map(
-    ErrorType.ParseError -> StatusCodes.BAD_REQUEST,
-    ErrorType.InvalidRequest -> StatusCodes.BAD_REQUEST,
-    ErrorType.MethodNotFound -> StatusCodes.NOT_IMPLEMENTED,
-    ErrorType.InvalidParams -> StatusCodes.BAD_REQUEST,
-    ErrorType.InternalError -> StatusCodes.INTERNAL_SERVER_ERROR,
-    ErrorType.IOError -> StatusCodes.INTERNAL_SERVER_ERROR,
-    ErrorType.ApplicationError -> StatusCodes.INTERNAL_SERVER_ERROR
-  ).withDefaultValue(StatusCodes.INTERNAL_SERVER_ERROR).map { case (errorType, statusCode) =>
-    errorType.code -> statusCode
-  }
+  /** Default JSON-RPC error to HTTP status code mapping. */
+  val defaultErrorStatusCode: Int => Int = Http.defaultErrorStatusCode
 }

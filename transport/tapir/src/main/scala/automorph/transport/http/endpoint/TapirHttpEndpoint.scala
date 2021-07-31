@@ -3,7 +3,7 @@ package automorph.transport.http.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.{ErrorType, ResponseError}
+import automorph.protocol.ResponseError
 import automorph.spi.{EndpointMessageTransport, MessageFormat}
 import automorph.transport.http.Http
 import automorph.util.Bytes
@@ -106,16 +106,6 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
   private def clientAddress(clientIp: Option[String]): String =
     clientIp.getOrElse("[unknown]")
 
-  /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultErrorStatusCode: Int => StatusCode = Map(
-    ErrorType.ParseError -> StatusCode.BadRequest,
-    ErrorType.InvalidRequest -> StatusCode.BadRequest,
-    ErrorType.MethodNotFound -> StatusCode.NotImplemented,
-    ErrorType.InvalidParams -> StatusCode.BadRequest,
-    ErrorType.InternalError -> StatusCode.InternalServerError,
-    ErrorType.IOError -> StatusCode.InternalServerError,
-    ErrorType.ApplicationError -> StatusCode.InternalServerError
-  ).withDefaultValue(StatusCode.InternalServerError).map { case (errorType, status) =>
-    errorType.code -> status
-  }
+  /** Default JSON-RPC error to HTTP status code mapping. */
+  val defaultErrorStatusCode: Int => StatusCode = error => StatusCode(Http.defaultErrorStatusCode(error))
 }

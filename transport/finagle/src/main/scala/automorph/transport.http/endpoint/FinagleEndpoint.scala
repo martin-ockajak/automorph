@@ -3,7 +3,7 @@ package automorph.transport.http.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.{ErrorType, ResponseError}
+import automorph.protocol.ResponseError
 import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.FinagleEndpoint.{defaultErrorStatusCode, Context}
@@ -111,16 +111,6 @@ case object FinagleEndpoint {
   /** Request context type. */
   type Context = Http[Request]
 
-  /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
-  val defaultErrorStatusCode: Int => Status = Map(
-    ErrorType.ParseError -> Status.BadRequest,
-    ErrorType.InvalidRequest -> Status.BadRequest,
-    ErrorType.MethodNotFound -> Status.NotImplemented,
-    ErrorType.InvalidParams -> Status.BadRequest,
-    ErrorType.InternalError -> Status.InternalServerError,
-    ErrorType.IOError -> Status.InternalServerError,
-    ErrorType.ApplicationError -> Status.InternalServerError
-  ).withDefaultValue(Status.InternalServerError).map { case (errorType, status) =>
-    errorType.code -> status
-  }
+  /** Default JSON-RPC error to HTTP status code mapping. */
+  val defaultErrorStatusCode: Int => Status = error => Status(Http.defaultErrorStatusCode(error))
 }
