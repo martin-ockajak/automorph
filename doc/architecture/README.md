@@ -33,7 +33,3 @@ Depends on:
 
 * [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html)
 * [Message format](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html)
-
-## REST-RPC
-
-REST-RPC is an RPC protocol prescribing a standard way to model REST APIs while taking reusing existing tools in the REST ecosystem. 
