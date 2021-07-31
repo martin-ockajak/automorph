@@ -79,41 +79,13 @@ lazy val core = (project in file("common/core")).dependsOn(
 ).settings(
   name := "${projectName}-core"
 )
-lazy val standard = project.dependsOn(
+
+// Effect system
+lazy val standard = (project in file(s"system/standard")).dependsOn(
   http, core, testCore % Test
 ).settings(
   name := "${projectName}-standard"
 )
-
-// Codec
-val circeVersion = "0.14.1"
-lazy val circe = (project in file(s"format/circe")).dependsOn(
-  spi, testBase % Test
-).settings(
-  name := s"${projectName}-circe",
-  libraryDependencies ++= Seq(
-    "io.circe" %% "circe-parser" % circeVersion,
-    "io.circe" %% "circe-generic" % circeVersion
-  )
-)
-lazy val upickle = (project in file("format/upickle")).dependsOn(
-  spi, testBase % Test
-).settings(
-  name := "${projectName}-upickle",
-  libraryDependencies ++= Seq(
-    "com.lihaoyi" %% "upickle" % "1.4.0"
-  )
-)
-lazy val argonaut = (project in file("format/argonaut")).dependsOn(
-  spi, testBase % Test
-).settings(
-  name := "${projectName}-argonaut",
-  libraryDependencies ++= Seq(
-    "io.argonaut" %% "argonaut" % "6.3.6"
-  )
-)
-
-// Effect
 lazy val zio = (project in file("system/zio")).dependsOn(
   spi, testCore % Test
 ).settings(
@@ -147,7 +119,35 @@ lazy val scalaz = (project in file("system/scalaz")).dependsOn(
   )
 )
 
-// Transport
+// Message format
+val circeVersion = "0.14.1"
+lazy val circe = (project in file(s"format/circe")).dependsOn(
+  spi, testBase % Test
+).settings(
+  name := s"${projectName}-circe",
+  libraryDependencies ++= Seq(
+    "io.circe" %% "circe-parser" % circeVersion,
+    "io.circe" %% "circe-generic" % circeVersion
+  )
+)
+lazy val upickle = (project in file("format/upickle")).dependsOn(
+  spi, testBase % Test
+).settings(
+  name := "${projectName}-upickle",
+  libraryDependencies ++= Seq(
+    "com.lihaoyi" %% "upickle" % "1.4.0"
+  )
+)
+lazy val argonaut = (project in file("format/argonaut")).dependsOn(
+  spi, testBase % Test
+).settings(
+  name := "${projectName}-argonaut",
+  libraryDependencies ++= Seq(
+    "io.argonaut" %% "argonaut" % "6.3.6"
+  )
+)
+
+// Message transport
 val sttpVersion = "3.3.12"
 lazy val http = (project in file("transport/http"))
 lazy val amqp = (project in file("transport/amqp"))
