@@ -2,7 +2,7 @@ package automorph.transport.http.client
 
 import automorph.log.Logging
 import automorph.spi.{ClientMessageTransport, EffectSystem}
-import automorph.transport.http.HttpProperties
+import automorph.transport.http.Http
 import automorph.transport.http.client.SttpClient.{Context, WebSocket}
 import automorph.util.Bytes
 import java.net.URI
@@ -130,7 +130,7 @@ case object SttpClient {
   type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
 
   /** Request context type. */
-  type Context = HttpProperties[PartialRequest[Either[String, String], Any]]
+  type Context = Http[PartialRequest[Either[String, String], Any]]
 
-  implicit val defaultContext: Context = HttpProperties()
+  implicit val defaultContext: Context = Http()
 }

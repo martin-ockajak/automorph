@@ -3,7 +3,7 @@ package automorph.transport.amqp.client
 import automorph.log.Logging
 import automorph.spi.ClientMessageTransport
 import automorph.transport.amqp.client.RabbitMqClient.Context
-import automorph.transport.amqp.{AmqpProperties, RabbitMqCommon}
+import automorph.transport.amqp.{Amqp, RabbitMqCommon}
 import automorph.util.Extensions.TryOps
 import automorph.util.MessageId
 import com.rabbitmq.client.AMQP.BasicProperties
@@ -174,7 +174,7 @@ final case class RabbitMqClient(
 
 case object RabbitMqClient {
   /** Request context type. */
-  type Context = AmqpProperties[BasicProperties]
+  type Context = Amqp[BasicProperties]
 
-  implicit val defaultContext: Context = AmqpProperties()
+  implicit val defaultContext: Context = Amqp()
 }

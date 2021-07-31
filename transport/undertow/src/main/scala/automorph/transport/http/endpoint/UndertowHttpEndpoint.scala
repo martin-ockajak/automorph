@@ -5,7 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.EndpointMessageTransport
-import automorph.transport.http.HttpProperties
+import automorph.transport.http.Http
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.{defaultErrorStatus, Context}
 import automorph.util.Extensions.TryOps
 import automorph.util.{Bytes, Network}
@@ -124,7 +124,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     val headers = exchange.getRequestHeaders.asScala.flatMap { headerValues =>
       headerValues.iterator.asScala.map(value => headerValues.getHeaderName.toString -> value)
     }.toSeq
-    HttpProperties(
+    Http(
       source = Some(Left(exchange).withRight[WebSocketHttpExchange]),
       method = Some(exchange.getRequestMethod.toString),
       headers = headers
@@ -141,7 +141,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
 case object UndertowHttpEndpoint {
 
   /** Request context type. */
-  type Context = HttpProperties[Either[HttpServerExchange, WebSocketHttpExchange]]
+  type Context = Http[Either[HttpServerExchange, WebSocketHttpExchange]]
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus = Map(

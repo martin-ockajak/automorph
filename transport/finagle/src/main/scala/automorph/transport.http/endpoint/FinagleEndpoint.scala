@@ -5,7 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.EndpointMessageTransport
-import automorph.transport.http.HttpProperties
+import automorph.transport.http.Http
 import automorph.transport.http.endpoint.FinagleEndpoint.{defaultErrorStatus, Context}
 import automorph.util.Network
 import com.twitter.finagle.Service
@@ -80,7 +80,7 @@ final case class FinagleEndpoint[Node, Effect[_]](
     response
   }
 
-  private def createContext(request: Request): Context = HttpProperties(
+  private def createContext(request: Request): Context = Http(
     source = Some(request),
     method = Some(request.method.name),
     headers = request.headerMap.iterator.toSeq
@@ -109,7 +109,7 @@ final case class FinagleEndpoint[Node, Effect[_]](
 case object FinagleEndpoint {
 
   /** Request context type. */
-  type Context = HttpProperties[Request]
+  type Context = Http[Request]
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus: Int => Status = Map(

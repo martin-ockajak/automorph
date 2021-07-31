@@ -22,7 +22,7 @@ import scala.concurrent.duration.{Duration, FiniteDuration}
  * @param readTimeout response read timeout
  * @tparam Source specific message transport plugin source properties type
  */
-final case class HttpProperties[Source](
+final case class Http[Source](
   source: Option[Source] = None,
   method: Option[String] = None,
   scheme: Option[String] = None,
@@ -61,13 +61,10 @@ final case class HttpProperties[Source](
   def contentLength: Option[String] = header(headerContentLength)
 
   /** Cookie names and values. */
-  def cookies: Map[String, Option[String]] = (headers(headerCookie) ++ headers(headerSetCookie)).flatMap { header =>
-    header.split("=", 2).map(_.trim) match {
-      case Array(name, value) => Some(name -> Some(value))
-      case Array(name) => Some(name -> None)
-      case _ => None
-    }
-  }.toMap
+  def cookies: Map[String, Option[String]] = cookies(headerCookie)
+
+  /** Set-Cookie names and values. */
+  def setCookies: Map[String, Option[String]] = cookies(headerSetCookie)
 
   /**
    * Cookie value.
@@ -116,7 +113,7 @@ final case class HttpProperties[Source](
    * @param password password
    * @return HTTP properties
    */
-  def authorizationBasic(user: String, password: String): HttpProperties[Source] = {
+  def authorizationBasic(user: String, password: String): Http[Source] = {
     val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
     header(headerAuthorization, s"$headerAuthorizationBasic $value")
   }
@@ -127,7 +124,7 @@ final case class HttpProperties[Source](
    * @param token authentication token
    * @return HTTP properties
    */
-  def authorizationBasic(token: String): HttpProperties[Source] =
+  def authorizationBasic(token: String): Http[Source] =
     header(headerAuthorization, s"$headerAuthorizationBasic $token")
 
   /**
@@ -136,7 +133,7 @@ final case class HttpProperties[Source](
    * @param token authentication token
    * @return HTTP properties
    */
-  def authorizationBearer(token: String): HttpProperties[Source] =
+  def authorizationBearer(token: String): Http[Source] =
     header(headerAuthorization, s"$headerAuthorizationBearer $token")
 
   /**
@@ -145,8 +142,8 @@ final case class HttpProperties[Source](
    * @param entries cookie names and values
    * @return HTTP properties
    */
-  def cookies(entries: (String, String)*): HttpProperties[Source] =
-    cookies(entries, false)
+  def cookies(entries: (String, String)*): Http[Source] =
+    cookies(entries, headerCookie)
 
   /**
    * Add message header.
@@ -155,7 +152,7 @@ final case class HttpProperties[Source](
    * @param value header value
    * @return HTTP properties
    */
-  def header(name: String, value: String): HttpProperties[Source] = header(name, value, false)
+  def header(name: String, value: String): Http[Source] = header(name, value, false)
 
   /**
    * Add or replace message header.
@@ -165,7 +162,7 @@ final case class HttpProperties[Source](
    * @param replace replace all existing headers with the specied name
    * @return HTTP properties
    */
-  def header(name: String, value: String, replace: Boolean): HttpProperties[Source] = {
+  def header(name: String, value: String, replace: Boolean): Http[Source] = {
     val originalHeaders = if (replace) headers.filter(_._1 != name) else headers
     copy(headers = originalHeaders :+ (name -> value))
   }
@@ -176,7 +173,7 @@ final case class HttpProperties[Source](
    * @param entries header names and values
    * @return HTTP properties
    */
-  def headers(entries: (String, String)*): HttpProperties[Source] =
+  def headers(entries: (String, String)*): Http[Source] =
     headers(entries, false)
 
   /**
@@ -186,7 +183,7 @@ final case class HttpProperties[Source](
    * @param replace replace all existing headers with specified names
    * @return HTTP properties
    */
-  def headers(entries: Iterable[(String, String)], replace: Boolean): HttpProperties[Source] = {
+  def headers(entries: Iterable[(String, String)], replace: Boolean): Http[Source] = {
     val entryNames = entries.map { case (name, _) => name }.toSet
     val originalHeaders = if (replace) headers.filter { case (name, _) => !entryNames.contains(name) } else headers
     copy(headers = originalHeaders ++ entries)
@@ -199,7 +196,7 @@ final case class HttpProperties[Source](
    * @param password password
    * @return HTTP properties
    */
-  def proxyAuthBasic(user: String, password: String): HttpProperties[Source] = {
+  def proxyAuthBasic(user: String, password: String): Http[Source] = {
     val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
     header(headerProxyAuthorization, s"$headerAuthorizationBasic $value")
   }
@@ -210,7 +207,7 @@ final case class HttpProperties[Source](
    * @param token authentication token
    * @return HTTP properties
    */
-  def proxyAuthBasic(token: String): HttpProperties[Source] =
+  def proxyAuthBasic(token: String): Http[Source] =
     header(headerProxyAuthorization, s"$headerAuthorizationBasic $token")
 
   /**
@@ -219,7 +216,7 @@ final case class HttpProperties[Source](
    * @param token authentication token
    * @return HTTP properties
    */
-  def proxyAuthBearer(token: String): HttpProperties[Source] =
+  def proxyAuthBearer(token: String): Http[Source] =
     header(headerProxyAuthorization, s"$headerAuthorizationBearer $token")
 
   /**
@@ -228,7 +225,7 @@ final case class HttpProperties[Source](
    * @param value URL query string
    * @return HTTP properties
    */
-  def query(value: String): HttpProperties[Source] = this.copy(query = Some(value))
+  def query(value: String): Http[Source] = this.copy(query = Some(value))
 
   /**
    * Set request URL query parameters.
@@ -236,7 +233,7 @@ final case class HttpProperties[Source](
    * @param entries query parameter names and values
    * @return HTTP properties
    */
-  def parameters(entries: (String, String)*): HttpProperties[Source] = {
+  def parameters(entries: (String, String)*): Http[Source] = {
     val components = entries.map { case (name, value) => s"$name=$value" }
     query(s"?${components.mkString("&")}")
   }
@@ -247,8 +244,8 @@ final case class HttpProperties[Source](
    * @param entries cookie names and values
    * @return HTTP properties
    */
-  def setCookies(values: (String, String)*): HttpProperties[Source] =
-    cookies(values, true)
+  def setCookies(values: (String, String)*): Http[Source] =
+    cookies(values, headerSetCookie)
 
   /**
    * Set request URL.
@@ -256,7 +253,7 @@ final case class HttpProperties[Source](
    * @param url URL
    * @return HTTP properties
    */
-  def url(url: String): HttpProperties[Source] = this.url(new URI(url))
+  def url(url: String): Http[Source] = this.url(new URI(url))
 
   /**
    * Set request URL.
@@ -264,7 +261,7 @@ final case class HttpProperties[Source](
    * @param url URL
    * @return HTTP properties
    */
-  def url(url: URI): HttpProperties[Source] =
+  def url(url: URI): Http[Source] =
     copy(
       scheme = Some(url.getScheme),
       authority = Some(url.getAuthority),
@@ -279,9 +276,18 @@ final case class HttpProperties[Source](
       case _ => None
     })
 
-  private def cookies(values: Iterable[(String, String)], set: Boolean): HttpProperties[Source] = {
-    val headerName = if (set) headerSetCookie else headerCookie
+  private def cookies(values: Iterable[(String, String)], headerName: String): Http[Source] = {
     val headerValue = (headers(headerName) ++ values.map { case (name, value) => s"$name=$value" }).mkString("; ")
     header(headerName, headerValue, true)
+  }
+
+  private def cookies(headerName: String): Map[String, Option[String]] = {
+    headers(headerName).flatMap { header =>
+      header.split("=", 2).map(_.trim) match {
+        case Array(name, value) => Some(name -> Some(value))
+        case Array(name) => Some(name -> None)
+        case _ => None
+      }
+    }.toMap
   }
 }

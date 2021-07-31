@@ -1,7 +1,7 @@
 package automorph.transport.amqp
 
 import automorph.log.Logging
-import automorph.transport.amqp.AmqpProperties
+import automorph.transport.amqp.Amqp
 import automorph.util.Extensions.TryOps
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{AMQP, Address, Channel, Connection, ConnectionFactory, DefaultConsumer}
@@ -85,8 +85,8 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @tparam Source properties source type
    * @return request context
    */
-  def context(properties: BasicProperties): AmqpProperties[BasicProperties] =
-    AmqpProperties(
+  def context(properties: BasicProperties): Amqp[BasicProperties] =
+    Amqp(
       Some(properties),
       Option(properties.getContentType),
       Option(properties.getContentEncoding),

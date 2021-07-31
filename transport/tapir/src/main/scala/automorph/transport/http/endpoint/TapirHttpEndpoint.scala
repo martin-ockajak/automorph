@@ -5,7 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.{EndpointMessageTransport, MessageFormat}
-import automorph.transport.http.HttpProperties
+import automorph.transport.http.Http
 import automorph.util.Bytes
 import sttp.model.headers.Cookie
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
@@ -23,7 +23,7 @@ import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, 
 case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 
   /** Request context type. */
-  type Context = HttpProperties[Unit]
+  type Context = Http[Unit]
 
   /** Endpoint request type. */
   type RequestType = (Array[Byte], List[String], QueryParams, List[Header], List[Cookie], Option[String])
@@ -95,7 +95,7 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     queryParams: QueryParams,
     headers: List[Header],
   ): Context = {
-    HttpProperties(
+    Http(
       source = Some(()),
       method = Some(method.method),
       path = Some(paths.mkString("/")),

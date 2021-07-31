@@ -22,7 +22,7 @@ import java.time.Instant
  * @param appId creating application identifier
  * @tparam Source specific message transport plugin source properties type
  */
-final case class AmqpProperties[Source](
+final case class Amqp[Source](
   source: Option[Source] = None,
   contentType: Option[String] = None,
   contentEncoding: Option[String] = None,

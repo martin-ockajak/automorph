@@ -5,7 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.ServerMessageTransport
-import automorph.transport.http.HttpProperties
+import automorph.transport.http.Http
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.transport.http.server.NanoHttpdServer.Context
@@ -95,7 +95,7 @@ final case class NanoHttpdServer[Effect[_]] private (
   }
 
   private def createContext(session: IHTTPSession): Context = {
-    HttpProperties(
+    Http(
       source = Some(session),
       method = Some(session.getMethod.name),
       headers = session.getHeaders.asScala.toSeq
@@ -114,7 +114,7 @@ final case class NanoHttpdServer[Effect[_]] private (
 case object NanoHttpdServer {
 
   /** Request context type. */
-  type Context = HttpProperties[IHTTPSession]
+  type Context = Http[IHTTPSession]
 
   /** Request type. */
   type Response = automorph.transport.http.server.NanoHTTPD.Response

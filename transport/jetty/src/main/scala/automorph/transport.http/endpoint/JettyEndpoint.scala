@@ -5,7 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.{ErrorType, ResponseError}
 import automorph.spi.EndpointMessageTransport
-import automorph.transport.http.HttpProperties
+import automorph.transport.http.Http
 import automorph.transport.http.endpoint.JettyEndpoint.{Context, defaultErrorStatus}
 import automorph.util.{Bytes, Network}
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
@@ -80,7 +80,7 @@ final case class JettyEndpoint[Effect[_]](
     val headers = request.getHeaderNames.asScala.flatMap { name =>
       request.getHeaders(name).asScala.map(value => name -> value)
     }.toSeq
-    HttpProperties(
+    Http(
       source = Some(request),
       method = Some(request.getMethod),
       headers = headers
@@ -96,7 +96,7 @@ final case class JettyEndpoint[Effect[_]](
 
 case object JettyEndpoint {
   /** Request context type. */
-  type Context = HttpProperties[HttpServletRequest]
+  type Context = Http[HttpServletRequest]
 
   /** Error propagaring mapping of JSON-RPC error types to HTTP status codes. */
   val defaultErrorStatus: Int => Int = Map(

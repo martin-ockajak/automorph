@@ -3,7 +3,7 @@ package automorph.transport.http.client
 import automorph.log.Logging
 import automorph.spi.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
-import automorph.transport.http.HttpProperties
+import automorph.transport.http.Http
 import automorph.transport.http.client.HttpUrlConnectionClient.Context
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
@@ -123,7 +123,7 @@ final case class HttpUrlConnectionClient(
 case object HttpUrlConnectionClient {
 
   /** Request context type. */
-  type Context = HttpProperties[HttpURLConnection]
+  type Context = Http[HttpURLConnection]
 
-  implicit val defaultContext: Context = HttpProperties()
+  implicit val defaultContext: Context = Http()
 }

@@ -4,7 +4,7 @@ import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.protocol.ResponseError
-import automorph.transport.http.HttpProperties
+import automorph.transport.http.Http
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
 import automorph.util.{Bytes, Network}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
@@ -47,7 +47,7 @@ case object UndertowWebSocketEndpoint {
   }
 
   /** Request context type. */
-  type Context = HttpProperties[Either[HttpServerExchange, WebSocketHttpExchange]]
+  type Context = Http[Either[HttpServerExchange, WebSocketHttpExchange]]
 }
 
 /**
@@ -147,7 +147,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         val headers = exchange.getRequestHeaders.asScala.view.mapValues(_.asScala).flatMap { case (name, values) =>
           values.map(value => name -> value)
         }.toSeq
-        HttpProperties(
+        Http(
           source = Some(Right(exchange).withLeft[HttpServerExchange]),
           headers = headers
         ).url(exchange.getRequestURI)
