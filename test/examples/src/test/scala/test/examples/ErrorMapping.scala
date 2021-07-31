@@ -1,6 +1,6 @@
 package test.examples
 
-import automorph.protocol.ErrorType
+import automorph.protocol.jsonrpc.ErrorType
 import automorph.transport.http.client.SttpClient.defaultContext
 import automorph.{Client, DefaultHttpClient, DefaultHttpServer, Handler}
 import java.sql.SQLException

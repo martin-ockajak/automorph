@@ -1,6 +1,6 @@
-package automorph.protocol
+package automorph.protocol.jsonrpc
 
-import automorph.protocol.Response.mandatory
+import automorph.protocol.jsonrpc.Response.mandatory
 import automorph.spi.MessageError
 
 

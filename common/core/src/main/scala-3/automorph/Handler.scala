@@ -3,8 +3,8 @@ package automorph
 import automorph.handler.HandlerCore.defaultErrorMapping
 import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
-import automorph.protocol.ErrorType
-import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
+import automorph.protocol.jsonrpc.ErrorType
+import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
 import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.util.{CannotEqual, EmptyContext}
 import java.io.IOException

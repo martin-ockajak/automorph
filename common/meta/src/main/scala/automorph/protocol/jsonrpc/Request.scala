@@ -1,6 +1,6 @@
-package automorph.protocol
+package automorph.protocol.jsonrpc
 
-import automorph.protocol.ErrorType.InvalidRequestException
+import automorph.protocol.jsonrpc.ErrorType.InvalidRequestException
 import automorph.spi.Message
 import automorph.spi.Message.{Id, Params, version}
 

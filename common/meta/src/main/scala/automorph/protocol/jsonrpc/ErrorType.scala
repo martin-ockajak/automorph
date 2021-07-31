@@ -1,4 +1,4 @@
-package automorph.protocol
+package automorph.protocol.jsonrpc
 
 /**
  * JSON-RPC error type with code.

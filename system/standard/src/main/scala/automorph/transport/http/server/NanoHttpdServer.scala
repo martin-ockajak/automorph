@@ -3,7 +3,7 @@ package automorph.transport.http.server
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.{ErrorType, ResponseError}
+import automorph.protocol.jsonrpc.ResponseError
 import automorph.spi.ServerMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.Http

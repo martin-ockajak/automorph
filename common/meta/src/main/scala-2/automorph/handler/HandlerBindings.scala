@@ -140,7 +140,7 @@ case object HandlerBindings {
             q"""
               (scala.util.Try($format.decode[${parameter.dataType}](argumentNodes($argumentIndex))) match {
                 case scala.util.Failure(error) => scala.util.Failure(
-                  automorph.protocol.ErrorType.InvalidRequestException("Invalid argument: " + $argumentIndex, error)
+                  automorph.protocol.jsonrpc.ErrorType.InvalidRequestException("Invalid argument: " + $argumentIndex, error)
                 )
                 case result => result
               }).get

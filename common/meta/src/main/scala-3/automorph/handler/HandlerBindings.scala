@@ -1,7 +1,7 @@
 package automorph.handler
 
 import automorph.log.MacroLogger
-import automorph.protocol.ErrorType.InvalidRequestException
+import automorph.protocol.jsonrpc.ErrorType.InvalidRequestException
 import automorph.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.util.{Method, Reflection}

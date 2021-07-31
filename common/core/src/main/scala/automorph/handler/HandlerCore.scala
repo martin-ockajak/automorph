@@ -1,7 +1,7 @@
 package automorph.handler
 
-import automorph.protocol.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
-import automorph.protocol.{ErrorType, Request, Response, ResponseError}
+import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
+import automorph.protocol.jsonrpc.{ErrorType, Request, Response, ResponseError}
 import automorph.spi.{Message, MessageFormat}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps

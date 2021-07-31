@@ -1,6 +1,6 @@
 package automorph.transport.http
 
-import automorph.protocol.ErrorType
+import automorph.protocol.jsonrpc.ErrorType
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.Base64

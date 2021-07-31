@@ -3,7 +3,7 @@ package automorph.transport.amqp.server
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.ResponseError
+import automorph.protocol.jsonrpc.ResponseError
 import automorph.spi.ServerMessageTransport
 import automorph.transport.amqp.RabbitMqCommon
 import automorph.transport.amqp.Amqp
