@@ -106,7 +106,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
                       serialize(validResponse.formed)
                     }.getOrElse(system.pure(None)),
                     (rawResponse: Option[ArraySeq.ofByte]) =>
-                      HandlerResult(rawResponse.map(implicitly[Bytes[Data]].to), formedRequest.id, formedRequest.method, None)
+                      HandlerResult(rawResponse.map(implicitly[Bytes[Data]].to), None)
                   )
                 }
               )
@@ -180,7 +180,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
         serialize(validResponse.formed)
       }.getOrElse(system.pure(None)),
       (rawResponse: Option[ArraySeq.ofByte]) =>
-        HandlerResult(rawResponse.map(implicitly[Bytes[Data]].to), formedRequest.id, formedRequest.method, Some(responseError.code))
+        HandlerResult(rawResponse.map(implicitly[Bytes[Data]].to), Some(responseError.code))
     )
   }
 

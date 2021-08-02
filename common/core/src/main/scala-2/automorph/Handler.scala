@@ -18,6 +18,7 @@ import scala.reflect.macros.blackbox
  * @param format message format plugin
  * @param system effect system plugin
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
+ * @param encodedNone message format node representing missing optional value
  * @tparam Node message node type
  * @tparam Format message format plugin type
  * @tparam Effect effect type

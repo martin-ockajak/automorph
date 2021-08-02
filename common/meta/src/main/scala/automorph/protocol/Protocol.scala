@@ -1,19 +1,36 @@
 package automorph.protocol
 
+import automorph.spi.MessageFormat
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
-trait Protocol[Node, Request, Response] {
-  def parseRequest(request: ArraySeq.ofByte, method: Option[String]): Try[(String, Seq[Node])]
+trait Protocol[RequestProperties] {
 
-  def parseResponse(request: ArraySeq.ofByte): Try[Node]
+  def parseRequest[Node](
+    request: ArraySeq.ofByte,
+    method: Option[String],
+    format: MessageFormat[Node]
+  ): Try[RpcRequest[Node, RequestProperties]]
 
-  def createRequest(method: Option[String], arguments: Seq[Node]): Try[ArraySeq.ofByte]
+  def parseResponse[Node](response: ArraySeq.ofByte, format: MessageFormat[Node]): Try[Node]
 
-  def createResponse(value: Try[Node]): Try[ArraySeq.ofByte]
+  def createRequest[Node](
+    method: String,
+    argumentNames: Option[Seq[String]],
+    arguments: Seq[Node],
+    format: MessageFormat[Node]
+  ): Try[(ArraySeq.ofByte, RequestProperties)]
+
+  def createResponse[Node](
+    result: Try[Node],
+    id: Option[String],
+    format: MessageFormat[Node],
+    encodeStrings: List[String] => Node
+  ): Try[ArraySeq.ofByte]
 }
 
 case object Protocol {
+
   /** Invalid request error. */
   final case class InvalidRequestException(
     message: String,
@@ -68,8 +85,8 @@ case object Protocol {
   private[automorph] def trace(throwable: Throwable, maxCauses: Int = 100): Seq[String] =
     LazyList.iterate(Option(throwable))(_.flatMap(error => Option(error.getCause)))
       .takeWhile(_.isDefined).flatten.take(maxCauses).map { throwable =>
-      val exceptionName = throwable.getClass.getSimpleName
-      val message = Option(throwable.getMessage).getOrElse("")
-      s"[$exceptionName] $message"
-    }
+        val exceptionName = throwable.getClass.getSimpleName
+        val message = Option(throwable.getMessage).getOrElse("")
+        s"[$exceptionName] $message"
+      }
 }
