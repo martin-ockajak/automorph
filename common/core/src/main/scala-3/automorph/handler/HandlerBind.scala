@@ -8,15 +8,15 @@ import automorph.spi.{EffectSystem, MessageFormat}
  * Handler method bindings code generation.
  *
  * @tparam Node message node type
- * @tparam ActualFormat message format plugin type
+ * @tparam Format message format plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerBind[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context]:
-  this: Handler[Node, ActualFormat, Effect, Context] =>
+private[automorph] trait HandlerBind[Node, Format <: MessageFormat[Node], Effect[_], Context]:
+  this: Handler[Node, Format, Effect, Context] =>
 
   /** This handler type. */
-  type ThisHandler = Handler[Node, ActualFormat, Effect, Context]
+  type ThisHandler = Handler[Node, Format, Effect, Context]
 
   /**
    * Creates a copy of this handler with generated method bindings for all valid public methods of the specified API.
@@ -61,7 +61,7 @@ private[automorph] trait HandlerBind[Node, ActualFormat <: MessageFormat[Node], 
    */
   inline def bind[Api <: AnyRef](api: Api, methodAliases: String => Seq[String]): ThisHandler =
     copy(methodBindings =
-      methodBindings ++ HandlerBindings.generate[Node, ActualFormat, Effect, Context, Api](format, system, api).flatMap {
+      methodBindings ++ HandlerBindings.generate[Node, Format, Effect, Context, Api](format, system, api).flatMap {
         (methodName, method) => methodAliases(methodName).map(_ -> method)
       }
     )

@@ -17,26 +17,26 @@ case object HandlerBindings {
    * @param system effect system plugin
    * @param api API instance
    * @tparam Node message node type
-   * @tparam ActualFormat message format plugin type
+   * @tparam Format message format plugin type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to handler method bindings
    */
-  def generate[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
-    format: ActualFormat,
+  def generate[Node, Format <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
+    format: Format,
     system: EffectSystem[Effect],
     api: Api
-  ): Map[String, HandlerBinding[Node, Effect, Context]] = macro generateMacro[Node, ActualFormat, Effect, Context, Api]
+  ): Map[String, HandlerBinding[Node, Effect, Context]] = macro generateMacro[Node, Format, Effect, Context, Api]
 
   def generateMacro[
     Node: c.WeakTypeTag,
-    ActualFormat <: MessageFormat[Node]: c.WeakTypeTag,
+    Format <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
-    format: c.Expr[ActualFormat],
+    format: c.Expr[Format],
     system: c.Expr[EffectSystem[Effect]],
     api: c.Expr[Api]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, HandlerBinding[Node, Effect, Context]]] = {
@@ -56,7 +56,7 @@ case object HandlerBindings {
 
     // Generate bound API method bindings
     val handlerBindings = validMethods.map { method =>
-      q"${method.name} -> ${generateBinding[c.type, Node, ActualFormat, Effect, Context, Api](ref)(method, format, system, api)}"
+      q"${method.name} -> ${generateBinding[c.type, Node, Format, Effect, Context, Api](ref)(method, format, system, api)}"
     }
     c.Expr[Map[String, HandlerBinding[Node, Effect, Context]]](q"""
       Seq(..$handlerBindings).toMap
@@ -66,19 +66,19 @@ case object HandlerBindings {
   private def generateBinding[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    ActualFormat <: MessageFormat[Node]: ref.c.WeakTypeTag,
+    Format <: MessageFormat[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
     Api: ref.c.WeakTypeTag
   ](ref: Reflection[C])(
     method: ref.RefMethod,
-    format: ref.c.Expr[ActualFormat],
+    format: ref.c.Expr[Format],
     system: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[HandlerBinding[Node, Effect, Context]] = {
     import ref.c.universe.{Liftable, Quasiquote}
 
-    val invoke = generateInvoke[C, Node, ActualFormat, Effect, Context, Api](ref)(method, format, system, api)
+    val invoke = generateInvoke[C, Node, Format, Effect, Context, Api](ref)(method, format, system, api)
     logBoundMethod[C, Api](ref)(method, invoke)
     implicit val methodLift: Liftable[Method] = methodLiftable(ref)
     Seq(methodLift)
@@ -94,18 +94,18 @@ case object HandlerBindings {
   private def generateInvoke[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    ActualFormat <: MessageFormat[Node]: ref.c.WeakTypeTag,
+    Format <: MessageFormat[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
     Api
   ](ref: Reflection[C])(
     method: ref.RefMethod,
-    format: ref.c.Expr[ActualFormat],
+    format: ref.c.Expr[Format],
     system: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}
-    (weakTypeOf[Node], weakTypeOf[ActualFormat])
+    (weakTypeOf[Node], weakTypeOf[Format])
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>

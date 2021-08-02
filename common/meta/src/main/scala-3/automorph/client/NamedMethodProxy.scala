@@ -3,17 +3,17 @@ package automorph.client
 import automorph.spi.MessageFormat
 import automorph.util.CannotEqual
 
-case class NamedMethodProxy[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context](
+case class NamedMethodProxy[Node, Format <: MessageFormat[Node], Effect[_], Context](
   methodName: String,
-  private val core: ClientCore[Node, ActualFormat, Effect, Context],
+  private val core: ClientCore[Node, Format, Effect, Context],
   private val argumentValues: Seq[(String, Any)],
   private val encodedArguments: Seq[Node]
 ) extends CannotEqual:
 
   /** Positional method proxy type. */
-  type PositionalMethod = PositionalMethodProxy[Node, ActualFormat, Effect, Context]
+  type PositionalMethod = PositionalMethodProxy[Node, Format, Effect, Context]
   /** Named method proxy type. */
-  type NamedMethod = NamedMethodProxy[Node, ActualFormat, Effect, Context]
+  type NamedMethod = NamedMethodProxy[Node, Format, Effect, Context]
 
   /**
    * Creates a copy of this method proxy without argument names passing method arguments ''by position''.

@@ -18,27 +18,27 @@ private[automorph] case object HandlerBindings:
    * @param system effect system plugin
    * @param api API instance
    * @tparam Node message node type
-   * @tparam ActualFormat message format plugin type
+   * @tparam Format message format plugin type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to handler method bindings
    */
-  inline def generate[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
-    format: ActualFormat,
+  inline def generate[Node, Format <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
+    format: Format,
     system: EffectSystem[Effect],
     api: Api
   ): Map[String, HandlerBinding[Node, Effect, Context]] =
-    ${ generateMacro[Node, ActualFormat, Effect, Context, Api]('format, 'system, 'api) }
+    ${ generateMacro[Node, Format, Effect, Context, Api]('format, 'system, 'api) }
 
   private def generateMacro[
     Node: Type,
-    ActualFormat <: MessageFormat[Node]: Type,
+    Format <: MessageFormat[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
   ](
-    format: Expr[ActualFormat],
+    format: Expr[Format],
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   )(using quotes: Quotes): Expr[Map[String, HandlerBinding[Node, Effect, Context]]] =
@@ -56,7 +56,7 @@ private[automorph] case object HandlerBindings:
     val handlerBindings = Expr.ofSeq(validMethods.map { method =>
       '{
         ${ Expr(method.name) } -> ${
-          generateBinding[Node, ActualFormat, Effect, Context, Api](ref)(method, format, system, api)
+          generateBinding[Node, Format, Effect, Context, Api](ref)(method, format, system, api)
         }
       }
     })
@@ -64,19 +64,19 @@ private[automorph] case object HandlerBindings:
 
   private def generateBinding[
     Node: Type,
-    ActualFormat <: MessageFormat[Node]: Type,
+    Format <: MessageFormat[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
   ](ref: Reflection)(
     method: ref.RefMethod,
-    format: Expr[ActualFormat],
+    format: Expr[Format],
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[HandlerBinding[Node, Effect, Context]] =
     given Quotes = ref.q
 
-    val invoke = generateInvoke[Node, ActualFormat, Effect, Context, Api](ref)(method, format, system, api)
+    val invoke = generateInvoke[Node, Format, Effect, Context, Api](ref)(method, format, system, api)
     logBoundMethod[Api](ref)(method, invoke)
     '{
       HandlerBinding(
@@ -88,13 +88,13 @@ private[automorph] case object HandlerBindings:
 
   private def generateInvoke[
     Node: Type,
-    ActualFormat <: MessageFormat[Node]: Type,
+    Format <: MessageFormat[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
   ](ref: Reflection)(
     method: ref.RefMethod,
-    format: Expr[ActualFormat],
+    format: Expr[Format],
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =

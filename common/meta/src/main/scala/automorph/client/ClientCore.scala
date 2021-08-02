@@ -18,17 +18,17 @@ import scala.util.Try
  * @param transport message transport plugin
  * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @tparam Node message node type
- * @tparam ActualFormat message format plugin type
+ * @tparam Format message format plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
 private[automorph] case class ClientCore[
   Node,
-  ActualFormat <: MessageFormat[Node],
+  Format <: MessageFormat[Node],
   Effect[_],
   Context
 ] private[automorph] (
-  format: ActualFormat,
+  format: Format,
   private val system: EffectSystem[Effect],
   private val transport: ClientMessageTransport[Effect, Context],
   private val errorToException: (Int, String) => Throwable

@@ -19,18 +19,18 @@ import scala.reflect.macros.blackbox
  * @param system effect system plugin
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
  * @tparam Node message node type
- * @tparam ActualFormat message format plugin type
+ * @tparam Format message format plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Handler[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context](
-  format: ActualFormat,
+final case class Handler[Node, Format <: MessageFormat[Node], Effect[_], Context](
+  format: Format,
   system: EffectSystem[Effect],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val exceptionToError: Throwable => Node,
   protected val encodedNone: Node
-) extends HandlerCore[Node, ActualFormat, Effect, Context]
-  with HandlerBind[Node, ActualFormat, Effect, Context]
+) extends HandlerCore[Node, Format, Effect, Context]
+  with HandlerBind[Node, Format, Effect, Context]
   with CannotEqual
   with Logging
 
@@ -48,16 +48,16 @@ case object Handler {
    * @param format message format plugin
    * @param system effect system plugin
    * @tparam Node message node type
-   * @tparam ActualFormat message format plugin type
+   * @tparam Format message format plugin type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @return RPC request handler
    */
-  def apply[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context](
-    format: ActualFormat,
+  def apply[Node, Format <: MessageFormat[Node], Effect[_], Context](
+    format: Format,
     system: EffectSystem[Effect]
-  ): Handler[Node, ActualFormat, Effect, Context] =
-    macro applyMacro[Node, ActualFormat, Effect, Context]
+  ): Handler[Node, Format, Effect, Context] =
+    macro applyMacro[Node, Format, Effect, Context]
 
   /**
    * Creates a RPC request handler with empty request context plus specified specified ''format'' and ''system'' plugins.
@@ -68,16 +68,16 @@ case object Handler {
    * @param format message format plugin
    * @param system effect system plugin
    * @tparam Node message node type
-   * @tparam ActualFormat message format plugin type
+   * @tparam Format message format plugin type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @return RPC request handler
    */
-  def withoutContext[Node, ActualFormat <: MessageFormat[Node], Effect[_]](
-    format: ActualFormat,
+  def withoutContext[Node, Format <: MessageFormat[Node], Effect[_]](
+    format: Format,
     system: EffectSystem[Effect]
-  ): Handler[Node, ActualFormat, Effect, EmptyContext.Value] =
-    macro withoutContextMacro[Node, ActualFormat, Effect]
+  ): Handler[Node, Format, Effect, EmptyContext.Value] =
+    macro withoutContextMacro[Node, Format, Effect]
 
   /**
    * Maps an exception class to a corresponding default JSON-RPC error type.
@@ -87,31 +87,31 @@ case object Handler {
    */
   def defaultErrorMapping(exception: Throwable): ErrorType = HandlerCore.defaultErrorMapping(exception)
 
-  def applyMacro[Node: c.WeakTypeTag, ActualFormat <: MessageFormat[Node]: c.WeakTypeTag, Effect[_], Context: c.WeakTypeTag](
+  def applyMacro[Node: c.WeakTypeTag, Format <: MessageFormat[Node]: c.WeakTypeTag, Effect[_], Context: c.WeakTypeTag](
     c: blackbox.Context
   )(
-    format: c.Expr[ActualFormat],
+    format: c.Expr[Format],
     system: c.Expr[EffectSystem[Effect]]
-  ): c.Expr[Handler[Node, ActualFormat, Effect, Context]] = {
+  ): c.Expr[Handler[Node, Format, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
-    Seq(weakTypeOf[Node], weakTypeOf[ActualFormat], weakTypeOf[Context])
+    Seq(weakTypeOf[Node], weakTypeOf[Format], weakTypeOf[Context])
 
     c.Expr[Any](q"""
       new automorph.Handler($format, $system, Map.empty, automorph.handler.Handler.defaultErrorMapping,
         value => $format.encode[List[String]](value), $format.encode(None))
-    """).asInstanceOf[c.Expr[Handler[Node, ActualFormat, Effect, Context]]]
+    """).asInstanceOf[c.Expr[Handler[Node, Format, Effect, Context]]]
   }
 
-  def withoutContextMacro[Node: c.WeakTypeTag, ActualFormat <: MessageFormat[Node]: c.WeakTypeTag, Effect[_]](c: blackbox.Context)(
-    format: c.Expr[ActualFormat],
+  def withoutContextMacro[Node: c.WeakTypeTag, Format <: MessageFormat[Node]: c.WeakTypeTag, Effect[_]](c: blackbox.Context)(
+    format: c.Expr[Format],
     system: c.Expr[EffectSystem[Effect]]
-  ): c.Expr[Handler[Node, ActualFormat, Effect, EmptyContext.Value]] = {
+  ): c.Expr[Handler[Node, Format, Effect, EmptyContext.Value]] = {
     import c.universe.{weakTypeOf, Quasiquote}
-    Seq(weakTypeOf[Node], weakTypeOf[ActualFormat])
+    Seq(weakTypeOf[Node], weakTypeOf[Format])
 
     c.Expr[Any](q"""
       automorph.Handler($format, $system, Map.empty, automorph.handler.Handler.defaultErrorMapping,
         value => $format.encode[List[String]](value), $format.encode(None))
-    """).asInstanceOf[c.Expr[Handler[Node, ActualFormat, Effect, EmptyContext.Value]]]
+    """).asInstanceOf[c.Expr[Handler[Node, Format, Effect, EmptyContext.Value]]]
   }
 }

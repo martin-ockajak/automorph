@@ -20,23 +20,23 @@ import java.io.IOException
  * @param transport message transport plugin
  * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @tparam Node message node type
- * @tparam ActualFormat message format plugin type
+ * @tparam Format message format plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Client[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context](
-  format: ActualFormat,
+final case class Client[Node, Format <: MessageFormat[Node], Effect[_], Context](
+  format: Format,
   system: EffectSystem[Effect],
   transport: ClientMessageTransport[Effect, Context],
   protected val errorToException: (Int, String) => Throwable = defaultErrorMapping
-) extends ClientBind[Node, ActualFormat, Effect, Context] with AutoCloseable with CannotEqual {
+) extends ClientBind[Node, Format, Effect, Context] with AutoCloseable with CannotEqual {
 
   /** This client type. */
-  type ThisClient = Client[Node, ActualFormat, Effect, Context]
+  type ThisClient = Client[Node, Format, Effect, Context]
   /** Named method proxy type. */
-  type NamedMethod = NamedMethodProxy[Node, ActualFormat, Effect, Context]
+  type NamedMethod = NamedMethodProxy[Node, Format, Effect, Context]
 
-  val core: ClientCore[Node, ActualFormat, Effect, Context] = ClientCore(format, system, transport, errorToException)
+  val core: ClientCore[Node, Format, Effect, Context] = ClientCore(format, system, transport, errorToException)
 
   /**
    * Creates a method proxy with specified method name.
@@ -80,15 +80,15 @@ case object Client {
    * @param system effect system plugin
    * @param transport message transport protocol plugin
    * @tparam Node message node type
-   * @tparam ActualFormat message format plugin type
+   * @tparam Format message format plugin type
    * @tparam Effect effect type
    * @return RPC client
    */
-  def withoutContext[Node, ActualFormat <: MessageFormat[Node], Effect[_]](
-    format: ActualFormat,
+  def withoutContext[Node, Format <: MessageFormat[Node], Effect[_]](
+    format: Format,
     system: EffectSystem[Effect],
     transport: ClientMessageTransport[Effect, EmptyContext.Value]
-  ): Client[Node, ActualFormat, Effect, EmptyContext.Value] = Client(format, system, transport)
+  ): Client[Node, Format, Effect, EmptyContext.Value] = Client(format, system, transport)
 
   /**
    * Maps a JSON-RPC error to a corresponding default exception.

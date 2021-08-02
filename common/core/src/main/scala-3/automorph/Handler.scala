@@ -20,19 +20,19 @@ import java.io.IOException
  * @param system effect system plugin
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
  * @tparam Node message node type
- * @tparam ActualFormat message format plugin type
+ * @tparam Format message format plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Handler[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context](
-  format: ActualFormat,
+final case class Handler[Node, Format <: MessageFormat[Node], Effect[_], Context](
+  format: Format,
   system: EffectSystem[Effect],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val exceptionToError: Throwable => ErrorType,
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
-) extends HandlerCore[Node, ActualFormat, Effect, Context]
-  with HandlerBind[Node, ActualFormat, Effect, Context]
+) extends HandlerCore[Node, Format, Effect, Context]
+  with HandlerBind[Node, Format, Effect, Context]
   with CannotEqual
   with Logging
 
@@ -50,15 +50,15 @@ case object Handler:
    * @param format message format plugin
    * @param system effect system plugin
    * @tparam Node message node type
-   * @tparam ActualFormat message format plugin type
+   * @tparam Format message format plugin type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @return RPC request handler
    */
-  inline def apply[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context](
-    format: ActualFormat,
+  inline def apply[Node, Format <: MessageFormat[Node], Effect[_], Context](
+    format: Format,
     system: EffectSystem[Effect]
-  ): Handler[Node, ActualFormat, Effect, Context] =
+  ): Handler[Node, Format, Effect, Context] =
     val encodeStrings = (value: List[String]) => format.encode[List[String]](value)
     Handler(format, system, Map.empty, defaultErrorMapping, encodeStrings, format.encode(None))
 
@@ -71,15 +71,15 @@ case object Handler:
    * @param format message format plugin
    * @param system effect system plugin
    * @tparam Node message node type
-   * @tparam ActualFormat message format plugin type
+   * @tparam Format message format plugin type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @return RPC request handler
    */
-  inline def withoutContext[Node, ActualFormat <: MessageFormat[Node], Effect[_]](
-    format: ActualFormat,
+  inline def withoutContext[Node, Format <: MessageFormat[Node], Effect[_]](
+    format: Format,
     system: EffectSystem[Effect]
-  ): Handler[Node, ActualFormat, Effect, EmptyContext.Value] =
+  ): Handler[Node, Format, Effect, EmptyContext.Value] =
     val encodeStrings = (value: List[String]) => format.encode[List[String]](value)
     Handler(format, system, Map.empty, defaultErrorMapping, encodeStrings, format.encode(None))
 

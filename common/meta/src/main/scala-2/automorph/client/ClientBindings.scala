@@ -15,23 +15,23 @@ case object ClientBindings {
    *
    * @param format message format plugin
    * @tparam Node message node type
-   * @tparam ActualFormat message format plugin type
+   * @tparam Format message format plugin type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to client method bindings
    */
-  def generate[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
-    format: ActualFormat
-  ): Map[String, ClientBinding[Node]] = macro generateMacro[Node, ActualFormat, Effect, Context, Api]
+  def generate[Node, Format <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
+    format: Format
+  ): Map[String, ClientBinding[Node]] = macro generateMacro[Node, Format, Effect, Context, Api]
 
   def generateMacro[
     Node: c.WeakTypeTag,
-    ActualFormat <: MessageFormat[Node]: c.WeakTypeTag,
+    Format <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
-  ](c: blackbox.Context)(format: c.Expr[ActualFormat])(implicit
+  ](c: blackbox.Context)(format: c.Expr[Format])(implicit
     effectType: c.WeakTypeTag[Effect[_]]
   ): c.Expr[Map[String, ClientBinding[Node]]] = {
     import c.universe.Quasiquote
@@ -50,7 +50,7 @@ case object ClientBindings {
 
     // Generate bound API method bindings
     val clientMethods = validMethods.map { method =>
-      q"${method.name} -> ${generateBinding[c.type, Node, ActualFormat, Effect, Context, Api](ref)(method, format)}"
+      q"${method.name} -> ${generateBinding[c.type, Node, Format, Effect, Context, Api](ref)(method, format)}"
     }
     c.Expr[Map[String, ClientBinding[Node]]](q"""
       Seq(..$clientMethods).toMap
@@ -60,19 +60,19 @@ case object ClientBindings {
   private def generateBinding[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    ActualFormat <: MessageFormat[Node]: ref.c.WeakTypeTag,
+    Format <: MessageFormat[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag,
     Api: ref.c.WeakTypeTag
   ](ref: Reflection[C])(
     method: ref.RefMethod,
-    format: ref.c.Expr[ActualFormat]
+    format: ref.c.Expr[Format]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[ClientBinding[Node]] = {
     import ref.c.universe.{weakTypeOf, Liftable, Quasiquote}
 
     val nodeType = weakTypeOf[Node]
-    val encodeArguments = generateEncodeArguments[C, Node, ActualFormat, Context](ref)(method, format)
-    val decodeResult = generateDecodeResult[C, Node, ActualFormat, Effect](ref)(method, format)
+    val encodeArguments = generateEncodeArguments[C, Node, Format, Context](ref)(method, format)
+    val decodeResult = generateDecodeResult[C, Node, Format, Effect](ref)(method, format)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
     implicit val methodLift: Liftable[Method] = methodLiftable(ref)
     Seq(methodLift)
@@ -89,11 +89,11 @@ case object ClientBindings {
   private def generateEncodeArguments[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    ActualFormat <: MessageFormat[Node]: ref.c.WeakTypeTag,
+    Format <: MessageFormat[Node]: ref.c.WeakTypeTag,
     Context: ref.c.WeakTypeTag
-  ](ref: Reflection[C])(method: ref.RefMethod, format: ref.c.Expr[ActualFormat]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
+  ](ref: Reflection[C])(method: ref.RefMethod, format: ref.c.Expr[Format]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}
-    (weakTypeOf[Node], weakTypeOf[ActualFormat])
+    (weakTypeOf[Node], weakTypeOf[Format])
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
@@ -129,13 +129,13 @@ case object ClientBindings {
   private def generateDecodeResult[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
-    ActualFormat <: MessageFormat[Node]: ref.c.WeakTypeTag,
+    Format <: MessageFormat[Node]: ref.c.WeakTypeTag,
     Effect[_]
-  ](ref: Reflection[C])(method: ref.RefMethod, format: ref.c.Expr[ActualFormat])(implicit
+  ](ref: Reflection[C])(method: ref.RefMethod, format: ref.c.Expr[Format])(implicit
     effectType: ref.c.WeakTypeTag[Effect[_]]
   ): ref.c.Expr[Node => Any] = {
     import ref.c.universe.{weakTypeOf, Quasiquote}
-    (weakTypeOf[Node], weakTypeOf[ActualFormat])
+    (weakTypeOf[Node], weakTypeOf[Format])
 
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = format.dencode[ResultValueType](resultNode)

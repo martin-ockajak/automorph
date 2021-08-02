@@ -9,13 +9,13 @@ import scala.reflect.macros.blackbox
  * Client method bindings code generation.
  *
  * @tparam Node message node type
- * @tparam ActualFormat message format plugin type
+ * @tparam Format message format plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait ClientBind[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context] {
+private[automorph] trait ClientBind[Node, Format <: MessageFormat[Node], Effect[_], Context] {
 
-  def core: ClientCore[Node, ActualFormat, Effect, Context]
+  def core: ClientCore[Node, Format, Effect, Context]
 
   /**
    * Creates a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
@@ -36,7 +36,7 @@ ne
    * @return JSON-RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef]: Api = macro ClientBind.bindNamedMacro[Node, ActualFormat, Effect, Context, Api]
+  def bind[Api <: AnyRef]: Api = macro ClientBind.bindNamedMacro[Node, Format, Effect, Context, Api]
 
   /**
    * Creates a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
@@ -56,7 +56,7 @@ ne
    * @return JSON-RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bindPositional[Api <: AnyRef]: Api = macro ClientBind.bindPositionalMacro[Node, ActualFormat, Effect, Context, Api]
+  def bindPositional[Api <: AnyRef]: Api = macro ClientBind.bindPositionalMacro[Node, Format, Effect, Context, Api]
 }
 
 object ClientBind {
@@ -65,7 +65,7 @@ object ClientBind {
 
   def bindNamedMacro[
     Node: c.WeakTypeTag,
-    ActualFormat <: MessageFormat[Node]: c.WeakTypeTag,
+    Format <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
@@ -75,7 +75,7 @@ object ClientBind {
     c.Expr[Api](q"""
       automorph.client.ClientBind.generalBind[
         ${weakTypeOf[Node]},
-        ${weakTypeOf[ActualFormat]},
+        ${weakTypeOf[Format]},
         ${weakTypeOf[Effect[_]]},
         ${weakTypeOf[Context]},
         ${weakTypeOf[Api]}
@@ -85,7 +85,7 @@ object ClientBind {
 
   def bindPositionalMacro[
     Node: c.WeakTypeTag,
-    ActualFormat <: MessageFormat[Node]: c.WeakTypeTag,
+    Format <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
@@ -95,7 +95,7 @@ object ClientBind {
     c.Expr[Api](q"""
       automorph.client.ClientBind.generalBind[
         ${weakTypeOf[Node]},
-        ${weakTypeOf[ActualFormat]},
+        ${weakTypeOf[Format]},
         ${weakTypeOf[Effect[_]]},
         ${weakTypeOf[Context]},
         ${weakTypeOf[Api]}
@@ -103,25 +103,25 @@ object ClientBind {
     """)
   }
 
-  def generalBind[Node, ActualFormat <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
-    clientCore: ClientCore[Node, ActualFormat, Effect, Context],
+  def generalBind[Node, Format <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
+    clientCore: ClientCore[Node, Format, Effect, Context],
     namedArguments: Boolean
-  ): Api = macro generalBindMacro[Node, ActualFormat, Effect, Context, Api]
+  ): Api = macro generalBindMacro[Node, Format, Effect, Context, Api]
 
   def generalBindMacro[
     Node: c.WeakTypeTag,
-    ActualFormat <: MessageFormat[Node]: c.WeakTypeTag,
+    Format <: MessageFormat[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
-    clientCore: c.Expr[ClientCore[Node, ActualFormat, Effect, Context]],
+    clientCore: c.Expr[ClientCore[Node, Format, Effect, Context]],
     namedArguments: c.Expr[Boolean]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Api] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
     val nodeType = weakTypeOf[Node]
-    val formatType = weakTypeOf[ActualFormat]
+    val formatType = weakTypeOf[Format]
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Api](q"""
