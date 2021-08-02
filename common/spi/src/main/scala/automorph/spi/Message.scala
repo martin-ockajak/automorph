@@ -58,13 +58,13 @@ object Message {
  * JSON-RPC protocol message error structure.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @param code error code
  * @param message error description
+ * @param code error code
  * @param data additional error information
  * @tparam Node message node type
  */
 final case class MessageError[Node](
-  code: Option[Int],
   message: Option[String],
+  code: Option[Int],
   data: Option[Node]
 )

@@ -39,10 +39,10 @@ case object Generators {
   def arbitraryMesage[Node: Arbitrary]: Arbitrary[Message[Node]] = {
     implicit val arbitraryMessageError: Arbitrary[MessageError[Node]] = Arbitrary {
       for {
-        code <- arbitrary[Option[Int]]
         message <- arbitrary[Option[String]]
+        code <- arbitrary[Option[Int]]
         data <- arbitrary[Option[Node]]
-      } yield MessageError(code, message, data)
+      } yield MessageError(message, code, data)
     }
 
     Arbitrary {

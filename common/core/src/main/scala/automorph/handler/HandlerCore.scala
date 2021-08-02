@@ -162,14 +162,14 @@ private[automorph] trait HandlerCore[Node, ActualFormat <: MessageFormat[Node], 
   private def errorResponse[Data: Bytes](error: Throwable, formedRequest: Message[Node]): Effect[HandlerResult[Data]] = {
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
     val responseError = error match {
-      case JsonRpcError(message, code, data, _) => ResponseError(code, message, data.asInstanceOf[Option[Node]])
+      case JsonRpcError(message, code, data, _) => ResponseError(message, code, data.asInstanceOf[Option[Node]])
       case _ =>
         // Assemble error details
-        val code = exceptionToError(error).code
         val trace = ResponseError.trace(error)
         val message = trace.headOption.getOrElse("Unknown error")
+        val code = exceptionToError(error).code
         val data = Some(encodeStrings(trace.drop(1).toList))
-        ResponseError(code, message, data)
+        ResponseError(message, code, data)
     }
     system.map(
       formedRequest.id.map { id =>

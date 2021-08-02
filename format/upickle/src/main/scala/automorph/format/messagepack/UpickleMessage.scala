@@ -43,14 +43,14 @@ private[automorph] object UpickleMessage {
 }
 
 private[automorph] final case class UpickleMessageError(
-  code: Option[Int],
   message: Option[String],
+  code: Option[Int],
   data: Option[Msg]
 ) {
 
   def toSpi: MessageError[Msg] = MessageError[Msg](
-    code,
     message,
+    code,
     data
   )
 }
@@ -58,8 +58,8 @@ private[automorph] final case class UpickleMessageError(
 private[automorph] object UpickleMessageError {
 
   def fromSpi(v: MessageError[Msg]): UpickleMessageError = UpickleMessageError(
-    v.code,
     v.message,
+    v.code,
     v.data
   )
 }

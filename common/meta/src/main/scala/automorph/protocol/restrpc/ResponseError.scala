@@ -1,27 +1,26 @@
-package automorph.protocol.jsonrpc
+package automorph.protocol.restrpc
 
 import automorph.protocol.jsonrpc.Response.mandatory
 import automorph.spi.MessageError
 
 
 /**
- * JSON-RPC call response error.
+ * REST-RPC call response error.
  *
- * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param message error description
  * @param code error code
- * @param data additional error information
+ * @param details additional error information
  * @tparam Node message node type
  */
 private[automorph] final case class ResponseError[Node](
   message: String,
-  code: Int,
+  code: Option[Int],
   data: Option[Node]
 ) {
 
   def formed: MessageError[Node] = MessageError[Node](
     message = Some(message),
-    code = Some(code),
+    code = code,
     data = data
   )
 }
@@ -31,7 +30,7 @@ case object ResponseError {
   private[automorph] def apply[Node](error: MessageError[Node]): ResponseError[Node] = {
     val message = mandatory(error.message, "message")
     val code = mandatory(error.code, "code")
-    new ResponseError(message, code, error.data)
+    new ResponseError(message, Some(code), error.data)
   }
 
   /**

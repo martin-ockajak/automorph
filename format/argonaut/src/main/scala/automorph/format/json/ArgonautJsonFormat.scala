@@ -18,9 +18,9 @@ final case class ArgonautJsonFormat() extends ArgonautJsonFormatMeta {
   private val charset = StandardCharsets.UTF_8
 
   implicit private lazy val messageErrorCodecJson: CodecJson[MessageError[Json]] =
-    Argonaut.codec3(MessageError.apply[Json], (v: MessageError[Json]) => (v.code, v.message, v.data))(
-      "codec",
+    Argonaut.codec3(MessageError.apply[Json], (v: MessageError[Json]) => (v.message, v.code, v.data))(
       "message",
+      "code",
       "data"
     )
 
