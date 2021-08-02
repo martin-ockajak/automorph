@@ -1,5 +1,18 @@
 package automorph.protocol
 
+import scala.collection.immutable.ArraySeq
+import scala.util.Try
+
+trait Protocol[Node, Request, Response] {
+  def parseRequest(request: ArraySeq.ofByte, method: Option[String]): Try[(String, Seq[Node])]
+
+  def parseResponse(request: ArraySeq.ofByte): Try[Node]
+
+  def createRequest(method: Option[String], arguments: Seq[Node]): Try[ArraySeq.ofByte]
+
+  def createResponse(value: Try[Node]): Try[ArraySeq.ofByte]
+}
+
 case object Protocol {
   /** Invalid request error. */
   final case class InvalidRequestException(
