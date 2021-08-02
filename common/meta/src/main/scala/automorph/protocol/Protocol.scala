@@ -23,7 +23,7 @@ trait Protocol[RequestProperties] {
 
   def createResponse[Node](
     result: Try[Node],
-    id: Option[String],
+    properties: RequestProperties,
     format: MessageFormat[Node],
     encodeStrings: List[String] => Node
   ): Try[ArraySeq.ofByte]

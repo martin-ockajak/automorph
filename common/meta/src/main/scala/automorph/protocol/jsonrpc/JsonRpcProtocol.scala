@@ -69,13 +69,13 @@ final case class JsonRpcProtocol(
 
   override def createResponse[Node](
     result: Try[Node],
-    id: Option[String],
+    properties: Option[Message.Id],
     format: MessageFormat[Node],
     encodeStrings: List[String] => Node
   ): Try[ArraySeq.ofByte] =
-    id.fold {
+    properties.fold {
       Failure(InternalErrorException("Missing response identifier", None.orNull))
-    } { callId =>
+    } { id =>
       val formedResponse = result.pureFold(
         error => {
           val responseError = error match {
@@ -89,9 +89,9 @@ final case class JsonRpcProtocol(
               val data = Some(encodeStrings(trace.drop(1).toList))
               ResponseError(message, code, data)
           }
-          Response[Node](Right(callId), None, Some(responseError)).formed
+          Response[Node](id, None, Some(responseError)).formed
         },
-        resultValue => Response(Right(callId), Some(resultValue), None).formed
+        resultValue => Response(id, Some(resultValue), None).formed
       )
       logger.trace(s"Sending JSON-RPC response:\n${format.format(formedResponse)}")
       Try(format.serialize(formedResponse)).mapFailure { error =>
