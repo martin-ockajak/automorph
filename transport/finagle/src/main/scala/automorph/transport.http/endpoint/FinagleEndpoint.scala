@@ -3,7 +3,7 @@ package automorph.transport.http.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.jsonrpc.ResponseError
+import automorph.protocol.Protocol
 import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.FinagleEndpoint.Context
@@ -65,7 +65,7 @@ final case class FinagleEndpoint[Effect[_]](
       error,
       Map("Client" -> clientAddress(request), "Size" -> request.content.length)
     )
-    val message = Reader.fromBuf(Buf.Utf8(ResponseError.trace(error).mkString("\n")))
+    val message = Reader.fromBuf(Buf.Utf8(Protocol.trace(error).mkString("\n")))
     val status = Status.InternalServerError
     createResponse(message, status, request)
   }

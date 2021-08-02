@@ -2,6 +2,7 @@ package automorph.handler
 
 import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
 import automorph.protocol.jsonrpc.{ErrorType, Request, Response, ResponseError}
+import automorph.protocol.Protocol
 import automorph.spi.{Message, MessageFormat}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
@@ -165,7 +166,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
       case JsonRpcError(message, code, data, _) => ResponseError(message, code, data.asInstanceOf[Option[Node]])
       case _ =>
         // Assemble error details
-        val trace = ResponseError.trace(error)
+        val trace = Protocol.trace(error)
         val message = trace.headOption.getOrElse("Unknown error")
         val code = exceptionToError(error).code
         val data = Some(encodeStrings(trace.drop(1).toList))

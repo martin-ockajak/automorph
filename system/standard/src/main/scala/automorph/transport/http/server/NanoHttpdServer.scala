@@ -3,7 +3,7 @@ package automorph.transport.http.server
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.jsonrpc.ResponseError
+import automorph.protocol.Protocol
 import automorph.spi.ServerMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.Http
@@ -76,7 +76,7 @@ final case class NanoHttpdServer[Effect[_]] private (
       Map("Client" -> clientAddress(session), "Size" -> request.length)
     )
     val status = Status.INTERNAL_ERROR
-    val message = Bytes.string.from(ResponseError.trace(error).mkString("\n"))
+    val message = Bytes.string.from(Protocol.trace(error).mkString("\n"))
     createResponse(message, status, session)
   }
 

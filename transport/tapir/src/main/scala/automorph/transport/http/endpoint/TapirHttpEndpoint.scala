@@ -3,7 +3,7 @@ package automorph.transport.http.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.jsonrpc.ResponseError
+import automorph.protocol.Protocol
 import automorph.spi.{EndpointMessageTransport, MessageFormat}
 import automorph.transport.http.Http
 import automorph.util.Bytes
@@ -78,7 +78,7 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 
   private def serverError(error: Throwable, request: Array[Byte], client: String): (Array[Byte], StatusCode) = {
     logger.error("Failed to process HTTP request", error, Map("Client" -> client, "Size" -> request.length))
-    val message = Bytes.string.from(ResponseError.trace(error).mkString("\n")).unsafeArray
+    val message = Bytes.string.from(Protocol.trace(error).mkString("\n")).unsafeArray
     val status = StatusCode.InternalServerError
     createResponse(message, status, client)
   }

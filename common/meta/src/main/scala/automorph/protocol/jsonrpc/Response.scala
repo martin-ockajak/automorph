@@ -1,6 +1,6 @@
 package automorph.protocol.jsonrpc
 
-import automorph.protocol.jsonrpc.ErrorType.InvalidResponseException
+import automorph.protocol.Protocol.{InvalidResponseException, fromResponse}
 import automorph.spi.Message
 import automorph.spi.Message.{Id, version}
 
@@ -32,29 +32,16 @@ private[automorph] final case class Response[Node](
 private[automorph] case object Response {
 
   def apply[Node](message: Message[Node]): Response[Node] = {
-    val jsonrpc = mandatory(message.jsonrpc, "automorph")
+    val jsonrpc = fromResponse(message.jsonrpc, "automorph")
     if (jsonrpc != version) {
       throw InvalidResponseException(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
     }
-    val id = mandatory(message.id, "id")
+    val id = fromResponse(message.id, "id")
     message.result.map { result =>
       Response(id, Some(result), None)
     }.getOrElse {
-      val error = mandatory(message.error, "error")
+      val error = fromResponse(message.error, "error")
       Response(id, None, Some(ResponseError(error)))
     }
   }
-
-  /**
-   * Return specified mandatory property value or throw an exception if it is missing.
-   *
-   * @param value property value
-   * @param name property name
-   * @tparam T property type
-   * @return property value
-   * @throws InvalidResponseException if the property value is missing
-   */
-  def mandatory[T](value: Option[T], name: String): T = value.getOrElse(
-    throw InvalidResponseException(s"Missing message property: $name", None.orNull)
-  )
 }

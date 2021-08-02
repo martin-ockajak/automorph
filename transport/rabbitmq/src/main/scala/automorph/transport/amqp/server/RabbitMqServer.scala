@@ -3,7 +3,7 @@ package automorph.transport.amqp.server
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.jsonrpc.ResponseError
+import automorph.protocol.Protocol
 import automorph.spi.ServerMessageTransport
 import automorph.transport.amqp.RabbitMqCommon
 import automorph.transport.amqp.Amqp
@@ -113,7 +113,7 @@ final case class RabbitMqServer[Effect[_]](
         "Size" -> request.length
       )
     )
-    val message = Bytes.string.from(ResponseError.trace(error).mkString("\n")).unsafeArray
+    val message = Bytes.string.from(Protocol.trace(error).mkString("\n")).unsafeArray
     sendResponse(message, properties)
   }
 

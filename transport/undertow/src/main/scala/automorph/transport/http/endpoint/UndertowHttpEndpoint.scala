@@ -3,7 +3,7 @@ package automorph.transport.http.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.jsonrpc.ResponseError
+import automorph.protocol.Protocol
 import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
@@ -89,7 +89,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
       error,
       Map("Client" -> clientAddress(exchange)) ++ request.flatMap(request => Option("Size" -> request.length))
     )
-    val message = Bytes.string.from(ResponseError.trace(error).mkString("\n"))
+    val message = Bytes.string.from(Protocol.trace(error).mkString("\n"))
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
     sendResponse(message, statusCode, exchange)
   }

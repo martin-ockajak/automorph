@@ -27,7 +27,7 @@ REST-RPC is an RPC protocol prescribing a standard way to model REST APIs while 
   "error": {
     "code": 0,
     "message": "Some error",
-    "details": {
+    "data": {
     }
   }
 }

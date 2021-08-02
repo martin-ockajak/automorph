@@ -3,7 +3,7 @@ package automorph.transport.http.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.jsonrpc.ResponseError
+import automorph.protocol.Protocol
 import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.JettyEndpoint.Context
@@ -61,7 +61,7 @@ final case class JettyEndpoint[Effect[_]](
 
   private def serverError(error: Throwable, response: HttpServletResponse, client: String): Unit = {
     logger.error("Failed to process HTTP request", error, Map("Client" -> client))
-    val message = Bytes.inputStream.to(Bytes.string.from(ResponseError.trace(error).mkString("\n")))
+    val message = Bytes.inputStream.to(Bytes.string.from(Protocol.trace(error).mkString("\n")))
     val status = HttpStatus.INTERNAL_SERVER_ERROR_500
     sendResponse(message, response, status, client)
   }

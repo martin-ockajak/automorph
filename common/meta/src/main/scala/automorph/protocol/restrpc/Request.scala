@@ -1,7 +1,5 @@
 package automorph.protocol.restrpc
 
-import automorph.spi.Message
-
 /**
  * REST-RPC call request.
  */
