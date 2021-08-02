@@ -6,7 +6,7 @@ import automorph.system.CatsEffectSystem
 import automorph.spi.EffectSystem
 import scala.util.Try
 
-class CatsEffectSystemSpec extends SystemSpec[IO] {
+class CatsSystemSpec extends EffectSystemSpec[IO] {
   def system: EffectSystem[IO] = CatsEffectSystem()
 
   def run[T](effect: IO[T]): Either[Throwable, T] = Try(effect.unsafeRunSync()).toEither

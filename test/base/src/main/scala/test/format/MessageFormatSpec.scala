@@ -11,7 +11,7 @@ import test.base.BaseSpec
  *
  * Checks message serialization, deserialization and formatting.
  */
-trait FormatSpec extends BaseSpec {
+trait MessageFormatSpec extends BaseSpec {
 
   type Node
   type ActualFormat <: MessageFormat[Node]

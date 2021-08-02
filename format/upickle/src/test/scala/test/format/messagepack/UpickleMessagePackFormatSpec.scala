@@ -6,11 +6,11 @@ import org.scalacheck.{Arbitrary, Gen}
 import scala.annotation.nowarn
 import scala.collection.mutable.LinkedHashMap
 import test.Generators.arbitraryRecord
-import test.format.FormatSpec
+import test.format.MessageFormatSpec
 import test.{Enum, Record, Structure}
 import upack.{Arr, Bool, Float64, Msg, Obj, Str}
 
-class UpickleMessagePackSpec extends FormatSpec {
+class UpickleMessagePackSpec extends MessageFormatSpec {
 
   type Node = Msg
   type ActualFormat = UpickleMessagePackFormat[UpickleMessagePackFormatSpec.type]

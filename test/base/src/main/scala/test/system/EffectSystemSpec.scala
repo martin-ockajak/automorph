@@ -11,7 +11,7 @@ import test.base.BaseSpec
  *
  * @tparam Effect effect type
  */
-trait SystemSpec[Effect[_]] extends BaseSpec {
+trait EffectSystemSpec[Effect[_]] extends BaseSpec {
   private val text = "test"
   private val number = 0
 

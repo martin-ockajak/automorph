@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import scala.util.Try
 import zio.{RIO, Runtime, ZEnv}
 
-class ZioSystemSpec extends SystemSpec[({ type Effect[T] = RIO[ZEnv, T] })#Effect] {
+class ZioSystemSpec extends EffectSystemSpec[({ type Effect[T] = RIO[ZEnv, T] })#Effect] {
   private lazy val runtime = Runtime.default.withReportFailure(_ => ())
 
   def system: EffectSystem[({ type Effect[T] = RIO[ZEnv, T] })#Effect] = ZioSystem[ZEnv]()

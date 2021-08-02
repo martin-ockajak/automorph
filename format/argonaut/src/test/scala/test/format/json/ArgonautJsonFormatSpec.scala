@@ -5,10 +5,10 @@ import argonaut.{Argonaut, CodecJson, Json}
 import automorph.format.json.ArgonautJsonFormat
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
-import test.format.FormatSpec
+import test.format.MessageFormatSpec
 import test.{Enum, Record, Structure}
 
-class ArgonautJsonFormatSpec extends FormatSpec {
+class ArgonautJsonFormatSpec extends MessageFormatSpec {
 
   type Node = Json
   type ActualFormat = ArgonautJsonFormat

@@ -4,11 +4,11 @@ import automorph.format.json.UpickleJsonFormat
 import automorph.format.UpickleCustom
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
-import test.format.FormatSpec
+import test.format.MessageFormatSpec
 import test.{Enum, Record, Structure}
 import ujson.{Arr, Bool, Num, Obj, Str, Value}
 
-class UpickleJsonFormatSpec extends FormatSpec {
+class UpickleJsonFormatSpec extends MessageFormatSpec {
 
   type Node = Value
   type ActualFormat = UpickleJsonFormat[UpickleJsonFormatSpec.type]
