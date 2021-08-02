@@ -19,7 +19,7 @@ trait Protocol[RequestProperties] {
     argumentNames: Option[Seq[String]],
     arguments: Seq[Node],
     format: MessageFormat[Node]
-  ): Try[(ArraySeq.ofByte, RequestProperties)]
+  ): Try[(ArraySeq.ofByte, RpcRequest[Node, RequestProperties])]
 
   def createResponse[Node](
     result: Try[Node],

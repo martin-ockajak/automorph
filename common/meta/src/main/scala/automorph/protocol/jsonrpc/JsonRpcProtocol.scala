@@ -3,7 +3,7 @@ package automorph.protocol.jsonrpc
 import automorph.log.Logging
 import automorph.protocol.Protocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
 import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorException}
-import automorph.protocol.jsonrpc.JsonRpcProtocol.{defaultErrorToException, defaultExceptionToError}
+import automorph.protocol.jsonrpc.JsonRpcProtocol.{RequestProperties, defaultErrorToException, defaultExceptionToError}
 import automorph.protocol.{Protocol, RpcRequest}
 import automorph.spi.Message.Params
 import automorph.spi.{Message, MessageFormat}
@@ -16,13 +16,13 @@ import scala.util.{Failure, Success, Try}
 final case class JsonRpcProtocol(
   errorToException: (Int, String) => Throwable = defaultErrorToException,
   exceptionToError: Throwable => ErrorType = defaultExceptionToError
-) extends Protocol[Option[Message.Id]] with Logging {
+) extends Protocol[RequestProperties] with Logging {
 
   override def parseRequest[Node](
     request: ArraySeq.ofByte,
     method: Option[String],
     format: MessageFormat[Node]
-  ): Try[RpcRequest[Node, Option[Message.Id]]] =
+  ): Try[RpcRequest[Node, RequestProperties]] =
     Try(format.deserialize(request)).mapFailure { error =>
       ParseErrorException("Invalid request format", error)
     }.flatMap { formedRequest =>
@@ -57,19 +57,19 @@ final case class JsonRpcProtocol(
     argumentNames: Option[Seq[String]],
     arguments: Seq[Node],
     format: MessageFormat[Node]
-  ): Try[(ArraySeq.ofByte, Option[Message.Id])] = {
+  ): Try[(ArraySeq.ofByte, RpcRequest[Node, RequestProperties])] = {
     val id = Some(Right[BigDecimal, String](MessageId.next))
     val argumentNodes = createArgumentNodes(argumentNames, arguments)
     val formedRequest = Request(id, method, argumentNodes).formed
     logger.trace(s"Sending JSON-RPC request:\n${format.format(formedRequest)}")
-    Try(format.serialize(formedRequest) -> id).mapFailure { error =>
+    Try(format.serialize(formedRequest) -> RpcRequest(method, argumentNodes, id)).mapFailure { error =>
       ParseErrorException("Invalid request format", error)
     }
   }
 
   override def createResponse[Node](
     result: Try[Node],
-    properties: Option[Message.Id],
+    properties: RequestProperties,
     format: MessageFormat[Node],
     encodeStrings: List[String] => Node
   ): Try[ArraySeq.ofByte] =
@@ -113,6 +113,9 @@ final case class JsonRpcProtocol(
 }
 
 case object JsonRpcProtocol {
+
+  /** JSON-RPC request properties. */
+  type RequestProperties = Option[Message.Id]
 
   /**
    * Maps a JSON-RPC error to a corresponding default exception.
