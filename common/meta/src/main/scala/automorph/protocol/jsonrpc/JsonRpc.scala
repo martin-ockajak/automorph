@@ -1,6 +1,5 @@
 package automorph.protocol.jsonrpc
 
-import automorph.JsonRpcError
 import automorph.log.Logging
 import automorph.protocol.Protocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
 import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorException}

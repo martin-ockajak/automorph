@@ -1,4 +1,4 @@
-package automorph
+package automorph.protocol.jsonrpc
 
 /**
  * JSON-RPC API error exception.

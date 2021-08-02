@@ -1,13 +1,13 @@
 package automorph.handler
 
+import automorph.Handler
 import automorph.protocol.Protocol
 import automorph.protocol.Protocol.{InvalidRequestException, MethodNotFoundException}
 import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorException}
-import automorph.protocol.jsonrpc.{ErrorType, Request, Response, ResponseError}
+import automorph.protocol.jsonrpc.{ErrorType, JsonRpcError, Request, Response, ResponseError}
 import automorph.spi.{Message, MessageFormat}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
-import automorph.{Handler, JsonRpcError}
 import java.io.IOException
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
