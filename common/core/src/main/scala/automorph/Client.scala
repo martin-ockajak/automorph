@@ -2,8 +2,9 @@ package automorph
 
 import automorph.Client.defaultErrorMapping
 import automorph.client.{ClientBind, ClientCore, NamedMethodProxy}
+import automorph.protocol.Protocol
 import automorph.protocol.Protocol.{InvalidRequestException, MethodNotFoundException}
-import automorph.protocol.jsonrpc.ErrorType
+import automorph.protocol.jsonrpc.{ErrorType, JsonRpcProtocol}
 import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorException}
 import automorph.spi.{ClientMessageTransport, EffectSystem, MessageFormat}
 import automorph.util.{CannotEqual, EmptyContext}
@@ -19,6 +20,7 @@ import java.io.IOException
  * @param format message format plugin
  * @param system effect system plugin
  * @param transport message transport plugin
+ * @param protocol RPC protocol
  * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @tparam Node message node type
  * @tparam Format message format plugin type
@@ -29,6 +31,7 @@ final case class Client[Node, Format <: MessageFormat[Node], Effect[_], Context]
   format: Format,
   system: EffectSystem[Effect],
   transport: ClientMessageTransport[Effect, Context],
+  protocol: Protocol[_] = JsonRpcProtocol(),
   protected val errorToException: (Int, String) => Throwable = defaultErrorMapping
 ) extends ClientBind[Node, Format, Effect, Context] with AutoCloseable with CannotEqual {
 
@@ -89,7 +92,7 @@ case object Client {
     format: Format,
     system: EffectSystem[Effect],
     transport: ClientMessageTransport[Effect, EmptyContext.Value]
-  ): Client[Node, Format, Effect, EmptyContext.Value] = Client(format, system, transport)
+  ): Client[Node, Format, Effect, EmptyContext.Value] = Client(format, system, transport, JsonRpcProtocol())
 
   /**
    * Maps a JSON-RPC error to a corresponding default exception.
