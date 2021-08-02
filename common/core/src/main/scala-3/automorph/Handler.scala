@@ -3,7 +3,8 @@ package automorph
 import automorph.handler.HandlerCore.defaultErrorMapping
 import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
-import automorph.protocol.jsonrpc.ErrorType
+import automorph.protocol.Protocol
+import automorph.protocol.jsonrpc.{ErrorType, JsonRpcProtocol}
 import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.util.{CannotEqual, EmptyContext}
 import java.io.IOException
@@ -17,6 +18,7 @@ import java.io.IOException
  * @constructor Creates a new RPC request handler with specified request `Context` type plus specified ''format'' and ''system'' plugins.
  * @param format message format plugin
  * @param system effect system plugin
+ * @param protocol RPC protocol
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
  * @param encodedNone message format node representing missing optional value
  * @tparam Node message node type
@@ -27,6 +29,7 @@ import java.io.IOException
 final case class Handler[Node, Format <: MessageFormat[Node], Effect[_], Context](
   format: Format,
   system: EffectSystem[Effect],
+  protocol: Protocol[_],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val exceptionToError: Throwable => ErrorType,
   protected val encodeStrings: List[String] => Node,
@@ -60,7 +63,7 @@ case object Handler:
     system: EffectSystem[Effect]
   ): Handler[Node, Format, Effect, Context] =
     val encodeStrings = (value: List[String]) => format.encode[List[String]](value)
-    Handler(format, system, Map.empty, defaultErrorMapping, encodeStrings, format.encode(None))
+    Handler(format, system, JsonRpcProtocol(), Map.empty, defaultErrorMapping, encodeStrings, format.encode(None))
 
   /**
    * Creates a RPC request handler with empty request context plus specified specified ''format'' and ''system'' plugins.
@@ -81,7 +84,7 @@ case object Handler:
     system: EffectSystem[Effect]
   ): Handler[Node, Format, Effect, EmptyContext.Value] =
     val encodeStrings = (value: List[String]) => format.encode[List[String]](value)
-    Handler(format, system, Map.empty, defaultErrorMapping, encodeStrings, format.encode(None))
+    Handler(format, system, JsonRpcProtocol(), Map.empty, defaultErrorMapping, encodeStrings, format.encode(None))
 
   /**
    * Maps an exception class to a corresponding default JSON-RPC error type.

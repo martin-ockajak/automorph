@@ -2,6 +2,7 @@ package automorph
 
 import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
+import automorph.protocol.Protocol
 import automorph.protocol.jsonrpc.ErrorType
 import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.util.{CannotEqual, EmptyContext}
@@ -17,6 +18,7 @@ import scala.reflect.macros.blackbox
  * @constructor Creates a new RPC request handler with specified request `Context` type plus specified ''format'' and ''system'' plugins.
  * @param format message format plugin
  * @param system effect system plugin
+ * @param protocol RPC protocol
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
  * @param encodedNone message format node representing missing optional value
  * @tparam Node message node type
@@ -27,6 +29,7 @@ import scala.reflect.macros.blackbox
 final case class Handler[Node, Format <: MessageFormat[Node], Effect[_], Context](
   format: Format,
   system: EffectSystem[Effect],
+  protocol: Protocol[_],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val exceptionToError: Throwable => Node,
   protected val encodedNone: Node
@@ -98,8 +101,13 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[Format], weakTypeOf[Context])
 
     c.Expr[Any](q"""
-      new automorph.Handler($format, $system, Map.empty, automorph.handler.Handler.defaultErrorMapping,
-        value => $format.encode[List[String]](value), $format.encode(None))
+      new automorph.Handler($format,
+        $system,
+        automorph.protocol.jsonrpc.JsonRpcProtocol(),
+        Map.empty,
+        automorph.handler.Handler.defaultErrorMapping,
+        value => $format.encode[List[String]](value), $format.encode(None)
+      )
     """).asInstanceOf[c.Expr[Handler[Node, Format, Effect, Context]]]
   }
 
@@ -111,8 +119,14 @@ case object Handler {
     Seq(weakTypeOf[Node], weakTypeOf[Format])
 
     c.Expr[Any](q"""
-      automorph.Handler($format, $system, Map.empty, automorph.handler.Handler.defaultErrorMapping,
-        value => $format.encode[List[String]](value), $format.encode(None))
+      automorph.Handler(
+        $format,
+        $system,
+        automorph.protocol.jsonrpc.JsonRpcProtocol(),
+        Map.empty,
+        automorph.handler.Handler.defaultErrorMapping,
+        value => $format.encode[List[String]](value), $format.encode(None)
+      )
     """).asInstanceOf[c.Expr[Handler[Node, Format, Effect, EmptyContext.Value]]]
   }
 }

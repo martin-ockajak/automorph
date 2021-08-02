@@ -23,34 +23,34 @@ final case class JsonRpcProtocol(
     method: Option[String],
     format: MessageFormat[Node]
   ): Try[RpcRequest[Node, Option[Message.Id]]] =
-    Try(format.deserialize(request)).pureFold(
-      error => Failure(ParseErrorException("Invalid request format", error)),
-      formedRequest => {
-        // Validate request
-        logger.trace(s"Received JSON-RPC request:\n${format.format(formedRequest)}")
-        Try(Request(formedRequest)).map { validRequest =>
-          RpcRequest(validRequest.method, validRequest.params, validRequest.id)
-        }
+    Try(format.deserialize(request)).mapFailure { error =>
+      ParseErrorException("Invalid request format", error)
+    }.flatMap { formedRequest =>
+      // Validate request
+      logger.trace(s"Received JSON-RPC request:\n${format.format(formedRequest)}")
+      Try(Request(formedRequest)).map { validRequest =>
+        RpcRequest(validRequest.method, validRequest.params, validRequest.id)
       }
-    )
+    }
 
   override def parseResponse[Node](response: ArraySeq.ofByte, format: MessageFormat[Node]): Try[Node] =
-    Try(format.deserialize(response)).pureFold(
-      error => Failure(ParseErrorException("Invalid response format", error)),
-      formedResponse => {
-        // Validate response
-        logger.trace(s"Received JSON-RPC response:\n${format.format(formedResponse)}")
-        Try(Response(formedResponse)).flatMap { validResponse =>
-          validResponse.error.fold(
-            validResponse.result.fold {
-              Failure(InvalidResponseException("Invalid result", None.orNull))
-            }(Success.apply)
-          ) { error =>
-            Failure(errorToException(error.code, error.message))
-          }
+    Try(format.deserialize(response)).mapFailure { error =>
+      ParseErrorException("Invalid response format", error)
+    }.flatMap { formedResponse =>
+      // Validate response
+      logger.trace(s"Received JSON-RPC response:\n${format.format(formedResponse)}")
+      Try(Response(formedResponse)).flatMap { validResponse =>
+        // Check for error
+        validResponse.error.fold(
+          // Check for result
+          validResponse.result.fold {
+            Failure(InvalidResponseException("Invalid result", None.orNull))
+          }(Success.apply)
+        ) { error =>
+          Failure(errorToException(error.code, error.message))
         }
       }
-    )
+    }
 
   override def createRequest[Node](
     method: String,
@@ -76,10 +76,11 @@ final case class JsonRpcProtocol(
     id.fold {
       Failure(InternalErrorException("Missing response identifier", None.orNull))
     } { callId =>
-      val formedResponse = result.fold(
+      val formedResponse = result.pureFold(
         error => {
           val responseError = error match {
-            case JsonRpcException(message, code, data, _) => ResponseError(message, code, data.asInstanceOf[Option[Node]])
+            case JsonRpcException(message, code, data, _) =>
+              ResponseError(message, code, data.asInstanceOf[Option[Node]])
             case _ =>
               // Assemble error details
               val trace = Protocol.trace(error)
