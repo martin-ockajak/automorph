@@ -3,7 +3,7 @@ package automorph.protocol.jsonrpc
 import automorph.log.Logging
 import automorph.protocol.Protocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
 import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorException}
-import automorph.protocol.jsonrpc.JsonRpc.{defaultErrorToException, defaultExceptionToError}
+import automorph.protocol.jsonrpc.JsonRpcProtocol.{defaultErrorToException, defaultExceptionToError}
 import automorph.protocol.{Protocol, RpcRequest}
 import automorph.spi.Message.Params
 import automorph.spi.{Message, MessageFormat}
@@ -13,7 +13,7 @@ import java.io.IOException
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
 
-final case class JsonRpc(
+final case class JsonRpcProtocol(
   errorToException: (Int, String) => Throwable = defaultErrorToException,
   exceptionToError: Throwable => ErrorType = defaultExceptionToError
 ) extends Protocol[Option[Message.Id]] with Logging {
@@ -111,7 +111,7 @@ final case class JsonRpc(
     }.getOrElse(Left(encodedArguments.toList))
 }
 
-case object JsonRpc {
+case object JsonRpcProtocol {
 
   /**
    * Maps a JSON-RPC error to a corresponding default exception.
