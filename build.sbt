@@ -152,7 +152,7 @@ lazy val http = (project in file("transport/http")).dependsOn(
   core
 )
 lazy val amqp = (project in file("transport/amqp"))
-val sttpVersion = "3.3.12"
+val sttpVersion = "3.3.13"
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
   http, testCore % Test, standard % Test
 ).settings(
