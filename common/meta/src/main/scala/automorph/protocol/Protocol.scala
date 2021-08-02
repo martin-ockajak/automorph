@@ -2,7 +2,7 @@ package automorph.protocol
 
 import automorph.protocol.jsonrpc.ErrorType.InvalidResponseException
 
-case object Protocol {
+private[automorph] case object Protocol {
   /** Invalid request error. */
   final case class InvalidRequestException(
     message: String,
