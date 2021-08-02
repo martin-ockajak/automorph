@@ -2,7 +2,7 @@ package automorph.transport.local.client
 
 import automorph.Handler
 import automorph.handler.HandlerResult
-import automorph.protocol.jsonrpc.ErrorType.InvalidResponseException
+import automorph.protocol.Protocol.InvalidResponseException
 import automorph.spi.{EffectSystem, ClientMessageTransport, MessageFormat}
 import scala.collection.immutable.ArraySeq
 

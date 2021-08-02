@@ -30,26 +30,8 @@ object ErrorType {
     cause: Throwable
   ) extends RuntimeException(message, cause)
 
-  /** JSON-RPC invalid request error. */
-  final case class InvalidRequestException(
-    message: String,
-    cause: Throwable
-  ) extends RuntimeException(message, cause)
-
-  /** JSON-RPC method not found error. */
-  final case class MethodNotFoundException(
-    message: String,
-    cause: Throwable
-  ) extends RuntimeException(message, cause)
-
   /** JSON-RPC internal error. */
   final case class InternalErrorException(
-    message: String,
-    cause: Throwable
-  ) extends RuntimeException(message, cause)
-
-  /** JSON-RPC invalid response error. */
-  final case class InvalidResponseException(
     message: String,
     cause: Throwable
   ) extends RuntimeException(message, cause)

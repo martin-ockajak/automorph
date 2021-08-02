@@ -1,7 +1,8 @@
 package automorph.client
 
 import automorph.log.Logging
-import automorph.protocol.jsonrpc.ErrorType.{InvalidResponseException, ParseErrorException}
+import automorph.protocol.Protocol.InvalidResponseException
+import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
 import automorph.protocol.jsonrpc.{Request, Response}
 import automorph.spi.Message.Params
 import automorph.spi.{ClientMessageTransport, EffectSystem, Message, MessageFormat}

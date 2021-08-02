@@ -2,9 +2,10 @@ package automorph
 
 import automorph.Client.defaultErrorMapping
 import automorph.client.{ClientBind, ClientCore, NamedMethodProxy}
+import automorph.protocol.Protocol.{InvalidRequestException, MethodNotFoundException}
 import automorph.protocol.jsonrpc.ErrorType
-import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, InvalidRequestException, MethodNotFoundException, ParseErrorException}
-import automorph.spi.{EffectSystem, MessageFormat, ClientMessageTransport}
+import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorException}
+import automorph.spi.{ClientMessageTransport, EffectSystem, MessageFormat}
 import automorph.util.{CannotEqual, EmptyContext}
 import java.io.IOException
 

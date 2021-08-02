@@ -1,6 +1,7 @@
 package test.examples
 
-import automorph.protocol.jsonrpc.ErrorType
+import automorph.protocol.Protocol.InvalidRequestException
+import automorph.protocol.jsonrpc.ErrorType.{ApplicationError, InvalidRequest}
 import automorph.transport.http.client.SttpClient.defaultContext
 import automorph.{Client, DefaultHttpClient, DefaultHttpServer, Handler}
 import java.sql.SQLException
@@ -18,7 +19,7 @@ object ErrorMapping extends App {
   // Customize default server error mapping
   val exceptionToError = (exception: Throwable) =>
     Handler.defaultErrorMapping(exception) match {
-      case ErrorType.ApplicationError if exception.isInstanceOf[SQLException] => ErrorType.InvalidRequest
+      case ApplicationError if exception.isInstanceOf[SQLException] => InvalidRequest
       case error => error
     }
 
@@ -28,7 +29,7 @@ object ErrorMapping extends App {
   // Customize default client error mapping
   val errorToException = (code: Int, message: String) =>
     Client.defaultErrorMapping(code, message) match {
-      case _: ErrorType.InvalidRequestException if message.toUpperCase.contains("SQL") => new SQLException(message)
+      case _: InvalidRequestException if message.toUpperCase.contains("SQL") => new SQLException(message)
       case exception => exception
     }
 

@@ -1,8 +1,6 @@
 package automorph.protocol
 
-import automorph.protocol.jsonrpc.ErrorType.InvalidResponseException
-
-private[automorph] case object Protocol {
+case object Protocol {
   /** Invalid request error. */
   final case class InvalidRequestException(
     message: String,
@@ -11,6 +9,12 @@ private[automorph] case object Protocol {
 
   /** Invalid response error. */
   final case class InvalidResponseException(
+    message: String,
+    cause: Throwable
+  ) extends RuntimeException(message, cause)
+
+  /** JSON-RPC method not found error. */
+  final case class MethodNotFoundException(
     message: String,
     cause: Throwable
   ) extends RuntimeException(message, cause)
@@ -24,7 +28,7 @@ private[automorph] case object Protocol {
    * @return property value
    * @throws InvalidRequestException if the property value is missing
    */
-  def fromRequest[T](value: Option[T], name: String): T = value.getOrElse(
+  private[automorph] def fromRequest[T](value: Option[T], name: String): T = value.getOrElse(
     throw InvalidRequestException(s"Missing message property: $name", None.orNull)
   )
 
@@ -37,10 +41,9 @@ private[automorph] case object Protocol {
    * @return property value
    * @throws InvalidResponseException if the property value is missing
    */
-  def fromResponse[T](value: Option[T], name: String): T = value.getOrElse(
+  private[automorph] def fromResponse[T](value: Option[T], name: String): T = value.getOrElse(
     throw InvalidResponseException(s"Missing message property: $name", None.orNull)
   )
-
 
   /**
    * Assemble detailed trace of an exception and its causes.
@@ -49,7 +52,7 @@ private[automorph] case object Protocol {
    * @param maxCauses maximum number of included exception causes
    * @return error messages
    */
-  def trace(throwable: Throwable, maxCauses: Int = 100): Seq[String] =
+  private[automorph] def trace(throwable: Throwable, maxCauses: Int = 100): Seq[String] =
     LazyList.iterate(Option(throwable))(_.flatMap(error => Option(error.getCause)))
       .takeWhile(_.isDefined).flatten.take(maxCauses).map { throwable =>
       val exceptionName = throwable.getClass.getSimpleName
