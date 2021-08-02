@@ -20,6 +20,7 @@ import java.io.IOException
  * @param system effect system plugin
  * @param protocol RPC protocol
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
+ * @param encodedStrings converts list of strings to message format node
  * @param encodedNone message format node representing missing optional value
  * @tparam Node message node type
  * @tparam Format message format plugin type

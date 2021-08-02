@@ -20,6 +20,7 @@ import scala.reflect.macros.blackbox
  * @param system effect system plugin
  * @param protocol RPC protocol
  * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
+ * @param encodedStrings converts list of strings to message format node
  * @param encodedNone message format node representing missing optional value
  * @tparam Node message node type
  * @tparam Format message format plugin type
@@ -31,7 +32,8 @@ final case class Handler[Node, Format <: MessageFormat[Node], Effect[_], Context
   system: EffectSystem[Effect],
   protocol: Protocol[_],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
-  protected val exceptionToError: Throwable => Node,
+  protected val exceptionToError: Throwable => ErrorType,
+  protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
 ) extends HandlerCore[Node, Format, Effect, Context]
   with HandlerBind[Node, Format, Effect, Context]

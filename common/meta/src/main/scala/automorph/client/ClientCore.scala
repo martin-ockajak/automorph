@@ -1,13 +1,10 @@
 package automorph.client
 
 import automorph.log.Logging
+import automorph.protocol.Protocol
 import automorph.protocol.Protocol.InvalidResponseException
-import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
-import automorph.protocol.jsonrpc.{Request, Response}
-import automorph.spi.Message.Params
-import automorph.spi.{ClientMessageTransport, EffectSystem, Message, MessageFormat}
+import automorph.spi.{ClientMessageTransport, EffectSystem, MessageFormat}
 import automorph.util.Extensions.TryOps
-import automorph.util.MessageId
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -17,6 +14,7 @@ import scala.util.Try
  * @param format message format plugin
  * @param system effect system plugin
  * @param transport message transport plugin
+ * @param protocol RPC protocol
  * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @tparam Node message node type
  * @tparam Format message format plugin type
@@ -32,6 +30,7 @@ private[automorph] case class ClientCore[
   format: Format,
   private val system: EffectSystem[Effect],
   private val transport: ClientMessageTransport[Effect, Context],
+  private val protocol: Protocol[_],
   private val errorToException: (Int, String) => Throwable
 ) extends Logging {
 
@@ -40,144 +39,102 @@ private[automorph] case class ClientCore[
    *
    * Optional request context is used as a last method argument.
    *
-   * @param methodName method name
+   * @param method method name
    * @param argumentNames argument names
    * @param encodedArguments method argument nodes
-   * @param decodeResultNode result node decoding function
+   * @param decodeResult result node decoding function
    * @param context request context
    * @tparam R result type
    * @return result value
    */
   def call[R](
-    methodName: String,
+    method: String,
     argumentNames: Option[Seq[String]],
     encodedArguments: Seq[Node],
-    decodeResultNode: Node => R,
+    decodeResult: Node => R,
     context: Option[Context]
-  ): Effect[R] = {
-    val argumentNodes = createArgumentNodes(argumentNames, encodedArguments)
-    val id = Some(Right[BigDecimal, String](MessageId.next))
-    val formedRequest = Request(id, methodName, argumentNodes).formed
-    logger.debug(s"Performing JSON-RPC request", formedRequest.properties)
-    system.flatMap(
-      // Serialize request
-      serialize(formedRequest),
-      (rawRequest: ArraySeq.ofByte) =>
-        // Send request
+  ): Effect[R] =
+    // Create request
+    protocol.createRequest(method, argumentNames, encodedArguments, format).pureFold(
+      error => system.failed(error),
+      request =>
         system.flatMap(
-          transport.call(rawRequest, format.mediaType, context),
-          // Process response
-          rawResponse => processResponse[R](rawResponse, formedRequest, decodeResultNode)
+          system.pure(request),
+          (request: (ArraySeq.ofByte, _)) =>
+            // Send request
+            system.flatMap(
+              transport.call(request._1, format.mediaType, context),
+              // Process response
+              rawResponse => processResponse[R](rawResponse, Map.empty, decodeResult)
+            )
         )
     )
-  }
 
   /**
    * Performs a method notification using specified arguments.
    *
    * Optional request context is used as a last method argument.
    *
-   * @param methodName method name
+   * @param method method name
    * @param argumentNames argument names
    * @param encodedArguments method argument nodes
    * @param context request context
    * @return nothing
    */
   private[automorph] def notify(
-    methodName: String,
+    method: String,
     argumentNames: Option[Seq[String]],
     encodedArguments: Seq[Node],
     context: Option[Context]
-  ): Effect[Unit] = {
-    val argumentNodes = createArgumentNodes(argumentNames, encodedArguments)
-    val formedRequest = Request(None, methodName, argumentNodes).formed
-    system.flatMap(
-      // Serialize request
-      serialize(formedRequest),
-      // Send request
-      (rawRequest: ArraySeq.ofByte) => transport.notify(rawRequest, format.mediaType, context)
+  ): Effect[Unit] =
+    // Create request
+    protocol.createRequest(method, argumentNames, encodedArguments, format).pureFold(
+      error => system.failed(error),
+      request =>
+        system.flatMap(
+          system.pure(request),
+          // Send request
+          (request: (ArraySeq.ofByte, _)) => transport.notify(request._1, format.mediaType, context)
+        )
     )
-  }
-
-  /**
-   * Creates method invocation argument nodes.
-   *
-   * @param argumentNames argument names
-   * @param encodedArguments encoded arguments
-   * @return argument nodes
-   */
-  private def createArgumentNodes(argumentNames: Option[Seq[String]], encodedArguments: Seq[Node]): Params[Node] =
-    argumentNames.filter(_.size >= encodedArguments.size).map { names =>
-      Right(names.zip(encodedArguments).toMap)
-    }.getOrElse(Left(encodedArguments.toList))
 
   /**
    * Processes a method call response.
    *
    * @param rawResponse raw response
-   * @param formedRequest formed request
+   * @param requestProperties request properties
    * @param decodeResult result decoding function
    * @tparam R result type
    * @return result value
    */
   private def processResponse[R](
     rawResponse: ArraySeq.ofByte,
-    formedRequest: Message[Node],
+    requestProperties: Map[String, String],
     decodeResult: Node => R
   ): Effect[R] =
-    // Deserialize response
-    Try(format.deserialize(rawResponse)).pureFold(
-      error => raiseError(ParseErrorException("Invalid response format", error), formedRequest),
-      formedResponse => {
-        // Validate response
-        logger.trace(s"Received JSON-RPC response:\n${format.format(formedResponse)}")
-        Try(Response(formedResponse)).pureFold(
-          error => raiseError(error, formedRequest),
-          validResponse =>
-            validResponse.error.fold(
-              validResponse.result.fold {
-                raiseError(InvalidResponseException("Invalid result", None.orNull), formedRequest)
-              } { result =>
-                // Decode result
-                Try(decodeResult(result)).pureFold(
-                  error => raiseError(InvalidResponseException("Invalid result", error), formedRequest),
-                  result => {
-                    logger.info(s"Performed JSON-RPC request", formedRequest.properties)
-                    system.pure(result)
-                  }
-                )
-              }
-            ) { error =>
-              raiseError(errorToException(error.code, error.message), formedRequest)
-            }
+    protocol.parseResponse(rawResponse, format).pureFold(
+      error => raiseError(error, requestProperties),
+      result =>
+        // Decode result
+        Try(decodeResult(result)).pureFold(
+          error => raiseError(InvalidResponseException("Invalid result", error), requestProperties),
+          result => {
+            logger.info(s"Performed JSON-RPC request", requestProperties)
+            system.pure(result)
+          }
         )
-      }
     )
-
-  /**
-   * Serializes a JSON-RPC message.
-   *
-   * @param formedRequest formed request
-   * @return serialized response
-   */
-  private def serialize(formedRequest: Message[Node]): Effect[ArraySeq.ofByte] = {
-    logger.trace(s"Sending JSON-RPC request:\n${format.format(formedRequest)}")
-    Try(format.serialize(formedRequest)).pureFold(
-      error => raiseError(ParseErrorException("Invalid request format", error), formedRequest),
-      message => system.pure(message)
-    )
-  }
 
   /**
    * Creates an error effect from an exception.
    *
    * @param error exception
-   * @param requestMessage request message
+   * @param requestProperties request properties
    * @tparam T effectful value type
    * @return error value
    */
-  private def raiseError[T](error: Throwable, requestMessage: Message[Node]): Effect[T] = {
-    logger.error(s"Failed to perform JSON-RPC request", error, requestMessage.properties)
+  private def raiseError[T](error: Throwable, requestProperties: Map[String, String]): Effect[T] = {
+    logger.error(s"Failed to perform JSON-RPC request", error, requestProperties)
     system.failed(error)
   }
 }

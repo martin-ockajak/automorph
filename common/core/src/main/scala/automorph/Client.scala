@@ -40,7 +40,7 @@ final case class Client[Node, Format <: MessageFormat[Node], Effect[_], Context]
   /** Named method proxy type. */
   type NamedMethod = NamedMethodProxy[Node, Format, Effect, Context]
 
-  val core: ClientCore[Node, Format, Effect, Context] = ClientCore(format, system, transport, errorToException)
+  val core: ClientCore[Node, Format, Effect, Context] = ClientCore(format, system, transport, protocol, errorToException)
 
   /**
    * Creates a method proxy with specified method name.

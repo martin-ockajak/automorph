@@ -8,7 +8,7 @@ import automorph.protocol.{Protocol, RpcRequest}
 import automorph.spi.Message.Params
 import automorph.spi.{Message, MessageFormat}
 import automorph.util.Extensions.TryOps
-import automorph.util.{MessageId, Method}
+import automorph.util.MessageId
 import java.io.IOException
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
@@ -22,7 +22,8 @@ final case class JsonRpcProtocol(
     request: ArraySeq.ofByte,
     method: Option[String],
     format: MessageFormat[Node]
-  ): Try[RpcRequest[Node, RequestProperties]] =
+  ): Try[RpcRequest[Node, RequestProperties]] = {
+    // Deserialize request
     Try(format.deserialize(request)).mapFailure { error =>
       ParseErrorException("Invalid request format", error)
     }.flatMap { formedRequest =>
@@ -32,8 +33,10 @@ final case class JsonRpcProtocol(
         RpcRequest(validRequest.method, validRequest.params, validRequest.id)
       }
     }
+  }
 
-  override def parseResponse[Node](response: ArraySeq.ofByte, format: MessageFormat[Node]): Try[Node] =
+  override def parseResponse[Node](response: ArraySeq.ofByte, format: MessageFormat[Node]): Try[Node] = {
+    // Deserialize response
     Try(format.deserialize(response)).mapFailure { error =>
       ParseErrorException("Invalid response format", error)
     }.flatMap { formedResponse =>
@@ -43,14 +46,16 @@ final case class JsonRpcProtocol(
         // Check for error
         validResponse.error.fold(
           // Check for result
-          validResponse.result.fold {
-            Failure(InvalidResponseException("Invalid result", None.orNull))
-          }(Success.apply)
+          validResponse.result match {
+            case None => Failure(InvalidResponseException("Invalid result", None.orNull))
+            case Some(result) => Success(result)
+          }
         ) { error =>
-          Failure(errorToException(error.code, error.message))
+          Failure[Node](errorToException(error.code, error.message))
         }
       }
     }
+  }
 
   override def createRequest[Node](
     method: String,
@@ -62,7 +67,8 @@ final case class JsonRpcProtocol(
     val argumentNodes = createArgumentNodes(argumentNames, arguments)
     val formedRequest = Request(id, method, argumentNodes).formed
     logger.trace(s"Sending JSON-RPC request:\n${format.format(formedRequest)}")
-    Try(format.serialize(formedRequest) -> RpcRequest(method, argumentNodes, id)).mapFailure { error =>
+    val rpcRequest = RpcRequest[Node, RequestProperties](method, argumentNodes, id)
+    Try(format.serialize(formedRequest) -> rpcRequest).mapFailure { error =>
       ParseErrorException("Invalid request format", error)
     }
   }
@@ -73,30 +79,30 @@ final case class JsonRpcProtocol(
     format: MessageFormat[Node],
     encodeStrings: List[String] => Node
   ): Try[ArraySeq.ofByte] =
-    properties.fold {
-      Failure(InternalErrorException("Missing response identifier", None.orNull))
-    } { id =>
-      val formedResponse = result.pureFold(
-        error => {
-          val responseError = error match {
-            case JsonRpcException(message, code, data, _) =>
-              ResponseError(message, code, data.asInstanceOf[Option[Node]])
-            case _ =>
-              // Assemble error details
-              val trace = Protocol.trace(error)
-              val message = trace.headOption.getOrElse("Unknown error")
-              val code = exceptionToError(error).code
-              val data = Some(encodeStrings(trace.drop(1).toList))
-              ResponseError(message, code, data)
-          }
-          Response[Node](id, None, Some(responseError)).formed
-        },
-        resultValue => Response(id, Some(resultValue), None).formed
-      )
-      logger.trace(s"Sending JSON-RPC response:\n${format.format(formedResponse)}")
-      Try(format.serialize(formedResponse)).mapFailure { error =>
-        ParseErrorException("Invalid response format", error)
-      }
+    properties match {
+      case None => Failure(InternalErrorException("Missing response identifier", None.orNull))
+      case Some(id) =>
+        val formedResponse = result.pureFold(
+          error => {
+            val responseError = error match {
+              case JsonRpcException(message, code, data, _) =>
+                ResponseError(message, code, data.asInstanceOf[Option[Node]])
+              case _ =>
+                // Assemble error details
+                val trace = Protocol.trace(error)
+                val message = trace.headOption.getOrElse("Unknown error")
+                val code = exceptionToError(error).code
+                val data = Some(encodeStrings(trace.drop(1).toList))
+                ResponseError(message, code, data)
+            }
+            Response[Node](id, None, Some(responseError)).formed
+          },
+          resultValue => Response(id, Some(resultValue), None).formed
+        )
+        logger.trace(s"Sending JSON-RPC response:\n${format.format(formedResponse)}")
+        Try(format.serialize(formedResponse)).mapFailure { error =>
+          ParseErrorException("Invalid response format", error)
+        }
     }
 
   /**
