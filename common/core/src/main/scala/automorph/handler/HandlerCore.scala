@@ -4,7 +4,7 @@ import automorph.Handler
 import automorph.protocol.Protocol
 import automorph.protocol.Protocol.{InvalidRequestException, MethodNotFoundException}
 import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorException}
-import automorph.protocol.jsonrpc.{ErrorType, JsonRpcError, Request, Response, ResponseError}
+import automorph.protocol.jsonrpc.{ErrorType, JsonRpcException, Request, Response, ResponseError}
 import automorph.spi.{Message, MessageFormat}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
@@ -164,7 +164,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
   private def errorResponse[Data: Bytes](error: Throwable, formedRequest: Message[Node]): Effect[HandlerResult[Data]] = {
     logger.error(s"Failed to process JSON-RPC request", error, formedRequest.properties)
     val responseError = error match {
-      case JsonRpcError(message, code, data, _) => ResponseError(message, code, data.asInstanceOf[Option[Node]])
+      case JsonRpcException(message, code, data, _) => ResponseError(message, code, data.asInstanceOf[Option[Node]])
       case _ =>
         // Assemble error details
         val trace = Protocol.trace(error)

@@ -13,7 +13,7 @@ package automorph.protocol.jsonrpc
  * @param cause exception cause
  * @tparam Node message format node representation type
  */
-final case class JsonRpcError[Node](
+final case class JsonRpcException[Node](
   message: String,
   code: Int,
   data: Option[Node],

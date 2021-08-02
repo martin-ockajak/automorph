@@ -79,7 +79,7 @@ final case class JsonRpcProtocol(
       val formedResponse = result.fold(
         error => {
           val responseError = error match {
-            case JsonRpcError(message, code, data, _) => ResponseError(message, code, data.asInstanceOf[Option[Node]])
+            case JsonRpcException(message, code, data, _) => ResponseError(message, code, data.asInstanceOf[Option[Node]])
             case _ =>
               // Assemble error details
               val trace = Protocol.trace(error)
