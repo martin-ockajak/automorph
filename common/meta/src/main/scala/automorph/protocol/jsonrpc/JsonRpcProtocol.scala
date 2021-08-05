@@ -226,7 +226,6 @@ case object JsonRpcProtocol {
     case _: IllegalArgumentException => ErrorType.InvalidParams
     case _: InternalErrorException => ErrorType.InternalError
     case _: ServerErrorException => ErrorType.ServerError
-    case _: IOException => ErrorType.ServerError
     case _ => ErrorType.ApplicationError
   }
 }

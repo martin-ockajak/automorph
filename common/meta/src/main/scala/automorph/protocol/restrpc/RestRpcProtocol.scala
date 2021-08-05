@@ -7,7 +7,6 @@ import automorph.spi.Message.Params
 import automorph.spi.{Message, MessageFormat, MessageType}
 import automorph.util.Extensions.TryOps
 import automorph.util.MessageId
-import java.io.IOException
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
 
