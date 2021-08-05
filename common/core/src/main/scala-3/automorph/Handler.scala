@@ -16,7 +16,7 @@ import automorph.util.{CannotEqual, EmptyContext}
  * @param format message format plugin
  * @param system effect system plugin
  * @param protocol RPC protocol
- * @param encodedStrings converts list of strings to message format node
+ * @param encodeStrings converts list of strings to message format node
  * @param encodedNone message format node representing missing optional value
  * @tparam Node message node type
  * @tparam Format message format plugin type

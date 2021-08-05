@@ -13,8 +13,9 @@ import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
 
 /**
- * JSON-RPC 2.0 protocol.
+ * JSON-RPC 2.0 protocol implementation.
  *
+ * @constructor Creates a JSON-RPC 2.0 protocol implementation.
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @param exceptionToError maps an exception to a corresponding JSON-RPC error
@@ -80,12 +81,12 @@ final case class JsonRpcProtocol(
   override def createRequest[Node](
     method: String,
     argumentNames: Option[Seq[String]],
-    arguments: Seq[Node],
+    argumentValues: Seq[Node],
     respond: Boolean,
     format: MessageFormat[Node]
   ): Try[RpcRequest[Node, Content]] = {
     val id = Option.when(respond)(Right(MessageId.next).withLeft[BigDecimal])
-    val argumentNodes = createArgumentNodes(argumentNames, arguments)
+    val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
     val formedRequest = Request(id, method, argumentNodes).formed
     val messageText = () => format.format(formedRequest)
     Try(format.serialize(formedRequest)).mapFailure { error =>
