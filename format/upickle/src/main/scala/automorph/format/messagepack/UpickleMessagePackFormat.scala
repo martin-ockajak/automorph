@@ -32,14 +32,19 @@ final case class UpickleMessagePackFormat[Custom <: UpickleCustom](
 
   override def serialize(message: Message[Msg]): ArraySeq.ofByte =
     new ArraySeq.ofByte(custom.writeToByteArray(UpickleMessage.fromSpi(message)))
+//    new ArraySeq.ofByte(custom.writeBinary(UpickleMessage.fromSpi(message)))
 
   override def deserialize(data: ArraySeq.ofByte): Message[Msg] =
     custom.read[UpickleMessage](data.unsafeArray).toSpi
+//    custom.readBinary[UpickleMessage](data.unsafeArray).toSpi
 
   override def serializeNode(node: Msg): ArraySeq.ofByte =
     new ArraySeq.ofByte(custom.writeToByteArray(node))
+//    new ArraySeq.ofByte(custom.writeBinary(node))
 
-  override def deserializeNode(data: ArraySeq.ofByte): Msg = custom.read[Msg](data.unsafeArray)
+  override def deserializeNode(data: ArraySeq.ofByte): Msg =
+    custom.read[Msg](data.unsafeArray)
+//    custom.readBinary[Msg](data.unsafeArray)
 
   override def format(message: Message[Msg]): String =
     custom.write(UpickleMessage.fromSpi(message), indent)

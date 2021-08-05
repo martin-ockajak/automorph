@@ -45,7 +45,8 @@ final case class ArgonautJsonFormat() extends ArgonautJsonFormatMeta {
       identity
     )
 
-  override def serializeNode(node: Json): ArraySeq.ofByte = new ArraySeq.ofByte(node.nospaces.getBytes(charset))
+  override def serializeNode(node: Json): ArraySeq.ofByte =
+    new ArraySeq.ofByte(node.nospaces.getBytes(charset))
 
   override def deserializeNode(data: ArraySeq.ofByte): Json =
     new String(data.unsafeArray, charset).decodeEither[Json].fold(
