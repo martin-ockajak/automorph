@@ -134,7 +134,7 @@ case class NamedMethodProxy[Node, Format <: MessageFormat[Node], Effect[_], Cont
   ): NamedMethod = macro NamedMethodProxy.args7Macro[NamedMethod, T1, T2, T3, T4, T5, T6, T7]
 
   /**
-   * Sends a remote JSON-RPC method ''call'' request with specified result type extracted from the response.
+   * Sends a remote method ''call'' request with specified result type extracted from the response.
    *
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
@@ -145,7 +145,7 @@ case class NamedMethodProxy[Node, Format <: MessageFormat[Node], Effect[_], Cont
   def call[R](implicit context: Context): Effect[R] = macro NamedMethodProxy.callMacro[Effect, Context, R]
 
   /**
-   * Sends a remote JSON-RPC method ''notification'' request disregarding the response.
+   * Sends a remote method ''notification'' request disregarding the response.
    *
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *

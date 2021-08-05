@@ -197,7 +197,7 @@ case class NamedMethodProxy[Node, Format <: MessageFormat[Node], Effect[_], Cont
     )
 
   /**
-   * Sends a remote JSON-RPC method ''call'' request with specified result type extracted from the response.
+   * Sends a remote method ''call'' request with specified result type extracted from the response.
    *
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *
@@ -209,7 +209,7 @@ case class NamedMethodProxy[Node, Format <: MessageFormat[Node], Effect[_], Cont
     core.call(methodName, Some(argumentValues.map(_._1)), encodedArguments, core.format.decode[R](_), Some(context))
 
   /**
-   * Sends a remote JSON-RPC method ''notification'' request disregarding the response.
+   * Sends a remote method ''notification'' request disregarding the response.
    *
    * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
    *

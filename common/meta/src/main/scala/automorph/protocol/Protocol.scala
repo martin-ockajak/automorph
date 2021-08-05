@@ -4,29 +4,44 @@ import automorph.spi.MessageFormat
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
-trait Protocol[RequestProperties] {
+/** RPC protocol. */
+trait Protocol {
+
+  /** Protocol-specific message content type. */
+  type Content
+
+  /**
+   * Protocol name.
+   *
+   * @return protocol name
+   */
+  def name: String
 
   def parseRequest[Node](
     request: ArraySeq.ofByte,
-    method: Option[String],
-    format: MessageFormat[Node]
-  ): Try[RpcRequest[Node, RequestProperties]]
+    format: MessageFormat[Node],
+    method: Option[String]
+  ): Either[RpcError[Content], RpcRequest[Node, Content]]
 
-  def parseResponse[Node](response: ArraySeq.ofByte, format: MessageFormat[Node]): Try[Node]
+  def parseResponse[Node](
+    response: ArraySeq.ofByte,
+    format: MessageFormat[Node]
+  ): Either[RpcError[Content], RpcResponse[Node, Content]]
 
   def createRequest[Node](
     method: String,
     argumentNames: Option[Seq[String]],
     arguments: Seq[Node],
+    respond: Boolean,
     format: MessageFormat[Node]
-  ): Try[(ArraySeq.ofByte, RpcRequest[Node, RequestProperties])]
+  ): Try[RpcRequest[Node, Content]]
 
   def createResponse[Node](
     result: Try[Node],
-    properties: RequestProperties,
+    content: Content,
     format: MessageFormat[Node],
     encodeStrings: List[String] => Node
-  ): Try[ArraySeq.ofByte]
+  ): Try[RpcResponse[Node, Content]]
 }
 
 case object Protocol {
@@ -58,7 +73,7 @@ case object Protocol {
    * @return property value
    * @throws InvalidRequestException if the property value is missing
    */
-  private[automorph] def fromRequest[T](value: Option[T], name: String): T = value.getOrElse(
+  private[automorph] def requestMandatory[T](value: Option[T], name: String): T = value.getOrElse(
     throw InvalidRequestException(s"Missing message property: $name", None.orNull)
   )
 
@@ -71,7 +86,7 @@ case object Protocol {
    * @return property value
    * @throws InvalidResponseException if the property value is missing
    */
-  private[automorph] def fromResponse[T](value: Option[T], name: String): T = value.getOrElse(
+  private[automorph] def responseMandatory[T](value: Option[T], name: String): T = value.getOrElse(
     throw InvalidResponseException(s"Missing message property: $name", None.orNull)
   )
 

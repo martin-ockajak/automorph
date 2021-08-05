@@ -1,9 +1,7 @@
 package automorph.handler
 
-import automorph.spi.Message
-
 /**
- * JSON-RPC handler request processing result.
+ * RPC handler request processing result.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param response response message

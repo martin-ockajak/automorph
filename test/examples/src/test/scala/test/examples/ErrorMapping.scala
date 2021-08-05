@@ -2,6 +2,7 @@ package test.examples
 
 import automorph.protocol.Protocol.InvalidRequestException
 import automorph.protocol.jsonrpc.ErrorType.{ApplicationError, InvalidRequest}
+import automorph.protocol.jsonrpc.JsonRpcProtocol
 import automorph.transport.http.client.SttpClient.defaultContext
 import automorph.{Client, DefaultHttpClient, DefaultHttpServer, Handler}
 import java.sql.SQLException
@@ -18,24 +19,26 @@ object ErrorMapping extends App {
 
   // Customize default server error mapping
   val exceptionToError = (exception: Throwable) =>
-    Handler.defaultErrorMapping(exception) match {
+    JsonRpcProtocol.defaultExceptionToError(exception) match {
       case ApplicationError if exception.isInstanceOf[SQLException] => InvalidRequest
       case error => error
     }
+  val serverProtocol = JsonRpcProtocol().errorMapping(exceptionToError)
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val server = DefaultHttpServer.async(_.bind(api).errorMapping(exceptionToError), 80, "/api")
+  val server = DefaultHttpServer.async(_.bind(api).protocol(serverProtocol), 80, "/api")
 
   // Customize default client error mapping
   val errorToException = (code: Int, message: String) =>
-    Client.defaultErrorMapping(code, message) match {
+    JsonRpcProtocol.defaultErrorToException(code, message) match {
       case _: InvalidRequestException if message.toUpperCase.contains("SQL") => new SQLException(message)
       case exception => exception
     }
+  val clientProtocol = JsonRpcProtocol().errorMapping(errorToException)
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
   val url = new java.net.URI("http://localhost/api")
-  val client = DefaultHttpClient.async(url, "POST").errorMapping(errorToException)
+  val client = DefaultHttpClient.async(url, "POST").protocol(clientProtocol)
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api

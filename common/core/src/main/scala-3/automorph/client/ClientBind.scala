@@ -20,7 +20,7 @@ private[automorph] trait ClientBind[Node, Format <: MessageFormat[Node], Effect[
   def core: ClientCore[Node, Format, Effect, Context]
 
   /**
-   * Creates a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
+   * Creates an RPC API proxy instance with bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -34,14 +34,14 @@ private[automorph] trait ClientBind[Node, Format <: MessageFormat[Node], Effect[
    * Invoked method arguments are supplied ''by name'' as an object.
    *
    * @tparam Api API trait type (classes are not supported)
-   * @return JSON-RPC API proxy instance
+   * @return RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef]: Api =
     ClientBind.generalBind[Node, Format, Effect, Context, Api](core, namedArguments = true)
 
   /**
-   * Creates a JSON-RPC API proxy instance with bindings for all valid public methods of the specified API.
+   * Creates an RPC API proxy instance with bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -55,7 +55,7 @@ private[automorph] trait ClientBind[Node, Format <: MessageFormat[Node], Effect[
    * Invoked method arguments are supplied ''by position'' as an array.
    *
    * @tparam Api API trait type (classes are not supported)
-   * @return JSON-RPC API proxy instance
+   * @return RPC API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bindPositional[Api <: AnyRef]: Api =

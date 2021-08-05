@@ -7,7 +7,7 @@ import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-/** JSON-RPC client layer bindings code generation. */
+/** RPC client layer bindings code generation. */
 case object ClientBindings {
 
   /**

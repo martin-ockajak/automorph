@@ -34,7 +34,7 @@ private[automorph] trait HandlerBind[Node, Format <: MessageFormat[Node], Effect
    *
    * @param api API instance
    * @tparam Api API type (only member methods of this type are exposed)
-   * @return JSON-RPC server with added API bindings
+   * @return RPC request handler with added API bindings
    * @throws scala.IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef](api: Api): ThisHandler = bind(api, name => Seq(name))
@@ -56,7 +56,7 @@ private[automorph] trait HandlerBind[Node, Format <: MessageFormat[Node], Effect
    * @param api API instance
    * @param methodAliases mapping of method name to its exposed names (empty result causes the method not to be exposed)
    * @tparam Api API type (only member methods of this type are exposed)
-   * @return JSON-RPC server with added API bindings
+   * @return RPC request handler with added API bindings
    * @throws IllegalArgumentException if invalid p/ublic methods are found in the API type
    */
   inline def bind[Api <: AnyRef](api: Api, methodAliases: String => Seq[String]): ThisHandler =

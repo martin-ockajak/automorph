@@ -8,7 +8,7 @@ import automorph.util.{Method, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
 import scala.util.{Failure, Success, Try}
 
-/** JSON-RPC handler layer bindings code generation. */
+/** RPC handler layer bindings code generation. */
 private[automorph] case object HandlerBindings:
 
   /**

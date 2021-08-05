@@ -1,25 +1,21 @@
 package automorph
 
-import automorph.handler.HandlerCore.defaultErrorMapping
 import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
 import automorph.protocol.Protocol
-import automorph.protocol.jsonrpc.{ErrorType, JsonRpcProtocol}
+import automorph.protocol.jsonrpc.JsonRpcProtocol
 import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.util.{CannotEqual, EmptyContext}
-import java.io.IOException
 
 /**
  * Automorph RPC request handler.
  *
  * Used by an RPC server to invoke bound API methods based on incoming RPC requests.
  *
- * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Creates a new RPC request handler with specified request `Context` type plus specified ''format'' and ''system'' plugins.
  * @param format message format plugin
  * @param system effect system plugin
  * @param protocol RPC protocol
- * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
  * @param encodedStrings converts list of strings to message format node
  * @param encodedNone message format node representing missing optional value
  * @tparam Node message node type
@@ -30,9 +26,8 @@ import java.io.IOException
 final case class Handler[Node, Format <: MessageFormat[Node], Effect[_], Context](
   format: Format,
   system: EffectSystem[Effect],
-  protocol: Protocol[_],
+  protocol: Protocol,
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
-  protected val exceptionToError: Throwable => ErrorType,
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
 ) extends HandlerCore[Node, Format, Effect, Context]
@@ -50,7 +45,6 @@ case object Handler:
    *
    * The handler can be used by a RPC server to invoke bound API methods based on incoming RPC requests.
    *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param format message format plugin
    * @param system effect system plugin
    * @tparam Node message node type
@@ -64,14 +58,13 @@ case object Handler:
     system: EffectSystem[Effect]
   ): Handler[Node, Format, Effect, Context] =
     val encodeStrings = (value: List[String]) => format.encode[List[String]](value)
-    Handler(format, system, JsonRpcProtocol(), Map.empty, defaultErrorMapping, encodeStrings, format.encode(None))
+    Handler(format, system, JsonRpcProtocol(), Map.empty, encodeStrings, format.encode(None))
 
   /**
    * Creates a RPC request handler with empty request context plus specified specified ''format'' and ''system'' plugins.
    *
    * The handler can be used by a RPC server to invoke bound API methods based on incoming RPC requests.
    *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param format message format plugin
    * @param system effect system plugin
    * @tparam Node message node type
@@ -85,12 +78,4 @@ case object Handler:
     system: EffectSystem[Effect]
   ): Handler[Node, Format, Effect, EmptyContext.Value] =
     val encodeStrings = (value: List[String]) => format.encode[List[String]](value)
-    Handler(format, system, JsonRpcProtocol(), Map.empty, defaultErrorMapping, encodeStrings, format.encode(None))
-
-  /**
-   * Maps an exception class to a corresponding default JSON-RPC error type.
-   *
-   * @param exception exception class
-   * @return JSON-RPC error type
-   */
-  def defaultErrorMapping(exception: Throwable): ErrorType = HandlerCore.defaultErrorMapping(exception)
+    Handler(format, system, JsonRpcProtocol(), Map.empty, encodeStrings, format.encode(None))

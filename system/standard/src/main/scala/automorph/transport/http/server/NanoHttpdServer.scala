@@ -6,7 +6,6 @@ import automorph.log.Logging
 import automorph.protocol.Protocol
 import automorph.spi.ServerMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.Http
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.transport.http.server.NanoHttpdServer.Context

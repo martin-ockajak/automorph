@@ -3,7 +3,6 @@ package automorph
 import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
 import automorph.protocol.Protocol
-import automorph.protocol.jsonrpc.ErrorType
 import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.util.{CannotEqual, EmptyContext}
 import scala.language.experimental.macros
@@ -19,7 +18,6 @@ import scala.reflect.macros.blackbox
  * @param format message format plugin
  * @param system effect system plugin
  * @param protocol RPC protocol
- * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
  * @param encodedStrings converts list of strings to message format node
  * @param encodedNone message format node representing missing optional value
  * @tparam Node message node type
@@ -30,9 +28,8 @@ import scala.reflect.macros.blackbox
 final case class Handler[Node, Format <: MessageFormat[Node], Effect[_], Context](
   format: Format,
   system: EffectSystem[Effect],
-  protocol: Protocol[_],
+  protocol: Protocol,
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
-  protected val exceptionToError: Throwable => ErrorType,
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
 ) extends HandlerCore[Node, Format, Effect, Context]
@@ -50,7 +47,6 @@ case object Handler {
    *
    * The handler can be used by a RPC server to invoke bound API methods based on incoming RPC requests.
    *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param format message format plugin
    * @param system effect system plugin
    * @tparam Node message node type
@@ -70,7 +66,6 @@ case object Handler {
    *
    * The handler can be used by a RPC server to invoke bound API methods based on incoming RPC requests.
    *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param format message format plugin
    * @param system effect system plugin
    * @tparam Node message node type
@@ -84,14 +79,6 @@ case object Handler {
     system: EffectSystem[Effect]
   ): Handler[Node, Format, Effect, EmptyContext.Value] =
     macro withoutContextMacro[Node, Format, Effect]
-
-  /**
-   * Maps an exception class to a corresponding default JSON-RPC error type.
-   *
-   * @param exception exception class
-   * @return JSON-RPC error type
-   */
-  def defaultErrorMapping(exception: Throwable): ErrorType = HandlerCore.defaultErrorMapping(exception)
 
   def applyMacro[Node: c.WeakTypeTag, Format <: MessageFormat[Node]: c.WeakTypeTag, Effect[_], Context: c.WeakTypeTag](
     c: blackbox.Context
@@ -107,7 +94,6 @@ case object Handler {
         $system,
         automorph.protocol.jsonrpc.JsonRpcProtocol(),
         Map.empty,
-        automorph.handler.Handler.defaultErrorMapping,
         value => $format.encode[List[String]](value), $format.encode(None)
       )
     """).asInstanceOf[c.Expr[Handler[Node, Format, Effect, Context]]]
@@ -126,7 +112,6 @@ case object Handler {
         $system,
         automorph.protocol.jsonrpc.JsonRpcProtocol(),
         Map.empty,
-        automorph.handler.Handler.defaultErrorMapping,
         value => $format.encode[List[String]](value), $format.encode(None)
       )
     """).asInstanceOf[c.Expr[Handler[Node, Format, Effect, EmptyContext.Value]]]

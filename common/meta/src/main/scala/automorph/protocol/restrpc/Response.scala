@@ -1,6 +1,6 @@
 package automorph.protocol.restrpc
 
-import automorph.protocol.Protocol.fromResponse
+import automorph.protocol.Protocol.responseMandatory
 import automorph.spi.Message
 
 /**
@@ -31,7 +31,7 @@ private[automorph] case object Response {
     message.result.map { result =>
       Response(Some(result), None)
     }.getOrElse {
-      val error = fromResponse(message.error, "error")
+      val error = responseMandatory(message.error, "error")
       Response(None, Some(ResponseError(error)))
     }
   }

@@ -1,7 +1,7 @@
 package automorph.client
 
 import automorph.log.Logging
-import automorph.protocol.Protocol
+import automorph.protocol.{Protocol, RpcRequest}
 import automorph.protocol.Protocol.InvalidResponseException
 import automorph.spi.{ClientMessageTransport, EffectSystem, MessageFormat}
 import automorph.util.Extensions.TryOps
@@ -9,30 +9,25 @@ import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
 /**
- * JSON-RPC client core logic.
+ * RPC client core logic.
  *
  * @param format message format plugin
  * @param system effect system plugin
  * @param transport message transport plugin
  * @param protocol RPC protocol
- * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @tparam Node message node type
  * @tparam Format message format plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] case class ClientCore[
-  Node,
-  Format <: MessageFormat[Node],
-  Effect[_],
-  Context
-] private[automorph] (
+private[automorph] case class ClientCore[Node, Format <: MessageFormat[Node], Effect[_], Context](
   format: Format,
   private val system: EffectSystem[Effect],
   private val transport: ClientMessageTransport[Effect, Context],
-  private val protocol: Protocol[_],
-  private val errorToException: (Int, String) => Throwable
+  private val protocol: Protocol
 ) extends Logging {
+
+  private val bodyProperty = "Body"
 
   /**
    * Performs a method call using specified arguments.
@@ -55,19 +50,22 @@ private[automorph] case class ClientCore[
     context: Option[Context]
   ): Effect[R] =
     // Create request
-    protocol.createRequest(method, argumentNames, encodedArguments, format).pureFold(
+    protocol.createRequest(method, argumentNames, encodedArguments, true, format).pureFold(
       error => system.failed(error),
-      request =>
+      // Send request
+      rpcRequest => {
+        lazy val properties = rpcRequest.message.properties ++ rpcRequest.message.text.map(bodyProperty -> _())
+        logger.trace(s"Sending ${protocol.name} request", properties)
         system.flatMap(
-          system.pure(request),
-          (request: (ArraySeq.ofByte, _)) =>
-            // Send request
+          system.pure(rpcRequest),
+          (request: RpcRequest[Node, _]) =>
             system.flatMap(
-              transport.call(request._1, format.mediaType, context),
+              transport.call(request.message.body, format.mediaType, context),
               // Process response
-              rawResponse => processResponse[R](rawResponse, Map.empty, decodeResult)
+              rawResponse => processResponse[R](rawResponse, request.message.properties, decodeResult)
             )
         )
+      }
     )
 
   /**
@@ -88,13 +86,13 @@ private[automorph] case class ClientCore[
     context: Option[Context]
   ): Effect[Unit] =
     // Create request
-    protocol.createRequest(method, argumentNames, encodedArguments, format).pureFold(
+    protocol.createRequest(method, argumentNames, encodedArguments, false, format).pureFold(
       error => system.failed(error),
-      request =>
+      // Send request
+      rpcRequest =>
         system.flatMap(
-          system.pure(request),
-          // Send request
-          (request: (ArraySeq.ofByte, _)) => transport.notify(request._1, format.mediaType, context)
+          system.pure(rpcRequest),
+          (request: RpcRequest[Node, _]) => transport.notify(request.message.body, format.mediaType, context)
         )
     )
 
@@ -112,17 +110,26 @@ private[automorph] case class ClientCore[
     requestProperties: Map[String, String],
     decodeResult: Node => R
   ): Effect[R] =
-    protocol.parseResponse(rawResponse, format).pureFold(
-      error => raiseError(error, requestProperties),
-      result =>
-        // Decode result
-        Try(decodeResult(result)).pureFold(
-          error => raiseError(InvalidResponseException("Invalid result", error), requestProperties),
-          result => {
-            logger.info(s"Performed JSON-RPC request", requestProperties)
-            system.pure(result)
-          }
+    // Parse response
+    protocol.parseResponse(rawResponse, format).fold(
+      error => raiseError(error.exception, requestProperties),
+      rpcResponse => {
+        lazy val properties = rpcResponse.message.properties ++ rpcResponse.message.text.map(bodyProperty -> _())
+        logger.trace(s"Received ${protocol.name} response", properties)
+        rpcResponse.result.pureFold(
+          // Raise error
+          error => raiseError(error, requestProperties ++ properties),
+          // Decode result
+          result =>
+            Try(decodeResult(result)).pureFold(
+              error => raiseError(InvalidResponseException("Invalid result", error), requestProperties ++ properties),
+              result => {
+                logger.info(s"Performed ${protocol.name} request", requestProperties ++ properties)
+                system.pure(result)
+              }
+            )
         )
+      }
     )
 
   /**
@@ -134,7 +141,7 @@ private[automorph] case class ClientCore[
    * @return error value
    */
   private def raiseError[T](error: Throwable, requestProperties: Map[String, String]): Effect[T] = {
-    logger.error(s"Failed to perform JSON-RPC request", error, requestProperties)
+    logger.error(s"Failed to perform ${protocol.name} request", error, requestProperties)
     system.failed(error)
   }
 }

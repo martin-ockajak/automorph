@@ -1,6 +1,6 @@
 package automorph.protocol.jsonrpc
 
-import automorph.protocol.Protocol.{InvalidResponseException, fromResponse}
+import automorph.protocol.Protocol.{InvalidResponseException, responseMandatory}
 import automorph.spi.Message
 import automorph.spi.Message.{Id, version}
 
@@ -32,15 +32,15 @@ private[automorph] final case class Response[Node](
 private[automorph] case object Response {
 
   def apply[Node](message: Message[Node]): Response[Node] = {
-    val jsonrpc = fromResponse(message.jsonrpc, "automorph")
+    val jsonrpc = responseMandatory(message.jsonrpc, "automorph")
     if (jsonrpc != version) {
       throw InvalidResponseException(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
     }
-    val id = fromResponse(message.id, "id")
+    val id = responseMandatory(message.id, "id")
     message.result.map { result =>
       Response(id, Some(result), None)
     }.getOrElse {
-      val error = fromResponse(message.error, "error")
+      val error = responseMandatory(message.error, "error")
       Response(id, None, Some(ResponseError(error)))
     }
   }

@@ -25,7 +25,7 @@ val api = new Api()
 **Server**
 
 ```scala
-  // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = automorph.DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
 // Stop the server
@@ -301,13 +301,14 @@ val api = new Api()
 ```scala
 // Customize default server error mapping
 val exceptionToError = (exception: Throwable) =>
-  Handler.defaultErrorMapping(exception) match {
-    case ErrorType.ApplicationError if exception.isInstanceOf[SQLException] => ErrorType.InvalidRequest
+  JsonRpcProtocol.defaultExceptionToError(exception) match {
+    case ApplicationError if exception.isInstanceOf[SQLException] => InvalidRequest
     case error => error
   }
+val serverProtocol = JsonRpcProtocol().errorMapping(exceptionToError)
 
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = DefaultHttpServer.async(_.bind(api).errorMapping(exceptionToError), 80, "/api")
+val server = DefaultHttpServer.async(_.bind(api).protocol(serverProtocol), 80, "/api")
 
 // Stop the server
 server.close()
@@ -318,14 +319,15 @@ server.close()
 ```scala
 // Customize default client error mapping
 val errorToException = (code: Int, message: String) =>
-  Client.defaultErrorMapping(code, message) match {
-    case _: ErrorType.InvalidRequestException if message.toUpperCase.contains("SQL") => new SQLException(message)
+  JsonRpcProtocol.defaultErrorToException(code, message) match {
+    case _: InvalidRequestException if message.toUpperCase.contains("SQL") => new SQLException(message)
     case exception => exception
   }
+val clientProtocol = JsonRpcProtocol().errorMapping(errorToException)
 
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val url = new java.net.URI("http://localhost/api")
-val client = DefaultHttpClient.async(url, "POST").errorMapping(errorToException)
+val client = DefaultHttpClient.async(url, "POST").protocol(clientProtocol)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api

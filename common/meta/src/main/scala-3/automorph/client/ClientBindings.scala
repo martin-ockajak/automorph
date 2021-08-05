@@ -7,7 +7,7 @@ import automorph.spi.MessageFormat
 import automorph.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
 
-/** JSON-RPC client layer bindings code generation. */
+/** RPC client layer bindings code generation. */
 private[automorph] case object ClientBindings:
 
   /**
