@@ -19,7 +19,7 @@ object ErrorMapping extends App {
 
   // Customize default server error mapping
   val exceptionToError = (exception: Throwable) =>
-    JsonRpcProtocol.defaultExceptionToError(exception) match {
+    JsonRpcProtocol().exceptionToError(exception) match {
       case ApplicationError if exception.isInstanceOf[SQLException] => InvalidRequest
       case error => error
     }
@@ -30,7 +30,7 @@ object ErrorMapping extends App {
 
   // Customize default client error mapping
   val errorToException = (code: Int, message: String) =>
-    JsonRpcProtocol.defaultErrorToException(code, message) match {
+    JsonRpcProtocol().errorToException(code, message) match {
       case _: InvalidRequestException if message.toUpperCase.contains("SQL") => new SQLException(message)
       case exception => exception
     }

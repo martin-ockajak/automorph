@@ -301,7 +301,7 @@ val api = new Api()
 ```scala
 // Customize default server error mapping
 val exceptionToError = (exception: Throwable) =>
-  JsonRpcProtocol.defaultExceptionToError(exception) match {
+  JsonRpcProtocol().exceptionToError(exception) match {
     case ApplicationError if exception.isInstanceOf[SQLException] => InvalidRequest
     case error => error
   }
@@ -319,8 +319,8 @@ server.close()
 ```scala
 // Customize default client error mapping
 val errorToException = (code: Int, message: String) =>
-  JsonRpcProtocol.defaultErrorToException(code, message) match {
-    case _: InvalidRequestException if message.toUpperCase.contains("SQL") => new SQLException(message)
+  JsonRpcProtocol().errorToException(code, message) match {
+  case _: InvalidRequestException if message.toUpperCase.contains("SQL") => new SQLException(message)
     case exception => exception
   }
 val clientProtocol = JsonRpcProtocol().errorMapping(errorToException)

@@ -21,7 +21,8 @@ object ErrorType {
   case object MethodNotFound extends ErrorType(-32601)
   case object InvalidParams extends ErrorType(-32602)
   case object InternalError extends ErrorType(-32603)
-  case object IOError extends ErrorType(-32000)
+  case object ServerError extends ErrorType(-32000)
+  case object ReservedError extends ErrorType(-32768)
   case object ApplicationError extends ErrorType(0)
 
   /** JSON-RPC parse error. */
@@ -32,6 +33,12 @@ object ErrorType {
 
   /** JSON-RPC internal error. */
   final case class InternalErrorException(
+    message: String,
+    cause: Throwable = None.orNull
+  ) extends RuntimeException(message, cause)
+
+  /** JSON-RPC sever error. */
+  final case class ServerErrorException(
     message: String,
     cause: Throwable = None.orNull
   ) extends RuntimeException(message, cause)

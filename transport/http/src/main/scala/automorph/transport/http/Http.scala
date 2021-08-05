@@ -302,8 +302,7 @@ case object Http {
     ErrorType.MethodNotFound -> 501,
     ErrorType.InvalidParams -> 400,
     ErrorType.InternalError -> 500,
-    ErrorType.IOError -> 500,
-    ErrorType.ApplicationError -> 500
+    ErrorType.ServerError -> 500,
   ).withDefaultValue(500).map { case (errorType, statusCode) =>
     errorType.code -> statusCode
   }

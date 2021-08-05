@@ -1,7 +1,7 @@
 package automorph.protocol.jsonrpc
 
 import automorph.protocol.Protocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
-import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorException}
+import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorException, ServerErrorException}
 import automorph.protocol.jsonrpc.JsonRpcProtocol.{defaultErrorToException, defaultExceptionToError}
 import automorph.protocol.{Protocol, RpcError, RpcMessage, RpcRequest, RpcResponse}
 import automorph.spi.Message.Params
@@ -191,8 +191,7 @@ case object JsonRpcProtocol {
     case ErrorType.MethodNotFound.code => MethodNotFoundException(message)
     case ErrorType.InvalidParams.code => new IllegalArgumentException(message)
     case ErrorType.InternalError.code => InternalErrorException(message)
-    case ErrorType.IOError.code => new IOException(message)
-    case _ if code < ErrorType.ApplicationError.code => InternalErrorException(message)
+    case _ if Range(ErrorType.ReservedError.code, ErrorType.ServerError.code + 1).contains(code) => ServerErrorException(message)
     case _ => new RuntimeException(message)
   }
 
@@ -208,7 +207,8 @@ case object JsonRpcProtocol {
     case _: MethodNotFoundException => ErrorType.MethodNotFound
     case _: IllegalArgumentException => ErrorType.InvalidParams
     case _: InternalErrorException => ErrorType.InternalError
-    case _: IOException => ErrorType.IOError
+    case _: ServerErrorException => ErrorType.ServerError
+    case _: IOException => ErrorType.ServerError
     case _ => ErrorType.ApplicationError
   }
 }
