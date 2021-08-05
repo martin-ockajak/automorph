@@ -51,30 +51,29 @@ final case class RestRpcProtocol(
     response: ArraySeq.ofByte,
     format: MessageFormat[Node]
   ): Either[RpcError[Content], RpcResponse[Node, Content]] =
-//    // Deserialize response
-//    Try(format.deserialize(response)).pureFold(
-//      error => Left(RpcError(ParseErrorException("Invalid response format", error), RpcMessage(None, response))),
-//      formedResponse => {
-//        // Validate response
-//        val messageText = Some(() => format.format(formedResponse))
-//        val message = RpcMessage(formedResponse.id, response, formedResponse.properties, messageText)
-//        Try(Response(formedResponse)).pureFold(
-//          error => Left(RpcError(ParseErrorException("Invalid response format", error), message)),
-//          validResponse =>
-//            // Check for error
-//            validResponse.error.fold(
-//              // Check for result
-//              validResponse.result match {
-//                case None => Left(RpcError(InvalidResponseException("Invalid result", None.orNull), message))
-//                case Some(result) => Right(RpcResponse(Success(result), message))
-//              }
-//            ) { error =>
-//              Right(RpcResponse(Failure(errorToException(error.message, error.code)), message))
-//            }
-//        )
-//      }
-//    )
-  ???
+    // Deserialize response
+    Try(format.deserialize(response)).pureFold(
+      error => Left(RpcError(InvalidResponseException("Invalid response format", error), RpcMessage((), response))),
+      formedResponse => {
+        // Validate response
+        val messageText = Some(() => format.format(formedResponse))
+        val message = RpcMessage((), response, formedResponse.properties, messageText)
+        Try(Response(formedResponse)).pureFold(
+          error => Left(RpcError(InvalidResponseException("Invalid response format", error), message)),
+          validResponse =>
+            // Check for error
+            validResponse.error.fold(
+              // Check for result
+              validResponse.result match {
+                case None => Left(RpcError(InvalidResponseException("Invalid result", None.orNull), message))
+                case Some(result) => Right(RpcResponse(Success(result), message))
+              }
+            ) { error =>
+              Right(RpcResponse(Failure(errorToException(error.message, error.code)), message))
+            }
+        )
+      }
+    )
 
   override def createRequest[Node](
     method: String,
