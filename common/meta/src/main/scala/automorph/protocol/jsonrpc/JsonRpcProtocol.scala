@@ -19,7 +19,7 @@ import scala.util.{Failure, Success, Try}
  * @param exceptionToError maps an exception to a corresponding JSON-RPC error
  */
 final case class JsonRpcProtocol(
-  errorToException: (Int, String) => Throwable = defaultErrorToException,
+  errorToException: (String, Int) => Throwable = defaultErrorToException,
   exceptionToError: Throwable => ErrorType = defaultExceptionToError
 ) extends Protocol {
 
@@ -70,7 +70,7 @@ final case class JsonRpcProtocol(
                 case Some(result) => Right(RpcResponse(Success(result), message))
               }
             ) { error =>
-              Right(RpcResponse(Failure(errorToException(error.code, error.message)), message))
+              Right(RpcResponse(Failure(errorToException(error.message, error.code)), message))
             }
         )
       }
@@ -143,7 +143,7 @@ final case class JsonRpcProtocol(
    * @param errorToException maps a JSON-RPC error to a corresponding exception
    * @return JSON-RPC protocol
    */
-  def errorMapping(errorToException: (Int, String) => Throwable): JsonRpcProtocol =
+  def errorMapping(errorToException: (String, Int) => Throwable): JsonRpcProtocol =
     errorMapping(exceptionToError, errorToException)
 
   /**
@@ -155,7 +155,7 @@ final case class JsonRpcProtocol(
    */
   def errorMapping(
     exceptionToError: Throwable => ErrorType,
-    errorToException: (Int, String) => Throwable
+    errorToException: (String, Int) => Throwable
   ): JsonRpcProtocol =
     copy(errorToException = errorToException, exceptionToError = exceptionToError)
 
@@ -198,11 +198,11 @@ case object JsonRpcProtocol {
   /**
    * Maps a JSON-RPC error to a corresponding default exception.
    *
-   * @param code error code
    * @param message error message
+   * @param code error code
    * @return exception
    */
-  def defaultErrorToException(code: Int, message: String): Throwable = code match {
+  def defaultErrorToException(message: String, code: Int): Throwable = code match {
     case ErrorType.ParseError.code => ParseErrorException(message)
     case ErrorType.InvalidRequest.code => InvalidRequestException(message)
     case ErrorType.MethodNotFound.code => MethodNotFoundException(message)

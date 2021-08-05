@@ -36,11 +36,11 @@ object ErrorMapping extends App {
   val server = DefaultHttpServer.async(_.bind(api).protocol(serverProtocol), 80, "/api", exceptionToStatusCode)
 
   // Customize client JSON-RPC error mapping
-  val errorToException = (code: Int, message: String) =>
+  val errorToException = (message: String, code: Int) =>
     if (code == InvalidRequest.code && message.toUpperCase.contains("SQL")) {
       new SQLException(message)
     } else {
-      JsonRpcProtocol.defaultErrorToException(code, message)
+      JsonRpcProtocol.defaultErrorToException(message, code)
     }
   val clientProtocol = JsonRpcProtocol().errorMapping(errorToException)
 

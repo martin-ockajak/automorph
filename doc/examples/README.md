@@ -327,13 +327,14 @@ server.close()
 
 ```scala
 // Customize client JSON-RPC error mapping
-val errorToException = (code: Int, message: String) =>
+val errorToException = (message: String, code: Int) =>
   if (code == InvalidRequest.code && message.toUpperCase.contains("SQL")) {
     new SQLException(message)
   } else {
-    JsonRpcProtocol.defaultErrorToException(code, message)
+    JsonRpcProtocol.defaultErrorToException(message, code)
   }
 val clientProtocol = JsonRpcProtocol().errorMapping(errorToException)
+
 
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val url = new java.net.URI("http://localhost/api")

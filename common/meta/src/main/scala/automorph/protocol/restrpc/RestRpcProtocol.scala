@@ -19,7 +19,7 @@ import scala.util.{Failure, Success, Try}
  * @param exceptionToError maps an exception to a corresponding REST-RPC error
  */
 final case class RestRpcProtocol(
-  errorToException: (Option[Int], String) => Throwable = defaultErrorToException,
+  errorToException: (String, Option[Int]) => Throwable = defaultErrorToException,
   exceptionToError: Throwable => Option[Int] = defaultExceptionToError
 ) extends Protocol {
 
@@ -69,7 +69,7 @@ final case class RestRpcProtocol(
 //                case Some(result) => Right(RpcResponse(Success(result), message))
 //              }
 //            ) { error =>
-//              Right(RpcResponse(Failure(errorToException(error.code, error.message)), message))
+//              Right(RpcResponse(Failure(errorToException(error.message, error.code)), message))
 //            }
 //        )
 //      }
@@ -83,14 +83,13 @@ final case class RestRpcProtocol(
     respond: Boolean,
     format: MessageFormat[Node]
   ): Try[RpcRequest[Node, Content]] = {
-//    val id = Option.when(respond)(Right(MessageId.next).withLeft[BigDecimal])
-//    val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
+    val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
 //    val formedRequest = Request(id, method, argumentNodes).formed
-//    val properties = Map(
-//      "Type" -> MessageType.Call.toString,
-//      "Method" -> method,
-//      "Arguments" -> argumentValues.size.toString
-//    )
+    val properties = Map(
+      "Type" -> MessageType.Call.toString,
+      "Method" -> method,
+      "Arguments" -> argumentValues.size.toString
+    )
 //    val messageText = () => format.format(formedRequest)
 //    Try(format.serialize(formedRequest)).mapFailure { error =>
 //      ParseErrorException("Invalid request format", error)
@@ -107,31 +106,30 @@ final case class RestRpcProtocol(
     format: MessageFormat[Node],
     encodeStrings: List[String] => Node
   ): Try[RpcResponse[Node, Content]] = {
-//    val formedResponse = result.pureFold(
-//      error => {
-//        val responseError = error match {
-//          case RestRpcException(message, code, data, _) =>
-//            ResponseError(message, code, data.asInstanceOf[Option[Node]])
-//          case _ =>
-//            // Assemble error details
-//            val trace = Protocol.trace(error)
-//            val message = trace.headOption.getOrElse("Unknown error")
-//            val code = exceptionToError(error).code
-//            val data = Some(encodeStrings(trace.drop(1).toList))
-//            ResponseError(message, code, data)
-//        }
-//        Response[Node](None, Some(responseError)).formed
-//      },
-//      resultValue => Response(Some(resultValue), None).formed
-//    )
-//    val messageText = () => format.format(formedResponse)
-//    Try(format.serialize(formedResponse)).mapFailure { error =>
-//      ParseErrorException("Invalid response format", error)
-//    }.map { messageBody =>
-//      val message = RpcMessage(Option(id), messageBody, formedResponse.properties, Some(messageText))
-//      RpcResponse(result, message)
-//    }
-    ???
+    val formedResponse = result.pureFold(
+      error => {
+        val responseError = error match {
+          case RestRpcException(message, code, data, _) =>
+            ResponseError(message, code, data.asInstanceOf[Option[Node]])
+          case _ =>
+            // Assemble error details
+            val trace = Protocol.trace(error)
+            val message = trace.headOption.getOrElse("Unknown error")
+            val code = exceptionToError(error)
+            val data = Some(encodeStrings(trace.drop(1).toList))
+            ResponseError(message, code, data)
+        }
+        Response[Node](None, Some(responseError)).formed
+      },
+      resultValue => Response(Some(resultValue), None).formed
+    )
+    val messageText = () => format.format(formedResponse)
+    Try(format.serialize(formedResponse)).mapFailure { error =>
+      InvalidResponseException("Invalid response format", error)
+    }.map { messageBody =>
+      val message = RpcMessage((), messageBody, formedResponse.properties, Some(messageText))
+      RpcResponse(result, message)
+    }
   }
 
   /**
@@ -149,7 +147,7 @@ final case class RestRpcProtocol(
    * @param errorToException maps a REST-RPC error to a corresponding exception
    * @return REST-RPC protocol
    */
-  def errorMapping(errorToException: (Option[Int], String) => Throwable): RestRpcProtocol =
+  def errorMapping(errorToException: (String, Option[Int]) => Throwable): RestRpcProtocol =
     errorMapping(exceptionToError, errorToException)
 
   /**
@@ -161,7 +159,7 @@ final case class RestRpcProtocol(
    */
   def errorMapping(
     exceptionToError: Throwable => Option[Int],
-    errorToException: (Option[Int], String) => Throwable
+    errorToException: (String, Option[Int]) => Throwable
   ): RestRpcProtocol =
     copy(errorToException = errorToException, exceptionToError = exceptionToError)
 
@@ -186,11 +184,11 @@ case object RestRpcProtocol {
   /**
    * Maps a REST-RPC error to a corresponding default exception.
    *
-   * @param code error code
    * @param message error message
+   * @param code error code
    * @return exception
    */
-  def defaultErrorToException(code: Option[Int], message: String): Throwable = code match {
+  def defaultErrorToException(message: String, code: Option[Int]): Throwable = code match {
     case _ => new RuntimeException(message)
   }
 
