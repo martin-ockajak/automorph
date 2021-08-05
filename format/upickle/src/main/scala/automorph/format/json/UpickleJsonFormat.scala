@@ -22,18 +22,23 @@ final case class UpickleJsonFormat[Custom <: UpickleCustom](
 
   private val indent = 2
 
-  implicit private lazy val messageRw: custom.ReadWriter[UpickleMessage] = {
+  implicit private lazy val customMessageRw: custom.ReadWriter[UpickleMessage] = {
     implicit val messageErrorRw: custom.ReadWriter[UpickleMessageError] = custom.macroRW
     custom.macroRW
   }
 
+  implicit private lazy val messageRw: ReadWriter[Message[Value]] = readwriter[UpickleMessage].bimap[Message[Value]](
+    UpickleMessage.fromSpi,
+    _.toSpi
+  )
+
   override def mediaType: String = "application/json"
 
   override def serialize(message: Message[Value]): ArraySeq.ofByte =
-    new ArraySeq.ofByte(custom.writeToByteArray(UpickleMessage.fromSpi(message)))
+    new ArraySeq.ofByte(custom.writeToByteArray(message))
 
   override def deserialize(data: ArraySeq.ofByte): Message[Value] =
-    custom.read[UpickleMessage](data.unsafeArray).toSpi
+    custom.read[Message[Value]](data.unsafeArray)
 
   override def serializeNode(node: Value): ArraySeq.ofByte =
     new ArraySeq.ofByte(custom.writeToByteArray(node))

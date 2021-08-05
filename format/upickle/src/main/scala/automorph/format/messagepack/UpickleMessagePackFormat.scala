@@ -1,5 +1,6 @@
 package automorph.format.messagepack
 
+import automorph.format.messagepack.UpickleMessage
 import automorph.format.{DefaultUpickleCustom, UpickleCustom}
 import automorph.spi.Message
 import scala.collection.immutable.ArraySeq
@@ -18,25 +19,30 @@ final case class UpickleMessagePackFormat[Custom <: UpickleCustom](
   custom: Custom = DefaultUpickleCustom
 ) extends UpickleMessagePackFormatMeta[Custom] {
 
-  import custom._
+  import custom.*
 
   private val indent = 2
 
-  implicit private lazy val messageRw: custom.ReadWriter[UpickleMessage] = {
+  implicit private lazy val customMessageRw: custom.ReadWriter[UpickleMessage] = {
     implicit val messageErrorRw: custom.ReadWriter[UpickleMessageError] = custom.macroRW
-    Seq(messageErrorRw  )
+    Seq(messageErrorRw)
     custom.macroRW
   }
+
+  implicit private lazy val messageRw: ReadWriter[Message[Msg]] = readwriter[UpickleMessage].bimap[Message[Msg]](
+    UpickleMessage.fromSpi,
+    _.toSpi
+  )
 
   override def mediaType: String = "application/msgpack"
 
   override def serialize(message: Message[Msg]): ArraySeq.ofByte =
-    new ArraySeq.ofByte(custom.writeToByteArray(UpickleMessage.fromSpi(message)))
-//    new ArraySeq.ofByte(custom.writeBinary(UpickleMessage.fromSpi(message)))
+    new ArraySeq.ofByte(custom.writeToByteArray(message))
+//    new ArraySeq.ofByte(custom.writeBinary(message))
 
   override def deserialize(data: ArraySeq.ofByte): Message[Msg] =
-    custom.read[UpickleMessage](data.unsafeArray).toSpi
-//    custom.readBinary[UpickleMessage](data.unsafeArray).toSpi
+    custom.read[Message[Msg]](data.unsafeArray)
+//    custom.readBinary[Message[Msg](data.unsafeArray)
 
   override def serializeNode(node: Msg): ArraySeq.ofByte =
     new ArraySeq.ofByte(custom.writeToByteArray(node))
@@ -47,7 +53,7 @@ final case class UpickleMessagePackFormat[Custom <: UpickleCustom](
 //    custom.readBinary[Msg](data.unsafeArray)
 
   override def format(message: Message[Msg]): String =
-    custom.write(UpickleMessage.fromSpi(message), indent)
+    custom.write(message, indent)
 }
 
 case object UpickleMessagePackFormat {
