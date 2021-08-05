@@ -35,6 +35,22 @@ trait MessageFormat[Node] extends FormatMeta[Node] {
   def deserialize(data: ArraySeq.ofByte): Message[Node]
 
   /**
+   * Serializes a node as binary data.
+   *
+   * @param node node
+   * @return binary data in the specific format
+   */
+  def serializeNode(message: Node): ArraySeq.ofByte
+
+  /**
+   * Deserializes a node from binary data.
+   *
+   * @param data binary data in the specific format
+   * @return node
+   */
+  def deserializeNode(data: ArraySeq.ofByte): Node
+
+  /**
    * Formats a message as text.
    *
    * @param message message

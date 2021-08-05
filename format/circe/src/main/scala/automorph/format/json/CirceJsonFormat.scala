@@ -39,8 +39,12 @@ final case class CirceJsonFormat() extends CirceJsonFormatMeta {
   override def deserialize(data: ArraySeq.ofByte): Message[Json] =
     parser.decode[Message[Json]](new String(data.unsafeArray, charset)).toTry.get
 
-  override def format(message: Message[Json]): String =
-    message.asJson.spaces2
+  override def serializeNode(node: Json): ArraySeq.ofByte = new ArraySeq.ofByte(node.noSpaces.getBytes(charset))
+
+  override def deserializeNode(data: ArraySeq.ofByte): Json =
+    parser.decode[Json](new String(data.unsafeArray, charset)).toTry.get
+
+  override def format(message: Message[Json]): String = message.asJson.spaces2
 }
 
 case object CirceJsonFormat {

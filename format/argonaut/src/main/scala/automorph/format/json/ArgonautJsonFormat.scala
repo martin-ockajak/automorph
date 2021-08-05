@@ -1,6 +1,6 @@
 package automorph.format.json
 
-import argonaut.Argonaut.{jNull, StringToParseWrap, ToJsonIdentity}
+import argonaut.Argonaut.{StringToParseWrap, ToJsonIdentity, jNull}
 import argonaut.{Argonaut, CodecJson, DecodeResult, Json}
 import java.nio.charset.StandardCharsets
 import automorph.spi.{Message, MessageError}
@@ -41,6 +41,14 @@ final case class ArgonautJsonFormat() extends ArgonautJsonFormatMeta {
 
   override def deserialize(data: ArraySeq.ofByte): Message[Json] =
     new String(data.unsafeArray, charset).decodeEither[Message[Json]].fold(
+      errorMessage => throw new IllegalArgumentException(errorMessage),
+      identity
+    )
+
+  override def serializeNode(node: Json): ArraySeq.ofByte = new ArraySeq.ofByte(node.nospaces.getBytes(charset))
+
+  override def deserializeNode(data: ArraySeq.ofByte): Json =
+    new String(data.unsafeArray, charset).decodeEither[Json].fold(
       errorMessage => throw new IllegalArgumentException(errorMessage),
       identity
     )
