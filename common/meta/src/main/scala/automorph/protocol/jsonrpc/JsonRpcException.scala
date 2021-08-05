@@ -3,7 +3,7 @@ package automorph.protocol.jsonrpc
 /**
  * JSON-RPC API error exception.
  *
- * API methods bound via a JSON-RPC handler can throw this exception to customize JSON-RPC error response data.
+ * API methods bound via an RPC request handler can throw this exception to customize JSON-RPC error response.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @constructor Creates a new JSON-RPC error exception.
