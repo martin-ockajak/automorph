@@ -1,8 +1,7 @@
 package automorph.protocol.jsonrpc
 
 import automorph.protocol.Protocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
-import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorException, ServerErrorException}
-import automorph.protocol.jsonrpc.JsonRpcProtocol.{defaultErrorToException, defaultExceptionToError}
+import automorph.protocol.jsonrpc.JsonRpcProtocol.{ParseErrorException, defaultErrorToException, defaultExceptionToError}
 import automorph.protocol.{Protocol, RpcError, RpcMessage, RpcRequest, RpcResponse}
 import automorph.spi.Message.Params
 import automorph.spi.{Message, MessageFormat}
@@ -178,6 +177,24 @@ case object JsonRpcProtocol {
 
   /** JSON-RPC request properties. */
   type Content = Option[Message.Id]
+
+  /** JSON-RPC parse error. */
+  final case class ParseErrorException(
+    message: String,
+    cause: Throwable = None.orNull
+  ) extends RuntimeException(message, cause)
+
+  /** JSON-RPC internal error. */
+  final case class InternalErrorException(
+    message: String,
+    cause: Throwable = None.orNull
+  ) extends RuntimeException(message, cause)
+
+  /** JSON-RPC sever error. */
+  final case class ServerErrorException(
+    message: String,
+    cause: Throwable = None.orNull
+  ) extends RuntimeException(message, cause)
 
   /**
    * Maps a JSON-RPC error to a corresponding default exception.
