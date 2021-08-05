@@ -162,7 +162,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
       rpcResponse => {
         lazy val properties = rpcResponse.message.properties ++ rpcResponse.message.text.map(bodyProperty -> _())
         logger.trace(s"Sending ${protocol.name} response", properties)
-        system.pure(HandlerResult(Some(implicitly[Bytes[Data]].to(rpcResponse.message.body)), None))
+        system.pure(HandlerResult(Some(implicitly[Bytes[Data]].to(rpcResponse.message.body)), result.failed.toOption))
       }
     )
 }
