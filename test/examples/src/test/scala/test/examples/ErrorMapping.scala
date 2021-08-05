@@ -1,13 +1,13 @@
 package test.examples
 
-import automorph.protocol.Protocol.InvalidRequestException
-import automorph.protocol.jsonrpc.ErrorType.{ApplicationError, InvalidRequest}
+import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.protocol.jsonrpc.JsonRpcProtocol
-import automorph.transport.http.client.SttpClient.defaultContext
-import automorph.{Client, DefaultHttpClient, DefaultHttpServer, Handler}
+import automorph.transport.http.Http
+import automorph.{DefaultHttpClient, DefaultHttpServer}
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import automorph.transport.http.client.SttpClient.defaultContext
 
 object ErrorMapping extends App {
 
@@ -17,22 +17,30 @@ object ErrorMapping extends App {
   }
   val api = new Api()
 
-  // Customize default server error mapping
+  // Customize server JSON-RPC error mapping
   val exceptionToError = (exception: Throwable) =>
-    JsonRpcProtocol().exceptionToError(exception) match {
-      case ApplicationError if exception.isInstanceOf[SQLException] => InvalidRequest
-      case error => error
+    exception match {
+      case _: SQLException => InvalidRequest
+      case e => JsonRpcProtocol.defaultExceptionToError(e)
     }
   val serverProtocol = JsonRpcProtocol().errorMapping(exceptionToError)
 
-  // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val server = DefaultHttpServer.async(_.bind(api).protocol(serverProtocol), 80, "/api")
+  // Customize server HTTP status code mapping
+  val exceptionToStatusCode = (exception: Throwable) =>
+    exception match {
+      case _: SQLException => 400
+      case e => Http.defaultExceptionToStatusCode(e)
+    }
 
-  // Customize default client error mapping
+  // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
+  val server = DefaultHttpServer.async(_.bind(api).protocol(serverProtocol), 80, "/api", exceptionToStatusCode)
+
+  // Customize client JSON-RPC error mapping
   val errorToException = (code: Int, message: String) =>
-    JsonRpcProtocol().errorToException(code, message) match {
-      case _: InvalidRequestException if message.toUpperCase.contains("SQL") => new SQLException(message)
-      case exception => exception
+    if (code == InvalidRequest.code && message.toUpperCase.contains("SQL")) {
+      new SQLException(message)
+    } else {
+      JsonRpcProtocol.defaultErrorToException(code, message)
     }
   val clientProtocol = JsonRpcProtocol().errorMapping(errorToException)
 

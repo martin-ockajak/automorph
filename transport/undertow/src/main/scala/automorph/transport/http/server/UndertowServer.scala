@@ -24,7 +24,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @param runEffect effect execution function
  * @param port port to listen on for HTTP connections
  * @param path HTTP URL path (default: /)
- * @param errorStatus JSON-RPC error code to HTTP status mapping function
+ * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
  * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
  * @param builder Undertow web server builder
  * @tparam Effect effect type
@@ -34,7 +34,7 @@ final case class UndertowServer[Effect[_]](
   runEffect: Effect[Any] => Any,
   port: Int,
   path: String = "/",
-  errorStatus: Int => Int = Http.defaultErrorStatusCode,
+  exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
   webSocket: Boolean = true,
   builder: Undertow.Builder = defaultBuilder
 ) extends Logging with ServerMessageTransport {
@@ -45,7 +45,7 @@ final case class UndertowServer[Effect[_]](
 
   private def start(): Undertow = {
     // Configure the request handler
-    val httpHandler = UndertowHttpEndpoint(handler, runEffect, errorStatus)
+    val httpHandler = UndertowHttpEndpoint(handler, runEffect, exceptionToStatusCode)
     val webSocketHandler = if (webSocket) {
       UndertowWebSocketEndpoint(handler, runEffect, httpHandler)
     } else {

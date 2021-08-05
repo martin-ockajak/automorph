@@ -25,13 +25,13 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
  * @constructor Creates a Jetty web server HTTP servlet with the specified RPC request ''handler''.
  * @param handler RPC request handler
  * @param runEffect asynchronous effect execution function
- * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
+ * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
  * @tparam Effect effect type
  */
 final case class JettyEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any,
-  errorStatusCode: Int => Int = Http.defaultErrorStatusCode
+  exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends HttpServlet with Logging with EndpointMessageTransport {
 
   private val system = handler.system
@@ -51,7 +51,7 @@ final case class JettyEndpoint[Effect[_]](
         result => {
           // Send the response
           val message = result.response.getOrElse(new ByteArrayInputStream(Array()))
-          val status = result.errorCode.map(errorStatusCode).getOrElse(HttpStatus.OK_200)
+          val status = result.exception.map(exceptionToStatusCode).getOrElse(HttpStatus.OK_200)
           sendResponse(message, response, status, client)
         }
       )

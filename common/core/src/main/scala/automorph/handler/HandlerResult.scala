@@ -5,10 +5,10 @@ package automorph.handler
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param response response message
- * @param errorCode failed call error code
+ * @param exception failed call exception
  * @tparam Data message data type
  */
 final case class HandlerResult[Data](
   response: Option[Data],
-  errorCode: Option[Int]
+  exception: Option[Throwable]
 )

@@ -24,13 +24,13 @@ import com.twitter.util.{Future, Promise}
  * @constructor Creates a Finagle RPC system HTTP service with the specified RPC request ''handler''.
  * @param handler RPC request handler
  * @param runEffect asynchronous effect execution function
- * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
+ * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
  * @tparam Effect effect type
  */
 final case class FinagleEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any,
-  errorStatusCode: Int => Int = Http.defaultErrorStatusCode
+  exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
 
   private val system = handler.system
@@ -51,7 +51,7 @@ final case class FinagleEndpoint[Effect[_]](
           result => {
             // Send the response
             val response = result.response.getOrElse(Array[Byte]())
-            val status = result.errorCode.map(errorStatusCode).map(Status.apply).getOrElse(Status.Ok)
+            val status = result.exception.map(exceptionToStatusCode).map(Status.apply).getOrElse(Status.Ok)
             val message = Reader.fromBuf(Buf.ByteArray.Owned(response))
             createResponse(message, status, request)
           }

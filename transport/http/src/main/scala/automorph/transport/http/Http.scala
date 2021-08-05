@@ -1,6 +1,9 @@
 package automorph.transport.http
 
+import automorph.protocol.Protocol.{InvalidRequestException, MethodNotFoundException}
 import automorph.protocol.jsonrpc.ErrorType
+import automorph.protocol.jsonrpc.JsonRpcProtocol.{InternalErrorException, ParseErrorException, ServerErrorException}
+import java.io.IOException
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.Base64
@@ -295,15 +298,21 @@ final case class Http[Source](
 
 case object Http {
 
-  /** Default JSON-RPC error to HTTP status code mapping. */
-  val defaultErrorStatusCode: Int => Int = Map(
-    ErrorType.ParseError -> 400,
-    ErrorType.InvalidRequest -> 400,
-    ErrorType.MethodNotFound -> 501,
-    ErrorType.InvalidParams -> 400,
-    ErrorType.InternalError -> 500,
-    ErrorType.ServerError -> 500,
-  ).withDefaultValue(500).map { case (errorType, statusCode) =>
-    errorType.code -> statusCode
+
+  /**
+   * Maps an exception to a corresponding default HTTP status code.
+   *
+   * @param exception exception class
+   * @return HTTP status code
+   */
+  def defaultExceptionToStatusCode(exception: Throwable): Int = exception match {
+    case _: ParseErrorException => 400
+    case _: InvalidRequestException => 400
+    case _: MethodNotFoundException => 501
+    case _: IllegalArgumentException => 400
+    case _: InternalErrorException => 500
+    case _: ServerErrorException => 500
+    case _: IOException => 500
+    case _ => 500
   }
 }

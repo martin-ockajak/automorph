@@ -282,8 +282,10 @@ libraryDependencies ++= Seq(
 **API**
 
 ```scala
-import automorph.protocol.ErrorType
-import automorph.{Client, DefaultHttpClient, DefaultHttpServer, Handler}
+import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
+import automorph.protocol.jsonrpc.JsonRpcProtocol
+import automorph.transport.http.Http
+import automorph.{DefaultHttpClient, DefaultHttpServer}
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -299,16 +301,23 @@ val api = new Api()
 **Server**
 
 ```scala
-// Customize default server error mapping
+// Customize server JSON-RPC error mapping
 val exceptionToError = (exception: Throwable) =>
-  JsonRpcProtocol().exceptionToError(exception) match {
-    case ApplicationError if exception.isInstanceOf[SQLException] => InvalidRequest
-    case error => error
+  exception match {
+    case _: SQLException => InvalidRequest
+    case e => JsonRpcProtocol.defaultExceptionToError(e)
   }
 val serverProtocol = JsonRpcProtocol().errorMapping(exceptionToError)
 
+// Customize server HTTP status code mapping
+val exceptionToStatusCode = (exception: Throwable) =>
+  exception match {
+    case _: SQLException => 400
+    case e => Http.defaultExceptionToStatusCode(e)
+  }
+
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = DefaultHttpServer.async(_.bind(api).protocol(serverProtocol), 80, "/api")
+val server = DefaultHttpServer.async(_.bind(api).protocol(serverProtocol), 80, "/api", exceptionToStatusCode)
 
 // Stop the server
 server.close()
@@ -317,11 +326,12 @@ server.close()
 **Client**
 
 ```scala
-// Customize default client error mapping
+// Customize client JSON-RPC error mapping
 val errorToException = (code: Int, message: String) =>
-  JsonRpcProtocol().errorToException(code, message) match {
-  case _: InvalidRequestException if message.toUpperCase.contains("SQL") => new SQLException(message)
-    case exception => exception
+  if (code == InvalidRequest.code && message.toUpperCase.contains("SQL")) {
+    new SQLException(message)
+  } else {
+    JsonRpcProtocol.defaultErrorToException(code, message)
   }
 val clientProtocol = JsonRpcProtocol().errorMapping(errorToException)
 

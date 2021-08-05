@@ -29,13 +29,13 @@ import scala.util.Try
  * @constructor Creates an Undertow web server HTTP handler with the specified RPC request ''handler''.
  * @param handler RPC request handler
  * @param runEffect effect execution function
- * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
+ * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
  * @tparam Effect effect type
  */
 final case class UndertowHttpEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any,
-  errorStatusCode: Int => Int = Http.defaultErrorStatusCode
+  exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
   private val system = handler.system
@@ -59,7 +59,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
                 result => {
                   // Send the response
                   val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
-                  val statusCode = result.errorCode.map(errorStatusCode).getOrElse(StatusCodes.OK)
+                  val statusCode = result.exception.map(exceptionToStatusCode).getOrElse(StatusCodes.OK)
                   sendResponse(response, statusCode, exchange)
                 }
               )

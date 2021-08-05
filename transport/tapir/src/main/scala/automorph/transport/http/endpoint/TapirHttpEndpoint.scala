@@ -38,14 +38,14 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
    * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
    * @param handler RPC request handler
    * @param method HTTP method to server
-   * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
+   * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
    * @tparam Effect effect type
    * @return Tapir HTTP endpoint
    */
   def apply[Effect[_]](
     handler: Handler.AnyFormat[Effect, Context],
     method: Method,
-    errorStatusCode: Int => Int = Http.defaultErrorStatusCode
+    exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
   ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     val system = handler.system
     val contentType = Header.contentType(MediaType.parse(handler.format.mediaType).getOrElse {
@@ -68,7 +68,7 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
               result => {
                 // Send the response
                 val message = result.response.getOrElse(Array[Byte]())
-                val status = result.errorCode.map(errorStatusCode).map(StatusCode.apply).getOrElse(StatusCode.Ok)
+                val status = result.exception.map(exceptionToStatusCode).map(StatusCode.apply).getOrElse(StatusCode.Ok)
                 Right(createResponse(message, status, client))
               }
             )

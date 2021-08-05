@@ -214,9 +214,9 @@ case object JsonRpcProtocol {
   }
 
   /**
-   * Maps an exception class to a corresponding default JSON-RPC error type.
+   * Maps an exception to a corresponding default JSON-RPC error type.
    *
-   * @param exception exception class
+   * @param exception exception
    * @return JSON-RPC error type
    */
   def defaultExceptionToError(exception: Throwable): ErrorType = exception match {

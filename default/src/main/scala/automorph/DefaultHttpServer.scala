@@ -2,7 +2,7 @@ package automorph
 
 import io.undertow.Undertow
 import automorph.system.IdentitySystem.Identity
-import automorph.transport.http.Http.defaultErrorStatusCode
+import automorph.transport.http.Http
 import automorph.transport.http.server.UndertowServer.defaultBuilder
 import automorph.transport.http.server.UndertowServer
 import automorph.spi.EffectSystem
@@ -34,7 +34,7 @@ case object DefaultHttpServer {
    * @param runEffect effect execution function
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
+   * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @tparam Effect effect type
@@ -45,10 +45,10 @@ case object DefaultHttpServer {
     runEffect: Effect[Any] => Any,
     port: Int,
     path: String = "/",
-    errorStatusCode: Int => Int = defaultErrorStatusCode,
+    exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): Type[Effect] = UndertowServer(handler, runEffect, port, path, errorStatusCode, webSocket, builder)
+  ): Type[Effect] = UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
 
   /**
    * Creates a default RPC server using HTTP as message transport protocol with specified effect ''system'' plugin.
@@ -62,7 +62,7 @@ case object DefaultHttpServer {
    * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
+   * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @tparam Effect effect type
@@ -74,12 +74,12 @@ case object DefaultHttpServer {
     bindApis: Handler[Effect] => Handler[Effect],
     port: Int,
     path: String = "/",
-    errorStatusCode: Int => Int = defaultErrorStatusCode,
+    exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
   ): Type[Effect] = {
     val handler = bindApis(DefaultHandler(system))
-    DefaultHttpServer(handler, runEffect, port, path, errorStatusCode, webSocket, builder)
+    DefaultHttpServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
   }
 
   /**
@@ -91,7 +91,7 @@ case object DefaultHttpServer {
    * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
+   * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @param executionContext execution context
@@ -101,14 +101,14 @@ case object DefaultHttpServer {
     bindApis: Handler[Future] => Handler[Future],
     port: Int,
     path: String = "/",
-    errorStatusCode: Int => Int = defaultErrorStatusCode,
+    exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
   )(implicit executionContext: ExecutionContext): Type[Future] = {
     Seq(executionContext)
     val handler = bindApis(DefaultHandler.async)
     val runEffect = (_: Future[Any]) => ()
-    DefaultHttpServer(handler, runEffect, port, path, errorStatusCode, webSocket, builder)
+    DefaultHttpServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
   }
 
   /**
@@ -120,7 +120,7 @@ case object DefaultHttpServer {
    * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param errorStatusCode maps a JSON-RPC error to a corresponding HTTP status code
+   * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @return synchronous RPC server
@@ -129,12 +129,12 @@ case object DefaultHttpServer {
     bindApis: Handler[Identity] => Handler[Identity],
     port: Int,
     path: String = "/",
-    errorStatusCode: Int => Int = defaultErrorStatusCode,
+    exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
   ): Type[Identity] = {
     val handler = bindApis(DefaultHandler.sync)
     val runEffect = (_: Identity[Any]) => ()
-    DefaultHttpServer(handler, runEffect, port, path, errorStatusCode, webSocket, builder)
+    DefaultHttpServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
   }
 }
