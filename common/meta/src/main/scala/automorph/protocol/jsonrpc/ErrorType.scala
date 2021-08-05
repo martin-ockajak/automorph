@@ -27,12 +27,12 @@ object ErrorType {
   /** JSON-RPC parse error. */
   final case class ParseErrorException(
     message: String,
-    cause: Throwable
+    cause: Throwable = None.orNull
   ) extends RuntimeException(message, cause)
 
   /** JSON-RPC internal error. */
   final case class InternalErrorException(
     message: String,
-    cause: Throwable
+    cause: Throwable = None.orNull
   ) extends RuntimeException(message, cause)
 }

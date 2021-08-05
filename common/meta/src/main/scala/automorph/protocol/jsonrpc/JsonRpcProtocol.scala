@@ -186,14 +186,14 @@ case object JsonRpcProtocol {
    * @return exception
    */
   def defaultErrorToException(code: Int, message: String): Throwable = code match {
-    case ErrorType.ParseError.code => ParseErrorException(message, None.orNull)
-    case ErrorType.InvalidRequest.code => InvalidRequestException(message, None.orNull)
-    case ErrorType.MethodNotFound.code => MethodNotFoundException(message, None.orNull)
-    case ErrorType.InvalidParams.code => new IllegalArgumentException(message, None.orNull)
-    case ErrorType.InternalError.code => InternalErrorException(message, None.orNull)
-    case ErrorType.IOError.code => new IOException(message, None.orNull)
-    case _ if code < ErrorType.ApplicationError.code => InternalErrorException(message, None.orNull)
-    case _ => new RuntimeException(message, None.orNull)
+    case ErrorType.ParseError.code => ParseErrorException(message)
+    case ErrorType.InvalidRequest.code => InvalidRequestException(message)
+    case ErrorType.MethodNotFound.code => MethodNotFoundException(message)
+    case ErrorType.InvalidParams.code => new IllegalArgumentException(message)
+    case ErrorType.InternalError.code => InternalErrorException(message)
+    case ErrorType.IOError.code => new IOException(message)
+    case _ if code < ErrorType.ApplicationError.code => InternalErrorException(message)
+    case _ => new RuntimeException(message)
   }
 
   /**

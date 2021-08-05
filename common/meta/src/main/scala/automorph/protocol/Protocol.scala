@@ -49,19 +49,19 @@ case object Protocol {
   /** Invalid request error. */
   final case class InvalidRequestException(
     message: String,
-    cause: Throwable
+    cause: Throwable = None.orNull
   ) extends RuntimeException(message, cause)
 
   /** Invalid response error. */
   final case class InvalidResponseException(
     message: String,
-    cause: Throwable
+    cause: Throwable = None.orNull
   ) extends RuntimeException(message, cause)
 
   /** JSON-RPC method not found error. */
   final case class MethodNotFoundException(
     message: String,
-    cause: Throwable
+    cause: Throwable = None.orNull
   ) extends RuntimeException(message, cause)
 
   /**
