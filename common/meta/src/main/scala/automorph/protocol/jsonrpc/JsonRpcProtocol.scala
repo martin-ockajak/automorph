@@ -134,8 +134,8 @@ final case class JsonRpcProtocol(
    * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
    * @return JSON-RPC protocol
    */
-  def errorMapping(exceptionToError: Throwable => ErrorType): JsonRpcProtocol =
-    errorMapping(exceptionToError, errorToException)
+  def exceptionToError(exceptionToError: Throwable => ErrorType): JsonRpcProtocol =
+    copy(exceptionToError = exceptionToError)
 
   /**
    * Creates a copy of this protocol with specified JSON-RPC error to exception mapping.
@@ -143,21 +143,8 @@ final case class JsonRpcProtocol(
    * @param errorToException maps a JSON-RPC error to a corresponding exception
    * @return JSON-RPC protocol
    */
-  def errorMapping(errorToException: (String, Int) => Throwable): JsonRpcProtocol =
-    errorMapping(exceptionToError, errorToException)
-
-  /**
-   * Creates a copy of this protocol with specified JSON-RPC error to exception and exception to JSON-RPC error mapping.
-   *
-   * @param errorToException maps a JSON-RPC error to a corresponding exception
-   * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
-   * @return JSON-RPC protocol
-   */
-  def errorMapping(
-    exceptionToError: Throwable => ErrorType,
-    errorToException: (String, Int) => Throwable
-  ): JsonRpcProtocol =
-    copy(errorToException = errorToException, exceptionToError = exceptionToError)
+  def errorToException(errorToException: (String, Int) => Throwable): JsonRpcProtocol =
+    copy(errorToException = errorToException)
 
   /**
    * Creates method invocation argument nodes.

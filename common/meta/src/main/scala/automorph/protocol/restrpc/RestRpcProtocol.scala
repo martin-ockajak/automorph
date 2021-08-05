@@ -137,8 +137,8 @@ final case class RestRpcProtocol(
    * @param exceptionToError maps an exception classs to a corresponding REST-RPC error type
    * @return REST-RPC protocol
    */
-  def errorMapping(exceptionToError: Throwable => Option[Int]): RestRpcProtocol =
-    errorMapping(exceptionToError, errorToException)
+  def exceptionToError(exceptionToError: Throwable => Option[Int]): RestRpcProtocol =
+    copy(exceptionToError = exceptionToError)
 
   /**
    * Creates a copy of this protocol with specified REST-RPC error to exception mapping.
@@ -146,21 +146,8 @@ final case class RestRpcProtocol(
    * @param errorToException maps a REST-RPC error to a corresponding exception
    * @return REST-RPC protocol
    */
-  def errorMapping(errorToException: (String, Option[Int]) => Throwable): RestRpcProtocol =
-    errorMapping(exceptionToError, errorToException)
-
-  /**
-   * Creates a copy of this protocol with specified REST-RPC error to exception and exception to REST-RPC error mapping.
-   *
-   * @param errorToException maps a REST-RPC error to a corresponding exception
-   * @param exceptionToError maps an exception classs to a corresponding REST-RPC error type
-   * @return REST-RPC protocol
-   */
-  def errorMapping(
-    exceptionToError: Throwable => Option[Int],
-    errorToException: (String, Option[Int]) => Throwable
-  ): RestRpcProtocol =
-    copy(errorToException = errorToException, exceptionToError = exceptionToError)
+  def errorToException(errorToException: (String, Option[Int]) => Throwable): RestRpcProtocol =
+    copy(errorToException = errorToException)
 
   /**
    * Creates method invocation argument nodes.

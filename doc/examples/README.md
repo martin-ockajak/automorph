@@ -302,12 +302,10 @@ val api = new Api()
 
 ```scala
 // Customize server JSON-RPC error mapping
-val exceptionToError = (exception: Throwable) =>
-  exception match {
-    case _: SQLException => InvalidRequest
-    case e => JsonRpcProtocol.defaultExceptionToError(e)
-  }
-val serverProtocol = JsonRpcProtocol().errorMapping(exceptionToError)
+val serverProtocol = JsonRpcProtocol().exceptionToError {
+  case _: SQLException => InvalidRequest
+  case e => JsonRpcProtocol.defaultExceptionToError(e)
+}
 
 // Customize server HTTP status code mapping
 val exceptionToStatusCode = (exception: Throwable) =>
@@ -317,7 +315,16 @@ val exceptionToStatusCode = (exception: Throwable) =>
   }
 
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = DefaultHttpServer.async(_.bind(api).protocol(serverProtocol), 80, "/api", exceptionToStatusCode)
+val server = DefaultHttpServer.async(
+  _.bind(api).protocol(serverProtocol),
+  80,
+  "/api",
+  {
+    // Customize server HTTP status code mapping
+    case _: SQLException => 400
+    case e => Http.defaultExceptionToStatusCode(e)
+  }
+)
 
 // Stop the server
 server.close()
@@ -327,14 +334,10 @@ server.close()
 
 ```scala
 // Customize client JSON-RPC error mapping
-val errorToException = (message: String, code: Int) =>
-  if (code == InvalidRequest.code && message.toUpperCase.contains("SQL")) {
-    new SQLException(message)
-  } else {
-    JsonRpcProtocol.defaultErrorToException(message, code)
-  }
-val clientProtocol = JsonRpcProtocol().errorMapping(errorToException)
-
+val clientProtocol = JsonRpcProtocol().errorToException {
+  case (message, InvalidRequest.code) if message.contains("SQL") => new SQLException(message)
+  case (message, code) => JsonRpcProtocol.defaultErrorToException(message, code)
+}
 
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val url = new java.net.URI("http://localhost/api")
