@@ -1,4 +1,4 @@
-package test.local
+package test.transport.local
 
 import automorph.system.MonixSystem
 import automorph.spi.EffectSystem

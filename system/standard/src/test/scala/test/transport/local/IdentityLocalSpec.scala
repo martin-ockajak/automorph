@@ -1,4 +1,4 @@
-package test.local
+package test.transport.local
 
 import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity

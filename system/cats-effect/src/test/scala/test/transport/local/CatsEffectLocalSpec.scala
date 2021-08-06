@@ -1,4 +1,4 @@
-package test.local
+package test.transport.local
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
