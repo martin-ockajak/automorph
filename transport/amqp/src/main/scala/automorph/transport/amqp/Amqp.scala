@@ -14,7 +14,7 @@ import java.time.Instant
  * @param priority message priority (0 to 9)
  * @param correlationId request-response correlation identifier
  * @param replyTo address to reply to
- * @param expiration message expiration specification
+ * @param expiration message expiration specification (milliseconds)
  * @param messageId application message identifier
  * @param timestamp message timestamp
  * @param `type` message type name
