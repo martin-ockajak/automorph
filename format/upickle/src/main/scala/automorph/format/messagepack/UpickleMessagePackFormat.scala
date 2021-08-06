@@ -17,7 +17,7 @@ import upack.Msg
  */
 final case class UpickleMessagePackFormat[Custom <: UpickleCustom](
   custom: Custom = DefaultUpickleCustom
-) extends UpickleMessagePackFormatMeta[Custom] {
+) extends UpickleMessagePackMeta[Custom] {
 
   import custom.*
 

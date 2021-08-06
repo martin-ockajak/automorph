@@ -11,14 +11,14 @@ import upack.Msg
  *
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-trait UpickleMessagePackFormatMeta[Custom <: UpickleCustom] extends MessageFormat[Msg] {
+trait UpickleMessagePackMeta[Custom <: UpickleCustom] extends MessageFormat[Msg] {
 
-  override def encode[T](value: T): Msg = macro UpickleMessagePackFormatMeta.encode[T]
+  override def encode[T](value: T): Msg = macro UpickleMessagePackMeta.encode[T]
 
-  override def decode[T](node: Msg): T = macro UpickleMessagePackFormatMeta.decode[T]
+  override def decode[T](node: Msg): T = macro UpickleMessagePackMeta.decode[T]
 }
 
-object UpickleMessagePackFormatMeta {
+object UpickleMessagePackMeta {
 
   def encode[T](c: blackbox.Context)(value: c.Expr[T]): c.Expr[Msg] = {
     import c.universe.Quasiquote

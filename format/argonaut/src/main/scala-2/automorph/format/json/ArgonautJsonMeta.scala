@@ -8,14 +8,14 @@ import scala.reflect.macros.blackbox
 /**
  * Argonaut JSON format plugin code generation.
  */
-private[automorph] trait ArgonautJsonFormatMeta extends MessageFormat[Json] {
+private[automorph] trait ArgonautJsonMeta extends MessageFormat[Json] {
 
   override def encode[T](value: T): Json = macro ArgonautJsonFormatMeta.encodeExpr[T]
 
   override def decode[T](node: Json): T = macro ArgonautJsonFormatMeta.decodeExpr[T]
 }
 
-private[automorph] object ArgonautJsonFormatMeta {
+private[automorph] object ArgonautJsonMeta {
 
   def encodeExpr[T: c.WeakTypeTag](c: blackbox.Context)(value: c.Expr[T]): c.Expr[Json] = {
     import c.universe.Quasiquote

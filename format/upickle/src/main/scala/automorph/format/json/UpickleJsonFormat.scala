@@ -16,7 +16,7 @@ import ujson.Value
  */
 final case class UpickleJsonFormat[Custom <: UpickleCustom](
   custom: Custom = DefaultUpickleCustom
-) extends UpickleJsonFormatMeta[Custom] {
+) extends UpickleJsonMeta[Custom] {
 
   import custom._
 

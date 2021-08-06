@@ -6,7 +6,7 @@ import automorph.spi.MessageFormat
 import scala.compiletime.summonInline
 
 /** Argonaut JSON format plugin code generation. */
-private[automorph] trait ArgonautJsonFormatMeta extends MessageFormat[Json]:
+private[automorph] trait ArgonautJsonMeta extends MessageFormat[Json]:
 
   override inline def encode[T](value: T): Json =
     import ArgonautJsonFormat.noneCodecJson

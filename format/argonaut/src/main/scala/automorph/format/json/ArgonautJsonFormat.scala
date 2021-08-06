@@ -13,7 +13,7 @@ import scala.collection.immutable.ArraySeq
  * @see [[http://argonaut.io/scaladocs/#argonaut.Json Node type]]
  * @constructor Creates an Argonaut codec plugin using JSON as message format.
  */
-final case class ArgonautJsonFormat() extends ArgonautJsonFormatMeta {
+final case class ArgonautJsonFormat() extends ArgonautJsonMeta {
 
   private val charset = StandardCharsets.UTF_8
 

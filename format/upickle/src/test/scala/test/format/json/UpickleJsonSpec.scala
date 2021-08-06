@@ -8,12 +8,12 @@ import test.format.MessageFormatSpec
 import test.{Enum, Record, Structure}
 import ujson.{Arr, Bool, Num, Obj, Str, Value}
 
-class UpickleJsonFormatSpec extends MessageFormatSpec {
+class UpickleJsonSpec extends MessageFormatSpec {
 
   type Node = Value
-  type ActualFormat = UpickleJsonFormat[UpickleJsonFormatSpec.type]
+  type ActualFormat = UpickleJsonFormat[UpickleJsonSpec.type]
 
-  override def format: ActualFormat = UpickleJsonFormat(UpickleJsonFormatSpec)
+  override def format: ActualFormat = UpickleJsonFormat(UpickleJsonSpec)
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
@@ -42,7 +42,7 @@ class UpickleJsonFormatSpec extends MessageFormatSpec {
   }
 }
 
-object UpickleJsonFormatSpec extends UpickleCustom {
+object UpickleJsonSpec extends UpickleCustom {
 
   implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
     value => Enum.toOrdinal(value),

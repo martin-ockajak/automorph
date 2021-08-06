@@ -10,7 +10,7 @@ import ujson.Value
  *
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-private[automorph] trait UpickleJsonFormatMeta[Custom <: UpickleCustom] extends MessageFormat[Value]:
+private[automorph] trait UpickleJsonMeta[Custom <: UpickleCustom] extends MessageFormat[Value]:
 
   val custom: Custom
 

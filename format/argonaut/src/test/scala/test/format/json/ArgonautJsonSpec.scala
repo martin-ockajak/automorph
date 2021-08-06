@@ -8,7 +8,7 @@ import test.Generators.arbitraryRecord
 import test.format.MessageFormatSpec
 import test.{Enum, Record, Structure}
 
-class ArgonautJsonFormatSpec extends MessageFormatSpec {
+class ArgonautJsonSpec extends MessageFormatSpec {
 
   type Node = Json
   type ActualFormat = ArgonautJsonFormat
