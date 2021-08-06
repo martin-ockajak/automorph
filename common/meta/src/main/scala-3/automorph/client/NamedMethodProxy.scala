@@ -36,8 +36,8 @@ case class NamedMethodProxy[Node, Format <: MessageFormat[Node], Effect[_], Cont
    * @return method proxy
    */
   def args(): NamedMethod = copy(
-    argumentValues = Seq(),
-    encodedArguments = Seq()
+    argumentValues = Seq.empty,
+    encodedArguments = Seq.empty
   )
 
   /**

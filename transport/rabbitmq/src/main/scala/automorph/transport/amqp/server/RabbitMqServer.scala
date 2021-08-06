@@ -42,7 +42,7 @@ final case class RabbitMqServer[Effect[_]](
   runEffect: Effect[Any] => Any,
   url: URL,
   queues: Seq[String],
-  addresses: Seq[Address] = Seq(),
+  addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
 )(implicit executionContext: ExecutionContext)
   extends AutoCloseable with Logging with ServerMessageTransport {
@@ -157,19 +157,5 @@ final case class RabbitMqServer[Effect[_]](
     }.get
   }
 
-  private def createConnection(): Connection = RabbitMqCommon.connect(url, Seq(), clientId, connectionFactory)
-
-//  private def setupQueueConsumers(): Unit = {
-//    logger.info(s"Consuming messages from queues: ${queueNames.mkString(", ")}")
-//    for (queueName <- queueNames) yield {
-//      // create queue and allow consuming only one message without acknowledgement
-//      val channel = connection.createChannel()
-//      channel.queueDeclare(queueName, durable, exclusive, autoDelete, null)
-//      channel.basicQos(prefetchCount)
-//
-//      // consume messages from the queue
-//      channel.basicConsume(queueName, false, InetAddress.getLocalHost.getHostName,
-//        new QueueConsumer(channel, virtualHost, applicationId, this))
-//    }
-//  }
+  private def createConnection(): Connection = RabbitMqCommon.connect(url, Seq.empty, clientId, connectionFactory)
 }

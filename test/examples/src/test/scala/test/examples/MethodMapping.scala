@@ -20,7 +20,7 @@ object MethodMapping extends App {
   // Customize method name mapping
   val methodAliases = (name: String) => name match {
     case "original" => Seq("original", "aliased")
-    case "omitted" => Seq()
+    case "omitted" => Seq.empty
     case other => Seq(s"test.$other")
   }
 

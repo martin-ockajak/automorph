@@ -240,7 +240,7 @@ trait ClientApi {
 // Customize method names
 val mapMethodName = (name: String) => name match {
   case "original" => Seq("original", "aliased")
-  case "omitted" => Seq()
+  case "omitted" => Seq.empty
   case other => Seq(s"test.$other")
 }
 

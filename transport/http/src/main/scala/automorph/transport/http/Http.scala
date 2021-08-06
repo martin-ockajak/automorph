@@ -19,7 +19,6 @@ import scala.concurrent.duration.{Duration, FiniteDuration}
  * @param scheme request URL scheme
  * @param authority request URL authority
  * @param path request URL path
- * @param query request URL query
  * @param fragment request URL fragment
  * @param headers message headers
  * @param followRedirects automatically follow redirects if true
@@ -32,9 +31,9 @@ final case class Http[Source](
   scheme: Option[String] = None,
   authority: Option[String] = None,
   path: Option[String] = None,
-  query: Option[String] = None,
+  parameters: Seq[(String, String)] = Seq.empty,
   fragment: Option[String] = None,
-  headers: Seq[(String, String)] = Seq(),
+  headers: Seq[(String, String)] = Seq.empty,
   followRedirects: Boolean = true,
   readTimeout: Duration = FiniteDuration(30, TimeUnit.SECONDS)
 ) {
@@ -94,6 +93,22 @@ final case class Http[Source](
    */
   def headers(name: String): Seq[String] = headers.filter(_._1 == name).map(_._2)
 
+  /**
+   * First URL query parameter value.
+   *
+   * @param name query parameter name
+   * @return first query parameter value
+   */
+  def parameter(name: String): Option[String] = parameters.find(_._1 == name).map(_._2)
+
+  /**
+   * URL query parameter values.
+   *
+   * @param name query parameter name
+   * @return query parameter values
+   */
+  def parameters(name: String): Seq[String] = parameters.filter(_._1 == name).map(_._2)
+
   /** `Proxy-Authorization` header value. */
   def proxyAuthorization: Option[String] = header(headerProxyAuthorization)
 
@@ -102,6 +117,12 @@ final case class Http[Source](
 
   /** `Proxy-Authorization: Bearer` header value. */
   def proxyAuthorizationBearer: Option[String] = authorization(headerProxyAuthorization, headerAuthorizationBearer)
+
+  /** Request URL query. */
+  def query: Option[String] = parameters match {
+    case Seq() => None
+    case _ => Some(s"?${parameters.map { case (name, value) => s"$name=$value" }.mkString("&")}")
+  }
 
   /** Request URL. */
   def url: Option[URI] = (scheme, authority, path, query, fragment) match {
@@ -172,7 +193,7 @@ final case class Http[Source](
   }
 
   /**
-   * Set message headers.
+   * Add message headers.
    *
    * @param entries header names and values
    * @return HTTP properties
@@ -181,7 +202,7 @@ final case class Http[Source](
     headers(entries, false)
 
   /**
-   * Set message headers.
+   * Add or replace message headers.
    *
    * @param entries header names and values
    * @param replace replace all existing headers with specified names
@@ -189,8 +210,60 @@ final case class Http[Source](
    */
   def headers(entries: Iterable[(String, String)], replace: Boolean): Http[Source] = {
     val entryNames = entries.map { case (name, _) => name }.toSet
-    val originalHeaders = if (replace) headers.filter { case (name, _) => !entryNames.contains(name) } else headers
+    val originalHeaders =
+      if (replace) headers.filter { case (name, _) => !entryNames.contains(name) }
+      else headers
     copy(headers = originalHeaders ++ entries)
+  }
+
+  /**
+   * Add URL query parameter.
+   *
+   * @param name parameter name
+   * @param value parameter value
+   * @return HTTP properties
+   */
+  def parameter(name: String, value: String): Http[Source] = parameter(name, value, false)
+
+  /**
+   * Add or replace URL query parameter.
+   *
+   * @param name query parameter name
+   * @param value query parameter value
+   * @param replace replace all existing query parameters with the specied name
+   * @return HTTP properties
+   */
+  def parameter(name: String, value: String, replace: Boolean): Http[Source] = {
+    val originalParameters =
+      if (replace) {
+        parameters.filter(_._1 != name)
+      } else parameters
+    copy(parameters = originalParameters :+ (name -> value))
+  }
+
+  /**
+   * Add URL query parameters.
+   *
+   * @param entries query parameter names and values
+   * @return HTTP properties
+   */
+  def parameters(entries: (String, String)*): Http[Source] =
+    parameters(entries, false)
+
+  /**
+   * Add or replace URL query parameters.
+   *
+   * @param entries query parameter names and values
+   * @param replace replace all existing query parameters with specified names
+   * @return HTTP properties
+   */
+  def parameters(entries: Iterable[(String, String)], replace: Boolean): Http[Source] = {
+    val entryNames = entries.map { case (name, _) => name }.toSet
+    val originalParameters =
+      if (replace) {
+        parameters.filter { case (name, _) => !entryNames.contains(name) }
+      } else parameters
+    copy(parameters = originalParameters ++ entries)
   }
 
   /**
@@ -226,20 +299,17 @@ final case class Http[Source](
   /**
    * Set request URL query string.
    *
-   * @param value URL query string
+   * @param queryString URL uery string
    * @return HTTP properties
    */
-  def query(value: String): Http[Source] = this.copy(query = Some(value))
-
-  /**
-   * Set request URL query parameters.
-   *
-   * @param entries query parameter names and values
-   * @return HTTP properties
-   */
-  def parameters(entries: (String, String)*): Http[Source] = {
-    val components = entries.map { case (name, value) => s"$name=$value" }
-    query(s"?${components.mkString("&")}")
+  def query(queryString: String): Http[Source] = {
+    val entries = queryString.replaceFirst("^\\?(.*)$", "$1")
+    val parameters = entries.split("&").flatMap(_.split("=") match {
+      case Array(name, value) if name.nonEmpty => Some((name, value))
+      case Array(name) if name.nonEmpty => Some((name, ""))
+      case _ => None
+    }).toSeq
+    copy(parameters = parameters)
   }
 
   /**
@@ -265,14 +335,15 @@ final case class Http[Source](
    * @param url URL
    * @return HTTP properties
    */
-  def url(url: URI): Http[Source] =
-    copy(
-      scheme = Some(url.getScheme),
-      authority = Some(url.getAuthority),
-      path = Some(url.getPath),
-      query = Some(url.getQuery),
-      fragment = Some(url.getFragment)
-    )
+  def url(url: URI): Http[Source] = {
+    val http = copy(
+      scheme = Option(url.getScheme),
+      authority = Option(url.getAuthority),
+      path = Option(url.getPath),
+      fragment = Option(url.getFragment)
+    ).query(url.getQuery)
+    Option(url.getQuery).map(http.query).getOrElse(http)
+  }
 
   private def authorization(header: String, method: String): Option[String] =
     headers(header).find(_.trim.startsWith(method)).flatMap(_.split(" ") match {
@@ -285,7 +356,7 @@ final case class Http[Source](
     header(headerName, headerValue, true)
   }
 
-  private def cookies(headerName: String): Map[String, Option[String]] = {
+  private def cookies(headerName: String): Map[String, Option[String]] =
     headers(headerName).flatMap { header =>
       header.split("=", 2).map(_.trim) match {
         case Array(name, value) => Some(name -> Some(value))
@@ -293,11 +364,9 @@ final case class Http[Source](
         case _ => None
       }
     }.toMap
-  }
 }
 
 case object Http {
-
 
   /**
    * Maps an exception to a corresponding default HTTP status code.

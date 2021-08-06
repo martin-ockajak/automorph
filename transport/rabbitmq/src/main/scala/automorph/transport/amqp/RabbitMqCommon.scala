@@ -90,7 +90,7 @@ private[automorph] object RabbitMqCommon extends Logging {
       Some(properties),
       Option(properties.getContentType),
       Option(properties.getContentEncoding),
-      Option(properties.getHeaders).map(headers => Map.from(headers.asScala)).getOrElse(Map()),
+      Option(properties.getHeaders).map(headers => Map.from(headers.asScala)).getOrElse(Map.empty),
       Option(properties.getDeliveryMode),
       Option(properties.getPriority),
       Option(properties.getCorrelationId),

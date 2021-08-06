@@ -26,7 +26,7 @@ final case class Amqp[Source](
   source: Option[Source] = None,
   contentType: Option[String] = None,
   contentEncoding: Option[String] = None,
-  headers: Map[String, Any] = Map(),
+  headers: Map[String, Any] = Map.empty,
   deliveryMode: Option[Int] = None,
   priority: Option[Int] = None,
   correlationId: Option[String] = None,

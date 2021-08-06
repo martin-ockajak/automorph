@@ -38,7 +38,7 @@ case class PositionalMethodProxy[Node, Format <: MessageFormat[Node], Effect[_],
    *
    * @return method proxy
    */
-  def args(): PositionalMethod = copy(argumentValues = Seq(), encodedArguments = Seq())
+  def args(): PositionalMethod = copy(argumentValues = Seq.empty, encodedArguments = Seq.empty)
 
   /**
    * Creates a copy of this method proxy with specified argument values.

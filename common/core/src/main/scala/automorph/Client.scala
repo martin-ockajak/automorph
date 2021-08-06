@@ -41,7 +41,7 @@ final case class Client[Node, Format <: MessageFormat[Node], Effect[_], Context]
    * @param methodName method name
    * @return method proxy with specified method name
    */
-  def method(methodName: String): NamedMethod = NamedMethodProxy(methodName, core, Seq(), Seq())
+  def method(methodName: String): NamedMethod = NamedMethodProxy(methodName, core, Seq.empty, Seq.empty)
 
   /**
    * Creates default request context.

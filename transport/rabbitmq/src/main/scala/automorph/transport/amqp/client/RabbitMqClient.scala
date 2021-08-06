@@ -39,7 +39,7 @@ final case class RabbitMqClient(
   url: URI,
   routingKey: String,
   exchange: String = RabbitMqCommon.defaultDirectExchange,
-  addresses: Seq[Address] = Seq(),
+  addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
 )(implicit executionContext: ExecutionContext)
   extends AutoCloseable with Logging with ClientMessageTransport[Future, Context] {
@@ -162,7 +162,7 @@ final case class RabbitMqClient(
   }
 
   private def createConnection(): Connection = {
-    val connection = RabbitMqCommon.connect(url.toURL, Seq(), clientId, connectionFactory)
+    val connection = RabbitMqCommon.connect(url.toURL, Seq.empty, clientId, connectionFactory)
     Option.when(exchange != RabbitMqCommon.defaultDirectExchange) {
       Using(connection.createChannel()) { channel =>
         channel.exchangeDeclare(exchange, BuiltinExchangeType.DIRECT, false)

@@ -65,7 +65,7 @@ final case class UndertowServer[Effect[_]](
             "Host" -> address.getHostString,
             "Port" -> address.getPort
           )
-        case _ => Map()
+        case _ => Map.empty
       })
       logger.info("Listening for connections", properties)
     }
