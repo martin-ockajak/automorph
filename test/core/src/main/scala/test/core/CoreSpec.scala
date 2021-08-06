@@ -44,7 +44,7 @@ trait CoreSpec extends BaseSpec {
 
   def run[T](effect: Effect[T]): T
 
-  def formatFixtures: Seq[FormatFixture]
+  def fixtures: Seq[FormatFixture]
 
   val simpleApiInstance: SimpleApiType = SimpleApiImpl(system)
   val complexApiInstance: ComplexApiType = ComplexApiImpl(system)
@@ -52,7 +52,7 @@ trait CoreSpec extends BaseSpec {
   val apiNames = Seq("Named", "Positional")
 
   "" - {
-    formatFixtures.lastOption.foreach { fixture =>
+    fixtures.lastOption.foreach { fixture =>
       fixture.format.getSimpleName.replaceAll("MessageFormat$", "") - {
         "Proxy" - {
           "Call" - {

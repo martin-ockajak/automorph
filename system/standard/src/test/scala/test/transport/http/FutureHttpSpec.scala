@@ -1,31 +1,38 @@
-//package test.transport.http
-//
-//import automorph.system.FutureBackend
-//import automorph.server.http.NanoHttpdServer
-//import automorph.spi.System
-//import org.scalacheck.Arbitrary
-//import scala.concurrent.ExecutionContext.Implicits.global
-//import scala.concurrent.Future
-//import test.FormatClientHandlerSpec
-//
-//class FutureHttpSpec extends FormatClientHandlerSpec {
-//
-//  type Effect[T] = Future[T]
-//  type Context = Short
-//
-//  private lazy val server = {
-//    val httpPort = availablePort
-//    NanoHttpdServer()
-//  }
-//
-//  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
-//
-//  override lazy val backend: System[Effect] = FutureBackend()
-//
-//  override def run[T](effect: Effect[T]): T = await(effect)
-//
-//  override def afterAll(): Unit = {
-//    server.close()
-//    super.afterAll()
-//  }
-//}
+package test.transport.http
+
+import automorph.spi.EffectSystem
+import automorph.system.FutureSystem
+import automorph.transport.http.Http
+import automorph.transport.http.server.NanoHTTPD.IHTTPSession
+import automorph.transport.http.server.{NanoHTTPD, NanoHttpdServer}
+import java.io.InputStream
+import java.util
+import org.scalacheck.Arbitrary
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalacheck.Gen
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import test.core.FormatCoreSpec
+
+class FutureHttpSpec extends FormatCoreSpec {
+
+  type Effect[T] = Future[T]
+  type Context = NanoHttpdServer.Context
+
+  private lazy val servers = fixtures.map { fixture =>
+    NanoHttpdServer[Effect](fixture.handler, await, availablePort)
+  }
+
+  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(for {
+    headers <- arbitrary[Seq[(String, String)]]
+  } yield Http(headers = headers))
+
+  override lazy val system: EffectSystem[Effect] = FutureSystem()
+
+  override def run[T](effect: Effect[T]): T = await(effect)
+
+  override def afterAll(): Unit = {
+    servers.foreach(_.close())
+    super.afterAll()
+  }
+}

@@ -114,17 +114,17 @@ private[automorph] case class ClientCore[Node, Format <: MessageFormat[Node], Ef
     protocol.parseResponse(rawResponse, format).fold(
       error => raiseError(error.exception, requestProperties),
       rpcResponse => {
-        lazy val properties = rpcResponse.message.properties ++ rpcResponse.message.text.map(bodyProperty -> _())
-        logger.trace(s"Received ${protocol.name} response", properties)
+        lazy val properties = requestProperties ++ rpcResponse.message.properties
+        logger.trace(s"Received ${protocol.name} response", properties ++ rpcResponse.message.text.map(bodyProperty -> _()))
         rpcResponse.result.pureFold(
           // Raise error
           error => raiseError(error, requestProperties ++ properties),
           // Decode result
           result =>
             Try(decodeResult(result)).pureFold(
-              error => raiseError(InvalidResponseException("Invalid result", error), requestProperties ++ properties),
+              error => raiseError(InvalidResponseException("Invalid result", error), properties),
               result => {
-                logger.info(s"Performed ${protocol.name} request", requestProperties ++ properties)
+                logger.info(s"Performed ${protocol.name} request", properties)
                 system.pure(result)
               }
             )
@@ -136,12 +136,12 @@ private[automorph] case class ClientCore[Node, Format <: MessageFormat[Node], Ef
    * Creates an error effect from an exception.
    *
    * @param error exception
-   * @param requestProperties request properties
+   * @param properties message properties
    * @tparam T effectful value type
    * @return error value
    */
-  private def raiseError[T](error: Throwable, requestProperties: Map[String, String]): Effect[T] = {
-    logger.error(s"Failed to perform ${protocol.name} request", error, requestProperties)
+  private def raiseError[T](error: Throwable, properties: Map[String, String]): Effect[T] = {
+    logger.error(s"Failed to perform ${protocol.name} request", error, properties)
     system.failed(error)
   }
 }
