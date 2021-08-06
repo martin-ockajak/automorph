@@ -82,7 +82,7 @@ lazy val core = (project in file("common/core")).dependsOn(
 
 // Effect system
 lazy val standard = (project in file(s"system/standard")).dependsOn(
-  http, testCore % Test
+  http, testCore % Test, testHttp % Test
 ).settings(
   name := s"$projectName-standard"
 )
@@ -248,6 +248,12 @@ lazy val testBase = (project in file("test/base")).dependsOn(
 )
 lazy val testCore = (project in file("test/core")).dependsOn(
   testBase, core, upickle, circe, argonaut,
+)
+lazy val testHttp = (project in file("test/http")).dependsOn(
+  testBase, http
+)
+lazy val testAmqp = (project in file("test/amqp")).dependsOn(
+  testBase, amqp
 )
 
 
