@@ -10,7 +10,7 @@ import test.core.FormatCoreSpec
 class FutureLocalSpec extends FormatCoreSpec {
 
   type Effect[T] = Future[T]
-  type Context = Short
+  type Context = Map[String, Double]
 
   override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 

@@ -9,7 +9,7 @@ import test.core.FormatCoreSpec
 class TryLocalSpec extends FormatCoreSpec {
 
   type Effect[T] = Try[T]
-  type Context = Short
+  type Context = Seq[Int]
 
   override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
