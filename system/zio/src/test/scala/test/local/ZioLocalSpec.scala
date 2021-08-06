@@ -11,7 +11,7 @@ class ZioLocalSpec extends FormatCoreSpec {
   private lazy val runtime = Runtime.default.withReportFailure(_ => ())
 
   type Effect[T] = RIO[ZEnv, T]
-  type Context = Short
+  type Context = String
 
   override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 

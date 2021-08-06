@@ -11,7 +11,7 @@ import test.core.FormatCoreSpec
 class MonixLocalSpec extends FormatCoreSpec {
 
   type Effect[T] = Task[T]
-  type Context = Short
+  type Context = String
 
   override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 

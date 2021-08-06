@@ -9,7 +9,7 @@ import test.core.FormatCoreSpec
 class IdentityLocalSpec extends FormatCoreSpec {
 
   type Effect[T] = Identity[T]
-  type Context = String
+  type Context = Option[String]
 
   override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
 
