@@ -6,8 +6,9 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 
 object Generator {
+
   def context[Source] = Arbitrary(for {
-    headers <- arbitrary[Map[String, String]]
+    headers <- Gen.listOf(arbitrary[(String, String)].suchThat(_._1.nonEmpty)).map(_.toMap)
     deliveryMode <- Gen.option(Gen.choose(1, 2))
     priority <- Gen.option(Gen.choose(0, 9))
     correlationId <- arbitrary[Option[String]]

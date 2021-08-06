@@ -6,7 +6,12 @@ import org.scalacheck.Gen
 import automorph.transport.http.Http
 
 object Generator {
+
   def context[Source] = Arbitrary(for {
-    headers <- arbitrary[Seq[(String, String)]]
-  } yield Http[Source](headers = headers))
+    headers <- Gen.listOf(arbitrary[(String, String)].suchThat(_._1.nonEmpty))
+    parameters <- Gen.listOf(arbitrary[(String, String)].suchThat(_._1.nonEmpty))
+  } yield Http[Source](
+    headers = headers,
+    parameters = parameters
+  ))
 }
