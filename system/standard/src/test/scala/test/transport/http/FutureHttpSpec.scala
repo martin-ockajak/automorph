@@ -4,16 +4,14 @@
 //import automorph.system.FutureSystem
 //import automorph.transport.http.Http
 //import automorph.transport.http.client.HttpUrlConnectionClient
-//import automorph.transport.http.server.NanoHTTPD.IHTTPSession
-//import automorph.transport.http.server.{NanoHTTPD, NanoHttpdServer}
-//import java.io.InputStream
+//import automorph.transport.http.server.NanoHttpdServer
+//import java.net.URI
+//import org.scalacheck.Arbitrary
 //import org.scalacheck.Arbitrary.arbitrary
-//import org.scalacheck.{Arbitrary, Gen}
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
 //import test.core.FormatCoreSpec
 //import test.transport.http.Generator
-//import java.net.URI
 //
 //class FutureHttpSpec extends FormatCoreSpec {
 //
