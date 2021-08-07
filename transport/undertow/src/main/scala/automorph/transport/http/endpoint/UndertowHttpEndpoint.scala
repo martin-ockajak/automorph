@@ -28,7 +28,7 @@ import scala.util.Try
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor Creates an Undertow web server HTTP handler with the specified RPC request ''handler''.
  * @param handler RPC request handler
- * @param runEffect effect execution function
+ * @param runEffect executes specified effect asynchronously
  * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
  * @tparam Effect effect type
  */

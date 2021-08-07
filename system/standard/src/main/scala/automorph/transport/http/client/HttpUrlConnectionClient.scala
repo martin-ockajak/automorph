@@ -4,7 +4,7 @@ import automorph.log.Logging
 import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.system.IdentitySystem
 import automorph.transport.http.Http
-import automorph.transport.http.client.HttpUrlConnectionClient.Context
+import automorph.transport.http.client.HttpUrlConnectionClient.{Context, EffectValue}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.{HttpURLConnection, URI}
@@ -18,22 +18,22 @@ import scala.util.{Try, Using}
  *
  * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
- * Note: This transport uses blocking operations so it is strongly recommended to use it with the following effect systems only:
- * - Identity
- * - Try
- * - Future (with dedicated blocking thread pool execution context)
+ * This transport uses blocking I/O operations so it is strongly recommended to supply
+ * a suitable blocking effect creation function when using an asynchronous effect system.
  *
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @constructor Creates an HTTP URL connection client transport plugin.
  * @param url HTTP server endpoint URL
  * @param method HTTP method
  * @param system effect system plugin
+ * @param blockingEffect creates an effect from specified blocking function
  * @tparam Effect effect type
  */
 final case class HttpUrlConnectionClient[Effect[_]](
   url: URI,
   method: String,
-  system: EffectSystem[Effect] = IdentitySystem()
+  system: EffectSystem[Effect] = IdentitySystem(),
+  blockingEffect: Option[(() => EffectValue) => Effect[EffectValue]] = None
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val contentLengthHeader = "Content-Length"
@@ -47,24 +47,27 @@ final case class HttpUrlConnectionClient[Effect[_]](
     mediaType: String,
     context: Option[Context]
   ): Effect[ArraySeq.ofByte] =
-    system.flatMap(
-      send(request, mediaType, context),
-      { connection =>
-        logger.trace("Receiving HTTP response", Map("URL" -> url))
-        Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).pureFold(
-          error => {
-            logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
-            system.failed(error)
-            throw error
-          },
-          response => {
-            logger.debug(
-              "Received HTTP response",
-              Map("URL" -> url, "Status" -> connection.getResponseCode, "Size" -> response.length)
-            )
-            system.pure(response)
+    system.map(
+      system.flatMap(
+        send(request, mediaType, context),
+        { case (connection, _) =>
+          blocking {
+            logger.trace("Receiving HTTP response", Map("URL" -> url))
+            Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).mapFailure { error =>
+              logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
+              error
+            }.map { response =>
+              logger.debug(
+                "Received HTTP response",
+                Map("URL" -> url, "Status" -> connection.getResponseCode, "Size" -> response.length)
+              )
+              connection -> response
+            }.get
           }
-        )
+        }
+      ),
+      { case (_, response) =>
+        response
       }
     )
 
@@ -75,29 +78,27 @@ final case class HttpUrlConnectionClient[Effect[_]](
 
   override def close(): Unit = ()
 
-  private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[HttpURLConnection] = {
-    logger.trace("Sending HTTP request", Map("URL" -> url, "Size" -> request.length))
-    val properties = context.getOrElse(defaultContext)
-    val connection = connect(properties)
-    val outputStream = connection.getOutputStream
-    val httpMethod = setProperties(connection, request, mediaType, properties)
-    val trySend = Using(outputStream)(_.write(request.unsafeArray))
-    clearProperties(connection, properties)
-    trySend.pureFold(
-      error => {
+  private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[EffectValue] =
+    blocking {
+      logger.trace("Sending HTTP request", Map("URL" -> url, "Size" -> request.length))
+      val properties = context.getOrElse(defaultContext)
+      val connection = connect(properties)
+      val outputStream = connection.getOutputStream
+      val httpMethod = setProperties(connection, request, mediaType, properties)
+      val trySend = Using(outputStream)(_.write(request.unsafeArray))
+      clearProperties(connection, properties)
+      trySend.mapFailure { error =>
         logger.error(
           "Failed to send HTTP request",
           error,
           Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length)
         )
-        system.failed(error)
-      },
-      _ => {
+        error
+      }.map { _ =>
         logger.debug("Sent HTTP request", Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length))
-        system.pure(connection)
-      }
-    )
-  }
+        connection -> ArraySeq.ofByte(Array.empty)
+      }.get
+    }
 
   private def setProperties(
     connection: HttpURLConnection,
@@ -134,12 +135,25 @@ final case class HttpUrlConnectionClient[Effect[_]](
     connection.setDoOutput(true)
     connection
   }
+
+  private def defaultBlockingEffect(
+    blocking: (() => EffectValue)
+  ): Effect[EffectValue] = Try(blocking()).pureFold(
+    error => system.failed(error),
+    result => system.pure(result)
+  )
+
+  private def blocking(value: => EffectValue): Effect[EffectValue] =
+    blockingEffect.getOrElse(defaultBlockingEffect)(() => value)
 }
 
 case object HttpUrlConnectionClient {
 
   /** Request context type. */
   type Context = Http[HttpURLConnection]
+
+  /** Effect value type. */
+  type EffectValue = (HttpURLConnection, ArraySeq.ofByte)
 
   implicit val defaultContext: Context = Http()
 }

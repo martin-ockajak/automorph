@@ -32,7 +32,7 @@ case object UndertowWebSocketEndpoint {
    * @see [[https://undertow.io/ Documentation]]
    * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
    * @param handler RPC request handler
-   * @param runEffect effect execution function
+   * @param runEffect executes specified effect asynchronously
    * @param next Undertow web server handler invoked if a HTTP request does not contain a WebSocket handshake
    * @return Undertow web server HTTP handler
    * @tparam Effect effect type
@@ -60,7 +60,7 @@ case object UndertowWebSocketEndpoint {
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor Creates an Undertow web server WebSocket handler with the specified RPC request ''handler''.
  * @param handler RPC request handler
- * @param runEffect effect execution function
+ * @param runEffect executes specified effect asynchronously
  * @tparam Effect effect type
  */
 final private[automorph] case class UndertowWebSocketCallback[Effect[_]](

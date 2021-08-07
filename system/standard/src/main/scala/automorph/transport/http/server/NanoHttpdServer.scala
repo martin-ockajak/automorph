@@ -16,14 +16,14 @@ import scala.jdk.CollectionConverters.MapHasAsScala
 /**
  * NanoHTTPD web server transport plugin using HTTP as message transport protocol.
  *
- * The server interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
+u* The server interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
  * The response returned by the RPC handler is used as HTTP response body.
  *
  * @see [[https://github.com/NanoHttpd/nanohttpd Documentation]]
  * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
  * @constructor Creates a NanoHTTPD HTTP server with the specified RPC request ''handler''.
  * @param handler RPC request handler
- * @param runEffectSync synchronous effect execution function
+ * @param runEffectSync executes specified effect synchronously
  * @param port port to listen on for HTTP connections
  * @param readTimeout HTTP connection read timeout (milliseconds)
  * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code

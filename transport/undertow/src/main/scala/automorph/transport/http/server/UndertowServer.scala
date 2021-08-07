@@ -21,7 +21,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor Creates an Undertow HTTP server with the specified HTTP handler.
  * @param handler RPC request handler
- * @param runEffect effect execution function
+ * @param runEffect executes specified effect asynchronously
  * @param port port to listen on for HTTP connections
  * @param path HTTP URL path (default: /)
  * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
