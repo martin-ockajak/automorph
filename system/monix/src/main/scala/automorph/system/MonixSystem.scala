@@ -18,7 +18,7 @@ final case class MonixSystem() extends EffectSystem[Task] {
 
   override def flatMap[T, R](effect: Task[T], function: T => Task[R]): Task[R] = effect.flatMap(function)
 
-  override def either[T](value: Task[T]): Task[Either[Throwable, T]] = value.attempt
+  override def either[T](effect: Task[T]): Task[Either[Throwable, T]] = effect.attempt
 }
 
 case object MonixSystem {

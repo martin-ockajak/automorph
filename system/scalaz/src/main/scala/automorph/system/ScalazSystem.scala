@@ -16,9 +16,9 @@ final case class ScalazSystem() extends EffectSystem[IO] {
 
   override def failed[T](exception: Throwable): IO[T] = IO.throwIO(exception)
 
-  override def flatMap[T, R](value: IO[T], function: T => IO[R]): IO[R] = value.flatMap(function)
+  override def flatMap[T, R](effect: IO[T], function: T => IO[R]): IO[R] = effect.flatMap(function)
 
-  override def either[T](value: IO[T]): IO[Either[Throwable, T]] = value.catchLeft.map(_.toEither)
+  override def either[T](effect: IO[T]): IO[Either[Throwable, T]] = effect.catchLeft.map(_.toEither)
 }
 
 case object ScalazSystem {

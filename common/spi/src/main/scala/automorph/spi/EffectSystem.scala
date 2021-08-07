@@ -30,24 +30,24 @@ trait EffectSystem[Effect[_]] {
   /**
    * Creates a new effect by applying an effectful function to an effect's value.
    *
-   * @param value effectful value
+   * @param effect effectful value
    * @param function effectful function applied to the specified effect's value
    * @tparam T effectful value type
    * @tparam R effectful function result type
    * @return effect containing the transformed value
    */
-  def flatMap[T, R](value: Effect[T], function: T => Effect[R]): Effect[R]
+  def flatMap[T, R](effect: Effect[T], function: T => Effect[R]): Effect[R]
 
   /**
    * Creates a new effect by lifting an effect's errors into a value.
    *
    * The resulting effect cannot fail.
    *
-   * @param value effectful value
+   * @param effect effectful value
    * @tparam T effectful value type
    * @return effectful error or the original value
    */
-  def either[T](value: Effect[T]): Effect[Either[Throwable, T]]
+  def either[T](effect: Effect[T]): Effect[Either[Throwable, T]]
 
   /**
    * Creates a new effect by applying a function to an effect's value.

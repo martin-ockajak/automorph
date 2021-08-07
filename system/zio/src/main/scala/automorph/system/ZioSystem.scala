@@ -17,10 +17,10 @@ final case class ZioSystem[Environment]() extends EffectSystem[({ type Effect[T]
 
   override def failed[T](exception: Throwable): RIO[Environment, T] = RIO.fail(exception)
 
-  override def flatMap[T, R](value: RIO[Environment, T], function: T => RIO[Environment, R]): RIO[Environment, R] =
-    value.flatMap(function)
+  override def flatMap[T, R](effect: RIO[Environment, T], function: T => RIO[Environment, R]): RIO[Environment, R] =
+    effect.flatMap(function)
 
-  override def either[T](value: RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] = value.either
+  override def either[T](effect: RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] = effect.either
 }
 
 case object ZioSystem {

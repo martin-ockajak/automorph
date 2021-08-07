@@ -17,9 +17,9 @@ final case class IdentitySystem() extends EffectSystem[Identity] {
 
   override def failed[T](exception: Throwable): T = throw exception
 
-  override def flatMap[T, R](value: T, function: T => R): R = function(value)
+  override def flatMap[T, R](effect: T, function: T => R): R = function(effect)
 
-  override def either[T](value: T): Either[Throwable, T] = Right(value)
+  override def either[T](effect: T): Either[Throwable, T] = Right(effect)
 }
 
 case object IdentitySystem {
