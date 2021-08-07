@@ -8,9 +8,11 @@ import automorph.spi.{EndpointMessageTransport, MessageFormat}
 import automorph.transport.http.Http
 import automorph.util.Bytes
 import sttp.model.headers.Cookie
+import sttp.capabilities.Streams
+import sttp.capabilities.WebSockets
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode}
+import sttp.tapir.{CodecFormat, byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode, webSocketBody}
 
 /**
  * Tapir endpoint endpoint transport plugin using HTTP as message transport protocol.
@@ -27,6 +29,9 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 
   /** Endpoint request type. */
   type RequestType = (Array[Byte], List[String], QueryParams, List[Header], List[Cookie], Option[String])
+
+  /** Endpoint request type. */
+  type XRequestType = (List[String], QueryParams, List[Header], List[Cookie], Option[String])
 
   /**
    * Creates a Tapir HTTP endpoint with the specified RPC request ''handler''.
@@ -75,6 +80,53 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
         )
       }
   }
+
+//  /**
+//   * Creates a Tapir HTTP endpoint with the specified RPC request ''handler''.
+//   *
+//   * The endpoint interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
+//   * The response returned by the RPC handler is used as HTTP response body.
+//   *
+//   * @see [[https://tapir.softwaremill.com/ Documentation]]
+//   * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
+//   * @param handler RPC request handler
+//   * @tparam Effect effect type
+//   * @return Tapir HTTP endpoint
+//   */
+//  def apply[Effect[_], S](
+//    handler: Handler.AnyFormat[Effect, Context],
+//    streams: Streams[S]
+//  ): ServerEndpoint[XRequestType, Unit, streams.Pipe[Array[Byte], Array[Byte]], WebSockets, Effect] = {
+//    val system = handler.system
+//    val contentType = Header.contentType(MediaType.parse(handler.format.mediaType).getOrElse {
+//      throw new IllegalArgumentException(s"Invalid content type: ${handler.format.mediaType}")
+//    })
+//    endpoint
+//      .in(paths).in(queryParams).in(headers).in(cookies).in(clientIp)
+//      .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream].apply[S](streams))
+//      .serverLogic { case (requestMessage, paths, queryParams, headers, cookies, clientIp) =>
+//        ???
+////        // Receive the request
+////        val client = clientAddress(clientIp)
+////        logger.debug("Received WebSocket request", Map("Client" -> client, "Size" -> requestMessage.length))
+////
+////        // Process the request
+////        implicit val usingContext: Context = createContext(method, paths, queryParams, headers)
+////        system.map(
+////          system.either(handler.processRequest(requestMessage)),
+////          (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
+////            handlerResult.fold(
+////              error => Right(serverError(error, requestMessage, client)),
+////              result => {
+////                // Send the response
+////                val message = result.response.getOrElse(Array[Byte]())
+////                val status = result.exception.map(exceptionToStatusCode).map(StatusCode.apply).getOrElse(StatusCode.Ok)
+////                Right(createResponse(message, status, client))
+////              }
+////            )
+////        )
+//      }
+//  }
 
   private def serverError(error: Throwable, request: Array[Byte], client: String): (Array[Byte], StatusCode) = {
     logger.error("Failed to process HTTP request", error, Map("Client" -> client, "Size" -> request.length))
