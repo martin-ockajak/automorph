@@ -16,7 +16,7 @@ object ClientMessageTransport extends App {
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
   val url = new java.net.URI("http://localhost/api")
-  val transport = HttpUrlConnectionClient(url, "POST", server.handler.system)
+  val transport = HttpUrlConnectionClient(url, "POST")
   val client = DefaultClient.sync(transport)
 
   // Call the remote API method via proxy

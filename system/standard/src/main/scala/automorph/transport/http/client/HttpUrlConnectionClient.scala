@@ -2,11 +2,13 @@ package automorph.transport.http.client
 
 import automorph.log.Logging
 import automorph.spi.{ClientMessageTransport, EffectSystem}
+import automorph.system.IdentitySystem
 import automorph.transport.http.Http
 import automorph.transport.http.client.HttpUrlConnectionClient.Context
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.{HttpURLConnection, URI}
+import java.security.Identity
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.duration.Duration
 import scala.util.{Try, Using}
@@ -15,6 +17,8 @@ import scala.util.{Try, Using}
  * URL connection client transport plugin using HTTP as message transport protocol.
  *
  * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
+ *
+ * Note: Strongly recommended to use with Identity effect system only since this transport relies on blocking operations.
  *
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @constructor Creates an HTTP URL connection client transport plugin.
@@ -26,7 +30,7 @@ import scala.util.{Try, Using}
 final case class HttpUrlConnectionClient[Effect[_]](
   url: URI,
   method: String,
-  system: EffectSystem[Effect]
+  system: EffectSystem[Effect] = IdentitySystem()
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val contentLengthHeader = "Content-Length"
