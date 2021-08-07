@@ -7,7 +7,7 @@ import org.scalacheck.{Arbitrary, Gen}
 
 object Generator {
 
-  def context[Source] = Arbitrary(for {
+  def context: Arbitrary[Amqp[_]] = Arbitrary(for {
     headers <- Gen.listOf(arbitrary[(String, String)].suchThat(_._1.nonEmpty)).map(_.toMap)
     deliveryMode <- Gen.option(Gen.choose(1, 2))
     priority <- Gen.option(Gen.choose(0, 9))
@@ -18,7 +18,7 @@ object Generator {
     `type` <- arbitrary[Option[String]]
     userId <- arbitrary[Option[String]]
     appId <- arbitrary[Option[String]]
-  } yield Amqp[Source](
+  } yield Amqp(
     None,
     None,
     None,
