@@ -1,18 +1,19 @@
 package automorph.transport.amqp.client
 
 import automorph.log.Logging
-import automorph.spi.ClientMessageTransport
+import automorph.spi.{ClientMessageTransport, EffectSystem}
+import automorph.system.FutureSystem
 import automorph.transport.amqp.client.RabbitMqClient.Context
 import automorph.transport.amqp.{Amqp, RabbitMqCommon}
 import automorph.util.Extensions.TryOps
 import automorph.util.MessageId
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, Consumer, DefaultConsumer, Envelope}
-import java.io.IOException
 import java.net.URI
 import java.util.Date
 import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.jdk.CollectionConverters.MapHasAsJava
@@ -30,37 +31,42 @@ import scala.util.{Try, Using}
  * @constructor Creates a RabbitMQ client transport plugin.
  * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
  * @param routingKey AMQP routing key (typically a queue name)
+ * @param system effect system plugin
+ * @param blockingEffect creates an effect from specified blocking function
+ * @param promisedEffect creates a not yet completed effect and its completion function
  * @param exchange direct non-durable AMQP message exchange name
  * @param addresses broker hostnames and ports for reconnection attempts
  * @param connectionFactory AMQP broker connection factory
- * @param executionContext execution context
+ * @tparam Effect effect type
  */
-final case class RabbitMqClient(
+final case class RabbitMqClient[Effect[_]](
   url: URI,
   routingKey: String,
+  system: EffectSystem[Effect],
+  blockingEffect: (() => Unit) => Effect[Unit],
+  promisedEffect: () => (Effect[ArraySeq.ofByte], ArraySeq.ofByte => Unit),
   exchange: String = RabbitMqCommon.defaultDirectExchange,
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
-)(implicit executionContext: ExecutionContext)
-  extends AutoCloseable with Logging with ClientMessageTransport[Future, Context] {
+) extends AutoCloseable with Logging with ClientMessageTransport[Effect, Context] {
 
   private lazy val connection = createConnection()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
-  private val callResults = TrieMap[String, Promise[ArraySeq.ofByte]]()
+  private val deliveryHandlers = TrieMap[String, ArraySeq.ofByte => Unit]()
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
 
   override def call(
     request: ArraySeq.ofByte,
     mediaType: String,
     context: Option[Context]
-  ): Future[ArraySeq.ofByte] = {
+  ): Effect[ArraySeq.ofByte] = {
     val properties = createProperties(mediaType, context)
-    val result = Promise[ArraySeq.ofByte]()
-    send(request, properties, Some(result)).flatMap(_ => result.future)
+    val (result, complete) = promisedEffect()
+    system.flatMap(send(request, properties, Some(complete)), _ => result)
   }
 
-  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Future[Unit] = {
+  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
     val properties = createProperties(mediaType, context)
     send(request, properties, None)
   }
@@ -72,8 +78,8 @@ final case class RabbitMqClient(
   private def send(
     request: ArraySeq.ofByte,
     properties: BasicProperties,
-    result: Option[Promise[ArraySeq.ofByte]]
-  ): Future[Unit] = Future {
+    complete: Option[ArraySeq.ofByte => Unit]
+  ): Effect[Unit] = {
     logger.trace(
       "Sending AMQP request",
       Map(
@@ -86,10 +92,10 @@ final case class RabbitMqClient(
     val consumer = threadConsumer.get
 
     // Retain result promise if available
-    result.foreach(callResults.put(properties.getCorrelationId, _))
+    complete.foreach(deliveryHandlers.put(properties.getCorrelationId, _))
 
     // Send the request
-    Try {
+    blockingEffect(() => Try {
       consumer.getChannel.basicPublish(exchange, routingKey, true, false, properties, request.unsafeArray)
       logger.debug(
         "Sent AMQP request",
@@ -112,7 +118,7 @@ final case class RabbitMqClient(
         )
       )
       error
-    }.get
+    }.get)
   }
 
   private def createProperties(mediaType: String, context: Option[Context]): BasicProperties = {
@@ -152,8 +158,8 @@ final case class RabbitMqClient(
             "Size" -> body.length
           )
         )
-        callResults.get(properties.getCorrelationId).foreach { promise =>
-          promise.success(new ArraySeq.ofByte(body))
+        deliveryHandlers.get(properties.getCorrelationId).foreach { complete =>
+          complete(new ArraySeq.ofByte(body))
         }
       }
     }
@@ -173,8 +179,45 @@ final case class RabbitMqClient(
 }
 
 case object RabbitMqClient {
+
   /** Request context type. */
   type Context = Amqp[BasicProperties]
 
   implicit val defaultContext: Context = Amqp()
+
+  /**
+   * Creates asynchronous RabbitMQ client transport plugin.
+   *
+   * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
+   * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
+   * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
+   * @param routingKey AMQP routing key (typically a queue name)
+   * @param exchange direct non-durable AMQP message exchange name
+   * @param addresses broker hostnames and ports for reconnection attempts
+   * @param connectionFactory AMQP broker connection factory
+   * @param executionContext execution context
+   */
+  def async(
+    url: URI,
+    routingKey: String,
+    exchange: String = RabbitMqCommon.defaultDirectExchange,
+    addresses: Seq[Address] = Seq.empty,
+    connectionFactory: ConnectionFactory = new ConnectionFactory
+  )(implicit executionContext: ExecutionContext): RabbitMqClient[Future] = {
+    val blockingEffect = (blocking: () => Unit) => Future(blocking())
+    val promisedEffect = () => {
+      val promise = Promise[ArraySeq.ofByte]
+      promise.future -> promise.success.andThen(_ => ())
+    }
+    RabbitMqClient(
+      url,
+      routingKey,
+      FutureSystem(),
+      blockingEffect,
+      promisedEffect,
+      exchange,
+      addresses,
+      connectionFactory
+    )
+  }
 }
