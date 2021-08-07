@@ -23,7 +23,7 @@ u* The server interprets HTTP request body as an RPC request and processes it us
  * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
  * @constructor Creates a NanoHTTPD HTTP server with the specified RPC request ''handler''.
  * @param handler RPC request handler
- * @param runEffectSync executes specified effect synchronously
+ * @param evaluateEffect executes specified effect synchronously
  * @param port port to listen on for HTTP connections
  * @param readTimeout HTTP connection read timeout (milliseconds)
  * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
@@ -31,7 +31,7 @@ u* The server interprets HTTP request body as an RPC request and processes it us
  */
 final case class NanoHttpdServer[Effect[_]] private (
   handler: Handler.AnyFormat[Effect, Context],
-  runEffectSync: Effect[Response] => Response,
+  evaluateEffect: Effect[Response] => Response,
   port: Int,
   readTimeout: Int,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
@@ -53,7 +53,7 @@ final case class NanoHttpdServer[Effect[_]] private (
 
     // Process the request
     implicit val usingContext: Context = createContext(session)
-    runEffectSync(system.map(
+    evaluateEffect(system.map(
       system.either(handler.processRequest(request)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
         handlerResult.fold(

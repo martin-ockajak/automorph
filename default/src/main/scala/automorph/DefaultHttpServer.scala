@@ -31,7 +31,7 @@ case object DefaultHttpServer {
    *
    * @see [[https://undertow.io/ HTTP Server Documentation]]
    * @param handler RPC request handler
-   * @param runEffect effect execution function
+   * @param runEffect executes specified effect asynchronously
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
    * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
@@ -42,7 +42,7 @@ case object DefaultHttpServer {
    */
   def apply[Effect[_]](
     handler: Handler.AnyFormat[Effect, Context],
-    runEffect: Effect[Any] => Any,
+    runEffect: Effect[Any] => Unit,
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
@@ -58,7 +58,7 @@ case object DefaultHttpServer {
    *
    * @see [[https://undertow.io/ HTTP Server Documentation]]
    * @param system effect system plugin
-   * @param runEffect effect execution function
+   * @param runEffect executes specified effect asynchronously
    * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
@@ -70,7 +70,7 @@ case object DefaultHttpServer {
    */
   def system[Effect[_]](
     system: EffectSystem[Effect],
-    runEffect: Effect[Any] => Any,
+    runEffect: Effect[Any] => Unit,
     bindApis: Handler[Effect] => Handler[Effect],
     port: Int,
     path: String = "/",

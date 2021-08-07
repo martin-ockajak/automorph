@@ -39,7 +39,7 @@ case object UndertowWebSocketEndpoint {
    */
   def apply[Effect[_]](
     handler: Handler.AnyFormat[Effect, Context],
-    runEffect: Effect[Any] => Any,
+    runEffect: Effect[Any] => Unit,
     next: HttpHandler
   ): WebSocketProtocolHandshakeHandler = {
     val webSocketCallback = UndertowWebSocketCallback(handler, runEffect)

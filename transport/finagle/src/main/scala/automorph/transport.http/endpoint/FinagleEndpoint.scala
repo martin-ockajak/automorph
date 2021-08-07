@@ -29,7 +29,7 @@ import com.twitter.util.{Future, Promise}
  */
 final case class FinagleEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
-  runEffect: Effect[Any] => Any,
+  runEffect: Effect[Any] => Unit,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
 

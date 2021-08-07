@@ -31,7 +31,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  */
 final case class UndertowServer[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
-  runEffect: Effect[Any] => Any,
+  runEffect: Effect[Any] => Unit,
   port: Int,
   path: String = "/",
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,

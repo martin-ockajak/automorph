@@ -30,7 +30,7 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
  */
 final case class JettyEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
-  runEffect: Effect[Any] => Any,
+  runEffect: Effect[Any] => Unit,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends HttpServlet with Logging with EndpointMessageTransport {
 
@@ -56,7 +56,6 @@ final case class JettyEndpoint[Effect[_]](
         }
       )
     ))
-    ()
   }
 
   private def serverError(error: Throwable, response: HttpServletResponse, client: String): Unit = {

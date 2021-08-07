@@ -34,7 +34,7 @@ import scala.util.Try
  */
 final case class UndertowHttpEndpoint[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
-  runEffect: Effect[Any] => Any,
+  runEffect: Effect[Any] => Unit,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
@@ -64,7 +64,6 @@ final case class UndertowHttpEndpoint[Effect[_]](
                 }
               )
           ))
-          ()
         }
       })
       ()
