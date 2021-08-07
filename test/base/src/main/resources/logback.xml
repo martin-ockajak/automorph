@@ -22,8 +22,23 @@
     </encoder>
   </appender>
 
+  <appender name="FileSync" class="ch.qos.logback.core.FileAppender">
+    <file>target/test.log</file>
+    <append>false</append>
+    <encoder>
+      <pattern>%date \(%level\) [%logger{16}] %message: %mdc%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="File" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="FileSync" />
+    <queueSize>1</queueSize>
+    <discardingThreshold>0</discardingThreshold>
+  </appender>
+
   <root level="${LOG_LEVEL:-OFF}">
     <appender-ref ref="CompactConsole" />
+    <appender-ref ref="File" />
   </root>
 
   <!--

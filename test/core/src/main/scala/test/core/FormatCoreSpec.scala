@@ -16,7 +16,7 @@ import test.{Enum, Record, Structure}
 
 trait FormatCoreSpec extends CoreSpec {
 
-  override lazy val fixtures: Seq[TestFixture] = {
+  private lazy val testFixtures = {
     implicit val usingContext: Context = contextValue
     Seq(
       {
@@ -150,6 +150,8 @@ trait FormatCoreSpec extends CoreSpec {
       }
     )
   }
+
+  override def fixtures: Seq[TestFixture] = testFixtures
 
   def customTransport(index: Int): Option[ClientMessageTransport[Effect, Context]] = None
 
