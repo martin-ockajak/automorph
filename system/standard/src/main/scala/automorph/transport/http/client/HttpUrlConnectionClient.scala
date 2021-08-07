@@ -18,7 +18,10 @@ import scala.util.{Try, Using}
  *
  * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
- * Note: Strongly recommended to use with Identity effect system only since this transport relies on blocking operations.
+ * Note: This transport uses blocking operations so it is strongly recommended to use it with the following effect systems only:
+ * - Identity
+ * - Try
+ * - Future (with dedicated blocking thread pool execution context)
  *
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @constructor Creates an HTTP URL connection client transport plugin.
