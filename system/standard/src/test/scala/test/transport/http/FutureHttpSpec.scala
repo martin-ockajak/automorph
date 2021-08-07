@@ -31,10 +31,11 @@ class FutureHttpSpec extends FormatCoreSpec {
 
   override def run[T](effect: Effect[T]): T = await(effect)
 
-//  override def customTransport(index: Int): Option[ClientMessageTransport[Effect, Context]] = {
+  override def customTransport(index: Int): Option[ClientMessageTransport[Effect, Context]] = {
 //    val url = new URI(s"http://localhost:${serverPorts(index)._2}")
+    None
 //    Some(HttpUrlConnectionClient(url, "POST", system).asInstanceOf[ClientMessageTransport[Effect, Context]])
-//  }
+  }
 
   override def afterAll(): Unit = {
     serverPorts.foreach { case (server, _) =>
