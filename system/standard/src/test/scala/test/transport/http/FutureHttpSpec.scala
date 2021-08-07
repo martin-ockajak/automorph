@@ -39,6 +39,11 @@ class FutureHttpSpec extends FormatCoreSpec {
 //    Some(HttpUrlConnectionClient(url, "POST", system).asInstanceOf[ClientMessageTransport[Effect, Context]])
   }
 
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    serverPorts
+  }
+
   override def afterAll(): Unit = {
     serverPorts.foreach { case (server, _) =>
       server.close()
