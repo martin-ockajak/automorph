@@ -43,7 +43,6 @@ trait CoreSpec extends BaseSpec {
   val complexApiInstance: ComplexApiType = ComplexApiImpl(system)
   val invalidApiInstance: InvalidApiType = InvalidApiImpl(system)
   private val apiNames = Seq("Named", "Positional")
-  private lazy val testFixtures = fixtures
 
   implicit def arbitraryContext: Arbitrary[Context]
 
@@ -54,7 +53,8 @@ trait CoreSpec extends BaseSpec {
   def fixtures: Seq[TestFixture]
 
   "" - {
-    testFixtures.foreach { fixture =>
+//    fixtures.foreach { fixture =>
+    fixtures.headOption.foreach { fixture =>
       fixture.format.getSimpleName.replaceAll("MessageFormat$", "") - {
         "Proxy" - {
           "Call" - {
@@ -210,7 +210,7 @@ trait CoreSpec extends BaseSpec {
   }
 
   override def afterAll(): Unit = {
-    testFixtures.foreach(_.client.close())
+    fixtures.foreach(_.client.close())
     super.afterAll()
   }
 

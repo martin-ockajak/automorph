@@ -16,7 +16,7 @@ import test.{Enum, Record, Structure}
 
 trait FormatCoreSpec extends CoreSpec {
 
-  override def fixtures: Seq[TestFixture] = {
+  override lazy val fixtures: Seq[TestFixture] = {
     implicit val usingContext: Context = contextValue
     Seq(
       {
