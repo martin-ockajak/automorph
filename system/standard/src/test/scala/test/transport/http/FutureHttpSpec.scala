@@ -22,6 +22,7 @@ class FutureHttpSpec extends FormatCoreSpec {
 
   private lazy val serverPorts = fixtures.map { fixture =>
     val port = availablePort
+    println(port)
     NanoHttpdServer[Effect](fixture.handler, await, port) -> port
   }
 
@@ -37,11 +38,6 @@ class FutureHttpSpec extends FormatCoreSpec {
     println(s"CLIENT END $index")
     None
 //    Some(HttpUrlConnectionClient(url, "POST", system).asInstanceOf[ClientMessageTransport[Effect, Context]])
-  }
-
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-    serverPorts
   }
 
   override def afterAll(): Unit = {
