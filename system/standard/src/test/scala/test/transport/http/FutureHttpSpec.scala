@@ -21,9 +21,8 @@ class FutureHttpSpec extends FormatCoreSpec {
   type Context = Http[_]
 
   private lazy val servers = fixtures.map { fixture =>
-    val port = availablePort
-    println(port)
-    NanoHttpdServer[Effect](fixture.handler, await, port) -> port
+    println(s"SERVER ${fixture.serverPort}")
+    NanoHttpdServer[Effect](fixture.handler, await, fixture.serverPort)
   }
 
   override lazy val arbitraryContext: Arbitrary[Context] = Generator.context
@@ -41,9 +40,7 @@ class FutureHttpSpec extends FormatCoreSpec {
   }
 
   override def afterAll(): Unit = {
-    servers.foreach { case (server, _) =>
-      server.close()
-    }
+    servers.foreach(_.close())
     super.afterAll()
   }
 }
