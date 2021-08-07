@@ -114,7 +114,7 @@ final case class NanoHttpdServer[Effect[_]] private (
 case object NanoHttpdServer {
 
   /** Request context type. */
-  type Context = Http[IHTTPSession]
+  type Context = Http[_]
 
   /** Request type. */
   type Response = automorph.transport.http.server.NanoHTTPD.Response

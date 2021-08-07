@@ -8,7 +8,7 @@ import automorph.util.Bytes
 import java.net.URI
 import scala.collection.immutable.ArraySeq
 import sttp.capabilities.WebSockets
-import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
+import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
@@ -19,10 +19,9 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @see [[https://sttp.softwaremill.com/en/latest/ Documentation]]
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
  * @constructor Creates an STTP client transport plugin with the specified STTP backend.
- * @param url endpoint URL
+ * @param url HTTP server endpoint URL
  * @param method HTTP method
  * @param system effect system plugin
- * @param method HTTP method
  * @param backend client message transport backend
  * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
  * @tparam Effect effect type

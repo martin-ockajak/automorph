@@ -1,8 +1,7 @@
 package automorph.transport.http.client
 
 import automorph.log.Logging
-import automorph.spi.ClientMessageTransport
-import automorph.system.IdentitySystem.Identity
+import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.Http
 import automorph.transport.http.client.HttpUrlConnectionClient.Context
 import automorph.util.Bytes
@@ -18,14 +17,17 @@ import scala.util.{Try, Using}
  * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
- * @constructor Creates an URL connection client transport plugin.
- * @param url HTTP endpoint URL
+ * @constructor Creates an HTTP URL connection client transport plugin.
+ * @param url HTTP server endpoint URL
  * @param method HTTP method
+ * @param system effect system plugin
+ * @tparam Effect effect type
  */
-final case class HttpUrlConnectionClient(
+final case class HttpUrlConnectionClient[Effect[_]](
   url: URI,
-  method: String
-) extends ClientMessageTransport[Identity, Context] with Logging {
+  method: String,
+  system: EffectSystem[Effect]
+) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val contentLengthHeader = "Content-Length"
   private val contentTypeHeader = "Content-Type"
@@ -37,31 +39,36 @@ final case class HttpUrlConnectionClient(
     request: ArraySeq.ofByte,
     mediaType: String,
     context: Option[Context]
-  ): Identity[ArraySeq.ofByte] = {
-    val connection = send(request, mediaType, context)
-    logger.trace("Receiving HTTP response", Map("URL" -> url))
-    Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).pureFold(
-      error => {
-        logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
-        throw error
-      },
-      response => {
-        logger.debug("Received HTTP response", Map("URL" -> url, "Status" -> connection.getResponseCode, "Size" -> response.length))
-        response
+  ): Effect[ArraySeq.ofByte] =
+    system.flatMap(
+      send(request, mediaType, context),
+      { connection =>
+        logger.trace("Receiving HTTP response", Map("URL" -> url))
+        Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).pureFold(
+          error => {
+            logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
+            system.failed(error)
+            throw error
+          },
+          response => {
+            logger.debug(
+              "Received HTTP response",
+              Map("URL" -> url, "Status" -> connection.getResponseCode, "Size" -> response.length)
+            )
+            system.pure(response)
+          }
+        )
       }
     )
-  }
 
-  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Identity[Unit] = {
-    send(request, mediaType, context)
-    ()
-  }
+  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] =
+    system.map(send(request, mediaType, context), _ => ())
 
   override def defaultContext: Context = HttpUrlConnectionClient.defaultContext.copy(method = Some(method))
 
   override def close(): Unit = ()
 
-  private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): HttpURLConnection = {
+  private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[HttpURLConnection] = {
     logger.trace("Sending HTTP request", Map("URL" -> url, "Size" -> request.length))
     val properties = context.getOrElse(defaultContext)
     val connection = connect(properties)
@@ -76,11 +83,13 @@ final case class HttpUrlConnectionClient(
           error,
           Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length)
         )
-        throw error
+        system.failed(error)
       },
-      _ => logger.debug("Sent HTTP request", Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length))
+      _ => {
+        logger.debug("Sent HTTP request", Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length))
+        system.pure(connection)
+      }
     )
-    connection
   }
 
   private def setProperties(
