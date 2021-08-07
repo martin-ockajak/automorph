@@ -31,8 +31,10 @@ class FutureHttpSpec extends FormatCoreSpec {
 
   override def run[T](effect: Effect[T]): T = await(effect)
 
-  override def customTransport(index: Int): Option[ClientMessageTransport[Effect, Context]] = {
+  override def customTransport(index: Int): Option[ClientMessageTransport[Effect, Context]] = synchronized {
+    println(s"CLIENT START $index")
 //    val url = new URI(s"http://localhost:${serverPorts(index)._2}")
+    println(s"CLIENT END $index")
     None
 //    Some(HttpUrlConnectionClient(url, "POST", system).asInstanceOf[ClientMessageTransport[Effect, Context]])
   }

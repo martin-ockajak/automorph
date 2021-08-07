@@ -52,7 +52,7 @@ trait CoreSpec extends BaseSpec {
   val apiNames = Seq("Named", "Positional")
 
   "" - {
-    fixtures.lastOption.foreach { fixture =>
+    fixtures.foreach { fixture =>
       fixture.format.getSimpleName.replaceAll("MessageFormat$", "") - {
         "Proxy" - {
           "Call" - {
