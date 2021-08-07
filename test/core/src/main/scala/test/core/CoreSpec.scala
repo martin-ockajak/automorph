@@ -25,7 +25,7 @@ trait CoreSpec extends BaseSpec {
   type ComplexApiType = ComplexApi[Effect, Context]
   type InvalidApiType = InvalidApi[Effect]
 
-  case class FormatFixture(
+  case class TestFixture(
     format: Class[_],
     client: ClientBind.AnyFormat[Effect, Context],
     handler: Handler.AnyFormat[Effect, Context],
@@ -42,8 +42,8 @@ trait CoreSpec extends BaseSpec {
   val simpleApiInstance: SimpleApiType = SimpleApiImpl(system)
   val complexApiInstance: ComplexApiType = ComplexApiImpl(system)
   val invalidApiInstance: InvalidApiType = InvalidApiImpl(system)
-  val apiNames: Seq[String] = Seq("Named", "Positional")
-  lazy val testFixtures: Seq[FormatFixture] = fixtures
+  private val apiNames = Seq("Named", "Positional")
+  private lazy val testFixtures = fixtures
 
   implicit def arbitraryContext: Arbitrary[Context]
 
@@ -51,7 +51,7 @@ trait CoreSpec extends BaseSpec {
 
   def run[T](effect: Effect[T]): T
 
-  def fixtures: Seq[FormatFixture]
+  def fixtures: Seq[TestFixture]
 
   "" - {
     testFixtures.foreach { fixture =>

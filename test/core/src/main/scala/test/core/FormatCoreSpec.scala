@@ -16,7 +16,7 @@ import test.{Enum, Record, Structure}
 
 trait FormatCoreSpec extends CoreSpec {
 
-  override def fixtures: Seq[FormatFixture] = {
+  override def fixtures: Seq[TestFixture] = {
     implicit val usingContext: Context = contextValue
     Seq(
       {
@@ -31,7 +31,7 @@ trait FormatCoreSpec extends CoreSpec {
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client: Client[CirceJsonFormat.Node, CirceJsonFormat, Effect, Context] =
           Client(format, system, transport)
-        FormatFixture(
+        TestFixture(
           format.getClass,
           client,
           handler,
@@ -52,7 +52,7 @@ trait FormatCoreSpec extends CoreSpec {
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client: Client[UpickleJsonFormat.Node, UpickleJsonFormat[FormatCoreSpec.type], Effect, Context] =
           Client(format, system, transport)
-        FormatFixture(
+        TestFixture(
           format.getClass,
           client,
           handler,
@@ -73,7 +73,7 @@ trait FormatCoreSpec extends CoreSpec {
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client: Client[UpickleMessagePackFormat.Node, UpickleMessagePackFormat[FormatCoreSpec.type], Effect, Context] =
           Client(format, system, transport)
-        FormatFixture(
+        TestFixture(
           format.getClass,
           client,
           handler,
@@ -134,7 +134,7 @@ trait FormatCoreSpec extends CoreSpec {
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client: Client[ArgonautJsonFormat.Node, ArgonautJsonFormat, Effect, Context] =
           Client(format, system, transport)
-        FormatFixture(
+        TestFixture(
           format.getClass,
           client,
           handler,
