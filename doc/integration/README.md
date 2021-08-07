@@ -9,7 +9,7 @@ Computational [effect system](https://www.javadoc.io/doc/org.automorph/automorph
 The underlying runtime must support monadic composition of effectful values.
 
 | Class | Artifact | Library | Effect Type |
-| ---- | --- | --- | --- |
+| --- | --- | --- | --- |
 | [FutureSystem](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/FutureSystem.html) (Default) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/overviews/core/futures.html) | [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html) |
 | [IdentitySystem](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://www.scala-lang.org/) | [Identity](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem$$Identity.html) |
 | [TrySystem](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/TrySystem.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html) | [Try](https://www.scala-lang.org/api/2.13.6/scala/util/Try.html) |
@@ -25,7 +25,7 @@ Structured [message format](https://www.javadoc.io/doc/org.automorph/automorph-s
 The underlying format must support storing arbitrarily nested structures of basic data types.
 
 | Class | Artifact | Library | Node Type | Format |
-| ---- | --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 | [CirceJsonFormat](https://www.javadoc.io/doc/org.automorph/automorph-circe_2.13/latest/automorph/format/json/CirceJsonFormat.html) (Default) | [automorph-circe](https://mvnrepository.com/artifact/org.automorph/automorph-circe) | [Circe](https://circe.github.io/circe) |[Json](https://circe.github.io/circe/api/io/circe/Json.html) | [JSON](https://www.json.org/) |
 | [UpickleJsonFormat](https://www.javadoc.io/doc/org.automorph/automorph-upickle_2.13/latest/automorph/format/json/UpickleJsonFormat.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Value](http://com-lihaoyi.github.io/upickle/#uJson) | [JSON](https://www.json.org/) |
 | [UpickleMessagePackFormat](https://www.javadoc.io/doc/org.automorph/automorph-upickle_2.13/latest/automorph/format/messagepack/UpickleMessagePackFormat.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Msg](http://com-lihaoyi.github.io/upickle/#uPack) | [MessagePack](https://msgpack.org/) |
@@ -43,11 +43,11 @@ The underlying transport protocol must support request/response messaging patter
 
 Used by the RPC client to send requests and receive responses to and from a remote endpoint.
 
-| Class | Artifact | Library | Effect Type | Protocol |
-| ---- | --- | --- | --- | --- |
-| [SttpClient](https://www.javadoc.io/doc/org.automorph/automorph-sttp_2.13/latest/automorph/transport/http/client/SttpClient.html) (Default) | [automorph-sttp](https://mvnrepository.com/artifact/org.automorph/automorph-sttp) | [STTP](https://sttp.softwaremill.com/en/latest/) -> [Akka HTTP, AsyncHttpClient, HttpClient, OkHttp](https://sttp.softwaremill.com/en/latest/backends/summary.html)| *All* | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
-| [HttpUrlConnectionClient](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/transport/http/client/HttpUrlConnectionClient.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html) | *All* | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
-| [RabbitMqClient](https://www.javadoc.io/doc/org.automorph/automorph-rabbitmq_2.13/latest/automorph/transport/amqp/client/RabbitMqClient.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq) | [RabbitMQ](https://www.rabbitmq.com/java-client.html) | [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
+| Class | Artifact | Library | Protocol |
+| --- | --- | --- | --- |
+| [SttpClient](https://www.javadoc.io/doc/org.automorph/automorph-sttp_2.13/latest/automorph/transport/http/client/SttpClient.html) (Default) | [automorph-sttp](https://mvnrepository.com/artifact/org.automorph/automorph-sttp) | [STTP](https://sttp.softwaremill.com/en/latest/) -> [Akka HTTP, AsyncHttpClient, HttpClient, OkHttp](https://sttp.softwaremill.com/en/latest/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
+| [HttpUrlConnectionClient](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/transport/http/client/HttpUrlConnectionClient.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [RabbitMqClient](https://www.javadoc.io/doc/org.automorph/automorph-rabbitmq_2.13/latest/automorph/transport/amqp/client/RabbitMqClient.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq) | [RabbitMQ](https://www.rabbitmq.com/java-client.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
 
 ### Server
 
@@ -56,11 +56,11 @@ Used by the RPC client to send requests and receive responses to and from a remo
 Used to actively receive and reply to requests using specific message transport protocol
 while invoking RPC request handler to process them.
 
-| Class | Artifact | Library | Effect Type | Protocol |
-| ---- | --- | --- | --- | --- |
-| [UndertowServer](https://www.javadoc.io/doc/org.automorph/automorph-undertow_2.13/latest/automorph/transport/http/server/UndertowServer.html) (Default) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | *All* | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
-| [NanoHttpdServer](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/transport/http/server/NanoHttpdServer.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd) | *All* | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
-| [RabbitMqServer](https://www.javadoc.io/doc/org.automorph/automorph-rabbitmq_2.13/latest/automorph/transport/amqp/server/RabbitMqServer.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq) | [RabbitMq](https://www.rabbitmq.com/java-client.html) | *All* | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
+| Class | Artifact | Library | Protocol |
+| --- | --- | --- | --- |
+| [UndertowServer](https://www.javadoc.io/doc/org.automorph/automorph-undertow_2.13/latest/automorph/transport/http/server/UndertowServer.html) (Default) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
+| [NanoHttpdServer](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/transport/http/server/NanoHttpdServer.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [RabbitMqServer](https://www.javadoc.io/doc/org.automorph/automorph-rabbitmq_2.13/latest/automorph/transport/amqp/server/RabbitMqServer.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq) | [RabbitMq](https://www.rabbitmq.com/java-client.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
 
 ### Endpoint
 
@@ -68,10 +68,10 @@ while invoking RPC request handler to process them.
 
 Used to passively receive and reply to requests using specific message transport protocol from an active server while invoking RPC request handler to process them.
 
-| Class | Artifact | Library | Effect Type | Protocol |
-| ---- | --- | --- | --- | --- |
-| [UndertowHttpEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-undertow_2.13/latest/automorph/transport/http/endpoint/UndertowHttpEndpoint.html) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | *All* | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
-| [UndertowWebSocketEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-undertow_2.13/latest/automorph/transport/websocket/endpoint/UndertowWebSocketEndpoint.html) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | *All* | [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
-| [TapirHttpEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-tapir_2.13/latest/automorph/transport/http/endpoint/TapirHttpEndpoint.html) | [automorph-tapir](https://mvnrepository.com/artifact/org.automorph/automorph-tapir) | [Tapir](https://tapir.softwaremill.com/) -> [Akka HTTP](https://tapir.softwaremill.com/en/latest/server/akkahttp.html), [Finatra](https://tapir.softwaremill.com/en/latest/server/finatra.html), [http4s](https://tapir.softwaremill.com/en/latest/server/http4s.html), [Play](https://tapir.softwaremill.com/en/latest/server/play.html), [Vert.X](https://tapir.softwaremill.com/en/latest/server/vertx.html), [ZIO Http](https://tapir.softwaremill.com/en/latest/server/ziohttp.html) | *All* | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
-| [JettyEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-jetty_2.13/latest/automorph/transport/http/endpoint/JettyEndpoint.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | *All* | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
-| [FinagleEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-finagle_2.13/latest/automorph/transport/http/endpoint/FinagleEndpoint.html) | [automorph-finagle](https://mvnrepository.com/artifact/org.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) | *All* | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| Class | Artifact | Library | Protocol |
+| --- | --- | --- | --- |
+| [UndertowHttpEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-undertow_2.13/latest/automorph/transport/http/endpoint/UndertowHttpEndpoint.html) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [UndertowWebSocketEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-undertow_2.13/latest/automorph/transport/websocket/endpoint/UndertowWebSocketEndpoint.html) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
+| [TapirHttpEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-tapir_2.13/latest/automorph/transport/http/endpoint/TapirHttpEndpoint.html) | [automorph-tapir](https://mvnrepository.com/artifact/org.automorph/automorph-tapir) | [Tapir](https://tapir.softwaremill.com/) -> [Akka HTTP](https://tapir.softwaremill.com/en/latest/server/akkahttp.html), [Finatra](https://tapir.softwaremill.com/en/latest/server/finatra.html), [http4s](https://tapir.softwaremill.com/en/latest/server/http4s.html), [Play](https://tapir.softwaremill.com/en/latest/server/play.html), [Vert.X](https://tapir.softwaremill.com/en/latest/server/vertx.html), [ZIO Http](https://tapir.softwaremill.com/en/latest/server/ziohttp.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [JettyEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-jetty_2.13/latest/automorph/transport/http/endpoint/JettyEndpoint.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [FinagleEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-finagle_2.13/latest/automorph/transport/http/endpoint/FinagleEndpoint.html) | [automorph-finagle](https://mvnrepository.com/artifact/org.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
