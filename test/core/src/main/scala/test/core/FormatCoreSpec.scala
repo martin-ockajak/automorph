@@ -24,16 +24,18 @@ trait FormatCoreSpec extends CoreSpec {
         implicit lazy val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
         implicit lazy val structureEncoder: Encoder[Structure] = deriveEncoder[Structure]
         implicit lazy val structureDecoder: Decoder[Structure] = deriveDecoder[Structure]
+        val port = availablePort
         val format = CirceJsonFormat()
         val handler = Handler[CirceJsonFormat.Node, CirceJsonFormat, Effect, Context](format, system)
           .bind(simpleApiInstance).bind(complexApiInstance)
-        val transport = customTransport(0).getOrElse(HandlerTransport(handler, system, contextValue))
+        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client: Client[CirceJsonFormat.Node, CirceJsonFormat, Effect, Context] =
           Client(format, system, transport)
         FormatFixture(
           format.getClass,
           client,
           handler,
+          port,
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
@@ -43,16 +45,18 @@ trait FormatCoreSpec extends CoreSpec {
           (method, p1) => client.method(method).args(p1).tell
         )
       }, {
+        val port = availablePort
         val format = UpickleJsonFormat(FormatCoreSpec)
         val handler = Handler[UpickleJsonFormat.Node, UpickleJsonFormat[FormatCoreSpec.type], Effect, Context](format, system)
           .bind(simpleApiInstance).bind(complexApiInstance)
-        val transport = customTransport(1).getOrElse(HandlerTransport(handler, system, contextValue))
+        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client: Client[UpickleJsonFormat.Node, UpickleJsonFormat[FormatCoreSpec.type], Effect, Context] =
           Client(format, system, transport)
         FormatFixture(
           format.getClass,
           client,
           handler,
+          port,
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
@@ -62,16 +66,18 @@ trait FormatCoreSpec extends CoreSpec {
           (method, p1) => client.method(method).args(p1).tell
         )
       }, {
+        val port = availablePort
         val format = UpickleMessagePackFormat(FormatCoreSpec)
         val handler = Handler[UpickleMessagePackFormat.Node, UpickleMessagePackFormat[FormatCoreSpec.type], Effect, Context](format, system)
           .bind(simpleApiInstance).bind(complexApiInstance)
-        val transport = customTransport(2).getOrElse(HandlerTransport(handler, system, contextValue))
+        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client: Client[UpickleMessagePackFormat.Node, UpickleMessagePackFormat[FormatCoreSpec.type], Effect, Context] =
           Client(format, system, transport)
         FormatFixture(
           format.getClass,
           client,
           handler,
+          port,
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
@@ -121,16 +127,18 @@ trait FormatCoreSpec extends CoreSpec {
             "structure",
             "none"
           )
+        val port = availablePort
         val format = ArgonautJsonFormat()
         val handler = Handler[ArgonautJsonFormat.Node, ArgonautJsonFormat, Effect, Context](format, system)
           .bind(simpleApiInstance).bind(complexApiInstance)
-        val transport = customTransport(3).getOrElse(HandlerTransport(handler, system, contextValue))
+        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client: Client[ArgonautJsonFormat.Node, ArgonautJsonFormat, Effect, Context] =
           Client(format, system, transport)
         FormatFixture(
           format.getClass,
           client,
           handler,
+          port,
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),

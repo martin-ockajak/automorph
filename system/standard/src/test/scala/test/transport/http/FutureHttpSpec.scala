@@ -20,7 +20,7 @@ class FutureHttpSpec extends FormatCoreSpec {
   type Effect[T] = Future[T]
   type Context = Http[_]
 
-  private lazy val serverPorts = fixtures.map { fixture =>
+  private lazy val servers = fixtures.map { fixture =>
     val port = availablePort
     println(port)
     NanoHttpdServer[Effect](fixture.handler, await, port) -> port
@@ -32,16 +32,16 @@ class FutureHttpSpec extends FormatCoreSpec {
 
   override def run[T](effect: Effect[T]): T = await(effect)
 
-  override def customTransport(index: Int): Option[ClientMessageTransport[Effect, Context]] = synchronized {
-    println(s"CLIENT START $index")
-//    val url = new URI(s"http://localhost:${serverPorts(index)._2}")
-    println(s"CLIENT END $index")
+  override def customTransport(port: Int): Option[ClientMessageTransport[Effect, Context]] = synchronized {
+    println(s"CLIENT START $port")
+//    val url = new URI(s"http://localhost:$port")
+    println(s"CLIENT END $port")
     None
 //    Some(HttpUrlConnectionClient(url, "POST", system).asInstanceOf[ClientMessageTransport[Effect, Context]])
   }
 
   override def afterAll(): Unit = {
-    serverPorts.foreach { case (server, _) =>
+    servers.foreach { case (server, _) =>
       server.close()
     }
     super.afterAll()

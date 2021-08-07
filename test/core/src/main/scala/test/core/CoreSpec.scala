@@ -29,6 +29,7 @@ trait CoreSpec extends BaseSpec {
     format: Class[_],
     client: ClientBind.AnyFormat[Effect, Context],
     handler: Handler.AnyFormat[Effect, Context],
+    serverPort: Int,
     simpleApis: Seq[SimpleApiType],
     complexApis: Seq[ComplexApiType],
     invalidApis: Seq[InvalidApiType],
@@ -38,6 +39,12 @@ trait CoreSpec extends BaseSpec {
     namedNotify: (String, (String, String)) => Effect[Unit]
   )
 
+  val simpleApiInstance: SimpleApiType = SimpleApiImpl(system)
+  val complexApiInstance: ComplexApiType = ComplexApiImpl(system)
+  val invalidApiInstance: InvalidApiType = InvalidApiImpl(system)
+  val apiNames: Seq[String] = Seq("Named", "Positional")
+  lazy val testFixtures: Seq[FormatFixture] = fixtures
+
   implicit def arbitraryContext: Arbitrary[Context]
 
   def system: EffectSystem[Effect]
@@ -46,13 +53,8 @@ trait CoreSpec extends BaseSpec {
 
   def fixtures: Seq[FormatFixture]
 
-  val simpleApiInstance: SimpleApiType = SimpleApiImpl(system)
-  val complexApiInstance: ComplexApiType = ComplexApiImpl(system)
-  val invalidApiInstance: InvalidApiType = InvalidApiImpl(system)
-  val apiNames = Seq("Named", "Positional")
-
   "" - {
-    fixtures.foreach { fixture =>
+    testFixtures.foreach { fixture =>
       fixture.format.getSimpleName.replaceAll("MessageFormat$", "") - {
         "Proxy" - {
           "Call" - {
@@ -205,6 +207,11 @@ trait CoreSpec extends BaseSpec {
         }
       }
     }
+  }
+
+  override def afterAll(): Unit = {
+    testFixtures.foreach(_.client.close())
+    super.afterAll()
   }
 
   private def apiCombinations[Api](originalApi: Api, apis: Seq[Api]): Seq[(String, (Api, Api))] =
