@@ -2,7 +2,7 @@ package automorph.protocol.jsonrpc
 
 import automorph.spi.Message
 import automorph.spi.Message.{Id, version}
-import automorph.spi.Protocol.InvalidResponseException
+import automorph.spi.RpcProtocol.InvalidResponseException
 
 /**
  * JSON-RPC call response.

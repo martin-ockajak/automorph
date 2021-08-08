@@ -2,7 +2,7 @@ package automorph.handler
 
 import automorph.log.MacroLogger
 import automorph.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
-import automorph.spi.Protocol.InvalidRequestException
+import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageFormat}
 import automorph.util.{Method, Reflection}
 import scala.quoted.{Expr, Quotes, Type}

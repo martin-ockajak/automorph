@@ -2,8 +2,8 @@ package automorph.client
 
 import automorph.log.Logging
 import automorph.protocol.RpcRequest
-import automorph.spi.Protocol.InvalidResponseException
-import automorph.spi.{ClientMessageTransport, EffectSystem, MessageFormat, Protocol}
+import automorph.spi.RpcProtocol.InvalidResponseException
+import automorph.spi.{ClientMessageTransport, EffectSystem, MessageFormat, RpcProtocol}
 import automorph.util.Extensions.TryOps
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
@@ -24,7 +24,7 @@ private[automorph] case class ClientCore[Node, Format <: MessageFormat[Node], Ef
   format: Format,
   private val system: EffectSystem[Effect],
   private val transport: ClientMessageTransport[Effect, Context],
-  private val protocol: Protocol
+  private val protocol: RpcProtocol
 ) extends Logging {
 
   private val bodyProperty = "Body"

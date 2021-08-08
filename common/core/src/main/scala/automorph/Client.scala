@@ -2,7 +2,7 @@ package automorph
 
 import automorph.client.{ClientBind, ClientCore, NamedMethodProxy}
 import automorph.protocol.jsonrpc.JsonRpcProtocol
-import automorph.spi.{ClientMessageTransport, EffectSystem, MessageFormat, Protocol}
+import automorph.spi.{ClientMessageTransport, EffectSystem, MessageFormat, RpcProtocol}
 import automorph.util.{CannotEqual, EmptyContext}
 
 /**
@@ -24,7 +24,7 @@ final case class Client[Node, Format <: MessageFormat[Node], Effect[_], Context]
   format: Format,
   system: EffectSystem[Effect],
   transport: ClientMessageTransport[Effect, Context],
-  protocol: Protocol = JsonRpcProtocol()
+  protocol: RpcProtocol = JsonRpcProtocol()
 ) extends ClientBind[Node, Format, Effect, Context] with AutoCloseable with CannotEqual {
 
   /** This client type. */
@@ -55,7 +55,7 @@ final case class Client[Node, Format <: MessageFormat[Node], Effect[_], Context]
    * @param protocol RPC protocol
    * @return RPC request handler
    */
-  def protocol(protocol: Protocol): ThisClient = copy(protocol = protocol)
+  def protocol(protocol: RpcProtocol): ThisClient = copy(protocol = protocol)
 
   override def close(): Unit = transport.close()
 

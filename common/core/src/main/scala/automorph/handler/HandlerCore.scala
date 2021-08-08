@@ -2,8 +2,8 @@ package automorph.handler
 
 import automorph.Handler
 import automorph.protocol.{RpcMessage, RpcRequest}
-import automorph.spi.{MessageFormat, Protocol}
-import automorph.spi.Protocol.MethodNotFoundException
+import automorph.spi.{MessageFormat, RpcProtocol}
+import automorph.spi.RpcProtocol.MethodNotFoundException
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import scala.util.{Failure, Success, Try}
@@ -48,7 +48,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
    * @param protocol RPC protocol
    * @return RPC request handler
    */
-  def protocol(protocol: Protocol): ThisHandler = copy(protocol = protocol)
+  def protocol(protocol: RpcProtocol): ThisHandler = copy(protocol = protocol)
 
   override def toString: String =
     s"${this.getClass.getName}(format = ${format.getClass.getName}, system = ${system.getClass.getName})"

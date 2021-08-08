@@ -3,8 +3,8 @@ package automorph.protocol.restrpc
 import automorph.protocol.restrpc.RestRpcProtocol.{defaultErrorToException, defaultExceptionToError}
 import automorph.protocol.{RpcError, RpcMessage, RpcRequest, RpcResponse}
 import automorph.spi.Message.Params
-import automorph.spi.Protocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
-import automorph.spi.{Message, MessageFormat, MessageType, Protocol}
+import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
+import automorph.spi.{Message, MessageFormat, MessageType, RpcProtocol}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import automorph.util.MessageId
 import scala.collection.immutable.ArraySeq
@@ -21,7 +21,7 @@ import scala.util.{Failure, Success, Try}
 final case class RestRpcProtocol(
   errorToException: (String, Option[Int]) => Throwable = defaultErrorToException,
   exceptionToError: Throwable => Option[Int] = defaultExceptionToError
-) extends Protocol {
+) extends RpcProtocol {
 
   type Content = RestRpcProtocol.Content
 

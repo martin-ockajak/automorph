@@ -3,7 +3,7 @@ package automorph.transport.websocket.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.spi.Protocol
+import automorph.spi.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
 import automorph.util.Extensions.ThrowableOps
@@ -67,7 +67,7 @@ case object UndertowWebSocketEndpoint {
 final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
   handler: Handler.AnyFormat[Effect, Context],
   runEffect: Effect[Any] => Any
-) extends WebSocketConnectionCallback with AutoCloseable with Logging {
+) extends WebSocketConnectionCallback with AutoCloseable with Logging with EndpointMessageTransport {
 
   private val system = handler.system
 

@@ -6,7 +6,7 @@ import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
 /** RPC protocol. */
-trait Protocol {
+trait RpcProtocol {
 
   /** Protocol-specific message content type. */
   type Content
@@ -83,7 +83,7 @@ trait Protocol {
   ): Try[RpcResponse[Node, Content]]
 }
 
-case object Protocol {
+case object RpcProtocol {
 
   /** Invalid request error. */
   final case class InvalidRequestException(

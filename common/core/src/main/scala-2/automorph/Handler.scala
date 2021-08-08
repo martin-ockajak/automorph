@@ -2,7 +2,7 @@ package automorph
 
 import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
-import automorph.spi.{EffectSystem, MessageFormat, Protocol}
+import automorph.spi.{EffectSystem, MessageFormat, RpcProtocol}
 import automorph.util.{CannotEqual, EmptyContext}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -27,7 +27,7 @@ import scala.reflect.macros.blackbox
 final case class Handler[Node, Format <: MessageFormat[Node], Effect[_], Context](
   format: Format,
   system: EffectSystem[Effect],
-  protocol: Protocol,
+  protocol: RpcProtocol,
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
