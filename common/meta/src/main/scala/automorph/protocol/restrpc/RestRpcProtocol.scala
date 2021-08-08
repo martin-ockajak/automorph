@@ -3,10 +3,9 @@ package automorph.protocol.restrpc
 import automorph.protocol.restrpc.RestRpcProtocol.{defaultErrorToException, defaultExceptionToError}
 import automorph.protocol.{RpcError, RpcMessage, RpcRequest, RpcResponse}
 import automorph.spi.Message.Params
-import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
+import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
 import automorph.spi.{Message, MessageFormat, MessageType, RpcProtocol}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
-import automorph.util.MessageId
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
 
@@ -34,7 +33,7 @@ final case class RestRpcProtocol(
   ): Either[RpcError[Content], RpcRequest[Node, Content]] =
 //    // Deserialize request
 //    Try(format.deserialize(request)).pureFold(
-//      error => Left(RpcError(ParseErrorException("Invalid request format", error), RpcMessage(None, request))),
+//      error => Left(RpcError(InvalidRequest("Invalid request format", error), RpcMessage(None, request))),
 //      formedRequest => {
 //        // Validate request
 //        val messageText = Some(() => format.format(formedRequest))
@@ -91,7 +90,7 @@ final case class RestRpcProtocol(
     )
 //    val messageText = () => format.format(formedRequest)
 //    Try(format.serialize(formedRequest)).mapFailure { error =>
-//      ParseErrorException("Invalid request format", error)
+//      InvalidRequestException("Invalid request format", error)
 //    }.map { messageBody =>
 //      val message = RpcMessage(id, messageBody, formedRequest.properties, Some(messageText))
 //      RpcRequest(method, argumentNodes, respond, message)
