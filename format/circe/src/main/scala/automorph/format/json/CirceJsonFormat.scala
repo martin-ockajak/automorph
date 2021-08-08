@@ -54,18 +54,18 @@ final case class CirceJsonFormat() extends CirceJsonMeta {
   override def mediaType: String = "application/json"
 
   override def serialize(message: Message[Json]): ArraySeq.ofByte =
-    new ArraySeq.ofByte(message.asJson.noSpaces.getBytes(charset))
+    new ArraySeq.ofByte(message.asJson.dropNullValues.noSpaces.getBytes(charset))
 
   override def deserialize(data: ArraySeq.ofByte): Message[Json] =
     parser.decode[Message[Json]](new String(data.unsafeArray, charset)).toTry.get
 
   override def serializeNode(node: Json): ArraySeq.ofByte =
-    new ArraySeq.ofByte(node.noSpaces.getBytes(charset))
+    new ArraySeq.ofByte(node.dropNullValues.noSpaces.getBytes(charset))
 
   override def deserializeNode(data: ArraySeq.ofByte): Json =
     parser.decode[Json](new String(data.unsafeArray, charset)).toTry.get
 
-  override def format(message: Message[Json]): String = message.asJson.spaces2
+  override def format(message: Message[Json]): String = message.asJson.dropNullValues.spaces2
 
   private def invalidId(value: Any): Message.Id =
     throw new IllegalArgumentException(s"Invalid request identifier: $value")
