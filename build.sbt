@@ -19,6 +19,9 @@ lazy val root = project.in(file(".")).settings(
   description := "Remote procedure call client and server library for Scala ",
   publish / skip := true
 ).aggregate(
+  spi,
+  util,
+  meta,
   core,
 
   circe,
@@ -62,13 +65,16 @@ lazy val spi = (project in file("common/spi")).settings(
     }
   }
 )
-lazy val meta = (project in file("common/meta")).dependsOn(
-  spi
-).settings(
-  name := s"$projectName-meta",
+lazy val util = (project in file("common/util")).settings(
+  name := s"$projectName-util",
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-api" % "1.7.31"
-  ),
+  )
+)
+lazy val meta = (project in file("common/meta")).dependsOn(
+  spi, util
+).settings(
+  name := s"$projectName-meta",
   initialize ~= { _ =>
 //    System.setProperty("macro.debug", "true")
     System.setProperty("macro.test", "true")

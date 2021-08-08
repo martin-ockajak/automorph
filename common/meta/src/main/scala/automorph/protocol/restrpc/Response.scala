@@ -1,7 +1,7 @@
 package automorph.protocol.restrpc
 
 import automorph.spi.Message
-import automorph.spi.Protocol.InvalidResponseException
+import automorph.spi.RpcProtocol.InvalidResponseException
 
 /**
  * REST-RPC call response.
