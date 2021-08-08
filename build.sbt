@@ -109,7 +109,7 @@ lazy val restrpc = (project in file("protocol/restrpc")).dependsOn(
 
 // Effect system
 lazy val standard = (project in file(s"system/standard")).dependsOn(
-  http, testCore % Test, testHttp % Test
+  core, http, testCore % Test, testHttp % Test
 ).settings(
   name := s"$projectName-standard"
 )
@@ -176,7 +176,7 @@ lazy val argonaut = (project in file("format/argonaut")).dependsOn(
 
 // Message transport
 lazy val http = (project in file("transport/http")).dependsOn(
-  core
+  jsonrpc
 )
 lazy val amqp = (project in file("transport/amqp"))
 val sttpVersion = "3.3.13"
@@ -204,7 +204,7 @@ lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
 
 // Server
 lazy val undertow = (project in file("transport/undertow")).dependsOn(
-  http, testCore % Test, standard % Test
+  core, http, testCore % Test, standard % Test
 ).settings(
   name := s"$projectName-undertow",
   libraryDependencies ++= Seq(
@@ -212,7 +212,7 @@ lazy val undertow = (project in file("transport/undertow")).dependsOn(
   )
 )
 lazy val jetty = (project in file("transport/jetty")).dependsOn(
-  http, testCore % Test, standard % Test
+  core, http, testCore % Test, standard % Test
 ).settings(
   name := s"$projectName-jetty",
   libraryDependencies ++= Seq(
@@ -221,7 +221,7 @@ lazy val jetty = (project in file("transport/jetty")).dependsOn(
   )
 )
 lazy val finagle = (project in file("transport/finagle")).dependsOn(
-  http, testCore % Test, standard % Test
+  core, http, testCore % Test, standard % Test
 ).settings(
   name := s"$projectName-finagle",
   libraryDependencies ++= Seq(
@@ -229,7 +229,7 @@ lazy val finagle = (project in file("transport/finagle")).dependsOn(
   )
 )
 lazy val tapir = (project in file("transport/tapir")).dependsOn(
-  http, testCore % Test, standard % Test
+  core, http, testCore % Test, standard % Test
 ).settings(
   name := s"$projectName-tapir",
   libraryDependencies ++= Seq(
