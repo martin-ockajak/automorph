@@ -66,7 +66,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
           }
         }
       ),
-      { case (_, response) =>
+      { case (_: HttpURLConnection, response: ArraySeq.ofByte) =>
         response
       }
     )
