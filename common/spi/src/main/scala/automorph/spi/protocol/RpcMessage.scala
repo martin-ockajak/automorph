@@ -1,4 +1,4 @@
-package automorph.protocol
+package automorph.spi.protocol
 
 import scala.collection.immutable.ArraySeq
 

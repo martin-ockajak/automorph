@@ -1,9 +1,9 @@
 package automorph.protocol.restrpc
 
 import automorph.protocol.restrpc.RestRpcProtocol.{defaultErrorToException, defaultExceptionToError}
-import automorph.protocol.{RpcError, RpcMessage, RpcRequest, RpcResponse}
 import automorph.spi.Message.Params
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
+import automorph.spi.protocol.{RpcError, RpcMessage, RpcRequest, RpcResponse}
 import automorph.spi.{Message, MessageFormat, MessageType, RpcProtocol}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.collection.immutable.ArraySeq
