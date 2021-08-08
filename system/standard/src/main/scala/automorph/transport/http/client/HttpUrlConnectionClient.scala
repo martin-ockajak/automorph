@@ -72,7 +72,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
     )
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] =
-    system.map(send(request, mediaType, context), _ => ())
+    system.map(send(request, mediaType, context), (_: (HttpURLConnection, ArraySeq.ofByte)) => ())
 
   override def defaultContext: Context = HttpUrlConnectionClient.defaultContext.copy(method = Some(method))
 
@@ -96,7 +96,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
         error
       }.map { _ =>
         logger.debug("Sent HTTP request", Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length))
-        connection -> ArraySeq.ofByte(Array.empty)
+        connection -> new ArraySeq.ofByte(Array.empty)
       }.get
     }
 

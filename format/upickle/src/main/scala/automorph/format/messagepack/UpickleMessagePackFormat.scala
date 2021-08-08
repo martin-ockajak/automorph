@@ -40,15 +40,15 @@ final case class UpickleMessagePackFormat[Custom <: UpickleCustom](
   implicit def paramsRw: ReadWriter[Message.Params[Msg]] = readwriter[Msg].bimap[Message.Params[Msg]](
     {
       case Right(params) => Obj(mutable.LinkedHashMap[Msg, Msg](params.map { case (key, value) =>
-        Str(key) -> value
-      }.toSeq*))
-      case Left(params) => Arr(params*)
+          Str(key) -> value
+        }.toSeq: _*))
+      case Left(params) => Arr(params: _*)
     },
     {
       case Obj(params) => Right(params.toMap.map {
-        case (Str(key), value) => key -> value
-        case _ => throw Abort(s"Invalid request parameters: $params")
-      })
+          case (Str(key), value) => key -> value
+          case _ => throw Abort(s"Invalid request parameters: $params")
+        })
       case Arr(params) => Left(params.toList)
       case params => throw Abort(s"Invalid request parameters: $params")
     }
