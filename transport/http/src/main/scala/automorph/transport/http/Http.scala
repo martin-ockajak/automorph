@@ -341,7 +341,7 @@ final case class Http[Source](
       authority = Option(url.getAuthority),
       path = Option(url.getPath),
       fragment = Option(url.getFragment)
-    ).query(url.getQuery)
+    )
     Option(url.getQuery).map(http.query).getOrElse(http)
   }
 
