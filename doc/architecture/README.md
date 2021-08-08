@@ -6,6 +6,7 @@ The library provides the following components to assemble either fully standalon
 
 * [Client](https://www.javadoc.io/doc/org.automorph/automorph-core_2.13/latest/automorph/Client.html)
 * [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_2.13/latest/automorph/Handler.html)
+* [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)
 * [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html)
 * [Message format](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html)
 * [Message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageTransport.html)
@@ -21,6 +22,7 @@ supports direct calls and notifications of remote API methods.
 
 Depends on:
 
+* [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)
 * [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html)
 * [Message format](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html)
 * [Client message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/ClientMessageTransport.html)
@@ -31,5 +33,6 @@ The handler provides automatic creation of remote RPC endpoint bindings for exis
 
 Depends on:
 
+* [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)
 * [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html)
 * [Message format](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html)
