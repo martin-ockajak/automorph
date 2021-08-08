@@ -519,7 +519,7 @@ val api = new Api()
 **Server**
 
 ```scala
-import automorph.system.IdentitySystem.Identity
+import automorph.system.IdentitySystem
 import automorph.transport.http.server.NanoHttpdServer
 import automorph.{Client, DefaultSystem, DefaultFormat, Handler}
 
@@ -535,7 +535,7 @@ server.close()
 ```scala
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val url = new java.net.URI("http://localhost/api")
-val transport = HttpUrlConnectionClient(url, "POST", server.handler.system)
+val transport = HttpUrlConnectionClient(url, "POST", IdentitySystem())
 val client = DefaultClient.sync(transport)
 
 // Call the remote API method via proxy
