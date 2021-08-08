@@ -40,6 +40,8 @@ final case class NanoHttpdServer[Effect[_]] private (
   private val HeaderXForwardedFor = "X-Forwarded-For"
   private val system = handler.system
 
+  def close(): Unit = stop()
+
   override def start(): Unit = {
     logger.info("Listening for connections", Map("Port" -> port))
     super.start()
@@ -108,8 +110,6 @@ final case class NanoHttpdServer[Effect[_]] private (
     val address = session.getRemoteHostName
     Network.address(forwardedFor, address)
   }
-
-  override def close(): Unit = stop()
 }
 
 case object NanoHttpdServer {

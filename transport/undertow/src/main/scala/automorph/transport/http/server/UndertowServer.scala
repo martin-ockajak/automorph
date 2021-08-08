@@ -41,7 +41,7 @@ final case class UndertowServer[Effect[_]](
 
   private val undertow = start()
 
-  override def close(): Unit = undertow.stop()
+  def close(): Unit = undertow.stop()
 
   private def start(): Undertow = {
     // Configure the request handler

@@ -8,4 +8,4 @@ import automorph.spi.MessageTransport
  * Used to actively receive and reply to requests using specific message transport protocol
  * while invoking RPC request handler to process them.
  */
-trait ServerMessageTransport extends MessageTransport with AutoCloseable
+trait ServerMessageTransport extends MessageTransport
