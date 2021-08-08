@@ -2,7 +2,7 @@ package automorph.format.json
 
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
-import io.circe.{parser, Decoder, Encoder, Json}
+import io.circe.{parser, Decoder, Encoder, Json, JsonObject}
 import java.nio.charset.StandardCharsets
 import automorph.spi.{Message, MessageError}
 import scala.collection.immutable.ArraySeq
@@ -18,14 +18,34 @@ final case class CirceJsonFormat() extends CirceJsonMeta {
 
   private val charset = StandardCharsets.UTF_8
 
-  implicit private val idEncoder: Encoder[Either[BigDecimal, String]] = deriveEncoder[Either[BigDecimal, String]]
-  implicit private val idDecoder: Decoder[Either[BigDecimal, String]] = deriveDecoder[Either[BigDecimal, String]]
+  implicit private val idEncoder: Encoder[Message.Id] = Encoder.encodeJson.contramap[Message.Id] {
+    case Right(id) => Json.fromString(id)
+    case Left(id) => Json.fromBigInt(id.toBigInt)
+  }
 
-  implicit private val paramsEncoder: Encoder[Either[List[Json], Map[String, Json]]] =
-    deriveEncoder[Either[List[Json], Map[String, Json]]]
+  implicit private val idDecoder: Decoder[Message.Id] = Decoder.decodeJson.map(_.fold(
+    invalidId(None.orNull),
+    invalidId,
+    id => id.toBigDecimal.map(Left.apply).getOrElse(invalidId(id)),
+    id => Right(id),
+    invalidId,
+    invalidId
+  ))
 
-  implicit private val paramsDecoder: Decoder[Either[List[Json], Map[String, Json]]] =
-    deriveDecoder[Either[List[Json], Map[String, Json]]]
+  implicit private val paramsEncoder: Encoder[Message.Params[Json]] =
+    Encoder.encodeJson.contramap[Message.Params[Json]] {
+      case Right(params) => Json.fromJsonObject(JsonObject.fromMap(params))
+      case Left(params) => Json.fromValues(params)
+    }
+
+  implicit private val paramsDecoder: Decoder[Message.Params[Json]] = Decoder.decodeJson.map(_.fold(
+    invalidParams(None.orNull),
+    invalidParams,
+    invalidParams,
+    invalidParams,
+    params => Left(params.toList),
+    params => Right(params.toMap)
+  ))
   implicit private val messageErrorEncoder: Encoder[MessageError[Json]] = deriveEncoder[MessageError[Json]]
   implicit private val messageErrorDecoder: Decoder[MessageError[Json]] = deriveDecoder[MessageError[Json]]
   implicit private val messageEncoder: Encoder[Message[Json]] = deriveEncoder[Message[Json]]
@@ -46,6 +66,12 @@ final case class CirceJsonFormat() extends CirceJsonMeta {
     parser.decode[Json](new String(data.unsafeArray, charset)).toTry.get
 
   override def format(message: Message[Json]): String = message.asJson.spaces2
+
+  private def invalidId(value: Any): Message.Id =
+    throw new IllegalArgumentException(s"Invalid request identifier: $value")
+
+  private def invalidParams(value: Any): Message.Params[Json] =
+    throw new IllegalArgumentException(s"Invalid request parameters: $value")
 }
 
 case object CirceJsonFormat {
