@@ -20,7 +20,7 @@ final case class CirceJsonFormat() extends CirceJsonMeta {
 
   implicit private val idEncoder: Encoder[Message.Id] = Encoder.encodeJson.contramap[Message.Id] {
     case Right(id) => Json.fromString(id)
-    case Left(id) => Json.fromBigInt(id.toBigInt)
+    case Left(id) => Json.fromBigDecimal(id)
   }
 
   implicit private val idDecoder: Decoder[Message.Id] = Decoder.decodeJson.map(_.fold(
