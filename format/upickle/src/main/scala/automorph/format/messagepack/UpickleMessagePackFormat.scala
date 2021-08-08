@@ -19,7 +19,7 @@ final case class UpickleMessagePackFormat[Custom <: UpickleCustom](
   custom: Custom = DefaultUpickleCustom
 ) extends UpickleMessagePackMeta[Custom] {
 
-  import custom.*
+  import custom._
 
   private val indent = 2
 

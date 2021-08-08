@@ -9,7 +9,6 @@ import automorph.transport.http.client.HttpUrlConnectionClient.{Context, EffectV
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.{HttpURLConnection, URI}
-import java.security.Identity
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.duration.Duration
 import scala.util.{Try, Using}
@@ -51,7 +50,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
     system.map(
       system.flatMap(
         send(request, mediaType, context),
-        { case (connection, _) =>
+        { case (connection: HttpURLConnection, _: ArraySeq.ofByte) =>
           blocking {
             logger.trace("Receiving HTTP response", Map("URL" -> url))
             Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).mapFailure { error =>
@@ -145,7 +144,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
   )
 
   private def blocking(value: => EffectValue): Effect[EffectValue] =
-    blockingEffect.getOrElse(defaultBlockingEffect)(() => value)
+    blockingEffect.getOrElse(defaultBlockingEffect(_))(() => value)
 }
 
 case object HttpUrlConnectionClient {
