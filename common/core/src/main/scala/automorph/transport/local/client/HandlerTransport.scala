@@ -42,5 +42,5 @@ case class HandlerTransport[Node, Format <: MessageFormat[Node], Effect[_], Cont
     )
   }
 
-  override def close(): Unit = ()
+  def close(): Unit = ()
 }

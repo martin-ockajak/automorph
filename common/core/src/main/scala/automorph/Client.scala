@@ -26,7 +26,7 @@ final case class Client[Node, Format <: MessageFormat[Node], Effect[_], Context]
   system: EffectSystem[Effect],
   transport: ClientMessageTransport[Effect, Context],
   protocol: RpcProtocol = JsonRpcProtocol()
-) extends ClientBind[Node, Format, Effect, Context] with AutoCloseable with CannotEqual {
+) extends ClientBind[Node, Format, Effect, Context] with CannotEqual {
 
   /** This client type. */
   type ThisClient = Client[Node, Format, Effect, Context]
@@ -58,7 +58,7 @@ final case class Client[Node, Format <: MessageFormat[Node], Effect[_], Context]
    */
   def protocol(protocol: RpcProtocol): ThisClient = copy(protocol = protocol)
 
-  override def close(): Unit = transport.close()
+  def close(): Effect[Unit] = system.pure(())
 
   override def toString: String =
     s"${this.getClass.getName}(format = ${format.getClass.getName}, system = ${system.getClass.getName}, transport = ${transport.getClass.getName})"

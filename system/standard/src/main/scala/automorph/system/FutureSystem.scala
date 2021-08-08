@@ -14,7 +14,9 @@ import scala.util.Success
  */
 final case class FutureSystem()(implicit executionContext: ExecutionContext) extends EffectSystem[Future] {
 
-  override def pure[T](value: T): Future[T] = Future.successful(value)
+  override def impure[T](value: => T): Future[T] = Future(value)
+
+  override def pure[T](value: => T): Future[T] = Future.successful(value)
 
   override def failed[T](exception: Throwable): Future[T] = Future.failed(exception)
 

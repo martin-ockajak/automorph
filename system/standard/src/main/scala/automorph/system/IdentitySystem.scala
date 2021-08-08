@@ -13,7 +13,9 @@ import automorph.spi.EffectSystem
  */
 final case class IdentitySystem() extends EffectSystem[Identity] {
 
-  override def pure[T](value: T): T = value
+  override def impure[T](value: => T): T = value
+
+  override def pure[T](value: => T): T = value
 
   override def failed[T](exception: Throwable): T = throw exception
 

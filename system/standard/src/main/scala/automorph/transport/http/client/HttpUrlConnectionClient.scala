@@ -76,7 +76,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
 
   override def defaultContext: Context = HttpUrlConnectionClient.defaultContext.copy(method = Some(method))
 
-  override def close(): Unit = ()
+  def close(): Unit = ()
 
   private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[EffectValue] =
     blocking {

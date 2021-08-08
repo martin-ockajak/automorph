@@ -10,13 +10,22 @@ package automorph.spi
 trait EffectSystem[Effect[_]] {
 
   /**
-   * Lifts a value into a new effect of specified type.
+   * Lifts a side-effecting value into a new effect of specified type.
+   *
+   * @param value an existing side-effecting value
+   * @tparam T effectful value type
+   * @return effect containing the value
+   */
+  def impure[T](value: => T): Effect[T]
+
+  /**
+   * Lifts a pure value into a new effect of specified type.
    *
    * @param value an existing value
    * @tparam T effectful value type
    * @return effect containing the value
    */
-  def pure[T](value: T): Effect[T]
+  def pure[T](value: => T): Effect[T]
 
   /**
    * Lifts an exception into a new effect of specified type.

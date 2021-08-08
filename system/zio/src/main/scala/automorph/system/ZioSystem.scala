@@ -1,6 +1,7 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
+import scala.util.Try
 import zio.RIO
 
 /**
@@ -13,7 +14,9 @@ import zio.RIO
  */
 final case class ZioSystem[Environment]() extends EffectSystem[({ type Effect[T] = RIO[Environment, T] })#Effect] {
 
-  override def pure[T](value: T): RIO[Environment, T] = RIO.succeed(value)
+  override def impure[T](value: => T): RIO[Environment, T] = RIO.fromTry(Try(value))
+
+  override def pure[T](value: => T): RIO[Environment, T] = RIO.succeed(value)
 
   override def failed[T](exception: Throwable): RIO[Environment, T] = RIO.fail(exception)
 
