@@ -26,14 +26,12 @@ import scala.util.{Try, Using}
  * @param url HTTP server endpoint URL
  * @param method HTTP method
  * @param system effect system plugin
- * @param blockingEffect creates an effect from specified blocking function
  * @tparam Effect effect type
  */
 final case class HttpUrlConnectionClient[Effect[_]](
   url: URI,
   method: String,
-  system: EffectSystem[Effect] = IdentitySystem(),
-  blockingEffect: Option[(() => EffectValue) => Effect[EffectValue]] = None
+  system: EffectSystem[Effect] = IdentitySystem()
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val contentLengthHeader = "Content-Length"
@@ -51,7 +49,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
       system.flatMap(
         send(request, mediaType, context),
         { case (connection: HttpURLConnection, _: ArraySeq.ofByte) =>
-          blocking {
+          system.impure {
             logger.trace("Receiving HTTP response", Map("URL" -> url))
             Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).mapFailure { error =>
               logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
@@ -79,7 +77,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
   def close(): Unit = ()
 
   private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[EffectValue] =
-    blocking {
+    system.impure {
       logger.trace("Sending HTTP request", Map("URL" -> url, "Size" -> request.length))
       val properties = context.getOrElse(defaultContext)
       val connection = connect(properties)
@@ -135,16 +133,6 @@ final case class HttpUrlConnectionClient[Effect[_]](
     connection.setDoOutput(true)
     connection
   }
-
-  private def defaultBlockingEffect(
-    blocking: (() => EffectValue)
-  ): Effect[EffectValue] = Try(blocking()).pureFold(
-    error => system.failed(error),
-    result => system.pure(result)
-  )
-
-  private def blocking(value: => EffectValue): Effect[EffectValue] =
-    blockingEffect.getOrElse(defaultBlockingEffect(_))(() => value)
 }
 
 case object HttpUrlConnectionClient {
