@@ -1,7 +1,7 @@
 package automorph.protocol.restrpc
 
 import automorph.spi.Message
-import automorph.spi.Protocol.responseMandatory
+import automorph.spi.Protocol.InvalidResponseException
 
 /**
  * REST-RPC call response.
@@ -31,8 +31,21 @@ private[automorph] case object Response {
     message.result.map { result =>
       Response(Some(result), None)
     }.getOrElse {
-      val error = responseMandatory(message.error, "error")
+      val error = mandatory(message.error, "error")
       Response(None, Some(ResponseError(error)))
     }
   }
+
+  /**
+   * Return specified mandatory property value or throw an exception if it is missing.
+   *
+   * @param value property value
+   * @param name property name
+   * @tparam T property type
+   * @return property value
+   * @throws InvalidResponseException if the property value is missing
+   */
+  def mandatory[T](value: Option[T], name: String): T = value.getOrElse(
+    throw InvalidResponseException(s"Missing message property: $name", None.orNull)
+  )
 }

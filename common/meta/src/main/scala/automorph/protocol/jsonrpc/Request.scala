@@ -2,7 +2,7 @@ package automorph.protocol.jsonrpc
 
 import automorph.spi.Message
 import automorph.spi.Message.{Id, Params, version}
-import automorph.spi.Protocol.{InvalidRequestException, requestMandatory}
+import automorph.spi.Protocol.InvalidRequestException
 
 /**
  * JSON-RPC request.
@@ -32,13 +32,26 @@ private[automorph] final case class Request[Node](
 private[automorph] case object Request {
 
   def apply[Node](message: Message[Node]): Request[Node] = {
-    val jsonrpc = requestMandatory(message.jsonrpc, "automorph")
+    val jsonrpc = mandatory(message.jsonrpc, "automorph")
     if (jsonrpc != version) {
       throw InvalidRequestException(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
     }
     val id = message.id
-    val method = requestMandatory(message.method, "method")
+    val method = mandatory(message.method, "method")
     val params = message.params.getOrElse(Right(Map.empty[String, Node]))
     Request(id, method, params)
   }
+
+  /**
+   * Return specified mandatory property value or throw an exception if it is missing.
+   *
+   * @param value property value
+   * @param name property name
+   * @tparam T property type
+   * @return property value
+   * @throws InvalidRequestException if the property value is missing
+   */
+  def mandatory[T](value: Option[T], name: String): T = value.getOrElse(
+    throw InvalidRequestException(s"Missing message property: $name", None.orNull)
+  )
 }

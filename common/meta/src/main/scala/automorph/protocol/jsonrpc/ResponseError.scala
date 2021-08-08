@@ -1,7 +1,7 @@
 package automorph.protocol.jsonrpc
 
+import automorph.protocol.jsonrpc.Response.mandatory
 import automorph.spi.MessageError
-import automorph.spi.Protocol.responseMandatory
 
 
 /**
@@ -29,8 +29,8 @@ private[automorph] final case class ResponseError[Node](
 private[automorph] case object ResponseError {
 
   private[automorph] def apply[Node](error: MessageError[Node]): ResponseError[Node] = {
-    val message = responseMandatory(error.message, "message")
-    val code = responseMandatory(error.code, "code")
+    val message = mandatory(error.message, "message")
+    val code = mandatory(error.code, "code")
     new ResponseError(message, code, error.data)
   }
 }
