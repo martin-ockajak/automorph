@@ -6,10 +6,10 @@ import io.circe.{Decoder, Encoder, Json}
 import automorph.format.json.CirceJsonFormat
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
-import test.format.MessageFormatSpec
+import test.format.JsonMessageFormatSpec
 import test.{Enum, Record, Structure}
 
-class CirceJsonMessageFormatSpec extends MessageFormatSpec {
+class CirceJsonMessageFormatSpec extends JsonMessageFormatSpec {
 
   type Node = Json
   type ActualFormat = CirceJsonFormat

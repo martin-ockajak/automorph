@@ -6,9 +6,9 @@ import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import org.scalacheck.Arbitrary
 import scala.concurrent.duration.Duration
-import test.core.FormatCoreSpec
+import test.core.ProtocolFormatSpec
 
-class MonixLocalSpec extends FormatCoreSpec {
+class MonixLocalSpec extends ProtocolFormatSpec {
 
   type Effect[T] = Task[T]
   type Context = String

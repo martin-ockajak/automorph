@@ -1,7 +1,7 @@
 package test.format
 
 import java.nio.charset.StandardCharsets
-import automorph.spi.{MessageFormat, Message}
+import automorph.spi.{Message, MessageFormat}
 import org.scalacheck.Arbitrary
 import test.Generators
 import test.base.BaseSpec
@@ -20,8 +20,8 @@ trait MessageFormatSpec extends BaseSpec {
 
   implicit def arbitraryNode: Arbitrary[Node]
 
+  val charset = StandardCharsets.UTF_8
   implicit lazy val arbitraryMessage: Arbitrary[Message[Node]] = Generators.arbitraryMesage
-  private lazy val charset = StandardCharsets.UTF_8
 
   "" - {
 
