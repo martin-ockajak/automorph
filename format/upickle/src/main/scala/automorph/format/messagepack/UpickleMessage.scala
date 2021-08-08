@@ -12,7 +12,7 @@ import upack.Msg
 //    at ujson.ByteParser.parseNested(ByteParser.scala:462)
 //    at ujson.ByteParser.parseTopLevel0(ByteParser.scala:323)
 private[automorph] final case class UpickleMessage(
-  automorph: Option[String],
+  jsonrpc: Option[String],
   id: Option[Either[BigDecimal, String]],
   method: Option[String],
   params: Option[Either[List[Msg], Map[String, Msg]]],
@@ -21,7 +21,7 @@ private[automorph] final case class UpickleMessage(
 ) {
 
   def toSpi: Message[Msg] = Message[Msg](
-    automorph,
+    jsonrpc,
     id,
     method,
     params,

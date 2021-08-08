@@ -4,10 +4,12 @@ import automorph.format.json.UpickleJsonFormat
 import automorph.format.UpickleCustom
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
+//import test.format.JsonMessageFormatSpec
 import test.format.MessageFormatSpec
 import test.{Enum, Record, Structure}
 import ujson.{Arr, Bool, Num, Obj, Str, Value}
 
+//class UpickleJsonSpec extends JsonMessageFormatSpec {
 class UpickleJsonSpec extends MessageFormatSpec {
 
   type Node = Value
@@ -29,9 +31,6 @@ class UpickleJsonSpec extends MessageFormatSpec {
   implicit private lazy val recordRw: custom.ReadWriter[Record] = custom.macroRW
 
   "" - {
-    "TEST" in {
-      val encode = (x: List[String]) => format.encode(x)
-    }
     "Encode / Decode" in {
       check { (record: Record) =>
         val encodedValue = format.encode(record)

@@ -3,7 +3,8 @@ package automorph.format.json
 import automorph.format.{DefaultUpickleCustom, UpickleCustom}
 import automorph.spi.Message
 import scala.collection.immutable.ArraySeq
-import ujson.Value
+import ujson.{Arr, Num, Obj, Str, Value}
+import upickle.core.Abort
 
 /**
  * uPickle message format plugin using JSON as message format.
@@ -21,6 +22,30 @@ final case class UpickleJsonFormat[Custom <: UpickleCustom](
   import custom._
 
   private val indent = 2
+
+  implicit def idRw: ReadWriter[Message.Id] = readwriter[Value].bimap[Message.Id](
+    {
+      case Right(id) => Str(id)
+      case Left(id) => Num(id.toDouble)
+    },
+    {
+      case Str(id) => Right(id)
+      case Num(id) => Left(BigDecimal(id))
+      case id => throw Abort(s"Invalid request identifier: $id")
+    }
+  )
+
+  implicit def paramsRw: ReadWriter[Message.Params[Value]] = readwriter[Value].bimap[Message.Params[Value]](
+    {
+      case Right(params) => Obj.from(params)
+      case Left(params) => Arr(params)
+    },
+    {
+      case Obj(params) => Right(params.toMap)
+      case Arr(params) => Left(params.toList)
+      case params => throw Abort(s"Invalid request parameters: $params")
+    }
+  )
 
   implicit private lazy val customMessageRw: custom.ReadWriter[UpickleMessage] = {
     implicit val messageErrorRw: custom.ReadWriter[UpickleMessageError] = custom.macroRW
