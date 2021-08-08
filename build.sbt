@@ -408,7 +408,7 @@ site / fileInputs ++= Seq(
   baseDirectory.value.toGlob / "doc" / ** / "*.jpg"
 )
 site := {}
-site := site.dependsOn(laikaSite).value
+site := site.dependsOn(Compile / doc, laikaSite).value
 
 // Deployment
 val repositoryShell = s"git@github.com:${repositoryPath}.git"
