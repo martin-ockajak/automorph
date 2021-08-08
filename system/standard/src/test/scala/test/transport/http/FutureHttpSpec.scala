@@ -1,6 +1,7 @@
 package test.transport.http
 
-import automorph.spi.{ClientMessageTransport, EffectSystem}
+import automorph.spi.EffectSystem
+import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.Http
 import automorph.transport.http.client.HttpUrlConnectionClient

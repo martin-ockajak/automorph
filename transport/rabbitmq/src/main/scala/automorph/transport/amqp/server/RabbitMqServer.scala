@@ -3,7 +3,7 @@ package automorph.transport.amqp.server
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.spi.ServerMessageTransport
+import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.amqp.{Amqp, RabbitMqCommon}
 import automorph.util.Bytes
 import automorph.util.Extensions.{ThrowableOps, TryOps}

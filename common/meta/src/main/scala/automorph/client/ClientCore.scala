@@ -3,7 +3,8 @@ package automorph.client
 import automorph.log.Logging
 import automorph.spi.protocol.RpcRequest
 import automorph.spi.RpcProtocol.InvalidResponseException
-import automorph.spi.{ClientMessageTransport, EffectSystem, MessageFormat, RpcProtocol}
+import automorph.spi.transport.ClientMessageTransport
+import automorph.spi.{EffectSystem, MessageFormat, RpcProtocol}
 import automorph.util.Extensions.TryOps
 import scala.collection.immutable.ArraySeq
 import scala.util.Try

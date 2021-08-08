@@ -1,5 +1,6 @@
-package automorph.spi
+package automorph.spi.transport
 
+import automorph.spi.MessageTransport
 import scala.collection.immutable.ArraySeq
 
 /**

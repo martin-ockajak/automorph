@@ -2,7 +2,7 @@ package automorph.transport.http.server
 
 import automorph.Handler
 import automorph.log.Logging
-import automorph.spi.ServerMessageTransport
+import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import automorph.transport.http.server.UndertowServer.{Context, defaultBuilder}

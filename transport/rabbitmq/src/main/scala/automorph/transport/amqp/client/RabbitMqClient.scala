@@ -1,7 +1,8 @@
 package automorph.transport.amqp.client
 
 import automorph.log.Logging
-import automorph.spi.{ClientMessageTransport, EffectSystem}
+import automorph.spi.EffectSystem
+import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.amqp.client.RabbitMqClient.Context
 import automorph.transport.amqp.{Amqp, RabbitMqCommon}

@@ -1,14 +1,15 @@
 package automorph.transport.http.client
 
 import automorph.log.Logging
-import automorph.spi.{ClientMessageTransport, EffectSystem}
+import automorph.spi.EffectSystem
+import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.client.SttpClient.{Context, WebSocket}
 import automorph.util.Bytes
 import java.net.URI
 import scala.collection.immutable.ArraySeq
 import sttp.capabilities.WebSockets
-import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
+import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**

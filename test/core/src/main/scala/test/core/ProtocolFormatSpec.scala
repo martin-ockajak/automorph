@@ -5,10 +5,10 @@ import argonaut.{Argonaut, CodecJson}
 import automorph.format.UpickleCustom
 import automorph.format.json.{ArgonautJsonFormat, CirceJsonFormat, UpickleJsonFormat}
 import automorph.format.messagepack.UpickleMessagePackFormat
-import automorph.spi.ClientMessageTransport
+import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.local.client.HandlerTransport
 import automorph.{Client, Handler}
-import io.circe.generic.auto._
+import io.circe.generic.auto.*
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import test.core.CoreSpec

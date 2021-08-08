@@ -1,4 +1,6 @@
-package automorph.spi
+package automorph.spi.transport
+
+import automorph.spi.MessageTransport
 
 /**
  * Server message transport protocol plugin.

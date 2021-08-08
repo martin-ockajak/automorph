@@ -1,6 +1,7 @@
 package automorph
 
-import automorph.spi.{ClientMessageTransport, EffectSystem}
+import automorph.spi.EffectSystem
+import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
 import scala.concurrent.{ExecutionContext, Future}
 
