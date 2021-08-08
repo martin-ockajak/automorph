@@ -19,24 +19,34 @@ lazy val root = project.in(file(".")).settings(
   description := "Remote procedure call client and server library for Scala ",
   publish / skip := true
 ).aggregate(
+  // Common
   spi,
   util,
   meta,
   core,
+  openapi,
 
+  // RPC protocol
+  jsonrpc,
+  restrpc,
+
+  // Transport protocol
+  http,
+  amqp,
+
+  // Message format
   circe,
   upickle,
   argonaut,
 
+  // Effect system
   standard,
   zio,
   monix,
   catsEffect,
   scalaz,
 
-  http,
-  amqp,
-
+  // Message transport
   sttp,
   tapir,
   undertow,
@@ -44,9 +54,8 @@ lazy val root = project.in(file(".")).settings(
   finagle,
   rabbitmq,
 
-  openapi,
+  // Misc
   default,
-
   examples
 )
 
@@ -72,7 +81,7 @@ lazy val util = (project in file("common/util")).settings(
   )
 )
 lazy val meta = (project in file("common/meta")).dependsOn(
-  spi, util
+  spi, util, jsonrpc, restrpc
 ).settings(
   name := s"$projectName-meta",
   initialize ~= { _ =>
@@ -84,6 +93,18 @@ lazy val core = (project in file("common/core")).dependsOn(
   meta, testBase % Test
 ).settings(
   name := s"$projectName-core"
+)
+
+// Protocol
+lazy val jsonrpc = (project in file("protocol/jsonrpc")).dependsOn(
+  spi, util, testBase % Test
+).settings(
+  name := s"$projectName-jsonrpc"
+)
+lazy val restrpc = (project in file("protocol/restrpc")).dependsOn(
+  spi, util, testBase % Test
+).settings(
+  name := s"$projectName-restrpc"
 )
 
 // Effect system
@@ -223,7 +244,7 @@ lazy val openapi = (project in file("common/openapi")).dependsOn(
   name := s"$projectName-open-api"
 )
 
-// Default
+// Misc
 lazy val default = project.dependsOn(
   circe, standard, undertow, sttp
 ).settings(
@@ -232,8 +253,6 @@ lazy val default = project.dependsOn(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion
   )
 )
-
-// Examples
 lazy val examples = (project in file("test/examples")).dependsOn(
   default, upickle, zio, testBase % Test
 ).settings(
