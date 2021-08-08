@@ -77,7 +77,7 @@ lazy val spi = (project in file("common/spi")).settings(
 lazy val util = (project in file("common/util")).settings(
   name := s"$projectName-util",
   libraryDependencies ++= Seq(
-    "org.slf4j" % "slf4j-api" % "1.7.31"
+    "org.slf4j" % "slf4j-api" % "1.7.32"
   )
 )
 lazy val meta = (project in file("common/meta")).dependsOn(
@@ -134,7 +134,7 @@ lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
 ).settings(
   name := s"$projectName-cats-effect",
   libraryDependencies ++= Seq(
-    "org.typelevel" %% "cats-effect" % "3.2.1"
+    "org.typelevel" %% "cats-effect" % "3.2.2"
   )
 )
 lazy val scalaz = (project in file("system/scalaz")).dependsOn(
