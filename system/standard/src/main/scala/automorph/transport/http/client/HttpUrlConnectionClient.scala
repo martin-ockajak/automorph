@@ -3,7 +3,6 @@ package automorph.transport.http.client
 import automorph.log.Logging
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
-import automorph.system.IdentitySystem
 import automorph.transport.http.Http
 import automorph.transport.http.client.HttpUrlConnectionClient.{Context, EffectValue}
 import automorph.util.Bytes
@@ -18,9 +17,6 @@ import scala.util.{Try, Using}
  *
  * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
- * This transport uses blocking I/O operations so it is strongly recommended to supply
- * a suitable blocking effect creation function when using an asynchronous effect system.
- *
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @constructor Creates an HTTP URL connection client transport plugin.
  * @param url HTTP server endpoint URL
@@ -31,7 +27,7 @@ import scala.util.{Try, Using}
 final case class HttpUrlConnectionClient[Effect[_]](
   url: URI,
   method: String,
-  system: EffectSystem[Effect] = IdentitySystem()
+  system: EffectSystem[Effect]
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val contentLengthHeader = "Content-Length"
