@@ -15,8 +15,6 @@ trait JsonMessageFormatSpec extends MessageFormatSpec {
         "Request - String Id / Named Parameters" in {
           val message = Message[Node](Some("2.0"), Some(Right("test")), Some("test"), Some(Right(Map.empty)), None, None)
           val expectedMessage = """{"jsonrpc":"2.0","id":"test","method":"test","params":{}}"""
-          println(serialized(message))
-          println(expectedMessage)
           serialized(message).should(equal(expectedMessage))
         }
         "Request - Numeric Id / Named Parameters" in {

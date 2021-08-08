@@ -9,7 +9,7 @@ import test.Generators.arbitraryRecord
 import test.format.JsonMessageFormatSpec
 import test.{Enum, Record, Structure}
 
-class CirceJsonMessageFormatSpec extends JsonMessageFormatSpec {
+class CirceJsonSpec extends JsonMessageFormatSpec {
 
   type Node = Json
   type ActualFormat = CirceJsonFormat

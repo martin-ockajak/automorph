@@ -24,13 +24,13 @@ trait MessageFormatSpec extends BaseSpec {
   implicit lazy val arbitraryMessage: Arbitrary[Message[Node]] = Generators.arbitraryMesage
 
   "" - {
-//    "Serialize / Deserialize" in {
-//      check { (message: Message[Node]) =>
-//        val rawMessage = format.serialize(message)
-//        val formedMessage = format.deserialize(rawMessage)
-//        formedMessage.equals(message)
-//      }
-//    }
+    "Serialize / Deserialize" in {
+      check { (message: Message[Node]) =>
+        val rawMessage = format.serialize(message)
+        val formedMessage = format.deserialize(rawMessage)
+        formedMessage.equals(message)
+      }
+    }
     "Format" in {
       check { (message: Message[Node]) =>
         val formattedMessage = format.format(message)
