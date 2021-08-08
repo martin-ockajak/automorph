@@ -4,9 +4,9 @@ import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
-import test.core.FormatCoreSpec
+import test.core.ProtocolFormatSpec
 
-class IdentityLocalSpec extends FormatCoreSpec {
+class IdentityLocalSpec extends ProtocolFormatSpec {
 
   type Effect[T] = Identity[T]
   type Context = Option[String]

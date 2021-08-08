@@ -3,10 +3,10 @@ package test.transport.local
 import automorph.system.ZioSystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
-import test.core.FormatCoreSpec
+import test.core.ProtocolFormatSpec
 import zio.{RIO, Runtime, ZEnv}
 
-class ZioLocalSpec extends FormatCoreSpec {
+class ZioLocalSpec extends ProtocolFormatSpec {
 
   private lazy val runtime = Runtime.default.withReportFailure(_ => ())
 
