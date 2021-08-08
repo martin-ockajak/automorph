@@ -2,8 +2,7 @@ package automorph
 
 import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
-import automorph.protocol.Protocol
-import automorph.spi.{EffectSystem, MessageFormat}
+import automorph.spi.{EffectSystem, MessageFormat, Protocol}
 import automorph.util.{CannotEqual, EmptyContext}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -86,7 +85,7 @@ case object Handler {
     format: c.Expr[Format],
     system: c.Expr[EffectSystem[Effect]]
   ): c.Expr[Handler[Node, Format, Effect, Context]] = {
-    import c.universe.{weakTypeOf, Quasiquote}
+    import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[Format], weakTypeOf[Context])
 
     c.Expr[Any](q"""
@@ -103,7 +102,7 @@ case object Handler {
     format: c.Expr[Format],
     system: c.Expr[EffectSystem[Effect]]
   ): c.Expr[Handler[Node, Format, Effect, EmptyContext.Value]] = {
-    import c.universe.{weakTypeOf, Quasiquote}
+    import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[Format])
 
     c.Expr[Any](q"""

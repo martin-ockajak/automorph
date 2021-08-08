@@ -1,7 +1,7 @@
 package automorph.protocol.restrpc
 
-import automorph.protocol.Protocol.responseMandatory
 import automorph.spi.Message
+import automorph.spi.Protocol.responseMandatory
 
 /**
  * REST-RPC call response.

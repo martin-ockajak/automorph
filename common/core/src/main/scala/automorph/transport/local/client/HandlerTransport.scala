@@ -2,8 +2,8 @@ package automorph.transport.local.client
 
 import automorph.Handler
 import automorph.handler.HandlerResult
-import automorph.protocol.Protocol.InvalidResponseException
-import automorph.spi.{EffectSystem, ClientMessageTransport, MessageFormat}
+import automorph.spi.Protocol.InvalidResponseException
+import automorph.spi.{ClientMessageTransport, EffectSystem, MessageFormat}
 import scala.collection.immutable.ArraySeq
 
 /**

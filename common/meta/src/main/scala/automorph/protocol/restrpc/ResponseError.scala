@@ -1,7 +1,7 @@
 package automorph.protocol.restrpc
 
-import automorph.protocol.Protocol.responseMandatory
 import automorph.spi.MessageError
+import automorph.spi.Protocol.responseMandatory
 
 
 /**

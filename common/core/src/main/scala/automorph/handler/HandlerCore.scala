@@ -1,9 +1,9 @@
 package automorph.handler
 
 import automorph.Handler
-import automorph.protocol.Protocol.MethodNotFoundException
-import automorph.protocol.{Protocol, RpcMessage, RpcRequest}
-import automorph.spi.MessageFormat
+import automorph.protocol.{RpcMessage, RpcRequest}
+import automorph.spi.{MessageFormat, Protocol}
+import automorph.spi.Protocol.MethodNotFoundException
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import scala.util.{Failure, Success, Try}

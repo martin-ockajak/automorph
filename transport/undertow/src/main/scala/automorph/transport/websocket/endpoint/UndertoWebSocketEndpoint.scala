@@ -3,9 +3,10 @@ package automorph.transport.websocket.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.Protocol
+import automorph.spi.Protocol
 import automorph.transport.http.Http
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
+import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Network}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.Headers
@@ -122,7 +123,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
           error,
           Map("Client" -> clientAddress(exchange), "Size" -> request.length)
         )
-        val message = Bytes.string.from(Protocol.trace(error).mkString("\n"))
+        val message = Bytes.string.from(error.trace.mkString("\n"))
         sendResponse(message, exchange, channel)
       }
 

@@ -3,10 +3,10 @@ package automorph.transport.http.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.Protocol
-import automorph.spi.EndpointMessageTransport
+import automorph.spi.{EndpointMessageTransport, Protocol}
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.FinagleEndpoint.Context
+import automorph.util.Extensions.ThrowableOps
 import automorph.util.Network
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
@@ -65,7 +65,7 @@ final case class FinagleEndpoint[Effect[_]](
       error,
       Map("Client" -> clientAddress(request), "Size" -> request.content.length)
     )
-    val message = Reader.fromBuf(Buf.Utf8(Protocol.trace(error).mkString("\n")))
+    val message = Reader.fromBuf(Buf.Utf8(error.trace.mkString("\n")))
     val status = Status.InternalServerError
     createResponse(message, status, request)
   }

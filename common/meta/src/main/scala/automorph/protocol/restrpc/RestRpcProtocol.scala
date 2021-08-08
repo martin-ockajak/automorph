@@ -1,11 +1,11 @@
 package automorph.protocol.restrpc
 
-import automorph.protocol.Protocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
 import automorph.protocol.restrpc.RestRpcProtocol.{defaultErrorToException, defaultExceptionToError}
-import automorph.protocol.{Protocol, RpcError, RpcMessage, RpcRequest, RpcResponse}
+import automorph.protocol.{RpcError, RpcMessage, RpcRequest, RpcResponse}
 import automorph.spi.Message.Params
-import automorph.spi.{Message, MessageFormat, MessageType}
-import automorph.util.Extensions.TryOps
+import automorph.spi.Protocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
+import automorph.spi.{Message, MessageFormat, MessageType, Protocol}
+import automorph.util.Extensions.{ThrowableOps, TryOps}
 import automorph.util.MessageId
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
@@ -112,7 +112,7 @@ final case class RestRpcProtocol(
             ResponseError(message, code, data.asInstanceOf[Option[Node]])
           case _ =>
             // Assemble error details
-            val trace = Protocol.trace(error)
+            val trace = error.trace
             val message = trace.headOption.getOrElse("Unknown error")
             val code = exceptionToError(error)
             val data = Some(encodeStrings(trace.drop(1).toList))

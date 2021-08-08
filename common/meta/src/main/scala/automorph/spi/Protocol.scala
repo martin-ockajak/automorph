@@ -1,5 +1,6 @@
-package automorph.protocol
+package automorph.spi
 
+import automorph.protocol.{RpcError, RpcRequest, RpcResponse}
 import automorph.spi.MessageFormat
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
@@ -127,19 +128,4 @@ case object Protocol {
   private[automorph] def responseMandatory[T](value: Option[T], name: String): T = value.getOrElse(
     throw InvalidResponseException(s"Missing message property: $name", None.orNull)
   )
-
-  /**
-   * Assemble detailed trace of an exception and its causes.
-   *
-   * @param throwable exception
-   * @param maxCauses maximum number of included exception causes
-   * @return error messages
-   */
-  private[automorph] def trace(throwable: Throwable, maxCauses: Int = 100): Seq[String] =
-    LazyList.iterate(Option(throwable))(_.flatMap(error => Option(error.getCause)))
-      .takeWhile(_.isDefined).flatten.take(maxCauses).map { throwable =>
-        val exceptionName = throwable.getClass.getSimpleName
-        val message = Option(throwable.getMessage).getOrElse("")
-        s"[$exceptionName] $message"
-      }
 }

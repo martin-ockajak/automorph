@@ -3,13 +3,12 @@ package automorph.transport.http.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.protocol.Protocol
-import automorph.spi.{EndpointMessageTransport, MessageFormat}
+import automorph.spi.{EndpointMessageTransport, MessageFormat, Protocol}
 import automorph.transport.http.Http
 import automorph.util.Bytes
+import automorph.util.Extensions.ThrowableOps
+import sttp.capabilities.{Streams, WebSockets}
 import sttp.model.headers.Cookie
-import sttp.capabilities.Streams
-import sttp.capabilities.WebSockets
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.{CodecFormat, byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode, webSocketBody}
@@ -130,7 +129,7 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 
   private def serverError(error: Throwable, request: Array[Byte], client: String): (Array[Byte], StatusCode) = {
     logger.error("Failed to process HTTP request", error, Map("Client" -> client, "Size" -> request.length))
-    val message = Bytes.string.from(Protocol.trace(error).mkString("\n")).unsafeArray
+    val message = Bytes.string.from(error.trace.mkString("\n")).unsafeArray
     val status = StatusCode.InternalServerError
     createResponse(message, status, client)
   }

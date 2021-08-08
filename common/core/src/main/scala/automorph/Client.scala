@@ -1,9 +1,8 @@
 package automorph
 
 import automorph.client.{ClientBind, ClientCore, NamedMethodProxy}
-import automorph.protocol.Protocol
 import automorph.protocol.jsonrpc.JsonRpcProtocol
-import automorph.spi.{ClientMessageTransport, EffectSystem, MessageFormat}
+import automorph.spi.{ClientMessageTransport, EffectSystem, MessageFormat, Protocol}
 import automorph.util.{CannotEqual, EmptyContext}
 
 /**
