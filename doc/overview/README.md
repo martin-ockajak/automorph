@@ -8,7 +8,7 @@ way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/sp
 ## Goals
 
 * Provide a **definitive RPC solution** for Scala ecosystem
-* Strive for **easiest possible integration** with existing applications
+* Strive for **very easy integration** with existing applications
 * Encourage use of **appropriate technical standards** for system interoperability
 
 ## Features
