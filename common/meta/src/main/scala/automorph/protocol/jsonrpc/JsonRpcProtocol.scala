@@ -6,9 +6,8 @@ import automorph.spi.Message.Params
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
 import automorph.spi.{Message, MessageFormat, RpcProtocol}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
-import automorph.util.MessageId
 import scala.collection.immutable.ArraySeq
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Random, Success, Try}
 
 /**
  * JSON-RPC 2.0 protocol implementation.
@@ -26,6 +25,7 @@ final case class JsonRpcProtocol(
   type Content = JsonRpcProtocol.Content
 
   private val unknownId: Message.Id = Right("[unknown]")
+  private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   override val name: String = "JSON-RPC"
 
@@ -83,7 +83,7 @@ final case class JsonRpcProtocol(
     respond: Boolean,
     format: MessageFormat[Node]
   ): Try[RpcRequest[Node, Content]] = {
-    val id = Option.when(respond)(Right(MessageId.next).withLeft[BigDecimal])
+    val id = Option.when(respond)(Right(Math.abs(random.nextLong).toString).withLeft[BigDecimal])
     val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
     val formedRequest = Request(id, method, argumentNodes).formed
     val messageText = () => format.format(formedRequest)
