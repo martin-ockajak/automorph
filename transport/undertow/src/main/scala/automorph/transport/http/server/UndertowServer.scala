@@ -37,11 +37,11 @@ final case class UndertowServer[Effect[_]](
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
   webSocket: Boolean = true,
   builder: Undertow.Builder = defaultBuilder
-) extends Logging with ServerMessageTransport {
+) extends Logging with ServerMessageTransport[Effect] {
 
   private val undertow = start()
 
-  def close(): Unit = undertow.stop()
+  override def close(): Effect[Unit] = handler.system.impure(undertow.stop())
 
   private def start(): Undertow = {
     // Configure the request handler

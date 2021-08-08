@@ -43,7 +43,7 @@ final case class RabbitMqServer[Effect[_]](
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
 )(implicit executionContext: ExecutionContext)
-  extends AutoCloseable with Logging with ServerMessageTransport {
+  extends Logging with ServerMessageTransport[Effect] {
 
   private lazy val connection = createConnection()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
@@ -52,7 +52,7 @@ final case class RabbitMqServer[Effect[_]](
   private val exchange = RabbitMqCommon.defaultDirectExchange
   private val system = handler.system
 
-  def close(): Unit = connection.abort(AMQP.CONNECTION_FORCED, "Terminated")
+  override def close(): Effect[Unit] = system.impure(connection.abort(AMQP.CONNECTION_FORCED, "Terminated"))
 
   private def createConsumer(channel: Channel): DefaultConsumer = {
     val consumer = new DefaultConsumer(channel) {

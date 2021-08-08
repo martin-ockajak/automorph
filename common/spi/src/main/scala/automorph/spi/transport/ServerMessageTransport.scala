@@ -7,5 +7,14 @@ import automorph.spi.MessageTransport
  *
  * Used to actively receive and reply to requests using specific message transport protocol
  * while invoking RPC request handler to process them.
+ *
+ * @tparam Effect effect type
  */
-trait ServerMessageTransport extends MessageTransport
+trait ServerMessageTransport[Effect[_]] extends MessageTransport {
+  /**
+   * Close this server freeing the underlying resources.
+   *
+   * @return nothing
+   */
+  def close(): Effect[Unit]
+}
