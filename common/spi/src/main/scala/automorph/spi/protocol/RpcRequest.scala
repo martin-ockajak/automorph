@@ -1,7 +1,7 @@
 package automorph.spi.protocol
 
 /**
- * RPC response.
+ * RPC request.
  *
  * @constructor Creates RPC request.
  * @param method method name
