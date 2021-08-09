@@ -14,7 +14,7 @@ final case class CatsEffectSystem() extends EffectSystem[IO] {
 
   override def wrap[T](value: => T): IO[T] = IO(value)
 
-  override def pure[T](value: => T): IO[T] = IO.pure(value)
+  override def pure[T](value: T): IO[T] = IO.pure(value)
 
   override def failed[T](exception: Throwable): IO[T] = IO.raiseError(exception)
 

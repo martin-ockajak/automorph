@@ -27,7 +27,7 @@ trait EffectSystem[Effect[_]] {
    * @tparam T effectful value type
    * @return effect containing the value
    */
-  def pure[T](value: => T): Effect[T]
+  def pure[T](value: T): Effect[T]
 
   /**
    * Lifts an exception into a new effect of specified type.

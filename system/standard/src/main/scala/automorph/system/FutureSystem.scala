@@ -16,7 +16,7 @@ final case class FutureSystem()(implicit executionContext: ExecutionContext) ext
 
   override def wrap[T](value: => T): Future[T] = Future(value)
 
-  override def pure[T](value: => T): Future[T] = Future.successful(value)
+  override def pure[T](value: T): Future[T] = Future.successful(value)
 
   override def failed[T](exception: Throwable): Future[T] = Future.failed(exception)
 

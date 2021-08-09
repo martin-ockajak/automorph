@@ -14,7 +14,7 @@ final case class TrySystem() extends EffectSystem[Try] {
 
   override def wrap[T](value: => T): Try[T] = Try(value)
 
-  override def pure[T](value: => T): Try[T] = Success(value)
+  override def pure[T](value: T): Try[T] = Success(value)
 
   override def failed[T](exception: Throwable): Try[T] = Failure(exception)
 

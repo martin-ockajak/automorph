@@ -14,7 +14,7 @@ final case class MonixSystem() extends EffectSystem[Task] {
 
   override def wrap[T](value: => T): Task[T] = Task.evalAsync(value)
 
-  override def pure[T](value: => T): Task[T] = Task.pure(value)
+  override def pure[T](value: T): Task[T] = Task.pure(value)
 
   override def failed[T](exception: Throwable): Task[T] = Task.raiseError(exception)
 

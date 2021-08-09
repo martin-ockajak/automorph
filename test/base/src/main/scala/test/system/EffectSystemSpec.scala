@@ -14,6 +14,7 @@ import test.base.BaseSpec
 trait EffectSystemSpec[Effect[_]] extends BaseSpec {
   private val text = "test"
   private val number = 0
+  private val error = TestException(text)
 
   case class TestException(message: String) extends RuntimeException(message)
 
@@ -22,14 +23,23 @@ trait EffectSystemSpec[Effect[_]] extends BaseSpec {
   def run[T](effect: Effect[T]): Either[Throwable, T]
 
   "" - {
+    "Wrap" - {
+      "Success" in {
+        val outcome = system.wrap(text)
+        run(outcome).should(equal(Right(text)))
+      }
+      "Failure" in {
+        val outcome = system.wrap(error)
+      }
+    }
     "Pure" in {
       val outcome = system.pure(text)
       run(outcome).should(equal(Right(text)))
     }
     "Failed" in {
-      Try(system.failed(TestException(text))) match {
-        case Success(outcome) => run(outcome).should(equal(Left(TestException(text))))
-        case Failure(error) => error.should(equal(TestException(text)))
+      Try(system.failed(error)) match {
+        case Success(outcome) => run(outcome).should(equal(Left(error)))
+        case Failure(error) => error.should(equal(error))
       }
     }
     "Map" in {

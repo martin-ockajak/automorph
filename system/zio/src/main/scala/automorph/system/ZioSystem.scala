@@ -16,7 +16,7 @@ final case class ZioSystem[Environment]() extends EffectSystem[({ type Effect[T]
 
   override def wrap[T](value: => T): RIO[Environment, T] = RIO(value)
 
-  override def pure[T](value: => T): RIO[Environment, T] = RIO.succeed(value)
+  override def pure[T](value: T): RIO[Environment, T] = RIO.succeed(value)
 
   override def failed[T](exception: Throwable): RIO[Environment, T] = RIO.fail(exception)
 
