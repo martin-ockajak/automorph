@@ -12,7 +12,9 @@ trait EffectSystem[Effect[_]] {
   /**
    * Lifts a side-effecting value into a new effect of specified type.
    *
-   * @param value an existing side-effecting value
+   * Exceptions thrown while computing the value are translated into a failed effect.
+   *
+   * @param value side-effecting value
    * @tparam T effectful value type
    * @return effect containing the value
    */
@@ -21,7 +23,7 @@ trait EffectSystem[Effect[_]] {
   /**
    * Lifts a pure value into a new effect of specified type.
    *
-   * @param value an existing value
+   * @param value pure value
    * @tparam T effectful value type
    * @return effect containing the value
    */

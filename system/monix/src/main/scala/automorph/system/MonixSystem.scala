@@ -12,7 +12,7 @@ import monix.eval.Task
  */
 final case class MonixSystem() extends EffectSystem[Task] {
 
-  override def impure[T](value: => T): Task[T] = Task.eval(value)
+  override def impure[T](value: => T): Task[T] = Task.evalAsync(value)
 
   override def pure[T](value: => T): Task[T] = Task.pure(value)
 
