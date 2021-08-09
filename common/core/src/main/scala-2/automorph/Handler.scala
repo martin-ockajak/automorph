@@ -91,7 +91,7 @@ case object Handler {
     c.Expr[Any](q"""
       new automorph.Handler($codec,
         $system,
-        automorph.protocol.jsonrpc.JsonRpcProtocol($codec),
+        automorph.protocol.JsonRpcProtocol($codec),
         Map.empty,
         value => $codec.encode[List[String]](value), $codec.encode(None)
       )
@@ -109,7 +109,7 @@ case object Handler {
       automorph.Handler(
         $codec,
         $system,
-        automorph.protocol.jsonrpc.JsonRpcProtocol($codec),
+        automorph.protocol.JsonRpcProtocol($codec),
         Map.empty,
         value => $codec.encode[List[String]](value), $codec.encode(None)
       )

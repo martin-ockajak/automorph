@@ -1,6 +1,7 @@
-package automorph.protocol.restrpc
+package automorph.protocol
 
-import automorph.protocol.restrpc.RestRpcProtocol.{defaultErrorToException, defaultExceptionToError}
+import automorph.protocol.RestRpcProtocol.{defaultErrorToException, defaultExceptionToError}
+import automorph.protocol.restrpc.{Response, ResponseError, RestRpcException}
 import automorph.spi.Message.Params
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
 import automorph.spi.protocol.{RpcError, RpcMessage, RpcRequest, RpcResponse}

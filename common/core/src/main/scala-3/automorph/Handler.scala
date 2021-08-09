@@ -2,7 +2,7 @@ package automorph
 
 import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
-import automorph.protocol.jsonrpc.JsonRpcProtocol
+import automorph.protocol.JsonRpcProtocol
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.{CannotEqual, EmptyContext}
 

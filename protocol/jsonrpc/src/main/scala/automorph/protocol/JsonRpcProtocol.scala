@@ -1,8 +1,9 @@
-package automorph.protocol.jsonrpc
+package automorph.protocol
 
-import automorph.protocol.jsonrpc.JsonRpcProtocol.{defaultErrorToException, defaultExceptionToError, ParseErrorException}
+import automorph.protocol.JsonRpcProtocol.{ParseErrorException, defaultErrorToException, defaultExceptionToError}
+import automorph.protocol.jsonrpc.{ErrorType, JsonRpcException, Request, Response, ResponseError}
 import automorph.spi.Message.Params
-import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException, FunctionNotFoundException}
+import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException, InvalidResponseException}
 import automorph.spi.protocol.{RpcError, RpcMessage, RpcRequest, RpcResponse}
 import automorph.spi.{Message, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{ThrowableOps, TryOps}

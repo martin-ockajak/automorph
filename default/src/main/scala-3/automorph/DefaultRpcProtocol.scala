@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.protocol.jsonrpc.JsonRpcProtocol
+import automorph.protocol.JsonRpcProtocol
 import automorph.spi.MessageCodec
 
 object DefaultRpcProtocol {
