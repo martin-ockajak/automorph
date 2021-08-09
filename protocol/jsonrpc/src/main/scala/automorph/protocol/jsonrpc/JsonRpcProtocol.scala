@@ -39,7 +39,7 @@ final case class JsonRpcProtocol(
       error => Left(RpcError(ParseErrorException("Invalid request format", error), RpcMessage(None, request))),
       formedRequest => {
         // Validate request
-        val messageText = () => Some(format.format(formedRequest))
+        val messageText = () => Some(format.text(formedRequest))
         val message = RpcMessage(formedRequest.id, request, formedRequest.properties, messageText)
         Try(Request(formedRequest)).pureFold(
           error => Left(RpcError(error, message)),
@@ -58,7 +58,7 @@ final case class JsonRpcProtocol(
     val id = Option.when(responseRequest)(Right(Math.abs(random.nextLong).toString).withLeft[BigDecimal])
     val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
     val formedRequest = Request(id, method, argumentNodes).formed
-    val messageText = () => Some(format.format(formedRequest))
+    val messageText = () => Some(format.text(formedRequest))
     Try(format.serialize(formedRequest)).mapFailure { error =>
       ParseErrorException("Invalid request format", error)
     }.map { messageBody =>
@@ -91,7 +91,7 @@ final case class JsonRpcProtocol(
       },
       resultValue => Response(id, Some(resultValue), None).formed
     )
-    val messageText = () => Some(format.format(formedResponse))
+    val messageText = () => Some(format.text(formedResponse))
     Try(format.serialize(formedResponse)).mapFailure { error =>
       ParseErrorException("Invalid response format", error)
     }.map { messageBody =>
@@ -109,7 +109,7 @@ final case class JsonRpcProtocol(
       error => Left(RpcError(ParseErrorException("Invalid response format", error), RpcMessage(None, response))),
       formedResponse => {
         // Validate response
-        val messageText = () => Some(format.format(formedResponse))
+        val messageText = () => Some(format.text(formedResponse))
         val message = RpcMessage(formedResponse.id, response, formedResponse.properties, messageText)
         Try(Response(formedResponse)).pureFold(
           error => Left(RpcError(ParseErrorException("Invalid response format", error), message)),

@@ -79,7 +79,7 @@ final case class UpickleMessagePackFormat[Custom <: UpickleCustom](
   override def deserializeNode(data: ArraySeq.ofByte): Msg =
     custom.readBinary[Msg](data.unsafeArray)
 
-  override def format(message: Message[Msg]): String =
+  override def text(message: Message[Msg]): String =
     custom.write(message, indent)
 }
 

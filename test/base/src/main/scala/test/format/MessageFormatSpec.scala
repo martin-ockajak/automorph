@@ -33,7 +33,7 @@ trait MessageFormatSpec extends BaseSpec {
     }
     "Format" in {
       check { (message: Message[Node]) =>
-        val formattedMessage = format.format(message)
+        val formattedMessage = format.text(message)
         val rawMessage = format.serialize(message)
         formattedMessage.getBytes(charset).length > rawMessage.size
       }

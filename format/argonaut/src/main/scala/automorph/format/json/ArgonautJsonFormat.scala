@@ -82,7 +82,7 @@ final case class ArgonautJsonFormat() extends ArgonautJsonMeta {
       identity
     )
 
-  override def format(message: Message[Json]): String =
+  override def text(message: Message[Json]): String =
     message.asJson.spaces2
 }
 

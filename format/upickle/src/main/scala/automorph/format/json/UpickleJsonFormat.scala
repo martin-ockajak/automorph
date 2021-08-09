@@ -71,7 +71,7 @@ final case class UpickleJsonFormat[Custom <: UpickleCustom](
   override def deserializeNode(data: ArraySeq.ofByte): Value =
     custom.read[Value](data.unsafeArray)
 
-  override def format(message: Message[Value]): String =
+  override def text(message: Message[Value]): String =
     custom.write(UpickleMessage.fromSpi(message), indent)
 }
 

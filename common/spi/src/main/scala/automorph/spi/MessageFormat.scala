@@ -56,5 +56,5 @@ trait MessageFormat[Node] extends FormatMeta[Node] {
    * @param message message
    * @return message in human-readable textual form
    */
-  def format(message: Message[Node]): String
+  def text(message: Message[Node]): String
 }
