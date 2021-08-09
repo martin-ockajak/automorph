@@ -1,6 +1,6 @@
 package test.codec
 
-import automorph.spi.{Message, MessageCodec}
+import automorph.spi.Message
 
 /**
  * JSON message codec test.

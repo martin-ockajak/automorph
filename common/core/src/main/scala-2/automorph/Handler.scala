@@ -88,7 +88,7 @@ case object Handler {
   )(
     codec: c.Expr[Codec],
     system: c.Expr[EffectSystem[Effect]],
-    protocol: c.Expr[RpcProtocol[Node, Codec]]
+    protocol: c.Expr[RpcProtocol[Node]]
   ): c.Expr[Handler[Node, Codec, Effect, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[Codec], weakTypeOf[Context])
@@ -99,7 +99,8 @@ case object Handler {
         $system,
         $protocol,
         Map.empty,
-        value => $codec.encode[List[String]](value), $codec.encode(None)
+        value => $codec.encode[List[String]](value),
+        $codec.encode(None)
       )
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
   }
@@ -107,7 +108,7 @@ case object Handler {
   def withoutContextMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag, Effect[_]](c: blackbox.Context)(
     codec: c.Expr[Codec],
     system: c.Expr[EffectSystem[Effect]],
-    protocol: c.Expr[RpcProtocol[Node, Codec]]
+    protocol: c.Expr[RpcProtocol[Node]]
   ): c.Expr[Handler[Node, Codec, Effect, EmptyContext.Value]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[Codec])
@@ -118,7 +119,8 @@ case object Handler {
         $system,
         $protocol,
         Map.empty,
-        value => $codec.encode[List[String]](value), $codec.encode(None)
+        value => $codec.encode[List[String]](value),
+        $codec.encode(None)
       )
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, EmptyContext.Value]]]
   }

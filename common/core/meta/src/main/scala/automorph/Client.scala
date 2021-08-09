@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.client.{ClientBind, ClientCore, NamedMethodProxy}
+import automorph.client.{ClientBind, ClientCore}
 import automorph.log.Logging
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
