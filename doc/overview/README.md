@@ -14,7 +14,7 @@ way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/sp
 ## Features
 
 * **Powerful** - client and server API bindings are generated directly from public methods of existing API classes
-* **Modular** - various integration plugins can be combined to match required effect type, message format and message transport protocol
+* **Modular** - various integration plugins can be combined to match required effect type, message format and transport protocol
 * **Clean** - request/response metadata can be manipulated using transport protocol agnostic abstraction
 * **Fast** - optimized API binding code is generated during compilation
 * **Safe** - generated API bindings are type checked during compilation
@@ -38,7 +38,7 @@ way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/sp
 * [WebSocket](https://en.wikipedia.org/wiki/WebSocket)
 * [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
 
-### Message formats
+### Message codecs
 
 * [JSON](https://www.json.org/)
 * [MessagePack](https://msgpack.org/)

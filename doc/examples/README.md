@@ -428,9 +428,9 @@ apiProxy.hello("world", 1) // Task[String]
 client.close()
 ```
 
-## [Message format]
+## [Message codec]
 
-* [Source](/test/examples/src/test/scala/test/examples/MessageFormat.scala)
+* [Source](/test/examples/src/test/scala/test/examples/MessageCodec.scala)
 
 **Dependencies**
 
@@ -444,7 +444,7 @@ libraryDependencies ++= Seq(
 **API**
 
 ```scala
-import automorph.format.messagepack.UpickleMessagePackFormat
+import automorph.codec.messagepack.UpickleMessagePackCodec
 import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, Handler}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -460,15 +460,15 @@ val api = new Api()
 **Server**
 
 ```scala
-// Create message format and custom data type serializer/deserializer
-val format = UpickleMessagePackFormat()
-implicit def recordRw: format.custom.ReadWriter[Record] = format.custom.macroRW
+// Create message codec and custom data type serializer/deserializer
+val codec = UpickleMessagePackCodec()
+implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
 
 // Create an effect system plugin
 val system = DefaultEffectSystem.async
 
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val handler = Handler[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpServer.Context](format, system)
+val handler = Handler[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpServer.Context](codec, system)
 val server = DefaultHttpServer(handler.bind(api), identity, 80, "/api")
 
 // Stop the server
@@ -481,7 +481,7 @@ server.close()
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val url = new java.net.URI("http://localhost/api")
 val transport = DefaultHttpClientTransport.async(url, "POST")
-val client = Client[UpickleMessagePackFormat.Node, format.type, Future, DefaultHttpClientTransport.Context](format, system, transport)
+val client = Client[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpClientTransport.Context](codec, system, transport)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
@@ -521,7 +521,7 @@ val api = new Api()
 ```scala
 import automorph.system.IdentitySystem
 import automorph.transport.http.server.NanoHttpdServer
-import automorph.{Client, DefaultSystem, DefaultFormat, Handler}
+import automorph.{Client, DefaultCodec, DefaultSystem, Handler}
 
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val server = DefaultHttpServer.sync(_.bind(api), 80, "/api")

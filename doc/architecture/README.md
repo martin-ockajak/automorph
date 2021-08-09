@@ -8,7 +8,7 @@ The library provides the following components to assemble either fully standalon
 * [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_2.13/latest/automorph/Handler.html)
 * [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)
 * [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html)
-* [Message format](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html)
+* [Message codec](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageCodec.html)
 * [Message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageTransport.html)
 
 ## Diagram
@@ -24,7 +24,7 @@ Depends on:
 
 * [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)
 * [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html)
-* [Message format](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html)
+* [Message codec](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageCodec.html)
 * [Client message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/ClientMessageTransport.html)
 
 ## Handler
@@ -35,4 +35,4 @@ Depends on:
 
 * [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)
 * [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html)
-* [Message format](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html)
+* [Message codec](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageCodec.html)
