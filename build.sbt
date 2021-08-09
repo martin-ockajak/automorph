@@ -104,17 +104,17 @@ lazy val jsonrpcMeta = (project in file("protocol/jsonrpc/meta")).dependsOn(
   name := s"$projectName-jsonrpc-meta"
 )
 lazy val jsonrpc = (project in file("protocol/jsonrpc")).dependsOn(
-  jsonrpcMeta, util, testBase % Test
+  jsonrpcMeta, util
 ).settings(
   name := s"$projectName-jsonrpc"
 )
 lazy val restrpcMeta = (project in file("protocol/restrpc/meta")).dependsOn(
-  spi, testBase % Test
+  spi
 ).settings(
   name := s"$projectName-restrpc-meta"
 )
 lazy val restrpc = (project in file("protocol/restrpc")).dependsOn(
-  restrpcMeta, util, testBase % Test
+  restrpcMeta, util
 ).settings(
   name := s"$projectName-restrpc"
 )
@@ -274,7 +274,7 @@ lazy val examples = (project in file("test/examples")).dependsOn(
 )
 // Test
 lazy val testBase = (project in file("test/base")).dependsOn(
-  spi
+  spi, jsonrpc, restrpc
 ).settings(
   libraryDependencies ++= Seq(
     // Test
