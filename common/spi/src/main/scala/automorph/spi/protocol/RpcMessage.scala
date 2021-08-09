@@ -16,5 +16,5 @@ final case class RpcMessage[Content](
   content: Content,
   body: ArraySeq.ofByte,
   properties: Map[String, String] = Map.empty,
-  text: Option[() => String] = None,
+  text: () => Option[String] = () => None
 )

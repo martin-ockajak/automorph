@@ -36,7 +36,7 @@ final case class RestRpcProtocol(
 //      error => Left(RpcError(InvalidRequest("Invalid request format", error), RpcMessage(None, request))),
 //      formedRequest => {
 //        // Validate request
-//        val messageText = Some(() => format.format(formedRequest))
+//        val messageText = () => Some(format.format(formedRequest))
 //        val message = RpcMessage(formedRequest.id, request, formedRequest.properties, messageText)
 //        Try(Request(formedRequest)).pureFold(
 //          error => Left(RpcError(error, message)),
@@ -55,7 +55,7 @@ final case class RestRpcProtocol(
       error => Left(RpcError(InvalidResponseException("Invalid response format", error), RpcMessage((), response))),
       formedResponse => {
         // Validate response
-        val messageText = Some(() => format.format(formedResponse))
+        val messageText = () => Some(format.format(formedResponse))
         val message = RpcMessage((), response, formedResponse.properties, messageText)
         Try(Response(formedResponse)).pureFold(
           error => Left(RpcError(InvalidResponseException("Invalid response format", error), message)),
@@ -121,11 +121,11 @@ final case class RestRpcProtocol(
       },
       resultValue => Response(Some(resultValue), None).formed
     )
-    val messageText = () => format.format(formedResponse)
+    val messageText = () => Some(format.format(formedResponse))
     Try(format.serialize(formedResponse)).mapFailure { error =>
       InvalidResponseException("Invalid response format", error)
     }.map { messageBody =>
-      val message = RpcMessage((), messageBody, formedResponse.properties, Some(messageText))
+      val message = RpcMessage((), messageBody, formedResponse.properties, messageText)
       RpcResponse(result, message)
     }
   }
