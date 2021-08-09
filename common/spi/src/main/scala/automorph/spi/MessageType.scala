@@ -1,9 +1,7 @@
 package automorph.spi
 
 /**
- * JSON-RPC message type.
- *
- * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+ * RPC message type.
  */
 sealed abstract class MessageType {
   /**

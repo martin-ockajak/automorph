@@ -161,7 +161,7 @@ lazy val scalaz = (project in file("system/scalaz")).dependsOn(
 // Message codec
 val circeVersion = "0.14.1"
 lazy val circe = (project in file(s"codec/circe")).dependsOn(
-  spi, testBase % Test
+  jsonrpc, restrpc, testBase % Test
 ).settings(
   name := s"$projectName-circe",
   libraryDependencies ++= Seq(
@@ -170,7 +170,7 @@ lazy val circe = (project in file(s"codec/circe")).dependsOn(
   )
 )
 lazy val upickle = (project in file("codec/upickle")).dependsOn(
-  spi, testBase % Test
+  jsonrpc, restrpc, testBase % Test
 ).settings(
   name := s"$projectName-upickle",
   libraryDependencies ++= Seq(
@@ -178,7 +178,7 @@ lazy val upickle = (project in file("codec/upickle")).dependsOn(
   )
 )
 lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
-  spi, testBase % Test
+  jsonrpc, restrpc, testBase % Test
 ).settings(
   name := s"$projectName-argonaut",
   libraryDependencies ++= Seq(
