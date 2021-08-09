@@ -1,10 +1,9 @@
 package test.examples
 
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
-import automorph.protocol.jsonrpc.JsonRpcProtocol
 import automorph.transport.http.Http
 import automorph.transport.http.client.SttpClient.defaultContext
-import automorph.{DefaultHttpClient, DefaultHttpServer, DefaultMessageCodec}
+import automorph.{DefaultHttpClient, DefaultHttpServer, DefaultRpcProtocol}
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -17,10 +16,11 @@ object ErrorMapping extends App {
   }
   val api = new Api()
 
-  // Customize server JSON-RPC error mapping
-  val serverProtocol = JsonRpcProtocol(DefaultMessageCodec()).exceptionToError {
+  // Customize server RPC error mapping
+  val defaultProtocol = DefaultRpcProtocol()
+  val serverProtocol = defaultProtocol.exceptionToError {
     case _: SQLException => InvalidRequest
-    case e => JsonRpcProtocol.defaultExceptionToError(e)
+    case e => defaultProtocol.exceptionToError(e)
   }
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
@@ -35,10 +35,10 @@ object ErrorMapping extends App {
     }
   )
 
-  // Customize client JSON-RPC error mapping
-  val clientProtocol = JsonRpcProtocol(DefaultMessageCodec()).errorToException {
+  // Customize client RPC error mapping
+  val clientProtocol = defaultProtocol.errorToException {
     case (message, InvalidRequest.code) if message.contains("SQL") => new SQLException(message)
-    case (message, code) => JsonRpcProtocol.defaultErrorToException(message, code)
+    case (message, code) => defaultProtocol.errorToException(message, code)
   }
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'

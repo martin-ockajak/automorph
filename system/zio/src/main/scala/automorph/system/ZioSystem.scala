@@ -1,7 +1,6 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
-import scala.util.Try
 import zio.RIO
 
 /**
