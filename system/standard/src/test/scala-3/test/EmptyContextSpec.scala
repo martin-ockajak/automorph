@@ -15,9 +15,10 @@ class EmptyContextSpec extends BaseSpec {
     "Create" in {
       val codec = CirceJsonCodec()
       val system = IdentitySystem()
-      val handler = Handler.withoutContext(codec, system)
+      val protocol = JsonRpcProtocol(codec)
+      val handler = Handler.withoutContext(codec, system, protocol)
       val handlerTransport = HandlerTransport(handler, system, EmptyContext.value)
-      val client = Client.withoutContext(codec, system, handlerTransport, JsonRpcProtocol(codec))
+      val client = Client.withoutContext(codec, system, handlerTransport, protocol)
       client
     }
   }

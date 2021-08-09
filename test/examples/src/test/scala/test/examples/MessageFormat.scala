@@ -23,13 +23,17 @@ object MessageCodec extends App {
   val system = DefaultEffectSystem.async
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val handler = Handler[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpServer.Context](codec, system)
+  val protocol = DefaultRpcProtocol(codec)
+  val handler = Handler[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpServer.Context](
+    codec,
+    system,
+    protocol
+  )
   val server = DefaultHttpServer(handler.bind(api), identity, 80, "/api")
 
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
   val url = new java.net.URI("http://localhost/api")
   val transport = DefaultHttpClientTransport.async(url, "POST")
-  val protocol = DefaultRpcProtocol(codec)
   val client = Client[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpClientTransport.Context](
     codec,
     system,
