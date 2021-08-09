@@ -13,7 +13,7 @@ case object DefaultClient {
    * @tparam Effect effect type
    * @tparam Context request context type
    */
-  type Type[Effect[_], Context] = Client[DefaultMessageFormat.Node, DefaultMessageFormat.Type, Effect, Context]
+  type Type[Effect[_], Context] = Client[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Effect, Context]
 
   /**
    * Creates a default RPC client with specified effect ''system'' and message ''transport'' plugins.
@@ -29,8 +29,8 @@ case object DefaultClient {
   def apply[Effect[_], Context](
     system: EffectSystem[Effect],
     transport: ClientMessageTransport[Effect, Context]
-  ): Client[DefaultMessageFormat.Node, DefaultMessageFormat.Type, Effect, Context] =
-    Client(DefaultMessageFormat(), system, transport)
+  ): Client[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Effect, Context] =
+    Client(DefaultMessageCodec(), system, transport)
 
   /**
    * Creates a default asynchronous RPC client using 'Future' as an effect type with specified message ''transport'' plugin.

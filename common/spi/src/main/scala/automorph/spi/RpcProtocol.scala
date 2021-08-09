@@ -1,6 +1,6 @@
 package automorph.spi
 
-import automorph.spi.MessageFormat
+import automorph.spi.MessageCodec
 import automorph.spi.protocol.{RpcError, RpcRequest, RpcResponse}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
@@ -25,7 +25,7 @@ trait RpcProtocol {
    * @param argumentNames argument names
    * @param argumentValues argument values
    * @param responseRequired true if the request mandates a response, false if there should be no response
-   * @param format message format plugin
+   * @param codec message codec plugin
    * @tparam Node message node type
    * @return RPC request
    */
@@ -34,7 +34,7 @@ trait RpcProtocol {
     argumentNames: Option[Seq[String]],
     argumentValues: Seq[Node],
     responseRequired: Boolean,
-    format: MessageFormat[Node]
+    codec: MessageCodec[Node]
   ): Try[RpcRequest[Node, Details]]
 
   /**
@@ -42,14 +42,14 @@ trait RpcProtocol {
    *
    * @param request RPC request message
    * @param method method name override, if specified it is used instead of method name obtained from the request
-   * @param format message format plugin
+   * @param codec message codec plugin
    * @tparam Node message node type
    * @return RPC request on valid request message or RPC error on invalid request message
    */
   def parseRequest[Node](
     request: ArraySeq.ofByte,
     method: Option[String],
-    format: MessageFormat[Node]
+    codec: MessageCodec[Node]
   ): Either[RpcError[Details], RpcRequest[Node, Details]]
 
   /**
@@ -57,15 +57,15 @@ trait RpcProtocol {
    *
    * @param result RPC response result
    * @param details corresponding RPC request details
-   * @param format message format plugin
-   * @param encodeStrings converts list of strings to message format node
+   * @param codec message codec plugin
+   * @param encodeStrings converts list of strings to message codec node
    * @tparam Node message node type
    * @return RPC response
    */
   def createResponse[Node](
     result: Try[Node],
     details: Details,
-    format: MessageFormat[Node],
+    codec: MessageCodec[Node],
     encodeStrings: List[String] => Node
   ): Try[RpcResponse[Node, Details]]
 
@@ -73,13 +73,13 @@ trait RpcProtocol {
    * Parses an RPC response.
    *
    * @param response RPC response message
-   * @param format message format plugin
+   * @param codec message codec plugin
    * @tparam Node message node type
    * @return RPC response on valid response message or RPC error on invalid response message
    */
   def parseResponse[Node](
     response: ArraySeq.ofByte,
-    format: MessageFormat[Node]
+    codec: MessageCodec[Node]
   ): Either[RpcError[Details], RpcResponse[Node, Details]]
 }
 

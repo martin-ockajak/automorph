@@ -34,7 +34,7 @@ lazy val root = project.in(file(".")).settings(
   http,
   amqp,
 
-  // Message format
+  // Message codec
   circe,
   upickle,
   argonaut,
@@ -146,9 +146,9 @@ lazy val scalaz = (project in file("system/scalaz")).dependsOn(
   )
 )
 
-// Message format
+// Message codec
 val circeVersion = "0.14.1"
-lazy val circe = (project in file(s"format/circe")).dependsOn(
+lazy val circe = (project in file(s"codec/circe")).dependsOn(
   spi, testBase % Test
 ).settings(
   name := s"$projectName-circe",
@@ -157,7 +157,7 @@ lazy val circe = (project in file(s"format/circe")).dependsOn(
     "io.circe" %% "circe-generic" % circeVersion
   )
 )
-lazy val upickle = (project in file("format/upickle")).dependsOn(
+lazy val upickle = (project in file("codec/upickle")).dependsOn(
   spi, testBase % Test
 ).settings(
   name := s"$projectName-upickle",
@@ -165,7 +165,7 @@ lazy val upickle = (project in file("format/upickle")).dependsOn(
     "com.lihaoyi" %% "upickle" % "1.4.0"
   )
 )
-lazy val argonaut = (project in file("format/argonaut")).dependsOn(
+lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
   spi, testBase % Test
 ).settings(
   name := s"$projectName-argonaut",
@@ -308,7 +308,7 @@ ThisBuild / scalacOptions ++= Seq(
   case _ => Seq(
     "-language:existentials",
     "-Xlint",
-    "-Wconf:site=[^.]+\\.format\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
+    "-Wconf:site=[^.]+\\.codec\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
     "-Wextra-implicit",
     "-Wnumeric-widen",
     "-Wvalue-discard",

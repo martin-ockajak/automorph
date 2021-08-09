@@ -3,7 +3,7 @@ package automorph
 import automorph.client.{ClientBind, ClientCore, NamedMethodProxy}
 import automorph.protocol.jsonrpc.JsonRpcProtocol
 import automorph.spi.transport.ClientMessageTransport
-import automorph.spi.{EffectSystem, MessageFormat, RpcProtocol}
+import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.{CannotEqual, EmptyContext}
 
 /**
@@ -11,29 +11,29 @@ import automorph.util.{CannotEqual, EmptyContext}
  *
  * Used to perform RPC calls and notifications.
  *
- * @constructor Creates a RPC client with specified request `Context` type plus ''format'', ''system'' and ''transport'' plugins.
- * @param format message format plugin
+ * @constructor Creates a RPC client with specified request `Context` type plus ''codec'', ''system'' and ''transport'' plugins.
+ * @param codec message codec plugin
  * @param system effect system plugin
  * @param transport message transport plugin
  * @param protocol RPC protocol
  * @tparam Node message node type
- * @tparam Format message format plugin type
+ * @tparam Codec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Client[Node, Format <: MessageFormat[Node], Effect[_], Context](
-  format: Format,
+final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+  codec: Codec,
   system: EffectSystem[Effect],
   transport: ClientMessageTransport[Effect, Context],
   protocol: RpcProtocol = JsonRpcProtocol()
-) extends ClientBind[Node, Format, Effect, Context] with CannotEqual {
+) extends ClientBind[Node, Codec, Effect, Context] with CannotEqual {
 
   /** This client type. */
-  type ThisClient = Client[Node, Format, Effect, Context]
+  type ThisClient = Client[Node, Codec, Effect, Context]
   /** Named method proxy type. */
-  type NamedMethod = NamedMethodProxy[Node, Format, Effect, Context]
+  type NamedMethod = NamedMethodProxy[Node, Codec, Effect, Context]
 
-  val core: ClientCore[Node, Format, Effect, Context] = ClientCore(format, system, transport, protocol)
+  val core: ClientCore[Node, Codec, Effect, Context] = ClientCore(codec, system, transport, protocol)
 
   /**
    * Creates a method proxy with specified method name.
@@ -61,27 +61,27 @@ final case class Client[Node, Format <: MessageFormat[Node], Effect[_], Context]
   def close(): Effect[Unit] = system.pure(())
 
   override def toString: String =
-    s"${this.getClass.getName}(format = ${format.getClass.getName}, system = ${system.getClass.getName}, transport = ${transport.getClass.getName})"
+    s"${this.getClass.getName}(codec = ${codec.getClass.getName}, system = ${system.getClass.getName}, transport = ${transport.getClass.getName})"
 }
 
 case object Client {
 
   /**
-   * Creates a RPC client with empty request context and specified ''format'', ''system'' and ''transport'' plugins.
+   * Creates a RPC client with empty request context and specified ''codec'', ''system'' and ''transport'' plugins.
    *
    * The client can be used to perform RPC calls and notifications.
    *
-   * @param format structured message format format plugin
+   * @param codec structured message codec codec plugin
    * @param system effect system plugin
    * @param transport message transport protocol plugin
    * @tparam Node message node type
-   * @tparam Format message format plugin type
+   * @tparam Codec message codec plugin type
    * @tparam Effect effect type
    * @return RPC client
    */
-  def withoutContext[Node, Format <: MessageFormat[Node], Effect[_]](
-    format: Format,
+  def withoutContext[Node, Codec <: MessageCodec[Node], Effect[_]](
+    codec: Codec,
     system: EffectSystem[Effect],
     transport: ClientMessageTransport[Effect, EmptyContext.Value]
-  ): Client[Node, Format, Effect, EmptyContext.Value] = Client(format, system, transport, JsonRpcProtocol())
+  ): Client[Node, Codec, Effect, EmptyContext.Value] = Client(codec, system, transport, JsonRpcProtocol())
 }

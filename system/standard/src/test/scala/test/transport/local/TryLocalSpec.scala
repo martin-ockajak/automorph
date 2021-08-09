@@ -4,9 +4,9 @@ import automorph.system.TrySystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import scala.util.Try
-import test.core.ProtocolFormatSpec
+import test.core.ProtocolCodecSpec
 
-class TryLocalSpec extends ProtocolFormatSpec {
+class TryLocalSpec extends ProtocolCodecSpec {
 
   type Effect[T] = Try[T]
   type Context = Seq[Int]

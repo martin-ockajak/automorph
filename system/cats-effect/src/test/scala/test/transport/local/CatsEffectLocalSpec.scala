@@ -5,9 +5,9 @@ import cats.effect.unsafe.implicits.global
 import automorph.system.CatsEffectSystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
-import test.core.ProtocolFormatSpec
+import test.core.ProtocolCodecSpec
 
-class CatsEffectLocalSpec extends ProtocolFormatSpec {
+class CatsEffectLocalSpec extends ProtocolCodecSpec {
 
   type Effect[T] = IO[T]
   type Context = String

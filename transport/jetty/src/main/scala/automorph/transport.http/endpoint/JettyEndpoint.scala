@@ -29,7 +29,7 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
  * @tparam Effect effect type
  */
 final case class JettyEndpoint[Effect[_]](
-  handler: Handler.AnyFormat[Effect, Context],
+  handler: Handler.AnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends HttpServlet with Logging with EndpointMessageTransport {
@@ -68,7 +68,7 @@ final case class JettyEndpoint[Effect[_]](
   private def sendResponse(message: InputStream, response: HttpServletResponse, status: Int, client: String): Unit = {
     logger.debug("Sending HTTP response", Map("Client" -> client, "Status" -> status))
     response.setStatus(status)
-    response.setContentType(handler.format.mediaType)
+    response.setContentType(handler.codec.mediaType)
     val outputStream = response.getOutputStream
     IOUtils.copy(message, outputStream)
     outputStream.flush()

@@ -4,7 +4,7 @@ import automorph.log.Logging
 import automorph.spi.protocol.RpcRequest
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.transport.ClientMessageTransport
-import automorph.spi.{EffectSystem, MessageFormat, RpcProtocol}
+import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.TryOps
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
@@ -12,17 +12,17 @@ import scala.util.Try
 /**
  * RPC client core logic.
  *
- * @param format message format plugin
+ * @param codec message codec plugin
  * @param system effect system plugin
  * @param transport message transport plugin
  * @param protocol RPC protocol
  * @tparam Node message node type
- * @tparam Format message format plugin type
+ * @tparam Codec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] case class ClientCore[Node, Format <: MessageFormat[Node], Effect[_], Context](
-  format: Format,
+private[automorph] case class ClientCore[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+  codec: Codec,
   private val system: EffectSystem[Effect],
   private val transport: ClientMessageTransport[Effect, Context],
   private val protocol: RpcProtocol
@@ -51,7 +51,7 @@ private[automorph] case class ClientCore[Node, Format <: MessageFormat[Node], Ef
     context: Option[Context]
   ): Effect[R] =
     // Create request
-    protocol.createRequest(method, argumentNames, encodedArguments, true, format).pureFold(
+    protocol.createRequest(method, argumentNames, encodedArguments, true, codec).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest => {
@@ -61,7 +61,7 @@ private[automorph] case class ClientCore[Node, Format <: MessageFormat[Node], Ef
           system.pure(rpcRequest),
           (request: RpcRequest[Node, _]) =>
             system.flatMap(
-              transport.call(request.message.body, format.mediaType, context),
+              transport.call(request.message.body, codec.mediaType, context),
               // Process response
               rawResponse => processResponse[R](rawResponse, request.message.properties, decodeResult)
             )
@@ -87,13 +87,13 @@ private[automorph] case class ClientCore[Node, Format <: MessageFormat[Node], Ef
     context: Option[Context]
   ): Effect[Unit] =
     // Create request
-    protocol.createRequest(method, argumentNames, encodedArguments, false, format).pureFold(
+    protocol.createRequest(method, argumentNames, encodedArguments, false, codec).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>
         system.flatMap(
           system.pure(rpcRequest),
-          (request: RpcRequest[Node, _]) => transport.notify(request.message.body, format.mediaType, context)
+          (request: RpcRequest[Node, _]) => transport.notify(request.message.body, codec.mediaType, context)
         )
     )
 
@@ -112,7 +112,7 @@ private[automorph] case class ClientCore[Node, Format <: MessageFormat[Node], Ef
     decodeResult: Node => R
   ): Effect[R] =
     // Parse response
-    protocol.parseResponse(rawResponse, format).fold(
+    protocol.parseResponse(rawResponse, codec).fold(
       error => raiseError(error.exception, requestProperties),
       rpcResponse => {
         lazy val properties = requestProperties ++ rpcResponse.message.properties

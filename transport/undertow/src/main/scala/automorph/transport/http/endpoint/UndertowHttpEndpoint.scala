@@ -32,7 +32,7 @@ import scala.util.Try
  * @tparam Effect effect type
  */
 final case class UndertowHttpEndpoint[Effect[_]](
-  handler: Handler.AnyFormat[Effect, Context],
+  handler: Handler.AnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends HttpHandler with Logging with EndpointMessageTransport {
@@ -102,7 +102,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
       if (exchange.isResponseChannelAvailable) {
         throw new IOException("Response channel not available")
       }
-      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.format.mediaType)
+      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.codec.mediaType)
       exchange.setStatusCode(statusCode).getResponseSender.send(Bytes.byteBuffer.to(message))
       logger.debug(
         "Sent HTTP response",

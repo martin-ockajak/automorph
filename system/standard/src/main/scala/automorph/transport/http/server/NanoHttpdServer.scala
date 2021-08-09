@@ -30,7 +30,7 @@ u* The server interprets HTTP request body as an RPC request and processes it us
  * @tparam Effect effect type
  */
 final case class NanoHttpdServer[Effect[_]] private (
-  handler: Handler.AnyFormat[Effect, Context],
+  handler: Handler.AnyCodec[Effect, Context],
   evaluateEffect: Effect[Response] => Response,
   port: Int,
   readTimeout: Int,
@@ -89,7 +89,7 @@ final case class NanoHttpdServer[Effect[_]] private (
       Map("Client" -> client, "Status" -> status.getRequestStatus, "Size" -> message.length)
     )
     val inputStream = Bytes.inputStream.to(message)
-    val response = newFixedLengthResponse(status, handler.format.mediaType, inputStream, message.size.toLong)
+    val response = newFixedLengthResponse(status, handler.codec.mediaType, inputStream, message.size.toLong)
     logger.debug(
       "Sent HTTP response",
       Map("Client" -> client, "Status" -> status.getRequestStatus, "Size" -> message.length)
@@ -133,7 +133,7 @@ case object NanoHttpdServer {
    * @tparam Effect effect type
    */
   def apply[Effect[_]](
-    handler: Handler.AnyFormat[Effect, Context],
+    handler: Handler.AnyCodec[Effect, Context],
     runEffectSync: Effect[Response] => Response,
     port: Int,
     readTimeout: Int = 5000,

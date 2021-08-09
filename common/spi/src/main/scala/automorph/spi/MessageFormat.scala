@@ -4,15 +4,15 @@ import automorph.spi.Message
 import scala.collection.immutable.ArraySeq
 
 /**
- * Structured message format serialization/deserialization plugin.
+ * Structured message format codec plugin.
  *
- * The underlying format must support storing arbitrarily nested structures of basic data types.
+ * The underlying codec must support storing arbitrarily nested structures of basic data types.
  *
- * @tparam Node message format node representation type
+ * @tparam Node message codec node representation type
  */
-trait MessageFormat[Node] extends FormatMeta[Node] {
+trait MessageCodec[Node] extends CodecMeta[Node] {
   /**
-   * Message format media (MIME) type.
+   * Message codec media (MIME) type.
    *
    * @return media (MIME) type
    */
@@ -22,14 +22,14 @@ trait MessageFormat[Node] extends FormatMeta[Node] {
    * Serializes a message as binary data.
    *
    * @param message message
-   * @return binary data in the specific format
+   * @return binary data in the specific codec
    */
   def serialize(message: Message[Node]): ArraySeq.ofByte
 
   /**
    * Deserializes a message from binary data.
    *
-   * @param data binary data in the specific format
+   * @param data binary data in the specific codec
    * @return message
    */
   def deserialize(data: ArraySeq.ofByte): Message[Node]
@@ -38,20 +38,20 @@ trait MessageFormat[Node] extends FormatMeta[Node] {
    * Serializes a node as binary data.
    *
    * @param node node
-   * @return binary data in the specific format
+   * @return binary data in the specific codec
    */
   def serializeNode(message: Node): ArraySeq.ofByte
 
   /**
    * Deserializes a node from binary data.
    *
-   * @param data binary data in the specific format
+   * @param data binary data in the specific codec
    * @return node
    */
   def deserializeNode(data: ArraySeq.ofByte): Node
 
   /**
-   * Formats a message as human-readable text.
+   * Codecs a message as human-readable text.
    *
    * @param message message
    * @return message in human-readable textual form

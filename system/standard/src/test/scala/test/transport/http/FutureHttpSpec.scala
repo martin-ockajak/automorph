@@ -11,10 +11,10 @@ import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import test.core.ProtocolFormatSpec
+import test.core.ProtocolCodecSpec
 import test.transport.http.Generator
 
-class FutureHttpSpec extends ProtocolFormatSpec {
+class FutureHttpSpec extends ProtocolCodecSpec {
 
   type Effect[T] = Future[T]
   type Context = Http[_]

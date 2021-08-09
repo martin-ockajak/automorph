@@ -28,7 +28,7 @@ import com.twitter.util.{Future, Promise}
  * @tparam Effect effect type
  */
 final case class FinagleEndpoint[Effect[_]](
-  handler: Handler.AnyFormat[Effect, Context],
+  handler: Handler.AnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
@@ -72,7 +72,7 @@ final case class FinagleEndpoint[Effect[_]](
 
   private def createResponse(message: Reader[Buf], status: Status, request: Request): Response = {
     val response = Response(request.version, status, message)
-    response.contentType = handler.format.mediaType
+    response.contentType = handler.codec.mediaType
     logger.debug(
       "Sending HTTP response",
       Map("Client" -> clientAddress(request), "Status" -> status.code, "Size" -> response.content.length)

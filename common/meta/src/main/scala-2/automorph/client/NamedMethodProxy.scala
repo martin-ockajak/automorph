@@ -1,21 +1,21 @@
 package automorph.client
 
-import automorph.spi.MessageFormat
+import automorph.spi.MessageCodec
 import automorph.util.CannotEqual
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-case class NamedMethodProxy[Node, Format <: MessageFormat[Node], Effect[_], Context](
+case class NamedMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   methodName: String,
-  core: ClientCore[Node, Format, Effect, Context],
+  core: ClientCore[Node, Codec, Effect, Context],
   argumentValues: Seq[(String, Any)],
   encodedArguments: Seq[Node]
 ) extends CannotEqual {
 
   /** Positional method proxy type. */
-  type PositionalMethod = PositionalMethodProxy[Node, Format, Effect, Context]
+  type PositionalMethod = PositionalMethodProxy[Node, Codec, Effect, Context]
   /** Named method proxy type. */
-  type NamedMethod = NamedMethodProxy[Node, Format, Effect, Context]
+  type NamedMethod = NamedMethodProxy[Node, Codec, Effect, Context]
 
   /**
    * Creates a copy of this method proxy without argument names passing method arguments ''by position''.
@@ -170,7 +170,7 @@ case object NamedMethodProxy {
       ${c.prefix}.copy(
         argumentValues = Seq($p1),
         encodedArguments = Seq(
-          ${c.prefix}.core.format.encode[${weakTypeOf[T1]}]($p1._2)
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1._2)
       ))
     """)
   }
@@ -185,8 +185,8 @@ case object NamedMethodProxy {
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2),
         encodedArguments = Seq(
-          ${c.prefix}.core.format.encode[${weakTypeOf[T1]}]($p1._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T2]}]($p2._2)
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2._2)
       ))
     """)
   }
@@ -202,9 +202,9 @@ case object NamedMethodProxy {
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3),
         encodedArguments = Seq(
-          ${c.prefix}.core.format.encode[${weakTypeOf[T1]}]($p1._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T2]}]($p2._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T3]}]($p3._2)
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3._2)
       ))
     """)
   }
@@ -227,10 +227,10 @@ case object NamedMethodProxy {
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3, $p4),
         encodedArguments = Seq(
-          ${c.prefix}.core.format.encode[${weakTypeOf[T1]}]($p1._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T2]}]($p2._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T3]}]($p3._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T4]}]($p4._2)
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T4]}]($p4._2)
       ))
     """)
   }
@@ -255,11 +255,11 @@ case object NamedMethodProxy {
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3, $p4, $p5),
         encodedArguments = Seq(
-          ${c.prefix}.core.format.encode[${weakTypeOf[T1]}]($p1._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T2]}]($p2._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T3]}]($p3._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T4]}]($p4._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T5]}]($p5._2)
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T4]}]($p4._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T5]}]($p5._2)
       ))
     """)
   }
@@ -286,12 +286,12 @@ case object NamedMethodProxy {
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3, $p4, $p5, $p6),
         encodedArguments = Seq(
-          ${c.prefix}.core.format.encode[${weakTypeOf[T1]}]($p1._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T2]}]($p2._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T3]}]($p3._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T4]}]($p4._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T5]}]($p5._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T6]}]($p6._2)
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T4]}]($p4._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T5]}]($p5._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T6]}]($p6._2)
       ))
     """)
   }
@@ -320,13 +320,13 @@ case object NamedMethodProxy {
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3, $p4, $p5, $p6, $p7),
         encodedArguments = Seq(
-          ${c.prefix}.core.format.encode[${weakTypeOf[T1]}]($p1._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T2]}]($p2._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T3]}]($p3._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T4]}]($p4._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T5]}]($p5._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T6]}]($p6._2),
-          ${c.prefix}.core.format.encode[${weakTypeOf[T7]}]($p7._2)
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T4]}]($p4._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T5]}]($p5._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T6]}]($p6._2),
+          ${c.prefix}.core.codec.encode[${weakTypeOf[T7]}]($p7._2)
       ))
     """)
   }
@@ -341,7 +341,7 @@ case object NamedMethodProxy {
         ${c.prefix}.methodName,
         Some(${c.prefix}.argumentValues.map(_._1)),
         ${c.prefix}.encodedArguments,
-        ${c.prefix}.core.format.decode[${weakTypeOf[R]}](_),
+        ${c.prefix}.core.codec.decode[${weakTypeOf[R]}](_),
         Some($context)
       )
     """)

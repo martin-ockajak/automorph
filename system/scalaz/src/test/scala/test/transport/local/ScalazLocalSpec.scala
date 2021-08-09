@@ -5,9 +5,9 @@ import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import scala.util.Try
 import scalaz.effect.IO
-import test.core.ProtocolFormatSpec
+import test.core.ProtocolCodecSpec
 
-class ScalazLocalSpec extends ProtocolFormatSpec {
+class ScalazLocalSpec extends ProtocolCodecSpec {
 
   type Effect[T] = IO[T]
   type Context = String

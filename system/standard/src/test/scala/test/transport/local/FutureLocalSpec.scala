@@ -5,9 +5,9 @@ import automorph.system.FutureSystem
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import test.core.ProtocolFormatSpec
+import test.core.ProtocolCodecSpec
 
-class FutureLocalSpec extends ProtocolFormatSpec {
+class FutureLocalSpec extends ProtocolCodecSpec {
 
   type Effect[T] = Future[T]
   type Context = Map[String, Double]

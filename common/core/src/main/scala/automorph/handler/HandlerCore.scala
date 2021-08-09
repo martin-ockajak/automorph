@@ -1,7 +1,7 @@
 package automorph.handler
 
 import automorph.Handler
-import automorph.spi.{MessageFormat, RpcProtocol}
+import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.spi.RpcProtocol.MethodNotFoundException
 import automorph.spi.protocol.{RpcMessage, RpcRequest}
 import automorph.util.Bytes
@@ -12,12 +12,12 @@ import scala.util.{Failure, Success, Try}
  * RPC request handler core logic.
  *
  * @tparam Node message node type
- * @tparam Format message format plugin type
+ * @tparam Codec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect[_], Context] {
-  this: Handler[Node, Format, Effect, Context] =>
+private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
+  this: Handler[Node, Codec, Effect, Context] =>
 
   private val bodyProperty = "Body"
 
@@ -32,7 +32,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
   def processRequest[Data: Bytes](request: Data)(implicit context: Context): Effect[HandlerResult[Data]] = {
     // Parse request
     val rawRequest = implicitly[Bytes[Data]].from(request)
-    protocol.parseRequest(rawRequest, None, format).fold(
+    protocol.parseRequest(rawRequest, None, codec).fold(
       error => errorResponse(error.exception, error.message),
       rpcRequest => {
         lazy val properties = rpcRequest.message.properties ++ rpcRequest.message.text.map(bodyProperty -> _)
@@ -51,7 +51,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
   def protocol(protocol: RpcProtocol): ThisHandler = copy(protocol = protocol)
 
   override def toString: String =
-    s"${this.getClass.getName}(format = ${format.getClass.getName}, system = ${system.getClass.getName})"
+    s"${this.getClass.getName}(codec = ${codec.getClass.getName}, system = ${system.getClass.getName})"
 
   /**
    * Invokes bound method specified in a request.
@@ -157,7 +157,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
    * @return handler result
    */
   private def response[Data: Bytes](result: Try[Node], message: RpcMessage[protocol.Details]): Effect[HandlerResult[Data]] =
-    protocol.createResponse(result, message.details, format, encodeStrings).pureFold(
+    protocol.createResponse(result, message.details, codec, encodeStrings).pureFold(
       error => system.failed(error),
       rpcResponse => {
         lazy val properties = rpcResponse.message.properties ++ rpcResponse.message.text.map(bodyProperty -> _)

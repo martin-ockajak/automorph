@@ -9,9 +9,9 @@ package automorph.protocol.restrpc
  * @constructor Creates a new REST-RPC error exception.
  * @param message error description
  * @param code error code
- * @param data additional error information
+ * @param data additional error incodecion
  * @param cause exception cause
- * @tparam Node message format node representation type
+ * @tparam Node message codec node representation type
  */
 final case class RestRpcException[Node](
   message: String,

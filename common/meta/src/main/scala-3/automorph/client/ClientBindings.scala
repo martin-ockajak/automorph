@@ -3,7 +3,7 @@ package automorph.client
 import automorph.log.MacroLogger
 import automorph.client.ClientBinding
 import automorph.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
-import automorph.spi.MessageFormat
+import automorph.spi.MessageCodec
 import automorph.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
 
@@ -13,26 +13,26 @@ private[automorph] case object ClientBindings:
   /**
    * Generates client bindings for all valid public methods of an API type.
    *
-   * @param format message format plugin
+   * @param codec message codec plugin
    * @tparam Node message node type
-   * @tparam Format message format plugin type
+   * @tparam Codec message codec plugin type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to client method bindings
    */
-  inline def generate[Node, Format <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
-    format: Format
+  inline def generate[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
+    codec: Codec
   ): Map[String, ClientBinding[Node]] =
-    ${ generateMacro[Node, Format, Effect, Context, Api]('format) }
+    ${ generateMacro[Node, Codec, Effect, Context, Api]('codec) }
 
   private def generateMacro[
     Node: Type,
-    Format <: MessageFormat[Node]: Type,
+    Codec <: MessageCodec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
-  ](format: Expr[Format])(using quotes: Quotes): Expr[Map[String, ClientBinding[Node]]] =
+  ](codec: Expr[Codec])(using quotes: Quotes): Expr[Map[String, ClientBinding[Node]]] =
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -47,7 +47,7 @@ private[automorph] case object ClientBindings:
     val clientMethods = Expr.ofSeq(validMethods.map { method =>
       '{
         ${ Expr(method.name) } -> ${
-          generateBinding[Node, Format, Effect, Context, Api](ref)(method, format)
+          generateBinding[Node, Codec, Effect, Context, Api](ref)(method, codec)
         }
       }
     })
@@ -55,15 +55,15 @@ private[automorph] case object ClientBindings:
 
   private def generateBinding[
     Node: Type,
-    Format <: MessageFormat[Node]: Type,
+    Codec <: MessageCodec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
-  ](ref: Reflection)(method: ref.RefMethod, format: Expr[Format]): Expr[ClientBinding[Node]] =
+  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[Codec]): Expr[ClientBinding[Node]] =
     given Quotes = ref.q
 
-    val encodeArguments = generateEncodeArguments[Node, Format, Context](ref)(method, format)
-    val decodeResult = generateDecodeResult[Node, Format, Effect](ref)(method, format)
+    val encodeArguments = generateEncodeArguments[Node, Codec, Context](ref)(method, codec)
+    val decodeResult = generateDecodeResult[Node, Codec, Effect](ref)(method, codec)
     logBoundMethod[Api](ref)(method, encodeArguments, decodeResult)
     '{
       ClientBinding(
@@ -74,9 +74,9 @@ private[automorph] case object ClientBindings:
       )
     }
 
-  private def generateEncodeArguments[Node: Type, Format <: MessageFormat[Node]: Type, Context: Type](ref: Reflection)(
+  private def generateEncodeArguments[Node: Type, Codec <: MessageCodec[Node]: Type, Context: Type](ref: Reflection)(
     method: ref.RefMethod,
-    format: Expr[Format]
+    codec: Expr[Codec]
   ): Expr[Seq[Any] => Seq[Node]] =
     import ref.q.reflect.{Term, asTerm}
     given Quotes = ref.q
@@ -93,17 +93,17 @@ private[automorph] case object ClientBindings:
       ${
         // Create the method argument lists by encoding corresponding argument values into nodes
         //   List(
-        //     format.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
-        //     format.encode[Parameter1Type](arguments(1).asInstanceOf[Parameter1Type]),
+        //     codec.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
+        //     codec.encode[Parameter1Type](arguments(1).asInstanceOf[Parameter1Type]),
         //     ...
-        //     format.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
+        //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
         //   ): List[Node]
         val argumentNodes = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
             Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[Context](ref)(method)) {
               val argument = parameter.dataType.asType match
                 case '[parameterType] => '{ arguments(${ Expr(offset + index) }).asInstanceOf[parameterType] }
-              call(ref.q, format.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
+              call(ref.q, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
             }
           }
         ).map(_.asInstanceOf[Term].asExprOf[Node])
@@ -114,19 +114,19 @@ private[automorph] case object ClientBindings:
       }
     }
 
-  private def generateDecodeResult[Node: Type, Format <: MessageFormat[Node]: Type, Effect[_]: Type](ref: Reflection)(
+  private def generateDecodeResult[Node: Type, Codec <: MessageCodec[Node]: Type, Effect[_]: Type](ref: Reflection)(
     method: ref.RefMethod,
-    format: Expr[Format]
+    codec: Expr[Codec]
   ): Expr[Node => Any] =
     import ref.q.reflect.asTerm
     given Quotes = ref.q
 
     // Create decode result function
-    //   (resultNode: Node) => ResultValueType = format.dencode[ResultValueType](resultNode)
+    //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
     val resultValueType = unwrapType[Effect](ref.q)(method.resultType.dealias).dealias
     '{ resultNode =>
       ${
-        call(ref.q, format.asTerm, "decode", List(resultValueType), List(List('{ resultNode }.asTerm))).asExprOf[Any]
+        call(ref.q, codec.asTerm, "decode", List(resultValueType), List(List('{ resultNode }.asTerm))).asExprOf[Any]
       }
     }
 

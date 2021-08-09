@@ -30,7 +30,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @tparam Effect effect type
  */
 final case class UndertowServer[Effect[_]](
-  handler: Handler.AnyFormat[Effect, Context],
+  handler: Handler.AnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
   port: Int,
   path: String = "/",

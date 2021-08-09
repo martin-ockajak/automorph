@@ -1,7 +1,7 @@
 package automorph.openapi
 
 import automorph.Handler
-import automorph.format.json.CirceJsonFormat
+import automorph.codec.json.CirceJsonCodec
 import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity
 import io.circe.syntax.EncoderOps
@@ -17,8 +17,8 @@ class GeneratorSpec extends BaseSpec {
 
   "" - {
     "Test" in {
-      val format = CirceJsonFormat()
-      val handler = Handler[CirceJsonFormat.Node, CirceJsonFormat, Identity, Unit](format, system)
+      val codec = CirceJsonCodec()
+      val handler = Handler[CirceJsonCodec.Node, CirceJsonCodec, Identity, Unit](codec, system)
         .bind(simpleApiInstance)
       val methods = handler.methodBindings.view.mapValues(_.method).toMap
       val specification = Generator.jsonRpcSpec(methods, "Test", "0.0", Seq("http://localhost:80/api"))

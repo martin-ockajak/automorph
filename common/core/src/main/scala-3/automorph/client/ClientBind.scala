@@ -2,7 +2,7 @@ package automorph.client
 
 import automorph.Client
 import automorph.client.{ClientBindings, ClientCore}
-import automorph.spi.MessageFormat
+import automorph.spi.MessageCodec
 import java.lang.reflect.Proxy
 import scala.compiletime.summonInline
 import scala.reflect.ClassTag
@@ -11,13 +11,13 @@ import scala.reflect.ClassTag
  * Client method bindings code generation.
  *
  * @tparam Node message node type
- * @tparam Format message format plugin type
+ * @tparam Codec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait ClientBind[Node, Format <: MessageFormat[Node], Effect[_], Context]:
+private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
 
-  def core: ClientCore[Node, Format, Effect, Context]
+  def core: ClientCore[Node, Codec, Effect, Context]
 
   /**
    * Creates an RPC API proxy instance with bindings for all valid public methods of the specified API.
@@ -38,7 +38,7 @@ private[automorph] trait ClientBind[Node, Format <: MessageFormat[Node], Effect[
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef]: Api =
-    ClientBind.generalBind[Node, Format, Effect, Context, Api](core, namedArguments = true)
+    ClientBind.generalBind[Node, Codec, Effect, Context, Api](core, namedArguments = true)
 
   /**
    * Creates an RPC API proxy instance with bindings for all valid public methods of the specified API.
@@ -59,19 +59,19 @@ private[automorph] trait ClientBind[Node, Format <: MessageFormat[Node], Effect[
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bindPositional[Api <: AnyRef]: Api =
-    ClientBind.generalBind[Node, Format, Effect, Context, Api](core, namedArguments = false)
+    ClientBind.generalBind[Node, Codec, Effect, Context, Api](core, namedArguments = false)
 
 object ClientBind:
 
-  /** Client with arbitrary format. */
-  type AnyFormat[Effect[_], Context] = Client[_, _, Effect, Context]
+  /** Client with arbitrary codec. */
+  type AnyCodec[Effect[_], Context] = Client[_, _, Effect, Context]
 
-  inline def generalBind[Node, Format <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
-    clientCore: ClientCore[Node, Format, Effect, Context],
+  inline def generalBind[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
+    clientCore: ClientCore[Node, Codec, Effect, Context],
     namedArguments: Boolean
   ): Api =
     // Generate API method bindings
-    val methodBindings = ClientBindings.generate[Node, Format, Effect, Context, Api](clientCore.format)
+    val methodBindings = ClientBindings.generate[Node, Codec, Effect, Context, Api](clientCore.codec)
 
     // Create API proxy instance
     val classTag = summonInline[ClassTag[Api]]

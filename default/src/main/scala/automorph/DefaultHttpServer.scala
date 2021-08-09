@@ -41,7 +41,7 @@ case object DefaultHttpServer {
    * @return RPC server
    */
   def apply[Effect[_]](
-    handler: Handler.AnyFormat[Effect, Context],
+    handler: Handler.AnyCodec[Effect, Context],
     runEffect: Effect[Any] => Unit,
     port: Int,
     path: String = "/",

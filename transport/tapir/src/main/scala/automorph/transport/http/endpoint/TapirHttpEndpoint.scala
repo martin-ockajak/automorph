@@ -3,7 +3,7 @@ package automorph.transport.http.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
-import automorph.spi.MessageFormat
+import automorph.spi.MessageCodec
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.util.Bytes
@@ -48,13 +48,13 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
    * @return Tapir HTTP endpoint
    */
   def apply[Effect[_]](
-    handler: Handler.AnyFormat[Effect, Context],
+    handler: Handler.AnyCodec[Effect, Context],
     method: Method,
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
   ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     val system = handler.system
-    val contentType = Header.contentType(MediaType.parse(handler.format.mediaType).getOrElse {
-      throw new IllegalArgumentException(s"Invalid content type: ${handler.format.mediaType}")
+    val contentType = Header.contentType(MediaType.parse(handler.codec.mediaType).getOrElse {
+      throw new IllegalArgumentException(s"Invalid content type: ${handler.codec.mediaType}")
     })
     endpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(cookies).in(clientIp)
       .out(byteArrayBody).out(header(contentType)).out(statusCode)
@@ -94,12 +94,12 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 //   * @return Tapir HTTP endpoint
 //   */
 //  def apply[Effect[_], S](
-//    handler: Handler.AnyFormat[Effect, Context],
+//    handler: Handler.AnyCodec[Effect, Context],
 //    streams: Streams[S]
 //  ): ServerEndpoint[XRequestType, Unit, streams.Pipe[Array[Byte], Array[Byte]], WebSockets, Effect] = {
 //    val system = handler.system
-//    val contentType = Header.contentType(MediaType.parse(handler.format.mediaType).getOrElse {
-//      throw new IllegalArgumentException(s"Invalid content type: ${handler.format.mediaType}")
+//    val contentType = Header.contentType(MediaType.parse(handler.codec.mediaType).getOrElse {
+//      throw new IllegalArgumentException(s"Invalid content type: ${handler.codec.mediaType}")
 //    })
 //    endpoint
 //      .in(paths).in(queryParams).in(headers).in(cookies).in(clientIp)

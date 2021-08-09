@@ -113,7 +113,7 @@ final private[automorph] case class Logger private (private val underlying: slf4
   ): Unit = if (enabled) {
     val iterableProperties = unpackProperties(properties)
     addDiagnosticContext(iterableProperties)
-    logMessage(s"$message\n${formatProperties(iterableProperties)}\n")
+    logMessage(s"$message\n${codecProperties(iterableProperties)}\n")
     removeDiagnosticContext(iterableProperties)
   }
 
@@ -126,7 +126,7 @@ final private[automorph] case class Logger private (private val underlying: slf4
   )(implicit evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]): Unit = if (enabled) {
     val iterableProperties = unpackProperties(properties)
     addDiagnosticContext(iterableProperties)
-    logMessage(s"$message\n${formatProperties(iterableProperties)}\n", cause)
+    logMessage(s"$message\n${codecProperties(iterableProperties)}\n", cause)
     removeDiagnosticContext(iterableProperties)
   }
 
@@ -139,16 +139,16 @@ final private[automorph] case class Logger private (private val underlying: slf4
   private def productProperties(product: Product): Map[String, Any] =
     product.productElementNames.map(_.capitalize).zip(product.productIterator).toMap
 
-  private def formatProperties(properties: Iterable[(String, Any)]): String =
-    properties.map { case (key, value) => s"$key = ${format(value)}" }.mkString("\n")
+  private def codecProperties(properties: Iterable[(String, Any)]): String =
+    properties.map { case (key, value) => s"$key = ${codec(value)}" }.mkString("\n")
 
   private def addDiagnosticContext(properties: Iterable[(String, Any)]): Unit =
-    properties.foreach { case (key, value) => MDC.put(key, format(value)) }
+    properties.foreach { case (key, value) => MDC.put(key, codec(value)) }
 
   private def removeDiagnosticContext(properties: Iterable[(String, Any)]): Unit =
     properties.foreach { case (key, _) => MDC.remove(key) }
 
-  private def format(value: Any): String = value.toString
+  private def codec(value: Any): String = value.toString
 }
 
 case object Logger {

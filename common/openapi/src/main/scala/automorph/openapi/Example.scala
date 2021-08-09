@@ -1,7 +1,7 @@
 package automorph.openapi
 
 import automorph.spi.Message
-import automorph.format.json.CirceJsonFormat.Node
+import automorph.codec.json.CirceJsonCodec.Node
 
 final case class Example (
   summary: Option[String] = None,

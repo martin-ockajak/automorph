@@ -36,7 +36,7 @@ import scala.util.{Try, Using}
  * @tparam Effect effect type
  */
 final case class RabbitMqServer[Effect[_]](
-  handler: Handler.AnyFormat[Effect, Amqp[BasicProperties]],
+  handler: Handler.AnyCodec[Effect, Amqp[BasicProperties]],
   runEffect: Effect[Any] => Any,
   url: URL,
   queues: Seq[String],

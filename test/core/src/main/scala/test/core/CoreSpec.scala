@@ -26,9 +26,9 @@ trait CoreSpec extends BaseSpec {
   type InvalidApiType = InvalidApi[Effect]
 
   case class TestFixture(
-    format: Class[_],
-    client: ClientBind.AnyFormat[Effect, Context],
-    handler: Handler.AnyFormat[Effect, Context],
+    codec: Class[_],
+    client: ClientBind.AnyCodec[Effect, Context],
+    handler: Handler.AnyCodec[Effect, Context],
     serverPort: Int,
     simpleApis: Seq[SimpleApiType],
     complexApis: Seq[ComplexApiType],
@@ -55,7 +55,7 @@ trait CoreSpec extends BaseSpec {
   "" - {
 //    fixtures.foreach { fixture =>
     fixtures.headOption.foreach { fixture =>
-      fixture.format.getSimpleName.replaceAll("MessageFormat$", "") - {
+      fixture.codec.getSimpleName.replaceAll("MessageCodec$", "") - {
         "Proxy" - {
           "Call" - {
             "Simple API" - {

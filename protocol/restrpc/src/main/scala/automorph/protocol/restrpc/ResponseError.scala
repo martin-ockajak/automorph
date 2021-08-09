@@ -9,7 +9,7 @@ import automorph.spi.MessageError
  *
  * @param message error description
  * @param code error code
- * @param data additional error information
+ * @param data additional error incodecion
  * @tparam Node message node type
  */
 private[automorph] final case class ResponseError[Node](

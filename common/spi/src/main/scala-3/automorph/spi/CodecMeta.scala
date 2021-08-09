@@ -1,19 +1,19 @@
 package automorph.spi
 
-trait FormatMeta[Node]:
+trait CodecMeta[Node]:
   /**
-   * Encodes a value as a message format node.
+   * Encodes a value as a message codec node.
    *
    * @param value value of given type
    * @tparam T value type
-   * @return message format node
+   * @return message codec node
    */
   inline def encode[T](value: T): Node
 
   /**
-   * Decodes a value from a message format node.
+   * Decodes a value from a message codec node.
    *
-   * @param node message format node
+   * @param node message codec node
    * @tparam T value type
    * @return value of the specified type
    */

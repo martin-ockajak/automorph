@@ -98,10 +98,10 @@ case object Generator {
   )
 
   /**
-   * Serialize OpenAPI specification into JSON format.
+   * Serialize OpenAPI specification into JSON codec.
    *
    * @param specification OpenApi specification
-   * @return OpenAPI specification in JSON format
+   * @return OpenAPI specification in JSON codec
    */
   def json(specification: Specification): String = {
 //    Schema().asJson
@@ -180,7 +180,7 @@ case object Generator {
         Some(Map(
           "code" -> Schema(Some("integer"), Some("code"), Some("Error code")),
           "message" -> Schema(Some("string"), Some("message"), Some("Error message")),
-          "data" -> Schema(Some("object"), Some("data"), Some("Additional error information"))
+          "data" -> Schema(Some("object"), Some("data"), Some("Additional error incodecion"))
         )),
         Some(List("code", "message"))
       )
@@ -200,7 +200,7 @@ case object Generator {
         Some(Map(
           "code" -> Schema(Some("integer"), Some("code"), Some("Error code")),
           "message" -> Schema(Some("string"), Some("message"), Some("Error message")),
-          "data" -> Schema(Some("object"), Some("data"), Some("Additional error information"))
+          "data" -> Schema(Some("object"), Some("data"), Some("Additional error incodecion"))
         )),
         Some(List("code", "message"))
       )

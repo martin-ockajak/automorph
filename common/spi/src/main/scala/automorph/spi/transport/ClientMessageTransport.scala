@@ -18,7 +18,7 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
   /**
    * Sends a ''request'' to a remote endpoint and retrieves the ''response''.
    *
-   * An optional ''request context'' is used to supply additional information needed to send the request.
+   * An optional ''request context'' is used to supply additional incodecion needed to send the request.
    *
    * @param request request message
    * @param mediaType message media (MIME) type.
@@ -30,7 +30,7 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
   /**
    * Sends a ''request'' to a remote endpoint without retrieving a response.
    *
-   * An optional ''request context'' is used to supply additional information needed to send the request.
+   * An optional ''request context'' is used to supply additional incodecion needed to send the request.
    *
    * @param request request message
    * @param mediaType message media (MIME) type.

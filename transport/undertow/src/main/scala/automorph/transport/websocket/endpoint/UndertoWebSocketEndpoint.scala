@@ -39,7 +39,7 @@ case object UndertowWebSocketEndpoint {
    * @tparam Effect effect type
    */
   def apply[Effect[_]](
-    handler: Handler.AnyFormat[Effect, Context],
+    handler: Handler.AnyCodec[Effect, Context],
     runEffect: Effect[Any] => Unit,
     next: HttpHandler
   ): WebSocketProtocolHandshakeHandler = {
@@ -65,7 +65,7 @@ case object UndertowWebSocketEndpoint {
  * @tparam Effect effect type
  */
 final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
-  handler: Handler.AnyFormat[Effect, Context],
+  handler: Handler.AnyCodec[Effect, Context],
   runEffect: Effect[Any] => Any
 ) extends WebSocketConnectionCallback with AutoCloseable with Logging with EndpointMessageTransport {
 

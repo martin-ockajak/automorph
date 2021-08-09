@@ -14,7 +14,7 @@ case object DefaultHttpClient {
    *
    * @tparam Effect effect type
    */
-  type Type[Effect[_]] = Client[DefaultMessageFormat.Node, DefaultMessageFormat.Type, Effect, Context]
+  type Type[Effect[_]] = Client[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Effect, Context]
 
   /** Request context type. */
   type Context = DefaultHttpClientTransport.Context

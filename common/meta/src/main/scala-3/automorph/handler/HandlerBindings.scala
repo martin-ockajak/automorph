@@ -3,7 +3,7 @@ package automorph.handler
 import automorph.log.MacroLogger
 import automorph.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.RpcProtocol.InvalidRequestException
-import automorph.spi.{EffectSystem, MessageFormat}
+import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.{Method, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
 import scala.util.{Failure, Success, Try}
@@ -14,31 +14,31 @@ private[automorph] case object HandlerBindings:
   /**
    * Generates handler bindings for all valid public methods of an API type.
    *
-   * @param format message format plugin
+   * @param codec message codec plugin
    * @param system effect system plugin
    * @param api API instance
    * @tparam Node message node type
-   * @tparam Format message format plugin type
+   * @tparam Codec message codec plugin type
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
    * @return mapping of method names to handler method bindings
    */
-  inline def generate[Node, Format <: MessageFormat[Node], Effect[_], Context, Api <: AnyRef](
-    format: Format,
+  inline def generate[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
+    codec: Codec,
     system: EffectSystem[Effect],
     api: Api
   ): Map[String, HandlerBinding[Node, Effect, Context]] =
-    ${ generateMacro[Node, Format, Effect, Context, Api]('format, 'system, 'api) }
+    ${ generateMacro[Node, Codec, Effect, Context, Api]('codec, 'system, 'api) }
 
   private def generateMacro[
     Node: Type,
-    Format <: MessageFormat[Node]: Type,
+    Codec <: MessageCodec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
   ](
-    format: Expr[Format],
+    codec: Expr[Codec],
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   )(using quotes: Quotes): Expr[Map[String, HandlerBinding[Node, Effect, Context]]] =
@@ -56,7 +56,7 @@ private[automorph] case object HandlerBindings:
     val handlerBindings = Expr.ofSeq(validMethods.map { method =>
       '{
         ${ Expr(method.name) } -> ${
-          generateBinding[Node, Format, Effect, Context, Api](ref)(method, format, system, api)
+          generateBinding[Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
         }
       }
     })
@@ -64,19 +64,19 @@ private[automorph] case object HandlerBindings:
 
   private def generateBinding[
     Node: Type,
-    Format <: MessageFormat[Node]: Type,
+    Codec <: MessageCodec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
   ](ref: Reflection)(
     method: ref.RefMethod,
-    format: Expr[Format],
+    codec: Expr[Codec],
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[HandlerBinding[Node, Effect, Context]] =
     given Quotes = ref.q
 
-    val invoke = generateInvoke[Node, Format, Effect, Context, Api](ref)(method, format, system, api)
+    val invoke = generateInvoke[Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
     logBoundMethod[Api](ref)(method, invoke)
     '{
       HandlerBinding(
@@ -88,13 +88,13 @@ private[automorph] case object HandlerBindings:
 
   private def generateInvoke[
     Node: Type,
-    Format <: MessageFormat[Node]: Type,
+    Codec <: MessageCodec[Node]: Type,
     Effect[_]: Type,
     Context: Type,
     Api: Type
   ](ref: Reflection)(
     method: ref.RefMethod,
-    format: Expr[Format],
+    codec: Expr[Codec],
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
@@ -113,12 +113,12 @@ private[automorph] case object HandlerBindings:
       ${
         // Create the method argument lists by decoding corresponding argument nodes into values
         //   List(List(
-        //     (Try(format.decode[Parameter0Type](argumentNodes(0))) match {
+        //     (Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
         //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
         //       case result => result
         //     }).get
         //     ...
-        //     (Try(format.decode[ParameterNType](argumentNodes(N))) match {
+        //     (Try(codec.decode[ParameterNType](argumentNodes(N))) match {
         //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
         //       case result => result
         //     }).get
@@ -131,7 +131,7 @@ private[automorph] case object HandlerBindings:
               'context.asTerm
             else
               val decodeArguments = List(List(argumentNode.asTerm))
-              val decodeCall = call(ref.q, format.asTerm, "decode", List(parameter.dataType), decodeArguments)
+              val decodeCall = call(ref.q, codec.asTerm, "decode", List(parameter.dataType), decodeArguments)
               parameter.dataType.asType match
                 case '[argumentType] => '{
                     (Try(${ decodeCall.asExprOf[argumentType] }) match
@@ -148,12 +148,12 @@ private[automorph] case object HandlerBindings:
         val apiMethodCall = call(ref.q, api.asTerm, method.name, List.empty, arguments)
 
         // Create encode result function
-        //   (result: ResultValueType) => Node = format.encode[ResultValueType](result)
+        //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
         val resultValueType = unwrapType[Effect](ref.q)(method.resultType).dealias
         val encodeResult = resultValueType.asType match
           case '[resultType] => '{ (result: resultType) =>
               ${
-                call(ref.q, format.asTerm, "encode", List(resultValueType), List(List('{ result }.asTerm))).asExprOf[Node]
+                call(ref.q, codec.asTerm, "encode", List(resultValueType), List(List('{ result }.asTerm))).asExprOf[Node]
               }
             }
 
