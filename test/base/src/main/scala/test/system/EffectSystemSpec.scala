@@ -29,7 +29,10 @@ trait EffectSystemSpec[Effect[_]] extends BaseSpec {
         run(outcome).should(equal(Right(text)))
       }
       "Failure" in {
-        val outcome = system.wrap(error)
+        Try(system.wrap(throw error)) match {
+          case Success(outcome) => run(outcome).should(equal(Left(error)))
+          case Failure(error) => error.should(equal(error))
+        }
       }
     }
     "Pure" in {
@@ -42,17 +45,41 @@ trait EffectSystemSpec[Effect[_]] extends BaseSpec {
         case Failure(error) => error.should(equal(error))
       }
     }
-    "Map" in {
-      val outcome = system.map(system.pure(text), (result: String) => s"$result$number")
-      run(outcome).should(equal(Right(s"$text$number")))
+    "Map" - {
+      "Success" in {
+        val outcome = system.map(system.pure(text), (result: String) => s"$result$number")
+        run(outcome).should(equal(Right(s"$text$number")))
+      }
+      "Failure" in {
+        Try(system.map(system.failed(error), (_: Unit) => ())) match {
+          case Success(outcome) => run(outcome).should(equal(Left(error)))
+          case Failure(error) => error.should(equal(error))
+        }
+      }
     }
-    "Flatmap" in {
-      val outcome = system.flatMap(system.pure(text), (result: String) => system.pure(s"$result$number"))
-      run(outcome).should(equal(Right(s"$text$number")))
+    "Flatmap" - {
+      "Success" in {
+        val outcome = system.flatMap(system.pure(text), (result: String) => system.pure(s"$result$number"))
+        run(outcome).should(equal(Right(s"$text$number")))
+      }
+      "Failure" in {
+        Try(system.flatMap(system.failed(error), (_: Unit) => system.pure(()))) match {
+          case Success(outcome) => run(outcome).should(equal(Left(error)))
+          case Failure(error) => error.should(equal(error))
+        }
+      }
     }
-    "Either" in {
-      val outcome = system.either(system.pure(text))
-      run(outcome).should(equal(Right(Right(text))))
+    "Either" - {
+      "Success" in {
+        val outcome = system.either(system.pure(text))
+        run(outcome).should(equal(Right(Right(text))))
+      }
+      "Failure" in {
+        Try(system.either(system.failed(error))) match {
+          case Success(outcome) => run(outcome).should(equal(Right(Left(error))))
+          case Failure(error) => error.should(equal(error))
+        }
+      }
     }
   }
 }
