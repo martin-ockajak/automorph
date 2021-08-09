@@ -3,7 +3,7 @@ package test.core
 import automorph.Handler
 import automorph.client.ClientBind
 import automorph.spi.EffectSystem
-import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
+import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException, FunctionNotFoundException}
 import org.scalacheck.Arbitrary
 import scala.util.Try
 import test.Generators.arbitraryRecord

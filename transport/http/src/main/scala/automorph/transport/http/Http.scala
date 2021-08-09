@@ -1,7 +1,7 @@
 package automorph.transport.http
 
 import automorph.protocol.jsonrpc.JsonRpcProtocol.{InternalErrorException, ParseErrorException, ServerErrorException}
-import automorph.spi.RpcProtocol.{InvalidRequestException, MethodNotFoundException}
+import automorph.spi.RpcProtocol.{InvalidRequestException, FunctionNotFoundException}
 import java.io.IOException
 import java.net.URI
 import java.nio.charset.StandardCharsets
@@ -376,7 +376,7 @@ case object Http {
   def defaultExceptionToStatusCode(exception: Throwable): Int = exception match {
     case _: ParseErrorException => 400
     case _: InvalidRequestException => 400
-    case _: MethodNotFoundException => 501
+    case _: FunctionNotFoundException => 501
     case _: IllegalArgumentException => 400
     case _: InternalErrorException => 500
     case _: ServerErrorException => 500

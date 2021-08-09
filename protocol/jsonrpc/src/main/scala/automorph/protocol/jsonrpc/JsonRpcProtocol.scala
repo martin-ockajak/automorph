@@ -2,7 +2,7 @@ package automorph.protocol.jsonrpc
 
 import automorph.protocol.jsonrpc.JsonRpcProtocol.{defaultErrorToException, defaultExceptionToError, ParseErrorException}
 import automorph.spi.Message.Params
-import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
+import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException, FunctionNotFoundException}
 import automorph.spi.protocol.{RpcError, RpcMessage, RpcRequest, RpcResponse}
 import automorph.spi.{Message, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
@@ -36,7 +36,7 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
 
   override def parseRequest(
     request: ArraySeq.ofByte,
-    method: Option[String]
+    function: Option[String]
   ): Either[RpcError[Details], RpcRequest[Node, Details]] =
     // Deserialize request
     Try(codec.deserialize(request)).pureFold(
@@ -53,20 +53,20 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
     )
 
   override def createRequest(
-    method: String,
+    function: String,
     argumentNames: Option[Seq[String]],
     argumentValues: Seq[Node],
     responseRequest: Boolean
   ): Try[RpcRequest[Node, Details]] = {
     val id = Option.when(responseRequest)(Right(Math.abs(random.nextLong()).toString).withLeft[BigDecimal])
     val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
-    val formedRequest = Request(id, method, argumentNodes).formed
+    val formedRequest = Request(id, function, argumentNodes).formed
     val messageText = () => Some(codec.text(formedRequest))
     Try(codec.serialize(formedRequest)).mapFailure { error =>
       ParseErrorException("Invalid request codec", error)
     }.map { messageBody =>
       val message = RpcMessage(id, messageBody, formedRequest.properties, messageText)
-      RpcRequest(method, argumentNodes, responseRequest, message)
+      RpcRequest(function, argumentNodes, responseRequest, message)
     }
   }
 
@@ -146,7 +146,7 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
     copy(errorToException = errorToException)
 
   /**
-   * Creates method invocation argument nodes.
+   * Creates function invocation argument nodes.
    *
    * @param argumentNames argument names
    * @param encodedArguments encoded arguments
@@ -191,7 +191,7 @@ case object JsonRpcProtocol {
   def defaultErrorToException(message: String, code: Int): Throwable = code match {
     case ErrorType.ParseError.code => ParseErrorException(message)
     case ErrorType.InvalidRequest.code => InvalidRequestException(message)
-    case ErrorType.MethodNotFound.code => MethodNotFoundException(message)
+    case ErrorType.MethodNotFound.code => FunctionNotFoundException(message)
     case ErrorType.InvalidParams.code => new IllegalArgumentException(message)
     case ErrorType.InternalError.code => InternalErrorException(message)
     case _ if Range(ErrorType.ReservedError.code, ErrorType.ServerError.code + 1).contains(code) =>
@@ -208,7 +208,7 @@ case object JsonRpcProtocol {
   def defaultExceptionToError(exception: Throwable): ErrorType = exception match {
     case _: ParseErrorException => ErrorType.ParseError
     case _: InvalidRequestException => ErrorType.InvalidRequest
-    case _: MethodNotFoundException => ErrorType.MethodNotFound
+    case _: FunctionNotFoundException => ErrorType.MethodNotFound
     case _: IllegalArgumentException => ErrorType.InvalidParams
     case _: InternalErrorException => ErrorType.InternalError
     case _: ServerErrorException => ErrorType.ServerError

@@ -33,7 +33,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
 
   override def parseRequest(
     request: ArraySeq.ofByte,
-    method: Option[String]
+    function: Option[String]
   ): Either[RpcError[Details], RpcRequest[Node, Details]] =
 //    // Deserialize request
 //    Try(codec.deserialize(request)).pureFold(
@@ -82,16 +82,16 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
   }
 
   override def createRequest(
-    method: String,
+    function: String,
     argumentNames: Option[Seq[String]],
     argumentValues: Seq[Node],
     responseRequired: Boolean
   ): Try[RpcRequest[Node, Details]] = {
     val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
-//    val formedRequest = Request(id, method, argumentNodes).formed
+//    val formedRequest = Request(id, function, argumentNodes).formed
     val properties = Map(
       "Type" -> MessageType.Call.toString,
-      "Method" -> method,
+      "Method" -> function,
       "Arguments" -> argumentValues.size.toString
     )
 //    val messageText = () => codec.text(formedRequest)
@@ -99,7 +99,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
 //      InvalidRequestException("Invalid request codec", error)
 //    }.map { messageBody =>
 //      val message = RpcMessage(id, messageBody, formedRequest.properties, Some(messageText))
-//      RpcRequest(method, argumentNodes, respond, message)
+//      RpcRequest(function, argumentNodes, respond, message)
 //    }
     ???
   }
@@ -148,7 +148,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
     copy(errorToException = errorToException)
 
   /**
-   * Creates method invocation argument nodes.
+   * Creates function invocation argument nodes.
    *
    * @param argumentNames argument names
    * @param encodedArguments encoded arguments

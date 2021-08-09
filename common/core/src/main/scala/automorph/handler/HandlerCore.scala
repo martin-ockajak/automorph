@@ -2,7 +2,7 @@ package automorph.handler
 
 import automorph.Handler
 import automorph.spi.{MessageCodec, RpcProtocol}
-import automorph.spi.RpcProtocol.MethodNotFoundException
+import automorph.spi.RpcProtocol.FunctionNotFoundException
 import automorph.spi.protocol.{RpcMessage, RpcRequest}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
@@ -91,7 +91,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
         }
       )
     }.getOrElse {
-      val error = MethodNotFoundException(s"Method not found: ${rpcRequest.method}", None.orNull)
+      val error = FunctionNotFoundException(s"Method not found: ${rpcRequest.method}", None.orNull)
       errorResponse(error, rpcRequest.message)
     }
   }

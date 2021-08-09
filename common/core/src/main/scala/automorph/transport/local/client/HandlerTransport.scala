@@ -15,7 +15,7 @@ import scala.collection.immutable.ArraySeq
  * @param defaultContext default request context
  * @constructor Creates a local handler transport passing requests directly to specified ''handler'' using specified ''backend''.
  * @tparam Node message node type
- * @tparam Codec message codec codec plugin type
+ * @tparam Codec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */

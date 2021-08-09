@@ -5,7 +5,9 @@ import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
 /**
- * RPC protocol.
+ * Remote procedure call (RPC) protocol plugin.
+ *
+ * The underlying RPC protocol must support remote invocation of functions.
  *
  * @tparam Node message node type
  */
@@ -27,14 +29,14 @@ trait RpcProtocol[Node] {
   /**
    * Creates an RPC request.
    *
-   * @param method method name
+   * @param function function name
    * @param argumentNames argument names
    * @param argumentValues argument values
    * @param responseRequired true if the request mandates a response, false if there should be no response
    * @return RPC request
    */
   def createRequest(
-    method: String,
+    function: String,
     argumentNames: Option[Seq[String]],
     argumentValues: Seq[Node],
     responseRequired: Boolean
@@ -44,10 +46,10 @@ trait RpcProtocol[Node] {
    * Parses an RPC request.
    *
    * @param request RPC request message
-   * @param method method name override, if specified it is used instead of method name obtained from the request
+   * @param function function name override, if specified it is used instead of function name obtained from the request
    * @return RPC request on valid request message or RPC error on invalid request message
    */
-  def parseRequest(request: ArraySeq.ofByte, method: Option[String]): Either[RpcError[Details], RpcRequest[Node, Details]]
+  def parseRequest(request: ArraySeq.ofByte, function: Option[String]): Either[RpcError[Details], RpcRequest[Node, Details]]
 
   /**
    * Creates an RPC response.
@@ -74,20 +76,20 @@ trait RpcProtocol[Node] {
 
 case object RpcProtocol {
 
-  /** Invalid request error. */
+  /** Invalid RPC request error. */
   final case class InvalidRequestException(
     message: String,
     cause: Throwable = None.orNull
   ) extends RuntimeException(message, cause)
 
-  /** Invalid response error. */
+  /** Invalid RPC response error. */
   final case class InvalidResponseException(
     message: String,
     cause: Throwable = None.orNull
   ) extends RuntimeException(message, cause)
 
-  /** JSON-RPC method not found error. */
-  final case class MethodNotFoundException(
+  /** Remote function not found error. */
+  final case class FunctionNotFoundException(
     message: String,
     cause: Throwable = None.orNull
   ) extends RuntimeException(message, cause)
