@@ -115,7 +115,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
 
   private def connect(properties: Context): HttpURLConnection = {
     val connectionUrl = properties.url.getOrElse(url)
-    val connection = url.toURL.openConnection().asInstanceOf[HttpURLConnection]
+    val connection = connectionUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
     connection.setDoOutput(true)
     connection
   }

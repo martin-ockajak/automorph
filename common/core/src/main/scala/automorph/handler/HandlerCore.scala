@@ -157,7 +157,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    * @return handler result
    */
   private def response[Data: Bytes](result: Try[Node], message: RpcMessage[protocol.Details]): Effect[HandlerResult[Data]] =
-    protocol.createResponse(result, message.details, encodeStrings).pureFold(
+    protocol.createResponse(result, message.details).pureFold(
       error => system.failed(error),
       rpcResponse => {
         lazy val properties = rpcResponse.message.properties ++ rpcResponse.message.text.map(bodyProperty -> _)

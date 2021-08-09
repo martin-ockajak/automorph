@@ -65,8 +65,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
 
   override def createResponse(
     result: Try[Node],
-    details: Details,
-    encodeStrings: List[String] => Node
+    details: Details
   ): Try[RpcResponse[Node, Details]] = {
     val id = details.getOrElse(unknownId)
     val formedResponse = result.pureFold(

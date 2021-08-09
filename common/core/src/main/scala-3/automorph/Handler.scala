@@ -14,7 +14,6 @@ import automorph.util.{CannotEqual, EmptyContext}
  * @param codec message codec plugin
  * @param system effect system plugin
  * @param protocol RPC protocol
- * @param encodeStrings converts list of strings to message codec node
  * @param encodedNone message codec node representing missing optional value
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
@@ -26,7 +25,6 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context] 
   system: EffectSystem[Effect],
   protocol: RpcProtocol[Node],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
-  protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
 ) extends HandlerCore[Node, Codec, Effect, Context]
   with HandlerBind[Node, Codec, Effect, Context]
@@ -57,8 +55,7 @@ case object Handler:
     system: EffectSystem[Effect],
     protocol: RpcProtocol[Node]
   ): Handler[Node, Codec, Effect, Context] =
-    val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
-    Handler(codec, system, protocol, Map.empty, encodeStrings, codec.encode(None))
+    Handler(codec, system, protocol, Map.empty, codec.encode(None))
 
   /**
    * Creates a RPC request handler with empty request context plus specified specified ''codec'' and ''system'' plugins.
@@ -79,5 +76,4 @@ case object Handler:
     system: EffectSystem[Effect],
     protocol: RpcProtocol[Node]
   ): Handler[Node, Codec, Effect, EmptyContext.Value] =
-    val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
-    Handler(codec, system, protocol, Map.empty, encodeStrings, codec.encode(None))
+    Handler(codec, system, protocol, Map.empty, codec.encode(None))

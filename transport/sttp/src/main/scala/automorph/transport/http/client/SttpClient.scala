@@ -67,7 +67,7 @@ final case class SttpClient[Effect[_]](
 
   override def defaultContext: Context = SttpClient.defaultContext
 
-  override def close(): Effect[Unit] = system.wrap(backend.close())
+  override def close(): Effect[Unit] = backend.close()
 
   private def send[R](httpRequest: Request[R, WebSocket[Effect]], request: ArraySeq.ofByte): Effect[Response[R]] = {
     logger.trace(

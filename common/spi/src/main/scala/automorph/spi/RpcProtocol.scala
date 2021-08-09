@@ -56,13 +56,11 @@ trait RpcProtocol[Node] {
    *
    * @param result RPC response result
    * @param details corresponding RPC request details
-   * @param encodeStrings converts list of strings to message codec node
    * @return RPC response
    */
   def createResponse(
     result: Try[Node],
-    details: Details,
-    encodeStrings: List[String] => Node
+    details: Details
   ): Try[RpcResponse[Node, Details]]
 
   /**
