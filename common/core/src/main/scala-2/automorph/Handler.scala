@@ -48,6 +48,7 @@ case object Handler {
    *
    * @param codec message codec plugin
    * @param system effect system plugin
+   * @param protocol RPC protocol
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Effect effect type
@@ -56,7 +57,8 @@ case object Handler {
    */
   def apply[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     codec: Codec,
-    system: EffectSystem[Effect]
+    system: EffectSystem[Effect],
+    protocol: RpcProtocol[Node]
   ): Handler[Node, Codec, Effect, Context] =
     macro applyMacro[Node, Codec, Effect, Context]
 
@@ -67,6 +69,7 @@ case object Handler {
    *
    * @param codec message codec plugin
    * @param system effect system plugin
+   * @param protocol RPC protocol
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Effect effect type
@@ -75,7 +78,8 @@ case object Handler {
    */
   def withoutContext[Node, Codec <: MessageCodec[Node], Effect[_]](
     codec: Codec,
-    system: EffectSystem[Effect]
+    system: EffectSystem[Effect],
+    protocol: RpcProtocol[Node]
   ): Handler[Node, Codec, Effect, EmptyContext.Value] =
     macro withoutContextMacro[Node, Codec, Effect]
 
@@ -83,15 +87,17 @@ case object Handler {
     c: blackbox.Context
   )(
     codec: c.Expr[Codec],
-    system: c.Expr[EffectSystem[Effect]]
+    system: c.Expr[EffectSystem[Effect]],
+    protocol: c.Expr[RpcProtocol[Node, Codec]]
   ): c.Expr[Handler[Node, Codec, Effect, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[Codec], weakTypeOf[Context])
 
     c.Expr[Any](q"""
-      new automorph.Handler($codec,
+      new automorph.Handler(
+        $codec,
         $system,
-        automorph.protocol.JsonRpcProtocol($codec),
+        $protocol,
         Map.empty,
         value => $codec.encode[List[String]](value), $codec.encode(None)
       )
@@ -100,7 +106,8 @@ case object Handler {
 
   def withoutContextMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag, Effect[_]](c: blackbox.Context)(
     codec: c.Expr[Codec],
-    system: c.Expr[EffectSystem[Effect]]
+    system: c.Expr[EffectSystem[Effect]],
+    protocol: c.Expr[RpcProtocol[Node, Codec]]
   ): c.Expr[Handler[Node, Codec, Effect, EmptyContext.Value]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[Codec])
@@ -109,7 +116,7 @@ case object Handler {
       automorph.Handler(
         $codec,
         $system,
-        automorph.protocol.JsonRpcProtocol($codec),
+        $protocol,
         Map.empty,
         value => $codec.encode[List[String]](value), $codec.encode(None)
       )

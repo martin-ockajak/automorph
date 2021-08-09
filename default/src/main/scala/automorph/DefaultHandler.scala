@@ -26,7 +26,7 @@ object DefaultHandler {
    * @return RPC request handler
    */
   def apply[Effect[_], Context](system: EffectSystem[Effect]): Type[Effect, Context] =
-    Handler(DefaultMessageCodec(), system)
+    Handler(DefaultMessageCodec(), system, DefaultRpcProtocol())
 
   /**
    * Creates a default asynchronous RPC request handler with specified request `Context` type and 'Future' as an effect type.
@@ -38,7 +38,7 @@ object DefaultHandler {
    * @return asynchronous RPC request handler
    */
   def async[Context](implicit executionContext: ExecutionContext): Type[Future, Context] =
-    Handler(DefaultMessageCodec(), DefaultEffectSystem.async)
+    Handler(DefaultMessageCodec(), DefaultEffectSystem.async, DefaultRpcProtocol())
 
   /**
    * Creates a default synchronous RPC request handler with specified request `Context` type and identity as an effect type.
@@ -48,7 +48,8 @@ object DefaultHandler {
    * @tparam Context request context type
    * @return synchronous RPC request handler
    */
-  def sync[Context]: Type[Identity, Context] = Handler(DefaultMessageCodec(), DefaultEffectSystem.sync)
+  def sync[Context]: Type[Identity, Context] =
+    Handler(DefaultMessageCodec(), DefaultEffectSystem.sync, DefaultRpcProtocol())
 
   /**
    * Creates a default request RPC handler with empty request context and specified effect ''system'' plugin.
@@ -60,7 +61,7 @@ object DefaultHandler {
    * @return RPC request handler
    */
   def withoutContext[Effect[_]](system: EffectSystem[Effect]): Type[Effect, EmptyContext.Value] =
-    Handler.withoutContext(DefaultMessageCodec(), system)
+    Handler.withoutContext(DefaultMessageCodec(), system, DefaultRpcProtocol())
 
   /**
    * Creates a default asynchronous RPC request handler with empty request context and `Future` as an effect type.
@@ -71,7 +72,7 @@ object DefaultHandler {
    * @return asynchronous RPC request handler
    */
   def asyncWithoutContext()(implicit executionContext: ExecutionContext): Type[Future, EmptyContext.Value] =
-    Handler.withoutContext(DefaultMessageCodec(), DefaultEffectSystem.async)
+    Handler.withoutContext(DefaultMessageCodec(), DefaultEffectSystem.async, DefaultRpcProtocol())
 
   /**
    * Creates a default synchronous RPC request handler with empty request context and `Identity` as an effect type.
@@ -81,5 +82,5 @@ object DefaultHandler {
    * @return asynchronous RPC request handler
    */
   def syncWithoutContext(): Type[Identity, EmptyContext.Value] =
-    Handler.withoutContext(DefaultMessageCodec(), DefaultEffectSystem.sync)
+    Handler.withoutContext(DefaultMessageCodec(), DefaultEffectSystem.sync, DefaultRpcProtocol())
 }

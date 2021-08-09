@@ -2,7 +2,6 @@ package automorph
 
 import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
 import automorph.log.Logging
-import automorph.protocol.JsonRpcProtocol
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.{CannotEqual, EmptyContext}
 
@@ -46,6 +45,7 @@ case object Handler:
    *
    * @param codec message codec plugin
    * @param system effect system plugin
+   * @param protocol RPC protocol
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Effect effect type
@@ -54,10 +54,11 @@ case object Handler:
    */
   inline def apply[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     codec: Codec,
-    system: EffectSystem[Effect]
+    system: EffectSystem[Effect],
+    protocol: RpcProtocol[Node]
   ): Handler[Node, Codec, Effect, Context] =
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
-    Handler(codec, system, JsonRpcProtocol(codec), Map.empty, encodeStrings, codec.encode(None))
+    Handler(codec, system, protocol, Map.empty, encodeStrings, codec.encode(None))
 
   /**
    * Creates a RPC request handler with empty request context plus specified specified ''codec'' and ''system'' plugins.
@@ -66,6 +67,7 @@ case object Handler:
    *
    * @param codec message codec plugin
    * @param system effect system plugin
+   * @param protocol RPC protocol
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Effect effect type
@@ -74,7 +76,8 @@ case object Handler:
    */
   inline def withoutContext[Node, Codec <: MessageCodec[Node], Effect[_]](
     codec: Codec,
-    system: EffectSystem[Effect]
+    system: EffectSystem[Effect],
+    protocol: RpcProtocol[Node]
   ): Handler[Node, Codec, Effect, EmptyContext.Value] =
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
-    Handler(codec, system, JsonRpcProtocol(codec), Map.empty, encodeStrings, codec.encode(None))
+    Handler(codec, system, protocol, Map.empty, encodeStrings, codec.encode(None))
