@@ -14,7 +14,7 @@ import zio.RIO
  */
 final case class ZioSystem[Environment]() extends EffectSystem[({ type Effect[T] = RIO[Environment, T] })#Effect] {
 
-  override def impure[T](value: => T): RIO[Environment, T] = RIO.fromTry(Try(value))
+  override def impure[T](value: => T): RIO[Environment, T] = RIO(value)
 
   override def pure[T](value: => T): RIO[Environment, T] = RIO.succeed(value)
 
