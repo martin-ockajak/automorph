@@ -30,7 +30,7 @@ object DefaultClient {
     system: EffectSystem[Effect],
     transport: ClientMessageTransport[Effect, Context]
   ): Client[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Effect, Context] =
-    Client(DefaultMessageCodec(), system, transport)
+    Client(DefaultMessageCodec(), system, transport, DefaultRpcProtocol())
 
   /**
    * Creates a default asynchronous RPC client using 'Future' as an effect type with specified message ''transport'' plugin.

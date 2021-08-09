@@ -1,7 +1,7 @@
 package test.examples
 
 import automorph.codec.messagepack.UpickleMessagePackCodec
-import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, Handler}
+import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, DefaultRpcProtocol, Handler}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -9,6 +9,7 @@ object MessageCodec extends App {
 
   // Define an API type and create API instance
   case class Record(values: List[String])
+
   class Api {
     def hello(some: String, n: Int): Future[Record] = Future(Record(List("Hello", some, n.toString)))
   }
@@ -28,7 +29,13 @@ object MessageCodec extends App {
   // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
   val url = new java.net.URI("http://localhost/api")
   val transport = DefaultHttpClientTransport.async(url, "POST")
-  val client = Client[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpClientTransport.Context](codec, system, transport)
+  val protocol = DefaultRpcProtocol(codec)
+  val client = Client[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpClientTransport.Context](
+    codec,
+    system,
+    transport,
+    protocol
+  )
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api

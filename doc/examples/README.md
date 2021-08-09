@@ -1,6 +1,6 @@
 # Examples
 
-## [Synchronous]
+## Synchronous
 
 * [Source](/test/examples/src/test/scala/test/examples/Synchronous.scala)
 
@@ -47,7 +47,7 @@ apiProxy.hello("world", 1) // String
 client.close()
 ```
 
-## [Asynchronous]
+## Asynchronous
 
 * [Source](/test/examples/src/test/scala/test/examples/Asynchronous.scala)
 
@@ -115,7 +115,7 @@ hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
-## [Request metadata]
+## Request metadata
 
 * [Source](/test/examples/src/test/scala/test/examples/RequestMetadata.scala)
 
@@ -197,7 +197,7 @@ client.method("useMetadata").args("message" -> "test").call[String] // String
 client.close()
 ```
 
-## [Method mapping]
+## Method mapping
 
 * [Source](/test/examples/src/test/scala/test/examples/MethodMapping.scala)
 
@@ -267,7 +267,7 @@ util.Try(client.method("omitted").args().call[String]) // Failure
 client.close()
 ```
 
-## [Error mapping]
+## Error mapping
 
 * [Source](/test/examples/src/test/scala/test/examples/ErrorMapping.scala)
 
@@ -369,7 +369,7 @@ hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
-## [Effect system]
+## Effect system
 
 * [Source](/test/examples/src/test/scala/test/examples/EffectSystem.scala)
 
@@ -429,7 +429,7 @@ apiProxy.hello("world", 1) // Task[String]
 client.close()
 ```
 
-## [Message codec]
+## Message codec
 
 * [Source](/test/examples/src/test/scala/test/examples/MessageCodec.scala)
 
@@ -446,7 +446,7 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.codec.messagepack.UpickleMessagePackCodec
-import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, Handler}
+import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, DefaultRpcProtocol, Handler}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -482,7 +482,13 @@ server.close()
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val url = new java.net.URI("http://localhost/api")
 val transport = DefaultHttpClientTransport.async(url, "POST")
-val client = Client[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpClientTransport.Context](codec, system, transport)
+val protocol = DefaultRpcProtocol(codec)
+val client = Client[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpClientTransport.Context](
+  codec,
+  system,
+  transport,
+  protocol
+)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api
@@ -492,7 +498,7 @@ apiProxy.hello("world", 1) // Future[String]
 client.close()
 ```
 
-## [Client message transport]
+## Client message transport
 
 * [Source](/test/examples/src/test/scala/test/examples/ClientMessageTransport.scala)
 
@@ -547,7 +553,7 @@ apiProxy.hello("world", 1) // String
 client.close()
 ```
 
-## [Server message transport]
+## Server message transport
 
 * [Source](/test/examples/src/test/scala/test/examples/ServerMessageTransport.scala)
 
@@ -598,7 +604,7 @@ apiProxy.hello("world", 1) // String
 client.close()
 ```
 
-## [Endpoint message transport]
+## Endpoint message transport
 
 * [Source](/test/examples/src/test/scala/test/examples/EndpointMessageTransport.scala)
 
