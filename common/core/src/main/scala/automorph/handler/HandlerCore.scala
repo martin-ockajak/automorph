@@ -35,7 +35,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
     protocol.parseRequest(rawRequest, format, None).fold(
       error => errorResponse(error.exception, error.message),
       rpcRequest => {
-        lazy val properties = rpcRequest.message.properties ++ rpcRequest.message.text().map(bodyProperty -> _)
+        lazy val properties = rpcRequest.message.properties ++ rpcRequest.message.text.map(bodyProperty -> _)
         logger.trace(s"Received ${protocol.name} request", properties)
         invokeMethod(rpcRequest, context)
       }
@@ -160,7 +160,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
     protocol.createResponse(result, message.details, format, encodeStrings).pureFold(
       error => system.failed(error),
       rpcResponse => {
-        lazy val properties = rpcResponse.message.properties ++ rpcResponse.message.text().map(bodyProperty -> _)
+        lazy val properties = rpcResponse.message.properties ++ rpcResponse.message.text.map(bodyProperty -> _)
         logger.trace(s"Sending ${protocol.name} response", properties)
         system.pure(HandlerResult(Some(implicitly[Bytes[Data]].to(rpcResponse.message.body)), result.failed.toOption))
       }

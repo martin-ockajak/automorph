@@ -9,12 +9,15 @@ import scala.collection.immutable.ArraySeq
  * @param details protocol-specific message details
  * @param body message body
  * @param properties message properties
- * @param text message text representation
+ * @param text textual message representation
  * @tparam Details protocol-specific message details type
  */
 final case class RpcMessage[Details](
   details: Details,
   body: ArraySeq.ofByte,
   properties: Map[String, String] = Map.empty,
-  text: () => Option[String] = () => None
-)
+  private val messageText: () => Option[String] = () => None
+) {
+  /** Textual message representation. */
+  def text: Option[String] = messageText()
+}

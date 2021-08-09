@@ -55,7 +55,7 @@ private[automorph] case class ClientCore[Node, Format <: MessageFormat[Node], Ef
       error => system.failed(error),
       // Send request
       rpcRequest => {
-        lazy val properties = rpcRequest.message.properties ++ rpcRequest.message.text().map(bodyProperty -> _)
+        lazy val properties = rpcRequest.message.properties ++ rpcRequest.message.text.map(bodyProperty -> _)
         logger.trace(s"Sending ${protocol.name} request", properties)
         system.flatMap(
           system.pure(rpcRequest),
@@ -116,7 +116,7 @@ private[automorph] case class ClientCore[Node, Format <: MessageFormat[Node], Ef
       error => raiseError(error.exception, requestProperties),
       rpcResponse => {
         lazy val properties = requestProperties ++ rpcResponse.message.properties
-        logger.trace(s"Received ${protocol.name} response", properties ++ rpcResponse.message.text().map(bodyProperty -> _))
+        logger.trace(s"Received ${protocol.name} response", properties ++ rpcResponse.message.text.map(bodyProperty -> _))
         rpcResponse.result.pureFold(
           // Raise error
           error => raiseError(error, requestProperties ++ properties),
