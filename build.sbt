@@ -83,7 +83,7 @@ lazy val util = (project in file("common/util")).settings(
   )
 )
 lazy val coreMeta = (project in file("common/core/meta")).dependsOn(
-  spi, util, jsonrpc, restrpc
+  spi, util
 ).settings(
   name := s"$projectName-core-meta",
   initialize ~= { _ =>
@@ -258,7 +258,7 @@ lazy val openapi = (project in file("common/openapi")).dependsOn(
 
 // Misc
 lazy val default = project.dependsOn(
-  circe, standard, undertow, sttp
+  jsonrpc, restrpc, circe, standard, undertow, sttp
 ).settings(
   name := s"$projectName-default",
   libraryDependencies ++= Seq(
@@ -284,7 +284,7 @@ lazy val testBase = (project in file("test/base")).dependsOn(
   )
 )
 lazy val testCore = (project in file("test/core")).dependsOn(
-  testBase, core, upickle, circe, argonaut,
+  testBase, core, jsonrpc, restrpc, http, circe, upickle, argonaut,
 )
 lazy val testHttp = (project in file("test/http")).dependsOn(
   testBase, http
