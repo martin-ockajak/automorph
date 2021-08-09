@@ -22,7 +22,7 @@ lazy val root = project.in(file(".")).settings(
   // Common
   spi,
   util,
-  meta,
+  coreMeta,
   core,
   openapi,
 
@@ -80,17 +80,17 @@ lazy val util = (project in file("common/util")).settings(
     "org.slf4j" % "slf4j-api" % "1.7.32"
   )
 )
-lazy val meta = (project in file("common/meta")).dependsOn(
+lazy val coreMeta = (project in file("common/core/meta")).dependsOn(
   spi, util, jsonrpc, restrpc
 ).settings(
-  name := s"$projectName-meta",
+  name := s"$projectName-core-meta",
   initialize ~= { _ =>
 //    System.setProperty("macro.debug", "true")
     System.setProperty("macro.test", "true")
   }
 )
 lazy val core = (project in file("common/core")).dependsOn(
-  meta, testBase % Test
+  coreMeta, testBase % Test
 ).settings(
   name := s"$projectName-core"
 )
