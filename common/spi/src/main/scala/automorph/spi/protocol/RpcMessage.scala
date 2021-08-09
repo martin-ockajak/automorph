@@ -19,5 +19,5 @@ final case class RpcMessage[Details](
   private val messageText: () => Option[String] = () => None
 ) {
   /** Textual message representation. */
-  def text: Option[String] = messageText()
+  lazy val text: Option[String] = messageText()
 }
