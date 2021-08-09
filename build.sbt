@@ -411,16 +411,18 @@ val deleteSite = taskKey[Unit]("Deletes generated documentation website.")
 deleteSite := {
   IO.delete((laikaSite / target).value)
 }
-laikaSite := laikaSite.dependsOn(Compile / doc, deleteSite).value
 laikaSite / target := target.value / "site"
 val site = taskKey[Unit]("Generates documentation website.")
+site := Def.sequential(
+  deleteSite,
+  Compile / doc,
+  laikaSite
+).value
 site / fileInputs ++= Seq(
   baseDirectory.value.toGlob / "doc" / ** / "*.md",
   baseDirectory.value.toGlob / "doc" / ** / "*.conf",
   baseDirectory.value.toGlob / "doc" / ** / "*.jpg"
 )
-site := {}
-site := site.dependsOn(laikaSite).value
 
 // Deployment
 val repositoryShell = s"git@github.com:${repositoryPath}.git"
