@@ -36,26 +36,24 @@ final case class HttpUrlConnectionClient[Effect[_]](
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   require(httpMethods.contains(method), s"Invalid HTTP method: $method")
 
-  override def call(
-    request: ArraySeq.ofByte,
-    mediaType: String,
-    context: Option[Context]
-  ): Effect[ArraySeq.ofByte] =
+  override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] =
     system.flatMap(
       send(request, mediaType, context),
-      (connection: HttpURLConnection, _: ArraySeq.ofByte) =>
-        system.wrap {
-          logger.trace("Receiving HTTP response", Map("URL" -> url))
-          val response = Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).mapFailure { error =>
-            logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
-            error
-          }.get
-          logger.debug(
-            "Received HTTP response",
-            Map("URL" -> url, "Status" -> connection.getResponseCode, "Size" -> response.length)
-          )
-          response
-        }
+      (_: EffectValue) match {
+        case (connection: HttpURLConnection, _) =>
+          system.wrap {
+            logger.trace("Receiving HTTP response", Map("URL" -> url))
+            val response = Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).mapFailure { error =>
+              logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
+              error
+            }.get
+            logger.debug(
+              "Received HTTP response",
+              Map("URL" -> url, "Status" -> connection.getResponseCode, "Size" -> response.length)
+            )
+            response
+          }
+      }
     )
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] =
