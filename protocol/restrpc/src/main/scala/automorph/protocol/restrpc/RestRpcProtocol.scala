@@ -22,7 +22,7 @@ final case class RestRpcProtocol(
   exceptionToError: Throwable => Option[Int] = defaultExceptionToError
 ) extends RpcProtocol {
 
-  type Content = RestRpcProtocol.Content
+  type Details = RestRpcProtocol.Details
 
   override val name: String = "REST-RPC"
 
@@ -30,7 +30,7 @@ final case class RestRpcProtocol(
     request: ArraySeq.ofByte,
     format: MessageFormat[Node],
     method: Option[String]
-  ): Either[RpcError[Content], RpcRequest[Node, Content]] =
+  ): Either[RpcError[Details], RpcRequest[Node, Details]] =
 //    // Deserialize request
 //    Try(format.deserialize(request)).pureFold(
 //      error => Left(RpcError(InvalidRequest("Invalid request format", error), RpcMessage(None, request))),
@@ -49,7 +49,7 @@ final case class RestRpcProtocol(
   override def parseResponse[Node](
     response: ArraySeq.ofByte,
     format: MessageFormat[Node]
-  ): Either[RpcError[Content], RpcResponse[Node, Content]] =
+  ): Either[RpcError[Details], RpcResponse[Node, Details]] =
     // Deserialize response
     Try(format.deserialize(response)).pureFold(
       error => Left(RpcError(InvalidResponseException("Invalid response format", error), RpcMessage((), response))),
@@ -80,7 +80,7 @@ final case class RestRpcProtocol(
     argumentValues: Seq[Node],
     respond: Boolean,
     format: MessageFormat[Node]
-  ): Try[RpcRequest[Node, Content]] = {
+  ): Try[RpcRequest[Node, Details]] = {
     val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
 //    val formedRequest = Request(id, method, argumentNodes).formed
     val properties = Map(
@@ -100,10 +100,10 @@ final case class RestRpcProtocol(
 
   override def createResponse[Node](
     result: Try[Node],
-    content: Content,
+    details: Details,
     format: MessageFormat[Node],
     encodeStrings: List[String] => Node
-  ): Try[RpcResponse[Node, Content]] = {
+  ): Try[RpcResponse[Node, Details]] = {
     val formedResponse = result.pureFold(
       error => {
         val responseError = error match {
@@ -164,7 +164,7 @@ final case class RestRpcProtocol(
 case object RestRpcProtocol {
 
   /** REST-RPC request properties. */
-  type Content = Unit
+  type Details = Unit
 
   /**
    * Maps a REST-RPC error to a corresponding default exception.

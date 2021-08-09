@@ -64,7 +64,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
    * @return bound method invocation result
    */
   private def invokeMethod[Data: Bytes](
-    rpcRequest: RpcRequest[Node, protocol.Content],
+    rpcRequest: RpcRequest[Node, protocol.Details],
     context: Context
   ): Effect[HandlerResult[Data]] = {
     // Lookup bindings for the specified method
@@ -142,7 +142,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
    */
   private def errorResponse[Data: Bytes](
     error: Throwable,
-    message: RpcMessage[protocol.Content]
+    message: RpcMessage[protocol.Details]
   ): Effect[HandlerResult[Data]] = {
     logger.error(s"Failed to process ${protocol.name} request", error, message.properties)
     response(Failure(error), message)
@@ -156,8 +156,8 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
    * @tparam Data message data type
    * @return handler result
    */
-  private def response[Data: Bytes](result: Try[Node], message: RpcMessage[protocol.Content]): Effect[HandlerResult[Data]] =
-    protocol.createResponse(result, message.content, format, encodeStrings).pureFold(
+  private def response[Data: Bytes](result: Try[Node], message: RpcMessage[protocol.Details]): Effect[HandlerResult[Data]] =
+    protocol.createResponse(result, message.details, format, encodeStrings).pureFold(
       error => system.failed(error),
       rpcResponse => {
         lazy val properties = rpcResponse.message.properties ++ rpcResponse.message.text().map(bodyProperty -> _)

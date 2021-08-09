@@ -22,7 +22,7 @@ final case class JsonRpcProtocol(
   exceptionToError: Throwable => ErrorType = defaultExceptionToError
 ) extends RpcProtocol {
 
-  type Content = JsonRpcProtocol.Content
+  type Details = JsonRpcProtocol.Details
 
   private val unknownId: Message.Id = Right("[unknown]")
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
@@ -33,7 +33,7 @@ final case class JsonRpcProtocol(
     request: ArraySeq.ofByte,
     format: MessageFormat[Node],
     method: Option[String]
-  ): Either[RpcError[Content], RpcRequest[Node, Content]] =
+  ): Either[RpcError[Details], RpcRequest[Node, Details]] =
     // Deserialize request
     Try(format.deserialize(request)).pureFold(
       error => Left(RpcError(ParseErrorException("Invalid request format", error), RpcMessage(None, request))),
@@ -51,7 +51,7 @@ final case class JsonRpcProtocol(
   override def parseResponse[Node](
     response: ArraySeq.ofByte,
     format: MessageFormat[Node]
-  ): Either[RpcError[Content], RpcResponse[Node, Content]] =
+  ): Either[RpcError[Details], RpcResponse[Node, Details]] =
     // Deserialize response
     Try(format.deserialize(response)).pureFold(
       error => Left(RpcError(ParseErrorException("Invalid response format", error), RpcMessage(None, response))),
@@ -82,7 +82,7 @@ final case class JsonRpcProtocol(
     argumentValues: Seq[Node],
     respond: Boolean,
     format: MessageFormat[Node]
-  ): Try[RpcRequest[Node, Content]] = {
+  ): Try[RpcRequest[Node, Details]] = {
     val id = Option.when(respond)(Right(Math.abs(random.nextLong).toString).withLeft[BigDecimal])
     val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
     val formedRequest = Request(id, method, argumentNodes).formed
@@ -97,11 +97,11 @@ final case class JsonRpcProtocol(
 
   override def createResponse[Node](
     result: Try[Node],
-    content: Content,
+    details: Details,
     format: MessageFormat[Node],
     encodeStrings: List[String] => Node
-  ): Try[RpcResponse[Node, Content]] = {
-    val id = content.getOrElse(unknownId)
+  ): Try[RpcResponse[Node, Details]] = {
+    val id = details.getOrElse(unknownId)
     val formedResponse = result.pureFold(
       error => {
         val responseError = error match {
@@ -162,7 +162,7 @@ final case class JsonRpcProtocol(
 case object JsonRpcProtocol {
 
   /** JSON-RPC request properties. */
-  type Content = Option[Message.Id]
+  type Details = Option[Message.Id]
 
   /** JSON-RPC parse error. */
   final case class ParseErrorException(

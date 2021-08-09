@@ -9,11 +9,11 @@ package automorph.spi.protocol
  * @param responseRequired true if the request mandates a response, false if there should be no response
  * @param message RPC message
  * @tparam Node message node type
- * @tparam Content protocol-specific message content type
+ * @tparam Details protocol-specific message details type
  */
-final case class RpcRequest[Node, Content](
+final case class RpcRequest[Node, Details](
   method: String,
   arguments: Either[List[Node], Map[String, Node]],
   responseRequired: Boolean,
-  message: RpcMessage[Content]
+  message: RpcMessage[Details]
 )

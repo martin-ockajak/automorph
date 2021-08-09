@@ -8,8 +8,8 @@ import scala.util.Try
 /** RPC protocol. */
 trait RpcProtocol {
 
-  /** Protocol-specific message content type. */
-  type Content
+  /** Protocol-specific message details type. */
+  type Details
 
   /**
    * Protocol name.
@@ -31,7 +31,7 @@ trait RpcProtocol {
     request: ArraySeq.ofByte,
     format: MessageFormat[Node],
     method: Option[String]
-  ): Either[RpcError[Content], RpcRequest[Node, Content]]
+  ): Either[RpcError[Details], RpcRequest[Node, Details]]
 
   /**
    * Parses an RPC response.
@@ -44,7 +44,7 @@ trait RpcProtocol {
   def parseResponse[Node](
     response: ArraySeq.ofByte,
     format: MessageFormat[Node]
-  ): Either[RpcError[Content], RpcResponse[Node, Content]]
+  ): Either[RpcError[Details], RpcResponse[Node, Details]]
 
   /**
    * Creates an RPC request.
@@ -63,13 +63,13 @@ trait RpcProtocol {
     argumentValues: Seq[Node],
     respond: Boolean,
     format: MessageFormat[Node]
-  ): Try[RpcRequest[Node, Content]]
+  ): Try[RpcRequest[Node, Details]]
 
   /**
    * Creates an RPC response.
    *
    * @param result RPC response result
-   * @param content corresponding RPC request content
+   * @param details corresponding RPC request details
    * @param format message format plugin
    * @param encodeStrings converts list of strings to message format node
    * @tparam Node message node type
@@ -77,10 +77,10 @@ trait RpcProtocol {
    */
   def createResponse[Node](
     result: Try[Node],
-    content: Content,
+    details: Details,
     format: MessageFormat[Node],
     encodeStrings: List[String] => Node
-  ): Try[RpcResponse[Node, Content]]
+  ): Try[RpcResponse[Node, Details]]
 }
 
 case object RpcProtocol {

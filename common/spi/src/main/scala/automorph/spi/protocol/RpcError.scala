@@ -6,9 +6,9 @@ package automorph.spi.protocol
  * @constructor Creates RPC error.
  * @param exception exception causing the error
  * @param message RPC message
- * @tparam Content protocol-specific message content type
+ * @tparam Details protocol-specific message details type
  */
-final case class RpcError[Content](
+final case class RpcError[Details](
   exception: Throwable,
-  message: RpcMessage[Content]
+  message: RpcMessage[Details]
 )
