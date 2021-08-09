@@ -6,7 +6,7 @@ package automorph.spi.protocol
  * @constructor Creates RPC request.
  * @param method method name
  * @param arguments method arguments by position or by name
- * @param respond true if the request mandates a response
+ * @param responseRequired true if the request mandates a response, false if there should be no response
  * @param message RPC message
  * @tparam Node message node type
  * @tparam Content protocol-specific message content type
@@ -14,6 +14,6 @@ package automorph.spi.protocol
 final case class RpcRequest[Node, Content](
   method: String,
   arguments: Either[List[Node], Map[String, Node]],
-  respond: Boolean,
+  responseRequired: Boolean,
   message: RpcMessage[Content]
 )

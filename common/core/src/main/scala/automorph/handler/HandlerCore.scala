@@ -81,7 +81,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
           system.flatMap(
             effect,
             (outcome: Either[Throwable, Node]) =>
-              if (rpcRequest.respond) {
+              if (rpcRequest.responseRequired) {
                 // Create response
                 response(outcome.toTry, rpcRequest.message)
               } else {
