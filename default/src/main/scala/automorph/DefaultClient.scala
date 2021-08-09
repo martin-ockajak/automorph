@@ -58,5 +58,4 @@ object DefaultClient {
   def sync[Context](
     transport: ClientMessageTransport[Identity, Context]
   ): Type[Identity, Context] = DefaultClient(DefaultEffectSystem.sync, transport)
-
 }

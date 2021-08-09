@@ -21,7 +21,7 @@ object DefaultRpcProtocol {
    * @return RPC protocol plugin
    */
   def apply(): Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
-    macro apply0Macro
+    JsonRpcProtocol(DefaultMessageCodec())
 
   /**
    * Creates a default RPC protocol plugin with specified message ''codec'' plugin.
@@ -32,17 +32,9 @@ object DefaultRpcProtocol {
    * @tparam Codec message codec plugin type
    */
   def apply[Node, Codec <: MessageCodec[Node]](codec: Codec): Type[Node, Codec] =
-    macro apply1Macro[Node, Codec]
+    macro applyMacro[Node, Codec]
 
-  def apply0Macro(c: blackbox.Context)(): c.Expr[Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type]] = {
-    import c.universe.Quasiquote
-
-    c.Expr[Any](q"""
-      new automorph.protocol.JsonRpcProtocol(automorph.DefaultMessageCodec())
-    """).asInstanceOf[c.Expr[Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type]]]
-  }
-
-  def apply1Macro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](
+  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](
     c: blackbox.Context
   )(codec: c.Expr[Codec]): c.Expr[Type[Node, Codec]] = {
     import c.universe.{Quasiquote, weakTypeOf}

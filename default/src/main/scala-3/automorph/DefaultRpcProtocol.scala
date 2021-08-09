@@ -18,7 +18,7 @@ object DefaultRpcProtocol {
    *
    * @return RPC protocol plugin
    */
-  inline def apply(): Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
+  def apply(): Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
     JsonRpcProtocol(DefaultMessageCodec())
 
   /**
