@@ -27,7 +27,7 @@ import scala.reflect.macros.blackbox
 final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   codec: Codec,
   system: EffectSystem[Effect],
-  protocol: RpcProtocol,
+  protocol: RpcProtocol[Node],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
@@ -91,7 +91,7 @@ case object Handler {
     c.Expr[Any](q"""
       new automorph.Handler($codec,
         $system,
-        automorph.protocol.jsonrpc.JsonRpcProtocol(),
+        automorph.protocol.jsonrpc.JsonRpcProtocol($codec),
         Map.empty,
         value => $codec.encode[List[String]](value), $codec.encode(None)
       )
@@ -109,7 +109,7 @@ case object Handler {
       automorph.Handler(
         $codec,
         $system,
-        automorph.protocol.jsonrpc.JsonRpcProtocol(),
+        automorph.protocol.jsonrpc.JsonRpcProtocol($codec),
         Map.empty,
         value => $codec.encode[List[String]](value), $codec.encode(None)
       )

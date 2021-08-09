@@ -25,7 +25,7 @@ import automorph.util.{CannotEqual, EmptyContext}
 final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   codec: Codec,
   system: EffectSystem[Effect],
-  protocol: RpcProtocol,
+  protocol: RpcProtocol[Node],
   methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val encodeStrings: List[String] => Node,
   protected val encodedNone: Node
@@ -57,7 +57,7 @@ case object Handler:
     system: EffectSystem[Effect]
   ): Handler[Node, Codec, Effect, Context] =
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
-    Handler(codec, system, JsonRpcProtocol(), Map.empty, encodeStrings, codec.encode(None))
+    Handler(codec, system, JsonRpcProtocol(codec), Map.empty, encodeStrings, codec.encode(None))
 
   /**
    * Creates a RPC request handler with empty request context plus specified specified ''codec'' and ''system'' plugins.
@@ -77,4 +77,4 @@ case object Handler:
     system: EffectSystem[Effect]
   ): Handler[Node, Codec, Effect, EmptyContext.Value] =
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
-    Handler(codec, system, JsonRpcProtocol(), Map.empty, encodeStrings, codec.encode(None))
+    Handler(codec, system, JsonRpcProtocol(codec), Map.empty, encodeStrings, codec.encode(None))

@@ -130,7 +130,7 @@ libraryDependencies ++= Seq(
 **API**
 
 ```scala
-  // Define server API type and create API instance
+// Define server API type and create API instance
 class ServerApi {
 
   import automorph.DefaultHttpServer.Context
@@ -285,7 +285,7 @@ libraryDependencies ++= Seq(
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.protocol.jsonrpc.JsonRpcProtocol
 import automorph.transport.http.Http
-import automorph.{DefaultHttpClient, DefaultHttpServer}
+import automorph.{DefaultHttpClient, DefaultHttpServer, DefaultMessageCodec}
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -302,7 +302,7 @@ val api = new Api()
 
 ```scala
 // Customize server JSON-RPC error mapping
-val serverProtocol = JsonRpcProtocol().exceptionToError {
+val serverProtocol = JsonRpcProtocol(DefaultMessageCodec()).exceptionToError {
   case _: SQLException => InvalidRequest
   case e => JsonRpcProtocol.defaultExceptionToError(e)
 }
@@ -334,7 +334,7 @@ server.close()
 
 ```scala
 // Customize client JSON-RPC error mapping
-val clientProtocol = JsonRpcProtocol().errorToException {
+val clientProtocol = JsonRpcProtocol(DefaultMessageCodec()).errorToException {
   case (message, InvalidRequest.code) if message.contains("SQL") => new SQLException(message)
   case (message, code) => JsonRpcProtocol.defaultErrorToException(message, code)
 }

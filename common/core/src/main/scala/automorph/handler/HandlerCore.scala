@@ -32,7 +32,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
   def processRequest[Data: Bytes](request: Data)(implicit context: Context): Effect[HandlerResult[Data]] = {
     // Parse request
     val rawRequest = implicitly[Bytes[Data]].from(request)
-    protocol.parseRequest(rawRequest, None, codec).fold(
+    protocol.parseRequest(rawRequest, None).fold(
       error => errorResponse(error.exception, error.message),
       rpcRequest => {
         lazy val properties = rpcRequest.message.properties ++ rpcRequest.message.text.map(bodyProperty -> _)
@@ -48,7 +48,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    * @param protocol RPC protocol
    * @return RPC request handler
    */
-  def protocol(protocol: RpcProtocol): ThisHandler = copy(protocol = protocol)
+  def protocol(protocol: RpcProtocol[Node]): ThisHandler = copy(protocol = protocol)
 
   override def toString: String =
     s"${this.getClass.getName}(codec = ${codec.getClass.getName}, system = ${system.getClass.getName})"
@@ -157,7 +157,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    * @return handler result
    */
   private def response[Data: Bytes](result: Try[Node], message: RpcMessage[protocol.Details]): Effect[HandlerResult[Data]] =
-    protocol.createResponse(result, message.details, codec, encodeStrings).pureFold(
+    protocol.createResponse(result, message.details, encodeStrings).pureFold(
       error => system.failed(error),
       rpcResponse => {
         lazy val properties = rpcResponse.message.properties ++ rpcResponse.message.text.map(bodyProperty -> _)

@@ -3,11 +3,11 @@ package test.examples
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.protocol.jsonrpc.JsonRpcProtocol
 import automorph.transport.http.Http
-import automorph.{DefaultHttpClient, DefaultHttpServer}
+import automorph.transport.http.client.SttpClient.defaultContext
+import automorph.{DefaultHttpClient, DefaultHttpServer, DefaultMessageCodec}
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import automorph.transport.http.client.SttpClient.defaultContext
 
 object ErrorMapping extends App {
 
@@ -18,7 +18,7 @@ object ErrorMapping extends App {
   val api = new Api()
 
   // Customize server JSON-RPC error mapping
-  val serverProtocol = JsonRpcProtocol().exceptionToError {
+  val serverProtocol = JsonRpcProtocol(DefaultMessageCodec()).exceptionToError {
     case _: SQLException => InvalidRequest
     case e => JsonRpcProtocol.defaultExceptionToError(e)
   }
@@ -36,7 +36,7 @@ object ErrorMapping extends App {
   )
 
   // Customize client JSON-RPC error mapping
-  val clientProtocol = JsonRpcProtocol().errorToException {
+  val clientProtocol = JsonRpcProtocol(DefaultMessageCodec()).errorToException {
     case (message, InvalidRequest.code) if message.contains("SQL") => new SQLException(message)
     case (message, code) => JsonRpcProtocol.defaultErrorToException(message, code)
   }

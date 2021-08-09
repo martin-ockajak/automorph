@@ -1,6 +1,6 @@
 package automorph.protocol.jsonrpc
 
-import automorph.protocol.jsonrpc.JsonRpcProtocol.{ParseErrorException, defaultErrorToException, defaultExceptionToError}
+import automorph.protocol.jsonrpc.JsonRpcProtocol.{defaultErrorToException, defaultExceptionToError, ParseErrorException}
 import automorph.spi.Message.Params
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException, MethodNotFoundException}
 import automorph.spi.protocol.{RpcError, RpcMessage, RpcRequest, RpcResponse}
@@ -14,25 +14,29 @@ import scala.util.{Failure, Random, Success, Try}
  *
  * @constructor Creates a JSON-RPC 2.0 protocol implementation.
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+ * @param codec message codec plugin
  * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @param exceptionToError maps an exception to a corresponding JSON-RPC error
+ * @tparam Node message node type
+ * @tparam Codec message codec plugin type
  */
-final case class JsonRpcProtocol(
+final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
+  codec: Codec,
   errorToException: (String, Int) => Throwable = defaultErrorToException,
   exceptionToError: Throwable => ErrorType = defaultExceptionToError
-) extends RpcProtocol {
+) extends RpcProtocol[Node] {
 
   type Details = JsonRpcProtocol.Details
+  type Helper = Unit
 
   private val unknownId = Right("[unknown]")
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   override val name: String = "JSON-RPC"
 
-  override def parseRequest[Node](
+  override def parseRequest(
     request: ArraySeq.ofByte,
-    method: Option[String],
-    codec: MessageCodec[Node]
+    method: Option[String]
   ): Either[RpcError[Details], RpcRequest[Node, Details]] =
     // Deserialize request
     Try(codec.deserialize(request)).pureFold(
@@ -48,12 +52,11 @@ final case class JsonRpcProtocol(
       }
     )
 
-  override def createRequest[Node](
+  override def createRequest(
     method: String,
     argumentNames: Option[Seq[String]],
     argumentValues: Seq[Node],
-    responseRequest: Boolean,
-    codec: MessageCodec[Node]
+    responseRequest: Boolean
   ): Try[RpcRequest[Node, Details]] = {
     val id = Option.when(responseRequest)(Right(Math.abs(random.nextLong).toString).withLeft[BigDecimal])
     val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
@@ -67,10 +70,9 @@ final case class JsonRpcProtocol(
     }
   }
 
-  override def createResponse[Node](
+  override def createResponse(
     result: Try[Node],
     details: Details,
-    codec: MessageCodec[Node],
     encodeStrings: List[String] => Node
   ): Try[RpcResponse[Node, Details]] = {
     val id = details.getOrElse(unknownId)
@@ -100,10 +102,7 @@ final case class JsonRpcProtocol(
     }
   }
 
-  override def parseResponse[Node](
-    response: ArraySeq.ofByte,
-    codec: MessageCodec[Node]
-  ): Either[RpcError[Details], RpcResponse[Node, Details]] =
+  override def parseResponse(response: ArraySeq.ofByte): Either[RpcError[Details], RpcResponse[Node, Details]] =
     // Deserialize response
     Try(codec.deserialize(response)).pureFold(
       error => Left(RpcError(ParseErrorException("Invalid response codec", error), RpcMessage(None, response))),
@@ -134,7 +133,7 @@ final case class JsonRpcProtocol(
    * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
    * @return JSON-RPC protocol
    */
-  def exceptionToError(exceptionToError: Throwable => ErrorType): JsonRpcProtocol =
+  def exceptionToError(exceptionToError: Throwable => ErrorType): JsonRpcProtocol[Node, Codec] =
     copy(exceptionToError = exceptionToError)
 
   /**
@@ -143,7 +142,7 @@ final case class JsonRpcProtocol(
    * @param errorToException maps a JSON-RPC error to a corresponding exception
    * @return JSON-RPC protocol
    */
-  def errorToException(errorToException: (String, Int) => Throwable): JsonRpcProtocol =
+  def errorToException(errorToException: (String, Int) => Throwable): JsonRpcProtocol[Node, Codec] =
     copy(errorToException = errorToException)
 
   /**
@@ -195,7 +194,8 @@ case object JsonRpcProtocol {
     case ErrorType.MethodNotFound.code => MethodNotFoundException(message)
     case ErrorType.InvalidParams.code => new IllegalArgumentException(message)
     case ErrorType.InternalError.code => InternalErrorException(message)
-    case _ if Range(ErrorType.ReservedError.code, ErrorType.ServerError.code + 1).contains(code) => ServerErrorException(message)
+    case _ if Range(ErrorType.ReservedError.code, ErrorType.ServerError.code + 1).contains(code) =>
+      ServerErrorException(message)
     case _ => new RuntimeException(message)
   }
 

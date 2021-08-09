@@ -25,7 +25,7 @@ private[automorph] case class ClientCore[Node, Codec <: MessageCodec[Node], Effe
   codec: Codec,
   private val system: EffectSystem[Effect],
   private val transport: ClientMessageTransport[Effect, Context],
-  private val protocol: RpcProtocol
+  private val protocol: RpcProtocol[Node]
 ) extends Logging {
 
   private val bodyProperty = "Body"
@@ -51,7 +51,7 @@ private[automorph] case class ClientCore[Node, Codec <: MessageCodec[Node], Effe
     context: Option[Context]
   ): Effect[R] =
     // Create request
-    protocol.createRequest(method, argumentNames, encodedArguments, true, codec).pureFold(
+    protocol.createRequest(method, argumentNames, encodedArguments, true).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest => {
@@ -87,7 +87,7 @@ private[automorph] case class ClientCore[Node, Codec <: MessageCodec[Node], Effe
     context: Option[Context]
   ): Effect[Unit] =
     // Create request
-    protocol.createRequest(method, argumentNames, encodedArguments, false, codec).pureFold(
+    protocol.createRequest(method, argumentNames, encodedArguments, false).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>
@@ -112,7 +112,7 @@ private[automorph] case class ClientCore[Node, Codec <: MessageCodec[Node], Effe
     decodeResult: Node => R
   ): Effect[R] =
     // Parse response
-    protocol.parseResponse(rawResponse, codec).fold(
+    protocol.parseResponse(rawResponse).fold(
       error => raiseError(error.exception, requestProperties),
       rpcResponse => {
         lazy val properties = requestProperties ++ rpcResponse.message.properties

@@ -14,22 +14,26 @@ import scala.util.{Failure, Success, Try}
  *
  * @constructor Creates a REST-RPC 2.0 protocol implementation.
  * @see [[https://automorph.org/rest-rpc REST-RPC protocol specification]]
+ * @param codec message codec plugin
  * @param errorToException maps a REST-RPC error to a corresponding exception
  * @param exceptionToError maps an exception to a corresponding REST-RPC error
+ * @tparam Node message node type
+ * @tparam Codec message codec plugin type
  */
-final case class RestRpcProtocol(
+final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
+  codec: Codec,
   errorToException: (String, Option[Int]) => Throwable = defaultErrorToException,
   exceptionToError: Throwable => Option[Int] = defaultExceptionToError
-) extends RpcProtocol {
+) extends RpcProtocol[Node] {
 
   type Details = RestRpcProtocol.Details
+  type Helper = Unit
 
   override val name: String = "REST-RPC"
 
-  override def parseRequest[Node](
+  override def parseRequest(
     request: ArraySeq.ofByte,
-    method: Option[String],
-    codec: MessageCodec[Node]
+    method: Option[String]
   ): Either[RpcError[Details], RpcRequest[Node, Details]] =
 //    // Deserialize request
 //    Try(codec.deserialize(request)).pureFold(
@@ -44,12 +48,11 @@ final case class RestRpcProtocol(
 //        )
 //      }
 //    )
-  ???
+    ???
 
-  override def createResponse[Node](
+  override def createResponse(
     result: Try[Node],
     details: Details,
-    codec: MessageCodec[Node],
     encodeStrings: List[String] => Node
   ): Try[RpcResponse[Node, Details]] = {
     val formedResponse = result.pureFold(
@@ -78,12 +81,11 @@ final case class RestRpcProtocol(
     }
   }
 
-  override def createRequest[Node](
+  override def createRequest(
     method: String,
     argumentNames: Option[Seq[String]],
     argumentValues: Seq[Node],
-    responseRequired: Boolean,
-    codec: MessageCodec[Node]
+    responseRequired: Boolean
   ): Try[RpcRequest[Node, Details]] = {
     val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
 //    val formedRequest = Request(id, method, argumentNodes).formed
@@ -102,11 +104,8 @@ final case class RestRpcProtocol(
     ???
   }
 
-  override def parseResponse[Node](
-    response: ArraySeq.ofByte,
-    codec: MessageCodec[Node]
-  ): Either[RpcError[Details], RpcResponse[Node, Details]] =
-  // Deserialize response
+  override def parseResponse(response: ArraySeq.ofByte): Either[RpcError[Details], RpcResponse[Node, Details]] =
+    // Deserialize response
     Try(codec.deserialize(response)).pureFold(
       error => Left(RpcError(InvalidResponseException("Invalid response codec", error), RpcMessage((), response))),
       formedResponse => {
@@ -136,7 +135,7 @@ final case class RestRpcProtocol(
    * @param exceptionToError maps an exception classs to a corresponding REST-RPC error type
    * @return REST-RPC protocol
    */
-  def exceptionToError(exceptionToError: Throwable => Option[Int]): RestRpcProtocol =
+  def exceptionToError(exceptionToError: Throwable => Option[Int]): RestRpcProtocol[Node, Codec] =
     copy(exceptionToError = exceptionToError)
 
   /**
@@ -145,7 +144,7 @@ final case class RestRpcProtocol(
    * @param errorToException maps a REST-RPC error to a corresponding exception
    * @return REST-RPC protocol
    */
-  def errorToException(errorToException: (String, Option[Int]) => Throwable): RestRpcProtocol =
+  def errorToException(errorToException: (String, Option[Int]) => Throwable): RestRpcProtocol[Node, Codec] =
     copy(errorToException = errorToException)
 
   /**
