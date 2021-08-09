@@ -48,34 +48,6 @@ final case class JsonRpcProtocol(
       }
     )
 
-  override def parseResponse[Node](
-    response: ArraySeq.ofByte,
-    format: MessageFormat[Node]
-  ): Either[RpcError[Details], RpcResponse[Node, Details]] =
-    // Deserialize response
-    Try(format.deserialize(response)).pureFold(
-      error => Left(RpcError(ParseErrorException("Invalid response format", error), RpcMessage(None, response))),
-      formedResponse => {
-        // Validate response
-        val messageText = () => Some(format.format(formedResponse))
-        val message = RpcMessage(formedResponse.id, response, formedResponse.properties, messageText)
-        Try(Response(formedResponse)).pureFold(
-          error => Left(RpcError(ParseErrorException("Invalid response format", error), message)),
-          validResponse =>
-            // Check for error
-            validResponse.error.fold(
-              // Check for result
-              validResponse.result match {
-                case None => Left(RpcError(InvalidResponseException("Invalid result", None.orNull), message))
-                case Some(result) => Right(RpcResponse(Success(result), message))
-              }
-            ) { error =>
-              Right(RpcResponse(Failure(errorToException(error.message, error.code)), message))
-            }
-        )
-      }
-    )
-
   override def createRequest[Node](
     method: String,
     argumentNames: Option[Seq[String]],
@@ -127,6 +99,34 @@ final case class JsonRpcProtocol(
       RpcResponse(result, message)
     }
   }
+
+  override def parseResponse[Node](
+    response: ArraySeq.ofByte,
+    format: MessageFormat[Node]
+  ): Either[RpcError[Details], RpcResponse[Node, Details]] =
+    // Deserialize response
+    Try(format.deserialize(response)).pureFold(
+      error => Left(RpcError(ParseErrorException("Invalid response format", error), RpcMessage(None, response))),
+      formedResponse => {
+        // Validate response
+        val messageText = () => Some(format.format(formedResponse))
+        val message = RpcMessage(formedResponse.id, response, formedResponse.properties, messageText)
+        Try(Response(formedResponse)).pureFold(
+          error => Left(RpcError(ParseErrorException("Invalid response format", error), message)),
+          validResponse =>
+            // Check for error
+            validResponse.error.fold(
+              // Check for result
+              validResponse.result match {
+                case None => Left(RpcError(InvalidResponseException("Invalid result", None.orNull), message))
+                case Some(result) => Right(RpcResponse(Success(result), message))
+              }
+            ) { error =>
+              Right(RpcResponse(Failure(errorToException(error.message, error.code)), message))
+            }
+        )
+      }
+    )
 
   /**
    * Creates a copy of this protocol with specified exception to JSON-RPC error mapping.

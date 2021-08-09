@@ -46,58 +46,6 @@ final case class RestRpcProtocol(
 //    )
   ???
 
-  override def parseResponse[Node](
-    response: ArraySeq.ofByte,
-    format: MessageFormat[Node]
-  ): Either[RpcError[Details], RpcResponse[Node, Details]] =
-    // Deserialize response
-    Try(format.deserialize(response)).pureFold(
-      error => Left(RpcError(InvalidResponseException("Invalid response format", error), RpcMessage((), response))),
-      formedResponse => {
-        // Validate response
-        val messageText = () => Some(format.format(formedResponse))
-        val message = RpcMessage((), response, formedResponse.properties, messageText)
-        Try(Response(formedResponse)).pureFold(
-          error => Left(RpcError(InvalidResponseException("Invalid response format", error), message)),
-          validResponse =>
-            // Check for error
-            validResponse.error.fold(
-              // Check for result
-              validResponse.result match {
-                case None => Left(RpcError(InvalidResponseException("Invalid result", None.orNull), message))
-                case Some(result) => Right(RpcResponse(Success(result), message))
-              }
-            ) { error =>
-              Right(RpcResponse(Failure(errorToException(error.message, error.code)), message))
-            }
-        )
-      }
-    )
-
-  override def createRequest[Node](
-    method: String,
-    argumentNames: Option[Seq[String]],
-    argumentValues: Seq[Node],
-    responseRequired: Boolean,
-    format: MessageFormat[Node]
-  ): Try[RpcRequest[Node, Details]] = {
-    val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
-//    val formedRequest = Request(id, method, argumentNodes).formed
-    val properties = Map(
-      "Type" -> MessageType.Call.toString,
-      "Method" -> method,
-      "Arguments" -> argumentValues.size.toString
-    )
-//    val messageText = () => format.format(formedRequest)
-//    Try(format.serialize(formedRequest)).mapFailure { error =>
-//      InvalidRequestException("Invalid request format", error)
-//    }.map { messageBody =>
-//      val message = RpcMessage(id, messageBody, formedRequest.properties, Some(messageText))
-//      RpcRequest(method, argumentNodes, respond, message)
-//    }
-    ???
-  }
-
   override def createResponse[Node](
     result: Try[Node],
     details: Details,
@@ -129,6 +77,58 @@ final case class RestRpcProtocol(
       RpcResponse(result, message)
     }
   }
+
+  override def createRequest[Node](
+    method: String,
+    argumentNames: Option[Seq[String]],
+    argumentValues: Seq[Node],
+    responseRequired: Boolean,
+    format: MessageFormat[Node]
+  ): Try[RpcRequest[Node, Details]] = {
+    val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
+//    val formedRequest = Request(id, method, argumentNodes).formed
+    val properties = Map(
+      "Type" -> MessageType.Call.toString,
+      "Method" -> method,
+      "Arguments" -> argumentValues.size.toString
+    )
+//    val messageText = () => format.format(formedRequest)
+//    Try(format.serialize(formedRequest)).mapFailure { error =>
+//      InvalidRequestException("Invalid request format", error)
+//    }.map { messageBody =>
+//      val message = RpcMessage(id, messageBody, formedRequest.properties, Some(messageText))
+//      RpcRequest(method, argumentNodes, respond, message)
+//    }
+    ???
+  }
+
+  override def parseResponse[Node](
+    response: ArraySeq.ofByte,
+    format: MessageFormat[Node]
+  ): Either[RpcError[Details], RpcResponse[Node, Details]] =
+  // Deserialize response
+    Try(format.deserialize(response)).pureFold(
+      error => Left(RpcError(InvalidResponseException("Invalid response format", error), RpcMessage((), response))),
+      formedResponse => {
+        // Validate response
+        val messageText = () => Some(format.format(formedResponse))
+        val message = RpcMessage((), response, formedResponse.properties, messageText)
+        Try(Response(formedResponse)).pureFold(
+          error => Left(RpcError(InvalidResponseException("Invalid response format", error), message)),
+          validResponse =>
+            // Check for error
+            validResponse.error.fold(
+              // Check for result
+              validResponse.result match {
+                case None => Left(RpcError(InvalidResponseException("Invalid result", None.orNull), message))
+                case Some(result) => Right(RpcResponse(Success(result), message))
+              }
+            ) { error =>
+              Right(RpcResponse(Failure(errorToException(error.message, error.code)), message))
+            }
+        )
+      }
+    )
 
   /**
    * Creates a copy of this protocol with specified exception to REST-RPC error mapping.

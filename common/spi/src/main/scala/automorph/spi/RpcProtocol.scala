@@ -19,34 +19,6 @@ trait RpcProtocol {
   def name: String
 
   /**
-   * Parses an RPC request.
-   *
-   * @param request RPC request message
-   * @param method method name override, if specified it is used instead of method name obtained from the request
-   * @param format message format plugin
-   * @tparam Node message node type
-   * @return RPC request on valid request message or RPC error on invalid request message
-   */
-  def parseRequest[Node](
-    request: ArraySeq.ofByte,
-    method: Option[String],
-    format: MessageFormat[Node]
-  ): Either[RpcError[Details], RpcRequest[Node, Details]]
-
-  /**
-   * Parses an RPC response.
-   *
-   * @param response RPC response message
-   * @param format message format plugin
-   * @tparam Node message node type
-   * @return RPC response on valid response message or RPC error on invalid response message
-   */
-  def parseResponse[Node](
-    response: ArraySeq.ofByte,
-    format: MessageFormat[Node]
-  ): Either[RpcError[Details], RpcResponse[Node, Details]]
-
-  /**
    * Creates an RPC request.
    *
    * @param method method name
@@ -66,6 +38,21 @@ trait RpcProtocol {
   ): Try[RpcRequest[Node, Details]]
 
   /**
+   * Parses an RPC request.
+   *
+   * @param request RPC request message
+   * @param method method name override, if specified it is used instead of method name obtained from the request
+   * @param format message format plugin
+   * @tparam Node message node type
+   * @return RPC request on valid request message or RPC error on invalid request message
+   */
+  def parseRequest[Node](
+    request: ArraySeq.ofByte,
+    method: Option[String],
+    format: MessageFormat[Node]
+  ): Either[RpcError[Details], RpcRequest[Node, Details]]
+
+  /**
    * Creates an RPC response.
    *
    * @param result RPC response result
@@ -81,6 +68,19 @@ trait RpcProtocol {
     format: MessageFormat[Node],
     encodeStrings: List[String] => Node
   ): Try[RpcResponse[Node, Details]]
+
+  /**
+   * Parses an RPC response.
+   *
+   * @param response RPC response message
+   * @param format message format plugin
+   * @tparam Node message node type
+   * @return RPC response on valid response message or RPC error on invalid response message
+   */
+  def parseResponse[Node](
+    response: ArraySeq.ofByte,
+    format: MessageFormat[Node]
+  ): Either[RpcError[Details], RpcResponse[Node, Details]]
 }
 
 case object RpcProtocol {
