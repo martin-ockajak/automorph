@@ -24,7 +24,7 @@ final case class JsonRpcProtocol(
 
   type Details = JsonRpcProtocol.Details
 
-  private val unknownId: Message.Id = Right("[unknown]")
+  private val unknownId = Right("[unknown]")
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   override val name: String = "JSON-RPC"
