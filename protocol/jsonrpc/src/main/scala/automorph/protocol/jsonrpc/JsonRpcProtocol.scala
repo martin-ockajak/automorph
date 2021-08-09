@@ -80,10 +80,10 @@ final case class JsonRpcProtocol(
     method: String,
     argumentNames: Option[Seq[String]],
     argumentValues: Seq[Node],
-    respond: Boolean,
+    responseRequest: Boolean,
     format: MessageFormat[Node]
   ): Try[RpcRequest[Node, Details]] = {
-    val id = Option.when(respond)(Right(Math.abs(random.nextLong).toString).withLeft[BigDecimal])
+    val id = Option.when(responseRequest)(Right(Math.abs(random.nextLong).toString).withLeft[BigDecimal])
     val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
     val formedRequest = Request(id, method, argumentNodes).formed
     val messageText = () => Some(format.format(formedRequest))
@@ -91,7 +91,7 @@ final case class JsonRpcProtocol(
       ParseErrorException("Invalid request format", error)
     }.map { messageBody =>
       val message = RpcMessage(id, messageBody, formedRequest.properties, messageText)
-      RpcRequest(method, argumentNodes, respond, message)
+      RpcRequest(method, argumentNodes, responseRequest, message)
     }
   }
 

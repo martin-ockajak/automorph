@@ -52,7 +52,7 @@ trait RpcProtocol {
    * @param method method name
    * @param argumentNames argument names
    * @param argumentValues argument values
-   * @param respond true if the request mandates a response
+   * @param responseRequired true if the request mandates a response, false if there should be no response
    * @param format message format plugin
    * @tparam Node message node type
    * @return RPC request
@@ -61,7 +61,7 @@ trait RpcProtocol {
     method: String,
     argumentNames: Option[Seq[String]],
     argumentValues: Seq[Node],
-    respond: Boolean,
+    responseRequired: Boolean,
     format: MessageFormat[Node]
   ): Try[RpcRequest[Node, Details]]
 

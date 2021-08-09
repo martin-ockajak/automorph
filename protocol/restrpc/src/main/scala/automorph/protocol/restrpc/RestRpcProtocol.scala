@@ -78,7 +78,7 @@ final case class RestRpcProtocol(
     method: String,
     argumentNames: Option[Seq[String]],
     argumentValues: Seq[Node],
-    respond: Boolean,
+    responseRequired: Boolean,
     format: MessageFormat[Node]
   ): Try[RpcRequest[Node, Details]] = {
     val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
