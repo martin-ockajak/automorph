@@ -27,7 +27,9 @@ lazy val root = project.in(file(".")).settings(
   openapi,
 
   // RPC protocol
+  jsonrpcMeta,
   jsonrpc,
+  restrpcMeta,
   restrpc,
 
   // Transport protocol
@@ -96,13 +98,23 @@ lazy val core = (project in file("common/core")).dependsOn(
 )
 
 // Protocol
+lazy val jsonrpcMeta = (project in file("protocol/jsonrpc/meta")).dependsOn(
+  spi
+).settings(
+  name := s"$projectName-jsonrpc-meta"
+)
 lazy val jsonrpc = (project in file("protocol/jsonrpc")).dependsOn(
-  spi, util, testBase % Test
+  jsonrpcMeta, util, testBase % Test
 ).settings(
   name := s"$projectName-jsonrpc"
 )
+lazy val restrpcMeta = (project in file("protocol/restrpc/meta")).dependsOn(
+  spi, testBase % Test
+).settings(
+  name := s"$projectName-restrpc-meta"
+)
 lazy val restrpc = (project in file("protocol/restrpc")).dependsOn(
-  spi, util, testBase % Test
+  restrpcMeta, util, testBase % Test
 ).settings(
   name := s"$projectName-restrpc"
 )
