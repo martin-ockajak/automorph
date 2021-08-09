@@ -27,9 +27,9 @@ object DefaultRpcProtocol {
    * Creates a default RPC protocol plugin with specified message ''codec'' plugin.
    *
    * @param codec message codec plugin
-   * @return RPC protocol plugin
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
+   * @return RPC protocol plugin
    */
   def apply[Node, Codec <: MessageCodec[Node]](codec: Codec): Type[Node, Codec] =
     macro applyMacro[Node, Codec]
