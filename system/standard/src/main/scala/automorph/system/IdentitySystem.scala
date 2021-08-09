@@ -13,15 +13,15 @@ import automorph.spi.EffectSystem
  */
 final case class IdentitySystem() extends EffectSystem[Identity] {
 
-  override def impure[T](value: => T): T = value
+  override def wrap[T](value: => T): T = value
 
   override def pure[T](value: => T): T = value
 
   override def failed[T](exception: Throwable): T = throw exception
 
-  override def flatMap[T, R](effect: T, function: T => R): R = function(effect)
-
   override def either[T](effect: T): Either[Throwable, T] = Right(effect)
+
+  override def flatMap[T, R](effect: T, function: T => R): R = function(effect)
 }
 
 case object IdentitySystem {

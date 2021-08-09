@@ -52,7 +52,7 @@ final case class RabbitMqServer[Effect[_]](
   private val exchange = RabbitMqCommon.defaultDirectExchange
   private val system = handler.system
 
-  override def close(): Effect[Unit] = system.impure(connection.abort(AMQP.CONNECTION_FORCED, "Terminated"))
+  override def close(): Effect[Unit] = system.wrap(connection.abort(AMQP.CONNECTION_FORCED, "Terminated"))
 
   private def createConsumer(channel: Channel): DefaultConsumer = {
     val consumer = new DefaultConsumer(channel) {

@@ -12,15 +12,15 @@ import monix.eval.Task
  */
 final case class MonixSystem() extends EffectSystem[Task] {
 
-  override def impure[T](value: => T): Task[T] = Task.evalAsync(value)
+  override def wrap[T](value: => T): Task[T] = Task.evalAsync(value)
 
   override def pure[T](value: => T): Task[T] = Task.pure(value)
 
   override def failed[T](exception: Throwable): Task[T] = Task.raiseError(exception)
 
-  override def flatMap[T, R](effect: Task[T], function: T => Task[R]): Task[R] = effect.flatMap(function)
-
   override def either[T](effect: Task[T]): Task[Either[Throwable, T]] = effect.attempt
+
+  override def flatMap[T, R](effect: Task[T], function: T => Task[R]): Task[R] = effect.flatMap(function)
 }
 
 case object MonixSystem {

@@ -14,15 +14,15 @@ import scala.util.Success
  */
 final case class FutureSystem()(implicit executionContext: ExecutionContext) extends EffectSystem[Future] {
 
-  override def impure[T](value: => T): Future[T] = Future(value)
+  override def wrap[T](value: => T): Future[T] = Future(value)
 
   override def pure[T](value: => T): Future[T] = Future.successful(value)
 
   override def failed[T](exception: Throwable): Future[T] = Future.failed(exception)
 
-  override def flatMap[T, R](effect: Future[T], function: T => Future[R]): Future[R] = effect.flatMap(function)
-
   override def either[T](effect: Future[T]): Future[Either[Throwable, T]] = effect.transform(value => Success(value.toEither))
+
+  override def flatMap[T, R](effect: Future[T], function: T => Future[R]): Future[R] = effect.flatMap(function)
 }
 
 case object FutureSystem {

@@ -45,7 +45,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
       system.flatMap(
         send(request, mediaType, context),
         { case (connection: HttpURLConnection, _: ArraySeq.ofByte) =>
-          system.impure {
+          system.wrap {
             logger.trace("Receiving HTTP response", Map("URL" -> url))
             Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).mapFailure { error =>
               logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
@@ -73,7 +73,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
   override def close(): Effect[Unit] = system.pure(())
 
   private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[EffectValue] =
-    system.impure {
+    system.wrap {
       logger.trace("Sending HTTP request", Map("URL" -> url, "Size" -> request.length))
       val properties = context.getOrElse(defaultContext)
       val connection = connect(properties)

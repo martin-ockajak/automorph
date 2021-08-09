@@ -12,15 +12,15 @@ import scalaz.effect.IO
  */
 final case class ScalazSystem() extends EffectSystem[IO] {
 
-  override def impure[T](value: => T): IO[T] = IO(value)
+  override def wrap[T](value: => T): IO[T] = IO(value)
 
   override def pure[T](value: => T): IO[T] = IO(value)
 
   override def failed[T](exception: Throwable): IO[T] = IO.throwIO(exception)
 
-  override def flatMap[T, R](effect: IO[T], function: T => IO[R]): IO[R] = effect.flatMap(function)
-
   override def either[T](effect: IO[T]): IO[Either[Throwable, T]] = effect.catchLeft.map(_.toEither)
+
+  override def flatMap[T, R](effect: IO[T], function: T => IO[R]): IO[R] = effect.flatMap(function)
 }
 
 case object ScalazSystem {

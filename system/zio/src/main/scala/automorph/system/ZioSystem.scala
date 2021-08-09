@@ -14,16 +14,16 @@ import zio.RIO
  */
 final case class ZioSystem[Environment]() extends EffectSystem[({ type Effect[T] = RIO[Environment, T] })#Effect] {
 
-  override def impure[T](value: => T): RIO[Environment, T] = RIO(value)
+  override def wrap[T](value: => T): RIO[Environment, T] = RIO(value)
 
   override def pure[T](value: => T): RIO[Environment, T] = RIO.succeed(value)
 
   override def failed[T](exception: Throwable): RIO[Environment, T] = RIO.fail(exception)
 
+  override def either[T](effect: RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] = effect.either
+
   override def flatMap[T, R](effect: RIO[Environment, T], function: T => RIO[Environment, R]): RIO[Environment, R] =
     effect.flatMap(function)
-
-  override def either[T](effect: RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] = effect.either
 }
 
 case object ZioSystem {

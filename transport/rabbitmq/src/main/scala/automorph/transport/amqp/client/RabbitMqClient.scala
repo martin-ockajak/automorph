@@ -74,7 +74,7 @@ final case class RabbitMqClient[Effect[_]](
 
   override def defaultContext: Context = RabbitMqClient.defaultContext
 
-  override def close(): Effect[Unit] = system.impure(RabbitMqCommon.disconnect(connection))
+  override def close(): Effect[Unit] = system.wrap(RabbitMqCommon.disconnect(connection))
 
   private def send(
     request: ArraySeq.ofByte,

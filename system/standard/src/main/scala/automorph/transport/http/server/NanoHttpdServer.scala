@@ -40,7 +40,7 @@ final case class NanoHttpdServer[Effect[_]] private (
   private val HeaderXForwardedFor = "X-Forwarded-For"
   private val system = handler.system
 
-  override def close(): Effect[Unit] = system.impure(stop())
+  override def close(): Effect[Unit] = system.wrap(stop())
 
   override def start(): Unit = {
     logger.info("Listening for connections", Map("Port" -> port))
