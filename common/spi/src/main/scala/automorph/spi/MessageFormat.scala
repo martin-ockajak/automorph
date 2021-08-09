@@ -51,10 +51,10 @@ trait MessageFormat[Node] extends FormatMeta[Node] {
   def deserializeNode(data: ArraySeq.ofByte): Node
 
   /**
-   * Formats a message as text.
+   * Formats a message as human-readable text.
    *
    * @param message message
-   * @return message in textual form
+   * @return message in human-readable textual form
    */
   def format(message: Message[Node]): String
 }

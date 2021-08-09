@@ -9,7 +9,7 @@ import scala.collection.immutable.ArraySeq
  * @param details protocol-specific message details
  * @param body message body
  * @param properties message properties
- * @param text textual message representation
+ * @param text message in human-readable textual form
  * @tparam Details protocol-specific message details type
  */
 final case class RpcMessage[Details](
@@ -18,6 +18,6 @@ final case class RpcMessage[Details](
   properties: Map[String, String] = Map.empty,
   private val messageText: () => Option[String] = () => None
 ) {
-  /** Textual message representation. */
+  /** Message in human-readable textual form. */
   lazy val text: Option[String] = messageText()
 }
