@@ -70,7 +70,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
 
   override def defaultContext: Context = HttpUrlConnectionClient.defaultContext.copy(method = Some(method))
 
-  def close(): Unit = ()
+  override def close(): Effect[Unit] = system.pure(())
 
   private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[EffectValue] =
     system.impure {

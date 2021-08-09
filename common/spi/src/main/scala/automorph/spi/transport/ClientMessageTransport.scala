@@ -45,4 +45,11 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
    * @return request context
    */
   def defaultContext: Context
+
+  /**
+   * Closes this client freeing the underlying resources.
+   *
+   * @return nothing
+   */
+  def close(): Effect[Unit]
 }

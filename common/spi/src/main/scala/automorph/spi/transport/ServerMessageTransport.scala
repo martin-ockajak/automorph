@@ -12,7 +12,7 @@ import automorph.spi.MessageTransport
  */
 trait ServerMessageTransport[Effect[_]] extends MessageTransport {
   /**
-   * Close this server freeing the underlying resources.
+   * Closes this server freeing the underlying resources.
    *
    * @return nothing
    */

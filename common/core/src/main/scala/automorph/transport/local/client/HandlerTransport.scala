@@ -44,5 +44,5 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     )
   }
 
-  def close(): Unit = ()
+  override def close(): Effect[Unit] = system.pure(())
 }

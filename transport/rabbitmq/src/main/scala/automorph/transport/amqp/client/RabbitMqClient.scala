@@ -48,7 +48,7 @@ final case class RabbitMqClient[Effect[_]](
   exchange: String = RabbitMqCommon.defaultDirectExchange,
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
-) extends AutoCloseable with Logging with ClientMessageTransport[Effect, Context] {
+) extends Logging with ClientMessageTransport[Effect, Context] {
 
   private lazy val connection = createConnection()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
@@ -74,7 +74,7 @@ final case class RabbitMqClient[Effect[_]](
 
   override def defaultContext: Context = RabbitMqClient.defaultContext
 
-  override def close(): Unit = RabbitMqCommon.disconnect(connection)
+  override def close(): Effect[Unit] = system.impure(RabbitMqCommon.disconnect(connection))
 
   private def send(
     request: ArraySeq.ofByte,

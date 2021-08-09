@@ -33,7 +33,7 @@ final case class SttpClient[Effect[_]](
   system: EffectSystem[Effect],
   backend: SttpBackend[Effect, WebSocket[Effect]],
   webSocket: Boolean = false
-) extends ClientMessageTransport[Effect, Context] with AutoCloseable with Logging {
+) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val defaultUrl = Uri(url)
   private val defaultMethod = Method.unsafeApply(method)
@@ -67,10 +67,7 @@ final case class SttpClient[Effect[_]](
 
   override def defaultContext: Context = SttpClient.defaultContext
 
-  override def close(): Unit = {
-    backend.close()
-    ()
-  }
+  override def close(): Effect[Unit] = system.impure(backend.close())
 
   private def send[R](httpRequest: Request[R, WebSocket[Effect]], request: ArraySeq.ofByte): Effect[Response[R]] = {
     logger.trace(
