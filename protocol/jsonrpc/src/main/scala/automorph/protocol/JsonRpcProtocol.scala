@@ -22,5 +22,4 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
   exceptionToError: Throwable => ErrorType = defaultExceptionToError
 ) extends JsonRpcCore[Node, Codec] with RpcProtocol[Node]
 
-
 case object JsonRpcProtocol extends ErrorMapping
