@@ -22,15 +22,15 @@ trait RpcProtocol {
    * Parses an RPC request.
    *
    * @param request RPC request message
-   * @param format message format plugin
    * @param method method name override, if specified it is used instead of method name obtained from the request
+   * @param format message format plugin
    * @tparam Node message node type
    * @return RPC request on valid request message or RPC error on invalid request message
    */
   def parseRequest[Node](
     request: ArraySeq.ofByte,
-    format: MessageFormat[Node],
-    method: Option[String]
+    method: Option[String],
+    format: MessageFormat[Node]
   ): Either[RpcError[Details], RpcRequest[Node, Details]]
 
   /**

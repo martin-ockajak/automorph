@@ -32,7 +32,7 @@ private[automorph] trait HandlerCore[Node, Format <: MessageFormat[Node], Effect
   def processRequest[Data: Bytes](request: Data)(implicit context: Context): Effect[HandlerResult[Data]] = {
     // Parse request
     val rawRequest = implicitly[Bytes[Data]].from(request)
-    protocol.parseRequest(rawRequest, format, None).fold(
+    protocol.parseRequest(rawRequest, None, format).fold(
       error => errorResponse(error.exception, error.message),
       rpcRequest => {
         lazy val properties = rpcRequest.message.properties ++ rpcRequest.message.text.map(bodyProperty -> _)

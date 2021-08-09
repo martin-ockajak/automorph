@@ -28,8 +28,8 @@ final case class RestRpcProtocol(
 
   override def parseRequest[Node](
     request: ArraySeq.ofByte,
-    format: MessageFormat[Node],
-    method: Option[String]
+    method: Option[String],
+    format: MessageFormat[Node]
   ): Either[RpcError[Details], RpcRequest[Node, Details]] =
 //    // Deserialize request
 //    Try(format.deserialize(request)).pureFold(
