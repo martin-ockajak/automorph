@@ -1,20 +1,25 @@
 package automorph
 
-import automorph.codec.json.CirceJsonCodec
 import automorph.protocol.jsonrpc.JsonRpcProtocol
 import automorph.spi.MessageCodec
 
 object DefaultRpcProtocol {
 
-  /** Default RPC protocol plugin type. */
-  type Type = JsonRpcProtocol[DefaultMessageCodec.Node, DefaultMessageCodec.Type]
+  /**
+   * Default RPC protocol plugin type.
+   *
+   * @tparam Node message node type
+   * @tparam Codec message codec plugin type
+   */
+  type Type[Node, Codec <: MessageCodec[Node]] = JsonRpcProtocol[Node, Codec]
 
   /**
    * Creates a default RPC protocol plugin.
    *
    * @return RPC protocol plugin
    */
-  def apply(): Type = JsonRpcProtocol(DefaultMessageCodec())
+  inline def apply(): Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
+    JsonRpcProtocol(DefaultMessageCodec())
 
   /**
    * Creates a default RPC protocol plugin with specified message ''codec'' plugin.
@@ -24,5 +29,6 @@ object DefaultRpcProtocol {
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    */
-  def apply[Node, Codec <: MessageCodec[Node]](codec: Codec): JsonRpcProtocol[Node, Codec] = JsonRpcProtocol(codec)
+  inline def apply[Node, Codec <: MessageCodec[Node]](codec: Codec): Type[Node, Codec] =
+    JsonRpcProtocol(codec)
 }

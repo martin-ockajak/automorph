@@ -1,11 +1,9 @@
 package automorph.client
 
 import automorph.Client
-import automorph.log.Logging
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.RpcRequest
-import automorph.spi.transport.ClientMessageTransport
-import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
+import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.util.Extensions.TryOps
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
@@ -57,7 +55,7 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
    *
    * @return nothing
    */
-  def close(): Effect[Unit] = system.pure(transport.close())
+  def close(): Effect[Unit] = transport.close()
 
   override def toString: String =
     s"${this.getClass.getName}(codec = ${codec.getClass.getName}, system = ${system.getClass.getName}, transport = ${transport.getClass.getName})"
