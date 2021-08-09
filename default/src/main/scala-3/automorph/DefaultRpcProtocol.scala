@@ -3,7 +3,7 @@ package automorph
 import automorph.protocol.JsonRpcProtocol
 import automorph.spi.MessageCodec
 
-object DefaultRpcProtocol {
+object DefaultRpcProtocol:
 
   /**
    * Default RPC protocol plugin type.
@@ -31,4 +31,3 @@ object DefaultRpcProtocol {
    */
   inline def apply[Node, Codec <: MessageCodec[Node]](codec: Codec): Type[Node, Codec] =
     JsonRpcProtocol(codec)
-}

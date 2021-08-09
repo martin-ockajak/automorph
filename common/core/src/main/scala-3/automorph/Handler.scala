@@ -21,7 +21,7 @@ import automorph.util.{CannotEqual, EmptyContext}
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
   codec: Codec,
   system: EffectSystem[Effect],
   protocol: RpcProtocol[Node],
