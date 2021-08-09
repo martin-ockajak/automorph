@@ -1,6 +1,7 @@
 package automorph
 
 import automorph.client.{ClientBind, ClientCore, NamedMethodProxy}
+import automorph.log.Logging
 import automorph.protocol.jsonrpc.JsonRpcProtocol
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
@@ -26,45 +27,13 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   system: EffectSystem[Effect],
   transport: ClientMessageTransport[Effect, Context],
   protocol: RpcProtocol[Node]
-) extends ClientBind[Node, Codec, Effect, Context] with CannotEqual {
-
-  /** This client type. */
-  type ThisClient = Client[Node, Codec, Effect, Context]
-  /** Named method proxy type. */
-  type NamedMethod = NamedMethodProxy[Node, Codec, Effect, Context]
-
-  val core: ClientCore[Node, Codec, Effect, Context] = ClientCore(codec, system, transport, protocol)
-
-  /**
-   * Creates a method proxy with specified method name.
-   *
-   * @param methodName method name
-   * @return method proxy with specified method name
-   */
-  def method(methodName: String): NamedMethod = NamedMethodProxy(methodName, core, Seq.empty, Seq.empty)
-
-  /**
-   * Creates default request context.
-   *
-   * @return request context
-   */
-  def context: Context = transport.defaultContext
-
-  /**
-   * Creates a copy of this client with specified RPC protocol.
-   *
-   * @param protocol RPC protocol
-   * @return RPC request handler
-   */
-  def protocol(protocol: RpcProtocol[Node]): ThisClient = copy(protocol = protocol)
-
-  def close(): Effect[Unit] = system.pure(())
-
-  override def toString: String =
-    s"${this.getClass.getName}(codec = ${codec.getClass.getName}, system = ${system.getClass.getName}, transport = ${transport.getClass.getName})"
-}
+) extends ClientCore[Node, Codec, Effect, Context]
+  with ClientBind[Node, Codec, Effect, Context]
+  with CannotEqual
+  with Logging
 
 case object Client {
+
   /**
    * Creates a RPC client with specified request `Context` type plus ''codec'', ''system'' and ''transport'' plugins.
    *

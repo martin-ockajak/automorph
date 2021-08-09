@@ -154,7 +154,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
    * @param encodedArguments encoded arguments
    * @return argument nodes
    */
-  private def createArgumentNodes[Node](argumentNames: Option[Seq[String]], encodedArguments: Seq[Node]): Params[Node] =
+  private def createArgumentNodes(argumentNames: Option[Seq[String]], encodedArguments: Seq[Node]): Params[Node] =
     argumentNames.filter(_.size >= encodedArguments.size).map { names =>
       Right(names.zip(encodedArguments).toMap)
     }.getOrElse(Left(encodedArguments.toList))

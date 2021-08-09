@@ -6,6 +6,7 @@ import automorph.util.CannotEqual
 case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
   methodName: String,
   private val core: ClientCore[Node, Codec, Effect, Context],
+  private val codec: Codec,
   private val argumentValues: Seq[Any],
   private val encodedArguments: Seq[Node]
 ) extends CannotEqual:
@@ -24,6 +25,7 @@ case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
   def named(argumentNames: String*): NamedMethod = NamedMethodProxy(
     methodName,
     core,
+    codec,
     argumentNames.zip(argumentValues),
     Option.when(argumentNames.size == argumentValues.size)(encodedArguments).getOrElse {
       throw IllegalArgumentException(s"Supplied ${argumentNames.size} argument names instead of ${argumentValues.size} required")
@@ -51,7 +53,7 @@ case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
   inline def args[T1](p1: T1): PositionalMethod = copy(
     argumentValues = Seq(p1),
     encodedArguments = Seq(
-      core.codec.encode(p1)
+      codec.encode(p1)
     )
   )
 
@@ -66,8 +68,8 @@ case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
   inline def args[T1, T2](p1: T1, p2: T2): PositionalMethod = copy(
     argumentValues = Seq(p1, p2),
     encodedArguments = Seq(
-      core.codec.encode(p1),
-      core.codec.encode(p2)
+      codec.encode(p1),
+      codec.encode(p2)
     )
   )
 
@@ -82,9 +84,9 @@ case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
   inline def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): PositionalMethod = copy(
     argumentValues = Seq(p1, p2, p3),
     encodedArguments = Seq(
-      core.codec.encode(p1),
-      core.codec.encode(p2),
-      core.codec.encode(p3)
+      codec.encode(p1),
+      codec.encode(p2),
+      codec.encode(p3)
     )
   )
 
@@ -99,10 +101,10 @@ case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
   inline def args[T1, T2, T3, T4](p1: T1, p2: T2, p3: T3, p4: T4): PositionalMethod = copy(
     argumentValues = Seq(p1, p2, p3, p4),
     encodedArguments = Seq(
-      core.codec.encode(p1),
-      core.codec.encode(p2),
-      core.codec.encode(p3),
-      core.codec.encode(p4)
+      codec.encode(p1),
+      codec.encode(p2),
+      codec.encode(p3),
+      codec.encode(p4)
     )
   )
 
@@ -117,11 +119,11 @@ case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
   inline def args[T1, T2, T3, T4, T5](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5): PositionalMethod = copy(
     argumentValues = Seq(p1, p2, p3, p4, p5),
     encodedArguments = Seq(
-      core.codec.encode(p1),
-      core.codec.encode(p2),
-      core.codec.encode(p3),
-      core.codec.encode(p4),
-      core.codec.encode(p5)
+      codec.encode(p1),
+      codec.encode(p2),
+      codec.encode(p3),
+      codec.encode(p4),
+      codec.encode(p5)
     )
   )
 
@@ -136,12 +138,12 @@ case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
   inline def args[T1, T2, T3, T4, T5, T6](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6): PositionalMethod = copy(
     argumentValues = Seq(p1, p2, p3, p4, p5, p6),
     encodedArguments = Seq(
-      core.codec.encode(p1),
-      core.codec.encode(p2),
-      core.codec.encode(p3),
-      core.codec.encode(p4),
-      core.codec.encode(p5),
-      core.codec.encode(p6)
+      codec.encode(p1),
+      codec.encode(p2),
+      codec.encode(p3),
+      codec.encode(p4),
+      codec.encode(p5),
+      codec.encode(p6)
     )
   )
 
@@ -157,13 +159,13 @@ case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
     copy(
       argumentValues = Seq(p1, p2, p3, p4, p5, p6, p7),
       encodedArguments = Seq(
-        core.codec.encode(p1),
-        core.codec.encode(p2),
-        core.codec.encode(p3),
-        core.codec.encode(p4),
-        core.codec.encode(p5),
-        core.codec.encode(p6),
-        core.codec.encode(p7)
+        codec.encode(p1),
+        codec.encode(p2),
+        codec.encode(p3),
+        codec.encode(p4),
+        codec.encode(p5),
+        codec.encode(p6),
+        codec.encode(p7)
       )
     )
 
@@ -177,7 +179,7 @@ case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    * @return result value
    */
   inline def call[R](using context: Context): Effect[R] =
-    core.call(methodName, None, encodedArguments, core.codec.decode[R](_), Some(context))
+    core.call(methodName, None, encodedArguments, codec.decode[R](_), Some(context))
 
   /**
    * Sends a remote method ''notification'' request disregarding the response.

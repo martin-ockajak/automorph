@@ -8,6 +8,7 @@ import scala.reflect.macros.blackbox
 case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   methodName: String,
   core: ClientCore[Node, Codec, Effect, Context],
+  codec: Codec,
   argumentValues: Seq[Any],
   encodedArguments: Seq[Node]
 ) extends CannotEqual {
@@ -26,6 +27,7 @@ case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
   def named(argumentNames: String*): NamedMethod = NamedMethodProxy(
     methodName,
     core,
+    codec,
     argumentNames.zip(argumentValues),
     Option.when(argumentNames.size == argumentValues.size)(encodedArguments).getOrElse {
       throw new IllegalArgumentException(s"Supplied ${argumentNames.size} argument names instead of ${argumentValues.size} required")
@@ -153,7 +155,7 @@ case object PositionalMethodProxy {
     c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1), encodedArguments = Seq(
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1)
+          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1)
       ))
     """)
   }
@@ -167,8 +169,8 @@ case object PositionalMethodProxy {
     c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2), encodedArguments = Seq(
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2)
+          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+          ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2)
       ))
     """)
   }
@@ -183,9 +185,9 @@ case object PositionalMethodProxy {
     c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3), encodedArguments = Seq(
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3)
+          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+          ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+          ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3)
       ))
     """)
   }
@@ -207,10 +209,10 @@ case object PositionalMethodProxy {
     c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3, $p4), encodedArguments = Seq(
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T4]}]($p4)
+          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+          ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+          ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3),
+          ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4)
       ))
     """)
   }
@@ -234,11 +236,11 @@ case object PositionalMethodProxy {
     c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3, $p4, $p5), encodedArguments = Seq(
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T4]}]($p4),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T5]}]($p5)
+          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+          ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+          ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3),
+          ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4),
+          ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5)
       ))
     """)
   }
@@ -264,12 +266,12 @@ case object PositionalMethodProxy {
     c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3, $p4, $p5, $p6), encodedArguments = Seq(
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T4]}]($p4),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T5]}]($p5),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T6]}]($p6)
+          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+          ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+          ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3),
+          ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4),
+          ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5),
+          ${c.prefix}.codec.encode[${weakTypeOf[T6]}]($p6)
       ))
     """)
   }
@@ -297,13 +299,13 @@ case object PositionalMethodProxy {
     c.Expr[MethodProxyType](q"""
       ${c.prefix}.copy(
         argumentValues = Seq($p1, $p2, $p3, $p4, $p5, $p6, $p7), encodedArguments = Seq(
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T1]}]($p1),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T2]}]($p2),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T3]}]($p3),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T4]}]($p4),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T5]}]($p5),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T6]}]($p6),
-          ${c.prefix}.core.codec.encode[${weakTypeOf[T7]}]($p7)
+          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1),
+          ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2),
+          ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3),
+          ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4),
+          ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5),
+          ${c.prefix}.codec.encode[${weakTypeOf[T6]}]($p6),
+          ${c.prefix}.codec.encode[${weakTypeOf[T7]}]($p7)
       ))
     """)
   }
@@ -318,7 +320,7 @@ case object PositionalMethodProxy {
         ${c.prefix}.methodName,
         None,
         ${c.prefix}.encodedArguments,
-        ${c.prefix}.core.codec.decode[${weakTypeOf[R]}](_),
+        ${c.prefix}.codec.decode[${weakTypeOf[R]}](_),
         Some($context)
       )
     """)

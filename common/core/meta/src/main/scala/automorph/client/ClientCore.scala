@@ -1,8 +1,9 @@
 package automorph.client
 
+import automorph.Client
 import automorph.log.Logging
-import automorph.spi.protocol.RpcRequest
 import automorph.spi.RpcProtocol.InvalidResponseException
+import automorph.spi.protocol.RpcRequest
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.TryOps
@@ -12,23 +13,54 @@ import scala.util.Try
 /**
  * RPC client core logic.
  *
- * @param codec message codec plugin
- * @param system effect system plugin
- * @param transport message transport plugin
- * @param protocol RPC protocol
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] case class ClientCore[Node, Codec <: MessageCodec[Node], Effect[_], Context](
-  codec: Codec,
-  private val system: EffectSystem[Effect],
-  private val transport: ClientMessageTransport[Effect, Context],
-  private val protocol: RpcProtocol[Node]
-) extends Logging {
+private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
+  this: Client[Node, Codec, Effect, Context] =>
+
+  /** This client type. */
+  type ThisClient = Client[Node, Codec, Effect, Context]
+
+  /** Named method proxy type. */
+  type NamedMethod = NamedMethodProxy[Node, Codec, Effect, Context]
 
   private val bodyProperty = "Body"
+
+  /**
+   * Creates a method proxy with specified method name.
+   *
+   * @param methodName method name
+   * @return method proxy with specified method name
+   */
+  def method(methodName: String): NamedMethod = NamedMethodProxy(methodName, this, codec, Seq.empty, Seq.empty)
+
+  /**
+   * Creates default request context.
+   *
+   * @return request context
+   */
+  def context: Context = transport.defaultContext
+
+  /**
+   * Creates a copy of this client with specified RPC protocol.
+   *
+   * @param protocol RPC protocol
+   * @return RPC request handler
+   */
+  def protocol(protocol: RpcProtocol[Node]): ThisClient = copy(protocol = protocol)
+
+  /**
+   * Closes this client freeing the underlying resources.
+   *
+   * @return nothing
+   */
+  def close(): Effect[Unit] = system.pure(transport.close())
+
+  override def toString: String =
+    s"${this.getClass.getName}(codec = ${codec.getClass.getName}, system = ${system.getClass.getName}, transport = ${transport.getClass.getName})"
 
   /**
    * Performs a method call using specified arguments.

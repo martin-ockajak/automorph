@@ -58,7 +58,7 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
     argumentValues: Seq[Node],
     responseRequest: Boolean
   ): Try[RpcRequest[Node, Details]] = {
-    val id = Option.when(responseRequest)(Right(Math.abs(random.nextLong).toString).withLeft[BigDecimal])
+    val id = Option.when(responseRequest)(Right(Math.abs(random.nextLong()).toString).withLeft[BigDecimal])
     val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
     val formedRequest = Request(id, method, argumentNodes).formed
     val messageText = () => Some(codec.text(formedRequest))
@@ -152,7 +152,7 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
    * @param encodedArguments encoded arguments
    * @return argument nodes
    */
-  private def createArgumentNodes[Node](argumentNames: Option[Seq[String]], encodedArguments: Seq[Node]): Params[Node] =
+  private def createArgumentNodes(argumentNames: Option[Seq[String]], encodedArguments: Seq[Node]): Params[Node] =
     argumentNames.filter(_.size >= encodedArguments.size).map { names =>
       Right(names.zip(encodedArguments).toMap)
     }.getOrElse(Left(encodedArguments.toList))

@@ -16,8 +16,7 @@ import scala.reflect.ClassTag
  * @tparam Context request context type
  */
 private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
-
-  def core: ClientCore[Node, Codec, Effect, Context]
+  this: Client[Node, Codec, Effect, Context] =>
 
   /**
    * Creates an RPC API proxy instance with bindings for all valid public methods of the specified API.
@@ -38,7 +37,7 @@ private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_]
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef]: Api =
-    ClientBind.generalBind[Node, Codec, Effect, Context, Api](core, namedArguments = true)
+    ClientBind.generalBind[Node, Codec, Effect, Context, Api](this, codec, namedArguments = true)
 
   /**
    * Creates an RPC API proxy instance with bindings for all valid public methods of the specified API.
@@ -59,7 +58,7 @@ private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_]
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bindPositional[Api <: AnyRef]: Api =
-    ClientBind.generalBind[Node, Codec, Effect, Context, Api](core, namedArguments = false)
+    ClientBind.generalBind[Node, Codec, Effect, Context, Api](this, codec, namedArguments = false)
 
 object ClientBind:
 
@@ -67,11 +66,12 @@ object ClientBind:
   type AnyCodec[Effect[_], Context] = Client[_, _, Effect, Context]
 
   inline def generalBind[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
-    clientCore: ClientCore[Node, Codec, Effect, Context],
+    core: ClientCore[Node, Codec, Effect, Context],
+    codec: Codec,
     namedArguments: Boolean
   ): Api =
     // Generate API method bindings
-    val methodBindings = ClientBindings.generate[Node, Codec, Effect, Context, Api](clientCore.codec)
+    val methodBindings = ClientBindings.generate[Node, Codec, Effect, Context, Api](codec)
 
     // Create API proxy instance
     val classTag = summonInline[ClassTag[Api]]
@@ -95,7 +95,7 @@ object ClientBind:
           val argumentNames = Option.when(namedArguments)(parameterNames)
 
           // Perform the API call
-          clientCore.call(
+          core.call(
             method.getName,
             argumentNames,
             encodedArguments,

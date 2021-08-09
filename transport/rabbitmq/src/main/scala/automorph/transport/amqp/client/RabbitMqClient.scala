@@ -126,7 +126,7 @@ final case class RabbitMqClient[Effect[_]](
     val properties = context.getOrElse(defaultContext)
     new BasicProperties().builder()
       .replyTo(properties.replyTo.getOrElse(directReplyToQueue))
-      .correlationId(properties.correlationId.getOrElse(Math.abs(random.nextLong).toString))
+      .correlationId(properties.correlationId.getOrElse(Math.abs(random.nextLong()).toString))
       .contentType(properties.contentType.getOrElse(mediaType))
       .appId(properties.appId.getOrElse(clientId))
       .contentEncoding(properties.contentEncoding.orNull)

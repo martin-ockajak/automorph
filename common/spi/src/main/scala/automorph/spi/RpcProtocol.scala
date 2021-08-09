@@ -1,6 +1,5 @@
 package automorph.spi
 
-import automorph.spi.MessageCodec
 import automorph.spi.protocol.{RpcError, RpcRequest, RpcResponse}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try

@@ -14,8 +14,7 @@ import scala.reflect.macros.blackbox
  * @tparam Context request context type
  */
 private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
-
-  def core: ClientCore[Node, Codec, Effect, Context]
+  this: Client[Node, Codec, Effect, Context] =>
 
   /**
    * Creates an RPC API proxy instance with bindings for all valid public methods of the specified API.
@@ -79,7 +78,7 @@ object ClientBind {
         ${weakTypeOf[Effect[_]]},
         ${weakTypeOf[Context]},
         ${weakTypeOf[Api]}
-      ](${c.prefix}.core, true)
+      ](${c.prefix}, ${c.prefix}.codec, true)
     """)
   }
 
@@ -99,12 +98,13 @@ object ClientBind {
         ${weakTypeOf[Effect[_]]},
         ${weakTypeOf[Context]},
         ${weakTypeOf[Api]}
-      ](${c.prefix}.core, false)
+      ](${c.prefix}, ${c.prefix}.codec, false)
     """)
   }
 
   def generalBind[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
-    clientCore: ClientCore[Node, Codec, Effect, Context],
+    core: ClientCore[Node, Codec, Effect, Context],
+    codec: Codec,
     namedArguments: Boolean
   ): Api = macro generalBindMacro[Node, Codec, Effect, Context, Api]
 
@@ -115,7 +115,8 @@ object ClientBind {
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
-    clientCore: c.Expr[ClientCore[Node, Codec, Effect, Context]],
+    core: c.Expr[ClientCore[Node, Codec, Effect, Context]],
+    codec: c.Expr[Codec],
     namedArguments: c.Expr[Boolean]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Api] = {
     import c.universe.{Quasiquote, weakTypeOf}
@@ -126,9 +127,8 @@ object ClientBind {
     val apiType = weakTypeOf[Api]
     c.Expr[Api](q"""
       // Generate API method bindings
-      val codec = $clientCore.codec
       val methodBindings =
-        automorph.client.ClientBindings.generate[$nodeType, $codecType, $effectType, $contextType, $apiType](codec)
+        automorph.client.ClientBindings.generate[$nodeType, $codecType, $effectType, $contextType, $apiType]($codec)
 
       // Create API proxy instance
       java.lang.reflect.Proxy.newProxyInstance(
@@ -152,7 +152,7 @@ object ClientBind {
             val argumentNames = Option.when($namedArguments)(parameterNames)
 
             // Perform the API call
-            $clientCore.call(method.getName, argumentNames, encodedArguments, resultNode =>
+            $core.call(method.getName, argumentNames, encodedArguments, resultNode =>
               clientBinding.decodeResult(resultNode), context)
           }.getOrElse(throw new UnsupportedOperationException("Invalid method: " + method.getName))
       ).asInstanceOf[$apiType]
