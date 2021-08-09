@@ -1,6 +1,6 @@
 package automorph.transport.http
 
-import automorph.protocol.JsonRpcProtocol.{InternalErrorException, ParseErrorException, ServerErrorException}
+import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorException, ServerErrorException}
 import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException}
 import java.io.IOException
 import java.net.URI
