@@ -44,25 +44,21 @@ final case class HttpUrlConnectionClient[Effect[_]](
     system.map(
       system.flatMap(
         send(request, mediaType, context),
-        { case (connection: HttpURLConnection, _: ArraySeq.ofByte) =>
+        (connection: HttpURLConnection, _: ArraySeq.ofByte) =>
           system.wrap {
             logger.trace("Receiving HTTP response", Map("URL" -> url))
-            Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).mapFailure { error =>
+            val response = Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).mapFailure { error =>
               logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
               error
-            }.map { response =>
-              logger.debug(
-                "Received HTTP response",
-                Map("URL" -> url, "Status" -> connection.getResponseCode, "Size" -> response.length)
-              )
-              connection -> response
             }.get
+            logger.debug(
+              "Received HTTP response",
+              Map("URL" -> url, "Status" -> connection.getResponseCode, "Size" -> response.length)
+            )
+            connection -> response
           }
-        }
       ),
-      { case (_: HttpURLConnection, response: ArraySeq.ofByte) =>
-        response
-      }
+      (_: HttpURLConnection, response: ArraySeq.ofByte) => response
     )
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] =
@@ -88,10 +84,9 @@ final case class HttpUrlConnectionClient[Effect[_]](
           Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length)
         )
         error
-      }.map { _ =>
-        logger.debug("Sent HTTP request", Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length))
-        connection -> new ArraySeq.ofByte(Array.empty)
       }.get
+      logger.debug("Sent HTTP request", Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length))
+      connection -> new ArraySeq.ofByte(Array.empty)
     }
 
   private def setProperties(
