@@ -10,7 +10,7 @@ import io.circe.syntax.EncoderOps
 import test.base.BaseSpec
 import test.{SimpleApi, SimpleApiImpl}
 
-class GeneratorSpec extends BaseSpec {
+class OpenApiSpec extends BaseSpec {
   import io.circe.syntax.EncoderOps
 
   private val system = IdentitySystem()
@@ -23,7 +23,7 @@ class GeneratorSpec extends BaseSpec {
       val handler = Handler[CirceJsonCodec.Node, CirceJsonCodec, Identity, Unit](codec, system, protocol)
         .bind(simpleApiInstance)
       val methods = handler.methodBindings.view.mapValues(_.method).toMap
-      val specification = Generator.jsonRpcSpec(methods, "Test", "0.0", Seq("http://localhost:80/api"))
+      val specification = OpenApi.jsonRpcSpec(methods, "Test", "0.0", Seq("http://localhost:80/api"))
       println(specification)
 //      println(Generator.json(specification))
     }

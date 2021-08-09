@@ -14,7 +14,7 @@ import javax.swing.plaf.synth.SynthCheckBoxMenuItemUI
  *
  * @see https://github.com/OAI/OpenAPI-Specification
  */
-case object Generator {
+case object OpenApi {
 
   private val contentType = "application/json"
   private val objectType = "object"
