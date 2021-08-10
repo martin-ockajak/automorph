@@ -19,7 +19,7 @@ private[automorph] final case class ResponseError[Node](
   def formed: MessageError[Node] = MessageError[Node](
     message = Some(message),
     code = code,
-    data = details
+    details = details
   )
 }
 
@@ -28,6 +28,6 @@ private[automorph] case object ResponseError {
   def apply[Node](error: MessageError[Node]): ResponseError[Node] = {
     val message = mandatory(error.message, "message")
     val code = mandatory(error.code, "code")
-    new ResponseError(message, Some(code), error.data)
+    new ResponseError(message, Some(code), error.details)
   }
 }
