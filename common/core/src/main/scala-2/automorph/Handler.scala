@@ -27,7 +27,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   codec: Codec,
   system: EffectSystem[Effect],
   protocol: RpcProtocol[Node],
-  methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
+  bindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val encodedNone: Node
 ) extends HandlerCore[Node, Codec, Effect, Context]
   with HandlerBind[Node, Codec, Effect, Context]

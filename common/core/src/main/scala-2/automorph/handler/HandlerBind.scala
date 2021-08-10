@@ -20,7 +20,7 @@ private[automorph] trait HandlerBind[Node, Codec <: MessageCodec[Node], Effect[_
   type ThisHandler = Handler[Node, Codec, Effect, Context]
 
   /**
-   * Creates a copy of this handler with generated method bindings for all valid public methods of the specified API.
+   * Creates a copy of this handler with generated RPC bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -42,7 +42,7 @@ private[automorph] trait HandlerBind[Node, Codec <: MessageCodec[Node], Effect[_
     macro HandlerBind.basicBindMacro[Node, Codec, Effect, Context, Api]
 
   /**
-   * Creates a copy of this handler with generated method bindings for all valid public methods of the specified API.
+   * Creates a copy of this handler with generated RPC bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -53,15 +53,15 @@ private[automorph] trait HandlerBind[Node, Codec <: MessageCodec[Node], Effect[_
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
-   * Bound API methods are exposed using names resulting from a transcodecion of their actual names via the `methodAliases` function.
+   * Bound API methods are exposed using names resulting from a transcodecion of their actual names via the `aliases` function.
    *
    * @param api API instance
-   * @param methodAliases mapping of method name to its exposed names (empty result causes the method not to be exposed)
+   * @param aliases mapping of method name to its exposed names (empty result causes the method not to be exposed)
    * @tparam Api API type (only member methods of this type are exposed)
    * @return RPC request handler with added API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api, methodAliases: String => Seq[String]): ThisHandler =
+  def bind[Api <: AnyRef](api: Api, aliases: String => Seq[String]): ThisHandler =
     macro HandlerBind.bindMacro[Node, Codec, Effect, Context, Api]
 
   def brokenBind[Api <: AnyRef](api: Api): ThisHandler =
@@ -108,7 +108,7 @@ case object HandlerBind {
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
-      ${c.prefix}.copy(methodBindings = ${c.prefix}.methodBindings ++ automorph.handler.HandlerBindings
+      ${c.prefix}.copy(bindings = ${c.prefix}.bindings ++ automorph.handler.HandlerBindings
         .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.system, $api)
       )
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
@@ -122,7 +122,7 @@ case object HandlerBind {
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     api: c.Expr[Api],
-    methodAliases: c.Expr[String => Seq[String]]
+    aliases: c.Expr[String => Seq[String]]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, Codec, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
@@ -131,10 +131,10 @@ case object HandlerBind {
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
-      ${c.prefix}.copy(methodBindings = ${c.prefix}.methodBindings ++ automorph.handler.HandlerBindings
+      ${c.prefix}.copy(bindings = ${c.prefix}.bindings ++ automorph.handler.HandlerBindings
         .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.system, $api)
-        .flatMap { case (methodName, method) =>
-          $methodAliases(methodName).map(_ -> method)
+        .flatMap { case (name, method) =>
+          $aliases(name).map(_ -> method)
         }
       )
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]

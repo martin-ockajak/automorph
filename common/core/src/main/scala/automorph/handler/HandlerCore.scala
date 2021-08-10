@@ -69,7 +69,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
   ): Effect[HandlerResult[Data]] = {
     // Lookup bindings for the specified method
     logger.debug(s"Processing ${protocol.name} request", rpcRequest.message.properties)
-    methodBindings.get(rpcRequest.function).map { handlerBinding =>
+    bindings.get(rpcRequest.function).map { handlerBinding =>
       // Extract arguments
       extractArguments(rpcRequest, handlerBinding).flatMap { arguments =>
         // Invoke method

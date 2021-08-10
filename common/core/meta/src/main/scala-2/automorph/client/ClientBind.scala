@@ -17,7 +17,7 @@ private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_]
   this: Client[Node, Codec, Effect, Context] =>
 
   /**
-   * Creates an RPC API proxy instance with bindings for all valid public methods of the specified API.
+   * Creates a remote API proxy instance with RPC bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -38,7 +38,7 @@ ne
   def bind[Api <: AnyRef]: Api = macro ClientBind.bindNamedMacro[Node, Codec, Effect, Context, Api]
 
   /**
-   * Creates an RPC API proxy instance with bindings for all valid public methods of the specified API.
+   * Creates a remote API proxy instance with RPC bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime

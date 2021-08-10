@@ -19,7 +19,7 @@ private[automorph] trait HandlerBind[Node, Codec <: MessageCodec[Node], Effect[_
   type ThisHandler = Handler[Node, Codec, Effect, Context]
 
   /**
-   * Creates a copy of this handler with generated method bindings for all valid public methods of the specified API.
+   * Creates a copy of this handler with generated RPC bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -40,7 +40,7 @@ private[automorph] trait HandlerBind[Node, Codec <: MessageCodec[Node], Effect[_
   inline def bind[Api <: AnyRef](api: Api): ThisHandler = bind(api, name => Seq(name))
 
   /**
-   * Creates a copy of this handler with generated method bindings for all valid public methods of the specified API.
+   * Creates a copy of this handler with generated RPC bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -51,18 +51,18 @@ private[automorph] trait HandlerBind[Node, Codec <: MessageCodec[Node], Effect[_
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
-   * Bound API methods are exposed using names resulting from a transcodecion of their actual names via the `methodAliases` function.
+   * Bound API methods are exposed using names resulting from a transcodecion of their actual names via the `aliases` function.
    *
    * @param api API instance
-   * @param methodAliases mapping of method name to its exposed names (empty result causes the method not to be exposed)
+   * @param aliases mapping of method name to its exposed names (empty result causes the method not to be exposed)
    * @tparam Api API type (only member methods of this type are exposed)
    * @return RPC request handler with added API bindings
    * @throws IllegalArgumentException if invalid p/ublic methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](api: Api, methodAliases: String => Seq[String]): ThisHandler =
-    copy(methodBindings =
-      methodBindings ++ HandlerBindings.generate[Node, Codec, Effect, Context, Api](codec, system, api).flatMap {
-        (methodName, method) => methodAliases(methodName).map(_ -> method)
+  inline def bind[Api <: AnyRef](api: Api, aliases: String => Seq[String]): ThisHandler =
+    copy(bindings =
+      bindings ++ HandlerBindings.generate[Node, Codec, Effect, Context, Api](codec, system, api).flatMap {
+        (name, method) => aliases(name).map(_ -> method)
       }
     )
 

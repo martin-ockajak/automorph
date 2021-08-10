@@ -14,6 +14,7 @@ import automorph.util.{CannotEqual, EmptyContext}
  * @param codec message codec plugin
  * @param system effect system plugin
  * @param protocol RPC protocol
+ * @param bindings API method bindings
  * @param encodedNone message codec node representing missing optional value
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
@@ -24,7 +25,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context] 
   codec: Codec,
   system: EffectSystem[Effect],
   protocol: RpcProtocol[Node],
-  methodBindings: Map[String, HandlerBinding[Node, Effect, Context]],
+  bindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val encodedNone: Node
 ) extends HandlerCore[Node, Codec, Effect, Context]
   with HandlerBind[Node, Codec, Effect, Context]

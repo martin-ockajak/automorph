@@ -22,7 +22,7 @@ class OpenApiSpec extends BaseSpec {
       val protocol = JsonRpcProtocol(codec)
       val handler = Handler[CirceJsonCodec.Node, CirceJsonCodec, Identity, Unit](codec, system, protocol)
         .bind(simpleApiInstance)
-      val rpcFunctions = handler.methodBindings.values.map(_.function)
+      val rpcFunctions = handler.bindings.values.map(_.function)
       val specification = OpenApi.jsonRpcSpec(rpcFunctions, "Test", "0.0", Seq("http://localhost:80/api"))
       println(specification)
     }
