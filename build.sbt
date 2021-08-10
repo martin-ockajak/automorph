@@ -21,10 +21,10 @@ lazy val root = project.in(file(".")).settings(
 ).aggregate(
   // Common
   spi,
+  openapi,
   util,
   coreMeta,
   core,
-  openapi,
 
   // RPC protocol
   jsonrpcMeta,
@@ -76,6 +76,11 @@ lazy val spi = (project in file("common/spi")).settings(
     }
   }
 )
+lazy val openapi = (project in file("common/openapi")).dependsOn(
+  spi, testBase % Test
+).settings(
+  name := s"$projectName-open-api"
+)
 lazy val util = (project in file("common/util")).settings(
   name := s"$projectName-util",
   libraryDependencies ++= Seq(
@@ -92,7 +97,7 @@ lazy val coreMeta = (project in file("common/core/meta")).dependsOn(
   }
 )
 lazy val core = (project in file("common/core")).dependsOn(
-  coreMeta, testBase % Test
+  coreMeta, testPlugin % Test
 ).settings(
   name := s"$projectName-core"
 )
@@ -104,7 +109,7 @@ lazy val jsonrpcMeta = (project in file("protocol/jsonrpc/meta")).dependsOn(
   name := s"$projectName-jsonrpc-meta"
 )
 lazy val jsonrpc = (project in file("protocol/jsonrpc")).dependsOn(
-  jsonrpcMeta, util
+  jsonrpcMeta, openapi, util
 ).settings(
   name := s"$projectName-jsonrpc"
 )
@@ -114,7 +119,7 @@ lazy val restrpcMeta = (project in file("protocol/restrpc/meta")).dependsOn(
   name := s"$projectName-restrpc-meta"
 )
 lazy val restrpc = (project in file("protocol/restrpc")).dependsOn(
-  restrpcMeta, util
+  restrpcMeta, openapi, util
 ).settings(
   name := s"$projectName-restrpc"
 )
@@ -161,7 +166,7 @@ lazy val scalaz = (project in file("system/scalaz")).dependsOn(
 // Message codec
 val circeVersion = "0.14.1"
 lazy val circe = (project in file(s"codec/circe")).dependsOn(
-  jsonrpc, restrpc, testBase % Test
+  jsonrpc, restrpc, testPlugin % Test
 ).settings(
   name := s"$projectName-circe",
   libraryDependencies ++= Seq(
@@ -170,7 +175,7 @@ lazy val circe = (project in file(s"codec/circe")).dependsOn(
   )
 )
 lazy val upickle = (project in file("codec/upickle")).dependsOn(
-  jsonrpc, restrpc, testBase % Test
+  jsonrpc, restrpc, testPlugin % Test
 ).settings(
   name := s"$projectName-upickle",
   libraryDependencies ++= Seq(
@@ -178,7 +183,7 @@ lazy val upickle = (project in file("codec/upickle")).dependsOn(
   )
 )
 lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
-  jsonrpc, restrpc, testBase % Test
+  jsonrpc, restrpc, testPlugin % Test
 ).settings(
   name := s"$projectName-argonaut",
   libraryDependencies ++= Seq(
@@ -249,13 +254,6 @@ lazy val tapir = (project in file("transport/tapir")).dependsOn(
   )
 )
 
-// OpenAPI
-lazy val openapi = (project in file("common/openapi")).dependsOn(
-  spi, testCore % Test, standard % Test
-).settings(
-  name := s"$projectName-open-api"
-)
-
 // Misc
 lazy val default = project.dependsOn(
   jsonrpc, restrpc, circe, standard, undertow, sttp
@@ -266,7 +264,7 @@ lazy val default = project.dependsOn(
   )
 )
 lazy val examples = (project in file("test/examples")).dependsOn(
-  default, upickle, zio, testBase % Test
+  default, upickle, zio, testPlugin % Test
 ).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test
@@ -274,7 +272,7 @@ lazy val examples = (project in file("test/examples")).dependsOn(
 )
 // Test
 lazy val testBase = (project in file("test/base")).dependsOn(
-  spi, jsonrpc, restrpc
+  spi
 ).settings(
   libraryDependencies ++= Seq(
     // Test
@@ -283,8 +281,11 @@ lazy val testBase = (project in file("test/base")).dependsOn(
     "ch.qos.logback" % "logback-classic" % "1.2.3"
   )
 )
+lazy val testPlugin = (project in file("test/plugin")).dependsOn(
+  testBase, jsonrpc, restrpc
+)
 lazy val testCore = (project in file("test/core")).dependsOn(
-  testBase, core, jsonrpc, restrpc, http, circe, upickle, argonaut,
+  testPlugin, core, http, circe, upickle, argonaut,
 )
 lazy val testHttp = (project in file("test/http")).dependsOn(
   testBase, http
