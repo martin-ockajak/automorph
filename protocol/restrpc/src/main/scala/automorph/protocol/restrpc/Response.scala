@@ -15,8 +15,6 @@ private[automorph] final case class Response[Node](
 ) {
 
   def formed: Message[Node] = Message[Node](
-    method = None,
-    params = None,
     result = result,
     error = error.map(_.formed)
   )

@@ -1,7 +1,6 @@
 package automorph.codec.json
 
 import automorph.codec.{DefaultUpickleCustom, UpickleCustom}
-import automorph.protocol.jsonrpc.Message
 import scala.collection.immutable.ArraySeq
 import ujson.Value
 
@@ -20,7 +19,8 @@ final case class UpickleJsonCodec[Custom <: UpickleCustom](
 
   private val indent = 2
 
-  implicit private lazy val messageRw: custom.ReadWriter[Message[Value]] = JsonRpc.readWriter(custom)
+  implicit private lazy val jsonRpcMessageRw: custom.ReadWriter[UpickleJsonRpc.Data] = UpickleJsonRpc.readWriter(custom)
+  implicit private lazy val restRpcMessageRw: custom.ReadWriter[UpickleRestRpc.Data] = UpickleRestRpc.readWriter(custom)
 
   override def mediaType: String = "application/json"
 

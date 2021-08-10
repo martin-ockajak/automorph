@@ -1,8 +1,6 @@
 package automorph.codec.messagepack
 
-import automorph.codec.messagepack.UpickleMessage
 import automorph.codec.{DefaultUpickleCustom, UpickleCustom}
-import automorph.protocol.jsonrpc.Message
 import scala.collection.immutable.ArraySeq
 import upack.Msg
 
@@ -21,8 +19,9 @@ final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
 
   private val indent = 2
 
-  implicit private lazy val messageRw: custom.ReadWriter[Message[Msg]] = JsonRpc.readWriter(custom)
-  Seq(messageRw)
+  implicit private lazy val jsonRpcMessageRw: custom.ReadWriter[UpickleJsonRpc.Data] = UpickleJsonRpc.readWriter(custom)
+  implicit private lazy val restRpcMessageRw: custom.ReadWriter[UpickleRestRpc.Data] = UpickleRestRpc.readWriter(custom)
+  Seq(jsonRpcMessageRw, restRpcMessageRw)
 
   override def mediaType: String = "application/msgpack"
 

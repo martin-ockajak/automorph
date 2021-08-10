@@ -2,7 +2,6 @@ package automorph.codec.json
 
 import argonaut.Argonaut.{StringToParseWrap, jNull}
 import argonaut.{Argonaut, CodecJson, DecodeResult, Json}
-import automorph.protocol.jsonrpc.Message
 import java.nio.charset.StandardCharsets
 import scala.collection.immutable.ArraySeq
 
@@ -17,7 +16,8 @@ final case class ArgonautJsonCodec() extends ArgonautJsonMeta {
 
   private val charset = StandardCharsets.UTF_8
 
-  implicit private lazy val messageCodecJson: CodecJson[Message[Json]] = JsonRpc.messageCodecJson
+  implicit private lazy val jsonRpcMessageCodecJson: CodecJson[ArgonautJsonRpc.Data] = ArgonautJsonRpc.messageCodecJson
+  implicit private lazy val restRpcMessageCodecJson: CodecJson[ArgonautRestRpc.Data] = ArgonautRestRpc.messageCodecJson
 
   override def mediaType: String = "application/json"
 

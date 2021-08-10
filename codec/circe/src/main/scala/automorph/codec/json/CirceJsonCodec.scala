@@ -1,6 +1,5 @@
 package automorph.codec.json
 
-import automorph.protocol.jsonrpc.Message
 import io.circe.{Decoder, Encoder, Json, parser}
 import java.nio.charset.StandardCharsets
 import scala.collection.immutable.ArraySeq
@@ -15,8 +14,10 @@ import scala.collection.immutable.ArraySeq
 final case class CirceJsonCodec() extends CirceJsonMeta {
 
   private val charset = StandardCharsets.UTF_8
-  implicit private lazy val messageEncoder: Encoder[Message[Json]] = JsonRpc.messageEncoder
-  implicit private lazy val messageDecoder: Decoder[Message[Json]] = JsonRpc.messageDecoder
+  implicit private lazy val jsonRpcMessageEncoder: Encoder[CirceJsonRpc.Data] = CirceJsonRpc.messageEncoder
+  implicit private lazy val jsonRpcMessageDecoder: Decoder[CirceJsonRpc.Data] = CirceJsonRpc.messageDecoder
+  implicit private lazy val restRpcMessageEncoder: Encoder[CirceRestRpc.Data] = CirceRestRpc.messageEncoder
+  implicit private lazy val restRpcMessageDecoder: Decoder[CirceRestRpc.Data] = CirceRestRpc.messageDecoder
 
   override def mediaType: String = "application/json"
 

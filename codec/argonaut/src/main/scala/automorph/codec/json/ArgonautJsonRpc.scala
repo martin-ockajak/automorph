@@ -7,7 +7,9 @@ import automorph.protocol.jsonrpc.{Message, MessageError}
 /**
  * JSON-RPC protocol support for uPickle message codec plugin.
  */
-object JsonRpc {
+private[automorph] object ArgonautJsonRpc {
+  type Data = Message[Json]
+
   def messageCodecJson: CodecJson[Message[Json]] = {
     implicit val idCodecJson: CodecJson[Message.Id] = CodecJson(
       {

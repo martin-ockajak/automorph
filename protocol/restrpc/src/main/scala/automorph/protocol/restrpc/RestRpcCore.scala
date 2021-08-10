@@ -1,7 +1,7 @@
 package automorph.protocol.restrpc
 
 import automorph.protocol.RestRpcProtocol
-import automorph.protocol.restrpc.Message.Params
+import automorph.protocol.restrpc.Message.Request
 import automorph.protocol.restrpc.{Response, ResponseError, RestRpcException}
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
@@ -64,8 +64,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
       },
       resultValue => Response(Some(resultValue), None).formed
     )
-    val messageText = () => Some(codec.text(encodeMessage(formedResponse)))
-    Try(codec.serialize(encodeMessage(formedResponse))).mapFailure { error =>
+    val messageText = () => Some(codec.text(encodeResponse(formedResponse)))
+    Try(codec.serialize(encodeResponse(formedResponse))).mapFailure { error =>
       InvalidResponseException("Invalid response codec", error)
     }.map { messageBody =>
       val message = RpcMessage((), messageBody, formedResponse.properties, messageText)
@@ -98,11 +98,11 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
 
   override def parseResponse(response: ArraySeq.ofByte): Either[RpcError[Details], RpcResponse[Node, Details]] =
   // Deserialize response
-    Try(decodeMessage(codec.deserialize(response))).pureFold(
+    Try(decodeResponse(codec.deserialize(response))).pureFold(
       error => Left(RpcError(InvalidResponseException("Invalid response codec", error), RpcMessage((), response))),
       formedResponse => {
         // Validate response
-        val messageText = () => Some(codec.text(encodeMessage(formedResponse)))
+        val messageText = () => Some(codec.text(encodeResponse(formedResponse)))
         val message = RpcMessage((), response, formedResponse.properties, messageText)
         Try(Response(formedResponse)).pureFold(
           error => Left(RpcError(InvalidResponseException("Invalid response codec", error), message)),
@@ -146,8 +146,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
    * @param encodedArguments encoded arguments
    * @return argument nodes
    */
-  private def createArgumentNodes(argumentNames: Option[Seq[String]], encodedArguments: Seq[Node]): Params[Node] =
+  private def createArgumentNodes(argumentNames: Option[Seq[String]], encodedArguments: Seq[Node]): Request[Node] =
     argumentNames.filter(_.size >= encodedArguments.size).map { names =>
-      Right(names.zip(encodedArguments).toMap)
-    }.getOrElse(Left(encodedArguments.toList))
+      names.zip(encodedArguments).toMap
+    }.getOrElse(throw IllegalArgumentException("Missing REST-RPC request argument names"))
 }

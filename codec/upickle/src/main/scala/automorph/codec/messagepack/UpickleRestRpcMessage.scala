@@ -1,6 +1,6 @@
 package automorph.codec.messagepack
 
-import automorph.protocol.jsonrpc.{Message, MessageError}
+import automorph.protocol.restrpc.{Message, MessageError}
 import upack.Msg
 
 // Workaround for upickle bug causing the following error when using its
@@ -11,55 +11,43 @@ import upack.Msg
 //    at ujson.ByteParser.tryCloseCollection(ByteParser.scala:496)
 //    at ujson.ByteParser.parseNested(ByteParser.scala:462)
 //    at ujson.ByteParser.parseTopLevel0(ByteParser.scala:323)
-private[automorph] final case class UpickleMessage(
-  jsonrpc: Option[String],
-  id: Option[Either[BigDecimal, String]],
-  method: Option[String],
-  params: Option[Either[List[Msg], Map[String, Msg]]],
+private[automorph] final case class UpickleRestRpcMessage(
   result: Option[Msg],
-  error: Option[UpickleMessageError]
+  error: Option[UpickleRestRpcMessageError]
 ) {
 
   def toProtocol: Message[Msg] = Message[Msg](
-    jsonrpc,
-    id,
-    method,
-    params,
     result,
     error.map(_.toProtocol)
   )
 }
 
-private[automorph] object UpickleMessage {
+private[automorph] object UpickleRestRpcMessage {
 
-  def fromProtocol(v: Message[Msg]): UpickleMessage = UpickleMessage(
-    v.jsonrpc,
-    v.id,
-    v.method,
-    v.params,
+  def fromProtocol(v: Message[Msg]): UpickleRestRpcMessage = UpickleRestRpcMessage(
     v.result,
-    v.error.map(UpickleMessageError.fromProtocol)
+    v.error.map(UpickleRestRpcMessageError.fromProtocol)
   )
 }
 
-private[automorph] final case class UpickleMessageError(
+private[automorph] final case class UpickleRestRpcMessageError(
   message: Option[String],
   code: Option[Int],
-  data: Option[Msg]
+  details: Option[Msg]
 ) {
 
   def toProtocol: MessageError[Msg] = MessageError[Msg](
     message,
     code,
-    data
+    details
   )
 }
 
-private[automorph] object UpickleMessageError {
+private[automorph] object UpickleRestRpcMessageError {
 
-  def fromProtocol(v: MessageError[Msg]): UpickleMessageError = UpickleMessageError(
+  def fromProtocol(v: MessageError[Msg]): UpickleRestRpcMessageError = UpickleRestRpcMessageError(
     v.message,
     v.code,
-    v.data
+    v.details
   )
 }

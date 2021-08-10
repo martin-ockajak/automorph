@@ -10,7 +10,7 @@ import scala.compiletime.summonInline
  * Circe JSON codec plugin code generation.
  */
 private[automorph] trait CirceJsonMeta extends MessageCodec[Json]:
-  implicit private val messageEncoder: Encoder[Message[Json]] = JsonRpc.messageEncoder
+  implicit private val messageEncoder: Encoder[Message[Json]] = CirceJsonRpc.messageEncoder
 
   override inline def encode[T](value: T): Json =
     value.asJson(using summonInline[Encoder[T]])

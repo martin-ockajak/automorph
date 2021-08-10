@@ -13,8 +13,8 @@ import scala.reflect.macros.blackbox
  * @param codec message codec plugin
  * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @param exceptionToError maps an exception to a corresponding JSON-RPC error
- * @param encodeMessage coverts a JSON-RPC message to message format node
- * @param decodeMessage coverts a message format node to JSON-RPC message
+ * @param encodeMessage converts a JSON-RPC message to message format node
+ * @param decodeMessage converts a message format node to JSON-RPC message
  * @param encodeStrings converts list of strings to message format node
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
