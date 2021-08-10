@@ -65,10 +65,10 @@ case object RestRpcProtocol extends ErrorMapping {
         $codec,
         $errorToException,
         $exceptionToError,
-        request => codec.encode[automorph.protocol.restrpc.Message.Request[Node]](request),
-        node => codec.decode[automorph.protocol.restrpc.Message.Request[Node]](node),
-        response => codec.encode[automorph.protocol.restrpc.Message[Node]](response),
-        node => codec.decode[automorph.protocol.restrpc.Message[Node]](node),
+        request => $codec.encode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](request),
+        node => $codec.decode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](node),
+        response => $codec.encode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](response),
+        node => $codec.decode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](node),
         value => $codec.encode[List[String]](value)
       )
     """).asInstanceOf[c.Expr[RestRpcProtocol[Node, Codec]]]

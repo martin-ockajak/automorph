@@ -60,8 +60,8 @@ case object JsonRpcProtocol extends ErrorMapping {
         $codec,
         $errorToException,
         $exceptionToError,
-        message => codec.encode[automorph.protocol.jsonrpc.Message[Node]](message),
-        node => codec.decode[automorph.protocol.jsonrpc.Message[Node]](node),
+        message => $codec.encode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](message),
+        node => $codec.decode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](node),
         value => $codec.encode[List[String]](value)
       )
     """).asInstanceOf[c.Expr[JsonRpcProtocol[Node, Codec]]]
