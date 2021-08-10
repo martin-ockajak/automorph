@@ -1,7 +1,7 @@
 package automorph.handler
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodBindings.{call, methodSignature, rpcFunctionToExpr, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodBindings.{call, methodSignature, functionToExpr, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.{Method, Reflection}

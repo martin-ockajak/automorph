@@ -12,7 +12,7 @@ private[automorph] case object MethodBindings:
    *
    * @return method quoted expression converter
    */
-  given rpcFunctionToExpr: ToExpr[RpcFunction] = new ToExpr[RpcFunction]:
+  given functionToExpr: ToExpr[RpcFunction] = new ToExpr[RpcFunction]:
 
     given parameterToExpr: ToExpr[RpcParameter] = new ToExpr[RpcParameter]:
 

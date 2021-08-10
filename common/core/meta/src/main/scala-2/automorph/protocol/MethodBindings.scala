@@ -17,7 +17,7 @@ private[automorph] case object MethodBindings {
    * @tparam C macro context type
    * @return method quoted tree converter
    */
-  def methodLiftable[C <: blackbox.Context](ref: Reflection[C]): ref.c.universe.Liftable[RpcFunction] =
+  def functionLiftable[C <: blackbox.Context](ref: Reflection[C]): ref.c.universe.Liftable[RpcFunction] =
     new ref.c.universe.Liftable[RpcFunction] {
 
       import ref.c.universe.{Liftable, Quasiquote, Tree}

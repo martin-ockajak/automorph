@@ -2,7 +2,7 @@ package automorph.client
 
 import automorph.log.MacroLogger
 import automorph.client.ClientBinding
-import automorph.protocol.MethodBindings.{call, methodSignature, rpcFunctionToExpr, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodBindings.{call, methodSignature, functionToExpr, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.MessageCodec
 import automorph.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
