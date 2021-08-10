@@ -251,7 +251,7 @@ lazy val tapir = (project in file("transport/tapir")).dependsOn(
 
 // OpenAPI
 lazy val openapi = (project in file("common/openapi")).dependsOn(
-  core, circe, testCore % Test, standard % Test
+  spi, testCore % Test, standard % Test
 ).settings(
   name := s"$projectName-open-api"
 )

@@ -1,5 +1,7 @@
 package automorph.util
 
+import automorph.spi.protocol.{RpcFunction, RpcParameter}
+
 /**
  * Method descriptor.
  *
@@ -36,6 +38,14 @@ final case class Method(
     }.mkString
     s"$name$typeParametersText$parametersText: $resultType"
   }
+
+  lazy val rpcFunction: RpcFunction = RpcFunction(
+    name,
+    resultType,
+    parameters.flatten.map { case Parameter(name, dataType, _) => RpcParameter(name, dataType) },
+    typeParameters.map { case Parameter(name, dataType, _) => RpcParameter(name, dataType) },
+    documentation
+  )
 }
 
 /**
