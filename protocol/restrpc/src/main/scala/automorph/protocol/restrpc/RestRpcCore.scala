@@ -5,7 +5,7 @@ import automorph.protocol.restrpc.Message.Request
 import automorph.protocol.restrpc.{Response, ResponseError, RestRpcException}
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
-import automorph.spi.protocol.{RpcError, RpcMessage, RpcRequest, RpcResponse}
+import automorph.spi.protocol.{RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
@@ -127,6 +127,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
         )
       }
     )
+
+  override def openApi(functions: Iterable[RpcFunction]): String = ???
 
   /**
    * Creates a copy of this protocol with specified exception to REST-RPC error mapping.

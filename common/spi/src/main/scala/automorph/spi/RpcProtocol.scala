@@ -1,6 +1,6 @@
 package automorph.spi
 
-import automorph.spi.protocol.{RpcError, RpcRequest, RpcResponse}
+import automorph.spi.protocol.{RpcError, RpcFunction, RpcRequest, RpcResponse}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -70,6 +70,14 @@ trait RpcProtocol[Node] {
    * @return RPC response on valid response message or RPC error on invalid response message
    */
   def parseResponse(response: ArraySeq.ofByte): Either[RpcError[Details], RpcResponse[Node, Details]]
+
+  /**
+   * Generates OpenApi speficication for specified RPC functions.
+   *
+   * @see https://github.com/OAI/OpenAPI-Specification
+   * @return OpenAPI specification
+   */
+  def openApi(functions: Iterable[RpcFunction]): String
 }
 
 case object RpcProtocol {

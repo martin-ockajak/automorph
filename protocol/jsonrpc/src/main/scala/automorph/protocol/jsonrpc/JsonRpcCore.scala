@@ -4,7 +4,7 @@ import automorph.protocol.JsonRpcProtocol
 import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
 import automorph.protocol.jsonrpc.Message.Params
 import automorph.spi.RpcProtocol.InvalidResponseException
-import automorph.spi.protocol.{RpcError, RpcMessage, RpcRequest, RpcResponse}
+import automorph.spi.protocol.{RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.spi.MessageCodec
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.collection.immutable.ArraySeq
@@ -123,6 +123,8 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
         )
       }
     )
+
+  override def openApi(functions: Iterable[RpcFunction]): String = ???
 
   /**
    * Creates a copy of this protocol with specified exception to JSON-RPC error mapping.
