@@ -180,7 +180,7 @@ case object OpenApi {
         Some(Map(
           "code" -> Schema(Some("integer"), Some("code"), Some("Error code")),
           "message" -> Schema(Some("string"), Some("message"), Some("Error message")),
-          "data" -> Schema(Some("object"), Some("data"), Some("Additional error incodecion"))
+          "data" -> Schema(Some("object"), Some("data"), Some("Additional error information"))
         )),
         Some(List("code", "message"))
       )
@@ -200,7 +200,7 @@ case object OpenApi {
         Some(Map(
           "code" -> Schema(Some("integer"), Some("code"), Some("Error code")),
           "message" -> Schema(Some("string"), Some("message"), Some("Error message")),
-          "data" -> Schema(Some("object"), Some("data"), Some("Additional error incodecion"))
+          "data" -> Schema(Some("object"), Some("data"), Some("Additional error information"))
         )),
         Some(List("code", "message"))
       )

@@ -53,7 +53,7 @@ object Message {
  * @see [[https://www.jsonrpc.org/specification REST-RPC protocol specification]]
  * @param message error description
  * @param code error code
- * @param data additional error incodecion
+ * @param data additional error information
  * @tparam Node message node type
  */
 final case class MessageError[Node](

@@ -9,7 +9,7 @@ package automorph.protocol.jsonrpc
  * @constructor Creates a new JSON-RPC error exception.
  * @param message error description
  * @param code error code
- * @param data additional error incodecion
+ * @param data additional error information
  * @param cause exception cause
  * @tparam Node message codec node representation type
  */
