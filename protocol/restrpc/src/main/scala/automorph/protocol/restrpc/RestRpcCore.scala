@@ -30,7 +30,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
   ): Either[RpcError[Details], RpcRequest[Node, Details]] =
     // Deserialize request
     Try(decodeRequest(codec.deserialize(request))).pureFold(
-      error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage(None, request))),
+      error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), request))),
       formedRequest => {
         // Validate request
         val messageText = () => Some(codec.text(encodeRequest(formedRequest)))
@@ -53,6 +53,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
     details: Details
   ): Try[RpcResponse[Node, Details]] = {
     // Create response
+    Seq(details)
     val formedResponse = result.pureFold(
       error => {
         val responseError = error match {
