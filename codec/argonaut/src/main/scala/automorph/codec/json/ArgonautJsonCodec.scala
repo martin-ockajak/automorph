@@ -1,9 +1,9 @@
 package automorph.codec.json
 
-import argonaut.Argonaut.{StringToParseWrap, ToJsonIdentity, jArray, jNull, jNumber, jObject, jString}
-import argonaut.{Argonaut, CodecJson, DecodeResult, Json, JsonObject}
+import argonaut.Argonaut.{StringToParseWrap, jNull}
+import argonaut.{Argonaut, CodecJson, DecodeResult, Json}
+import automorph.protocol.jsonrpc.Message
 import java.nio.charset.StandardCharsets
-import automorph.spi.{Message, MessageError}
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -17,73 +17,21 @@ final case class ArgonautJsonCodec() extends ArgonautJsonMeta {
 
   private val charset = StandardCharsets.UTF_8
 
-  implicit private lazy val idCodecJson: CodecJson[Message.Id] = CodecJson(
-    {
-      case Right(id) => jString(id)
-      case Left(id) => jNumber(id)
-    },
-    cursor =>
-      DecodeResult(cursor.focus.string.map(Right.apply).orElse {
-        cursor.focus.number.map(number => Left(number.toBigDecimal))
-      } match {
-        case Some(value) => Right(value)
-        case None => Left(s"Invalid request identifier: ${cursor.focus}", cursor.history)
-      })
-  )
-
-  implicit private lazy val paramsCodecJson: CodecJson[Message.Params[Json]] = CodecJson(
-    {
-      case Right(params) => jObject(JsonObject.fromIterable(params))
-      case Left(params) => jArray(params)
-    },
-    cursor =>
-      DecodeResult(cursor.focus.obj.map(json => Right(json.toMap)).orElse {
-        cursor.focus.array.map(json => Left(json.toList))
-      } match {
-        case Some(value) => Right(value)
-        case None => Left(s"Invalid request parameters: ${cursor.focus}", cursor.history)
-      })
-  )
-
-  implicit private lazy val messageErrorCodecJson: CodecJson[MessageError[Json]] =
-    Argonaut.codec3(MessageError.apply[Json], (v: MessageError[Json]) => (v.message, v.code, v.data))(
-      "message",
-      "code",
-      "data"
-    )
-
-  implicit private lazy val messageCodecJson: CodecJson[Message[Json]] =
-    Argonaut.codec6(Message.apply[Json], (v: Message[Json]) => (v.jsonrpc, v.id, v.method, v.params, v.result, v.error))(
-      "jsonrpc",
-      "id",
-      "method",
-      "params",
-      "result",
-      "error"
-    )
+  implicit private lazy val messageCodecJson: CodecJson[Message[Json]] = JsonRpc.messageCodecJson
 
   override def mediaType: String = "application/json"
 
-  override def serialize(message: Message[Json]): ArraySeq.ofByte =
-    new ArraySeq.ofByte(message.asJson.nospaces.getBytes(charset))
-
-  override def deserialize(data: ArraySeq.ofByte): Message[Json] =
-    new String(data.unsafeArray, charset).decodeEither[Message[Json]].fold(
-      errorMessage => throw new IllegalArgumentException(errorMessage),
-      identity
-    )
-
-  override def serializeNode(node: Json): ArraySeq.ofByte =
+  override def serialize(node: Json): ArraySeq.ofByte =
     new ArraySeq.ofByte(node.nospaces.getBytes(charset))
 
-  override def deserializeNode(data: ArraySeq.ofByte): Json =
+  override def deserialize(data: ArraySeq.ofByte): Json =
     new String(data.unsafeArray, charset).decodeEither[Json].fold(
       errorMessage => throw new IllegalArgumentException(errorMessage),
       identity
     )
 
-  override def text(message: Message[Json]): String =
-    message.asJson.spaces2
+  override def text(node: Json): String =
+    node.spaces2
 }
 
 case object ArgonautJsonCodec {

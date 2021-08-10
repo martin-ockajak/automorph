@@ -2,11 +2,13 @@ package test.examples
 
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.transport.http.Http
-import automorph.transport.http.client.SttpClient.defaultContext
 import automorph.{DefaultHttpClient, DefaultHttpServer, DefaultRpcProtocol}
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
+// FIXME
+import automorph.transport.http.client.SttpClient.defaultContext
 
 object ErrorMapping extends App {
 

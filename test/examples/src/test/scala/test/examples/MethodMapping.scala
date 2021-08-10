@@ -1,5 +1,6 @@
 package test.examples
 
+// FIXME
 import automorph.transport.http.client.SttpClient.defaultContext
 
 object MethodMapping extends App {

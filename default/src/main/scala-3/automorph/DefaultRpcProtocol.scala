@@ -1,7 +1,10 @@
 package automorph
 
 import automorph.protocol.JsonRpcProtocol
+import automorph.protocol.jsonrpc.Message
+import automorph.codec.json.JsonRpc
 import automorph.spi.MessageCodec
+import io.circe.{Decoder, Encoder, Json}
 
 object DefaultRpcProtocol:
 
@@ -19,6 +22,10 @@ object DefaultRpcProtocol:
    * @return RPC protocol plugin
    */
   def apply(): Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
+    // FIXME
+    given Encoder[Message[Json]] = JsonRpc.messageEncoder
+    given Decoder[Message[Json]] = JsonRpc.messageDecoder
+
     JsonRpcProtocol(DefaultMessageCodec())
 
   /**

@@ -1,6 +1,5 @@
 package automorph.protocol.restrpc
 
-import automorph.spi.Message
 import automorph.spi.RpcProtocol.InvalidResponseException
 
 /**
@@ -16,8 +15,6 @@ private[automorph] final case class Response[Node](
 ) {
 
   def formed: Message[Node] = Message[Node](
-    jsonrpc = None,
-    id = None,
     method = None,
     params = None,
     result = result,

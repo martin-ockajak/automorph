@@ -1,8 +1,6 @@
 package automorph.protocol.restrpc
 
 import automorph.protocol.restrpc.Response.mandatory
-import automorph.spi.MessageError
-
 
 /**
  * REST-RPC call response error.

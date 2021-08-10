@@ -1,6 +1,6 @@
 package automorph.codec.messagepack
 
-import automorph.spi.{Message, MessageError}
+import automorph.protocol.jsonrpc.{Message, MessageError}
 import upack.Msg
 
 // Workaround for upickle bug causing the following error when using its
@@ -20,25 +20,25 @@ private[automorph] final case class UpickleMessage(
   error: Option[UpickleMessageError]
 ) {
 
-  def toSpi: Message[Msg] = Message[Msg](
+  def toProtocol: Message[Msg] = Message[Msg](
     jsonrpc,
     id,
     method,
     params,
     result,
-    error.map(_.toSpi)
+    error.map(_.toProtocol)
   )
 }
 
 private[automorph] object UpickleMessage {
 
-  def fromSpi(v: Message[Msg]): UpickleMessage = UpickleMessage(
+  def fromProtocol(v: Message[Msg]): UpickleMessage = UpickleMessage(
     v.jsonrpc,
     v.id,
     v.method,
     v.params,
     v.result,
-    v.error.map(UpickleMessageError.fromSpi)
+    v.error.map(UpickleMessageError.fromProtocol)
   )
 }
 
@@ -48,7 +48,7 @@ private[automorph] final case class UpickleMessageError(
   data: Option[Msg]
 ) {
 
-  def toSpi: MessageError[Msg] = MessageError[Msg](
+  def toProtocol: MessageError[Msg] = MessageError[Msg](
     message,
     code,
     data
@@ -57,7 +57,7 @@ private[automorph] final case class UpickleMessageError(
 
 private[automorph] object UpickleMessageError {
 
-  def fromSpi(v: MessageError[Msg]): UpickleMessageError = UpickleMessageError(
+  def fromProtocol(v: MessageError[Msg]): UpickleMessageError = UpickleMessageError(
     v.message,
     v.code,
     v.data

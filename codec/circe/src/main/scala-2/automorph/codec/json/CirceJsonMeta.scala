@@ -1,6 +1,7 @@
 package automorph.codec.json
 
-import io.circe.Json
+import automorph.protocol.jsonrpc.Message
+import io.circe.{Decoder, Encoder, Json}
 import automorph.spi.MessageCodec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -9,6 +10,8 @@ import scala.reflect.macros.blackbox
  * Circe JSON codec plugin code generation.
  */
 private[automorph] trait CirceJsonMeta extends MessageCodec[Json] {
+  implicit lazy val messageEncoder: Encoder[Message[Json]] = JsonRpc.messageEncoder
+  implicit lazy val messageDecoder: Decoder[Message[Json]] = JsonRpc.messageDecoder
 
   override def encode[T](value: T): Json = macro CirceJsonMeta.encodeExpr[T]
 

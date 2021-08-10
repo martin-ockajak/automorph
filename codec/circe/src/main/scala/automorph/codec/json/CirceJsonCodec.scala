@@ -1,10 +1,8 @@
 package automorph.codec.json
 
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.syntax.EncoderOps
-import io.circe.{parser, Decoder, Encoder, Json, JsonObject}
+import automorph.protocol.jsonrpc.Message
+import io.circe.{Decoder, Encoder, Json, parser}
 import java.nio.charset.StandardCharsets
-import automorph.spi.{Message, MessageError}
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -17,61 +15,18 @@ import scala.collection.immutable.ArraySeq
 final case class CirceJsonCodec() extends CirceJsonMeta {
 
   private val charset = StandardCharsets.UTF_8
-
-  implicit private val idEncoder: Encoder[Message.Id] = Encoder.encodeJson.contramap[Message.Id] {
-    case Right(id) => Json.fromString(id)
-    case Left(id) => Json.fromBigDecimal(id)
-  }
-
-  implicit private val idDecoder: Decoder[Message.Id] = Decoder.decodeJson.map(_.fold(
-    invalidId(None.orNull),
-    invalidId,
-    id => id.toBigDecimal.map(Left.apply).getOrElse(invalidId(id)),
-    id => Right(id),
-    invalidId,
-    invalidId
-  ))
-
-  implicit private val paramsEncoder: Encoder[Message.Params[Json]] =
-    Encoder.encodeJson.contramap[Message.Params[Json]] {
-      case Right(params) => Json.fromJsonObject(JsonObject.fromMap(params))
-      case Left(params) => Json.fromValues(params)
-    }
-
-  implicit private val paramsDecoder: Decoder[Message.Params[Json]] = Decoder.decodeJson.map(_.fold(
-    invalidParams(None.orNull),
-    invalidParams,
-    invalidParams,
-    invalidParams,
-    params => Left(params.toList),
-    params => Right(params.toMap)
-  ))
-  implicit private val messageErrorEncoder: Encoder[MessageError[Json]] = deriveEncoder[MessageError[Json]]
-  implicit private val messageErrorDecoder: Decoder[MessageError[Json]] = deriveDecoder[MessageError[Json]]
-  implicit private val messageEncoder: Encoder[Message[Json]] = deriveEncoder[Message[Json]]
-  implicit private val messageDecoder: Decoder[Message[Json]] = deriveDecoder[Message[Json]]
+  implicit private lazy val messageEncoder: Encoder[Message[Json]] = JsonRpc.messageEncoder
+  implicit private lazy val messageDecoder: Decoder[Message[Json]] = JsonRpc.messageDecoder
 
   override def mediaType: String = "application/json"
 
-  override def serialize(message: Message[Json]): ArraySeq.ofByte =
-    new ArraySeq.ofByte(message.asJson.dropNullValues.noSpaces.getBytes(charset))
-
-  override def deserialize(data: ArraySeq.ofByte): Message[Json] =
-    parser.decode[Message[Json]](new String(data.unsafeArray, charset)).toTry.get
-
-  override def serializeNode(node: Json): ArraySeq.ofByte =
+  override def serialize(node: Json): ArraySeq.ofByte =
     new ArraySeq.ofByte(node.dropNullValues.noSpaces.getBytes(charset))
 
-  override def deserializeNode(data: ArraySeq.ofByte): Json =
+  override def deserialize(data: ArraySeq.ofByte): Json =
     parser.decode[Json](new String(data.unsafeArray, charset)).toTry.get
 
-  override def text(message: Message[Json]): String = message.asJson.dropNullValues.spaces2
-
-  private def invalidId(value: Any): Message.Id =
-    throw new IllegalArgumentException(s"Invalid request identifier: $value")
-
-  private def invalidParams(value: Any): Message.Params[Json] =
-    throw new IllegalArgumentException(s"Invalid request parameters: $value")
+  override def text(node: Json): String = node.dropNullValues.spaces2
 }
 
 case object CirceJsonCodec {

@@ -1,7 +1,7 @@
 package test.codec
 
 import java.nio.charset.StandardCharsets
-import automorph.spi.{Message, MessageCodec}
+import automorph.spi.MessageCodec
 import org.scalacheck.Arbitrary
 import test.Generators
 import test.base.BaseSpec
@@ -9,7 +9,7 @@ import test.base.BaseSpec
 /**
  * Message codec test.
  *
- * Checks message serialization, deserialization and codecting.
+ * Checks message serialization, deserialization and textual representation.
  */
 trait MessageCodecSpec extends BaseSpec {
 
@@ -21,21 +21,20 @@ trait MessageCodecSpec extends BaseSpec {
   implicit def arbitraryNode: Arbitrary[Node]
 
   val charset = StandardCharsets.UTF_8
-  implicit lazy val arbitraryMessage: Arbitrary[Message[Node]] = Generators.arbitraryMesage
+//  implicit lazy val arbitraryMessage: Arbitrary[Message[Node]] = Generators.arbitraryMesage
 
   "" - {
     "Serialize / Deserialize" in {
-      check { (message: Message[Node]) =>
-        val rawMessage = codec.serialize(message)
-        val formedMessage = codec.deserialize(rawMessage)
-        formedMessage.equals(message)
+      check { (node: Node) =>
+        val serializedNode = codec.serialize(node)
+        codec.deserialize(serializedNode).equals(node)
       }
     }
-    "Codec" in {
-      check { (message: Message[Node]) =>
-        val codectedMessage = codec.text(message)
-        val rawMessage = codec.serialize(message)
-        codectedMessage.getBytes(charset).length > rawMessage.size
+    "Text" in {
+      check { (node: Node) =>
+        val textNode = codec.text(node)
+        val serializedNode = codec.serialize(node)
+        textNode.getBytes(charset).length >= serializedNode.length
       }
     }
   }

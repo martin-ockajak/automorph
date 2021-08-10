@@ -46,122 +46,122 @@ trait ProtocolCodecSpec extends CoreSpec {
           (method, p1) => client.method(method).positional.args(p1).tell,
           (method, p1) => client.method(method).args(p1).tell
         )
-      }, {
-        val port = availablePort
-        val codec = UpickleJsonCodec(ProtocolCodecSpec)
-        val protocol = JsonRpcProtocol(codec)
-        val handler = Handler[UpickleJsonCodec.Node, UpickleJsonCodec[ProtocolCodecSpec.type], Effect, Context](
-          codec,
-          system,
-          protocol
-        )
-          .bind(simpleApiInstance).bind(complexApiInstance)
-        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-        val client: Client[UpickleJsonCodec.Node, UpickleJsonCodec[ProtocolCodecSpec.type], Effect, Context] =
-          Client(codec, system, transport, protocol)
-        TestFixture(
-          codec.getClass,
-          client,
-          handler,
-          port,
-          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
-          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
-          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
-          (method, p1) => client.method(method).positional.args(p1).call,
-          (method, p1) => client.method(method).args(p1).call,
-          (method, p1) => client.method(method).positional.args(p1).tell,
-          (method, p1) => client.method(method).args(p1).tell
-        )
-      }, {
-        val port = availablePort
-        val codec = UpickleMessagePackCodec(ProtocolCodecSpec)
-        val protocol = JsonRpcProtocol(codec)
-        val handler =
-          Handler[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[ProtocolCodecSpec.type], Effect, Context](
-            codec,
-            system,
-            protocol
-          )
-            .bind(simpleApiInstance).bind(complexApiInstance)
-        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-        val client
-          : Client[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[ProtocolCodecSpec.type], Effect, Context] =
-          Client(codec, system, transport, protocol)
-        TestFixture(
-          codec.getClass,
-          client,
-          handler,
-          port,
-          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
-          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
-          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
-          (method, p1) => client.method(method).positional.args(p1).call,
-          (method, p1) => client.method(method).args(p1).call,
-          (method, p1) => client.method(method).positional.args(p1).tell,
-          (method, p1) => client.method(method).args(p1).tell
-        )
-      }, {
-        implicit lazy val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
-          (v: Enum.Enum) => jNumber(Enum.toOrdinal(v)),
-          cursor => cursor.focus.as[Int].map(Enum.fromOrdinal)
-        )
-        implicit lazy val structureCodecJson: CodecJson[Structure] =
-          Argonaut.codec1(Structure.apply, (v: Structure) => v.value)("value")
-        implicit lazy val recordCodecJson: CodecJson[Record] =
-          Argonaut.codec13(
-            Record.apply,
-            (v: Record) =>
-              (
-                v.string,
-                v.boolean,
-                v.byte,
-                v.short,
-                v.int,
-                v.long,
-                v.float,
-                v.double,
-                v.enumeration,
-                v.list,
-                v.map,
-                v.structure,
-                v.none
-              )
-          )(
-            "string",
-            "boolean",
-            "byte",
-            "short",
-            "int",
-            "long",
-            "float",
-            "double",
-            "enumeration",
-            "list",
-            "map",
-            "structure",
-            "none"
-          )
-        val port = availablePort
-        val codec = ArgonautJsonCodec()
-        val protocol = JsonRpcProtocol(codec)
-        val handler = Handler[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context](codec, system, protocol)
-          .bind(simpleApiInstance).bind(complexApiInstance)
-        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-        val client: Client[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context] =
-          Client(codec, system, transport, protocol)
-        TestFixture(
-          codec.getClass,
-          client,
-          handler,
-          port,
-          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
-          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
-          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
-          (method, p1) => client.method(method).positional.args(p1).call,
-          (method, p1) => client.method(method).args(p1).call,
-          (method, p1) => client.method(method).positional.args(p1).tell,
-          (method, p1) => client.method(method).args(p1).tell
-        )
+//      }, {
+//        val port = availablePort
+//        val codec = UpickleJsonCodec(ProtocolCodecSpec)
+//        val protocol = JsonRpcProtocol(codec)
+//        val handler = Handler[UpickleJsonCodec.Node, UpickleJsonCodec[ProtocolCodecSpec.type], Effect, Context](
+//          codec,
+//          system,
+//          protocol
+//        )
+//          .bind(simpleApiInstance).bind(complexApiInstance)
+//        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
+//        val client: Client[UpickleJsonCodec.Node, UpickleJsonCodec[ProtocolCodecSpec.type], Effect, Context] =
+//          Client(codec, system, transport, protocol)
+//        TestFixture(
+//          codec.getClass,
+//          client,
+//          handler,
+//          port,
+//          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
+//          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
+//          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
+//          (method, p1) => client.method(method).positional.args(p1).call,
+//          (method, p1) => client.method(method).args(p1).call,
+//          (method, p1) => client.method(method).positional.args(p1).tell,
+//          (method, p1) => client.method(method).args(p1).tell
+//        )
+//      }, {
+//        val port = availablePort
+//        val codec = UpickleMessagePackCodec(ProtocolCodecSpec)
+//        val protocol = JsonRpcProtocol(codec)
+//        val handler =
+//          Handler[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[ProtocolCodecSpec.type], Effect, Context](
+//            codec,
+//            system,
+//            protocol
+//          )
+//            .bind(simpleApiInstance).bind(complexApiInstance)
+//        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
+//        val client
+//          : Client[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[ProtocolCodecSpec.type], Effect, Context] =
+//          Client(codec, system, transport, protocol)
+//        TestFixture(
+//          codec.getClass,
+//          client,
+//          handler,
+//          port,
+//          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
+//          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
+//          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
+//          (method, p1) => client.method(method).positional.args(p1).call,
+//          (method, p1) => client.method(method).args(p1).call,
+//          (method, p1) => client.method(method).positional.args(p1).tell,
+//          (method, p1) => client.method(method).args(p1).tell
+//        )
+//      }, {
+//        implicit lazy val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
+//          (v: Enum.Enum) => jNumber(Enum.toOrdinal(v)),
+//          cursor => cursor.focus.as[Int].map(Enum.fromOrdinal)
+//        )
+//        implicit lazy val structureCodecJson: CodecJson[Structure] =
+//          Argonaut.codec1(Structure.apply, (v: Structure) => v.value)("value")
+//        implicit lazy val recordCodecJson: CodecJson[Record] =
+//          Argonaut.codec13(
+//            Record.apply,
+//            (v: Record) =>
+//              (
+//                v.string,
+//                v.boolean,
+//                v.byte,
+//                v.short,
+//                v.int,
+//                v.long,
+//                v.float,
+//                v.double,
+//                v.enumeration,
+//                v.list,
+//                v.map,
+//                v.structure,
+//                v.none
+//              )
+//          )(
+//            "string",
+//            "boolean",
+//            "byte",
+//            "short",
+//            "int",
+//            "long",
+//            "float",
+//            "double",
+//            "enumeration",
+//            "list",
+//            "map",
+//            "structure",
+//            "none"
+//          )
+//        val port = availablePort
+//        val codec = ArgonautJsonCodec()
+//        val protocol = JsonRpcProtocol(codec)
+//        val handler = Handler[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context](codec, system, protocol)
+//          .bind(simpleApiInstance).bind(complexApiInstance)
+//        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
+//        val client: Client[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context] =
+//          Client(codec, system, transport, protocol)
+//        TestFixture(
+//          codec.getClass,
+//          client,
+//          handler,
+//          port,
+//          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
+//          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
+//          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
+//          (method, p1) => client.method(method).positional.args(p1).call,
+//          (method, p1) => client.method(method).args(p1).call,
+//          (method, p1) => client.method(method).positional.args(p1).tell,
+//          (method, p1) => client.method(method).args(p1).tell
+//        )
       }
     )
   }

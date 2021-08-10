@@ -1,6 +1,5 @@
 package automorph.spi
 
-import automorph.spi.Message
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -19,28 +18,12 @@ trait MessageCodec[Node] extends CodecMeta[Node] {
   def mediaType: String
 
   /**
-   * Serializes a message as binary data.
-   *
-   * @param message message
-   * @return binary data in the specific codec
-   */
-  def serialize(message: Message[Node]): ArraySeq.ofByte
-
-  /**
-   * Deserializes a message from binary data.
-   *
-   * @param data binary data in the specific codec
-   * @return message
-   */
-  def deserialize(data: ArraySeq.ofByte): Message[Node]
-
-  /**
    * Serializes a node as binary data.
    *
    * @param node node
    * @return binary data in the specific codec
    */
-  def serializeNode(message: Node): ArraySeq.ofByte
+  def serialize(message: Node): ArraySeq.ofByte
 
   /**
    * Deserializes a node from binary data.
@@ -48,13 +31,13 @@ trait MessageCodec[Node] extends CodecMeta[Node] {
    * @param data binary data in the specific codec
    * @return node
    */
-  def deserializeNode(data: ArraySeq.ofByte): Node
+  def deserialize(data: ArraySeq.ofByte): Node
 
   /**
-   * Codecs a message as human-readable text.
+   * Formats a node as human-readable text.
    *
-   * @param message message
-   * @return message in human-readable textual form
+   * @param node node
+   * @return node in human-readable textual form
    */
-  def text(message: Message[Node]): String
+  def text(node: Node): String
 }

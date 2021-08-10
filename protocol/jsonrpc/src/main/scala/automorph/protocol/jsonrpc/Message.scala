@@ -1,6 +1,4 @@
-package automorph.spi
-
-import automorph.spi.MessageType
+package automorph.protocol.jsonrpc
 
 /**
  * JSON-RPC protocol message structure.
@@ -68,3 +66,27 @@ final case class MessageError[Node](
   code: Option[Int],
   data: Option[Node]
 )
+
+/**
+ * JSON-RPC message type.
+ */
+sealed abstract class MessageType {
+  /**
+   * Message type name.
+   *
+   * @return message type name
+   */
+  def name: String = toString
+}
+
+object MessageType {
+
+  /** JSON-RPC method call request. */
+  case object Call extends MessageType
+  /** JSON-RPC method notification request. */
+  case object Notification extends MessageType
+  /** JSON-RPC result response. */
+  case object Result extends MessageType
+  /** JSON-RPC error response. */
+  case object Error extends MessageType
+}

@@ -1,8 +1,10 @@
 package test.examples
 
-import automorph.transport.http.client.SttpClient.defaultContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
+// FIXME
+import automorph.transport.http.client.SttpClient.defaultContext
 
 object Asynchronous extends App {
 
