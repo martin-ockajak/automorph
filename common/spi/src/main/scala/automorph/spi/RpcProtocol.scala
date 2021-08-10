@@ -49,7 +49,10 @@ trait RpcProtocol[Node] {
    * @param function function name override, if specified it is used instead of function name obtained from the request
    * @return RPC request on valid request message or RPC error on invalid request message
    */
-  def parseRequest(request: ArraySeq.ofByte, function: Option[String]): Either[RpcError[Details], RpcRequest[Node, Details]]
+  def parseRequest(
+    request: ArraySeq.ofByte,
+    function: Option[String]
+  ): Either[RpcError[Details], RpcRequest[Node, Details]]
 
   /**
    * Creates an RPC response.
@@ -75,9 +78,13 @@ trait RpcProtocol[Node] {
    * Generates OpenApi speficication for specified RPC functions.
    *
    * @see https://github.com/OAI/OpenAPI-Specification
+   * @param functions API functions
+   * @param title API title
+   * @param version API specification version
+   * @param serverUrls API server URLs
    * @return OpenAPI specification
    */
-  def openApi(functions: Iterable[RpcFunction]): String
+  def openApi(functions: Iterable[RpcFunction], title: String, version: String, serverUrls: Seq[String]): String
 }
 
 case object RpcProtocol {

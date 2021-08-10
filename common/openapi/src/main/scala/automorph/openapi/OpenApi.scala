@@ -9,7 +9,7 @@ import automorph.spi.protocol.RpcFunction
  *
  * @see https://github.com/OAI/OpenAPI-Specification
  */
-case object OpenApi {
+object OpenApi {
 
   private val contentType = "application/json"
   private val objectType = "object"
@@ -35,58 +35,58 @@ case object OpenApi {
 //    implicit private val propertiesDecoder: Decoder[Properties] = Decoder.decodeMap
 
   /**
-   * Generate OpenAPI paths for given API rpcFunctions.
+   * Generate OpenAPI paths for given API functions.
    *
-   * @param rpcFunctions API rpcFunctions
+   * @param functions API functions
    * @return OpenAPI paths
    */
-  def jsonRpcPaths(rpcFunctions: Iterable[RpcFunction]): Paths = toPaths(rpcFunctions, true)
+  def jsonRpcPaths(functions: Iterable[RpcFunction]): Paths = toPaths(functions, true)
 
   /**
-   * Generate OpenAPI specification for given API rpcFunctions.
+   * Generate OpenAPI specification for given API functions.
    *
-   * @param rpcFunctions named API rpcFunctions
+   * @param functions API functions
    * @param title API title
    * @param version API specification version
-   * @param serverUrls API server URL
+   * @param serverUrls API server URLs
    * @return OpenAPI specification
    */
   def jsonRpcSpec(
-    rpcFunctions: Iterable[RpcFunction],
+    functions: Iterable[RpcFunction],
     title: String,
     version: String,
     serverUrls: Seq[String]
   ): Specification = Specification(
-    paths = Some(toPaths(rpcFunctions, true)),
+    paths = Some(toPaths(functions, true)),
     info = Info(title = title, version = version),
     servers = toServers(serverUrls),
     components = toComponents()
   )
 
   /**
-   * Generate OpenAPI paths for given API rpcFunctions.
+   * Generate OpenAPI paths for given API functions.
    *
-   * @param rpcFunctions named API rpcFunctions
+   * @param functions API functions
    * @return OpenAPI paths
    */
-  def restRpcPaths(rpcFunctions: Iterable[RpcFunction]): Paths = toPaths(rpcFunctions, false)
+  def restRpcPaths(functions: Iterable[RpcFunction]): Paths = toPaths(functions, false)
 
   /**
-   * Generate OpenAPI specification for given API rpcFunctions.
+   * Generate OpenAPI specification for given API functions.
    *
-   * @param rpcFunctions named API rpcFunctions
+   * @param functions API functions
    * @param title API title
    * @param version API specification version
-   * @param serverUrls API server URL
+   * @param serverUrls API server URLs
    * @return OpenAPI specification
    */
   def restRpcSpec(
-    rpcFunctions: Iterable[RpcFunction],
+    functions: Iterable[RpcFunction],
     title: String,
     version: String,
     serverUrls: Seq[String]
   ): Specification = Specification(
-    paths = Some(toPaths(rpcFunctions, false)),
+    paths = Some(toPaths(functions, false)),
     info = Info(title = title, version = version),
     servers = toServers(serverUrls),
     components = toComponents()
@@ -207,7 +207,7 @@ case object OpenApi {
   private def toServers(serverUrls: Seq[String]): Option[Servers] =
     maybe(serverUrls.map(url => Server(url = url)).toList)
 
-  private def toPaths(rpcFunctions: Iterable[RpcFunction], rpc: Boolean): Paths = rpcFunctions.map { function =>
+  private def toPaths(functions: Iterable[RpcFunction], rpc: Boolean): Paths = functions.map { function =>
     val (requestSchema, resultSchema, errorSchema) =
       if (rpc) {
         (jsonRpcRequestSchema(function), jsonRpcResultSchema(function), jsonRpcErrorSchema)

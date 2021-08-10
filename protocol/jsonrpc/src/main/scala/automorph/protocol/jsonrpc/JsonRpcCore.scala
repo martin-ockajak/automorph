@@ -1,5 +1,6 @@
 package automorph.protocol.jsonrpc
 
+import automorph.openapi.OpenApi
 import automorph.protocol.JsonRpcProtocol
 import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
 import automorph.protocol.jsonrpc.Message.Params
@@ -124,7 +125,14 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
       }
     )
 
-  override def openApi(functions: Iterable[RpcFunction]): String = ???
+  override def openApi(
+    functions: Iterable[RpcFunction],
+    title: String,
+    version: String,
+    serverUrls: Seq[String]
+  ): String = {
+    ???
+  }
 
   /**
    * Creates a copy of this protocol with specified exception to JSON-RPC error mapping.

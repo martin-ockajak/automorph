@@ -1,5 +1,6 @@
 package automorph.protocol.restrpc
 
+import automorph.openapi.OpenApi
 import automorph.protocol.RestRpcProtocol
 import automorph.protocol.restrpc.Message.Request
 import automorph.protocol.restrpc.{Response, ResponseError, RestRpcException}
@@ -128,7 +129,14 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
       }
     )
 
-  override def openApi(functions: Iterable[RpcFunction]): String = ???
+  override def openApi(
+    functions: Iterable[RpcFunction],
+    title: String,
+    version: String,
+    serverUrls: Seq[String]
+  ): String = {
+    ???
+  }
 
   /**
    * Creates a copy of this protocol with specified exception to REST-RPC error mapping.
