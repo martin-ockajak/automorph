@@ -1,6 +1,6 @@
 package automorph.protocol
 
-import automorph.protocol.restrpc.{ErrorMapping, Message, Response, RestRpcCore}
+import automorph.protocol.restrpc.{ErrorMapping, Message, RestRpcCore}
 import automorph.spi.{MessageCodec, RpcProtocol}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -25,8 +25,8 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
   codec: Codec,
   errorToException: (String, Option[Int]) => Throwable,
   exceptionToError: Throwable => Option[Int],
-  protected val encodeRequest: Message.Request => Node,
-  protected val decodeRequest: Node => Message.Request,
+  protected val encodeRequest: Message.Request[Node] => Node,
+  protected val decodeRequest: Node => Message.Request[Node],
   protected val encodeResponse: Message[Node] => Node,
   protected val decodeResponse: Node => Message[Node],
   protected val encodeStrings: List[String] => Node

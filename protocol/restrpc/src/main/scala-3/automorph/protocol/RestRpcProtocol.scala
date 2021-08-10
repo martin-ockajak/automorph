@@ -1,7 +1,7 @@
 package automorph.protocol
 
 import automorph.protocol.RestRpcProtocol.{defaultErrorToException, defaultExceptionToError}
-import automorph.protocol.restrpc.{ErrorMapping, Message, Response, RestRpcCore}
+import automorph.protocol.restrpc.{ErrorMapping, Message, RestRpcCore}
 import automorph.spi.{MessageCodec, RpcProtocol}
 
 /**

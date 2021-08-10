@@ -88,20 +88,21 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
     responseRequired: Boolean
   ): Try[RpcRequest[Node, Details]] = {
     // Create request
-    val formedRequest = createArgumentNodes(argumentNames, argumentValues)
-    val requestProperties = Map(
-      "Type" -> MessageType.Call.toString,
-      "Function" -> function,
-      "Arguments" -> argumentValues.size.toString
-    )
+    Try(createArgumentNodes(argumentNames, argumentValues)).flatMap { formedRequest =>
+      val requestProperties = Map(
+        "Type" -> MessageType.Call.toString,
+        "Function" -> function,
+        "Arguments" -> argumentValues.size.toString
+      )
 
-    // Serialize request
-    val messageText = () => Some(codec.text(encodeRequest(formedRequest)))
-    Try(codec.serialize(encodeRequest(formedRequest))).mapFailure { error =>
-      InvalidRequestException("Malformed request", error)
-    }.map { messageBody =>
-      val message = RpcMessage((), messageBody, requestProperties, messageText)
-      RpcRequest(function, Right(formedRequest), responseRequired, message)
+      // Serialize request
+      val messageText = () => Some(codec.text(encodeRequest(formedRequest)))
+      Try(codec.serialize(encodeRequest(formedRequest))).mapFailure { error =>
+        InvalidRequestException("Malformed request", error)
+      }.map { messageBody =>
+        val message = RpcMessage((), messageBody, requestProperties, messageText)
+        RpcRequest(function, Right(formedRequest), responseRequired, message)
+      }
     }
   }
 
@@ -158,5 +159,5 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
   private def createArgumentNodes(argumentNames: Option[Seq[String]], encodedArguments: Seq[Node]): Request[Node] =
     argumentNames.filter(_.size >= encodedArguments.size).map { names =>
       names.zip(encodedArguments).toMap
-    }.getOrElse(throw IllegalArgumentException("Missing REST-RPC request argument names"))
+    }.getOrElse(throw InvalidRequestException("Missing REST-RPC request argument names"))
 }
