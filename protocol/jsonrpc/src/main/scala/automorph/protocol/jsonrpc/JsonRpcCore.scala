@@ -32,6 +32,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     function: Option[String]
   ): Either[RpcError[Details], RpcRequest[Node, Details]] =
     // Deserialize request
+    Seq(function)
     Try(decodeMessage(codec.deserialize(request))).pureFold(
       error => Left(RpcError(ParseErrorException("Malformed request", error), RpcMessage(None, request))),
       formedRequest => {
