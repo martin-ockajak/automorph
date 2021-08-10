@@ -69,7 +69,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
   ): Effect[HandlerResult[Data]] = {
     // Lookup bindings for the specified method
     logger.debug(s"Processing ${protocol.name} request", rpcRequest.message.properties)
-    methodBindings.get(rpcRequest.method).map { handlerMethod =>
+    methodBindings.get(rpcRequest.function).map { handlerMethod =>
       // Extract arguments
       extractArguments(rpcRequest, handlerMethod).flatMap { arguments =>
         // Invoke method
@@ -91,7 +91,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
         }
       )
     }.getOrElse {
-      val error = FunctionNotFoundException(s"Method not found: ${rpcRequest.method}", None.orNull)
+      val error = FunctionNotFoundException(s"Method not found: ${rpcRequest.function}", None.orNull)
       errorResponse(error, rpcRequest.message)
     }
   }
