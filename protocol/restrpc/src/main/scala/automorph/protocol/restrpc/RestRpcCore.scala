@@ -28,25 +28,25 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
     request: ArraySeq.ofByte,
     function: Option[String]
   ): Either[RpcError[Details], RpcRequest[Node, Details]] =
-      // Deserialize request
-      Try(decodeRequest(codec.deserialize(request))).pureFold(
-        error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage(None, request))),
-        formedRequest => {
-          // Validate request
-          val messageText = () => Some(codec.text(encodeRequest(formedRequest)))
-          val requestProperties = Map(
-            "Type" -> MessageType.Call.toString,
-            "Arguments" -> formedRequest.size.toString
-          )
-          function.map { functionName =>
-            val message = RpcMessage((), request, requestProperties ++ Option("Function" -> functionName), messageText)
-            Right(RpcRequest(functionName, Right(formedRequest), true, message))
-          }.getOrElse {
-            val message = RpcMessage((), request, requestProperties, messageText)
-            Left(RpcError(InvalidRequestException("Missing invoked function name"), message))
-          }
+    // Deserialize request
+    Try(decodeRequest(codec.deserialize(request))).pureFold(
+      error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage(None, request))),
+      formedRequest => {
+        // Validate request
+        val messageText = () => Some(codec.text(encodeRequest(formedRequest)))
+        val requestProperties = Map(
+          "Type" -> MessageType.Call.toString,
+          "Arguments" -> formedRequest.size.toString
+        )
+        function.map { functionName =>
+          val message = RpcMessage((), request, requestProperties ++ Option("Function" -> functionName), messageText)
+          Right(RpcRequest(functionName, Right(formedRequest), true, message))
+        }.getOrElse {
+          val message = RpcMessage((), request, requestProperties, messageText)
+          Left(RpcError(InvalidRequestException("Missing invoked function name"), message))
         }
-      )
+      }
+    )
 
   override def createResponse(
     result: Try[Node],
@@ -86,9 +86,9 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
     argumentNames: Option[Seq[String]],
     argumentValues: Seq[Node],
     responseRequired: Boolean
-  ): Try[RpcRequest[Node, Details]] = {
+  ): Try[RpcRequest[Node, Details]] =
     // Create request
-    Try(createArgumentNodes(argumentNames, argumentValues)).flatMap { formedRequest =>
+    createArgumentNodes(argumentNames, argumentValues).flatMap { formedRequest =>
       val requestProperties = Map(
         "Type" -> MessageType.Call.toString,
         "Function" -> function,
@@ -104,7 +104,6 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
         RpcRequest(function, Right(formedRequest), responseRequired, message)
       }
     }
-  }
 
   override def parseResponse(response: ArraySeq.ofByte): Either[RpcError[Details], RpcResponse[Node, Details]] =
     // Deserialize response
@@ -156,8 +155,10 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
    * @param encodedArguments encoded arguments
    * @return argument nodes
    */
-  private def createArgumentNodes(argumentNames: Option[Seq[String]], encodedArguments: Seq[Node]): Request[Node] =
+  private def createArgumentNodes(argumentNames: Option[Seq[String]], encodedArguments: Seq[Node]): Try[Request[Node]] =
     argumentNames.filter(_.size >= encodedArguments.size).map { names =>
-      names.zip(encodedArguments).toMap
-    }.getOrElse(throw InvalidRequestException("Missing REST-RPC request argument names"))
+      Success(names.zip(encodedArguments).toMap)
+    }.getOrElse {
+      Failure(InvalidRequestException("Missing REST-RPC request argument names"))
+    }
 }
