@@ -32,11 +32,11 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     function: Option[String]
   ): Either[RpcError[Details], RpcRequest[Node, Details]] =
     // Deserialize request
-    Seq(function)
     Try(decodeMessage(codec.deserialize(request))).pureFold(
       error => Left(RpcError(ParseErrorException("Malformed request", error), RpcMessage(None, request))),
       formedRequest => {
         // Validate request
+        Seq(function)
         val messageText = () => Some(codec.text(encodeMessage(formedRequest)))
         val message = RpcMessage(formedRequest.id, request, formedRequest.properties, messageText)
         Try(Request(formedRequest)).pureFold(
