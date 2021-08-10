@@ -35,15 +35,27 @@ object OpenApi {
 //    implicit private val propertiesDecoder: Decoder[Properties] = Decoder.decodeMap
 
   /**
-   * Generate OpenAPI paths for given API functions.
+   * Generate OpenAPI paths for specified API functions.
    *
    * @param functions API functions
    * @return OpenAPI paths
    */
-  def jsonRpcPaths(functions: Iterable[RpcFunction]): Paths = toPaths(functions, true)
+  def jsonRpcPaths(functions: Iterable[RpcFunction]): Paths = toPaths(functions.map { function =>
+    function -> RpcSchema(jsonRpcRequestSchema(function), jsonRpcResultSchema(function), jsonRpcErrorSchema)
+  })
 
   /**
-   * Generate OpenAPI specification for given API functions.
+   * Generate OpenAPI paths for specified API functions.
+   *
+   * @param functions API functions
+   * @return OpenAPI paths
+   */
+  def restRpcPaths(functions: Iterable[RpcFunction]): Paths = toPaths(functions.map { function =>
+    function -> RpcSchema(restRpcRequestSchema(function), restRpcResultSchema(function), restRpcErrorSchema)
+  })
+
+  /**
+   * Generate OpenAPI specification for specified API functions.
    *
    * @param functions API functions
    * @param title API title
@@ -57,22 +69,14 @@ object OpenApi {
     version: String,
     serverUrls: Seq[String]
   ): Specification = Specification(
-    paths = Some(toPaths(functions, true)),
+    paths = Some(jsonRpcPaths(functions)),
     info = Info(title = title, version = version),
     servers = toServers(serverUrls),
     components = toComponents()
   )
 
   /**
-   * Generate OpenAPI paths for given API functions.
-   *
-   * @param functions API functions
-   * @return OpenAPI paths
-   */
-  def restRpcPaths(functions: Iterable[RpcFunction]): Paths = toPaths(functions, false)
-
-  /**
-   * Generate OpenAPI specification for given API functions.
+   * Generate OpenAPI specification for specified API functions.
    *
    * @param functions API functions
    * @param title API title
@@ -86,7 +90,7 @@ object OpenApi {
     version: String,
     serverUrls: Seq[String]
   ): Specification = Specification(
-    paths = Some(toPaths(functions, false)),
+    paths = Some(restRpcPaths(functions)),
     info = Info(title = title, version = version),
     servers = toServers(serverUrls),
     components = toComponents()
@@ -207,16 +211,10 @@ object OpenApi {
   private def toServers(serverUrls: Seq[String]): Option[Servers] =
     maybe(serverUrls.map(url => Server(url = url)).toList)
 
-  private def toPaths(functions: Iterable[RpcFunction], rpc: Boolean): Paths = functions.map { function =>
-    val (requestSchema, resultSchema, errorSchema) =
-      if (rpc) {
-        (jsonRpcRequestSchema(function), jsonRpcResultSchema(function), jsonRpcErrorSchema)
-      } else {
-        (restRpcRequestSchema(function), restRpcResultSchema(function), restRpcErrorSchema)
-      }
-    val requestMediaType = MediaType(schema = Some(requestSchema))
-    val resultMediaType = MediaType(schema = Some(resultSchema))
-    val errorMediaType = MediaType(schema = Some(errorSchema))
+  private def toPaths(functions: Iterable[(RpcFunction, RpcSchema)]): Paths = functions.map { case (function, schema) =>
+    val requestMediaType = MediaType(schema = Some(schema.request))
+    val resultMediaType = MediaType(schema = Some(schema.result))
+    val errorMediaType = MediaType(schema = Some(schema.error))
     val requestBody = RequestBody(content = Map(contentType -> requestMediaType), required = Some(true))
     val responses = Map(
       "default" -> Response("Failed function call error details", Some(Map(contentType -> errorMediaType))),
