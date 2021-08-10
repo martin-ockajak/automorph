@@ -48,10 +48,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
       }
     )
 
-  override def createResponse(
-    result: Try[Node],
-    details: Details
-  ): Try[RpcResponse[Node, Details]] = {
+  override def createResponse(result: Try[Node], details: Details): Try[RpcResponse[Node, Details]] = {
     // Create response
     Seq(details)
     val formedResponse = result.pureFold(

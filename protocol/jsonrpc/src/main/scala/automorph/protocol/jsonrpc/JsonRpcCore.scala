@@ -68,10 +68,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     }
   }
 
-  override def createResponse(
-    result: Try[Node],
-    details: Details
-  ): Try[RpcResponse[Node, Details]] = {
+  override def createResponse(result: Try[Node], details: Details): Try[RpcResponse[Node, Details]] = {
     // Create response
     val id = details.getOrElse(unknownId)
     val formedResponse = result.pureFold(
@@ -103,7 +100,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
   }
 
   override def parseResponse(response: ArraySeq.ofByte): Either[RpcError[Details], RpcResponse[Node, Details]] =
-  // Deserialize response
+    // Deserialize response
     Try(decodeMessage(codec.deserialize(response))).pureFold(
       error => Left(RpcError(ParseErrorException("Malformed response", error), RpcMessage(None, response))),
       formedResponse => {
