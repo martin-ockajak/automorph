@@ -1,7 +1,7 @@
 package automorph.handler
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodBindings.{methodLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodBindings.{rpcFunctionLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
@@ -84,7 +84,7 @@ case object HandlerBindings {
     Seq(methodLift)
     ref.c.Expr[HandlerBinding[Node, Effect, Context]](q"""
       automorph.handler.HandlerBinding(
-        ${method.lift},
+        ${method.lift.rpcFunction},
         $invoke,
         ${methodUsesContext[C, Context](ref)(method)}
       )

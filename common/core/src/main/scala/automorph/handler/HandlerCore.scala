@@ -69,11 +69,11 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
   ): Effect[HandlerResult[Data]] = {
     // Lookup bindings for the specified method
     logger.debug(s"Processing ${protocol.name} request", rpcRequest.message.properties)
-    methodBindings.get(rpcRequest.function).map { handlerMethod =>
+    methodBindings.get(rpcRequest.function).map { handlerBinding =>
       // Extract arguments
-      extractArguments(rpcRequest, handlerMethod).flatMap { arguments =>
+      extractArguments(rpcRequest, handlerBinding).flatMap { arguments =>
         // Invoke method
-        Try(system.either(handlerMethod.invoke(arguments, context)))
+        Try(system.either(handlerBinding.invoke(arguments, context)))
       }.pureFold(
         error => errorResponse(error, rpcRequest.message),
         effect => {
@@ -110,7 +110,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
     handlerMethod: HandlerBinding[Node, Effect, Context]
   ): Try[Seq[Node]] = {
     // Adjust expected method parameters if it uses context as its last parameter
-    val parameters = handlerMethod.method.parameters.flatten
+    val parameters = handlerMethod.function.parameters
     val parameterNames = parameters.map(_.name).dropRight(if (handlerMethod.usesContext) 1 else 0)
     rpcRequest.arguments.fold(
       arguments =>

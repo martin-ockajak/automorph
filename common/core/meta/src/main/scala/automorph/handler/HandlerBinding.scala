@@ -1,11 +1,11 @@
 package automorph.handler
 
-import automorph.util.Method
+import automorph.spi.protocol.RpcFunction
 
 /**
- * Handler bound API method binding.
+ * RPC handler API method binding.
  *
- * @param method method descriptor
+ * @param function RPC function
  * @param invoke bound method invocation function
  * @param usesContext true if the last parameter of the bound method is contextual
  * @tparam Node message node type
@@ -13,7 +13,7 @@ import automorph.util.Method
  * @tparam Context request context type
  */
 final case class HandlerBinding[Node, Effect[_], Context](
-  method: Method,
+  function: RpcFunction,
   invoke: (Seq[Node], Context) => Effect[Node],
   usesContext: Boolean
 )

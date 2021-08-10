@@ -91,7 +91,7 @@ object ClientBind:
 
           // Encode method arguments
           val encodedArguments = clientBinding.encodeArguments(argumentValues)
-          val parameterNames = clientBinding.method.parameters.flatten.map(_.name)
+          val parameterNames = clientBinding.function.parameters.map(_.name)
           val argumentNames = Option.when(namedArguments)(parameterNames)
 
           // Perform the API call

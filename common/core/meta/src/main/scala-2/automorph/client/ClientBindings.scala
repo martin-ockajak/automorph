@@ -1,7 +1,7 @@
 package automorph.client
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodBindings.{methodLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodBindings.{rpcFunctionLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.MessageCodec
 import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
@@ -78,7 +78,7 @@ case object ClientBindings {
     Seq(methodLift)
     ref.c.Expr[ClientBinding[Node]](q"""
       automorph.client.ClientBinding[$nodeType](
-        ${method.lift},
+        ${method.lift.rpcFunction},
         $encodeArguments,
         $decodeResult,
         ${methodUsesContext[C, Context](ref)(method)}

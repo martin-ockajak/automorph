@@ -13,7 +13,7 @@ import automorph.spi.protocol.{RpcFunction, RpcParameter}
  * @param available true if it possible to call this method
  * @param documentation documentation (Scaladoc)
  */
-final case class Method(
+final private[automorph] case class Method(
   name: String,
   resultType: String,
   parameters: Seq[Seq[Parameter]],
@@ -28,7 +28,7 @@ final case class Method(
     val typeParametersText = typeParameters.map { typeParameter =>
       s"${typeParameter.name}"
     } match {
-      case Seq()  => ""
+      case Seq() => ""
       case values => s"[${values.mkString(", ")}]"
     }
     val parametersText = parameters.map { parameters =>
@@ -39,6 +39,7 @@ final case class Method(
     s"$name$typeParametersText$parametersText: $resultType"
   }
 
+  /** RPC function descriptor. */
   lazy val rpcFunction: RpcFunction = RpcFunction(
     name,
     resultType,
@@ -55,7 +56,7 @@ final case class Method(
  * @param dataType type
  * @param contextual true if this parameter is implicit
  */
-final case class Parameter(
+final private[automorph] case class Parameter(
   name: String,
   dataType: String,
   contextual: Boolean

@@ -1,6 +1,7 @@
 package automorph.protocol
 
-import automorph.util.{Method, Parameter, Reflection}
+import automorph.spi.protocol.{RpcFunction, RpcParameter}
+import automorph.util.Reflection
 import scala.annotation.nowarn
 import scala.reflect.macros.blackbox
 
@@ -10,35 +11,32 @@ private[automorph] case object MethodBindings {
   private val testProperty = "macro.test"
 
   /**
-   * Creates method quoted tree converter.
+   * Creates RPC function quoted tree converter.
    *
    * @param ref reflection
    * @tparam C macro context type
    * @return method quoted tree converter
    */
-  def methodLiftable[C <: blackbox.Context](ref: Reflection[C]): ref.c.universe.Liftable[Method] =
-    new ref.c.universe.Liftable[Method] {
+  def methodLiftable[C <: blackbox.Context](ref: Reflection[C]): ref.c.universe.Liftable[RpcFunction] =
+    new ref.c.universe.Liftable[RpcFunction] {
 
       import ref.c.universe.{Liftable, Quasiquote, Tree}
 
-      implicit val parameterLiftable: Liftable[Parameter] = (v: Parameter) =>
+      implicit val parameterLiftable: Liftable[RpcParameter] = (v: RpcParameter) =>
         q"""
-          automorph.util.Parameter(
+          automorph.spi.protocol.RpcParameter(
             ${v.name},
-            ${v.dataType},
-            ${v.contextual}
+            ${v.dataType}
           )
         """
       Seq(parameterLiftable)
 
-      override def apply(v: Method): Tree = q"""
-        automorph.util.Method(
+      override def apply(v: RpcFunction): Tree = q"""
+        automorph.spi.protocol.RpcFunction(
           ${v.name},
           ${v.resultType},
-          Seq(..${v.parameters.map(values => q"Seq(..$values)")}),
-          Seq(..${v.typeParameters}),
-          ${v.public},
-          ${v.available},
+          Seq(..${v.parameters.flatten}),
+          Seq(..${v.typeRpcParameters}),
           ${v.documentation}
         )
       """

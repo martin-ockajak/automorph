@@ -2,7 +2,7 @@ package automorph.client
 
 import automorph.log.MacroLogger
 import automorph.client.ClientBinding
-import automorph.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodBindings.{call, methodSignature, rpcFunctionToExpr, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.MessageCodec
 import automorph.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -67,7 +67,7 @@ private[automorph] case object ClientBindings:
     logBoundMethod[Api](ref)(method, encodeArguments, decodeResult)
     '{
       ClientBinding(
-        ${ Expr(method.lift) },
+        ${ Expr(method.lift.rpcFunction) },
         $encodeArguments,
         $decodeResult,
         ${ Expr(methodUsesContext[Context](ref)(method)) }

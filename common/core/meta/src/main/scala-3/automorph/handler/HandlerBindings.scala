@@ -1,7 +1,7 @@
 package automorph.handler
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodBindings.{call, methodSignature, methodToExpr, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodBindings.{call, methodSignature, rpcFunctionToExpr, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.{Method, Reflection}
@@ -80,7 +80,7 @@ private[automorph] case object HandlerBindings:
     logBoundMethod[Api](ref)(method, invoke)
     '{
       HandlerBinding(
-        ${ Expr(method.lift) },
+        ${ Expr(method.lift.rpcFunction) },
         $invoke,
         ${ Expr(methodUsesContext[Context](ref)(method)) }
       )

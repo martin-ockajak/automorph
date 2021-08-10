@@ -1,36 +1,34 @@
 package automorph.protocol
 
-import automorph.util.{Method, Parameter, Reflection}
-import scala.quoted.{quotes, Expr, Quotes, ToExpr, Type}
+import automorph.spi.protocol.{RpcFunction, RpcParameter}
+import automorph.util.Reflection
+import scala.quoted.{Expr, Quotes, ToExpr, Type, quotes}
 
 /** Method bindings introspection. */
 private[automorph] case object MethodBindings:
 
   /**
-   * Method quoted expression converter.
+   * Method RPC function quoted expression converter.
    *
    * @return method quoted expression converter
    */
-  given methodToExpr: ToExpr[Method] = new ToExpr[Method]:
+  given rpcFunctionToExpr: ToExpr[RpcFunction] = new ToExpr[RpcFunction]:
 
-    given parameterToExpr: ToExpr[Parameter] = new ToExpr[Parameter]:
+    given parameterToExpr: ToExpr[RpcParameter] = new ToExpr[RpcParameter]:
 
-      override def apply(v: Parameter)(using Quotes): Expr[Parameter] = '{
-        Parameter(
+      override def apply(v: RpcParameter)(using Quotes): Expr[RpcParameter] = '{
+        RpcParameter(
           ${ Expr(v.name) },
-          ${ Expr(v.dataType) },
-          ${ Expr(v.contextual) }
+          ${ Expr(v.dataType) }
         )
       }
 
-    override def apply(v: Method)(using Quotes): Expr[Method] = '{
-      Method(
+    override def apply(v: RpcFunction)(using Quotes): Expr[RpcFunction] = '{
+      RpcFunction(
         ${ Expr(v.name) },
         ${ Expr(v.resultType) },
         ${ Expr(v.parameters) },
         ${ Expr(v.typeParameters) },
-        ${ Expr(v.public) },
-        ${ Expr(v.available) },
         ${ Expr(v.documentation) }
       )
     }
