@@ -2,6 +2,17 @@
 
 *Automorph* supports integration with other software using various plugins published in separate artifacts.
 
+## RPC protocol
+
+Remote procedure call [(RPC) protocol]((https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)) plugins.
+
+The underlying RPC protocol must support remote function invocation.
+
+| Class | Artifact |  Protocol |
+| --- | --- | --- |
+| [JsonRpcProtocol](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/protocol/JsonRpcProtocol.html) (Default) | [automorph-jsonrpc](https://mvnrepository.com/artifact/org.automorph/automorph-jsonrpc) | [JSON-RPC](https://www.jsonrpc.org/specification) |
+| [RestRpcProtocol](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/protocol/RestRpcProtocol.html) | [automorph-restrpc](https://mvnrepository.com/artifact/org.automorph/automorph-restrpc) | [REST-RPC] |
+
 ## Effect system
 
 Computational [effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html) plugins.
@@ -17,17 +28,6 @@ The underlying runtime must support monadic composition of effectful values.
 | [MonixSystem](https://www.javadoc.io/doc/org.automorph/automorph-monix_2.13/latest/automorph/system/MonixSystem.html) | [automorph-monix](https://mvnrepository.com/artifact/org.automorph/automorph-monix) | [Monix](https://monix.io/) | [Task](https://monix.io/api/current/monix/eval/Task.html) |
 | [CatsEffectSystem](https://www.javadoc.io/doc/org.automorph/automorph-cats-effect_2.13/latest/automorph/system/CatsEffectSystem.html) | [automorph-cats-effect](https://mvnrepository.com/artifact/org.automorph/automorph-cats-effect) | [Cats Effect](https://typelevel.org/cats-effect/) | [IO](https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html) |
 | [ScalazSystem](https://www.javadoc.io/doc/org.automorph/automorph-scalaz_2.13/latest/automorph/system/ScalazSystem.html) | [automorph-scalaz](https://mvnrepository.com/artifact/org.automorph/automorph-scalaz) | [Scalaz](https://github.com/scalaz) | [IO](https://www.javadoc.io/doc/org.scalaz/scalaz_2.13/latest/scalaz/effect/IO.html) |
-
-## RPC protocol
-
-Remote procedure call [(RPC) protocol]((https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)) plugins.
-
-The underlying RPC protocol must support remote function invocation.
-
-| Class | Artifact |  Protocol |
-| --- | --- | --- |
-| [JsonRpcProtocol](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/protocol/JsonRpcProtocol.html) (Default) | [automorph-jsonrpc](https://mvnrepository.com/artifact/org.automorph/automorph-jsonrpc) | [JSON-RPC](https://www.jsonrpc.org/specification) |
-| [RestRpcProtocol](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/protocol/RestRpcProtocol.html) | [automorph-restrpc](https://mvnrepository.com/artifact/org.automorph/automorph-restrpc) | [REST-RPC] |
 
 ## Message transport
 
