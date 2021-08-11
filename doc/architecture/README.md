@@ -8,8 +8,8 @@ The library provides the following components to assemble either fully standalon
 * [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_2.13/latest/automorph/Handler.html)
 * [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)
 * [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html)
-* [Message codec](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageCodec.html)
 * [Message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageTransport.html)
+* [Message codec](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageCodec.html)
 
 ## Diagram
 
@@ -20,19 +20,28 @@ The library provides the following components to assemble either fully standalon
 The client provides automatic creation of transparent proxy instances for remote RPC endpoints defined by existing API classes. Additionally, it also
 supports direct calls and notifications of remote API methods.
 
-Depends on:
+**Depends on**
 
-* [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)
 * [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html)
+* [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)
 * [Message codec](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageCodec.html)
 * [Client message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/ClientMessageTransport.html)
+
+**Used by**
+
+* Applications
 
 ## Handler
 
 The handler provides automatic creation of remote RPC endpoint bindings for existing API instances and subsequent processing RPC requests.
 
-Depends on:
+**Depends on**
 
 * [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)
-* [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html)
 * [Message codec](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageCodec.html)
+* [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/EffectSystem.html)
+
+**Used by**
+
+* [Server message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/transport/ServerMessageTransport.html)
+* [Endpoint message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/transport/EndpointMessageTransport.html)
