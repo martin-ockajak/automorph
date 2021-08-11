@@ -18,7 +18,6 @@ object OpenApi {
   val argumentsDescription = "Function argument values by name"
   private val contentType = "application/json"
   private val httpStatusCodeOk = 200.toString
-  private val restRpcPrefix = "REST-RPC "
   private val scaladocMarkup = "^[/\\* ]*$".r
   private val optionTypePrefix = s"${classOf[Option[Unit]].getName}"
 //  implicit private val pathsEncoder: Encoder[Paths] = new Encoder[Paths] {
