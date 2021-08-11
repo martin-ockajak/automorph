@@ -2,26 +2,25 @@
 
 ![automorph](../images/banner.jpg)
 
-**Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless
-way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/specification) and [REST-RPC] protocols.
+**Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](https://www.scala-lang.org/) supporting [JSON-RPC](https://www.jsonrpc.org/specification) and [REST-RPC] protocols.
 
 ## Goals
 
-* Provide a **definitive RPC solution** for Scala ecosystem
-* Strive for **very easy integration** with existing applications
-* Encourage use of **appropriate technical standards** for system interoperability
+* Enable consuming and exposing **remote APIs** transparently and directly **without another layer**
+* Strive for **smooth integration** with other **libraries** and existing **applications**
+* Preserve user **freedom** to make suitable **technical decisions**
 
 ## Features
 
-* **Powerful** - client and server API bindings are generated directly from public methods of existing API classes
-* **Modular** - various integration plugins can be combined to match required effect type, message format and transport protocol
-* **Clean** - request/response metadata can be manipulated using transport protocol agnostic abstraction
-* **Fast** - optimized API binding code is generated during compilation
-* **Safe** - generated API bindings are type checked during compilation
-* **Flexible** - remote API method names and error/exception mapping are customizable
-* **Extensible** - additional integration plugins and arbitrary data type serialization are simple to implement
-* **Compatible** - available for [Scala 2.12](https://www.scala-lang.org/news/2.12.0/), [Scala 2.13](https://www.scala-lang.org/news/2.13.0)
+* **Convenient** - client-side or server-side remote API bindings are created automatically by analyzing public methods of existing API classes
+* **Modular** - [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) protocol, [transport](https://en.wikipedia.org/wiki/Transport_layer) protocol, message [format](https://en.wikipedia.org/wiki/File_format) and [effect](https://en.wikipedia.org/wiki/Effect_system) type can be freely combined by choosing appropriate plugins
+* **Clean** - request and response transport protocol metadata can be manipulated via optional API abstractions
+* **Safe** - optimized API binding code is generated and type checked during compilation
+* **Flexible** - remote API method names and exception to error mapping are customizable
+* **Extensible** - additional plugins and arbitrary data type serialization support can be added with minimal effort
+* **Compatible** - artifacts available for [Scala 2.12](https://www.scala-lang.org/news/2.12.0/), [Scala 2.13](https://www.scala-lang.org/news/2.13.0)
   and [Scala 3](https://dotty.epfl.ch/)
+* **Descriptive** - [OpenAPI](https://github.com/OAI/OpenAPI-Specification) specification in [JSON](https://en.wikipedia.org/wiki/JSON) format can be assembled for remote APIs
 * **Boilerplate free** - even advanced use-cases require only a few lines of code
 * **Dependency free** - core functionality depends on [SLF4J API](http://www.slf4j.org/) only
 
@@ -30,18 +29,18 @@ way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/sp
 ### RPC protocols
 
 * [JSON-RPC](https://www.jsonrpc.org/specification)
-* [REST-RPC](https://en.wikipedia.org/wiki/Representational_state_transfer)
+* [REST-RPC]
+
+### Message formats
+
+* [JSON](https://www.json.org/)
+* [MessagePack](https://msgpack.org/)
 
 ### Transport protocols
 
 * [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)
 * [WebSocket](https://en.wikipedia.org/wiki/WebSocket)
 * [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
-
-### Message codecs
-
-* [JSON](https://www.json.org/)
-* [MessagePack](https://msgpack.org/)
 
 ## Inspired by
 
