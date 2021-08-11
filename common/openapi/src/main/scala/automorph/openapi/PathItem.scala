@@ -1,6 +1,6 @@
 package automorph.openapi
 
-final case class PathItem(
+private [automorph] final case class PathItem(
   get: Option[Operation] = None,
   put: Option[Operation] = None,
   post: Option[Operation] = None,

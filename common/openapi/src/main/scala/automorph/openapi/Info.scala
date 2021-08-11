@@ -1,6 +1,6 @@
 package automorph.openapi
 
-final case class Info(
+private [automorph] final case class Info(
   title: String,
   version: String,
   summary: Option[String] = None,

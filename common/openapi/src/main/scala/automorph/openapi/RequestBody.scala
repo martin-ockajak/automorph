@@ -2,12 +2,12 @@ package automorph.openapi
 
 import automorph.openapi.RequestBody.Content
 
-final case class RequestBody(
+private [automorph] final case class RequestBody(
   content: Content,
   required: Option[Boolean] = None,
   description: Option[String] = None
 )
 
-case object RequestBody {
+private [automorph] case object RequestBody {
   type Content = Map[String, MediaType]
 }

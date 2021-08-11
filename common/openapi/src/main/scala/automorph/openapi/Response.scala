@@ -2,11 +2,11 @@ package automorph.openapi
 
 import automorph.openapi.Response.Content
 
-final case class Response(
+private [automorph] final case class Response(
   description: String,
   content: Option[Content]
 )
 
-case object Response {
+private [automorph] case object Response {
   type Content = Map[String, MediaType]
 }

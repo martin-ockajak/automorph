@@ -2,7 +2,7 @@ package automorph.openapi
 
 import automorph.openapi.Schema.Properties
 
-final case class Schema(
+private [automorph] final case class Schema(
   `type`: Option[String] = None,
   title: Option[String] = None,
   description: Option[String] = None,
@@ -13,6 +13,6 @@ final case class Schema(
   $ref: Option[String] = None
 )
 
-case object Schema {
+private [automorph] case object Schema {
   type Properties = Map[String, Schema]
 }

@@ -7,7 +7,7 @@ package automorph.openapi
  * @param result result schema
  * @param error error schema
  */
-final case class RpcSchema(
+private [automorph] final case class RpcSchema(
   request: Schema,
   result: Schema,
   error: Schema

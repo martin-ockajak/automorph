@@ -1,6 +1,6 @@
 package automorph.openapi
 
-final case class Parameter(
+private [automorph] final case class Parameter(
   name: String,
   in: String,
   required: Boolean,

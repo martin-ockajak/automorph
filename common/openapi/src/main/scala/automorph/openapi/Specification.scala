@@ -7,7 +7,7 @@ import automorph.openapi.Specification.{Components, Paths, Servers}
  *
  * @see https://github.com/OAI/OpenAPI-Specification
  */
-final case class Specification(
+private [automorph] final case class Specification(
   openapi: String = "3.1.0",
   info: Info,
   servers: Option[Servers] = None,
@@ -15,7 +15,7 @@ final case class Specification(
   components: Option[Components] = None
 )
 
-case object Specification {
+private [automorph] case object Specification {
   type Servers = List[Server]
   type Paths = Map[String, PathItem]
   type Components = Map[String, Schema]

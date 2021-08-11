@@ -1,6 +1,6 @@
 package automorph.openapi
 
-final case class License(
+private[automorph] final case class License(
   name: String,
   identifier: Option[String] = None,
   url: Option[String] = None

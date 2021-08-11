@@ -9,7 +9,7 @@ import automorph.spi.protocol.RpcFunction
  *
  * @see https://github.com/OAI/OpenAPI-Specification
  */
-object OpenApi {
+private[automorph] object OpenApi {
 
   val requestTitle = "Request"
   val resultTitle = "Result"
