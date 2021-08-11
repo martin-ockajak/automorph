@@ -4,7 +4,7 @@
 
 ## RPC protocol
 
-Remote procedure call [(RPC) protocol]((https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)) plugins.
+Remote procedure call [(RPC) protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html) plugins.
 
 The underlying RPC protocol must support remote function invocation.
 
