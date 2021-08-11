@@ -8,4 +8,14 @@ private [automorph] final case class PathItem(
   parameters: Option[List[Parameter]] = None,
   summary: Option[String] = None,
   description: Option[String] = None
-)
+) {
+  def map: Map[String, Any] = Map(
+    "get" -> get.map(_.map),
+    "put" -> put.map(_.map),
+    "post" -> post.map(_.map),
+    "delete" -> delete.map(_.map),
+    "parameters" -> parameters.map(_.map(_.map)),
+    "summary" -> summary,
+    "description" -> description
+  )
+}

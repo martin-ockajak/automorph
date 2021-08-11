@@ -7,7 +7,14 @@ private [automorph] final case class Operation(
   responses: Option[Responses] = None,
   summary: Option[String] = None,
   description: Option[String] = None
-)
+) {
+  def map: Map[String, Any] = Map(
+    "requestBody" -> requestBody.map(_.map),
+    "responses" -> responses.map(_.view.mapValues(_.map).toMap),
+    "summary" -> summary,
+    "description" -> description
+  )
+}
 
 private [automorph] case object Operation {
   type Responses = Map[String, Response]
