@@ -1,6 +1,6 @@
 package automorph.protocol.restrpc
 
-import automorph.openapi.OpenApi
+import automorph.openapi.{OpenApi, RpcSchema, Schema}
 import automorph.protocol.RestRpcProtocol
 import automorph.protocol.restrpc.Message.Request
 import automorph.protocol.restrpc.{Response, ResponseError, RestRpcException}
@@ -22,6 +22,26 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
 
   /** REST-RPC request details. */
   type Details = Unit
+
+  private val errrorSchema: Schema = Schema(
+    Some(OpenApi.objectType),
+    Some(OpenApi.errorTitle),
+    Some(s"$name${OpenApi.errorTitle}"),
+    Some(Map(
+      "error" -> Schema(
+        Some("string"),
+        Some("error"),
+        Some("Failed function call error details"),
+        Some(Map(
+          "code" -> Schema(Some("integer"), Some("code"), Some("Error code")),
+          "message" -> Schema(Some("string"), Some("message"), Some("Error message")),
+          "data" -> Schema(Some("object"), Some("data"), Some("Additional error information"))
+        )),
+        Some(List("code", "message"))
+      )
+    )),
+    Some(List("error"))
+  )
 
   override val name: String = "REST-RPC"
 
@@ -135,7 +155,10 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
     version: String,
     serverUrls: Seq[String]
   ): String = {
-    ???
+    val functionSchemas = functions.map { function =>
+      function -> RpcSchema(requestSchema(function), resultSchema(function), errrorSchema)
+    }
+    OpenApi.specification(functionSchemas, title, version, serverUrls).toString
   }
 
   /**
@@ -169,4 +192,19 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
     }.getOrElse {
       Failure(InvalidRequestException("Missing REST-RPC request argument names"))
     }
+
+  private def requestSchema(function: RpcFunction): Schema = Schema(
+    Some(OpenApi.objectType),
+    Some(function.name),
+    Some(OpenApi.argumentsDescription),
+    OpenApi.maybe(OpenApi.parameterSchemas(function))
+  )
+
+  private def resultSchema(function: RpcFunction): Schema = Schema(
+    Some(OpenApi.objectType),
+    Some(OpenApi.resultTitle),
+    Some(s"$name${OpenApi.resultTitle}"),
+    Some(Map("result" -> OpenApi.resultSchema(function))),
+    Some(List("result"))
+  )
 }

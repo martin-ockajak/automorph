@@ -1,12 +1,12 @@
 package automorph.protocol.jsonrpc
 
-import automorph.openapi.OpenApi
+import automorph.openapi.{OpenApi, RpcSchema, Schema}
 import automorph.protocol.JsonRpcProtocol
 import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
 import automorph.protocol.jsonrpc.Message.Params
+import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.{RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
-import automorph.spi.MessageCodec
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Random, Success, Try}
@@ -24,6 +24,26 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
   type Details = Option[Message.Id]
 
   private val unknownId = Right("[unknown]")
+
+  private val errrorSchema: Schema = Schema(
+    Some(OpenApi.objectType),
+    Some(OpenApi.errorTitle),
+    Some(s"$name${OpenApi.errorTitle}"),
+    Some(Map(
+      "error" -> Schema(
+        Some("string"),
+        Some("error"),
+        Some("Failed function call error details"),
+        Some(Map(
+          "code" -> Schema(Some("integer"), Some("code"), Some("Error code")),
+          "message" -> Schema(Some("string"), Some("message"), Some("Error message")),
+          "details" -> Schema(Some("object"), Some("data"), Some("Additional error information"))
+        )),
+        Some(List("message"))
+      )
+    )),
+    Some(List("error"))
+  )
   private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   override val name: String = "JSON-RPC"
@@ -131,7 +151,10 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     version: String,
     serverUrls: Seq[String]
   ): String = {
-    ???
+    val functionSchemas = functions.map { function =>
+      function -> RpcSchema(requestSchema(function), resultSchema(function), errrorSchema)
+    }
+    OpenApi.specification(functionSchemas, title, version, serverUrls).toString
   }
 
   /**
@@ -163,4 +186,35 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     argumentNames.filter(_.size >= encodedArguments.size).map { names =>
       Right(names.zip(encodedArguments).toMap)
     }.getOrElse(Left(encodedArguments.toList))
+
+  private def requestSchema(function: RpcFunction): Schema = Schema(
+    Some(OpenApi.objectType),
+    Some(OpenApi.requestTitle),
+    Some(s"$name${OpenApi.requestTitle}"),
+    Some(Map(
+      "jsonrpc" -> Schema(Some("string"), Some("jsonrpc"), Some("Protocol version (must be 2.0)")),
+      "function" -> Schema(Some("string"), Some("function"), Some("Invoked function name")),
+      "params" -> Schema(
+        Some(OpenApi.objectType),
+        Some(function.name),
+        Some(OpenApi.argumentsDescription),
+        OpenApi.maybe(OpenApi.parameterSchemas(function)),
+        OpenApi.maybe(OpenApi.requiredParameters(function))
+      ),
+      "id" -> Schema(
+        Some("integer"),
+        Some("id"),
+        Some("Call identifier, a request without and identifier is considered to be a notification")
+      )
+    )),
+    Some(List("jsonrpc", "function", "params"))
+  )
+
+  private def resultSchema(function: RpcFunction): Schema = Schema(
+    Some(OpenApi.objectType),
+    Some(OpenApi.resultTitle),
+    Some(s"$name${OpenApi.resultTitle}"),
+    Some(Map("result" -> OpenApi.resultSchema(function))),
+    Some(List("result"))
+  )
 }
