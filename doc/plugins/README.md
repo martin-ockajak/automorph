@@ -8,7 +8,7 @@ Computational [effect system](https://www.javadoc.io/doc/org.automorph/automorph
 
 The underlying runtime must support monadic composition of effectful values.
 
-| Class | Artifact | Library | Effect Type |
+| Class | Artifact | Library | Effect |
 | --- | --- | --- | --- |
 | [FutureSystem](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/FutureSystem.html) (Default) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/overviews/core/futures.html) | [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html) |
 | [IdentitySystem](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://www.scala-lang.org/) | [Identity](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem$$Identity.html) |
