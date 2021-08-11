@@ -17,7 +17,7 @@ private [automorph] final case class Specification(
   def json: String = Json.map(Map(
     "openapi" -> openapi,
     "info" -> info.map,
-    "servers" -> servers.map(_.map),
+    "servers" -> servers,
     "paths" -> paths.map(_.view.mapValues(_.map).toMap),
     "components" -> components.map(_.view.mapValues(_.map).toMap)
   ), 0, 0)
