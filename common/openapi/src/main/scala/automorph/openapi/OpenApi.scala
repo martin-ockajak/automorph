@@ -45,10 +45,10 @@ private[automorph] object OpenApi {
     functionSchemas: Iterable[(RpcFunction, RpcSchema)],
     title: String,
     version: String,
-    serverUrls: Seq[String]
+    serverUrls: Iterable[String]
   ): Specification = Specification(
     info = Info(title = title, version = version),
-    servers = servers(serverUrls),
+    servers = servers(serverUrls.toSeq),
     paths = Some(paths(functionSchemas)),
     components = components()
   )

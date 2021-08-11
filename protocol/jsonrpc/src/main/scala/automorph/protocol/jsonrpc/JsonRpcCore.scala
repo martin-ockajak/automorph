@@ -149,7 +149,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     functions: Iterable[RpcFunction],
     title: String,
     version: String,
-    serverUrls: Seq[String]
+    serverUrls: Iterable[String]
   ): String = {
     val functionSchemas = functions.map { function =>
       function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)

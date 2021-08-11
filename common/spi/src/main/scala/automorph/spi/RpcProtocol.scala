@@ -84,7 +84,7 @@ trait RpcProtocol[Node] {
    * @param serverUrls API server URLs
    * @return OpenAPI specification
    */
-  def openApi(functions: Iterable[RpcFunction], title: String, version: String, serverUrls: Seq[String]): String
+  def openApi(functions: Iterable[RpcFunction], title: String, version: String, serverUrls: Iterable[String]): String
 }
 
 case object RpcProtocol {
