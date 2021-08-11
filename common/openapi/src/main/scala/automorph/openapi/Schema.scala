@@ -17,7 +17,7 @@ private [automorph] final case class Schema(
     "title" -> title,
     "description" -> description,
     "properties" -> properties.map(_.view.mapValues(_.map).toMap),
-    "required" -> required,
+    "required" -> required.flatten,
     "default" -> default,
     "allOf" -> allOf.map(_.map(_.map)),
     "$ref" -> $ref
