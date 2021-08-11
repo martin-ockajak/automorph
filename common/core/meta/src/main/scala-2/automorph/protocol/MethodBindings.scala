@@ -34,9 +34,8 @@ private[automorph] case object MethodBindings {
       override def apply(v: RpcFunction): Tree = q"""
         automorph.spi.protocol.RpcFunction(
           ${v.name},
-          ${v.resultType},
           Seq(..${v.parameters.flatten}),
-          Seq(..${v.typeRpcParameters}),
+          ${v.resultType},
           ${v.documentation}
         )
       """

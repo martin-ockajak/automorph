@@ -26,9 +26,8 @@ private[automorph] case object MethodBindings:
     override def apply(v: RpcFunction)(using Quotes): Expr[RpcFunction] = '{
       RpcFunction(
         ${ Expr(v.name) },
-        ${ Expr(v.resultType) },
         ${ Expr(v.parameters) },
-        ${ Expr(v.typeParameters) },
+        ${ Expr(v.resultType) },
         ${ Expr(v.documentation) }
       )
     }

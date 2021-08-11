@@ -1,27 +1,26 @@
 //package automorph.openapi
 //
-//import automorph.Handler
-//import automorph.protocol.JsonRpcProtocol
-//import automorph.system.IdentitySystem
-//import automorph.system.IdentitySystem.Identity
+//import automorph.spi.protocol.{RpcFunction, RpcParameter}
 //import test.base.BaseSpec
-//import test.{SimpleApi, SimpleApiImpl}
 //
 //class OpenApiSpec extends BaseSpec {
-//  import io.circe.syntax.EncoderOps
-//
-//  private val system = IdentitySystem()
-//  private val simpleApiInstance: SimpleApi[Identity] = SimpleApiImpl(system)
+//  private val functions = Seq(
+//    RpcFunction(
+//      "test",
+//      Seq(
+//        RpcParameter("foo", "String"),
+//        RpcParameter("bar", "Integer"),
+//        RpcParameter("alt", "Option[Map[String, Boolean]"),
+//      ),
+//      "Seq[String]",
+//      Some("Testing function")
+//    )
+//  )
 //
 //  "" - {
 //    "Test" in {
-//      val codec = CirceJsonCodec()
-//      val protocol = JsonRpcProtocol(codec)
-//      val handler = Handler[CirceJsonCodec.Node, CirceJsonCodec, Identity, Unit](codec, system, protocol)
-//        .bind(simpleApiInstance)
-//      val rpcFunctions = handler.bindings.values.map(_.function)
-//      val specification = OpenApi.jsonRpcSpec(rpcFunctions, "Test", "0.0", Seq("http://localhost:80/api"))
-//      println(specification)
+//      val specification = OpenApi.specification(functions, "Test", "0.0", Seq("http://localhost:80/api"))
+//      println(specification.json)
 //    }
 //  }
 //}

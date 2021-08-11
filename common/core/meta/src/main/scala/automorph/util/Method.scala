@@ -42,9 +42,8 @@ final private[automorph] case class Method(
   /** RPC function descriptor. */
   lazy val rpcFunction: RpcFunction = RpcFunction(
     name,
-    resultType,
     parameters.flatten.map { case Parameter(name, dataType, _) => RpcParameter(name, dataType) },
-    typeParameters.map { case Parameter(name, dataType, _) => RpcParameter(name, dataType) },
+    resultType,
     documentation
   )
 }
