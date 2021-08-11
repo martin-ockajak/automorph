@@ -25,7 +25,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
 
   private val unknownId = Right("[unknown]")
 
-  private val errrorSchema: Schema = Schema(
+  private val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.errorTitle),
     Some(s"$name${OpenApi.errorTitle}"),
@@ -152,7 +152,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     serverUrls: Seq[String]
   ): String = {
     val functionSchemas = functions.map { function =>
-      function -> RpcSchema(requestSchema(function), resultSchema(function), errrorSchema)
+      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
     }
     OpenApi.specification(functionSchemas, title, version, serverUrls).toString
   }
