@@ -27,14 +27,13 @@ class RestRpcSpec extends BaseSpec {
 
   "" - {
     "OpenAPI" in {
-
       val protocol = RestRpcProtocol(
         DefaultMessageCodec(),
         RestRpcProtocol.defaultErrorToException,
         RestRpcProtocol.defaultExceptionToError
       )
       val specification = protocol.openApi(functions, "Test", "0.0", Seq("http://localhost:80/api"))
-      println(specification)
+      specification.should(not(be(empty)))
     }
   }
 }

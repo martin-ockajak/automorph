@@ -27,14 +27,13 @@ class JsonRpcSpec extends BaseSpec {
 
   "" - {
     "OpenApi" in {
-
       val protocol = JsonRpcProtocol(
         DefaultMessageCodec(),
         JsonRpcProtocol.defaultErrorToException,
         JsonRpcProtocol.defaultExceptionToError
       )
       val specification = protocol.openApi(functions, "Test", "0.0", Seq("http://localhost:80/api"))
-      println(specification)
+      specification.should(not(be(empty)))
     }
   }
 }

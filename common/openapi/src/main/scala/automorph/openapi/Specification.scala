@@ -17,10 +17,10 @@ private [automorph] final case class Specification(
   def json: String = Json.map(Map(
     "openapi" -> openapi,
     "info" -> info.map,
-    "servers" -> servers,
+    "servers" -> servers.map(_.map(_.map)),
     "paths" -> paths.map(_.view.mapValues(_.map).toMap),
     "components" -> components.map(_.view.mapValues(_.map).toMap)
-  ), 0, 0)
+  ), 0)
 }
 
 private [automorph] case object Specification {
