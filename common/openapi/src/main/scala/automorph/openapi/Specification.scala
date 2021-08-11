@@ -13,7 +13,15 @@ private [automorph] final case class Specification(
   servers: Option[Servers] = None,
   paths: Option[Paths] = None,
   components: Option[Components] = None
-)
+) {
+  def json: String = Json.map(Map(
+    "openapi" -> openapi,
+    "info" -> info.map,
+    "servers" -> servers.map(_.map(_.map)),
+    "paths" -> paths.map(_.view.mapValues(identity).toMap),
+    "components" -> components.map(_.view.mapValues(_.map).toMap)
+  ), 0, 0)
+}
 
 private [automorph] case object Specification {
   type Servers = List[Server]

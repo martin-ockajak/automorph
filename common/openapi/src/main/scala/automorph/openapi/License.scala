@@ -1,7 +1,14 @@
 package automorph.openapi
 
-private[automorph] final case class License(
+final private[automorph] case class License(
   name: String,
   identifier: Option[String] = None,
   url: Option[String] = None
-)
+) {
+
+  def map: Map[String, Any] = Map(
+    "name" -> name,
+    "identifier" -> identifier,
+    "url" -> url
+  )
+}

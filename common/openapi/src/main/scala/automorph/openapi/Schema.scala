@@ -11,7 +11,18 @@ private [automorph] final case class Schema(
   default: Option[String] = None,
   allOf: Option[List[Schema]] = None,
   $ref: Option[String] = None
-)
+) {
+  def map: Map[String, Any] = Map(
+    "type" -> `type`,
+    "title" -> title,
+    "description" -> description,
+    "properties" -> properties.map(_.view.mapValues(_.map).toMap),
+    "required" -> required,
+    "default" -> default,
+    "allOf" -> allOf.map(_.map(_.map)),
+    "$ref" -> $ref
+  )
+}
 
 private [automorph] case object Schema {
   type Properties = Map[String, Schema]
