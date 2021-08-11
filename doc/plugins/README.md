@@ -1,6 +1,6 @@
-# Integration
+# Plugins
 
-*Automorph* supports integration with various libraries via plugins published in different artifacts.
+*Automorph* supports integration with other software using various plugins published in separate artifacts.
 
 ## Effect system
 
@@ -18,18 +18,16 @@ The underlying runtime must support monadic composition of effectful values.
 | [CatsEffectSystem](https://www.javadoc.io/doc/org.automorph/automorph-cats-effect_2.13/latest/automorph/system/CatsEffectSystem.html) | [automorph-cats-effect](https://mvnrepository.com/artifact/org.automorph/automorph-cats-effect) | [Cats Effect](https://typelevel.org/cats-effect/) | [IO](https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html) |
 | [ScalazSystem](https://www.javadoc.io/doc/org.automorph/automorph-scalaz_2.13/latest/automorph/system/ScalazSystem.html) | [automorph-scalaz](https://mvnrepository.com/artifact/org.automorph/automorph-scalaz) | [Scalaz](https://github.com/scalaz) | [IO](https://www.javadoc.io/doc/org.scalaz/scalaz_2.13/latest/scalaz/effect/IO.html) |
 
-## Message format
+## RPC protocol
 
-Structured [message format](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html) serialization/deserialization plugins.
+Remote procedure call [(RPC) protocol]((https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/RpcProtocol.html)) plugins.
 
-The underlying format must support storing arbitrarily nested structures of basic data types.
+The underlying RPC protocol must support remote function invocation.
 
-| Class | Artifact | Library | Node Type | Format |
-| --- | --- | --- | --- | --- |
-| [CirceJsonFormat](https://www.javadoc.io/doc/org.automorph/automorph-circe_2.13/latest/automorph/format/json/CirceJsonFormat.html) (Default) | [automorph-circe](https://mvnrepository.com/artifact/org.automorph/automorph-circe) | [Circe](https://circe.github.io/circe) |[Json](https://circe.github.io/circe/api/io/circe/Json.html) | [JSON](https://www.json.org/) |
-| [UpickleJsonFormat](https://www.javadoc.io/doc/org.automorph/automorph-upickle_2.13/latest/automorph/format/json/UpickleJsonFormat.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Value](http://com-lihaoyi.github.io/upickle/#uJson) | [JSON](https://www.json.org/) |
-| [UpickleMessagePackFormat](https://www.javadoc.io/doc/org.automorph/automorph-upickle_2.13/latest/automorph/format/messagepack/UpickleMessagePackFormat.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Msg](http://com-lihaoyi.github.io/upickle/#uPack) | [MessagePack](https://msgpack.org/) |
-| [ArgonautJsonFormat](https://www.javadoc.io/doc/org.automorph/automorph-argonaut_2.13/latest/automorph/format/json/ArgonautJsonFormat.html) | [automorph-argonaut](https://mvnrepository.com/artifact/org.automorph/automorph-argonaut) | [Argonaut](http://argonaut.io/doc/) |[Json](http://argonaut.io/scaladocs/#argonaut.Json) | [JSON](https://www.json.org/) |
+| Class | Artifact |  Protocol |
+| --- | --- | --- |
+| [JsonRpcProtocol](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/protocol/JsonRpcProtocol.html) (Default) | [automorph-jsonrpc](https://mvnrepository.com/artifact/org.automorph/automorph-jsonrpc) | [JSON-RPC](https://www.jsonrpc.org/specification) |
+| [RestRpcProtocol](https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/protocol/RestRpcProtocol.html) | [automorph-restrpc](https://mvnrepository.com/artifact/org.automorph/automorph-restrpc) | [REST-RPC] |
 
 ## Message transport
 
@@ -86,3 +84,17 @@ Used to passively receive and reply to requests using specific message transport
 |  | -> | [ZIO Http](https://tapir.softwaremill.com/en/latest/server/ziohttp.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [JettyEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-jetty_2.13/latest/automorph/transport/http/endpoint/JettyEndpoint.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [FinagleEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-finagle_2.13/latest/automorph/transport/http/endpoint/FinagleEndpoint.html) | [automorph-finagle](https://mvnrepository.com/artifact/org.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+
+## Message format
+
+Structured [message format](https://www.javadoc.io/doc/org.automorph/automorph-spi_2.13/latest/automorph/spi/MessageFormat.html) serialization/deserialization plugins.
+
+The underlying format must support storing arbitrarily nested structures of basic data types.
+
+| Class | Artifact | Library | Node Type | Format |
+| --- | --- | --- | --- | --- |
+| [CirceJsonFormat](https://www.javadoc.io/doc/org.automorph/automorph-circe_2.13/latest/automorph/format/json/CirceJsonFormat.html) (Default) | [automorph-circe](https://mvnrepository.com/artifact/org.automorph/automorph-circe) | [Circe](https://circe.github.io/circe) |[Json](https://circe.github.io/circe/api/io/circe/Json.html) | [JSON](https://www.json.org/) |
+| [UpickleJsonFormat](https://www.javadoc.io/doc/org.automorph/automorph-upickle_2.13/latest/automorph/format/json/UpickleJsonFormat.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Value](http://com-lihaoyi.github.io/upickle/#uJson) | [JSON](https://www.json.org/) |
+| [UpickleMessagePackFormat](https://www.javadoc.io/doc/org.automorph/automorph-upickle_2.13/latest/automorph/format/messagepack/UpickleMessagePackFormat.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Msg](http://com-lihaoyi.github.io/upickle/#uPack) | [MessagePack](https://msgpack.org/) |
+| [ArgonautJsonFormat](https://www.javadoc.io/doc/org.automorph/automorph-argonaut_2.13/latest/automorph/format/json/ArgonautJsonFormat.html) | [automorph-argonaut](https://mvnrepository.com/artifact/org.automorph/automorph-argonaut) | [Argonaut](http://argonaut.io/doc/) |[Json](http://argonaut.io/scaladocs/#argonaut.Json) | [JSON](https://www.json.org/) |
+
