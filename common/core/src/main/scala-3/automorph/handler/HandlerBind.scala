@@ -59,7 +59,7 @@ private[automorph] trait HandlerBind[Node, Codec <: MessageCodec[Node], Effect[_
    * @return RPC request handler with added API bindings
    * @throws IllegalArgumentException if invalid p/ublic methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](api: Api, aliases: String => Seq[String]): ThisHandler =
+  inline def bind[Api <: AnyRef](api: Api, aliases: String => Iterable[String]): ThisHandler =
     copy(bindings =
       bindings ++ HandlerBindings.generate[Node, Codec, Effect, Context, Api](codec, system, api).flatMap {
         (name, method) => aliases(name).map(_ -> method)

@@ -61,7 +61,7 @@ private[automorph] trait HandlerBind[Node, Codec <: MessageCodec[Node], Effect[_
    * @return RPC request handler with added API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api, aliases: String => Seq[String]): ThisHandler =
+  def bind[Api <: AnyRef](api: Api, aliases: String => Iterable[String]): ThisHandler =
     macro HandlerBind.bindMacro[Node, Codec, Effect, Context, Api]
 
   def brokenBind[Api <: AnyRef](api: Api): ThisHandler =
@@ -122,7 +122,7 @@ case object HandlerBind {
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     api: c.Expr[Api],
-    aliases: c.Expr[String => Seq[String]]
+    aliases: c.Expr[String => Iterable[String]]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, Codec, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
