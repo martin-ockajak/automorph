@@ -23,7 +23,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
   /** REST-RPC request details. */
   type Details = Unit
 
-  private val errorSchema: Schema = Schema(
+  private lazy val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.errorTitle),
     Some(s"$name${OpenApi.errorTitle}"),
@@ -102,8 +102,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
 
   override def createRequest(
     function: String,
-    argumentNames: Option[Seq[String]],
-    argumentValues: Seq[Node],
+    argumentNames: Option[Iterable[String]],
+    argumentValues: Iterable[Node],
     responseRequired: Boolean
   ): Try[RpcRequest[Node, Details]] =
     // Create request
@@ -186,7 +186,10 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
    * @param encodedArguments encoded arguments
    * @return argument nodes
    */
-  private def createArgumentNodes(argumentNames: Option[Seq[String]], encodedArguments: Seq[Node]): Try[Request[Node]] =
+  private def createArgumentNodes(
+    argumentNames: Option[Iterable[String]],
+    encodedArguments: Iterable[Node]
+  ): Try[Request[Node]] =
     argumentNames.filter(_.size >= encodedArguments.size).map { names =>
       Success(names.zip(encodedArguments).toMap)
     }.getOrElse {

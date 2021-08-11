@@ -25,7 +25,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
 
   private val unknownId = Right("[unknown]")
 
-  private val errorSchema: Schema = Schema(
+  private lazy val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.errorTitle),
     Some(s"$name${OpenApi.errorTitle}"),
@@ -69,8 +69,8 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
 
   override def createRequest(
     function: String,
-    argumentNames: Option[Seq[String]],
-    argumentValues: Seq[Node],
+    argumentNames: Option[Iterable[String]],
+    argumentValues: Iterable[Node],
     responseRequired: Boolean
   ): Try[RpcRequest[Node, Details]] = {
     // Create request
@@ -182,7 +182,10 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
    * @param encodedArguments encoded arguments
    * @return argument nodes
    */
-  private def createArgumentNodes(argumentNames: Option[Seq[String]], encodedArguments: Seq[Node]): Params[Node] =
+  private def createArgumentNodes(
+    argumentNames: Option[Iterable[String]],
+    encodedArguments: Iterable[Node]
+  ): Params[Node] =
     argumentNames.filter(_.size >= encodedArguments.size).map { names =>
       Right(names.zip(encodedArguments).toMap)
     }.getOrElse(Left(encodedArguments.toList))

@@ -37,8 +37,8 @@ trait RpcProtocol[Node] {
    */
   def createRequest(
     function: String,
-    argumentNames: Option[Seq[String]],
-    argumentValues: Seq[Node],
+    argumentNames: Option[Iterable[String]],
+    argumentValues: Iterable[Node],
     responseRequired: Boolean
   ): Try[RpcRequest[Node, Details]]
 
