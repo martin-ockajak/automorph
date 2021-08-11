@@ -48,9 +48,9 @@ object OpenApi {
     version: String,
     serverUrls: Seq[String]
   ): Specification = Specification(
-    paths = Some(paths(functionSchemas)),
     info = Info(title = title, version = version),
     servers = servers(serverUrls),
+    paths = Some(paths(functionSchemas)),
     components = components()
   )
 
