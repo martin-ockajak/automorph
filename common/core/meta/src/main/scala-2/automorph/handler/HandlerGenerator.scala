@@ -1,7 +1,7 @@
 package automorph.handler
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodBindings.{functionLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodIntrospection.{functionLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
@@ -104,7 +104,7 @@ object HandlerGenerator {
     system: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
-    import ref.c.universe.{weakTypeOf, Quasiquote}
+    import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -159,7 +159,7 @@ object HandlerGenerator {
       val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result)"
 
       // Create the effect mapping call using the method call and the encode result function
-      //   system.map(methodCall, encodeResult): Effect[Node]
+      //   system.map(apiMethodCall, encodeResult): Effect[Node]
       q"$system.map($apiMethodCall, $encodeResult)"
 //      arguments.flatten.foreach(println(ref.c.universe.showCode(_)))
 //      q"null.asInstanceOf[$effectType[$resultValueType]]"

@@ -4,8 +4,8 @@ import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import automorph.util.Reflection
 import scala.quoted.{Expr, Quotes, ToExpr, Type, quotes}
 
-/** Method bindings introspection. */
-private[automorph] object MethodBindings:
+/** Method introspection. */
+private[automorph] object MethodIntrospection:
 
   /**
    * Method RPC function quoted expression converter.

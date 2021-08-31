@@ -1,7 +1,7 @@
 package automorph.handler
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodBindings.{methodCall, methodSignature, functionToExpr, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodIntrospection.{methodCall, methodSignature, functionToExpr, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.{Method, Reflection}
@@ -158,7 +158,7 @@ private[automorph] object HandlerGenerator:
             }
 
         // Create the effect mapping call using the method call and the encode result function
-        //   system.map(methodCall, encodeResult): Effect[Node]
+        //   system.map(apiMethodCall, encodeResult): Effect[Node]
         val mapArguments = List(List(apiMethodCall, encodeResult.asTerm))
         methodCall(ref.q, system.asTerm, "map", List(resultValueType, TypeRepr.of[Node]), mapArguments).asExprOf[Effect[Node]]
       }

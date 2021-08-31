@@ -5,8 +5,8 @@ import automorph.util.Reflection
 import scala.annotation.nowarn
 import scala.reflect.macros.blackbox
 
-/** Method bindings introspection. */
-private[automorph] object MethodBindings {
+/** Method introspection. */
+private[automorph] object MethodIntrospection {
 
   private val testProperty = "macro.test"
 
