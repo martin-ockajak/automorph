@@ -3,7 +3,7 @@ package automorph.handler
 import automorph.spi.protocol.RpcFunction
 
 /**
- * RPC handler API method binding.
+ * RPC handler remote API function binding.
  *
  * @param function RPC function
  * @param invoke bound method invocation function

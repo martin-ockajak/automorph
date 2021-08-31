@@ -19,13 +19,13 @@ private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_]
   this: Client[Node, Codec, Effect, Context] =>
 
   /**
-   * Creates a remote API proxy instance with RPC bindings for all valid public methods of the specified API.
+   * Creates a remote API proxy instance with RPC bindings for all valid public methods of the specified API type.
    *
    * A method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
    * - has no type parameters
    * - returns the specified effect type
-   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
+   * - (if request context type is not EmptyContext) accepts the specified request context type as its last parameter
    *
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
@@ -33,7 +33,7 @@ private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_]
    * Invoked method arguments are supplied ''by name'' as an object.
    *
    * @tparam Api API trait type (classes are not supported)
-   * @return RPC API proxy instance
+   * @return remote API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef]: Api =
@@ -42,11 +42,11 @@ private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_]
   /**
    * Creates a remote API proxy instance with RPC bindings for all valid public methods of the specified API.
    *
-   * A method is considered valid if it satisfies all of these conditions:
+   * An API method is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
    * - has no type parameters
    * - returns the specified effect type
-   * - (if request context type is not Unit) accepts the specified request context type as its last parameter
+   * - (if request context type is not EmptyContext) accepts the specified request context type as its last parameter
    *
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
@@ -54,7 +54,7 @@ private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_]
    * Invoked method arguments are supplied ''by position'' as an array.
    *
    * @tparam Api API trait type (classes are not supported)
-   * @return RPC API proxy instance
+   * @return remote API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bindPositional[Api <: AnyRef]: Api =

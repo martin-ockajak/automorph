@@ -3,7 +3,7 @@ package automorph.client
 import automorph.spi.protocol.RpcFunction
 
 /**
- * RPC client API method binding.
+ * RPC client remote API function binding.
  *
  * @param function method descriptor
  * @param encodeArguments bound method arguments encoding function
