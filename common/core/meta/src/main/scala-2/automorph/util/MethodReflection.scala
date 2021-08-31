@@ -34,7 +34,7 @@ private[automorph] object MethodReflection {
       override def apply(v: RpcFunction): Tree = q"""
         automorph.spi.protocol.RpcFunction(
           ${v.name},
-          Seq(..${v.parameters.flatten}),
+          Seq(..${v.parameters}),
           ${v.resultType},
           ${v.documentation}
         )
