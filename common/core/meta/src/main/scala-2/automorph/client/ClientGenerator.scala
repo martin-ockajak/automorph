@@ -2,8 +2,8 @@ package automorph.client
 
 import automorph.log.MacroLogger
 import automorph.spi.MessageCodec
-import automorph.util.MethodReflection.functionLiftable
-import automorph.util.{Method, MethodReflection, Reflection}
+import automorph.spi.protocol.RpcFunction
+import automorph.util.{MethodReflection, Reflection}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -74,8 +74,8 @@ case object ClientGenerator {
     val encodeArguments = generateEncodeArguments[C, Node, Codec, Context](ref)(method, codec)
     val decodeResult = generateDecodeResult[C, Node, Codec, Effect](ref)(method, codec)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
-    implicit val methodLift: Liftable[Method] = methodLiftable(ref)
-    Seq(methodLift)
+    implicit val functionLiftable: Liftable[RpcFunction] = MethodReflection.functionLiftable(ref)
+    Seq(functionLiftable)
     ref.c.Expr[ClientBinding[Node]](q"""
       automorph.client.ClientBinding[$nodeType](
         ${method.lift.rpcFunction},

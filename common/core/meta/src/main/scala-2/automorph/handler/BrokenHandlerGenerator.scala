@@ -1,9 +1,9 @@
 package automorph.handler
 
 import automorph.log.MacroLogger
+import automorph.spi.protocol.RpcFunction
 import automorph.spi.{EffectSystem, MessageCodec}
-import automorph.util.MethodReflection.methodLiftable
-import automorph.util.{Method, MethodReflection, Reflection}
+import automorph.util.{MethodReflection, Reflection}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -59,11 +59,11 @@ case object BrokenHandlerGenerator {
 
     val invoke = generateInvoke[C, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
     logBoundMethod[C, Api](ref)(method, invoke)
-    implicit val methodLift: Liftable[Method] = methodLiftable(ref)
-    Seq(methodLift)
+    implicit val functionLiftable: Liftable[RpcFunction] = MethodReflection.functionLiftable(ref)
+    Seq(functionLiftable)
     ref.c.Expr[HandlerBinding[Node, Effect, Context]](q"""
       automorph.handler.HandlerBinding(
-        ${method.lift},
+        ${method.lift.rpcFunction},
         $invoke,
         ${MethodReflection.usesContext[C, Context](ref)(method)}
       )
@@ -143,7 +143,7 @@ case object BrokenHandlerGenerator {
     method: ref.RefMethod,
     invoke: ref.c.Expr[Any]
   ): Unit = MacroLogger.debug(
-    s"""${methodSignature[C, Api](ref)(method)} =
+    s"""${MethodReflection.signature[C, Api](ref)(method)} =
       |  ${ref.c.universe.showCode(invoke.tree)}
       |""".stripMargin
   )
