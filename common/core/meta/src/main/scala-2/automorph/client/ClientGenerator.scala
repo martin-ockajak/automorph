@@ -1,7 +1,7 @@
 package automorph.client
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodIntrospection.{functionLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodReflection.{functionLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.MessageCodec
 import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
