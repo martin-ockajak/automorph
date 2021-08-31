@@ -8,7 +8,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /** RPC client layer bindings code generation. */
-object ClientGenerator {
+case object ClientGenerator {
 
   /**
    * Generates client bindings for all valid public methods of an API type.

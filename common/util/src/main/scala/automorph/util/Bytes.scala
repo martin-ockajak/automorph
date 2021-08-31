@@ -31,7 +31,7 @@ trait Bytes[T] {
   def from(data: T): ArraySeq.ofByte
 }
 
-object Bytes {
+case object Bytes {
 
 
   /** `ArraySeq.ofByte` <-> byte sequence converter. */

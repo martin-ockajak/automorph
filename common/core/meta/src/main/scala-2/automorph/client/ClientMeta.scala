@@ -58,7 +58,7 @@ ne
   def bindPositional[Api <: AnyRef]: Api = macro ClientMeta.bindPositionalMacro[Node, Codec, Effect, Context, Api]
 }
 
-object ClientMeta {
+case object ClientMeta {
   /** Client with arbitrary codec. */
   type AnyCodec[Effect[_], Context] = Client[Node, _ <: MessageCodec[Node], Effect, Context] forSome { type Node }
 

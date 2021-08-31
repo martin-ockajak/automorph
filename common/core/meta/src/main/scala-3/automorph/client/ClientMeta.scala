@@ -60,7 +60,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
   inline def bindPositional[Api <: AnyRef]: Api =
     ClientMeta.generalBind[Node, Codec, Effect, Context, Api](this, codec, namedArguments = false)
 
-object ClientMeta:
+case object ClientMeta:
 
   /** Client with arbitrary codec. */
   type AnyCodec[Effect[_], Context] = Client[_, _, Effect, Context]
