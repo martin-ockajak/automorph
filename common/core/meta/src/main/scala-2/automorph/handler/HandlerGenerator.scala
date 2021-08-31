@@ -2,7 +2,7 @@ package automorph.handler
 
 import automorph.log.MacroLogger
 import automorph.spi.{EffectSystem, MessageCodec}
-import automorph.util.MethodReflection.{functionLiftable, methodSignature}
+import automorph.util.MethodReflection.functionLiftable
 import automorph.util.{Method, MethodReflection, Reflection}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox

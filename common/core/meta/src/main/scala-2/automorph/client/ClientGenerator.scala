@@ -2,7 +2,7 @@ package automorph.client
 
 import automorph.log.MacroLogger
 import automorph.spi.MessageCodec
-import automorph.util.MethodReflection.{functionLiftable, methodSignature}
+import automorph.util.MethodReflection.functionLiftable
 import automorph.util.{Method, MethodReflection, Reflection}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -151,7 +151,7 @@ object ClientGenerator {
     encodeArguments: ref.c.Expr[Any],
     decodeResult: ref.c.Expr[Any]
   ): Unit = MacroLogger.debug(
-    s"""${methodSignature[C, Api](ref)(method)} =
+    s"""${MethodReflection.signature[C, Api](ref)(method)} =
       |  ${ref.c.universe.showCode(encodeArguments.tree)}
       |  ${ref.c.universe.showCode(decodeResult.tree)}
       |""".stripMargin

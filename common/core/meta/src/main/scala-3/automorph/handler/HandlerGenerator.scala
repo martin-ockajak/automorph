@@ -3,7 +3,7 @@ package automorph.handler
 import automorph.log.MacroLogger
 import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
-import automorph.util.MethodReflection.{functionToExpr, methodCall}
+import automorph.util.MethodReflection.functionToExpr
 import automorph.util.{Method, MethodReflection, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
 import scala.util.{Failure, Success, Try}
@@ -98,7 +98,7 @@ private[automorph] object HandlerGenerator:
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
-    import ref.q.reflect.{Term, TypeRepr, asTerm}
+    import ref.q.reflect.{asTerm, Term, TypeRepr}
     given Quotes = ref.q
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -131,7 +131,13 @@ private[automorph] object HandlerGenerator:
               'context.asTerm
             else
               val decodeArguments = List(List(argumentNode.asTerm))
-              val decodeCall = methodCall(ref.q, codec.asTerm, "decode", List(parameter.dataType), decodeArguments)
+              val decodeCall = MethodReflection.call(
+                ref.q,
+                codec.asTerm,
+                "decode",
+                List(parameter.dataType),
+                decodeArguments
+              )
               parameter.dataType.asType match
                 case '[argumentType] => '{
                     (Try(${ decodeCall.asExprOf[argumentType] }) match
@@ -145,7 +151,7 @@ private[automorph] object HandlerGenerator:
 
         // Create the API method call using the decoded arguments
         //   api.method(arguments*): Effect[ResultValueType]
-        val apiMethodCall = methodCall(ref.q, api.asTerm, method.name, List.empty, arguments)
+        val apiMethodCall = MethodReflection.call(ref.q, api.asTerm, method.name, List.empty, arguments)
 
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
@@ -153,22 +159,34 @@ private[automorph] object HandlerGenerator:
         val encodeResult = resultValueType.asType match
           case '[resultType] => '{ (result: resultType) =>
               ${
-                methodCall(ref.q, codec.asTerm, "encode", List(resultValueType), List(List('{ result }.asTerm))).asExprOf[Node]
+                MethodReflection.call(
+                  ref.q,
+                  codec.asTerm,
+                  "encode",
+                  List(resultValueType),
+                  List(List('{ result }.asTerm))
+                ).asExprOf[Node]
               }
             }
 
         // Create the effect mapping call using the method call and the encode result function
         //   system.map(apiMethodCall, encodeResult): Effect[Node]
         val mapArguments = List(List(apiMethodCall, encodeResult.asTerm))
-        methodCall(ref.q, system.asTerm, "map", List(resultValueType, TypeRepr.of[Node]), mapArguments).asExprOf[Effect[Node]]
+        MethodReflection.call(
+          ref.q,
+          system.asTerm,
+          "map",
+          List(resultValueType, TypeRepr.of[Node]),
+          mapArguments
+        ).asExprOf[Effect[Node]]
       }
     }
 
   private def logBoundMethod[Api: Type](ref: Reflection)(method: ref.RefMethod, invoke: Expr[Any]): Unit =
-    import ref.q.reflect.{Printer, asTerm}
+    import ref.q.reflect.{asTerm, Printer}
 
     MacroLogger.debug(
       s"""${MethodReflection.signature[Api](ref)(method)} =
-         |  ${invoke.asTerm.show(using Printer.TreeShortCode)}
-         |""".stripMargin
+        |  ${invoke.asTerm.show(using Printer.TreeShortCode)}
+        |""".stripMargin
     )

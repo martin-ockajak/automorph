@@ -3,7 +3,7 @@ package automorph.client
 import automorph.client.ClientBinding
 import automorph.log.MacroLogger
 import automorph.spi.MessageCodec
-import automorph.util.MethodReflection.{functionToExpr, methodCall}
+import automorph.util.MethodReflection.functionToExpr
 import automorph.util.{MethodReflection, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
 
@@ -103,7 +103,13 @@ private[automorph] object ClientGenerator:
             Option.when((offset + index) != lastArgumentIndex || !MethodReflection.usesContext[Context](ref)(method)) {
               val argument = parameter.dataType.asType match
                 case '[parameterType] => '{ arguments(${ Expr(offset + index) }).asInstanceOf[parameterType] }
-              methodCall(ref.q, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
+              MethodReflection.call(
+                ref.q,
+                codec.asTerm,
+                "encode",
+                List(parameter.dataType),
+                List(List(argument.asTerm))
+              )
             }
           }
         ).map(_.asInstanceOf[Term].asExprOf[Node])
@@ -126,7 +132,13 @@ private[automorph] object ClientGenerator:
     val resultValueType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType.dealias).dealias
     '{ resultNode =>
       ${
-        methodCall(ref.q, codec.asTerm, "decode", List(resultValueType), List(List('{ resultNode }.asTerm))).asExprOf[Any]
+        MethodReflection.call(
+          ref.q,
+          codec.asTerm,
+          "decode",
+          List(resultValueType),
+          List(List('{ resultNode }.asTerm))
+        ).asExprOf[Any]
       }
     }
 
