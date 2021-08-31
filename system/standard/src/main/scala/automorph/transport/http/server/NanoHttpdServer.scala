@@ -129,7 +129,7 @@ case object NanoHttpdServer {
    * @param runEffectSync synchronous effect execution function
    * @param port port to listen on for HTTP connections
    * @param readTimeout HTTP connection read timeout (milliseconds)
-   * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @tparam Effect effect type
    */
   def apply[Effect[_]](

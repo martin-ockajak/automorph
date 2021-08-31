@@ -24,7 +24,7 @@ import com.twitter.util.{Future, Promise}
  * @constructor Creates a Finagle RPC system HTTP service with the specified RPC request ''handler''.
  * @param handler RPC request handler
  * @param runEffect executes specified effect asynchronously
- * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
+ * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @tparam Effect effect type
  */
 final case class FinagleEndpoint[Effect[_]](

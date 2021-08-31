@@ -43,7 +43,7 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
    * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
    * @param handler RPC request handler
    * @param method HTTP method to server
-   * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @tparam Effect effect type
    * @return Tapir HTTP endpoint
    */

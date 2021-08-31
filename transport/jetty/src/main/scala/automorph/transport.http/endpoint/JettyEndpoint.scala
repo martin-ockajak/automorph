@@ -25,7 +25,7 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
  * @constructor Creates a Jetty web server HTTP servlet with the specified RPC request ''handler''.
  * @param handler RPC request handler
  * @param runEffect executes specified effect asynchronously
- * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
+ * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @tparam Effect effect type
  */
 final case class JettyEndpoint[Effect[_]](
