@@ -5,10 +5,10 @@ import automorph.spi.protocol.RpcFunction
 /**
  * RPC client remote API function binding.
  *
- * @param function method descriptor
- * @param encodeArguments bound method arguments encoding function
- * @param decodeResult bound method result decoding function
- * @param usesContext true if the last parameter of the bound method is contextual
+ * @param function function descriptor
+ * @param encodeArguments encodes bound function arguments
+ * @param decodeResult decodes bound function result
+ * @param usesContext true if the last parameter of the bound function is contextual
  * @tparam Node message node type
  */
 final case class ClientBinding[Node](
