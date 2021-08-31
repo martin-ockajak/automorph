@@ -3,7 +3,6 @@ package automorph.codec.json
 import automorph.codec.UpickleCustom
 import automorph.protocol.restrpc.{Message, MessageError}
 import ujson.Value
-import upickle.core.Abort
 
 /**
  * JSON-RPC protocol support for uPickle message codec plugin.
