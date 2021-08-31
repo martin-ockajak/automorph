@@ -6,7 +6,7 @@ import scala.annotation.nowarn
 import scala.reflect.macros.blackbox
 
 /** Method bindings introspection. */
-private[automorph] case object MethodBindings {
+private[automorph] object MethodBindings {
 
   private val testProperty = "macro.test"
 

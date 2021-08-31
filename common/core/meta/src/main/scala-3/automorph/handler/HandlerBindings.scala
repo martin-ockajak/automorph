@@ -9,7 +9,7 @@ import scala.quoted.{Expr, Quotes, Type}
 import scala.util.{Failure, Success, Try}
 
 /** RPC handler layer bindings code generation. */
-private[automorph] case object HandlerBindings:
+private[automorph] object HandlerBindings:
 
   /**
    * Generates handler bindings for all valid public methods of an API type.
