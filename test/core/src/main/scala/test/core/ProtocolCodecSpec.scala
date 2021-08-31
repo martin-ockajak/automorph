@@ -173,7 +173,7 @@ trait ProtocolCodecSpec extends CoreSpec {
   private def contextValue: Context = arbitraryContext.arbitrary.sample.get
 }
 
-case object ProtocolCodecSpec extends UpickleCustom {
+object ProtocolCodecSpec extends UpickleCustom {
 
   implicit def enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
     value => Enum.toOrdinal(value),
