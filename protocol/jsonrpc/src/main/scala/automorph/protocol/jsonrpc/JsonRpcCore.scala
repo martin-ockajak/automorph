@@ -20,7 +20,7 @@ import scala.util.{Failure, Random, Success, Try}
 private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
   this: JsonRpcProtocol[Node, Codec] =>
 
-  /** JSON-RPC request details. */
+  /** JSON-RPC message details. */
   type Details = Option[Message.Id]
 
   private val unknownId = Right("[unknown]")

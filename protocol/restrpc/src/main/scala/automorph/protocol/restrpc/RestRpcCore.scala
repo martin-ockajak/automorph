@@ -20,7 +20,7 @@ import scala.util.{Failure, Success, Try}
 private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
   this: RestRpcProtocol[Node, Codec] =>
 
-  /** REST-RPC request details. */
+  /** REST-RPC message details. */
   type Details = Unit
 
   private lazy val errorSchema: Schema = Schema(
