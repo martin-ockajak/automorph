@@ -1,4 +1,4 @@
-package automorph.spi
+package automorph.spi.codec
 
 /**
  * Structured message format codec code generation.

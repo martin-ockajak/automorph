@@ -1,5 +1,6 @@
 package automorph.spi
 
+import automorph.spi.codec.MessageCodecMeta
 import scala.collection.immutable.ArraySeq
 
 /**
