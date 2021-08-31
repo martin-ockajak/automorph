@@ -26,7 +26,7 @@ u* The server interprets HTTP request body as an RPC request and processes it us
  * @param evaluateEffect executes specified effect synchronously
  * @param port port to listen on for HTTP connections
  * @param readTimeout HTTP connection read timeout (milliseconds)
- * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
+ * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @tparam Effect effect type
  */
 final case class NanoHttpdServer[Effect[_]] private (

@@ -34,7 +34,7 @@ object DefaultHttpServer {
    * @param runEffect executes specified effect asynchronously
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @tparam Effect effect type
@@ -62,7 +62,7 @@ object DefaultHttpServer {
    * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @tparam Effect effect type
@@ -91,7 +91,7 @@ object DefaultHttpServer {
    * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @param executionContext execution context
@@ -120,7 +120,7 @@ object DefaultHttpServer {
    * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param exceptionToStatusCode maps an exception to a corresponding default HTTP status code
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @return synchronous RPC server
