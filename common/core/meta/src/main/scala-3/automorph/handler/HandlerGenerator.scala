@@ -6,7 +6,7 @@ import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.MethodReflection.functionToExpr
 import automorph.util.{Method, MethodReflection, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Try}
 
 /** RPC handler layer bindings code generation. */
 private[automorph] object HandlerGenerator:
