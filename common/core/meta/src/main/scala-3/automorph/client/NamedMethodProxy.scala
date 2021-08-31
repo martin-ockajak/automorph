@@ -3,7 +3,7 @@ package automorph.client
 import automorph.spi.MessageCodec
 import automorph.util.CannotEqual
 
-case class NamedMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+final case class NamedMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   methodName: String,
   private val core: ClientCore[Node, Codec, Effect, Context],
   private val codec: Codec,

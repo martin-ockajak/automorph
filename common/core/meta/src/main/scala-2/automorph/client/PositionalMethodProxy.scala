@@ -5,7 +5,7 @@ import automorph.util.CannotEqual
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+final case class PositionalMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   methodName: String,
   core: ClientCore[Node, Codec, Effect, Context],
   codec: Codec,
