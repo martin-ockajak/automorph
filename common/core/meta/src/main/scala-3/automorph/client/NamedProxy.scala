@@ -3,7 +3,7 @@ package automorph.client
 import automorph.spi.MessageCodec
 import automorph.util.CannotEqual
 
-final case class NamedMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   methodName: String,
   private val core: ClientCore[Node, Codec, Effect, Context],
   private val codec: Codec,
@@ -12,16 +12,16 @@ final case class NamedMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], 
 ) extends CannotEqual:
 
   /** Positional method proxy type. */
-  type PositionalMethod = PositionalMethodProxy[Node, Codec, Effect, Context]
+  type Positional = PositionalProxy[Node, Codec, Effect, Context]
   /** Named method proxy type. */
-  type NamedMethod = NamedMethodProxy[Node, Codec, Effect, Context]
+  type Named = NamedProxy[Node, Codec, Effect, Context]
 
   /**
    * Creates a copy of this method proxy without argument names passing method arguments ''by position''.
    *
    * @return method proxy without argument names passing method arguments ''by position''
    */
-  def positional: PositionalMethod = PositionalMethodProxy(
+  def positional: Positional = PositionalProxy(
     methodName,
     core,
     codec,
@@ -37,7 +37,7 @@ final case class NamedMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], 
    *
    * @return method proxy
    */
-  def args(): NamedMethod = copy(
+  def args(): Named = copy(
     argumentValues = Seq.empty,
     encodedArguments = Seq.empty
   )
@@ -50,7 +50,7 @@ final case class NamedMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], 
    *
    * @return method proxy
    */
-  inline def args[T1](p1: (String, T1)): NamedMethod = copy(
+  inline def args[T1](p1: (String, T1)): Named = copy(
     argumentValues = Seq(p1),
     encodedArguments = Seq(
       codec.encode(p1._2)
@@ -65,7 +65,7 @@ final case class NamedMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], 
    *
    * @return method proxy
    */
-  inline def args[T1, T2](p1: (String, T1), p2: (String, T2)): NamedMethod = copy(
+  inline def args[T1, T2](p1: (String, T1), p2: (String, T2)): Named = copy(
     argumentValues = Seq(p1, p2),
     encodedArguments = Seq(
       codec.encode(p1._2),
@@ -81,7 +81,7 @@ final case class NamedMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], 
    *
    * @return method proxy
    */
-  inline def args[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3)): NamedMethod = copy(
+  inline def args[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3)): Named = copy(
     argumentValues = Seq(p1, p2, p3),
     encodedArguments = Seq(
       codec.encode(p1._2),
@@ -103,7 +103,7 @@ final case class NamedMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], 
     p2: (String, T2),
     p3: (String, T3),
     p4: (String, T4)
-  ): NamedMethod =
+  ): Named =
     copy(
       argumentValues = Seq(p1, p2, p3, p4),
       encodedArguments = Seq(
@@ -128,7 +128,7 @@ final case class NamedMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], 
     p3: (String, T3),
     p4: (String, T4),
     p5: (String, T5)
-  ): NamedMethod =
+  ): Named =
     copy(
       argumentValues = Seq(p1, p2, p3, p4, p5),
       encodedArguments = Seq(
@@ -155,7 +155,7 @@ final case class NamedMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], 
     p4: (String, T4),
     p5: (String, T5),
     p6: (String, T6)
-  ): NamedMethod =
+  ): Named =
     copy(
       argumentValues = Seq(p1, p2, p3, p4, p5, p6),
       encodedArguments = Seq(
@@ -184,7 +184,7 @@ final case class NamedMethodProxy[Node, Codec <: MessageCodec[Node], Effect[_], 
     p5: (String, T5),
     p6: (String, T6),
     p7: (String, T7)
-  ): NamedMethod =
+  ): Named =
     copy(
       argumentValues = Seq(p1, p2, p3, p4, p5, p6, p7),
       encodedArguments = Seq(

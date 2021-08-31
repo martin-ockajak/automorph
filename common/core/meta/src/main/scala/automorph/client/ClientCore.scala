@@ -23,7 +23,7 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
   type ThisClient = Client[Node, Codec, Effect, Context]
 
   /** Named method proxy type. */
-  type NamedMethod = NamedMethodProxy[Node, Codec, Effect, Context]
+  type NamedMethod = NamedProxy[Node, Codec, Effect, Context]
 
   private val bodyProperty = "Body"
 
@@ -33,7 +33,7 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
    * @param methodName method name
    * @return method proxy with specified method name
    */
-  def method(methodName: String): NamedMethod = NamedMethodProxy(methodName, this, codec, Seq.empty, Seq.empty)
+  def method(methodName: String): NamedMethod = NamedProxy(methodName, this, codec, Seq.empty, Seq.empty)
 
   /**
    * Creates default request context.
