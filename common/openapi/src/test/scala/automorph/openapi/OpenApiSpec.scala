@@ -1,3 +1,4 @@
+// FIXME - enable
 //package automorph.openapi
 //
 //import automorph.spi.protocol.{RpcFunction, RpcParameter}

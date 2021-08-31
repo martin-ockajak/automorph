@@ -161,6 +161,7 @@ case object HandlerGenerator {
       // Create the effect mapping call using the method call and the encode result function
       //   system.map(apiMethodCall, encodeResult): Effect[Node]
       q"$system.map($apiMethodCall, $encodeResult)"
+// FIXME - remove
 //      arguments.flatten.foreach(println(ref.c.universe.showCode(_)))
 //      q"null.asInstanceOf[$effectType[$resultValueType]]"
     }

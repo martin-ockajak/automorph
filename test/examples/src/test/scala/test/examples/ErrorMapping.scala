@@ -7,7 +7,7 @@ import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-// FIXME
+// FIXME - remove
 import automorph.transport.http.client.SttpClient.defaultContext
 
 object ErrorMapping extends App {

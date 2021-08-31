@@ -19,17 +19,6 @@ private[automorph] object OpenApi {
   private val httpStatusCodeOk = 200.toString
   private val scaladocMarkup = "^[/\\* ]*$".r
   private val optionTypePrefix = s"${classOf[Option[Unit]].getName}"
-//  implicit private val pathsEncoder: Encoder[Paths] = new Encoder[Paths] {
-//    def apply(v: Paths): Json = Json.obj((v.map { case (key, value) =>
-//      key -> value.asJson
-//    }.toSeq)*)
-//  }
-//  implicit private val pathsEncoder: Encoder[Paths] = Encoder.encodeMap
-//  implicit private val pathsDecoder: Decoder[Paths] = Decoder.decodeMap
-//  implicit private val componentsEncoder: Encoder[Components] = Encoder.encodeMap
-//  implicit private val componentsDecoder: Decoder[Components] = Decoder.decodeMap
-//    implicit private val propertiesEncoder: Encoder[Properties] = Encoder.encodeMap
-//    implicit private val propertiesDecoder: Decoder[Properties] = Decoder.decodeMap
 
   /**
    * Generate OpenAPI specification for given RPC API functions.

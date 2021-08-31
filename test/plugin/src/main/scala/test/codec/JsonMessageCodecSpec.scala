@@ -9,6 +9,7 @@ import automorph.protocol.jsonrpc.Message
  */
 trait JsonMessageCodecSpec extends MessageCodecSpec {
 
+// FIXME - enable
 //  "" - {
 //    "Codec" - {
 //      "JSON-RPC" - {

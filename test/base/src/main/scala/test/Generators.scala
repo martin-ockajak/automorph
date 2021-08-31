@@ -27,7 +27,8 @@ case object Generators {
     structure <- arbitrary[Option[Structure]]
     none <- arbitrary[Option[String]]
   } yield Record(string, boolean, byte, short, int, long, float, double, enumeration, list, map, structure, none))
-//
+
+// FIXME - enable
 //  def arbitraryMesage[Node: Arbitrary]: Arbitrary[Message[Node]] = {
 //    implicit val arbitraryMessageError: Arbitrary[MessageError[Node]] = Arbitrary(for {
 //      message <- arbitrary[Option[String]]

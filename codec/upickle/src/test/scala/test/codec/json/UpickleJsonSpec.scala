@@ -1,3 +1,4 @@
+// FIXME - enable
 //package test.codec.json
 //
 //import automorph.codec.json.UpickleJsonCodec

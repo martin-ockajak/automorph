@@ -81,6 +81,7 @@ case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
       }
   }
 
+// FIXME - finish WebSocket support
 //  /**
 //   * Creates a Tapir HTTP endpoint with the specified RPC request ''handler''.
 //   *

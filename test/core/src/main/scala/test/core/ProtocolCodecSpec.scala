@@ -46,6 +46,7 @@ trait ProtocolCodecSpec extends CoreSpec {
           (method, p1) => client.method(method).positional.args(p1).tell,
           (method, p1) => client.method(method).args(p1).tell
         )
+// FIXME - enable
 //      }, {
 //        val port = availablePort
 //        val codec = UpickleJsonCodec(ProtocolCodecSpec)
