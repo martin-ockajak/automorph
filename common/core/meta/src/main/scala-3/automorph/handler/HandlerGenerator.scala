@@ -1,7 +1,8 @@
 package automorph.handler
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodReflection.{methodCall, methodSignature, functionToExpr, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodReflection
+import automorph.protocol.MethodReflection.{methodCall, methodSignature, functionToExpr, usesContext, unwrapType}
 import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.{Method, Reflection}
@@ -45,7 +46,7 @@ private[automorph] object HandlerGenerator:
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = validApiMethods[Api, Effect](ref)
+    val apiMethods = MethodReflection.apiMethods[Api, Effect](ref)
     val validMethods = apiMethods.flatMap(_.swap.toOption) match
       case Seq() => apiMethods.flatMap(_.toOption)
       case errors => ref.q.reflect.report.throwError(
@@ -82,7 +83,7 @@ private[automorph] object HandlerGenerator:
       HandlerBinding(
         ${ Expr(method.lift.rpcFunction) },
         $invoke,
-        ${ Expr(methodUsesContext[Context](ref)(method)) }
+        ${ Expr(usesContext[Context](ref)(method)) }
       )
     }
 
@@ -127,7 +128,7 @@ private[automorph] object HandlerGenerator:
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentIndex = offset + index
             val argumentNode = '{ argumentNodes(${ Expr(argumentIndex) }) }
-            if argumentIndex == lastArgumentIndex && methodUsesContext[Context](ref)(method) then
+            if argumentIndex == lastArgumentIndex && usesContext[Context](ref)(method) then
               'context.asTerm
             else
               val decodeArguments = List(List(argumentNode.asTerm))

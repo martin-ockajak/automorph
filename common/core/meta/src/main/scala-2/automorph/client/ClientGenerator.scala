@@ -1,7 +1,8 @@
 package automorph.client
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodReflection.{functionLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodReflection
+import automorph.protocol.MethodReflection.{functionLiftable, methodSignature, unwrapType}
 import automorph.spi.MessageCodec
 import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
@@ -38,7 +39,7 @@ object ClientGenerator {
     val ref = Reflection[c.type](c)
 
     // Detect and validate public methods in the API type
-    val apiMethods = validApiMethods[c.type, Api, Effect[_]](ref)
+    val apiMethods = MethodReflection.apiMethods[c.type, Api, Effect[_]](ref)
     val validMethods = apiMethods.flatMap(_.swap.toOption) match {
       case Seq() => apiMethods.flatMap(_.toOption)
       case errors =>
@@ -81,7 +82,7 @@ object ClientGenerator {
         ${method.lift.rpcFunction},
         $encodeArguments,
         $decodeResult,
-        ${methodUsesContext[C, Context](ref)(method)}
+        ${MethodReflection.usesContext[C, Context](ref)(method)}
       )
     """)
   }

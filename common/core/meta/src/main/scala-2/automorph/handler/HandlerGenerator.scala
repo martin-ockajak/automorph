@@ -1,7 +1,8 @@
 package automorph.handler
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodReflection.{functionLiftable, methodSignature, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodReflection
+import automorph.protocol.MethodReflection.{functionLiftable, methodSignature, unwrapType}
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
@@ -44,7 +45,7 @@ object HandlerGenerator {
     val ref = Reflection[c.type](c)
 
     // Detect and validate public methods in the API type
-    val apiMethods = validApiMethods[c.type, Api, Effect[_]](ref)
+    val apiMethods = MethodReflection.apiMethods[c.type, Api, Effect[_]](ref)
     val validMethods = apiMethods.flatMap(_.swap.toOption) match {
       case Seq() => apiMethods.flatMap(_.toOption)
       case errors =>
@@ -86,7 +87,7 @@ object HandlerGenerator {
       automorph.handler.HandlerBinding(
         ${method.lift.rpcFunction},
         $invoke,
-        ${methodUsesContext[C, Context](ref)(method)}
+        ${MethodReflection.usesContext[C, Context](ref)(method)}
       )
     """)
   }

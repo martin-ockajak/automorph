@@ -40,7 +40,7 @@ private[automorph] object MethodReflection:
    * @tparam Effect effect type
    * @return valid method descriptors or error messages by method name
    */
-  def validApiMethods[ApiType: Type, Effect[_]: Type](ref: Reflection): Seq[Either[String, ref.RefMethod]] =
+  def apiMethods[ApiType: Type, Effect[_]: Type](ref: Reflection): Seq[Either[String, ref.RefMethod]] =
     import ref.q.reflect.TypeRepr
     given Quotes = ref.q
 
@@ -84,7 +84,7 @@ private[automorph] object MethodReflection:
    * @tparam Context request context type
    * @return true if the method uses request context as its last parameter, false otherwise
    */
-  def methodUsesContext[Context: Type](ref: Reflection)(method: ref.RefMethod): Boolean =
+  def usesContext[Context: Type](ref: Reflection)(method: ref.RefMethod): Boolean =
     method.parameters.flatten.lastOption.exists { parameter =>
       parameter.contextual && parameter.dataType =:= ref.q.reflect.TypeRepr.of[Context]
     }

@@ -50,7 +50,7 @@ private[automorph] object MethodReflection {
    * @tparam Effect effect type
    * @return valid method descriptors or error messages by method name
    */
-  def validApiMethods[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
+  def apiMethods[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
     ref: Reflection[C]
   ): Seq[Either[String, ref.RefMethod]] = {
     // Omit base data type methods
@@ -74,7 +74,7 @@ private[automorph] object MethodReflection {
    * @tparam Context request context type
    * @return true if the method uses request context as its last parameter, false otherwise
    */
-  def methodUsesContext[C <: blackbox.Context, Context: ref.c.WeakTypeTag](
+  def usesContext[C <: blackbox.Context, Context: ref.c.WeakTypeTag](
     ref: Reflection[C]
   )(method: ref.RefMethod): Boolean =
     method.parameters.flatten.lastOption.exists { parameter =>

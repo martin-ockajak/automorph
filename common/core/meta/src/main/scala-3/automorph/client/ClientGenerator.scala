@@ -2,7 +2,8 @@ package automorph.client
 
 import automorph.log.MacroLogger
 import automorph.client.ClientBinding
-import automorph.protocol.MethodReflection.{methodCall, methodSignature, functionToExpr, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodReflection
+import automorph.protocol.MethodReflection.{methodCall, methodSignature, functionToExpr, usesContext, unwrapType}
 import automorph.spi.MessageCodec
 import automorph.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -36,7 +37,7 @@ private[automorph] object ClientGenerator:
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
-    val apiMethods = validApiMethods[Api, Effect](ref)
+    val apiMethods = MethodReflection.apiMethods[Api, Effect](ref)
     val validMethods = apiMethods.flatMap(_.swap.toOption) match
       case Seq() => apiMethods.flatMap(_.toOption)
       case errors => ref.q.reflect.report.throwError(
@@ -70,7 +71,7 @@ private[automorph] object ClientGenerator:
         ${ Expr(method.lift.rpcFunction) },
         $encodeArguments,
         $decodeResult,
-        ${ Expr(methodUsesContext[Context](ref)(method)) }
+        ${ Expr(usesContext[Context](ref)(method)) }
       )
     }
 
@@ -100,7 +101,7 @@ private[automorph] object ClientGenerator:
         //   ): List[Node]
         val argumentNodes = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
-            Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[Context](ref)(method)) {
+            Option.when((offset + index) != lastArgumentIndex || !usesContext[Context](ref)(method)) {
               val argument = parameter.dataType.asType match
                 case '[parameterType] => '{ arguments(${ Expr(offset + index) }).asInstanceOf[parameterType] }
               methodCall(ref.q, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
