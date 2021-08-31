@@ -215,7 +215,7 @@ lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
 ).settings(
   name := s"$projectName-rabbitmq",
   libraryDependencies ++= Seq(
-    "com.rabbitmq" % "amqp-client" % "5.13.0"
+    "com.rabbitmq" % "amqp-client" % "5.13.1"
   )
 )
 
@@ -225,7 +225,7 @@ lazy val undertow = (project in file("transport/undertow")).dependsOn(
 ).settings(
   name := s"$projectName-undertow",
   libraryDependencies ++= Seq(
-    "io.undertow" % "undertow-core" % "2.2.9.Final"
+    "io.undertow" % "undertow-core" % "2.2.10.Final"
   )
 )
 lazy val jetty = (project in file("transport/jetty")).dependsOn(
@@ -242,7 +242,7 @@ lazy val finagle = (project in file("transport/finagle")).dependsOn(
 ).settings(
   name := s"$projectName-finagle",
   libraryDependencies ++= Seq(
-    ("com.twitter" % "finagle-http" % "21.6.0").cross(CrossVersion.for3Use2_13)
+    ("com.twitter" % "finagle-http" % "21.8.0").cross(CrossVersion.for3Use2_13)
   )
 )
 lazy val tapir = (project in file("transport/tapir")).dependsOn(
@@ -250,7 +250,7 @@ lazy val tapir = (project in file("transport/tapir")).dependsOn(
 ).settings(
   name := s"$projectName-tapir",
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.18.1"
+    "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.18.3"
   )
 )
 
