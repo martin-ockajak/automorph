@@ -135,7 +135,7 @@ lazy val zio = (project in file("system/zio")).dependsOn(
 ).settings(
   name := s"$projectName-zio",
   libraryDependencies ++= Seq(
-    "dev.zio" %% "zio" % "1.0.10"
+    "dev.zio" %% "zio" % "1.0.11"
   )
 )
 lazy val monix = (project in file("system/monix")).dependsOn(
@@ -151,7 +151,7 @@ lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
 ).settings(
   name := s"$projectName-cats-effect",
   libraryDependencies ++= Seq(
-    "org.typelevel" %% "cats-effect" % "3.2.2"
+    "org.typelevel" %% "cats-effect" % "3.2.5"
   )
 )
 lazy val scalaz = (project in file("system/scalaz")).dependsOn(
@@ -159,7 +159,7 @@ lazy val scalaz = (project in file("system/scalaz")).dependsOn(
 ).settings(
   name := s"$projectName-scalaz",
   libraryDependencies ++= Seq(
-    "org.scalaz" %% "scalaz-effect" % "7.4.0-M7"
+    "org.scalaz" %% "scalaz-effect" % "7.4.0-M8"
   )
 )
 
