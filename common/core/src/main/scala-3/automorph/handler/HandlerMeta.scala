@@ -1,7 +1,7 @@
 package automorph.handler
 
 import automorph.Handler
-import automorph.handler.HandlerBindings
+import automorph.handler.HandlerGenerator
 import automorph.spi.{EffectSystem, MessageCodec}
 
 /**
@@ -61,7 +61,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    */
   inline def bind[Api <: AnyRef](api: Api, aliases: String => Iterable[String]): ThisHandler =
     copy(bindings =
-      bindings ++ HandlerBindings.generate[Node, Codec, Effect, Context, Api](codec, system, api).flatMap {
+      bindings ++ HandlerGenerator.bindings[Node, Codec, Effect, Context, Api](codec, system, api).flatMap {
         (name, method) => aliases(name).map(_ -> method)
       }
     )

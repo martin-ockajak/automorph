@@ -9,7 +9,7 @@ import scala.quoted.{Expr, Quotes, Type}
 import scala.util.{Failure, Success, Try}
 
 /** RPC handler layer bindings code generation. */
-private[automorph] object HandlerBindings:
+private[automorph] object HandlerGenerator:
 
   /**
    * Generates handler bindings for all valid public methods of an API type.
@@ -24,14 +24,14 @@ private[automorph] object HandlerBindings:
    * @tparam Api API type
    * @return mapping of API method names to handler function bindings
    */
-  inline def generate[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
+  inline def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec,
     system: EffectSystem[Effect],
     api: Api
   ): Map[String, HandlerBinding[Node, Effect, Context]] =
-    ${ generateMacro[Node, Codec, Effect, Context, Api]('codec, 'system, 'api) }
+    ${ bindingsMacro[Node, Codec, Effect, Context, Api]('codec, 'system, 'api) }
 
-  private def generateMacro[
+  private def bindingsMacro[
     Node: Type,
     Codec <: MessageCodec[Node]: Type,
     Effect[_]: Type,

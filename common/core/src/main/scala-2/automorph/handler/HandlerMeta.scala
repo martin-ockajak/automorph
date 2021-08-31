@@ -86,8 +86,8 @@ case object HandlerMeta {
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
-      automorph.handler.BrokenHandlerBindings
-        .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.system, $api)
+      automorph.handler.BrokenHandlerGenerator
+        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.system, $api)
       ${c.prefix}
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
   }
@@ -108,8 +108,8 @@ case object HandlerMeta {
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
-      ${c.prefix}.copy(bindings = ${c.prefix}.bindings ++ automorph.handler.HandlerBindings
-        .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.system, $api)
+      ${c.prefix}.copy(bindings = ${c.prefix}.bindings ++ automorph.handler.HandlerGenerator
+        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.system, $api)
       )
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
   }
@@ -131,8 +131,8 @@ case object HandlerMeta {
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
-      ${c.prefix}.copy(bindings = ${c.prefix}.bindings ++ automorph.handler.HandlerBindings
-        .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.system, $api)
+      ${c.prefix}.copy(bindings = ${c.prefix}.bindings ++ automorph.handler.HandlerGenerator
+        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.system, $api)
         .flatMap { case (name, method) =>
           $aliases(name).map(_ -> method)
         }

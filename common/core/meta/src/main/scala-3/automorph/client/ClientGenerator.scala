@@ -8,7 +8,7 @@ import automorph.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
 
 /** RPC client layer bindings code generation. */
-private[automorph] object ClientBindings:
+private[automorph] object ClientGenerator:
 
   /**
    * Generates client bindings for all valid public methods of an API type.
@@ -21,12 +21,12 @@ private[automorph] object ClientBindings:
    * @tparam Api API type
    * @return mapping of API method names to client function bindings
    */
-  inline def generate[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
+  inline def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec
   ): Map[String, ClientBinding[Node]] =
-    ${ generateMacro[Node, Codec, Effect, Context, Api]('codec) }
+    ${ bindingsMacro[Node, Codec, Effect, Context, Api]('codec) }
 
-  private def generateMacro[
+  private def bindingsMacro[
     Node: Type,
     Codec <: MessageCodec[Node]: Type,
     Effect[_]: Type,

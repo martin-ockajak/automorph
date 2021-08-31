@@ -8,15 +8,15 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /** JSON-RPC handler layer bindings code generation. */
-case object BrokenHandlerBindings {
+case object BrokenHandlerGenerator {
 
-  def generate[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
+  def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec,
     system: EffectSystem[Effect],
     api: Api
-  ): Map[String, HandlerBinding[Node, Effect, Context]] = macro generateMacro[Node, Codec, Effect, Context, Api]
+  ): Map[String, HandlerBinding[Node, Effect, Context]] = macro bindingsMacro[Node, Codec, Effect, Context, Api]
 
-  def generateMacro[
+  def bindingsMacro[
     Node: c.WeakTypeTag,
     Codec <: MessageCodec[Node]: c.WeakTypeTag,
     Effect[_],

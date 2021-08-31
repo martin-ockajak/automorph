@@ -8,7 +8,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /** RPC client layer bindings code generation. */
-object ClientBindings {
+object ClientGenerator {
 
   /**
    * Generates client bindings for all valid public methods of an API type.
@@ -21,11 +21,11 @@ object ClientBindings {
    * @tparam Api API type
    * @return mapping of API method names to client function bindings
    */
-  def generate[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
+  def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec
-  ): Map[String, ClientBinding[Node]] = macro generateMacro[Node, Codec, Effect, Context, Api]
+  ): Map[String, ClientBinding[Node]] = macro bindingsMacro[Node, Codec, Effect, Context, Api]
 
-  def generateMacro[
+  def bindingsMacro[
     Node: c.WeakTypeTag,
     Codec <: MessageCodec[Node]: c.WeakTypeTag,
     Effect[_],

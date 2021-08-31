@@ -128,7 +128,7 @@ object ClientMeta {
     c.Expr[Api](q"""
       // Generate API method bindings
       val methodBindings =
-        automorph.client.ClientBindings.generate[$nodeType, $codecType, $effectType, $contextType, $apiType]($codec)
+        automorph.client.ClientGenerator.bindings[$nodeType, $codecType, $effectType, $contextType, $apiType]($codec)
 
       // Create API proxy instance
       java.lang.reflect.Proxy.newProxyInstance(

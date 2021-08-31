@@ -1,7 +1,7 @@
 package automorph.client
 
 import automorph.Client
-import automorph.client.{ClientBindings, ClientCore}
+import automorph.client.{ClientCore, ClientGenerator}
 import automorph.spi.MessageCodec
 import java.lang.reflect.Proxy
 import scala.compiletime.summonInline
@@ -71,7 +71,7 @@ object ClientMeta:
     namedArguments: Boolean
   ): Api =
     // Generate API method bindings
-    val methodBindings = ClientBindings.generate[Node, Codec, Effect, Context, Api](codec)
+    val methodBindings = ClientGenerator.bindings[Node, Codec, Effect, Context, Api](codec)
 
     // Create API proxy instance
     val classTag = summonInline[ClassTag[Api]]
