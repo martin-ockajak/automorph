@@ -13,7 +13,7 @@ import scala.reflect.macros.blackbox
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
+private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
   this: Client[Node, Codec, Effect, Context] =>
 
   /**
@@ -35,7 +35,7 @@ ne
    * @return remote API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef]: Api = macro ClientBind.bindNamedMacro[Node, Codec, Effect, Context, Api]
+  def bind[Api <: AnyRef]: Api = macro ClientMeta.bindNamedMacro[Node, Codec, Effect, Context, Api]
 
   /**
    * Creates a remote API proxy instance with RPC bindings for all valid public methods of the specified API.
@@ -55,10 +55,10 @@ ne
    * @return remote API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bindPositional[Api <: AnyRef]: Api = macro ClientBind.bindPositionalMacro[Node, Codec, Effect, Context, Api]
+  def bindPositional[Api <: AnyRef]: Api = macro ClientMeta.bindPositionalMacro[Node, Codec, Effect, Context, Api]
 }
 
-object ClientBind {
+object ClientMeta {
   /** Client with arbitrary codec. */
   type AnyCodec[Effect[_], Context] = Client[Node, _ <: MessageCodec[Node], Effect, Context] forSome { type Node }
 

@@ -1,7 +1,7 @@
 package test.core
 
 import automorph.Handler
-import automorph.client.ClientBind
+import automorph.client.ClientMeta
 import automorph.spi.EffectSystem
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException, FunctionNotFoundException}
 import org.scalacheck.Arbitrary
@@ -27,7 +27,7 @@ trait CoreSpec extends BaseSpec {
 
   case class TestFixture(
     codec: Class[_],
-    client: ClientBind.AnyCodec[Effect, Context],
+    client: ClientMeta.AnyCodec[Effect, Context],
     handler: Handler.AnyCodec[Effect, Context],
     serverPort: Int,
     simpleApis: Seq[SimpleApiType],

@@ -13,7 +13,7 @@ import scala.reflect.macros.blackbox
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerBind[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
+private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
   this: Handler[Node, Codec, Effect, Context] =>
 
   /** This handler type. */
@@ -39,7 +39,7 @@ private[automorph] trait HandlerBind[Node, Codec <: MessageCodec[Node], Effect[_
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   def bind[Api <: AnyRef](api: Api): ThisHandler =
-    macro HandlerBind.basicBindMacro[Node, Codec, Effect, Context, Api]
+    macro HandlerMeta.basicBindMacro[Node, Codec, Effect, Context, Api]
 
   /**
    * Creates a copy of this handler with generated RPC bindings for all valid public methods of the specified API.
@@ -62,13 +62,13 @@ private[automorph] trait HandlerBind[Node, Codec <: MessageCodec[Node], Effect[_
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   def bind[Api <: AnyRef](api: Api, aliases: String => Iterable[String]): ThisHandler =
-    macro HandlerBind.bindMacro[Node, Codec, Effect, Context, Api]
+    macro HandlerMeta.bindMacro[Node, Codec, Effect, Context, Api]
 
   def brokenBind[Api <: AnyRef](api: Api): ThisHandler =
-    macro HandlerBind.brokenBindMacro[Node, Codec, Effect, Context, Api]
+    macro HandlerMeta.brokenBindMacro[Node, Codec, Effect, Context, Api]
 }
 
-case object HandlerBind {
+case object HandlerMeta {
 
   def brokenBindMacro[
     Node: c.WeakTypeTag,

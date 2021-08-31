@@ -15,7 +15,7 @@ import scala.reflect.ClassTag
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
+private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
   this: Client[Node, Codec, Effect, Context] =>
 
   /**
@@ -37,7 +37,7 @@ private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_]
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef]: Api =
-    ClientBind.generalBind[Node, Codec, Effect, Context, Api](this, codec, namedArguments = true)
+    ClientMeta.generalBind[Node, Codec, Effect, Context, Api](this, codec, namedArguments = true)
 
   /**
    * Creates a remote API proxy instance with RPC bindings for all valid public methods of the specified API.
@@ -58,9 +58,9 @@ private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_]
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bindPositional[Api <: AnyRef]: Api =
-    ClientBind.generalBind[Node, Codec, Effect, Context, Api](this, codec, namedArguments = false)
+    ClientMeta.generalBind[Node, Codec, Effect, Context, Api](this, codec, namedArguments = false)
 
-object ClientBind:
+object ClientMeta:
 
   /** Client with arbitrary codec. */
   type AnyCodec[Effect[_], Context] = Client[_, _, Effect, Context]

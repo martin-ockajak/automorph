@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.handler.{HandlerBind, HandlerBinding, HandlerCore}
+import automorph.handler.{HandlerBinding, HandlerCore, HandlerMeta}
 import automorph.log.Logging
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.{CannotEqual, EmptyContext}
@@ -28,7 +28,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context] 
   bindings: Map[String, HandlerBinding[Node, Effect, Context]],
   protected val encodedNone: Node
 ) extends HandlerCore[Node, Codec, Effect, Context]
-  with HandlerBind[Node, Codec, Effect, Context]
+  with HandlerMeta[Node, Codec, Effect, Context]
   with CannotEqual
   with Logging
 

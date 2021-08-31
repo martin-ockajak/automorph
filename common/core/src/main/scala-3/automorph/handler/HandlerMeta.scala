@@ -12,7 +12,7 @@ import automorph.spi.{EffectSystem, MessageCodec}
  * @tparam Effect effect type
  * @tparam Context request context type
  */
-private[automorph] trait HandlerBind[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
+private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
   this: Handler[Node, Codec, Effect, Context] =>
 
   /** This handler type. */

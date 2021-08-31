@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.client.{ClientBind, ClientCore}
+import automorph.client.{ClientCore, ClientMeta}
 import automorph.log.Logging
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
@@ -27,7 +27,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   transport: ClientMessageTransport[Effect, Context],
   protocol: RpcProtocol[Node]
 ) extends ClientCore[Node, Codec, Effect, Context]
-  with ClientBind[Node, Codec, Effect, Context]
+  with ClientMeta[Node, Codec, Effect, Context]
   with CannotEqual
   with Logging
 
