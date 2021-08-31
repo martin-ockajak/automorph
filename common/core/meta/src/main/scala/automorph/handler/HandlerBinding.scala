@@ -5,7 +5,7 @@ import automorph.spi.protocol.RpcFunction
 /**
  * RPC handler remote API function binding.
  *
- * @param function RPC function
+ * @param function bound function descriptor
  * @param invoke invokes bound function
  * @param usesContext true if the last parameter of the bound function is contextual
  * @tparam Node message node type

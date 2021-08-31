@@ -1,7 +1,7 @@
 package automorph.spi.protocol
 
 /**
- * Renote function descriptor.
+ * Remote function descriptor.
  *
  * @param name name
  * @param resultType result type
