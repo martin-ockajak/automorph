@@ -1,3 +1,4 @@
+// FIXME - enable
 //package test.codec.messagepack
 //
 //import automorph.codec.messagepack.UpickleMessagePackCodec
