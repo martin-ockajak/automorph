@@ -19,7 +19,7 @@ private[automorph] object ClientBindings:
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
-   * @return mapping of method names to client method bindings
+   * @return mapping of API method names to client function bindings
    */
   inline def generate[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec

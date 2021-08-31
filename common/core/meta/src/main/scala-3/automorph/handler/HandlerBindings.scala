@@ -22,7 +22,7 @@ private[automorph] object HandlerBindings:
    * @tparam Effect effect type
    * @tparam Context request context type
    * @tparam Api API type
-   * @return mapping of method names to handler method bindings
+   * @return mapping of API method names to handler function bindings
    */
   inline def generate[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec,
