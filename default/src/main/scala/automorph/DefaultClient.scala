@@ -5,7 +5,7 @@ import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
 import scala.concurrent.{ExecutionContext, Future}
 
-object DefaultClient {
+case object DefaultClient {
 
   /**
    * Default client type.

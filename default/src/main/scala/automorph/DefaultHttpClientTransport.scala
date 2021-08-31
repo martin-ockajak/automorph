@@ -9,7 +9,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
 import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 
-object DefaultHttpClientTransport {
+case object DefaultHttpClientTransport {
 
   /**
    * Default message transport type.

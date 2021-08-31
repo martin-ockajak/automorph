@@ -5,7 +5,7 @@ import automorph.protocol.JsonRpcProtocol
 import automorph.spi.MessageCodec
 import io.circe.{Decoder, Encoder}
 
-object DefaultRpcProtocol:
+case object DefaultRpcProtocol:
 
   /**
    * Default RPC protocol plugin type.

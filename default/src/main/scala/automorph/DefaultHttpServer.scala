@@ -8,7 +8,7 @@ import automorph.transport.http.server.UndertowServer
 import automorph.spi.EffectSystem
 import scala.concurrent.{ExecutionContext, Future}
 
-object DefaultHttpServer {
+case object DefaultHttpServer {
 
   /** Default server type. */
   type Type[Effect[_]] = UndertowServer[Effect]

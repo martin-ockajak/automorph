@@ -7,7 +7,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
 import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 
-object DefaultHttpClient {
+case object DefaultHttpClient {
 
   /**
    * Default client type.

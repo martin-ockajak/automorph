@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.util.EmptyContext
 import scala.concurrent.{ExecutionContext, Future}
 
-object DefaultHandler {
+case object DefaultHandler {
 
   /**
    * Default request handler type.

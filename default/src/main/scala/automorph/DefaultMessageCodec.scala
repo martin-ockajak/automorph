@@ -2,7 +2,7 @@ package automorph
 
 import automorph.codec.json.CirceJsonCodec
 
-object DefaultMessageCodec {
+case object DefaultMessageCodec {
 
   /** Default message node type. */
   type Node = CirceJsonCodec.Node
