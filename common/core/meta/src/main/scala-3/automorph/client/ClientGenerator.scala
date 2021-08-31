@@ -3,7 +3,7 @@ package automorph.client
 import automorph.log.MacroLogger
 import automorph.client.ClientBinding
 import automorph.protocol.MethodReflection
-import automorph.protocol.MethodReflection.{methodCall, methodSignature, functionToExpr, usesContext, unwrapType}
+import automorph.protocol.MethodReflection.{methodCall, methodSignature, functionToExpr}
 import automorph.spi.MessageCodec
 import automorph.util.Reflection
 import scala.quoted.{Expr, Quotes, Type}
@@ -71,7 +71,7 @@ private[automorph] object ClientGenerator:
         ${ Expr(method.lift.rpcFunction) },
         $encodeArguments,
         $decodeResult,
-        ${ Expr(usesContext[Context](ref)(method)) }
+        ${ Expr(MethodReflection.usesContext[Context](ref)(method)) }
       )
     }
 
@@ -101,7 +101,7 @@ private[automorph] object ClientGenerator:
         //   ): List[Node]
         val argumentNodes = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
-            Option.when((offset + index) != lastArgumentIndex || !usesContext[Context](ref)(method)) {
+            Option.when((offset + index) != lastArgumentIndex || !MethodReflection.usesContext[Context](ref)(method)) {
               val argument = parameter.dataType.asType match
                 case '[parameterType] => '{ arguments(${ Expr(offset + index) }).asInstanceOf[parameterType] }
               methodCall(ref.q, codec.asTerm, "encode", List(parameter.dataType), List(List(argument.asTerm)))
@@ -124,7 +124,7 @@ private[automorph] object ClientGenerator:
 
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
-    val resultValueType = unwrapType[Effect](ref.q)(method.resultType.dealias).dealias
+    val resultValueType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType.dealias).dealias
     '{ resultNode =>
       ${
         methodCall(ref.q, codec.asTerm, "decode", List(resultValueType), List(List('{ resultNode }.asTerm))).asExprOf[Any]

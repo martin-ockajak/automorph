@@ -2,7 +2,7 @@ package automorph.handler
 
 import automorph.log.MacroLogger
 import automorph.protocol.MethodReflection
-import automorph.protocol.MethodReflection.{methodLiftable, methodSignature, unwrapType}
+import automorph.protocol.MethodReflection.{methodLiftable, methodSignature}
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
@@ -128,7 +128,7 @@ case object BrokenHandlerGenerator {
 
       // Create encode result function
       //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
-      val resultValueType = unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
+      val resultValueType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
       val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result)"
 
       // Create the effect mapping call using the method call and the encode result function

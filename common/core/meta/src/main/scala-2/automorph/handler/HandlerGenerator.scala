@@ -2,7 +2,7 @@ package automorph.handler
 
 import automorph.log.MacroLogger
 import automorph.protocol.MethodReflection
-import automorph.protocol.MethodReflection.{functionLiftable, methodSignature, unwrapType}
+import automorph.protocol.MethodReflection.{functionLiftable, methodSignature}
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
@@ -135,7 +135,7 @@ object HandlerGenerator {
       val arguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
         parameters.toList.zipWithIndex.map { case (parameter, index) =>
           val argumentIndex = offset + index
-          if (argumentIndex == lastArgumentIndex && methodUsesContext[C, Context](ref)(method)) {
+          if (argumentIndex == lastArgumentIndex && MethodReflection.usesContext[C, Context](ref)(method)) {
             q"context"
           } else {
             q"""
@@ -156,7 +156,7 @@ object HandlerGenerator {
 
       // Create encode result function
       //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
-      val resultValueType = unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
+      val resultValueType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
       val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result)"
 
       // Create the effect mapping call using the method call and the encode result function

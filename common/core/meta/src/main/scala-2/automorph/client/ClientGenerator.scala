@@ -2,7 +2,7 @@ package automorph.client
 
 import automorph.log.MacroLogger
 import automorph.protocol.MethodReflection
-import automorph.protocol.MethodReflection.{functionLiftable, methodSignature, unwrapType}
+import automorph.protocol.MethodReflection.{functionLiftable, methodSignature}
 import automorph.spi.MessageCodec
 import automorph.util.{Method, Reflection}
 import scala.language.experimental.macros
@@ -114,7 +114,7 @@ object ClientGenerator {
       //   ): List[Node]
       val argumentNodes = method.parameters.toList.zip(parameterListOffsets).flatMap { case (parameters, offset) =>
         parameters.toList.zipWithIndex.flatMap { case (parameter, index) =>
-          Option.when((offset + index) != lastArgumentIndex || !methodUsesContext[C, Context](ref)(method)) {
+          Option.when((offset + index) != lastArgumentIndex || !MethodReflection.usesContext[C, Context](ref)(method)) {
             q"$codec.encode[${parameter.dataType}](arguments(${offset + index}).asInstanceOf[${parameter.dataType}])"
           }
         }
@@ -141,7 +141,7 @@ object ClientGenerator {
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
     val nodeType = weakTypeOf[Node]
-    val resultValueType = unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
+    val resultValueType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
     ref.c.Expr[Node => Any](q"""
       (resultNode: $nodeType) => $codec.decode[$resultValueType](resultNode)
     """)

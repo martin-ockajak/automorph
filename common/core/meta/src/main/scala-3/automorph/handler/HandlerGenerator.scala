@@ -2,7 +2,7 @@ package automorph.handler
 
 import automorph.log.MacroLogger
 import automorph.protocol.MethodReflection
-import automorph.protocol.MethodReflection.{methodCall, methodSignature, functionToExpr, usesContext, unwrapType}
+import automorph.protocol.MethodReflection.{methodCall, methodSignature, functionToExpr}
 import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.{Method, Reflection}
@@ -83,7 +83,7 @@ private[automorph] object HandlerGenerator:
       HandlerBinding(
         ${ Expr(method.lift.rpcFunction) },
         $invoke,
-        ${ Expr(usesContext[Context](ref)(method)) }
+        ${ Expr(MethodReflection.usesContext[Context](ref)(method)) }
       )
     }
 
@@ -128,7 +128,7 @@ private[automorph] object HandlerGenerator:
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentIndex = offset + index
             val argumentNode = '{ argumentNodes(${ Expr(argumentIndex) }) }
-            if argumentIndex == lastArgumentIndex && usesContext[Context](ref)(method) then
+            if argumentIndex == lastArgumentIndex && MethodReflection.usesContext[Context](ref)(method) then
               'context.asTerm
             else
               val decodeArguments = List(List(argumentNode.asTerm))
@@ -150,7 +150,7 @@ private[automorph] object HandlerGenerator:
 
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
-        val resultValueType = unwrapType[Effect](ref.q)(method.resultType).dealias
+        val resultValueType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
         val encodeResult = resultValueType.asType match
           case '[resultType] => '{ (result: resultType) =>
               ${
