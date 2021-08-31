@@ -9,7 +9,7 @@ import scala.collection.immutable.ArraySeq
  *
  * @tparam Node message codec node representation type
  */
-trait MessageCodec[Node] extends CodecMeta[Node] {
+trait MessageCodec[Node] extends MessageCodecMeta[Node] {
   /**
    * Message codec media (MIME) type.
    *

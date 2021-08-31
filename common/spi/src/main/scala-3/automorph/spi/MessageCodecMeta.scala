@@ -1,6 +1,11 @@
 package automorph.spi
 
-trait CodecMeta[Node]:
+/**
+ * Structured message format codec code generation.
+ *
+ * @tparam Node message codec node representation type
+ */
+trait MessageCodecMeta[Node]:
   /**
    * Encodes a value as a message codec node.
    *
