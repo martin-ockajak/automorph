@@ -1,10 +1,9 @@
 package automorph.handler
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodReflection
-import automorph.protocol.MethodReflection.{methodLiftable, methodSignature}
 import automorph.spi.{EffectSystem, MessageCodec}
-import automorph.util.{Method, Reflection}
+import automorph.util.MethodReflection.methodLiftable
+import automorph.util.{Method, MethodReflection, Reflection}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -84,7 +83,7 @@ case object BrokenHandlerGenerator {
     system: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
-    import ref.c.universe.{weakTypeOf, Quasiquote}
+    import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
     // Map multiple parameter lists to flat argument node list offsets

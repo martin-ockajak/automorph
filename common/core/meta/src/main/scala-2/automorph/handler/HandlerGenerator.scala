@@ -1,10 +1,9 @@
 package automorph.handler
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodReflection
-import automorph.protocol.MethodReflection.{functionLiftable, methodSignature}
 import automorph.spi.{EffectSystem, MessageCodec}
-import automorph.util.{Method, Reflection}
+import automorph.util.MethodReflection.{functionLiftable, methodSignature}
+import automorph.util.{Method, MethodReflection, Reflection}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 

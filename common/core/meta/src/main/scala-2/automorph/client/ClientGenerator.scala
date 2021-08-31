@@ -1,10 +1,9 @@
 package automorph.client
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodReflection
-import automorph.protocol.MethodReflection.{functionLiftable, methodSignature}
 import automorph.spi.MessageCodec
-import automorph.util.{Method, Reflection}
+import automorph.util.MethodReflection.{functionLiftable, methodSignature}
+import automorph.util.{Method, MethodReflection, Reflection}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -69,7 +68,7 @@ object ClientGenerator {
     method: ref.RefMethod,
     codec: ref.c.Expr[Codec]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[ClientBinding[Node]] = {
-    import ref.c.universe.{weakTypeOf, Liftable, Quasiquote}
+    import ref.c.universe.{Liftable, Quasiquote, weakTypeOf}
 
     val nodeType = weakTypeOf[Node]
     val encodeArguments = generateEncodeArguments[C, Node, Codec, Context](ref)(method, codec)
@@ -93,7 +92,7 @@ object ClientGenerator {
     Codec <: MessageCodec[Node]: ref.c.WeakTypeTag,
     Context: ref.c.WeakTypeTag
   ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[Codec]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
-    import ref.c.universe.{weakTypeOf, Quasiquote}
+    import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -135,7 +134,7 @@ object ClientGenerator {
   ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[Codec])(implicit
     effectType: ref.c.WeakTypeTag[Effect[_]]
   ): ref.c.Expr[Node => Any] = {
-    import ref.c.universe.{weakTypeOf, Quasiquote}
+    import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
     // Create decode result function

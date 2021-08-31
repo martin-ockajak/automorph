@@ -1,11 +1,10 @@
 package automorph.handler
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodReflection
-import automorph.protocol.MethodReflection.{methodCall, methodSignature, functionToExpr}
 import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
-import automorph.util.{Method, Reflection}
+import automorph.util.MethodReflection.{functionToExpr, methodCall}
+import automorph.util.{Method, MethodReflection, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
 import scala.util.{Failure, Success, Try}
 
@@ -169,7 +168,7 @@ private[automorph] object HandlerGenerator:
     import ref.q.reflect.{Printer, asTerm}
 
     MacroLogger.debug(
-      s"""${methodSignature[Api](ref)(method)} =
+      s"""${MethodReflection.signature[Api](ref)(method)} =
          |  ${invoke.asTerm.show(using Printer.TreeShortCode)}
          |""".stripMargin
     )

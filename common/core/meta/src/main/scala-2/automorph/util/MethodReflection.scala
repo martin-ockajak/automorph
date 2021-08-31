@@ -1,4 +1,4 @@
-package automorph.protocol
+package automorph.util
 
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import automorph.util.Reflection
@@ -138,7 +138,7 @@ private[automorph] object MethodReflection {
    * @tparam ApiType API type
    * @return method description
    */
-  def methodSignature[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag](
+  def signature[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag](
     ref: Reflection[C]
   )(method: ref.RefMethod): String =
     s"${ref.c.weakTypeOf[ApiType].typeSymbol.fullName}.${method.lift.signature}"
@@ -157,13 +157,13 @@ private[automorph] object MethodReflection {
     ref: Reflection[C]
   )(method: ref.RefMethod): Either[String, ref.RefMethod] = {
     // No type parameters
-    val signature = methodSignature[C, ApiType](ref)(method)
+    val methodSignature = signature[C, ApiType](ref)(method)
     if (method.typeParameters.nonEmpty) {
-      Left(s"Bound API method '$signature' must not have type parameters")
+      Left(s"Bound API method '$methodSignature' must not have type parameters")
     } else {
       // Callable at runtime
       if (!method.available) {
-        Left(s"Bound API method '$signature' must be callable at runtime")
+        Left(s"Bound API method '$methodSignature' must be callable at runtime")
       } else {
         // Returns the effect type
         val effectTypeConstructor = ref.c.weakTypeOf[Effect].dealias.typeConstructor
@@ -172,7 +172,7 @@ private[automorph] object MethodReflection {
 
         // FIXME - determine concrete result type constructor instead of an abstract one
         if (!matchingResultType && false) {
-          Left(s"Bound API method '$signature' must return the specified effect type '${effectTypeConstructor.typeSymbol.fullName}'")
+          Left(s"Bound API method '$methodSignature' must return the specified effect type '${effectTypeConstructor.typeSymbol.fullName}'")
         } else {
           Right(method)
         }

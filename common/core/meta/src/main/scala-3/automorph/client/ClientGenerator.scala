@@ -1,11 +1,10 @@
 package automorph.client
 
-import automorph.log.MacroLogger
 import automorph.client.ClientBinding
-import automorph.protocol.MethodReflection
-import automorph.protocol.MethodReflection.{methodCall, methodSignature, functionToExpr}
+import automorph.log.MacroLogger
 import automorph.spi.MessageCodec
-import automorph.util.Reflection
+import automorph.util.MethodReflection.{functionToExpr, methodCall}
+import automorph.util.{MethodReflection, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
 
 /** RPC client layer bindings code generation. */
@@ -139,7 +138,7 @@ private[automorph] object ClientGenerator:
     import ref.q.reflect.{Printer, asTerm}
 
     MacroLogger.debug(
-      s"""${methodSignature[Api](ref)(method)} =
+      s"""${MethodReflection.signature[Api](ref)(method)} =
          |  ${encodeArguments.asTerm.show(using Printer.TreeShortCode)}
          |  ${decodeResult.asTerm.show(using Printer.TreeShortCode)}
          |""".stripMargin

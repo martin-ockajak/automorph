@@ -1,4 +1,4 @@
-package automorph.protocol
+package automorph.util
 
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import automorph.util.Reflection
@@ -129,7 +129,7 @@ private[automorph] object MethodReflection:
    * @tparam ApiType API type
    * @return method description
    */
-  def methodSignature[ApiType: Type](ref: Reflection)(method: ref.RefMethod): String =
+  def signature[ApiType: Type](ref: Reflection)(method: ref.RefMethod): String =
     import ref.q.reflect.{Printer, TypeRepr}
 
     s"${TypeRepr.of[ApiType].show(using Printer.TypeReprCode)}.${method.lift.signature}"
@@ -150,13 +150,13 @@ private[automorph] object MethodReflection:
 
     // No type parameters
     val apiType = TypeTree.of[ApiType]
-    val signature = methodSignature[ApiType](ref)(method)
+    val methodSignature = signature[ApiType](ref)(method)
     if method.typeParameters.nonEmpty then
-      Left(s"Bound API method '$signature' must not have type parameters")
+      Left(s"Bound API method '$methodSignature' must not have type parameters")
 
     // Callable at runtime
     else if !method.available then
-      Left(s"Bound API method '$signature' must be callable at runtime")
+      Left(s"Bound API method '$methodSignature' must be callable at runtime")
 
     // Returns the effect type
     else
