@@ -1,4 +1,4 @@
-package automorph.spi
+package automorph.spi.codec
 
 import scala.annotation.nowarn
 
