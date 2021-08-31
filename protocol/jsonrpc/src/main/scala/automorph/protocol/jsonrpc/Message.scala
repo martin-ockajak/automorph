@@ -41,7 +41,7 @@ final case class Message[Node](
       }
 }
 
-object Message {
+case object Message {
   /** Message identifier type. */
   type Id = Either[BigDecimal, String]
 
@@ -79,7 +79,7 @@ sealed abstract class MessageType {
   def name: String = toString
 }
 
-object MessageType {
+case object MessageType {
 
   /** JSON-RPC method call request. */
   case object Call extends MessageType

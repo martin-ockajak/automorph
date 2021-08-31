@@ -14,7 +14,7 @@ sealed abstract class ErrorType(val code: Int) {
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  */
-object ErrorType {
+case object ErrorType {
 
   case object ParseError extends ErrorType(-32700)
   case object InvalidRequest extends ErrorType(-32600)
