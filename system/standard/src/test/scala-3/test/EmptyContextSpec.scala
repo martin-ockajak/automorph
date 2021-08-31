@@ -15,7 +15,7 @@ class EmptyContextSpec extends BaseSpec {
 
   "" - {
     "Create" in {
-      // FIXME
+      // FIXME - remove
       given Encoder[Message[Json]] = CirceJsonRpc.messageEncoder
       given Decoder[Message[Json]] = CirceJsonRpc.messageDecoder
 

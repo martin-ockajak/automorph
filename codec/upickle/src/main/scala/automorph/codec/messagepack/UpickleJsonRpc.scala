@@ -10,7 +10,7 @@ import upickle.core.Abort
  * JSON-RPC protocol support for uPickle message codec plugin.
  */
 case object UpickleJsonRpc {
-// FIXME - make private
+// FIXME - restore
 // private[automorph] case object UpickleJsonRpc {
   private[automorph] type Data = Message[Msg]
 
