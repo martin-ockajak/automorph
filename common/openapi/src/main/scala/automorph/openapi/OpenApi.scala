@@ -80,7 +80,7 @@ private[automorph] object OpenApi {
             Some((tag.substring(fieldPrefix.size) +: rest).mkString("@").trim)
           case _ => None
         }
-      })
+      }.toSeq)
     }.map(_.mkString(" "))
   }
 
