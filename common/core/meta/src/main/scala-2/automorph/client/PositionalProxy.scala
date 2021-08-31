@@ -13,10 +13,8 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
   encodedArguments: Seq[Node]
 ) extends CannotEqual {
 
-  /** Positional method proxy type. */
-  type Positional = PositionalProxy[Node, Codec, Effect, Context]
-  /** Named method proxy type. */
-  type Named = NamedProxy[Node, Codec, Effect, Context]
+  /** Proxy type. */
+  type Type = PositionalProxy[Node, Codec, Effect, Context]
 
   /**
    * Creates a copy of this method proxy passing method arguments ''by name'' with specified argument names.
@@ -24,7 +22,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    * @param argumentNames method argument names
    * @return method proxy
    */
-  def named(argumentNames: String*): Named = NamedProxy(
+  def named(argumentNames: String*): NamedProxy[Node, Codec, Effect, Context] = NamedProxy(
     methodName,
     core,
     codec,
@@ -42,7 +40,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  def args(): Positional = copy(argumentValues = Seq.empty, encodedArguments = Seq.empty)
+  def args(): Type = copy(argumentValues = Seq.empty, encodedArguments = Seq.empty)
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -52,7 +50,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  def args[T1](p1: T1): Positional = macro PositionalProxy.args1Macro[Positional, T1]
+  def args[T1](p1: T1): Type = macro PositionalProxy.args1Macro[Type, T1]
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -62,7 +60,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  def args[T1, T2](p1: T1, p2: T2): Positional = macro PositionalProxy.args2Macro[Positional, T1, T2]
+  def args[T1, T2](p1: T1, p2: T2): Type = macro PositionalProxy.args2Macro[Type, T1, T2]
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -72,8 +70,8 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): Positional =
-    macro PositionalProxy.args3Macro[Positional, T1, T2, T3]
+  def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): Type =
+    macro PositionalProxy.args3Macro[Type, T1, T2, T3]
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -83,8 +81,8 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  def args[T1, T2, T3, T4](p1: T1, p2: T2, p3: T3, p4: T4): Positional =
-    macro PositionalProxy.args4Macro[Positional, T1, T2, T3, T4]
+  def args[T1, T2, T3, T4](p1: T1, p2: T2, p3: T3, p4: T4): Type =
+    macro PositionalProxy.args4Macro[Type, T1, T2, T3, T4]
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -94,8 +92,8 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  def args[T1, T2, T3, T4, T5](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5): Positional =
-    macro PositionalProxy.args5Macro[Positional, T1, T2, T3, T4, T5]
+  def args[T1, T2, T3, T4, T5](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5): Type =
+    macro PositionalProxy.args5Macro[Type, T1, T2, T3, T4, T5]
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -105,8 +103,8 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  def args[T1, T2, T3, T4, T5, T6](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6): Positional =
-    macro PositionalProxy.args6Macro[Positional, T1, T2, T3, T4, T5, T6]
+  def args[T1, T2, T3, T4, T5, T6](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6): Type =
+    macro PositionalProxy.args6Macro[Type, T1, T2, T3, T4, T5, T6]
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -116,8 +114,8 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  def args[T1, T2, T3, T4, T5, T6, T7](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6, p7: T7): Positional =
-    macro PositionalProxy.args7Macro[Positional, T1, T2, T3, T4, T5, T6, T7]
+  def args[T1, T2, T3, T4, T5, T6, T7](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6, p7: T7): Type =
+    macro PositionalProxy.args7Macro[Type, T1, T2, T3, T4, T5, T6, T7]
 
   /**
    * Sends a remote method ''call'' request with specified result type extracted from the response.

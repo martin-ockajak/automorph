@@ -11,17 +11,15 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
   private val encodedArguments: Seq[Node]
 ) extends CannotEqual:
 
-  /** Positional method proxy type. */
-  type Positional = PositionalProxy[Node, Codec, Effect, Context]
-  /** Named method proxy type. */
-  type Named = NamedProxy[Node, Codec, Effect, Context]
+  /** Proxy type. */
+  type Type = NamedProxy[Node, Codec, Effect, Context]
 
   /**
    * Creates a copy of this method proxy without argument names passing method arguments ''by position''.
    *
    * @return method proxy without argument names passing method arguments ''by position''
    */
-  def positional: Positional = PositionalProxy(
+  def positional: PositionalProxy[Node, Codec, Effect, Context] = PositionalProxy(
     methodName,
     core,
     codec,
@@ -37,7 +35,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    *
    * @return method proxy
    */
-  def args(): Named = copy(
+  def args(): Type = copy(
     argumentValues = Seq.empty,
     encodedArguments = Seq.empty
   )
@@ -50,7 +48,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    *
    * @return method proxy
    */
-  inline def args[T1](p1: (String, T1)): Named = copy(
+  inline def args[T1](p1: (String, T1)): Type = copy(
     argumentValues = Seq(p1),
     encodedArguments = Seq(
       codec.encode(p1._2)
@@ -65,7 +63,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    *
    * @return method proxy
    */
-  inline def args[T1, T2](p1: (String, T1), p2: (String, T2)): Named = copy(
+  inline def args[T1, T2](p1: (String, T1), p2: (String, T2)): Type = copy(
     argumentValues = Seq(p1, p2),
     encodedArguments = Seq(
       codec.encode(p1._2),
@@ -81,7 +79,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    *
    * @return method proxy
    */
-  inline def args[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3)): Named = copy(
+  inline def args[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3)): Type = copy(
     argumentValues = Seq(p1, p2, p3),
     encodedArguments = Seq(
       codec.encode(p1._2),
@@ -103,7 +101,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     p2: (String, T2),
     p3: (String, T3),
     p4: (String, T4)
-  ): Named =
+  ): Type =
     copy(
       argumentValues = Seq(p1, p2, p3, p4),
       encodedArguments = Seq(
@@ -128,7 +126,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     p3: (String, T3),
     p4: (String, T4),
     p5: (String, T5)
-  ): Named =
+  ): Type =
     copy(
       argumentValues = Seq(p1, p2, p3, p4, p5),
       encodedArguments = Seq(
@@ -155,7 +153,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     p4: (String, T4),
     p5: (String, T5),
     p6: (String, T6)
-  ): Named =
+  ): Type =
     copy(
       argumentValues = Seq(p1, p2, p3, p4, p5, p6),
       encodedArguments = Seq(
@@ -184,7 +182,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     p5: (String, T5),
     p6: (String, T6),
     p7: (String, T7)
-  ): Named =
+  ): Type =
     copy(
       argumentValues = Seq(p1, p2, p3, p4, p5, p6, p7),
       encodedArguments = Seq(

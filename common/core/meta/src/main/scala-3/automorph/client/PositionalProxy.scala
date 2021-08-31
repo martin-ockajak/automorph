@@ -11,10 +11,8 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
   private val encodedArguments: Seq[Node]
 ) extends CannotEqual:
 
-  /** Positional method proxy type. */
-  type Positional = PositionalProxy[Node, Codec, Effect, Context]
-  /** Named method proxy type. */
-  type Named = NamedProxy[Node, Codec, Effect, Context]
+  /** Proxy type. */
+  type Type = PositionalProxy[Node, Codec, Effect, Context]
 
   /**
    * Creates a copy of this method proxy passing method arguments ''by name'' with specified argument names.
@@ -22,7 +20,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    * @param argumentNames method argument names
    * @return method proxy
    */
-  def named(argumentNames: String*): Named = NamedProxy(
+  def named(argumentNames: String*): NamedProxy[Node, Codec, Effect, Context] = NamedProxy(
     methodName,
     core,
     codec,
@@ -40,7 +38,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  def args(): Positional = copy(argumentValues = Seq.empty, encodedArguments = Seq.empty)
+  def args(): Type = copy(argumentValues = Seq.empty, encodedArguments = Seq.empty)
 
   /**
    * Creates a copy of this method proxy with specified argument values.
@@ -50,7 +48,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  inline def args[T1](p1: T1): Positional = copy(
+  inline def args[T1](p1: T1): Type = copy(
     argumentValues = Seq(p1),
     encodedArguments = Seq(
       codec.encode(p1)
@@ -65,7 +63,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  inline def args[T1, T2](p1: T1, p2: T2): Positional = copy(
+  inline def args[T1, T2](p1: T1, p2: T2): Type = copy(
     argumentValues = Seq(p1, p2),
     encodedArguments = Seq(
       codec.encode(p1),
@@ -81,7 +79,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  inline def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): Positional = copy(
+  inline def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): Type = copy(
     argumentValues = Seq(p1, p2, p3),
     encodedArguments = Seq(
       codec.encode(p1),
@@ -98,7 +96,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  inline def args[T1, T2, T3, T4](p1: T1, p2: T2, p3: T3, p4: T4): Positional = copy(
+  inline def args[T1, T2, T3, T4](p1: T1, p2: T2, p3: T3, p4: T4): Type = copy(
     argumentValues = Seq(p1, p2, p3, p4),
     encodedArguments = Seq(
       codec.encode(p1),
@@ -116,7 +114,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  inline def args[T1, T2, T3, T4, T5](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5): Positional = copy(
+  inline def args[T1, T2, T3, T4, T5](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5): Type = copy(
     argumentValues = Seq(p1, p2, p3, p4, p5),
     encodedArguments = Seq(
       codec.encode(p1),
@@ -135,7 +133,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  inline def args[T1, T2, T3, T4, T5, T6](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6): Positional = copy(
+  inline def args[T1, T2, T3, T4, T5, T6](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6): Type = copy(
     argumentValues = Seq(p1, p2, p3, p4, p5, p6),
     encodedArguments = Seq(
       codec.encode(p1),
@@ -155,7 +153,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
    *
    * @return method proxy
    */
-  inline def args[T1, T2, T3, T4, T5, T6, T7](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6, p7: T7): Positional =
+  inline def args[T1, T2, T3, T4, T5, T6, T7](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6, p7: T7): Type =
     copy(
       argumentValues = Seq(p1, p2, p3, p4, p5, p6, p7),
       encodedArguments = Seq(

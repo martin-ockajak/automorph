@@ -13,17 +13,15 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
   encodedArguments: Seq[Node]
 ) extends CannotEqual {
 
-  /** Positional method proxy type. */
-  type Positional = PositionalProxy[Node, Codec, Effect, Context]
-  /** Named method proxy type. */
-  type Named = NamedProxy[Node, Codec, Effect, Context]
+  /** Proxy type. */
+  type Type = NamedProxy[Node, Codec, Effect, Context]
 
   /**
    * Creates a copy of this method proxy without argument names passing method arguments ''by position''.
    *
    * @return method proxy without argument names passing method arguments ''by position''
    */
-  def positional: Positional = PositionalProxy(
+  def positional: PositionalProxy[Node, Codec, Effect, Context] = PositionalProxy(
     methodName,
     core,
     codec,
@@ -39,7 +37,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    *
    * @return method proxy
    */
-  def args(): Named = copy(argumentValues = Seq.empty, encodedArguments = Seq.empty)
+  def args(): Type = copy(argumentValues = Seq.empty, encodedArguments = Seq.empty)
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
@@ -49,7 +47,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    *
    * @return method proxy
    */
-  def args[T1](p1: (String, T1)): Named = macro NamedProxy.args1Macro[Named, T1]
+  def args[T1](p1: (String, T1)): Type = macro NamedProxy.args1Macro[Type, T1]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
@@ -59,8 +57,8 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    *
    * @return method proxy
    */
-  def args[T1, T2](p1: (String, T1), p2: (String, T2)): Named =
-    macro NamedProxy.args2Macro[Named, T1, T2]
+  def args[T1, T2](p1: (String, T1), p2: (String, T2)): Type =
+    macro NamedProxy.args2Macro[Type, T1, T2]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
@@ -70,8 +68,8 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    *
    * @return method proxy
    */
-  def args[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3)): Named =
-    macro NamedProxy.args3Macro[Named, T1, T2, T3]
+  def args[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3)): Type =
+    macro NamedProxy.args3Macro[Type, T1, T2, T3]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
@@ -81,8 +79,8 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    *
    * @return method proxy
    */
-  def args[T1, T2, T3, T4](p1: (String, T1), p2: (String, T2), p3: (String, T3), p4: (String, T4)): Named =
-    macro NamedProxy.args4Macro[Named, T1, T2, T3, T4]
+  def args[T1, T2, T3, T4](p1: (String, T1), p2: (String, T2), p3: (String, T3), p4: (String, T4)): Type =
+    macro NamedProxy.args4Macro[Type, T1, T2, T3, T4]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
@@ -98,7 +96,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     p3: (String, T3),
     p4: (String, T4),
     p5: (String, T5)
-  ): Named = macro NamedProxy.args5Macro[Named, T1, T2, T3, T4, T5]
+  ): Type = macro NamedProxy.args5Macro[Type, T1, T2, T3, T4, T5]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
@@ -115,7 +113,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     p4: (String, T4),
     p5: (String, T5),
     p6: (String, T6)
-  ): Named = macro NamedProxy.args6Macro[Named, T1, T2, T3, T4, T5, T6]
+  ): Type = macro NamedProxy.args6Macro[Type, T1, T2, T3, T4, T5, T6]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.
@@ -133,7 +131,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     p5: (String, T5),
     p6: (String, T6),
     p7: (String, T7)
-  ): Named = macro NamedProxy.args7Macro[Named, T1, T2, T3, T4, T5, T6, T7]
+  ): Type = macro NamedProxy.args7Macro[Type, T1, T2, T3, T4, T5, T6, T7]
 
   /**
    * Sends a remote method ''call'' request with specified result type extracted from the response.
