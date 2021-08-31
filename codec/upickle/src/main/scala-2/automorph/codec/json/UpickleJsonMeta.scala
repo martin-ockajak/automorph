@@ -18,7 +18,7 @@ trait UpickleJsonMeta[Custom <: UpickleCustom] extends MessageCodec[Value] {
   override def decode[T](node: Value): T = macro UpickleJsonMeta.decode[T]
 }
 
-object UpickleJsonMeta {
+case object UpickleJsonMeta {
 
   def encode[T: c.WeakTypeTag](c: blackbox.Context)(value: c.Expr[T]): c.Expr[Value] = {
     import c.universe.Quasiquote

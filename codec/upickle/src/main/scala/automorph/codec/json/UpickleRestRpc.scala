@@ -8,7 +8,7 @@ import upickle.core.Abort
 /**
  * JSON-RPC protocol support for uPickle message codec plugin.
  */
-object UpickleRestRpc {
+private[automorph] case object UpickleRestRpc {
   type Data = Message[Value]
 
   // Workaround for upickle bug causing the following error when using its

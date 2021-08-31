@@ -7,7 +7,7 @@ import automorph.protocol.restrpc.{Message, MessageError}
 /**
  * REST-RPC protocol support for uPickle message codec plugin.
  */
-private[automorph] object ArgonautRestRpc {
+private[automorph] case object ArgonautRestRpc {
   type Data = Message[Json]
 
   def messageCodecJson: CodecJson[Message[Json]] = {
