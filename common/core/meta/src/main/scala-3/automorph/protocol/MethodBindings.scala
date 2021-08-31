@@ -65,7 +65,7 @@ private[automorph] object MethodBindings:
    * @param arguments method argument terms
    * @return instance method call term
    */
-  def call(
+  def methodCall(
     quotes: Quotes,
     instance: quotes.reflect.Term,
     methodName: String,

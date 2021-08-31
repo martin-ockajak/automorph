@@ -1,7 +1,7 @@
 package automorph.handler
 
 import automorph.log.MacroLogger
-import automorph.protocol.MethodBindings.{call, methodSignature, functionToExpr, methodUsesContext, unwrapType, validApiMethods}
+import automorph.protocol.MethodBindings.{methodCall, methodSignature, functionToExpr, methodUsesContext, unwrapType, validApiMethods}
 import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.{Method, Reflection}
@@ -131,7 +131,7 @@ private[automorph] object HandlerBindings:
               'context.asTerm
             else
               val decodeArguments = List(List(argumentNode.asTerm))
-              val decodeCall = call(ref.q, codec.asTerm, "decode", List(parameter.dataType), decodeArguments)
+              val decodeCall = methodCall(ref.q, codec.asTerm, "decode", List(parameter.dataType), decodeArguments)
               parameter.dataType.asType match
                 case '[argumentType] => '{
                     (Try(${ decodeCall.asExprOf[argumentType] }) match
@@ -145,7 +145,7 @@ private[automorph] object HandlerBindings:
 
         // Create the API method call using the decoded arguments
         //   api.method(arguments*): Effect[ResultValueType]
-        val apiMethodCall = call(ref.q, api.asTerm, method.name, List.empty, arguments)
+        val apiMethodCall = methodCall(ref.q, api.asTerm, method.name, List.empty, arguments)
 
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
@@ -153,14 +153,14 @@ private[automorph] object HandlerBindings:
         val encodeResult = resultValueType.asType match
           case '[resultType] => '{ (result: resultType) =>
               ${
-                call(ref.q, codec.asTerm, "encode", List(resultValueType), List(List('{ result }.asTerm))).asExprOf[Node]
+                methodCall(ref.q, codec.asTerm, "encode", List(resultValueType), List(List('{ result }.asTerm))).asExprOf[Node]
               }
             }
 
         // Create the effect mapping call using the method call and the encode result function
         //   system.map(methodCall, encodeResult): Effect[Node]
         val mapArguments = List(List(apiMethodCall, encodeResult.asTerm))
-        call(ref.q, system.asTerm, "map", List(resultValueType, TypeRepr.of[Node]), mapArguments).asExprOf[Effect[Node]]
+        methodCall(ref.q, system.asTerm, "map", List(resultValueType, TypeRepr.of[Node]), mapArguments).asExprOf[Effect[Node]]
       }
     }
 
