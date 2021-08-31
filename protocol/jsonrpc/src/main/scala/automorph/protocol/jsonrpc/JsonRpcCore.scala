@@ -20,8 +20,8 @@ import scala.util.{Failure, Random, Success, Try}
 private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
   this: JsonRpcProtocol[Node, Codec] =>
 
-  /** JSON-RPC message details. */
-  type Details = Option[Message.Id]
+  /** JSON-RPC message metadata. */
+  type Metadata = Option[Message.Id]
 
   private val unknownId = Right("[unknown]")
 
@@ -51,7 +51,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
   override def parseRequest(
     request: ArraySeq.ofByte,
     function: Option[String]
-  ): Either[RpcError[Details], RpcRequest[Node, Details]] =
+  ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
     // Deserialize request
     Try(decodeMessage(codec.deserialize(request))).pureFold(
       error => Left(RpcError(ParseErrorException("Malformed request", error), RpcMessage(None, request))),
@@ -72,7 +72,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     argumentNames: Option[Iterable[String]],
     argumentValues: Iterable[Node],
     responseRequired: Boolean
-  ): Try[RpcRequest[Node, Details]] = {
+  ): Try[RpcRequest[Node, Metadata]] = {
     // Create request
     Seq(function)
     val id = Option.when(responseRequired)(Right(Math.abs(random.nextLong()).toString).withLeft[BigDecimal])
@@ -89,7 +89,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     }
   }
 
-  override def createResponse(result: Try[Node], details: Details): Try[RpcResponse[Node, Details]] = {
+  override def createResponse(result: Try[Node], details: Metadata): Try[RpcResponse[Node, Metadata]] = {
     // Create response
     val id = details.getOrElse(unknownId)
     val formedResponse = result.pureFold(
@@ -120,7 +120,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     }
   }
 
-  override def parseResponse(response: ArraySeq.ofByte): Either[RpcError[Details], RpcResponse[Node, Details]] =
+  override def parseResponse(response: ArraySeq.ofByte): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
     // Deserialize response
     Try(decodeMessage(codec.deserialize(response))).pureFold(
       error => Left(RpcError(ParseErrorException("Malformed response", error), RpcMessage(None, response))),

@@ -64,7 +64,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    * @return bound method invocation result
    */
   private def invokeMethod[Data: Bytes](
-    rpcRequest: RpcRequest[Node, protocol.Details],
+    rpcRequest: RpcRequest[Node, protocol.Metadata],
     context: Context
   ): Effect[HandlerResult[Data]] = {
     // Lookup bindings for the specified method
@@ -142,7 +142,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    */
   private def errorResponse[Data: Bytes](
     error: Throwable,
-    message: RpcMessage[protocol.Details]
+    message: RpcMessage[protocol.Metadata]
   ): Effect[HandlerResult[Data]] = {
     logger.error(s"Failed to process ${protocol.name} request", error, message.properties)
     response(Failure(error), message)
@@ -156,7 +156,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    * @tparam Data message data type
    * @return handler result
    */
-  private def response[Data: Bytes](result: Try[Node], message: RpcMessage[protocol.Details]): Effect[HandlerResult[Data]] =
+  private def response[Data: Bytes](result: Try[Node], message: RpcMessage[protocol.Metadata]): Effect[HandlerResult[Data]] =
     protocol.createResponse(result, message.details).pureFold(
       error => system.failed(error),
       rpcResponse => {

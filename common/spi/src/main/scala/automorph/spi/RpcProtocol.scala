@@ -13,8 +13,8 @@ import scala.util.Try
  */
 trait RpcProtocol[Node] {
 
-  /** Protocol-specific message details type. */
-  type Details
+  /** Protocol-specific message metadata. */
+  type Metadata
 
   /**
    * Protocol name.
@@ -37,7 +37,7 @@ trait RpcProtocol[Node] {
     argumentNames: Option[Iterable[String]],
     argumentValues: Iterable[Node],
     responseRequired: Boolean
-  ): Try[RpcRequest[Node, Details]]
+  ): Try[RpcRequest[Node, Metadata]]
 
   /**
    * Parses an RPC request.
@@ -49,7 +49,7 @@ trait RpcProtocol[Node] {
   def parseRequest(
     request: ArraySeq.ofByte,
     function: Option[String]
-  ): Either[RpcError[Details], RpcRequest[Node, Details]]
+  ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]]
 
   /**
    * Creates an RPC response.
@@ -60,8 +60,8 @@ trait RpcProtocol[Node] {
    */
   def createResponse(
     result: Try[Node],
-    details: Details
-  ): Try[RpcResponse[Node, Details]]
+    details: Metadata
+  ): Try[RpcResponse[Node, Metadata]]
 
   /**
    * Parses an RPC response.
@@ -69,7 +69,7 @@ trait RpcProtocol[Node] {
    * @param response RPC response message
    * @return RPC response on valid response message or RPC error on invalid response message
    */
-  def parseResponse(response: ArraySeq.ofByte): Either[RpcError[Details], RpcResponse[Node, Details]]
+  def parseResponse(response: ArraySeq.ofByte): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
 
   /**
    * Generates OpenApi speficication for specified RPC functions.
