@@ -16,9 +16,6 @@ trait RpcProtocol[Node] {
   /** Protocol-specific message details type. */
   type Details
 
-  /** Protocol-specific helper type. */
-  type Helper
-
   /**
    * Protocol name.
    *
