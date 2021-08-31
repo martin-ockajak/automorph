@@ -1,6 +1,5 @@
 package automorph.openapi
 
-import automorph.openapi.Schema.Properties
 import automorph.openapi.Specification.{Components, Paths, Servers}
 import automorph.spi.protocol.RpcFunction
 
@@ -77,7 +76,7 @@ private[automorph] object OpenApi {
     scaladoc.flatMap { doc =>
       maybe(doc.split('\n').flatMap { line =>
         line.split('@') match {
-          case Array(prefix, tag, rest @ _*) if tag.startsWith(fieldPrefix) =>
+          case Array(_, tag, rest @ _*) if tag.startsWith(fieldPrefix) =>
             Some((tag.substring(fieldPrefix.size) +: rest).mkString("@").trim)
           case _ => None
         }

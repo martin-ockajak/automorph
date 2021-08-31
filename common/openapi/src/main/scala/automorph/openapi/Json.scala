@@ -19,10 +19,10 @@ private[automorph] object Json {
     val end = s"${space * indent}]"
     val items = values.map {
       case None => none
-      case (key, Some(value: Map[_, _])) => map(value, indent + 1)
-      case (key, Some(value: Iterable[_])) => array(value, indent + 1)
-      case (key, Some(value: Number)) => number(value)
-      case (key, Some(value)) => string(value)
+      case Some(value: Map[_, _]) => map(value, indent + 1)
+      case Some(value: Iterable[_]) => array(value, indent + 1)
+      case Some(value: Number) => number(value)
+      case Some(value) => string(value)
       case value: Map[_, _] => map(value, indent + 1)
       case value: Iterable[_] => array(value, indent + 1)
       case value: Number => number(value)
@@ -36,7 +36,7 @@ private[automorph] object Json {
   def map(values: Map[_, _], indent: Int): String = {
     val start = "{"
     val end = s"${space * indent}}"
-    val items = values.flatMap {
+    val items = values.flatMap((entry: (_, _)) => entry match {
       case (_, None) => None
       case (key, Some(value: Map[_, _])) => Some(key -> map(value, indent + 1))
       case (key, Some(value: Iterable[_])) => Some(key -> array(value, indent + 1))
@@ -46,7 +46,7 @@ private[automorph] object Json {
       case (key, value: Iterable[_]) => Some(key -> array(value, indent + 1))
       case (key, value: Number) => Some(key -> number(value))
       case (key, value) => Some(key -> string(value))
-    }.map { case (key, value) =>
+    }).map { case (key, value) =>
       s"${space * (indent + 1)}\"$key\": $value"
     }.mkString("\n")
     s"$start\n$items\n$end"
