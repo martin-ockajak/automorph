@@ -1,13 +1,14 @@
 // Project
 
 // Repository
+val projectGroup = "org"
 val projectName = "automorph"
-val repositoryPath = s"martin-ockajak/${projectName}"
-val repositoryUrl = s"https://github.com/${repositoryPath}"
+val repositoryPath = s"martin-ockajak/$projectName"
+val repositoryUrl = s"https://github.com/$repositoryPath"
 val documentationUrl = repositoryUrl
 
 // Metadata
-ThisBuild / organization := s"io.${name.value}"
+ThisBuild / organization := s"$projectGroup.$projectName"
 ThisBuild / homepage := Some(url(repositoryUrl))
 ThisBuild / licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / developers := List()
@@ -381,24 +382,22 @@ laikaTheme := laika.helium.Helium.defaults.all.metadata(
   language = Some("en")
 ).all.themeColors(
   primary = Color.hex("11698E"),
-  secondary = Color.hex("39A2DB"),
-  primaryDark = Color.hex("095269"),
   primaryMedium = Color.hex("A7D4DE"),
   primaryLight = Color.hex("EFEFEF"),
-  text = Color.hex("5F3F3F")
+  secondary = Color.hex("39A2DB"),
+  text = Color.hex("5F3F3F"),
+  background = Color.hex("FFFFFF"),
+  bgGradient = (Color.hex("095269"), Color.hex("007c99"))
 ).site.layout(
   contentWidth = vw(85),
-  navigationWidth = vw(15),
+  navigationWidth = vw(16),
+  topBarHeight = px(32),
   defaultBlockSpacing = px(20),
   defaultLineHeight = 1.5,
   anchorPlacement = AnchorPlacement.Right
 ).site.topNavigationBar(
-  logo = Some(Logo.internal(
-    path = Root / "images/logo.jpg", 
-    alt = Some("Homepage"), 
-    title = Some("Home")
-  )),
-  links = Seq(
+  homeLink = IconLink.external(s"https://$projectName.$projectGroup", HeliumIcon.home),
+  navLinks = Seq(
     IconLink.external(repositoryUrl, HeliumIcon.github),
     IconLink.external(s"${documentationUrl}/api", HeliumIcon.api),
     IconLink.external(s"https://mvnrepository.com/artifact/${organization.value}", HeliumIcon.download)
