@@ -298,7 +298,7 @@ lazy val testAmqp = (project in file("test/amqp")).dependsOn(
 
 // Compile
 ThisBuild / scalaVersion := "3.0.0"
-ThisBuild / crossScalaVersions ++= Seq("2.13.6", "3.0.0")
+ThisBuild / crossScalaVersions ++= Seq("2.13.6", scalaVersion.value)
 ThisBuild / scalacOptions ++= Seq(
   "-feature",
   "-language:higherKinds",
