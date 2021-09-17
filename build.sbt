@@ -196,7 +196,7 @@ lazy val http = (project in file("transport/http")).dependsOn(
   jsonrpc
 )
 lazy val amqp = (project in file("transport/amqp"))
-val sttpVersion = "3.3.13"
+val sttpVersion = "3.3.14"
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
   http, testCore % Test, standard % Test
 ).settings(
