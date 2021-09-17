@@ -151,7 +151,7 @@ lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
 ).settings(
   name := s"$projectName-cats-effect",
   libraryDependencies ++= Seq(
-    "org.typelevel" %% "cats-effect" % "3.2.5"
+    "org.typelevel" %% "cats-effect" % "3.2.8"
   )
 )
 lazy val scalaz = (project in file("system/scalaz")).dependsOn(
@@ -179,7 +179,7 @@ lazy val upickle = (project in file("codec/upickle")).dependsOn(
 ).settings(
   name := s"$projectName-upickle",
   libraryDependencies ++= Seq(
-    "com.lihaoyi" %% "upickle" % "1.4.0"
+    "com.lihaoyi" %% "upickle" % "1.4.1"
   )
 )
 lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
