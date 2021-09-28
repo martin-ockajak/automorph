@@ -188,7 +188,7 @@ lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
 ).settings(
   name := s"$projectName-argonaut",
   libraryDependencies ++= Seq(
-    "io.argonaut" %% "argonaut" % "6.3.6"
+    "io.argonaut" %% "argonaut" % "6.3.7"
   )
 )
 
