@@ -151,7 +151,7 @@ final private[automorph] case class Logger private (private val underlying: slf4
   private def codec(value: Any): String = value.toString
 }
 
-case object Logger {
+object Logger {
 
   /**
    * Create a [[Logger]] implicit the underlying `org.slf4j.Logger`.
