@@ -14,6 +14,6 @@ private [automorph] final case class RequestBody(
   )
 }
 
-private [automorph] case object RequestBody {
+private [automorph] object RequestBody {
   type Content = Map[String, MediaType]
 }

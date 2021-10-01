@@ -23,7 +23,7 @@ private [automorph] final case class Specification(
   ), 0)
 }
 
-private [automorph] case object Specification {
+private [automorph] object Specification {
   type Servers = List[Server]
   type Paths = Map[String, PathItem]
   type Components = Map[String, Schema]

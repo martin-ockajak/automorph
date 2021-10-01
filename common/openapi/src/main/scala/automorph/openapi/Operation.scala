@@ -16,6 +16,6 @@ private [automorph] final case class Operation(
   )
 }
 
-private [automorph] case object Operation {
+private [automorph] object Operation {
   type Responses = Map[String, Response]
 }

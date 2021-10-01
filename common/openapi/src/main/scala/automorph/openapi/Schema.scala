@@ -24,6 +24,6 @@ private [automorph] final case class Schema(
   )
 }
 
-private [automorph] case object Schema {
+private [automorph] object Schema {
   type Properties = Map[String, Schema]
 }

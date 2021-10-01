@@ -12,6 +12,6 @@ private [automorph] final case class Response(
   )
 }
 
-private [automorph] case object Response {
+private [automorph] object Response {
   type Content = Map[String, MediaType]
 }
