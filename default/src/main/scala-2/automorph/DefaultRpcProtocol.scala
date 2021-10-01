@@ -5,7 +5,7 @@ import automorph.spi.MessageCodec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-case object DefaultRpcProtocol {
+object DefaultRpcProtocol {
 
   /**
    * Default RPC protocol plugin type.
