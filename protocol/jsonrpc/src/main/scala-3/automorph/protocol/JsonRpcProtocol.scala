@@ -27,7 +27,7 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
   protected val encodeStrings: List[String] => Node
 ) extends JsonRpcCore[Node, Codec] with RpcProtocol[Node]
 
-case object JsonRpcProtocol extends ErrorMapping:
+object JsonRpcProtocol extends ErrorMapping:
 
   /**
    * Creates a JSON-RPC protocol plugin.

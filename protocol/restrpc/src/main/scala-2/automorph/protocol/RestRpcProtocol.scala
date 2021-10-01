@@ -32,7 +32,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
   protected val encodeStrings: List[String] => Node
 ) extends RestRpcCore[Node, Codec] with RpcProtocol[Node]
 
-case object RestRpcProtocol extends ErrorMapping {
+object RestRpcProtocol extends ErrorMapping {
 
   /**
    * Creates a REST-RPC protocol plugin.
