@@ -48,7 +48,7 @@ private[automorph] object Json {
       case (key, value) => Some(key -> string(value))
     }).map { case (key, value) =>
       s"${space * (indent + 1)}\"$key\": $value"
-    }.mkString("\n")
+    }.mkString(",\n")
     s"$start\n$items\n$end"
   }
 }

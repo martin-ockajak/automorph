@@ -26,7 +26,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
   private lazy val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.errorTitle),
-    Some(s"$name${OpenApi.errorTitle}"),
+    Some(s"$name ${OpenApi.errorTitle}"),
     Some(Map(
       "error" -> Schema(
         Some("string"),
@@ -35,7 +35,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
         Some(Map(
           "code" -> Schema(Some("integer"), Some("code"), Some("Error code")),
           "message" -> Schema(Some("string"), Some("message"), Some("Error message")),
-          "data" -> Schema(Some("object"), Some("data"), Some("Additional error information"))
+          "details" -> Schema(Some("object"), Some("details"), Some("Additional error information"))
         )),
         Some(List("code", "message"))
       )
@@ -206,7 +206,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
   private def resultSchema(function: RpcFunction): Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.resultTitle),
-    Some(s"$name${OpenApi.resultTitle}"),
+    Some(s"$name ${OpenApi.resultTitle}"),
     Some(Map("result" -> OpenApi.resultSchema(function))),
     Some(List("result"))
   )

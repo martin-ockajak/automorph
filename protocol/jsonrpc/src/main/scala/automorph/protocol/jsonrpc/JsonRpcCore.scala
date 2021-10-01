@@ -28,7 +28,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
   private lazy val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.errorTitle),
-    Some(s"$name${OpenApi.errorTitle}"),
+    Some(s"$name ${OpenApi.errorTitle}"),
     Some(Map(
       "error" -> Schema(
         Some("string"),
@@ -37,7 +37,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
         Some(Map(
           "code" -> Schema(Some("integer"), Some("code"), Some("Error code")),
           "message" -> Schema(Some("string"), Some("message"), Some("Error message")),
-          "details" -> Schema(Some("object"), Some("data"), Some("Additional error information"))
+          "data" -> Schema(Some("object"), Some("data"), Some("Additional error information"))
         )),
         Some(List("message"))
       )
@@ -193,7 +193,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
   private def requestSchema(function: RpcFunction): Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.requestTitle),
-    Some(s"$name${OpenApi.requestTitle}"),
+    Some(s"$name ${OpenApi.requestTitle}"),
     Some(Map(
       "jsonrpc" -> Schema(Some("string"), Some("jsonrpc"), Some("Protocol version (must be 2.0)")),
       "function" -> Schema(Some("string"), Some("function"), Some("Invoked function name")),
@@ -216,7 +216,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
   private def resultSchema(function: RpcFunction): Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.resultTitle),
-    Some(s"$name${OpenApi.resultTitle}"),
+    Some(s"$name ${OpenApi.resultTitle}"),
     Some(Map("result" -> OpenApi.resultSchema(function))),
     Some(List("result"))
   )

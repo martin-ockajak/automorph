@@ -16,7 +16,7 @@ final private[automorph] case class Info(
     "summary" -> summary,
     "description" -> description,
     "termsOfService" -> termsOfService,
-    "contact" -> contact.map,
-    "license" -> license.map
+    "contact" -> contact,
+    "license" -> license
   )
 }
