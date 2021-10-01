@@ -23,7 +23,7 @@ final case class CatsEffectSystem() extends EffectSystem[IO] {
   override def flatMap[T, R](effect: IO[T], function: T => IO[R]): IO[R] = effect.flatMap(function)
 }
 
-case object CatsEffectSystem {
+object CatsEffectSystem {
   /**
    * Effect type.
    *

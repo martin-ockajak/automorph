@@ -25,7 +25,7 @@ final case class FutureSystem()(implicit executionContext: ExecutionContext) ext
   override def flatMap[T, R](effect: Future[T], function: T => Future[R]): Future[R] = effect.flatMap(function)
 }
 
-case object FutureSystem {
+object FutureSystem {
   /**
    * Effect type.
    *

@@ -25,7 +25,7 @@ final case class IdentitySystem() extends EffectSystem[Identity] {
   override def flatMap[T, R](effect: T, function: T => R): R = function(effect)
 }
 
-case object IdentitySystem {
+object IdentitySystem {
   /**
    * Effect type.
    *

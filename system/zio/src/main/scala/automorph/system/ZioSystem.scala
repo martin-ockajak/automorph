@@ -25,7 +25,7 @@ final case class ZioSystem[Environment]() extends EffectSystem[({ type Effect[T]
     effect.flatMap(function)
 }
 
-case object ZioSystem {
+object ZioSystem {
   /**
    * Effect type constructor.
    *

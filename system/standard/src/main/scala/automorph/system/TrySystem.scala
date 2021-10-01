@@ -23,7 +23,7 @@ final case class TrySystem() extends EffectSystem[Try] {
   override def flatMap[T, R](effect: Try[T], function: T => Try[R]): Try[R] = effect.flatMap(function)
 }
 
-case object TrySystem {
+object TrySystem {
   /**
    * Effect type.
    *
