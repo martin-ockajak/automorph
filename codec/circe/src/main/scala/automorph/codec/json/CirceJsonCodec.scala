@@ -30,7 +30,7 @@ final case class CirceJsonCodec() extends CirceJsonMeta {
   override def text(node: Json): String = node.dropNullValues.spaces2
 }
 
-case object CirceJsonCodec {
+object CirceJsonCodec {
   /** Message node type. */
   type Node = Json
 }
