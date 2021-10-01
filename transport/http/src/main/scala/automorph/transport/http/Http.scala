@@ -365,7 +365,7 @@ final case class Http[Source](
     }.toMap
 }
 
-case object Http {
+object Http {
 
   /**
    * Maps an exception to a corresponding default HTTP status code.

@@ -179,7 +179,7 @@ final case class RabbitMqClient[Effect[_]](
   }
 }
 
-case object RabbitMqClient {
+object RabbitMqClient {
 
   /** Request context type. */
   type Context = Amqp[BasicProperties]
