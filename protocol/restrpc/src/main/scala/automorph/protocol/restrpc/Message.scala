@@ -30,7 +30,7 @@ final case class Message[Node](
       }
 }
 
-case object Message {
+object Message {
   /** Request parameters type. */
   type Request[Node] = Map[String, Node]
 }
@@ -62,7 +62,7 @@ sealed abstract class MessageType {
   def name: String = toString
 }
 
-case object MessageType {
+object MessageType {
 
   /** REST-RPC method call request. */
   case object Call extends MessageType

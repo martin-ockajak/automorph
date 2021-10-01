@@ -53,9 +53,7 @@ trait CoreSpec extends BaseSpec {
   def fixtures: Seq[TestFixture]
 
   "" - {
-// FIXME - enable
-//    fixtures.foreach { fixture =>
-    fixtures.headOption.foreach { fixture =>
+    fixtures.foreach { fixture =>
       fixture.codec.getSimpleName.replaceAll("MessageCodec$", "") - {
         "Proxy" - {
           "Call" - {
