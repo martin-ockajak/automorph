@@ -84,7 +84,7 @@ trait RpcProtocol[Node] {
   def openApi(functions: Iterable[RpcFunction], title: String, version: String, serverUrls: Iterable[String]): String
 }
 
-case object RpcProtocol {
+object RpcProtocol {
 
   /** Invalid RPC request error. */
   final case class InvalidRequestException(

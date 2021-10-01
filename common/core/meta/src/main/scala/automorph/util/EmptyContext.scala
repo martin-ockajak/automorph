@@ -7,7 +7,7 @@ package automorph.util
  */
 final case class EmptyContext[T]()
 
-case object EmptyContext {
+object EmptyContext {
 
   /** Empty context value type */
   type Value = EmptyContext[EmptyContext.type]

@@ -143,7 +143,7 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
     s"${this.getClass.getName}(Method: $methodName, Arguments: $argumentValues)"
 }
 
-case object PositionalProxy {
+object PositionalProxy {
 
   def args1Macro[ProxyType, T1: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[T1]

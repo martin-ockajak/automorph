@@ -159,7 +159,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     s"${this.getClass.getName}(Method: $methodName, Arguments: $argumentValues)"
 }
 
-case object NamedProxy {
+object NamedProxy {
 
   def args1Macro[ProxyType, T1: c.WeakTypeTag](c: blackbox.Context)(
     p1: c.Expr[(String, T1)]

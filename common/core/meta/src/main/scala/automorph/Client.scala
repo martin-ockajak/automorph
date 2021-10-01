@@ -31,7 +31,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   with CannotEqual
   with Logging
 
-case object Client {
+object Client {
 
   /**
    * Creates a RPC client with empty request context and specified ''codec'', ''system'' and ''transport'' plugins.

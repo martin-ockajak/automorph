@@ -68,7 +68,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
     macro HandlerMeta.brokenBindMacro[Node, Codec, Effect, Context, Api]
 }
 
-case object HandlerMeta {
+object HandlerMeta {
 
   def brokenBindMacro[
     Node: c.WeakTypeTag,

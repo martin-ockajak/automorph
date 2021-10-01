@@ -32,7 +32,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context] 
   with CannotEqual
   with Logging
 
-case object Handler:
+object Handler:
 
   /** Handler with arbitrary codec. */
   type AnyCodec[Effect[_], Context] = Handler[_, _, Effect, Context]

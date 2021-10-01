@@ -8,7 +8,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /** RPC handler layer bindings code generation. */
-case object HandlerGenerator {
+object HandlerGenerator {
 
   /**
    * Generates handler bindings for all valid public methods of an API type.

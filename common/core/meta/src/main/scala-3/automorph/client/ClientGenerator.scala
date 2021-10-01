@@ -8,7 +8,7 @@ import automorph.util.{MethodReflection, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
 
 /** RPC client layer bindings code generation. */
-private[automorph] case object ClientGenerator:
+private[automorph] object ClientGenerator:
 
   /**
    * Generates client bindings for all valid public methods of an API type.
