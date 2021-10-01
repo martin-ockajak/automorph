@@ -43,7 +43,7 @@ private[automorph] object OpenApi {
 
   def parameterSchemas(function: RpcFunction): Map[String, Schema] =
     function.parameters.map { parameter =>
-      // FIXME - convert data type to JSON type
+      // TODO - convert data type to JSON type
       parameter.name -> Schema(
         Some(parameter.dataType),
         Some(parameter.name),
@@ -52,7 +52,7 @@ private[automorph] object OpenApi {
     }.toMap
 
   def resultSchema(function: RpcFunction): Schema =
-    // FIXME - convert data type to JSON type
+    // TODO - convert data type to JSON type
     Schema(Some(function.resultType), Some("result"), scaladocField(function.documentation, "return"))
 
   def requiredParameters(function: RpcFunction): List[String] =
