@@ -21,8 +21,6 @@ trait MessageCodecSpec extends BaseSpec {
   implicit def arbitraryNode: Arbitrary[Node]
 
   val charset = StandardCharsets.UTF_8
-// FIXME - enable
-//  implicit lazy val arbitraryMessage: Arbitrary[Message[Node]] = Generators.arbitraryMesage
 
   "" - {
     "Serialize / Deserialize" in {
