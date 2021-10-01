@@ -29,7 +29,7 @@ private[automorph] final case class Request[Node](
   )
 }
 
-private[automorph] case object Request {
+private[automorph] object Request {
 
   def apply[Node](message: Message[Node]): Request[Node] = {
     val jsonrpc = mandatory(message.jsonrpc, "automorph")
