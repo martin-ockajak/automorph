@@ -21,7 +21,7 @@ class JsonRpcSpec extends BaseSpec {
     )
   )
 
-  // FIXME
+  // FIXME - remove
   private implicit val messageEncoder: Encoder[CirceJsonRpc.Data] = CirceJsonRpc.messageEncoder
   private implicit val messageDecoder: Decoder[CirceJsonRpc.Data] = CirceJsonRpc.messageDecoder
 

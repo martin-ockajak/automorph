@@ -21,7 +21,7 @@ class RestRpcSpec extends BaseSpec {
     )
   )
 
-  // FIXME
+  // FIXME - remove
   private implicit val messageEncoder: Encoder[CirceRestRpc.Data] = CirceRestRpc.messageEncoder
   private implicit val messageDecoder: Decoder[CirceRestRpc.Data] = CirceRestRpc.messageDecoder
 
