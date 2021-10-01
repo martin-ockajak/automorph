@@ -23,7 +23,7 @@ final case class MonixSystem() extends EffectSystem[Task] {
   override def flatMap[T, R](effect: Task[T], function: T => Task[R]): Task[R] = effect.flatMap(function)
 }
 
-case object MonixSystem {
+object MonixSystem {
   /**
    * Effect type.
    *

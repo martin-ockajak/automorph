@@ -106,7 +106,7 @@ final case class FinagleEndpoint[Effect[_]](
   }
 }
 
-case object FinagleEndpoint {
+object FinagleEndpoint {
 
   /** Request context type. */
   type Context = Http[Request]

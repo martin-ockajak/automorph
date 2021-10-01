@@ -113,7 +113,7 @@ final case class NanoHttpdServer[Effect[_]] private (
   }
 }
 
-case object NanoHttpdServer {
+object NanoHttpdServer {
 
   /** Request context type. */
   type Context = Http[_]

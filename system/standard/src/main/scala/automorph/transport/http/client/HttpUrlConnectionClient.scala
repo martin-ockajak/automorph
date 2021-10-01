@@ -121,7 +121,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
   }
 }
 
-case object HttpUrlConnectionClient {
+object HttpUrlConnectionClient {
 
   /** Request context type. */
   type Context = Http[HttpURLConnection]

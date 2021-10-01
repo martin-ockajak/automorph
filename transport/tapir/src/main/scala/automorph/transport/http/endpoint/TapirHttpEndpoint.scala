@@ -22,7 +22,7 @@ import sttp.tapir.{CodecFormat, byteArrayBody, clientIp, cookies, endpoint, head
  *
  * @see [[https://tapir.softwaremill.com Documentation]]
  */
-case object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
+object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 
   /** Request context type. */
   type Context = Http[Unit]

@@ -22,7 +22,7 @@ import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
  * The handler interprets WebSocket request message as an RPC request and processes it using the specified RPC handler.
  * The response returned by the RPC handler is used as WebSocket response message.
  */
-case object UndertowWebSocketEndpoint {
+object UndertowWebSocketEndpoint {
 
   /**
    * Creates an Undertow web server WebSocket handler with the specified RPC request ''handler''.

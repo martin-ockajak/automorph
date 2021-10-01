@@ -121,7 +121,7 @@ final case class SttpClient[Effect[_]](
   }
 }
 
-case object SttpClient {
+object SttpClient {
 
   /** Client message transport backend WebSocket capabilities type. */
   type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
