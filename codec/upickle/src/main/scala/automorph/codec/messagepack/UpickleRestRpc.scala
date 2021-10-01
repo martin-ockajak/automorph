@@ -7,7 +7,7 @@ import upack.Msg
 /**
  * JSON-RPC protocol support for uPickle message codec plugin.
  */
-private[automorph] case object UpickleRestRpc {
+private[automorph] object UpickleRestRpc {
   type Data = Message[Msg]
 
   // Workaround for upickle bug causing the following error when using its

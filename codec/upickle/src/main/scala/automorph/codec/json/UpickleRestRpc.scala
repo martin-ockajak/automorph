@@ -7,7 +7,7 @@ import ujson.Value
 /**
  * JSON-RPC protocol support for uPickle message codec plugin.
  */
-private[automorph] case object UpickleRestRpc {
+private[automorph] object UpickleRestRpc {
   type Data = Message[Value]
 
   // Workaround for upickle bug causing the following error when using its

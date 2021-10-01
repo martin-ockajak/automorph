@@ -125,4 +125,4 @@ trait UpickleCustom extends AttributeTagged {
   }
 }
 
-case object DefaultUpickleCustom extends UpickleCustom
+object DefaultUpickleCustom extends UpickleCustom
