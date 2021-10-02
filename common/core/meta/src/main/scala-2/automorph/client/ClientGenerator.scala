@@ -23,7 +23,7 @@ object ClientGenerator {
    */
   def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec
-  ): Map[String, ClientBinding[Node]] = macro bindingsMacro[Node, Codec, Effect, Context, Api]
+  ): Seq[ClientBinding[Node]] = macro bindingsMacro[Node, Codec, Effect, Context, Api]
 
   def bindingsMacro[
     Node: c.WeakTypeTag,
@@ -33,7 +33,7 @@ object ClientGenerator {
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(codec: c.Expr[Codec])(implicit
     effectType: c.WeakTypeTag[Effect[_]]
-  ): c.Expr[Map[String, ClientBinding[Node]]] = {
+  ): c.Expr[Seq[ClientBinding[Node]]] = {
     import c.universe.Quasiquote
     val ref = Reflection[c.type](c)
 
@@ -49,11 +49,11 @@ object ClientGenerator {
     }
 
     // Generate bound API method bindings
-    val clientMethods = validMethods.map { method =>
-      q"${method.name} -> ${generateBinding[c.type, Node, Codec, Effect, Context, Api](ref)(method, codec)}"
+    val clientBindings = validMethods.map { method =>
+      generateBinding[c.type, Node, Codec, Effect, Context, Api](ref)(method, codec)
     }
-    c.Expr[Map[String, ClientBinding[Node]]](q"""
-      Seq(..$clientMethods).toMap
+    c.Expr[Seq[ClientBinding[Node]]](q"""
+      Seq(..$clientBindings)
     """)
   }
 

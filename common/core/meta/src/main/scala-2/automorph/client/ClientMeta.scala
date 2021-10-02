@@ -26,7 +26,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * - (if request context type is not EmptyContext) accepts the specified request context type as its last parameter
    *
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting o
-ne
+   * ne
    * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
    *
    * Invoked method arguments are supplied ''by name'' as an object.
@@ -59,6 +59,7 @@ ne
 }
 
 object ClientMeta {
+
   /** Client with arbitrary codec. */
   type AnyCodec[Effect[_], Context] = Client[Node, _ <: MessageCodec[Node], Effect, Context] forSome { type Node }
 
@@ -127,8 +128,10 @@ object ClientMeta {
     val apiType = weakTypeOf[Api]
     c.Expr[Api](q"""
       // Generate API method bindings
-      val methodBindings =
-        automorph.client.ClientGenerator.bindings[$nodeType, $codecType, $effectType, $contextType, $apiType]($codec)
+      val methodBindings = automorph.client.ClientGenerator.bindings[$nodeType, $codecType, $effectType, $contextType, $apiType]($codec)
+        .map { binding =>
+          binding.function.name -> binding
+        }.toMap
 
       // Create API proxy instance
       java.lang.reflect.Proxy.newProxyInstance(

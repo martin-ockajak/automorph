@@ -23,8 +23,7 @@ private[automorph] object ClientGenerator:
    */
   inline def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec
-  ): Map[String, ClientBinding[Node]] =
-    ${ bindingsMacro[Node, Codec, Effect, Context, Api]('codec) }
+  ): Seq[ClientBinding[Node]] = ${ bindingsMacro[Node, Codec, Effect, Context, Api]('codec) }
 
   private def bindingsMacro[
     Node: Type,
@@ -32,7 +31,7 @@ private[automorph] object ClientGenerator:
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
-  ](codec: Expr[Codec])(using quotes: Quotes): Expr[Map[String, ClientBinding[Node]]] =
+  ](codec: Expr[Codec])(using quotes: Quotes): Expr[Seq[ClientBinding[Node]]] =
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -44,14 +43,10 @@ private[automorph] object ClientGenerator:
         )
 
     // Generate bound API method bindings
-    val clientMethods = Expr.ofSeq(validMethods.map { method =>
-      '{
-        ${ Expr(method.name) } -> ${
-          generateBinding[Node, Codec, Effect, Context, Api](ref)(method, codec)
-        }
-      }
-    })
-    '{ $clientMethods.toMap }
+    val clientBindings = validMethods.map { method =>
+      generateBinding[Node, Codec, Effect, Context, Api](ref)(method, codec)
+    }
+    Expr.ofSeq(clientBindings)
 
   private def generateBinding[
     Node: Type,
@@ -151,7 +146,7 @@ private[automorph] object ClientGenerator:
 
     MacroLogger.debug(
       s"""${MethodReflection.signature[Api](ref)(method)} =
-         |  ${encodeArguments.asTerm.show(using Printer.TreeShortCode)}
-         |  ${decodeResult.asTerm.show(using Printer.TreeShortCode)}
-         |""".stripMargin
+        |  ${encodeArguments.asTerm.show(using Printer.TreeShortCode)}
+        |  ${decodeResult.asTerm.show(using Printer.TreeShortCode)}
+        |""".stripMargin
     )

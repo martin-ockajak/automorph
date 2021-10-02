@@ -71,7 +71,9 @@ object ClientMeta:
     namedArguments: Boolean
   ): Api =
     // Generate API method bindings
-    val methodBindings = ClientGenerator.bindings[Node, Codec, Effect, Context, Api](codec)
+    val methodBindings = ClientGenerator.bindings[Node, Codec, Effect, Context, Api](codec).map { binding =>
+      binding.function.name -> binding
+    }.toMap
 
     // Create API proxy instance
     val classTag = summonInline[ClassTag[Api]]
