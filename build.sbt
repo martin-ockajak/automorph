@@ -284,6 +284,10 @@ lazy val testBase = (project in file("test/base")).dependsOn(
 )
 lazy val testPlugin = (project in file("test/plugin")).dependsOn(
   testBase, jsonrpc, restrpc
+).settings(
+  libraryDependencies ++= Seq(
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.0"
+  )
 )
 lazy val testCore = (project in file("test/core")).dependsOn(
   testPlugin, core, http, circe, upickle, argonaut,

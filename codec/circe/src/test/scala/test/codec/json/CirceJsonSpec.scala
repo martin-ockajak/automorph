@@ -6,7 +6,7 @@ import io.circe.{Decoder, Encoder, Json}
 import automorph.codec.json.CirceJsonCodec
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
-import test.codec.JsonMessageCodecSpec
+import test.codec.json.JsonMessageCodecSpec
 import test.{Enum, Record, Structure}
 
 class CirceJsonSpec extends JsonMessageCodecSpec {

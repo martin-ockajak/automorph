@@ -5,10 +5,10 @@ import argonaut.{Argonaut, CodecJson, Json}
 import automorph.codec.json.ArgonautJsonCodec
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
-import test.codec.MessageCodecSpec
+import test.codec.json.JsonMessageCodecSpec
 import test.{Enum, Record, Structure}
 
-class ArgonautJsonSpec extends MessageCodecSpec {
+class ArgonautJsonSpec extends JsonMessageCodecSpec {
 
   type Node = Json
   type ActualCodec = ArgonautJsonCodec

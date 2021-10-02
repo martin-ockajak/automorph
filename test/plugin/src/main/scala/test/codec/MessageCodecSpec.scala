@@ -3,7 +3,6 @@ package test.codec
 import automorph.spi.MessageCodec
 import java.nio.charset.StandardCharsets
 import org.scalacheck.Arbitrary
-import test.{Enum, Generators, Record, Structure}
 import test.base.BaseSpec
 
 /**
@@ -25,34 +24,20 @@ trait MessageCodecSpec extends BaseSpec {
 
   private val charset = StandardCharsets.UTF_8
 
-//  private val record = Record(
-//    "test",
-//    true,
-//    0,
-//    1,
-//    Some(2),
-//    3,
-//    4.5,
-//    6.7,
-//    Enum.Enum.One,
-//    List("foo", "bar"),
-//    Map("a" -> 0, "b" -> 1),
-//    Some(Structure("")),
-//    None
-//  )
-
   "" - {
-    "Serialize / Deserialize" in {
-      check { (node: Node) =>
-        val serializedNode = codec.serialize(node)
-        codec.deserialize(serializedNode).equals(node)
+    "Format" - {
+      "Serialize / Deserialize" in {
+        check { (node: Node) =>
+          val serializedNode = codec.serialize(node)
+          codec.deserialize(serializedNode).equals(node)
+        }
       }
-    }
-    "Text" in {
-      check { (node: Node) =>
-        val textNode = codec.text(node)
-        val serializedNode = codec.serialize(node)
-        textNode.getBytes(charset).length >= serializedNode.length
+      "Text" in {
+        check { (node: Node) =>
+          val textNode = codec.text(node)
+          val serializedNode = codec.serialize(node)
+          textNode.getBytes(charset).length >= serializedNode.length
+        }
       }
     }
   }

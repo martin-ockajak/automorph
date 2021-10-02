@@ -4,11 +4,11 @@ import automorph.codec.UpickleCustom
 import automorph.codec.json.UpickleJsonCodec
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
-import test.codec.MessageCodecSpec
+import test.codec.json.JsonMessageCodecSpec
 import test.{Enum, Record, Structure}
 import ujson.{Arr, Bool, Num, Obj, Str, Value}
 
-class UpickleJsonSpec extends MessageCodecSpec {
+class UpickleJsonSpec extends JsonMessageCodecSpec {
 
   type Node = Value
   type ActualCodec = UpickleJsonCodec[UpickleJsonSpec.type]
