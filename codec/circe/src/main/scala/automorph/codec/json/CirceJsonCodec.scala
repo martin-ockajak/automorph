@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets
 import scala.collection.immutable.ArraySeq
 
 /**
- * Circe message codec plugin using JSON as message codec.
+ * Circe message codec plugin using JSON format.
  *
  * @see [[https://circe.github.io/circe Documentation]]
  * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]

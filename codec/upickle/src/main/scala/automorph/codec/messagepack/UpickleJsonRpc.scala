@@ -7,7 +7,7 @@ import upack.{Arr, Float64, Msg, Null, Obj, Str}
 import upickle.core.Abort
 
 /**
- * JSON-RPC protocol support for uPickle message codec plugin.
+ * JSON-RPC protocol support for uPickle message codec plugin using MessagePack format.
  */
 object UpickleJsonRpc {
 // FIXME - restore

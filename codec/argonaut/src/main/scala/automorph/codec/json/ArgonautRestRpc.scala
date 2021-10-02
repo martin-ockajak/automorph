@@ -5,7 +5,7 @@ import argonaut.{Argonaut, CodecJson, DecodeResult, Json, JsonObject}
 import automorph.protocol.restrpc.{Message, MessageError}
 
 /**
- * REST-RPC protocol support for uPickle message codec plugin.
+ * REST-RPC protocol support for uPickle message codec plugin using JSON format.
  */
 private[automorph] object ArgonautRestRpc {
   type Data = Message[Json]

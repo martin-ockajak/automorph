@@ -4,7 +4,7 @@ import upickle.AttributeTagged
 import upickle.core.{Abort, Util}
 
 /**
- * Customized Upickle reader and writer implicits instance.
+ * Customized Upickle reader and writer implicits.
  *
  * Contains null-safe readers and writers for basic data types.
  */

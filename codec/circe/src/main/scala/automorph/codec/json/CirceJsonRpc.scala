@@ -4,7 +4,9 @@ import automorph.protocol.jsonrpc.{Message, MessageError}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder, Json, JsonObject}
 
-/** JSON-RPC protocol support for Circe message codec plugin. */
+/**
+ * JSON-RPC protocol support for Circe message codec plugin using JSON format.
+ */
 object CirceJsonRpc {
 // FIXME - restore
 // private[automorph] case object CirceJsonRpc {

@@ -5,7 +5,7 @@ import automorph.protocol.restrpc.{Message, MessageError}
 import upack.Msg
 
 /**
- * JSON-RPC protocol support for uPickle message codec plugin.
+ * JSON-RPC protocol support for uPickle message codec plugin using MessagePack format.
  */
 private[automorph] object UpickleRestRpc {
   type Data = Message[Msg]

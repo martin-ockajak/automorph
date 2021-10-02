@@ -5,7 +5,7 @@ import scala.collection.immutable.ArraySeq
 import ujson.Value
 
 /**
- * uPickle message codec plugin using JSON as message format.
+ * uPickle message codec plugin using JSON format.
  *
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[http://com-lihaoyi.github.io/upickle/#uJson Node type]]
