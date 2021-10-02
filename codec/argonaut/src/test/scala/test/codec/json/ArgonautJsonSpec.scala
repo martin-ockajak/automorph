@@ -69,7 +69,7 @@ class ArgonautJsonSpec extends JsonMessageCodecSpec {
     )
 
   "" - {
-    "Encode / Decode" in {
+    "Encode & Decode" in {
       check { (record: Record) =>
         val encodedValue = codec.encode(record)
         val decodedValue = codec.decode[Record](encodedValue)

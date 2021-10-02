@@ -1,7 +1,6 @@
 package automorph.codec.json
 
-import argonaut.Argonaut.{StringToParseWrap, jArray, jNull, jNumber, jObject, jString}
-import argonaut.{Argonaut, CodecJson, DecodeResult, Json, JsonObject}
+import argonaut.{Argonaut, CodecJson, Json}
 import automorph.protocol.restrpc.{Message, MessageError}
 
 /**

@@ -25,19 +25,17 @@ trait MessageCodecSpec extends BaseSpec {
   private val charset = StandardCharsets.UTF_8
 
   "" - {
-    "Format" - {
-      "Serialize / Deserialize" in {
-        check { (node: Node) =>
-          val serializedNode = codec.serialize(node)
-          codec.deserialize(serializedNode).equals(node)
-        }
+    "Serialize & Deserialize" in {
+      check { (node: Node) =>
+        val serializedNode = codec.serialize(node)
+        codec.deserialize(serializedNode).equals(node)
       }
-      "Text" in {
-        check { (node: Node) =>
-          val textNode = codec.text(node)
-          val serializedNode = codec.serialize(node)
-          textNode.getBytes(charset).length >= serializedNode.length
-        }
+    }
+    "Text" in {
+      check { (node: Node) =>
+        val textNode = codec.text(node)
+        val serializedNode = codec.serialize(node)
+        textNode.getBytes(charset).length >= serializedNode.length
       }
     }
   }

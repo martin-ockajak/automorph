@@ -1,7 +1,7 @@
 package automorph.codec.json
 
 import argonaut.Argonaut.{StringToParseWrap, jNull}
-import argonaut.{Argonaut, CodecJson, DecodeResult, Json}
+import argonaut.{CodecJson, DecodeResult, Json}
 import java.nio.charset.StandardCharsets
 import scala.collection.immutable.ArraySeq
 
