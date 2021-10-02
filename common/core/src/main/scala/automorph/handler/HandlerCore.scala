@@ -1,9 +1,9 @@
 package automorph.handler
 
 import automorph.Handler
-import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.spi.RpcProtocol.FunctionNotFoundException
-import automorph.spi.protocol.{RpcMessage, RpcRequest}
+import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
+import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import scala.util.{Failure, Success, Try}
@@ -20,6 +20,13 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
   this: Handler[Node, Codec, Effect, Context] =>
 
   private val bodyProperty = "Body"
+
+  /**
+   * Bound RPC functions.
+   */
+  lazy val boundFunctions: Seq[RpcFunction] = bindings.map { case (name, binding) =>
+    binding.function.copy(name = name)
+  }.toSeq
 
   /**
    * Processes an RPC ''request'' by invoking a bound ''method'' based on and its ''context'' and return an RPC ''response''.

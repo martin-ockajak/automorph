@@ -2,8 +2,10 @@ package automorph
 
 import automorph.handler.{HandlerBinding, HandlerCore, HandlerMeta}
 import automorph.log.Logging
+import automorph.spi.protocol.RpcFunction
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.{CannotEqual, EmptyContext}
+import scala.collection.immutable.ListMap
 
 /**
  * Automorph RPC request handler.
@@ -25,7 +27,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context] 
   codec: Codec,
   system: EffectSystem[Effect],
   protocol: RpcProtocol[Node],
-  bindings: Map[String, HandlerBinding[Node, Effect, Context]],
+  protected val bindings: ListMap[String, HandlerBinding[Node, Effect, Context]],
   protected val encodedNone: Node
 ) extends HandlerCore[Node, Codec, Effect, Context]
   with HandlerMeta[Node, Codec, Effect, Context]
@@ -56,7 +58,7 @@ object Handler:
     system: EffectSystem[Effect],
     protocol: RpcProtocol[Node]
   ): Handler[Node, Codec, Effect, Context] =
-    Handler(codec, system, protocol, Map.empty, codec.encode(None))
+    Handler(codec, system, protocol, ListMap.empty, codec.encode(None))
 
   /**
    * Creates a RPC request handler with empty request context plus specified specified ''codec'' and ''system'' plugins.
@@ -77,4 +79,4 @@ object Handler:
     system: EffectSystem[Effect],
     protocol: RpcProtocol[Node]
   ): Handler[Node, Codec, Effect, EmptyContext.Value] =
-    Handler(codec, system, protocol, Map.empty, codec.encode(None))
+    Handler(codec, system, protocol, ListMap.empty, codec.encode(None))

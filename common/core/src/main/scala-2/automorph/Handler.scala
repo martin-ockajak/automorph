@@ -4,6 +4,7 @@ import automorph.handler.{HandlerBinding, HandlerCore, HandlerMeta}
 import automorph.log.Logging
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.{CannotEqual, EmptyContext}
+import scala.collection.immutable.ListMap
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -27,7 +28,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   codec: Codec,
   system: EffectSystem[Effect],
   protocol: RpcProtocol[Node],
-  bindings: Map[String, HandlerBinding[Node, Effect, Context]],
+  bindings: ListMap[String, HandlerBinding[Node, Effect, Context]],
   protected val encodedNone: Node
 ) extends HandlerCore[Node, Codec, Effect, Context]
   with HandlerMeta[Node, Codec, Effect, Context]
@@ -96,7 +97,7 @@ object Handler {
         $codec,
         $system,
         $protocol,
-        Map.empty,
+        ListMap.empty,
         $codec.encode(None)
       )
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
@@ -115,7 +116,7 @@ object Handler {
         $codec,
         $system,
         $protocol,
-        Map.empty,
+        ListMap.empty,
         $codec.encode(None)
       )
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, EmptyContext.Value]]]
