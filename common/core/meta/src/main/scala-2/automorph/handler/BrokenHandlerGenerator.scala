@@ -14,7 +14,7 @@ object BrokenHandlerGenerator {
     codec: Codec,
     system: EffectSystem[Effect],
     api: Api
-  ): Map[String, HandlerBinding[Node, Effect, Context]] = macro bindingsMacro[Node, Codec, Effect, Context, Api]
+  ): Seq[HandlerBinding[Node, Effect, Context]] = macro bindingsMacro[Node, Codec, Effect, Context, Api]
 
   def bindingsMacro[
     Node: c.WeakTypeTag,
@@ -26,7 +26,7 @@ object BrokenHandlerGenerator {
     codec: c.Expr[Codec],
     system: c.Expr[EffectSystem[Effect]],
     api: c.Expr[Api]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Map[String, HandlerBinding[Node, Effect, Context]]] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Seq[HandlerBinding[Node, Effect, Context]]] = {
     import c.universe.Quasiquote
     val ref = Reflection[c.type](c)
 
@@ -35,10 +35,10 @@ object BrokenHandlerGenerator {
 
     // Generate bound API method bindings
     val handlerBindings = validMethods.map { method =>
-      q"${method.name} -> ${generateBinding[c.type, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)}"
+      generateBinding[c.type, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
     }
-    c.Expr[Map[String, HandlerBinding[Node, Effect, Context]]](q"""
-      Seq(..$handlerBindings).toMap
+    c.Expr[Seq[HandlerBinding[Node, Effect, Context]]](q"""
+      Seq(..$handlerBindings)
     """)
   }
 

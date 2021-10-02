@@ -60,9 +60,10 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef](api: Api, aliases: String => Iterable[String]): ThisHandler =
-    val newBindings = bindings ++ HandlerGenerator.bindings[Node, Codec, Effect, Context, Api](codec, system, api).flatMap {
-      (name, binding) => aliases(name).map(_ -> binding)
-    }
+    val newBindings =
+      bindings ++ HandlerGenerator.bindings[Node, Codec, Effect, Context, Api](codec, system, api).flatMap { binding =>
+        aliases(binding.function.name).map(_ -> binding)
+      }
     copy(bindings = newBindings)
 
   inline def brokenBind[Api <: AnyRef](api: Api): ThisHandler = ???

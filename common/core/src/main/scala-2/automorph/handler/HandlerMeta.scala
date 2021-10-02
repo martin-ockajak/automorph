@@ -133,8 +133,8 @@ object HandlerMeta {
     c.Expr[Any](q"""
       val newBindings = ${c.prefix}.bindings ++ automorph.handler.HandlerGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.system, $api)
-        .flatMap { case (name, binding) =>
-          $aliases(name).map(_ -> binding)
+        .flatMap { binding =>
+          $aliases(binding.function.name).map(_ -> binding)
         }
       ${c.prefix}.copy(bindings = newBindings)
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]

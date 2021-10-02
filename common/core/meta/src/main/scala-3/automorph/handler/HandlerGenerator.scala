@@ -28,7 +28,7 @@ private[automorph] object HandlerGenerator:
     codec: Codec,
     system: EffectSystem[Effect],
     api: Api
-  ): Map[String, HandlerBinding[Node, Effect, Context]] =
+  ): Seq[HandlerBinding[Node, Effect, Context]] =
     ${ bindingsMacro[Node, Codec, Effect, Context, Api]('codec, 'system, 'api) }
 
   private def bindingsMacro[
@@ -41,7 +41,7 @@ private[automorph] object HandlerGenerator:
     codec: Expr[Codec],
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
-  )(using quotes: Quotes): Expr[Map[String, HandlerBinding[Node, Effect, Context]]] =
+  )(using quotes: Quotes): Expr[Seq[HandlerBinding[Node, Effect, Context]]] =
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -53,14 +53,10 @@ private[automorph] object HandlerGenerator:
         )
 
     // Generate bound API method bindings
-    val handlerBindings = Expr.ofSeq(validMethods.map { method =>
-      '{
-        ${ Expr(method.name) } -> ${
-          generateBinding[Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
-        }
-      }
-    })
-    '{ $handlerBindings.toMap }
+    val handlerBindings = validMethods.map { method =>
+      generateBinding[Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
+    }
+    Expr.ofSeq(handlerBindings)
 
   private def generateBinding[
     Node: Type,
