@@ -3,13 +3,18 @@ package test.core
 import argonaut.Argonaut.jNumber
 import argonaut.{Argonaut, CodecJson}
 import automorph.codec.UpickleCustom
-import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, UpickleJsonCodec}
+import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, JacksonJsonCodec, UpickleJsonCodec}
 import automorph.codec.messagepack.UpickleMessagePackCodec
 import automorph.protocol.JsonRpcProtocol
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.local.client.HandlerTransport
 import automorph.{Client, Handler}
-import io.circe.generic.auto.*
+import com.fasterxml.jackson.core.{JsonGenerator, JsonParser}
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import com.fasterxml.jackson.databind.{DeserializationContext, SerializerProvider}
+import io.circe.generic.auto._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import test.core.CoreSpec
@@ -23,16 +28,13 @@ trait ProtocolCodecSpec extends CoreSpec {
       {
         implicit lazy val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
         implicit lazy val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
-        implicit lazy val structureEncoder: Encoder[Structure] = deriveEncoder[Structure]
-        implicit lazy val structureDecoder: Decoder[Structure] = deriveDecoder[Structure]
         val port = availablePort
         val codec = CirceJsonCodec()
         val protocol = JsonRpcProtocol(codec)
         val handler = Handler[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context](codec, system, protocol)
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-        val client: Client[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context] =
-          Client(codec, system, transport, protocol)
+        val client = Client[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context](codec, system, transport, protocol)
         TestFixture(
           codec.getClass,
           client,
@@ -48,6 +50,42 @@ trait ProtocolCodecSpec extends CoreSpec {
         )
 // FIXME - enable
 //      }, {
+//        val enumModule = new SimpleModule().addSerializer(
+//          classOf[Enum.Enum],
+//          new StdSerializer[Enum.Enum](classOf[Enum.Enum]) {
+//
+//            override def serialize(value: Enum.Enum, generator: JsonGenerator, provider: SerializerProvider): Unit =
+//              generator.writeNumber(Enum.toOrdinal(value))
+//          }
+//        ).addDeserializer(
+//          classOf[Enum.Enum],
+//          new StdDeserializer[Enum.Enum](classOf[Enum.Enum]) {
+//
+//            override def deserialize(parser: JsonParser, context: DeserializationContext): Enum.Enum =
+//              Enum.fromOrdinal(parser.getIntValue)
+//          }
+//        )
+//        val port = availablePort
+//        val codec = JacksonJsonCodec()
+//        val protocol = JsonRpcProtocol(codec)
+//        val handler = Handler[JacksonJsonCodec.Node, JacksonJsonCodec, Effect, Context](codec, system, protocol)
+//          .bind(simpleApiInstance).bind(complexApiInstance)
+//        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
+//        val client = Client[JacksonJsonCodec.Node, JacksonJsonCodec, Effect, Context](codec, system, transport, protocol)
+//        TestFixture(
+//          codec.getClass,
+//          client,
+//          handler,
+//          port,
+//          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
+//          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
+//          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
+//          (method, p1) => client.method(method).positional.args(p1).call,
+//          (method, p1) => client.method(method).args(p1).call,
+//          (method, p1) => client.method(method).positional.args(p1).tell,
+//          (method, p1) => client.method(method).args(p1).tell
+//        )
+//      }, {
 //        val port = availablePort
 //        val codec = UpickleJsonCodec(ProtocolCodecSpec)
 //        val protocol = JsonRpcProtocol(codec)
@@ -58,8 +96,7 @@ trait ProtocolCodecSpec extends CoreSpec {
 //        )
 //          .bind(simpleApiInstance).bind(complexApiInstance)
 //        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-//        val client: Client[UpickleJsonCodec.Node, UpickleJsonCodec[ProtocolCodecSpec.type], Effect, Context] =
-//          Client(codec, system, transport, protocol)
+//        val client = Client[UpickleJsonCodec.Node, UpickleJsonCodec[ProtocolCodecSpec.type], Effect, Context](codec, system, transport, protocol)
 //        TestFixture(
 //          codec.getClass,
 //          client,
@@ -85,9 +122,7 @@ trait ProtocolCodecSpec extends CoreSpec {
 //          )
 //            .bind(simpleApiInstance).bind(complexApiInstance)
 //        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-//        val client
-//          : Client[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[ProtocolCodecSpec.type], Effect, Context] =
-//          Client(codec, system, transport, protocol)
+//        val client = Client[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[ProtocolCodecSpec.type], Effect, Context](codec, system, transport, protocol)
 //        TestFixture(
 //          codec.getClass,
 //          client,
@@ -148,8 +183,7 @@ trait ProtocolCodecSpec extends CoreSpec {
 //        val handler = Handler[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context](codec, system, protocol)
 //          .bind(simpleApiInstance).bind(complexApiInstance)
 //        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-//        val client: Client[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context] =
-//          Client(codec, system, transport, protocol)
+//        val client = Client[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context](codec, system, transport, protocol)
 //        TestFixture(
 //          codec.getClass,
 //          client,

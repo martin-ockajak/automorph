@@ -17,7 +17,7 @@ class JacksonJsonSpec extends JsonMessageCodecSpec {
 
   type Node = JsonNode
   type ActualCodec = JacksonJsonCodec
-  override lazy val codec: ActualCodec = JacksonJsonCodec(JacksonJsonCodec.defaultMapper.registerModule(customModule))
+  override lazy val codec: ActualCodec = JacksonJsonCodec(JacksonJsonCodec.defaultMapper.registerModule(enumModule))
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
@@ -33,23 +33,21 @@ class JacksonJsonSpec extends JsonMessageCodecSpec {
     )
   ))
 
-  private lazy val enumClass = classOf[Enum.Enum]
+  private lazy val enumModule = new SimpleModule().addSerializer(
+    classOf[Enum.Enum],
+    new StdSerializer[Enum.Enum](classOf[Enum.Enum]) {
 
-  private lazy val enumSerializer = new StdSerializer[Enum.Enum](enumClass) {
+      override def serialize(value: Enum.Enum, generator: JsonGenerator, provider: SerializerProvider): Unit =
+        generator.writeNumber(Enum.toOrdinal(value))
+    }
+  ).addDeserializer(
+    classOf[Enum.Enum],
+    new StdDeserializer[Enum.Enum](classOf[Enum.Enum]) {
 
-    override def serialize(value: Enum.Enum, generator: JsonGenerator, provider: SerializerProvider): Unit =
-      generator.writeNumber(Enum.toOrdinal(value))
-  }
-
-  private lazy val enumDeserializer = new StdDeserializer[Enum.Enum](enumClass) {
-
-    override def deserialize(parser: JsonParser, context: DeserializationContext): Enum.Enum =
-      Enum.fromOrdinal(parser.getIntValue)
-  }
-
-  private lazy val customModule = new SimpleModule()
-    .addSerializer(enumClass, enumSerializer)
-    .addDeserializer(enumClass, enumDeserializer)
+      override def deserialize(parser: JsonParser, context: DeserializationContext): Enum.Enum =
+        Enum.fromOrdinal(parser.getIntValue)
+    }
+  )
 
   "" - {
     "Encode & Decode" in {
@@ -70,8 +68,10 @@ class JacksonJsonSpec extends JsonMessageCodecSpec {
       )
       val text = codec.text(codec.encode(message))
       println(text)
-//      val node = codec.deserialize(automorph.util.Bytes.string.from(text))
-//      println(codec.decode[automorph.protocol.jsonrpc.Message[JsonNode]](node))
+      val node = codec.deserialize(automorph.util.Bytes.string.from(text))
+      val decoded = codec.decode[automorph.protocol.jsonrpc.Message[JsonNode]](node)
+      println(decoded)
+      println(codec.text(codec.encode(decoded)))
     }
   }
 }

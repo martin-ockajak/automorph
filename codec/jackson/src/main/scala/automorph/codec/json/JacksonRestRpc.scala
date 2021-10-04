@@ -34,7 +34,7 @@ private[automorph] object JacksonRestRpc {
   private def messageErrorDeserializer = new StdDeserializer[RpcError](classOf[RpcError]) {
 
     override def deserialize(parser: JsonParser, context: DeserializationContext): RpcError =
-      parser.readValueAsTree[TreeNode]() match {
+      context.readTree(parser) match {
         case node: ObjectNode => MessageError[JsonNode](
             field("message", value => Option.when(value.isTextual)(value.asText), node, parser),
             field("code", value => Option.when(value.isInt)(value.asInt), node, parser),
@@ -58,7 +58,7 @@ private[automorph] object JacksonRestRpc {
   private def messageDeserializer = new StdDeserializer[RpcMessage](classOf[RpcMessage]) {
 
     override def deserialize(parser: JsonParser, context: DeserializationContext): RpcMessage =
-      parser.readValueAsTree[TreeNode]() match {
+      context.readTree(parser) match {
         case node: ObjectNode => Message[JsonNode](
             field("result", Some(_), node, parser),
             field("error", value => Some(context.readValue[RpcError](value.traverse(), classOf[RpcError])), node, parser)
