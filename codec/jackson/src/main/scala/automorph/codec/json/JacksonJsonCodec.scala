@@ -1,8 +1,9 @@
 package automorph.codec.json
 
-import com.fasterxml.jackson.core.{JsonGenerator, JsonParser}
+import com.fasterxml.jackson.core.{JsonGenerator, JsonParseException, JsonParser, TreeNode}
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, JsonNode, ObjectMapper, SerializerProvider}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
@@ -41,14 +42,18 @@ object JacksonJsonCodec {
     new StdSerializer[BoxedUnit](classOf[BoxedUnit]) {
 
       override def serialize(value: BoxedUnit, generator: JsonGenerator, provider: SerializerProvider): Unit =
-        generator.writeNull()
+        generator.writeStartObject()
+        generator.writeEndObject()
     }
   ).addDeserializer(
     classOf[BoxedUnit],
     new StdDeserializer[BoxedUnit](classOf[BoxedUnit]) {
 
       override def deserialize(parser: JsonParser, context: DeserializationContext): BoxedUnit =
-        BoxedUnit.UNIT
+        parser.readValueAsTree[TreeNode]() match {
+          case _: ObjectNode => BoxedUnit.UNIT
+          case _ => throw new JsonParseException(parser, "Invalid unit value", parser.getCurrentLocation)
+        }
     }
   )
 
