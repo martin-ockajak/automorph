@@ -9,7 +9,7 @@ import ujson.Value
  *
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[http://com-lihaoyi.github.io/upickle/#uJson Node type]]
- * @constructor Creates an uPickle codec plugin using JSON as message codec.
+ * @constructor Creates an uPickle codec plugin using JSON as message format.
  * @param custom customized Upickle reader and writer implicits instance
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
@@ -19,8 +19,11 @@ final case class UpickleJsonCodec[Custom <: UpickleCustom](
 
   private val indent = 2
 
-  implicit private lazy val jsonRpcMessageRw: custom.ReadWriter[UpickleJsonRpc.Data] = UpickleJsonRpc.readWriter(custom)
-  implicit private lazy val restRpcMessageRw: custom.ReadWriter[UpickleRestRpc.Data] = UpickleRestRpc.readWriter(custom)
+  implicit private lazy val jsonRpcMessageRw: custom.ReadWriter[UpickleJsonRpc.RpcMessage] =
+    UpickleJsonRpc.readWriter(custom)
+
+  implicit private lazy val restRpcMessageRw: custom.ReadWriter[UpickleRestRpc.RpcMessage] =
+    UpickleRestRpc.readWriter(custom)
 
   override def mediaType: String = "application/json"
 

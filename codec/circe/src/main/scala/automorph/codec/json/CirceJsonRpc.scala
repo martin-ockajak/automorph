@@ -10,7 +10,7 @@ import io.circe.{Decoder, Encoder, Json, JsonObject}
 object CirceJsonRpc {
 // FIXME - restore
 // private[automorph] case object CirceJsonRpc {
-  type Data = Message[Json]
+  type RpcMessage = Message[Json]
 
   def messageEncoder: Encoder[Message[Json]] = {
     implicit val idEncoder: Encoder[Message.Id] = Encoder.encodeJson.contramap[Message.Id] {

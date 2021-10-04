@@ -1,6 +1,6 @@
 package automorph.codec.json
 
-import io.circe.{Decoder, Encoder, Json, parser}
+import io.circe.{parser, Decoder, Encoder, Json}
 import java.nio.charset.StandardCharsets
 import scala.collection.immutable.ArraySeq
 
@@ -9,15 +9,15 @@ import scala.collection.immutable.ArraySeq
  *
  * @see [[https://circe.github.io/circe Documentation]]
  * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
- * @constructor Creates a Circe codec plugin using JSON as message codec.
+ * @constructor Creates a Circe codec plugin using JSON as message format.
  */
 final case class CirceJsonCodec() extends CirceJsonMeta {
 
   private val charset = StandardCharsets.UTF_8
-  implicit private lazy val jsonRpcMessageEncoder: Encoder[CirceJsonRpc.Data] = CirceJsonRpc.messageEncoder
-  implicit private lazy val jsonRpcMessageDecoder: Decoder[CirceJsonRpc.Data] = CirceJsonRpc.messageDecoder
-  implicit private lazy val restRpcMessageEncoder: Encoder[CirceRestRpc.Data] = CirceRestRpc.messageEncoder
-  implicit private lazy val restRpcMessageDecoder: Decoder[CirceRestRpc.Data] = CirceRestRpc.messageDecoder
+  implicit private lazy val jsonRpcMessageEncoder: Encoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageEncoder
+  implicit private lazy val jsonRpcMessageDecoder: Decoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageDecoder
+  implicit private lazy val restRpcMessageEncoder: Encoder[CirceRestRpc.RpcMessage] = CirceRestRpc.messageEncoder
+  implicit private lazy val restRpcMessageDecoder: Decoder[CirceRestRpc.RpcMessage] = CirceRestRpc.messageDecoder
 
   override def mediaType: String = "application/json"
 

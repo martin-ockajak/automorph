@@ -8,7 +8,7 @@ import io.circe.{Decoder, Encoder, Json}
  * REST-RPC protocol support for Circe message codec plugin using JSON format.
  */
 private[automorph] object CirceRestRpc {
-  type Data = Message[Json]
+  type RpcMessage = Message[Json]
 
   def messageEncoder: Encoder[Message[Json]] = {
     implicit val messageErrorEncoder: Encoder[MessageError[Json]] = deriveEncoder[MessageError[Json]]

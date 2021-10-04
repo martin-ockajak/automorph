@@ -8,7 +8,7 @@ import ujson.Value
  * JSON-RPC protocol support for uPickle message codec plugin using JSON format.
  */
 private[automorph] object UpickleRestRpc {
-  type Data = Message[Value]
+  type RpcMessage = Message[Value]
 
   // Workaround for upickle bug causing the following error when using its
   // macroRW method to generate readers and writers for case classes with type parameters:

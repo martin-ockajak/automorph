@@ -13,9 +13,11 @@ import upack.Msg
  */
 trait UpickleMessagePackMeta[Custom <: UpickleCustom] extends MessageCodec[Msg] {
 
-  override def encode[T](value: T): Msg = macro UpickleMessagePackMeta.encode[T]
+  override def encode[T](value: T): Msg =
+    macro UpickleMessagePackMeta.encode[T]
 
-  override def decode[T](node: Msg): T = macro UpickleMessagePackMeta.decode[T]
+  override def decode[T](node: Msg): T =
+    macro UpickleMessagePackMeta.decode[T]
 }
 
 object UpickleMessagePackMeta {

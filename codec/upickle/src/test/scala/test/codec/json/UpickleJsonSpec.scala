@@ -13,7 +13,7 @@ class UpickleJsonSpec extends JsonMessageCodecSpec {
   type Node = Value
   type ActualCodec = UpickleJsonCodec[UpickleJsonSpec.type]
 
-  override def codec: ActualCodec = UpickleJsonCodec(UpickleJsonSpec)
+  override lazy val codec: ActualCodec = UpickleJsonCodec(UpickleJsonSpec)
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
@@ -31,9 +31,9 @@ class UpickleJsonSpec extends JsonMessageCodecSpec {
   "" - {
     "Encode & Decode" in {
       check { (record: Record) =>
-        val encodedValue = codec.encode(record)
-        val decodedValue = codec.decode[Record](encodedValue)
-        decodedValue.equals(record)
+        val encoded = codec.encode(record)
+        val decoded = codec.decode[Record](encoded)
+        decoded.equals(record)
       }
     }
   }

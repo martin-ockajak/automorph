@@ -13,9 +13,11 @@ import ujson.Value
  */
 trait UpickleJsonMeta[Custom <: UpickleCustom] extends MessageCodec[Value] {
 
-  override def encode[T](value: T): Value = macro UpickleJsonMeta.encode[T]
+  override def encode[T](value: T): Value =
+    macro UpickleJsonMeta.encode[T]
 
-  override def decode[T](node: Value): T = macro UpickleJsonMeta.decode[T]
+  override def decode[T](node: Value): T =
+    macro UpickleJsonMeta.decode[T]
 }
 
 object UpickleJsonMeta {

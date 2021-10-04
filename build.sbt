@@ -41,6 +41,7 @@ lazy val root = project.in(file(".")).settings(
   circe,
   upickle,
   argonaut,
+  jackson,
 
   // Effect system
   standard,
@@ -191,6 +192,14 @@ lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
     "io.argonaut" %% "argonaut" % "6.3.7"
   )
 )
+lazy val jackson = (project in file("codec/jackson")).dependsOn(
+  jsonrpc, restrpc, testPlugin % Test
+).settings(
+  name := s"$projectName-jackson",
+  libraryDependencies ++= Seq(
+    ("com.fasterxml.jackson.module" % "jackson-module-scala" % "2.12.3").cross(CrossVersion.for3Use2_13)
+  )
+)
 
 // Message transport
 lazy val http = (project in file("transport/http")).dependsOn(
@@ -286,7 +295,7 @@ lazy val testPlugin = (project in file("test/plugin")).dependsOn(
   testBase, jsonrpc, restrpc
 ).settings(
   libraryDependencies ++= Seq(
-    "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.0"
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.12.5"
   )
 )
 lazy val testCore = (project in file("test/core")).dependsOn(

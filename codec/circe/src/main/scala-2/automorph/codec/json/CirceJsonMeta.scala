@@ -6,16 +6,17 @@ import automorph.spi.MessageCodec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-/**
- * Circe JSON codec plugin code generation.
- */
+/** Circe JSON codec plugin code generation. */
 private[automorph] trait CirceJsonMeta extends MessageCodec[Json] {
+
   implicit lazy val messageEncoder: Encoder[Message[Json]] = CirceJsonRpc.messageEncoder
   implicit lazy val messageDecoder: Decoder[Message[Json]] = CirceJsonRpc.messageDecoder
 
-  override def encode[T](value: T): Json = macro CirceJsonMeta.encodeExpr[T]
+  override def encode[T](value: T): Json =
+    macro CirceJsonMeta.encodeExpr[T]
 
-  override def decode[T](node: Json): T = macro CirceJsonMeta.decodeExpr[T]
+  override def decode[T](node: Json): T =
+    macro CirceJsonMeta.decodeExpr[T]
 }
 
 private[automorph] object CirceJsonMeta {

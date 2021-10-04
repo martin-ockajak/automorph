@@ -5,14 +5,14 @@ import automorph.spi.MessageCodec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-/**
- * Argonaut JSON codec plugin code generation.
- */
+/** Argonaut JSON codec plugin code generation. */
 private[automorph] trait ArgonautJsonMeta extends MessageCodec[Json] {
 
-  override def encode[T](value: T): Json = macro ArgonautJsonMeta.encodeExpr[T]
+  override def encode[T](value: T): Json =
+    macro ArgonautJsonMeta.encodeExpr[T]
 
-  override def decode[T](node: Json): T = macro ArgonautJsonMeta.decodeExpr[T]
+  override def decode[T](node: Json): T =
+    macro ArgonautJsonMeta.decodeExpr[T]
 }
 
 private[automorph] object ArgonautJsonMeta {

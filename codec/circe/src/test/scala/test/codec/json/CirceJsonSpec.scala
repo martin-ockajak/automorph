@@ -14,7 +14,7 @@ class CirceJsonSpec extends JsonMessageCodecSpec {
   type Node = Json
   type ActualCodec = CirceJsonCodec
 
-  override def codec: ActualCodec = CirceJsonCodec()
+  override lazy val codec: ActualCodec = CirceJsonCodec()
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
@@ -34,9 +34,9 @@ class CirceJsonSpec extends JsonMessageCodecSpec {
   "" - {
     "Encode & Decode" in {
       check { (record: Record) =>
-        val encodedValue = codec.encode(record)
-        val decodedValue = codec.decode[Record](encodedValue)
-        decodedValue.equals(record)
+        val encoded = codec.encode(record)
+        val decoded = codec.decode[Record](encoded)
+        decoded.equals(record)
       }
     }
   }

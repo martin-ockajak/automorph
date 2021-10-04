@@ -15,7 +15,7 @@ class UpickleMessagePackSpec extends MessageCodecSpec {
   type Node = Msg
   type ActualCodec = UpickleMessagePackCodec[UpickleMessagePackSpec.type]
 
-  override def codec: ActualCodec = UpickleMessagePackCodec(UpickleMessagePackSpec)
+  override lazy val codec: ActualCodec = UpickleMessagePackCodec(UpickleMessagePackSpec)
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
@@ -34,9 +34,9 @@ class UpickleMessagePackSpec extends MessageCodecSpec {
   "" - {
     "Encode & Decode" in {
       check { (record: Record) =>
-        val encodedValue = codec.encode(record)
-        val decodedValue = codec.decode[Record](encodedValue)
-        decodedValue.equals(record)
+        val encoded = codec.encode(record)
+        val decoded = codec.decode[Record](encoded)
+        decoded.equals(record)
       }
     }
   }

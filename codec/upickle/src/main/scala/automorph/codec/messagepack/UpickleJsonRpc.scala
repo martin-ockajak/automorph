@@ -12,7 +12,7 @@ import upickle.core.Abort
 object UpickleJsonRpc {
 // FIXME - restore
 // private[automorph] case object UpickleJsonRpc {
-  private[automorph] type Data = Message[Msg]
+  private[automorph] type RpcMessage = Message[Msg]
 
   // Workaround for upickle bug causing the following error when using its
   // macroRW method to generate readers and writers for case classes with type parameters:

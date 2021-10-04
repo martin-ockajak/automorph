@@ -47,7 +47,8 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    *
    * @return method proxy
    */
-  def args[T1](p1: (String, T1)): Type = macro NamedProxy.args1Macro[Type, T1]
+  def args[T1](p1: (String, T1)): Type =
+    macro NamedProxy.args1Macro[Type, T1]
 
   /**
    * Creates a copy of this method proxy with specified argument names and values.

@@ -27,15 +27,15 @@ trait MessageCodecSpec extends BaseSpec {
   "" - {
     "Serialize & Deserialize" in {
       check { (node: Node) =>
-        val serializedNode = codec.serialize(node)
-        codec.deserialize(serializedNode).equals(node)
+        val serialized = codec.serialize(node)
+        codec.deserialize(serialized).equals(node)
       }
     }
     "Text" in {
       check { (node: Node) =>
-        val textNode = codec.text(node)
+        val text = codec.text(node)
         val serializedNode = codec.serialize(node)
-        textNode.getBytes(charset).length >= serializedNode.length
+        text.getBytes(charset).length >= serializedNode.length
       }
     }
   }

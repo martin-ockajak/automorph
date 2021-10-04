@@ -24,7 +24,7 @@ trait MessageCodec[Node] extends MessageCodecMeta[Node] {
    * @param node node
    * @return binary data in the specific codec
    */
-  def serialize(message: Node): ArraySeq.ofByte
+  def serialize(node: Node): ArraySeq.ofByte
 
   /**
    * Deserializes a node from binary data.
