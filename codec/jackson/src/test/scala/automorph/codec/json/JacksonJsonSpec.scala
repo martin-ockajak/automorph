@@ -68,7 +68,10 @@ class JacksonJsonSpec extends JsonMessageCodecSpec {
         None,
         Some(automorph.protocol.jsonrpc.MessageError[JsonNode](Some("message"), None, Some(TextNode.valueOf("data"))))
       )
-      println(codec.text(codec.encode(message)))
+      val text = codec.text(codec.encode(message))
+      println(text)
+//      val node = codec.deserialize(automorph.util.Bytes.string.from(text))
+//      println(codec.decode[automorph.protocol.jsonrpc.Message[JsonNode]](node))
     }
   }
 }

@@ -83,7 +83,6 @@ Used to passively receive and reply to requests using specific message transport
 |  | -> | [Vert.X](https://tapir.softwaremill.com/en/latest/server/vertx.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 |  | -> | [ZIO Http](https://tapir.softwaremill.com/en/latest/server/ziohttp.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [JettyEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-jetty_2.13/latest/automorph/transport/http/endpoint/JettyEndpoint.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
-| [FinagleEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-finagle_2.13/latest/automorph/transport/http/endpoint/FinagleEndpoint.html) | [automorph-finagle](https://mvnrepository.com/artifact/org.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 
 ## Message codec
 
