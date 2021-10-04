@@ -22,8 +22,8 @@ object DefaultRpcProtocol:
    */
   def apply(): Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
     // FIXME - remove
-    given Encoder[CirceJsonRpc.Data] = CirceJsonRpc.messageEncoder
-    given Decoder[CirceJsonRpc.Data] = CirceJsonRpc.messageDecoder
+    given Encoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageEncoder
+    given Decoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageDecoder
 
     JsonRpcProtocol(DefaultMessageCodec())
 
