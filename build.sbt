@@ -181,7 +181,7 @@ lazy val upickle = (project in file("codec/upickle")).dependsOn(
 ).settings(
   name := s"$projectName-upickle",
   libraryDependencies ++= Seq(
-    "com.lihaoyi" %% "upickle" % "1.4.1"
+    "com.lihaoyi" %% "upickle" % "1.4.2"
   )
 )
 lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
@@ -197,7 +197,7 @@ lazy val jackson = (project in file("codec/jackson")).dependsOn(
 ).settings(
   name := s"$projectName-jackson",
   libraryDependencies ++= Seq(
-    ("com.fasterxml.jackson.module" % "jackson-module-scala" % "2.12.3").cross(CrossVersion.for3Use2_13)
+    ("com.fasterxml.jackson.module" % "jackson-module-scala" % "2.13.0").cross(CrossVersion.for3Use2_13)
   )
 )
 
@@ -295,7 +295,7 @@ lazy val testPlugin = (project in file("test/plugin")).dependsOn(
   testBase, jsonrpc, restrpc
 ).settings(
   libraryDependencies ++= Seq(
-    "com.fasterxml.jackson.core" % "jackson-databind" % "2.12.5"
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.0"
   )
 )
 lazy val testCore = (project in file("test/core")).dependsOn(
