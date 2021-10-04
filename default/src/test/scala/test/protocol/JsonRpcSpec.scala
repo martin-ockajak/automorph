@@ -22,8 +22,8 @@ class JsonRpcSpec extends BaseSpec {
   )
 
   // FIXME - remove
-  private implicit val messageEncoder: Encoder[CirceJsonRpc.Data] = CirceJsonRpc.messageEncoder
-  private implicit val messageDecoder: Decoder[CirceJsonRpc.Data] = CirceJsonRpc.messageDecoder
+  private implicit val messageEncoder: Encoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageEncoder
+  private implicit val messageDecoder: Decoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageDecoder
 
   "" - {
     "OpenApi" in {
