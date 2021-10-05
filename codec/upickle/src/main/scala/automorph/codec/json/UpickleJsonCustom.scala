@@ -5,7 +5,7 @@ import automorph.codec.UpickleCustom
 /**
  * Basic null-safe data types and RPC protocol message support for uPickle message codec using JSON format.
  */
-trait UpickleCustomJson extends UpickleCustom {
+trait UpickleJsonCustom extends UpickleCustom {
 
   implicit lazy val jsonRpcMessageRw: ReadWriter[UpickleJsonRpc.RpcMessage] =
     UpickleJsonRpc.readWriter(this)
@@ -14,7 +14,7 @@ trait UpickleCustomJson extends UpickleCustom {
     UpickleRestRpc.readWriter(this)
 }
 
-object UpickleCustomJson {
+object UpickleJsonCustom {
   /** Default data types support for uPickle message codec using JSON format. */
-  lazy val default = new UpickleCustomJson {}
+  lazy val default = new UpickleJsonCustom {}
 }

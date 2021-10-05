@@ -1,6 +1,6 @@
 package test.codec.json
 
-import automorph.codec.json.{UpickleCustomJson, UpickleJsonCodec}
+import automorph.codec.json.{UpickleJsonCustom, UpickleJsonCodec}
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
 import test.codec.json.JsonMessageCodecSpec
@@ -38,7 +38,7 @@ class UpickleJsonSpec extends JsonMessageCodecSpec {
   }
 }
 
-object UpickleJsonSpec extends UpickleCustomJson {
+object UpickleJsonSpec extends UpickleJsonCustom {
 
   implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
     value => Enum.toOrdinal(value),

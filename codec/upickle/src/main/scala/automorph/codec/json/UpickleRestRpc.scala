@@ -58,7 +58,7 @@ private[automorph] object UpickleRestRpc {
     )
   }
 
-  def readWriter[Custom <: UpickleCustomJson](custom: Custom): custom.ReadWriter[Message[Value]] = {
+  def readWriter[Custom <: UpickleJsonCustom](custom: Custom): custom.ReadWriter[Message[Value]] = {
     import custom._
     implicit val messageErrorRw: custom.ReadWriter[UpickleMessageError] = custom.macroRW
     implicit val customMessageRw: custom.ReadWriter[UpickleMessage] = custom.macroRW

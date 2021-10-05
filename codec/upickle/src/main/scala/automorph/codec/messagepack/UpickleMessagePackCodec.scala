@@ -12,8 +12,8 @@ import upack.Msg
  * @param custom customized Upickle reader and writer implicits instance
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-final case class UpickleMessagePackCodec[Custom <: UpickleCustomMessagePack](
-  custom: Custom = UpickleCustomMessagePack.default
+final case class UpickleMessagePackCodec[Custom <: UpickleMessagePackCustom](
+  custom: Custom = UpickleMessagePackCustom.default
 ) extends UpickleMessagePackMeta[Custom] {
 
   import custom._

@@ -1,6 +1,6 @@
 package test.codec.messagepack
 
-import automorph.codec.messagepack.{UpickleCustomMessagePack, UpickleMessagePackCodec}
+import automorph.codec.messagepack.{UpickleMessagePackCustom, UpickleMessagePackCodec}
 import org.scalacheck.{Arbitrary, Gen}
 import scala.collection.mutable.LinkedHashMap
 import test.Generators.arbitraryRecord
@@ -40,7 +40,7 @@ class UpickleMessagePackSpec extends MessageCodecSpec {
   }
 }
 
-object UpickleMessagePackSpec extends UpickleCustomMessagePack {
+object UpickleMessagePackSpec extends UpickleMessagePackCustom {
 
   implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
     value => Enum.toOrdinal(value),

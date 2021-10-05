@@ -71,7 +71,7 @@ private[automorph] object UpickleJsonRpc {
     )
   }
 
-  def readWriter[Custom <: UpickleCustomJson](custom: Custom): custom.ReadWriter[Message[Value]] = {
+  def readWriter[Custom <: UpickleJsonCustom](custom: Custom): custom.ReadWriter[Message[Value]] = {
     import custom._
 
     implicit val idRw: ReadWriter[Option[Message.Id]] = readwriter[Value].bimap[Option[Message.Id]](

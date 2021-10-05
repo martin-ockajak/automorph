@@ -12,8 +12,8 @@ import ujson.Value
  * @param custom customized Upickle reader and writer implicits instance
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-final case class UpickleJsonCodec[Custom <: UpickleCustomJson](
-  custom: Custom = UpickleCustomJson.default
+final case class UpickleJsonCodec[Custom <: UpickleJsonCustom](
+  custom: Custom = UpickleJsonCustom.default
 ) extends UpickleJsonMeta[Custom] {
 
   import custom._
