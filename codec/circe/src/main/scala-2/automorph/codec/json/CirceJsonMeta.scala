@@ -26,6 +26,7 @@ private[automorph] object CirceJsonMeta {
 
     c.Expr[Json](q"""
       import io.circe.syntax.EncoderOps
+      import automorph.codec.json.CirceJsonCodec._
       $value.asJson
     """)
   }
@@ -34,6 +35,7 @@ private[automorph] object CirceJsonMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[T](q"""
+      import automorph.codec.json.CirceJsonCodec._
       $node.as[${weakTypeOf[T]}].toTry.get
     """)
   }

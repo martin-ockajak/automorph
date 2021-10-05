@@ -14,10 +14,6 @@ import scala.collection.immutable.ArraySeq
 final case class CirceJsonCodec() extends CirceJsonMeta {
 
   private val charset = StandardCharsets.UTF_8
-  implicit private lazy val jsonRpcMessageEncoder: Encoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageEncoder
-  implicit private lazy val jsonRpcMessageDecoder: Decoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageDecoder
-  implicit private lazy val restRpcMessageEncoder: Encoder[CirceRestRpc.RpcMessage] = CirceRestRpc.messageEncoder
-  implicit private lazy val restRpcMessageDecoder: Decoder[CirceRestRpc.RpcMessage] = CirceRestRpc.messageDecoder
 
   override def mediaType: String = "application/json"
 
@@ -31,6 +27,11 @@ final case class CirceJsonCodec() extends CirceJsonMeta {
 }
 
 object CirceJsonCodec {
+  implicit lazy val jsonRpcMessageEncoder: Encoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageEncoder
+  implicit lazy val jsonRpcMessageDecoder: Decoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageDecoder
+  implicit lazy val restRpcMessageEncoder: Encoder[CirceRestRpc.RpcMessage] = CirceRestRpc.messageEncoder
+  implicit lazy val restRpcMessageDecoder: Decoder[CirceRestRpc.RpcMessage] = CirceRestRpc.messageDecoder
+
   /** Message node type. */
   type Node = Json
 }
