@@ -9,9 +9,9 @@ final case class EmptyContext[T]()
 
 object EmptyContext {
 
-  /** Empty context value type */
+  /** Empty context value type. */
   type Value = EmptyContext[EmptyContext.type]
 
-  /** Implicit empty context value instance */
+  /** Implicit empty context value instance. */
   implicit val value: Value = EmptyContext[EmptyContext.type]()
 }
