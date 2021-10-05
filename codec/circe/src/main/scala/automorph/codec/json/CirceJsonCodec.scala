@@ -13,25 +13,25 @@ import scala.collection.immutable.ArraySeq
  */
 final case class CirceJsonCodec() extends CirceJsonMeta {
 
-  private val charset = StandardCharsets.UTF_8
-
   override def mediaType: String = "application/json"
 
   override def serialize(node: Json): ArraySeq.ofByte =
-    new ArraySeq.ofByte(node.dropNullValues.noSpaces.getBytes(charset))
+    new ArraySeq.ofByte(node.dropNullValues.noSpaces.getBytes(CirceJsonCodec.charset))
 
   override def deserialize(data: ArraySeq.ofByte): Json =
-    parser.decode[Json](new String(data.unsafeArray, charset)).toTry.get
+    parser.decode[Json](new String(data.unsafeArray, CirceJsonCodec.charset)).toTry.get
 
   override def text(node: Json): String = node.dropNullValues.spaces2
 }
 
 object CirceJsonCodec {
+
+  /** Message node type. */
+  type Node = Json
+
   implicit lazy val jsonRpcMessageEncoder: Encoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageEncoder
   implicit lazy val jsonRpcMessageDecoder: Decoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageDecoder
   implicit lazy val restRpcMessageEncoder: Encoder[CirceRestRpc.RpcMessage] = CirceRestRpc.messageEncoder
   implicit lazy val restRpcMessageDecoder: Decoder[CirceRestRpc.RpcMessage] = CirceRestRpc.messageDecoder
-
-  /** Message node type. */
-  type Node = Json
+  private val charset = StandardCharsets.UTF_8
 }
