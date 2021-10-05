@@ -57,21 +57,5 @@ class JacksonJsonSpec extends JsonMessageCodecSpec {
         decoded.equals(record)
       }
     }
-    "Test" in {
-      val message = automorph.protocol.jsonrpc.Message(
-        None,
-        Some(Left[BigDecimal, String](BigDecimal(1.2))),
-        Some("method"),
-        Some(Right[List[JsonNode], Map[String, JsonNode]](Map("arg1" -> IntNode.valueOf(1)))),
-        None,
-        Some(automorph.protocol.jsonrpc.MessageError[JsonNode](Some("message"), None, Some(TextNode.valueOf("data"))))
-      )
-      val text = codec.text(codec.encode(message))
-      println(text)
-      val node = codec.deserialize(automorph.util.Bytes.string.from(text))
-      val decoded = codec.decode[automorph.protocol.jsonrpc.Message[JsonNode]](node)
-      println(decoded)
-      println(codec.text(codec.encode(decoded)))
-    }
   }
 }
