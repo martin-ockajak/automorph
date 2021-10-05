@@ -1,5 +1,6 @@
 package automorph.codec
 
+import automorph.codec.json.{UpickleJsonRpc, UpickleRestRpc}
 import upickle.AttributeTagged
 import upickle.core.{Abort, Util}
 
@@ -123,6 +124,15 @@ trait UpickleCustom extends AttributeTagged {
       Util.parseIntegralNum(s, decIndex, expIndex, index)
     override def visitNull(index: Int) = throw Abort(expectedMsg + " got null")
   }
+
+  implicit lazy val jsonRpcMessageRw: ReadWriter[UpickleJsonRpc.RpcMessage] =
+    UpickleJsonRpc.readWriter(this)
+
+  implicit lazy val restRpcMessageRw: ReadWriter[UpickleRestRpc.RpcMessage] =
+    UpickleRestRpc.readWriter(this)
 }
 
-object DefaultUpickleCustom extends UpickleCustom
+object UpickleCustom {
+  /** Default Upickle reader and writer implicits. */
+  lazy val default = new UpickleCustom {}
+}

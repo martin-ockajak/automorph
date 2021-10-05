@@ -3,7 +3,6 @@ package test.codec.messagepack
 import automorph.codec.UpickleCustom
 import automorph.codec.messagepack.UpickleMessagePackCodec
 import org.scalacheck.{Arbitrary, Gen}
-import scala.annotation.nowarn
 import scala.collection.mutable.LinkedHashMap
 import test.Generators.arbitraryRecord
 import test.codec.MessageCodecSpec
@@ -49,6 +48,5 @@ object UpickleMessagePackSpec extends UpickleCustom {
     number => Enum.fromOrdinal(number)
   )
 
-  @nowarn
   implicit lazy val structureRw: ReadWriter[Structure] = macroRW
 }

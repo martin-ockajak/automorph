@@ -4,10 +4,9 @@ import automorph.codec.UpickleCustom
 import automorph.protocol.restrpc.{Message, MessageError}
 import upack.Msg
 
-/**
- * JSON-RPC protocol support for uPickle message codec plugin using MessagePack format.
- */
+/** JSON-RPC protocol support for uPickle message codec plugin using MessagePack format. */
 private[automorph] object UpickleRestRpc {
+
   type RpcMessage = Message[Msg]
 
   // Workaround for upickle bug causing the following error when using its
@@ -18,7 +17,7 @@ private[automorph] object UpickleRestRpc {
   //    at ujson.ByteParser.tryCloseCollection(ByteParser.scala:496)
   //    at ujson.ByteParser.parseNested(ByteParser.scala:462)
   //    at ujson.ByteParser.parseTopLevel0(ByteParser.scala:323)
-  private[automorph] final case class UpickleMessage(
+  final private[automorph] case class UpickleMessage(
     result: Option[Msg],
     error: Option[UpickleMessageError]
   ) {
@@ -37,7 +36,7 @@ private[automorph] object UpickleRestRpc {
     )
   }
 
-  private[automorph] final case class UpickleMessageError(
+  final private[automorph] case class UpickleMessageError(
     message: Option[String],
     code: Option[Int],
     details: Option[Msg]
