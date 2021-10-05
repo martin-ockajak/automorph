@@ -109,7 +109,7 @@ final case class SttpClient[Effect[_]](
     val properties = context.getOrElse(defaultContext)
     val requestMethod = properties.method.map(Method.unsafeApply).getOrElse(defaultMethod)
     val requestUrl = properties.url.map(Uri(_)).getOrElse(defaultUrl)
-    val httpRequest = basicRequest.method(requestMethod, requestUrl)
+    val httpRequest = properties.source.getOrElse(basicRequest).method(requestMethod, requestUrl)
       .contentType(contentType).header(Header.accept(contentType))
       .followRedirects(properties.followRedirects).readTimeout(properties.readTimeout)
       .headers(properties.headers.map { case (name, value) => Header(name, value) }: _*)
@@ -129,5 +129,5 @@ object SttpClient {
   /** Request context type. */
   type Context = Http[PartialRequest[Either[String, String], Any]]
 
-  implicit val defaultContext: Context = Http()
+  implicit val defaultContext: Context = Http(source = Some(basicRequest))
 }
