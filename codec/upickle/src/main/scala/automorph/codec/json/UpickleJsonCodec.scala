@@ -8,7 +8,7 @@ import ujson.Value
  * uPickle message codec plugin using JSON format.
  *
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
- * @see [[http://com-lihaoyi.github.io/upickle/#uJson Node type]]
+ * @see [[https://com-lihaoyi.github.io/upickle/#uJson Node type]]
  * @constructor Creates an uPickle codec plugin using JSON as message format.
  * @param custom customized Upickle reader and writer implicits instance
  * @tparam Custom customized Upickle reader and writer implicits instance type

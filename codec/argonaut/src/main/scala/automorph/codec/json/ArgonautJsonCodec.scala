@@ -14,21 +14,13 @@ import scala.collection.immutable.ArraySeq
  */
 final case class ArgonautJsonCodec() extends ArgonautJsonMeta {
 
-  private val charset = StandardCharsets.UTF_8
-
-  implicit private lazy val jsonRpcMessageCodecJson: CodecJson[ArgonautJsonRpc.RpcMessage] =
-    ArgonautJsonRpc.messageCodecJson
-
-  implicit private lazy val restRpcMessageCodecJson: CodecJson[ArgonautRestRpc.RpcMessage] =
-    ArgonautRestRpc.messageCodecJson
-
   override def mediaType: String = "application/json"
 
   override def serialize(node: Json): ArraySeq.ofByte =
-    new ArraySeq.ofByte(node.nospaces.getBytes(charset))
+    new ArraySeq.ofByte(node.nospaces.getBytes(ArgonautJsonCodec.charset))
 
   override def deserialize(data: ArraySeq.ofByte): Json =
-    new String(data.unsafeArray, charset).decodeEither[Json].fold(
+    new String(data.unsafeArray, ArgonautJsonCodec.charset).decodeEither[Json].fold(
       errorMessage => throw new IllegalArgumentException(errorMessage),
       identity
     )
@@ -46,4 +38,12 @@ object ArgonautJsonCodec {
     (_: None.type) => jNull,
     cursor => if (cursor.focus.isNull) DecodeResult.ok(None) else DecodeResult.fail("Not a null", cursor.history)
   )
+
+  implicit lazy val jsonRpcMessageCodecJson: CodecJson[ArgonautJsonRpc.RpcMessage] =
+    ArgonautJsonRpc.messageCodecJson
+
+  implicit lazy val restRpcMessageCodecJson: CodecJson[ArgonautRestRpc.RpcMessage] =
+    ArgonautRestRpc.messageCodecJson
+
+  private val charset = StandardCharsets.UTF_8
 }

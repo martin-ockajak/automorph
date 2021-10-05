@@ -22,7 +22,7 @@ private[automorph] object ArgonautJsonMeta {
 
     c.Expr[Json](q"""
       import argonaut.Argonaut.ToJsonIdentity
-      implicit val noneCodecJson: argonaut.CodecJson[None.type] = automorph.codec.json.ArgonautJsonCodec.noneCodecJson
+      import automorph.codec.json.ArgonautJsonCodec._
       $value.asJson
     """)
   }
@@ -32,7 +32,7 @@ private[automorph] object ArgonautJsonMeta {
 
     c.Expr[T](q"""
       import argonaut.Argonaut.ToJsonIdentity
-      implicit val noneCodecJson: argonaut.CodecJson[None.type] = automorph.codec.json.ArgonautJsonCodec.noneCodecJson
+      import automorph.codec.json.ArgonautJsonCodec._
       $node.as[${weakTypeOf[T]}].fold(
         (errorMessage, _) => throw new IllegalArgumentException(errorMessage),
         identity
