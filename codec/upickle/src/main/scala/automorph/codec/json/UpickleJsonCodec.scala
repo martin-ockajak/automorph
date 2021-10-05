@@ -17,6 +17,8 @@ final case class UpickleJsonCodec[Custom <: UpickleCustom](
   custom: Custom = DefaultUpickleCustom
 ) extends UpickleJsonMeta[Custom] {
 
+  import custom._
+
   private val indent = 2
 
   implicit private lazy val jsonRpcMessageRw: custom.ReadWriter[UpickleJsonRpc.RpcMessage] =
