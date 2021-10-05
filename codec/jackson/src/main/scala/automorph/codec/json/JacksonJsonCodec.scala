@@ -3,7 +3,7 @@ package automorph.codec.json
 import com.fasterxml.jackson.core.{JsonGenerator, JsonParseException, JsonParser, TreeNode}
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.node.{NumericNode, ObjectNode}
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, JsonNode, ObjectMapper, SerializerProvider}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
@@ -57,10 +57,30 @@ object JacksonJsonCodec {
     }
   )
 
+  private lazy val bigDecimalModule = new SimpleModule().addSerializer(
+    classOf[BigDecimal],
+    new StdSerializer[BigDecimal](classOf[BigDecimal]) {
+
+      override def serialize(value: BigDecimal, generator: JsonGenerator, provider: SerializerProvider): Unit =
+        generator.writeNumber(value.bigDecimal)
+    }
+  ).addDeserializer(
+    classOf[BigDecimal],
+    new StdDeserializer[BigDecimal](classOf[BigDecimal]) {
+
+      override def deserialize(parser: JsonParser, context: DeserializationContext): BigDecimal =
+        parser.readValueAsTree[TreeNode]() match {
+          case value: NumericNode => BigDecimal(value.decimalValue)
+          case _ => throw new JsonParseException(parser, "Invalid numeric value", parser.getCurrentLocation)
+        }
+    }
+  )
+
   /** Default Jackson object mapper. */
   lazy val defaultMapper: ObjectMapper = (new ObjectMapper() with ClassTagExtensions)
     .registerModule(DefaultScalaModule)
     .registerModule(unitModule)
+    .registerModule(bigDecimalModule)
     .registerModule(JacksonJsonRpc.module)
     .registerModule(JacksonRestRpc.module)
 

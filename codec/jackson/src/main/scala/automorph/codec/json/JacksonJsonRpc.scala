@@ -84,7 +84,6 @@ private[automorph] object JacksonJsonRpc {
                 case value if value.isArray =>
                   val params = value.asInstanceOf[ArrayNode].elements().asScala
                   Some(Left(params.toList))
-
                 case _ => None
               },
               node,
