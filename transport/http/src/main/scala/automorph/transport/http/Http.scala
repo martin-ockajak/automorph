@@ -366,6 +366,15 @@ final case class Http[Source](
 }
 
 object Http {
+  private val exceptionToStatusCode: Map[Class[_], Int] = Map(
+    classOf[ParseErrorException] -> 400,
+    classOf[InvalidRequestException] -> 400,
+    classOf[FunctionNotFoundException] -> 501,
+    classOf[IllegalArgumentException] -> 400,
+    classOf[InternalErrorException] -> 500,
+    classOf[ServerErrorException] -> 500,
+    classOf[IOException] -> 500
+  ).withDefaultValue(500)
 
   /**
    * Maps an exception to a corresponding default HTTP status code.
@@ -373,14 +382,6 @@ object Http {
    * @param exception exception class
    * @return HTTP status code
    */
-  def defaultExceptionToStatusCode(exception: Throwable): Int = exception match {
-    case _: ParseErrorException => 400
-    case _: InvalidRequestException => 400
-    case _: FunctionNotFoundException => 501
-    case _: IllegalArgumentException => 400
-    case _: InternalErrorException => 500
-    case _: ServerErrorException => 500
-    case _: IOException => 500
-    case _ => 500
-  }
+  def defaultExceptionToStatusCode(exception: Throwable): Int =
+    exceptionToStatusCode(exception.getClass)
 }
