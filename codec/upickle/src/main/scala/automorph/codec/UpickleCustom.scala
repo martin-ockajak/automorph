@@ -1,13 +1,10 @@
 package automorph.codec
 
-import automorph.codec.json.{UpickleJsonRpc, UpickleRestRpc}
 import upickle.AttributeTagged
 import upickle.core.{Abort, Util}
 
 /**
- * Customized Upickle reader and writer implicits.
- *
- * Contains null-safe readers and writers for basic data types.
+ * Basic null-safe data types support for uPickle message codec.
  */
 trait UpickleCustom extends AttributeTagged {
 
@@ -124,15 +121,4 @@ trait UpickleCustom extends AttributeTagged {
       Util.parseIntegralNum(s, decIndex, expIndex, index)
     override def visitNull(index: Int) = throw Abort(expectedMsg + " got null")
   }
-
-  implicit lazy val jsonRpcMessageRw: ReadWriter[UpickleJsonRpc.RpcMessage] =
-    UpickleJsonRpc.readWriter(this)
-
-  implicit lazy val restRpcMessageRw: ReadWriter[UpickleRestRpc.RpcMessage] =
-    UpickleRestRpc.readWriter(this)
-}
-
-object UpickleCustom {
-  /** Default Upickle reader and writer implicits. */
-  lazy val default = new UpickleCustom {}
 }

@@ -1,6 +1,6 @@
 package test
 
-import automorph.codec.json.{CirceJsonCodec, CirceJsonRpc}
+import automorph.codec.json.CirceJsonCodec
 import automorph.protocol.JsonRpcProtocol
 import automorph.protocol.jsonrpc.Message
 import automorph.system.IdentitySystem
@@ -15,10 +15,6 @@ class EmptyContextSpec extends BaseSpec {
 
   "" - {
     "Create" in {
-      // FIXME - remove
-      given Encoder[Message[Json]] = CirceJsonRpc.messageEncoder
-      given Decoder[Message[Json]] = CirceJsonRpc.messageDecoder
-
       val codec = CirceJsonCodec()
       val system = IdentitySystem()
       val protocol = JsonRpcProtocol(codec)

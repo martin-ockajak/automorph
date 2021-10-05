@@ -1,12 +1,11 @@
 package automorph.codec.json
 
-import automorph.codec.UpickleCustom
 import automorph.protocol.jsonrpc.{Message, MessageError}
 import ujson.{Arr, Null, Num, Obj, Str, Value}
 import upickle.core.Abort
 
 /**
- * JSON-RPC protocol support for uPickle message codec plugin using JSON format.
+ * JSON-RPC protocol support for uPickle message codec using JSON format.
  */
 private[automorph] object UpickleJsonRpc {
   private[automorph] type RpcMessage = Message[Value]
@@ -72,7 +71,7 @@ private[automorph] object UpickleJsonRpc {
     )
   }
 
-  def readWriter[Custom <: UpickleCustom](custom: Custom): custom.ReadWriter[Message[Value]] = {
+  def readWriter[Custom <: UpickleCustomJson](custom: Custom): custom.ReadWriter[Message[Value]] = {
     import custom._
 
     implicit val idRw: ReadWriter[Option[Message.Id]] = readwriter[Value].bimap[Option[Message.Id]](

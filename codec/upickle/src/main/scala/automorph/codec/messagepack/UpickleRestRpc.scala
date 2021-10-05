@@ -1,10 +1,9 @@
 package automorph.codec.messagepack
 
-import automorph.codec.UpickleCustom
 import automorph.protocol.restrpc.{Message, MessageError}
 import upack.Msg
 
-/** JSON-RPC protocol support for uPickle message codec plugin using MessagePack format. */
+/** JSON-RPC protocol support for uPickle message codec using MessagePack format. */
 private[automorph] object UpickleRestRpc {
 
   type RpcMessage = Message[Msg]
@@ -58,7 +57,7 @@ private[automorph] object UpickleRestRpc {
     )
   }
 
-  def readWriter[Custom <: UpickleCustom](custom: Custom): custom.ReadWriter[Message[Msg]] = {
+  def readWriter[Custom <: UpickleCustomMessagePack](custom: Custom): custom.ReadWriter[Message[Msg]] = {
     import custom._
     implicit val messageErrorRw: custom.ReadWriter[UpickleMessageError] = custom.macroRW
     implicit val customMessageRw: custom.ReadWriter[UpickleMessage] = custom.macroRW

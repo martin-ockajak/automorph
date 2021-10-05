@@ -1,17 +1,14 @@
 package automorph.codec.messagepack
 
-import automorph.codec.UpickleCustom
 import automorph.protocol.jsonrpc.{Message, MessageError}
 import scala.collection.mutable
 import upack.{Arr, Float64, Msg, Null, Obj, Str}
 import upickle.core.Abort
 
 /**
- * JSON-RPC protocol support for uPickle message codec plugin using MessagePack format.
+ * JSON-RPC protocol support for uPickle message codec using MessagePack format.
  */
-object UpickleJsonRpc {
-// FIXME - restore
-// private[automorph] case object UpickleJsonRpc {
+private[automorph] object UpickleJsonRpc {
   private[automorph] type RpcMessage = Message[Msg]
 
   // Workaround for upickle bug causing the following error when using its
@@ -75,7 +72,7 @@ object UpickleJsonRpc {
     )
   }
 
-  def readWriter[Custom <: UpickleCustom](custom: Custom): custom.ReadWriter[Message[Msg]] = {
+  def readWriter[Custom <: UpickleCustomMessagePack](custom: Custom): custom.ReadWriter[Message[Msg]] = {
     import custom._
 
     implicit val idRw: ReadWriter[Option[Message.Id]] = readwriter[Msg].bimap[Option[Message.Id]](

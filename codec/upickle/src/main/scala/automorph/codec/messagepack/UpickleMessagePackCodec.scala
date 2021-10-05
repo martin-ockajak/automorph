@@ -1,6 +1,5 @@
 package automorph.codec.messagepack
 
-import automorph.codec.UpickleCustom
 import scala.collection.immutable.ArraySeq
 import upack.Msg
 
@@ -13,8 +12,8 @@ import upack.Msg
  * @param custom customized Upickle reader and writer implicits instance
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-final case class UpickleMessagePackCodec[Custom <: UpickleCustom](
-  custom: Custom = UpickleCustom.default
+final case class UpickleMessagePackCodec[Custom <: UpickleCustomMessagePack](
+  custom: Custom = UpickleCustomMessagePack.default
 ) extends UpickleMessagePackMeta[Custom] {
 
   import custom._
