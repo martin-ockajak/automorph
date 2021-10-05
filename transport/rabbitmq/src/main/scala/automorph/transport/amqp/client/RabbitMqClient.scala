@@ -124,7 +124,7 @@ final case class RabbitMqClient[Effect[_]](
 
   private def createProperties(mediaType: String, context: Option[Context]): BasicProperties = {
     val properties = context.getOrElse(defaultContext)
-    new BasicProperties().builder()
+    properties.source.getOrElse(new BasicProperties).builder()
       .replyTo(properties.replyTo.getOrElse(directReplyToQueue))
       .correlationId(properties.correlationId.getOrElse(Math.abs(random.nextLong()).toString))
       .contentType(properties.contentType.getOrElse(mediaType))
@@ -184,7 +184,7 @@ object RabbitMqClient {
   /** Request context type. */
   type Context = Amqp[BasicProperties]
 
-  implicit val defaultContext: Context = Amqp()
+  implicit val defaultContext: Context = Amqp(source = Some(new BasicProperties))
 
   /**
    * Creates asynchronous RabbitMQ client transport plugin.
