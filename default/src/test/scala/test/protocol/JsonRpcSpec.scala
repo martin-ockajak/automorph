@@ -1,7 +1,6 @@
 package automorph.protocol
 
 import automorph.DefaultMessageCodec
-import automorph.codec.json.CirceJsonRpc
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import io.circe.{Decoder, Encoder}
 import test.base.BaseSpec
@@ -20,10 +19,6 @@ class JsonRpcSpec extends BaseSpec {
       Some("Testing function")
     )
   )
-
-  // FIXME - remove
-  private implicit val messageEncoder: Encoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageEncoder
-  private implicit val messageDecoder: Decoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageDecoder
 
   "" - {
     "OpenApi" in {
