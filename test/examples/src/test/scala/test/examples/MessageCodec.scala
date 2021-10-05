@@ -19,10 +19,6 @@ object MessageCodec extends App {
   val codec = UpickleMessagePackCodec()
   implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
 
-  // FIXME - remove
-  implicit val readWriter: codec.custom.ReadWriter[automorph.protocol.jsonrpc.Message[upack.Msg]] =
-    automorph.codec.messagepack.UpickleJsonRpc.readWriter(codec.custom)
-
   // Create an effect system plugin
   val system = DefaultEffectSystem.async
 
