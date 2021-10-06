@@ -10,6 +10,8 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.ClassTagExtensions
 import scala.collection.immutable.ArraySeq
 import scala.runtime.BoxedUnit
+import automorph.util.Extensions.TryOps
+import scala.util.Try
 
 /**
  * Jackson message codec plugin using JSON format.
@@ -70,7 +72,9 @@ object JacksonJsonCodec {
 
       override def deserialize(parser: JsonParser, context: DeserializationContext): BigDecimal =
         parser.readValueAsTree[TreeNode]() match {
-          case value: NumericNode => BigDecimal(value.decimalValue)
+          case value: NumericNode => Try(BigDecimal(value.decimalValue)).mapFailure(
+            error => new JsonParseException(parser, "Invalid numeric value", parser.getCurrentLocation, error),
+          ).get
           case _ => throw new JsonParseException(parser, "Invalid numeric value", parser.getCurrentLocation)
         }
     }
