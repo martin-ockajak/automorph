@@ -17,6 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.jdk.CollectionConverters.MapHasAsJava
+import scala.jdk.CollectionConverters.MapHasAsScala
 import scala.util.{Random, Try, Using}
 
 /**
@@ -62,9 +63,9 @@ final case class RabbitMqClient[Effect[_]](
     mediaType: String,
     context: Option[Context]
   ): Effect[ArraySeq.ofByte] = {
-    val properties = createProperties(mediaType, context)
+    val amqpProperties = createProperties(mediaType, context)
     val (result, complete) = promisedEffect()
-    system.flatMap(send(request, properties, Some(complete)), _ => result)
+    system.flatMap(send(request, amqpProperties, Some(complete)), _ => result)
   }
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
@@ -78,7 +79,7 @@ final case class RabbitMqClient[Effect[_]](
 
   private def send(
     request: ArraySeq.ofByte,
-    properties: BasicProperties,
+    amqpProperties: BasicProperties,
     complete: Option[ArraySeq.ofByte => Unit]
   ): Effect[Unit] = {
     logger.trace(
@@ -86,58 +87,61 @@ final case class RabbitMqClient[Effect[_]](
       Map(
         "URL" -> url,
         "Routing key" -> routingKey,
-        "Correlation ID" -> properties.getCorrelationId,
+        "Correlation ID" -> amqpProperties.getCorrelationId,
         "Size" -> request.length
       )
     )
     val consumer = threadConsumer.get
 
     // Retain result promise if available
-    complete.foreach(deliveryHandlers.put(properties.getCorrelationId, _))
+    complete.foreach(deliveryHandlers.put(amqpProperties.getCorrelationId, _))
 
     // Send the request
-    blockingEffect(() => Try {
-      consumer.getChannel.basicPublish(exchange, routingKey, true, false, properties, request.unsafeArray)
-      logger.debug(
-        "Sent AMQP request",
-        Map(
-          "URL" -> url,
-          "Routing key" -> routingKey,
-          "Correlation ID" -> properties.getCorrelationId,
-          "Size" -> request.length
+    blockingEffect(() =>
+      Try {
+        consumer.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, request.unsafeArray)
+        logger.debug(
+          "Sent AMQP request",
+          Map(
+            "URL" -> url,
+            "Routing key" -> routingKey,
+            "Correlation ID" -> amqpProperties.getCorrelationId,
+            "Size" -> request.length
+          )
         )
-      )
-    }.mapFailure { error =>
-      logger.error(
-        "Failed to send AMQP request",
-        error,
-        Map(
-          "URL" -> url,
-          "Routing key" -> routingKey,
-          "Correlation ID" -> properties.getCorrelationId,
-          "Size" -> request.length
+      }.mapFailure { error =>
+        logger.error(
+          "Failed to send AMQP request",
+          error,
+          Map(
+            "URL" -> url,
+            "Routing key" -> routingKey,
+            "Correlation ID" -> amqpProperties.getCorrelationId,
+            "Size" -> request.length
+          )
         )
-      )
-      error
-    }.get)
+        error
+      }.get
+    )
   }
 
   private def createProperties(mediaType: String, context: Option[Context]): BasicProperties = {
-    val properties = context.getOrElse(defaultContext)
-    properties.source.getOrElse(new BasicProperties).builder()
-      .replyTo(properties.replyTo.getOrElse(directReplyToQueue))
-      .correlationId(properties.correlationId.getOrElse(Math.abs(random.nextLong()).toString))
-      .contentType(properties.contentType.getOrElse(mediaType))
-      .appId(properties.appId.getOrElse(clientId))
-      .contentEncoding(properties.contentEncoding.orNull)
-      .headers(properties.headers.asJava)
-      .deliveryMode(properties.deliveryMode.map(new Integer(_)).orNull)
-      .priority(properties.priority.map(new Integer(_)).orNull)
-      .expiration(properties.expiration.orNull)
-      .messageId(properties.messageId.orNull)
-      .timestamp(properties.timestamp.map(Date.from).orNull)
-      .`type`(properties.`type`.orNull)
-      .userId(properties.userId.orNull)
+    val amqp = context.getOrElse(defaultContext)
+    val default = amqp.base.getOrElse(new BasicProperties())
+    (new BasicProperties()).builder()
+      .replyTo(amqp.replyTo.orElse(Option(default.getReplyTo)).getOrElse(directReplyToQueue))
+      .correlationId(amqp.correlationId.orElse(Option(default.getCorrelationId)).getOrElse(Math.abs(random.nextLong()).toString))
+      .contentType(amqp.contentType.getOrElse(mediaType))
+      .contentEncoding(amqp.contentEncoding.orElse(Option(default.getContentEncoding)).orNull)
+      .appId(amqp.appId.orElse(Option(default.getAppId)).getOrElse(clientId))
+      .headers((amqp.headers ++ default.getHeaders.asScala).asJava)
+      .deliveryMode(amqp.deliveryMode.map(new Integer(_)).orElse(Option(default.getDeliveryMode)).orNull)
+      .priority(amqp.priority.map(new Integer(_)).orElse(Option(default.getPriority)).orNull)
+      .expiration(amqp.expiration.orElse(Option(default.getExpiration)).orNull)
+      .messageId(amqp.messageId.orElse(Option(default.getMessageId)).orNull)
+      .timestamp(amqp.timestamp.map(Date.from).orElse(Option(default.getTimestamp)).orNull)
+      .`type`(amqp.`type`.orElse(Option(default.getType)).orNull)
+      .userId(amqp.userId.orElse(Option(default.getUserId)).orNull)
       .build
   }
 
@@ -184,7 +188,7 @@ object RabbitMqClient {
   /** Request context type. */
   type Context = Amqp[BasicProperties]
 
-  implicit val defaultContext: Context = Amqp(source = Some(new BasicProperties))
+  implicit val defaultContext: Context = Amqp()
 
   /**
    * Creates asynchronous RabbitMQ client transport plugin.

@@ -87,19 +87,19 @@ private[automorph] object RabbitMqCommon extends Logging {
    */
   def context(properties: BasicProperties): Amqp[BasicProperties] =
     Amqp(
-      Some(properties),
-      Option(properties.getContentType),
-      Option(properties.getContentEncoding),
-      Option(properties.getHeaders).map(headers => Map.from(headers.asScala)).getOrElse(Map.empty),
-      Option(properties.getDeliveryMode),
-      Option(properties.getPriority),
-      Option(properties.getCorrelationId),
-      Option(properties.getReplyTo),
-      Option(properties.getExpiration),
-      Option(properties.getMessageId),
-      Option(properties.getTimestamp).map(_.toInstant),
-      Option(properties.getType),
-      Option(properties.getUserId),
-      Option(properties.getAppId)
+      contentType = Option(properties.getContentType),
+      contentEncoding = Option(properties.getContentEncoding),
+      headers = Option(properties.getHeaders).map(headers => Map.from(headers.asScala)).getOrElse(Map.empty),
+      deliveryMode = Option(properties.getDeliveryMode),
+      priority = Option(properties.getPriority),
+      correlationId = Option(properties.getCorrelationId),
+      replyTo = Option(properties.getReplyTo),
+      expiration = Option(properties.getExpiration),
+      messageId = Option(properties.getMessageId),
+      timestamp = Option(properties.getTimestamp).map(_.toInstant),
+      `type` = Option(properties.getType),
+      userId = Option(properties.getUserId),
+      appId = Option(properties.getAppId),
+      base = Some(properties)
     )
 }

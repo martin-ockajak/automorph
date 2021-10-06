@@ -40,7 +40,7 @@ final case class SttpClient[Effect[_]](
   private val protocol = if (webSocket) "WebSocket" else "HTTP"
 
   override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
-    val httpRequest = createHttpRequest(request, mediaType, context)
+    val httpRequest = createRequest(request, mediaType, context)
     system.flatMap(
       system.either(send(httpRequest, request)),
       (response: Either[Throwable, Response[Array[Byte]]]) =>
@@ -61,7 +61,7 @@ final case class SttpClient[Effect[_]](
   }
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
-    val httpRequest = createHttpRequest(request, mediaType, context).response(ignore)
+    val httpRequest = createRequest(request, mediaType, context).response(ignore)
     system.map(send(httpRequest, request), (_: Response[Unit]) => ())
   }
 
@@ -100,19 +100,24 @@ final case class SttpClient[Effect[_]](
   private def sendWebSocket(request: ArraySeq.ofByte): sttp.ws.WebSocket[Effect] => Effect[Array[Byte]] =
     webSocket => system.flatMap(webSocket.sendBinary(request.unsafeArray), (_: Unit) => webSocket.receiveBinary(true))
 
-  private def createHttpRequest(
+  private def createRequest(
     request: ArraySeq.ofByte,
     mediaType: String,
     context: Option[Context]
   ): Request[Array[Byte], WebSocket[Effect]] = {
+    val http = context.getOrElse(defaultContext)
+    val default = http.base.getOrElse(basicRequest)
+    val requestMethod = http.method.map(Method.unsafeApply).getOrElse(defaultMethod)
+    val requestUrl = http.url.map(Uri(_)).getOrElse(defaultUrl)
     val contentType = MediaType.unsafeParse(mediaType)
-    val properties = context.getOrElse(defaultContext)
-    val requestMethod = properties.method.map(Method.unsafeApply).getOrElse(defaultMethod)
-    val requestUrl = properties.url.map(Uri(_)).getOrElse(defaultUrl)
-    val httpRequest = properties.source.getOrElse(basicRequest).method(requestMethod, requestUrl)
-      .contentType(contentType).header(Header.accept(contentType))
-      .followRedirects(properties.followRedirects).readTimeout(properties.readTimeout)
-      .headers(properties.headers.map { case (name, value) => Header(name, value) }: _*)
+    val headers = default.headers ++ http.headers.map { case (name, value) => Header(name, value) }
+    val httpRequest = default.method(requestMethod, requestUrl)
+      .contentType(contentType)
+      .header(Header.accept(contentType))
+      .followRedirects(http.followRedirects.getOrElse(default.options.followRedirects))
+      .readTimeout(http.readTimeout.getOrElse(default.options.readTimeout))
+      .headers(headers: _*)
+      .maxRedirects(default.options.maxRedirects)
     if (webSocket) {
       httpRequest.response(asWebSocketAlways(sendWebSocket(request)))
     } else {
@@ -129,5 +134,5 @@ object SttpClient {
   /** Request context type. */
   type Context = Http[PartialRequest[Either[String, String], Any]]
 
-  implicit val defaultContext: Context = Http(source = Some(basicRequest))
+  implicit val defaultContext: Context = Http()
 }

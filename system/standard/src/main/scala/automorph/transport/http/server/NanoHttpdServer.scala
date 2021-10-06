@@ -100,7 +100,7 @@ final case class NanoHttpdServer[Effect[_]] private (
 
   private def createContext(session: IHTTPSession): Context = {
     Http(
-      source = Some(session),
+      base = Some(session),
       method = Some(session.getMethod.name),
       headers = session.getHeaders.asScala.toSeq
     ).url(session.getUri)

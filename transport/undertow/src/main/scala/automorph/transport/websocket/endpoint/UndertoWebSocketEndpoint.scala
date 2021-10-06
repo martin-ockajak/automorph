@@ -149,7 +149,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
           values.map(value => name -> value)
         }.toSeq
         Http(
-          source = Some(Right(exchange).withLeft[HttpServerExchange]),
+          base = Some(Right(exchange).withLeft[HttpServerExchange]),
           headers = headers
         ).url(exchange.getRequestURI)
       }

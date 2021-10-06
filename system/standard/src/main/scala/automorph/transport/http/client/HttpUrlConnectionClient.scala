@@ -9,7 +9,8 @@ import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.{HttpURLConnection, URI}
 import scala.collection.immutable.ArraySeq
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.util.{Try, Using}
 
 /**
@@ -59,19 +60,19 @@ final case class HttpUrlConnectionClient[Effect[_]](
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] =
     system.map(send(request, mediaType, context), (_: (HttpURLConnection, ArraySeq.ofByte)) => ())
 
-  override def defaultContext: Context = HttpUrlConnectionClient.defaultContext.copy(method = Some(method))
+  override def defaultContext: Context = HttpUrlConnectionClient.defaultContext
 
   override def close(): Effect[Unit] = system.pure(())
 
   private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[EffectValue] =
     system.wrap {
       logger.trace("Sending HTTP request", Map("URL" -> url, "Size" -> request.length))
-      val properties = context.getOrElse(defaultContext)
-      val connection = connect(properties)
-      val httpMethod = setProperties(connection, request, mediaType, properties)
+      val http = context.getOrElse(defaultContext)
+      val connection = connect(http)
+      val httpMethod = setRequestProperties(connection, request, mediaType, http)
       val outputStream = connection.getOutputStream
       val write = Using(outputStream)(_.write(request.unsafeArray))
-      clearProperties(connection, properties)
+      clearRequestProperties(connection, http)
       write.mapFailure { error =>
         logger.error(
           "Failed to send HTTP request",
@@ -84,41 +85,47 @@ final case class HttpUrlConnectionClient[Effect[_]](
       connection -> new ArraySeq.ofByte(Array.empty)
     }
 
-  private def setProperties(
+  private def setRequestProperties(
     connection: HttpURLConnection,
     request: ArraySeq.ofByte,
     mediaType: String,
-    properties: Context
+    http: Context
   ): String = {
-    val httpMethod = properties.method.getOrElse(method)
+    val default = http.base.getOrElse(connection)
+    val httpMethod = http.method.orElse(http.base.map(_.getRequestMethod)).getOrElse(method)
     require(httpMethods.contains(httpMethod), s"Invalid HTTP method: $httpMethod")
     connection.setRequestMethod(httpMethod)
-    connection.setConnectTimeout(properties.readTimeout.toMillis.toInt)
-    connection.setReadTimeout(properties.readTimeout match {
+    connection.setInstanceFollowRedirects(http.followRedirects.getOrElse(default.getInstanceFollowRedirects))
+    connection.setConnectTimeout(http.readTimeout.map(_.toMillis.toInt).getOrElse(default.getConnectTimeout))
+    connection.setReadTimeout(http.readTimeout.map {
       case Duration.Inf => 0
       case duration => duration.toMillis.toInt
-    })
+    }.getOrElse(default.getReadTimeout))
     connection.setRequestProperty(contentLengthHeader, request.size.toString)
     connection.setRequestProperty(contentTypeHeader, mediaType)
     connection.setRequestProperty(acceptHeader, mediaType)
-    properties.path.getOrElse(url.getPath)
-    properties.headers.foreach { case (key, value) =>
-      connection.setRequestProperty(key, value)
+    (connectionHeaders(default) ++ http.headers).foreach { case (name, value) =>
+      connection.setRequestProperty(name, value)
     }
     httpMethod
   }
 
-  private def clearProperties(connection: HttpURLConnection, properties: Context): Unit =
-    properties.headers.foreach { case (key, _) =>
-      connection.setRequestProperty(key, null)
+  private def clearRequestProperties(connection: HttpURLConnection, http: Context): Unit =
+    (connectionHeaders(connection) ++ http.headers).foreach { case (name, _) =>
+      connection.setRequestProperty(name, null)
     }
 
-  private def connect(properties: Context): HttpURLConnection = {
-    val connectionUrl = properties.url.getOrElse(url)
+  private def connect(http: Context): HttpURLConnection = {
+    val connectionUrl = http.url.orElse(http.base.map(_.getURL.toURI)).getOrElse(url)
     val connection = connectionUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
     connection.setDoOutput(true)
     connection
   }
+
+  private def connectionHeaders(connection: HttpURLConnection): Seq[(String, String)] =
+    connection.getRequestProperties.asScala.toSeq.flatMap { case (name, values) =>
+      values.asScala.map(name -> _)
+    }
 }
 
 object HttpUrlConnectionClient {

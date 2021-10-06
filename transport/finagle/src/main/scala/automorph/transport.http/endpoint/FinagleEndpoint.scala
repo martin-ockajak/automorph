@@ -81,7 +81,7 @@ final case class FinagleEndpoint[Effect[_]](
   }
 
   private def createContext(request: Request): Context = Http(
-    source = Some(request),
+    base = Some(request),
     method = Some(request.method.name),
     headers = request.headerMap.iterator.toSeq
   ).url(request.uri)

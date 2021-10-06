@@ -5,8 +5,12 @@ import java.time.Instant
 /**
  * AMQP message properties.
  *
- * @see [[https://www.rabbitmq.com/resources/specs/amqp-xml-doc0-9-1.pdf AMQP specification]]
- * @param source source properties provided by the specific message transport plugin
+ * Message transport plugins must set message properties based on their origin in the descending order of priority:
+ * - This class
+ * - Base
+ * - Defaults
+ *
+ * @see [[https://www.rabbitmq.com/rebases/specs/amqp-xml-doc0-9-1.pdf AMQP specification]]
  * @param contentType MIME content type
  * @param contentEncoding MIME content encoding
  * @param headers message headers
@@ -20,10 +24,10 @@ import java.time.Instant
  * @param `type` message type name
  * @param userId creating user identifier
  * @param appId creating application identifier
- * @tparam Source specific message transport plugin source properties type
+ * @param base base properties defined by the specific message transport plugin
+ * @tparam Base specific message transport plugin base properties type
  */
-final case class Amqp[Source](
-  source: Option[Source] = None,
+final case class Amqp[Base](
   contentType: Option[String] = None,
   contentEncoding: Option[String] = None,
   headers: Map[String, Any] = Map.empty,
@@ -36,5 +40,6 @@ final case class Amqp[Source](
   timestamp: Option[Instant] = None,
   `type`: Option[String] = None,
   userId: Option[String] = None,
-  appId: Option[String] = None
+  appId: Option[String] = None,
+  base: Option[Base] = None
 )

@@ -80,7 +80,7 @@ final case class JettyEndpoint[Effect[_]](
       request.getHeaders(name).asScala.map(value => name -> value)
     }.toSeq
     Http(
-      source = Some(request),
+      base = Some(request),
       method = Some(request.getMethod),
       headers = headers
     ).url(request.getRequestURI)
