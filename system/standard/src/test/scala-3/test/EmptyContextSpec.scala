@@ -19,7 +19,7 @@ class EmptyContextSpec extends BaseSpec {
       val system = IdentitySystem()
       val protocol = JsonRpcProtocol(codec)
       val handler = Handler.withoutContext(codec, system, protocol)
-      val handlerTransport = HandlerTransport(handler, system, EmptyContext.value)
+      val handlerTransport = HandlerTransport(handler, system, EmptyContext.default)
       val client = Client.withoutContext(codec, system, handlerTransport, protocol)
       client
     }

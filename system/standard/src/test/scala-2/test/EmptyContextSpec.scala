@@ -15,7 +15,7 @@ class EmptyContextSpec extends BaseSpec {
       val codec = CirceJsonCodec()
       val system = IdentitySystem()
       val handler = Handler.withoutContext[Value, codec.type, Identity](codec, system)
-      val handlerTransport = HandlerTransport(handler, system, EmptyContext.value)
+      val handlerTransport = HandlerTransport(handler, system, EmptyContext.default)
       val client = Client.withoutContext[Value, codec.type, Identity](codec, system, handlerTransport)
       client
     }

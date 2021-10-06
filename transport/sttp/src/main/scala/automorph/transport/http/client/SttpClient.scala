@@ -9,7 +9,7 @@ import automorph.util.Bytes
 import java.net.URI
 import scala.collection.immutable.ArraySeq
 import sttp.capabilities.WebSockets
-import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
+import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
@@ -65,7 +65,7 @@ final case class SttpClient[Effect[_]](
     system.map(send(httpRequest, request), (_: Response[Unit]) => ())
   }
 
-  override def defaultContext: Context = SttpClient.defaultContext
+  override def defaultContext: Context = SttpContext.default
 
   override def close(): Effect[Unit] = backend.close()
 
@@ -106,7 +106,7 @@ final case class SttpClient[Effect[_]](
     context: Option[Context]
   ): Request[Array[Byte], WebSocket[Effect]] = {
     val http = context.getOrElse(defaultContext)
-    val default = http.base.getOrElse(basicRequest)
+    val default = http.base.map(_.request).getOrElse(basicRequest)
     val requestMethod = http.method.map(Method.unsafeApply).getOrElse(defaultMethod)
     val requestUrl = http.url.map(Uri(_)).getOrElse(defaultUrl)
     val contentType = MediaType.unsafeParse(mediaType)
@@ -132,7 +132,12 @@ object SttpClient {
   type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
 
   /** Request context type. */
-  type Context = Http[PartialRequest[Either[String, String], Any]]
+  type Context = Http[SttpContext]
+}
 
-  implicit val defaultContext: Context = Http()
+final case class SttpContext(request: PartialRequest[Either[String, String], Any])
+
+object SttpContext {
+  /** Implicit default context value. */
+  implicit val default: Context = Http()
 }

@@ -73,7 +73,7 @@ final case class RabbitMqClient[Effect[_]](
     send(request, properties, None)
   }
 
-  override def defaultContext: Context = RabbitMqClient.defaultContext
+  override def defaultContext: Context = RabbitMqContext.default
 
   override def close(): Effect[Unit] = system.wrap(RabbitMqCommon.disconnect(connection))
 
@@ -127,7 +127,7 @@ final case class RabbitMqClient[Effect[_]](
 
   private def createProperties(mediaType: String, context: Option[Context]): BasicProperties = {
     val amqp = context.getOrElse(defaultContext)
-    val default = amqp.base.getOrElse(new BasicProperties())
+    val default = amqp.base.map(_.properties).getOrElse(new BasicProperties())
     (new BasicProperties()).builder()
       .replyTo(amqp.replyTo.orElse(Option(default.getReplyTo)).getOrElse(directReplyToQueue))
       .correlationId(amqp.correlationId.orElse(Option(default.getCorrelationId)).getOrElse(Math.abs(random.nextLong()).toString))
@@ -186,9 +186,7 @@ final case class RabbitMqClient[Effect[_]](
 object RabbitMqClient {
 
   /** Request context type. */
-  type Context = Amqp[BasicProperties]
-
-  implicit val defaultContext: Context = Amqp()
+  type Context = Amqp[RabbitMqContext]
 
   /**
    * Creates asynchronous RabbitMQ client transport plugin.
@@ -225,4 +223,11 @@ object RabbitMqClient {
       connectionFactory
     )
   }
+}
+
+final case class RabbitMqContext(properties: BasicProperties)
+
+object RabbitMqContext {
+  /** Implicit default context value. */
+  implicit val default: Context = Amqp()
 }

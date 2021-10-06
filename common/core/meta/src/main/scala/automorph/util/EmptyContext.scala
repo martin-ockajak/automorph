@@ -12,6 +12,6 @@ object EmptyContext {
   /** Empty context value type. */
   type Value = EmptyContext[EmptyContext.type]
 
-  /** Implicit empty context value instance. */
-  implicit val value: Value = EmptyContext[EmptyContext.type]()
+  /** Implicit default empty context value. */
+  implicit val default: Value = EmptyContext[EmptyContext.type]()
 }

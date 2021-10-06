@@ -7,9 +7,6 @@ import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-// FIXME - remove
-import automorph.transport.http.client.SttpClient.defaultContext
-
 object ErrorMapping extends App {
 
   // Define an API type and create API instance

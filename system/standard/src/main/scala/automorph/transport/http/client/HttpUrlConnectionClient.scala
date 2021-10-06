@@ -60,7 +60,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] =
     system.map(send(request, mediaType, context), (_: (HttpURLConnection, ArraySeq.ofByte)) => ())
 
-  override def defaultContext: Context = HttpUrlConnectionClient.defaultContext
+  override def defaultContext: Context = HttpUrlConnectionContext.default
 
   override def close(): Effect[Unit] = system.pure(())
 
@@ -91,8 +91,8 @@ final case class HttpUrlConnectionClient[Effect[_]](
     mediaType: String,
     http: Context
   ): String = {
-    val default = http.base.getOrElse(connection)
-    val httpMethod = http.method.orElse(http.base.map(_.getRequestMethod)).getOrElse(method)
+    val default = http.base.map(_.connection).getOrElse(connection)
+    val httpMethod = http.method.orElse(http.base.map(_.connection.getRequestMethod)).getOrElse(method)
     require(httpMethods.contains(httpMethod), s"Invalid HTTP method: $httpMethod")
     connection.setRequestMethod(httpMethod)
     connection.setInstanceFollowRedirects(http.followRedirects.getOrElse(default.getInstanceFollowRedirects))
@@ -116,7 +116,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
     }
 
   private def connect(http: Context): HttpURLConnection = {
-    val connectionUrl = http.url.orElse(http.base.map(_.getURL.toURI)).getOrElse(url)
+    val connectionUrl = http.url.orElse(http.base.map(_.connection.getURL.toURI)).getOrElse(url)
     val connection = connectionUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
     connection.setDoOutput(true)
     connection
@@ -131,10 +131,15 @@ final case class HttpUrlConnectionClient[Effect[_]](
 object HttpUrlConnectionClient {
 
   /** Request context type. */
-  type Context = Http[HttpURLConnection]
+  type Context = Http[HttpUrlConnectionContext]
 
   /** Effect value type. */
-  type EffectValue = (HttpURLConnection, ArraySeq.ofByte)
+  private[automorph] type EffectValue = (HttpURLConnection, ArraySeq.ofByte)
+}
 
-  implicit val defaultContext: Context = Http()
+final case class HttpUrlConnectionContext(connection: HttpURLConnection)
+
+object HttpUrlConnectionContext {
+  /** Implicit default context value. */
+  implicit val default: Context = Http()
 }

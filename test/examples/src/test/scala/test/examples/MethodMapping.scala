@@ -1,8 +1,5 @@
 package test.examples
 
-// FIXME - remove
-import automorph.transport.http.client.SttpClient.defaultContext
-
 object MethodMapping extends App {
 
   // Define an API type and create API instance
