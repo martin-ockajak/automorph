@@ -110,12 +110,12 @@ private[automorph] object HandlerGenerator:
         // Create the method argument lists by decoding corresponding argument nodes into values
         //   List(List(
         //     (Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
-        //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
+        //       case Failure(error) => Failure(InvalidRequestException("Malformed argument number " + ${ Expr(argumentIndex) }, error))
         //       case result => result
         //     }).get
         //     ...
         //     (Try(codec.decode[ParameterNType](argumentNodes(N))) match {
-        //       case Failure(error) => Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
+        //       case Failure(error) => Failure(InvalidRequestException("Malformed argument number " + ${ Expr(argumentIndex) }, error))
         //       case result => result
         //     }).get
         //   )): List[List[ParameterXType]]
@@ -138,7 +138,7 @@ private[automorph] object HandlerGenerator:
                 case '[argumentType] => '{
                     (Try(${ decodeCall.asExprOf[argumentType] }) match
                       case Failure(error) =>
-                        Failure(InvalidRequestException("Invalid argument: " + ${ Expr(argumentIndex) }, error))
+                        Failure(InvalidRequestException("Malformed argument number " + ${ Expr(argumentIndex) }, error))
                       case result => result
                     ).get
                   }.asTerm
