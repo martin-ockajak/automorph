@@ -107,6 +107,7 @@ object BrokenHandlerGenerator {
       //   )): List[List[ParameterXType]]
       val arguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
         parameters.toList.zipWithIndex.map { case (parameter, index) =>
+          // Decode supplied argument node into a value
           val argumentIndex = offset + index
           val decode = q"""
             $codec.decode[${parameter.dataType}](argumentNodes($argumentIndex))

@@ -135,17 +135,21 @@ object HandlerGenerator {
         parameters.toList.zipWithIndex.map { case (parameter, index) =>
           val argumentIndex = offset + index
           if (argumentIndex == lastArgumentIndex && MethodReflection.usesContext[C, Context](ref)(method)) {
+            // Use supplied context as a last argument if the method accepts context as its last parameter
             q"context"
           } else {
             if (argumentIndex > lastArgumentIndex) {
               if MethodReflection.typeConstructor(ref.c)(parameter.dataType) =:= typeOf[Option] {
+                // Use None if an optional argument is missing
                 q"None"
               } else {
+                // Raise error if a mandatory argument is missing
                 q"""
                   throw InvalidRequestException("Missing argument: " + ${parameter.name})
                 """
               }
             } else {
+              // Decode an argument node into a value
               q"""
                 (scala.util.Try($codec.decode[${parameter.dataType}](argumentNodes($argumentIndex))) match {
                   case scala.util.Failure(error) => scala.util.Failure(

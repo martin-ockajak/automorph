@@ -123,13 +123,17 @@ private[automorph] object HandlerGenerator:
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentIndex = offset + index
             if argumentIndex == lastArgumentIndex && MethodReflection.usesContext[Context](ref)(method) then
+              // Use supplied context as a last argument if the method accepts context as its last parameter
               'context.asTerm
             else if argumentIndex > lastArgumentIndex then
               if MethodReflection.typeConstructor(ref.q)(parameter.dataType) =:= TypeRepr.of[Option] then
+                // Use None if an optional argument is missing
                 'None
               else
+                // Raise error if a mandatory argument is missing
                 '{ throw InvalidRequestException("Missing argument: " + ${ Expr(parameter.name) }) }
             else
+              // Decode supplied argument node into a value
               val decodeArguments = List(List('{ argumentNodes(${ Expr(argumentIndex) }) }.asTerm))
               val decodeCall = MethodReflection.call(
                 ref.q,
