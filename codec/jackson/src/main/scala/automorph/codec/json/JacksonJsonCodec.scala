@@ -5,12 +5,14 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.{NumericNode, ObjectNode}
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.fasterxml.jackson.databind.{DeserializationContext, JsonNode, ObjectMapper, SerializerProvider}
+import com.fasterxml.jackson.databind.{DeserializationContext, DeserializationFeature, JsonNode, ObjectMapper, SerializationConfig, SerializationFeature, SerializerProvider}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.ClassTagExtensions
 import scala.collection.immutable.ArraySeq
 import scala.runtime.BoxedUnit
 import automorph.util.Extensions.TryOps
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonInclude.Include
 import scala.util.Try
 
 /**
@@ -87,6 +89,10 @@ object JacksonJsonCodec {
     .registerModule(bigDecimalModule)
     .registerModule(JacksonJsonRpc.module)
     .registerModule(JacksonRestRpc.module)
+    .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
+    .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
+    .setSerializationInclusion(Include.NON_ABSENT)
+    .setDefaultLeniency(false)
 
   /** Message node type. */
   type Node = JsonNode

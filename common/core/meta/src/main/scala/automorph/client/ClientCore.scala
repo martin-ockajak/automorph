@@ -153,7 +153,7 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
           // Decode result
           result =>
             Try(decodeResult(result)).pureFold(
-              error => raiseError(InvalidResponseException("Invalid result", error), properties),
+              error => raiseError(InvalidResponseException("Malformed result", error), properties),
               result => {
                 logger.info(s"Performed ${protocol.name} request", properties)
                 system.pure(result)

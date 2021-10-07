@@ -122,16 +122,16 @@ object HandlerGenerator {
       // Create the method argument lists by decoding corresponding argument nodes into values
       //   List(List(
       //     (Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
-      //       case Failure(error) => Failure(InvalidRequestException("Malformed argument number " + ${ Expr(argumentIndex) }, error))
+      //       case Failure(error) => Failure(InvalidRequestException("Malformed argument: " + ${parameter.name}, error))
       //       case result => result
       //     }).get
       //     ...
       //     (Try(codec.decode[ParameterNType](argumentNodes(N))) match {
-      //       case Failure(error) => Failure(InvalidRequestException("Malformed argument number " + ${ Expr(argumentIndex) }, error))
+      //       case Failure(error) => Failure(InvalidRequestException("Malformed argument: " + ${parameter.name}, error))
       //       case result => result
       //     }).get
       //   )): List[List[ParameterXType]]
-      val arguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
+      val apiMethodArguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
         parameters.toList.zipWithIndex.map { case (parameter, index) =>
           val argumentIndex = offset + index
           if (argumentIndex == lastArgumentIndex && MethodReflection.usesContext[C, Context](ref)(method)) {
@@ -140,7 +140,7 @@ object HandlerGenerator {
             q"""
               (scala.util.Try($codec.decode[${parameter.dataType}](argumentNodes($argumentIndex))) match {
                 case scala.util.Failure(error) => scala.util.Failure(
-                  automorph.spi.Protocol.InvalidRequestException("Malformed argument number " + $argumentIndex, error)
+                  automorph.spi.Protocol.InvalidRequestException("Malformed argument: " + ${parameter.name}, error)
                 )
                 case result => result
               }).get
@@ -151,7 +151,7 @@ object HandlerGenerator {
 
       // Create the API method call using the decoded arguments
       //   api.method(arguments ...): Effect[ResultValueType]
-      val apiMethodCall = q"$api.${method.symbol}(...$arguments)"
+      val apiMethodCall = q"$api.${method.symbol}(...$apiMethodArguments)"
 
       // Create encode result function
       //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)

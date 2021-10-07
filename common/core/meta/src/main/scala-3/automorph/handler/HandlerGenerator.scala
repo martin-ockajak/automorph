@@ -110,23 +110,22 @@ private[automorph] object HandlerGenerator:
         // Create the method argument lists by decoding corresponding argument nodes into values
         //   List(List(
         //     (Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
-        //       case Failure(error) => Failure(InvalidRequestException("Malformed argument number " + ${ Expr(argumentIndex) }, error))
+        //       case Failure(error) => Failure(InvalidRequestException("Malformed argument: " + ${ Expr(parameter.name), error))
         //       case result => result
         //     }).get
         //     ...
         //     (Try(codec.decode[ParameterNType](argumentNodes(N))) match {
-        //       case Failure(error) => Failure(InvalidRequestException("Malformed argument number " + ${ Expr(argumentIndex) }, error))
+        //       case Failure(error) => Failure(InvalidRequestException("Malformed argument: " + ${ Expr(parameter.name), error))
         //       case result => result
         //     }).get
         //   )): List[List[ParameterXType]]
-        val arguments = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
+        val apiMethodArguments = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
           parameters.toList.zipWithIndex.map { (parameter, index) =>
             val argumentIndex = offset + index
-            val argumentNode = '{ argumentNodes(${ Expr(argumentIndex) }) }
             if argumentIndex == lastArgumentIndex && MethodReflection.usesContext[Context](ref)(method) then
               'context.asTerm
             else
-              val decodeArguments = List(List(argumentNode.asTerm))
+              val decodeArguments = List(List('{ argumentNodes(${ Expr(argumentIndex) }) }.asTerm))
               val decodeCall = MethodReflection.call(
                 ref.q,
                 codec.asTerm,
@@ -138,7 +137,7 @@ private[automorph] object HandlerGenerator:
                 case '[argumentType] => '{
                     (Try(${ decodeCall.asExprOf[argumentType] }) match
                       case Failure(error) =>
-                        Failure(InvalidRequestException("Malformed argument number " + ${ Expr(argumentIndex) }, error))
+                        Failure(InvalidRequestException("Malformed argument: " + ${ Expr(parameter.name) }, error))
                       case result => result
                     ).get
                   }.asTerm
@@ -147,7 +146,7 @@ private[automorph] object HandlerGenerator:
 
         // Create the API method call using the decoded arguments
         //   api.method(arguments*): Effect[ResultValueType]
-        val apiMethodCall = MethodReflection.call(ref.q, api.asTerm, method.name, List.empty, arguments)
+        val apiMethodCall = MethodReflection.call(ref.q, api.asTerm, method.name, List.empty, apiMethodArguments)
 
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)

@@ -120,18 +120,19 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
     val parameters = handlerMethod.function.parameters
     val parameterNames = parameters.map(_.name).dropRight(if (handlerMethod.usesContext) 1 else 0)
     rpcRequest.arguments.fold(
-      arguments =>
+      positionalArguments =>
         // Arguments by position
-        if (arguments.size > parameterNames.size) {
-          Failure(new IllegalArgumentException(s"Redundant arguments: ${arguments.size - parameterNames.size}"))
+        val redundantIndices = Range(parameterNames.size, positionalArguments.size)
+        if (redundantIndices.nonEmpty) {
+          Failure(new IllegalArgumentException(s"Redundant arguments: ${redundantIndices.mkString(", ")}"))
         } else {
-          Success(arguments ++ Seq.fill(parameterNames.size - arguments.size)(encodedNone))
+          Success(positionalArguments ++ Seq.fill(parameterNames.size - positionalArguments.size)(encodedNone))
         },
       namedArguments => {
         // Arguments by name
-        val redundantArguments = namedArguments.keys.toSeq.diff(parameterNames)
-        if (redundantArguments.nonEmpty) {
-          Failure(new IllegalArgumentException(s"Redundant arguments: ${redundantArguments.mkString(", ")}"))
+        val redundantNames = namedArguments.keys.toSeq.diff(parameterNames)
+        if (redundantNames.nonEmpty) {
+          Failure(new IllegalArgumentException(s"Redundant arguments: ${redundantNames.mkString(", ")}"))
         } else {
           Success(parameterNames.map(name => namedArguments.getOrElse(name, encodedNone)))
         }
