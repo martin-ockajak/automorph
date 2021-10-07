@@ -104,7 +104,7 @@ object HandlerGenerator {
     system: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
-    import ref.c.universe.{Quasiquote, weakTypeOf}
+    import ref.c.universe.{Quasiquote, TypeRef, typeOf, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -137,14 +137,24 @@ object HandlerGenerator {
           if (argumentIndex == lastArgumentIndex && MethodReflection.usesContext[C, Context](ref)(method)) {
             q"context"
           } else {
-            q"""
-              (scala.util.Try($codec.decode[${parameter.dataType}](argumentNodes($argumentIndex))) match {
-                case scala.util.Failure(error) => scala.util.Failure(
-                  automorph.spi.Protocol.InvalidRequestException("Malformed argument: " + ${parameter.name}, error)
-                )
-                case result => result
-              }).get
+            if (argumentIndex > lastArgumentIndex) {
+              if MethodReflection.typeConstructor(ref.c)(parameter.dataType) =:= typeOf[Option] {
+                q"None"
+              } else {
+                q"""
+                  throw InvalidRequestException("Missing argument: " + ${parameter.name})
+                """
+              }
+            } else {
+              q"""
+                (scala.util.Try($codec.decode[${parameter.dataType}](argumentNodes($argumentIndex))) match {
+                  case scala.util.Failure(error) => scala.util.Failure(
+                    automorph.spi.Protocol.InvalidRequestException("Malformed argument: " + ${parameter.name}, error)
+                  )
+                  case result => result
+                }).get
              """
+            }
           }
         }
       }

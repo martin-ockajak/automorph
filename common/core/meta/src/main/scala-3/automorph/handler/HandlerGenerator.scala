@@ -94,7 +94,7 @@ private[automorph] object HandlerGenerator:
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[(Seq[Node], Context) => Effect[Node]] =
-    import ref.q.reflect.{asTerm, Term, TypeRepr}
+    import ref.q.reflect.{asTerm, AppliedType, Term, TypeRepr}
     given Quotes = ref.q
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -124,6 +124,11 @@ private[automorph] object HandlerGenerator:
             val argumentIndex = offset + index
             if argumentIndex == lastArgumentIndex && MethodReflection.usesContext[Context](ref)(method) then
               'context.asTerm
+            else if argumentIndex > lastArgumentIndex then
+              if MethodReflection.typeConstructor(ref.q)(parameter.dataType) =:= TypeRepr.of[Option] then
+                'None
+              else
+                '{ throw InvalidRequestException("Missing argument: " + ${ Expr(parameter.name) }) }
             else
               val decodeArguments = List(List('{ argumentNodes(${ Expr(argumentIndex) }) }.asTerm))
               val decodeCall = MethodReflection.call(

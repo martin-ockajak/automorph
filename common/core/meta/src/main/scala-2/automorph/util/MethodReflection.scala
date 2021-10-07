@@ -83,6 +83,33 @@ private[automorph] object MethodReflection {
     }
 
   /**
+   * Determines type constructor of the specified type.
+   *
+   * @param c macro context
+   * @param someType some type
+   * @tparam C macro context type
+   * @return type constructor
+   */
+  @nowarn
+  def typeConstructor[C <: blackbox.Context](c: C)(someType: c.Type): c.Type = {
+    import c.universe.TypeRef
+
+    someType.dealias match {
+      case typeRef: TypeRef =>
+        val expandedType = if (typeRef.typeArgs.nonEmpty) typeRef else typeRef.etaExpand.resultType.dealias
+        if (expandedType.typeArgs.nonEmpty) {
+          // Find constructor for an applied type
+            expandedType.typeConstructor
+        } else {
+          // Assume type reference to be a single parameter type constructor
+          expandedType
+        }
+      // Keep any other types wrapped
+      case _ => someType
+    }
+  }
+
+  /**
    * Extracts type wrapped in a wrapper type.
    *
    * @param c macro context
@@ -97,11 +124,7 @@ private[automorph] object MethodReflection {
     val wrapperType = resultType(c)(c.weakTypeOf[Wrapper])
     val (wrapperTypeConstructor, wrapperTypeParameterIndex) = wrapperType match {
       case typeRef: TypeRef =>
-        val expandedType =
-          if (typeRef.typeArgs.nonEmpty) typeRef
-          else {
-            typeRef.etaExpand.resultType.dealias
-          }
+        val expandedType = if (typeRef.typeArgs.nonEmpty) typeRef else typeRef.etaExpand.resultType.dealias
         if (expandedType.typeArgs.nonEmpty) {
           // Find constructor and type parameter index for an applied type
           (
@@ -113,7 +136,7 @@ private[automorph] object MethodReflection {
             }
           )
         } else {
-          // Assume type reference to be single parameter type constructor
+          // Assume type reference to be a single parameter type constructor
           (expandedType, 0)
         }
       // Keep any other types wrapped

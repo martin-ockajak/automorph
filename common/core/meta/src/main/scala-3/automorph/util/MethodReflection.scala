@@ -2,7 +2,7 @@ package automorph.util
 
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import automorph.util.Reflection
-import scala.quoted.{Expr, Quotes, ToExpr, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, ToExpr, Type}
 
 /** Method introspection. */
 private[automorph] object MethodReflection:
@@ -69,6 +69,24 @@ private[automorph] object MethodReflection:
     }
 
   /**
+   * Determines type constructor of the specified type.
+   *
+   * @param q quotation context
+   * @param someType some type
+   * @return type constructor
+   */
+  def typeConstructor(q: Quotes)(someType: q.reflect.TypeRepr): q.reflect.TypeRepr =
+    import q.reflect.{AppliedType, TypeRef, TypeRepr}
+
+    someType.dealias match
+      // Find constructor for an applied type
+      case appliedType: q.reflect.AppliedType => appliedType.tycon
+      // Assume type reference to be a single parameter type constructor
+      case typeRef: TypeRef => typeRef.dealias
+      // Keep any other types wrapped
+      case _ => someType
+
+  /**
    * Extracts type wrapped in a wrapper type.
    *
    * @param q quotation context
@@ -79,20 +97,20 @@ private[automorph] object MethodReflection:
   def unwrapType[Wrapper[_]: Type](q: Quotes)(someType: q.reflect.TypeRepr): q.reflect.TypeRepr =
     import q.reflect.{AppliedType, ParamRef, TypeRef, TypeRepr}
 
-    val (wrapperTypeConstructor, wrapperTypeParameterIndex) =
-      resultType(q)(TypeRepr.of[Wrapper]) match
-        // Find constructor and type parameter index for an applied type
-        case wrapperType: q.reflect.AppliedType => (
-            wrapperType.tycon,
-            wrapperType.args.indexWhere {
-              case _: ParamRef => true
-              case _ => false
-            }
-          )
-        // Assume type reference to be single parameter type constructor
-        case wrapperType: TypeRef => (wrapperType.dealias, 0)
-        // Keep any other types wrapped
-        case wrapperType => (wrapperType, -1)
+    val wrapperType = resultType(q)(TypeRepr.of[Wrapper])
+    val (wrapperTypeConstructor, wrapperTypeParameterIndex) = wrapperType match
+      // Find constructor and type parameter index for an applied type
+      case appliedType: q.reflect.AppliedType => (
+          appliedType.tycon,
+          appliedType.args.indexWhere {
+            case _: ParamRef => true
+            case _ => false
+          }
+        )
+      // Assume type reference to be a single parameter type constructor
+      case typeRef: TypeRef => (typeRef.dealias, 0)
+      // Keep any other types wrapped
+      case _ => (wrapperType, -1)
     if wrapperTypeParameterIndex >= 0 then
       someType.dealias match
         case appliedType: AppliedType if appliedType.tycon <:< wrapperTypeConstructor =>
