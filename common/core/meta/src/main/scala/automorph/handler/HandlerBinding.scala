@@ -14,6 +14,6 @@ import automorph.spi.protocol.RpcFunction
  */
 final case class HandlerBinding[Node, Effect[_], Context](
   function: RpcFunction,
-  invoke: (Seq[Node], Context) => Effect[Node],
+  invoke: (Seq[Option[Node]], Context) => Effect[Node],
   usesContext: Boolean
 )

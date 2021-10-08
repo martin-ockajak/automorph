@@ -94,17 +94,21 @@ trait InvalidApi[Effect[_]] {
   def method3(p0: Float, p1: Option[Long]): Effect[List[String]]
 
   def method4(p0: BigDecimal, p1: Option[Boolean], p2: Option[String]): Effect[String]
+
+  def method5(p0: Boolean, p1: Short): Effect[String]
 }
 
 final case class InvalidApiImpl[Effect[_]](backend: EffectSystem[Effect]) extends InvalidApi[Effect] {
 
-  def nomethod(p0: String): Effect[Unit] = backend.pure(())
+  override def nomethod(p0: String): Effect[Unit] = backend.pure(())
 
-  def method1(p0: String): Effect[Unit] = backend.pure(())
+  override def method1(p0: String): Effect[Unit] = backend.pure(())
 
-  def method2(p0: String): Effect[String] = backend.pure("")
+  override def method2(p0: String): Effect[String] = backend.pure("")
 
-  def method3(p0: Float, p1: Option[Long]): Effect[List[String]] = backend.pure(List())
+  override def method3(p0: Float, p1: Option[Long]): Effect[List[String]] = backend.pure(List())
 
-  def method4(p0: BigDecimal, p1: Option[Boolean], p2: Option[String]): Effect[String] = backend.pure("")
+  override def method4(p0: BigDecimal, p1: Option[Boolean], p2: Option[String]): Effect[String] = backend.pure("")
+
+  override def method5(p0: Boolean, p1: Short): Effect[String] = backend.pure("")
 }

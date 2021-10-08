@@ -82,7 +82,7 @@ object BrokenHandlerGenerator {
     codec: ref.c.Expr[Codec],
     system: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Option[Node]], Context) => Effect[Node]] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
@@ -92,10 +92,10 @@ object BrokenHandlerGenerator {
     }
 
     // Create invoke function
-    //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
+    //   (argumentNodes: Seq[Option[Node]], context: Context) => Effect[Node]
     val nodeType = weakTypeOf[Node].dealias
     val contextType = weakTypeOf[Context].dealias
-    ref.c.Expr[(Seq[Node], Context) => Effect[Node]](q"""
+    ref.c.Expr[(Seq[Option[Node]], Context) => Effect[Node]](q"""
       (argumentNodes: Seq[$nodeType], context: $contextType) => ${
       // Create the method argument lists by decoding corresponding argument nodes into values
       //   List(List(
@@ -110,7 +110,7 @@ object BrokenHandlerGenerator {
           // Decode supplied argument node into a value
           val argumentIndex = offset + index
           val decode = q"""
-            $codec.decode[${parameter.dataType}](argumentNodes($argumentIndex))
+            $codec.decode[${parameter.dataType}](argumentNodes($argumentIndex).get)
            """
           println(ref.c.universe.showCode(decode))
           decode

@@ -103,8 +103,8 @@ object HandlerGenerator {
     codec: ref.c.Expr[Codec],
     system: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Node], Context) => Effect[Node]] = {
-    import ref.c.universe.{Quasiquote, TypeRef, typeOf, weakTypeOf}
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Option[Node]], Context) => Effect[Node]] = {
+    import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -114,11 +114,11 @@ object HandlerGenerator {
     val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
     // Create invoke function
-    //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
+    //   (argumentNodes: Seq[Option[Node]], context: Context) => Effect[Node]
     val nodeType = weakTypeOf[Node].dealias
     val contextType = weakTypeOf[Context].dealias
-    ref.c.Expr[(Seq[Node], Context) => Effect[Node]](q"""
-      (argumentNodes: Seq[$nodeType], context: $contextType) => ${
+    ref.c.Expr[(Seq[Option[Node]], Context) => Effect[Node]](q"""
+      (argumentNodes: Seq[Option[$nodeType]], context: $contextType) => ${
       // Create the method argument lists by decoding corresponding argument nodes into values
       //   List(List(
       //     (Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
@@ -138,27 +138,20 @@ object HandlerGenerator {
             // Use supplied context as a last argument if the method accepts context as its last parameter
             q"context"
           } else {
-            if (argumentIndex > lastArgumentIndex) {
-              if MethodReflection.typeConstructor(ref.c)(parameter.dataType) =:= typeOf[Option] {
-                // Use None if an optional argument is missing
-                q"None"
-              } else {
-                // Raise error if a mandatory argument is missing
-                q"""
-                  throw InvalidRequestException("Missing argument: " + ${parameter.name})
-                """
-              }
-            } else {
-              // Decode an argument node into a value
-              q"""
-                (scala.util.Try($codec.decode[${parameter.dataType}](argumentNodes($argumentIndex))) match {
-                  case scala.util.Failure(error) => scala.util.Failure(
-                    automorph.spi.Protocol.InvalidRequestException("Malformed argument: " + ${parameter.name}, error)
+            // Decode an argument node if it exists or an empty node if not into a value
+            q"""
+              (scala.util.Try($codec.decode[${parameter.dataType}](
+                argumentNodes($argumentIndex).getOrElse($codec.encode[Option[String]](None))
+              )) match {
+                case scala.util.Failure(error) => scala.util.Failure(
+                  automorph.spi.Protocol.InvalidRequestException(
+                    argumentNodes($argumentIndex).fold("Missing")(_ => "Malformed") + " argument: " + ${parameter.name},
+                    error
                   )
-                  case result => result
-                }).get
-             """
-            }
+                )
+                case result => result
+              }).get
+            """
           }
         }
       }

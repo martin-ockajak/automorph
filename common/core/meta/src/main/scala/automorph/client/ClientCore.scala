@@ -57,8 +57,15 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
    */
   def close(): Effect[Unit] = transport.close()
 
-  override def toString: String =
-    s"${this.getClass.getName}(codec = ${codec.getClass.getName}, system = ${system.getClass.getName}, transport = ${transport.getClass.getName})"
+  override def toString: String = {
+    val plugins = Map(
+      "codec" -> codec,
+      "system" -> system,
+      "transport" -> transport,
+      "protocol" -> protocol
+    ).map { case (name, plugin) => s"$name = ${plugin.getClass.getName}" }.mkString(", ")
+    s"${this.getClass.getName}($plugins)"
+  }
 
   /**
    * Performs a method call using specified arguments.

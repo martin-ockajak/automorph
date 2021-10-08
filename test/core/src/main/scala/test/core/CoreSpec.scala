@@ -153,13 +153,6 @@ trait CoreSpec extends BaseSpec {
                     }.getMessage.toLowerCase
                     error.should(include("malformed result"))
                   }
-                  "Missing arguments" in {
-                    val error = intercept[InvalidRequestException] {
-                      run(api.method4(BigDecimal(0), None, None))
-                    }.getMessage.toLowerCase
-                    error.should(include("malformed argument"))
-                    error.should(include("p1"))
-                  }
                   "Optional arguments" in {
                     run(api.method3(0, Some(0)))
                   }
@@ -169,6 +162,13 @@ trait CoreSpec extends BaseSpec {
                     }.getMessage.toLowerCase
                     error.should(include("malformed argument"))
                     error.should(include("p1"))
+                  }
+                  "Missing arguments" in {
+                    val error = intercept[InvalidRequestException] {
+                      run(api.method5(true, 0))
+                    }.getMessage.toLowerCase
+                    error.should(include("missing argument"))
+                    error.should(include("p2"))
                   }
                 }
               }

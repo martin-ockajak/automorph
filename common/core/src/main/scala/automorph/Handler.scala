@@ -17,7 +17,6 @@ import scala.collection.immutable.ListMap
  * @param system effect system plugin
  * @param protocol RPC protocol
  * @param bindings API method bindings
- * @param encodedNone message codec node representing missing optional value
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Effect effect type
@@ -27,14 +26,13 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context] 
   codec: Codec,
   system: EffectSystem[Effect],
   protocol: RpcProtocol[Node],
-  protected val bindings: ListMap[String, HandlerBinding[Node, Effect, Context]],
-  protected val encodedNone: Node
+  protected val bindings: ListMap[String, HandlerBinding[Node, Effect, Context]]
 ) extends HandlerCore[Node, Codec, Effect, Context]
   with HandlerMeta[Node, Codec, Effect, Context]
   with CannotEqual
   with Logging
 
-object Handler:
+object Handler {
 
   /** Handler with arbitrary codec. */
   type AnyCodec[Effect[_], Context] = Handler[_, _, Effect, Context]
@@ -53,12 +51,12 @@ object Handler:
    * @tparam Context request context type
    * @return RPC request handler
    */
-  inline def apply[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+  def apply[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     codec: Codec,
     system: EffectSystem[Effect],
     protocol: RpcProtocol[Node]
   ): Handler[Node, Codec, Effect, Context] =
-    Handler(codec, system, protocol, ListMap.empty, codec.encode(None))
+    Handler(codec, system, protocol, ListMap.empty)
 
   /**
    * Creates a RPC request handler with empty request context plus specified specified ''codec'' and ''system'' plugins.
@@ -74,9 +72,10 @@ object Handler:
    * @tparam Context request context type
    * @return RPC request handler
    */
-  inline def withoutContext[Node, Codec <: MessageCodec[Node], Effect[_]](
+  def withoutContext[Node, Codec <: MessageCodec[Node], Effect[_]](
     codec: Codec,
     system: EffectSystem[Effect],
     protocol: RpcProtocol[Node]
   ): Handler[Node, Codec, Effect, EmptyContext.Value] =
-    Handler(codec, system, protocol, ListMap.empty, codec.encode(None))
+    Handler(codec, system, protocol, ListMap.empty)
+}

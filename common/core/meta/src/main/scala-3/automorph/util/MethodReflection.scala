@@ -69,24 +69,6 @@ private[automorph] object MethodReflection:
     }
 
   /**
-   * Determines type constructor of the specified type.
-   *
-   * @param q quotation context
-   * @param someType some type
-   * @return type constructor
-   */
-  def typeConstructor(q: Quotes)(someType: q.reflect.TypeRepr): q.reflect.TypeRepr =
-    import q.reflect.{AppliedType, TypeRef, TypeRepr}
-
-    someType.dealias match
-      // Find constructor for an applied type
-      case appliedType: q.reflect.AppliedType => appliedType.tycon
-      // Assume type reference to be a single parameter type constructor
-      case typeRef: TypeRef => typeRef.dealias
-      // Keep any other types wrapped
-      case _ => someType
-
-  /**
    * Extracts type wrapped in a wrapper type.
    *
    * @param q quotation context

@@ -53,7 +53,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
-   * Bound API methods are exposed using names resulting from a transcodecion of their actual names via the `aliases` function.
+   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `aliases` function.
    *
    * @param api API instance
    * @param aliases maps API method name to its exposed RPC aliases (empty result causes the method not to be exposed)

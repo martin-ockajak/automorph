@@ -21,9 +21,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
 
   private val bodyProperty = "Body"
 
-  /**
-   * Bound RPC functions.
-   */
+  /** Bound RPC functions. */
   lazy val boundFunctions: Seq[RpcFunction] = bindings.map { case (name, binding) =>
     binding.function.copy(name = name)
   }.toSeq
@@ -57,8 +55,14 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    */
   def protocol(protocol: RpcProtocol[Node]): ThisHandler = copy(protocol = protocol)
 
-  override def toString: String =
-    s"${this.getClass.getName}(codec = ${codec.getClass.getName}, system = ${system.getClass.getName})"
+  override def toString: String = {
+    val plugins = Map(
+      "codec" -> codec,
+      "system" -> system,
+      "protocol" -> protocol
+    ).map { case (name, plugin) => s"$name = ${plugin.getClass.getName}" }.mkString(", ")
+    s"${this.getClass.getName}($plugins)"
+  }
 
   /**
    * Invokes bound method specified in a request.
@@ -115,26 +119,29 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
   private def extractArguments(
     rpcRequest: RpcRequest[Node, _],
     handlerMethod: HandlerBinding[Node, Effect, Context]
-  ): Try[Seq[Node]] = {
+  ): Try[Seq[Option[Node]]] = {
     // Adjust expected method parameters if it uses context as its last parameter
     val parameters = handlerMethod.function.parameters
     val parameterNames = parameters.map(_.name).dropRight(if (handlerMethod.usesContext) 1 else 0)
     rpcRequest.arguments.fold(
-      positionalArguments =>
+      positionalArguments => {
         // Arguments by position
-        val redundantIndices = Range(parameterNames.size, positionalArguments.size)
-        if (redundantIndices.nonEmpty) {
-          Failure(new IllegalArgumentException(s"Redundant arguments: ${redundantIndices.mkString(", ")}"))
+        val redundantSize = positionalArguments.size - parameterNames.size
+        if (redundantSize > 0) {
+          Failure(new IllegalArgumentException(
+            s"Redundant arguments: ${Range(parameterNames.size, redundantSize).mkString(", ")}"
+          ))
         } else {
-          Success(positionalArguments ++ Seq.fill(parameterNames.size - positionalArguments.size)(encodedNone))
-        },
+          Success(positionalArguments.map(Some(_)) ++ Seq.fill(-redundantSize)(None))
+        }
+      },
       namedArguments => {
         // Arguments by name
         val redundantNames = namedArguments.keys.toSeq.diff(parameterNames)
         if (redundantNames.nonEmpty) {
           Failure(new IllegalArgumentException(s"Redundant arguments: ${redundantNames.mkString(", ")}"))
         } else {
-          Success(parameterNames.map(name => namedArguments.getOrElse(name, encodedNone)))
+          Success(parameterNames.map(namedArguments.get))
         }
       }
     )
@@ -164,7 +171,10 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    * @tparam Data message data type
    * @return handler result
    */
-  private def response[Data: Bytes](result: Try[Node], message: RpcMessage[protocol.Metadata]): Effect[HandlerResult[Data]] =
+  private def response[Data: Bytes](
+    result: Try[Node],
+    message: RpcMessage[protocol.Metadata]
+  ): Effect[HandlerResult[Data]] =
     protocol.createResponse(result, message.details).pureFold(
       error => system.failed(error),
       rpcResponse => {

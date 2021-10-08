@@ -93,8 +93,8 @@ private[automorph] object HandlerGenerator:
     codec: Expr[Codec],
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
-  ): Expr[(Seq[Node], Context) => Effect[Node]] =
-    import ref.q.reflect.{asTerm, AppliedType, Term, TypeRepr}
+  ): Expr[(Seq[Option[Node]], Context) => Effect[Node]] =
+    import ref.q.reflect.{asTerm, Term, TypeRepr}
     given Quotes = ref.q
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -103,8 +103,18 @@ private[automorph] object HandlerGenerator:
     }
     val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
+    // Create encoded non-existent value expression
+    val encodeNoneArguments = List(List('{ None }.asTerm))
+    val encodeNoneCall = MethodReflection.call(
+      ref.q,
+      codec.asTerm,
+      "encode",
+      List(TypeRepr.of[Option[String]]),
+      encodeNoneArguments
+    )
+
     // Create invoke function
-    //   (argumentNodes: Seq[Node], context: Context) => Effect[Node]
+    //   (argumentNodes: Seq[Option[Node]], context: Context) => Effect[Node]
     '{ (argumentNodes, context) =>
       ${
         // Create the method argument lists by decoding corresponding argument nodes into values
@@ -125,16 +135,11 @@ private[automorph] object HandlerGenerator:
             if argumentIndex == lastArgumentIndex && MethodReflection.usesContext[Context](ref)(method) then
               // Use supplied context as a last argument if the method accepts context as its last parameter
               'context.asTerm
-            else if argumentIndex > lastArgumentIndex then
-              if MethodReflection.typeConstructor(ref.q)(parameter.dataType) =:= TypeRepr.of[Option] then
-                // Use None if an optional argument is missing
-                'None
-              else
-                // Raise error if a mandatory argument is missing
-                '{ throw InvalidRequestException("Missing argument: " + ${ Expr(parameter.name) }) }
             else
-              // Decode supplied argument node into a value
-              val decodeArguments = List(List('{ argumentNodes(${ Expr(argumentIndex) }) }.asTerm))
+              // Decode an argument node if it exists or an empty node if not into a value
+              val decodeArguments = List(List('{
+                argumentNodes(${ Expr(argumentIndex) }).getOrElse(${ encodeNoneCall.asExprOf[Node] })
+              }.asTerm))
               val decodeCall = MethodReflection.call(
                 ref.q,
                 codec.asTerm,
@@ -146,7 +151,12 @@ private[automorph] object HandlerGenerator:
                 case '[argumentType] => '{
                     (Try(${ decodeCall.asExprOf[argumentType] }) match
                       case Failure(error) =>
-                        Failure(InvalidRequestException("Malformed argument: " + ${ Expr(parameter.name) }, error))
+                        Failure(InvalidRequestException(
+                          argumentNodes(${ Expr(argumentIndex) }).fold("Missing")(_ => "Malformed") + " argument: " + ${
+                            Expr(parameter.name)
+                          },
+                          error
+                        ))
                       case result => result
                     ).get
                   }.asTerm
