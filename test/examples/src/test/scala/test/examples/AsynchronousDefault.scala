@@ -3,7 +3,7 @@ package test.examples
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object Asynchronous extends App {
+object AsynchronousDefault extends App {
 
   // Define an API type and create API instance
   class Api {
@@ -42,10 +42,10 @@ object Asynchronous extends App {
   server.close()
 }
 
-class Asynchronous extends test.base.BaseSpec {
+class AsynchronousDefault extends test.base.BaseSpec {
   "" - {
     "Test" ignore {
-      Asynchronous.main(Array())
+      AsynchronousDefault.main(Array())
     }
   }
 }

@@ -11,11 +11,11 @@ import automorph.util.{CannotEqual, EmptyContext}
  *
  * Used to perform RPC calls and notifications.
  *
- * @constructor Creates a RPC client with specified request `Context` type plus ''codec'', ''system'' and ''transport'' plugins.
+ * @constructor Creates a RPC client with specified request `Context` type plus ''codec'', ''system'', ''transport'' and ''protocol'' plugins.
  * @param codec message codec plugin
  * @param system effect system plugin
- * @param transport message transport plugin
  * @param protocol RPC protocol
+ * @param transport message transport plugin
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Effect effect type
@@ -24,8 +24,8 @@ import automorph.util.{CannotEqual, EmptyContext}
 final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   codec: Codec,
   system: EffectSystem[Effect],
-  transport: ClientMessageTransport[Effect, Context],
-  protocol: RpcProtocol[Node]
+  protocol: RpcProtocol[Node],
+  transport: ClientMessageTransport[Effect, Context]
 ) extends ClientCore[Node, Codec, Effect, Context]
   with ClientMeta[Node, Codec, Effect, Context]
   with CannotEqual
@@ -40,8 +40,8 @@ object Client {
    *
    * @param codec structured message codec codec plugin
    * @param system effect system plugin
-   * @param transport message transport protocol plugin
    * @param protocol RPC protocol
+   * @param transport message transport protocol plugin
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Effect effect type
@@ -50,7 +50,7 @@ object Client {
   def withoutContext[Node, Codec <: MessageCodec[Node], Effect[_]](
     codec: Codec,
     system: EffectSystem[Effect],
-    transport: ClientMessageTransport[Effect, EmptyContext.Value],
-    protocol: RpcProtocol[Node]
-  ): Client[Node, Codec, Effect, EmptyContext.Value] = Client(codec, system, transport, protocol)
+    protocol: RpcProtocol[Node],
+    transport: ClientMessageTransport[Effect, EmptyContext.Value]
+  ): Client[Node, Codec, Effect, EmptyContext.Value] = Client(codec, system, protocol, transport)
 }

@@ -1,6 +1,6 @@
 package test.examples
 
-object Synchronous extends App {
+object SynchronousDefault extends App {
 
   // Define an API type and create API instance
   class Api {
@@ -26,10 +26,10 @@ object Synchronous extends App {
   server.close()
 }
 
-class Synchronous extends test.base.BaseSpec {
+class SynchronousDefault extends test.base.BaseSpec {
   "" - {
     "Test" ignore {
-      Synchronous.main(Array())
+      SynchronousDefault.main(Array())
     }
   }
 }

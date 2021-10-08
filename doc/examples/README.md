@@ -1,8 +1,8 @@
 # Examples
 
-## Synchronous
+## Synchronous default
 
-* [Source](/test/examples/src/test/scala/test/examples/Synchronous.scala)
+* [Source](/test/examples/src/test/scala/test/examples/SynchronousDefault.scala)
 
 **Dependencies**
 
@@ -47,9 +47,9 @@ apiProxy.hello("world", 1) // String
 client.close()
 ```
 
-## Asynchronous
+## Asynchronous default
 
-* [Source](/test/examples/src/test/scala/test/examples/Asynchronous.scala)
+* [Source](/test/examples/src/test/scala/test/examples/AsynchronousDefault.scala)
 
 **Dependencies**
 
@@ -486,8 +486,8 @@ val protocol = DefaultRpcProtocol(codec)
 val client = Client[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpClientTransport.Context](
   codec,
   system,
-  transport,
-  protocol
+  protocol,
+  transport
 )
 
 // Call the remote API method via proxy

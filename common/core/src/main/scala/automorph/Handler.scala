@@ -38,7 +38,7 @@ object Handler {
   type AnyCodec[Effect[_], Context] = Handler[_, _, Effect, Context]
 
   /**
-   * Creates a RPC request handler with specified request `Context` type plus specified ''codec'' and ''system'' plugins.
+   * Creates a RPC request handler with specified request `Context` type plus specified ''codec'', ''system'' and ''protocol'' plugins.
    *
    * The handler can be used by a RPC server to invoke bound API methods based on incoming RPC requests.
    *

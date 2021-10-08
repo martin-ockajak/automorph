@@ -37,8 +37,8 @@ object MessageCodec extends App {
   val client = Client[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpClientTransport.Context](
     codec,
     system,
-    transport,
-    protocol
+    protocol,
+    transport
   )
 
   // Call the remote API method via proxy
