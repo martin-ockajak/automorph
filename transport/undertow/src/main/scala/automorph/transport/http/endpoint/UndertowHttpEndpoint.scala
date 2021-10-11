@@ -3,6 +3,7 @@ package automorph.transport.http.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
+import automorph.spi.MessageCodec
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
@@ -102,7 +103,8 @@ final case class UndertowHttpEndpoint[Effect[_]](
       if (exchange.isResponseChannelAvailable) {
         throw new IOException("Response channel not available")
       }
-      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.protocol.codec.mediaType)
+      val mediaType = handler.protocol.codec.asInstanceOf[MessageCodec[_]].mediaType
+      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, mediaType)
       exchange.setStatusCode(statusCode).getResponseSender.send(Bytes.byteBuffer.to(message))
       logger.debug(
         "Sent HTTP response",

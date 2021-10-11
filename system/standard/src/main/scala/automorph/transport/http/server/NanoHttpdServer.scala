@@ -3,6 +3,7 @@ package automorph.transport.http.server
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
+import automorph.spi.MessageCodec
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.server.NanoHTTPD.Response.Status
@@ -90,7 +91,8 @@ final case class NanoHttpdServer[Effect[_]] private (
       Map("Client" -> client, "Status" -> status.getRequestStatus, "Size" -> message.length)
     )
     val inputStream = Bytes.inputStream.to(message)
-    val response = newFixedLengthResponse(status, handler.protocol.codec.mediaType, inputStream, message.size.toLong)
+    val mediaType = handler.protocol.codec.asInstanceOf[MessageCodec[_]].mediaType
+    val response = newFixedLengthResponse(status, mediaType, inputStream, message.size.toLong)
     logger.debug(
       "Sent HTTP response",
       Map("Client" -> client, "Status" -> status.getRequestStatus, "Size" -> message.length)
