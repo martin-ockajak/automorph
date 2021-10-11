@@ -27,7 +27,7 @@ final case class JacksonJsonCodec(
   objectMapper: ObjectMapper = JacksonJsonCodec.defaultMapper
 ) extends JacksonJsonMeta {
 
-  override def mediaType: String = "application/json"
+  override val mediaType: String = "application/json"
 
   def serialize(node: JsonNode): ArraySeq.ofByte =
     new ArraySeq.ofByte(objectMapper.writeValueAsBytes(node))

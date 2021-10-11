@@ -20,7 +20,7 @@ final case class UpickleJsonCodec[Custom <: UpickleJsonCustom](
 
   private val indent = 2
 
-  override def mediaType: String = "application/json"
+  override val mediaType: String = "application/json"
 
   override def serialize(node: Value): ArraySeq.ofByte =
     new ArraySeq.ofByte(custom.writeToByteArray(node))

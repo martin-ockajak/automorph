@@ -13,7 +13,7 @@ import scala.collection.immutable.ArraySeq
  */
 final case class CirceJsonCodec() extends CirceJsonMeta {
 
-  override def mediaType: String = "application/json"
+  override val mediaType: String = "application/json"
 
   override def serialize(node: Json): ArraySeq.ofByte =
     new ArraySeq.ofByte(node.dropNullValues.noSpaces.getBytes(CirceJsonCodec.charset))

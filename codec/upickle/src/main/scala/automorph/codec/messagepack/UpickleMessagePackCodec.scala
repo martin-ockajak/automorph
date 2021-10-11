@@ -20,7 +20,7 @@ final case class UpickleMessagePackCodec[Custom <: UpickleMessagePackCustom](
 
   private val indent = 2
 
-  override def mediaType: String = "application/msgpack"
+  override val mediaType: String = "application/msgpack"
 
   override def serialize(node: Msg): ArraySeq.ofByte =
     new ArraySeq.ofByte(custom.writeBinary(node))
