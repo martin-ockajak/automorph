@@ -10,8 +10,9 @@ import scala.util.Try
  * The underlying RPC protocol must support remote function invocation.
  *
  * @tparam Node message node type
+ * @tparam Codec message codec plugin type
  */
-trait RpcProtocol[Node] {
+trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
 
   /** Protocol-specific message metadata. */
   type Metadata
@@ -22,6 +23,13 @@ trait RpcProtocol[Node] {
    * @return protocol name
    */
   def name: String
+
+  /**
+   * Message codec plugin.
+   *
+   * @return message codec plugin
+   */
+  def codec: Codec
 
   /**
    * Creates an RPC request.

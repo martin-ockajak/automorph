@@ -33,7 +33,7 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
    * @param methodName method name
    * @return method proxy with specified method name
    */
-  def method(methodName: String): NamedMethod = NamedProxy(methodName, this, codec, Seq.empty, Seq.empty)
+  def method(methodName: String): NamedMethod = NamedProxy(methodName, this, protocol.codec, Seq.empty, Seq.empty)
 
   /**
    * Creates default request context.
@@ -48,7 +48,7 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
    * @param protocol RPC protocol
    * @return RPC request handler
    */
-  def protocol(protocol: RpcProtocol[Node]): ThisClient = copy(protocol = protocol)
+  def protocol(protocol: RpcProtocol[Node, Codec]): ThisClient = copy(protocol = protocol)
 
   /**
    * Closes this client freeing the underlying resources.
@@ -59,7 +59,6 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
 
   override def toString: String = {
     val plugins = Map(
-      "codec" -> codec,
       "system" -> system,
       "transport" -> transport,
       "protocol" -> protocol
@@ -98,7 +97,7 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
           system.pure(rpcRequest),
           (request: RpcRequest[Node, _]) =>
             system.flatMap(
-              transport.call(request.message.body, codec.mediaType, context),
+              transport.call(request.message.body, protocol.codec.mediaType, context),
               // Process response
               rawResponse => processResponse[R](rawResponse, request.message.properties, decodeResult)
             )
@@ -130,7 +129,7 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
       rpcRequest =>
         system.flatMap(
           system.pure(rpcRequest),
-          (request: RpcRequest[Node, _]) => transport.notify(request.message.body, codec.mediaType, context)
+          (request: RpcRequest[Node, _]) => transport.notify(request.message.body, protocol.codec.mediaType, context)
         )
     )
 

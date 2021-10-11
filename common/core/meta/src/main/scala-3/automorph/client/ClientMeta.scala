@@ -37,7 +37,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef]: Api =
-    ClientMeta.generalBind[Node, Codec, Effect, Context, Api](this, codec, namedArguments = true)
+    ClientMeta.generalBind[Node, Codec, Effect, Context, Api](this, protocol.codec, namedArguments = true)
 
   /**
    * Creates a remote API proxy instance with RPC bindings for all valid public methods of the specified API.
@@ -58,7 +58,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bindPositional[Api <: AnyRef]: Api =
-    ClientMeta.generalBind[Node, Codec, Effect, Context, Api](this, codec, namedArguments = false)
+    ClientMeta.generalBind[Node, Codec, Effect, Context, Api](this, protocol.codec, namedArguments = false)
 
 object ClientMeta:
 

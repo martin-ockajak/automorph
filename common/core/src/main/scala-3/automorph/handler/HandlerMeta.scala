@@ -61,7 +61,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    */
   inline def bind[Api <: AnyRef](api: Api, aliases: String => Iterable[String]): ThisHandler =
     val newBindings =
-      bindings ++ HandlerGenerator.bindings[Node, Codec, Effect, Context, Api](codec, system, api).flatMap { binding =>
+      bindings ++ HandlerGenerator.bindings[Node, Codec, Effect, Context, Api](protocol.codec, system, api).flatMap { binding =>
         aliases(binding.function.name).map(_ -> binding)
       }
     copy(bindings = newBindings)

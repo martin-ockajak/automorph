@@ -6,15 +6,15 @@ import scala.collection.immutable.ArraySeq
 /**
  * Structured message format codec plugin.
  *
- * The underlying codec must support storing arbitrarily nested structures of basic data types.
+ * The underlying format must support storing arbitrarily nested structures of basic data types.
  *
- * @tparam Node message codec node representation type
+ * @tparam Node message format node type
  */
 trait MessageCodec[Node] extends MessageCodecMeta[Node] {
   /**
-   * Message codec media (MIME) type.
+   * Message format media (MIME) type.
    *
-   * @return media (MIME) type
+   * @return message format media (MIME) type
    */
   def mediaType: String
 

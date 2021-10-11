@@ -102,7 +102,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
       if (exchange.isResponseChannelAvailable) {
         throw new IOException("Response channel not available")
       }
-      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.codec.mediaType)
+      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.protocol.codec.mediaType)
       exchange.setStatusCode(statusCode).getResponseSender.send(Bytes.byteBuffer.to(message))
       logger.debug(
         "Sent HTTP response",

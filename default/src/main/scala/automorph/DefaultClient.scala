@@ -16,7 +16,7 @@ object DefaultClient {
   type Type[Effect[_], Context] = Client[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Effect, Context]
 
   /**
-   * Creates a default RPC client with specified effect ''system'' and message ''transport'' plugins.
+   * Creates a default RPC client with specified ''system'' and ''transport'' plugins accepting corresponding request context type.
    *
    * The client can be used to perform RPC calls and notifications.
    *
@@ -30,10 +30,10 @@ object DefaultClient {
     system: EffectSystem[Effect],
     transport: ClientMessageTransport[Effect, Context]
   ): Client[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Effect, Context] =
-    Client(DefaultMessageCodec(), system, DefaultRpcProtocol(), transport)
+    Client(system, DefaultRpcProtocol(), transport)
 
   /**
-   * Creates a default asynchronous RPC client using 'Future' as an effect type with specified message ''transport'' plugin.
+   * Creates a default asynchronous RPC client with specified message ''transport'' plugin using 'Future' as an effect type and accepting corresponding request context type.
    *
    * The client can be used to perform RPC calls and notifications.
    *
@@ -47,7 +47,7 @@ object DefaultClient {
   ): Type[Future, Context] = DefaultClient(DefaultEffectSystem.async, transport)
 
   /**
-   * Creates a default asynchronous RPC client using identity as an effect type with specified message ''transport'' plugin.
+   * Creates a default asynchronous RPC client with specified message ''transport'' plugin using identity as an effect type and accepting corresponding request context type.
    *
    * The client can be used to perform RPC calls and notifications.
    *

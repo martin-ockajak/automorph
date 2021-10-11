@@ -87,7 +87,7 @@ object HandlerMeta {
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
       automorph.handler.BrokenHandlerGenerator
-        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.codec, ${c.prefix}.system, $api)
+        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec, ${c.prefix}.system, $api)
       ${c.prefix}
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
   }

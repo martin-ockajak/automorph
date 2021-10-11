@@ -469,7 +469,11 @@ implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
 val system = DefaultEffectSystem.async
 
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val handler = Handler[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpServer.Context](codec, system)
+val protocol = DefaultRpcProtocol[UpickleMessagePackCodec.Node, codec.type](codec)
+val handler = Handler[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpServer.Context](
+  system,
+  protocol
+)
 val server = DefaultHttpServer(handler.bind(api), identity, 80, "/api")
 
 // Stop the server
@@ -482,9 +486,7 @@ server.close()
 // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
 val url = new java.net.URI("http://localhost/api")
 val transport = DefaultHttpClientTransport.async(url, "POST")
-val protocol = DefaultRpcProtocol(codec)
 val client = Client[UpickleMessagePackCodec.Node, codec.type, Future, DefaultHttpClientTransport.Context](
-  codec,
   system,
   protocol,
   transport

@@ -53,11 +53,10 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    * @param protocol RPC protocol
    * @return RPC request handler
    */
-  def protocol(protocol: RpcProtocol[Node]): ThisHandler = copy(protocol = protocol)
+  def protocol(protocol: RpcProtocol[Node, Codec]): ThisHandler = copy(protocol = protocol)
 
   override def toString: String = {
     val plugins = Map(
-      "codec" -> codec,
       "system" -> system,
       "protocol" -> protocol
     ).map { case (name, plugin) => s"$name = ${plugin.getClass.getName}" }.mkString(", ")

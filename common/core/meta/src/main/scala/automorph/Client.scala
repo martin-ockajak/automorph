@@ -11,8 +11,7 @@ import automorph.util.{CannotEqual, EmptyContext}
  *
  * Used to perform RPC calls and notifications.
  *
- * @constructor Creates a RPC client with specified request `Context` type plus ''codec'', ''system'', ''transport'' and ''protocol'' plugins.
- * @param codec message codec plugin
+ * @constructor Creates a RPC client with specified ''system'', ''protocol'' and ''transport'' plugins accepting corresponding request context type.
  * @param system effect system plugin
  * @param protocol RPC protocol
  * @param transport message transport plugin
@@ -22,9 +21,8 @@ import automorph.util.{CannotEqual, EmptyContext}
  * @tparam Context request context type
  */
 final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
-  codec: Codec,
   system: EffectSystem[Effect],
-  protocol: RpcProtocol[Node],
+  protocol: RpcProtocol[Node, Codec],
   transport: ClientMessageTransport[Effect, Context]
 ) extends ClientCore[Node, Codec, Effect, Context]
   with ClientMeta[Node, Codec, Effect, Context]
@@ -34,11 +32,10 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
 object Client {
 
   /**
-   * Creates a RPC client with empty request context and specified ''codec'', ''system'' and ''transport'' plugins.
+   * Creates a RPC client with specified ''system'', ''protocol'' and ''transport'' plugins without accepting request context.
    *
    * The client can be used to perform RPC calls and notifications.
    *
-   * @param codec structured message codec codec plugin
    * @param system effect system plugin
    * @param protocol RPC protocol
    * @param transport message transport protocol plugin
@@ -48,9 +45,8 @@ object Client {
    * @return RPC client
    */
   def withoutContext[Node, Codec <: MessageCodec[Node], Effect[_]](
-    codec: Codec,
     system: EffectSystem[Effect],
-    protocol: RpcProtocol[Node],
+    protocol: RpcProtocol[Node, Codec],
     transport: ClientMessageTransport[Effect, EmptyContext.Value]
-  ): Client[Node, Codec, Effect, EmptyContext.Value] = Client(codec, system, protocol, transport)
+  ): Client[Node, Codec, Effect, EmptyContext.Value] = Client(system, protocol, transport)
 }

@@ -90,7 +90,7 @@ final case class NanoHttpdServer[Effect[_]] private (
       Map("Client" -> client, "Status" -> status.getRequestStatus, "Size" -> message.length)
     )
     val inputStream = Bytes.inputStream.to(message)
-    val response = newFixedLengthResponse(status, handler.codec.mediaType, inputStream, message.size.toLong)
+    val response = newFixedLengthResponse(status, handler.protocol.codec.mediaType, inputStream, message.size.toLong)
     logger.debug(
       "Sent HTTP response",
       Map("Client" -> client, "Status" -> status.getRequestStatus, "Size" -> message.length)
