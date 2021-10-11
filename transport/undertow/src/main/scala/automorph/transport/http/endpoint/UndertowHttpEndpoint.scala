@@ -6,7 +6,7 @@ import automorph.log.Logging
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
-import automorph.util.Extensions.ThrowableOps
+import automorph.util.Extensions.{ThrowableOps, TryOps}
 import automorph.util.{Bytes, Network}
 import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}

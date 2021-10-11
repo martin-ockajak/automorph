@@ -13,6 +13,8 @@ import ujson.Value
 private[automorph] trait UpickleJsonMeta[Custom <: UpickleCustom] extends MessageCodec[Value]:
 
   val custom: Custom
+  given [T]: custom.Reader[T] = custom.reader[T]
+  given [T]: custom.Writer[T] = custom.writer[T]
 
   override inline def encode[T](value: T): Value =
     custom.writeJs(value)(using summonInline[custom.Writer[T]])
