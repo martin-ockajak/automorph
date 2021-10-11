@@ -202,10 +202,14 @@ lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
   )
 )
 // Message transport
-lazy val http = (project in file("transport/http")).dependsOn(
+lazy val http = (project in file("transport/http")).settings(
+  name := s"$projectName-http",
+).dependsOn(
   jsonrpc
 )
-lazy val amqp = (project in file("transport/amqp"))
+lazy val amqp = (project in file("transport/amqp")).settings(
+  name := s"$projectName-amqp"
+)
 val sttpVersion = "3.3.15"
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
   http, testCore % Test, standard % Test
@@ -276,6 +280,7 @@ lazy val default = project.dependsOn(
 lazy val examples = (project in file("test/examples")).dependsOn(
   default, upickle, zio, testPlugin % Test
 ).settings(
+  name := s"$projectName-examples",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test
   )
