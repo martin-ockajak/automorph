@@ -10,11 +10,8 @@ import upack.Msg
  * @tparam Custom custom Upickle reader and writer implicits instance type
  */
 private[automorph] trait UpickleMessagePackMeta[Custom <: UpickleMessagePackCustom] extends MessageCodec[Msg]:
-//  this: UpickleMessagePackCodec[Custom] =>
 
   val custom: Custom
-//  given [T]: custom.Reader[T] = custom.reader[T]
-//  given [T]: custom.Writer[T] = custom.writer[T]
 
   override inline def encode[T](value: T): Msg =
     custom.writeMsg(value)(using summonInline[custom.Writer[T]])

@@ -29,7 +29,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
    *
    * @return message codec plugin
    */
-  def codec: Codec
+  val codec: Codec
 
   /**
    * Creates an RPC request.
