@@ -30,7 +30,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
   protected val encodeResponse: Message[Node] => Node,
   protected val decodeResponse: Node => Message[Node],
   protected val encodeStrings: List[String] => Node
-) extends RestRpcCore[Node, Codec] with RpcProtocol[Node]
+) extends RestRpcCore[Node, Codec] with RpcProtocol[Node, Codec]
 
 object RestRpcProtocol extends ErrorMapping {
 

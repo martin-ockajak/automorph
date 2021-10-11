@@ -9,7 +9,7 @@ import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.{HttpURLConnection, URI}
 import scala.collection.immutable.ArraySeq
-import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.util.{Try, Using}
 

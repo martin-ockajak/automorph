@@ -6,8 +6,7 @@ import java.io.IOException
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.Base64
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.concurrent.duration.Duration
 
 /**
  * HTTP message properties.
@@ -371,7 +370,7 @@ final case class Http[Base](
 }
 
 object Http {
-  private val exceptionToStatusCode: Map[Class[_], Int] = Map(
+  private val exceptionToStatusCode: Map[Class[_], Int] = Map[Class[_], Int](
     classOf[ParseErrorException] -> 400,
     classOf[InvalidRequestException] -> 400,
     classOf[FunctionNotFoundException] -> 501,
