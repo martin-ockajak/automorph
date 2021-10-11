@@ -1,6 +1,5 @@
 package automorph.codec.json
 
-import automorph.codec.UpickleCustom
 import automorph.spi.MessageCodec
 import scala.compiletime.summonInline
 import ujson.Value
@@ -10,11 +9,9 @@ import ujson.Value
  *
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-private[automorph] trait UpickleJsonMeta[Custom <: UpickleCustom] extends MessageCodec[Value]:
+private[automorph] trait UpickleJsonMeta[Custom <: UpickleJsonCustom] extends MessageCodec[Value]:
 
   val custom: Custom
-  given [T]: custom.Reader[T] = custom.reader[T]
-  given [T]: custom.Writer[T] = custom.writer[T]
 
   override inline def encode[T](value: T): Value =
     custom.writeJs(value)(using summonInline[custom.Writer[T]])

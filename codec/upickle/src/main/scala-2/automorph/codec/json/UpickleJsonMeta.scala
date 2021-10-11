@@ -1,6 +1,5 @@
 package automorph.codec.json
 
-import automorph.codec.UpickleCustom
 import automorph.spi.MessageCodec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -11,7 +10,7 @@ import ujson.Value
  *
  * @tparam Custom customized Upickle reader and writer implicits instance type
  */
-trait UpickleJsonMeta[Custom <: UpickleCustom] extends MessageCodec[Value] {
+trait UpickleJsonMeta[Custom <: UpickleJsonCustom] extends MessageCodec[Value] {
 
   override def encode[T](value: T): Value =
     macro UpickleJsonMeta.encode[T]

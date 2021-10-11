@@ -1,6 +1,5 @@
 package automorph.codec.messagepack
 
-import automorph.codec.UpickleCustom
 import automorph.spi.MessageCodec
 import scala.compiletime.summonInline
 import upack.Msg
@@ -10,7 +9,8 @@ import upack.Msg
  *
  * @tparam Custom custom Upickle reader and writer implicits instance type
  */
-private[automorph] trait UpickleMessagePackMeta[Custom <: UpickleCustom] extends MessageCodec[Msg]:
+private[automorph] trait UpickleMessagePackMeta[Custom <: UpickleMessagePackCustom] extends MessageCodec[Msg]:
+//  this: UpickleMessagePackCodec[Custom] =>
 
   val custom: Custom
   given [T]: custom.Reader[T] = custom.reader[T]
