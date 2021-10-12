@@ -6,7 +6,7 @@ import automorph.spi.transport.ClientMessageTransport
 object DefaultClient {
 
   /**
-   * Default client type.
+   * Default RPC client type.
    *
    * @tparam Effect effect type
    * @tparam Context request context type
