@@ -46,7 +46,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
   override val name: String = "REST-RPC"
 
   override def parseRequest(
-    request: ArraySeq.ofByte,
+    request: Body,
     function: Option[String]
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
     // Deserialize request
@@ -124,7 +124,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
       }
     }
 
-  override def parseResponse(response: ArraySeq.ofByte): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
+  override def parseResponse(response: Body): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
     // Deserialize response
     Try(decodeResponse(codec.deserialize(response))).pureFold(
       error => Left(RpcError(InvalidResponseException("Malformed response", error), RpcMessage((), response))),

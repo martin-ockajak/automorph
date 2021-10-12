@@ -14,7 +14,10 @@ import scala.util.Try
  */
 trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
 
-  /** Protocol-specific message metadata. */
+  /** RPC message body type. */
+  type Body = ArraySeq.ofByte
+
+  /** Protocol-specific RPC message metadata. */
   type Metadata
 
   /** Protocol name. */
@@ -46,10 +49,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
    * @param function function name override, if specified it is used instead of function name obtained from the request
    * @return RPC request on valid request message or RPC error on invalid request message
    */
-  def parseRequest(
-    request: ArraySeq.ofByte,
-    function: Option[String]
-  ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]]
+  def parseRequest(request: Body, function: Option[String]): Either[RpcError[Metadata], RpcRequest[Node, Metadata]]
 
   /**
    * Creates an RPC response.
@@ -69,7 +69,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
    * @param response RPC response message
    * @return RPC response on valid response message or RPC error on invalid response message
    */
-  def parseResponse(response: ArraySeq.ofByte): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
+  def parseResponse(response: Body): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
 
   /**
    * Generates OpenApi speficication for specified RPC functions.
