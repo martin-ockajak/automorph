@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.handler.HandlerBuilder
+import automorph.handler.FullHandlerBuilder
 import automorph.spi.EffectSystem
 import automorph.system.IdentitySystem.Identity
 import automorph.util.EmptyContext
@@ -40,11 +40,10 @@ object DefaultHandler {
     Handler(DefaultRpcProtocol(), DefaultEffectSystem.sync)
 
   /**
-   * Creates a default synchronous RPC request ''handler'' builder using identity as an effect type and providing given request context type.
+   * Creates a default synchronous RPC request ''handler'' builder using identity as an effect type.
    *
-   * @param executionContext execution context
    * @return RPC request ''handler'' builder
    */
-  def builder: HandlerBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Identity, EmptyContext.Value] =
-    HandlerBuilder().protocol(DefaultRpcProtocol()).system(DefaultEffectSystem.sync).context[EmptyContext.Value]
+  def builder: FullHandlerBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Identity] =
+    Handler.protocol(DefaultRpcProtocol()).system(DefaultEffectSystem.sync)
 }

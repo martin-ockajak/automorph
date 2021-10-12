@@ -78,7 +78,7 @@ object DefaultHttpServer {
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
   ): Type[Effect] = {
-    val handler = bindApis(DefaultHandler.builder.system(system).context[DefaultHttpServer.Context].build)
+    val handler = bindApis(Handler.protocol(DefaultRpcProtocol()).system(system).context[DefaultHttpServer.Context])
     DefaultHttpServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
   }
 

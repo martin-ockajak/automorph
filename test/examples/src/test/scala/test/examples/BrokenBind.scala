@@ -1,6 +1,6 @@
 package test.examples
 
-import automorph.DefaultHandler
+import automorph.{DefaultRpcProtocol, Handler}
 import automorph.spi.EffectSystem
 import automorph.system.IdentitySystem.Identity
 
@@ -14,7 +14,7 @@ trait BrokenBind {
   private val api = BrokenApiImpl[Effect]()
 //  private val api: BrokenApi[Effect] = BrokenApiImpl()
 
-  private val handler = DefaultHandler.builder.system(system).context[Unit].build
+  private val handler = Handler.protocol(DefaultRpcProtocol()).system(system).context[Unit]
     .brokenBind(api)
 //    .brokenBind(api)
 }

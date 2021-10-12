@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.handler.{FullHandlerBuilder, HandlerBinding, HandlerBuilder, HandlerCore, HandlerMeta, ProtocolHandlerBuilder, SystemHandlerBuilder}
+import automorph.handler.{FullHandlerBuilder, HandlerBinding, HandlerCore, HandlerMeta, ProtocolHandlerBuilder, SystemHandlerBuilder}
 import automorph.log.Logging
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.{CannotEqual, EmptyContext}
