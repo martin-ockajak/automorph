@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.handler.{HandlerBinding, HandlerBuilder, HandlerCore, HandlerMeta}
+import automorph.handler.{FullHandlerBuilder, HandlerBinding, HandlerBuilder, HandlerCore, HandlerMeta, ProtocolHandlerBuilder, SystemHandlerBuilder}
 import automorph.log.Logging
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.{CannotEqual, EmptyContext}
@@ -36,13 +36,25 @@ object Handler {
   type AnyCodec[Effect[_], Context] = Handler[_, _, Effect, Context]
 
   /**
-   * Creates an RPC request handler builder.
+   * Creates an RPC request handler builder with specified RPC ''protocol'' plugin.
    *
+   * @param protocol RPC ''protocol'' plugin
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
+   * @return RPC request handler builder
+   */
+  def protocol[Node, Codec <: MessageCodec[Node]](
+    protocol: RpcProtocol[Node, Codec]
+  ): ProtocolHandlerBuilder[Node, Codec] =
+    ProtocolHandlerBuilder(protocol)
+
+  /**
+   * Creates an RPC request handler builder with specified effect ''system'' plugin.
+   *
+   * @param system effect ''system'' plugin
    * @tparam Effect effect type
    * @return RPC request handler builder
    */
-  def builder[Node, Codec <: MessageCodec[Node], Effect[_]]: HandlerBuilder[Node, Codec, Effect, EmptyContext.Value] =
-    HandlerBuilder()
+  def system[Effect[_]](system: EffectSystem[Effect]): SystemHandlerBuilder[Effect] =
+    SystemHandlerBuilder(system)
 }

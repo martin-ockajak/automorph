@@ -25,7 +25,7 @@ object MessageCodec extends App {
   val system = DefaultEffectSystem.async
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val handler = Handler.builder.protocol(protocol).system(system).context[DefaultHttpServer.Context].build
+  val handler = Handler.protocol(protocol).system(system).context[DefaultHttpServer.Context]
   val server = DefaultHttpServer(handler.bind(api), identity, 80, "/api")
 
   // Create RPC client sending HTTP POST requests to 'http://localhost/api'

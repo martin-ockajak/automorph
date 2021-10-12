@@ -325,7 +325,7 @@ val exceptionToStatusCode = (exception: Throwable) =>
 
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val system = DefaultEffectSystem.async
-val handler = Handler.builder.protocol(serverProtocol).system(system).context[DefaultHttpServer.Context].build
+val handler = Handler.protocol(serverProtocol).system(system).context[DefaultHttpServer.Context]
 val server = DefaultHttpServer(handler, (_: Future[Any]) => (), 80, "/api", {
   // Customize server HTTP status code mapping
   case _: SQLException => 400
@@ -476,7 +476,7 @@ val protocol = DefaultRpcProtocol[UpickleMessagePackCodec.Node, codec.type](code
 val system = DefaultEffectSystem.async
 
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val handler = Handler.builder.protocol(protocol).system(system).context[DefaultHttpServer.Context].build
+val handler = Handler.protocol(protocol).system(system).context[DefaultHttpServer.Context]
 val server = DefaultHttpServer(handler.bind(api), identity, 80, "/api")
 
 // Stop the server
