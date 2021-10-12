@@ -14,10 +14,11 @@ import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.util.{Try, Using}
 
 /**
- * URL connection client transport plugin using HTTP as message transport protocol.
+ * URL connection HTTP client message transport plugin.
  *
  * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
+ * @see [[https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol Transport protocol]]
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @constructor Creates an HTTP URL connection client transport plugin.
  * @param url HTTP server endpoint URL
