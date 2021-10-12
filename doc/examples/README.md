@@ -292,7 +292,7 @@ libraryDependencies ++= Seq(
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.transport.http.Http
 import automorph.transport.http.client.SttpClient.defaultContext
-import automorph.{DefaultHttpClient, DefaultHttpServer, DefaultRpcProtocol}
+import automorph.{Client, DefaultEffectSystem, DefaultHttpClient, DefaultHttpServer, DefaultRpcProtocol, Handler}
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -324,16 +324,13 @@ val exceptionToStatusCode = (exception: Throwable) =>
   }
 
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = DefaultHttpServer.async(
-  _.bind(api).protocol(serverProtocol),
-  80,
-  "/api",
-  {
-    // Customize server HTTP status code mapping
-    case _: SQLException => 400
-    case e => Http.defaultExceptionToStatusCode(e)
-  }
-)
+val system = DefaultEffectSystem.async
+val handler = Handler.builder.protocol(serverProtocol).system(system).context[DefaultHttpServer.Context].build
+val server = DefaultHttpServer(handler, (_: Future[Any]) => (), 80, "/api", {
+  // Customize server HTTP status code mapping
+  case _: SQLException => 400
+  case e => Http.defaultExceptionToStatusCode(e)
+})
 
 // Stop the server
 server.close()
@@ -349,7 +346,8 @@ val clientProtocol = defaultProtocol.errorToException {
 }
 
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
-val client = DefaultHttpClient.async(new URI("http://localhost/api"), "POST").protocol(clientProtocol)
+val transport = DefaultHttpClientTransport.async(new URI("http://localhost/api"), "POST")
+val client = Client.builder.protocol(clientProtocol).transport(transport).build
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api

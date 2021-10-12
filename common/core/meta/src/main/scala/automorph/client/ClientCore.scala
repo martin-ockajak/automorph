@@ -43,14 +43,6 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
   def context: Context = transport.defaultContext
 
   /**
-   * Creates a copy of this client with specified RPC protocol.
-   *
-   * @param protocol RPC protocol
-   * @return RPC request handler
-   */
-  def protocol(protocol: RpcProtocol[Node, Codec]): ThisClient = copy(protocol = protocol)
-
-  /**
    * Closes this client freeing the underlying resources.
    *
    * @return nothing

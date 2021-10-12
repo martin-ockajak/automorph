@@ -47,14 +47,6 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
     )
   }
 
-  /**
-   * Creates a copy of this handler with specified RPC protocol.
-   *
-   * @param protocol RPC protocol
-   * @return RPC request handler
-   */
-  def protocol(protocol: RpcProtocol[Node, Codec]): ThisHandler = copy(protocol = protocol)
-
   override def toString: String = {
     val plugins = Map(
       "system" -> system,
