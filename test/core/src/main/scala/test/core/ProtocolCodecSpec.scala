@@ -30,10 +30,10 @@ trait ProtocolCodecSpec extends CoreSpec {
         val port = availablePort
         val codec = CirceJsonCodec()
         val protocol = JsonRpcProtocol(codec)
-        val handler = Handler[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context](codec, system, protocol)
+        val handler = Handler.protocol(protocol).system(system).context[Context]
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-        val client = Client[CirceJsonCodec.Node, CirceJsonCodec, Effect, Context](codec, system, transport, protocol)
+        val client = Client.protocol(protocol).transport(transport)
         TestFixture(
           codec.getClass,
           client,
@@ -66,10 +66,10 @@ trait ProtocolCodecSpec extends CoreSpec {
         val port = availablePort
         val codec = JacksonJsonCodec(JacksonJsonCodec.defaultMapper.registerModule(enumModule))
         val protocol = JsonRpcProtocol(codec)
-        val handler = Handler[JacksonJsonCodec.Node, JacksonJsonCodec, Effect, Context](codec, system, protocol)
+        val handler = Handler.protocol(protocol).system(system).context[Context]
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-        val client = Client[JacksonJsonCodec.Node, JacksonJsonCodec, Effect, Context](codec, system, transport, protocol)
+        val client = Client.protocol(protocol).transport(transport)
         TestFixture(
           codec.getClass,
           client,
@@ -96,18 +96,10 @@ trait ProtocolCodecSpec extends CoreSpec {
         val port = availablePort
         val codec = UpickleJsonCodec(custom)
         val protocol = JsonRpcProtocol(codec)
-        val handler = Handler[UpickleJsonCodec.Node, UpickleJsonCodec[Custom], Effect, Context](
-          codec,
-          system,
-          protocol
-        ).bind(simpleApiInstance).bind(complexApiInstance)
+        val handler = Handler.protocol(protocol).system(system).context[Context]
+          .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-        val client = Client[UpickleJsonCodec.Node, UpickleJsonCodec[Custom], Effect, Context](
-          codec,
-          system,
-          transport,
-          protocol
-        )
+        val client = Client.protocol(protocol).transport(transport)
         TestFixture(
           codec.getClass,
           client,
@@ -134,20 +126,10 @@ trait ProtocolCodecSpec extends CoreSpec {
         val port = availablePort
         val codec = UpickleMessagePackCodec(custom)
         val protocol = JsonRpcProtocol(codec)
-        val handler =
-          Handler[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[Custom], Effect, Context](
-            codec,
-            system,
-            protocol
-          ).bind(simpleApiInstance).bind(complexApiInstance)
+        val handler = Handler.protocol(protocol).system(system).context[Context]
+         .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-        val client =
-          Client[UpickleMessagePackCodec.Node, UpickleMessagePackCodec[Custom], Effect, Context](
-            codec,
-            system,
-            transport,
-            protocol
-          )
+        val client = Client.protocol(protocol).transport(transport)
         TestFixture(
           codec.getClass,
           client,
@@ -205,10 +187,10 @@ trait ProtocolCodecSpec extends CoreSpec {
         val port = availablePort
         val codec = ArgonautJsonCodec()
         val protocol = JsonRpcProtocol(codec)
-        val handler = Handler[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context](codec, system, protocol)
+        val handler = Handler.protocol(protocol).system(system).context[Context]
           .bind(simpleApiInstance).bind(complexApiInstance)
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-        val client = Client[ArgonautJsonCodec.Node, ArgonautJsonCodec, Effect, Context](codec, system, transport, protocol)
+        val client = Client.protocol(protocol).transport(transport)
         TestFixture(
           codec.getClass,
           client,
