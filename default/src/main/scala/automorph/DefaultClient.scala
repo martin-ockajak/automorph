@@ -1,8 +1,10 @@
 package automorph
 
+import automorph.client.ClientBuilder
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
+import automorph.util.EmptyContext
 import scala.concurrent.{ExecutionContext, Future}
 
 object DefaultClient {
@@ -53,4 +55,13 @@ object DefaultClient {
    */
   def sync[Context](transport: ClientMessageTransport[Identity, Context]): Type[Identity, Context] =
     DefaultClient(transport)
+
+
+  /**
+   * Creates a default synchronous RPC ''client'' builder using identity as an effect type and accepting given request context type.
+   *
+   * @return RPC request ''client'' builder
+   */
+  def builder: ClientBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Identity, EmptyContext.Value] =
+    ClientBuilder().protocol(DefaultRpcProtocol())
 }
