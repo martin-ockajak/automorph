@@ -56,12 +56,11 @@ object DefaultClient {
   def sync[Context](transport: ClientMessageTransport[Identity, Context]): Type[Identity, Context] =
     DefaultClient(transport)
 
-
   /**
-   * Creates a default synchronous RPC ''client'' builder using identity as an effect type and accepting given request context type.
+   * Creates a default synchronous RPC ''client'' builder.
    *
    * @return RPC request ''client'' builder
    */
-  def builder: ProtocolClientBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
+  def apply(): ProtocolClientBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
     Client.protocol(DefaultRpcProtocol())
 }

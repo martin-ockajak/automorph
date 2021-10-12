@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.handler.FullHandlerBuilder
+import automorph.handler.ProtocolHandlerBuilder
 import automorph.spi.EffectSystem
 import automorph.system.IdentitySystem.Identity
 import automorph.util.EmptyContext
@@ -38,4 +38,12 @@ object DefaultHandler {
    */
   def sync[Context]: Type[Identity, Context] =
     Handler(DefaultRpcProtocol(), DefaultEffectSystem.sync)
+
+  /**
+   * Creates a default synchronous RPC request ''handler'' builder.
+   *
+   * @return RPC request ''handler'' builder
+   */
+  def apply(): ProtocolHandlerBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
+    Handler.protocol(DefaultRpcProtocol())
 }
