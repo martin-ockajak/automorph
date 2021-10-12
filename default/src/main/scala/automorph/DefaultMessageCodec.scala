@@ -11,9 +11,9 @@ object DefaultMessageCodec {
   type Type = CirceJsonCodec
 
   /**
-   * Creates a default structured message format codec plugin.
+   * Creates a default message ''codec'' plugin.
    *
-   * @return message codec plugin
+   * @return message ''codec'' plugin
    */
   def apply(): Type = CirceJsonCodec()
 }
