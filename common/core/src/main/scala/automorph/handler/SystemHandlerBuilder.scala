@@ -25,6 +25,5 @@ case class SystemHandlerBuilder[Effect[_]](
    */
   def protocol[Node, Codec <: MessageCodec[Node]](
     protocol: RpcProtocol[Node, Codec]
-  ): FullHandlerBuilder[Node, Codec, Effect] =
-    FullHandlerBuilder(protocol, system)
+  ): FullHandlerBuilder[Node, Codec, Effect] = FullHandlerBuilder(protocol, system)
 }

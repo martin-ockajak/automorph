@@ -27,6 +27,5 @@ case class ProtocolClientBuilder[Node, Codec <: MessageCodec[Node]](
    */
   def transport[Effect[_], Context](
     transport: ClientMessageTransport[Effect, Context]
-  ): Client[Node, Codec, Effect, Context] =
-    Client(protocol, transport)
+  ): Client[Node, Codec, Effect, Context] = Client(protocol, transport)
 }

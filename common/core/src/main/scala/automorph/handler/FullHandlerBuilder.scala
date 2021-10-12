@@ -25,14 +25,12 @@ case class FullHandlerBuilder[Node, Codec <: MessageCodec[Node], Effect[_]](
    * @tparam Context request context type
    * @return RPC request ''handler''
    */
-  def context[Context]: Handler[Node, Codec, Effect, Context] =
-    Handler(protocol, system)
+  def context[Context]: Handler[Node, Codec, Effect, Context] = Handler(protocol, system)
 
   /**
    * Creates an RPC request ''handler'' with empty request context type.
    *
    * @return RPC request ''handler''
    */
-  def emptyContext: Handler[Node, Codec, Effect, EmptyContext.Value] =
-    Handler(protocol, system)
+  def emptyContext: Handler[Node, Codec, Effect, EmptyContext.Value] = Handler(protocol, system)
 }
