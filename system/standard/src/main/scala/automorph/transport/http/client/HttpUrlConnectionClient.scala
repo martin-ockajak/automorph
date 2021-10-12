@@ -38,9 +38,10 @@ final case class HttpUrlConnectionClient[Effect[_]](
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   require(httpMethods.contains(method), s"Invalid HTTP method: $method")
 
-  override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] =
+  override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
+    val http = context.getOrElse(defaultContext)
     system.flatMap(
-      send(request, mediaType, context),
+      send(request, mediaType, http),
       (_: EffectValue) match {
         case (connection: HttpURLConnection, _) =>
           system.wrap {
@@ -53,30 +54,32 @@ final case class HttpUrlConnectionClient[Effect[_]](
               "Received HTTP response",
               Map("URL" -> url, "Status" -> connection.getResponseCode, "Size" -> response.length)
             )
-            clearRequestProperties(connection, context.getOrElse(defaultContext))
+            clearRequestProperties(connection, http)
             response
           }
       }
     )
+  }
 
-  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] =
+  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
+    val http = context.getOrElse(defaultContext)
     system.map(
-      send(request, mediaType, context),
+      send(request, mediaType, http),
       (_: EffectValue) match {
-        case (connection: HttpURLConnection, _) => clearRequestProperties(connection, context.getOrElse(defaultContext))
+        case (connection: HttpURLConnection, _) => clearRequestProperties(connection, http)
       }
     )
+  }
 
   override def defaultContext: Context = HttpUrlConnectionContext.default
 
   override def close(): Effect[Unit] = system.pure(())
 
-  private def send(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[EffectValue] =
+  private def send(request: ArraySeq.ofByte, mediaType: String, context: Context): Effect[EffectValue] =
     system.wrap {
       logger.trace("Sending HTTP request", Map("URL" -> url, "Size" -> request.length))
-      val http = context.getOrElse(defaultContext)
-      val connection = connect(http)
-      val httpMethod = setRequestProperties(connection, request, mediaType, http)
+      val connection = connect(context)
+      val httpMethod = setRequestProperties(connection, request, mediaType, context)
       val outputStream = connection.getOutputStream
       val write = Using(outputStream)(_.write(request.unsafeArray))
       write.mapFailure { error =>
