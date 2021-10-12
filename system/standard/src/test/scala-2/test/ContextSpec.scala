@@ -8,7 +8,7 @@ import automorph.util.Context
 import automorph.{Client, Handler}
 import ujson.Value
 
-class EmptyContextSpec extends BaseSpec {
+class ContextSpec extends BaseSpec {
 
   "" - {
     "Create" in {
