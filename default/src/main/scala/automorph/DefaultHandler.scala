@@ -2,7 +2,6 @@ package automorph
 
 import automorph.spi.EffectSystem
 import automorph.system.IdentitySystem.Identity
-import automorph.util.EmptyContext
 import scala.concurrent.{ExecutionContext, Future}
 
 object DefaultHandler {

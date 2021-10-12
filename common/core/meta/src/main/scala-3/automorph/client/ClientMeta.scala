@@ -25,7 +25,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * - can be called at runtime
    * - has no type parameters
    * - returns the specified effect type
-   * - (if request context type is not EmptyContext) accepts the specified request context type as its last parameter
+   * - (if request context type is not Context.Empty) accepts the specified request context type as its last parameter
    *
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.
@@ -46,7 +46,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * - can be called at runtime
    * - has no type parameters
    * - returns the specified effect type
-   * - (if request context type is not EmptyContext) accepts the specified request context type as its last parameter
+   * - (if request context type is not Context.Empty) accepts the specified request context type as its last parameter
    *
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the caller-supplied ''request context'' is passed to the underlying message ''transport'' plugin.

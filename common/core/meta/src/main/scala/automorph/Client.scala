@@ -4,7 +4,7 @@ import automorph.client.{ClientCore, ClientMeta, ProtocolClientBuilder, Transpor
 import automorph.log.Logging
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
-import automorph.util.{CannotEqual, EmptyContext}
+import automorph.util.{CannotEqual, Context}
 
 /**
  * RPC client.

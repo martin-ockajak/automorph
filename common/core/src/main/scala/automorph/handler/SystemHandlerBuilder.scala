@@ -2,7 +2,6 @@ package automorph.handler
 
 import automorph.Handler
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
-import automorph.util.EmptyContext
 
 /**
  * RPC request ''handler'' builder.

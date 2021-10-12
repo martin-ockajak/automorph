@@ -2,7 +2,7 @@ package automorph.handler
 
 import automorph.Handler
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
-import automorph.util.EmptyContext
+import automorph.util.Context
 
 /**
  * RPC request ''handler'' builder.
@@ -32,5 +32,5 @@ case class FullHandlerBuilder[Node, Codec <: MessageCodec[Node], Effect[_]](
    *
    * @return RPC request ''handler''
    */
-  def emptyContext: Handler[Node, Codec, Effect, EmptyContext.Value] = Handler(protocol, system)
+  def emptyContext: Handler[Node, Codec, Effect, Context.Empty] = Handler(protocol, system)
 }

@@ -3,7 +3,7 @@ package automorph.client
 import automorph.Client
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{MessageCodec, RpcProtocol}
-import automorph.util.EmptyContext
+import automorph.util.Context
 
 /**
  * RPC request ''client'' builder.

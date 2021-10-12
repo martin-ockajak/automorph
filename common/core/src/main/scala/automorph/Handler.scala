@@ -3,7 +3,7 @@ package automorph
 import automorph.handler.{FullHandlerBuilder, HandlerBinding, HandlerCore, HandlerMeta, ProtocolHandlerBuilder, SystemHandlerBuilder}
 import automorph.log.Logging
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
-import automorph.util.{CannotEqual, EmptyContext}
+import automorph.util.CannotEqual
 import scala.collection.immutable.ListMap
 
 /**
