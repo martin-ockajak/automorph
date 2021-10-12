@@ -20,7 +20,7 @@ object DefaultHttpClient {
   type Context = DefaultHttpClientTransport.Context
 
   /**
-   * Creates a default RPC over STTP HTTP client with specified effect system plugin.
+   * Creates a default JSON-RPC over STTP HTTP client with specified effect system plugin.
    *
    * The client can be used to perform RPC calls and notifications.
    *
@@ -42,7 +42,7 @@ object DefaultHttpClient {
   ): Type[Effect] = DefaultClient(DefaultHttpClientTransport(url, method, backend, system))
 
   /**
-   * Creates a default asynchronous RPC over STTP HTTP client using 'Future' as an effect type.
+   * Creates a default asynchronous JSON-RPC over STTP HTTP client using 'Future' as an effect type.
    *
    * The client can be used to perform RPC calls and notifications.
    *
@@ -59,7 +59,7 @@ object DefaultHttpClient {
   ): Type[Future] = DefaultHttpClient(url, method, AsyncHttpClientFutureBackend(), DefaultEffectSystem.async)
 
   /**
-   * Creates a default asynchronous RPC over STTP HTTP client using identity as an effect type.
+   * Creates a default asynchronous JSON-RPC over STTP HTTP client using identity as an effect type.
    *
    * The client can be used to perform RPC calls and notifications.
    *
