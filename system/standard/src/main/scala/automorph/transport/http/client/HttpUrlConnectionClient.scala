@@ -53,6 +53,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
               "Received HTTP response",
               Map("URL" -> url, "Status" -> connection.getResponseCode, "Size" -> response.length)
             )
+            clearRequestProperties(connection, context.getOrElse(defaultContext))
             response
           }
       }
@@ -73,7 +74,6 @@ final case class HttpUrlConnectionClient[Effect[_]](
       val httpMethod = setRequestProperties(connection, request, mediaType, http)
       val outputStream = connection.getOutputStream
       val write = Using(outputStream)(_.write(request.unsafeArray))
-      clearRequestProperties(connection, http)
       write.mapFailure { error =>
         logger.error(
           "Failed to send HTTP request",
