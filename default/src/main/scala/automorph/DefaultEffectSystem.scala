@@ -13,10 +13,10 @@ object DefaultEffectSystem {
   /** Default synchronous effect type. */
   type SyncEffect[T] = Identity[T]
 
-  /** Default asynchronous effectful computation backend plugin type. */
+  /** Default asynchronous effect system plugin type. */
   type AsyncType = EffectSystem[Future]
 
-  /** Default synchronous effectful computation backend plugin type. */
+  /** Default synchronous effect system plugin type. */
   type SyncType = EffectSystem[Identity]
 
   /**
