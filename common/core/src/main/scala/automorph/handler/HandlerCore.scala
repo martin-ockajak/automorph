@@ -31,12 +31,12 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    *
    * @param request request message
    * @param context request context
-   * @tparam Data message data type
+   * @tparam Body message body type
    * @return optional response message
    */
-  def processRequest[Data: Bytes](request: Data)(implicit context: Context): Effect[HandlerResult[Data]] = {
+  def processRequest[Body: Bytes](request: Body)(implicit context: Context): Effect[HandlerResult[Body]] = {
     // Parse request
-    val rawRequest = implicitly[Bytes[Data]].from(request)
+    val rawRequest = implicitly[Bytes[Body]].from(request)
     protocol.parseRequest(rawRequest, None).fold(
       error => errorResponse(error.exception, error.message),
       rpcRequest => {
@@ -62,13 +62,13 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    *
    * @param rpcRequest RPC request
    * @param context request context
-   * @tparam Data message data type
+   * @tparam Body message body type
    * @return bound method invocation result
    */
-  private def invokeMethod[Data: Bytes](
+  private def invokeMethod[Body: Bytes](
     rpcRequest: RpcRequest[Node, protocol.Metadata],
     context: Context
-  ): Effect[HandlerResult[Data]] = {
+  ): Effect[HandlerResult[Body]] = {
     // Lookup bindings for the specified method
     logger.debug(s"Processing ${protocol.name} request", rpcRequest.message.properties)
     bindings.get(rpcRequest.function).map { handlerBinding =>
@@ -87,7 +87,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
                 // Create response
                 response(outcome.toTry, rpcRequest.message)
               } else {
-                system.pure(HandlerResult[Data](None, None))
+                system.pure(HandlerResult[Body](None, None))
               }
           )
         }
@@ -143,13 +143,13 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    *
    * @param error exception
    * @param message RPC message
-   * @tparam Data message data type
+   * @tparam Body message body type
    * @return handler result
    */
-  private def errorResponse[Data: Bytes](
+  private def errorResponse[Body: Bytes](
     error: Throwable,
     message: RpcMessage[protocol.Metadata]
-  ): Effect[HandlerResult[Data]] = {
+  ): Effect[HandlerResult[Body]] = {
     logger.error(s"Failed to process ${protocol.name} request", error, message.properties)
     response(Failure(error), message)
   }
@@ -159,19 +159,19 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    *
    * @param result a call result on success or an exception on failure
    * @param message RPC message
-   * @tparam Data message data type
+   * @tparam Body message body type
    * @return handler result
    */
-  private def response[Data: Bytes](
+  private def response[Body: Bytes](
     result: Try[Node],
     message: RpcMessage[protocol.Metadata]
-  ): Effect[HandlerResult[Data]] =
+  ): Effect[HandlerResult[Body]] =
     protocol.createResponse(result, message.details).pureFold(
       error => system.failed(error),
       rpcResponse => {
         lazy val properties = rpcResponse.message.properties ++ rpcResponse.message.text.map(bodyProperty -> _)
         logger.trace(s"Sending ${protocol.name} response", properties)
-        system.pure(HandlerResult(Some(implicitly[Bytes[Data]].to(rpcResponse.message.body)), result.failed.toOption))
+        system.pure(HandlerResult(Some(implicitly[Bytes[Body]].to(rpcResponse.message.body)), result.failed.toOption))
       }
     )
 }
