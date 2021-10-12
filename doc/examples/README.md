@@ -541,7 +541,7 @@ server.close()
 ```scala
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
 val transport = HttpUrlConnectionClient(new URI("http://localhost/api"), "POST", IdentitySystem())
-val client = DefaultClient.sync(transport)
+val client = DefaultClient(transport)
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api

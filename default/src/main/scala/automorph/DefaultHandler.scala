@@ -1,12 +1,23 @@
 package automorph
 
-import automorph.handler.ProtocolHandlerBuilder
 import automorph.spi.EffectSystem
 import automorph.system.IdentitySystem.Identity
 import automorph.util.EmptyContext
 import scala.concurrent.{ExecutionContext, Future}
 
 object DefaultHandler {
+
+  /**
+   * Creates a default asynchronous RPC request ''handler'' with specified effect ''system'' plugin and providing given request context type.
+   *
+   * The handler can be used by a server to invoke bound API methods based on incoming requests.
+   *
+   * @param system effect ''system'' plugin
+   * @tparam Context request context type
+   * @return RPC request ''handler''
+   */
+  def apply[Effect[_], Context](system: EffectSystem[Effect]): Type[Effect, Context] =
+    Handler(DefaultRpcProtocol(), system)
 
   /**
    * Default request handler type.
@@ -38,12 +49,4 @@ object DefaultHandler {
    */
   def sync[Context]: Type[Identity, Context] =
     Handler(DefaultRpcProtocol(), DefaultEffectSystem.sync)
-
-  /**
-   * Creates a default synchronous RPC request ''handler'' builder.
-   *
-   * @return RPC request ''handler'' builder
-   */
-  def builder: ProtocolHandlerBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
-    Handler.protocol(DefaultRpcProtocol())
 }
