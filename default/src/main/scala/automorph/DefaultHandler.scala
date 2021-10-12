@@ -38,12 +38,4 @@ object DefaultHandler {
    */
   def sync[Context]: Type[Identity, Context] =
     Handler(DefaultRpcProtocol(), DefaultEffectSystem.sync)
-
-  /**
-   * Creates a default synchronous RPC request ''handler'' builder using identity as an effect type.
-   *
-   * @return RPC request ''handler'' builder
-   */
-  def builder: FullHandlerBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Identity] =
-    Handler.protocol(DefaultRpcProtocol()).system(DefaultEffectSystem.sync)
 }
