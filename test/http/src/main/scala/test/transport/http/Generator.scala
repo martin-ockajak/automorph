@@ -7,9 +7,19 @@ import automorph.transport.http.Http
 
 object Generator {
 
+  private val header = for {
+    name <- Gen.alphaStr.suchThat(_.nonEmpty)
+    value <- Gen.asciiPrintableStr
+  } yield (name, value)
+
+  private val parameter = for {
+    name <- arbitrary[String].suchThat(_.nonEmpty)
+    value <- arbitrary[String]
+  } yield (name, value)
+
   def context: Arbitrary[Http[_]] = Arbitrary(for {
-    headers <- Gen.listOf(arbitrary[(String, String)].suchThat(_._1.nonEmpty))
-    parameters <- Gen.listOf(arbitrary[(String, String)].suchThat(_._1.nonEmpty))
+    headers <- Gen.listOf(header)
+    parameters <- Gen.listOf(parameter)
   } yield Http(
     headers = headers,
     parameters = parameters
