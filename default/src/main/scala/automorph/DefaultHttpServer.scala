@@ -29,7 +29,10 @@ object DefaultHttpServer {
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
    *
-   * @see [[https://undertow.io/ HTTP Server Documentation]]
+   * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
+   * @see [[https://undertow.io Library documentation]]
+   * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
    * @param handler RPC request handler
    * @param runEffect executes specified effect asynchronously
    * @param port port to listen on for HTTP connections
@@ -56,7 +59,10 @@ object DefaultHttpServer {
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
    *
-   * @see [[https://undertow.io/ HTTP Server Documentation]]
+   * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
+   * @see [[https://undertow.io Library documentation]]
+   * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
    * @param system effect system plugin
    * @param runEffect executes specified effect asynchronously
    * @param bindApis function to bind APIs to the underlying handler
@@ -88,6 +94,10 @@ object DefaultHttpServer {
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
    *
+   * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
+   * @see [[https://undertow.io Library documentation]]
+   * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
    * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
@@ -117,6 +127,10 @@ object DefaultHttpServer {
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
    *
+   * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
+   * @see [[https://undertow.io Library documentation]]
+   * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
    * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
