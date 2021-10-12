@@ -22,7 +22,7 @@ object DefaultEffectSystem {
   /**
    * Creates a default asynchronous effect system plugin.
    *
-   * @see [[https://docs.scala-lang.org/overviews/core/futures.html Documentation]]
+   * @see [[https://docs.scala-lang.org/overviews/core/futures.html Library documentation]]
    * @see [[https://www.scala-lang.org/api/current/scala/concurrent/Future.html Effect type]]
    * @return asynchronous effect system plugin
    */

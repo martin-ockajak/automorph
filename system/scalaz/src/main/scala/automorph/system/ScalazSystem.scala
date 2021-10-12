@@ -6,7 +6,7 @@ import scalaz.effect.IO
 /**
  * Scalaz effect system plugin using `IO` as an effect type.
  *
- * @see [[https://github.com/scalaz Documentation]]
+ * @see [[https://github.com/scalaz Library documentation]]
  * @see [[https://www.javadoc.io/doc/org.scalaz/scalaz_2.13/latest/scalaz/effect/IO.html Effect type]]
  * @constructor Creates a Scalaz effect system plugin using `IO` as an effect type.
  */

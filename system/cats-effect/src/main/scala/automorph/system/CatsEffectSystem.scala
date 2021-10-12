@@ -6,7 +6,7 @@ import automorph.spi.EffectSystem
 /**
  * Cats Effect effect system plugin.
  *
- * @see [[https://typelevel.org/cats-effect/ Documentation]]
+ * @see [[https://typelevel.org/cats-effect/ Library documentation]]
  * @see [[https://www.javadoc.io/doc/org.typelevel/cats-effect_3/latest/cats/effect/IO.html Effect type]]
  * @constructor Creates a Cats Effect effect system plugin using `IO` as an effect type.
  */

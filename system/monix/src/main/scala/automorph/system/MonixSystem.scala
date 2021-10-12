@@ -6,7 +6,7 @@ import monix.eval.Task
 /**
  * Monix effect effect system plugin using `Task` as an effect type.
  *
- * @see [[https://monix.io/ Documentation]]
+ * @see [[https://monix.io/ Library documentation]]
  * @see [[https://monix.io/api/current/monix/eval/Task.html Effect type]]
  * @constructor Creates a Monix effect system plugin using `Task` as an effect type.
  */

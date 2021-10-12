@@ -7,7 +7,7 @@ import scala.util.Success
 /**
  * Asynchronous effect system plugin using Future as an effect type.
  *
- * @see [[https://docs.scala-lang.org/overviews/core/futures.html Documentation]]
+ * @see [[https://docs.scala-lang.org/overviews/core/futures.html Library documentation]]
  * @see [[https://www.scala-lang.org/api/current/scala/concurrent/Future.html Effect type]]
  * @constructor Creates an asynchronous effect system plugin using `Future` as an effect type.
  * @param executionContext execution context
