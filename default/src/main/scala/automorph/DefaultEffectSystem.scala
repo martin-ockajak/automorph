@@ -20,7 +20,7 @@ object DefaultEffectSystem {
   type SyncType = EffectSystem[Identity]
 
   /**
-   * Creates a default asynchronous `Future` effect system plugin.
+   * Creates an asynchronous `Future` effect system plugin.
    *
    * @see [[https://docs.scala-lang.org/overviews/core/futures.html Library documentation]]
    * @see [[https://www.scala-lang.org/api/current/scala/concurrent/Future.html Effect type]]
@@ -29,7 +29,7 @@ object DefaultEffectSystem {
   def async(implicit executionContext: ExecutionContext): AsyncType = FutureSystem()
 
   /**
-   * Creates a default synchronous identity effect system plugin.
+   * Creates a synchronous identity effect system plugin.
    *
    * @see [[https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem$$Identity.html Effect type]]
    * @return synchronous effect system plugin

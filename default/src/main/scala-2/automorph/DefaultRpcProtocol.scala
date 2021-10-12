@@ -16,7 +16,7 @@ object DefaultRpcProtocol {
   type Type[Node, Codec <: MessageCodec[Node]] = JsonRpcProtocol[Node, Codec]
 
   /**
-   * Creates a default JSON-RPC protocol plugin.
+   * Creates a JSON-RPC protocol plugin.
    *
    * @see [[https://www.jsonrpc.org/specification Protocol specification]]
    * @return RPC protocol plugin
@@ -25,7 +25,7 @@ object DefaultRpcProtocol {
     JsonRpcProtocol(DefaultMessageCodec(), JsonRpcProtocol.defaultErrorToException, JsonRpcProtocol.defaultExceptionToError)
 
   /**
-   * Creates a default JSON-RPC protocol plugin with specified message codec plugin.
+   * Creates a JSON-RPC protocol plugin with specified message codec plugin.
    *
    * @see [[https://www.jsonrpc.org/specification Protocol specification]]
    * @param codec message codec plugin

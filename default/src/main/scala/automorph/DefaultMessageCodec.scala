@@ -11,7 +11,7 @@ object DefaultMessageCodec {
   type Type = CirceJsonCodec
 
   /**
-   * Creates a default Circe JSON message codec plugin.
+   * Creates a Circe JSON message codec plugin.
    *
    * @see [[https://www.json.org Message format]]
    * @see [[https://circe.github.io/circe Library documentation]]
