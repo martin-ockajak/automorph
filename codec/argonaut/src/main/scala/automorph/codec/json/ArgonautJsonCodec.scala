@@ -8,8 +8,8 @@ import scala.collection.immutable.ArraySeq
 /**
  * Argonaut JSON message codec plugin.
  *
- * @see [[https://www.json.org Format]]
- * @see [[http://argonaut.io/doc Documentation]]
+ * @see [[https://www.json.org Message format]]
+ * @see [[http://argonaut.io/doc Library documentation]]
  * @see [[http://argonaut.io/scaladocs/#argonaut.Json Node type]]
  * @constructor Creates an Argonaut codec plugin using JSON as message format.
  */

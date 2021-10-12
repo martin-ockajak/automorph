@@ -6,8 +6,8 @@ import upack.Msg
 /**
  * uPickle MessagePack message codec plugin.
  *
- * @see [[https://msgpack.org MessagePack]]
- * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
+ * @see [[https://msgpack.org Message format]]
+ * @see [[https://github.com/com-lihaoyi/upickle Library documentation]]
  * @see [[https://com-lihaoyi.github.io/upickle/#uPack Node type]]
  * @constructor Creates a uPickle codec plugin using MessagePack as message format.
  * @param custom customized Upickle reader and writer implicits instance

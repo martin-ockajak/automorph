@@ -8,7 +8,7 @@ import automorph.spi.{MessageCodec, RpcProtocol}
  * JSON-RPC protocol plugin.
  *
  * @constructor Creates a JSON-RPC protocol plugin.
- * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+ * @see [[https://www.jsonrpc.org/specification Protocol specification]]
  * @param codec message codec plugin
  * @param errorToException maps a JSON-RPC error to a corresponding exception
  * @param exceptionToError maps an exception to a corresponding JSON-RPC error

@@ -8,7 +8,7 @@ import scala.reflect.macros.blackbox
 object DefaultRpcProtocol {
 
   /**
-   * Default RPC ''protocol'' plugin type.
+   * Default RPC protocol plugin type.
    *
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
@@ -16,20 +16,22 @@ object DefaultRpcProtocol {
   type Type[Node, Codec <: MessageCodec[Node]] = JsonRpcProtocol[Node, Codec]
 
   /**
-   * Creates a default RPC ''protocol'' plugin.
+   * Creates a default JSON-RPC protocol plugin.
    *
-   * @return RPC ''protocol'' plugin
+   * @see [[https://www.jsonrpc.org/specification Protocol specification]]
+   * @return RPC protocol plugin
    */
   def apply(): Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
     JsonRpcProtocol(DefaultMessageCodec(), JsonRpcProtocol.defaultErrorToException, JsonRpcProtocol.defaultExceptionToError)
 
   /**
-   * Creates a default RPC ''protocol'' plugin with specified message ''codec'' plugin.
+   * Creates a default JSON-RPC protocol plugin with specified message codec plugin.
    *
-   * @param codec message ''codec'' plugin
+   * @see [[https://www.jsonrpc.org/specification Protocol specification]]
+   * @param codec message codec plugin
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
-   * @return RPC ''protocol'' plugin
+   * @return RPC protocol plugin
    */
   def apply[Node, Codec <: MessageCodec[Node]](codec: Codec): Type[Node, Codec] =
     macro applyMacro[Node, Codec]

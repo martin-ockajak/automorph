@@ -6,7 +6,7 @@ import zio.RIO
 /**
  * ZIO effect system plugin using `RIO` as an effect type.
  *
- * @see [[https://zio.dev Documentation]]
+ * @see [[https://zio.dev Library documentation]]
  * @see [[https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html Effect type]]
  * @constructor Creates a ZIO effect system plugin using `RIO` as an effect type.
  * @tparam Environment ZIO environment type

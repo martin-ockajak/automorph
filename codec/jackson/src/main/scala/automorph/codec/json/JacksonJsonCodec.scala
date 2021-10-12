@@ -18,8 +18,8 @@ import scala.util.Try
 /**
  * Jackson message codec plugin.
  *
- * @see [[https://www.json.org Format]]
- * @see [[https://github.com/FasterXML/jackson Documentation]]
+ * @see [[https://www.json.org Message format]]
+ * @see [[https://github.com/FasterXML/jackson Library documentation]]
  * @see [[https://fasterxml.github.io/jackson-databind/javadoc/2.12/com/fasterxml/jackson/databind/JsonNode.html Node type]]
  * @constructor Creates a Jackson codec plugin using JSON as message format.
  * @param objectMapper Jackson object mapper

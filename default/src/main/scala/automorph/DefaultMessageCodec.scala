@@ -13,8 +13,8 @@ object DefaultMessageCodec {
   /**
    * Creates a default JSON message codec plugin.
    *
-   * @see [[https://www.json.org Format]]
-   * @see [[https://circe.github.io/circe Documentation]]
+   * @see [[https://www.json.org Message format]]
+   * @see [[https://circe.github.io/circe Library documentation]]
    * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
    * @return message codec plugin
    */
