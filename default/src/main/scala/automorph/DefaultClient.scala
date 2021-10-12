@@ -61,6 +61,6 @@ object DefaultClient {
    *
    * @return RPC request ''client'' builder
    */
-  def apply(): ProtocolClientBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
+  def builder: ProtocolClientBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
     Client.protocol(DefaultRpcProtocol())
 }

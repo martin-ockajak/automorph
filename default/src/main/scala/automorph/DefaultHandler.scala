@@ -44,6 +44,6 @@ object DefaultHandler {
    *
    * @return RPC request ''handler'' builder
    */
-  def apply(): ProtocolHandlerBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
+  def builder: ProtocolHandlerBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
     Handler.protocol(DefaultRpcProtocol())
 }
