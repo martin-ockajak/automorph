@@ -51,7 +51,7 @@ final case class NanoHttpdServer[Effect[_]] private (
 
   override def serve(session: IHTTPSession): Response = {
 // FIXME - remove
-//    println(Bytes.string.to(Bytes.inputStream.from(session.getInputStream)))
+    println(s"RECEIVING REQUEST\n${Bytes.string.to(Bytes.inputStream.from(session.getInputStream))}")
     // Receive the request
     logger.trace("Receiving HTTP request", Map("Client" -> clientAddress(session)))
     val request = Bytes.inputStream.from(session.getInputStream)
