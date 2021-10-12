@@ -58,10 +58,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
    * @param details corresponding RPC request details
    * @return RPC response
    */
-  def createResponse(
-    result: Try[Node],
-    details: Metadata
-  ): Try[RpcResponse[Node, Metadata]]
+  def createResponse(result: Try[Node], details: Metadata): Try[RpcResponse[Node, Metadata]]
 
   /**
    * Parses an RPC response.
