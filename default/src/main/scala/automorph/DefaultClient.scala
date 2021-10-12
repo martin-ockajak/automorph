@@ -51,7 +51,6 @@ object DefaultClient {
    * @tparam Context request context type
    * @return synchronous RPC ''client''
    */
-  def sync[Context](
-    transport: ClientMessageTransport[Identity, Context]
-  ): Type[Identity, Context] = DefaultClient(transport)
+  def sync[Context](transport: ClientMessageTransport[Identity, Context]): Type[Identity, Context] =
+    DefaultClient(transport)
 }
