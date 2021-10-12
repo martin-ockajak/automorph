@@ -7,6 +7,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object DefaultEffectSystem {
 
+  /** Default synchronous effect type. */
+  type SyncEffect[T] = Future[T]
+
+  /** Default asynchronous effect type. */
+  type AsyncEffect[T] = Identity[T]
+
   /**
    * Creates a default asynchronous effect ''system'' plugin using `Future` as an effect type.
    *
