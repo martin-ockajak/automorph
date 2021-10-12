@@ -1,9 +1,11 @@
 package test.examples
 
+import automorph.{DefaultHttpClient, DefaultHttpServer}
+import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object AsynchronousDefault extends App {
+object Asynchronous extends App {
 
   // Define an API type and create API instance
   class Api {
@@ -12,11 +14,10 @@ object AsynchronousDefault extends App {
   val api = new Api()
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val server = automorph.DefaultHttpServer.async(_.bind(api), 80, "/api")
+  val server = DefaultHttpServer.async(_.bind(api), 80, "/api")
 
-  // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val url = new java.net.URI("http://localhost/api")
-  val client = automorph.DefaultHttpClient.async(url, "POST")
+  // Create RPC client sending HTTP POST requests to 'http://localhost/api'
+  val client = DefaultHttpClient.async(new URI("http://localhost/api"), "POST")
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api
@@ -42,10 +43,10 @@ object AsynchronousDefault extends App {
   server.close()
 }
 
-class AsynchronousDefault extends test.base.BaseSpec {
+class Asynchronous extends test.base.BaseSpec {
   "" - {
     "Test" ignore {
-      AsynchronousDefault.main(Array())
+      Asynchronous.main(Array())
     }
   }
 }

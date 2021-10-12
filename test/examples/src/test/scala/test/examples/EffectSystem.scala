@@ -2,6 +2,7 @@ package test.examples
 
 import automorph.system.ZioSystem
 import automorph.{DefaultHttpClient, DefaultHttpServer}
+import java.net.URI
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio.{Runtime, Task}
@@ -21,10 +22,9 @@ object EffectSystem extends App {
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
   val server = DefaultHttpServer.system(system, unsafeRunTask, _.bind(api), 80, "/api")
 
-  // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val url = new java.net.URI("http://localhost/api")
+  // Create RPC client sending HTTP POST requests to 'http://localhost/api'
   val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
-  val client = DefaultHttpClient(url, "POST", backend, system)
+  val client = DefaultHttpClient(new URI("http://localhost/api"), "POST", backend, system)
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api

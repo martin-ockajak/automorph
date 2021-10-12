@@ -20,11 +20,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
   /** Protocol name. */
   val name: String
 
-  /**
-   * Message codec plugin.
-   *
-   * @return message codec plugin
-   */
+  /** Message ''codec'' plugin. */
   val codec: Codec
 
   /**

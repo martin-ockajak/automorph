@@ -78,7 +78,7 @@ object DefaultHttpServer {
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
   ): Type[Effect] = {
-    val handler = bindApis(DefaultHandler(system))
+    val handler = bindApis(DefaultHandler.builder.system(system).context[DefaultHttpServer.Context].build)
     DefaultHttpServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
   }
 

@@ -1,6 +1,6 @@
 package automorph.spi.transport
 
-import automorph.spi.MessageTransport
+import automorph.spi.{EffectSystem, MessageTransport}
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -14,6 +14,9 @@ import scala.collection.immutable.ArraySeq
  * @tparam Context request context type
  */
 trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
+
+  /** Effect ''system'' plugin. */
+  val system: EffectSystem[Effect]
 
   /**
    * Sends a ''request'' to a remote endpoint and retrieves the ''response''.

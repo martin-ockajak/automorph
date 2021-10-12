@@ -3,6 +3,7 @@ package test.examples
 import automorph.system.IdentitySystem
 import automorph.transport.http.client.HttpUrlConnectionClient
 import automorph.{DefaultClient, DefaultHttpServer}
+import java.net.URI
 
 object ClientMessageTransport extends App {
 
@@ -15,9 +16,8 @@ object ClientMessageTransport extends App {
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
   val server = DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
-  // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val url = new java.net.URI("http://localhost/api")
-  val transport = HttpUrlConnectionClient(url, "POST", IdentitySystem())
+  // Create RPC client sending HTTP POST requests to 'http://localhost/api'
+  val transport = HttpUrlConnectionClient(new URI("http://localhost/api"), "POST", IdentitySystem())
   val client = DefaultClient.sync(transport)
 
   // Call the remote API method via proxy

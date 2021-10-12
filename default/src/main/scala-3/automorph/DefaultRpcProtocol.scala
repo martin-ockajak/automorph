@@ -8,7 +8,7 @@ import io.circe.{Decoder, Encoder}
 object DefaultRpcProtocol:
 
   /**
-   * Default RPC protocol plugin type.
+   * Default RPC ''protocol'' plugin type.
    *
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
@@ -16,18 +16,18 @@ object DefaultRpcProtocol:
   type Type[Node, Codec <: MessageCodec[Node]] = JsonRpcProtocol[Node, Codec]
 
   /**
-   * Creates a default RPC protocol plugin.
+   * Creates a default RPC ''protocol'' plugin.
    *
-   * @return RPC protocol plugin
+   * @return RPC ''protocol'' plugin
    */
   def apply(): Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
     JsonRpcProtocol(DefaultMessageCodec())
 
   /**
-   * Creates a default RPC protocol plugin with specified message ''codec'' plugin.
+   * Creates a default RPC ''protocol'' plugin with specified message ''codec'' plugin.
    *
-   * @param codec message codec plugin
-   * @return RPC protocol plugin
+   * @param codec message ''codec'' plugin
+   * @return RPC ''protocol'' plugin
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    */

@@ -59,7 +59,6 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
 
   override def toString: String = {
     val plugins = Map(
-      "system" -> system,
       "transport" -> transport,
       "protocol" -> protocol
     ).map { case (name, plugin) => s"$name = ${plugin.getClass.getName}" }.mkString(", ")

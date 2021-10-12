@@ -16,24 +16,20 @@ object DefaultClient {
   type Type[Effect[_], Context] = Client[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Effect, Context]
 
   /**
-   * Creates a default RPC client with specified ''system'' and ''transport'' plugins accepting corresponding request context type.
+   * Creates a default RPC client with specified ''system'' and ''transport'' plugins accepting given request context type.
    *
    * The client can be used to perform RPC calls and notifications.
    *
-   * @param system effect system plugin
    * @param transport message transport protocol plugin
    * @tparam Effect effect type
    * @tparam Context request context type
    * @return RPC client
    */
-  def apply[Effect[_], Context](
-    system: EffectSystem[Effect],
-    transport: ClientMessageTransport[Effect, Context]
-  ): Client[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Effect, Context] =
-    Client(system, DefaultRpcProtocol(), transport)
+  def apply[Effect[_], Context](transport: ClientMessageTransport[Effect, Context]): Type[Effect, Context] =
+    Client(DefaultRpcProtocol(), transport)
 
   /**
-   * Creates a default asynchronous RPC client with specified message ''transport'' plugin using 'Future' as an effect type and accepting corresponding request context type.
+   * Creates a default asynchronous RPC client with specified message ''transport'' plugin using 'Future' as an effect type and accepting given request context type.
    *
    * The client can be used to perform RPC calls and notifications.
    *
@@ -44,10 +40,10 @@ object DefaultClient {
    */
   def async[Context](transport: ClientMessageTransport[Future, Context])(implicit
     executionContext: ExecutionContext
-  ): Type[Future, Context] = DefaultClient(DefaultEffectSystem.async, transport)
+  ): Type[Future, Context] = DefaultClient(transport)
 
   /**
-   * Creates a default asynchronous RPC client with specified message ''transport'' plugin using identity as an effect type and accepting corresponding request context type.
+   * Creates a default asynchronous RPC client with specified message ''transport'' plugin using identity as an effect type and accepting given request context type.
    *
    * The client can be used to perform RPC calls and notifications.
    *
@@ -57,5 +53,5 @@ object DefaultClient {
    */
   def sync[Context](
     transport: ClientMessageTransport[Identity, Context]
-  ): Type[Identity, Context] = DefaultClient(DefaultEffectSystem.sync, transport)
+  ): Type[Identity, Context] = DefaultClient(transport)
 }

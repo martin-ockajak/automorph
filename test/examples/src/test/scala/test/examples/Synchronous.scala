@@ -1,6 +1,9 @@
 package test.examples
 
-object SynchronousDefault extends App {
+import automorph.{DefaultHttpClient, DefaultHttpServer}
+import java.net.URI
+
+object Synchronous extends App {
 
   // Define an API type and create API instance
   class Api {
@@ -9,11 +12,10 @@ object SynchronousDefault extends App {
   val api = new Api()
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val server = automorph.DefaultHttpServer.sync(_.bind(api), 80, "/api")
+  val server = DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
-  // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val url = new java.net.URI("http://localhost/api")
-  val client = automorph.DefaultHttpClient.sync(url, "POST")
+  // Create RPC client sending HTTP POST requests to 'http://localhost/api'
+  val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api
@@ -26,10 +28,10 @@ object SynchronousDefault extends App {
   server.close()
 }
 
-class SynchronousDefault extends test.base.BaseSpec {
+class Synchronous extends test.base.BaseSpec {
   "" - {
     "Test" ignore {
-      SynchronousDefault.main(Array())
+      Synchronous.main(Array())
     }
   }
 }

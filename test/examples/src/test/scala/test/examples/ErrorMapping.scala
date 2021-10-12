@@ -3,6 +3,7 @@ package test.examples
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.transport.http.Http
 import automorph.{DefaultHttpClient, DefaultHttpServer, DefaultRpcProtocol}
+import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -40,9 +41,8 @@ object ErrorMapping extends App {
     case (message, code) => defaultProtocol.errorToException(message, code)
   }
 
-  // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val url = new java.net.URI("http://localhost/api")
-  val client = DefaultHttpClient.async(url, "POST").protocol(clientProtocol)
+  // Create RPC client sending HTTP POST requests to 'http://localhost/api'
+  val client = DefaultHttpClient.async(new URI("http://localhost/api"), "POST").protocol(clientProtocol)
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api

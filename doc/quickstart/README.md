@@ -17,6 +17,7 @@ libraryDependencies += "org.automorph" %% "automorph-default" % "0.0.1"
 Take an existing asynchronous API:
 
 ```scala
+import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -45,9 +46,8 @@ server.close()
 Invoke the API via JSON-RPC over HTTP(S).
 
 ```scala
-// Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-val url = new java.net.URI("http://localhost/api")
-val client = automorph.DefaultHttpClient.async(url, "POST")
+// Create RPC client sending HTTP POST requests to 'http://localhost/api'
+val client = automorph.DefaultHttpClient.async(new URI("http://localhost/api"), "POST")
 
 // Call the remote API method via proxy
 val apiProxy = client.bind[Api] // Api

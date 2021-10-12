@@ -2,6 +2,7 @@ package test.examples
 
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, DefaultRpcProtocol, Handler}
+import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -18,25 +19,18 @@ object MessageCodec extends App {
   // Create message codec and custom data type serializer/deserializer
   val codec = UpickleMessagePackCodec()
   implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
+  val protocol = DefaultRpcProtocol[UpickleMessagePackCodec.Node, codec.type](codec)
 
   // Create an effect system plugin
   val system = DefaultEffectSystem.async
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val protocol = DefaultRpcProtocol[UpickleMessagePackCodec.Node, codec.type](codec)
-  val server = DefaultHttpServer(Handler(
-    system,
-    protocol
-  ).bind(api), identity, 80, "/api")
+  val handler = Handler.builder.protocol(protocol).system(system).context[DefaultHttpServer.Context].build
+  val server = DefaultHttpServer(handler.bind(api), identity, 80, "/api")
 
-  // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val url = new java.net.URI("http://localhost/api")
-  val transport = DefaultHttpClientTransport.async(url, "POST")
-  val client = Client(
-    system,
-    protocol,
-    transport
-  )
+  // Create RPC client sending HTTP POST requests to 'http://localhost/api'
+  val transport = DefaultHttpClientTransport.async(new URI("http://localhost/api"), "POST")
+  val client = Client(protocol, transport)
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api

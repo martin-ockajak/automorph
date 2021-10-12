@@ -1,5 +1,8 @@
 package test.examples
 
+import automorph.{DefaultHttpClient, DefaultHttpServer}
+import java.net.URI
+
 object MethodMapping extends App {
 
   // Define an API type and create API instance
@@ -23,11 +26,10 @@ object MethodMapping extends App {
   }
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val server = automorph.DefaultHttpServer.sync(_.bind(api, methodAliases(_)), 80, "/api")
+  val server = DefaultHttpServer.sync(_.bind(api, methodAliases(_)), 80, "/api")
 
-  // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val url = new java.net.URI("http://localhost/api")
-  val client = automorph.DefaultHttpClient.sync(url, "POST")
+  // Create RPC client sending HTTP POST requests to 'http://localhost/api'
+  val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
   // Call the remote API method via proxy
   client.method("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2

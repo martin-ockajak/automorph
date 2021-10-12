@@ -37,7 +37,7 @@ object DefaultHttpClient {
     method: String,
     backend: SttpBackend[Effect, _],
     system: EffectSystem[Effect]
-  ): Type[Effect] = DefaultClient(system, DefaultHttpClientTransport(url, method, backend, system))
+  ): Type[Effect] = DefaultClient(DefaultHttpClientTransport(url, method, backend, system))
 
   /**
    * Creates a default asynchronous RPC client using HTTP as message transport protocol and 'Future' as an effect type.

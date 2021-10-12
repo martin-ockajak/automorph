@@ -1,14 +1,17 @@
 package test.examples
 
+import automorph.DefaultHttpServer.{Context => ServerContext}
+import automorph.DefaultHttpClient.{Context => ClientContext}
+import automorph.{DefaultHttpClient, DefaultHttpServer}
+import java.net.URI
+
 object RequestMetadata extends App {
 
   // Define server API type and create API instance
   class ServerApi {
 
-    import automorph.DefaultHttpServer.Context
-
-    // Use HTTP request metadata context provided by the message transport plugin
-    def useMetadata(message: String)(implicit request: Context): String = Seq(
+    // Use HTTP request metadata context provided by the server message transport plugin
+    def useMetadata(message: String)(implicit request: ServerContext): String = Seq(
       Some(message),
       request.path,
       request.header("X-Test")
@@ -19,18 +22,15 @@ object RequestMetadata extends App {
   // Define client view of the server API
   trait ClientApi {
 
-    import automorph.DefaultHttpClient.Context
-
-    // Recognize HTTP request metadata context defined by the message transport plugin
-    def useMetadata(message: String)(implicit request: Context): String
+    // Use HTTP request metadata context defined by the client message transport plugin
+    def useMetadata(message: String)(implicit request: ClientContext): String
   }
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val server = automorph.DefaultHttpServer.sync(_.bind(api), 80, "/api")
+  val server = DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
-  // Create RPC client for sending HTTP POST requests to 'http://localhost/api'
-  val url = new java.net.URI("http://localhost/api")
-  val client = automorph.DefaultHttpClient.sync(url, "POST")
+  // Create RPC client sending HTTP POST requests to 'http://localhost/api'
+  val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
   // Create client request context specifying HTTP request meta-data
   val apiProxy = client.bind[ClientApi] // Api
