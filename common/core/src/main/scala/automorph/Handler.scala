@@ -7,11 +7,11 @@ import automorph.util.{CannotEqual, EmptyContext}
 import scala.collection.immutable.ListMap
 
 /**
- * RPC request handler.
+ * RPC request ''handler''.
  *
  * Used by RPC servers to invoke bound API methods based on incoming requests.
  *
- * @constructor Creates a new RPC request handler with specified ''system'' and ''protocol'' plugins providing corresponding request context type.
+ * @constructor Creates a new RPC request ''handler'' with specified ''system'' and ''protocol'' plugins providing corresponding request context type.
  * @param protocol RPC ''protocol'' plugin
  * @param system effect ''system'' plugin
  * @param bindings API method bindings
@@ -36,12 +36,12 @@ object Handler {
   type AnyCodec[Effect[_], Context] = Handler[_, _, Effect, Context]
 
   /**
-   * Creates an RPC request handler builder with specified RPC ''protocol'' plugin.
+   * Creates an RPC request ''handler'' builder with specified RPC ''protocol'' plugin.
    *
    * @param protocol RPC ''protocol'' plugin
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
-   * @return RPC request handler builder
+   * @return RPC request ''handler'' builder
    */
   def protocol[Node, Codec <: MessageCodec[Node]](
     protocol: RpcProtocol[Node, Codec]
@@ -49,11 +49,11 @@ object Handler {
     ProtocolHandlerBuilder(protocol)
 
   /**
-   * Creates an RPC request handler builder with specified effect ''system'' plugin.
+   * Creates an RPC request ''handler'' builder with specified effect ''system'' plugin.
    *
    * @param system effect ''system'' plugin
    * @tparam Effect effect type
-   * @return RPC request handler builder
+   * @return RPC request ''handler'' builder
    */
   def system[Effect[_]](system: EffectSystem[Effect]): SystemHandlerBuilder[Effect] =
     SystemHandlerBuilder(system)

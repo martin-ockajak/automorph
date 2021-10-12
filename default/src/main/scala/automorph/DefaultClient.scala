@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.client.ClientBuilder
+import automorph.client.ProtocolClientBuilder
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
@@ -62,6 +62,6 @@ object DefaultClient {
    *
    * @return RPC request ''client'' builder
    */
-  def builder: ClientBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Identity, EmptyContext.Value] =
-    ClientBuilder().protocol(DefaultRpcProtocol())
+  def builder: ProtocolClientBuilder[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
+    Client.protocol(DefaultRpcProtocol())
 }

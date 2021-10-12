@@ -40,7 +40,7 @@ object ErrorMapping extends App {
 
   // Create RPC client sending HTTP POST requests to 'http://localhost/api'
   val transport = DefaultHttpClientTransport.async(new URI("http://localhost/api"), "POST")
-  val client = Client.builder.protocol(clientProtocol).transport(transport).build
+  val client = Client.protocol(clientProtocol).transport(transport)
 
   // Call the remote API method via proxy
   val apiProxy = client.bind[Api] // Api

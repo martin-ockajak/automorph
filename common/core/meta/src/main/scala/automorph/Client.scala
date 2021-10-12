@@ -1,17 +1,17 @@
 package automorph
 
-import automorph.client.{ClientBuilder, ClientCore, ClientMeta}
+import automorph.client.{ClientCore, ClientMeta, ProtocolClientBuilder, TransportClientBuilder}
 import automorph.log.Logging
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.{CannotEqual, EmptyContext}
 
 /**
- * RPC client.
+ * RPC ''client''.
  *
  * Used to perform remote API calls and notifications.
  *
- * @constructor Creates a RPC client with specified ''protocol'' and ''transport'' plugins accepting corresponding request context type.
+ * @constructor Creates a RPC ''client'' with specified ''protocol'' and ''transport'' plugins accepting corresponding request context type.
  * @param protocol RPC ''protocol'' plugin
  * @param transport message ''transport'' plugin
  * @tparam Node message node type
@@ -32,30 +32,28 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
 object Client {
 
   /**
-   * Creates a RPC client with specified ''protocol'' and ''transport'' plugins without accepting request context.
+   * Creates an RPC ''client'' builder with specified RPC ''protocol'' plugin.
    *
-   * The client can be used to perform RPC calls and notifications.
-   *
-   * @param protocol RPC protocol
-   * @param transport message transport protocol plugin
+   * @param protocol RPC ''protocol'' plugin
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
-   * @tparam Effect effect type
-   * @return RPC client
+   * @return RPC ''client'' builder
    */
-  def withoutContext[Node, Codec <: MessageCodec[Node], Effect[_]](
-    protocol: RpcProtocol[Node, Codec],
-    transport: ClientMessageTransport[Effect, EmptyContext.Value]
-  ): Client[Node, Codec, Effect, EmptyContext.Value] = Client(protocol, transport)
+  def protocol[Node, Codec <: MessageCodec[Node]](
+    protocol: RpcProtocol[Node, Codec]
+  ): ProtocolClientBuilder[Node, Codec] =
+    ProtocolClientBuilder(protocol)
 
   /**
-   * Creates an RPC client builder.
+   * Creates an RPC ''client'' builder with specified effect ''transport'' plugin.
    *
-   * @tparam Node message node type
-   * @tparam Codec message codec plugin type
+   * @param transport message ''transport'' plugin
    * @tparam Effect effect type
-   * @return RPC request handler builder
+   * @tparam Context request context type
+   * @return RPC ''client'' builder
    */
-  def builder[Node, Codec <: MessageCodec[Node], Effect[_]]: ClientBuilder[Node, Codec, Effect, EmptyContext.Value] =
-    ClientBuilder()
+  def transport[Effect[_], Context](
+    transport: ClientMessageTransport[Effect, Context]
+  ): TransportClientBuilder[Effect, Context] =
+    TransportClientBuilder(transport)
 }
