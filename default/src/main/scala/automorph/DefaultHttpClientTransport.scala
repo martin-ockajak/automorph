@@ -22,7 +22,7 @@ object DefaultHttpClientTransport {
   type Context = SttpClient.Context
 
   /**
-   * Creates an STTP HTTP client message transport plugin with specified effect system plugin.
+   * Creates an STTP HTTP & WebSocket client message transport plugin with specified effect system plugin.
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
@@ -44,7 +44,7 @@ object DefaultHttpClientTransport {
   ): Type[Effect] = DefaultHttpClientTransport(url, method, backend, system)
 
   /**
-   * Creates an asynchronous STTP HTTP client message transport plugin using 'Future' as an effect type.
+   * Creates an asynchronous STTP HTTP & WebSocket client message transport plugin using 'Future' as an effect type.
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
@@ -61,7 +61,7 @@ object DefaultHttpClientTransport {
     DefaultHttpClientTransport(url, method, AsyncHttpClientFutureBackend(), DefaultEffectSystem.async)
 
   /**
-   * Creates a synchronous STTP HTTP client message transport plugin using identity as an effect type.
+   * Creates a synchronous STTP HTTP & WebSocket client message transport plugin using identity as an effect type.
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]

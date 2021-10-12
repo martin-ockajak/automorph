@@ -24,7 +24,7 @@ object DefaultHttpServer {
   type Handler[Effect[_]] = DefaultHandler.Type[Effect, Context]
 
   /**
-   * Creates a default RPC server using HTTP as message transport protocol with specified RPC request handler.
+   * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -54,7 +54,7 @@ object DefaultHttpServer {
   ): Type[Effect] = UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
 
   /**
-   * Creates a default RPC server using HTTP as message transport protocol with specified effect system plugin.
+   * Creates an Undertow JSON-RPC over HTTP & WebSocket server with specified effect system plugin.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -89,7 +89,7 @@ object DefaultHttpServer {
   }
 
   /**
-   * Creates a default asynchronous RPC server using HTTP as message transport protocol and 'Future' as an effect type.
+   * Creates an asynchronous Undertow JSON-RPC over HTTP & WebSocket server using 'Future' as an effect type.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -122,7 +122,7 @@ object DefaultHttpServer {
   }
 
   /**
-   * Creates a default synchronous RPC server using HTTP as message transport protocol and identity as an effect type.
+   * Creates a synchronous Undertow JSON-RPC over HTTP & WebSocket server using identity as an effect type.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
