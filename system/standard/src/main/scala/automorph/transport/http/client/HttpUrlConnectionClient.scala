@@ -60,7 +60,12 @@ final case class HttpUrlConnectionClient[Effect[_]](
     )
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] =
-    system.map(send(request, mediaType, context), (_: (HttpURLConnection, ArraySeq.ofByte)) => ())
+    system.map(
+      send(request, mediaType, context),
+      (_: EffectValue) match {
+        case (connection: HttpURLConnection, _) => clearRequestProperties(connection, context.getOrElse(defaultContext))
+      }
+    )
 
   override def defaultContext: Context = HttpUrlConnectionContext.default
 
