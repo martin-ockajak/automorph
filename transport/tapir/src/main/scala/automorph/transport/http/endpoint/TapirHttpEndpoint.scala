@@ -15,12 +15,14 @@ import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.{CodecFormat, byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode, webSocketBody}
 
 /**
- * Tapir endpoint endpoint transport plugin using HTTP as message transport protocol.
+ * Tapir HTTP endpoint message transport plugin.
  *
  * The endpoint interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
  * The response returned by the RPC handler is used as HTTP response body.
  *
- * @see [[https://tapir.softwaremill.com Documentation]]
+ * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see [[https://tapir.softwaremill.com Library documentation]]
+ * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
  */
 object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 
@@ -34,12 +36,13 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
   type XRequestType = (List[String], QueryParams, List[Header], List[Cookie], Option[String])
 
   /**
-   * Creates a Tapir HTTP endpoint with the specified RPC request ''handler''.
+   * Creates a Tapir HTTP endpoint with the specified RPC request handler.
    *
    * The endpoint interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
    * The response returned by the RPC handler is used as HTTP response body.
    *
-   * @see [[https://tapir.softwaremill.com/ Documentation]]
+   * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   * @see [[https://tapir.softwaremill.com Library documentation]]
    * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
    * @param handler RPC request handler
    * @param method HTTP method to server
@@ -83,7 +86,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 
 // FIXME - finish WebSocket support
 //  /**
-//   * Creates a Tapir HTTP endpoint with the specified RPC request ''handler''.
+//   * Creates a Tapir HTTP endpoint with the specified RPC request handler.
 //   *
 //   * The endpoint interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
 //   * The response returned by the RPC handler is used as HTTP response body.

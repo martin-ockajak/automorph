@@ -14,7 +14,7 @@ import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise}
 
 /**
- * Finagle RPC system endpoint transport plugin using HTTP as message transport protocol.
+ * Finagle RPC system HTTP endpoint message transport plugin.
  *
  * The service interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
  * The response returned by the RPC handler is used as HTTP response body.
@@ -22,7 +22,7 @@ import com.twitter.util.{Future, Promise}
  * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
  * @see [[https://twitter.github.io/finagle Library documentation]]
  * @see [[https://twitter.github.io/finagle/docs/com/twitter/finagle/ API]]
- * @constructor Creates a Finagle RPC system HTTP service with the specified RPC request ''handler''.
+ * @constructor Creates a Finagle RPC system HTTP service with the specified RPC request handler.
  * @param handler RPC request handler
  * @param runEffect executes specified effect asynchronously
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code

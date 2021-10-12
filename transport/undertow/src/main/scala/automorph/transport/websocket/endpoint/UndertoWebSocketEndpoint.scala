@@ -17,7 +17,7 @@ import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 
 /**
- * Undertow web server endpoint transport plugin using WebSocket as message transport protocol.
+ * Undertow web server WebSocket endpoint message transport plugin.
  *
  * The handler interprets WebSocket request message as an RPC request and processes it using the specified RPC handler.
  * The response returned by the RPC handler is used as WebSocket response message.
@@ -25,11 +25,12 @@ import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 object UndertowWebSocketEndpoint {
 
   /**
-   * Creates an Undertow web server WebSocket handler with the specified RPC request ''handler''.
+   * Creates an Undertow web server WebSocket handler with the specified RPC request handler.
    *
    * The handler interprets WebSocket request message as an RPC request and processes it using the specified RPC handler.
    * The response returned by the RPC handler is used as WebSocket response message.
    *
+   * @see [[https://en.wikipedia.org/wiki/WebSocket Transport protocol]]
    * @see [[https://undertow.io Library documentation]]
    * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
    * @param handler RPC request handler
@@ -57,9 +58,10 @@ object UndertowWebSocketEndpoint {
  * The callback interprets WebSocket request message as an RPC request and processes it using the specified RPC handler.
  * The response returned by the RPC handler is used as WebSocket response message.
  *
- * @see [[https://undertow.io/ Documentation]]
+ * @see [[https://en.wikipedia.org/wiki/WebSocket Transport protocol]]
+ * @see [[https://undertow.io/ Library documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
- * @constructor Creates an Undertow web server WebSocket handler with the specified RPC request ''handler''.
+ * @constructor Creates an Undertow web server WebSocket handler with the specified RPC request handler.
  * @param handler RPC request handler
  * @param runEffect executes specified effect asynchronously
  * @tparam Effect effect type
@@ -165,11 +167,4 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
   }
 
   override def close(): Unit = ()
-
-  //  private def sendResponse(channel: WebSocketChannel)(message: Option[JsonRpcMessage]): Unit = {
-  //    message match {
-  //      case Some(value) => WebSockets.sendText(value.message, channel, null)
-  //      case None =>
-  //    }
-  //  }
 }

@@ -19,7 +19,7 @@ import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 import scala.util.Try
 
 /**
- * Undertow web server endpoint transport plugin using HTTP as message transport protocol.
+ * Undertow web server HTTP endpoint message transport plugin.
  *
  * The handler interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
  * The response returned by the RPC handler is used as HTTP response body.

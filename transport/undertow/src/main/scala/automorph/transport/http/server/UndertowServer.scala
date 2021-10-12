@@ -13,11 +13,16 @@ import java.net.InetSocketAddress
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
- * Undertow web server transport plugin using HTTP as message transport protocol.
+ * Undertow web server HTTP & WebSocket server transport plugin.
  *
- * The processs HTTP requests starting with specified URL path using the specified HTTP handler.
+ * The server interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
+ * The response returned by the RPC handler is used as HTTP response body.
  *
- * @see [[https://undertow.io/ Documentation]]
+ * Processes only HTTP requests starting with specified URL path.
+ *
+ * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
+ * @see [[https://undertow.io Library documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor Creates an Undertow HTTP server with the specified HTTP handler.
  * @param handler RPC request handler

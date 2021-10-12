@@ -24,7 +24,7 @@ object DefaultHttpServer {
   type Handler[Effect[_]] = DefaultHandler.Type[Effect, Context]
 
   /**
-   * Creates a default RPC ''server'' using HTTP as message transport protocol with specified RPC request ''handler''.
+   * Creates a default RPC server using HTTP as message transport protocol with specified RPC request handler.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -38,7 +38,7 @@ object DefaultHttpServer {
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @tparam Effect effect type
-   * @return RPC ''server''
+   * @return RPC server
    */
   def apply[Effect[_]](
     handler: Handler.AnyCodec[Effect, Context],
@@ -51,7 +51,7 @@ object DefaultHttpServer {
   ): Type[Effect] = UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
 
   /**
-   * Creates a default RPC ''server'' using HTTP as message transport protocol with specified effect ''system'' plugin.
+   * Creates a default RPC server using HTTP as message transport protocol with specified effect system plugin.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -66,7 +66,7 @@ object DefaultHttpServer {
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @tparam Effect effect type
-   * @return RPC ''server''
+   * @return RPC server
    */
   def system[Effect[_]](
     system: EffectSystem[Effect],
@@ -83,7 +83,7 @@ object DefaultHttpServer {
   }
 
   /**
-   * Creates a default asynchronous RPC ''server'' using HTTP as message transport protocol and 'Future' as an effect type.
+   * Creates a default asynchronous RPC server using HTTP as message transport protocol and 'Future' as an effect type.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -95,7 +95,7 @@ object DefaultHttpServer {
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @param executionContext execution context
-   * @return asynchronous RPC ''server''
+   * @return asynchronous RPC server
    */
   def async(
     bindApis: Handler[Future] => Handler[Future],
@@ -112,7 +112,7 @@ object DefaultHttpServer {
   }
 
   /**
-   * Creates a default synchronous RPC ''server'' using HTTP as message transport protocol and identity as an effect type.
+   * Creates a default synchronous RPC server using HTTP as message transport protocol and identity as an effect type.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -123,7 +123,7 @@ object DefaultHttpServer {
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
-   * @return synchronous RPC ''server''
+   * @return synchronous RPC server
    */
   def sync(
     bindApis: Handler[Identity] => Handler[Identity],
