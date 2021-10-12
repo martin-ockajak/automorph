@@ -6,8 +6,9 @@ import java.nio.charset.StandardCharsets
 import scala.collection.immutable.ArraySeq
 
 /**
- * Argonaut message codec plugin using JSON format.
+ * Argonaut JSON message codec plugin.
  *
+ * @see [[https://www.json.org Format]]
  * @see [[http://argonaut.io/doc Documentation]]
  * @see [[http://argonaut.io/scaladocs/#argonaut.Json Node type]]
  * @constructor Creates an Argonaut codec plugin using JSON as message format.

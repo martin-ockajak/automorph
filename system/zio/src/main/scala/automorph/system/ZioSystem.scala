@@ -4,11 +4,11 @@ import automorph.spi.EffectSystem
 import zio.RIO
 
 /**
- * ZIO backend plugin using `RIO` as an effect type.
+ * ZIO effect system plugin using `RIO` as an effect type.
  *
- * @see [[https://zio.dev/ Documentation]]
+ * @see [[https://zio.dev Documentation]]
  * @see [[https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html Effect type]]
- * @constructor Creates a ZIO backend plugin using `RIO` as an effect type.
+ * @constructor Creates a ZIO effect system plugin using `RIO` as an effect type.
  * @tparam Environment ZIO environment type
  */
 final case class ZioSystem[Environment]() extends EffectSystem[({ type Effect[T] = RIO[Environment, T] })#Effect] {

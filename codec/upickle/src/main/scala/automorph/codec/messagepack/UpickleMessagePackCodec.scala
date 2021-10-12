@@ -4,8 +4,9 @@ import scala.collection.immutable.ArraySeq
 import upack.Msg
 
 /**
- * uPickle message codec plugin using MessagePack format.
+ * uPickle MessagePack message codec plugin.
  *
+ * @see [[https://msgpack.org MessagePack]]
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[https://com-lihaoyi.github.io/upickle/#uPack Node type]]
  * @constructor Creates a uPickle codec plugin using MessagePack as message format.

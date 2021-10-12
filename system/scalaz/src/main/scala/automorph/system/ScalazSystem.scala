@@ -4,11 +4,11 @@ import automorph.spi.EffectSystem
 import scalaz.effect.IO
 
 /**
- * Scalaz backend plugin using `IO` as an effect type.
+ * Scalaz effect system plugin using `IO` as an effect type.
  *
  * @see [[https://github.com/scalaz Documentation]]
  * @see [[https://www.javadoc.io/doc/org.scalaz/scalaz_2.13/latest/scalaz/effect/IO.html Effect type]]
- * @constructor Creates a Scalaz backend plugin using `IO` as an effect type.
+ * @constructor Creates a Scalaz effect system plugin using `IO` as an effect type.
  */
 final case class ScalazSystem() extends EffectSystem[IO] {
 

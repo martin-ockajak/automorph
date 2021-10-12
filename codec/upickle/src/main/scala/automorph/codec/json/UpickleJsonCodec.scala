@@ -4,8 +4,9 @@ import scala.collection.immutable.ArraySeq
 import ujson.Value
 
 /**
- * uPickle message codec plugin using JSON format.
+ * uPickle JSON message codec plugin.
  *
+ * @see [[https://www.json.org Format]]
  * @see [[https://github.com/com-lihaoyi/upickle Documentation]]
  * @see [[https://com-lihaoyi.github.io/upickle/#uJson Node type]]
  * @constructor Creates an uPickle codec plugin using JSON as message format.

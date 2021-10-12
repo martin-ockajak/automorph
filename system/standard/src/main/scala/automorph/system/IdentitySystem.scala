@@ -5,12 +5,12 @@ import automorph.system.IdentitySystem.Identity
 import scala.util.Try
 
 /**
- * Synchronous backend plugin using identity as an effect type.
+ * Synchronous effect system plugin using identity as an effect type.
  *
  * Represents direct use of computed values without wrapping them in an effect.
  *
- * Effect type: original value type
- * @constructor Creates a synchronous backend plugin using identity as an effect type.
+ * @see [[https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem$$Identity.html Effect type]]
+ * @constructor Creates a synchronous effect system plugin using identity as an effect type.
  */
 final case class IdentitySystem() extends EffectSystem[Identity] {
 

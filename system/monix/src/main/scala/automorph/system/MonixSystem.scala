@@ -4,11 +4,11 @@ import automorph.spi.EffectSystem
 import monix.eval.Task
 
 /**
- * Monix effect backend plugin using `Task` as an effect type.
+ * Monix effect effect system plugin using `Task` as an effect type.
  *
  * @see [[https://monix.io/ Documentation]]
  * @see [[https://monix.io/api/current/monix/eval/Task.html Effect type]]
- * @constructor Creates a Monix backend plugin using `Task` as an effect type.
+ * @constructor Creates a Monix effect system plugin using `Task` as an effect type.
  */
 final case class MonixSystem() extends EffectSystem[Task] {
 
