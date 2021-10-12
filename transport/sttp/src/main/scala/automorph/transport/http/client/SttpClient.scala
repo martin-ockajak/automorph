@@ -13,11 +13,12 @@ import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore,
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
- * STTP HTTP client message transport plugin.
+ * STTP HTTP & WebSocket client message transport plugin.
  *
  * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
  * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
  * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
  * @constructor Creates an STTP client transport plugin with the specified STTP backend.

@@ -24,7 +24,8 @@ import scala.util.Try
  * The handler interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
  * The response returned by the RPC handler is used as HTTP response body.
  *
- * @see [[https://undertow.io/ Documentation]]
+ * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see [[https://undertow.io Library documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor Creates an Undertow web server HTTP handler with the specified RPC request ''handler''.
  * @param handler RPC request handler

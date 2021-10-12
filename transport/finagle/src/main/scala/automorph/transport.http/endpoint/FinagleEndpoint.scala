@@ -19,7 +19,8 @@ import com.twitter.util.{Future, Promise}
  * The service interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
  * The response returned by the RPC handler is used as HTTP response body.
  *
- * @see [[https://twitter.github.io/finagle/ Documentation]]
+ * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see [[https://twitter.github.io/finagle Library documentation]]
  * @see [[https://twitter.github.io/finagle/docs/com/twitter/finagle/ API]]
  * @constructor Creates a Finagle RPC system HTTP service with the specified RPC request ''handler''.
  * @param handler RPC request handler

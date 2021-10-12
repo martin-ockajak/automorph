@@ -20,7 +20,8 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
  * The servlet interprets HTTP request body as an RPC request and processes it with the specified RPC handler.
  * The response returned by the RPC handler is used as HTTP response body.
  *
- * @see [[https://www.eclipse.org/jetty/ Documentation]]
+ * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see [[https://www.eclipse.org/jetty Library documentation]]
  * @see [[https://www.eclipse.org/jetty/javadoc/jetty-11/index.html API]]
  * @constructor Creates a Jetty web server HTTP servlet with the specified RPC request ''handler''.
  * @param handler RPC request handler
