@@ -25,7 +25,6 @@ object DefaultHttpClientTransport {
    * Creates a default client message transport plugin using HTTP as messge transport protocol with specified effect system plugin.
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
-   * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
    * @param url HTTP endpoint URL
@@ -46,7 +45,6 @@ object DefaultHttpClientTransport {
    * Creates a default asynchronous client message transport plugin using HTTP as message transport protocol and 'Future' as an effect type.
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
-   * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
    * @param url HTTP endpoint URL
@@ -61,7 +59,6 @@ object DefaultHttpClientTransport {
    * Creates a default synchronous client message transport plugin using HTTP as message transport protocol and identity as an effect type.
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
-   * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
    * @param url HTTP endpoint URL
