@@ -46,10 +46,10 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
    * Parses an RPC request.
    *
    * @param request RPC request message
-   * @param function function name override, if specified it is used instead of function name obtained from the request
-   * @return RPC request on valid request message or RPC error on invalid request message
+   * @param functionName function name, if specified it is used instead of function name obtained from the request body
+   * @return RPC request if the message is valid or RPC error if the message is invalid
    */
-  def parseRequest(request: Body, function: Option[String]): Either[RpcError[Metadata], RpcRequest[Node, Metadata]]
+  def parseRequest(request: Body, functionName: Option[String]): Either[RpcError[Metadata], RpcRequest[Node, Metadata]]
 
   /**
    * Creates an RPC response.
@@ -64,7 +64,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
    * Parses an RPC response.
    *
    * @param response RPC response message
-   * @return RPC response on valid response message or RPC error on invalid response message
+   * @return RPC response if the message is valid or RPC error if the message is invalid
    */
   def parseResponse(response: Body): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
 

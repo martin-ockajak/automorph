@@ -47,7 +47,7 @@ final case class JettyEndpoint[Effect[_]](
     // Process the request
     implicit val usingContext: Context = createContext(request)
     runEffect(system.map(
-      system.either(handler.processRequest(requestMessage)),
+      system.either(handler.processRequest(requestMessage, requestId)),
       (handlerResult: Either[Throwable, HandlerResult[InputStream]]) =>
         handlerResult.fold(
           error => serverError(error, response, request, requestId, requestDetails),

@@ -5,6 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec}
+import automorph.util.Random
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -26,9 +27,10 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
 ) extends ClientMessageTransport[Effect, Context] {
 
   override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
+    val requestId = Random.id
     implicit val usingContext = context.getOrElse(defaultContext)
     system.flatMap(
-      handler.processRequest(request),
+      handler.processRequest(request, requestId),
       (result: HandlerResult[ArraySeq.ofByte]) =>
         result.response.map(response => system.pure(response)).getOrElse {
           system.failed(InvalidResponseException("Missing call response", None.orNull))
@@ -37,9 +39,10 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
   }
 
   override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
+    val requestId = Random.id
     implicit val usingContext = context.getOrElse(defaultContext)
     system.map(
-      handler.processRequest(request),
+      handler.processRequest(request, requestId),
       (_: HandlerResult[ArraySeq.ofByte]) => ()
     )
   }

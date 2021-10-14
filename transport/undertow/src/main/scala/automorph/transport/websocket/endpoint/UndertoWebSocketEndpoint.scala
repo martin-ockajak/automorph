@@ -100,7 +100,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         // Process the request
         implicit val usingContext: Context = createContext(exchange)
         runEffect(system.map(
-          system.either(handler.processRequest(request)),
+          system.either(handler.processRequest(request, requestId)),
           (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
             handlerResult.fold(
               error => sendServerError(error, exchange, channel, request, requestId, requestDetails),

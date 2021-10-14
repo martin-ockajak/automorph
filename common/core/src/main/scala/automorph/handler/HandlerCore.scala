@@ -30,11 +30,12 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    * Processes an RPC ''request'' by invoking a bound ''method'' based on and its ''context'' and return an RPC ''response''.
    *
    * @param request request message
+   * @param requestId request correlation identifier
    * @param context request context
    * @tparam Body message body type
    * @return optional response message
    */
-  def processRequest[Body: Bytes](request: Body)(implicit context: Context): Effect[HandlerResult[Body]] = {
+  def processRequest[Body: Bytes](request: Body, requestId: String)(implicit context: Context): Effect[HandlerResult[Body]] = {
     // Parse request
     val rawRequest = implicitly[Bytes[Body]].from(request)
     protocol.parseRequest(rawRequest, None).fold(

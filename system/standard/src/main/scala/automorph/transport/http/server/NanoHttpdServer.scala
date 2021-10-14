@@ -62,7 +62,7 @@ final case class NanoHttpdServer[Effect[_]] private (
     // Process the request
     implicit val usingContext: Context = createContext(session)
     evaluateEffect(system.map(
-      system.either(handler.processRequest(request)),
+      system.either(handler.processRequest(request, requestId)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
         handlerResult.fold(
           error => serverError(error, session, requestId, requestDetails),
