@@ -80,6 +80,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
       logger.trace("Sending HTTP request", Map("URL" -> url, "Size" -> request.length))
       val connection = connect(context)
       val httpMethod = setRequestProperties(connection, request, mediaType, context)
+      connection.setDoOutput(true)
       val outputStream = connection.getOutputStream
       // FIXME - remove
       println(s"SENDING REQUEST\n${Bytes.string.to(request)}")
@@ -131,9 +132,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
 
   private def connect(http: Context): HttpURLConnection = {
     val connectionUrl = http.url.orElse(http.base.map(_.connection.getURL.toURI)).getOrElse(url)
-    val connection = connectionUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
-    connection.setDoOutput(true)
-    connection
+    connectionUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
   }
 
   private def connectionHeaders(connection: HttpURLConnection): Seq[(String, String)] =
