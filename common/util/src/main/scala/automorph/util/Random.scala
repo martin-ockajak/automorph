@@ -10,5 +10,5 @@ object Random {
    *
    * @return numeric identifier
    */
-  def id: String = Math.abs(random.nextLong()).toString
+  def id: String = Math.abs(random.nextInt()).toString
 }
