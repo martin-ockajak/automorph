@@ -1,6 +1,7 @@
 package automorph.handler
 
 import automorph.Handler
+import automorph.log.LogProperties
 import automorph.spi.RpcProtocol.FunctionNotFoundException
 import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{MessageCodec, RpcProtocol}
@@ -18,9 +19,6 @@ import scala.util.{Failure, Success, Try}
  */
 private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
   this: Handler[Node, Codec, Effect, Context] =>
-
-  private val bodyProperty = "Body"
-  private val requestIdProperty = "RequestId"
 
   /** Bound RPC functions. */
   lazy val boundFunctions: Seq[RpcFunction] = bindings.map { case (name, binding) =>
@@ -42,11 +40,11 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
     // Parse request
     val rawRequest = implicitly[Bytes[Body]].from(request)
     protocol.parseRequest(rawRequest, None).fold(
-      error => errorResponse(error.exception, error.message, requestId, Map(requestIdProperty -> requestId)),
+      error => errorResponse(error.exception, error.message, requestId, Map(LogProperties.requestId -> requestId)),
       rpcRequest => {
         // Invoke requested RPC function
-        lazy val requestProperties = rpcRequest.message.properties + (requestIdProperty -> requestId)
-        lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(bodyProperty -> _)
+        lazy val requestProperties = rpcRequest.message.properties + (LogProperties.requestId -> requestId)
+        lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
         logger.trace(s"Received ${protocol.name} request", allProperties)
         invokeFunction(rpcRequest, context, requestId, requestProperties)
       }
@@ -186,7 +184,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
       error => system.failed(error),
       rpcResponse => {
         lazy val allProperties = rpcResponse.message.properties +
-          (requestIdProperty -> requestId) ++ rpcResponse.message.text.map(bodyProperty -> _)
+          (LogProperties.requestId -> requestId) ++ rpcResponse.message.text.map(LogProperties.body -> _)
         logger.trace(s"Sending ${protocol.name} response", allProperties)
         system.pure(HandlerResult(Some(implicitly[Bytes[Body]].to(rpcResponse.message.body)), result.failed.toOption))
       }

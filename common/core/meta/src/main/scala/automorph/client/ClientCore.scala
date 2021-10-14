@@ -1,6 +1,7 @@
 package automorph.client
 
 import automorph.Client
+import automorph.log.LogProperties
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.RpcRequest
 import automorph.spi.{MessageCodec, RpcProtocol}
@@ -26,16 +27,14 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
   /** Named RPC function proxy type. */
   type NamedFunction = NamedProxy[Node, Codec, Effect, Context]
 
-  private val bodyProperty = "Body"
-  private val requestIdProperty = "RequestId"
-
   /**
    * Creates a remote RPC function proxy with specified function name.
    *
    * @param functionName remote RPC function name
    * @return remote RPC function proxy with specified function name
    */
-  def function(functionName: String): NamedFunction = NamedProxy(functionName, this, protocol.codec, Seq.empty, Seq.empty)
+  def function(functionName: String): NamedFunction =
+    NamedProxy(functionName, this, protocol.codec, Seq.empty, Seq.empty)
 
   /**
    * Creates default request context.
@@ -85,8 +84,8 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
       // Send request
       rpcRequest => {
         val requestId = Random.id
-        lazy val requestProperties = rpcRequest.message.properties + (requestIdProperty -> requestId)
-        lazy val allProperties = rpcRequest.message.properties ++ rpcRequest.message.text.map(bodyProperty -> _)
+        lazy val requestProperties = rpcRequest.message.properties + (LogProperties.requestId -> requestId)
+        lazy val allProperties = rpcRequest.message.properties ++ rpcRequest.message.text.map(LogProperties.body -> _)
         logger.trace(s"Sending ${protocol.name} request", allProperties)
         system.flatMap(
           system.pure(rpcRequest),
@@ -147,7 +146,10 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
       error => raiseError(error.exception, requestProperties),
       rpcResponse => {
         lazy val properties = requestProperties ++ rpcResponse.message.properties
-        logger.trace(s"Received ${protocol.name} response", properties ++ rpcResponse.message.text.map(bodyProperty -> _))
+        logger.trace(
+          s"Received ${protocol.name} response",
+          properties ++ rpcResponse.message.text.map(LogProperties.body -> _)
+        )
         rpcResponse.result.pureFold(
           // Raise error
           error => raiseError(error, requestProperties ++ properties),
