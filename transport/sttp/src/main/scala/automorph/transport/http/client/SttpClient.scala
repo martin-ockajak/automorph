@@ -61,9 +61,9 @@ final case class SttpClient[Effect[_]](
             logger.error(s"Failed to receive $protocol response", error, responseProperties)
             system.failed(error)
           },
-          message => {
-            logger.debug(s"Received $protocol response", responseProperties + ("Status" -> message.code.toString))
-            system.pure(Bytes.byteArray.from(message.body))
+          response => {
+            logger.debug(s"Received $protocol response", responseProperties + ("Status" -> response.code.toString))
+            system.pure(Bytes.byteArray.from(response.body))
           }
         )
       }
