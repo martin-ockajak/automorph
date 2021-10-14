@@ -22,18 +22,18 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
   /** This client type. */
   type ThisClient = Client[Node, Codec, Effect, Context]
 
-  /** Named method proxy type. */
-  type NamedMethod = NamedProxy[Node, Codec, Effect, Context]
+  /** Named RPC function proxy type. */
+  type NamedFunction = NamedProxy[Node, Codec, Effect, Context]
 
   private val bodyProperty = "Body"
 
   /**
-   * Creates a method proxy with specified method name.
+   * Creates a remote RPC function proxy with specified function name.
    *
-   * @param methodName method name
-   * @return method proxy with specified method name
+   * @param functionName remote RPC function name
+   * @return remote RPC function proxy with specified function name
    */
-  def method(methodName: String): NamedMethod = NamedProxy(methodName, this, protocol.codec, Seq.empty, Seq.empty)
+  def method(functionName: String): NamedFunction = NamedProxy(functionName, this, protocol.codec, Seq.empty, Seq.empty)
 
   /**
    * Creates default request context.
@@ -58,27 +58,27 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
   }
 
   /**
-   * Performs a method call using specified arguments.
+   * Performs an RPC function call using specified arguments.
    *
-   * Optional request context is used as a last method argument.
+   * Optional request context is used as a last RPC function argument.
    *
-   * @param method method name
+   * @param functionName RPC function name
    * @param argumentNames argument names
-   * @param encodedArguments method argument nodes
+   * @param encodedArguments function argument nodes
    * @param decodeResult result node decoding function
    * @param context request context
    * @tparam R result type
    * @return result value
    */
   def call[R](
-    method: String,
+    functionName: String,
     argumentNames: Option[Seq[String]],
     encodedArguments: Seq[Node],
     decodeResult: Node => R,
     context: Option[Context]
   ): Effect[R] =
     // Create request
-    protocol.createRequest(method, argumentNames, encodedArguments, true).pureFold(
+    protocol.createRequest(functionName, argumentNames, encodedArguments, true).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest => {
@@ -97,24 +97,24 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
     )
 
   /**
-   * Performs a method notification using specified arguments.
+   * Performs an RPC function notification using specified arguments.
    *
-   * Optional request context is used as a last method argument.
+   * Optional request context is used as a last RPC function argument.
    *
-   * @param method method name
+   * @param functionName RPC function name
    * @param argumentNames argument names
-   * @param encodedArguments method argument nodes
+   * @param encodedArguments function argument nodes
    * @param context request context
    * @return nothing
    */
   private[automorph] def notify(
-    method: String,
+    functionName: String,
     argumentNames: Option[Seq[String]],
     encodedArguments: Seq[Node],
     context: Option[Context]
   ): Effect[Unit] =
     // Create request
-    protocol.createRequest(method, argumentNames, encodedArguments, false).pureFold(
+    protocol.createRequest(functionName, argumentNames, encodedArguments, false).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>
@@ -125,7 +125,7 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
     )
 
   /**
-   * Processes a method call response.
+   * Processes an RPC function call response.
    *
    * @param rawResponse raw response
    * @param requestProperties request properties
