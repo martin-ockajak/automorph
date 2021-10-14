@@ -31,6 +31,7 @@ class FutureHttpSpec extends ProtocolCodecSpec {
 
   override def customTransport(port: Int): Option[ClientMessageTransport[Effect, Context]] = synchronized {
     val url = new URI(s"http://localhost:$port")
+//    val url = new URI(s"http://localhost:1234")
     Some(HttpUrlConnectionClient(url, "POST", system).asInstanceOf[ClientMessageTransport[Effect, Context]])
   }
 
