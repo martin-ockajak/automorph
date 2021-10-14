@@ -212,7 +212,7 @@ lazy val amqp = (project in file("transport/amqp")).settings(
 )
 val sttpVersion = "3.3.15"
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
-  http, testCore % Test, standard % Test
+  core, http, testCore % Test, standard % Test
 ).settings(
   name := s"$projectName-sttp",
   libraryDependencies ++= Seq(

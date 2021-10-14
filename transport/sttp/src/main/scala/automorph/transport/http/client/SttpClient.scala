@@ -6,6 +6,7 @@ import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.client.SttpClient.{Context, WebSocket}
 import automorph.util.Bytes
+import automorph.log.LogProperties
 import java.net.URI
 import scala.collection.immutable.ArraySeq
 import sttp.capabilities.WebSockets
