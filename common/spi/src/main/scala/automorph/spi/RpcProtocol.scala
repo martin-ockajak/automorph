@@ -29,7 +29,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
   /**
    * Creates an RPC request.
    *
-   * @param functionName function name
+   * @param functionName invoked function name
    * @param argumentNames argument names
    * @param argumentValues argument values
    * @param responseRequired true if the request mandates a response, false if there should be no response
@@ -46,7 +46,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
    * Parses an RPC request.
    *
    * @param request RPC request message
-   * @param functionName function name, if specified it is used instead of function name obtained from the request body
+   * @param functionName invoked function name, if specified it is used instead of function name obtained from the request body
    * @return RPC request if the message is valid or RPC error if the message is invalid
    */
   def parseRequest(request: Body, functionName: Option[String]): Either[RpcError[Metadata], RpcRequest[Node, Metadata]]
