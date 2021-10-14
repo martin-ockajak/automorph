@@ -88,7 +88,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
 
   private def send(request: ArraySeq.ofByte, requestId: String, mediaType: String, context: Context): Effect[EffectValue] =
     system.wrap {
-      val httpMethod = selectHttpMethod(context)
+      val httpMethod = determineMethod(context)
       lazy val requestProperties = Map(
         LogProperties.requestId -> requestId,
         "URL" -> url,
@@ -112,7 +112,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
       connection -> new ArraySeq.ofByte(Array.empty)
     }
 
-  private def selectHttpMethod(http: Context): String =
+  private def determineMethod(http: Context): String =
     http.method.orElse(http.base.map(_.connection.getRequestMethod)).getOrElse(method)
 
   private def setRequestProperties(
