@@ -55,6 +55,7 @@ final case class RabbitMqClient[Effect[_]](
   private lazy val connection = createConnection()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
+  private val urlText = url.toURL.toExternalForm
   private val deliveryHandlers = TrieMap[String, ArraySeq.ofByte => Unit]()
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
 
@@ -82,44 +83,21 @@ final case class RabbitMqClient[Effect[_]](
     amqpProperties: BasicProperties,
     complete: Option[ArraySeq.ofByte => Unit]
   ): Effect[Unit] = {
-    logger.trace(
-      "Sending AMQP request",
-      Map(
-        "URL" -> url,
-        "Routing key" -> routingKey,
-        "Correlation ID" -> amqpProperties.getCorrelationId,
-        "Size" -> request.length
-      )
-    )
+    val requestId = amqpProperties.getCorrelationId
+    lazy val requestProperties = RabbitMqCommon.messageProperties(requestId, routingKey, urlText, None)
+    logger.trace("Sending AMQP request", requestProperties)
     val consumer = threadConsumer.get
 
     // Retain result promise if available
-    complete.foreach(deliveryHandlers.put(amqpProperties.getCorrelationId, _))
+    complete.foreach(deliveryHandlers.put(requestId, _))
 
     // Send the request
     blockingEffect(() =>
       Try {
         consumer.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, request.unsafeArray)
-        logger.debug(
-          "Sent AMQP request",
-          Map(
-            "URL" -> url,
-            "Routing key" -> routingKey,
-            "Correlation ID" -> amqpProperties.getCorrelationId,
-            "Size" -> request.length
-          )
-        )
+        logger.debug("Sent AMQP request", requestProperties)
       }.mapFailure { error =>
-        logger.error(
-          "Failed to send AMQP request",
-          error,
-          Map(
-            "URL" -> url,
-            "Routing key" -> routingKey,
-            "Correlation ID" -> amqpProperties.getCorrelationId,
-            "Size" -> request.length
-          )
-        )
+        logger.error("Failed to send AMQP request", error, requestProperties)
         error
       }.get
     )
@@ -154,15 +132,8 @@ final case class RabbitMqClient[Effect[_]](
         properties: BasicProperties,
         body: Array[Byte]
       ): Unit = {
-        logger.debug(
-          "Received AMQP response",
-          Map(
-            "URL" -> url,
-            "Routing key" -> routingKey,
-            "Correlation ID" -> properties.getCorrelationId,
-            "Size" -> body.length
-          )
-        )
+        lazy val responseProperties = RabbitMqCommon.messageProperties(properties.getCorrelationId, routingKey, urlText, None)
+        logger.debug("Received AMQP response", responseProperties)
         deliveryHandlers.get(properties.getCorrelationId).foreach { complete =>
           complete(new ArraySeq.ofByte(body))
         }
@@ -173,7 +144,7 @@ final case class RabbitMqClient[Effect[_]](
   }
 
   private def createConnection(): Connection = {
-    val connection = RabbitMqCommon.connect(url.toURL, Seq.empty, clientId, connectionFactory)
+    val connection = RabbitMqCommon.connect(url, Seq.empty, clientId, connectionFactory)
     Option.when(exchange != RabbitMqCommon.defaultDirectExchange) {
       Using(connection.createChannel()) { channel =>
         channel.exchangeDeclare(exchange, BuiltinExchangeType.DIRECT, false)

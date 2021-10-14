@@ -1,12 +1,12 @@
 package automorph.transport.amqp
 
-import automorph.log.Logging
+import automorph.log.{LogProperties, Logging}
 import automorph.transport.amqp.Amqp
 import automorph.util.Extensions.TryOps
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.{AMQP, Address, Channel, Connection, ConnectionFactory, DefaultConsumer}
+import com.rabbitmq.client.{AMQP, Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.io.IOException
-import java.net.{InetAddress, URL}
+import java.net.{InetAddress, URI}
 import scala.jdk.CollectionConverters.MapHasAsScala
 import scala.util.Try
 
@@ -15,6 +15,9 @@ private[automorph] object RabbitMqCommon extends Logging {
 
   /** Default direct AMQP message exchange name. */
   val defaultDirectExchange: String = ""
+
+  /** Routing key property. */
+  val routingKeyProperty = "Routing Key"
 
   /**
    * Initialize AMQP broker connection.
@@ -26,13 +29,13 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @return AMQP broker connection
    */
   def connect(
-    url: URL,
+    url: URI,
     addresses: Seq[Address],
     name: String,
     connectionFactory: ConnectionFactory
   ): Connection = {
-    val urlText = url.toExternalForm
-    connectionFactory.setUri(url.toURI)
+    val urlText = url.toURL.toExternalForm
+    connectionFactory.setUri(url)
     logger.debug(s"Connecting to RabbitMQ broker: $urlText")
     Try(if (addresses.nonEmpty) {
       connectionFactory.newConnection(addresses.toArray, name)
@@ -102,4 +105,24 @@ private[automorph] object RabbitMqCommon extends Logging {
       appId = Option(properties.getAppId),
       base = Some(properties)
     )
+
+  /**
+   * Assemble message properties.
+   *
+   * @param requestId request correlation identifier
+   * @param routingKey routing key
+   * @param url AMQP broker URL
+   * @param consumerTag consumer tag
+   * @return message properties
+   */
+  def messageProperties(
+    requestId: String,
+    routingKey: String,
+    url: String,
+    consumerTag: Option[String]
+  ): Map[String, String] = Map(
+    LogProperties.requestId -> requestId,
+    routingKeyProperty -> routingKey,
+    "URL" -> url
+  ) ++ consumerTag.map("Consumer Tag" -> _)
 }

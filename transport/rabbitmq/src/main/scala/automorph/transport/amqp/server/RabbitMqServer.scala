@@ -5,12 +5,12 @@ import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.amqp.{Amqp, RabbitMqCommon}
-import automorph.util.Bytes
+import automorph.util.{Bytes, Random}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.io.IOException
-import java.net.URL
+import java.net.{URI, URL}
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,7 +38,7 @@ import scala.util.{Try, Using}
 final case class RabbitMqServer[Effect[_]](
   handler: Handler.AnyCodec[Effect, Amqp[BasicProperties]],
   runEffect: Effect[Any] => Any,
-  url: URL,
+  url: URI,
   queues: Seq[String],
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
@@ -48,7 +48,7 @@ final case class RabbitMqServer[Effect[_]](
   private lazy val connection = createConnection()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
-  private val urlText = url.toExternalForm
+  private val urlText = url.toURL.toExternalForm
   private val exchange = RabbitMqCommon.defaultDirectExchange
   private val system = handler.system
 
@@ -60,30 +60,26 @@ final case class RabbitMqServer[Effect[_]](
       override def handleDelivery(
         consumerTag: String,
         envelope: Envelope,
-        properties: BasicProperties,
+        amqpProperties: BasicProperties,
         body: Array[Byte]
       ): Unit = {
-        logger.debug(
-          "Received AMQP request",
-          Map(
-            "URL" -> urlText,
-            "Routing key" -> envelope.getRoutingKey,
-            "Correlation ID" -> properties.getCorrelationId,
-            "Size" -> body.length
-          )
-        )
+        val requestId = Option(amqpProperties.getCorrelationId).getOrElse(Random.id)
+        lazy val requestProperties =
+          RabbitMqCommon.messageProperties(requestId, envelope.getRoutingKey, urlText, Option(consumerTag))
+        logger.debug("Received AMQP request", requestProperties)
 
         // Process the request
-        implicit val usingContext: Amqp[BasicProperties] = RabbitMqCommon.context(properties)
+        implicit val usingContext: Amqp[BasicProperties] = RabbitMqCommon.context(amqpProperties)
+        val replyTo = Option(amqpProperties.getReplyTo)
         runEffect(system.map(
-          system.either(handler.processRequest(body)),
+          system.either(handler.processRequest(body, requestId)),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
             handlerResult.fold(
-              error => sendServerError(error, body, properties, envelope.getRoutingKey),
+              error => sendServerError(error, amqpProperties, requestProperties),
               result => {
                 // Send the response
                 val response = result.response.getOrElse(Array[Byte]())
-                sendResponse(response, properties)
+                sendResponse(response, amqpProperties, requestProperties)
               }
             )
         ))
@@ -97,60 +93,33 @@ final case class RabbitMqServer[Effect[_]](
 
   private def sendServerError(
     error: Throwable,
-    request: Array[Byte],
-    properties: BasicProperties,
-    routingKey: String
+    amqpProperties: BasicProperties,
+    requestProperties: => Map[String, String]
   ): Unit = {
-    logger.debug(
-      "Failed to process AMQP request",
-      error,
-      Map(
-        "URL" -> urlText,
-        "Routing key" -> routingKey,
-        "Correlation ID" -> properties.getCorrelationId,
-        "Size" -> request.length
-      )
-    )
+    logger.debug("Failed to process AMQP request", error, requestProperties)
     val message = Bytes.string.from(error.trace.mkString("\n")).unsafeArray
-    sendResponse(message, properties)
+    sendResponse(message, amqpProperties, requestProperties)
   }
 
-  private def sendResponse(message: Array[Byte], properties: BasicProperties): Unit = {
-    logger.trace(
-      "Sending AMQP request",
-      Map(
-        "URL" -> urlText,
-        "Routing key" -> properties.getReplyTo,
-        "Correlation ID" -> properties.getCorrelationId,
-        "Size" -> message.length
-      )
-    )
+  private def sendResponse(
+    message: Array[Byte],
+    amqpProperties: BasicProperties,
+    requestProperties: => Map[String, String]
+  ): Unit = {
+    val replyTo = Option(amqpProperties.getReplyTo)
+    lazy val responseProperties = replyTo.map { value =>
+      requestProperties + (RabbitMqCommon.routingKeyProperty -> value)
+    }.getOrElse(requestProperties - RabbitMqCommon.routingKeyProperty)
+    logger.trace("Sending AMQP response", responseProperties)
     val consumer = threadConsumer.get
     Try {
-      val routingKey = Option(properties.getReplyTo).getOrElse {
+      val routingKey = replyTo.getOrElse {
         throw new IllegalArgumentException("Missing request header: reply-to")
       }
-      consumer.getChannel.basicPublish(exchange, routingKey, true, false, properties, message)
-      logger.debug(
-        "Sent AMQP request",
-        Map(
-          "URL" -> urlText,
-          "Routing key" -> properties.getReplyTo,
-          "Correlation ID" -> properties.getCorrelationId,
-          "Size" -> message.length
-        )
-      )
+      consumer.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, message)
+      logger.debug("Sent AMQP response", responseProperties)
     }.mapFailure { error =>
-      logger.error(
-        "Failed to send AMQP request",
-        error,
-        Map(
-          "URL" -> urlText,
-          "Routing key" -> properties.getReplyTo,
-          "Correlation ID" -> properties.getCorrelationId,
-          "Size" -> message.length
-        )
-      )
+      logger.error("Failed to send AMQP response", error, responseProperties)
       error
     }.get
   }

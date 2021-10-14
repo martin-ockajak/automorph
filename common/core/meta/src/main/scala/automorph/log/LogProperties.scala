@@ -4,7 +4,7 @@ package automorph.log
 object LogProperties {
 
   /** Request correlation identifier */
-  val requestId = "RequestId"
+  val requestId = "Request ID"
 
   /** Request body */
   val body = "Body"
