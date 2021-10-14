@@ -28,7 +28,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
   }.toSeq
 
   /**
-   * Processes an RPC ''request'' by invoking a bound ''method'' based on and its ''context'' and return an RPC ''response''.
+   * Processes an RPC ''request'' by invoking a bound RPC ''function'' based on and its ''context'' and return an RPC ''response''.
    *
    * @param request request message
    * @param requestId request correlation identifier
@@ -44,10 +44,11 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
     protocol.parseRequest(rawRequest, None).fold(
       error => errorResponse(error.exception, error.message, requestId, Map(requestIdProperty -> requestId)),
       rpcRequest => {
+        // Invoke requested RPC function
         lazy val requestProperties = rpcRequest.message.properties + (requestIdProperty -> requestId)
         lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(bodyProperty -> _)
         logger.trace(s"Received ${protocol.name} request", allProperties)
-        invokeMethod(rpcRequest, context, requestId, requestProperties)
+        invokeFunction(rpcRequest, context, requestId, requestProperties)
       }
     )
   }
@@ -61,29 +62,29 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
   }
 
   /**
-   * Invokes bound method specified in a request.
+   * Invokes bound RPC function specified in a request.
    *
-   * Optional request context is used as a last method argument.
+   * Optional request context is used as a last RPC function argument.
    *
    * @param rpcRequest RPC request
    * @param context request context
    * @param requestId request correlation idendifier
    * @param requestProperties request properties
    * @tparam Body message body type
-   * @return bound method invocation result
+   * @return bound function invocation result
    */
-  private def invokeMethod[Body: Bytes](
+  private def invokeFunction[Body: Bytes](
     rpcRequest: RpcRequest[Node, protocol.Metadata],
     context: Context,
     requestId: String,
     requestProperties: => Map[String, String]
   ): Effect[HandlerResult[Body]] = {
-    // Lookup bindings for the specified method
+    // Lookup bindings for the specified RPC function
     logger.debug(s"Processing ${protocol.name} request", requestProperties)
     bindings.get(rpcRequest.function).map { handlerBinding =>
       // Extract arguments
       extractArguments(rpcRequest, handlerBinding).flatMap { arguments =>
-        // Invoke method
+        // Invoke bound function
         Try(system.either(handlerBinding.invoke(arguments, context)))
       }.pureFold(
         error => errorResponse(error, rpcRequest.message, requestId, requestProperties),
@@ -102,27 +103,27 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
         }
       )
     }.getOrElse {
-      val error = FunctionNotFoundException(s"Method not found: ${rpcRequest.function}", None.orNull)
+      val error = FunctionNotFoundException(s"Function not found: ${rpcRequest.function}", None.orNull)
       errorResponse(error, rpcRequest.message, requestId, requestProperties)
     }
   }
 
   /**
-   * Validates and extracts specified bound method arguments from a request.
+   * Validates and extracts specified bound RPC function arguments from a request.
    *
-   * Optional request context is used as a last method argument.
+   * Optional request context is used as a last RPC function argument.
    *
    * @param rpcRequest RPC request
-   * @param handlerMethod handler method binding
-   * @return bound method arguments
+   * @param handlerBinding handler RPC function binding
+   * @return bound function arguments
    */
   private def extractArguments(
     rpcRequest: RpcRequest[Node, _],
-    handlerMethod: HandlerBinding[Node, Effect, Context]
+    handlerBinding: HandlerBinding[Node, Effect, Context]
   ): Try[Seq[Option[Node]]] = {
-    // Adjust expected method parameters if it uses context as its last parameter
-    val parameters = handlerMethod.function.parameters
-    val parameterNames = parameters.map(_.name).dropRight(if (handlerMethod.usesContext) 1 else 0)
+    // Adjust expected function parameters if it uses context as its last parameter
+    val parameters = handlerBinding.function.parameters
+    val parameterNames = parameters.map(_.name).dropRight(if (handlerBinding.usesContext) 1 else 0)
     rpcRequest.arguments.fold(
       positionalArguments => {
         // Arguments by position
