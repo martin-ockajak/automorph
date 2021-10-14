@@ -69,10 +69,10 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
   def parseResponse(response: Body): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
 
   /**
-   * Generates OpenApi speficication for specified RPC functions.
+   * Generates OpenApi speficication for specified RPC API functions.
    *
    * @see https://github.com/OAI/OpenAPI-Specification
-   * @param functions API functions
+   * @param functions RPC API functions
    * @param title API title
    * @param version API specification version
    * @param serverUrls API server URLs
