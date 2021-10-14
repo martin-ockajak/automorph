@@ -83,18 +83,23 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
       error => system.failed(error),
       // Send request
       rpcRequest => {
-        val requestId = Random.id
-        lazy val requestProperties = rpcRequest.message.properties + (LogProperties.requestId -> requestId)
-        lazy val allProperties = rpcRequest.message.properties ++ rpcRequest.message.text.map(LogProperties.body -> _)
-        logger.trace(s"Sending ${protocol.name} request", allProperties)
         system.flatMap(
           system.pure(rpcRequest),
-          (request: RpcRequest[Node, _]) =>
-            system.flatMap(
-              transport.call(request.message.body, protocol.codec.mediaType, context),
-              // Process response
-              rawResponse => processResponse[R](rawResponse, request.message.properties, decodeResult)
+          (request: RpcRequest[Node, _]) => {
+            val requestId = Random.id
+            val rawRequest = request.message.body
+            lazy val requestProperties = rpcRequest.message.properties ++ Map(
+              LogProperties.requestId -> requestId,
+              LogProperties.size -> rawRequest.length.toString
             )
+            lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
+            logger.trace(s"Sending ${protocol.name} request", allProperties)
+            system.flatMap(
+              transport.call(rawRequest, protocol.codec.mediaType, context),
+              // Process response
+              rawResponse => processResponse[R](rawResponse, requestProperties, decodeResult)
+            )
+          }
         )
       }
     )
@@ -123,7 +128,17 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
       rpcRequest =>
         system.flatMap(
           system.pure(rpcRequest),
-          (request: RpcRequest[Node, _]) => transport.notify(request.message.body, protocol.codec.mediaType, context)
+          (request: RpcRequest[Node, _]) => {
+            val requestId = Random.id
+            val rawRequest = request.message.body
+            lazy val requestProperties = rpcRequest.message.properties ++ Map(
+              LogProperties.requestId -> requestId,
+              LogProperties.size -> rawRequest.length.toString
+            )
+            lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
+            logger.trace(s"Sending ${protocol.name} request", allProperties)
+            transport.notify(request.message.body, protocol.codec.mediaType, context)
+          }
         )
     )
 
@@ -138,27 +153,25 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
    */
   private def processResponse[R](
     rawResponse: ArraySeq.ofByte,
-    requestProperties: Map[String, String],
+    requestProperties: => Map[String, String],
     decodeResult: Node => R
   ): Effect[R] =
     // Parse response
     protocol.parseResponse(rawResponse).fold(
       error => raiseError(error.exception, requestProperties),
       rpcResponse => {
-        lazy val properties = requestProperties ++ rpcResponse.message.properties
-        logger.trace(
-          s"Received ${protocol.name} response",
-          properties ++ rpcResponse.message.text.map(LogProperties.body -> _)
-        )
+        lazy val allProperties = requestProperties ++ rpcResponse.message.properties +
+          (LogProperties.size -> rawResponse.length.toString) ++ rpcResponse.message.text.map(LogProperties.body -> _)
+        logger.trace(s"Received ${protocol.name} response", allProperties)
         rpcResponse.result.pureFold(
           // Raise error
-          error => raiseError(error, requestProperties ++ properties),
+          error => raiseError(error, requestProperties),
           // Decode result
           result =>
             Try(decodeResult(result)).pureFold(
-              error => raiseError(InvalidResponseException("Malformed result", error), properties),
+              error => raiseError(InvalidResponseException("Malformed result", error), requestProperties),
               result => {
-                logger.info(s"Performed ${protocol.name} request", properties)
+                logger.info(s"Performed ${protocol.name} request", requestProperties)
                 system.pure(result)
               }
             )

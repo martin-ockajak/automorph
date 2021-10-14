@@ -6,6 +6,9 @@ object LogProperties {
   /** Request correlation identifier */
   val requestId = "Request ID"
 
-  /** Request body */
+  /** Message size */
+  val size = "Size"
+
+  /** Message body */
   val body = "Body"
 }

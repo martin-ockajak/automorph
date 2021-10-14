@@ -43,7 +43,10 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
       error => errorResponse(error.exception, error.message, requestId, Map(LogProperties.requestId -> requestId)),
       rpcRequest => {
         // Invoke requested RPC function
-        lazy val requestProperties = rpcRequest.message.properties + (LogProperties.requestId -> requestId)
+        lazy val requestProperties = rpcRequest.message.properties ++ Map(
+          LogProperties.requestId -> requestId,
+          LogProperties.size -> rawRequest.length.toString
+        )
         lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
         logger.trace(s"Received ${protocol.name} request", allProperties)
         invokeFunction(rpcRequest, context, requestId, requestProperties)
@@ -183,10 +186,14 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
     protocol.createResponse(result, message.details).pureFold(
       error => system.failed(error),
       rpcResponse => {
-        lazy val allProperties = rpcResponse.message.properties +
-          (LogProperties.requestId -> requestId) ++ rpcResponse.message.text.map(LogProperties.body -> _)
+        val rawResponse = rpcResponse.message.body
+        lazy val requestProperties = rpcResponse.message.properties ++ Map(
+          LogProperties.requestId -> requestId,
+          LogProperties.size -> rawResponse.length.toString
+        )
+        lazy val allProperties = requestProperties ++ rpcResponse.message.text.map(LogProperties.body -> _)
         logger.trace(s"Sending ${protocol.name} response", allProperties)
-        system.pure(HandlerResult(Some(implicitly[Bytes[Body]].to(rpcResponse.message.body)), result.failed.toOption))
+        system.pure(HandlerResult(Some(implicitly[Bytes[Body]].to(rawResponse)), result.failed.toOption))
       }
     )
 }
