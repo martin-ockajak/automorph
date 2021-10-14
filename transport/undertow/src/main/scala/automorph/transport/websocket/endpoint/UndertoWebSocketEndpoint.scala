@@ -7,7 +7,7 @@ import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
 import automorph.util.Extensions.ThrowableOps
-import automorph.util.{Bytes, Network}
+import automorph.util.{Bytes, Network, Random}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.Headers
 import io.undertow.websockets.core.{AbstractReceiveListener, BufferedBinaryMessage, BufferedTextMessage, WebSocketCallback, WebSocketChannel, WebSockets}
@@ -36,7 +36,7 @@ object UndertowWebSocketEndpoint {
    * @param handler RPC request handler
    * @param runEffect executes specified effect asynchronously
    * @param next Undertow web server handler invoked if a HTTP request does not contain a WebSocket handshake
-   * @return Undertow web server HTTP handler
+   * @return Undertow web server WebSocket handler
    * @tparam Effect effect type
    */
   def apply[Effect[_]](
@@ -93,8 +93,9 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         channel: WebSocketChannel,
         discardMessage: () => Unit
       ): Unit = {
-        val client = clientAddress(exchange)
-        logger.debug("Received HTTP request", Map("Client" -> client, "Size" -> request.length))
+        val requestId = Random.id
+        lazy val requestDetails = requestProperties(exchange, request, requestId)
+        logger.debug("Received WebSocket request", requestDetails)
 
         // Process the request
         implicit val usingContext: Context = createContext(exchange)
@@ -102,11 +103,11 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
           system.either(handler.processRequest(request)),
           (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
             handlerResult.fold(
-              error => sendServerError(error, exchange, channel, request),
+              error => sendServerError(error, exchange, channel, request, requestId, requestDetails),
               result => {
                 // Send the response
                 val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
-                sendResponse(response, exchange, channel)
+                sendResponse(response, exchange, channel, requestId)
                 discardMessage
               }
             )
@@ -118,30 +119,32 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         error: Throwable,
         exchange: WebSocketHttpExchange,
         channel: WebSocketChannel,
-        request: ArraySeq.ofByte
+        request: ArraySeq.ofByte,
+        requestId: String,
+        requestDetails: => Map[String, String]
       ): Unit = {
-        logger.error(
-          "Failed to process HTTP request",
-          error,
-          Map("Client" -> clientAddress(exchange), "Size" -> request.length)
-        )
+        logger.error("Failed to process WebSocket request", error, requestDetails)
         val message = Bytes.string.from(error.trace.mkString("\n"))
-        sendResponse(message, exchange, channel)
+        sendResponse(message, exchange, channel, requestId)
       }
 
       private def sendResponse(
         message: ArraySeq.ofByte,
         exchange: WebSocketHttpExchange,
-        channel: WebSocketChannel
+        channel: WebSocketChannel,
+        requestId: String
       ): Unit = {
-        val client = clientAddress(exchange)
-        logger.trace("Sending HTTP response", Map("Client" -> client, "Size" -> message.length))
+        lazy val responseDetails = Map(
+          "RequestId" -> requestId,
+          "Client" -> clientAddress(exchange)
+        )
+        logger.trace("Sending WebSocket response", responseDetails)
         val callback = new WebSocketCallback[Unit] {
           override def complete(channel: WebSocketChannel, context: Unit): Unit =
-            logger.debug("Sent HTTP response", Map("Client" -> client, "Size" -> message.length))
+            logger.debug("Sent WebSocket response", responseDetails)
 
           override def onError(channel: WebSocketChannel, context: Unit, throwable: Throwable): Unit =
-            logger.error("Failed to send HTTP response", throwable, Map("Client" -> client, "Size" -> message.length))
+            logger.error("Failed to send WebSocket response", throwable, responseDetails)
         }
         WebSockets.sendBinary(Bytes.byteBuffer.to(message), channel, callback, ())
       }
@@ -155,6 +158,17 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
           headers = headers
         ).url(exchange.getRequestURI)
       }
+
+      private def requestProperties(
+        exchange: WebSocketHttpExchange,
+        request: ArraySeq.ofByte,
+        requestId: String
+      ): Map[String, String] = Map(
+        "RequestId" -> requestId,
+        "Client" -> clientAddress(exchange),
+        "URL" -> (exchange.getRequestURI + Option(exchange.getQueryString)
+          .filter(_.nonEmpty).map("?" + _).getOrElse(""))
+      )
 
       private def clientAddress(exchange: WebSocketHttpExchange): String = {
         val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.get(0))

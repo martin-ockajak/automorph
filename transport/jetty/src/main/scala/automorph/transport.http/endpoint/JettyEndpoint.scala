@@ -7,7 +7,7 @@ import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.JettyEndpoint.Context
 import automorph.util.Extensions.ThrowableOps
-import automorph.util.{Bytes, Network}
+import automorph.util.{Bytes, Network, Random}
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import java.io.{ByteArrayInputStream, InputStream}
 import org.apache.commons.io.IOUtils
@@ -39,41 +39,60 @@ final case class JettyEndpoint[Effect[_]](
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     // Receive the request
-    val client = clientAddress(request)
-    logger.trace("Receiving HTTP request", Map("Client" -> client))
+    val requestId = Random.id
+    lazy val requestDetails = requestProperties(request, requestId)
+    logger.trace("Receiving HTTP request", requestDetails)
     val requestMessage: InputStream = request.getInputStream
 
     // Process the request
     implicit val usingContext: Context = createContext(request)
     runEffect(system.map(
       system.either(handler.processRequest(requestMessage)),
-      (handlerResult: Either[Throwable, HandlerResult[InputStream]]) => handlerResult.fold(
-        error => serverError(error, response, client),
-        result => {
-          // Send the response
-          val message = result.response.getOrElse(new ByteArrayInputStream(Array()))
-          val status = result.exception.map(exceptionToStatusCode).getOrElse(HttpStatus.OK_200)
-          sendResponse(message, response, status, client)
-        }
-      )
+      (handlerResult: Either[Throwable, HandlerResult[InputStream]]) =>
+        handlerResult.fold(
+          error => serverError(error, response, request, requestId, requestDetails),
+          result => {
+            // Send the response
+            val message = result.response.getOrElse(new ByteArrayInputStream(Array()))
+            val status = result.exception.map(exceptionToStatusCode).getOrElse(HttpStatus.OK_200)
+            sendResponse(message, status, response, request, requestId)
+          }
+        )
     ))
   }
 
-  private def serverError(error: Throwable, response: HttpServletResponse, client: String): Unit = {
-    logger.error("Failed to process HTTP request", error, Map("Client" -> client))
+  private def serverError(
+    error: Throwable,
+    response: HttpServletResponse,
+    request: HttpServletRequest,
+    requestId: String,
+    requestDetails: => Map[String, String]
+  ): Unit = {
+    logger.error("Failed to process HTTP request", error, requestDetails)
     val message = Bytes.inputStream.to(Bytes.string.from(error.trace.mkString("\n")))
     val status = HttpStatus.INTERNAL_SERVER_ERROR_500
-    sendResponse(message, response, status, client)
+    sendResponse(message, status, response, request, requestId)
   }
 
-  private def sendResponse(message: InputStream, response: HttpServletResponse, status: Int, client: String): Unit = {
-    logger.debug("Sending HTTP response", Map("Client" -> client, "Status" -> status))
+  private def sendResponse(
+    message: InputStream,
+    status: Int,
+    response: HttpServletResponse,
+    request: HttpServletRequest,
+    requestId: String
+  ): Unit = {
+    lazy val responseDetails = Map(
+      "RequestId" -> requestId,
+      "Client" -> clientAddress(request),
+      "Status" -> status.toString
+    )
+    logger.debug("Sending HTTP response", responseDetails)
     response.setStatus(status)
-    response.setContentType(handler.codec.mediaType)
+    response.setContentType(handler.protocol.codec.mediaType)
     val outputStream = response.getOutputStream
     IOUtils.copy(message, outputStream)
     outputStream.flush()
-    logger.debug("Sent HTTP response", Map("Client" -> client, "Status" -> status))
+    logger.debug("Sent HTTP response", responseDetails)
   }
 
   private def createContext(request: HttpServletRequest): Context = {
@@ -86,6 +105,17 @@ final case class JettyEndpoint[Effect[_]](
       headers = headers
     ).url(request.getRequestURI)
   }
+
+  private def requestProperties(
+    request: HttpServletRequest,
+    requestId: String
+  ): Map[String, String] = Map(
+    "RequestId" -> requestId,
+    "Client" -> clientAddress(request),
+    "URL" -> (request.getRequestURI + Option(request.getQueryString)
+      .filter(_.nonEmpty).map("?" + _).getOrElse("")),
+    "Method" -> request.getMethod
+  )
 
   private def clientAddress(request: HttpServletRequest): String = {
     val forwardedFor = Option(request.getHeader(HttpHeader.X_FORWARDED_FOR.name))

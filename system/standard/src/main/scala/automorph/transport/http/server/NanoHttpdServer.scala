@@ -7,12 +7,14 @@ import automorph.spi.MessageCodec
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.server.NanoHTTPD.Response.Status
-import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
+import automorph.transport.http.server.NanoHTTPD.{newFixedLengthResponse, IHTTPSession, Response}
 import automorph.transport.http.server.NanoHttpdServer.Context
 import automorph.util.Extensions.ThrowableOps
-import automorph.util.{Bytes, Network}
+import automorph.util.Extensions.TryOps
+import automorph.util.{Bytes, Network, Random}
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.MapHasAsScala
+import scala.util.Try
 
 /**
  * NanoHTTPD web server HTTP server transport plugin.
@@ -50,12 +52,12 @@ final case class NanoHttpdServer[Effect[_]] private (
   }
 
   override def serve(session: IHTTPSession): Response = {
-// FIXME - remove
-    println(s"RECEIVING REQUEST\n${Bytes.string.to(Bytes.inputStream.from(session.getInputStream))}")
     // Receive the request
-    logger.trace("Receiving HTTP request", Map("Client" -> clientAddress(session)))
+    val requestId = Random.id
+    lazy val requestDetails = requestProperties(session, requestId)
+    logger.trace("Receiving HTTP request", requestDetails)
     val request = Bytes.inputStream.from(session.getInputStream)
-    logger.debug("Received HTTP request", Map("Client" -> clientAddress(session), "Size" -> request.length))
+    logger.debug("Received HTTP request", requestDetails)
 
     // Process the request
     implicit val usingContext: Context = createContext(session)
@@ -63,51 +65,65 @@ final case class NanoHttpdServer[Effect[_]] private (
       system.either(handler.processRequest(request)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
         handlerResult.fold(
-          error => serverError(error, request, session),
+          error => serverError(error, session, requestId, requestDetails),
           result => {
             // Send the response
             val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
             val status = result.exception.map(exceptionToStatusCode).map(Status.lookup).getOrElse(Status.OK)
-            createResponse(response, status, session)
+            createResponse(response, status, session, requestId)
           }
         )
     ))
   }
 
-  private def serverError(error: Throwable, request: ArraySeq.ofByte, session: IHTTPSession): Response = {
-    logger.error(
-      "Failed to process HTTP request",
-      error,
-      Map("Client" -> clientAddress(session), "Size" -> request.length)
-    )
+  private def serverError(
+    error: Throwable,
+    session: IHTTPSession,
+    requestId: String,
+    requestDetails: => Map[String, String]
+  ): Response = {
+    logger.error("Failed to process HTTP request", error, requestDetails)
     val status = Status.INTERNAL_ERROR
     val message = Bytes.string.from(error.trace.mkString("\n"))
-    createResponse(message, status, session)
+    createResponse(message, status, session, requestId)
   }
 
-  private def createResponse(message: ArraySeq.ofByte, status: Status, session: IHTTPSession): Response = {
-    val client = clientAddress(session)
-    logger.trace(
-      "Sending HTTP response",
-      Map("Client" -> client, "Status" -> status.getRequestStatus, "Size" -> message.length)
+  private def createResponse(
+    message: ArraySeq.ofByte,
+    status: Status,
+    session: IHTTPSession,
+    requestId: String
+  ): Response = {
+    lazy val responseDetails = Map(
+      "RequestId" -> requestId,
+      "Client" -> clientAddress(session),
+      "Status" -> status.toString
     )
+    logger.trace("Sending HTTP response", responseDetails)
     val inputStream = Bytes.inputStream.to(message)
     val mediaType = handler.protocol.codec.asInstanceOf[MessageCodec[_]].mediaType
     val response = newFixedLengthResponse(status, mediaType, inputStream, message.size.toLong)
-    logger.debug(
-      "Sent HTTP response",
-      Map("Client" -> client, "Status" -> status.getRequestStatus, "Size" -> message.length)
-    )
+    logger.debug("Sent HTTP response", responseDetails)
     response
   }
 
-  private def createContext(session: IHTTPSession): Context = {
+  private def createContext(session: IHTTPSession): Context =
     Http(
       base = Some(session),
       method = Some(session.getMethod.name),
       headers = session.getHeaders.asScala.toSeq
     ).url(session.getUri)
-  }
+
+  private def requestProperties(
+    session: IHTTPSession,
+    requestId: String
+  ): Map[String, String] = Map(
+    "RequestId" -> requestId,
+    "Client" -> clientAddress(session),
+    "URL" -> (session.getUri + Option(session.getQueryParameterString)
+      .filter(_.nonEmpty).map("?" + _).getOrElse("")),
+    "Method" -> session.getMethod.toString
+  )
 
   private def clientAddress(session: IHTTPSession): String = {
     val forwardedFor = Option(session.getHeaders.get(HeaderXForwardedFor))

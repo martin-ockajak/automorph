@@ -7,6 +7,7 @@ import automorph.system.FutureSystem
 import automorph.transport.amqp.client.RabbitMqClient.Context
 import automorph.transport.amqp.{Amqp, RabbitMqCommon}
 import automorph.util.Extensions.TryOps
+import automorph.util.Random
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, Consumer, DefaultConsumer, Envelope}
 import java.net.URI
@@ -18,7 +19,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.jdk.CollectionConverters.MapHasAsJava
 import scala.jdk.CollectionConverters.MapHasAsScala
-import scala.util.{Random, Try, Using}
+import scala.util.{Try, Using}
 
 /**
  * RabbitMQ client transport plugin using AMQP as message transport protocol.
@@ -56,7 +57,6 @@ final case class RabbitMqClient[Effect[_]](
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
   private val deliveryHandlers = TrieMap[String, ArraySeq.ofByte => Unit]()
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
-  private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   override def call(
     request: ArraySeq.ofByte,
@@ -130,7 +130,7 @@ final case class RabbitMqClient[Effect[_]](
     val default = amqp.base.map(_.properties).getOrElse(new BasicProperties())
     (new BasicProperties()).builder()
       .replyTo(amqp.replyTo.orElse(Option(default.getReplyTo)).getOrElse(directReplyToQueue))
-      .correlationId(amqp.correlationId.orElse(Option(default.getCorrelationId)).getOrElse(Math.abs(random.nextLong()).toString))
+      .correlationId(amqp.correlationId.orElse(Option(default.getCorrelationId)).getOrElse(Random.id))
       .contentType(amqp.contentType.getOrElse(mediaType))
       .contentEncoding(amqp.contentEncoding.orElse(Option(default.getContentEncoding)).orNull)
       .appId(amqp.appId.orElse(Option(default.getAppId)).getOrElse(clientId))

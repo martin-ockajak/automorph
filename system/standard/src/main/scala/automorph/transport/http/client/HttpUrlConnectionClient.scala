@@ -81,7 +81,6 @@ final case class HttpUrlConnectionClient[Effect[_]](
       val connection = connect(context)
       val httpMethod = setRequestProperties(connection, request, mediaType, context)
       val outputStream = connection.getOutputStream
-      println(s"SENDING REQUEST\n${Bytes.string.to(request)}")
       val write = Using(outputStream)(_.write(request.unsafeArray))
       write.mapFailure { error =>
         logger.error(

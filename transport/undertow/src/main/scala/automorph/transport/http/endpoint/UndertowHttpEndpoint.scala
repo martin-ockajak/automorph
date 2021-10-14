@@ -8,7 +8,7 @@ import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
 import automorph.util.Extensions.{ThrowableOps, TryOps}
-import automorph.util.{Bytes, Network}
+import automorph.util.{Bytes, Network, Random}
 import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, StatusCodes}
@@ -44,8 +44,9 @@ final case class UndertowHttpEndpoint[Effect[_]](
   private val receiveCallback = new Receiver.FullBytesCallback {
 
     override def handle(exchange: HttpServerExchange, message: Array[Byte]): Unit = {
-      val client = clientAddress(exchange)
-      logger.debug("Received HTTP request", Map("Client" -> client, "Size" -> message.length))
+      val requestId = Random.id
+      lazy val requestDetails = requestProperties(exchange, requestId)
+      logger.debug("Received HTTP request", requestDetails)
       val request = Bytes.byteArray.from(message)
       exchange.dispatch(new Runnable {
 
@@ -56,12 +57,12 @@ final case class UndertowHttpEndpoint[Effect[_]](
             system.either(handler.processRequest(request)),
             (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
               handlerResult.fold(
-                error => sendServerError(error, exchange, Some(request)),
+                error => sendServerError(error, exchange, requestId, requestDetails),
                 result => {
                   // Send the response
                   val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
                   val statusCode = result.exception.map(exceptionToStatusCode).getOrElse(StatusCodes.OK)
-                  sendResponse(response, statusCode, exchange)
+                  sendResponse(response, statusCode, exchange, requestId)
                 }
               )
           ))
@@ -73,33 +74,38 @@ final case class UndertowHttpEndpoint[Effect[_]](
 
   override def handleRequest(exchange: HttpServerExchange): Unit = {
     // Receive the request
-    logger.trace("Receiving HTTP request", Map("Client" -> clientAddress(exchange)))
+    val requestId = Random.id
+    lazy val requestDetails = requestProperties(exchange, requestId)
+    logger.trace("Receiving HTTP request", requestDetails)
     Try(exchange.getRequestReceiver.receiveFullBytes(receiveCallback)).recover { case error =>
-      sendServerError(error, exchange, None)
+      sendServerError(error, exchange, requestId, requestDetails)
     }.get
   }
 
   private def sendServerError(
     error: Throwable,
     exchange: HttpServerExchange,
-    request: Option[ArraySeq.ofByte]
+    requestId: String,
+    requestDetails: => Map[String, String]
   ): Unit = {
-    logger.error(
-      "Failed to process HTTP request",
-      error,
-      Map("Client" -> clientAddress(exchange)) ++ request.flatMap(request => Option("Size" -> request.length))
-    )
+    logger.error("Failed to process HTTP request", error, requestDetails)
     val message = Bytes.string.from(error.trace.mkString("\n"))
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
-    sendResponse(message, statusCode, exchange)
+    sendResponse(message, statusCode, exchange, requestId)
   }
 
-  private def sendResponse(message: ArraySeq.ofByte, statusCode: Int, exchange: HttpServerExchange): Unit = {
-    val client = clientAddress(exchange)
-    logger.trace(
-      "Sending HTTP response",
-      Map("Client" -> client, "Status" -> statusCode, "Size" -> message.length)
+  private def sendResponse(
+    message: ArraySeq.ofByte,
+    statusCode: Int,
+    exchange: HttpServerExchange,
+    requestId: String
+  ): Unit = {
+    lazy val responseDetails = Map(
+      "RequestId" -> requestId,
+      "Client" -> clientAddress(exchange),
+      "Status" -> statusCode.toString
     )
+    logger.trace("Sending HTTP response", responseDetails)
     Try {
       if (exchange.isResponseChannelAvailable) {
         throw new IOException("Response channel not available")
@@ -107,16 +113,9 @@ final case class UndertowHttpEndpoint[Effect[_]](
       val mediaType = handler.protocol.codec.asInstanceOf[MessageCodec[_]].mediaType
       exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, mediaType)
       exchange.setStatusCode(statusCode).getResponseSender.send(Bytes.byteBuffer.to(message))
-      logger.debug(
-        "Sent HTTP response",
-        Map("Client" -> client, "Status" -> statusCode, "Size" -> message.length)
-      )
+      logger.debug("Sent HTTP response", responseDetails)
     }.mapFailure { error =>
-      logger.error(
-        "Failed to send HTTP response",
-        error,
-        Map("Client" -> client, "Status" -> statusCode, "Size" -> message.length)
-      )
+      logger.error("Failed to send HTTP response", error, responseDetails)
       throw error
     }.get
   }
@@ -131,6 +130,17 @@ final case class UndertowHttpEndpoint[Effect[_]](
       headers = headers
     ).url(exchange.getRequestURI)
   }
+
+  private def requestProperties(
+    exchange: HttpServerExchange,
+    requestId: String
+  ): Map[String, String] = Map(
+    "RequestId" -> requestId,
+    "Client" -> clientAddress(exchange),
+    "URL" -> (exchange.getRequestURI + Option(exchange.getQueryString)
+      .filter(_.nonEmpty).map("?" + _).getOrElse("")),
+    "Method" -> exchange.getRequestMethod.toString
+  )
 
   private def clientAddress(exchange: HttpServerExchange): String = {
     val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)

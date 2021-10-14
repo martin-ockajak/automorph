@@ -7,7 +7,7 @@ import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.FinagleEndpoint.Context
 import automorph.util.Extensions.ThrowableOps
-import automorph.util.Network
+import automorph.util.{Network, Random}
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}
@@ -38,8 +38,9 @@ final case class FinagleEndpoint[Effect[_]](
 
   override def apply(request: Request): Future[Response] = {
     // Receive the request
-    val client = clientAddress(request)
-    logger.debug("Received HTTP request", Map("Client" -> client, "Size" -> request.content.length))
+    val requestId = Random.id
+    lazy val requestDetails = requestProperties(request, requestId)
+    logger.debug("Received HTTP request", requestDetails)
     val requestMessage = Buf.ByteArray.Owned.extract(request.content)
 
     // Process the request
@@ -48,36 +49,39 @@ final case class FinagleEndpoint[Effect[_]](
       system.either(handler.processRequest(requestMessage)),
       (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
         handlerResult.fold(
-          error => serverError(error, request),
+          error => serverError(error, request, requestId, requestDetails),
           result => {
             // Send the response
             val response = result.response.getOrElse(Array[Byte]())
             val status = result.exception.map(exceptionToStatusCode).map(Status.apply).getOrElse(Status.Ok)
             val message = Reader.fromBuf(Buf.ByteArray.Owned(response))
-            createResponse(message, status, request)
+            createResponse(message, status, request, requestId)
           }
         )
     ))
   }
 
-  private def serverError(error: Throwable, request: Request): Response = {
-    logger.error(
-      "Failed to process HTTP request",
-      error,
-      Map("Client" -> clientAddress(request), "Size" -> request.content.length)
-    )
+  private def serverError(
+    error: Throwable,
+    request: Request,
+    requestId: String,
+    requestDetails: => Map[String, String]
+  ): Response = {
+    logger.error("Failed to process HTTP request", error, requestDetails)
     val message = Reader.fromBuf(Buf.Utf8(error.trace.mkString("\n")))
     val status = Status.InternalServerError
-    createResponse(message, status, request)
+    createResponse(message, status, request, requestId)
   }
 
-  private def createResponse(message: Reader[Buf], status: Status, request: Request): Response = {
-    val response = Response(request.version, status, message)
-    response.contentType = handler.codec.mediaType
-    logger.debug(
-      "Sending HTTP response",
-      Map("Client" -> clientAddress(request), "Status" -> status.code, "Size" -> response.content.length)
+  private def createResponse(message: Reader[Buf], status: Status, request: Request, requestId: String): Response = {
+    lazy val responseDetails = Map(
+      "RequestId" -> requestId,
+      "Client" -> clientAddress(request),
+      "Status" -> status.toString
     )
+    val response = Response(request.version, status, message)
+    response.contentType = handler.protocol.codec.mediaType
+    logger.debug("Sending HTTP response", responseDetails)
     response
   }
 
@@ -86,6 +90,16 @@ final case class FinagleEndpoint[Effect[_]](
     method = Some(request.method.name),
     headers = request.headerMap.iterator.toSeq
   ).url(request.uri)
+
+  private def requestProperties(
+    request: Request,
+    requestId: String
+  ): Map[String, String] = Map(
+    "RequestId" -> requestId,
+    "Client" -> clientAddress(request),
+    "URL" -> request.uri,
+    "Method" -> request.method.toString
+  )
 
   private def clientAddress(request: Request): String = {
     val forwardedFor = request.xForwardedFor

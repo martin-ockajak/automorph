@@ -6,13 +6,13 @@ import automorph.log.Logging
 import automorph.spi.MessageCodec
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
-import automorph.util.Bytes
+import automorph.util.{Bytes, Random}
 import automorph.util.Extensions.ThrowableOps
 import sttp.capabilities.{Streams, WebSockets}
 import sttp.model.headers.Cookie
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.{CodecFormat, byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode, webSocketBody}
+import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode, webSocketBody, CodecFormat}
 
 /**
  * Tapir HTTP endpoint message transport plugin.
@@ -56,15 +56,16 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
   ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     val system = handler.system
-    val contentType = Header.contentType(MediaType.parse(handler.codec.mediaType).getOrElse {
-      throw new IllegalArgumentException(s"Invalid content type: ${handler.codec.mediaType}")
+    val contentType = Header.contentType(MediaType.parse(handler.protocol.codec.mediaType).getOrElse {
+      throw new IllegalArgumentException(s"Invalid content type: ${handler.protocol.codec.mediaType}")
     })
     endpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(cookies).in(clientIp)
       .out(byteArrayBody).out(header(contentType)).out(statusCode)
       .serverLogic { case (requestMessage, paths, queryParams, headers, cookies, clientIp) =>
         // Receive the request
-        val client = clientAddress(clientIp)
-        logger.debug("Received HTTP request", Map("Client" -> client, "Size" -> requestMessage.length))
+        val requestId = Random.id
+        lazy val requestDetails = requestProperties(clientIp, method, requestId)
+        logger.debug("Received HTTP request", requestDetails)
 
         // Process the request
         implicit val usingContext: Context = createContext(method, paths, queryParams, headers)
@@ -72,12 +73,12 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
           system.either(handler.processRequest(requestMessage)),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
             handlerResult.fold(
-              error => Right(serverError(error, requestMessage, client)),
+              error => Right(serverError(error, requestMessage, clientIp, requestId, requestDetails)),
               result => {
                 // Send the response
                 val message = result.response.getOrElse(Array[Byte]())
                 val status = result.exception.map(exceptionToStatusCode).map(StatusCode.apply).getOrElse(StatusCode.Ok)
-                Right(createResponse(message, status, client))
+                Right(createResponse(message, status, clientIp, requestId))
               }
             )
         )
@@ -111,7 +112,8 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 //      .serverLogic { case (requestMessage, paths, queryParams, headers, cookies, clientIp) =>
 //        ???
 ////        // Receive the request
-////        val client = clientAddress(clientIp)
+////        val requestId = Random.id
+////        lazy val requestDetails = requestProperties(clientIp, method, requestId)
 ////        logger.debug("Received WebSocket request", Map("Client" -> client, "Size" -> requestMessage.length))
 ////
 ////        // Process the request
@@ -120,27 +122,43 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 ////          system.either(handler.processRequest(requestMessage)),
 ////          (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
 ////            handlerResult.fold(
-////              error => Right(serverError(error, requestMessage, client)),
+////              error => Right(serverError(error, requestMessage, clientIp, requestId, requestDetails)),
 ////              result => {
 ////                // Send the response
 ////                val message = result.response.getOrElse(Array[Byte]())
 ////                val status = result.exception.map(exceptionToStatusCode).map(StatusCode.apply).getOrElse(StatusCode.Ok)
-////                Right(createResponse(message, status, client))
+////                Right(createResponse(message, status, clientIp, requestId))
 ////              }
 ////            )
 ////        )
 //      }
 //  }
 
-  private def serverError(error: Throwable, request: Array[Byte], client: String): (Array[Byte], StatusCode) = {
-    logger.error("Failed to process HTTP request", error, Map("Client" -> client, "Size" -> request.length))
+  private def serverError(
+    error: Throwable,
+    request: Array[Byte],
+    clientIp: Option[String],
+    requestId: String,
+    requestDetails: => Map[String, String]
+  ): (Array[Byte], StatusCode) = {
+    logger.error("Failed to process HTTP request", error, requestDetails)
     val message = Bytes.string.from(error.trace.mkString("\n")).unsafeArray
     val status = StatusCode.InternalServerError
-    createResponse(message, status, client)
+    createResponse(message, status, clientIp, requestId)
   }
 
-  private def createResponse(message: Array[Byte], status: StatusCode, client: String): (Array[Byte], StatusCode) = {
-    logger.debug("Sending HTTP response", Map("Client" -> client, "Status" -> status, "Size" -> message.length))
+  private def createResponse(
+    message: Array[Byte],
+    status: StatusCode,
+    clientIp: Option[String],
+    requestId: String
+  ): (Array[Byte], StatusCode) = {
+    lazy val responseDetails = Map(
+      "RequestId" -> requestId,
+      "Client" -> clientAddress(clientIp),
+      "Status" -> statusCode.toString
+    )
+    logger.debug("Sending HTTP response", responseDetails)
     (message, status)
   }
 
@@ -148,8 +166,8 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     method: Method,
     paths: List[String],
     queryParams: QueryParams,
-    headers: List[Header],
-  ): Context = {
+    headers: List[Header]
+  ): Context =
     Http(
       base = Some(()),
       method = Some(method.method),
@@ -157,7 +175,16 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
       parameters = queryParams.toSeq,
       headers = headers.map(header => header.name -> header.value).toSeq
     )
-  }
+
+  private def requestProperties(
+    clientIp: Option[String],
+    method: Method,
+    requestId: String
+  ): Map[String, String] = Map(
+    "RequestId" -> requestId,
+    "Client" -> clientAddress(clientIp),
+    "Method" -> Method.toString
+  )
 
   private def clientAddress(clientIp: Option[String]): String = clientIp.getOrElse("[unknown]")
 }

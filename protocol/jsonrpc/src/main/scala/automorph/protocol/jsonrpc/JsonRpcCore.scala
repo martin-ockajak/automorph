@@ -8,8 +8,9 @@ import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.{RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
+import automorph.util.Random
 import scala.collection.immutable.ArraySeq
-import scala.util.{Failure, Random, Success, Try}
+import scala.util.{Failure, Success, Try}
 
 /**
  * JSON-RPC protocol core logic.
@@ -44,7 +45,6 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     )),
     Some(List("error"))
   )
-  private lazy val random = new Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
   override val name: String = "JSON-RPC"
 
@@ -75,7 +75,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
   ): Try[RpcRequest[Node, Metadata]] = {
     // Create request
     Seq(function)
-    val id = Option.when(responseRequired)(Right(Math.abs(random.nextLong()).toString).withLeft[BigDecimal])
+    val id = Option.when(responseRequired)(Right(Random.id).withLeft[BigDecimal])
     val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
     val formedRequest = Request(id, function, argumentNodes).formed
 
