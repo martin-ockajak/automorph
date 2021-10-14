@@ -1,6 +1,6 @@
 package automorph.transport.http.client
 
-import automorph.log.Logging
+import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.Http
@@ -50,10 +50,12 @@ final case class HttpUrlConnectionClient[Effect[_]](
               logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
               error
             }.get
-            logger.debug(
-              "Received HTTP response",
-              Map("URL" -> url, "Status" -> connection.getResponseCode, "Size" -> response.length)
+            lazy val responseProperties = Map(
+              "URL" -> url,
+              "Status" -> connection.getResponseCode,
+              LogProperties.size -> response.length
             )
+            logger.debug("Received HTTP response")
             clearRequestProperties(connection, http)
             response
           }
