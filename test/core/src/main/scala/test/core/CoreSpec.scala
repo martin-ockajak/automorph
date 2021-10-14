@@ -12,9 +12,9 @@ import test.base.BaseSpec
 import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, Record, SimpleApi, SimpleApiImpl}
 
 /**
- * Main client -> handler API method invocation test.
+ * Main client -> handler RPC API function invocation test.
  *
- * Checks the results of remote method invocations against identical local invocations.
+ * Checks the results of remote RPC function invocations against identical local invocations.
  */
 trait CoreSpec extends BaseSpec {
 
@@ -137,9 +137,9 @@ trait CoreSpec extends BaseSpec {
 //              apiCombinations(invalidApiInstance, fixture.invalidApis).foreach { case (mode, apis) =>
 //                mode - {
 //                  val (_, api) = apis
-//                  "Method not found" in {
+//                  "Function not found" in {
 //                    val error = intercept[FunctionNotFoundException](run(api.nomethod(""))).getMessage.toLowerCase
-//                    error.should(include("method not found"))
+//                    error.should(include("function not found"))
 //                    error.should(include("nomethod"))
 //                  }
 //                  "Redundant arguments" in {

@@ -33,7 +33,7 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
    * @param functionName remote RPC function name
    * @return remote RPC function proxy with specified function name
    */
-  def method(functionName: String): NamedFunction = NamedProxy(functionName, this, protocol.codec, Seq.empty, Seq.empty)
+  def function(functionName: String): NamedFunction = NamedProxy(functionName, this, protocol.codec, Seq.empty, Seq.empty)
 
   /**
    * Creates default request context.

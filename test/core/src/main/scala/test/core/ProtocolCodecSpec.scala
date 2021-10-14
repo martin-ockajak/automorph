@@ -42,10 +42,10 @@ trait ProtocolCodecSpec extends CoreSpec {
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
-          (method, p1) => client.method(method).positional.args(p1).call,
-          (method, p1) => client.method(method).args(p1).call,
-          (method, p1) => client.method(method).positional.args(p1).tell,
-          (method, p1) => client.method(method).args(p1).tell
+          (function, a0) => client.function(function).positional.args(a0).call,
+          (function, a0) => client.function(function).args(a0).call,
+          (function, a0) => client.function(function).positional.args(a0).tell,
+          (function, a0) => client.function(function).args(a0).tell
         )
       }, {
         val enumModule = new SimpleModule().addSerializer(
@@ -78,10 +78,10 @@ trait ProtocolCodecSpec extends CoreSpec {
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
-          (method, p1) => client.method(method).positional.args(p1).call,
-          (method, p1) => client.method(method).args(p1).call,
-          (method, p1) => client.method(method).positional.args(p1).tell,
-          (method, p1) => client.method(method).args(p1).tell
+          (function, a0) => client.function(function).positional.args(a0).call,
+          (function, a0) => client.function(function).args(a0).call,
+          (function, a0) => client.function(function).positional.args(a0).tell,
+          (function, a0) => client.function(function).args(a0).tell
         )
       }, {
         class Custom extends UpickleJsonCustom {
@@ -108,10 +108,10 @@ trait ProtocolCodecSpec extends CoreSpec {
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
-          (method, p1) => client.method(method).positional.args(p1).call,
-          (method, p1) => client.method(method).args(p1).call,
-          (method, p1) => client.method(method).positional.args(p1).tell,
-          (method, p1) => client.method(method).args(p1).tell
+          (function, a0) => client.function(function).positional.args(a0).call,
+          (function, a0) => client.function(function).args(a0).call,
+          (function, a0) => client.function(function).positional.args(a0).tell,
+          (function, a0) => client.function(function).args(a0).tell
         )
       }, {
         class Custom extends UpickleMessagePackCustom {
@@ -138,10 +138,10 @@ trait ProtocolCodecSpec extends CoreSpec {
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
-          (method, p1) => client.method(method).positional.args(p1).call,
-          (method, p1) => client.method(method).args(p1).call,
-          (method, p1) => client.method(method).positional.args(p1).tell,
-          (method, p1) => client.method(method).args(p1).tell
+          (function, a0) => client.function(function).positional.args(a0).call,
+          (function, a0) => client.function(function).args(a0).call,
+          (function, a0) => client.function(function).positional.args(a0).tell,
+          (function, a0) => client.function(function).args(a0).tell
         )
       }, {
         implicit lazy val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
@@ -199,10 +199,10 @@ trait ProtocolCodecSpec extends CoreSpec {
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
-          (method, p1) => client.method(method).positional.args(p1).call,
-          (method, p1) => client.method(method).args(p1).call,
-          (method, p1) => client.method(method).positional.args(p1).tell,
-          (method, p1) => client.method(method).args(p1).tell
+          (function, a0) => client.function(function).positional.args(a0).call,
+          (function, a0) => client.function(function).args(a0).call,
+          (function, a0) => client.function(function).positional.args(a0).tell,
+          (function, a0) => client.function(function).args(a0).tell
         )
       }
     )

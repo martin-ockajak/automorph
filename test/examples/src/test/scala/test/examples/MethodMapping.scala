@@ -18,23 +18,23 @@ object MethodMapping extends App {
   }
   val api = new Api()
 
-  // Customize method name mapping
-  val methodAliases = (name: String) => name match {
+  // Customize function name mapping
+  val functionAliases = (name: String) => name match {
     case "original" => Seq("original", "aliased")
     case "omitted" => Seq.empty
     case other => Seq(s"test.$other")
   }
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val server = DefaultHttpServer.sync(_.bind(api, methodAliases(_)), 80, "/api")
+  val server = DefaultHttpServer.sync(_.bind(api, functionAliases(_)), 80, "/api")
 
   // Create RPC client sending HTTP POST requests to 'http://localhost/api'
   val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
-  // Call the remote API method via proxy
-  client.method("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
-  client.method("aliased").args("value" -> None).tell // ()
-  util.Try(client.method("omitted").args().call[String]) // Failure
+  // Call a remote API function dynamically passing the arguments by name
+  client.function("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
+  client.function("aliased").args("value" -> None).tell // ()
+  util.Try(client.function("omitted").args().call[String]) // Failure
 
   // Close the client
   client.close()

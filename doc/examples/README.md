@@ -41,7 +41,7 @@ server.close()
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
 val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
-// Call the remote API method via proxy
+// Call the remote API function via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // String
 
@@ -93,7 +93,7 @@ server.close()
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
 val client = DefaultHttpClient.async(new URI("http://localhost/api"), "POST")
 
-// Call the remote API method via proxy
+// Call the remote API function via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // Future[String]
 
@@ -104,17 +104,17 @@ client.close()
 **Dynamic Client**
 
 ```scala
-// Call a remote API method dynamically passing the arguments by name
-val hello = client.method("hello")
+// Call a remote API function dynamically passing the arguments by name
+val hello = client.function("hello")
 hello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
 
-// Call a remote API method dynamically passing the arguments by position
+// Call a remote API function dynamically passing the arguments by position
 hello.positional.args("world", 1).call[String] // Future[String]
 
-// Notify a remote API method dynamically passing the arguments by name
+// Notify a remote API function dynamically passing the arguments by name
 hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 
-// Notify a remote API method dynamically passing the arguments by position
+// Notify a remote API function dynamically passing the arguments by position
 hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
@@ -185,18 +185,18 @@ val request = client.context
   .cookies("Test" -> "value")
   .authorizationBearer("value")
 
-// Call the remote API method via proxy with request context supplied directly
+// Call the remote API function via proxy with request context supplied directly
 apiProxy.useMetadata("test")(request) // String
 
-// Call the remote API method dynamically with request context supplied directly
-client.method("useMetadata").args("message" -> "test").call[String] // String
+// Call the remote API function dynamically with request context supplied directly
+client.function("useMetadata").args("message" -> "test").call[String] // String
 
-// Call the remote API method via proxy with request context supplied implictly
+// Call the remote API function via proxy with request context supplied implictly
 implicit lazy val implicitRequest: automorph.DefaultHttpClient.Context = request
 apiProxy.useMetadata("test") // String
 
-// Call the remote API method dynamically with request context supplied implictly
-client.method("useMetadata").args("message" -> "test").call[String] // String
+// Call the remote API function dynamically with request context supplied implictly
+client.function("useMetadata").args("message" -> "test").call[String] // String
 
 // Close the client
 client.close()
@@ -245,7 +245,7 @@ trait ClientApi {
 **Server**
 
 ```scala
-// Customize method names
+// Customize function names
 val mapMethodName = (name: String) => name match {
   case "original" => Seq("original", "aliased")
   case "omitted" => Seq.empty
@@ -265,10 +265,10 @@ server.close()
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
 val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
-// Call the remote API method via proxy
-client.method("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
-client.method("aliased").args("value" -> None).tell // ()
-util.Try(client.method("omitted").args().call[String]) // Failure
+// Call a remote API function dynamically passing the arguments by name
+client.function("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
+client.function("aliased").args("value" -> None).tell // ()
+util.Try(client.function("omitted").args().call[String]) // Failure
 
 // Close the client
 client.close()
@@ -349,7 +349,7 @@ val clientProtocol = defaultProtocol.errorToException {
 val transport = DefaultHttpClientTransport.async(new URI("http://localhost/api"), "POST")
 val client = Client.protocol(clientProtocol).transport(transport)
 
-// Call the remote API method via proxy
+// Call the remote API function via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // Future[String]
 
@@ -360,17 +360,17 @@ client.close()
 **Dynamic Client**
 
 ```scala
-// Call a remote API method dynamically passing the arguments by name
-val hello = client.method("hello")
+// Call a remote API function dynamically passing the arguments by name
+val hello = client.function("hello")
 hello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
 
-// Call a remote API method dynamically passing the arguments by position
+// Call a remote API function dynamically passing the arguments by position
 hello.positional.args("world", 1).call[String] // Future[String]
 
-// Notify a remote API method dynamically passing the arguments by name
+// Notify a remote API function dynamically passing the arguments by name
 hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 
-// Notify a remote API method dynamically passing the arguments by position
+// Notify a remote API function dynamically passing the arguments by position
 hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
@@ -426,7 +426,7 @@ server.close()
 val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
 val client = DefaultHttpClient(new URI("http://localhost/api"), "POST", backend, system)
 
-// Call the remote API method via proxy
+// Call the remote API function via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // Task[String]
 
@@ -490,7 +490,7 @@ server.close()
 val transport = DefaultHttpClientTransport.async(new URI("http://localhost/api"), "POST")
 val client = Client(protocol, transport)
 
-// Call the remote API method via proxy
+// Call the remote API function via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // Future[String]
 
@@ -543,7 +543,7 @@ server.close()
 val transport = HttpUrlConnectionClient(new URI("http://localhost/api"), "POST", IdentitySystem())
 val client = DefaultClient(transport)
 
-// Call the remote API method via proxy
+// Call the remote API function via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // String
 
@@ -594,7 +594,7 @@ server.close()
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
 val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
-// Call the remote API method via proxy
+// Call the remote API function via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // String
 
@@ -652,7 +652,7 @@ server.stop()
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
 val client = DefaultHttpClient.async(new URI("http://localhost/api"), "POST")
 
-// Call the remote API method via proxy
+// Call the remote API function via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // Future[String]
 

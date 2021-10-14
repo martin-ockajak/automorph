@@ -49,7 +49,7 @@ Invoke the API via JSON-RPC over HTTP(S).
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
 val client = automorph.DefaultHttpClient.async(new URI("http://localhost/api"), "POST")
 
-// Call the remote API method via proxy
+// Call the remote API function via proxy
 val apiProxy = client.bind[Api] // Api
 apiProxy.hello("world", 1) // Future[String]
 ```
@@ -59,17 +59,17 @@ apiProxy.hello("world", 1) // Future[String]
 Invoke the API dynamically without definition via JSON-RPC over HTTP(S).
 
 ```scala
-// Call a remote API method dynamically passing the arguments by name
-val hello = client.method("hello")
+// Call a remote API function dynamically passing the arguments by name
+val hello = client.function("hello")
 hello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
 
-// Call a remote API method dynamically passing the arguments by position
+// Call a remote API function dynamically passing the arguments by position
 hello.positional.args("world", 1).call[String] // Future[String]
 
-// Notify a remote API method dynamically passing the arguments by name
+// Notify a remote API function dynamically passing the arguments by name
 hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 
-// Notify a remote API method dynamically passing the arguments by position
+// Notify a remote API function dynamically passing the arguments by position
 hello.positional.args("world", 1).tell // Future[Unit]
 
 // Close the client

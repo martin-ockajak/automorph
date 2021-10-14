@@ -20,7 +20,7 @@ object ClientMessageTransport extends App {
   val transport = HttpUrlConnectionClient(new URI("http://localhost/api"), "POST", IdentitySystem())
   val client = DefaultClient(transport)
 
-  // Call the remote API method via proxy
+  // Call the remote API function via proxy
   val apiProxy = client.bind[Api] // Api
   apiProxy.hello("world", 1) // : String
 
