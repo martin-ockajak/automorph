@@ -20,6 +20,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
   this: Handler[Node, Codec, Effect, Context] =>
 
   private val bodyProperty = "Body"
+  private val requestIdProperty = "RequestId"
 
   /** Bound RPC functions. */
   lazy val boundFunctions: Seq[RpcFunction] = bindings.map { case (name, binding) =>
@@ -35,15 +36,18 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    * @tparam Body message body type
    * @return optional response message
    */
-  def processRequest[Body: Bytes](request: Body, requestId: String)(implicit context: Context): Effect[HandlerResult[Body]] = {
+  def processRequest[Body: Bytes](request: Body, requestId: String)(implicit
+    context: Context
+  ): Effect[HandlerResult[Body]] = {
     // Parse request
     val rawRequest = implicitly[Bytes[Body]].from(request)
     protocol.parseRequest(rawRequest, None).fold(
-      error => errorResponse(error.exception, error.message),
+      error => errorResponse(error.exception, error.message, requestId, Map(requestIdProperty -> requestId)),
       rpcRequest => {
-        lazy val properties = rpcRequest.message.properties ++ rpcRequest.message.text.map(bodyProperty -> _)
-        logger.trace(s"Received ${protocol.name} request", properties)
-        invokeMethod(rpcRequest, context)
+        lazy val requestProperties = rpcRequest.message.properties + (requestIdProperty -> requestId)
+        lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(bodyProperty -> _)
+        logger.trace(s"Received ${protocol.name} request", allProperties)
+        invokeMethod(rpcRequest, context, requestId, requestProperties)
       }
     )
   }
@@ -63,30 +67,34 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    *
    * @param rpcRequest RPC request
    * @param context request context
+   * @param requestId request correlation idendifier
+   * @param requestProperties request properties
    * @tparam Body message body type
    * @return bound method invocation result
    */
   private def invokeMethod[Body: Bytes](
     rpcRequest: RpcRequest[Node, protocol.Metadata],
-    context: Context
+    context: Context,
+    requestId: String,
+    requestProperties: => Map[String, String]
   ): Effect[HandlerResult[Body]] = {
     // Lookup bindings for the specified method
-    logger.debug(s"Processing ${protocol.name} request", rpcRequest.message.properties)
+    logger.debug(s"Processing ${protocol.name} request", requestProperties)
     bindings.get(rpcRequest.function).map { handlerBinding =>
       // Extract arguments
       extractArguments(rpcRequest, handlerBinding).flatMap { arguments =>
         // Invoke method
         Try(system.either(handlerBinding.invoke(arguments, context)))
       }.pureFold(
-        error => errorResponse(error, rpcRequest.message),
+        error => errorResponse(error, rpcRequest.message, requestId, requestProperties),
         effect => {
-          logger.info(s"Processed ${protocol.name} request", rpcRequest.message.properties)
+          logger.info(s"Processed ${protocol.name} request", requestProperties)
           system.flatMap(
             effect,
             (outcome: Either[Throwable, Node]) =>
               if (rpcRequest.responseRequired) {
                 // Create response
-                response(outcome.toTry, rpcRequest.message)
+                response(outcome.toTry, rpcRequest.message, requestId)
               } else {
                 system.pure(HandlerResult[Body](None, None))
               }
@@ -95,7 +103,7 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
       )
     }.getOrElse {
       val error = FunctionNotFoundException(s"Method not found: ${rpcRequest.function}", None.orNull)
-      errorResponse(error, rpcRequest.message)
+      errorResponse(error, rpcRequest.message, requestId, requestProperties)
     }
   }
 
@@ -144,15 +152,19 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    *
    * @param error exception
    * @param message RPC message
+   * @param requestId request correlation idendifier
+   * @param requestProperties request properties
    * @tparam Body message body type
    * @return handler result
    */
   private def errorResponse[Body: Bytes](
     error: Throwable,
-    message: RpcMessage[protocol.Metadata]
+    message: RpcMessage[protocol.Metadata],
+    requestId: String,
+    requestProperties: => Map[String, String]
   ): Effect[HandlerResult[Body]] = {
-    logger.error(s"Failed to process ${protocol.name} request", error, message.properties)
-    response(Failure(error), message)
+    logger.error(s"Failed to process ${protocol.name} request", error, requestProperties)
+    response(Failure(error), message, requestId)
   }
 
   /**
@@ -160,18 +172,21 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    *
    * @param result a call result on success or an exception on failure
    * @param message RPC message
+   * @param requestId request correlation idendifier
    * @tparam Body message body type
    * @return handler result
    */
   private def response[Body: Bytes](
     result: Try[Node],
-    message: RpcMessage[protocol.Metadata]
+    message: RpcMessage[protocol.Metadata],
+    requestId: String
   ): Effect[HandlerResult[Body]] =
     protocol.createResponse(result, message.details).pureFold(
       error => system.failed(error),
       rpcResponse => {
-        lazy val properties = rpcResponse.message.properties ++ rpcResponse.message.text.map(bodyProperty -> _)
-        logger.trace(s"Sending ${protocol.name} response", properties)
+        lazy val allProperties = rpcResponse.message.properties +
+          (requestIdProperty -> requestId) ++ rpcResponse.message.text.map(bodyProperty -> _)
+        logger.trace(s"Sending ${protocol.name} response", allProperties)
         system.pure(HandlerResult(Some(implicitly[Bytes[Body]].to(rpcResponse.message.body)), result.failed.toOption))
       }
     )
