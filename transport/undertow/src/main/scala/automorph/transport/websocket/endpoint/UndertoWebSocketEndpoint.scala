@@ -2,7 +2,7 @@ package automorph.transport.websocket.endpoint
 
 import automorph.Handler
 import automorph.handler.HandlerResult
-import automorph.log.Logging
+import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
@@ -135,7 +135,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         requestId: String
       ): Unit = {
         lazy val responseDetails = Map(
-          "RequestId" -> requestId,
+          LogProperties.requestId -> requestId,
           "Client" -> clientAddress(exchange)
         )
         logger.trace("Sending WebSocket response", responseDetails)
@@ -164,7 +164,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         request: ArraySeq.ofByte,
         requestId: String
       ): Map[String, String] = Map(
-        "RequestId" -> requestId,
+        LogProperties.requestId -> requestId,
         "Client" -> clientAddress(exchange),
         "URL" -> (exchange.getRequestURI + Option(exchange.getQueryString)
           .filter(_.nonEmpty).map("?" + _).getOrElse(""))

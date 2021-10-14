@@ -2,12 +2,12 @@ package automorph.transport.http.server
 
 import automorph.Handler
 import automorph.handler.HandlerResult
-import automorph.log.Logging
+import automorph.log.{LogProperties, Logging}
 import automorph.spi.MessageCodec
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.server.NanoHTTPD.Response.Status
-import automorph.transport.http.server.NanoHTTPD.{newFixedLengthResponse, IHTTPSession, Response}
+import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.transport.http.server.NanoHttpdServer.Context
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.Extensions.TryOps
@@ -95,7 +95,7 @@ final case class NanoHttpdServer[Effect[_]] private (
     requestId: String
   ): Response = {
     lazy val responseDetails = Map(
-      "RequestId" -> requestId,
+      LogProperties.requestId -> requestId,
       "Client" -> clientAddress(session),
       "Status" -> status.toString
     )
@@ -118,7 +118,7 @@ final case class NanoHttpdServer[Effect[_]] private (
     session: IHTTPSession,
     requestId: String
   ): Map[String, String] = Map(
-    "RequestId" -> requestId,
+    LogProperties.requestId -> requestId,
     "Client" -> clientAddress(session),
     "URL" -> (session.getUri + Option(session.getQueryParameterString)
       .filter(_.nonEmpty).map("?" + _).getOrElse("")),

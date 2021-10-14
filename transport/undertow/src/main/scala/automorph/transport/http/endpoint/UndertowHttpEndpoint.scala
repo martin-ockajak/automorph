@@ -2,7 +2,7 @@ package automorph.transport.http.endpoint
 
 import automorph.Handler
 import automorph.handler.HandlerResult
-import automorph.log.Logging
+import automorph.log.{LogProperties, Logging}
 import automorph.spi.MessageCodec
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
@@ -101,7 +101,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     requestId: String
   ): Unit = {
     lazy val responseDetails = Map(
-      "RequestId" -> requestId,
+      LogProperties.requestId -> requestId,
       "Client" -> clientAddress(exchange),
       "Status" -> statusCode.toString
     )
@@ -135,7 +135,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     exchange: HttpServerExchange,
     requestId: String
   ): Map[String, String] = Map(
-    "RequestId" -> requestId,
+    LogProperties.requestId -> requestId,
     "Client" -> clientAddress(exchange),
     "URL" -> (exchange.getRequestURI + Option(exchange.getQueryString)
       .filter(_.nonEmpty).map("?" + _).getOrElse("")),

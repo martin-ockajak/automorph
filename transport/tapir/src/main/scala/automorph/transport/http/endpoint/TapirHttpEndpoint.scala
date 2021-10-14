@@ -2,7 +2,7 @@ package automorph.transport.http.endpoint
 
 import automorph.Handler
 import automorph.handler.HandlerResult
-import automorph.log.Logging
+import automorph.log.{LogProperties, Logging}
 import automorph.spi.MessageCodec
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
@@ -12,7 +12,7 @@ import sttp.capabilities.{Streams, WebSockets}
 import sttp.model.headers.Cookie
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.{byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode, webSocketBody, CodecFormat}
+import sttp.tapir.{CodecFormat, byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode, webSocketBody}
 
 /**
  * Tapir HTTP endpoint message transport plugin.
@@ -154,7 +154,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     requestId: String
   ): (Array[Byte], StatusCode) = {
     lazy val responseDetails = Map(
-      "RequestId" -> requestId,
+      LogProperties.requestId -> requestId,
       "Client" -> clientAddress(clientIp),
       "Status" -> statusCode.toString
     )
@@ -181,7 +181,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     method: Method,
     requestId: String
   ): Map[String, String] = Map(
-    "RequestId" -> requestId,
+    LogProperties.requestId -> requestId,
     "Client" -> clientAddress(clientIp),
     "Method" -> Method.toString
   )

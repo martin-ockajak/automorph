@@ -2,7 +2,7 @@ package automorph.transport.http.endpoint
 
 import automorph.Handler
 import automorph.handler.HandlerResult
-import automorph.log.Logging
+import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.JettyEndpoint.Context
@@ -82,7 +82,7 @@ final case class JettyEndpoint[Effect[_]](
     requestId: String
   ): Unit = {
     lazy val responseDetails = Map(
-      "RequestId" -> requestId,
+      LogProperties.requestId -> requestId,
       "Client" -> clientAddress(request),
       "Status" -> status.toString
     )
@@ -110,7 +110,7 @@ final case class JettyEndpoint[Effect[_]](
     request: HttpServletRequest,
     requestId: String
   ): Map[String, String] = Map(
-    "RequestId" -> requestId,
+    LogProperties.requestId -> requestId,
     "Client" -> clientAddress(request),
     "URL" -> (request.getRequestURI + Option(request.getQueryString)
       .filter(_.nonEmpty).map("?" + _).getOrElse("")),
