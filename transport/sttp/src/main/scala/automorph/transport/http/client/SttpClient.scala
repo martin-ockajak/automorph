@@ -1,6 +1,6 @@
 package automorph.transport.http.client
 
-import automorph.log.Logging
+import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.Http
@@ -41,58 +41,69 @@ final case class SttpClient[Effect[_]](
   private val defaultMethod = Method.unsafeApply(method)
   private val protocol = if (webSocket) "WebSocket" else "HTTP"
 
-  override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
+  override def call(
+    request: ArraySeq.ofByte,
+    requestId: String,
+    mediaType: String,
+    context: Option[Context]
+  ): Effect[ArraySeq.ofByte] = {
     val httpRequest = createRequest(request, mediaType, context)
     system.flatMap(
-      system.either(send(httpRequest, request)),
-      (response: Either[Throwable, Response[Array[Byte]]]) =>
+      system.either(send(httpRequest, request, requestId)),
+      (response: Either[Throwable, Response[Array[Byte]]]) => {
+        lazy val responseProperties = Map(
+          LogProperties.requestId -> requestId,
+          "URL" -> url
+        )
         response.fold(
           error => {
-            logger.error(s"Failed to receive $protocol response", error, Map("URL" -> url))
+            logger.error(s"Failed to receive $protocol response", error, responseProperties)
             system.failed(error)
           },
           message => {
-            logger.debug(
-              s"Received $protocol response",
-              Map("URL" -> url, "Status" -> message.code, "Size" -> message.body.length)
-            )
+            logger.debug(s"Received $protocol response", responseProperties + ("Status" -> message.code.toString))
             system.pure(Bytes.byteArray.from(message.body))
           }
         )
+      }
     )
   }
 
-  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
+  override def notify(
+    request: ArraySeq.ofByte,
+    requestId: String,
+    mediaType: String,
+    context: Option[Context]
+  ): Effect[Unit] = {
     val httpRequest = createRequest(request, mediaType, context).response(ignore)
-    system.map(send(httpRequest, request), (_: Response[Unit]) => ())
+    system.map(send(httpRequest, request, requestId), (_: Response[Unit]) => ())
   }
 
   override def defaultContext: Context = SttpContext.default
 
   override def close(): Effect[Unit] = backend.close()
 
-  private def send[R](httpRequest: Request[R, WebSocket[Effect]], request: ArraySeq.ofByte): Effect[Response[R]] = {
-    logger.trace(
-      s"Sending $protocol httpRequest",
-      Map("URL" -> url, "Method" -> httpRequest.method, "Size" -> request.size)
+  private def send[R](
+    httpRequest: Request[R, WebSocket[Effect]],
+    request: ArraySeq.ofByte,
+    requestId: String
+  ): Effect[Response[R]] = {
+    lazy val requestProperties = Map(
+      LogProperties.requestId -> requestId,
+      "URL" -> httpRequest.uri.toString,
+      "Method" -> httpRequest.method.toString
     )
+    logger.trace(s"Sending $protocol httpRequest", requestProperties)
     system.flatMap(
       system.either(httpRequest.send(backend)),
       (result: Either[Throwable, Response[R]]) =>
         result.fold(
           error => {
-            logger.error(
-              s"Failed to send $protocol httpRequest",
-              error,
-              Map("URL" -> url, "Method" -> httpRequest.method, "Size" -> request.size)
-            )
+            logger.error(s"Failed to send $protocol httpRequest", error, requestProperties)
             system.failed(error)
           },
           response => {
-            logger.debug(
-              s"Sent $protocol httpRequest",
-              Map("URL" -> url, "Method" -> httpRequest.method, "Size" -> request.size)
-            )
+            logger.debug(s"Sent $protocol httpRequest", requestProperties)
             system.pure(response)
           }
         )
@@ -100,7 +111,12 @@ final case class SttpClient[Effect[_]](
   }
 
   private def sendWebSocket(request: ArraySeq.ofByte): sttp.ws.WebSocket[Effect] => Effect[Array[Byte]] =
-    webSocket => system.flatMap(webSocket.sendBinary(request.unsafeArray), (_: Unit) => webSocket.receiveBinary(true))
+    webSocket =>
+      system.flatMap(
+        webSocket.sendBinary(request.unsafeArray),
+        (_: Unit) =>
+          webSocket.receiveBinary(true)
+      )
 
   private def createRequest(
     request: ArraySeq.ofByte,

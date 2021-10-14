@@ -38,24 +38,28 @@ final case class HttpUrlConnectionClient[Effect[_]](
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   require(httpMethods.contains(method), s"Invalid HTTP method: $method")
 
-  override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
+  override def call(
+    request: ArraySeq.ofByte,
+    requestId: String,
+    mediaType: String,
+    context: Option[Context]
+  ): Effect[ArraySeq.ofByte] = {
     val http = context.getOrElse(defaultContext)
     system.flatMap(
-      send(request, mediaType, http),
+      send(request, requestId, mediaType, http),
       (_: EffectValue) match {
         case (connection: HttpURLConnection, _) =>
           system.wrap {
-            logger.trace("Receiving HTTP response", Map("URL" -> url))
+            lazy val responseProperties = Map(
+              LogProperties.requestId -> requestId,
+              "URL" -> url
+            )
+            logger.trace("Receiving HTTP response", responseProperties)
             val response = Using(connection.getInputStream)(Bytes.inputStream.from).mapFailure { error =>
-              logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
+              logger.error("Failed to receive HTTP response", error, responseProperties)
               error
             }.get
-            lazy val responseProperties = Map(
-              "URL" -> url,
-              "Status" -> connection.getResponseCode,
-              LogProperties.size -> response.length
-            )
-            logger.debug("Received HTTP response")
+            logger.debug("Received HTTP response", responseProperties + ("Status" -> connection.getResponseCode.toString))
             clearRequestProperties(connection, http)
             response
           }
@@ -63,10 +67,15 @@ final case class HttpUrlConnectionClient[Effect[_]](
     )
   }
 
-  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
+  override def notify(
+    request: ArraySeq.ofByte,
+    requestId: String,
+    mediaType: String,
+    context: Option[Context]
+  ): Effect[Unit] = {
     val http = context.getOrElse(defaultContext)
     system.map(
-      send(request, mediaType, http),
+      send(request, requestId, mediaType, http),
       (_: EffectValue) match {
         case (connection: HttpURLConnection, _) => clearRequestProperties(connection, http)
       }
@@ -77,11 +86,17 @@ final case class HttpUrlConnectionClient[Effect[_]](
 
   override def close(): Effect[Unit] = system.pure(())
 
-  private def send(request: ArraySeq.ofByte, mediaType: String, context: Context): Effect[EffectValue] =
+  private def send(request: ArraySeq.ofByte, requestId: String, mediaType: String, context: Context): Effect[EffectValue] =
     system.wrap {
-      logger.trace("Sending HTTP request", Map("URL" -> url, "Size" -> request.length))
+      val httpMethod = selectHttpMethod(context)
+      lazy val requestProperties = Map(
+        LogProperties.requestId -> requestId,
+        "URL" -> url,
+        "Method" -> httpMethod
+      )
+      logger.trace("Sending HTTP request", requestProperties)
       val connection = connect(context)
-      val httpMethod = setRequestProperties(connection, request, mediaType, context)
+      setRequestProperties(connection, request, mediaType, httpMethod, context)
       val outputStream = connection.getOutputStream
       // FIXME - remove
       println(s"SENDING REQUEST\n${Bytes.string.to(request)}")
@@ -90,25 +105,24 @@ final case class HttpUrlConnectionClient[Effect[_]](
         stream.flush()
       }
       write.mapFailure { error =>
-        logger.error(
-          "Failed to send HTTP request",
-          error,
-          Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length)
-        )
+        logger.error("Failed to send HTTP request", error, requestProperties)
         error
       }.get
-      logger.debug("Sent HTTP request", Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length))
+      logger.debug("Sent HTTP request", requestProperties)
       connection -> new ArraySeq.ofByte(Array.empty)
     }
+
+  private def selectHttpMethod(http: Context): String =
+    http.method.orElse(http.base.map(_.connection.getRequestMethod)).getOrElse(method)
 
   private def setRequestProperties(
     connection: HttpURLConnection,
     request: ArraySeq.ofByte,
     mediaType: String,
+    httpMethod: String,
     http: Context
-  ): String = {
+  ): Unit = {
     val default = http.base.map(_.connection).getOrElse(connection)
-    val httpMethod = http.method.orElse(http.base.map(_.connection.getRequestMethod)).getOrElse(method)
     require(httpMethods.contains(httpMethod), s"Invalid HTTP method: $httpMethod")
     connection.setDoOutput(true)
     connection.setRequestMethod(httpMethod)
@@ -124,7 +138,6 @@ final case class HttpUrlConnectionClient[Effect[_]](
     (connectionHeaders(default) ++ http.headers).foreach { case (name, value) =>
       connection.setRequestProperty(name, value)
     }
-    httpMethod
   }
 
   private def clearRequestProperties(connection: HttpURLConnection, http: Context): Unit =

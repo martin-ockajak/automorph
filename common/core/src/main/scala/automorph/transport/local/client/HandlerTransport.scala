@@ -26,8 +26,12 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
   defaultContext: Context
 ) extends ClientMessageTransport[Effect, Context] {
 
-  override def call(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte] = {
-    val requestId = Random.id
+  override def call(
+    request: ArraySeq.ofByte,
+    requestId: String,
+    mediaType: String,
+    context: Option[Context]
+  ): Effect[ArraySeq.ofByte] = {
     implicit val usingContext = context.getOrElse(defaultContext)
     system.flatMap(
       handler.processRequest(request, requestId),
@@ -38,8 +42,12 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     )
   }
 
-  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
-    val requestId = Random.id
+  override def notify(
+    request: ArraySeq.ofByte,
+    requestId: String,
+    mediaType: String,
+    context: Option[Context]
+  ): Effect[Unit] = {
     implicit val usingContext = context.getOrElse(defaultContext)
     system.map(
       handler.processRequest(request, requestId),

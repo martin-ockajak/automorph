@@ -95,7 +95,7 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
             lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
             logger.trace(s"Sending ${protocol.name} request", allProperties)
             system.flatMap(
-              transport.call(rawRequest, protocol.codec.mediaType, context),
+              transport.call(rawRequest, requestId, protocol.codec.mediaType, context),
               // Process response
               rawResponse => processResponse[R](rawResponse, requestProperties, decodeResult)
             )
@@ -137,7 +137,7 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
             )
             lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
             logger.trace(s"Sending ${protocol.name} request", allProperties)
-            transport.notify(request.message.body, protocol.codec.mediaType, context)
+            transport.notify(request.message.body, requestId, protocol.codec.mediaType, context)
           }
         )
     )
