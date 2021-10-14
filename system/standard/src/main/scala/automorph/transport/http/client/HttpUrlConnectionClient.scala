@@ -80,7 +80,6 @@ final case class HttpUrlConnectionClient[Effect[_]](
       logger.trace("Sending HTTP request", Map("URL" -> url, "Size" -> request.length))
       val connection = connect(context)
       val httpMethod = setRequestProperties(connection, request, mediaType, context)
-      connection.setDoOutput(true)
       val outputStream = connection.getOutputStream
       // FIXME - remove
       println(s"SENDING REQUEST\n${Bytes.string.to(request)}")
@@ -109,6 +108,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
     val default = http.base.map(_.connection).getOrElse(connection)
     val httpMethod = http.method.orElse(http.base.map(_.connection.getRequestMethod)).getOrElse(method)
     require(httpMethods.contains(httpMethod), s"Invalid HTTP method: $httpMethod")
+    connection.setDoOutput(true)
     connection.setRequestMethod(httpMethod)
     connection.setInstanceFollowRedirects(http.followRedirects.getOrElse(default.getInstanceFollowRedirects))
     connection.setConnectTimeout(http.readTimeout.map(_.toMillis.toInt).getOrElse(default.getConnectTimeout))
