@@ -46,7 +46,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
         case (connection: HttpURLConnection, _) =>
           system.wrap {
             logger.trace("Receiving HTTP response", Map("URL" -> url))
-            val response = Try(Using.resource(connection.getInputStream)(Bytes.inputStream.from)).mapFailure { error =>
+            val response = Using(connection.getInputStream)(Bytes.inputStream.from).mapFailure { error =>
               logger.error("Failed to receive HTTP response", error, Map("URL" -> url))
               error
             }.get
