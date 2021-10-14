@@ -5,6 +5,7 @@ import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.RpcRequest
 import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.util.Extensions.TryOps
+import automorph.util.Random
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -26,6 +27,7 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
   type NamedFunction = NamedProxy[Node, Codec, Effect, Context]
 
   private val bodyProperty = "Body"
+  private val requestIdProperty = "RequestId"
 
   /**
    * Creates a remote RPC function proxy with specified function name.
@@ -82,8 +84,10 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
       error => system.failed(error),
       // Send request
       rpcRequest => {
-        lazy val properties = rpcRequest.message.properties ++ rpcRequest.message.text.map(bodyProperty -> _)
-        logger.trace(s"Sending ${protocol.name} request", properties)
+        val requestId = Random.id
+        lazy val requestProperties = rpcRequest.message.properties + (requestIdProperty -> requestId)
+        lazy val allProperties = rpcRequest.message.properties ++ rpcRequest.message.text.map(bodyProperty -> _)
+        logger.trace(s"Sending ${protocol.name} request", allProperties)
         system.flatMap(
           system.pure(rpcRequest),
           (request: RpcRequest[Node, _]) =>
