@@ -81,6 +81,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
       val connection = connect(context)
       val httpMethod = setRequestProperties(connection, request, mediaType, context)
       val outputStream = connection.getOutputStream
+      println(s"SENDING REQUEST\n${Bytes.string.to(request)}")
       val write = Using(outputStream) { stream =>
         stream.write(request.unsafeArray)
         stream.flush()
@@ -93,7 +94,6 @@ final case class HttpUrlConnectionClient[Effect[_]](
         )
         error
       }.get
-      println(s"SENT REQUEST\n${Bytes.string.to(request)}")
       logger.debug("Sent HTTP request", Map("URL" -> url, "Method" -> httpMethod, "Size" -> request.length))
       connection -> new ArraySeq.ofByte(Array.empty)
     }
