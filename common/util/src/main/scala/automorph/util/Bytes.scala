@@ -29,6 +29,15 @@ trait Bytes[T] {
    * @return byte sequence
    */
   def from(data: T): ArraySeq.ofByte
+
+  /**
+   * Convert part of specified data into a byte sequence.
+   *
+   * @param data data
+   * @param length converted data length
+   * @return byte sequence
+   */
+  def from(data: T, length: Int): ArraySeq.ofByte
 }
 
 object Bytes {
@@ -40,6 +49,9 @@ object Bytes {
     override def to(bytes: ArraySeq.ofByte): ArraySeq.ofByte = bytes
 
     override def from(data: ArraySeq.ofByte): ArraySeq.ofByte = data
+
+    override def from(data: ArraySeq.ofByte, length: Int): ArraySeq.ofByte =
+      new ArraySeq.ofByte(Array.copyAs(data.unsafeArray, length))
   }
 
   /** `Array[Byte]` <-> byte sequence converter. */
@@ -48,6 +60,9 @@ object Bytes {
     override def to(bytes: ArraySeq.ofByte): Array[Byte] = bytes.unsafeArray
 
     override def from(data: Array[Byte]): ArraySeq.ofByte = new ArraySeq.ofByte(data)
+
+    override def from(data: Array[Byte], length: Int): ArraySeq.ofByte =
+      new ArraySeq.ofByte(Array.copyAs(data, length))
   }
 
   /** `String` <-> byte sequence converter. */
@@ -59,6 +74,9 @@ object Bytes {
     override def to(bytes: ArraySeq.ofByte): String = new String(bytes.unsafeArray, charset)
 
     override def from(data: String): ArraySeq.ofByte = new ArraySeq.ofByte(data.getBytes(charset))
+
+    override def from(data: String, length: Int): ArraySeq.ofByte =
+      new ArraySeq.ofByte(Array.copyAs(data.getBytes(charset), length))
   }
 
   /** `ByteBuffer` <-> byte sequence converter. */
@@ -71,9 +89,15 @@ object Bytes {
         new ArraySeq.ofByte(data.array)
       } else {
         val array = Array.ofDim[Byte](data.remaining)
-        data.get(array, 0, array.length)
+        data.get(array)
         new ArraySeq.ofByte(array)
       }
+    }
+
+    override def from(data: ByteBuffer, length: Int): ArraySeq.ofByte = {
+      val array = Array.ofDim[Byte](length)
+      data.get(array)
+      new ArraySeq.ofByte(array)
     }
   }
 
@@ -88,10 +112,28 @@ object Bytes {
     override def from(data: InputStream): ArraySeq.ofByte = {
       val outputStream = new ByteArrayOutputStream()
       val buffer = Array.ofDim[Byte](bufferSize)
-      LazyList.iterate(data.read(buffer)) { length =>
-        outputStream.write(buffer, 0, length)
-        data.read(buffer)
-      }.takeWhile(_ >= 0).take(Int.MaxValue)
+      LazyList.iterate(0) { _ =>
+        data.read(buffer) match {
+          case length if length > 0 =>
+            outputStream.write(buffer, 0, length)
+            length
+          case length => length
+        }
+      }.takeWhile(_ >= 0).lastOption
+      new ArraySeq.ofByte(buffer)
+    }
+
+    override def from(data: InputStream, length: Int): ArraySeq.ofByte = {
+      val outputStream = new ByteArrayOutputStream(length)
+      val buffer = Array.ofDim[Byte](bufferSize)
+      LazyList.iterate(length) { remaining =>
+        data.read(buffer, 0, Math.min(remaining, buffer.size)) match {
+          case read if read >= 0 =>
+            outputStream.write(buffer, 0, read)
+            remaining - read
+          case read if read < 0 => 0
+        }
+      }.takeWhile(_ > 0).lastOption
       new ArraySeq.ofByte(buffer)
     }
   }

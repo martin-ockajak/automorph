@@ -1126,8 +1126,8 @@ public abstract class NanoHTTPD {
             return 0;
         }
 
-        @Override
-        public void parseBody(Map<String, String> files) throws IOException, ResponseException {
+          @Override
+          public void parseBody(Map<String, String> files) throws IOException, ResponseException {
             RandomAccessFile randomAccessFile = null;
             try {
                 long size = getBodySize();
@@ -1245,6 +1245,15 @@ public abstract class NanoHTTPD {
         InputStream getInputStream();
 
         Method getMethod();
+
+// PATCH START
+        /**
+         * Get request body size.
+         *
+         * @return request body size
+         */
+        long getBodySize();
+// PATCH END
 
         /**
          * This method will only return the first value for a given parameter.

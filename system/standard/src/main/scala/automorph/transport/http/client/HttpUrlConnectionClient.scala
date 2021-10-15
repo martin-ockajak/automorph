@@ -98,8 +98,6 @@ final case class HttpUrlConnectionClient[Effect[_]](
       val connection = connect(context)
       setRequestProperties(connection, request, mediaType, httpMethod, context)
       val outputStream = connection.getOutputStream
-      // FIXME - remove
-      println(s"SENDING REQUEST\n${Bytes.string.to(request)}")
       val write = Using(outputStream) { stream =>
         stream.write(request.unsafeArray)
         stream.flush()
