@@ -39,14 +39,14 @@ final case class HttpUrlConnectionClient[Effect[_]](
   require(httpMethods.contains(method), s"Invalid HTTP method: $method")
 
   override def call(
-    request: ArraySeq.ofByte,
+    requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
     context: Option[Context]
   ): Effect[ArraySeq.ofByte] = {
     val http = context.getOrElse(defaultContext)
     system.flatMap(
-      send(request, requestId, mediaType, http),
+      send(requestBody, requestId, mediaType, http),
       (_: EffectValue) match {
         case (connection: HttpURLConnection, _) =>
           system.wrap {
@@ -68,14 +68,14 @@ final case class HttpUrlConnectionClient[Effect[_]](
   }
 
   override def notify(
-    request: ArraySeq.ofByte,
+    requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
     context: Option[Context]
   ): Effect[Unit] = {
     val http = context.getOrElse(defaultContext)
     system.map(
-      send(request, requestId, mediaType, http),
+      send(requestBody, requestId, mediaType, http),
       (_: EffectValue) match {
         case (connection: HttpURLConnection, _) => clearRequestProperties(connection, http)
       }

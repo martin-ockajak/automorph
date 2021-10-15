@@ -8,7 +8,6 @@ import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.{RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
-import automorph.util.Random
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
 
@@ -48,6 +47,29 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
 
   override val name: String = "JSON-RPC"
 
+  override def createRequest(
+    function: String,
+    argumentNames: Option[Iterable[String]],
+    argumentValues: Iterable[Node],
+    responseRequired: Boolean,
+    requestId: String
+  ): Try[RpcRequest[Node, Metadata]] = {
+    // Create request
+    require(requestId.nonEmpty, "Empty request identifier")
+    val id = Option.when(responseRequired)(Right(requestId).withLeft[BigDecimal])
+    val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
+    val formedRequest = Request(id, function, argumentNodes).formed
+
+    // Serialize request
+    val messageText = () => Some(codec.text(encodeMessage(formedRequest)))
+    Try(codec.serialize(encodeMessage(formedRequest))).mapFailure { error =>
+      ParseErrorException("Malformed request", error)
+    }.map { messageBody =>
+      val message = RpcMessage(id, messageBody, formedRequest.properties, messageText)
+      RpcRequest(function, argumentNodes, responseRequired, message)
+    }
+  }
+
   override def parseRequest(
     request: Body,
     function: Option[String]
@@ -66,28 +88,6 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
         )
       }
     )
-
-  override def createRequest(
-    function: String,
-    argumentNames: Option[Iterable[String]],
-    argumentValues: Iterable[Node],
-    responseRequired: Boolean
-  ): Try[RpcRequest[Node, Metadata]] = {
-    // Create request
-    Seq(function)
-    val id = Option.when(responseRequired)(Right(Random.id).withLeft[BigDecimal])
-    val argumentNodes = createArgumentNodes(argumentNames, argumentValues)
-    val formedRequest = Request(id, function, argumentNodes).formed
-
-    // Serialize request
-    val messageText = () => Some(codec.text(encodeMessage(formedRequest)))
-    Try(codec.serialize(encodeMessage(formedRequest))).mapFailure { error =>
-      ParseErrorException("Malformed request", error)
-    }.map { messageBody =>
-      val message = RpcMessage(id, messageBody, formedRequest.properties, messageText)
-      RpcRequest(function, argumentNodes, responseRequired, message)
-    }
-  }
 
   override def createResponse(result: Try[Node], details: Metadata): Try[RpcResponse[Node, Metadata]] = {
     // Create response

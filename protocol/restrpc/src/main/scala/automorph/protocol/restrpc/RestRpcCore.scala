@@ -45,6 +45,31 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
 
   override val name: String = "REST-RPC"
 
+  override def createRequest(
+    function: String,
+    argumentNames: Option[Iterable[String]],
+    argumentValues: Iterable[Node],
+    responseRequired: Boolean,
+    requestId: String
+  ): Try[RpcRequest[Node, Metadata]] =
+  // Create request
+    createArgumentNodes(argumentNames, argumentValues).flatMap { formedRequest =>
+      val requestProperties = Map(
+        "Type" -> MessageType.Call.toString,
+        "Function" -> function,
+        "Arguments" -> argumentValues.size.toString
+      )
+
+      // Serialize request
+      val messageText = () => Some(codec.text(encodeRequest(formedRequest)))
+      Try(codec.serialize(encodeRequest(formedRequest))).mapFailure { error =>
+        InvalidRequestException("Malformed request", error)
+      }.map { messageBody =>
+        val message = RpcMessage((), messageBody, requestProperties, messageText)
+        RpcRequest(function, Right(formedRequest), responseRequired, message)
+      }
+    }
+
   override def parseRequest(
     request: Body,
     function: Option[String]
@@ -99,30 +124,6 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
       RpcResponse(result, message)
     }
   }
-
-  override def createRequest(
-    function: String,
-    argumentNames: Option[Iterable[String]],
-    argumentValues: Iterable[Node],
-    responseRequired: Boolean
-  ): Try[RpcRequest[Node, Metadata]] =
-    // Create request
-    createArgumentNodes(argumentNames, argumentValues).flatMap { formedRequest =>
-      val requestProperties = Map(
-        "Type" -> MessageType.Call.toString,
-        "Function" -> function,
-        "Arguments" -> argumentValues.size.toString
-      )
-
-      // Serialize request
-      val messageText = () => Some(codec.text(encodeRequest(formedRequest)))
-      Try(codec.serialize(encodeRequest(formedRequest))).mapFailure { error =>
-        InvalidRequestException("Malformed request", error)
-      }.map { messageBody =>
-        val message = RpcMessage((), messageBody, requestProperties, messageText)
-        RpcRequest(function, Right(formedRequest), responseRequired, message)
-      }
-    }
 
   override def parseResponse(response: Body): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
     // Deserialize response

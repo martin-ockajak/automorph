@@ -79,14 +79,14 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
     context: Option[Context]
   ): Effect[R] =
     // Create request
-    protocol.createRequest(functionName, argumentNames, encodedArguments, true).pureFold(
+    val requestId = Random.id
+    protocol.createRequest(functionName, argumentNames, encodedArguments, true, requestId).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest => {
         system.flatMap(
           system.pure(rpcRequest),
           (request: RpcRequest[Node, _]) => {
-            val requestId = Random.id
             val rawRequest = request.message.body
             lazy val requestProperties = rpcRequest.message.properties ++ Map(
               LogProperties.requestId -> requestId,
@@ -122,14 +122,14 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
     context: Option[Context]
   ): Effect[Unit] =
     // Create request
-    protocol.createRequest(functionName, argumentNames, encodedArguments, false).pureFold(
+    val requestId = Random.id
+    protocol.createRequest(functionName, argumentNames, encodedArguments, false, requestId).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>
         system.flatMap(
           system.pure(rpcRequest),
           (request: RpcRequest[Node, _]) => {
-            val requestId = Random.id
             val rawRequest = request.message.body
             lazy val requestProperties = rpcRequest.message.properties ++ Map(
               LogProperties.requestId -> requestId,

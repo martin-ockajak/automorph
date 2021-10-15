@@ -43,14 +43,14 @@ final case class SttpClient[Effect[_]](
   private val protocol = if (webSocket) "WebSocket" else "HTTP"
 
   override def call(
-    request: ArraySeq.ofByte,
+    requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
     context: Option[Context]
   ): Effect[ArraySeq.ofByte] = {
-    val httpRequest = createRequest(request, mediaType, context)
+    val httpRequest = createRequest(requestBody, mediaType, context)
     system.flatMap(
-      system.either(send(httpRequest, request, requestId)),
+      system.either(send(httpRequest, requestBody, requestId)),
       (response: Either[Throwable, Response[Array[Byte]]]) => {
         lazy val responseProperties = Map(
           LogProperties.requestId -> requestId,
@@ -71,13 +71,13 @@ final case class SttpClient[Effect[_]](
   }
 
   override def notify(
-    request: ArraySeq.ofByte,
+    requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
     context: Option[Context]
   ): Effect[Unit] = {
-    val httpRequest = createRequest(request, mediaType, context).response(ignore)
-    system.map(send(httpRequest, request, requestId), (_: Response[Unit]) => ())
+    val httpRequest = createRequest(requestBody, mediaType, context).response(ignore)
+    system.map(send(httpRequest, requestBody, requestId), (_: Response[Unit]) => ())
   }
 
   override def defaultContext: Context = SttpContext.default
