@@ -66,17 +66,18 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
         InvalidRequestException("Malformed request", error)
       }.map { messageBody =>
         val message = RpcMessage((), messageBody, requestProperties, messageText)
-        RpcRequest(function, Right(formedRequest), responseRequired, message)
+        RpcRequest(message, function, Right(formedRequest), responseRequired, requestId)
       }
     }
 
   override def parseRequest(
-    request: Body,
-    function: Option[String]
+    requestBody: MessageBody,
+    requestId: String,
+    functionName: Option[String]
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
     // Deserialize request
-    Try(decodeRequest(codec.deserialize(request))).pureFold(
-      error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), request))),
+    Try(decodeRequest(codec.deserialize(requestBody))).pureFold(
+      error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), requestBody))),
       formedRequest => {
         // Validate request
         val messageText = () => Some(codec.text(encodeRequest(formedRequest)))
@@ -84,11 +85,11 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
           "Type" -> MessageType.Call.toString,
           "Arguments" -> formedRequest.size.toString
         )
-        function.map { functionName =>
-          val message = RpcMessage((), request, requestProperties ++ Option("Function" -> functionName), messageText)
-          Right(RpcRequest(functionName, Right(formedRequest), true, message))
+        functionName.map { functionName =>
+          val message = RpcMessage((), requestBody, requestProperties ++ Option("Function" -> functionName), messageText)
+          Right(RpcRequest(message, functionName, Right(formedRequest), true, requestId))
         }.getOrElse {
-          val message = RpcMessage((), request, requestProperties, messageText)
+          val message = RpcMessage((), requestBody, requestProperties, messageText)
           Left(RpcError(InvalidRequestException("Missing invoked function name"), message))
         }
       }
@@ -125,7 +126,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
     }
   }
 
-  override def parseResponse(response: Body): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
+  override def parseResponse(response: MessageBody): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
     // Deserialize response
     Try(decodeResponse(codec.deserialize(response))).pureFold(
       error => Left(RpcError(InvalidResponseException("Malformed response", error), RpcMessage((), response))),

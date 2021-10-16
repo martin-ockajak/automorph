@@ -31,15 +31,15 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
    * @param requestBody request message body
    * @param requestId request correlation identifier
    * @param context request context
-   * @tparam RequestBody message body type
+   * @tparam MessageBody message body type
    * @return optional response message
    */
-  def processRequest[RequestBody: Bytes](requestBody: RequestBody, requestId: String)(implicit
+  def processRequest[MessageBody: Bytes](requestBody: MessageBody, requestId: String)(implicit
     context: Context
-  ): Effect[HandlerResult[RequestBody]] = {
+  ): Effect[HandlerResult[MessageBody]] = {
     // Parse request
-    val rawRequest = implicitly[Bytes[RequestBody]].from(requestBody)
-    protocol.parseRequest(rawRequest, None).fold(
+    val rawRequest = implicitly[Bytes[MessageBody]].from(requestBody)
+    protocol.parseRequest(rawRequest, requestId, None).fold(
       error => errorResponse(error.exception, error.message, requestId, Map(LogProperties.requestId -> requestId)),
       rpcRequest => {
         // Invoke requested RPC function
