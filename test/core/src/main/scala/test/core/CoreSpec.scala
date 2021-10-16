@@ -224,9 +224,7 @@ trait CoreSpec extends BaseSpec {
     }
 
   private def execute[Result](value: => Effect[Result]): Result =
-    Try {
-      run(value)
-    } match {
+    Try(run(value)) match {
       case Success(result) => result
       case Failure(error) =>
         error.printStackTrace(System.out)
