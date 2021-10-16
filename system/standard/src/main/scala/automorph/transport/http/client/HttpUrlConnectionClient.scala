@@ -122,7 +122,6 @@ final case class HttpUrlConnectionClient[Effect[_]](
   ): Unit = {
     val default = http.base.map(_.connection).getOrElse(connection)
     require(httpMethods.contains(httpMethod), s"Invalid HTTP method: $httpMethod")
-    connection.setDoOutput(true)
     connection.setRequestMethod(httpMethod)
     connection.setInstanceFollowRedirects(http.followRedirects.getOrElse(default.getInstanceFollowRedirects))
     connection.setConnectTimeout(http.readTimeout.map(_.toMillis.toInt).getOrElse(default.getConnectTimeout))
@@ -136,6 +135,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
     (connectionHeaders(default) ++ http.headers).foreach { case (name, value) =>
       connection.setRequestProperty(name, value)
     }
+    connection.setDoOutput(true)
   }
 
   private def clearRequestProperties(connection: HttpURLConnection, http: Context): Unit =
