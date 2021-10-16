@@ -120,7 +120,7 @@ object Bytes {
           case length => length
         }
       }.takeWhile(_ >= 0).lastOption
-      new ArraySeq.ofByte(buffer)
+      new ArraySeq.ofByte(outputStream.toByteArray)
     }
 
     override def from(data: InputStream, length: Int): ArraySeq.ofByte = {
@@ -131,10 +131,10 @@ object Bytes {
           case read if read >= 0 =>
             outputStream.write(buffer, 0, read)
             remaining - read
-          case read if read < 0 => 0
+          case _ => 0
         }
       }.takeWhile(_ > 0).lastOption
-      new ArraySeq.ofByte(buffer)
+      new ArraySeq.ofByte(outputStream.toByteArray)
     }
   }
 }

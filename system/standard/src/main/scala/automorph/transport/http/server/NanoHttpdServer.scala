@@ -57,8 +57,6 @@ final case class NanoHttpdServer[Effect[_]] private (
     lazy val requestDetails = requestProperties(session, requestId)
     logger.trace("Receiving HTTP request", requestDetails)
     val request = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
-    println("REQUEST")
-    println(Bytes.string.to(request))
     logger.debug("Received HTTP request", requestDetails)
 
     // Process the request
