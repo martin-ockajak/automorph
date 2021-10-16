@@ -181,13 +181,13 @@ trait CoreSpec extends BaseSpec {
 //              "Positional" in {
 //                check { (a0: String) =>
 //                  val expected = run(simpleApiInstance.test(a0))
-//                  run(fixture.positionalCall("test", a0)) == expected
+//                  execute(fixture.positionalCall("test", a0)) == expected
 //                }
 //              }
               "Named" in {
                 check { (a0: String) =>
                   val expected = run(simpleApiInstance.test(a0))
-                  run(fixture.namedCall("test", "test" -> a0)) == expected
+                  execute(fixture.namedCall("test", "test" -> a0)) == expected
                 }
               }
             }
@@ -196,13 +196,13 @@ trait CoreSpec extends BaseSpec {
 //            "Simple API" - {
 //              "Positional" in {
 //                check { (a0: String) =>
-//                  run(fixture.positionalNotify("test", a0))
+//                  execute(fixture.positionalNotify("test", a0))
 //                  true
 //                }
 //              }
 //              "Named" in {
 //                check { (a0: String) =>
-//                  run(fixture.namedNotify("test", "test" -> a0))
+//                  execute(fixture.namedNotify("test", "test" -> a0))
 //                  true
 //                }
 //              }
@@ -221,6 +221,16 @@ trait CoreSpec extends BaseSpec {
   private def apiCombinations[Api](originalApi: Api, apis: Seq[Api]): Seq[(String, (Api, Api))] =
     apis.zip(apiNames).map { case (api, name) =>
       name -> ((originalApi, api))
+    }
+
+  private def execute[Result](value: => Effect[Result]): Result =
+    Try {
+      run(value)
+    } match {
+      case Success(result) => result
+      case Failure(error) =>
+        error.printStackTrace(System.out)
+        throw error
     }
 
   private def consistent[Api, Result](apis: (Api, Api), function: Api => Effect[Result]): Boolean =
