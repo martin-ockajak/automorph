@@ -97,6 +97,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
       logger.trace("Sending HTTP request", requestProperties)
       val connection = connect(context)
       setRequestProperties(connection, request, mediaType, httpMethod, context)
+      connection.setDoOutput(true)
       val outputStream = connection.getOutputStream
       val write = Using(outputStream) { stream =>
         stream.write(request.unsafeArray)
@@ -135,7 +136,6 @@ final case class HttpUrlConnectionClient[Effect[_]](
     (connectionHeaders(default) ++ http.headers).foreach { case (name, value) =>
       connection.setRequestProperty(name, value)
     }
-    connection.setDoOutput(true)
   }
 
   private def clearRequestProperties(connection: HttpURLConnection, http: Context): Unit =
