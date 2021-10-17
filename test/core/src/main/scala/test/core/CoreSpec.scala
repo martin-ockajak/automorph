@@ -1,6 +1,6 @@
 package test.core
 
-import automorph.Handler
+import automorph.{Client, Handler}
 import automorph.client.ClientMeta
 import automorph.spi.EffectSystem
 import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException, InvalidResponseException}
@@ -27,7 +27,7 @@ trait CoreSpec extends BaseSpec {
   type InvalidApiType = InvalidApi[Effect]
 
   case class TestFixture(
-    client: ClientMeta.AnyCodec[Effect, Context],
+    client: Client.AnyCodec[Effect, Context],
     handler: Handler.AnyCodec[Effect, Context],
     serverPort: Int,
     simpleApi: SimpleApiType,

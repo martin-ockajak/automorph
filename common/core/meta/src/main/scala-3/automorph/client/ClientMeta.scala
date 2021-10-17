@@ -34,19 +34,9 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * @return remote API proxy instance
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[Api <: AnyRef]: Api = ClientMeta.generalBind[Node, Codec, Effect, Context, Api](this, protocol.codec)
-
-object ClientMeta:
-
-  /** Client with arbitrary codec. */
-  type AnyCodec[Effect[_], Context] = Client[_, _, Effect, Context]
-
-  inline def generalBind[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
-    core: Client[Node, Codec, Effect, Context],
-    codec: Codec
-  ): Api =
+  inline def bind[Api <: AnyRef]: Api =
     // Generate API method bindings
-    val methodBindings = ClientGenerator.bindings[Node, Codec, Effect, Context, Api](codec).map { binding =>
+    val methodBindings = ClientGenerator.bindings[Node, Codec, Effect, Context, Api](protocol.codec).map { binding =>
       binding.function.name -> binding
     }.toMap
 
@@ -71,7 +61,7 @@ object ClientMeta:
           val parameterNames = clientBinding.function.parameters.map(_.name)
 
           // Perform the API call
-          core.call(
+          call(
             method.getName,
             parameterNames,
             encodedArguments,
