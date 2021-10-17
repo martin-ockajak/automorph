@@ -18,7 +18,7 @@ import automorph.util.CannotEqual
  */
 final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   name: String,
-  private val arguments: Seq[(String, Any)],
+  arguments: Seq[(String, Any)],
   private val encodedArguments: Seq[Node],
   private val client: ClientCore[Node, Codec, Effect, Context],
   private val codec: Codec,
