@@ -24,10 +24,10 @@ private[automorph] object Extensions {
     def trace(maxCauses: Int = 100): Seq[String] =
       LazyList.iterate(Option(throwable))(_.flatMap(error => Option(error.getCause)))
         .takeWhile(_.isDefined).flatten.take(maxCauses).map { throwable =>
-        val exceptionName = throwable.getClass.getSimpleName
-        val message = Option(throwable.getMessage).getOrElse("")
-        s"[$exceptionName] $message"
-      }
+          val exceptionName = throwable.getClass.getSimpleName
+          val message = Option(throwable.getMessage).getOrElse("")
+          s"[$exceptionName] $message"
+        }
   }
 
   implicit final class TryOps[T](private val tryValue: Try[T]) {
@@ -38,9 +38,9 @@ private[automorph] object Extensions {
      * @param onFailure function to apply if this is a `Failure`
      * @return a transformed `Try`
      */
-    def mapFailure(onFailure: Throwable => Throwable): Try[T] = tryValue match {
-      case Failure(exception) => Failure(onFailure(exception))
-      case result => result
+    def forFailure(onFailure: Throwable => Unit): Try[T] = tryValue recoverWith { case exception =>
+      onFailure(exception)
+      Failure(exception)
     }
 
     /**

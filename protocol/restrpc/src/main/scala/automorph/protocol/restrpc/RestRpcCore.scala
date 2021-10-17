@@ -52,7 +52,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
     responseRequired: Boolean,
     requestId: String
   ): Try[RpcRequest[Node, Metadata]] =
-  // Create request
+    // Create request
     createArgumentNodes(argumentNames, argumentValues).flatMap { formedRequest =>
       val requestProperties = Map(
         "Type" -> MessageType.Call.toString,
@@ -62,8 +62,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
 
       // Serialize request
       val messageText = () => Some(codec.text(encodeRequest(formedRequest)))
-      Try(codec.serialize(encodeRequest(formedRequest))).mapFailure { error =>
-        InvalidRequestException("Malformed request", error)
+      Try(codec.serialize(encodeRequest(formedRequest))).recoverWith { case error =>
+        Failure(InvalidRequestException("Malformed request", error))
       }.map { messageBody =>
         val message = RpcMessage((), messageBody, requestProperties, messageText)
         RpcRequest(message, function, Right(formedRequest), responseRequired, requestId)
@@ -118,8 +118,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
 
     // Serialize response
     val messageText = () => Some(codec.text(encodeResponse(formedResponse)))
-    Try(codec.serialize(encodeResponse(formedResponse))).mapFailure { error =>
-      InvalidResponseException("Malformed response", error)
+    Try(codec.serialize(encodeResponse(formedResponse))).recoverWith { case error =>
+      Failure(InvalidResponseException("Malformed response", error))
     }.map { messageBody =>
       val message = RpcMessage((), messageBody, formedResponse.properties, messageText)
       RpcResponse(result, message)

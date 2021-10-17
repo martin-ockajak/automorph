@@ -62,8 +62,8 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
 
     // Serialize request
     val messageText = () => Some(codec.text(encodeMessage(formedRequest)))
-    Try(codec.serialize(encodeMessage(formedRequest))).mapFailure { error =>
-      ParseErrorException("Malformed request", error)
+    Try(codec.serialize(encodeMessage(formedRequest))).recoverWith { case error =>
+      Failure(ParseErrorException("Malformed request", error))
     }.map { messageBody =>
       val message = RpcMessage(id, messageBody, formedRequest.properties, messageText)
       RpcRequest(message, function, argumentNodes, responseRequired, requestId)
@@ -113,8 +113,8 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
 
     // Serialize response
     val messageText = () => Some(codec.text(encodeMessage(formedResponse)))
-    Try(codec.serialize(encodeMessage(formedResponse))).mapFailure { error =>
-      ParseErrorException("Malformed response", error)
+    Try(codec.serialize(encodeMessage(formedResponse))).recoverWith { case error =>
+      Failure(ParseErrorException("Malformed response", error))
     }.map { messageBody =>
       val message = RpcMessage(Option(id), messageBody, formedResponse.properties, messageText)
       RpcResponse(result, message)

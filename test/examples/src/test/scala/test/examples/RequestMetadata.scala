@@ -42,18 +42,18 @@ object RequestMetadata extends App {
     .cookies("Test" -> "value")
     .authorizationBearer("value")
 
-  // Call the remote API method via proxy with request context supplied directly
+  // Call the remote API function via proxy with request context supplied directly
   apiProxy.useMetadata("test")(request) // String
 
-  // Call the remote API method dynamically with request context supplied directly
-  client.method("useMetadata").args("message" -> "test").call[String] // String
+  // Call the remote API function dynamically with request context supplied directly
+  client.function("useMetadata").args("message" -> "test").call[String] // String
 
-  // Call the remote API method via proxy with request context supplied implictly
+  // Call the remote API function via proxy with request context supplied implictly
   implicit lazy val implicitRequest: automorph.DefaultHttpClient.Context = request
   apiProxy.useMetadata("test") // String
 
-  // Call the remote API method dynamically with request context supplied implictly
-  client.method("useMetadata").args("message" -> "test").call[String] // String
+  // Call the remote API function dynamically with request context supplied implictly
+  client.function("useMetadata").args("message" -> "test").call[String] // String
 
   // Close the client
   client.close()

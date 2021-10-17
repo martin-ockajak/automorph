@@ -55,9 +55,8 @@ final case class HttpUrlConnectionClient[Effect[_]](
               "URL" -> url
             )
             logger.trace("Receiving HTTP response", responseProperties)
-            val response = Using(connection.getInputStream)(Bytes.inputStream.from).mapFailure { error =>
-              logger.error("Failed to receive HTTP response", error, responseProperties)
-              error
+            val response = Using(connection.getInputStream)(Bytes.inputStream.from).forFailure {
+              logger.error("Failed to receive HTTP response", _, responseProperties)
             }.get
             logger.debug("Received HTTP response", responseProperties + ("Status" -> connection.getResponseCode.toString))
             response
@@ -97,10 +96,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
         stream.write(request.unsafeArray)
         stream.flush()
       }
-      write.mapFailure { error =>
-        logger.error("Failed to send HTTP request", error, requestProperties)
-        error
-      }.get
+      write.forFailure(logger.error("Failed to send HTTP request", _, requestProperties)).get
       logger.debug("Sent HTTP request", requestProperties)
       connection -> new ArraySeq.ofByte(Array.empty)
     }
