@@ -42,9 +42,7 @@ trait ProtocolCodecSpec extends CoreSpec {
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
-          (function, a0) => client.function(function).positional.args(a0).call,
           (function, a0) => client.function(function).args(a0).call,
-          (function, a0) => client.function(function).positional.args(a0).tell,
           (function, a0) => client.function(function).args(a0).tell
         )
       }, {
@@ -78,9 +76,7 @@ trait ProtocolCodecSpec extends CoreSpec {
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
-          (function, a0) => client.function(function).positional.args(a0).call,
           (function, a0) => client.function(function).args(a0).call,
-          (function, a0) => client.function(function).positional.args(a0).tell,
           (function, a0) => client.function(function).args(a0).tell
         )
       }, {
@@ -108,9 +104,7 @@ trait ProtocolCodecSpec extends CoreSpec {
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
-          (function, a0) => client.function(function).positional.args(a0).call,
           (function, a0) => client.function(function).args(a0).call,
-          (function, a0) => client.function(function).positional.args(a0).tell,
           (function, a0) => client.function(function).args(a0).tell
         )
       }, {
@@ -138,9 +132,7 @@ trait ProtocolCodecSpec extends CoreSpec {
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
-          (function, a0) => client.function(function).positional.args(a0).call,
           (function, a0) => client.function(function).args(a0).call,
-          (function, a0) => client.function(function).positional.args(a0).tell,
           (function, a0) => client.function(function).args(a0).tell
         )
       }, {
@@ -199,9 +191,7 @@ trait ProtocolCodecSpec extends CoreSpec {
           Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
           Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
           Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
-          (function, a0) => client.function(function).positional.args(a0).call,
           (function, a0) => client.function(function).args(a0).call,
-          (function, a0) => client.function(function).positional.args(a0).tell,
           (function, a0) => client.function(function).args(a0).tell
         )
       }

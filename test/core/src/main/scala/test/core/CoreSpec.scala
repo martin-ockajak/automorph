@@ -34,10 +34,8 @@ trait CoreSpec extends BaseSpec {
     simpleApis: Seq[SimpleApiType],
     complexApis: Seq[ComplexApiType],
     invalidApis: Seq[InvalidApiType],
-    positionalCall: (String, String) => Effect[String],
-    namedCall: (String, (String, String)) => Effect[String],
-    positionalNotify: (String, String) => Effect[Unit],
-    namedNotify: (String, (String, String)) => Effect[Unit]
+    call: (String, (String, String)) => Effect[String],
+    tell: (String, (String, String)) => Effect[Unit]
   )
 
   val simpleApiInstance: SimpleApiType = SimpleApiImpl(system)
@@ -177,35 +175,19 @@ trait CoreSpec extends BaseSpec {
         }
         "Direct" - {
           "Call" - {
-            "Simple API" - {
-//              "Positional" in {
-//                check { (a0: String) =>
-//                  val expected = run(simpleApiInstance.test(a0))
-//                  execute(fixture.positionalCall("test", a0)) == expected
-//                }
-//              }
-              "Named" in {
-                check { (a0: String) =>
-                  val expected = run(simpleApiInstance.test(a0))
-                  execute(fixture.namedCall("test", "test" -> a0)) == expected
-                }
+            "Simple API" in {
+              check { (a0: String) =>
+                val expected = run(simpleApiInstance.test(a0))
+                execute(fixture.call("test", "test" -> a0)) == expected
               }
             }
           }
-          "Notify" - {
-            "Simple API" - {
-              "Positional" in {
-                check { (a0: String) =>
-                  execute(fixture.positionalNotify("test", a0))
-                  true
-                }
+          "Tell" - {
+            "Simple API" in {
+              check { (a0: String) =>
+                execute(fixture.tell("test", "test" -> a0))
+                true
               }
-//              "Named" in {
-//                check { (a0: String) =>
-//                  execute(fixture.namedNotify("test", "test" -> a0))
-//                  true
-//                }
-//              }
             }
           }
         }

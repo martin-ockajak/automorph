@@ -3,29 +3,29 @@ package automorph.client
 import automorph.spi.MessageCodec
 import automorph.util.CannotEqual
 
-final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Context](
-  functionName: String,
-  private val core: ClientCore[Node, Codec, Effect, Context],
+/**
+ * Remote function invocation.
+ *
+ * @param name function name.
+ * @param client RPC client
+ * @param codec message codec plugin
+ * @param arguments argument names and values
+ * @param encodedArguments encodec argument values
+ * @tparam Node message node type
+ * @tparam Codec message codec plugin type
+ * @tparam Effect effect type
+ * @tparam Context request context type
+ */
+final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+  name: String,
+  private val arguments: Seq[(String, Any)],
+  private val encodedArguments: Seq[Node],
+  private val client: ClientCore[Node, Codec, Effect, Context],
   private val codec: Codec,
-  private val argumentValues: Seq[(String, Any)],
-  private val encodedArguments: Seq[Node]
 ) extends CannotEqual:
 
   /** Proxy type. */
-  type Type = NamedProxy[Node, Codec, Effect, Context]
-
-  /**
-   * Creates a copy of this function proxy without argument names passing function arguments by position.
-   *
-   * @return function proxy without argument names passing function arguments by position
-   */
-  def positional: PositionalProxy[Node, Codec, Effect, Context] = PositionalProxy(
-    functionName,
-    core,
-    codec,
-    argumentValues.map(_._2),
-    encodedArguments
-  )
+  type Type = RemoteFunction[Node, Codec, Effect, Context]
 
   /**
    * Creates a copy of this function proxy with specified argument names and values.
@@ -36,7 +36,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    * @return function proxy
    */
   def args(): Type = copy(
-    argumentValues = Seq.empty,
+    arguments = Seq.empty,
     encodedArguments = Seq.empty
   )
 
@@ -49,7 +49,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    * @return function proxy
    */
   inline def args[T1](p1: (String, T1)): Type = copy(
-    argumentValues = Seq(p1),
+    arguments = Seq(p1),
     encodedArguments = Seq(
       codec.encode(p1._2)
     )
@@ -64,7 +64,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    * @return function proxy
    */
   inline def args[T1, T2](p1: (String, T1), p2: (String, T2)): Type = copy(
-    argumentValues = Seq(p1, p2),
+    arguments = Seq(p1, p2),
     encodedArguments = Seq(
       codec.encode(p1._2),
       codec.encode(p2._2)
@@ -80,7 +80,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    * @return function proxy
    */
   inline def args[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3)): Type = copy(
-    argumentValues = Seq(p1, p2, p3),
+    arguments = Seq(p1, p2, p3),
     encodedArguments = Seq(
       codec.encode(p1._2),
       codec.encode(p2._2),
@@ -103,7 +103,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     p4: (String, T4)
   ): Type =
     copy(
-      argumentValues = Seq(p1, p2, p3, p4),
+      arguments = Seq(p1, p2, p3, p4),
       encodedArguments = Seq(
         codec.encode(p1._2),
         codec.encode(p2._2),
@@ -128,7 +128,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     p5: (String, T5)
   ): Type =
     copy(
-      argumentValues = Seq(p1, p2, p3, p4, p5),
+      arguments = Seq(p1, p2, p3, p4, p5),
       encodedArguments = Seq(
         codec.encode(p1._2),
         codec.encode(p2._2),
@@ -155,7 +155,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     p6: (String, T6)
   ): Type =
     copy(
-      argumentValues = Seq(p1, p2, p3, p4, p5, p6),
+      arguments = Seq(p1, p2, p3, p4, p5, p6),
       encodedArguments = Seq(
         codec.encode(p1._2),
         codec.encode(p2._2),
@@ -184,7 +184,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     p7: (String, T7)
   ): Type =
     copy(
-      argumentValues = Seq(p1, p2, p3, p4, p5, p6, p7),
+      arguments = Seq(p1, p2, p3, p4, p5, p6, p7),
       encodedArguments = Seq(
         codec.encode(p1._2),
         codec.encode(p2._2),
@@ -206,7 +206,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    * @return result value
    */
   inline def call[R](using context: Context): Effect[R] =
-    core.call(functionName, Some(argumentValues.map(_._1)), encodedArguments, codec.decode[R](_), Some(context))
+    client.call(name, Some(arguments.map(_._1)), encodedArguments, codec.decode[R](_), Some(context))
 
   /**
    * Sends a remote function notification request disregarding the response.
@@ -217,7 +217,7 @@ final case class NamedProxy[Node, Codec <: MessageCodec[Node], Effect[_], Contex
    * @return nothing
    */
   def tell(using context: Context): Effect[Unit] =
-    core.notify(functionName, Some(argumentValues.map(_._1)), encodedArguments, Some(context))
+    client.notify(name, Some(arguments.map(_._1)), encodedArguments, Some(context))
 
   override def toString: String =
-    s"${this.getClass.getName}(Method: $functionName, Arguments: $argumentValues)"
+    s"${this.getClass.getName}(Method: $name, Arguments: $arguments)"

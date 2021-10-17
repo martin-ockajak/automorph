@@ -104,18 +104,12 @@ client.close()
 **Dynamic Client**
 
 ```scala
-// Call a remote API function dynamically passing the arguments by name
+// Call a remote API function dynamically
 val hello = client.function("hello")
 hello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
 
-// Call a remote API function dynamically passing the arguments by position
-hello.positional.args("world", 1).call[String] // Future[String]
-
-// Notify a remote API function dynamically passing the arguments by name
+// Notify a remote API function dynamically
 hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
-
-// Notify a remote API function dynamically passing the arguments by position
-hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
 ## Request metadata
@@ -360,18 +354,12 @@ client.close()
 **Dynamic Client**
 
 ```scala
-// Call a remote API function dynamically passing the arguments by name
+// Call a remote API function dynamically
 val hello = client.function("hello")
 hello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
 
-// Call a remote API function dynamically passing the arguments by position
-hello.positional.args("world", 1).call[String] // Future[String]
-
-// Notify a remote API function dynamically passing the arguments by name
+// Notify a remote API function dynamically
 hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
-
-// Notify a remote API function dynamically passing the arguments by position
-hello.positional.args("world", 1).tell // Future[Unit]
 ```
 
 ## Effect system
