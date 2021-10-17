@@ -13,7 +13,7 @@ import scala.reflect.macros.blackbox
  * @param client RPC client
  * @param codec message codec plugin
  * @param arguments argument names and values
- * @param encodedArguments encoded argument values
+ * @param argumentNodes encoded argument values
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Effect effect type
@@ -22,7 +22,7 @@ import scala.reflect.macros.blackbox
 final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   name: String,
   arguments: Seq[(String, Any)],
-  encodedArguments: Seq[Node],
+  argumentNodes: Seq[Node],
   client: Client[Node, Codec, Effect, Context]
 ) extends CannotEqual {
 
@@ -39,7 +39,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    *
    * @return function proxy
    */
-  def args(): Type = copy(arguments = Seq.empty, encodedArguments = Seq.empty)
+  def args(): Type = copy(arguments = Seq.empty, argumentNodes = Seq.empty)
 
   /**
    * Creates a copy of this function proxy with specified argument names and values.
@@ -156,7 +156,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    * @return nothing
    */
   def tell(implicit context: Context): Effect[Unit] =
-    client.notify(name, Some(arguments.map(_._1)), encodedArguments, Some(context))
+    client.notify(name, Some(arguments.map(_._1)), argumentNodes, Some(context))
 
   override def toString: String =
     s"${this.getClass.getName}(Method: $name, Arguments: $arguments)"
@@ -172,7 +172,7 @@ object RemoteFunction {
     c.Expr[ProxyType](q"""
       ${c.prefix}.copy(
         arguments = Seq($p1),
-        encodedArguments = Seq(
+        argumentNodes = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2)
       ))
     """)
@@ -187,7 +187,7 @@ object RemoteFunction {
     c.Expr[ProxyType](q"""
       ${c.prefix}.copy(
         arguments = Seq($p1, $p2),
-        encodedArguments = Seq(
+        argumentNodes = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
           ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2)
       ))
@@ -204,7 +204,7 @@ object RemoteFunction {
     c.Expr[ProxyType](q"""
       ${c.prefix}.copy(
         arguments = Seq($p1, $p2, $p3),
-        encodedArguments = Seq(
+        argumentNodes = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
           ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
           ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2)
@@ -229,7 +229,7 @@ object RemoteFunction {
     c.Expr[ProxyType](q"""
       ${c.prefix}.copy(
         arguments = Seq($p1, $p2, $p3, $p4),
-        encodedArguments = Seq(
+        argumentNodes = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
           ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
           ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2),
@@ -257,7 +257,7 @@ object RemoteFunction {
     c.Expr[ProxyType](q"""
       ${c.prefix}.copy(
         arguments = Seq($p1, $p2, $p3, $p4, $p5),
-        encodedArguments = Seq(
+        argumentNodes = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
           ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
           ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2),
@@ -288,7 +288,7 @@ object RemoteFunction {
     c.Expr[ProxyType](q"""
       ${c.prefix}.copy(
         arguments = Seq($p1, $p2, $p3, $p4, $p5, $p6),
-        encodedArguments = Seq(
+        argumentNodes = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
           ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
           ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2),
@@ -322,7 +322,7 @@ object RemoteFunction {
     c.Expr[ProxyType](q"""
       ${c.prefix}.copy(
         arguments = Seq($p1, $p2, $p3, $p4, $p5, $p6, $p7),
-        encodedArguments = Seq(
+        argumentNodes = Seq(
           ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
           ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
           ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2),
@@ -343,7 +343,7 @@ object RemoteFunction {
       ${c.prefix}.client.call(
         ${c.prefix}.name,
         ${c.prefix}.arguments.map(_._1),
-        ${c.prefix}.encodedArguments,
+        ${c.prefix}.argumentNodes,
         ${c.prefix}.codec.decode[${weakTypeOf[R]}](_),
         Some($context)
       )

@@ -11,7 +11,7 @@ import automorph.util.CannotEqual
  * @param client RPC client
  * @param codec message codec plugin
  * @param arguments argument names and values
- * @param encodedArguments encodec argument values
+ * @param argumentNodes encodec argument values
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Effect effect type
@@ -20,7 +20,7 @@ import automorph.util.CannotEqual
 final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   name: String,
   arguments: Seq[(String, Any)],
-  private val encodedArguments: Seq[Node],
+  private val argumentNodes: Seq[Node],
   private val client: Client[Node, Codec, Effect, Context]
 ) extends CannotEqual:
   private val codec = client.protocol.codec
@@ -38,7 +38,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    */
   def args(): Type = copy(
     arguments = Seq.empty,
-    encodedArguments = Seq.empty
+    argumentNodes = Seq.empty
   )
 
   /**
@@ -51,7 +51,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    */
   inline def args[T1](p1: (String, T1)): Type = copy(
     arguments = Seq(p1),
-    encodedArguments = Seq(
+    argumentNodes = Seq(
       codec.encode(p1._2)
     )
   )
@@ -66,7 +66,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    */
   inline def args[T1, T2](p1: (String, T1), p2: (String, T2)): Type = copy(
     arguments = Seq(p1, p2),
-    encodedArguments = Seq(
+    argumentNodes = Seq(
       codec.encode(p1._2),
       codec.encode(p2._2)
     )
@@ -82,7 +82,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    */
   inline def args[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3)): Type = copy(
     arguments = Seq(p1, p2, p3),
-    encodedArguments = Seq(
+    argumentNodes = Seq(
       codec.encode(p1._2),
       codec.encode(p2._2),
       codec.encode(p3._2)
@@ -105,7 +105,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
   ): Type =
     copy(
       arguments = Seq(p1, p2, p3, p4),
-      encodedArguments = Seq(
+      argumentNodes = Seq(
         codec.encode(p1._2),
         codec.encode(p2._2),
         codec.encode(p3._2),
@@ -130,7 +130,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
   ): Type =
     copy(
       arguments = Seq(p1, p2, p3, p4, p5),
-      encodedArguments = Seq(
+      argumentNodes = Seq(
         codec.encode(p1._2),
         codec.encode(p2._2),
         codec.encode(p3._2),
@@ -157,7 +157,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
   ): Type =
     copy(
       arguments = Seq(p1, p2, p3, p4, p5, p6),
-      encodedArguments = Seq(
+      argumentNodes = Seq(
         codec.encode(p1._2),
         codec.encode(p2._2),
         codec.encode(p3._2),
@@ -186,7 +186,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
   ): Type =
     copy(
       arguments = Seq(p1, p2, p3, p4, p5, p6, p7),
-      encodedArguments = Seq(
+      argumentNodes = Seq(
         codec.encode(p1._2),
         codec.encode(p2._2),
         codec.encode(p3._2),
@@ -207,7 +207,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    * @return result value
    */
   inline def call[R](using context: Context): Effect[R] =
-    client.call(name, arguments.map(_._1), encodedArguments, codec.decode[R](_), Some(context))
+    client.call(name, arguments.map(_._1), argumentNodes, codec.decode[R](_), Some(context))
 
   /**
    * Sends a remote function notification request disregarding the response.
@@ -218,7 +218,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    * @return nothing
    */
   def tell(using context: Context): Effect[Unit] =
-    client.notify(name, Some(arguments.map(_._1)), encodedArguments, Some(context))
+    client.notify(name, Some(arguments.map(_._1)), argumentNodes, Some(context))
 
   override def toString: String =
     s"${this.getClass.getName}(Method: $name, Arguments: $arguments)"
