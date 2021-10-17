@@ -11,7 +11,7 @@ import java.net.{HttpURLConnection, URI}
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
-import scala.util.{Try, Using}
+import scala.util.{Failure, Success, Try, Using}
 
 /**
  * URL connection HTTP client message transport plugin.
@@ -97,9 +97,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
       logger.trace("Sending HTTP request", requestProperties)
       val connection = connect(context)
       setRequestProperties(connection, request, mediaType, httpMethod, context)
-      if (!connection.getDoOutput) {
-        connection.setDoOutput(true)
-      }
+      ifConnected(connection, _.getDoOutput)
       val outputStream = connection.getOutputStream
       val write = Using(outputStream) { stream =>
         stream.write(request.unsafeArray)
@@ -153,6 +151,11 @@ final case class HttpUrlConnectionClient[Effect[_]](
   private def connectionHeaders(connection: HttpURLConnection): Seq[(String, String)] =
     connection.getRequestProperties.asScala.toSeq.flatMap { case (name, values) =>
       values.asScala.map(name -> _)
+    }
+
+  private def ifConnected[T](connection: HttpURLConnection, function: HttpURLConnection => Unit): Unit =
+    Try(connection.getRequestProperties).recoverWith {
+      case _: IllegalArgumentException => Success(function(connection))
     }
 }
 
