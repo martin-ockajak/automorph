@@ -7,7 +7,7 @@ import automorph.spi.protocol.RpcRequest
 import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.util.Extensions.TryOps
 import automorph.util.Random
-import scala.collection.immutable.ArraySeq
+import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.util.Try
 
 /**
@@ -88,10 +88,8 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
           system.pure(rpcRequest),
           (request: RpcRequest[Node, _]) => {
             val rawRequest = request.message.body
-            lazy val requestProperties = rpcRequest.message.properties ++ Map(
-              LogProperties.requestId -> requestId,
-              LogProperties.size -> rawRequest.length.toString
-            )
+            lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++
+              rpcRequest.message.properties + (LogProperties.size -> rawRequest.length.toString)
             lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
             logger.trace(s"Sending ${protocol.name} request", allProperties)
             system.flatMap(

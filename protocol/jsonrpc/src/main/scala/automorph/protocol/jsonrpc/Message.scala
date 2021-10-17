@@ -1,5 +1,7 @@
 package automorph.protocol.jsonrpc
 
+import scala.collection.immutable.ListMap
+
 /**
  * JSON-RPC protocol message structure.
  *
@@ -29,19 +31,19 @@ final case class Message[Node](
   }
 
   /** Message properties. */
-  lazy val properties: Map[String, String] =
-    Map(
-      "Type" -> messageType.toString
-    ) ++
-      id.map(value => "Id" -> value.fold(_.toString, identity)) ++
-      method.map(value => "Method" -> value) ++
-      params.map(value => "Arguments" -> value.fold(_.size, _.size).toString) ++
-      error.toSeq.flatMap { value =>
-        value.code.map(code => "ErrorCode" -> code.toString) ++ value.message.map(message => "ErrorMessage" -> message)
-      }
+  lazy val properties: Map[String, String] = ListMap(
+    "Type" -> messageType.toString
+  ) ++
+    method.map(value => "Method" -> value) ++
+    params.map(value => "Arguments" -> value.fold(_.size, _.size).toString) ++
+    error.toSeq.flatMap { value =>
+      value.code.map(code => "Error Code" -> code.toString) ++ value.message.map(message => "ErrorMessage" -> message)
+    } ++
+    id.map(value => "Identifier" -> value.fold(_.toString, identity))
 }
 
 object Message {
+
   /** Message identifier type. */
   type Id = Either[BigDecimal, String]
 
@@ -67,9 +69,7 @@ final case class MessageError[Node](
   data: Option[Node]
 )
 
-/**
- * JSON-RPC message type.
- */
+/** JSON-RPC message type. */
 sealed abstract class MessageType {
   /**
    * Message type name.

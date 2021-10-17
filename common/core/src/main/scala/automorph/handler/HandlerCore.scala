@@ -7,6 +7,7 @@ import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
+import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -43,10 +44,8 @@ private[automorph] trait HandlerCore[Node, Codec <: MessageCodec[Node], Effect[_
       error => errorResponse(error.exception, error.message, requestId, Map(LogProperties.requestId -> requestId)),
       rpcRequest => {
         // Invoke requested RPC function
-        lazy val requestProperties = rpcRequest.message.properties ++ Map(
-          LogProperties.requestId -> requestId,
-          LogProperties.size -> rawRequest.length.toString
-        )
+        lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++
+          rpcRequest.message.properties + (LogProperties.size -> rawRequest.length.toString)
         lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
         logger.trace(s"Received ${protocol.name} request", allProperties)
         invokeFunction(rpcRequest, context, requestId, requestProperties)

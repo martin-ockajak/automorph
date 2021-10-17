@@ -1,5 +1,7 @@
 package automorph.protocol.restrpc
 
+import scala.collection.immutable.ListMap
+
 /**
  * REST-RPC protocol message structure.
  *
@@ -21,13 +23,12 @@ final case class Message[Node](
   }
 
   /** Message properties. */
-  lazy val properties: Map[String, String] =
-    Map(
-      "Type" -> messageType.toString
-    ) ++
-      error.toSeq.flatMap { value =>
-        value.code.map(code => "ErrorCode" -> code.toString) ++ value.message.map(message => "ErrorMessage" -> message)
-      }
+  lazy val properties: Map[String, String] = ListMap(
+    "Type" -> messageType.toString
+  ) ++
+    error.toSeq.flatMap { value =>
+      value.code.map(code => "Error Code" -> code.toString) ++ value.message.map(message => "ErrorMessage" -> message)
+    }
 }
 
 object Message {
@@ -50,9 +51,7 @@ final case class MessageError[Node](
   details: Option[Node]
 )
 
-/**
- * REST-RPC message type.
- */
+/** REST-RPC message type. */
 sealed abstract class MessageType {
   /**
    * Message type name.
