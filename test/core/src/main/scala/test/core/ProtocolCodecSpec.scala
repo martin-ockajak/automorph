@@ -31,7 +31,7 @@ trait ProtocolCodecSpec extends CoreSpec {
         val codec = CirceJsonCodec()
         val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type](codec)
         val handler = Handler.protocol(protocol).system(system).context[Context]
-          .bind(simpleApi).bind(complexApi)
+//          .bind(simpleApi).bind(complexApi)
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client = Client.protocol(protocol).transport(transport)
         TestFixture(
