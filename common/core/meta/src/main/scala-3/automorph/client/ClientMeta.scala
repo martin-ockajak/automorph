@@ -1,7 +1,7 @@
 package automorph.client
 
 import automorph.Client
-import automorph.client.{ClientCore, ClientGenerator}
+import automorph.client.ClientGenerator
 import automorph.spi.MessageCodec
 import java.lang.reflect.Proxy
 import scala.compiletime.summonInline
@@ -42,7 +42,7 @@ object ClientMeta:
   type AnyCodec[Effect[_], Context] = Client[_, _, Effect, Context]
 
   inline def generalBind[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
-    core: ClientCore[Node, Codec, Effect, Context],
+    core: Client[Node, Codec, Effect, Context],
     codec: Codec
   ): Api =
     // Generate API method bindings

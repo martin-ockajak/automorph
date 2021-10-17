@@ -62,7 +62,7 @@ object ClientMeta {
   }
 
   def generalBind[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
-    core: ClientCore[Node, Codec, Effect, Context],
+    core: Client[Node, Codec, Effect, Context],
     codec: Codec
   ): Api = macro generalBindMacro[Node, Codec, Effect, Context, Api]
 
@@ -73,7 +73,7 @@ object ClientMeta {
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
-    core: c.Expr[ClientCore[Node, Codec, Effect, Context]],
+    core: c.Expr[Core[Node, Codec, Effect, Context]],
     codec: c.Expr[Codec],
     namedArguments: c.Expr[Boolean]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Api] = {
