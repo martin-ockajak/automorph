@@ -13,7 +13,7 @@ import scala.runtime.BoxedUnit
 import automorph.util.Extensions.TryOps
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 /**
  * Jackson message codec plugin.
@@ -75,9 +75,9 @@ object JacksonJsonCodec {
 
       override def deserialize(parser: JsonParser, context: DeserializationContext): BigDecimal =
         parser.readValueAsTree[TreeNode]() match {
-          case value: NumericNode => Try(BigDecimal(value.decimalValue)).mapFailure(
-            error => new JsonParseException(parser, "Invalid numeric value", parser.getCurrentLocation, error),
-          ).get
+          case value: NumericNode => Try(BigDecimal(value.decimalValue)).recoverWith { case error =>
+            Failure(new JsonParseException(parser, "Invalid numeric value", parser.getCurrentLocation, error))
+          }.get
           case _ => throw new JsonParseException(parser, "Invalid numeric value", parser.getCurrentLocation)
         }
     }

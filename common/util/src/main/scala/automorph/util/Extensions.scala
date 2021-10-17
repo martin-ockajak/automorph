@@ -38,7 +38,7 @@ private[automorph] object Extensions {
      * @param onFailure function to apply if this is a `Failure`
      * @return a transformed `Try`
      */
-    def forFailure(onFailure: Throwable => Unit): Try[T] = tryValue recoverWith { case exception =>
+    def onFailure(onFailure: Throwable => Unit): Try[T] = tryValue recoverWith { case exception =>
       onFailure(exception)
       Failure(exception)
     }

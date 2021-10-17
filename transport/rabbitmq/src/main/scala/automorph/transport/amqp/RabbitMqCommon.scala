@@ -44,10 +44,7 @@ private[automorph] object RabbitMqCommon extends Logging {
     }).map { connection =>
       logger.info(s"Connected to RabbitMQ broker: $urlText")
       connection
-    }.mapFailure { error =>
-      logger.error(s"Failed to connect to RabbitMQ broker: $urlText", error)
-      error
-    }.get
+    }.onFailure(logger.error(s"Failed to connect to RabbitMQ broker: $urlText", _)).get
   }
 
   /**

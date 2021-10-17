@@ -114,7 +114,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
       exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, mediaType)
       exchange.setStatusCode(statusCode).getResponseSender.send(Bytes.byteBuffer.to(message))
       logger.debug("Sent HTTP response", responseDetails)
-    }.forFailure(logger.error("Failed to send HTTP response", _, responseDetails)).get
+    }.onFailure(logger.error("Failed to send HTTP response", _, responseDetails)).get
   }
 
   private def createContext(exchange: HttpServerExchange): Context = {

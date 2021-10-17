@@ -118,10 +118,7 @@ final case class RabbitMqServer[Effect[_]](
       }
       consumer.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, message)
       logger.debug("Sent AMQP response", responseProperties)
-    }.mapFailure { error =>
-      logger.error("Failed to send AMQP response", error, responseProperties)
-      error
-    }.get
+    }.onFailure(logger.error("Failed to send AMQP response", _, responseProperties)).get
   }
 
   private def createConnection(): Connection = RabbitMqCommon.connect(url, Seq.empty, clientId, connectionFactory)

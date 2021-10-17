@@ -60,18 +60,24 @@ final case class RabbitMqClient[Effect[_]](
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
 
   override def call(
-    request: ArraySeq.ofByte,
+    requestBody: ArraySeq.ofByte,
+    requestId: String,
     mediaType: String,
     context: Option[Context]
   ): Effect[ArraySeq.ofByte] = {
-    val amqpProperties = createProperties(mediaType, context)
+    val amqpProperties = createProperties(requestId, mediaType, context)
     val (result, complete) = promisedEffect()
-    system.flatMap(send(request, amqpProperties, Some(complete)), _ => result)
+    system.flatMap(send(requestBody, amqpProperties, Some(complete)), _ => result)
   }
 
-  override def notify(request: ArraySeq.ofByte, mediaType: String, context: Option[Context]): Effect[Unit] = {
-    val properties = createProperties(mediaType, context)
-    send(request, properties, None)
+  override def notify(
+    requestBody: ArraySeq.ofByte,
+    requestId: String,
+    mediaType: String,
+    context: Option[Context]
+  ): Effect[Unit] = {
+    val properties = createProperties(requestId, mediaType, context)
+    send(requestBody, properties, None)
   }
 
   override def defaultContext: Context = RabbitMqContext.default
@@ -96,19 +102,16 @@ final case class RabbitMqClient[Effect[_]](
       Try {
         consumer.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, request.unsafeArray)
         logger.debug("Sent AMQP request", requestProperties)
-      }.mapFailure { error =>
-        logger.error("Failed to send AMQP request", error, requestProperties)
-        error
-      }.get
+      }.onFailure(logger.error("Failed to send AMQP request", _, requestProperties)).get
     )
   }
 
-  private def createProperties(mediaType: String, context: Option[Context]): BasicProperties = {
+  private def createProperties(requestId: String, mediaType: String, context: Option[Context]): BasicProperties = {
     val amqp = context.getOrElse(defaultContext)
     val default = amqp.base.map(_.properties).getOrElse(new BasicProperties())
     (new BasicProperties()).builder()
       .replyTo(amqp.replyTo.orElse(Option(default.getReplyTo)).getOrElse(directReplyToQueue))
-      .correlationId(amqp.correlationId.orElse(Option(default.getCorrelationId)).getOrElse(Random.id))
+      .correlationId(amqp.correlationId.orElse(Option(default.getCorrelationId)).getOrElse(requestId))
       .contentType(amqp.contentType.getOrElse(mediaType))
       .contentEncoding(amqp.contentEncoding.orElse(Option(default.getContentEncoding)).orNull)
       .appId(amqp.appId.orElse(Option(default.getAppId)).getOrElse(clientId))
@@ -132,7 +135,8 @@ final case class RabbitMqClient[Effect[_]](
         properties: BasicProperties,
         body: Array[Byte]
       ): Unit = {
-        lazy val responseProperties = RabbitMqCommon.messageProperties(properties.getCorrelationId, routingKey, urlText, None)
+        lazy val responseProperties =
+          RabbitMqCommon.messageProperties(properties.getCorrelationId, routingKey, urlText, None)
         logger.debug("Received AMQP response", responseProperties)
         deliveryHandlers.get(properties.getCorrelationId).foreach { complete =>
           complete(new ArraySeq.ofByte(body))
