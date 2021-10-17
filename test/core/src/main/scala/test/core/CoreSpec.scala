@@ -27,7 +27,6 @@ trait CoreSpec extends BaseSpec {
   type InvalidApiType = InvalidApi[Effect]
 
   case class TestFixture(
-    codec: Class[_],
     client: ClientMeta.AnyCodec[Effect, Context],
     handler: Handler.AnyCodec[Effect, Context],
     serverPort: Int,
@@ -54,7 +53,8 @@ trait CoreSpec extends BaseSpec {
 // FIXME - restore
 //    fixtures.foreach { fixture =>
     fixtures.headOption.foreach { fixture =>
-      fixture.codec.getSimpleName.replaceAll("MessageCodec$", "") - {
+      val codecName = fixture.client.protocol.codec.getClass.getSimpleName.replaceAll("MessageCodec$", "")
+      codecName - {
         "Proxy" - {
           "Call" - {
             "Simple API" - {

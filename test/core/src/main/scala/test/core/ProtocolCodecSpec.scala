@@ -35,7 +35,6 @@ trait ProtocolCodecSpec extends CoreSpec {
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client = Client.protocol(protocol).transport(transport)
         TestFixture(
-          codec.getClass,
           client,
           handler,
           port,
@@ -69,7 +68,6 @@ trait ProtocolCodecSpec extends CoreSpec {
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client = Client.protocol(protocol).transport(transport)
         TestFixture(
-          codec.getClass,
           client,
           handler,
           port,
@@ -97,7 +95,6 @@ trait ProtocolCodecSpec extends CoreSpec {
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client = Client.protocol(protocol).transport(transport)
         TestFixture(
-          codec.getClass,
           client,
           handler,
           port,
@@ -125,7 +122,6 @@ trait ProtocolCodecSpec extends CoreSpec {
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client = Client.protocol(protocol).transport(transport)
         TestFixture(
-          codec.getClass,
           client,
           handler,
           port,
@@ -184,7 +180,6 @@ trait ProtocolCodecSpec extends CoreSpec {
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
         val client = Client.protocol(protocol).transport(transport)
         TestFixture(
-          codec.getClass,
           client,
           handler,
           port,
