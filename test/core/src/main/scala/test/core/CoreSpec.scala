@@ -1,10 +1,8 @@
 package test.core
 
 import automorph.{Client, Handler}
-import automorph.client.ClientMeta
 import automorph.spi.EffectSystem
 import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException, InvalidResponseException}
-import com.fasterxml.jackson.databind.util.TokenBuffer
 import org.scalacheck.Arbitrary
 import scala.util.{Failure, Success, Try}
 import test.Generators.arbitraryRecord
