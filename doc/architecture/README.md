@@ -18,7 +18,7 @@ The library provides the following components to assemble either fully standalon
 ## Client
 
 The client provides automatic creation of transparent proxy instances for remote RPC endpoints defined by existing API classes. Additionally, it also
-supports direct calls and notifications of remote API methods.
+supports direct calls and notifications of remote API functions.
 
 **Depends on**
 

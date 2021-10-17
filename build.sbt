@@ -373,9 +373,9 @@ Test / test := ((Test / test) dependsOn testScalastyle).value
 // Documentation
 
 // API
-enablePlugins(ScalaUnidocPlugin)
-ThisBuild / autoAPIMappings := true
 apiURL := Some(url(s"https://javadoc.io/doc/${organization.value}/$projectName-core_3/latest"))
+ThisBuild / autoAPIMappings := true
+enablePlugins(ScalaUnidocPlugin)
 ScalaUnidoc / unidoc / scalacOptions ++= Seq(
   "-Ymacro-expand:none",
   "-groups",
@@ -432,11 +432,13 @@ deleteSite := {
 }
 laikaSite / target := target.value / "site"
 val site = taskKey[Unit]("Generates documentation website.")
-site := Def.sequential(
-  deleteSite,
-  Compile / doc,
-  laikaSite
-).value
+//site := Def.sequential(
+//  deleteSite,
+//  Compile / doc,
+//  laikaSite
+//).value
+site := laikaSite.value
+laikaSite := (laikaSite dependsOn (Compile / doc)).value
 site / fileInputs ++= Seq(
   baseDirectory.value.toGlob / "doc" / ** / "*.md",
   baseDirectory.value.toGlob / "doc" / ** / "*.conf",
