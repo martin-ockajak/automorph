@@ -39,9 +39,9 @@ trait ProtocolCodecSpec extends CoreSpec {
           client,
           handler,
           port,
-          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
-          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
-          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
+          client.bind[SimpleApiType],
+          client.bind[ComplexApiType],
+          client.bind[InvalidApiType],
           (function, a0) => client.function(function).args(a0).call,
           (function, a0) => client.function(function).args(a0).tell
         )
@@ -73,9 +73,9 @@ trait ProtocolCodecSpec extends CoreSpec {
           client,
           handler,
           port,
-          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
-          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
-          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
+          client.bind[SimpleApiType],
+          client.bind[ComplexApiType],
+          client.bind[InvalidApiType],
           (function, a0) => client.function(function).args(a0).call,
           (function, a0) => client.function(function).args(a0).tell
         )
@@ -101,9 +101,9 @@ trait ProtocolCodecSpec extends CoreSpec {
           client,
           handler,
           port,
-          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
-          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
-          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
+          client.bind[SimpleApiType],
+          client.bind[ComplexApiType],
+          client.bind[InvalidApiType],
           (function, a0) => client.function(function).args(a0).call,
           (function, a0) => client.function(function).args(a0).tell
         )
@@ -129,9 +129,9 @@ trait ProtocolCodecSpec extends CoreSpec {
           client,
           handler,
           port,
-          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
-          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
-          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
+          client.bind[SimpleApiType],
+          client.bind[ComplexApiType],
+          client.bind[InvalidApiType],
           (function, a0) => client.function(function).args(a0).call,
           (function, a0) => client.function(function).args(a0).tell
         )
@@ -188,9 +188,9 @@ trait ProtocolCodecSpec extends CoreSpec {
           client,
           handler,
           port,
-          Seq(client.bind[SimpleApiType], client.bindPositional[SimpleApiType]),
-          Seq(client.bind[ComplexApiType], client.bindPositional[ComplexApiType]),
-          Seq(client.bind[InvalidApiType], client.bindPositional[InvalidApiType]),
+          client.bind[SimpleApiType],
+          client.bind[ComplexApiType],
+          client.bind[InvalidApiType],
           (function, a0) => client.function(function).args(a0).call,
           (function, a0) => client.function(function).args(a0).tell
         )

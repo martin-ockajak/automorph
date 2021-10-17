@@ -31,9 +31,9 @@ trait CoreSpec extends BaseSpec {
     client: ClientMeta.AnyCodec[Effect, Context],
     handler: Handler.AnyCodec[Effect, Context],
     serverPort: Int,
-    simpleApis: Seq[SimpleApiType],
-    complexApis: Seq[ComplexApiType],
-    invalidApis: Seq[InvalidApiType],
+    simpleApi: SimpleApiType,
+    complexApi: ComplexApiType,
+    invalidApi: InvalidApiType,
     call: (String, (String, String)) => Effect[String],
     tell: (String, (String, String)) => Effect[Unit]
   )
@@ -41,7 +41,6 @@ trait CoreSpec extends BaseSpec {
   val simpleApiInstance: SimpleApiType = SimpleApiImpl(system)
   val complexApiInstance: ComplexApiType = ComplexApiImpl(system)
   val invalidApiInstance: InvalidApiType = InvalidApiImpl(system)
-  private val apiNames = Seq("Named", "Positional")
 
   implicit def arbitraryContext: Arbitrary[Context]
 
@@ -58,20 +57,16 @@ trait CoreSpec extends BaseSpec {
       fixture.codec.getSimpleName.replaceAll("MessageCodec$", "") - {
         "Proxy" - {
           "Call" - {
-//            "Simple API" - {
-//              apiCombinations(simpleApiInstance, fixture.simpleApis).foreach { case (callingConvention, apis) =>
-//                callingConvention - {
-//                  "test" in {
-//                    check { (a0: String) =>
-//                      consistent(apis, (api: SimpleApiType) => api.test(a0))
-//                    }
-//                  }
-//                }
-//              }
-//            }
+            "Simple API" - {
+              val apis = (fixture.simpleApi, simpleApiInstance)
+              "test" in {
+                check { (a0: String) =>
+                  consistent(apis, (api: SimpleApiType) => api.test(a0))
+                }
+              }
+            }
             "Complex API" - {
-              apiCombinations(complexApiInstance, fixture.complexApis).foreach { case (callingConvention, apis) =>
-                callingConvention - {
+              val apis = (fixture.complexApi, complexApiInstance)
 //                  "method0" in {
 //                    check((_: Unit) => consistent(apis, (api: ComplexApiType) => api.method0()))
 //                  }
@@ -90,11 +85,11 @@ trait CoreSpec extends BaseSpec {
 //                      consistent(apis, (api: ComplexApiType) => api.method3(a0, a1, a2))
 //                    }
 //                  }
-                  "method4" in {
-                    check { (a0: Double, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
-                      consistent(apis, (api: ComplexApiType) => api.method4(BigDecimal(a0), a1, a2, a3))
-                    }
-                  }
+              "method4" in {
+                check { (a0: Double, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
+                  consistent(apis, (api: ComplexApiType) => api.method4(BigDecimal(a0), a1, a2, a3))
+                }
+              }
 //                  "method5" in {
 //                    check { (a0: Boolean, a1: Short, a2: List[Int]) =>
 //                      consistent(apis, (api: ComplexApiType) => api.method5(a0, a1)(a2))
@@ -128,13 +123,9 @@ trait CoreSpec extends BaseSpec {
 //                      expectedErrorMessage == result.swap.map(_.getMessage)
 //                    }
 //                  }
-                }
-              }
             }
             "Invalid API" - {
-              apiCombinations(invalidApiInstance, fixture.invalidApis).foreach { case (mode, apis) =>
-                mode - {
-                  val (_, api) = apis
+              val api = fixture.invalidApi
 //                  "Function not found" in {
 //                    val error = intercept[FunctionNotFoundException](run(api.nomethod(""))).getMessage.toLowerCase
 //                    error.should(include("function not found"))
@@ -161,14 +152,12 @@ trait CoreSpec extends BaseSpec {
 //                    error.should(include("malformed argument"))
 //                    error.should(include("p1"))
 //                  }
-                  "Missing arguments" in {
-                    val error = intercept[InvalidRequestException] {
-                      execute(api.method5(true, 0))
-                    }.getMessage.toLowerCase
-                    error.should(include("missing argument"))
-                    error.should(include("p2"))
-                  }
-                }
+              "Missing arguments" in {
+                val error = intercept[InvalidRequestException] {
+                  execute(api.method5(true, 0))
+                }.getMessage.toLowerCase
+                error.should(include("missing argument"))
+                error.should(include("p2"))
               }
             }
           }
@@ -200,11 +189,6 @@ trait CoreSpec extends BaseSpec {
     super.afterAll()
   }
 
-  private def apiCombinations[Api](originalApi: Api, apis: Seq[Api]): Seq[(String, (Api, Api))] =
-    apis.zip(apiNames).map { case (api, callingConvention) =>
-      callingConvention -> ((originalApi, api))
-    }
-
   private def execute[Result](value: => Effect[Result]): Result =
     Try(run(value)) match {
       case Success(result) => result
@@ -215,9 +199,9 @@ trait CoreSpec extends BaseSpec {
 
   private def consistent[Api, Result](apis: (Api, Api), function: Api => Effect[Result]): Boolean =
     Try {
-      val (referenceApi, testedApi) = apis
-      val expected = run(function(referenceApi))
+      val (testedApi, referenceApi) = apis
       val result = run(function(testedApi))
+      val expected = run(function(referenceApi))
       expected == result
     } match {
       case Success(result) => result

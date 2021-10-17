@@ -73,14 +73,14 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
    */
   def call[R](
     functionName: String,
-    argumentNames: Option[Seq[String]],
+    argumentNames: Seq[String],
     encodedArguments: Seq[Node],
     decodeResult: Node => R,
     context: Option[Context]
   ): Effect[R] =
     // Create request
     val requestId = Random.id
-    protocol.createRequest(functionName, argumentNames, encodedArguments, true, requestId).pureFold(
+    protocol.createRequest(functionName, Some(argumentNames), encodedArguments, true, requestId).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest => {

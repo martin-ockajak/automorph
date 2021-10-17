@@ -206,7 +206,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    * @return result value
    */
   inline def call[R](using context: Context): Effect[R] =
-    client.call(name, Some(arguments.map(_._1)), encodedArguments, codec.decode[R](_), Some(context))
+    client.call(name, arguments.map(_._1), encodedArguments, codec.decode[R](_), Some(context))
 
   /**
    * Sends a remote function notification request disregarding the response.

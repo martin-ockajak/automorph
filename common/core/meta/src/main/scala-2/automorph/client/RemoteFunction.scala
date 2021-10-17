@@ -340,7 +340,7 @@ object RemoteFunction {
     c.Expr[Effect[R]](q"""
       ${c.prefix}.client.call(
         ${c.prefix}.name,
-        Some(${c.prefix}.arguments.map(_._1)),
+        ${c.prefix}.arguments.map(_._1),
         ${c.prefix}.encodedArguments,
         ${c.prefix}.codec.decode[${weakTypeOf[R]}](_),
         Some($context)
