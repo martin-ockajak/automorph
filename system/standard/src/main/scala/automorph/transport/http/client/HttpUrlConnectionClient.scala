@@ -60,7 +60,6 @@ final case class HttpUrlConnectionClient[Effect[_]](
               error
             }.get
             logger.debug("Received HTTP response", responseProperties + ("Status" -> connection.getResponseCode.toString))
-            clearRequestProperties(connection, http)
             response
           }
       }
@@ -74,12 +73,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
     context: Option[Context]
   ): Effect[Unit] = {
     val http = context.getOrElse(defaultContext)
-    system.map(
-      send(requestBody, requestId, mediaType, http),
-      (_: EffectValue) match {
-        case (connection: HttpURLConnection, _) => clearRequestProperties(connection, http)
-      }
-    )
+    system.map(send(requestBody, requestId, mediaType, http), _ => ())
   }
 
   override def defaultContext: Context = HttpUrlConnectionContext.default
@@ -95,9 +89,9 @@ final case class HttpUrlConnectionClient[Effect[_]](
         "Method" -> httpMethod
       )
       logger.trace("Sending HTTP request", requestProperties)
-      val connection = connect(context)
+      val connection = createConnection(context)
       setRequestProperties(connection, request, mediaType, httpMethod, context)
-      ifConnected(connection, _.getDoOutput)
+      connection.setDoOutput(true)
       val outputStream = connection.getOutputStream
       val write = Using(outputStream) { stream =>
         stream.write(request.unsafeArray)
@@ -138,12 +132,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
     }
   }
 
-  private def clearRequestProperties(connection: HttpURLConnection, http: Context): Unit =
-    (connectionHeaders(connection) ++ http.headers).foreach { case (name, _) =>
-      connection.setRequestProperty(name, null)
-    }
-
-  private def connect(http: Context): HttpURLConnection = {
+  private def createConnection(http: Context): HttpURLConnection = {
     val connectionUrl = http.url.orElse(http.base.map(_.connection.getURL.toURI)).getOrElse(url)
     connectionUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
   }
@@ -153,9 +142,11 @@ final case class HttpUrlConnectionClient[Effect[_]](
       values.asScala.map(name -> _)
     }
 
-  private def ifConnected[T](connection: HttpURLConnection, function: HttpURLConnection => Unit): Unit =
-    Try(connection.getRequestProperties).recoverWith {
-      case _: IllegalArgumentException => Success(function(connection))
+  private def ifNotConnected[T](connection: HttpURLConnection, function: HttpURLConnection => Unit): Unit =
+    Try(connection.getRequestProperties) match {
+      case Success(_) => function(connection)
+      case Failure(_: IllegalArgumentException) => ()
+      case Failure(error) => throw error
     }
 }
 

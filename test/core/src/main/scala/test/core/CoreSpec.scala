@@ -58,8 +58,8 @@ trait CoreSpec extends BaseSpec {
 //    fixtures.foreach { fixture =>
     fixtures.headOption.foreach { fixture =>
       fixture.codec.getSimpleName.replaceAll("MessageCodec$", "") - {
-//        "Proxy" - {
-//          "Call" - {
+        "Proxy" - {
+          "Call" - {
 //            "Simple API" - {
 //              apiCombinations(simpleApiInstance, fixture.simpleApis).foreach { case (mode, apis) =>
 //                mode - {
@@ -71,9 +71,9 @@ trait CoreSpec extends BaseSpec {
 //                }
 //              }
 //            }
-//            "Complex API" - {
-//              apiCombinations(complexApiInstance, fixture.complexApis).foreach { case (mode, apis) =>
-//                mode - {
+            "Complex API" - {
+              apiCombinations(complexApiInstance, fixture.complexApis).foreach { case (mode, apis) =>
+                mode - {
 //                  "method0" in {
 //                    check((_: Unit) => consistent(apis, (api: ComplexApiType) => api.method0()))
 //                  }
@@ -92,11 +92,11 @@ trait CoreSpec extends BaseSpec {
 //                      consistent(apis, (api: ComplexApiType) => api.method3(a0, a1, a2))
 //                    }
 //                  }
-//                  "method4" in {
-//                    check { (a0: Double, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
-//                      consistent(apis, (api: ComplexApiType) => api.method4(BigDecimal(a0), a1, a2, a3))
-//                    }
-//                  }
+                  "method4" in {
+                    check { (a0: Double, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
+                      consistent(apis, (api: ComplexApiType) => api.method4(BigDecimal(a0), a1, a2, a3))
+                    }
+                  }
 //                  "method5" in {
 //                    check { (a0: Boolean, a1: Short, a2: List[Int]) =>
 //                      consistent(apis, (api: ComplexApiType) => api.method5(a0, a1)(a2))
@@ -130,13 +130,13 @@ trait CoreSpec extends BaseSpec {
 //                      expectedErrorMessage == result.swap.map(_.getMessage)
 //                    }
 //                  }
-//                }
-//              }
-//            }
-//            "Invalid API" - {
-//              apiCombinations(invalidApiInstance, fixture.invalidApis).foreach { case (mode, apis) =>
-//                mode - {
-//                  val (_, api) = apis
+                }
+              }
+            }
+            "Invalid API" - {
+              apiCombinations(invalidApiInstance, fixture.invalidApis).foreach { case (mode, apis) =>
+                mode - {
+                  val (_, api) = apis
 //                  "Function not found" in {
 //                    val error = intercept[FunctionNotFoundException](run(api.nomethod(""))).getMessage.toLowerCase
 //                    error.should(include("function not found"))
@@ -163,18 +163,18 @@ trait CoreSpec extends BaseSpec {
 //                    error.should(include("malformed argument"))
 //                    error.should(include("p1"))
 //                  }
-//                  "Missing arguments" in {
-//                    val error = intercept[InvalidRequestException] {
-//                      run(api.method5(true, 0))
-//                    }.getMessage.toLowerCase
-//                    error.should(include("missing argument"))
-//                    error.should(include("p2"))
-//                  }
-//                }
-//              }
-//            }
-//          }
-//        }
+                  "Missing arguments" in {
+                    val error = intercept[InvalidRequestException] {
+                      run(api.method5(true, 0))
+                    }.getMessage.toLowerCase
+                    error.should(include("missing argument"))
+                    error.should(include("p2"))
+                  }
+                }
+              }
+            }
+          }
+        }
         "Direct" - {
           "Call" - {
             "Simple API" - {
@@ -192,22 +192,22 @@ trait CoreSpec extends BaseSpec {
               }
             }
           }
-//          "Notify" - {
-//            "Simple API" - {
-//              "Positional" in {
-//                check { (a0: String) =>
-//                  execute(fixture.positionalNotify("test", a0))
-//                  true
-//                }
-//              }
+          "Notify" - {
+            "Simple API" - {
+              "Positional" in {
+                check { (a0: String) =>
+                  execute(fixture.positionalNotify("test", a0))
+                  true
+                }
+              }
 //              "Named" in {
 //                check { (a0: String) =>
 //                  execute(fixture.namedNotify("test", "test" -> a0))
 //                  true
 //                }
 //              }
-//            }
-//          }
+            }
+          }
         }
       }
     }
