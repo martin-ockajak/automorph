@@ -1,5 +1,6 @@
 package automorph.client
 
+import automorph.Client
 import automorph.spi.MessageCodec
 import automorph.util.CannotEqual
 import scala.language.experimental.macros
@@ -22,7 +23,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
   name: String,
   arguments: Seq[(String, Any)],
   encodedArguments: Seq[Node],
-  client: ClientCore[Node, Codec, Effect, Context],
+  client: Client[Node, Codec, Effect, Context],
   codec: Codec
 ) extends CannotEqual {
 
