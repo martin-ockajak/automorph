@@ -338,7 +338,7 @@ object RemoteFunction {
     import c.universe.{Quasiquote, weakTypeOf}
 
     c.Expr[Effect[R]](q"""
-      ${c.prefix}.core.call(
+      ${c.prefix}.client.call(
         ${c.prefix}.name,
         Some(${c.prefix}.arguments.map(_._1)),
         ${c.prefix}.encodedArguments,
