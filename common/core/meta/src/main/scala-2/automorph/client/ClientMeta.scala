@@ -47,43 +47,14 @@ object ClientMeta {
   ](c: blackbox.Context)(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Api] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[Api](q"""
-      automorph.client.ClientBind.generalBind[
-        ${weakTypeOf[Node]},
-        ${weakTypeOf[Codec]},
-        ${weakTypeOf[Effect[_]]},
-        ${weakTypeOf[Context]},
-        ${weakTypeOf[Api]}
-      ](${c.prefix}, ${c.prefix}.codec)
-    """)
-  }
-
-  def generalBind[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
-    core: Client[Node, Codec, Effect, Context],
-    codec: Codec
-  ): Api = macro generalBindMacro[Node, Codec, Effect, Context, Api]
-
-  def generalBindMacro[
-    Node: c.WeakTypeTag,
-    Codec <: MessageCodec[Node]: c.WeakTypeTag,
-    Effect[_],
-    Context: c.WeakTypeTag,
-    Api <: AnyRef: c.WeakTypeTag
-  ](c: blackbox.Context)(
-    core: c.Expr[Core[Node, Codec, Effect, Context]],
-    codec: c.Expr[Codec],
-    namedArguments: c.Expr[Boolean]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Api] = {
-    import c.universe.{Quasiquote, weakTypeOf}
-
     val nodeType = weakTypeOf[Node]
     val codecType = weakTypeOf[Codec]
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Api](q"""
       // Generate API method bindings
-      val methodBindings = automorph.client.ClientGenerator.bindings[$nodeType, $codecType, $effectType, $contextType, $apiType]($codec)
-        .map { binding =>
+      val methodBindings = automorph.client.ClientGenerator
+        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec).map { binding =>
           binding.function.name -> binding
         }.toMap
 
@@ -108,7 +79,7 @@ object ClientMeta {
             val parameterNames = clientBinding.method.parameters.map(_.name)
 
             // Perform the API call
-            $core.call(method.getName, parameterNames, encodedArguments, resultNode =>
+            ${c.prefix}.call(method.getName, parameterNames, encodedArguments, resultNode =>
               clientBinding.decodeResult(resultNode), context)
           }.getOrElse(throw new UnsupportedOperationException("Invalid method: " + method.getName))
       ).asInstanceOf[$apiType]

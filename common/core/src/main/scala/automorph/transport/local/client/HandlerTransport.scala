@@ -5,7 +5,6 @@ import automorph.handler.HandlerResult
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec}
-import automorph.util.Random
 import scala.collection.immutable.ArraySeq
 
 /**

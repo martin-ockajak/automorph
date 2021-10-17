@@ -36,9 +36,10 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    */
   inline def bind[Api <: AnyRef]: Api =
     // Generate API method bindings
-    val methodBindings = ClientGenerator.bindings[Node, Codec, Effect, Context, Api](protocol.codec).map { binding =>
-      binding.function.name -> binding
-    }.toMap
+    val methodBindings = ClientGenerator
+      .bindings[Node, Codec, Effect, Context, Api](protocol.codec).map { binding =>
+        binding.function.name -> binding
+      }.toMap
 
     // Create API proxy instance
     val classTag = summonInline[ClassTag[Api]]

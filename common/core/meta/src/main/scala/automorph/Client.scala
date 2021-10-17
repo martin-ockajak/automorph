@@ -5,7 +5,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.RpcRequest
 import automorph.spi.transport.ClientMessageTransport
-import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
+import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.util.Extensions.TryOps
 import automorph.util.{CannotEqual, Context, Random}
 import scala.collection.immutable.{ArraySeq, ListMap}
@@ -73,7 +73,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     encodedArguments: Seq[Node],
     decodeResult: Node => R,
     context: Option[Context]
-  ): Effect[R] =
+  ): Effect[R] = {
     // Create request
     val requestId = Random.id
     protocol.createRequest(functionName, Some(argumentNames), encodedArguments, true, requestId).pureFold(
@@ -97,6 +97,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         )
       }
     )
+  }
 
   /**
    * Performs an RPC function notification using specified arguments.
@@ -114,7 +115,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     argumentNames: Option[Seq[String]],
     encodedArguments: Seq[Node],
     context: Option[Context]
-  ): Effect[Unit] =
+  ): Effect[Unit] = {
     // Create request
     val requestId = Random.id
     protocol.createRequest(functionName, argumentNames, encodedArguments, false, requestId).pureFold(
@@ -135,6 +136,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           }
         )
     )
+  }
 
   /**
    * Processes an RPC function call response.

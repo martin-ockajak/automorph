@@ -2,7 +2,7 @@ package automorph.client
 
 import automorph.Client
 import automorph.spi.transport.ClientMessageTransport
-import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
+import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.util.Context
 
 /**
