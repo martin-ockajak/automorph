@@ -18,8 +18,8 @@ class ContextSpec extends BaseSpec {
       val codec = CirceJsonCodec()
       val protocol = JsonRpcProtocol(codec)
       val system = IdentitySystem()
-      val handler = Handler.protocol(protocol).system(system).context[Context.Empty]
-      val transport = HandlerTransport(handler, system, Context.empty)
+      val handler = Handler.protocol(protocol).system(system).context[Context.Value]
+      val transport = HandlerTransport(handler, system, Context.value)
       val client = Client.protocol(protocol).transport(transport)
       client
     }

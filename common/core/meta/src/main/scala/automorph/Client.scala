@@ -7,7 +7,7 @@ import automorph.spi.protocol.RpcRequest
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.util.Extensions.TryOps
-import automorph.util.{CannotEqual, Context, Random}
+import automorph.util.{CannotEqual, Random}
 import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.util.Try
 

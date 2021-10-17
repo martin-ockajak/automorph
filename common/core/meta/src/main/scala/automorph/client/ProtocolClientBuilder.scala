@@ -3,13 +3,12 @@ package automorph.client
 import automorph.Client
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{MessageCodec, RpcProtocol}
-import automorph.util.Context
 
 /**
- * RPC ''client'' builder.
+ * RPC client builder.
  *
- * @constructor Creates a new RPC ''client'' builder.
- * @param protocol RPC ''protocol'' plugin
+ * @constructor Creates a new RPC client builder.
+ * @param protocol RPC protocol plugin
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  */
@@ -18,12 +17,12 @@ case class ProtocolClientBuilder[Node, Codec <: MessageCodec[Node]](
 ) {
 
   /**
-   * Set specified effect ''transport'' plugin.
+   * Set specified effect transport plugin.
    *
-   * @param transport effect ''transport'' plugin
+   * @param transport effect transport plugin
    * @tparam Effect effect type
    * @tparam Context request context type
-   * @return RPC request ''client'' builder
+   * @return RPC request client builder
    */
   def transport[Effect[_], Context](
     transport: ClientMessageTransport[Effect, Context]
