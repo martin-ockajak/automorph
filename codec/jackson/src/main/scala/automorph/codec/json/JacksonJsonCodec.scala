@@ -44,9 +44,10 @@ object JacksonJsonCodec {
     classOf[BoxedUnit],
     new StdSerializer[BoxedUnit](classOf[BoxedUnit]) {
 
-      override def serialize(value: BoxedUnit, generator: JsonGenerator, provider: SerializerProvider): Unit =
+      override def serialize(value: BoxedUnit, generator: JsonGenerator, provider: SerializerProvider): Unit = {
         generator.writeStartObject()
         generator.writeEndObject()
+      }
     }
   ).addDeserializer(
     classOf[BoxedUnit],
