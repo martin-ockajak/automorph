@@ -36,6 +36,20 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    */
   def function(functionName: String): RemoteFunction[Node, Codec, Effect, Context] =
     RemoteFunction(functionName, Seq.empty, Seq.empty, this, protocol.codec)
+
+  /**
+   * Creates default request context.
+   *
+   * @return request context
+   */
+  def context: Context = transport.defaultContext
+
+  /**
+   * Closes this client freeing the underlying resources.
+   *
+   * @return nothing
+   */
+  def close(): Effect[Unit] = transport.close()
 }
 
 object Client {

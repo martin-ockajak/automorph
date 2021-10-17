@@ -24,20 +24,6 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
   /** This client type. */
   type ThisClient = Client[Node, Codec, Effect, Context]
 
-  /**
-   * Creates default request context.
-   *
-   * @return request context
-   */
-  def context: Context = transport.defaultContext
-
-  /**
-   * Closes this client freeing the underlying resources.
-   *
-   * @return nothing
-   */
-  def close(): Effect[Unit] = transport.close()
-
   override def toString: String = {
     val plugins = Map(
       "transport" -> transport,
