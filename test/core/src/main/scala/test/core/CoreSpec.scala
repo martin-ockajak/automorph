@@ -61,8 +61,8 @@ trait CoreSpec extends BaseSpec {
         "Proxy" - {
           "Call" - {
 //            "Simple API" - {
-//              apiCombinations(simpleApiInstance, fixture.simpleApis).foreach { case (mode, apis) =>
-//                mode - {
+//              apiCombinations(simpleApiInstance, fixture.simpleApis).foreach { case (callingConvention, apis) =>
+//                callingConvention - {
 //                  "test" in {
 //                    check { (a0: String) =>
 //                      consistent(apis, (api: SimpleApiType) => api.test(a0))
@@ -72,8 +72,8 @@ trait CoreSpec extends BaseSpec {
 //              }
 //            }
             "Complex API" - {
-              apiCombinations(complexApiInstance, fixture.complexApis).foreach { case (mode, apis) =>
-                mode - {
+              apiCombinations(complexApiInstance, fixture.complexApis).foreach { case (callingConvention, apis) =>
+                callingConvention - {
 //                  "method0" in {
 //                    check((_: Unit) => consistent(apis, (api: ComplexApiType) => api.method0()))
 //                  }
@@ -219,8 +219,8 @@ trait CoreSpec extends BaseSpec {
   }
 
   private def apiCombinations[Api](originalApi: Api, apis: Seq[Api]): Seq[(String, (Api, Api))] =
-    apis.zip(apiNames).map { case (api, name) =>
-      name -> ((originalApi, api))
+    apis.zip(apiNames).map { case (api, callingConvention) =>
+      callingConvention -> ((originalApi, api))
     }
 
   private def execute[Result](value: => Effect[Result]): Result =
