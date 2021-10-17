@@ -437,7 +437,10 @@ val site = taskKey[Unit]("Generates documentation website.")
 //  Compile / doc,
 //  laikaSite
 //).value
-site := laikaSite.value
+site := {
+  (Compile / doc).value
+  laikaSite.value
+}
 laikaSite := (laikaSite dependsOn (Compile / doc)).value
 site / fileInputs ++= Seq(
   baseDirectory.value.toGlob / "doc" / ** / "*.md",
