@@ -38,9 +38,6 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
 
 object ClientMeta {
 
-  /** Client with arbitrary codec. */
-  type AnyCodec[Effect[_], Context] = Client[Node, _ <: MessageCodec[Node], Effect, Context] forSome { type Node }
-
   def bindMacro[
     Node: c.WeakTypeTag,
     Codec <: MessageCodec[Node]: c.WeakTypeTag,
