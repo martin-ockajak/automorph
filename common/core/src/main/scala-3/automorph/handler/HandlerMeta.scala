@@ -35,7 +35,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * @param api API instance
    * @tparam Api API type (only member methods of this type are exposed)
    * @return RPC request handler with specified API bindings
-   * @throws scala.IllegalArgumentException if invalid public methods are found in the API type
+   * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef](api: Api): ThisHandler = bind(api, name => Seq(name))
 

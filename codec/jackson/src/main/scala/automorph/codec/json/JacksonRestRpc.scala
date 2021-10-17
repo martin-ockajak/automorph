@@ -1,7 +1,7 @@
 package automorph.codec.json
 
 import automorph.protocol.restrpc.{Message, MessageError}
-import com.fasterxml.jackson.core.{JsonGenerator, JsonParseException, JsonParser, TreeNode}
+import com.fasterxml.jackson.core.{JsonGenerator, JsonParseException, JsonParser}
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.ObjectNode

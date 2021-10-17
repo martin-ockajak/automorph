@@ -5,13 +5,11 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.{NumericNode, ObjectNode}
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.fasterxml.jackson.databind.{DeserializationContext, DeserializationFeature, JsonNode, ObjectMapper, SerializationConfig, SerializationFeature, SerializerProvider}
+import com.fasterxml.jackson.databind.{DeserializationContext, DeserializationFeature, JsonNode, ObjectMapper, SerializerProvider}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.ClassTagExtensions
 import scala.collection.immutable.ArraySeq
 import scala.runtime.BoxedUnit
-import automorph.util.Extensions.TryOps
-import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import scala.util.{Failure, Try}
 

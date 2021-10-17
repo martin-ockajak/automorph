@@ -11,7 +11,7 @@ import java.net.{HttpURLConnection, URI}
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
-import scala.util.{Failure, Success, Try, Using}
+import scala.util.Using
 
 /**
  * URL connection HTTP client message transport plugin.
@@ -72,7 +72,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
     context: Option[Context]
   ): Effect[Unit] = {
     val http = context.getOrElse(defaultContext)
-    system.map(send(requestBody, requestId, mediaType, http), _ => ())
+    system.map(send(requestBody, requestId, mediaType, http), (_: EffectValue) => ())
   }
 
   override def defaultContext: Context = HttpUrlConnectionContext.default
@@ -137,13 +137,6 @@ final case class HttpUrlConnectionClient[Effect[_]](
     connection.getRequestProperties.asScala.toSeq.flatMap { case (name, values) =>
       values.asScala.map(name -> _)
     }
-
-  private def ifNotConnected[T](connection: HttpURLConnection, function: HttpURLConnection => Unit): Unit =
-    Try(connection.getRequestProperties) match {
-      case Success(_) => function(connection)
-      case Failure(_: IllegalArgumentException) => ()
-      case Failure(error) => throw error
-    }
 }
 
 object HttpUrlConnectionClient {
@@ -152,7 +145,7 @@ object HttpUrlConnectionClient {
   type Context = Http[HttpUrlConnectionContext]
 
   /** Effect value type. */
-  private[automorph] type EffectValue = (HttpURLConnection, ArraySeq.ofByte)
+  private type EffectValue = (HttpURLConnection, ArraySeq.ofByte)
 }
 
 final case class HttpUrlConnectionContext(connection: HttpURLConnection)

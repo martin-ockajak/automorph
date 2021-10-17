@@ -1689,7 +1689,7 @@ public abstract class NanoHTTPD {
          * @param pending
          *            -1 to send everything, otherwise sets a max limit to the
          *            number of bytes sent
-         * @throws IOException
+         * @throws java.io.IOException
          *             if something goes wrong while sending the data.
          */
         private void sendBody(OutputStream outputStream, long pending) throws IOException {
@@ -2301,7 +2301,7 @@ public abstract class NanoHTTPD {
     /**
      * Start the server.
      * 
-     * @throws IOException
+     * @throws java.io.IOException
      *             if the socket is in use.
      */
     public void start() throws IOException {
@@ -2322,7 +2322,7 @@ public abstract class NanoHTTPD {
      *            timeout to use for socket connections.
      * @param daemon
      *            start the thread daemon or not.
-     * @throws IOException
+     * @throws java.io.IOException
      *             if the socket is in use.
      */
     public void start(final int timeout, boolean daemon) throws IOException {

@@ -36,7 +36,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * @param api API instance
    * @tparam Api API type (only member methods of this type are exposed)
    * @return RPC request handler with specified API bindings
-   * @throws IllegalArgumentException if invalid public methods are found in the API type
+   * @throws java.lang.IllegalArgumentException if invalid public methods are found in the API type
    */
   def bind[Api <: AnyRef](api: Api): ThisHandler =
     macro HandlerMeta.basicBindMacro[Node, Codec, Effect, Context, Api]
@@ -59,7 +59,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * @param aliases maps API method name to its exposed RPC aliases (empty result causes the method not to be exposed)
    * @tparam Api API type (only member methods of this type are exposed)
    * @return RPC request handler with specified API bindings
-   * @throws IllegalArgumentException if invalid public methods are found in the API type
+   * @throws java.lang.IllegalArgumentException if invalid public methods are found in the API type
    */
   def bind[Api <: AnyRef](api: Api, aliases: String => Iterable[String]): ThisHandler =
     macro HandlerMeta.bindMacro[Node, Codec, Effect, Context, Api]

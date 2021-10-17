@@ -30,6 +30,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
   type Type = RemoteFunction[Node, Codec, Effect, Context]
 
   private val codec = client.protocol.codec
+  Seq(codec)
 
   /**
    * Creates a copy of this function proxy with specified argument names and values.

@@ -375,7 +375,12 @@ Test / test := ((Test / test) dependsOn testScalastyle).value
 // API
 apiURL := Some(url(s"https://javadoc.io/doc/${organization.value}/$projectName-core_3/latest"))
 ThisBuild / autoAPIMappings := true
+Compile / doc / scalacOptions ++= Seq("-groups", "-implicits")
 enablePlugins(ScalaUnidocPlugin)
+ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(
+  examples
+)
+ScalaUnidoc / unidoc / target := (laikaSite / target).value / "api"
 ScalaUnidoc / unidoc / scalacOptions ++= Seq(
   "-Ymacro-expand:none",
   "-groups",
@@ -385,7 +390,6 @@ ScalaUnidoc / unidoc / scalacOptions ++= Seq(
   "-sourcepath",
   (LocalRootProject / baseDirectory).value.getAbsolutePath
 )
-//Compile / doc / scalacOptions ++= Seq("-groups", "-implicits")
 
 // Site settings
 enablePlugins(LaikaPlugin)
@@ -426,34 +430,16 @@ laikaIncludeAPI := true
 
 // Site tasks
 Laika / sourceDirectories := Seq(baseDirectory.value / "doc")
-val deleteSite = taskKey[Unit]("Deletes generated documentation website.")
-deleteSite := {
-  IO.delete((laikaSite / target).value)
-}
 laikaSite / target := target.value / "site"
+laikaSite := (laikaSite dependsOn (Compile / unidoc)).value
 val site = taskKey[Unit]("Generates documentation website.")
-//site := Def.sequential(
-//  deleteSite,
-//  Compile / doc,
-//  laikaSite
-//).value
-//site := {
-//  (Compile / doc).value
-//  laikaSite.value
-//}
-site := (Def.taskDyn {
-  val docTask = (Compile / doc).value
-  Def.task {
-    val laikaSiteTask = laikaSite.value
-    docTask
-  }
-}).value
-laikaSite := (laikaSite dependsOn (Compile / doc)).value
+site := laikaSite.value
 site / fileInputs ++= Seq(
   baseDirectory.value.toGlob / "doc" / ** / "*.md",
   baseDirectory.value.toGlob / "doc" / ** / "*.conf",
   baseDirectory.value.toGlob / "doc" / ** / "*.jpg"
 )
+
 
 // Deployment
 val repositoryShell = s"git@github.com:${repositoryPath}.git"
@@ -465,7 +451,7 @@ deploySite := {}
 deploySite := site.dependsOn(site, ghpagesPushSite).value
 
 
-// Continuous Integration
+// Continuous integration
 ThisBuild / githubWorkflowPublishTargetBranches := Seq()
 ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
 ThisBuild / githubWorkflowPublishTargetBranches := Seq(RefPredicate.StartsWith(Ref.Tag("v")))

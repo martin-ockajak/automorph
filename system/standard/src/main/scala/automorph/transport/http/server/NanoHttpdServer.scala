@@ -10,11 +10,9 @@ import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.transport.http.server.NanoHttpdServer.Context
 import automorph.util.Extensions.ThrowableOps
-import automorph.util.Extensions.TryOps
 import automorph.util.{Bytes, Network, Random}
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.MapHasAsScala
-import scala.util.Try
 
 /**
  * NanoHTTPD web server HTTP server transport plugin.

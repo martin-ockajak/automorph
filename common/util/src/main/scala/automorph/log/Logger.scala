@@ -154,7 +154,7 @@ final private[automorph] case class Logger private (private val underlying: slf4
 object Logger {
 
   /**
-   * Create a [[Logger]] implicit the underlying `org.slf4j.Logger`.
+   * Create a logger using the underlying `org.slf4j.Logger`.
    *
    * @param underlying underlying [[https://www.javadoc.io/doc/org.slf4j/slf4j-api/1.7.30/org/slf4j/Logger.html SLF4J logger]]
    * @return logger
@@ -162,7 +162,7 @@ object Logger {
   def apply(underlying: slf4j.Logger): Logger = new Logger(underlying)
 
   /**
-   * Create a [[Logger]] with the specified name.
+   * Create a logger with the specified name.
    *
    * @param name logger name
    * @return logger
