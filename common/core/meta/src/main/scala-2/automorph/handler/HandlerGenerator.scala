@@ -144,7 +144,7 @@ object HandlerGenerator {
                 argumentNodes($argumentIndex).getOrElse($codec.encode[Option[String]](None))
               )) match {
                 case scala.util.Failure(error) => scala.util.Failure(
-                  automorph.spi.Protocol.InvalidRequestException(
+                  automorph.spi.RpcProtocol.InvalidRequestException(
                     argumentNodes($argumentIndex).fold("Missing")(_ => "Malformed") + " argument: " + ${parameter.name},
                     error
                   )

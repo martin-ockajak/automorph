@@ -29,7 +29,7 @@ trait ProtocolCodecSpec extends CoreSpec {
         implicit lazy val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
         val port = availablePort
         val codec = CirceJsonCodec()
-        val protocol = JsonRpcProtocol(codec)
+        val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type](codec)
         val handler = Handler.protocol(protocol).system(system).context[Context]
           .bind(simpleApi).bind(complexApi)
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
@@ -62,7 +62,7 @@ trait ProtocolCodecSpec extends CoreSpec {
         )
         val port = availablePort
         val codec = JacksonJsonCodec(JacksonJsonCodec.defaultMapper.registerModule(enumModule))
-        val protocol = JsonRpcProtocol(codec)
+        val protocol = JsonRpcProtocol[JacksonJsonCodec.Node, codec.type](codec)
         val handler = Handler.protocol(protocol).system(system).context[Context]
           .bind(simpleApi).bind(complexApi)
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
@@ -89,7 +89,7 @@ trait ProtocolCodecSpec extends CoreSpec {
         val custom = new Custom
         val port = availablePort
         val codec = UpickleJsonCodec(custom)
-        val protocol = JsonRpcProtocol(codec)
+        val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type](codec)
         val handler = Handler.protocol(protocol).system(system).context[Context]
           .bind(simpleApi).bind(complexApi)
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
@@ -116,7 +116,7 @@ trait ProtocolCodecSpec extends CoreSpec {
         val custom = new Custom
         val port = availablePort
         val codec = UpickleMessagePackCodec(custom)
-        val protocol = JsonRpcProtocol(codec)
+        val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type](codec)
         val handler = Handler.protocol(protocol).system(system).context[Context]
          .bind(simpleApi).bind(complexApi)
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
@@ -174,7 +174,7 @@ trait ProtocolCodecSpec extends CoreSpec {
           )
         val port = availablePort
         val codec = ArgonautJsonCodec()
-        val protocol = JsonRpcProtocol(codec)
+        val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type](codec)
         val handler = Handler.protocol(protocol).system(system).context[Context]
           .bind(simpleApi).bind(complexApi)
         val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))

@@ -27,7 +27,7 @@ import scala.util.{Failure, Success, Try}
 final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   protocol: RpcProtocol[Node, Codec],
   system: EffectSystem[Effect],
-  protected val bindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
+  bindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
     ListMap.empty[String, HandlerBinding[Node, Effect, Context]]
 ) extends HandlerMeta[Node, Codec, Effect, Context] with CannotEqual with Logging {
 
