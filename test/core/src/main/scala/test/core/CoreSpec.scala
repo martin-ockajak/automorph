@@ -37,9 +37,9 @@ trait CoreSpec extends BaseSpec {
     tell: (String, (String, String)) => Effect[Unit]
   )
 
-  val simpleApiInstance: SimpleApiType = SimpleApiImpl(system)
-  val complexApiInstance: ComplexApiType = ComplexApiImpl(system)
-  val invalidApiInstance: InvalidApiType = InvalidApiImpl(system)
+  val simpleApi: SimpleApiType = SimpleApiImpl(system)
+  val complexApi: ComplexApiType = ComplexApiImpl(system)
+  val invalidApi: InvalidApiType = InvalidApiImpl(system)
 
   implicit def arbitraryContext: Arbitrary[Context]
 
@@ -58,7 +58,7 @@ trait CoreSpec extends BaseSpec {
         "Proxy" - {
           "Call" - {
             "Simple API" - {
-              val apis = (fixture.simpleApi, simpleApiInstance)
+              val apis = (fixture.simpleApi, simpleApi)
               "test" in {
                 check { (a0: String) =>
                   consistent(apis, (api: SimpleApiType) => api.test(a0))
@@ -66,7 +66,7 @@ trait CoreSpec extends BaseSpec {
               }
             }
             "Complex API" - {
-              val apis = (fixture.complexApi, complexApiInstance)
+              val apis = (fixture.complexApi, complexApi)
 //                  "method0" in {
 //                    check((_: Unit) => consistent(apis, (api: ComplexApiType) => api.method0()))
 //                  }
@@ -166,7 +166,7 @@ trait CoreSpec extends BaseSpec {
           "Call" - {
             "Simple API" in {
               check { (a0: String) =>
-                val expected = run(simpleApiInstance.test(a0))
+                val expected = run(simpleApi.test(a0))
                 execute(fixture.call("test", "test" -> a0)) == expected
               }
             }
