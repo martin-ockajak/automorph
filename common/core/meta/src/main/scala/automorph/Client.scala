@@ -38,7 +38,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @return remote RPC function proxy with specified function name
    */
   def function(functionName: String): RemoteFunction[Node, Codec, Effect, Context] =
-    RemoteFunction(functionName, Seq.empty, Seq.empty, this, protocol.codec)
+    RemoteFunction(functionName, Seq.empty, Seq.empty, this)
 
   /**
    * Creates default request context.

@@ -21,9 +21,9 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
   name: String,
   arguments: Seq[(String, Any)],
   private val encodedArguments: Seq[Node],
-  private val client: Client[Node, Codec, Effect, Context],
-  private val codec: Codec,
+  private val client: Client[Node, Codec, Effect, Context]
 ) extends CannotEqual:
+  private val codec = client.protocol.codec
 
   /** Proxy type. */
   type Type = RemoteFunction[Node, Codec, Effect, Context]
