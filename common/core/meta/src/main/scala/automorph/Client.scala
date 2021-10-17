@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.client.{ClientCore, ClientMeta, ProtocolClientBuilder, TransportClientBuilder}
+import automorph.client.{ClientCore, ClientMeta, ProtocolClientBuilder, RemoteFunction, TransportClientBuilder}
 import automorph.log.Logging
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
@@ -27,6 +27,15 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   with CannotEqual
   with Logging {
   protected val system = transport.system
+
+  /**
+   * Creates a remote RPC function proxy with specified function name.
+   *
+   * @param functionName remote RPC function name
+   * @return remote RPC function proxy with specified function name
+   */
+  def function(functionName: String): RemoteFunction[Node, Codec, Effect, Context] =
+    RemoteFunction(functionName, Seq.empty, Seq.empty, this, protocol.codec)
 }
 
 object Client {

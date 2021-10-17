@@ -25,15 +25,6 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
   type ThisClient = Client[Node, Codec, Effect, Context]
 
   /**
-   * Creates a remote RPC function proxy with specified function name.
-   *
-   * @param functionName remote RPC function name
-   * @return remote RPC function proxy with specified function name
-   */
-  def function(functionName: String): RemoteFunction[Node, Codec, Effect, Context] =
-    RemoteFunction(functionName, Seq.empty, Seq.empty, this, protocol.codec)
-
-  /**
    * Creates default request context.
    *
    * @return request context
