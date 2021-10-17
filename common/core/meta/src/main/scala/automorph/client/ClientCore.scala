@@ -24,14 +24,6 @@ private[automorph] trait ClientCore[Node, Codec <: MessageCodec[Node], Effect[_]
   /** This client type. */
   type ThisClient = Client[Node, Codec, Effect, Context]
 
-  override def toString: String = {
-    val plugins = Map(
-      "transport" -> transport,
-      "protocol" -> protocol
-    ).map { case (name, plugin) => s"$name = ${plugin.getClass.getName}" }.mkString(", ")
-    s"${this.getClass.getName}($plugins)"
-  }
-
   /**
    * Performs an RPC function call using specified arguments.
    *

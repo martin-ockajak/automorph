@@ -50,6 +50,14 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @return nothing
    */
   def close(): Effect[Unit] = transport.close()
+
+  override def toString: String = {
+    val plugins = Map(
+      "transport" -> transport,
+      "protocol" -> protocol
+    ).map { case (name, plugin) => s"$name = ${plugin.getClass.getName}" }.mkString(", ")
+    s"${this.getClass.getName}($plugins)"
+  }
 }
 
 object Client {
