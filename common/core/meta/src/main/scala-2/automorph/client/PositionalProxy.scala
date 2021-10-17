@@ -6,7 +6,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], Context](
-  methodName: String,
+  functionName: String,
   core: ClientCore[Node, Codec, Effect, Context],
   codec: Codec,
   argumentValues: Seq[Any],
@@ -17,13 +17,13 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
   type Type = PositionalProxy[Node, Codec, Effect, Context]
 
   /**
-   * Creates a copy of this method proxy passing method arguments ''by name'' with specified argument names.
+   * Creates a copy of this function proxy passing function arguments by name with specified argument names.
    *
-   * @param argumentNames method argument names
-   * @return method proxy
+   * @param argumentNames function argument names
+   * @return function proxy
    */
   def named(argumentNames: String*): NamedProxy[Node, Codec, Effect, Context] = NamedProxy(
-    methodName,
+    functionName,
     core,
     codec,
     argumentNames.zip(argumentValues),
@@ -33,96 +33,96 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
   )
 
   /**
-   * Creates a copy of this method proxy with specified argument values.
+   * Creates a copy of this function proxy with specified argument values.
    *
-   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
-   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return method proxy
+   * @return function proxy
    */
   def args(): Type = copy(argumentValues = Seq.empty, encodedArguments = Seq.empty)
 
   /**
-   * Creates a copy of this method proxy with specified argument values.
+   * Creates a copy of this function proxy with specified argument values.
    *
-   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
-   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return method proxy
+   * @return function proxy
    */
   def args[T1](p1: T1): Type =
     macro PositionalProxy.args1Macro[Type, T1]
 
   /**
-   * Creates a copy of this method proxy with specified argument values.
+   * Creates a copy of this function proxy with specified argument values.
    *
-   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
-   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return method proxy
+   * @return function proxy
    */
   def args[T1, T2](p1: T1, p2: T2): Type =
     macro PositionalProxy.args2Macro[Type, T1, T2]
 
   /**
-   * Creates a copy of this method proxy with specified argument values.
+   * Creates a copy of this function proxy with specified argument values.
    *
-   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
-   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return method proxy
+   * @return function proxy
    */
   def args[T1, T2, T3](p1: T1, p2: T2, p3: T3): Type =
     macro PositionalProxy.args3Macro[Type, T1, T2, T3]
 
   /**
-   * Creates a copy of this method proxy with specified argument values.
+   * Creates a copy of this function proxy with specified argument values.
    *
-   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
-   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return method proxy
+   * @return function proxy
    */
   def args[T1, T2, T3, T4](p1: T1, p2: T2, p3: T3, p4: T4): Type =
     macro PositionalProxy.args4Macro[Type, T1, T2, T3, T4]
 
   /**
-   * Creates a copy of this method proxy with specified argument values.
+   * Creates a copy of this function proxy with specified argument values.
    *
-   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
-   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return method proxy
+   * @return function proxy
    */
   def args[T1, T2, T3, T4, T5](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5): Type =
     macro PositionalProxy.args5Macro[Type, T1, T2, T3, T4, T5]
 
   /**
-   * Creates a copy of this method proxy with specified argument values.
+   * Creates a copy of this function proxy with specified argument values.
    *
-   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
-   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return method proxy
+   * @return function proxy
    */
   def args[T1, T2, T3, T4, T5, T6](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6): Type =
     macro PositionalProxy.args6Macro[Type, T1, T2, T3, T4, T5, T6]
 
   /**
-   * Creates a copy of this method proxy with specified argument values.
+   * Creates a copy of this function proxy with specified argument values.
    *
-   * Parameters 'p1', 'p2' ... 'pN' represent method argument values.
-   * Type parameters 'T1', 'T2' ... 'TN' represent method parameter types.
+   * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
+   * Type parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return method proxy
+   * @return function proxy
    */
   def args[T1, T2, T3, T4, T5, T6, T7](p1: T1, p2: T2, p3: T3, p4: T4, p5: T5, p6: T6, p7: T7): Type =
     macro PositionalProxy.args7Macro[Type, T1, T2, T3, T4, T5, T6, T7]
 
   /**
-   * Sends a remote method ''call'' request with specified result type extracted from the response.
+   * Sends a remote function call request with specified result type extracted from the response.
    *
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
+   * The specified request context is passed to the underlying message transport plugin.
    *
    * @tparam R result type
    * @param context request context
@@ -131,18 +131,18 @@ final case class PositionalProxy[Node, Codec <: MessageCodec[Node], Effect[_], C
   def call[R](implicit context: Context): Effect[R] = macro PositionalProxy.callMacro[Effect, Context, R]
 
   /**
-   * Sends a remote method ''notification'' request disregarding the response.
+   * Sends a remote function notification request disregarding the response.
    *
-   * The specified ''request context'' is passed to the underlying message ''transport'' plugin.
+   * The specified request context is passed to the underlying message transport plugin.
    *
    * @param context request context
    * @return nothing
    */
   def tell(implicit context: Context): Effect[Unit] =
-    core.notify(methodName, None, encodedArguments, Some(context))
+    core.notify(functionName, None, encodedArguments, Some(context))
 
   override def toString: String =
-    s"${this.getClass.getName}(Method: $methodName, Arguments: $argumentValues)"
+    s"${this.getClass.getName}(Method: $functionName, Arguments: $argumentValues)"
 }
 
 object PositionalProxy {
@@ -317,7 +317,7 @@ object PositionalProxy {
 
     c.Expr[Effect[R]](q"""
       ${c.prefix}.core.call(
-        ${c.prefix}.methodName,
+        ${c.prefix}.functionName,
         None,
         ${c.prefix}.encodedArguments,
         ${c.prefix}.codec.decode[${weakTypeOf[R]}](_),
