@@ -80,60 +80,60 @@ trait ProtocolCodecSpec extends CoreSpec {
           (function, a0) => client.function(function).args(a0).tell
         )
       }, {
-        class Custom extends UpickleJsonCustom {
-          implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
-            value => Enum.toOrdinal(value),
-            number => Enum.fromOrdinal(number)
-          )
-          implicit lazy val structureRw: ReadWriter[Structure] = macroRW
-          implicit lazy val recordRw: ReadWriter[Record] = macroRW
-        }
-        val custom = new Custom
-        val port = availablePort
-        val codec = UpickleJsonCodec(custom)
-        val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type](codec)
-        val handler = Handler.protocol(protocol).system(system).context[Context]
-          .bind(simpleApi).bind(complexApi)
-        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-        val client = Client.protocol(protocol).transport(transport)
-        TestFixture(
-          client,
-          handler,
-          port,
-          client.bind[SimpleApiType],
-          client.bind[ComplexApiType],
-          client.bind[InvalidApiType],
-          (function, a0) => client.function(function).args(a0).call,
-          (function, a0) => client.function(function).args(a0).tell
-        )
-      }, {
-        class Custom extends UpickleMessagePackCustom {
-          implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
-            value => Enum.toOrdinal(value),
-            number => Enum.fromOrdinal(number)
-          )
-          implicit lazy val structureRw: ReadWriter[Structure] = macroRW
-          implicit lazy val recordRw: ReadWriter[Record] = macroRW
-        }
-        val custom = new Custom
-        val port = availablePort
-        val codec = UpickleMessagePackCodec(custom)
-        val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type](codec)
-        val handler = Handler.protocol(protocol).system(system).context[Context]
-         .bind(simpleApi).bind(complexApi)
-        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
-        val client = Client.protocol(protocol).transport(transport)
-        TestFixture(
-          client,
-          handler,
-          port,
-          client.bind[SimpleApiType],
-          client.bind[ComplexApiType],
-          client.bind[InvalidApiType],
-          (function, a0) => client.function(function).args(a0).call,
-          (function, a0) => client.function(function).args(a0).tell
-        )
-      }, {
+//        class Custom extends UpickleJsonCustom {
+//          implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
+//            value => Enum.toOrdinal(value),
+//            number => Enum.fromOrdinal(number)
+//          )
+//          implicit lazy val structureRw: ReadWriter[Structure] = macroRW
+//          implicit lazy val recordRw: ReadWriter[Record] = macroRW
+//        }
+//        val custom = new Custom
+//        val port = availablePort
+//        val codec = UpickleJsonCodec(custom)
+//        val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type](codec)
+//        val handler = Handler.protocol(protocol).system(system).context[Context]
+//          .bind(simpleApi).bind(complexApi)
+//        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
+//        val client = Client.protocol(protocol).transport(transport)
+//        TestFixture(
+//          client,
+//          handler,
+//          port,
+//          client.bind[SimpleApiType],
+//          client.bind[ComplexApiType],
+//          client.bind[InvalidApiType],
+//          (function, a0) => client.function(function).args(a0).call,
+//          (function, a0) => client.function(function).args(a0).tell
+//        )
+//      }, {
+//        class Custom extends UpickleMessagePackCustom {
+//          implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
+//            value => Enum.toOrdinal(value),
+//            number => Enum.fromOrdinal(number)
+//          )
+//          implicit lazy val structureRw: ReadWriter[Structure] = macroRW
+//          implicit lazy val recordRw: ReadWriter[Record] = macroRW
+//        }
+//        val custom = new Custom
+//        val port = availablePort
+//        val codec = UpickleMessagePackCodec(custom)
+//        val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type](codec)
+//        val handler = Handler.protocol(protocol).system(system).context[Context]
+//         .bind(simpleApi).bind(complexApi)
+//        val transport = customTransport(port).getOrElse(HandlerTransport(handler, system, contextValue))
+//        val client = Client.protocol(protocol).transport(transport)
+//        TestFixture(
+//          client,
+//          handler,
+//          port,
+//          client.bind[SimpleApiType],
+//          client.bind[ComplexApiType],
+//          client.bind[InvalidApiType],
+//          (function, a0) => client.function(function).args(a0).call,
+//          (function, a0) => client.function(function).args(a0).tell
+//        )
+//      }, {
         implicit lazy val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
           (v: Enum.Enum) => jNumber(Enum.toOrdinal(v)),
           cursor => cursor.focus.as[Int].map(Enum.fromOrdinal)
