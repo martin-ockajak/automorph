@@ -311,11 +311,11 @@ val serverProtocol = defaultProtocol.exceptionToError {
 }
 
 // Customize server HTTP status code mapping
-val exceptionToStatusCode = (exception: Throwable) =>
-  exception match {
-    case _: SQLException => 400
-    case e => Http.defaultExceptionToStatusCode(e)
-  }
+val defaultProtocol = DefaultRpcProtocol()
+val serverProtocol = defaultProtocol.mapException {
+  case _: SQLException => InvalidRequest
+  case e => defaultProtocol.exceptionToError(e)
+}
 
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val system = DefaultEffectSystem.async
@@ -334,7 +334,7 @@ server.close()
 
 ```scala
 // Customize client RPC error mapping
-val clientProtocol = defaultProtocol.errorToException {
+val clientProtocol = defaultProtocol.mapError {
   case (message, InvalidRequest.code) if message.contains("SQL") => new SQLException(message)
   case (message, code) => defaultProtocol.errorToException(message, code)
 }
