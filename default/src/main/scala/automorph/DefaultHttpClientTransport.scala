@@ -41,7 +41,7 @@ object DefaultHttpClientTransport {
     backend: SttpBackend[Effect, _],
     system: EffectSystem[Effect],
     webSocket: Boolean = false
-  ): Type[Effect] = DefaultHttpClientTransport(url, method, backend, system)
+  ): Type[Effect] = SttpClient(url, method, backend, system, webSocket)
 
   /**
    * Creates an asynchronous STTP HTTP & WebSocket client message transport plugin using 'Future' as an effect type.

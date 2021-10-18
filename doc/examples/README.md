@@ -285,7 +285,6 @@ libraryDependencies ++= Seq(
 ```scala
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.transport.http.Http
-import automorph.transport.http.client.SttpClient.defaultContext
 import automorph.{Client, DefaultEffectSystem, DefaultHttpServer, DefaultRpcProtocol, Handler}
 import java.net.URI
 import java.sql.SQLException

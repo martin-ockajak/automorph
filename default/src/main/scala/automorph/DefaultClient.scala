@@ -1,6 +1,5 @@
 package automorph
 
-import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 
 object DefaultClient {

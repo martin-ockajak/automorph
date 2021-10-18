@@ -24,16 +24,16 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @constructor Creates an STTP client transport plugin with the specified STTP backend.
  * @param url HTTP server endpoint URL
  * @param method HTTP method
- * @param system effect system plugin
  * @param backend STTP backend
+ * @param system effect system plugin
  * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
  * @tparam Effect effect type
  */
 final case class SttpClient[Effect[_]](
   url: URI,
   method: String,
-  system: EffectSystem[Effect],
   backend: SttpBackend[Effect, WebSocket[Effect]],
+  system: EffectSystem[Effect],
   webSocket: Boolean = false
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
