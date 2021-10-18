@@ -1,7 +1,5 @@
 package automorph.util
 
-import java.sql.SQLException
-
 /** Random value generator. */
 object Random {
 
