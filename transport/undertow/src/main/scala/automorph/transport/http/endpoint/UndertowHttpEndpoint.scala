@@ -1,19 +1,18 @@
 package automorph.transport.http.endpoint
 
-import automorph.Handler
+import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
-import automorph.spi.MessageCodec
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import automorph.util.{Bytes, Network, Random}
+import java.io.IOException
 import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, StatusCodes}
 import io.undertow.websockets.spi.WebSocketHttpExchange
-import java.io.IOException
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 import scala.util.Try
@@ -34,12 +33,13 @@ import scala.util.Try
  * @tparam Effect effect type
  */
 final case class UndertowHttpEndpoint[Effect[_]](
-  handler: Handler.AnyCodec[Effect, Context],
+  handler: Types.HandlerAnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
-  private val system = handler.system
+  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
+  private val system = genericHandler.system
 
   private val receiveCallback = new Receiver.FullBytesCallback {
 
@@ -54,7 +54,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
           // Process the request
           implicit val usingContext: Context = createContext(exchange)
           runEffect(system.map(
-            system.either(handler.processRequest(request, requestId)),
+            system.either(genericHandler.processRequest(request, requestId)),
             (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
               handlerResult.fold(
                 error => sendServerError(error, exchange, requestId, requestDetails),
@@ -110,7 +110,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
       if (exchange.isResponseChannelAvailable) {
         throw new IOException("Response channel not available")
       }
-      val mediaType = handler.protocol.codec.asInstanceOf[MessageCodec[_]].mediaType
+      val mediaType = genericHandler.protocol.codec.mediaType
       exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, mediaType)
       exchange.setStatusCode(statusCode).getResponseSender.send(Bytes.byteBuffer.to(message))
       logger.debug("Sent HTTP response", responseDetails)

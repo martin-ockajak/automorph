@@ -199,9 +199,6 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
 
 object Client {
 
-  /** Client with arbitrary codec. */
-  type AnyCodec[Effect[_], Context] = Client[_, _, Effect, Context]
-
   /**
    * Creates an RPC client builder with specified RPC protocol plugin.
    *

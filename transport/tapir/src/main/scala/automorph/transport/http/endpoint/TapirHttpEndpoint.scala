@@ -1,6 +1,6 @@
 package automorph.transport.http.endpoint
 
-import automorph.Handler
+import automorph.{Handler, Types}
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.MessageCodec
@@ -51,11 +51,12 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
    * @return Tapir HTTP endpoint
    */
   def apply[Effect[_]](
-    handler: Handler.AnyCodec[Effect, Context],
+    handler: Types.HandlerAnyCodec[Effect, Context],
     method: Method,
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
   ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {
-    val system = handler.system
+    val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
+    val system = genericHandler.system
     val contentType = Header.contentType(MediaType.parse(handler.protocol.codec.mediaType).getOrElse {
       throw new IllegalArgumentException(s"Invalid content type: ${handler.protocol.codec.mediaType}")
     })
@@ -99,10 +100,11 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 //   * @return Tapir HTTP endpoint
 //   */
 //  def apply[Effect[_], S](
-//    handler: Handler.AnyCodec[Effect, Context],
+//    handler: Types.HandlerAnyCodec[Effect, Context],
 //    streams: Streams[S]
 //  ): ServerEndpoint[XRequestType, Unit, streams.Pipe[Array[Byte], Array[Byte]], WebSockets, Effect] = {
-//    val system = handler.system
+//    val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
+//    val system = genericHandler.system
 //    val contentType = Header.contentType(MediaType.parse(handler.codec.mediaType).getOrElse {
 //      throw new IllegalArgumentException(s"Invalid content type: ${handler.codec.mediaType}")
 //    })

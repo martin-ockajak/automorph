@@ -1,9 +1,8 @@
 package automorph.transport.http.server
 
-import automorph.Handler
+import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
-import automorph.spi.MessageCodec
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.server.NanoHTTPD.Response.Status
@@ -32,7 +31,7 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  * @tparam Effect effect type
  */
 final case class NanoHttpdServer[Effect[_]] private (
-  handler: Handler.AnyCodec[Effect, Context],
+  handler: Types.HandlerAnyCodec[Effect, Context],
   evaluateEffect: Effect[Response] => Response,
   port: Int,
   readTimeout: Int,
@@ -40,7 +39,8 @@ final case class NanoHttpdServer[Effect[_]] private (
 ) extends NanoHTTPD(port) with Logging with ServerMessageTransport[Effect] {
 
   private val HeaderXForwardedFor = "X-Forwarded-For"
-  private val system = handler.system
+  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
+  private val system = genericHandler.system
 
   override def close(): Effect[Unit] = system.wrap(stop())
 
@@ -60,7 +60,7 @@ final case class NanoHttpdServer[Effect[_]] private (
     // Process the request
     implicit val usingContext: Context = createContext(session)
     evaluateEffect(system.map(
-      system.either(handler.processRequest(request, requestId)),
+      system.either(genericHandler.processRequest(request, requestId)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
         handlerResult.fold(
           error => serverError(error, session, requestId, requestDetails),
@@ -99,7 +99,7 @@ final case class NanoHttpdServer[Effect[_]] private (
     )
     logger.trace("Sending HTTP response", responseDetails)
     val inputStream = Bytes.inputStream.to(message)
-    val mediaType = handler.protocol.codec.asInstanceOf[MessageCodec[_]].mediaType
+    val mediaType = genericHandler.protocol.codec.mediaType
     val response = newFixedLengthResponse(status, mediaType, inputStream, message.size.toLong)
     logger.debug("Sent HTTP response", responseDetails)
     response
@@ -151,7 +151,7 @@ object NanoHttpdServer {
    * @tparam Effect effect type
    */
   def apply[Effect[_]](
-    handler: Handler.AnyCodec[Effect, Context],
+    handler: Types.HandlerAnyCodec[Effect, Context],
     runEffectSync: Effect[Response] => Response,
     port: Int,
     readTimeout: Int = 5000,

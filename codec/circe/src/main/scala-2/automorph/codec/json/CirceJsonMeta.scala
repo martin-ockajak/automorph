@@ -1,7 +1,6 @@
 package automorph.codec.json
 
-import automorph.protocol.jsonrpc.Message
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.Json
 import automorph.spi.MessageCodec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox

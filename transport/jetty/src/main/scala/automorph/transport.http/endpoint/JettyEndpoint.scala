@@ -1,6 +1,6 @@
 package automorph.transport.http.endpoint
 
-import automorph.Handler
+import automorph.{Handler, Types}
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
@@ -8,7 +8,6 @@ import automorph.transport.http.Http
 import automorph.transport.http.endpoint.JettyEndpoint.Context
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Network, Random}
-import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import java.io.{ByteArrayInputStream, InputStream}
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
@@ -30,11 +29,12 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
  * @tparam Effect effect type
  */
 final case class JettyEndpoint[Effect[_]](
-  handler: Handler.AnyCodec[Effect, Context],
+  handler: Types.HandlerAnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends HttpServlet with Logging with EndpointMessageTransport {
 
+  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = handler.system
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
@@ -47,7 +47,7 @@ final case class JettyEndpoint[Effect[_]](
     // Process the request
     implicit val usingContext: Context = createContext(request)
     runEffect(system.map(
-      system.either(handler.processRequest(requestMessage, requestId)),
+      system.either(genericHandler.processRequest(requestMessage, requestId)),
       (handlerResult: Either[Throwable, HandlerResult[InputStream]]) =>
         handlerResult.fold(
           error => serverError(error, response, request, requestId, requestDetails),

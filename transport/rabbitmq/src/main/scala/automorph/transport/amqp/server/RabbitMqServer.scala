@@ -1,20 +1,18 @@
 package automorph.transport.amqp.server
 
-import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.amqp.{Amqp, RabbitMqCommon}
-import automorph.util.{Bytes, Random}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
+import automorph.util.{Bytes, Random}
+import automorph.{Handler, Types}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.io.IOException
 import java.net.{URI, URL}
-import scala.collection.immutable.ArraySeq
-import scala.concurrent.duration.{Duration, FiniteDuration}
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Try, Using}
+import scala.concurrent.ExecutionContext
+import scala.util.Try
 
 /**
  * RabbitMQ server transport plugin using AMQP as message transport protocol.
@@ -36,7 +34,7 @@ import scala.util.{Try, Using}
  * @tparam Effect effect type
  */
 final case class RabbitMqServer[Effect[_]](
-  handler: Handler.AnyCodec[Effect, Amqp[BasicProperties]],
+  handler: Types.HandlerAnyCodec[Effect, Amqp[BasicProperties]],
   runEffect: Effect[Any] => Any,
   url: URI,
   queues: Seq[String],
@@ -50,7 +48,8 @@ final case class RabbitMqServer[Effect[_]](
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
   private val urlText = url.toURL.toExternalForm
   private val exchange = RabbitMqCommon.defaultDirectExchange
-  private val system = handler.system
+  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
+  private val system = genericHandler.system
 
   override def close(): Effect[Unit] = system.wrap(connection.abort(AMQP.CONNECTION_FORCED, "Terminated"))
 
@@ -72,7 +71,7 @@ final case class RabbitMqServer[Effect[_]](
         implicit val usingContext: Amqp[BasicProperties] = RabbitMqCommon.context(amqpProperties)
         val replyTo = Option(amqpProperties.getReplyTo)
         runEffect(system.map(
-          system.either(handler.processRequest(body, requestId)),
+          system.either(genericHandler.processRequest(body, requestId)),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
             handlerResult.fold(
               error => sendServerError(error, amqpProperties, requestProperties),

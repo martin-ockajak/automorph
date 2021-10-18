@@ -1,5 +1,6 @@
 package test.core
 
+import automorph.Types
 import automorph.{Client, Handler}
 import automorph.spi.EffectSystem
 import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException, InvalidResponseException}
@@ -25,15 +26,17 @@ trait CoreSpec extends BaseSpec {
   type InvalidApiType = InvalidApi[Effect]
 
   case class TestFixture(
-    client: Client.AnyCodec[Effect, Context],
-    handler: Handler.AnyCodec[Effect, Context],
+    client: Types.ClientAnyCodec[Effect, Context],
+    handler: Types.HandlerAnyCodec[Effect, Context],
     serverPort: Int,
     simpleApi: SimpleApiType,
     complexApi: ComplexApiType,
     invalidApi: InvalidApiType,
     call: (String, (String, String)) => Effect[String],
     tell: (String, (String, String)) => Effect[Unit]
-  )
+  ) {
+    val genericClient = client.asInstanceOf[Types.ClientGenericCodec[Effect, Context]]
+  }
 
   val simpleApi: SimpleApiType = SimpleApiImpl(system)
   val complexApi: ComplexApiType = ComplexApiImpl(system)
@@ -51,7 +54,7 @@ trait CoreSpec extends BaseSpec {
 // FIXME - restore
 //    fixtures.foreach { fixture =>
     fixtures.headOption.foreach { fixture =>
-      val codecName = fixture.client.protocol.codec.getClass.getSimpleName.replaceAll("MessageCodec$", "")
+      val codecName = fixture.genericClient.protocol.codec.getClass.getSimpleName.replaceAll("MessageCodec$", "")
       codecName - {
         "Proxy" - {
           "Simple API" - {
@@ -179,7 +182,7 @@ trait CoreSpec extends BaseSpec {
   }
 
   override def afterAll(): Unit = {
-    fixtures.foreach(_.client.close())
+    fixtures.foreach(_.genericClient.close())
     super.afterAll()
   }
 

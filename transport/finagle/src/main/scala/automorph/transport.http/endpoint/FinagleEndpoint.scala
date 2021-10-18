@@ -1,6 +1,6 @@
 package automorph.transport.http.endpoint
 
-import automorph.Handler
+import automorph.{Handler, Types}
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
@@ -29,12 +29,13 @@ import com.twitter.util.{Future, Promise}
  * @tparam Effect effect type
  */
 final case class FinagleEndpoint[Effect[_]](
-  handler: Handler.AnyCodec[Effect, Context],
+  handler: Types.HandlerAnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
 
-  private val system = handler.system
+  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
+  private val system = genericHandler.system
 
   override def apply(request: Request): Future[Response] = {
     // Receive the request
@@ -46,7 +47,7 @@ final case class FinagleEndpoint[Effect[_]](
     // Process the request
     implicit val usingContext: Context = createContext(request)
     runAsFuture(system.map(
-      system.either(handler.processRequest(requestMessage, requestId)),
+      system.either(genericHandler.processRequest(requestMessage, requestId)),
       (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
         handlerResult.fold(
           error => serverError(error, request, requestId, requestDetails),

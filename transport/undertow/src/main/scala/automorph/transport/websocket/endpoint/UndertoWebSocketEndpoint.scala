@@ -1,6 +1,6 @@
 package automorph.transport.websocket.endpoint
 
-import automorph.Handler
+import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
@@ -40,7 +40,7 @@ object UndertowWebSocketEndpoint {
    * @tparam Effect effect type
    */
   def apply[Effect[_]](
-    handler: Handler.AnyCodec[Effect, Context],
+    handler: Types.HandlerAnyCodec[Effect, Context],
     runEffect: Effect[Any] => Unit,
     next: HttpHandler
   ): WebSocketProtocolHandshakeHandler = {
@@ -67,11 +67,12 @@ object UndertowWebSocketEndpoint {
  * @tparam Effect effect type
  */
 final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
-  handler: Handler.AnyCodec[Effect, Context],
+  handler: Types.HandlerAnyCodec[Effect, Context],
   runEffect: Effect[Any] => Any
 ) extends WebSocketConnectionCallback with AutoCloseable with Logging with EndpointMessageTransport {
 
-  private val system = handler.system
+  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
+  private val system = genericHandler.system
 
   override def onConnect(exchange: WebSocketHttpExchange, channel: WebSocketChannel): Unit = {
     val receiveListener = new AbstractReceiveListener {
@@ -94,16 +95,16 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         discardMessage: () => Unit
       ): Unit = {
         val requestId = Random.id
-        lazy val requestDetails = requestProperties(exchange, request, requestId)
+        lazy val requestDetails = requestProperties(exchange, requestId)
         logger.debug("Received WebSocket request", requestDetails)
 
         // Process the request
         implicit val usingContext: Context = createContext(exchange)
         runEffect(system.map(
-          system.either(handler.processRequest(request, requestId)),
+          system.either(genericHandler.processRequest(request, requestId)),
           (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
             handlerResult.fold(
-              error => sendServerError(error, exchange, channel, request, requestId, requestDetails),
+              error => sendServerError(error, exchange, channel, requestId, requestDetails),
               result => {
                 // Send the response
                 val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
@@ -119,7 +120,6 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         error: Throwable,
         exchange: WebSocketHttpExchange,
         channel: WebSocketChannel,
-        request: ArraySeq.ofByte,
         requestId: String,
         requestDetails: => Map[String, String]
       ): Unit = {
@@ -161,7 +161,6 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
 
       private def requestProperties(
         exchange: WebSocketHttpExchange,
-        request: ArraySeq.ofByte,
         requestId: String
       ): Map[String, String] = Map(
         LogProperties.requestId -> requestId,

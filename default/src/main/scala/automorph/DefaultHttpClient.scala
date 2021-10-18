@@ -41,7 +41,7 @@ object DefaultHttpClient {
     backend: SttpBackend[Effect, _],
     system: EffectSystem[Effect],
     webSocket: Boolean = false
-  ): Type[Effect] = DefaultClient(DefaultHttpClientTransport(url, method, backend, system))
+  ): Type[Effect] = DefaultClient(DefaultHttpClientTransport(url, method, backend, system, webSocket))
 
   /**
    * Creates an asynchronous JSON-RPC over STTP HTTP & WebSocket client using 'Future' as an effect type.
@@ -59,7 +59,8 @@ object DefaultHttpClient {
    */
   def async(url: URI, method: String, webSocket: Boolean = false)(implicit
     executionContext: ExecutionContext
-  ): Type[Future] = DefaultHttpClient(url, method, AsyncHttpClientFutureBackend(), DefaultEffectSystem.async)
+  ): Type[Future] =
+    DefaultHttpClient(url, method, AsyncHttpClientFutureBackend(), DefaultEffectSystem.async, webSocket)
 
   /**
    * Creates a synchronous JSON-RPC over STTP HTTP & WebSocket client using identity as an effect type.
@@ -76,6 +77,6 @@ object DefaultHttpClient {
    */
   def sync(url: URI, method: String, webSocket: Boolean = false): Type[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
-    DefaultHttpClient(url, method, HttpURLConnectionBackend(), DefaultEffectSystem.sync)
+    DefaultHttpClient(url, method, HttpURLConnectionBackend(), DefaultEffectSystem.sync, webSocket)
   }
 }

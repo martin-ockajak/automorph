@@ -1,6 +1,6 @@
 package automorph.transport.http.server
 
-import automorph.Handler
+import automorph.Types
 import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.Http
@@ -35,7 +35,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @tparam Effect effect type
  */
 final case class UndertowServer[Effect[_]](
-  handler: Handler.AnyCodec[Effect, Context],
+  handler: Types.HandlerAnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
   port: Int,
   path: String = "/",
@@ -45,8 +45,10 @@ final case class UndertowServer[Effect[_]](
 ) extends Logging with ServerMessageTransport[Effect] {
 
   private val undertow = start()
+  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
+  private val system = genericHandler.system
 
-  override def close(): Effect[Unit] = handler.system.wrap(undertow.stop())
+  override def close(): Effect[Unit] = system.wrap(undertow.stop())
 
   private def start(): Undertow = {
     // Configure the request handler
