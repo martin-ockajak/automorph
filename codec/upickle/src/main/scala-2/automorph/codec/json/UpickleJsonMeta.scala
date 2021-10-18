@@ -13,15 +13,15 @@ import ujson.Value
 trait UpickleJsonMeta[Custom <: UpickleJsonCustom] extends MessageCodec[Value] {
 
   override def encode[T](value: T): Value =
-    macro UpickleJsonMeta.encode[T]
+    macro UpickleJsonMeta.encodeMacro[T]
 
   override def decode[T](node: Value): T =
-    macro UpickleJsonMeta.decode[T]
+    macro UpickleJsonMeta.decodeMacro[T]
 }
 
 object UpickleJsonMeta {
 
-  def encode[T: c.WeakTypeTag](c: blackbox.Context)(value: c.Expr[T]): c.Expr[Value] = {
+  def encodeMacro[T: c.WeakTypeTag](c: blackbox.Context)(value: c.Expr[T]): c.Expr[Value] = {
     import c.universe.Quasiquote
 
     c.Expr[Value](q"""
@@ -29,7 +29,7 @@ object UpickleJsonMeta {
     """)
   }
 
-  def decode[T: c.WeakTypeTag](c: blackbox.Context)(node: c.Expr[Value]): c.Expr[T] = {
+  def decodeMacro[T: c.WeakTypeTag](c: blackbox.Context)(node: c.Expr[Value]): c.Expr[T] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[T](q"""

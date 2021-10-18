@@ -13,15 +13,15 @@ import upack.Msg
 trait UpickleMessagePackMeta[Custom <: UpickleMessagePackCustom] extends MessageCodec[Msg] {
 
   override def encode[T](value: T): Msg =
-    macro UpickleMessagePackMeta.encode[T]
+    macro UpickleMessagePackMeta.encodeMacro[T]
 
   override def decode[T](node: Msg): T =
-    macro UpickleMessagePackMeta.decode[T]
+    macro UpickleMessagePackMeta.decodeMacro[T]
 }
 
 object UpickleMessagePackMeta {
 
-  def encode[T](c: blackbox.Context)(value: c.Expr[T]): c.Expr[Msg] = {
+  def encodeMacro[T](c: blackbox.Context)(value: c.Expr[T]): c.Expr[Msg] = {
     import c.universe.Quasiquote
 
     c.Expr[Msg](q"""
@@ -29,7 +29,7 @@ object UpickleMessagePackMeta {
     """)
   }
 
-  def decode[T: c.WeakTypeTag](c: blackbox.Context)(node: c.Expr[Msg]): c.Expr[T] = {
+  def decodeMacro[T: c.WeakTypeTag](c: blackbox.Context)(node: c.Expr[Msg]): c.Expr[T] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[T](q"""
