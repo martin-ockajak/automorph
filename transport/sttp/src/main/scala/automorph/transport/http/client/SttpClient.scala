@@ -32,7 +32,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
 final case class SttpClient[Effect[_]](
   url: URI,
   method: String,
-  backend: SttpBackend[Effect, WebSocket[Effect]],
+  backend: SttpBackend[Effect, _],
   system: EffectSystem[Effect],
   webSocket: Boolean = false
 ) extends ClientMessageTransport[Effect, Context] with Logging {
@@ -94,7 +94,7 @@ final case class SttpClient[Effect[_]](
     )
     logger.trace(s"Sending $protocol httpRequest", requestProperties)
     system.flatMap(
-      system.either(httpRequest.send(backend)),
+      system.either(httpRequest.send(backend.asInstanceOf[SttpBackend[Effect, WebSocket[Effect]]])),
       (result: Either[Throwable, Response[R]]) =>
         result.fold(
           error => {
