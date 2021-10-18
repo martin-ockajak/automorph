@@ -2,7 +2,7 @@
 
 Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
-* [Scaladoc](https://www.javadoc.io/doc/org.automorph/automorph-core_2.13/latest/)
+* [Scaladoc](https://www.javadoc.io/doc/org.automorph/automorph-core_3.0.0/latest/)
 
 ## Build
 

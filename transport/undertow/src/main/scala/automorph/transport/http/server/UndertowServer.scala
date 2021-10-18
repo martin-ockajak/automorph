@@ -52,7 +52,7 @@ final case class UndertowServer[Effect[_]](
 
   private def start(): Undertow = {
     // Configure the request handler
-    val httpHandler = UndertowHttpEndpoint(handler, runEffect, exceptionToStatusCode)
+    val httpHandler = UndertowHttpEndpoint.create(handler)(runEffect, exceptionToStatusCode)
     val webSocketHandler = if (webSocket) {
       UndertowWebSocketEndpoint(handler, runEffect, httpHandler)
     } else {
