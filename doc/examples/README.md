@@ -286,7 +286,7 @@ libraryDependencies ++= Seq(
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.transport.http.Http
 import automorph.transport.http.client.SttpClient.defaultContext
-import automorph.{Client, DefaultEffectSystem, DefaultHttpClient, DefaultHttpServer, DefaultRpcProtocol, Handler}
+import automorph.{Client, DefaultEffectSystem, DefaultHttpServer, DefaultRpcProtocol, Handler}
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -624,7 +624,7 @@ val api = new Api()
 ```scala
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val handler = DefaultHandler.async[UndertowHttpEndpoint.Context]
-val endpoint = UndertowHttpEndpoint(handler.bind(api), identity)
+val endpoint = UndertowHttpEndpoint(handler.bind(api), (_: Future[Any]) => ())
 val server = Undertow.builder()
   .addHttpListener(80, "0.0.0.0")
   .setHandler(Handlers.path().addPrefixPath("/api", endpoint))

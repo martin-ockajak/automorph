@@ -2,7 +2,7 @@ package test.examples
 
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.transport.http.Http
-import automorph.{Client, DefaultEffectSystem, DefaultHttpClient, DefaultHttpClientTransport, DefaultHttpServer, DefaultRpcProtocol, Handler}
+import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, DefaultRpcProtocol, Handler}
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
