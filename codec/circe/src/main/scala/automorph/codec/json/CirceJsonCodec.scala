@@ -1,6 +1,7 @@
 package automorph.codec.json
 
-import io.circe.{parser, Decoder, Encoder, Json}
+import automorph.protocol.jsonrpc.Message
+import io.circe.{Decoder, Encoder, Json, parser}
 import java.nio.charset.StandardCharsets
 import scala.collection.immutable.ArraySeq
 

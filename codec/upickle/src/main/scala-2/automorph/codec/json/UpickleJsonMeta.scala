@@ -25,6 +25,7 @@ object UpickleJsonMeta {
     import c.universe.Quasiquote
 
     c.Expr[Value](q"""
+      import ${c.prefix}.custom._
       ${c.prefix}.custom.writeJs($value)
     """)
   }
@@ -33,6 +34,7 @@ object UpickleJsonMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[T](q"""
+      import ${c.prefix}.custom._
       ${c.prefix}.custom.read[${weakTypeOf[T]}]($node)
     """)
   }
