@@ -465,7 +465,7 @@ val system = DefaultEffectSystem.async
 
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val handler = Handler.protocol(protocol).system(system).context[DefaultHttpServer.Context]
-val server = DefaultHttpServer(handler.bind(api), identity, 80, "/api")
+val server = DefaultHttpServer(handler.bind(api), (_: Future[Any]) => (), 80, "/api")
 
 // Stop the server
 server.close()

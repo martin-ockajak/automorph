@@ -8,7 +8,6 @@ import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
 import automorph.spi.protocol.{RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
-import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
 
 /**

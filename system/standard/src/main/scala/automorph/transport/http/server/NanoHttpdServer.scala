@@ -137,7 +137,7 @@ object NanoHttpdServer {
   /** Request context type. */
   type Context = Http[_]
 
-  /** Request type. */
+  /** Response type. */
   type Response = automorph.transport.http.server.NanoHTTPD.Response
 
   /**
