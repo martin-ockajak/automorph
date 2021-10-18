@@ -25,7 +25,7 @@ object UpickleJsonMeta {
     import c.universe.Quasiquote
 
     c.Expr[Value](q"""
-      import ${c.prefix}.custom._
+      import ${c.prefix}.custom.NoneWriter
       ${c.prefix}.custom.writeJs($value)
     """)
   }

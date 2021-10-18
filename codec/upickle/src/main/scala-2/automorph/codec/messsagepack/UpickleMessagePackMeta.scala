@@ -25,7 +25,7 @@ object UpickleMessagePackMeta {
     import c.universe.Quasiquote
 
     c.Expr[Msg](q"""
-      import ${c.prefix}.custom._
+      import ${c.prefix}.custom.NoneWriter
       ${c.prefix}.custom.writeMsg($value)
     """)
   }

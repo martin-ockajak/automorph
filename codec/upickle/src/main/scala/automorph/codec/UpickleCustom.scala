@@ -1,20 +1,24 @@
 package automorph.codec
 
 import upickle.AttributeTagged
-import upickle.core.{Abort, Util}
+import upickle.core.{Abort, Util, Visitor}
 
 /**
  * Basic null-safe data types support for uPickle message codec.
  */
 trait UpickleCustom extends AttributeTagged {
 
-  implicit override def OptionWriter[T: Writer]: Writer[Option[T]] =
-    implicitly[Writer[T]].comap[Option[T]](_.getOrElse(null.asInstanceOf[T]))
+  implicit override val NoneWriter: Writer[None.type] = new Writer[None.type] {
+    def write0[R](out: Visitor[_, R], v: None.type ): R = out.visitNull(-1)
+  }
 
-  implicit override def OptionReader[T: Reader]: Reader[Option[T]] =
-    new Reader.Delegate[Any, Option[T]](implicitly[Reader[T]].map(Some(_))) {
-      override def visitNull(index: Int): Option[T] = None
-    }
+//  implicit override def OptionWriter[T: Writer]: Writer[Option[T]] =
+//    implicitly[Writer[T]].comap[Option[T]](_.getOrElse(null.asInstanceOf[T]))
+//
+//  implicit override def OptionReader[T: Reader]: Reader[Option[T]] =
+//    new Reader.Delegate[Any, Option[T]](implicitly[Reader[T]].map(Some(_))) {
+//      override def visitNull(index: Int): Option[T] = None
+//    }
 
   implicit override val BooleanReader: Reader[Boolean] = new SimpleReader[Boolean] {
 
