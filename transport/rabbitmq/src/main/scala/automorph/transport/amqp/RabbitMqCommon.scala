@@ -85,13 +85,13 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @tparam Source properties source type
    * @return request context
    */
-  def context(properties: BasicProperties): Amqp[BasicProperties] =
+  def context(properties: BasicProperties): Amqp[RabbitMqContext] = {
     Amqp(
       contentType = Option(properties.getContentType),
       contentEncoding = Option(properties.getContentEncoding),
       headers = Option(properties.getHeaders).map(headers => Map.from(headers.asScala)).getOrElse(Map.empty),
-      deliveryMode = Option(properties.getDeliveryMode),
-      priority = Option(properties.getPriority),
+      deliveryMode = Option(properties.getDeliveryMode.toInt),
+      priority = Option(properties.getPriority.toInt),
       correlationId = Option(properties.getCorrelationId),
       replyTo = Option(properties.getReplyTo),
       expiration = Option(properties.getExpiration),
@@ -100,8 +100,9 @@ private[automorph] object RabbitMqCommon extends Logging {
       `type` = Option(properties.getType),
       userId = Option(properties.getUserId),
       appId = Option(properties.getAppId),
-      base = Some(properties)
+      base = Some(RabbitMqContext(properties))
     )
+  }
 
   /**
    * Assemble message properties.
@@ -125,3 +126,9 @@ private[automorph] object RabbitMqCommon extends Logging {
 }
 
 final case class RabbitMqContext(properties: BasicProperties)
+
+object RabbitMqContext {
+
+  /** Implicit default context value. */
+  implicit val default: Amqp[RabbitMqContext] = Amqp()
+}

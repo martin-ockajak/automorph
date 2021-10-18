@@ -157,5 +157,5 @@ final case class SttpContext(request: PartialRequest[Either[String, String], Any
 
 object SttpContext {
   /** Implicit default context value. */
-  implicit val default: Context = Http()
+  implicit val default: Http[SttpContext] = Http()
 }

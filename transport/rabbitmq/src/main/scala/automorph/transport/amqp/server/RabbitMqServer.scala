@@ -4,14 +4,12 @@ import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
-import automorph.transport.amqp.client.RabbitMqContext
 import automorph.transport.amqp.{Amqp, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import automorph.util.{Bytes, Random}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{AMQP, Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
-import scala.concurrent.ExecutionContext
 import scala.util.Try
 
 /**
@@ -40,15 +38,14 @@ final case class RabbitMqServer[Effect[_]](
   queues: Seq[String],
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
-)(implicit executionContext: ExecutionContext)
-  extends Logging with ServerMessageTransport[Effect] {
+) extends Logging with ServerMessageTransport[Effect] {
 
   private lazy val connection = createConnection()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
   private val urlText = url.toURL.toExternalForm
   private val exchange = RabbitMqCommon.defaultDirectExchange
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
+  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, RabbitMqServer.Context]]
   private val system = genericHandler.system
 
   override def close(): Effect[Unit] = system.wrap(connection.abort(AMQP.CONNECTION_FORCED, "Terminated"))
@@ -68,8 +65,7 @@ final case class RabbitMqServer[Effect[_]](
         logger.debug("Received AMQP request", requestProperties)
 
         // Process the request
-        implicit val usingContext: Amqp[BasicProperties] = RabbitMqCommon.context(amqpProperties)
-        val replyTo = Option(amqpProperties.getReplyTo)
+        implicit val usingContext: RabbitMqServer.Context = RabbitMqCommon.context(amqpProperties)
         runEffect(system.map(
           system.either(genericHandler.processRequest(body, requestId)),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
@@ -82,6 +78,7 @@ final case class RabbitMqServer[Effect[_]](
               }
             )
         ))
+        ()
       }
     }
     queues.foreach { queue =>

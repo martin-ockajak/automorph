@@ -152,5 +152,5 @@ final case class HttpUrlConnectionContext(connection: HttpURLConnection)
 
 object HttpUrlConnectionContext {
   /** Implicit default context value. */
-  implicit val default: Context = Http()
+  implicit val default: Http[HttpUrlConnectionContext] = Http()
 }

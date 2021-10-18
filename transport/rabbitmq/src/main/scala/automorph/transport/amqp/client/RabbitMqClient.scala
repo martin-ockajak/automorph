@@ -195,12 +195,3 @@ object RabbitMqClient {
     )
   }
 }
-
-object RabbitMqContext {
-
-  /** Request context type. */
-  type Context = Amqp[RabbitMqContext]
-
-  /** Implicit default context value. */
-  implicit val default: Context = Amqp()
-}
