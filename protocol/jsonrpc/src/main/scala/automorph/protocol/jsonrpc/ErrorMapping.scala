@@ -5,7 +5,7 @@ import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorE
 import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException}
 
 /** JSON-RPC protocol errors. */
-private[automorph] trait ErrorMapping {
+private[automorph] object ErrorMapping {
 
   /**
    * Maps a JSON-RPC error to a corresponding default exception.

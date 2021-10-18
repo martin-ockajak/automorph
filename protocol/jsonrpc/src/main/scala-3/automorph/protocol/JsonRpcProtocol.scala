@@ -1,6 +1,5 @@
 package automorph.protocol
 
-import automorph.protocol.JsonRpcProtocol.{defaultErrorToException, defaultExceptionToError}
 import automorph.protocol.jsonrpc.{ErrorMapping, ErrorType, JsonRpcCore, Message}
 import automorph.spi.{MessageCodec, RpcProtocol}
 
@@ -29,7 +28,7 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
   protected val encodeStrings: List[String] => Node
 ) extends JsonRpcCore[Node, Codec] with RpcProtocol[Node, Codec]
 
-object JsonRpcProtocol extends ErrorMapping:
+object JsonRpcProtocol:
 
   /**
    * Creates a JSON-RPC protocol plugin.
@@ -45,8 +44,8 @@ object JsonRpcProtocol extends ErrorMapping:
    */
   inline def apply[Node, Codec <: MessageCodec[Node]](
     codec: Codec,
-    errorToException: (String, Int) => Throwable = defaultErrorToException,
-    exceptionToError: Throwable => ErrorType = defaultExceptionToError,
+    errorToException: (String, Int) => Throwable = ErrorMapping.defaultErrorToException,
+    exceptionToError: Throwable => ErrorType = ErrorMapping.defaultExceptionToError,
     argumentsByName: Boolean = true
   ): JsonRpcProtocol[Node, Codec] =
     val encodeMessage = (message: Message[Node]) => codec.encode[Message[Node]](message)

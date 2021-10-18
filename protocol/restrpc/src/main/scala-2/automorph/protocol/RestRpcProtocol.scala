@@ -23,8 +23,8 @@ import scala.reflect.macros.blackbox
  */
 final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
   codec: Codec,
-  errorToException: (String, Option[Int]) => Throwable,
-  exceptionToError: Throwable => Option[Int],
+  errorToException: (String, Option[Int]) => Throwable = ErrorMapping.defaultErrorToException,
+  exceptionToError: Throwable => Option[Int] = ErrorMapping.defaultExceptionToError,
   protected val encodeRequest: Message.Request[Node] => Node,
   protected val decodeRequest: Node => Message.Request[Node],
   protected val encodeResponse: Message[Node] => Node,
@@ -32,7 +32,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
   protected val encodeStrings: List[String] => Node
 ) extends RestRpcCore[Node, Codec] with RpcProtocol[Node, Codec]
 
-object RestRpcProtocol extends ErrorMapping {
+object RestRpcProtocol {
 
   /**
    * Creates a REST-RPC protocol plugin.
@@ -47,10 +47,22 @@ object RestRpcProtocol extends ErrorMapping {
    */
   def apply[Node, Codec <: MessageCodec[Node]](
     codec: Codec,
-    errorToException: (String, Option[Int]) => Throwable = defaultErrorToException,
-    exceptionToError: Throwable => Option[Int] = defaultExceptionToError
+    errorToException: (String, Option[Int]) => Throwable,
+    exceptionToError: Throwable => Option[Int]
   ): RestRpcProtocol[Node, Codec] =
     macro applyMacro[Node, Codec]
+
+  /**
+   * Creates a REST-RPC protocol plugin.
+   *
+   * @see [[https://www.jsonrpc.org/specification REST-RPC protocol specification]]
+   * @param codec message codec plugin
+   * @tparam Node message node type
+   * @tparam Codec message codec plugin type
+   * @return REST-RPC protocol plugin
+   */
+  def apply[Node, Codec <: MessageCodec[Node]](codec: Codec): RestRpcProtocol[Node, Codec] =
+    macro applyDefaultsMacro[Node, Codec]
 
   def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](c: blackbox.Context)(
     codec: c.Expr[Codec],
@@ -62,14 +74,32 @@ object RestRpcProtocol extends ErrorMapping {
 
     c.Expr[Any](q"""
       new automorph.protocol.RestRpcProtocol(
-        $codec,
-        $errorToException,
-        $exceptionToError,
-        request => $codec.encode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](request),
-        node => $codec.decode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](node),
-        response => $codec.encode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](response),
-        node => $codec.decode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](node),
-        value => $codec.encode[List[String]](value)
+        codec = $codec,
+        errorToException = $errorToException,
+        exceptionToError = $exceptionToError,
+        encodeRequest = request => $codec.encode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](request),
+        decodeRequest = node => $codec.decode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](node),
+        encodeResponse = response => $codec.encode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](response),
+        decodeResponse = node => $codec.decode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](node),
+        encodeString = value => $codec.encode[List[String]](value)
+      )
+    """).asInstanceOf[c.Expr[RestRpcProtocol[Node, Codec]]]
+  }
+
+  def applyDefaultsMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](c: blackbox.Context)(
+    codec: c.Expr[Codec]
+  ): c.Expr[RestRpcProtocol[Node, Codec]] = {
+    import c.universe.{Quasiquote, weakTypeOf}
+    Seq(weakTypeOf[Node], weakTypeOf[Codec])
+
+    c.Expr[Any](q"""
+      new automorph.protocol.RestRpcProtocol(
+        codec = $codec,
+        encodeRequest = request => $codec.encode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](request),
+        decodeRequest = node => $codec.decode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](node),
+        encodeResponse = response => $codec.encode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](response),
+        decodeResponse = node => $codec.decode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](node),
+        encodeString = value => $codec.encode[List[String]](value)
       )
     """).asInstanceOf[c.Expr[RestRpcProtocol[Node, Codec]]]
   }

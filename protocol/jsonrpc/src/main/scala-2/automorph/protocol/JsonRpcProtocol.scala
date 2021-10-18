@@ -22,15 +22,15 @@ import scala.reflect.macros.blackbox
  */
 final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
   codec: Codec,
-  errorToException: (String, Int) => Throwable,
-  exceptionToError: Throwable => ErrorType,
-  argumentsByName: Boolean,
+  errorToException: (String, Int) => Throwable = ErrorMapping.defaultErrorToException,
+  exceptionToError: Throwable => ErrorType = ErrorMapping.defaultExceptionToError,
+  argumentsByName: Boolean = true,
   protected val encodeMessage: Message[Node] => Node,
   protected val decodeMessage: Node => Message[Node],
   protected val encodeStrings: List[String] => Node
 ) extends JsonRpcCore[Node, Codec] with RpcProtocol[Node, Codec]
 
-object JsonRpcProtocol extends ErrorMapping {
+object JsonRpcProtocol {
   /**
    * Creates a JSON-RPC protocol plugin.
    *
@@ -45,11 +45,23 @@ object JsonRpcProtocol extends ErrorMapping {
    */
   def apply[Node, Codec <: MessageCodec[Node]](
     codec: Codec,
-    errorToException: (String, Int) => Throwable = defaultErrorToException,
-    exceptionToError: Throwable => ErrorType = defaultExceptionToError,
-    argumentsByName: Boolean = true
+    errorToException: (String, Int) => Throwable,
+    exceptionToError: Throwable => ErrorType,
+    argumentsByName: Boolean
   ): JsonRpcProtocol[Node, Codec] =
     macro applyMacro[Node, Codec]
+
+  /**
+   * Creates a JSON-RPC protocol plugin.
+   *
+   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+   * @param codec message codec plugin
+   * @tparam Node message node type
+   * @tparam Codec message codec plugin type
+   * @return JSON-RPC protocol plugin
+   */
+  def apply[Node, Codec <: MessageCodec[Node]](codec: Codec): JsonRpcProtocol[Node, Codec] =
+    macro applyDefaultsMacro[Node, Codec]
 
   def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](c: blackbox.Context)(
     codec: c.Expr[Codec],
@@ -62,13 +74,26 @@ object JsonRpcProtocol extends ErrorMapping {
 
     c.Expr[Any](q"""
       new automorph.protocol.JsonRpcProtocol(
-        $codec,
-        $errorToException,
-        $exceptionToError,
-        $argumentsByName,
-        message => $codec.encode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](message),
-        node => $codec.decode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](node),
-        value => $codec.encode[List[String]](value)
+        codec = $codec,
+        errorToException = $errorToException,
+        exceptionToError = $exceptionToError,
+        argumentsByName = $argumentsByName,
+      )
+    """).asInstanceOf[c.Expr[JsonRpcProtocol[Node, Codec]]]
+  }
+
+  def applyDefaultsMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](c: blackbox.Context)(
+    codec: c.Expr[Codec]
+  ): c.Expr[JsonRpcProtocol[Node, Codec]] = {
+    import c.universe.{Quasiquote, weakTypeOf}
+    Seq(weakTypeOf[Node], weakTypeOf[Codec])
+
+    c.Expr[Any](q"""
+      new automorph.protocol.JsonRpcProtocol(
+        codec = $codec,
+        encodeMessage = message => $codec.encode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](message),
+        decodeMessage = node => $codec.decode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](node),
+        encodeStrings = value => $codec.encode[List[String]](value)
       )
     """).asInstanceOf[c.Expr[JsonRpcProtocol[Node, Codec]]]
   }
