@@ -30,7 +30,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
   protected val encodeStrings: List[String] => Node
 ) extends RestRpcCore[Node, Codec] with RpcProtocol[Node, Codec]
 
-object RestRpcProtocol:
+object RestRpcProtocol extends ErrorMapping:
 
   /**
    * Creates a REST-RPC protocol plugin.
@@ -45,8 +45,8 @@ object RestRpcProtocol:
    */
   inline def apply[Node, Codec <: MessageCodec[Node]](
     codec: Codec,
-    errorToException: (String, Option[Int]) => Throwable = ErrorMapping.defaultErrorToException,
-    exceptionToError: Throwable => Option[Int] = ErrorMapping.defaultExceptionToError
+    errorToException: (String, Option[Int]) => Throwable = defaultErrorToException,
+    exceptionToError: Throwable => Option[Int] = defaultExceptionToError
   ): RestRpcProtocol[Node, Codec] =
     val encodeRequest = (request: Message.Request[Node]) => codec.encode[Message.Request[Node]](request)
     val decodeRequest = (node: Node) => codec.decode[Message.Request[Node]](node)

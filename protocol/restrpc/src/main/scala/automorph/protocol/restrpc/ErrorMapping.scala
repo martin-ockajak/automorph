@@ -1,6 +1,6 @@
 package automorph.protocol.restrpc
 
-private[automorph] object ErrorMapping {
+private[automorph] trait ErrorMapping {
 
   /**
    * Maps a REST-RPC error to a corresponding default exception.

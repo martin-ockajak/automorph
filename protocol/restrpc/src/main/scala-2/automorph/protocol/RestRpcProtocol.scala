@@ -23,8 +23,8 @@ import scala.reflect.macros.blackbox
  */
 final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
   codec: Codec,
-  errorToException: (String, Option[Int]) => Throwable = ErrorMapping.defaultErrorToException,
-  exceptionToError: Throwable => Option[Int] = ErrorMapping.defaultExceptionToError,
+  errorToException: (String, Option[Int]) => Throwable = RestRpcProtocol.defaultErrorToException,
+  exceptionToError: Throwable => Option[Int] = RestRpcProtocol.defaultExceptionToError,
   protected val encodeRequest: Message.Request[Node] => Node,
   protected val decodeRequest: Node => Message.Request[Node],
   protected val encodeResponse: Message[Node] => Node,
@@ -32,7 +32,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
   protected val encodeStrings: List[String] => Node
 ) extends RestRpcCore[Node, Codec] with RpcProtocol[Node, Codec]
 
-object RestRpcProtocol {
+object RestRpcProtocol extends ErrorMapping {
 
   /**
    * Creates a REST-RPC protocol plugin.

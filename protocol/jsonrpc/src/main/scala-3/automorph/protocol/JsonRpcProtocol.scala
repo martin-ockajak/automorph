@@ -28,7 +28,7 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
   protected val encodeStrings: List[String] => Node
 ) extends JsonRpcCore[Node, Codec] with RpcProtocol[Node, Codec]
 
-object JsonRpcProtocol:
+object JsonRpcProtocol extends ErrorMapping:
 
   /**
    * Creates a JSON-RPC protocol plugin.
@@ -44,8 +44,8 @@ object JsonRpcProtocol:
    */
   inline def apply[Node, Codec <: MessageCodec[Node]](
     codec: Codec,
-    errorToException: (String, Int) => Throwable = ErrorMapping.defaultErrorToException,
-    exceptionToError: Throwable => ErrorType = ErrorMapping.defaultExceptionToError,
+    errorToException: (String, Int) => Throwable = defaultErrorToException,
+    exceptionToError: Throwable => ErrorType = defaultExceptionToError,
     argumentsByName: Boolean = true
   ): JsonRpcProtocol[Node, Codec] =
     val encodeMessage = (message: Message[Node]) => codec.encode[Message[Node]](message)
