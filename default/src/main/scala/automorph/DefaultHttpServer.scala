@@ -5,23 +5,17 @@ import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.Http
 import automorph.transport.http.server.UndertowServer.defaultBuilder
 import automorph.transport.http.server.UndertowServer
-import automorph.spi.EffectSystem
+import automorph.spi.{EffectSystem, MessageCodec}
+import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
 import scala.concurrent.{ExecutionContext, Future}
 
 object DefaultHttpServer {
 
   /** Default server type. */
-  type Type[Effect[_]] = UndertowServer[Effect]
+  type Type[Node, Codec <: MessageCodec[Node], Effect[_]] = UndertowServer[Node, Codec, Effect]
 
   /** Request context type. */
   type Context = UndertowServer.Context
-
-  /**
-   * Default server RPC request handler type.
-   *
-   * @tparam Effect effect type
-   */
-  type Handler[Effect[_]] = DefaultHandler.Type[Effect, Context]
 
   /**
    * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
@@ -40,18 +34,20 @@ object DefaultHttpServer {
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
+   * @tparam Node message node type
+   * @tparam Codec message codec plugin type
    * @tparam Effect effect type
    * @return RPC server
    */
-  def apply[Effect[_]](
-    handler: Handler.AnyCodec[Effect, Context],
+  def apply[Node, Codec <: MessageCodec[Node], Effect[_]](
+    handler: Handler[Node, Codec, Effect, Context],
     runEffect: Effect[Any] => Unit,
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): Type[Effect] = UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
+  ): Type[Node, Codec, Effect] = UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
 
   /**
    * Creates an Undertow JSON-RPC over HTTP & WebSocket server with specified effect system plugin.
@@ -77,13 +73,13 @@ object DefaultHttpServer {
   def system[Effect[_]](
     system: EffectSystem[Effect],
     runEffect: Effect[Any] => Unit,
-    bindApis: Handler[Effect] => Handler[Effect],
+    bindApis: DefaultHandler.Type[Effect, Context] => DefaultHandler.Type[Effect, Context],
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): Type[Effect] = {
+  ): Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Effect] = {
     val handler = bindApis(Handler.protocol(DefaultRpcProtocol()).system(system).context[DefaultHttpServer.Context])
     DefaultHttpServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
   }
@@ -108,13 +104,13 @@ object DefaultHttpServer {
    * @return asynchronous RPC server
    */
   def async(
-    bindApis: Handler[Future] => Handler[Future],
+    bindApis: DefaultHandler.Type[Future, Context] => DefaultHandler.Type[Future, Context],
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  )(implicit executionContext: ExecutionContext): Type[Future] = {
+  )(implicit executionContext: ExecutionContext): Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Future] = {
     Seq(executionContext)
     val handler = bindApis(DefaultHandler.async)
     val runEffect = (_: Future[Any]) => ()
@@ -140,13 +136,13 @@ object DefaultHttpServer {
    * @return synchronous RPC server
    */
   def sync(
-    bindApis: Handler[Identity] => Handler[Identity],
+    bindApis: DefaultHandler.Type[Identity, Context] => DefaultHandler.Type[Identity, Context],
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): Type[Identity] = {
+  ): Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type, Identity] = {
     val handler = bindApis(DefaultHandler.sync)
     val runEffect = (_: Identity[Any]) => ()
     DefaultHttpServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)

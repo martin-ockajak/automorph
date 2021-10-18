@@ -2,6 +2,7 @@ package automorph.transport.http.server
 
 import automorph.Handler
 import automorph.log.Logging
+import automorph.spi.MessageCodec
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
@@ -32,10 +33,12 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
  * @param builder Undertow web server builder
+ * @tparam Node message node type
+ * @tparam Codec message codec plugin type
  * @tparam Effect effect type
  */
-final case class UndertowServer[Effect[_]](
-  handler: Handler.AnyCodec[Effect, Context],
+final case class UndertowServer[Node, Codec <: MessageCodec[Node], Effect[_]](
+  handler: Handler[Node, Codec, Effect, Context],
   runEffect: Effect[Any] => Unit,
   port: Int,
   path: String = "/",
