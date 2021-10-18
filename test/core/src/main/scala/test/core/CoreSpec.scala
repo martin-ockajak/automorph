@@ -1,8 +1,8 @@
 package test.core
 
-import automorph.{Client, Handler}
-import automorph.spi.EffectSystem
+import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException, InvalidResponseException}
+import automorph.{Client, Handler}
 import org.scalacheck.Arbitrary
 import scala.util.{Failure, Success, Try}
 import test.Generators.arbitraryRecord
@@ -24,9 +24,9 @@ trait CoreSpec extends BaseSpec {
   type ComplexApiType = ComplexApi[Effect, Context]
   type InvalidApiType = InvalidApi[Effect]
 
-  case class TestFixture(
-    client: Client.AnyCodec[Effect, Context],
-    handler: Handler.AnyCodec[Effect, Context],
+  case class TestFixture[Node, Codec <: MessageCodec[Node]](
+    client: Client[Node, Codec, Effect, Context],
+    handler: Handler[Node, Codec, Effect, Context],
     serverPort: Int,
     simpleApi: SimpleApiType,
     complexApi: ComplexApiType,
@@ -45,7 +45,7 @@ trait CoreSpec extends BaseSpec {
 
   def run[T](effect: Effect[T]): T
 
-  def fixtures: Seq[TestFixture]
+  def fixtures: Seq[TestFixture[_, _]]
 
   "" - {
 // FIXME - restore
