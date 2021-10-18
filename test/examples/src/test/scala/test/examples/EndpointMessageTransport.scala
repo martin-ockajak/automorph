@@ -17,7 +17,7 @@ object EndpointMessageTransport extends App {
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
   val handler = DefaultHandler.async[UndertowHttpEndpoint.Context]
-  val endpoint = UndertowHttpEndpoint.create(handler.bind(api))(_ => ())
+  val endpoint = UndertowHttpEndpoint(handler.bind(api), _ => ())
   val server = Undertow.builder()
     .addHttpListener(80, "0.0.0.0")
     .setHandler(Handlers.path().addPrefixPath("/api", endpoint))

@@ -32,7 +32,7 @@ import scala.util.Try
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @tparam Effect effect type
  */
-final case class UndertowHttpEndpoint[Effect[_]] private (
+final case class UndertowHttpEndpoint[Effect[_]] (
   handler: Types.HandlerAnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
