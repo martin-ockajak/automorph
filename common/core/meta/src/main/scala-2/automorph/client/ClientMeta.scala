@@ -6,7 +6,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /**
- * Client method bindings code generation.
+ * Client function bindings code generation.
  *
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
@@ -17,21 +17,21 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
   this: Client[Node, Codec, Effect, Context] =>
 
   /**
-   * Creates a remote API proxy instance with RPC bindings for all valid public methods of the specified API type.
+   * Creates a remote API proxy instance with RPC bindings for all valid public functions of the specified API type.
    *
-   * An API method is considered valid if it satisfies all of these conditions:
+   * An API function is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
    * - has no type parameters
    * - returns the specified effect type
    * - (if request context type is not Context.Empty) accepts the specified request context type as its last parameter
    *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting o
+   * If a bound function definition contains a last parameter of `Context` type or returns a context function accepting o
    * ne
    * the caller-supplied request context is passed to the underlying message transport plugin.
    *
    * @tparam Api API trait type (classes are not supported)
    * @return remote API proxy instance
-   * @throws IllegalArgumentException if invalid public methods are found in the API type
+   * @throws IllegalArgumentException if invalid public functions are found in the API type
    */
   def bind[Api <: AnyRef]: Api = macro ClientMeta.bindMacro[Node, Codec, Effect, Context, Api]
 }
@@ -52,8 +52,8 @@ object ClientMeta {
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Api](q"""
-      // Generate API method bindings
-      val methodBindings = automorph.client.ClientGenerator
+      // Generate API function bindings
+      val functionBindings = automorph.client.ClientGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec).map { binding =>
           binding.function.name -> binding
         }.toMap
@@ -62,10 +62,10 @@ object ClientMeta {
       java.lang.reflect.Proxy.newProxyInstance(
         getClass.getClassLoader,
         Array(classOf[$apiType]),
-        (_, method, arguments) =>
-          // Lookup bindings for the specified method
-          methodBindings.get(method.getName).map { clientBinding =>
-            // Adjust expected method parameters if it uses context as its last parameter
+        (_, function, arguments) =>
+          // Lookup bindings for the specified function
+          functionBindings.get(function.getName).map { clientBinding =>
+            // Adjust expected function parameters if it uses context as its last parameter
             val callArguments = Option(arguments).getOrElse(Array.empty[AnyRef])
             val (argumentValues, context) =
               if (clientBinding.usesContext && callArguments.nonEmpty) {
@@ -74,14 +74,14 @@ object ClientMeta {
                 callArguments.toSeq -> None
               }
 
-            // Encode method arguments
+            // Encode function arguments
             val encodedArguments = clientBinding.encodeArguments(argumentValues)
-            val parameterNames = clientBinding.method.parameters.map(_.name)
+            val parameterNames = clientBinding.function.parameters.map(_.name)
 
             // Perform the API call
-            ${c.prefix}.call(method.getName, parameterNames, encodedArguments, resultNode =>
+            ${c.prefix}.call(function.getName, parameterNames, encodedArguments, resultNode =>
               clientBinding.decodeResult(resultNode), context)
-          }.getOrElse(throw new UnsupportedOperationException("Invalid method: " + method.getName))
+          }.getOrElse(throw new UnsupportedOperationException("Invalid function: " + function.getName))
       ).asInstanceOf[$apiType]
     """)
   }
