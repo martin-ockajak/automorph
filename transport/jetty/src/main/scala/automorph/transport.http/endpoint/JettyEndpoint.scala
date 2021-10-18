@@ -1,6 +1,6 @@
 package automorph.transport.http.endpoint
 
-import automorph.{Handler, Types}
+import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport

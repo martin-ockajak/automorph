@@ -49,7 +49,7 @@ final case class SttpClient[Effect[_]](
   ): Effect[ArraySeq.ofByte] = {
     val httpRequest = createRequest(requestBody, mediaType, context)
     system.flatMap(
-      system.either(send(httpRequest, requestBody, requestId)),
+      system.either(send(httpRequest, requestId)),
       (response: Either[Throwable, Response[Array[Byte]]]) => {
         lazy val responseProperties = Map(
           LogProperties.requestId -> requestId,
@@ -76,7 +76,7 @@ final case class SttpClient[Effect[_]](
     context: Option[Context]
   ): Effect[Unit] = {
     val httpRequest = createRequest(requestBody, mediaType, context).response(ignore)
-    system.map(send(httpRequest, requestBody, requestId), (_: Response[Unit]) => ())
+    system.map(send(httpRequest, requestId), (_: Response[Unit]) => ())
   }
 
   override def defaultContext: Context = SttpContext.default
@@ -85,7 +85,6 @@ final case class SttpClient[Effect[_]](
 
   private def send[R](
     httpRequest: Request[R, WebSocket[Effect]],
-    request: ArraySeq.ofByte,
     requestId: String
   ): Effect[Response[R]] = {
     lazy val requestProperties = Map(
