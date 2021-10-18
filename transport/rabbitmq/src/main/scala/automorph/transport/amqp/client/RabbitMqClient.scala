@@ -13,7 +13,6 @@ import java.net.URI
 import java.util.Date
 import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.jdk.CollectionConverters.{MapHasAsJava, MapHasAsScala}
 import scala.util.{Try, Using}
