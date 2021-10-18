@@ -22,8 +22,8 @@ import scala.reflect.macros.blackbox
  */
 final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
   codec: Codec,
-  errorToException: (String, Int) => Throwable = ErrorMapping.defaultErrorToException,
-  exceptionToError: Throwable => ErrorType = ErrorMapping.defaultExceptionToError,
+  errorToException: (String, Int) => Throwable = JsonRpcProtocol.defaultErrorToException,
+  exceptionToError: Throwable => ErrorType = JsonRpcProtocol.defaultExceptionToError,
   argumentsByName: Boolean = true,
   protected val encodeMessage: Message[Node] => Node,
   protected val decodeMessage: Node => Message[Node],
