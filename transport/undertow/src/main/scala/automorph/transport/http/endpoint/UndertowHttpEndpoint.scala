@@ -7,7 +7,6 @@ import automorph.spi.MessageCodec
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
-import automorph.transport.http.server.UndertowServer.Context
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import automorph.util.{Bytes, Network, Random}
 import io.undertow.io.Receiver
@@ -32,12 +31,10 @@ import scala.util.Try
  * @param handler RPC request handler
  * @param runEffect executes specified effect asynchronously
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
- * @tparam Node message node type
- * @tparam Codec message codec plugin type
  * @tparam Effect effect type
  */
-final case class UndertowHttpEndpoint[Node, Codec <: MessageCodec[Node], Effect[_]](
-  handler: Handler[Node, Codec, Effect, Context],
+final case class UndertowHttpEndpoint[Effect[_]](
+  handler: Handler.AnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends HttpHandler with Logging with EndpointMessageTransport {

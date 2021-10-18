@@ -29,12 +29,10 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  * @param port port to listen on for HTTP connections
  * @param readTimeout HTTP connection read timeout (milliseconds)
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
- * @tparam Node message node type
- * @tparam Codec message codec plugin type
  * @tparam Effect effect type
  */
-final case class NanoHttpdServer[Node, Codec <: MessageCodec[Node], Effect[_]] private (
-  handler: Handler[Node, Codec, Effect, Context],
+final case class NanoHttpdServer[Effect[_]] private (
+  handler: Handler.AnyCodec[Effect, Context],
   evaluateEffect: Effect[Response] => Response,
   port: Int,
   readTimeout: Int,
@@ -150,18 +148,16 @@ object NanoHttpdServer {
    * @param port port to listen on for HTTP connections
    * @param readTimeout HTTP connection read timeout (milliseconds)
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
-   * @tparam Node message node type
-   * @tparam Codec message codec plugin type
    * @tparam Effect effect type
    */
-  def apply[Node, Codec <: MessageCodec[Node], Effect[_]](
-    handler: Handler[Node, Codec, Effect, Context],
+  def apply[Effect[_]](
+    handler: Handler.AnyCodec[Effect, Context],
     runEffectSync: Effect[Response] => Response,
     port: Int,
     readTimeout: Int = 5000,
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
-  ): NanoHttpdServer[Node, Codec, Effect] = {
-    val server = new NanoHttpdServer[Node, Codec, Effect](handler, runEffectSync, port, readTimeout, exceptionToStatusCode)
+  ): NanoHttpdServer[Effect] = {
+    val server = new NanoHttpdServer(handler, runEffectSync, port, readTimeout, exceptionToStatusCode)
     server.start()
     server
   }

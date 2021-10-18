@@ -1,6 +1,6 @@
 package test.examples
 
-import automorph.codec.messagepack.{UpickleMessagePackCodec}
+import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, DefaultRpcProtocol, Handler}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global

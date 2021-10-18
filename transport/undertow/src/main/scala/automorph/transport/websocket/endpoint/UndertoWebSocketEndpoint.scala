@@ -3,10 +3,8 @@ package automorph.transport.websocket.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
-import automorph.spi.MessageCodec
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.server.UndertowServer.Context
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Network, Random}
@@ -39,12 +37,10 @@ object UndertowWebSocketEndpoint {
    * @param runEffect executes specified effect asynchronously
    * @param next Undertow web server handler invoked if a HTTP request does not contain a WebSocket handshake
    * @return Undertow web server WebSocket handler
-   * @tparam Node message node type
-   * @tparam Codec message codec plugin type
    * @tparam Effect effect type
    */
-  def apply[Node, Codec <: MessageCodec[Node], Effect[_]](
-    handler: Handler[Node, Codec, Effect, Context],
+  def apply[Effect[_]](
+    handler: Handler.AnyCodec[Effect, Context],
     runEffect: Effect[Any] => Unit,
     next: HttpHandler
   ): WebSocketProtocolHandshakeHandler = {
@@ -68,12 +64,10 @@ object UndertowWebSocketEndpoint {
  * @constructor Creates an Undertow web server WebSocket handler with the specified RPC request handler.
  * @param handler RPC request handler
  * @param runEffect executes specified effect asynchronously
- * @tparam Node message node type
- * @tparam Codec message codec plugin type
  * @tparam Effect effect type
  */
-final private[automorph] case class UndertowWebSocketCallback[Node, Codec <: MessageCodec[Node], Effect[_]](
-  handler: Handler[Node, Codec, Effect, Context],
+final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
+  handler: Handler.AnyCodec[Effect, Context],
   runEffect: Effect[Any] => Any
 ) extends WebSocketConnectionCallback with AutoCloseable with Logging with EndpointMessageTransport {
 

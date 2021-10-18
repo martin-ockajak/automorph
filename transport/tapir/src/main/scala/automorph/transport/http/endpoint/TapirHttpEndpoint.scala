@@ -47,13 +47,11 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
    * @param handler RPC request handler
    * @param method HTTP method to server
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
-   * @tparam Node message node type
-   * @tparam Codec message codec plugin type
    * @tparam Effect effect type
    * @return Tapir HTTP endpoint
    */
-  def apply[Node, Codec <: MessageCodec[Node], Effect[_]](
-    handler: Handler[Node, Codec, Effect, Context],
+  def apply[Effect[_]](
+    handler: Handler.AnyCodec[Effect, Context],
     method: Method,
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
   ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {

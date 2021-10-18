@@ -3,7 +3,6 @@ package automorph.transport.http.endpoint
 import automorph.Handler
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
-import automorph.spi.MessageCodec
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
 import automorph.transport.http.endpoint.JettyEndpoint.Context
@@ -28,12 +27,10 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
  * @param handler RPC request handler
  * @param runEffect executes specified effect asynchronously
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
- * @tparam Node message node type
- * @tparam Codec message codec plugin type
  * @tparam Effect effect type
  */
-final case class JettyEndpoint[Node, Codec <: MessageCodec[Node], Effect[_]](
-  handler: Handler[Node, Codec, Effect, Context],
+final case class JettyEndpoint[Effect[_]](
+  handler: Handler.AnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends HttpServlet with Logging with EndpointMessageTransport {
