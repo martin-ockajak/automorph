@@ -22,7 +22,7 @@ object DefaultRpcProtocol {
    * @return RPC protocol plugin
    */
   def apply(): Type[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
-    JsonRpcProtocol(DefaultMessageCodec(), JsonRpcProtocol.defaultErrorToException, JsonRpcProtocol.defaultExceptionToError)
+    JsonRpcProtocol(DefaultMessageCodec(), JsonRpcProtocol.defaultErrorToException, JsonRpcProtocol.defaultExceptionToError, true)
 
   /**
    * Creates a JSON-RPC protocol plugin with specified message codec plugin.
