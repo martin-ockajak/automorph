@@ -43,7 +43,7 @@ object DefaultRpcProtocol {
     Seq(weakTypeOf[Node], weakTypeOf[Codec])
 
     c.Expr[Any](q"""
-      new automorph.protocol.JsonRpcProtocol($codec)
+      automorph.protocol.JsonRpcProtocol($codec)
     """).asInstanceOf[c.Expr[Type[Node, Codec]]]
   }
 }
