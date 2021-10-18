@@ -13,7 +13,7 @@ trait UpickleCustom extends AttributeTagged {
 
   implicit override def OptionReader[T: Reader]: Reader[Option[T]] =
     new Reader.Delegate[Any, Option[T]](implicitly[Reader[T]].map(Some(_))) {
-      override def visitNull(index: Int): None.type = None
+      override def visitNull(index: Int): Option[T] = None
     }
 
   implicit override val BooleanReader: Reader[Boolean] = new SimpleReader[Boolean] {
