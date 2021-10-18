@@ -25,7 +25,6 @@ object UpickleMessagePackMeta {
     import c.universe.Quasiquote
 
     c.Expr[Msg](q"""
-      implicit val noneWriter = ${c.prefix}.custom.NoneWriter
       ${c.prefix}.custom.writeMsg($value)
     """)
   }
