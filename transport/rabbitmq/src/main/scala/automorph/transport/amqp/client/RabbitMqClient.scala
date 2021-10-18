@@ -5,20 +5,17 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.amqp.client.RabbitMqClient.Context
-import automorph.transport.amqp.{Amqp, RabbitMqCommon}
+import automorph.transport.amqp.{Amqp, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.TryOps
-import automorph.util.Random
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, Consumer, DefaultConsumer, Envelope}
+import com.rabbitmq.client.{Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
 import java.util.Date
 import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.jdk.CollectionConverters.MapHasAsJava
-import scala.jdk.CollectionConverters.MapHasAsScala
+import scala.jdk.CollectionConverters.{MapHasAsJava, MapHasAsScala}
 import scala.util.{Try, Using}
 
 /**
@@ -67,7 +64,7 @@ final case class RabbitMqClient[Effect[_]](
   ): Effect[ArraySeq.ofByte] = {
     val amqpProperties = createProperties(requestId, mediaType, context)
     val (result, complete) = promisedEffect()
-    system.flatMap(send(requestBody, amqpProperties, Some(complete)), _ => result)
+    system.flatMap(send(requestBody, amqpProperties, Some(complete)), (_: Unit) => result)
   }
 
   override def notify(
@@ -184,7 +181,7 @@ object RabbitMqClient {
   )(implicit executionContext: ExecutionContext): RabbitMqClient[Future] = {
     val blockingEffect = (blocking: () => Unit) => Future(blocking())
     val promisedEffect = () => {
-      val promise = Promise[ArraySeq.ofByte]
+      val promise = Promise[ArraySeq.ofByte]()
       promise.future -> promise.success.andThen(_ => ())
     }
     RabbitMqClient(
@@ -200,9 +197,11 @@ object RabbitMqClient {
   }
 }
 
-final case class RabbitMqContext(properties: BasicProperties)
-
 object RabbitMqContext {
+
+  /** Request context type. */
+  type Context = Amqp[RabbitMqContext]
+
   /** Implicit default context value. */
   implicit val default: Context = Amqp()
 }

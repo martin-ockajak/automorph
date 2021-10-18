@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.transport.amqp.Amqp
 import automorph.util.Extensions.TryOps
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.{AMQP, Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
+import com.rabbitmq.client.{AMQP, Address, Channel, Connection, ConnectionFactory, DefaultConsumer}
 import java.io.IOException
 import java.net.{InetAddress, URI}
 import scala.jdk.CollectionConverters.MapHasAsScala
@@ -123,3 +123,5 @@ private[automorph] object RabbitMqCommon extends Logging {
     "URL" -> url
   ) ++ consumerTag.map("Consumer Tag" -> _)
 }
+
+final case class RabbitMqContext(properties: BasicProperties)

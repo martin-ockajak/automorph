@@ -1,16 +1,16 @@
 package automorph.transport.amqp.server
 
+import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
-import automorph.transport.amqp.{Amqp, RabbitMqCommon}
+import automorph.transport.amqp.client.RabbitMqContext
+import automorph.transport.amqp.{Amqp, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import automorph.util.{Bytes, Random}
-import automorph.{Handler, Types}
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
-import java.io.IOException
-import java.net.{URI, URL}
+import com.rabbitmq.client.{AMQP, Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
+import java.net.URI
 import scala.concurrent.ExecutionContext
 import scala.util.Try
 
@@ -121,4 +121,10 @@ final case class RabbitMqServer[Effect[_]](
   }
 
   private def createConnection(): Connection = RabbitMqCommon.connect(url, Seq.empty, clientId, connectionFactory)
+}
+
+object RabbitMqServer {
+
+  /** Request context type. */
+  type Context = Amqp[RabbitMqContext]
 }
