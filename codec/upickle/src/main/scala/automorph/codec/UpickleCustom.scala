@@ -8,7 +8,7 @@ import upickle.core.{Abort, Util, Visitor}
  */
 trait UpickleCustom extends AttributeTagged {
 
-  implicit override def NoneWriter: Writer[None.type] = new Writer[None.type] {
+  implicit override val NoneWriter: Writer[None.type] = new Writer[None.type] {
     def write0[R](out: Visitor[_, R], v: None.type): R = {
       out.visitNull(-1)
     }
