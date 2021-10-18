@@ -175,12 +175,6 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
   def mapError(errorToException: (String, Int) => Throwable): JsonRpcProtocol[Node, Codec] =
     copy(errorToException = errorToException)
 
-  def errorToException2(errorToException: (String, Int) => Throwable): JsonRpcProtocol[Node, Codec] =
-    copy(errorToException = errorToException)
-
-  def test(function: (String, Int) => Throwable): JsonRpcProtocol[Node, Codec] =
-    this
-
   /**
    * Creates function invocation argument nodes.
    *
