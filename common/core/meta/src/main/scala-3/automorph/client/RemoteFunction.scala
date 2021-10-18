@@ -8,10 +8,9 @@ import automorph.util.CannotEqual
  * Remote function invocation.
  *
  * @param name function name.
- * @param client RPC client
- * @param codec message codec plugin
  * @param arguments argument names and values
  * @param argumentNodes encodec argument values
+ * @param client RPC client
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Effect effect type
@@ -23,7 +22,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
   private val argumentNodes: Seq[Node],
   private val client: Client[Node, Codec, Effect, Context]
 ) extends CannotEqual:
-  private val codec = client.protocol.codec
+  val codec = client.protocol.codec
 
   /** Proxy type. */
   type Type = RemoteFunction[Node, Codec, Effect, Context]

@@ -10,10 +10,9 @@ import scala.reflect.macros.blackbox
  * Remote function invocation.
  *
  * @param name function name
- * @param client RPC client
- * @param codec message codec plugin
  * @param arguments argument names and values
  * @param argumentNodes encoded argument values
+ * @param client RPC client
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Effect effect type
@@ -29,7 +28,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
   /** Proxy type. */
   type Type = RemoteFunction[Node, Codec, Effect, Context]
 
-  private val codec = client.protocol.codec
+  val codec = client.protocol.codec
   Seq(codec)
 
   /**
