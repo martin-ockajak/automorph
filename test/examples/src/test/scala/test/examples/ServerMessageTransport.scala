@@ -1,7 +1,7 @@
 package test.example
 
 import automorph.transport.http.server.NanoHttpdServer
-import automorph.{DefaultHandler, DefaultHttpClient}
+import automorph.{DefaultHandler, DefaultEffectSystem, DefaultHttpClient}
 import java.net.URI
 
 object ServerMessageTransport extends App {
@@ -14,7 +14,7 @@ object ServerMessageTransport extends App {
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
   val handler = DefaultHandler.sync[NanoHttpdServer.Context]
-  val server = NanoHttpdServer(handler.bind(api), (response: NanoHttpdServer.Response) => response, 80)
+  val server = NanoHttpdServer(handler.bind(api), (response: DefaultEffectSystem.SyncEffect[NanoHttpdServer.Response]) => response, 80)
 
   // Create RPC client sending HTTP POST requests to 'http://localhost/api'
   val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
