@@ -195,7 +195,7 @@ trait ProtocolCodecSpec extends CoreSpec {
     )
   }
 
-  override def fixtures: Seq[TestFixture[_, _]] = testFixtures
+  override def fixtures: Seq[TestFixture] = testFixtures
 
   def customTransport(index: Int): Option[ClientMessageTransport[Effect, Context]] = None
 
