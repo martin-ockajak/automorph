@@ -109,7 +109,7 @@ private[automorph] object HandlerGenerator:
       ref.q,
       codec.asTerm,
       "encode",
-      List(TypeRepr.of[Option[String]]),
+      List(TypeRepr.of[None.type]),
       encodeNoneArguments
     )
 

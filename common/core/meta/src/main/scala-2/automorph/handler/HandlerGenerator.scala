@@ -141,7 +141,7 @@ object HandlerGenerator {
             // Decode an argument node if it exists or an empty node if not into a value
             q"""
               (scala.util.Try($codec.decode[${parameter.dataType}](
-                argumentNodes($argumentIndex).getOrElse($codec.encode[Option[String]](None))
+                argumentNodes($argumentIndex).getOrElse($codec.encode(None))
               )) match {
                 case scala.util.Failure(error) => scala.util.Failure(
                   automorph.spi.RpcProtocol.InvalidRequestException(
