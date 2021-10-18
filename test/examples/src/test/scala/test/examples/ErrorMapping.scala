@@ -18,7 +18,7 @@ object ErrorMapping extends App {
 
   // Customize server RPC error mapping
   val defaultProtocol = DefaultRpcProtocol()
-  val serverProtocol = defaultProtocol.exceptionToError {
+  val serverProtocol = defaultProtocol.mapException {
     case _: SQLException => InvalidRequest
     case e => defaultProtocol.exceptionToError(e)
   }
@@ -33,7 +33,7 @@ object ErrorMapping extends App {
   })
 
   // Customize client RPC error mapping
-  val clientProtocol = defaultProtocol.errorToException {
+  val clientProtocol = defaultProtocol.mapError {
     case (message, InvalidRequest.code) if message.contains("SQL") => new SQLException(message)
     case (message, code) => defaultProtocol.errorToException(message, code)
   }
