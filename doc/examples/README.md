@@ -570,7 +570,7 @@ val api = new Api()
 ```scala
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
 val handler = DefaultHandler.sync[NanoHttpdServer.Context]
-val server = NanoHttpdServer(handler.bind(api), identity, 80)
+val server = NanoHttpdServer(handler.bind(api), (response: DefaultEffectSystem.SyncEffect[NanoHttpdServer.Response]) => response, 80)
 
 // Stop the server
 server.close()
