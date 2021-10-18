@@ -81,7 +81,7 @@ final case class FinagleEndpoint[Effect[_]](
       "Status" -> status.toString
     )
     val response = Response(request.version, status, message)
-    response.contentType = handler.protocol.codec.mediaType
+    response.contentType = genericHandler.protocol.codec.mediaType
     logger.debug("Sending HTTP response", responseDetails)
     response
   }

@@ -38,7 +38,7 @@ object RestRpcProtocol extends ErrorMapping:
    *
    * @see [[https://automorph.org/rest-rpc REST-RPC protocol specification]]
    * @param codec message codec plugin
-   * @param errorToException maps a REST-RPC error to a corresponding exception
+    @param errorToException maps a REST-RPC error to a corresponding exception
    * @param exceptionToError maps an exception to a corresponding REST-RPC error
    * @tparam Node message node type
    * @tparam Codec message codec plugin type

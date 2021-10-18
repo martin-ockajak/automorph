@@ -48,17 +48,10 @@ object JsonRpcProtocol extends ErrorMapping {
     errorToException: (String, Int) => Throwable = defaultErrorToException,
     exceptionToError: Throwable => ErrorType = defaultExceptionToError,
     argumentsByName: Boolean = true
-  ): JsonRpcProtocol[Node, Codec] = JsonRpcProtocol(codec, errorToException, exceptionToError, argumentsByName)
-
-  private def create[Node, Codec <: MessageCodec[Node]](
-    codec: Codec,
-    errorToException: (String, Int) => Throwable,
-    exceptionToError: Throwable => ErrorType,
-    argumentsByName: Boolean
   ): JsonRpcProtocol[Node, Codec] =
-    macro createMacro[Node, Codec]
+    macro applyMacro[Node, Codec]
 
-  def createMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](c: blackbox.Context)(
+  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](c: blackbox.Context)(
     codec: c.Expr[Codec],
     errorToException: c.Expr[(String, Int) => Throwable],
     exceptionToError: c.Expr[Throwable => ErrorType],

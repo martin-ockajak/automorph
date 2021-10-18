@@ -8,6 +8,7 @@ import automorph.transport.http.Http
 import automorph.transport.http.endpoint.JettyEndpoint.Context
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Network, Random}
+import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import java.io.{ByteArrayInputStream, InputStream}
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
@@ -35,7 +36,7 @@ final case class JettyEndpoint[Effect[_]](
 ) extends HttpServlet with Logging with EndpointMessageTransport {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  private val system = handler.system
+  private val system = genericHandler.system
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     // Receive the request
@@ -88,7 +89,7 @@ final case class JettyEndpoint[Effect[_]](
     )
     logger.debug("Sending HTTP response", responseDetails)
     response.setStatus(status)
-    response.setContentType(handler.protocol.codec.mediaType)
+    response.setContentType(genericHandler.protocol.codec.mediaType)
     val outputStream = response.getOutputStream
     IOUtils.copy(message, outputStream)
     outputStream.flush()

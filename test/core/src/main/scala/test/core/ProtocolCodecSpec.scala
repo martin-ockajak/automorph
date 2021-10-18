@@ -21,7 +21,7 @@ import test.{Enum, Record, Structure}
 
 trait ProtocolCodecSpec extends CoreSpec {
 
-  private lazy val testFixtures = {
+  private lazy val testFixtures: Seq[TestFixture] = {
     implicit val usingContext: Context = contextValue
     Seq(
       {

@@ -58,7 +58,7 @@ object DefaultHttpClientTransport {
   def async(url: URI, method: String, webSocket: Boolean = false)(implicit
     executionContext: ExecutionContext
   ): Type[Future] =
-    DefaultHttpClientTransport(url, method, AsyncHttpClientFutureBackend(), DefaultEffectSystem.async)
+    DefaultHttpClientTransport(url, method, AsyncHttpClientFutureBackend(), DefaultEffectSystem.async, webSocket)
 
   /**
    * Creates a synchronous STTP HTTP & WebSocket client message transport plugin using identity as an effect type.
@@ -73,6 +73,6 @@ object DefaultHttpClientTransport {
    */
   def sync(url: URI, method: String, webSocket: Boolean = false): Type[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
-    DefaultHttpClientTransport(url, method, HttpURLConnectionBackend(), DefaultEffectSystem.sync)
+    DefaultHttpClientTransport(url, method, HttpURLConnectionBackend(), DefaultEffectSystem.sync, webSocket)
   }
 }
