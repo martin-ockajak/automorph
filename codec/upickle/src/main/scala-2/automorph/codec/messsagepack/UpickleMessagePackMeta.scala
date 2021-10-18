@@ -25,6 +25,7 @@ object UpickleMessagePackMeta {
     import c.universe.Quasiquote
 
     c.Expr[Msg](q"""
+      import ${c.prefix}.custom._
       ${c.prefix}.custom.writeMsg($value)
     """)
   }
@@ -33,6 +34,7 @@ object UpickleMessagePackMeta {
     import c.universe.{weakTypeOf, Quasiquote}
 
     c.Expr[T](q"""
+      import ${c.prefix}.custom._
       ${c.prefix}.custom.readBinary[${weakTypeOf[T]}]($node)
     """)
   }
