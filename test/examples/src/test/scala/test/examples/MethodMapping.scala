@@ -5,7 +5,7 @@ import java.net.URI
 
 object MethodMapping extends App {
 
-  // Define an API type and create API instance
+  // Define an API type and create its instance
   class Api {
     // Exposed as 'test.multiParams'
     def multiParams(add: Boolean)(n: Double): Double = if (add) n + 1 else n - 1
@@ -31,7 +31,7 @@ object MethodMapping extends App {
   // Create RPC client sending HTTP POST requests to 'http://localhost/api'
   val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
-  // Call a remote API function dynamically passing the arguments by name
+  // Call a remote API function dynamically
   client.function("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
   client.function("aliased").args("value" -> None).tell // ()
   util.Try(client.function("omitted").args().call[String]) // Failure

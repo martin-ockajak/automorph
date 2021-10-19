@@ -10,7 +10,7 @@ import zio.Runtime.default.unsafeRunTask
 
 object EffectSystem extends App {
 
-  // Define an API type and create API instance
+  // Define an API and create its instance
   class Api {
     def hello(some: String, n: Int): Task[String] = Task(s"Hello $some $n!")
   }
@@ -26,7 +26,7 @@ object EffectSystem extends App {
   val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
   val client = DefaultHttpClient(new URI("http://localhost/api"), "POST", backend, system)
 
-  // Call the remote API method via proxy
+  // Call the remote APi function via proxy
   val apiProxy = client.bind[Api] // Api
   apiProxy.hello("world", 1) // Task[String]
 

@@ -6,7 +6,7 @@ import java.net.URI
 
 object ServerMessageTransport extends App {
 
-  // Define an API type and create API instance
+  // Define an API type and create its instance
   class Api {
     def hello(some: String, n: Int): String = s"Hello $some $n!"
   }
@@ -19,7 +19,7 @@ object ServerMessageTransport extends App {
   // Create RPC client sending HTTP POST requests to 'http://localhost/api'
   val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
-  // Call the remote API method via proxy
+  // Call the remote API function via proxy
   val apiProxy = client.bind[Api] // Api
   apiProxy.hello("world", 1) // String
 

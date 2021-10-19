@@ -18,7 +18,7 @@ libraryDependencies ++= Seq(
 import automorph.{DefaultHttpClient, DefaultHttpServer}
 import java.net.URI
 
-// Define an API type and create API instance
+// Define an API type and create its instance
 class Api {
   def hello(some: String, n: Int): String = s"Hello $some $n!"
 }
@@ -69,14 +69,11 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-// Define an API type and create API instance
-trait Api {
-  def hello(what: String, n: Int): Future[String]
+// Define an API and create its instance
+class Api {
+  def hello(what: String, n: Int): Future[String] = Future(s"Hello $n $what!")
 }
-class ApiImpl extends Api {
-  override def hello(what: String, n: Int): Future[String] = Future(s"Hello $n $what!")
-}
-val api = new ApiImpl()
+val api = new Api()
 
 ```
 
@@ -90,7 +87,7 @@ val server = Default.asyncHttpServer(_.bind(api), 80, "/api")
 server.close()
 ```
 
-**Static Client**
+**Client**
 
 ```scala
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
@@ -102,17 +99,6 @@ apiProxy.hello("world", 3) // Future[String]
 
 // Close the client
 client.close()
-```
-
-**Dynamic Client**
-
-```scala
-// Call a remote API function dynamically
-val hello = client.function("hello")
-hello.args("what" -> "world", "n" -> 1).call[String] // Future[String]
-
-// Notify a remote API function dynamically
-hello.args("what" -> "world", "n" -> 1).tell // Future[Unit]
 ```
 
 ## Request metadata
@@ -130,13 +116,13 @@ libraryDependencies ++= Seq(
 **API**
 
 ```scala
-// Define server API type and create API instance
+// Define server API type and create its instance
 import automorph.DefaultHttpServer.{Context => ServerContext}
 import automorph.DefaultHttpClient.{Context => ClientContext}
 import automorph.{DefaultHttpClient, DefaultHttpServer}
 import java.net.URI
 
-// Define server API type and create API instance
+// Define server API type and create its instance
 class ServerApi {
 
   // Use HTTP request metadata context provided by the server message transport plugin
@@ -217,7 +203,7 @@ libraryDependencies ++= Seq(
 import automorph.{DefaultHttpClient, DefaultHttpServer}
 import java.net.URI
 
-// Define an API type and create API instance
+// Define an API type and create its instance
 class Api {
   // Exposed as 'test.multiParams'
   def multiParams(add: Boolean)(n: Double): Double = if (add) n + 1 else n - 1
@@ -294,7 +280,7 @@ import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-// Define an API type and create API instance
+// Define an API type and create its instance
 class Api {
   def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
 }
@@ -389,7 +375,7 @@ import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio.{Runtime, Task}
 import zio.Runtime.default.unsafeRunTask
 
-// Define an API type and create API instance
+// Define an API type and create its instance
 class Api {
   def hello(some: String, n: Int): Task[String] = Task.succeed(s"Hello $some $n!")
 }
@@ -446,7 +432,7 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-// Define an API type and create API instance
+// Define an API type and create its instance
 case class Record(values: List[String])
 class Api {
   def hello(some: String, n: Int): Future[Record] = Future(Record(List("Hello", some, n.toString)))
@@ -508,7 +494,7 @@ import automorph.transport.http.client.HttpUrlConnectionClient
 import automorph.{DefaultClient, DefaultHttpServer}
 import java.net.URI
 
-// Define an API type and create API instance
+// Define an API type and create its instance
 class Api {
   def hello(some: String, n: Int): String = s"Hello $some $n!"
 }
@@ -560,7 +546,7 @@ import automorph.transport.http.server.NanoHttpdServer
 import automorph.{DefaultHandler, DefaultHttpClient}
 import java.net.URI
 
-// Define an API type and create API instance
+// Define an API type and create its instance
 class Api {
   def hello(some: String, n: Int): String = s"Hello $some $n!"
 }
@@ -614,7 +600,7 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-// Define an API type and create API instance
+// Define an API type and create its instance
 class Api {
   def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
 }

@@ -10,7 +10,7 @@ import scala.concurrent.Future
 
 object ErrorMapping extends App {
 
-  // Define an API type and create API instance
+  // Define an API type and create its instance
   class Api {
     def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
   }

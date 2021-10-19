@@ -7,7 +7,7 @@ import java.net.URI
 
 object ClientMessageTransport extends App {
 
-  // Define an API type and create API instance
+  // Define an API and create its instance
   class Api {
     def hello(some: String, n: Int): String = s"Hello $some $n!"
   }

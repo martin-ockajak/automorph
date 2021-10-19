@@ -24,10 +24,12 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-// Define an API type and create API instance
+// Define an API
 trait Api {
   def hello(what: String, n: Int): Future[String]
 }
+
+// Create the API implementation
 class ApiImpl extends Api {
   override def hello(what: String, n: Int): Future[String] = Future(s"Hello $n $what!")
 }

@@ -7,7 +7,7 @@ import java.net.URI
 
 object RequestMetadata extends App {
 
-  // Define server API type and create API instance
+  // Define server API type and create its instance
   class ServerApi {
 
     // Use HTTP request metadata context provided by the server message transport plugin

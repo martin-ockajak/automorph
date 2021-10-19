@@ -8,7 +8,7 @@ import scala.concurrent.Future
 
 object MessageCodec extends App {
 
-  // Define an API type and create API instance
+  // Define an API type and create its instance
   case class Record(values: List[String])
 
   class Api {
@@ -32,7 +32,7 @@ object MessageCodec extends App {
   val transport = DefaultHttpClientTransport.async(new URI("http://localhost/api"), "POST")
   val client = Client(protocol, transport)
 
-  // Call the remote API method via proxy
+  // Call the remote API function via proxy
   val apiProxy = client.bind[Api] // Api
   apiProxy.hello("world", 1) // : Future[String]
 
