@@ -59,11 +59,11 @@ trait CoreSpec extends BaseSpec {
         "Proxy" - {
           "Simple API" - {
             val apis = (fixture.simpleApi, simpleApi)
-            "test" in {
-              check { (a0: String) =>
-                consistent(apis, (api: SimpleApiType) => api.test(a0))
-              }
-            }
+//            "test" in {
+//              check { (a0: String) =>
+//                consistent(apis, (api: SimpleApiType) => api.test(a0))
+//              }
+//            }
           }
           "Complex API" - {
             val apis = (fixture.complexApi, complexApi)
@@ -85,11 +85,11 @@ trait CoreSpec extends BaseSpec {
 //                      consistent(apis, (api: ComplexApiType) => api.method3(a0, a1, a2))
 //                    }
 //                  }
-            "method4" in {
-              check { (a0: Double, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
-                consistent(apis, (api: ComplexApiType) => api.method4(BigDecimal(a0), a1, a2, a3))
-              }
-            }
+//            "method4" in {
+//              check { (a0: Double, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
+//                consistent(apis, (api: ComplexApiType) => api.method4(BigDecimal(a0), a1, a2, a3))
+//              }
+//            }
 //                  "method5" in {
 //                    check { (a0: Boolean, a1: Short, a2: List[Int]) =>
 //                      consistent(apis, (api: ComplexApiType) => api.method5(a0, a1)(a2))
@@ -152,31 +152,31 @@ trait CoreSpec extends BaseSpec {
 //                    error.should(include("malformed argument"))
 //                    error.should(include("p1"))
 //                  }
-            "Missing arguments" in {
-              val error = intercept[InvalidRequestException] {
-                run(api.method5(true, 0))
-              }.getMessage.toLowerCase
-              error.should(include("missing argument"))
-              error.should(include("p2"))
-            }
+//            "Missing arguments" in {
+//              val error = intercept[InvalidRequestException] {
+//                run(api.method5(true, 0))
+//              }.getMessage.toLowerCase
+//              error.should(include("missing argument"))
+//              error.should(include("p2"))
+//            }
           }
         }
-        "Direct" - {
-          "Simple API" - {
-            "Call" in {
-              check { (a0: String) =>
-                val expected = run(simpleApi.test(a0))
-                execute(fixture.call("test", "test" -> a0)) == expected
-              }
-            }
-            "Tell" in {
-              check { (a0: String) =>
-                execute(fixture.tell("test", "test" -> a0))
-                true
-              }
-            }
-          }
-        }
+//        "Direct" - {
+//          "Simple API" - {
+//            "Call" in {
+//              check { (a0: String) =>
+//                val expected = run(simpleApi.test(a0))
+//                execute(fixture.call("test", "test" -> a0)) == expected
+//              }
+//            }
+//            "Tell" in {
+//              check { (a0: String) =>
+//                execute(fixture.tell("test", "test" -> a0))
+//                true
+//              }
+//            }
+//          }
+//        }
       }
     }
   }
