@@ -91,16 +91,20 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       }.pureFold(
         error => errorResponse(error, rpcRequest.message, requestId, requestProperties),
         effect => {
-          logger.info(s"Processed ${protocol.name} request", requestProperties)
           system.flatMap(
             effect,
-            (outcome: Either[Throwable, Node]) =>
+            (outcome: Either[Throwable, Node]) => {
+              outcome.fold(
+                error => logger.error(s"Failed to process ${protocol.name} request", error, requestProperties),
+                _ => logger.info(s"Processed ${protocol.name} request", requestProperties)
+              )
               if (rpcRequest.responseRequired) {
                 // Create response
                 response(outcome.toTry, rpcRequest.message, requestId)
               } else {
                 system.pure(HandlerResult[Body](None, None))
               }
+            }
           )
         }
       )
@@ -166,7 +170,6 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     requestId: String,
     requestProperties: => Map[String, String]
   ): Effect[HandlerResult[Body]] = {
-    logger.error("XXXXXXXXXXXXXXXXXXX", error)
     logger.error(s"Failed to process ${protocol.name} request", error, requestProperties)
     response(Failure(error), message, requestId)
   }

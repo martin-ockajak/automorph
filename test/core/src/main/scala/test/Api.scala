@@ -63,13 +63,9 @@ final case class ComplexApiImpl[Effect[_], Context](backend: EffectSystem[Effect
   override def method6(p0: Record, p1: Double): Effect[Option[Int]] =
     backend.pure(Some((p0.double + p1).toInt))
 
-  override def method7(p0: Record, p1: Boolean)(implicit context: Context): Effect[String] = {
-    println(s"REQUEST CONTEXT: $context")
-    println(s"RESULT: ${context.getClass.getName}")
-    p0.int match {
-      case Some(int) if p1 => backend.pure(int.toString + context.getClass.getName)
-      case _ => backend.pure(context.getClass.getName)
-    }
+  override def method7(p0: Record, p1: Boolean)(implicit context: Context): Effect[String] = p0.int match {
+    case Some(int) if p1 => backend.pure(int.toString + context.getClass.getName)
+    case _ => backend.pure(context.getClass.getName)
   }
 
   override def method8(p0: Record, p1: String, p2: Option[Double])(implicit context: Context): Effect[Record] =
