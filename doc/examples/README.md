@@ -710,7 +710,7 @@ val api = new Api()
 **Server**
 
 ```scala
-// Start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+// Start custom JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
 val handler = DefaultHandler.async[UndertowHttpEndpoint.Context]
 val endpoint = UndertowHttpEndpoint(handler.bind(api), (_: Future[Any]) => ())
 val server = Undertow.builder()
