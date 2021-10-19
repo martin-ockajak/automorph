@@ -52,7 +52,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
           system.wrap {
             lazy val responseProperties = Map(
               LogProperties.requestId -> requestId,
-              "URL" -> url
+              "URL" -> connection.getURL.toExternalForm
             )
             logger.trace("Receiving HTTP response", responseProperties)
             connection.getResponseCode
@@ -84,13 +84,13 @@ final case class HttpUrlConnectionClient[Effect[_]](
   private def send(request: ArraySeq.ofByte, requestId: String, mediaType: String, context: Context): Effect[EffectValue] =
     system.wrap {
       val httpMethod = determineMethod(context)
+      val connection = createConnection(context)
       lazy val requestProperties = Map(
         LogProperties.requestId -> requestId,
-        "URL" -> url,
-        "Method" -> httpMethod
+        "URL" -> connection.getURL.toExternalForm,
+        "Method" -> httpMethod.toString
       )
       logger.trace("Sending HTTP request", requestProperties)
-      val connection = createConnection(context)
       setRequestProperties(connection, request, mediaType, httpMethod, context)
       connection.setDoOutput(true)
       val outputStream = connection.getOutputStream
@@ -113,26 +113,27 @@ final case class HttpUrlConnectionClient[Effect[_]](
     httpMethod: String,
     http: Context
   ): Unit = {
-    val default = http.base.map(_.connection).getOrElse(connection)
+    val base = http.base.map(_.connection).getOrElse(connection)
     require(httpMethods.contains(httpMethod), s"Invalid HTTP method: $httpMethod")
     connection.setRequestMethod(httpMethod)
-    connection.setInstanceFollowRedirects(http.followRedirects.getOrElse(default.getInstanceFollowRedirects))
-    connection.setConnectTimeout(http.readTimeout.map(_.toMillis.toInt).getOrElse(default.getConnectTimeout))
+    connection.setInstanceFollowRedirects(http.followRedirects.getOrElse(base.getInstanceFollowRedirects))
+    connection.setConnectTimeout(http.readTimeout.map(_.toMillis.toInt).getOrElse(base.getConnectTimeout))
     connection.setReadTimeout(http.readTimeout.map {
       case Duration.Inf => 0
       case duration => duration.toMillis.toInt
-    }.getOrElse(default.getReadTimeout))
+    }.getOrElse(base.getReadTimeout))
     connection.setRequestProperty(contentLengthHeader, request.size.toString)
     connection.setRequestProperty(contentTypeHeader, mediaType)
     connection.setRequestProperty(acceptHeader, mediaType)
-    (connectionHeaders(default) ++ http.headers).foreach { case (name, value) =>
+    (connectionHeaders(base) ++ http.headers).foreach { case (name, value) =>
       connection.setRequestProperty(name, value)
     }
   }
 
   private def createConnection(http: Context): HttpURLConnection = {
-    val connectionUrl = http.url.orElse(http.base.map(_.connection.getURL.toURI)).getOrElse(url)
-    connectionUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
+    val baseUrl = http.base.map(_.connection.getURL.toURI).getOrElse(url)
+    val requestUrl = http.overrideUrl(baseUrl)
+    requestUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
   }
 
   private def connectionHeaders(connection: HttpURLConnection): Seq[(String, String)] =

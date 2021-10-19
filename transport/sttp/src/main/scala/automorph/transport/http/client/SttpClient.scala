@@ -53,7 +53,7 @@ final case class SttpClient[Effect[_]](
       (response: Either[Throwable, Response[Array[Byte]]]) => {
         lazy val responseProperties = Map(
           LogProperties.requestId -> requestId,
-          "URL" -> url
+          "URL" -> httpRequest.uri.toString
         )
         response.fold(
           error => {
@@ -123,18 +123,18 @@ final case class SttpClient[Effect[_]](
     context: Option[Context]
   ): Request[Array[Byte], WebSocket[Effect]] = {
     val http = context.getOrElse(defaultContext)
-    val default = http.base.map(_.request).getOrElse(basicRequest)
+    val base = http.base.map(_.request).getOrElse(basicRequest)
+    val requestUrl = http.overrideUrl(defaultUrl)
     val requestMethod = http.method.map(Method.unsafeApply).getOrElse(defaultMethod)
-    val requestUrl = http.url.map(Uri(_)).getOrElse(defaultUrl)
     val contentType = MediaType.unsafeParse(mediaType)
-    val headers = default.headers ++ http.headers.map { case (name, value) => Header(name, value) }
-    val httpRequest = default.method(requestMethod, requestUrl)
+    val headers = base.headers ++ http.headers.map { case (name, value) => Header(name, value) }
+    val httpRequest = base.method(requestMethod, requestUrl)
       .contentType(contentType)
       .header(Header.accept(contentType))
-      .followRedirects(http.followRedirects.getOrElse(default.options.followRedirects))
-      .readTimeout(http.readTimeout.getOrElse(default.options.readTimeout))
+      .followRedirects(http.followRedirects.getOrElse(base.options.followRedirects))
+      .readTimeout(http.readTimeout.getOrElse(base.options.readTimeout))
       .headers(headers: _*)
-      .maxRedirects(default.options.maxRedirects)
+      .maxRedirects(base.options.maxRedirects)
     if (webSocket) {
       httpRequest.response(asWebSocketAlways(sendWebSocket(request)))
     } else {

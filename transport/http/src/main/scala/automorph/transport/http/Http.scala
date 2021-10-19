@@ -99,10 +99,10 @@ final case class Http[Base](
   }
 
   /** Request URL authority. */
-  def authority: Option[String] = path.map { path =>
+  def authority: Option[String] = host.map { host =>
     val userInfoText = userInfo.map(userInfo => s"$userInfo@").getOrElse("")
     val portText = port.map(port => s":$port").getOrElse("")
-    s"$userInfoText$path$portText"
+    s"$userInfoText$host$portText"
   }
 
   /**
@@ -178,7 +178,7 @@ final case class Http[Base](
   /** Request URL query. */
   def query: Option[String] = parameters match {
     case Seq() => None
-    case _ => Some(s"?${parameters.map { case (name, value) => s"$name=$value" }.mkString("&")}")
+    case _ => Some(s"${parameters.map { case (name, value) => s"$name=$value" }.mkString("&")}")
   }
 
   /**
@@ -440,6 +440,16 @@ final case class Http[Base](
    */
   def proxyAuthBearer(token: String): Http[Base] =
     header(headerProxyAuthorization, s"$headerAuthorizationBearer $token")
+
+  private[automorph] def overrideUrl(url: URI): URI = {
+    val base = Http().url(url)
+    val scheme = this.scheme.map(base.scheme).getOrElse(base)
+    val authority = this.authority.map(scheme.authority).getOrElse(scheme)
+    val path = this.path.map(authority.path).getOrElse(authority)
+    val fragment = this.fragment.map(path.fragment).getOrElse(path)
+    val query = fragment.parameters(parameters*)
+    query.url.getOrElse(url)
+  }
 
   private def authorization(header: String, method: String): Option[String] =
     headers(header).find(_.trim.startsWith(method)).flatMap(_.split(" ") match {
