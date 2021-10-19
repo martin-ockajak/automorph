@@ -5,11 +5,11 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object Asynchronous extends App {
+object DynamicNotification extends App {
 
   // Define an API and create its instance
   class Api {
-    def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+    def hello(what: String, n: Int): Future[String] = Future(s"Hello $n $what!")
   }
   val api = new Api()
 
@@ -19,9 +19,12 @@ object Asynchronous extends App {
   // Create RPC client sending HTTP POST requests to 'http://localhost/api'
   val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
 
-  // Call the remote API function via proxy
-  val remoteApi = client.bind[Api] // Api
-  remoteApi.hello("world", 3) // Future[String]
+  // Call the remote API function dynamically
+  val hello = client.function("hello")
+  hello.args("what" -> "world", "n" -> 3).call[String] // Future[String]
+
+  // Notify the remote API function dynamically without expecting a response
+  hello.args("what" -> "world", "n" -> 3).tell // Future[Unit]
 
   // Close the client
   client.close()
@@ -30,7 +33,7 @@ object Asynchronous extends App {
   server.close()
 }
 
-class Asynchronous extends test.base.BaseSpec {
+class DynamicNotification extends test.base.BaseSpec {
   "" - {
     "Test" ignore {
       Asynchronous.main(Array())

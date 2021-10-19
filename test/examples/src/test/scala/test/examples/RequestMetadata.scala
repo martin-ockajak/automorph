@@ -33,27 +33,26 @@ object RequestMetadata extends App {
   val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
   // Create client request context specifying HTTP request meta-data
-  val apiProxy = client.bind[ClientApi] // Api
-
-  // Create HTTP request metadata context
-  val request = client.context
+  val requestMetadata = client.context
     .parameters("test" -> "value")
     .headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
     .cookies("Test" -> "value")
     .authorizationBearer("value")
 
-  // Call the remote API function via proxy with request context supplied directly
-  apiProxy.useMetadata("test")(request) // String
+  // Call the remote API function statically with request context supplied directly
+  val remoteApi = client.bind[ClientApi] // Api
+  remoteApi.useMetadata("test")(requestMetadata) // String
+
+  // Call the remote API function statically with request context supplied implictly
+  implicit val givenRequestMetadata: automorph.DefaultHttpClient.Context = requestMetadata
+  remoteApi.useMetadata("test") // String
 
   // Call the remote API function dynamically with request context supplied directly
-  client.function("useMetadata").args("message" -> "test").call[String] // String
-
-  // Call the remote API function via proxy with request context supplied implictly
-  implicit lazy val implicitRequest: automorph.DefaultHttpClient.Context = request
-  apiProxy.useMetadata("test") // String
+  val remoteUseMetadata = client.function("useMetadata")
+  remoteUseMetadata.args("message" -> "test").call[String] // String
 
   // Call the remote API function dynamically with request context supplied implictly
-  client.function("useMetadata").args("message" -> "test").call[String] // String
+  remoteUseMetadata.args("message" -> "test").call[String] // String
 
   // Close the client
   client.close()

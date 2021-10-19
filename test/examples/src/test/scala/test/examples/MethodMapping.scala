@@ -2,6 +2,7 @@ package test.examples
 
 import automorph.{DefaultHttpClient, DefaultHttpServer}
 import java.net.URI
+import scala.util.Try
 
 object MethodMapping extends App {
 
@@ -31,10 +32,10 @@ object MethodMapping extends App {
   // Create RPC client sending HTTP POST requests to 'http://localhost/api'
   val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
-  // Call a remote API function dynamically
+  // Call the remote API function dynamically
   client.function("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
   client.function("aliased").args("value" -> None).tell // ()
-  util.Try(client.function("omitted").args().call[String]) // Failure
+  Try(client.function("omitted").args().call[String]) // Failure
 
   // Close the client
   client.close()

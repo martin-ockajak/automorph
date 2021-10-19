@@ -41,15 +41,67 @@ server.close()
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
 val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
-// Call the remote API function via proxy
-val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // String
+// Call the remote API function
+val remoteApi = client.bind[Api] // Api
+remoteApi.hello("world", 1) // String
 
 // Close the client
 client.close()
 ```
 
 ## Asynchronous
+
+* [Source](/test/examples/src/test/scala/test/examples/Asynchronous.scala)
+
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "org.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
+**API**
+
+```scala
+import automorph.Default
+import java.net.URI
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+// Define an API and create its instance
+class Api {
+  def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+}
+val api = new Api()
+
+```
+
+**Server**
+
+```scala
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
+val server = Default.asyncHttpServer(_.bind(api), 80, "/api")
+
+// Stop the server
+server.close()
+```
+
+**Client**
+
+```scala
+// Create RPC client sending HTTP POST requests to 'http://localhost/api'
+val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
+
+// Call the remote API function
+val remoteApi = client.bind[Api] // Api
+remoteApi.hello("world", 1) // Future[String]
+
+// Close the client
+client.close()
+```
+
+## Dynamic notification
 
 * [Source](/test/examples/src/test/scala/test/examples/Asynchronous.scala)
 
@@ -93,9 +145,12 @@ server.close()
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
 val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
 
-// Call the remote API function via proxy
-val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 3) // Future[String]
+// Call the remote API function dynamically
+val hello = client.function("hello")
+hello.args("what" -> "world", "n" -> 3).call[String] // Future[String]
+
+// Notify the remote API function dynamically without expecting a response
+hello.args("what" -> "world", "n" -> 3).tell // Future[Unit]
 
 // Close the client
 client.close()
@@ -159,27 +214,26 @@ server.close()
 val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
 // Create client request context specifying HTTP request meta-data
-val apiProxy = client.bind[ClientApi] // Api
-
-// Create HTTP request metadata context
-val request = client.context
+val requestMetadata = client.context
   .parameters("test" -> "value")
   .headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
   .cookies("Test" -> "value")
   .authorizationBearer("value")
 
-// Call the remote API function via proxy with request context supplied directly
-apiProxy.useMetadata("test")(request) // String
+// Call the remote API function statically with request context supplied directly
+val remoteApi = client.bind[ClientApi] // Api
+remoteApi.useMetadata("test")(requestMetadata) // String
+
+// Call the remote API function statically with request context supplied implictly
+implicit val givenRequestMetadata: automorph.DefaultHttpClient.Context = requestMetadata
+remoteApi.useMetadata("test") // String
 
 // Call the remote API function dynamically with request context supplied directly
-client.function("useMetadata").args("message" -> "test").call[String] // String
-
-// Call the remote API function via proxy with request context supplied implictly
-implicit lazy val implicitRequest: automorph.DefaultHttpClient.Context = request
-apiProxy.useMetadata("test") // String
+val remoteUseMetadata = client.function("useMetadata")
+remoteUseMetadata.args("message" -> "test").call[String] // String
 
 // Call the remote API function dynamically with request context supplied implictly
-client.function("useMetadata").args("message" -> "test").call[String] // String
+remoteUseMetadata.args("message" -> "test").call[String] // String
 
 // Close the client
 client.close()
@@ -202,6 +256,7 @@ libraryDependencies ++= Seq(
 ```scala
 import automorph.{DefaultHttpClient, DefaultHttpServer}
 import java.net.URI
+import scala.util.Try
 
 // Define an API type and create its instance
 class Api {
@@ -248,10 +303,10 @@ server.close()
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
 val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
-// Call a remote API function dynamically passing the arguments by name
+// Call the remote API function dynamically
 client.function("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
 client.function("aliased").args("value" -> None).tell // ()
-util.Try(client.function("omitted").args().call[String]) // Failure
+Try(client.function("omitted").args().call[String]) // Failure
 
 // Close the client
 client.close()
@@ -331,23 +386,12 @@ val clientProtocol = defaultProtocol.mapError {
 val transport = DefaultHttpClientTransport.async(new URI("http://localhost/api"), "POST")
 val client = Client.protocol(clientProtocol).transport(transport)
 
-// Call the remote API function via proxy
-val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // Future[String]
+// Call the remote API function
+val remoteApi = client.bind[Api] // Api
+remoteApi.hello("world", 1) // Future[String]
 
 // Close the client
 client.close()
-```
-
-**Dynamic Client**
-
-```scala
-// Call a remote API function dynamically
-val hello = client.function("hello")
-hello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
-
-// Notify a remote API function dynamically
-hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 ```
 
 ## Effect system
@@ -402,9 +446,9 @@ server.close()
 val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
 val client = DefaultHttpClient(new URI("http://localhost/api"), "POST", backend, system)
 
-// Call the remote API function via proxy
-val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // Task[String]
+// Call the remote API function
+val remoteApi = client.bind[Api] // Api
+remoteApi.hello("world", 1) // Task[String]
 
 // Close the client
 client.close()
@@ -466,9 +510,9 @@ server.close()
 val transport = DefaultHttpClientTransport.async(new URI("http://localhost/api"), "POST")
 val client = Client(protocol, transport)
 
-// Call the remote API function via proxy
-val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // Future[String]
+// Call the remote API function
+val remoteApi = client.bind[Api] // Api
+remoteApi.hello("world", 1) // Future[String]
 
 // Close the client
 client.close()
@@ -519,9 +563,9 @@ server.close()
 val transport = HttpUrlConnectionClient(new URI("http://localhost/api"), "POST", IdentitySystem())
 val client = DefaultClient(transport)
 
-// Call the remote API function via proxy
-val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // String
+// Call the remote API function
+val remoteApi = client.bind[Api] // Api
+remoteApi.hello("world", 1) // String
 
 // Close the client
 client.close()
@@ -570,9 +614,9 @@ server.close()
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
 val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
-// Call the remote API function via proxy
-val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // String
+// Call the remote API function
+val remoteApi = client.bind[Api] // Api
+remoteApi.hello("world", 1) // String
 
 // Close the client
 client.close()
@@ -628,9 +672,9 @@ server.stop()
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
 val client = DefaultHttpClient.async(new URI("http://localhost/api"), "POST")
 
-// Call the remote API function via proxy
-val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // Future[String]
+// Call the remote API function
+val remoteApi = client.bind[Api] // Api
+remoteApi.hello("world", 1) // Future[String]
 
 // Close the client
 client.close()

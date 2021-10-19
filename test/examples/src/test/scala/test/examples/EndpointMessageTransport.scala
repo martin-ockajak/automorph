@@ -27,8 +27,8 @@ object EndpointMessageTransport extends App {
   val client = DefaultHttpClient.async(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function via proxy
-  val apiProxy = client.bind[Api] // Api
-  apiProxy.hello("world", 1) // Future[String]
+  val remoteApi = client.bind[Api] // Api
+  remoteApi.hello("world", 1) // Future[String]
 
   // Close the client
   client.close()

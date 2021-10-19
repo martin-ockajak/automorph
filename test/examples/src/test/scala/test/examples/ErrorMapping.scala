@@ -42,16 +42,9 @@ object ErrorMapping extends App {
   val transport = DefaultHttpClientTransport.async(new URI("http://localhost/api"), "POST")
   val client = Client.protocol(clientProtocol).transport(transport)
 
-  // Call the remote API function via proxy
-  val apiProxy = client.bind[Api] // Api
-  apiProxy.hello("world", 1) // Future[String]
-
-  // Call a remote API function dynamically
-  val hello = client.function("hello")
-  hello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
-
-  // Notify a remote API function dynamically
-  hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
+  // Call the remote API function
+  val remoteApi = client.bind[Api] // Api
+  remoteApi.hello("world", 1) // Future[String]
 
   // Close the client
   client.close()

@@ -17,9 +17,9 @@ object Synchronous extends App {
   // Create RPC client sending HTTP POST requests to 'http://localhost/api'
   val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
-  // Call the remote API function via proxy
-  val apiProxy = client.bind[Api] // Api
-  apiProxy.hello("world", 1) // String
+  // Call the remote API function
+  val remoteApi = client.bind[Api] // Api
+  remoteApi.hello("world", 1) // String
 
   // Close the client
   client.close()

@@ -26,12 +26,12 @@ import scala.concurrent.Future
 
 // Define an API
 trait Api {
-  def hello(what: String, n: Int): Future[String]
+  def hello(some: String, n: Int): Future[String]
 }
 
 // Create the API implementation
 class ApiImpl extends Api {
-  override def hello(what: String, n: Int): Future[String] = Future(s"Hello $n $what!")
+  override def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
 }
 val api = new ApiImpl()
 
@@ -57,9 +57,9 @@ Call the remote API instance via proxy created from API type using JSON-RPC over
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
 val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
 
-// Call the remote API function via proxy
-val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 3) // Future[String]
+// Call the remote API function statically via proxy
+val remoteApi = client.bind[Api] // Api
+remoteApi.hello("world", 3) // Future[String]
 ```
 
 ## Dynamic Client
@@ -68,11 +68,8 @@ Call the remote API dynamically without API type definition using JSON-RPC over 
 
 ```scala
 // Call a remote API function dynamically
-val hello = client.function("hello")
+val hello = client.function("hello") // RemoteFunction
 hello.args("what" -> "world", "n" -> 1).call[String] // Future[String]
-
-// Notify a remote API function dynamically
-hello.args("what" -> "world", "n" -> 1).tell // Future[Unit]
 
 // Close the client
 client.close()
