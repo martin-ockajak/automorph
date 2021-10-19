@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
 **API**
 
 ```scala
-import automorph.{DefaultHttpClient, DefaultHttpServer}
+import automorph.Default
 import java.net.URI
 
 // Define an API type and create its instance
@@ -39,7 +39,7 @@ server.close()
 
 ```scala
 // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
-val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
+val client = Default.syncHttpClient(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function
 val remoteApi = client.bind[Api] // Api
