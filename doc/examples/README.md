@@ -64,16 +64,19 @@ libraryDependencies ++= Seq(
 **API**
 
 ```scala
-import automorph.{DefaultHttpClient, DefaultHttpServer}
+import automorph.Default
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 // Define an API type and create API instance
-class Api {
-  def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+trait Api {
+  def hello(what: String, n: Int): Future[String]
 }
-val api = new Api()
+class ApiImpl extends Api {
+  override def hello(what: String, n: Int): Future[String] = Future(s"Hello $n $what!")
+}
+val api = new ApiImpl()
 
 ```
 
@@ -81,21 +84,21 @@ val api = new Api()
 
 ```scala
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = DefaultHttpServer.async(_.bind(api), 80, "/api")
+val server = Default.asyncHttpServer(_.bind(api), 80, "/api")
 
 // Stop the server
 server.close()
 ```
 
-**Client**
+**Static Client**
 
 ```scala
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
-val client = DefaultHttpClient.async(new URI("http://localhost/api"), "POST")
+val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function via proxy
 val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // Future[String]
+apiProxy.hello("world", 3) // Future[String]
 
 // Close the client
 client.close()
@@ -106,10 +109,10 @@ client.close()
 ```scala
 // Call a remote API function dynamically
 val hello = client.function("hello")
-hello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
+hello.args("what" -> "world", "n" -> 1).call[String] // Future[String]
 
 // Notify a remote API function dynamically
-hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
+hello.args("what" -> "world", "n" -> 1).tell // Future[Unit]
 ```
 
 ## Request metadata

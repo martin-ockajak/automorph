@@ -252,7 +252,7 @@ object Default extends DefaultMeta {
    * @param executionContext execution context
    * @return asynchronous RPC client
    */
-  def async(url: URI, method: String, webSocket: Boolean = false)(implicit
+  def asyncHttpClient(url: URI, method: String, webSocket: Boolean = false)(implicit
     executionContext: ExecutionContext
   ): HttpClient[Future] =
     httpClient(url, method, AsyncHttpClientFutureBackend(), asyncSystem, webSocket)
@@ -270,7 +270,7 @@ object Default extends DefaultMeta {
    * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @return synchronous RPC client
    */
-  def sync(url: URI, method: String, webSocket: Boolean = false): HttpClient[Identity] = {
+  def syncHttpClient(url: URI, method: String, webSocket: Boolean = false): HttpClient[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
     httpClient(url, method, HttpURLConnectionBackend(), syncSystem, webSocket)
   }

@@ -9,7 +9,9 @@ Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 Add the following to your `build.sbt` file:
 
 ```scala
-libraryDependencies += "org.automorph" %% "automorph-default" % "0.0.1"
+libraryDependencies ++= Seq(
+  "org.automorph" %% "automorph-default" % "0.0.1"
+)
 ```
 
 ## API
@@ -17,25 +19,29 @@ libraryDependencies += "org.automorph" %% "automorph-default" % "0.0.1"
 Take an existing asynchronous API:
 
 ```scala
+import automorph.Default
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 // Define an API type and create API instance
-class Api {
-  def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+trait Api {
+  def hello(what: String, n: Int): Future[String]
 }
-val api = new Api()
+class ApiImpl extends Api {
+  override def hello(what: String, n: Int): Future[String] = Future(s"Hello $n $what!")
+}
+val api = new ApiImpl()
 
 ```
 
-Expose the API via JSON-RPC over HTTP(S).
+Expose the API instance for remote calls using JSON-RPC over HTTP(S).
 
 ## Server
 
 ```scala
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = automorph.DefaultHttpServer.async(_.bind(api), 80, "/api")
+val server = Default.asyncHttpServer(_.bind(api), 80, "/api")
 
 // Stop the server
 server.close()
@@ -43,28 +49,28 @@ server.close()
 
 ## Static Client
 
-Invoke the API via JSON-RPC over HTTP(S).
+Call the remote API instance via proxy created from API type using JSON-RPC over HTTP(S).
 
 ```scala
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
-val client = automorph.DefaultHttpClient.async(new URI("http://localhost/api"), "POST")
+val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function via proxy
 val apiProxy = client.bind[Api] // Api
-apiProxy.hello("world", 1) // Future[String]
+apiProxy.hello("world", 3) // Future[String]
 ```
 
 ## Dynamic Client
 
-Invoke the API dynamically without definition via JSON-RPC over HTTP(S).
+Call the remote API dynamically without API type definition using JSON-RPC over HTTP(S).
 
 ```scala
 // Call a remote API function dynamically
 val hello = client.function("hello")
-hello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
+hello.args("what" -> "world", "n" -> 1).call[String] // Future[String]
 
 // Notify a remote API function dynamically
-hello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
+hello.args("what" -> "world", "n" -> 1).tell // Future[Unit]
 
 // Close the client
 client.close()
