@@ -21,7 +21,7 @@ object Asynchronous extends App {
 
   // Call the remote API function via proxy
   val remoteApi = client.bind[Api] // Api
-  remoteApi.hello("world", 3) // Future[String]
+  remoteApi.hello("world", 1) // Future[String]
 
   // Close the client
   client.close()

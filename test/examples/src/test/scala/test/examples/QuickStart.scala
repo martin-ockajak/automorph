@@ -26,7 +26,7 @@ object QuickStart extends App {
 
   // Call the remote API function via proxy
   val remoteApi = client.bind[Api] // Api
-  remoteApi.hello("world", 3) // Future[String]
+  remoteApi.hello("world", 1) // Future[String]
 
   // Call the remote API function dynamically
   val remoteHello = client.function("hello") // RemoteFunction

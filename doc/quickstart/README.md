@@ -59,7 +59,7 @@ val client = Default.asyncClient(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function statically via proxy
 val remoteApi = client.bind[Api] // Api
-remoteApi.hello("world", 3) // Future[String]
+remoteApi.hello("world", 1) // Future[String]
 ```
 
 ## Dynamic Client

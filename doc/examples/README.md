@@ -123,7 +123,7 @@ import scala.concurrent.Future
 
 // Define an API and create its instance
 class Api {
-  def hello(what: String, n: Int): Future[String] = Future(s"Hello $n $what!")
+  def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
 }
 val api = new Api()
 
@@ -147,10 +147,10 @@ val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function dynamically
 val remoteHello = client.function("hello")
-remoteHello.args("what" -> "world", "n" -> 3).call[String] // Future[String]
+remoteHello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
 
 // Notify the remote API function dynamically without expecting a response
-remoteHello.args("what" -> "world", "n" -> 3).tell // Future[Unit]
+remoteHello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
 
 // Close the client
 client.close()
