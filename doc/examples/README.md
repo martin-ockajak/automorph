@@ -172,16 +172,14 @@ libraryDependencies ++= Seq(
 
 ```scala
 // Define server API type and create its instance
-import automorph.DefaultHttpServer.{Context => ServerContext}
-import automorph.DefaultHttpClient.{Context => ClientContext}
-import automorph.{DefaultHttpClient, DefaultHttpServer}
+import automorph.Default
 import java.net.URI
 
 // Define server API type and create its instance
 class ServerApi {
 
   // Use HTTP request metadata context provided by the server message transport plugin
-  def useMetadata(message: String)(implicit request: ServerContext): String = Seq(
+  def useMetadata(message: String)(implicit request: Default.ServerContext): String = Seq(
     Some(message),
     request.path,
     request.header("X-Test")
@@ -193,7 +191,7 @@ val api = new ServerApi()
 trait ClientApi {
 
   // Use HTTP request metadata context defined by the client message transport plugin
-  def useMetadata(message: String)(implicit request: ClientContext): String
+  def useMetadata(message: String)(implicit request: Default.ClientContext): String
 }
 ```
 
@@ -201,7 +199,7 @@ trait ClientApi {
 
 ```scala
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val server = DefaultHttpServer.sync(_.bind(api), 80, "/api")
+val server = Default.syncServer(_.bind(api), 80, "/api")
 
 // Stop the server
 server.close()
@@ -211,7 +209,7 @@ server.close()
 
 ```scala
 // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
+val client = Default.syncClient(new URI("http://localhost/api"), "POST")
 
 // Create client request context specifying HTTP request meta-data
 val requestMetadata = client.context
@@ -254,7 +252,7 @@ libraryDependencies ++= Seq(
 **API**
 
 ```scala
-import automorph.{DefaultHttpClient, DefaultHttpServer}
+import automorph.Default
 import java.net.URI
 import scala.util.Try
 
@@ -291,7 +289,7 @@ val mapMethodName = (name: String) => name match {
 }
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val server = DefaultHttpServer.sync(_.bind(api, mapMethodName(_)), 80, "/api")
+val server = Default.syncServer(_.bind(api, functionAliases(_)), 80, "/api")
 
 // Stop the server
 server.close()
@@ -301,7 +299,7 @@ server.close()
 
 ```scala
 // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
+val client = Default.syncClient(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function dynamically
 client.function("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
@@ -404,13 +402,13 @@ libraryDependencies ++= Seq(
 **API**
 
 ```scala
+import automorph.Default
 import automorph.system.ZioSystem
-import automorph.{DefaultHttpClient, DefaultHttpServer}
 import java.net.URI
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-import zio.{Runtime, Task}
 import zio.Runtime.default.unsafeRunTask
+import zio.{Runtime, Task}
 
 // Define an API type and create its instance
 class Api {
@@ -426,7 +424,7 @@ val api = new Api()
 val system = ZioSystem[Any]()
 
 // Start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-val server = DefaultHttpServer.system(system, unsafeRunTask, _.bind(api), 80, "/api")
+val server = Default.systemServer(system, unsafeRunTask, _.bind(api), 80, "/api")
 
 // Stop the server
 server.close()
@@ -437,7 +435,7 @@ server.close()
 ```scala
 // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
-val client = DefaultHttpClient(new URI("http://localhost/api"), "POST", backend, system)
+val client = Default.client(new URI("http://localhost/api"), "POST", backend, system)
 
 // Call the remote API function
 val remoteApi = client.bind[Api] // Api
@@ -523,7 +521,7 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.codec.messagepack.UpickleMessagePackCodec
-import automorph.{Client, DefaultEffectSystem, DefaultHttpClientTransport, DefaultHttpServer, DefaultRpcProtocol, Handler}
+import automorph.{Client, Default, Handler}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -544,14 +542,16 @@ val codec = UpickleMessagePackCodec()
 
 // Create custom data type serializer/deserializer
 implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
-val protocol = DefaultRpcProtocol[UpickleMessagePackCodec.Node, codec.type](codec)
+
+// Create an RPC protocol plugin
+val protocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type](codec)
 
 // Create an effect system plugin
-val system = DefaultEffectSystem.async
+val system = Default.asyncSystem
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val handler = Handler.protocol(protocol).system(system).context[DefaultHttpServer.Context]
-val server = DefaultHttpServer(handler.bind(api), (_: Future[Any]) => (), 80, "/api")
+val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
+val server = Default.server(handler.bind(api), (_: Future[Any]) => (), 80, "/api")
 
 // Stop the server
 server.close()
@@ -561,7 +561,7 @@ server.close()
 
 ```scala
 // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val transport = DefaultHttpClientTransport.async(new URI("http://localhost/api"), "POST")
+val transport = Default.asyncClientTransport(new URI("http://localhost/api"), "POST")
 val client = Client(protocol, transport)
 
 // Call the remote API function

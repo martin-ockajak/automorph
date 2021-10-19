@@ -1,8 +1,6 @@
 package test.examples
 
-import automorph.DefaultHttpServer.{Context => ServerContext}
-import automorph.DefaultHttpClient.{Context => ClientContext}
-import automorph.{DefaultHttpClient, DefaultHttpServer}
+import automorph.Default
 import java.net.URI
 
 object RequestMetadata extends App {
@@ -11,7 +9,7 @@ object RequestMetadata extends App {
   class ServerApi {
 
     // Use HTTP request metadata context provided by the server message transport plugin
-    def useMetadata(message: String)(implicit request: ServerContext): String = Seq(
+    def useMetadata(message: String)(implicit request: Default.ServerContext): String = Seq(
       Some(message),
       request.path,
       request.header("X-Test")
@@ -23,14 +21,14 @@ object RequestMetadata extends App {
   trait ClientApi {
 
     // Use HTTP request metadata context defined by the client message transport plugin
-    def useMetadata(message: String)(implicit request: ClientContext): String
+    def useMetadata(message: String)(implicit request: Default.ClientContext): String
   }
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val server = DefaultHttpServer.sync(_.bind(api), 80, "/api")
+  val server = Default.syncServer(_.bind(api), 80, "/api")
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
+  val client = Default.syncClient(new URI("http://localhost/api"), "POST")
 
   // Create client request context specifying HTTP request meta-data
   val requestMetadata = client.context

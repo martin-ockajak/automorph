@@ -1,12 +1,12 @@
 package test.examples
 
+import automorph.Default
 import automorph.system.ZioSystem
-import automorph.{DefaultHttpClient, DefaultHttpServer}
 import java.net.URI
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-import zio.{Runtime, Task}
 import zio.Runtime.default.unsafeRunTask
+import zio.{Runtime, Task}
 
 object EffectSystem extends App {
 
@@ -20,11 +20,11 @@ object EffectSystem extends App {
   val system = ZioSystem[Any]()
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val server = DefaultHttpServer.system(system, unsafeRunTask, _.bind(api), 80, "/api")
+  val server = Default.systemServer(system, unsafeRunTask, _.bind(api), 80, "/api")
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
-  val client = DefaultHttpClient(new URI("http://localhost/api"), "POST", backend, system)
+  val client = Default.client(new URI("http://localhost/api"), "POST", backend, system)
 
   // Call the remote APi function via proxy
   val remoteApi = client.bind[Api] // Api
