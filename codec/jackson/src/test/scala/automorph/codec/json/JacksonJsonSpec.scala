@@ -59,11 +59,5 @@ class JacksonJsonSpec extends JsonMessageCodecSpec {
         decoded.equals(record)
       }
     }
-//    "Test" in {
-//      val node = codec.encode(None)
-//      println(node)
-//      println(codec.text(codec.encode(None)))
-//      println(codec.decode[Map[String, Int]](node))
-//    }
   }
 }
