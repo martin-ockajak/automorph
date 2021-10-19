@@ -16,7 +16,7 @@ object EffectSystem extends App {
   }
   val api = new Api()
 
-  // Create an effect system plugin
+  // Create ZIO effect system plugin
   val system = ZioSystem[Any]()
 
   // Start RPC server listening on port 80 for HTTP requests with URL path '/api'

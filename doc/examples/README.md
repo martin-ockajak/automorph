@@ -103,7 +103,7 @@ client.close()
 
 ## Dynamic notification
 
-* [Source](/test/examples/src/test/scala/test/examples/Asynchronous.scala)
+* [Source](/test/examples/src/test/scala/test/examples/DynamicNotification.scala)
 
 **Dependencies**
 
@@ -329,7 +329,7 @@ libraryDependencies ++= Seq(
 ```scala
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.transport.http.Http
-import automorph.{Client, DefaultEffectSystem, DefaultHttpServer, DefaultRpcProtocol, Handler}
+import automorph.{Client, Default, Handler}
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -347,23 +347,16 @@ val api = new Api()
 
 ```scala
 // Customize server RPC error mapping
-val defaultProtocol = DefaultRpcProtocol()
-val serverProtocol = defaultProtocol.exceptionToError {
+val protocol = Default.protocol
+val serverProtocol = protocol.mapException {
   case _: SQLException => InvalidRequest
-  case e => defaultProtocol.exceptionToError(e)
-}
-
-// Customize server HTTP status code mapping
-val defaultProtocol = DefaultRpcProtocol()
-val serverProtocol = defaultProtocol.mapException {
-  case _: SQLException => InvalidRequest
-  case e => defaultProtocol.exceptionToError(e)
+  case e => protocol.exceptionToError(e)
 }
 
 // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
-val system = DefaultEffectSystem.async
+val system = Default.asyncSystem
 val handler = Handler.protocol(serverProtocol).system(system).context[DefaultHttpServer.Context]
-val server = DefaultHttpServer(handler, (_: Future[Any]) => (), 80, "/api", {
+val server = Default.httpServer(handler, (_: Future[Any]) => (), 80, "/api", {
   // Customize server HTTP status code mapping
   case _: SQLException => 400
   case e => Http.defaultExceptionToStatusCode(e)
@@ -377,13 +370,13 @@ server.close()
 
 ```scala
 // Customize client RPC error mapping
-val clientProtocol = defaultProtocol.mapError {
+val clientProtocol = protocol.mapError {
   case (message, InvalidRequest.code) if message.contains("SQL") => new SQLException(message)
-  case (message, code) => defaultProtocol.errorToException(message, code)
+  case (message, code) => protocol.errorToException(message, code)
 }
 
 // Create RPC client sending HTTP POST requests to 'http://localhost/api'
-val transport = DefaultHttpClientTransport.async(new URI("http://localhost/api"), "POST")
+val transport = Default.asyncHttpClientTransport(new URI("http://localhost/api"), "POST")
 val client = Client.protocol(clientProtocol).transport(transport)
 
 // Call the remote API function
@@ -449,6 +442,65 @@ val client = DefaultHttpClient(new URI("http://localhost/api"), "POST", backend,
 // Call the remote API function
 val remoteApi = client.bind[Api] // Api
 remoteApi.hello("world", 1) // Task[String]
+
+// Close the client
+client.close()
+```
+
+## RPC protocol
+
+* [Source](/test/examples/src/test/scala/test/examples/RpcProtocol.scala)
+
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "org.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
+**API**
+
+```scala
+import automorph.protocol.RestRpcProtocol
+import automorph.{Client, Default, Handler}
+import java.net.URI
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+// Define an API type and create its instance
+class Api {
+  def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+}
+val api = new Api()
+
+```
+
+**Server**
+
+```scala
+// Create REST-RPC protocol plugin
+val protocol = RestRpcProtocol(Default.codec)
+
+// Start RPC server listening on port 80 for HTTP requests with URL path '/api'
+val system = Default.asyncSystem
+val handler = Handler.protocol(protocol).system(system).context[Default.HttpServerContext]
+val server = Default.httpServer(handler, (_: Future[Any]) => (), 80, "/api")
+
+// Stop the server
+server.close()
+```
+
+**Client**
+
+```scala
+// Create RPC client sending HTTP POST requests to 'http://localhost/api'
+val transport = Default.asyncHttpClientTransport(new URI("http://localhost/api"), "POST")
+val client = Client.protocol(protocol).transport(transport)
+
+// Call the remote API function
+val remoteApi = client.bind[Api] // Api
+remoteApi.hello("world", 1) // Future[String]
 
 // Close the client
 client.close()
