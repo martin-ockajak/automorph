@@ -58,7 +58,7 @@ object Default extends DefaultMeta {
   type ClientContext = SttpClient.Context
 
   /**
-   * Default client message transport type.
+   * Default RPC client message transport type.
    *
    * @tparam Effect effect type
    */
