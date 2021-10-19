@@ -43,7 +43,7 @@ Expose the API instance for remote calls using JSON-RPC over HTTP(S).
 
 ```scala
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val server = Default.asyncHttpServer(_.bind(api), 80, "/api")
+val server = Default.asyncServer(_.bind(api), 80, "/api")
 
 // Stop the server
 server.close()
@@ -55,7 +55,7 @@ Call the remote API instance via proxy created from API type using JSON-RPC over
 
 ```scala
 // Initialize STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
+val client = Default.asyncClient(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function statically via proxy
 val remoteApi = client.bind[Api] // Api

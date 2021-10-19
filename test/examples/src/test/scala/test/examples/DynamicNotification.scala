@@ -14,10 +14,10 @@ object DynamicNotification extends App {
   val api = new Api()
 
   // Start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val server = Default.asyncHttpServer(_.bind(api), 80, "/api")
+  val server = Default.asyncServer(_.bind(api), 80, "/api")
 
   // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
-  val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
+  val client = Default.asyncClient(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function dynamically
   val remoteHello = client.function("hello")

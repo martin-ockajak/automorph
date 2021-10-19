@@ -26,7 +26,7 @@ object ErrorMapping extends App {
   // Start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
   val system = Default.asyncSystem
   val handler = Handler.protocol(serverProtocol).system(system).context[Default.HttpServerContext]
-  val server = Default.httpServer(handler, (_: Future[Any]) => (), 80, "/api", {
+  val server = Default.server(handler, (_: Future[Any]) => (), 80, "/api", {
     // Customize server HTTP status code mapping
     case _: SQLException => 400
     case e => Http.defaultExceptionToStatusCode(e)
@@ -39,7 +39,7 @@ object ErrorMapping extends App {
   }
 
   // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
-  val transport = Default.asyncHttpClientTransport(new URI("http://localhost/api"), "POST")
+  val transport = Default.asyncClientTransport(new URI("http://localhost/api"), "POST")
   val client = Client.protocol(clientProtocol).transport(transport)
 
   // Call the remote API function
