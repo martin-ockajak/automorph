@@ -11,10 +11,10 @@ object Synchronous extends App {
   }
   val api = new Api()
 
-  // Start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val server = Default.syncHttpServer(_.bind(api), 80, "/api")
 
-  // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
+  // Initialize STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.syncHttpClient(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function
