@@ -55,7 +55,9 @@ final case class HttpUrlConnectionClient[Effect[_]](
               "URL" -> url
             )
             logger.trace("Receiving HTTP response", responseProperties)
-            val response = Using(connection.getInputStream)(Bytes.inputStream.from).onFailure {
+            connection.getResponseCode
+            val inputStream = Option(connection.getErrorStream).getOrElse(connection.getInputStream)
+            val response = Using(inputStream)(Bytes.inputStream.from).onFailure {
               logger.error("Failed to receive HTTP response", _, responseProperties)
             }.get
             logger.debug("Received HTTP response", responseProperties + ("Status" -> connection.getResponseCode.toString))

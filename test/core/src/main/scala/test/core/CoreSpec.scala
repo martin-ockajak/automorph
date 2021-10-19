@@ -100,12 +100,12 @@ trait CoreSpec extends BaseSpec {
 //                      consistent(apis, (api: ComplexApiType) => api.method6(a0, a1))
 //                    }
 //                  }
-//                  "method7" in {
-//                    check { (a0: Record, a1: Boolean, context: Context) =>
-//                      implicit val usingContext: Context = context
-//                      consistent(apis, (api: ComplexApiType) => api.method7(a0, a1))
-//                    }
-//                  }
+            "method7" in {
+              check { (a0: Record, a1: Boolean, context: Context) =>
+                implicit val usingContext: Context = context
+                consistent(apis, (api: ComplexApiType) => api.method7(a0, a1))
+              }
+            }
 //                  "method8" in {
 //                    check { (a0: Record, a1: String, a2: Option[Double], context: Context) =>
 //                      implicit val usingContext: Context = context
@@ -154,7 +154,7 @@ trait CoreSpec extends BaseSpec {
 //                  }
             "Missing arguments" in {
               val error = intercept[InvalidRequestException] {
-                execute(api.method5(true, 0))
+                run(api.method5(true, 0))
               }.getMessage.toLowerCase
               error.should(include("missing argument"))
               error.should(include("p2"))
