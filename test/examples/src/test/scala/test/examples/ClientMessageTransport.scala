@@ -13,11 +13,13 @@ object ClientMessageTransport extends App {
   }
   val api = new Api()
 
-  // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
   val server = DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
-  // Create RPC client sending HTTP POST requests to 'http://localhost/api'
+  // Create HttpUrlConnection HTTP client message transport
   val transport = HttpUrlConnectionClient(new URI("http://localhost/api"), "POST", IdentitySystem())
+
+  // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
   val client = DefaultClient(transport)
 
   // Call the remote API function via proxy

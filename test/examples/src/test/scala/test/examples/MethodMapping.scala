@@ -26,10 +26,10 @@ object MethodMapping extends App {
     case other => Seq(s"test.$other")
   }
 
-  // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
   val server = DefaultHttpServer.sync(_.bind(api, functionAliases(_)), 80, "/api")
 
-  // Create RPC client sending HTTP POST requests to 'http://localhost/api'
+  // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
   val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function dynamically

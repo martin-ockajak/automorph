@@ -19,10 +19,10 @@ object EffectSystem extends App {
   // Create ZIO effect system plugin
   val system = ZioSystem[Any]()
 
-  // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
   val server = DefaultHttpServer.system(system, unsafeRunTask, _.bind(api), 80, "/api")
 
-  // Create RPC client sending HTTP POST requests to 'http://localhost/api'
+  // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
   val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
   val client = DefaultHttpClient(new URI("http://localhost/api"), "POST", backend, system)
 

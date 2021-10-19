@@ -12,11 +12,11 @@ object ServerMessageTransport extends App {
   }
   val api = new Api()
 
-  // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Start NanoHTPD JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
   val handler = DefaultHandler.sync[NanoHttpdServer.Context]
   val server = NanoHttpdServer(handler.bind(api), (response: DefaultEffectSystem.SyncEffect[NanoHttpdServer.Response]) => response, 80)
 
-  // Create RPC client sending HTTP POST requests to 'http://localhost/api'
+  // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
   val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function

@@ -16,19 +16,21 @@ object MessageCodec extends App {
   }
   val api = new Api()
 
-  // Create message codec and custom data type serializer/deserializer
+  // Create uPickle message codec for JSON format
   val codec = UpickleMessagePackCodec()
+
+  // Create custom data type serializer/deserializer
   implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
   val protocol = DefaultRpcProtocol[UpickleMessagePackCodec.Node, codec.type](codec)
 
   // Create an effect system plugin
   val system = DefaultEffectSystem.async
 
-  // Start RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
   val handler = Handler.protocol(protocol).system(system).context[DefaultHttpServer.Context]
   val server = DefaultHttpServer(handler.bind(api), (_: Future[Any]) => (), 80, "/api")
 
-  // Create RPC client sending HTTP POST requests to 'http://localhost/api'
+  // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
   val transport = DefaultHttpClientTransport.async(new URI("http://localhost/api"), "POST")
   val client = Client(protocol, transport)
 
