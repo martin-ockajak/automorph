@@ -20,12 +20,6 @@ import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
  */
 object Default extends DefaultMeta {
 
-  /** Default message node type. */
-  type Node = CirceJsonCodec.Node
-
-  /** Default message codec plugin type. */
-  type Codec = CirceJsonCodec
-
   /** Default asynchronous effect type. */
   type AsyncEffect[T] = Future[T]
 
@@ -76,16 +70,6 @@ object Default extends DefaultMeta {
    * @tparam Effect effect type
    */
   type ServerHandler[Effect[_]] = Handler[Effect, ServerContext]
-
-  /**
-   * Creates a Circe JSON message codec plugin.
-   *
-   * @see [[https://www.json.org Message format]]
-   * @see [[https://circe.github.io/circe Library documentation]]
-   * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
-   * @return message codec plugin
-   */
-  def codec: Codec = CirceJsonCodec()
 
   /**
    * Creates an asynchronous `Future` effect system plugin.
@@ -329,7 +313,7 @@ object Default extends DefaultMeta {
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
   ): Server[Effect] = {
-    val handler = bindApis(Handler.protocol(DefaultRpcProtocol()).system(system).context[DefaultHttpServer.Context])
+    val handler = bindApis(Handler.protocol(protocol).system(system).context[ServerContext])
     server(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
   }
 
@@ -361,7 +345,7 @@ object Default extends DefaultMeta {
     builder: Undertow.Builder = defaultBuilder
   )(implicit executionContext: ExecutionContext): Server[Future] = {
     Seq(executionContext)
-    val handler = bindApis(DefaultHandler.async)
+    val handler = bindApis(asyncHandler)
     val runEffect = (_: Future[Any]) => ()
     server(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
   }
@@ -392,7 +376,7 @@ object Default extends DefaultMeta {
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
   ): Server[Identity] = {
-    val handler = bindApis(DefaultHandler.sync)
+    val handler = bindApis(syncHandler)
     val runEffect = (_: Identity[Any]) => ()
     server(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
   }

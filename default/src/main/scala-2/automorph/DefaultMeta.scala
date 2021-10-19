@@ -1,9 +1,17 @@
 package automorph
 
+import automorph.Default.Codec
+import automorph.codec.json.CirceJsonCodec
 import automorph.protocol.JsonRpcProtocol
 import automorph.spi.MessageCodec
 
 private[automorph] trait DefaultMeta {
+
+  /** Default message node type. */
+  type Node = CirceJsonCodec.Node
+
+  /** Default message codec plugin type. */
+  type Codec = CirceJsonCodec
 
   /**
    * Default RPC protocol plugin type.
@@ -14,13 +22,23 @@ private[automorph] trait DefaultMeta {
   type Protocol[Node, Codec <: MessageCodec[Node]] = JsonRpcProtocol[Node, Codec]
 
   /**
+   * Creates a Circe JSON message codec plugin.
+   *
+   * @see [[https://www.json.org Message format]]
+   * @see [[https://circe.github.io/circe Library documentation]]
+   * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
+   * @return message codec plugin
+   */
+  def codec: Codec = CirceJsonCodec()
+
+  /**
    * Creates a JSON-RPC protocol plugin.
    *
    * @see [[https://www.jsonrpc.org/specification Protocol specification]]
    * @return RPC protocol plugin
    */
-  def protocol: Protocol[DefaultMessageCodec.Node, DefaultMessageCodec.Type] =
-    JsonRpcProtocol(DefaultMessageCodec(), JsonRpcProtocol.defaultErrorToException, JsonRpcProtocol.defaultExceptionToError, true)
+  def protocol: Protocol[Node, Codec] =
+    JsonRpcProtocol(codec, JsonRpcProtocol.defaultErrorToException, JsonRpcProtocol.defaultExceptionToError, true)
 
   /**
    * Creates a JSON-RPC protocol plugin with specified message codec plugin.

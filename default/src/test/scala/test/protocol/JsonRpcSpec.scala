@@ -1,6 +1,5 @@
 package automorph.protocol
 
-import automorph.DefaultMessageCodec
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import io.circe.{Decoder, Encoder}
 import test.base.BaseSpec

@@ -42,7 +42,7 @@ object RequestMetadata extends App {
   remoteApi.useMetadata("test")(requestMetadata) // String
 
   // Call the remote API function statically with request context supplied implictly
-  implicit val givenRequestMetadata: automorph.DefaultHttpClient.Context = requestMetadata
+  implicit val givenRequestMetadata: Default.ClientContext = requestMetadata
   remoteApi.useMetadata("test") // String
 
   // Call the remote API function dynamically with request context supplied directly
