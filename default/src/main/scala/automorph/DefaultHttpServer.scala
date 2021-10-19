@@ -21,7 +21,7 @@ object DefaultHttpServer {
    *
    * @tparam Effect effect type
    */
-  type Handler[Effect[_]] = DefaultHandler.Type[Effect, Context]
+  type ServerHandler[Effect[_]] = DefaultHandler.Type[Effect, Context]
 
   /**
    * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
@@ -77,7 +77,7 @@ object DefaultHttpServer {
   def system[Effect[_]](
     system: EffectSystem[Effect],
     runEffect: Effect[Any] => Unit,
-    bindApis: Handler[Effect] => Handler[Effect],
+    bindApis: ServerHandler[Effect] => ServerHandler[Effect],
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
@@ -108,7 +108,7 @@ object DefaultHttpServer {
    * @return asynchronous RPC server
    */
   def async(
-    bindApis: Handler[Future] => Handler[Future],
+    bindApis: ServerHandler[Future] => ServerHandler[Future],
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
@@ -140,7 +140,7 @@ object DefaultHttpServer {
    * @return synchronous RPC server
    */
   def sync(
-    bindApis: Handler[Identity] => Handler[Identity],
+    bindApis: ServerHandler[Identity] => ServerHandler[Identity],
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
