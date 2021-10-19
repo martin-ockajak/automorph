@@ -105,12 +105,14 @@ final case class NanoHttpdServer[Effect[_]] private (
     response
   }
 
-  private def createContext(session: IHTTPSession): Context =
-    Http(
+  private def createContext(session: IHTTPSession): Context = {
+    val http = Http(
       base = Some(session),
       method = Some(session.getMethod.name),
       headers = session.getHeaders.asScala.toSeq
-    ).url(session.getUri)
+    ).url(session.getUri).scheme("http").host("localhost").port(port)
+    Option(session.getQueryParameterString).map(http.query).getOrElse(http)
+  }
 
   private def requestProperties(
     session: IHTTPSession,

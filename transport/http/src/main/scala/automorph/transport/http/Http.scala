@@ -19,10 +19,12 @@ import scala.concurrent.duration.Duration
  * @see [[https://datatracker.ietf.org/doc/html/rfc7232 HTTP specification]]
  * @param method request method
  * @param scheme request URL scheme
- * @param authority request URL authority
+ * @param userInfo request URL authority user information
+ * @param host request URL authority host
+ * @param port request URL authority port
  * @param path request URL path
  * @param fragment request URL fragment
- * @param headers message headers
+ * @param headers request headers
  * @param followRedirects automatically follow redirects if true
  * @param readTimeout response read timeout
  * @param base base properties defined by the specific message transport plugin
@@ -31,7 +33,9 @@ import scala.concurrent.duration.Duration
 final case class Http[Base](
   method: Option[String] = None,
   scheme: Option[String] = None,
-  authority: Option[String] = None,
+  userInfo: Option[String] = None,
+  host: Option[String] = None,
+  port: Option[Int] = None,
   path: Option[String] = None,
   parameters: Seq[(String, String)] = Seq.empty,
   fragment: Option[String] = None,
@@ -51,34 +55,213 @@ final case class Http[Base](
   private val headerProxyAuthorization = "Proxy-Authorization"
   private val headerSetCookie = "Set-Cookie"
 
-  /** `Authorization` header value. */
-  def authorization: Option[String] = header(headerAuthorization)
-
-  /** `Authorization: Basic` header value. */
-  def authorizationBasic: Option[String] = authorization(headerAuthorization, headerAuthorizationBasic)
-
-  /** `Authorization: Bearer` header value. */
-  def authorizationBearer: Option[String] = authorization(headerAuthorization, headerAuthorizationBearer)
-
-  /** `Content-Type` header value. */
-  def contentType: Option[String] = header(headerContentType)
-
-  /** `Content-Length` header value. */
-  def contentLength: Option[String] = header(headerContentLength)
-
-  /** Cookie names and values. */
-  def cookies: Map[String, Option[String]] = cookies(headerCookie)
-
-  /** Set-Cookie names and values. */
-  def setCookies: Map[String, Option[String]] = cookies(headerSetCookie)
+  /** Request URL. */
+  def url: Option[URI] = (scheme, authority, path, query, fragment) match {
+    case (Some(scheme), Some(authority), Some(path), query, fragment) =>
+      Some(new URI(scheme, authority, path, query.orNull, fragment.orNull))
+    case _ => None
+  }
 
   /**
-   * Cookie value.
+   * Set request URL.
    *
-   * @param name cookie name
-   * @return cookie value
+   * @param url URL
+   * @return HTTP message properties
    */
-  def cookie(name: String): Option[String] = cookies.get(name).flatten
+  def url(url: URI): Http[Base] = {
+    val http = copy(
+      scheme = Option(url.getScheme),
+      userInfo = Option(url.getUserInfo),
+      host = Option(url.getHost),
+      port = Option.when(url.getPort >= 0)(url.getPort),
+      path = Option(url.getPath),
+      fragment = Option(url.getFragment)
+    )
+    Option(url.getQuery).map(http.query).getOrElse(http)
+  }
+
+  /**
+   * Set request URL.
+   *
+   * @param url URL
+   * @return HTTP message properties
+   */
+  def url(url: String): Http[Base] = this.url(new URI(url))
+
+  /**
+   * Set request URL scheme.
+   *
+   * @param scheme URL scheme
+   * @return HTTP message properties
+   */
+  def scheme(scheme: String): Http[Base] = {
+    copy(scheme = Some(scheme))
+  }
+
+  /** Request URL authority. */
+  def authority: Option[String] = path.map { path =>
+    val userInfoText = userInfo.map(userInfo => s"$userInfo@").getOrElse("")
+    val portText = port.map(port => s":$port").getOrElse("")
+    s"$userInfoText$path$portText"
+  }
+
+  /**
+   * Set request URL authority.
+   *
+   * @param authority URL authority
+   * @return HTTP message properties
+   */
+  def authority(authority: String): Http[Base] = {
+    val (userInfo, endpoint) = authority.split("@", 2) match {
+      case Array(userInfo, endpoint) => Some(userInfo) -> Some(endpoint)
+      case Array(endpoint) => None -> Some(endpoint)
+      case _ => None -> None
+    }
+    val (host, port) = endpoint.map(_.split(":", 2) match {
+      case Array(host, port) => Some(host) -> Some(port.toInt)
+      case Array(host) => Some(host) -> None
+      case _ => None -> None
+    }).getOrElse(None -> None)
+    copy(userInfo = userInfo, host = host, port = port)
+  }
+
+  /**
+   * Set request URL user information.
+   *
+   * @param userInfo URL user information
+   * @return HTTP message properties
+   */
+  def userInfo(userInfo: String): Http[Base] = {
+    copy(userInfo = Some(userInfo))
+  }
+
+  /**
+   * Set request URL host.
+   *
+   * @param host URL host
+   * @return HTTP message properties
+   */
+  def host(host: String): Http[Base] = {
+    copy(host = Some(host))
+  }
+
+  /**
+   * Set request URL port.
+   *
+   * @param port URL port
+   * @return HTTP message properties
+   */
+  def port(port: Int): Http[Base] = {
+    copy(port = Some(port))
+  }
+
+  /**
+   * Set request URL user information.
+   *
+   * @param path URL userinfo
+   * @return HTTP message properties
+   */
+  def path(path: String): Http[Base] = {
+    copy(path = Some(path))
+  }
+
+  /**
+   * Set request URL fragment.
+   *
+   * @param fragment URL fragment
+   * @return HTTP message properties
+   */
+  def fragment(fragment: String): Http[Base] = {
+    copy(fragment = Some(fragment))
+  }
+
+  /** Request URL query. */
+  def query: Option[String] = parameters match {
+    case Seq() => None
+    case _ => Some(s"?${parameters.map { case (name, value) => s"$name=$value" }.mkString("&")}")
+  }
+
+  /**
+   * Set request URL query string.
+   *
+   * @param queryString URL query string
+   * @return HTTP message properties
+   */
+  def query(queryString: String): Http[Base] = {
+    val entries = queryString.replaceFirst("^\\?(.*)$", "$1")
+    val parameters = entries.split("&").flatMap(_.split("=", 2) match {
+      case Array(name, value) if name.nonEmpty => Some((name, value))
+      case Array(name) if name.nonEmpty => Some((name, ""))
+      case _ => None
+    }).toSeq
+    copy(parameters = parameters)
+  }
+
+  /**
+   * Add URL query parameter.
+   *
+   * @param name parameter name
+   * @param value parameter value
+   * @return HTTP message properties
+   */
+  def parameter(name: String, value: String): Http[Base] = parameter(name, value, false)
+
+  /**
+   * Add or replace URL query parameter.
+   *
+   * @param name query parameter name
+   * @param value query parameter value
+   * @param replace replace all existing query parameters with the specied name
+   * @return HTTP message properties
+   */
+  def parameter(name: String, value: String, replace: Boolean): Http[Base] = {
+    val originalParameters =
+      if (replace) {
+        parameters.filter(_._1 != name)
+      } else parameters
+    copy(parameters = originalParameters :+ (name -> value))
+  }
+
+  /**
+   * Add URL query parameters.
+   *
+   * @param entries query parameter names and values
+   * @return HTTP message properties
+   */
+  def parameters(entries: (String, String)*): Http[Base] =
+    parameters(entries, false)
+
+  /**
+   * Add or replace URL query parameters.
+   *
+   * @param entries query parameter names and values
+   * @param replace replace all existing query parameters with specified names
+   * @return HTTP message properties
+   */
+  def parameters(entries: Iterable[(String, String)], replace: Boolean): Http[Base] = {
+    val entryNames = entries.map { case (name, _) => name }.toSet
+    val originalParameters =
+      if (replace) {
+        parameters.filter { case (name, _) => !entryNames.contains(name) }
+      } else parameters
+    copy(parameters = originalParameters ++ entries)
+  }
+
+  /**
+   * First URL query parameter value.
+   *
+   * @param name query parameter name
+   * @return first query parameter value
+   */
+  def parameter(name: String): Option[String] = parameters.find(_._1 == name).map(_._2)
+
+  /**
+   * URL query parameter values.
+   *
+   * @param name query parameter name
+   * @return query parameter values
+   */
+  def parameters(name: String): Seq[String] = parameters.filter(_._1 == name).map(_._2)
 
   /**
    * First header value.
@@ -97,88 +280,11 @@ final case class Http[Base](
   def headers(name: String): Seq[String] = headers.filter(_._1 == name).map(_._2)
 
   /**
-   * First URL query parameter value.
-   *
-   * @param name query parameter name
-   * @return first query parameter value
-   */
-  def parameter(name: String): Option[String] = parameters.find(_._1 == name).map(_._2)
-
-  /**
-   * URL query parameter values.
-   *
-   * @param name query parameter name
-   * @return query parameter values
-   */
-  def parameters(name: String): Seq[String] = parameters.filter(_._1 == name).map(_._2)
-
-  /** `Proxy-Authorization` header value. */
-  def proxyAuthorization: Option[String] = header(headerProxyAuthorization)
-
-  /** `Proxy-Authorization: Basic` header value. */
-  def proxyAuthorizationBasic: Option[String] = authorization(headerProxyAuthorization, headerAuthorizationBasic)
-
-  /** `Proxy-Authorization: Bearer` header value. */
-  def proxyAuthorizationBearer: Option[String] = authorization(headerProxyAuthorization, headerAuthorizationBearer)
-
-  /** Request URL query. */
-  def query: Option[String] = parameters match {
-    case Seq() => None
-    case _ => Some(s"?${parameters.map { case (name, value) => s"$name=$value" }.mkString("&")}")
-  }
-
-  /** Request URL. */
-  def url: Option[URI] = (scheme, authority, path, query, fragment) match {
-    case (Some(scheme), Some(authority), Some(path), query, fragment) =>
-      Some(new URI(scheme, authority, path, query.orNull, fragment.orNull))
-    case _ => None
-  }
-
-  /**
-   * Set `Authorization: Basic` header value.
-   *
-   * @param user user
-   * @param password password
-   * @return HTTP properties
-   */
-  def authorizationBasic(user: String, password: String): Http[Base] = {
-    val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
-    header(headerAuthorization, s"$headerAuthorizationBasic $value")
-  }
-
-  /**
-   * Set `Authorization: Basic` header value.
-   *
-   * @param token authentication token
-   * @return HTTP properties
-   */
-  def authorizationBasic(token: String): Http[Base] =
-    header(headerAuthorization, s"$headerAuthorizationBasic $token")
-
-  /**
-   * Set `Authorization: Bearer` header value.
-   *
-   * @param token authentication token
-   * @return HTTP properties
-   */
-  def authorizationBearer(token: String): Http[Base] =
-    header(headerAuthorization, s"$headerAuthorizationBearer $token")
-
-  /**
-   * Set request cookies.
-   *
-   * @param entries cookie names and values
-   * @return HTTP properties
-   */
-  def cookies(entries: (String, String)*): Http[Base] =
-    cookies(entries, headerCookie)
-
-  /**
    * Add message header.
    *
    * @param name header name
    * @param value header value
-   * @return HTTP properties
+   * @return HTTP message properties
    */
   def header(name: String, value: String): Http[Base] = header(name, value, false)
 
@@ -188,7 +294,7 @@ final case class Http[Base](
    * @param name header name
    * @param value header value
    * @param replace replace all existing headers with the specied name
-   * @return HTTP properties
+   * @return HTTP message properties
    */
   def header(name: String, value: String, replace: Boolean): Http[Base] = {
     val originalHeaders = if (replace) headers.filter(_._1 != name) else headers
@@ -199,7 +305,7 @@ final case class Http[Base](
    * Add message headers.
    *
    * @param entries header names and values
-   * @return HTTP properties
+   * @return HTTP message properties
    */
   def headers(entries: (String, String)*): Http[Base] =
     headers(entries, false)
@@ -209,7 +315,7 @@ final case class Http[Base](
    *
    * @param entries header names and values
    * @param replace replace all existing headers with specified names
-   * @return HTTP properties
+   * @return HTTP message properties
    */
   def headers(entries: Iterable[(String, String)], replace: Boolean): Http[Base] = {
     val entryNames = entries.map { case (name, _) => name }.toSet
@@ -219,62 +325,98 @@ final case class Http[Base](
     copy(headers = originalHeaders ++ entries)
   }
 
-  /**
-   * Add URL query parameter.
-   *
-   * @param name parameter name
-   * @param value parameter value
-   * @return HTTP properties
-   */
-  def parameter(name: String, value: String): Http[Base] = parameter(name, value, false)
+  /** `Content-Type` header value. */
+  def contentType: Option[String] = header(headerContentType)
+
+  /** `Content-Length` header value. */
+  def contentLength: Option[String] = header(headerContentLength)
+
+  /** Cookie names and values. */
+  def cookies: Map[String, Option[String]] = cookies(headerCookie)
 
   /**
-   * Add or replace URL query parameter.
+   * Cookie value.
    *
-   * @param name query parameter name
-   * @param value query parameter value
-   * @param replace replace all existing query parameters with the specied name
-   * @return HTTP properties
+   * @param name cookie name
+   * @return cookie value
    */
-  def parameter(name: String, value: String, replace: Boolean): Http[Base] = {
-    val originalParameters =
-      if (replace) {
-        parameters.filter(_._1 != name)
-      } else parameters
-    copy(parameters = originalParameters :+ (name -> value))
+  def cookie(name: String): Option[String] = cookies.get(name).flatten
+
+  /**
+   * Set request cookies.
+   *
+   * @param entries cookie names and values
+   * @return HTTP message properties
+   */
+  def cookies(entries: (String, String)*): Http[Base] =
+    cookies(entries, headerCookie)
+
+  /** Set-Cookie names and values. */
+  def setCookies: Map[String, Option[String]] = cookies(headerSetCookie)
+
+  /**
+   * Set response cookies.
+   *
+   * @param entries cookie names and values
+   * @return HTTP message properties
+   */
+  def setCookies(values: (String, String)*): Http[Base] =
+    cookies(values, headerSetCookie)
+
+  /** `Authorization` header value. */
+  def authorization: Option[String] = header(headerAuthorization)
+
+  /** `Authorization: Basic` header value. */
+  def authorizationBasic: Option[String] = authorization(headerAuthorization, headerAuthorizationBasic)
+
+  /** `Authorization: Bearer` header value. */
+  def authorizationBearer: Option[String] = authorization(headerAuthorization, headerAuthorizationBearer)
+
+  /**
+   * Set `Authorization: Basic` header value.
+   *
+   * @param user user
+   * @param password password
+   * @return HTTP message properties
+   */
+  def authorizationBasic(user: String, password: String): Http[Base] = {
+    val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
+    header(headerAuthorization, s"$headerAuthorizationBasic $value")
   }
 
   /**
-   * Add URL query parameters.
+   * Set `Authorization: Basic` header value.
    *
-   * @param entries query parameter names and values
-   * @return HTTP properties
+   * @param token authentication token
+   * @return HTTP message properties
    */
-  def parameters(entries: (String, String)*): Http[Base] =
-    parameters(entries, false)
+  def authorizationBasic(token: String): Http[Base] =
+    header(headerAuthorization, s"$headerAuthorizationBasic $token")
 
   /**
-   * Add or replace URL query parameters.
+   * Set `Authorization: Bearer` header value.
    *
-   * @param entries query parameter names and values
-   * @param replace replace all existing query parameters with specified names
-   * @return HTTP properties
+   * @param token authentication token
+   * @return HTTP message properties
    */
-  def parameters(entries: Iterable[(String, String)], replace: Boolean): Http[Base] = {
-    val entryNames = entries.map { case (name, _) => name }.toSet
-    val originalParameters =
-      if (replace) {
-        parameters.filter { case (name, _) => !entryNames.contains(name) }
-      } else parameters
-    copy(parameters = originalParameters ++ entries)
-  }
+  def authorizationBearer(token: String): Http[Base] =
+    header(headerAuthorization, s"$headerAuthorizationBearer $token")
+
+  /** `Proxy-Authorization` header value. */
+  def proxyAuthorization: Option[String] = header(headerProxyAuthorization)
+
+  /** `Proxy-Authorization: Basic` header value. */
+  def proxyAuthorizationBasic: Option[String] = authorization(headerProxyAuthorization, headerAuthorizationBasic)
+
+  /** `Proxy-Authorization: Bearer` header value. */
+  def proxyAuthorizationBearer: Option[String] = authorization(headerProxyAuthorization, headerAuthorizationBearer)
 
   /**
    * Set `Proxy-Authorization: Basic` header value.
    *
    * @param user user
    * @param password password
-   * @return HTTP properties
+   * @return HTTP message properties
    */
   def proxyAuthBasic(user: String, password: String): Http[Base] = {
     val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
@@ -285,7 +427,7 @@ final case class Http[Base](
    * Set `Proxy-Authorization: Basic` header value.
    *
    * @param token authentication token
-   * @return HTTP properties
+   * @return HTTP message properties
    */
   def proxyAuthBasic(token: String): Http[Base] =
     header(headerProxyAuthorization, s"$headerAuthorizationBasic $token")
@@ -294,59 +436,10 @@ final case class Http[Base](
    * Set `Proxy-Authorization: Bearer` header value.
    *
    * @param token authentication token
-   * @return HTTP properties
+   * @return HTTP message properties
    */
   def proxyAuthBearer(token: String): Http[Base] =
     header(headerProxyAuthorization, s"$headerAuthorizationBearer $token")
-
-  /**
-   * Set request URL query string.
-   *
-   * @param queryString URL uery string
-   * @return HTTP properties
-   */
-  def query(queryString: String): Http[Base] = {
-    val entries = queryString.replaceFirst("^\\?(.*)$", "$1")
-    val parameters = entries.split("&").flatMap(_.split("=") match {
-      case Array(name, value) if name.nonEmpty => Some((name, value))
-      case Array(name) if name.nonEmpty => Some((name, ""))
-      case _ => None
-    }).toSeq
-    copy(parameters = parameters)
-  }
-
-  /**
-   * Set response cookies.
-   *
-   * @param entries cookie names and values
-   * @return HTTP properties
-   */
-  def setCookies(values: (String, String)*): Http[Base] =
-    cookies(values, headerSetCookie)
-
-  /**
-   * Set request URL.
-   *
-   * @param url URL
-   * @return HTTP properties
-   */
-  def url(url: String): Http[Base] = this.url(new URI(url))
-
-  /**
-   * Set request URL.
-   *
-   * @param url URL
-   * @return HTTP properties
-   */
-  def url(url: URI): Http[Base] = {
-    val http = copy(
-      scheme = Option(url.getScheme),
-      authority = Option(url.getAuthority),
-      path = Option(url.getPath),
-      fragment = Option(url.getFragment)
-    )
-    Option(url.getQuery).map(http.query).getOrElse(http)
-  }
 
   private def authorization(header: String, method: String): Option[String] =
     headers(header).find(_.trim.startsWith(method)).flatMap(_.split(" ") match {

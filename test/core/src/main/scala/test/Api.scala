@@ -28,9 +28,9 @@ trait ComplexApi[Effect[_], Context] {
 
   def method5(p0: Boolean, p1: Short)(p2: List[Int]): Effect[Map[String, String]]
 
-  def method6(p0: Record, p1: Double): Effect[Option[String]]
+  def method6(p0: Record, p1: Double): Effect[Option[Int]]
 
-  def method7(p0: Record, p1: Boolean)(implicit context: Context): Effect[Int]
+  def method7(p0: Record, p1: Boolean)(implicit context: Context): Effect[String]
 
   def method8(p0: Record, p1: String, p2: Option[Double])(implicit context: Context): Effect[Record]
 
@@ -60,12 +60,18 @@ final case class ComplexApiImpl[Effect[_], Context](backend: EffectSystem[Effect
       "list" -> p2.mkString(", ")
     ))
 
-  override def method6(p0: Record, p1: Double): Effect[Option[String]] =
-    backend.pure(Some((p0.double + p1).toString))
+  override def method6(p0: Record, p1: Double): Effect[Option[Int]] =
+    backend.pure(Some((p0.double + p1).toInt))
 
-  override def method7(p0: Record, p1: Boolean)(implicit context: Context): Effect[Int] = p0.int match {
-    case Some(int) if p1 => backend.pure(int + context.toString.length)
-    case _ => backend.pure(0)
+  override def method7(p0: Record, p1: Boolean)(implicit context: Context): Effect[String] = p0.int match {
+    case Some(int) if p1 =>
+      println(s"REQUEST CONTEXT: $context")
+      println(s"RESULT: ${int.toString + context.getClass.getName}")
+      backend.pure(int.toString + context.getClass.getName)
+    case _ =>
+      println(s"REQUEST CONTEXT: $context")
+      println(s"RESULT: ${context.getClass.getName}")
+      backend.pure(context.getClass.getName)
   }
 
   override def method8(p0: Record, p1: String, p2: Option[Double])(implicit context: Context): Effect[Record] =
