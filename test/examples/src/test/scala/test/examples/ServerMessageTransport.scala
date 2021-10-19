@@ -1,7 +1,7 @@
 package test.example
 
+import automorph.Default
 import automorph.transport.http.server.NanoHttpdServer
-import automorph.{DefaultHandler, DefaultEffectSystem, DefaultHttpClient}
 import java.net.URI
 
 object ServerMessageTransport extends App {
@@ -12,12 +12,12 @@ object ServerMessageTransport extends App {
   }
   val api = new Api()
 
-  // Start NanoHTPD JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val handler = DefaultHandler.sync[NanoHttpdServer.Context]
-  val server = NanoHttpdServer(handler.bind(api), (response: DefaultEffectSystem.SyncEffect[NanoHttpdServer.Response]) => response, 80)
+  // Start NanoHTTPD JSON-RPC HTTP server listening on port 80 for requests to '/api'
+  val handler = Default.syncHandler[NanoHttpdServer.Context]
+  val server = NanoHttpdServer(handler.bind(api), identity, 80)
 
-  // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
-  val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
+  // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+  val client = Default.syncClient(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function
   val remoteApi = client.bind[Api] // Api

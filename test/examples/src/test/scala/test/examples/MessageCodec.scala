@@ -26,11 +26,11 @@ object MessageCodec extends App {
   // Create an effect system plugin
   val system = DefaultEffectSystem.async
 
-  // Start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val handler = Handler.protocol(protocol).system(system).context[DefaultHttpServer.Context]
   val server = DefaultHttpServer(handler.bind(api), (_: Future[Any]) => (), 80, "/api")
 
-  // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
+  // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val transport = DefaultHttpClientTransport.async(new URI("http://localhost/api"), "POST")
   val client = Client(protocol, transport)
 

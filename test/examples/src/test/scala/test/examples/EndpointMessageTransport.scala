@@ -1,7 +1,7 @@
 package test.examples
 
+import automorph.Default
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
-import automorph.{DefaultHandler, DefaultHttpClient}
 import io.undertow.{Handlers, Undertow}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -15,16 +15,18 @@ object EndpointMessageTransport extends App {
   }
   val api = new Api()
 
-  // Start custom JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-  val handler = DefaultHandler.async[UndertowHttpEndpoint.Context]
+  // Create Undertow JSON-RPC endpoint
+  val handler = Default.asyncHandler[UndertowHttpEndpoint.Context]
   val endpoint = UndertowHttpEndpoint(handler.bind(api), _ => ())
+
+  // Start custom Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val server = Undertow.builder()
     .addHttpListener(80, "0.0.0.0")
     .setHandler(Handlers.path().addPrefixPath("/api", endpoint))
     .build()
 
-  // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
-  val client = DefaultHttpClient.async(new URI("http://localhost/api"), "POST")
+  // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+  val client = Default.asyncClient(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function via proxy
   val remoteApi = client.bind[Api] // Api

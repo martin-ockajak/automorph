@@ -26,10 +26,10 @@ object RequestMetadata extends App {
     def useMetadata(message: String)(implicit request: ClientContext): String
   }
 
-  // Start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
+  // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val server = DefaultHttpServer.sync(_.bind(api), 80, "/api")
 
-  // Create JSON-RPC client sending HTTP POST requests to 'http://localhost/api'
+  // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = DefaultHttpClient.sync(new URI("http://localhost/api"), "POST")
 
   // Create client request context specifying HTTP request meta-data

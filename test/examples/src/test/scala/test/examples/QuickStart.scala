@@ -21,7 +21,7 @@ object QuickStart extends App {
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val server = Default.asyncServer(_.bind(api), 80, "/api")
 
-  // Initialize STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+  // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.asyncClient(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function via proxy
