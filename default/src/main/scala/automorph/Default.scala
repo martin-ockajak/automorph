@@ -75,7 +75,7 @@ object Default extends DefaultMeta {
    *
    * @tparam Effect effect type
    */
-  type HttpServerHandler[Effect[_]] = Handler[Effect, ServerContext]
+  type ServerHandler[Effect[_]] = Handler[Effect, ServerContext]
 
   /**
    * Creates a Circe JSON message codec plugin.
@@ -322,7 +322,7 @@ object Default extends DefaultMeta {
   def systemServer[Effect[_]](
     system: EffectSystem[Effect],
     runEffect: Effect[Any] => Unit,
-    bindApis: HttpServerHandler[Effect] => HttpServerHandler[Effect],
+    bindApis: ServerHandler[Effect] => ServerHandler[Effect],
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
@@ -353,7 +353,7 @@ object Default extends DefaultMeta {
    * @return asynchronous RPC server
    */
   def asyncServer(
-    bindApis: HttpServerHandler[Future] => HttpServerHandler[Future],
+    bindApis: ServerHandler[Future] => ServerHandler[Future],
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
@@ -385,7 +385,7 @@ object Default extends DefaultMeta {
    * @return synchronous RPC server
    */
   def syncServer(
-    bindApis: HttpServerHandler[Identity] => HttpServerHandler[Identity],
+    bindApis: ServerHandler[Identity] => ServerHandler[Identity],
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
