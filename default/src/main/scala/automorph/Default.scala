@@ -47,7 +47,7 @@ object Default extends DefaultMeta {
   type Client[Effect[_], Context] = automorph.Client[Node, Codec, Effect, Context]
 
   /**
-   * Default request handler type.
+   * Default RPC request handler type.
    *
    * @tparam Effect effect type
    * @tparam Context request context type
@@ -71,7 +71,7 @@ object Default extends DefaultMeta {
   type ServerContext = UndertowServer.Context
 
   /**
-   * Default server RPC request handler type.
+   * Default RPC server request handler type.
    *
    * @tparam Effect effect type
    */
