@@ -55,34 +55,27 @@ object Default extends DefaultMeta {
   type Handler[Effect[_], Context] = automorph.Handler[Node, Codec, Effect, Context]
 
   /** Request context type. */
-  type HttpClientContext = SttpClient.Context
+  type ClientContext = SttpClient.Context
 
   /**
    * Default client message transport type.
    *
    * @tparam Effect effect type
    */
-  type HttpClientTransport[Effect[_]] = ClientMessageTransport[Effect, HttpClientContext]
-
-  /**
-   * Default client type.
-   *
-   * @tparam Effect effect type
-   */
-  type HttpClient[Effect[_]] = Client[Effect, HttpClientContext]
+  type ClientTransport[Effect[_]] = ClientMessageTransport[Effect, ClientContext]
 
   /** Default server type. */
-  type HttpServer[Effect[_]] = UndertowServer[Effect]
+  type Server[Effect[_]] = UndertowServer[Effect]
 
   /** Request context type. */
-  type HttpServerContext = UndertowServer.Context
+  type ServerContext = UndertowServer.Context
 
   /**
    * Default server RPC request handler type.
    *
    * @tparam Effect effect type
    */
-  type HttpServerHandler[Effect[_]] = Handler[Effect, HttpServerContext]
+  type HttpServerHandler[Effect[_]] = Handler[Effect, ServerContext]
 
   /**
    * Creates a Circe JSON message codec plugin.
@@ -179,7 +172,7 @@ object Default extends DefaultMeta {
     backend: SttpBackend[Effect, _],
     system: EffectSystem[Effect],
     webSocket: Boolean = false
-  ): HttpClientTransport[Effect] = SttpClient(url, method, backend, system, webSocket)
+  ): ClientTransport[Effect] = SttpClient(url, method, backend, system, webSocket)
 
   /**
    * Creates an asynchronous STTP HTTP & WebSocket client message transport plugin using 'Future' as an effect type.
@@ -195,7 +188,7 @@ object Default extends DefaultMeta {
    */
   def asyncClientTransport(url: URI, method: String, webSocket: Boolean = false)(implicit
     executionContext: ExecutionContext
-  ): HttpClientTransport[Future] =
+  ): ClientTransport[Future] =
     clientTransport(url, method, AsyncHttpClientFutureBackend(), asyncSystem, webSocket)
 
   /**
@@ -209,7 +202,7 @@ object Default extends DefaultMeta {
    * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @return synchronous client message transport plugin
    */
-  def syncClientTransport(url: URI, method: String, webSocket: Boolean = false): HttpClientTransport[Identity] = {
+  def syncClientTransport(url: URI, method: String, webSocket: Boolean = false): ClientTransport[Identity] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
     clientTransport(url, method, HttpURLConnectionBackend(), syncSystem, webSocket)
   }
@@ -236,7 +229,7 @@ object Default extends DefaultMeta {
     backend: SttpBackend[Effect, _],
     system: EffectSystem[Effect],
     webSocket: Boolean = false
-  ): HttpClient[Effect] = client(clientTransport(url, method, backend, system, webSocket))
+  ): Client[Effect, ClientContext] = client(clientTransport(url, method, backend, system, webSocket))
 
   /**
    * Creates an asynchronous STTP JSON-RPC HTTP & WebSocket client using 'Future' as an effect type.
@@ -254,7 +247,7 @@ object Default extends DefaultMeta {
    */
   def asyncClient(url: URI, method: String, webSocket: Boolean = false)(implicit
     executionContext: ExecutionContext
-  ): HttpClient[Future] =
+  ): Client[Future, ClientContext] =
     client(url, method, AsyncHttpClientFutureBackend(), asyncSystem, webSocket)
 
   /**
@@ -270,7 +263,7 @@ object Default extends DefaultMeta {
    * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @return synchronous RPC client
    */
-  def syncClient(url: URI, method: String, webSocket: Boolean = false): HttpClient[Identity] = {
+  def syncClient(url: URI, method: String, webSocket: Boolean = false): Client[Identity, ClientContext] = {
     System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
     client(url, method, HttpURLConnectionBackend(), syncSystem, webSocket)
   }
@@ -296,14 +289,14 @@ object Default extends DefaultMeta {
    * @return RPC server
    */
   def server[Effect[_]](
-    handler: Types.HandlerAnyCodec[Effect, HttpServerContext],
+    handler: Types.HandlerAnyCodec[Effect, ServerContext],
     runEffect: Effect[Any] => Unit,
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): HttpServer[Effect] = UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
+  ): Server[Effect] = UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
 
   /**
    * Creates an Undertow JSON-RPC HTTP & WebSocket server with specified effect system plugin.
@@ -335,7 +328,7 @@ object Default extends DefaultMeta {
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): HttpServer[Effect] = {
+  ): Server[Effect] = {
     val handler = bindApis(Handler.protocol(DefaultRpcProtocol()).system(system).context[DefaultHttpServer.Context])
     server(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
   }
@@ -366,7 +359,7 @@ object Default extends DefaultMeta {
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  )(implicit executionContext: ExecutionContext): HttpServer[Future] = {
+  )(implicit executionContext: ExecutionContext): Server[Future] = {
     Seq(executionContext)
     val handler = bindApis(DefaultHandler.async)
     val runEffect = (_: Future[Any]) => ()
@@ -398,7 +391,7 @@ object Default extends DefaultMeta {
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): HttpServer[Identity] = {
+  ): Server[Identity] = {
     val handler = bindApis(DefaultHandler.sync)
     val runEffect = (_: Identity[Any]) => ()
     server(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)

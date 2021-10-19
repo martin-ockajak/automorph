@@ -484,7 +484,7 @@ val protocol = RestRpcProtocol(Default.codec)
 
 // Start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
 val system = Default.asyncSystem
-val handler = Handler.protocol(protocol).system(system).context[Default.HttpServerContext]
+val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
 val server = Default.server(handler, (_: Future[Any]) => (), 80, "/api")
 
 // Stop the server
