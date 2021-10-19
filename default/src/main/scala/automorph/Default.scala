@@ -3,8 +3,8 @@ package automorph
 import automorph.codec.json.CirceJsonCodec
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
-import automorph.system.{FutureSystem, IdentitySystem}
 import automorph.system.IdentitySystem.Identity
+import automorph.system.{FutureSystem, IdentitySystem}
 import automorph.transport.http.Http
 import automorph.transport.http.client.SttpClient
 import automorph.transport.http.server.UndertowServer
