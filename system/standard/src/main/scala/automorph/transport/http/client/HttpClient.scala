@@ -18,6 +18,8 @@ import java.util.function.BiFunction
 import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
 import scala.jdk.OptionConverters.RichOptional
+import scala.jdk.CollectionConverters.MapHasAsScala
+import scala.jdk.CollectionConverters.ListHasAsScala
 import scala.util.Try
 
 /**
@@ -62,7 +64,7 @@ final case class HttpClient[Effect[_]](
     mediaType: String,
     context: Option[Context]
   ): Effect[ArraySeq.ofByte] = {
-    val httpRequest = createRequest(requestBody, mediaType, context)
+    val httpRequest = createHttpRequest(requestBody, mediaType, context)
     system.flatMap(
       system.either(send(httpRequest, requestId)),
       (result: Either[Throwable, Response]) => {
@@ -90,7 +92,7 @@ final case class HttpClient[Effect[_]](
     mediaType: String,
     context: Option[Context]
   ): Effect[Unit] = {
-    val httpRequest = createRequest(requestBody, mediaType, context)
+    val httpRequest = createHttpRequest(requestBody, mediaType, context)
     system.map(send(httpRequest, requestId), (_: Response) => ())
   }
 
@@ -121,7 +123,7 @@ final case class HttpClient[Effect[_]](
     )
   }
 
-  private def createRequest(
+  private def createHttpRequest(
     request: ArraySeq.ofByte,
     mediaType: String,
     context: Option[Context]
@@ -132,7 +134,8 @@ final case class HttpClient[Effect[_]](
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
     val base = http.base.map(_.request).getOrElse(HttpRequest.newBuilder.uri(requestUrl))
     val headers = http.headers.map { case (name, value) => Seq(name, value) }.flatten.toArray
-    val httpRequestBuilder = base.uri(requestUrl).method(requestMethod, BodyPublishers.ofByteArray(request.unsafeArray))
+    val httpRequestBuilder = base.uri(requestUrl)
+      .method(requestMethod, BodyPublishers.ofByteArray(request.unsafeArray))
       .header(contentTypeHeader, mediaType)
       .header(acceptHeader, mediaType)
       .headers(headers*)
@@ -143,7 +146,13 @@ final case class HttpClient[Effect[_]](
     }.getOrElse(httpRequestBuilder).build
   }
 
-  private def webSocket(url: URI): Effect[WebSocket] = {
+  private def createWebSocket(context: Option[Context]): Effect[WebSocket] = {
+    val http = context.getOrElse(defaultContext)
+    val requestUrl = http.overrideUrl(url)
+    val base = http.base.map(_.request).getOrElse(HttpRequest.newBuilder.uri(requestUrl))
+    val headers = base.uri(requestUrl).build.headers.map.asScala.flatMap { case (name, values) =>
+      values.asScala.map(name -> _)
+    } ++ http.headers
     val listener = WebSocketListener()
     val webSocketBuilder = httpClient.newWebSocketBuilder
     effect(httpClient.connectTimeout.toScala
