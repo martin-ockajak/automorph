@@ -15,7 +15,7 @@ import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
 import scala.jdk.CollectionConverters.EnumerationHasAsScala
 
 /**
- * Jetty web server HTTP endpoint message transport plugin.
+ * Jetty HTTP endpoint message transport plugin.
  *
  * The servlet interprets HTTP request body as an RPC request and processes it with the specified RPC handler.
  * The response returned by the RPC handler is used as HTTP response body.
@@ -23,7 +23,7 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
  * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
  * @see [[https://www.eclipse.org/jetty Library documentation]]
  * @see [[https://www.eclipse.org/jetty/javadoc/jetty-11/index.html API]]
- * @constructor Creates a Jetty web server HTTP servlet with the specified RPC request handler.
+ * @constructor Creates a Jetty HTTP servlet with the specified RPC request handler.
  * @param handler RPC request handler
  * @param runEffect executes specified effect asynchronously
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code

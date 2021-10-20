@@ -14,13 +14,13 @@ import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.util.Using
 
 /**
- * URL connection HTTP client message transport plugin.
+ * HttpURLConnection HTTP client message transport plugin.
  *
  * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
  * @see [[https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol Transport protocol]]
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
- * @constructor Creates an HTTP URL connection client transport plugin.
+ * @constructor Creates an HttpURLConnection HTTP client message transport plugin.
  * @param url HTTP server endpoint URL
  * @param method HTTP method
  * @param system effect system plugin
@@ -77,21 +77,20 @@ final case class UrlClient[Effect[_]](
     system.map(send(requestBody, requestId, mediaType, http), (_: EffectValue) => ())
   }
 
-  override def defaultContext: Context = HttpUrlConnectionContext.default
+  override def defaultContext: Context = UrlContext.default
 
   override def close(): Effect[Unit] = system.pure(())
 
   private def send(request: ArraySeq.ofByte, requestId: String, mediaType: String, context: Context): Effect[EffectValue] =
     system.wrap {
-      val httpMethod = determineMethod(context)
       val connection = createConnection(context)
+      val httpMethod = setRequestProperties(connection, request, mediaType, context)
       lazy val requestProperties = Map(
         LogProperties.requestId -> requestId,
         "URL" -> connection.getURL.toExternalForm,
-        "Method" -> httpMethod.toString
+        "Method" -> httpMethod
       )
       logger.trace("Sending HTTP request", requestProperties)
-      setRequestProperties(connection, request, mediaType, httpMethod, context)
       connection.setDoOutput(true)
       val outputStream = connection.getOutputStream
       val write = Using(outputStream) { stream =>
@@ -110,24 +109,25 @@ final case class UrlClient[Effect[_]](
     connection: HttpURLConnection,
     request: ArraySeq.ofByte,
     mediaType: String,
-    httpMethod: String,
     http: Context
-  ): Unit = {
+  ): String = {
+    val requestMethod = http.method.orElse(http.base.map(_.connection.getRequestMethod)).getOrElse(method)
+    require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
     val base = http.base.map(_.connection).getOrElse(connection)
-    require(httpMethods.contains(httpMethod), s"Invalid HTTP method: $httpMethod")
-    connection.setRequestMethod(httpMethod)
+    connection.setRequestMethod(requestMethod)
+    (connectionHeaders(base) ++ http.headers).foreach { case (name, value) =>
+      connection.setRequestProperty(name, value)
+    }
+    connection.setRequestProperty(contentLengthHeader, request.size.toString)
+    connection.setRequestProperty(contentTypeHeader, mediaType)
+    connection.setRequestProperty(acceptHeader, mediaType)
     connection.setInstanceFollowRedirects(http.followRedirects.getOrElse(base.getInstanceFollowRedirects))
     connection.setConnectTimeout(http.readTimeout.map(_.toMillis.toInt).getOrElse(base.getConnectTimeout))
     connection.setReadTimeout(http.readTimeout.map {
       case Duration.Inf => 0
       case duration => duration.toMillis.toInt
     }.getOrElse(base.getReadTimeout))
-    connection.setRequestProperty(contentLengthHeader, request.size.toString)
-    connection.setRequestProperty(contentTypeHeader, mediaType)
-    connection.setRequestProperty(acceptHeader, mediaType)
-    (connectionHeaders(base) ++ http.headers).foreach { case (name, value) =>
-      connection.setRequestProperty(name, value)
-    }
+    requestMethod
   }
 
   private def createConnection(http: Context): HttpURLConnection = {
@@ -145,15 +145,15 @@ final case class UrlClient[Effect[_]](
 object UrlClient {
 
   /** Request context type. */
-  type Context = Http[HttpUrlConnectionContext]
+  type Context = Http[UrlContext]
 
   /** Effect value type. */
   private type EffectValue = (HttpURLConnection, ArraySeq.ofByte)
 }
 
-final case class HttpUrlConnectionContext(connection: HttpURLConnection)
+final case class UrlContext(connection: HttpURLConnection)
 
-object HttpUrlConnectionContext {
+object UrlContext {
   /** Implicit default context value. */
-  implicit val default: Http[HttpUrlConnectionContext] = Http()
+  implicit val default: Http[UrlContext] = Http()
 }

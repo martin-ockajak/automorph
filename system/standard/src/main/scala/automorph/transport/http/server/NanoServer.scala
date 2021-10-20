@@ -18,7 +18,7 @@ import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.MapHasAsScala
 
 /**
- * NanoHTTPD web server HTTP server transport plugin.
+ * NanoHTTPD HTTP server transport plugin.
  *
  * The server interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
  * The response returned by the RPC handler is used as HTTP response body.
@@ -26,7 +26,7 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
  * @see [[https://github.com/NanoHttpd/nanohttpd Library documentation]]
  * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
- * @constructor Creates a NanoHTTPD HTTP server with the specified RPC request handler.
+ * @constructor Creates a NanoHTTPD HTTP & WebSocket server with the specified RPC request handler.
  * @param handler RPC request handler
  * @param executeEffect executes specified effect synchronously
  * @param port port to listen on for HTTP connections
@@ -88,7 +88,8 @@ final case class NanoServer[Effect[_]] private (
 
     override protected def onPong(pong: WebSocketFrame): Unit = ()
 
-    override protected def onException(exception: IOException): Unit = ()
+    override protected def onException(exception: IOException): Unit =
+      logger.error(s"Failed to receive ${Protocol.WebSocket} request", exception)
   }
 
   private def handleRequest(

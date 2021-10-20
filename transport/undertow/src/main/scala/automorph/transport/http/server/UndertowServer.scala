@@ -13,7 +13,7 @@ import java.net.InetSocketAddress
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
- * Undertow web server HTTP & WebSocket server transport plugin.
+ * Undertow HTTP & WebSocket server transport plugin.
  *
  * The server interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
  * The response returned by the RPC handler is used as HTTP response body.
@@ -24,14 +24,14 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
  * @see [[https://undertow.io Library documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
- * @constructor Creates an Undertow HTTP server with the specified HTTP handler.
+ * @constructor Creates an Undertow HTTP & WebSocket server with the specified HTTP handler.
  * @param handler RPC request handler
  * @param runEffect executes specified effect asynchronously
  * @param port port to listen on for HTTP connections
  * @param path HTTP URL path (default: /)
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
- * @param builder Undertow web server builder
+ * @param builder Undertow builder
  * @tparam Effect effect type
  */
 final case class UndertowServer[Effect[_]](

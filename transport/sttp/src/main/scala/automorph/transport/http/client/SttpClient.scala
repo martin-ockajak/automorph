@@ -21,7 +21,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
  * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
- * @constructor Creates an STTP client transport plugin with the specified STTP backend.
+ * @constructor Creates an STTP HTTP & WebSocket client message transport plugin with the specified STTP backend.
  * @param url HTTP server endpoint URL
  * @param method HTTP method
  * @param backend STTP backend
@@ -123,17 +123,17 @@ final case class SttpClient[Effect[_]](
     context: Option[Context]
   ): Request[Array[Byte], WebSocket[Effect]] = {
     val http = context.getOrElse(defaultContext)
-    val base = http.base.map(_.request).getOrElse(basicRequest)
     val requestUrl = Uri(http.overrideUrl(defaultUrl.toJavaUri))
     val requestMethod = http.method.map(Method.unsafeApply).getOrElse(defaultMethod)
+    val base = http.base.map(_.request).getOrElse(basicRequest)
     val contentType = MediaType.unsafeParse(mediaType)
     val headers = base.headers ++ http.headers.map { case (name, value) => Header(name, value) }
     val httpRequest = base.method(requestMethod, requestUrl)
+      .headers(headers*)
       .contentType(contentType)
       .header(Header.accept(contentType))
       .followRedirects(http.followRedirects.getOrElse(base.options.followRedirects))
       .readTimeout(http.readTimeout.getOrElse(base.options.readTimeout))
-      .headers(headers: _*)
       .maxRedirects(base.options.maxRedirects)
     if (webSocket) {
       httpRequest.response(asWebSocketAlways(sendWebSocket(request)))

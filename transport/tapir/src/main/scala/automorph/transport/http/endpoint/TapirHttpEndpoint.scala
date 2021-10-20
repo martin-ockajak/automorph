@@ -87,16 +87,16 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 
 // FIXME - finish WebSocket support
 //  /**
-//   * Creates a Tapir HTTP endpoint with the specified RPC request handler.
+//   * Creates a Tapir WebSocket endpoint with the specified RPC request handler.
 //   *
-//   * The endpoint interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
-//   * The response returned by the RPC handler is used as HTTP response body.
+//   * The endpoint interprets WebSocket request body as a RPC request and processes it with the specified RPC handler.
+//   * The response returned by the RPC handler is used as WebSocket response body.
 //   *
 //   * @see [[https://tapir.softwaremill.com/ Documentation]]
 //   * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
 //   * @param handler RPC request handler
 //   * @tparam Effect effect type
-//   * @return Tapir HTTP endpoint
+//   * @return Tapir WebSocket endpoint
 //   */
 //  def apply[Effect[_], S](
 //    handler: Types.HandlerAnyCodec[Effect, Context],
