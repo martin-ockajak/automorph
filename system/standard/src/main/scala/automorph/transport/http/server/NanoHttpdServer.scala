@@ -8,9 +8,12 @@ import automorph.transport.http.Http
 import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
-import automorph.transport.http.server.NanoHttpdServer.Context
+import automorph.transport.http.server.NanoHttpdServer.{Context, Protocol}
+import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
+import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Network, Random}
+import java.io.IOException
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.MapHasAsScala
 
@@ -37,7 +40,7 @@ final case class NanoHttpdServer[Effect[_]] private (
   port: Int,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
   webSocket: Boolean = true
-) extends NanoHTTPD(port) with Logging with ServerMessageTransport[Effect] {
+) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect] {
 
   private val HeaderXForwardedFor = "X-Forwarded-For"
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -50,13 +53,52 @@ final case class NanoHttpdServer[Effect[_]] private (
     super.start()
   }
 
-  override def serve(session: IHTTPSession): Response = {
+  override protected def serveHttp(session: IHTTPSession): Response = {
     // Receive the request
+    val protocol = Protocol.Http
     val requestId = Random.id
-    lazy val requestDetails = requestProperties(session, requestId)
+    lazy val requestDetails = requestProperties(session, protocol, requestId)
     logger.trace("Receiving HTTP request", requestDetails)
     val request = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
-    logger.debug("Received HTTP request", requestDetails)
+
+    // Handler the request
+    handleRequest(request, session, protocol, requestDetails, requestId)
+  }
+
+  override protected def openWebSocket(session: IHTTPSession) = new WebSocket(session) {
+
+    override protected def onOpen(): Unit =
+      if (!webSocket) {
+        this.close(CloseCode.PolicyViolation, "WebSocket disabled", true)
+      }
+
+    override protected def onClose(code: WebSocketFrame.CloseCode, reason: String, initiatedByRemote: Boolean): Unit = ()
+
+    protected def onMessage(frame: WebSocketFrame): Unit = {
+      // Receive the request
+      val protocol = Protocol.WebSocket
+      val requestId = Random.id
+      lazy val requestDetails = requestProperties(session, protocol, requestId)
+      val request = Bytes.byteArray.from(frame.getBinaryPayload)
+      val response = handleRequest(request, session, protocol, requestDetails, requestId)
+
+      // Handler the request
+      send(Bytes.byteArray.to(Bytes.inputStream.from(response.getData)))
+    }
+
+    override protected def onPong(pong: WebSocketFrame): Unit = ()
+
+    override protected def onException(exception: IOException): Unit = ()
+  }
+
+  private def handleRequest(
+    request: ArraySeq.ofByte,
+    session: IHTTPSession,
+    protocol: Protocol,
+    requestDetails: Map[String, String],
+    requestId: String
+  ): Response = {
+    logger.debug(s"Received $protocol request", requestDetails)
 
     // Process the request
     implicit val usingContext: Context = createContext(session)
@@ -64,12 +106,12 @@ final case class NanoHttpdServer[Effect[_]] private (
       system.either(genericHandler.processRequest(request, requestId)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
         handlerResult.fold(
-          error => serverError(error, session, requestId, requestDetails),
+          error => serverError(error, session, protocol, requestId, requestDetails),
           result => {
             // Send the response
             val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
             val status = result.exception.map(exceptionToStatusCode).map(Status.lookup).getOrElse(Status.OK)
-            createResponse(response, status, session, requestId)
+            createResponse(response, status, session, protocol, requestId)
           }
         )
     ))
@@ -78,31 +120,35 @@ final case class NanoHttpdServer[Effect[_]] private (
   private def serverError(
     error: Throwable,
     session: IHTTPSession,
+    protocol: Protocol,
     requestId: String,
     requestDetails: => Map[String, String]
-  ): Response = {
-    logger.error("Failed to process HTTP request", error, requestDetails)
+  ) = {
+    logger.error(s"Failed to process $protocol request", error, requestDetails)
     val status = Status.INTERNAL_ERROR
     val message = Bytes.string.from(error.trace.mkString("\n"))
-    createResponse(message, status, session, requestId)
+    createResponse(message, status, session, protocol, requestId)
   }
 
   private def createResponse(
     message: ArraySeq.ofByte,
     status: Status,
     session: IHTTPSession,
+    protocol: Protocol,
     requestId: String
   ): Response = {
     lazy val responseDetails = Map(
       LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(session),
-      "Status" -> status.toString
-    )
-    logger.trace("Sending HTTP response", responseDetails)
+      "Client" -> clientAddress(session)
+    ) ++ (protocol match {
+      case Protocol.Http => Some("Status" -> status.toString)
+      case _ => None
+    })
+    logger.trace(s"Sending $protocol response", responseDetails)
     val inputStream = Bytes.inputStream.to(message)
     val mediaType = genericHandler.protocol.codec.mediaType
     val response = newFixedLengthResponse(status, mediaType, inputStream, message.size.toLong)
-    logger.debug("Sent HTTP response", responseDetails)
+    logger.debug(s"Sent $protocol response", responseDetails)
     response
   }
 
@@ -117,14 +163,17 @@ final case class NanoHttpdServer[Effect[_]] private (
 
   private def requestProperties(
     session: IHTTPSession,
+    protocol: Protocol,
     requestId: String
   ): Map[String, String] = Map(
     LogProperties.requestId -> requestId,
     "Client" -> clientAddress(session),
     "URL" -> (session.getUri + Option(session.getQueryParameterString)
-      .filter(_.nonEmpty).map("?" + _).getOrElse("")),
-    "Method" -> session.getMethod.toString
-  )
+      .filter(_.nonEmpty).map("?" + _).getOrElse(""))
+  ) ++ (protocol match {
+    case Protocol.Http => Some("Method" -> session.getMethod.toString)
+    case _ => None
+  })
 
   private def clientAddress(session: IHTTPSession): String = {
     val forwardedFor = Option(session.getHeaders.get(HeaderXForwardedFor))
@@ -164,5 +213,18 @@ object NanoHttpdServer {
     val server = new NanoHttpdServer(handler, runEffectSync, port, exceptionToStatusCode)
     server.start()
     server
+  }
+
+  /** Transport protocol. */
+  private sealed abstract class Protocol(val name: String) {
+    override def toString: String = name
+  }
+
+  /** Transport protocols. */
+  private object Protocol {
+
+    case object Http extends Protocol("HTTP")
+
+    case object WebSocket extends Protocol("WebSocket")
   }
 }
