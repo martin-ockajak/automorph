@@ -13,7 +13,7 @@
 ## Features
 
 * **Convenient** - client-side or server-side remote API bindings are created automatically by analyzing public methods of existing API classes
-* **Modular** - [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) protocol, [transport](https://en.wikipedia.org/wiki/Transport_layer) protocol, message [format](https://en.wikipedia.org/wiki/File_format) and [effect](https://en.wikipedia.org/wiki/Effect_system) type can be freely combined by choosing appropriate plugins
+* **Modular** - [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) protocol, [effect](https://en.wikipedia.org/wiki/Effect_system) type, [transport](https://en.wikipedia.org/wiki/Transport_layer) protocol and message [format](https://en.wikipedia.org/wiki/File_format) and  can be freely combined by choosing appropriate plugins
 * **Clean** - request and response transport protocol metadata can be accessed using optional API abstractions
 * **Safe** - optimized API binding code is generated and type checked during compilation
 * **Flexible** - remote API method names and exception to error mapping are customizable
