@@ -50,12 +50,12 @@ final case class SttpClient[Effect[_]](
     val httpRequest = createRequest(requestBody, mediaType, context)
     system.flatMap(
       system.either(send(httpRequest, requestId)),
-      (response: Either[Throwable, Response[Array[Byte]]]) => {
+      (result: Either[Throwable, Response[Array[Byte]]]) => {
         lazy val responseProperties = Map(
           LogProperties.requestId -> requestId,
           "URL" -> httpRequest.uri.toString
         )
-        response.fold(
+        result.fold(
           error => {
             logger.error(s"Failed to receive $protocol response", error, responseProperties)
             system.failed(error)

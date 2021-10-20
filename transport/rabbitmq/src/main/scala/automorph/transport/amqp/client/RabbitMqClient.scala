@@ -4,8 +4,9 @@ import automorph.log.Logging
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
-import automorph.transport.amqp.client.RabbitMqClient.Context
+import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
 import automorph.transport.amqp.{Amqp, RabbitMqCommon, RabbitMqContext}
+import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
@@ -42,7 +43,7 @@ final case class RabbitMqClient[Effect[_]](
   routingKey: String,
   system: EffectSystem[Effect],
   blockingEffect: (() => Unit) => Effect[Unit],
-  promisedEffect: () => (Effect[ArraySeq.ofByte], ArraySeq.ofByte => Unit),
+  promisedEffect: () => (Effect[Response], Response => Unit),
   exchange: String = RabbitMqCommon.defaultDirectExchange,
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
@@ -52,7 +53,7 @@ final case class RabbitMqClient[Effect[_]](
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
   private val urlText = url.toURL.toExternalForm
-  private val deliveryHandlers = TrieMap[String, ArraySeq.ofByte => Unit]()
+  private val responseHandlers = TrieMap[String, Response => Unit]()
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
 
   override def call(
@@ -62,8 +63,8 @@ final case class RabbitMqClient[Effect[_]](
     context: Option[Context]
   ): Effect[ArraySeq.ofByte] = {
     val amqpProperties = createProperties(requestId, mediaType, context)
-    val (result, complete) = promisedEffect()
-    system.flatMap(send(requestBody, amqpProperties, Some(complete)), (_: Unit) => result)
+    val (effectResult, completeEffect) = promisedEffect()
+    system.flatMap(send(requestBody, amqpProperties, Some(completeEffect)), (_: Unit) => effectResult)
   }
 
   override def notify(
@@ -83,15 +84,15 @@ final case class RabbitMqClient[Effect[_]](
   private def send(
     request: ArraySeq.ofByte,
     amqpProperties: BasicProperties,
-    complete: Option[ArraySeq.ofByte => Unit]
+    completeEffect: Option[Response => Unit]
   ): Effect[Unit] = {
     val requestId = amqpProperties.getCorrelationId
     lazy val requestProperties = RabbitMqCommon.messageProperties(requestId, routingKey, urlText, None)
     logger.trace("Sending AMQP request", requestProperties)
     val consumer = threadConsumer.get
 
-    // Retain result promise if available
-    complete.foreach(deliveryHandlers.put(requestId, _))
+    // Retain response handling promise if available
+    completeEffect.foreach(responseHandlers.put(requestId, _))
 
     // Send the request
     blockingEffect(() =>
@@ -129,13 +130,13 @@ final case class RabbitMqClient[Effect[_]](
         consumerTag: String,
         envelope: Envelope,
         properties: BasicProperties,
-        body: Array[Byte]
+        messageBody: Array[Byte]
       ): Unit = {
         lazy val responseProperties =
           RabbitMqCommon.messageProperties(properties.getCorrelationId, routingKey, urlText, None)
         logger.debug("Received AMQP response", responseProperties)
-        deliveryHandlers.get(properties.getCorrelationId).foreach { complete =>
-          complete(new ArraySeq.ofByte(body))
+        responseHandlers.get(properties.getCorrelationId).foreach { complete =>
+          complete(Bytes.byteArray.from(messageBody))
         }
       }
     }
@@ -158,6 +159,9 @@ object RabbitMqClient {
 
   /** Request context type. */
   type Context = Amqp[RabbitMqContext]
+
+  /** Response type. */
+  type Response = ArraySeq.ofByte
 
   /**
    * Creates asynchronous RabbitMQ client transport plugin.

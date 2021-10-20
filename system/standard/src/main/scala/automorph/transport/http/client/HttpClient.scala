@@ -4,14 +4,18 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Protocol}
+import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Protocol, Response}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
-import java.net.URI
-import java.net.http.HttpClient.Redirect
 import java.net.http.HttpRequest.BodyPublishers
 import java.net.http.HttpResponse.BodyHandlers
-import java.net.http.{HttpRequest, HttpResponse}
+import java.net.http.WebSocket.Listener
+import java.net.http.{HttpRequest, HttpResponse, WebSocket}
+import java.net.{HttpURLConnection, URI}
+import java.nio.ByteBuffer
+import java.util.concurrent.CompletionStage
+import java.util.function.BiFunction
+import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
 import scala.jdk.OptionConverters.RichOptional
 import scala.util.Try
@@ -29,6 +33,7 @@ import scala.util.Try
  * @param url HTTP server endpoint URL
  * @param method HTTP method
  * @param system effect system plugin
+ * @param promisedEffect creates a not yet completed effect and its completion and failure functions
  * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
  * @param builder HttpClient builder
  * @tparam Effect effect type
@@ -37,6 +42,7 @@ final case class HttpClient[Effect[_]](
   url: URI,
   method: String,
   system: EffectSystem[Effect],
+  promisedEffect: () => (Effect[Response], Response => Unit, Throwable => Unit),
   webSocket: Boolean = false,
   builder: java.net.http.HttpClient.Builder = defaultBuilder
 ) extends ClientMessageTransport[Effect, Context] with Logging {
@@ -47,6 +53,15 @@ final case class HttpClient[Effect[_]](
   private val acceptHeader = "Accept"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   private val protocol = if (webSocket) Protocol.WebSocket else Protocol.Http
+  private val responseHandlers = TrieMap[String, Response => Unit]()
+
+  private val webSocketListener = new Listener {
+
+    override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[_] = {
+      webSocket.request(1)
+      super.onBinary(webSocket, data, last)
+    }
+  }
   require(httpMethods.contains(method), s"Invalid HTTP method: $method")
 
   override def call(
@@ -58,19 +73,19 @@ final case class HttpClient[Effect[_]](
     val httpRequest = createRequest(requestBody, mediaType, context)
     system.flatMap(
       system.either(send(httpRequest, requestId)),
-      (response: Either[Throwable, HttpResponse[Array[Byte]]]) => {
+      (result: Either[Throwable, Response]) => {
         lazy val responseProperties = Map(
           LogProperties.requestId -> requestId,
           "URL" -> httpRequest.uri.toString
         )
-        response.fold(
+        result.fold(
           error => {
             logger.error(s"Failed to receive $protocol response", error, responseProperties)
             system.failed(error)
           },
-          response => {
-            logger.debug(s"Received $protocol response", responseProperties + ("Status" -> response.statusCode.toString))
-            system.pure(Bytes.byteArray.from(response.body))
+          { case (responseBody, statusCode) =>
+            logger.debug(s"Received $protocol response", responseProperties ++ statusCode.map("Status" -> _))
+            system.pure(Bytes.byteArray.from(responseBody))
           }
         )
       }
@@ -84,33 +99,45 @@ final case class HttpClient[Effect[_]](
     context: Option[Context]
   ): Effect[Unit] = {
     val httpRequest = createRequest(requestBody, mediaType, context)
-    system.map(send(httpRequest, requestId), (_: HttpResponse[Array[Byte]]) => ())
+    val (effectResult, completeEffect, failEffect) = promisedEffect()
+    system.map(send(httpRequest, requestId), (_: Response) => ())
   }
 
   override def defaultContext: Context = HttpContext.default
 
   override def close(): Effect[Unit] = system.wrap(())
 
-  private def send(
-    httpRequest: HttpRequest,
-    requestId: String
-  ): Effect[HttpResponse[Array[Byte]]] = system.wrap {
+  private def send(httpRequest: HttpRequest, requestId: String): Effect[Response] = {
+    val (effectResult, completeEffect, failEffect) = promisedEffect()
     lazy val requestProperties = Map(
       LogProperties.requestId -> requestId,
       "URL" -> httpRequest.uri.toString,
       "Method" -> httpRequest.method
     )
     logger.trace(s"Sending $protocol httpRequest", requestProperties)
-    Try(httpClient.send(httpRequest, BodyHandlers.ofByteArray)).pureFold(
+    Try(httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray)).pureFold(
       error => {
         logger.error(s"Failed to send $protocol httpRequest", error, requestProperties)
-        throw error
+        failEffect(error)
       },
-      response => {
+      sendResult => {
         logger.debug(s"Sent $protocol httpRequest", requestProperties)
-        response
+        sendResult.handle { case (result, exception) =>
+          Option(result).map { response =>
+            logger.debug(s"Sent $protocol httpRequest", requestProperties)
+            completeEffect(response.body -> Some(response.statusCode))
+          }.orElse(Option(exception).map { error =>
+            logger.error(s"Failed to send $protocol httpRequest", error, requestProperties)
+            failEffect(error)
+          }).getOrElse {
+            val error = new IllegalStateException("WebSocket listener provided neither response nor error")
+            logger.error(s"Failed to send $protocol httpRequest", error, requestProperties)
+            failEffect(error)
+          }
+        }
       }
     )
+    effectResult
   }
 
   private def createRequest(
@@ -144,6 +171,9 @@ object HttpClient {
 
   /** Request context type. */
   type Context = Http[HttpContext]
+
+  /** Response type. */
+  type Response = (Array[Byte], Option[Int])
 
   /** Transport protocol. */
   sealed abstract private class Protocol(val name: String) {
