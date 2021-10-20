@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.client.SttpClient.{Context, WebSocket}
+import automorph.transport.http.client.SttpClient.{Context, Protocol, WebSocket}
 import automorph.util.Bytes
 import java.net.URI
 import scala.collection.immutable.ArraySeq
@@ -39,7 +39,7 @@ final case class SttpClient[Effect[_]](
 
   private val defaultUrl = Uri(url)
   private val defaultMethod = Method.unsafeApply(method)
-  private val protocol = if (webSocket) "WebSocket" else "HTTP"
+  private val protocol = if (webSocket) Protocol.WebSocket else Protocol.Http
 
   override def call(
     requestBody: ArraySeq.ofByte,
@@ -150,6 +150,19 @@ object SttpClient {
 
   /** Request context type. */
   type Context = Http[SttpContext]
+
+  /** Transport protocol. */
+  private sealed abstract class Protocol(val name: String) {
+    override def toString: String = name
+  }
+
+  /** Transport protocols. */
+  private object Protocol {
+
+    case object Http extends Protocol("HTTP")
+
+    case object WebSocket extends Protocol("WebSocket")
+  }
 }
 
 final case class SttpContext(request: PartialRequest[Either[String, String], Any])
