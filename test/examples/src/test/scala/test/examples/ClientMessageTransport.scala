@@ -2,7 +2,7 @@ package test.examples
 
 import automorph.Default
 import automorph.system.IdentitySystem
-import automorph.transport.http.client.HttpUrlConnectionClient
+import automorph.transport.http.client.UrlClient
 import java.net.URI
 
 object ClientMessageTransport extends App {
@@ -17,7 +17,7 @@ object ClientMessageTransport extends App {
   val server = Default.syncServer(_.bind(api), 80, "/api")
 
   // Create HttpUrlConnection HTTP client message transport
-  val transport = HttpUrlConnectionClient(new URI("http://localhost/api"), "POST", IdentitySystem())
+  val transport = UrlClient(new URI("http://localhost/api"), "POST", IdentitySystem())
 
   // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.client(transport)

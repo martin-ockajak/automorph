@@ -589,7 +589,7 @@ libraryDependencies ++= Seq(
 ```scala
 import automorph.Default
 import automorph.system.IdentitySystem
-import automorph.transport.http.client.HttpUrlConnectionClient
+import automorph.transport.http.client.UrlClient
 import java.net.URI
 
 // Define an API type and create its instance
@@ -613,7 +613,7 @@ server.close()
 
 ```scala
 // Create HttpUrlConnection HTTP client message transport
-val transport = HttpUrlConnectionClient(new URI("http://localhost/api"), "POST", IdentitySystem())
+val transport = UrlClient(new URI("http://localhost/api"), "POST", IdentitySystem())
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val client = Default.client(transport)
@@ -642,7 +642,7 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.Default
-import automorph.transport.http.server.NanoHttpdServer
+import automorph.transport.http.server.NanoServer
 import java.net.URI
 
 // Define an API type and create its instance
@@ -656,8 +656,8 @@ val api = new Api()
 
 ```scala
 // Start NanoHTTPD JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val handler = Default.syncHandler[NanoHttpdServer.Context]
-val server = NanoHttpdServer(handler.bind(api), identity, 80)
+val handler = Default.syncHandler[NanoServer.Context]
+val server = NanoServer(handler.bind(api), identity, 80)
 
 // Stop the server
 server.close()

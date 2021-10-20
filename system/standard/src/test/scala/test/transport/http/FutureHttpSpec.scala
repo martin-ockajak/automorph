@@ -4,8 +4,8 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.Http
-import automorph.transport.http.client.HttpUrlConnectionClient
-import automorph.transport.http.server.NanoHttpdServer
+import automorph.transport.http.client.UrlClient
+import automorph.transport.http.server.NanoServer
 import java.net.URI
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
@@ -20,7 +20,7 @@ class FutureHttpSpec extends ProtocolCodecSpec {
   type Context = Http[_]
 
   private lazy val servers = fixtures.map { fixture =>
-    NanoHttpdServer[Effect](fixture.handler, await, fixture.serverPort)
+    NanoServer[Effect](fixture.handler, await, fixture.serverPort)
   }
 
   override lazy val arbitraryContext: Arbitrary[Context] = Generator.context
@@ -32,7 +32,7 @@ class FutureHttpSpec extends ProtocolCodecSpec {
   override def customTransport(port: Int): Option[ClientMessageTransport[Effect, Context]] = synchronized {
     val url = new URI(s"http://localhost:$port")
 //    val url = new URI(s"http://localhost:1234")
-    Some(HttpUrlConnectionClient(url, "POST", system).asInstanceOf[ClientMessageTransport[Effect, Context]])
+    Some(UrlClient(url, "POST", system).asInstanceOf[ClientMessageTransport[Effect, Context]])
   }
 
   override def beforeAll(): Unit = {

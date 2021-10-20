@@ -8,7 +8,7 @@ import automorph.transport.http.Http
 import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
-import automorph.transport.http.server.NanoHttpdServer.{Context, Protocol}
+import automorph.transport.http.server.NanoServer.{Context, Protocol}
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.util.Extensions.ThrowableOps
@@ -34,7 +34,7 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
  * @tparam Effect effect type
  */
-final case class NanoHttpdServer[Effect[_]] private (
+final case class NanoServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
   executeEffect: Effect[Response] => Response,
   port: Int,
@@ -182,7 +182,7 @@ final case class NanoHttpdServer[Effect[_]] private (
   }
 }
 
-object NanoHttpdServer {
+object NanoServer {
 
   /** Request context type. */
   type Context = Http[_]
@@ -209,8 +209,8 @@ object NanoHttpdServer {
     port: Int,
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true
-  ): NanoHttpdServer[Effect] = {
-    val server = new NanoHttpdServer(handler, runEffectSync, port, exceptionToStatusCode)
+  ): NanoServer[Effect] = {
+    val server = new NanoServer(handler, runEffectSync, port, exceptionToStatusCode)
     server.start()
     server
   }

@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.client.HttpUrlConnectionClient.{Context, EffectValue}
+import automorph.transport.http.client.UrlClient.{Context, EffectValue}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.{HttpURLConnection, URI}
@@ -26,7 +26,7 @@ import scala.util.Using
  * @param system effect system plugin
  * @tparam Effect effect type
  */
-final case class HttpUrlConnectionClient[Effect[_]](
+final case class UrlClient[Effect[_]](
   url: URI,
   method: String,
   system: EffectSystem[Effect]
@@ -142,7 +142,7 @@ final case class HttpUrlConnectionClient[Effect[_]](
     }
 }
 
-object HttpUrlConnectionClient {
+object UrlClient {
 
   /** Request context type. */
   type Context = Http[HttpUrlConnectionContext]
