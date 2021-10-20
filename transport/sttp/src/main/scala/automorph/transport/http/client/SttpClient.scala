@@ -113,8 +113,7 @@ final case class SttpClient[Effect[_]](
     webSocket =>
       system.flatMap(
         webSocket.sendBinary(request.unsafeArray),
-        (_: Unit) =>
-          webSocket.receiveBinary(true)
+        (_: Unit) => webSocket.receiveBinary(true)
       )
 
   private def createRequest(
@@ -152,7 +151,7 @@ object SttpClient {
   type Context = Http[SttpContext]
 
   /** Transport protocol. */
-  private sealed abstract class Protocol(val name: String) {
+  sealed abstract private class Protocol(val name: String) {
     override def toString: String = name
   }
 
