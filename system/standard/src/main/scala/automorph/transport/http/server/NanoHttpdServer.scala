@@ -5,6 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.Http
+import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.transport.http.server.NanoHttpdServer.Context
@@ -26,7 +27,6 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  * @param handler RPC request handler
  * @param evaluateEffect executes specified effect synchronously
  * @param port port to listen on for HTTP connections
- * @param readTimeout HTTP connection read timeout (milliseconds)
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @tparam Effect effect type
  */
@@ -34,7 +34,6 @@ final case class NanoHttpdServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
   evaluateEffect: Effect[Response] => Response,
   port: Int,
-  readTimeout: Int,
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
 ) extends NanoHTTPD(port) with Logging with ServerMessageTransport[Effect] {
 
@@ -138,17 +137,17 @@ object NanoHttpdServer {
   type Context = Http[_]
 
   /** Response type. */
-  type Response = automorph.transport.http.server.NanoHTTPD.Response
+  type Response = NanoHTTPD.Response
 
   /**
    * Creates a NanoHTTPD web server with the specified RPC request handler.
    *
-   * @see [[https://github.com/NanoHttpd/nanohttpd Documentation]]
+   * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   * @see [[https://github.com/NanoHttpd/nanohttpd Library documentation]]
    * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
    * @param handler RPC request handler
    * @param runEffectSync synchronous effect execution function
    * @param port port to listen on for HTTP connections
-   * @param readTimeout HTTP connection read timeout (milliseconds)
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @tparam Effect effect type
    */
@@ -156,10 +155,9 @@ object NanoHttpdServer {
     handler: Types.HandlerAnyCodec[Effect, Context],
     runEffectSync: Effect[Response] => Response,
     port: Int,
-    readTimeout: Int = 5000,
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
   ): NanoHttpdServer[Effect] = {
-    val server = new NanoHttpdServer(handler, runEffectSync, port, readTimeout, exceptionToStatusCode)
+    val server = new NanoHttpdServer(handler, runEffectSync, port, exceptionToStatusCode)
     server.start()
     server
   }
