@@ -6,22 +6,22 @@
 
 ## Goals
 
-* Enable consuming and exposing **remote APIs** transparently and directly **without another layer**
+* Enable consuming and exposing **remote APIs** transparently **without** the requirement to craft an **intermediate layer**
+* Preserve user's **freedom** to make **technical decisions** and **access transport protocol** metadata
 * Strive for **smooth integration** with other **libraries** and existing **applications**
-* Preserve user **freedom** to make suitable **technical decisions**
 
 ## Features
 
 * **Convenient** - client-side or server-side remote API bindings are created automatically by analyzing public methods of existing API classes
 * **Modular** - [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) protocol, [transport](https://en.wikipedia.org/wiki/Transport_layer) protocol, message [format](https://en.wikipedia.org/wiki/File_format) and [effect](https://en.wikipedia.org/wiki/Effect_system) type can be freely combined by choosing appropriate plugins
-* **Clean** - request and response transport protocol metadata can be manipulated via optional API abstractions
+* **Clean** - request and response transport protocol metadata can be accessed using optional API abstractions
 * **Safe** - optimized API binding code is generated and type checked during compilation
 * **Flexible** - remote API method names and exception to error mapping are customizable
-* **Extensible** - additional plugins and arbitrary data type serialization support can be added with minimal effort
+* **Extensible** - additional plugins and custom data type serialization support can be added with minimal effort
 * **Compatible** - artifacts are currently available for [Scala 3](https://dotty.epfl.ch/) with upcoming support for [Scala 2.13](https://www.scala-lang.org/news/2.13.0) and [Scala 2.12](https://www.scala-lang.org/news/2.12.0/)
 * **Descriptive** - [OpenAPI](https://github.com/OAI/OpenAPI-Specification) specification in [JSON](https://en.wikipedia.org/wiki/JSON) format can be assembled for remote APIs
-* **Boilerplate free** - even advanced use-cases require only a few lines of code
 * **Dependency free** - core functionality depends on [SLF4J API](http://www.slf4j.org/) only
+* **Boilerplate free** - even advanced use-cases require only a few lines of code
 
 ## Supported standards
 
