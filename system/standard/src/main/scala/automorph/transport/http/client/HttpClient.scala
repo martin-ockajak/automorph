@@ -104,9 +104,8 @@ final case class HttpClient[Effect[_]](
     val (effectResult, completeEffect, failEffect) = promisedEffect()
     lazy val requestProperties = Map(
       LogProperties.requestId -> requestId,
-      "URL" -> httpRequest.uri.toString,
-      "Method" -> httpRequest.method
-    )
+      "URL" -> httpRequest.uri.toString
+    ) ++ Option.when(!webSocket)("Method" -> httpRequest.method)
     logger.trace(s"Sending $protocol httpRequest", requestProperties)
     system.flatMap(
       system.either(effect(httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray))),
@@ -148,7 +147,7 @@ final case class HttpClient[Effect[_]](
     }.getOrElse(httpRequestBuilder).build
   }
 
-  private def createWebSocket(context: Option[Context]): Effect[WebSocket] = {
+  private def createWebSocketBuilder(context: Option[Context]): (WebSocket.Builder, URI) = {
     val http = context.getOrElse(defaultContext)
     val baseBuilder = http.base.map(_.request).getOrElse(HttpRequest.newBuilder)
     val baseRequest = Try(baseBuilder.build).toOption
@@ -164,8 +163,7 @@ final case class HttpClient[Effect[_]](
         builder.header(name, value) -> headers.tail
       }.getOrElse(builder -> headers)
     }.dropWhile(!_._2.isEmpty).headOption.map(_._1).getOrElse(connectionBuilder)
-    val listener = WebSocketListener()
-    effect(headersBuilder.buildAsync(url, listener))
+    headersBuilder -> requestUrl
   }
 
   private def effect[T](completableFuture: => CompletableFuture[T]): Effect[T] = {
