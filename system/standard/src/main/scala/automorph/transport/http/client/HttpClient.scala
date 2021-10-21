@@ -110,16 +110,17 @@ final case class HttpClient[Effect[_]](
     logger.trace(s"Sending $protocol httpRequest", requestProperties)
     system.flatMap(
       system.either(effect(httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray))),
-      (result: Either[Throwable, HttpResponse[Array[Byte]]]) => result.fold(
-        error => {
-          logger.error(s"Failed to send $protocol httpRequest", error, requestProperties)
-          system.failed(error)
-        },
-        response => {
-          logger.debug(s"Sent $protocol httpRequest", requestProperties)
-          system.pure(response.body -> Some(response.statusCode))
-        }
-      )
+      (result: Either[Throwable, HttpResponse[Array[Byte]]]) =>
+        result.fold(
+          error => {
+            logger.error(s"Failed to send $protocol httpRequest", error, requestProperties)
+            system.failed(error)
+          },
+          response => {
+            logger.debug(s"Sent $protocol httpRequest", requestProperties)
+            system.pure(response.body -> Some(response.statusCode))
+          }
+        )
     )
   }
 
@@ -149,25 +150,32 @@ final case class HttpClient[Effect[_]](
 
   private def createWebSocket(context: Option[Context]): Effect[WebSocket] = {
     val http = context.getOrElse(defaultContext)
-    val requestUrl = http.overrideUrl(url)
-    val base = http.base.map(_.request).getOrElse(HttpRequest.newBuilder.uri(requestUrl))
-    val headers = base.uri(requestUrl).build.headers.map.asScala.flatMap { case (name, values) =>
+    val base = http.base.map(_.request).getOrElse(HttpRequest.newBuilder)
+    val baseRequest = Try(base.build).toOption
+    val requestUrl = http.overrideUrl(baseRequest.map(_.uri).getOrElse(url))
+    val httpHeaders = base.uri(requestUrl).build.headers.map.asScala.toSeq.flatMap { case (name, values) =>
       values.asScala.map(name -> _)
     } ++ http.headers
+    val connectionBuilder = httpClient.connectTimeout.toScala
+      .map(httpClient.newWebSocketBuilder.connectTimeout)
+      .getOrElse(httpClient.newWebSocketBuilder)
+    val headersBuilder = LazyList.iterate(connectionBuilder -> httpHeaders) { case (builder, headers) =>
+      headers.headOption.map { case (name, value) =>
+        builder.header(name, value) -> headers.tail
+      }.getOrElse(builder -> headers)
+    }.dropWhile(!_._2.isEmpty).headOption.map(_._1).getOrElse(connectionBuilder)
     val listener = WebSocketListener()
-    val webSocketBuilder = httpClient.newWebSocketBuilder
-    effect(httpClient.connectTimeout.toScala
-      .map(webSocketBuilder.connectTimeout).getOrElse(webSocketBuilder)
-      .buildAsync(url, listener))
+    effect(headersBuilder.buildAsync(url, listener))
   }
 
   private def effect[T](completableFuture: => CompletableFuture[T]): Effect[T] = {
     val (effectResult, completeEffect, failEffect) = promisedEffect()
     Try(completableFuture).pureFold(
       error => failEffect(error),
-      (value: CompletableFuture[T]) => value.handle { case (result, exception) =>
-        Option(result).map(completeEffect).orElse(Option(exception).map(failEffect)).getOrElse(failEffect)
-      }
+      (value: CompletableFuture[T]) =>
+        value.handle { case (result, exception) =>
+          Option(result).map(completeEffect).orElse(Option(exception).map(failEffect)).getOrElse(failEffect)
+        }
     )
     effectResult.asInstanceOf[Effect[T]]
   }
