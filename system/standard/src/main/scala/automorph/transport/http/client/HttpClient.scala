@@ -150,10 +150,10 @@ final case class HttpClient[Effect[_]](
 
   private def createWebSocket(context: Option[Context]): Effect[WebSocket] = {
     val http = context.getOrElse(defaultContext)
-    val base = http.base.map(_.request).getOrElse(HttpRequest.newBuilder)
-    val baseRequest = Try(base.build).toOption
+    val baseBuilder = http.base.map(_.request).getOrElse(HttpRequest.newBuilder)
+    val baseRequest = Try(baseBuilder.build).toOption
     val requestUrl = http.overrideUrl(baseRequest.map(_.uri).getOrElse(url))
-    val httpHeaders = base.uri(requestUrl).build.headers.map.asScala.toSeq.flatMap { case (name, values) =>
+    val httpHeaders = baseBuilder.uri(requestUrl).build.headers.map.asScala.toSeq.flatMap { case (name, values) =>
       values.asScala.map(name -> _)
     } ++ http.headers
     val connectionBuilder = httpClient.connectTimeout.toScala

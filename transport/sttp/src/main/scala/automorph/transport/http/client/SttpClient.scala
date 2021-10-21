@@ -121,18 +121,18 @@ final case class SttpClient[Effect[_]](
     context: Option[Context]
   ): Request[Array[Byte], WebSocket[Effect]] = {
     val http = context.getOrElse(defaultContext)
-    val base = http.base.map(_.request).getOrElse(basicRequest)
+    val baseRequest = http.base.map(_.request).getOrElse(basicRequest)
     val requestUrl = Uri(http.overrideUrl(defaultUrl.toJavaUri))
     val requestMethod = http.method.map(Method.unsafeApply).getOrElse(defaultMethod)
     val contentType = MediaType.unsafeParse(mediaType)
-    val headers = base.headers ++ http.headers.map { case (name, value) => Header(name, value) }
-    val sttpRequest = base.method(requestMethod, requestUrl)
+    val headers = baseRequest.headers ++ http.headers.map { case (name, value) => Header(name, value) }
+    val sttpRequest = baseRequest.method(requestMethod, requestUrl)
       .headers(headers*)
       .contentType(contentType)
       .header(Header.accept(contentType))
-      .followRedirects(http.followRedirects.getOrElse(base.options.followRedirects))
-      .readTimeout(http.readTimeout.getOrElse(base.options.readTimeout))
-      .maxRedirects(base.options.maxRedirects)
+      .followRedirects(http.followRedirects.getOrElse(baseRequest.options.followRedirects))
+      .readTimeout(http.readTimeout.getOrElse(baseRequest.options.readTimeout))
+      .maxRedirects(baseRequest.options.maxRedirects)
     if (webSocket) {
       sttpRequest.response(asWebSocketAlways(sendWebSocket(request)))
     } else {

@@ -117,22 +117,22 @@ final case class UrlClient[Effect[_]](
     context: Option[Context]
   ): String = {
     val http = context.getOrElse(defaultContext)
-    val base = http.base.map(_.connection).getOrElse(connection)
+    val baseConnection = http.base.map(_.connection).getOrElse(connection)
     val requestMethod = http.method.orElse(http.base.map(_.connection.getRequestMethod)).getOrElse(method)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
     connection.setRequestMethod(requestMethod)
-    (connectionHeaders(base) ++ http.headers).foreach { case (name, value) =>
+    (connectionHeaders(baseConnection) ++ http.headers).foreach { case (name, value) =>
       connection.setRequestProperty(name, value)
     }
     connection.setRequestProperty(contentLengthHeader, request.size.toString)
     connection.setRequestProperty(contentTypeHeader, mediaType)
     connection.setRequestProperty(acceptHeader, mediaType)
-    connection.setInstanceFollowRedirects(http.followRedirects.getOrElse(base.getInstanceFollowRedirects))
-    connection.setConnectTimeout(http.readTimeout.map(_.toMillis.toInt).getOrElse(base.getConnectTimeout))
+    connection.setInstanceFollowRedirects(http.followRedirects.getOrElse(baseConnection.getInstanceFollowRedirects))
+    connection.setConnectTimeout(http.readTimeout.map(_.toMillis.toInt).getOrElse(baseConnection.getConnectTimeout))
     connection.setReadTimeout(http.readTimeout.map {
       case Duration.Inf => 0
       case duration => duration.toMillis.toInt
-    }.getOrElse(base.getReadTimeout))
+    }.getOrElse(baseConnection.getReadTimeout))
     requestMethod
   }
 
