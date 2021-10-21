@@ -130,13 +130,13 @@ final case class HttpClient[Effect[_]](
     context: Option[Context]
   ): HttpRequest = {
     val http = context.getOrElse(defaultContext)
-    val base = http.base.map(_.request).getOrElse(HttpRequest.newBuilder)
-    val baseRequest = Try(base.build).toOption
+    val baseBuilder = http.base.map(_.request).getOrElse(HttpRequest.newBuilder)
+    val baseRequest = Try(baseBuilder.build).toOption
     val requestUrl = http.overrideUrl(baseRequest.map(_.uri).getOrElse(url))
     val requestMethod = http.method.getOrElse(method)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
     val headers = http.headers.map { case (name, value) => Seq(name, value) }.flatten.toArray
-    val httpRequestBuilder = base.uri(requestUrl)
+    val httpRequestBuilder = baseBuilder.uri(requestUrl)
       .method(requestMethod, BodyPublishers.ofByteArray(request.unsafeArray))
       .header(contentTypeHeader, mediaType)
       .header(acceptHeader, mediaType)
