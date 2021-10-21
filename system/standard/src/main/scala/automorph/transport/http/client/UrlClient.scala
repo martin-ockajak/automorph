@@ -43,10 +43,9 @@ final case class UrlClient[Effect[_]](
     requestId: String,
     mediaType: String,
     context: Option[Context]
-  ): Effect[ArraySeq.ofByte] = {
-    val http = context.getOrElse(defaultContext)
+  ): Effect[ArraySeq.ofByte] =
     system.flatMap(
-      send(requestBody, requestId, mediaType, http),
+      send(requestBody, requestId, mediaType, context),
       (_: EffectValue) match {
         case (connection: HttpURLConnection, _) =>
           system.wrap {
@@ -65,26 +64,28 @@ final case class UrlClient[Effect[_]](
           }
       }
     )
-  }
 
   override def notify(
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
     context: Option[Context]
-  ): Effect[Unit] = {
-    val http = context.getOrElse(defaultContext)
-    system.map(send(requestBody, requestId, mediaType, http), (_: EffectValue) => ())
-  }
+  ): Effect[Unit] =
+    system.map(send(requestBody, requestId, mediaType, context), (_: EffectValue) => ())
 
   override def defaultContext: Context = UrlContext.default
 
   override def close(): Effect[Unit] = system.pure(())
 
-  private def send(request: ArraySeq.ofByte, requestId: String, mediaType: String, context: Context): Effect[EffectValue] =
+  private def send(
+    request: ArraySeq.ofByte,
+    requestId: String,
+    mediaType: String,
+    context: Option[Context]
+  ): Effect[EffectValue] =
     system.wrap {
       val connection = createConnection(context)
-      val httpMethod = setRequestProperties(connection, request, mediaType, context)
+      val httpMethod = setConnectionProperties(connection, request, mediaType, context)
       lazy val requestProperties = Map(
         LogProperties.requestId -> requestId,
         "URL" -> connection.getURL.toExternalForm,
@@ -102,18 +103,23 @@ final case class UrlClient[Effect[_]](
       connection -> new ArraySeq.ofByte(Array.empty)
     }
 
-  private def determineMethod(http: Context): String =
-    http.method.orElse(http.base.map(_.connection.getRequestMethod)).getOrElse(method)
+  private def createConnection(context: Option[Context]): HttpURLConnection = {
+    val http = context.getOrElse(defaultContext)
+    val baseUrl = http.base.map(_.connection.getURL.toURI).getOrElse(url)
+    val requestUrl = http.overrideUrl(baseUrl)
+    requestUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
+  }
 
-  private def setRequestProperties(
+  private def setConnectionProperties(
     connection: HttpURLConnection,
     request: ArraySeq.ofByte,
     mediaType: String,
-    http: Context
+    context: Option[Context]
   ): String = {
+    val http = context.getOrElse(defaultContext)
+    val base = http.base.map(_.connection).getOrElse(connection)
     val requestMethod = http.method.orElse(http.base.map(_.connection.getRequestMethod)).getOrElse(method)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
-    val base = http.base.map(_.connection).getOrElse(connection)
     connection.setRequestMethod(requestMethod)
     (connectionHeaders(base) ++ http.headers).foreach { case (name, value) =>
       connection.setRequestProperty(name, value)
@@ -128,12 +134,6 @@ final case class UrlClient[Effect[_]](
       case duration => duration.toMillis.toInt
     }.getOrElse(base.getReadTimeout))
     requestMethod
-  }
-
-  private def createConnection(http: Context): HttpURLConnection = {
-    val baseUrl = http.base.map(_.connection.getURL.toURI).getOrElse(url)
-    val requestUrl = http.overrideUrl(baseUrl)
-    requestUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
   }
 
   private def connectionHeaders(connection: HttpURLConnection): Seq[(String, String)] =

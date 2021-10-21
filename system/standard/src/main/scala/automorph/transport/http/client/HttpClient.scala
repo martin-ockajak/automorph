@@ -129,10 +129,11 @@ final case class HttpClient[Effect[_]](
     context: Option[Context]
   ): HttpRequest = {
     val http = context.getOrElse(defaultContext)
-    val requestUrl = http.overrideUrl(url)
+    val base = http.base.map(_.request).getOrElse(HttpRequest.newBuilder)
+    val baseRequest = Try(base.build).toOption
+    val requestUrl = http.overrideUrl(baseRequest.map(_.uri).getOrElse(url))
     val requestMethod = http.method.getOrElse(method)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
-    val base = http.base.map(_.request).getOrElse(HttpRequest.newBuilder.uri(requestUrl))
     val headers = http.headers.map { case (name, value) => Seq(name, value) }.flatten.toArray
     val httpRequestBuilder = base.uri(requestUrl)
       .method(requestMethod, BodyPublishers.ofByteArray(request.unsafeArray))
@@ -141,7 +142,7 @@ final case class HttpClient[Effect[_]](
       .headers(headers*)
     http.readTimeout.map { timeout =>
       java.time.Duration.ofMillis(timeout.toMillis)
-    }.orElse(base.build.timeout.toScala).map { timeout =>
+    }.orElse(baseRequest.flatMap(_.timeout.toScala)).map { timeout =>
       httpRequestBuilder.timeout(timeout)
     }.getOrElse(httpRequestBuilder).build
   }

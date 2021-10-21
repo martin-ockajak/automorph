@@ -121,9 +121,9 @@ final case class SttpClient[Effect[_]](
     context: Option[Context]
   ): Request[Array[Byte], WebSocket[Effect]] = {
     val http = context.getOrElse(defaultContext)
+    val base = http.base.map(_.request).getOrElse(basicRequest)
     val requestUrl = Uri(http.overrideUrl(defaultUrl.toJavaUri))
     val requestMethod = http.method.map(Method.unsafeApply).getOrElse(defaultMethod)
-    val base = http.base.map(_.request).getOrElse(basicRequest)
     val contentType = MediaType.unsafeParse(mediaType)
     val headers = base.headers ++ http.headers.map { case (name, value) => Header(name, value) }
     val sttpRequest = base.method(requestMethod, requestUrl)
