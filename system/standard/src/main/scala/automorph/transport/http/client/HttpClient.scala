@@ -216,7 +216,6 @@ object HttpClient {
   private case class WebSocketListener(completeEffect: Response => Unit) extends Listener {
 
     override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[_] = {
-      webSocket.request(1)
       completeEffect(Bytes.byteBuffer.from(data) -> None)
       super.onBinary(webSocket, data, last)
     }
