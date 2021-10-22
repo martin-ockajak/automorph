@@ -122,7 +122,7 @@ final case class HttpClient[Effect[_]](
 
         // Use WebSocket connection
         { case (webSocketBuilder, requestBody) =>
-          val (effectResult, completeEffect, failEffect) = promisedEffect()
+          val (effectResult, completeEffect, _) = promisedEffect()
           val listener = WebSocketListener(completeEffect.asInstanceOf[Response => Unit])
           system.flatMap(
             effect(webSocketBuilder.buildAsync(url, listener)),
