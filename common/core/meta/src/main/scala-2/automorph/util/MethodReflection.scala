@@ -74,7 +74,7 @@ private[automorph] object MethodReflection {
    * @tparam Context request context type
    * @return true if the method uses request context as its last parameter, false otherwise
    */
-  def usesContext[C <: blackbox.Context, Context: ref.c.WeakTypeTag](
+  def usesRequestContext[C <: blackbox.Context, Context: ref.c.WeakTypeTag](
     ref: Reflection[C]
   )(method: ref.RefMethod): Boolean =
     method.parameters.flatten.lastOption.exists { parameter =>

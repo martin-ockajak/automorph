@@ -86,7 +86,7 @@ object HandlerGenerator {
       automorph.handler.HandlerBinding(
         ${method.lift.rpcFunction},
         $invoke,
-        ${MethodReflection.usesContext[C, Context](ref)(method)}
+        ${MethodReflection.usesRequestContext[C, Context](ref)(method)}
       )
     """)
   }

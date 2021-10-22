@@ -81,7 +81,7 @@ object ClientGenerator {
         ${method.lift.rpcFunction},
         $encodeArguments,
         $decodeResult,
-        ${MethodReflection.usesContext[C, Context](ref)(method)}
+        ${MethodReflection.usesRequestContext[C, Context](ref)(method)}
       )
     """)
   }
