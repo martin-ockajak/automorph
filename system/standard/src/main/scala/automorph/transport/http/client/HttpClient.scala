@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Protocol, Response, WebSocketListener}
+import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, WebSocketListener, defaultBuilder}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.http.HttpRequest.BodyPublishers
@@ -13,9 +13,9 @@ import java.net.http.WebSocket.Listener
 import java.net.http.{HttpRequest, HttpResponse, WebSocket}
 import java.net.{HttpURLConnection, URI}
 import java.nio.ByteBuffer
+import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.{CompletableFuture, CompletionStage}
 import java.util.function.BiFunction
-import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.jdk.OptionConverters.RichOptional
@@ -54,7 +54,7 @@ final case class HttpClient[Effect[_]](
   private val acceptHeader = "Accept"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   private val protocol = if (webSocket) Protocol.WebSocket else Protocol.Http
-  private val webSockets = TrieMap[URI, Effect[WebSocket]]()
+  private val webSockets = new AtomicReference[Map[URI, Effect[WebSocket]]](Map.empty)
   require(httpMethods.contains(method), s"Invalid HTTP method: $method")
 
   override def call(
@@ -189,8 +189,8 @@ final case class HttpClient[Effect[_]](
   }
 
   private def prepareWebSocket(context: Option[Context]): (Effect[WebSocket], Effect[Response], URI) = {
-    val (effectResult, completeEffect, failEffect) = promisedEffect()
     val (webSocketBuilder, requestUrl) = createWebSocketBuilder(context)
+    val (effectResult, completeEffect, failEffect) = promisedEffect()
     val listener = WebSocketListener(
       requestUrl,
       webSockets,
@@ -245,7 +245,7 @@ object HttpClient {
 
   private case class WebSocketListener[Effect[_]](
     url: URI,
-    webSockets: TrieMap[URI, Effect[WebSocket]],
+    webSockets: AtomicReference[Map[URI, Effect[WebSocket]]],
     completeEffect: Response => Unit,
     failEffect: Throwable => Unit
   ) extends Listener {
@@ -256,7 +256,6 @@ object HttpClient {
     }
 
     override def onClose(webSocket: WebSocket, statusCode: Int, reason: String): CompletionStage[_] = {
-      webSockets.remove(url)
       super.onClose(webSocket, statusCode, reason)
     }
 
