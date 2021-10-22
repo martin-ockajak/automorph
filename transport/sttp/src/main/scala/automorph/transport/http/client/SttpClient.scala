@@ -119,7 +119,7 @@ final case class SttpClient[Effect[_]](
       )
 
   private def createRequest(
-    request: ArraySeq.ofByte,
+    requestBody: ArraySeq.ofByte,
     mediaType: String,
     context: Option[Context]
   ): Request[Array[Byte], WebSocket[Effect]] = {
@@ -138,10 +138,10 @@ final case class SttpClient[Effect[_]](
       .maxRedirects(baseRequest.options.maxRedirects)
     if (webSocket) {
       // Use WebSocket connection
-      sttpRequest.response(asWebSocketAlways(sendWebSocket(request)))
+      sttpRequest.response(asWebSocketAlways(sendWebSocket(requestBody)))
     } else {
       // Use HTTP connection
-      sttpRequest.body(request.unsafeArray).response(asByteArrayAlways)
+      sttpRequest.body(requestBody.unsafeArray).response(asByteArrayAlways)
     }
   }
 }

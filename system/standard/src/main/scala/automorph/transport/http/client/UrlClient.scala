@@ -117,7 +117,7 @@ final case class UrlClient[Effect[_]](
 
   private def setConnectionProperties(
     connection: HttpURLConnection,
-    request: ArraySeq.ofByte,
+    requestBody: ArraySeq.ofByte,
     mediaType: String,
     context: Option[Context]
   ): String = {
@@ -129,7 +129,7 @@ final case class UrlClient[Effect[_]](
     (connectionHeaders(baseConnection) ++ http.headers).foreach { case (name, value) =>
       connection.setRequestProperty(name, value)
     }
-    connection.setRequestProperty(contentLengthHeader, request.size.toString)
+    connection.setRequestProperty(contentLengthHeader, requestBody.size.toString)
     connection.setRequestProperty(contentTypeHeader, mediaType)
     connection.setRequestProperty(acceptHeader, mediaType)
     connection.setInstanceFollowRedirects(http.followRedirects.getOrElse(baseConnection.getInstanceFollowRedirects))
