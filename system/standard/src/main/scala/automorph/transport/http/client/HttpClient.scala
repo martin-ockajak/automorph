@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, WebSocketListener, defaultBuilder}
+import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Protocol, Response, WebSocketListener}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.http.HttpRequest.BodyPublishers
@@ -115,21 +115,23 @@ final case class HttpClient[Effect[_]](
     system.flatMap(
       system.either(request.fold(
         // Use HTTP connection
-        httpRequest => system.map(
-          effect(httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray)),
-          response => Bytes.byteArray.from(response.body) -> Some(response.statusCode)
-        ),
+        httpRequest =>
+          system.map(
+            effect(httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray)),
+            response => Bytes.byteArray.from(response.body) -> Some(response.statusCode)
+          ),
 
         // Use WebSocket connection
         { case (webSocketBuilder, requestBody) =>
-          val (effectResult, completeEffect, _) = promisedEffect()
-          val listener = WebSocketListener(completeEffect.asInstanceOf[Response => Unit])
+          val (effectResult, completeEffect, failEFfect) = promisedEffect()
+          val listener = WebSocketListener(completeEffect.asInstanceOf[Response => Unit], failEFfect)
           system.flatMap(
             effect(webSocketBuilder.buildAsync(url, listener)),
-            webSocket => system.flatMap(
-              effect(webSocket.sendBinary(Bytes.byteBuffer.to(requestBody), true)),
-              _ => effectResult.asInstanceOf[Effect[Response]]
-            )
+            webSocket =>
+              system.flatMap(
+                effect(webSocket.sendBinary(Bytes.byteBuffer.to(requestBody), true)),
+                _ => effectResult.asInstanceOf[Effect[Response]]
+              )
           )
         }
       )),
@@ -213,11 +215,19 @@ object HttpClient {
 
   val defaultBuilder = java.net.http.HttpClient.newBuilder
 
-  private case class WebSocketListener(completeEffect: Response => Unit) extends Listener {
+  private case class WebSocketListener(
+    completeEffect: Response => Unit,
+    failEffect: Throwable => Unit
+  ) extends Listener {
 
     override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[_] = {
       completeEffect(Bytes.byteBuffer.from(data) -> None)
       super.onBinary(webSocket, data, last)
+    }
+
+    override def onError(webSocket: WebSocket, error: Throwable): Unit = {
+      failEffect(error)
+      super.onError(webSocket, error)
     }
   }
 
