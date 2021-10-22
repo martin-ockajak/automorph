@@ -86,6 +86,7 @@ final case class RabbitMqClient[Effect[_]](
     amqpProperties: BasicProperties,
     completeEffect: Option[Response => Unit]
   ): Effect[Unit] = {
+    // Log the request
     val requestId = amqpProperties.getCorrelationId
     lazy val requestProperties = RabbitMqCommon.messageProperties(requestId, routingKey, urlText, None)
     logger.trace("Sending AMQP request", requestProperties)

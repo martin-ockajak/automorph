@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Protocol, Response, WebSocketListener}
+import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, WebSocketListener, defaultBuilder}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.http.HttpRequest.BodyPublishers
@@ -17,9 +17,8 @@ import java.util.concurrent.{CompletableFuture, CompletionStage}
 import java.util.function.BiFunction
 import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
+import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.jdk.OptionConverters.RichOptional
-import scala.jdk.CollectionConverters.MapHasAsScala
-import scala.jdk.CollectionConverters.ListHasAsScala
 import scala.util.Try
 
 /**
@@ -66,7 +65,7 @@ final case class HttpClient[Effect[_]](
   ): Effect[ArraySeq.ofByte] = {
     val httpRequest = createHttpRequest(requestBody, mediaType, context)
     system.flatMap(
-      system.either(send(httpRequest, requestId)),
+      system.either(send(Left(httpRequest), httpRequest.uri, requestId)),
       (result: Either[Throwable, Response]) => {
         lazy val responseProperties = Map(
           LogProperties.requestId -> requestId,
@@ -79,7 +78,7 @@ final case class HttpClient[Effect[_]](
           },
           { case (responseBody, statusCode) =>
             logger.debug(s"Received $protocol response", responseProperties ++ statusCode.map("Status" -> _))
-            system.pure(Bytes.byteArray.from(responseBody))
+            system.pure(responseBody)
           }
         )
       }
@@ -93,23 +92,48 @@ final case class HttpClient[Effect[_]](
     context: Option[Context]
   ): Effect[Unit] = {
     val httpRequest = createHttpRequest(requestBody, mediaType, context)
-    system.map(send(httpRequest, requestId), (_: Response) => ())
+    system.map(send(Left(httpRequest), httpRequest.uri, requestId), (_: Response) => ())
   }
 
   override def defaultContext: Context = HttpContext.default
 
   override def close(): Effect[Unit] = system.wrap(())
 
-  private def send(httpRequest: HttpRequest, requestId: String): Effect[Response] = {
-    val (effectResult, completeEffect, failEffect) = promisedEffect()
+  private def send(
+    request: Either[HttpRequest, (WebSocket.Builder, ArraySeq.ofByte)],
+    requestUrl: URI,
+    requestId: String
+  ): Effect[Response] = {
+    // Log the request
     lazy val requestProperties = Map(
       LogProperties.requestId -> requestId,
-      "URL" -> httpRequest.uri.toString
-    ) ++ Option.when(!webSocket)("Method" -> httpRequest.method)
+      "URL" -> requestUrl.toString
+    ) ++ request.swap.toOption.map("Method" -> _.method)
     logger.trace(s"Sending $protocol httpRequest", requestProperties)
+
+    // Send the request
     system.flatMap(
-      system.either(effect(httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray))),
-      (result: Either[Throwable, HttpResponse[Array[Byte]]]) =>
+      system.either(request.fold(
+        // Use HTTP connection
+        httpRequest => system.map(
+          effect(httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray)),
+          response => Bytes.byteArray.from(response.body) -> Some(response.statusCode)
+        ),
+
+        // Use WebSocket connection
+        { case (webSocketBuilder, requestBody) =>
+          val (effectResult, completeEffect, failEffect) = promisedEffect()
+          val listener = WebSocketListener(completeEffect.asInstanceOf[Response => Unit])
+          system.flatMap(
+            effect(webSocketBuilder.buildAsync(url, listener)),
+            webSocket => system.flatMap(
+              effect(webSocket.sendBinary(Bytes.byteBuffer.to(requestBody), true)),
+              _ => effectResult.asInstanceOf[Effect[Response]]
+            )
+          )
+        }
+      )),
+      (result: Either[Throwable, Response]) =>
         result.fold(
           error => {
             logger.error(s"Failed to send $protocol httpRequest", error, requestProperties)
@@ -117,7 +141,7 @@ final case class HttpClient[Effect[_]](
           },
           response => {
             logger.debug(s"Sent $protocol httpRequest", requestProperties)
-            system.pure(response.body -> Some(response.statusCode))
+            system.pure(response)
           }
         )
     )
@@ -185,14 +209,15 @@ object HttpClient {
   type Context = Http[HttpContext]
 
   /** Response type. */
-  type Response = (Array[Byte], Option[Int])
+  type Response = (ArraySeq.ofByte, Option[Int])
 
   val defaultBuilder = java.net.http.HttpClient.newBuilder
 
-  private case class WebSocketListener() extends Listener {
+  private case class WebSocketListener(completeEffect: Response => Unit) extends Listener {
 
     override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[_] = {
       webSocket.request(1)
+      completeEffect(Bytes.byteBuffer.from(data) -> None)
       super.onBinary(webSocket, data, last)
     }
   }

@@ -87,11 +87,14 @@ final case class SttpClient[Effect[_]](
     sttpRequest: Request[R, WebSocket[Effect]],
     requestId: String
   ): Effect[Response[R]] = {
+    // Log the request
     lazy val requestProperties = Map(
       LogProperties.requestId -> requestId,
       "URL" -> sttpRequest.uri.toString,
     ) ++ Option.when(!webSocket)("Method" -> sttpRequest.method.toString)
     logger.trace(s"Sending $protocol request", requestProperties)
+
+    // Send the request
     system.flatMap(
       system.either(sttpRequest.send(backend.asInstanceOf[SttpBackend[Effect, WebSocket[Effect]]])),
       (result: Either[Throwable, Response[R]]) =>
@@ -134,8 +137,10 @@ final case class SttpClient[Effect[_]](
       .readTimeout(http.readTimeout.getOrElse(baseRequest.options.readTimeout))
       .maxRedirects(baseRequest.options.maxRedirects)
     if (webSocket) {
+      // Use WebSocket connection
       sttpRequest.response(asWebSocketAlways(sendWebSocket(request)))
     } else {
+      // Use HTTP connection
       sttpRequest.body(request.unsafeArray).response(asByteArrayAlways)
     }
   }

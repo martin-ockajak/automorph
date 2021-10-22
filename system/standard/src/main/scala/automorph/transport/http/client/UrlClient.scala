@@ -84,14 +84,19 @@ final case class UrlClient[Effect[_]](
     context: Option[Context]
   ): Effect[EffectValue] =
     system.wrap {
+      // Create the request
       val connection = createConnection(context)
       val httpMethod = setConnectionProperties(connection, request, mediaType, context)
+
+      // Log the request
       lazy val requestProperties = Map(
         LogProperties.requestId -> requestId,
         "URL" -> connection.getURL.toExternalForm,
         "Method" -> httpMethod
       )
       logger.trace("Sending HTTP request", requestProperties)
+
+      // Send the request
       connection.setDoOutput(true)
       val outputStream = connection.getOutputStream
       val write = Using(outputStream) { stream =>
