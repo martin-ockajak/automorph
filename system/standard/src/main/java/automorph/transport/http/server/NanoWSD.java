@@ -33,6 +33,10 @@ package automorph.transport.http.server;
  * #L%
  */
 
+// PATCH START
+import automorph.transport.http.server.NanoHTTPD.IHTTPSession;
+import automorph.transport.http.server.NanoHTTPD.Response;
+// PATCH END
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode;
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseFrame;
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.OpCode;
@@ -819,7 +823,7 @@ public abstract class NanoWSD extends NanoHTTPD {
         return connection != null && connection.toLowerCase().contains(NanoWSD.HEADER_CONNECTION_VALUE.toLowerCase());
     }
 
-    protected boolean isWebsocketRequested(IHTTPSession session) {
+    protected boolean isWebsocketRequested(NanoHTTPD.IHTTPSession session) {
         Map<String, String> headers = session.getHeaders();
         String upgrade = headers.get(NanoWSD.HEADER_UPGRADE);
         boolean isCorrectConnection = isWebSocketConnectionHeader(headers);
@@ -829,10 +833,10 @@ public abstract class NanoWSD extends NanoHTTPD {
 
     // --------------------------------Listener--------------------------------
 
-    protected abstract WebSocket openWebSocket(IHTTPSession handshake);
+    protected abstract WebSocket openWebSocket(NanoHTTPD.IHTTPSession handshake);
 
     @Override
-    public Response serve(final IHTTPSession session) {
+    public NanoHTTPD.Response serve(final NanoHTTPD.IHTTPSession session) {
         Map<String, String> headers = session.getHeaders();
         if (isWebsocketRequested(session)) {
             if (!NanoWSD.HEADER_WEBSOCKET_VERSION_VALUE.equalsIgnoreCase(headers.get(NanoWSD.HEADER_WEBSOCKET_VERSION))) {
@@ -845,7 +849,7 @@ public abstract class NanoWSD extends NanoHTTPD {
             }
 
             WebSocket webSocket = openWebSocket(session);
-            Response handshakeResponse = webSocket.getHandshakeResponse();
+            NanoHTTPD.Response handshakeResponse = webSocket.getHandshakeResponse();
             try {
                 handshakeResponse.addHeader(NanoWSD.HEADER_WEBSOCKET_ACCEPT, makeAcceptKey(headers.get(NanoWSD.HEADER_WEBSOCKET_KEY)));
             } catch (NoSuchAlgorithmException e) {
@@ -863,7 +867,7 @@ public abstract class NanoWSD extends NanoHTTPD {
         }
     }
 
-    protected Response serveHttp(final IHTTPSession session) {
+    protected NanoHTTPD.Response serveHttp(final NanoHTTPD.IHTTPSession session) {
         return super.serve(session);
     }
 
@@ -871,7 +875,7 @@ public abstract class NanoWSD extends NanoHTTPD {
      * not all websockets implementations accept gzip compression.
      */
     @Override
-    protected boolean useGzipWhenAccepted(Response r) {
+    protected boolean useGzipWhenAccepted(NanoHTTPD.Response r) {
         return false;
     }
 }
