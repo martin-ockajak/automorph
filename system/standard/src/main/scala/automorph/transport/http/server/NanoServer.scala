@@ -69,7 +69,7 @@ final case class NanoServer[Effect[_]] private (
 
     override protected def onOpen(): Unit =
       if (!webSocket) {
-        this.close(CloseCode.PolicyViolation, "WebSocket disabled", true)
+        this.close(CloseCode.PolicyViolation, "WebSocket support disabled", true)
       }
 
     override protected def onClose(code: WebSocketFrame.CloseCode, reason: String, initiatedByRemote: Boolean): Unit = ()
