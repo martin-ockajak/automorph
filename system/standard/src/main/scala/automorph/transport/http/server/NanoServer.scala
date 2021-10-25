@@ -14,6 +14,7 @@ import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Network, Random}
 import java.io.IOException
+import java.net.URI
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.MapHasAsScala
 
@@ -30,6 +31,7 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  * @param handler RPC request handler
  * @param executeEffect executes specified effect synchronously
  * @param port port to listen on for HTTP connections
+ * @param path HTTP URL path (default: /)
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
  * @tparam Effect effect type
@@ -38,6 +40,7 @@ final case class NanoServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
   executeEffect: Effect[Response] => Response,
   port: Int,
+  path: String = "/",
   exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
   webSocket: Boolean = true
 ) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect] {
@@ -54,15 +57,21 @@ final case class NanoServer[Effect[_]] private (
   }
 
   override protected def serveHttp(session: IHTTPSession): Response = {
-    // Receive the request
-    val protocol = Protocol.Http
-    val requestId = Random.id
-    lazy val requestDetails = requestProperties(session, protocol, requestId)
-    logger.trace("Receiving HTTP request", requestDetails)
-    val request = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
+    // Validate URL path
+    val url = new URI(session.getUri)
+    if (!url.getPath.startsWith(path)) {
+      newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Not Found")
+    } else {
+      // Receive the request
+      val protocol = Protocol.Http
+      val requestId = Random.id
+      lazy val requestDetails = requestProperties(session, protocol, requestId)
+      logger.trace("Receiving HTTP request", requestDetails)
+      val request = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
 
-    // Handler the request
-    handleRequest(request, session, protocol, requestDetails, requestId)
+      // Handler the request
+      handleRequest(request, session, protocol, requestDetails, requestId)
+    }
   }
 
   override protected def openWebSocket(session: IHTTPSession) = new WebSocket(session) {
@@ -200,6 +209,7 @@ object NanoServer {
    * @param handler RPC request handler
    * @param runEffectSync synchronous effect execution function
    * @param port port to listen on for HTTP connections
+   * @param path HTTP URL path (default: /)
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
    * @tparam Effect effect type
@@ -208,10 +218,11 @@ object NanoServer {
     handler: Types.HandlerAnyCodec[Effect, Context],
     runEffectSync: Effect[Response] => Response,
     port: Int,
+    path: String = "/",
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true
   ): NanoServer[Effect] = {
-    val server = new NanoServer(handler, runEffectSync, port, exceptionToStatusCode)
+    val server = new NanoServer(handler, runEffectSync, port, path, exceptionToStatusCode)
     server.start()
     server
   }
