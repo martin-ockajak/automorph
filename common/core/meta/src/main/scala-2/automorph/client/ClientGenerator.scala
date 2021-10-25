@@ -81,7 +81,7 @@ object ClientGenerator {
         ${method.lift.rpcFunction},
         $encodeArguments,
         $decodeResult,
-        ${MethodReflection.usesRequestContext[C, Context](ref)(method)}
+        ${MethodReflection.acceptsContext[C, Context](ref)(method)}
       )
     """)
   }
@@ -113,7 +113,7 @@ object ClientGenerator {
       //   ): List[Node]
       val argumentNodes = method.parameters.toList.zip(parameterListOffsets).flatMap { case (parameters, offset) =>
         parameters.toList.zipWithIndex.flatMap { case (parameter, index) =>
-          Option.when((offset + index) != lastArgumentIndex || !MethodReflection.usesContext[C, Context](ref)(method)) {
+          Option.when((offset + index) != lastArgumentIndex || !MethodReflection.acceptsContext[C, Context](ref)(method)) {
             q"$codec.encode[${parameter.dataType}](arguments(${offset + index}).asInstanceOf[${parameter.dataType}])"
           }
         }

@@ -65,7 +65,7 @@ private[automorph] object ClientGenerator:
         ${ Expr(method.lift.rpcFunction) },
         $encodeArguments,
         $decodeResult,
-        ${ Expr(MethodReflection.usesRequestContext[Context](ref)(method)) }
+        ${ Expr(MethodReflection.acceptsContext[Context](ref)(method)) }
       )
     }
 
@@ -95,7 +95,7 @@ private[automorph] object ClientGenerator:
         //   ): List[Node]
         val argumentNodes = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
           parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
-            Option.when((offset + index) != lastArgumentIndex || !MethodReflection.usesRequestContext[Context](ref)(method)) {
+            Option.when((offset + index) != lastArgumentIndex || !MethodReflection.acceptsContext[Context](ref)(method)) {
               val argument = parameter.dataType.asType match
                 case '[parameterType] => '{ arguments(${ Expr(offset + index) }).asInstanceOf[parameterType] }
               MethodReflection.call(

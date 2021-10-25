@@ -2,7 +2,7 @@ package automorph.util
 
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import automorph.util.Reflection
-import scala.quoted.{quotes, Expr, Quotes, ToExpr, Type}
+import scala.quoted.{Expr, Quotes, ToExpr, Type, quotes}
 
 /** Method introspection. */
 private[automorph] object MethodReflection:
@@ -56,16 +56,30 @@ private[automorph] object MethodReflection:
     methods.map(method => validateApiMethod[ApiType, Effect](ref)(method))
 
   /**
-   * Determines whether a method uses request context as its parameter.
+   * Determines whether a method accepts request context as its last parameter.
    *
    * @param ref reflection context
    * @param method method descriptor
    * @tparam Context request context type
-   * @return true if the method uses request context as its last parameter, false otherwise
+   * @return true if the method accepts request context as its last parameter, false otherwise
    */
-  def usesRequestContext[Context: Type](ref: Reflection)(method: ref.RefMethod): Boolean =
+  def acceptsContext[Context: Type](ref: Reflection)(method: ref.RefMethod): Boolean =
     method.parameters.flatten.lastOption.exists { parameter =>
       parameter.contextual && parameter.dataType =:= ref.q.reflect.TypeRepr.of[Context]
+    }
+
+  /**
+   * Determines whether a method returns response context as part of its result.
+   *
+   * @param ref reflection context
+   * @param method method descriptor
+   * @tparam Contextual contextual result type
+   * @return true if the method returns response context as part of its result
+   */
+  def returnsContext[Contextual: Type](ref: Reflection)(method: ref.RefMethod): Boolean =
+    method.resultType match {
+      case appliedType: ref.q.reflect.AppliedType => appliedType.tycon <:< ref.q.reflect.TypeRepr.of[Contextual]
+      case _ => false
     }
 
   /**

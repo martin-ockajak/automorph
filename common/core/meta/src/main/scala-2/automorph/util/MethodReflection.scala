@@ -8,8 +8,6 @@ import scala.reflect.macros.blackbox
 /** Method introspection. */
 private[automorph] object MethodReflection {
 
-  private val testProperty = "macro.test"
-
   /**
    * Creates RPC function quoted tree converter.
    *
@@ -66,21 +64,34 @@ private[automorph] object MethodReflection {
   }
 
   /**
-   * Determines whether a method uses request context as its parameter.
+   * Determines whether a method accepts request context as its last parameter.
    *
    * @param ref reflection context
    * @param method method descriptor
    * @tparam C macro context type
    * @tparam Context request context type
-   * @return true if the method uses request context as its last parameter, false otherwise
+   * @return true if the method accept request context as its last parameter, false otherwise
    */
-  def usesRequestContext[C <: blackbox.Context, Context: ref.c.WeakTypeTag](
+  def acceptsContext[C <: blackbox.Context, Context: ref.c.WeakTypeTag](
     ref: Reflection[C]
   )(method: ref.RefMethod): Boolean =
     method.parameters.flatten.lastOption.exists { parameter =>
-      parameter.contextual &&
-      (parameter.dataType =:= ref.c.weakTypeOf[Context] || Option(System.getProperty(testProperty)).isDefined)
+      parameter.contextual && parameter.dataType =:= ref.c.weakTypeOf[Context]
     }
+
+  /**
+   * Determines whether a method returns response context as part of its result.
+   *
+   * @param ref reflection context
+   * @param method method descriptor
+   * @tparam C macro context type
+   * @tparam Contextual contextual result type
+   * @return true if the method returns response context as part of its result
+   */
+  def returnsContext[C <: blackbox.Context, Contextual: ref.c.WeakTypeTag](
+    ref: Reflection[C]
+  )(method: ref.RefMethod): Boolean =
+    method.resultType =:= ref.c.weakTypeOf[Contextual]
 
   /**
    * Extracts type wrapped in a wrapper type.
@@ -118,8 +129,7 @@ private[automorph] object MethodReflection {
     if (
       wrapperTypeParameterIndex >= 0 &&
       (someType.dealias.typeConstructor <:< wrapperTypeConstructor) ||
-      (Option(System.getProperty(testProperty)).isDefined &&
-        someType.dealias.typeConstructor.typeSymbol.name == wrapperTypeConstructor.typeSymbol.name)
+      someType.dealias.typeConstructor.typeSymbol.name == wrapperTypeConstructor.typeSymbol.name
     ) {
       someType.dealias.typeArgs(wrapperTypeParameterIndex)
     } else someType

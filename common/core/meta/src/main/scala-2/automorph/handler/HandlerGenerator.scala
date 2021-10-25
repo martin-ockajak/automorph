@@ -86,7 +86,7 @@ object HandlerGenerator {
       automorph.handler.HandlerBinding(
         ${method.lift.rpcFunction},
         $invoke,
-        ${MethodReflection.usesRequestContext[C, Context](ref)(method)}
+        ${MethodReflection.acceptsContext[C, Context](ref)(method)}
       )
     """)
   }
@@ -134,7 +134,7 @@ object HandlerGenerator {
       val apiMethodArguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
         parameters.toList.zipWithIndex.map { case (parameter, index) =>
           val argumentIndex = offset + index
-          if (argumentIndex == lastArgumentIndex && MethodReflection.usesContext[C, Context](ref)(method)) {
+          if (argumentIndex == lastArgumentIndex && MethodReflection.acceptsContext[C, Context](ref)(method)) {
             // Use supplied context as a last argument if the method accepts context as its last parameter
             q"context"
           } else {
