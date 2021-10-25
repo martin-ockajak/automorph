@@ -70,7 +70,7 @@ final case class ComplexApiImpl[Effect[_], Context](backend: EffectSystem[Effect
 
   override def method8(p0: Record, p1: String, p2: Option[Double])(implicit context: Context): Effect[Record] =
     backend.pure(p0.copy(
-      string = s"${p0.string} - $p1 - ${implicitly[Context].toString}",
+      string = s"${p0.string} - $p1 - ${implicitly[Context].getClass.getName}",
       long = p0.long + p2.map(_.toLong).getOrElse(0L),
       double = p2.getOrElse(0.1),
       enumeration = Enum.fromOrdinal(1)
