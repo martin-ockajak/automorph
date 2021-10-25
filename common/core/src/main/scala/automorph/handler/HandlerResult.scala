@@ -6,9 +6,9 @@ package automorph.handler
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param response response message
  * @param exception failed call exception
- * @tparam Data message data type
+ * @tparam MessageBody message body type
  */
-final case class HandlerResult[Data](
-  response: Option[Data],
+final case class HandlerResult[MessageBody](
+  response: Option[MessageBody],
   exception: Option[Throwable]
 )
