@@ -70,7 +70,7 @@ final case class NanoServer[Effect[_]] private (
       val request = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
 
       // Handler the request
-      handleRequest(request, session, protocol, requestDetails, requestId)
+      handleRequest(request, session, protocol, Some(url.getPath), requestDetails, requestId)
     }
   }
 
@@ -89,7 +89,7 @@ final case class NanoServer[Effect[_]] private (
       val requestId = Random.id
       lazy val requestDetails = requestProperties(session, protocol, requestId)
       val request = Bytes.byteArray.from(frame.getBinaryPayload)
-      val response = handleRequest(request, session, protocol, requestDetails, requestId)
+      val response = handleRequest(request, session, protocol, None, requestDetails, requestId)
 
       // Handler the request
       send(Bytes.byteArray.to(Bytes.inputStream.from(response.getData)))
@@ -105,6 +105,7 @@ final case class NanoServer[Effect[_]] private (
     request: ArraySeq.ofByte,
     session: IHTTPSession,
     protocol: Protocol,
+    functionName: Option[String],
     requestDetails: Map[String, String],
     requestId: String
   ): Response = {
@@ -113,7 +114,7 @@ final case class NanoServer[Effect[_]] private (
     // Process the request
     implicit val usingContext: Context = createContext(session)
     executeEffect(system.map(
-      system.either(genericHandler.processRequest(request, requestId, None)),
+      system.either(genericHandler.processRequest(request, requestId, functionName)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
         handlerResult.fold(
           error => serverError(error, session, protocol, requestId, requestDetails),

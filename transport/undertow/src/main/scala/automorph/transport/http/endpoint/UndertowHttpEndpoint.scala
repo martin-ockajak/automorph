@@ -54,7 +54,7 @@ final case class UndertowHttpEndpoint[Effect[_]] (
           // Process the request
           implicit val usingContext: Context = createContext(exchange)
           runEffect(system.map(
-            system.either(genericHandler.processRequest(request, requestId)),
+            system.either(genericHandler.processRequest(request, requestId, Some(exchange.getRequestPath))),
             (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
               handlerResult.fold(
                 error => sendServerError(error, exchange, requestId, requestDetails),

@@ -10,6 +10,7 @@ import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Network, Random}
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import java.io.{ByteArrayInputStream, InputStream}
+import java.net.URI
 import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
 import scala.jdk.CollectionConverters.EnumerationHasAsScala
@@ -47,8 +48,9 @@ final case class JettyEndpoint[Effect[_]](
 
     // Process the request
     implicit val usingContext: Context = createContext(request)
+    val path = new URI(request.getRequestURI).getPath
     runEffect(system.map(
-      system.either(genericHandler.processRequest(requestMessage, requestId, None)),
+      system.either(genericHandler.processRequest(requestMessage, requestId, Some(path))),
       (handlerResult: Either[Throwable, HandlerResult[InputStream]]) =>
         handlerResult.fold(
           error => serverError(error, response, request, requestId, requestDetails),

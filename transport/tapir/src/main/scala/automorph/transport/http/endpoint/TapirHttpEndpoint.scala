@@ -70,7 +70,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
         // Process the request
         implicit val usingContext: Context = createContext(method, paths, queryParams, headers)
         system.map(
-          system.either(genericHandler.processRequest(requestMessage, requestId, Nano)),
+          system.either(genericHandler.processRequest(requestMessage, requestId, Some(urlPath(paths)))),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
             handlerResult.fold(
               error => Right(serverError(error, clientIp, requestId, requestDetails)),
@@ -171,10 +171,15 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     Http(
       base = Some(()),
       method = Some(method.method),
-      path = Some(paths.mkString("/")),
+      path = Some(urlPath(paths)),
       parameters = queryParams.toSeq,
       headers = headers.map(header => header.name -> header.value).toSeq
     )
+
+  private def urlPath(paths: List[String]): String = paths match {
+    case Nil => "/"
+    case items => items.mkString("/")
+  }
 
   private def requestProperties(
     clientIp: Option[String],
