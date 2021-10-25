@@ -45,7 +45,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    *
    * @return request context
    */
-  def context: Context = transport.defaultContext
+  def defaultContext: Context = transport.defaultContext
 
   /**
    * Closes this client freeing the underlying resources.
