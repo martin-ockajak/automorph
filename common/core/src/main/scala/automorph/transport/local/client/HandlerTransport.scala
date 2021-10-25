@@ -35,7 +35,7 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     system.flatMap(
       handler.processRequest(request, requestId),
       (result: HandlerResult[ArraySeq.ofByte]) =>
-        result.response.map(response => system.pure(response)).getOrElse {
+        result.responseBody.map(response => system.pure(response)).getOrElse {
           system.failed(InvalidResponseException("Missing call response", None.orNull))
         }
     )

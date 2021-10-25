@@ -93,7 +93,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
               error => sendServerError(error, exchange, channel, requestId, requestDetails),
               result => {
                 // Send the response
-                val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
+                val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
                 sendResponse(response, exchange, channel, requestId)
                 discardMessage
               }

@@ -54,7 +54,7 @@ final case class JettyEndpoint[Effect[_]](
           error => serverError(error, response, request, requestId, requestDetails),
           result => {
             // Send the response
-            val message = result.response.getOrElse(new ByteArrayInputStream(Array()))
+            val message = result.responseBody.getOrElse(new ByteArrayInputStream(Array()))
             val status = result.exception.map(exceptionToStatusCode).getOrElse(HttpStatus.OK_200)
             sendResponse(message, status, response, request, requestId)
           }

@@ -47,7 +47,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
   /**
    * Parses an RPC request.
    *
-   * @param requestBody RPC request message
+   * @param requestBody request message body
    * @param requestId request correlation identifier
    * @param functionName invoked function name, if specified it is used instead of function name obtained from the request body
    * @return RPC request if the message is valid or RPC error if the message is invalid

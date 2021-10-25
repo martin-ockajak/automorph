@@ -53,7 +53,7 @@ final case class FinagleEndpoint[Effect[_]](
           error => serverError(error, request, requestId, requestDetails),
           result => {
             // Send the response
-            val response = result.response.getOrElse(Array[Byte]())
+            val response = result.responseBody.getOrElse(Array[Byte]())
             val status = result.exception.map(exceptionToStatusCode).map(Status.apply).getOrElse(Status.Ok)
             val message = Reader.fromBuf(Buf.ByteArray.Owned(response))
             createResponse(message, status, request, requestId)

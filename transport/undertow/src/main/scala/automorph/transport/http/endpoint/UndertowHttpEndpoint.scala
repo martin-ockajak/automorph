@@ -60,7 +60,7 @@ final case class UndertowHttpEndpoint[Effect[_]] (
                 error => sendServerError(error, exchange, requestId, requestDetails),
                 result => {
                   // Send the response
-                  val response = result.response.getOrElse(new ArraySeq.ofByte(Array()))
+                  val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
                   val statusCode = result.exception.map(exceptionToStatusCode).getOrElse(StatusCodes.OK)
                   sendResponse(response, statusCode, exchange, requestId)
                 }

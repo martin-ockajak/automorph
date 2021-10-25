@@ -76,7 +76,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
               error => Right(serverError(error, clientIp, requestId, requestDetails)),
               result => {
                 // Send the response
-                val message = result.response.getOrElse(Array[Byte]())
+                val message = result.responseBody.getOrElse(Array[Byte]())
                 val status = result.exception.map(exceptionToStatusCode).map(StatusCode.apply).getOrElse(StatusCode.Ok)
                 Right(createResponse(message, status, clientIp, requestId))
               }
@@ -126,7 +126,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 ////              error => Right(serverError(error, clientIp, requestId, requestDetails)),
 ////              result => {
 ////                // Send the response
-////                val message = result.response.getOrElse(Array[Byte]())
+////                val message = result.responseBody.getOrElse(Array[Byte]())
 ////                val status = result.exception.map(exceptionToStatusCode).map(StatusCode.apply).getOrElse(StatusCode.Ok)
 ////                Right(createResponse(message, status, clientIp, requestId))
 ////              }
