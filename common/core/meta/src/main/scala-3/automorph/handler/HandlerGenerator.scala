@@ -20,7 +20,7 @@ private[automorph] object HandlerGenerator:
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Effect effect type
-   * @tparam Context request context type
+   * @tparam Context message context type
    * @tparam Api API type
    * @return mapping of API method names to handler function bindings
    */
@@ -93,7 +93,7 @@ private[automorph] object HandlerGenerator:
     codec: Expr[Codec],
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
-  ): Expr[(Seq[Option[Node]], Context) => Effect[Node]] =
+  ): Expr[(Seq[Option[Node]], Context) => Effect[(Node, Option[Context])]] =
     import ref.q.reflect.{asTerm, Term, TypeRepr}
     given Quotes = ref.q
 
@@ -168,7 +168,7 @@ private[automorph] object HandlerGenerator:
         val apiMethodCall = MethodReflection.call(ref.q, api.asTerm, method.name, List.empty, apiMethodArguments)
 
         // Create encode result function
-        //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
+        //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result) -> Option.empty[Context]
         val resultValueType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
         val encodeResult = resultValueType.asType match
           case '[resultType] => '{ (result: resultType) =>
@@ -180,19 +180,19 @@ private[automorph] object HandlerGenerator:
                   List(resultValueType),
                   List(List('{ result }.asTerm))
                 ).asExprOf[Node]
-              }
+              } -> Option.empty[Context]
             }
 
         // Create the effect mapping call using the method call and the encode result function
-        //   system.map(apiMethodCall, encodeResult): Effect[Node]
+        //   system.map(apiMethodCall, encodeResult): Effect[(Node, Option[Context])]
         val mapArguments = List(List(apiMethodCall, encodeResult.asTerm))
         MethodReflection.call(
           ref.q,
           system.asTerm,
           "map",
-          List(resultValueType, TypeRepr.of[Node]),
+          List(resultValueType, TypeRepr.of[(Node, Option[Context])]),
           mapArguments
-        ).asExprOf[Effect[Node]]
+        ).asExprOf[Effect[(Node, Option[Context])]]
       }
     }
 

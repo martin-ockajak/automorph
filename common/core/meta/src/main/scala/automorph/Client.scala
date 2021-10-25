@@ -16,13 +16,13 @@ import scala.util.Try
  *
  * Used to perform remote API calls and notifications.
  *
- * @constructor Creates a RPC client with specified protocol and transport plugins accepting corresponding request context type.
+ * @constructor Creates a RPC client with specified protocol and transport plugins accepting corresponding message context type.
  * @param protocol RPC protocol plugin
  * @param transport message transport plugin
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Effect effect type
- * @tparam Context request context type
+ * @tparam Context message context type
  */
 final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   protocol: RpcProtocol[Node, Codec],
@@ -41,7 +41,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     RemoteFunction(functionName, Seq.empty, Seq.empty, this)
 
   /**
-   * Creates default request context.
+   * Creates a default message context.
    *
    * @return request context
    */
@@ -63,7 +63,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @param argumentNames argument names
    * @param encodedArguments function argument nodes
    * @param decodeResult result node decoding function
-   * @param context request context
+   * @param requestContext request context
    * @tparam R result type
    * @return result value
    */
@@ -72,7 +72,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     argumentNames: Seq[String],
     encodedArguments: Seq[Node],
     decodeResult: Node => R,
-    context: Option[Context]
+    requestContext: Option[Context]
   ): Effect[R] = {
     // Create request
     val requestId = Random.id
@@ -89,7 +89,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
             lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
             logger.trace(s"Sending ${protocol.name} request", allProperties)
             system.flatMap(
-              transport.call(rawRequest, requestId, protocol.codec.mediaType, context),
+              transport.call(rawRequest, requestId, protocol.codec.mediaType, requestContext),
               // Process response
               rawResponse => processResponse[R](rawResponse, requestProperties, decodeResult)
             )
@@ -107,14 +107,14 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @param functionName RPC function name
    * @param argumentNames argument names
    * @param encodedArguments function argument nodes
-   * @param context request context
+   * @param requestContext request context
    * @return nothing
    */
   private[automorph] def notify(
     functionName: String,
     argumentNames: Option[Seq[String]],
     encodedArguments: Seq[Node],
-    context: Option[Context]
+    requestContext: Option[Context]
   ): Effect[Unit] = {
     // Create request
     val requestId = Random.id
@@ -132,7 +132,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
             )
             lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
             logger.trace(s"Sending ${protocol.name} request", allProperties)
-            transport.notify(request.message.body, requestId, protocol.codec.mediaType, context)
+            transport.notify(request.message.body, requestId, protocol.codec.mediaType, requestContext)
           }
         )
     )
@@ -217,7 +217,7 @@ object Client {
    *
    * @param transport message transport plugin
    * @tparam Effect effect type
-   * @tparam Context request context type
+   * @tparam Context message context type
    * @return RPC client builder
    */
   def transport[Effect[_], Context](

@@ -14,7 +14,7 @@ import automorph.util.CannotEqual
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Effect effect type
- * @tparam Context request context type
+ * @tparam Context message context type
  */
 final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   name: String,

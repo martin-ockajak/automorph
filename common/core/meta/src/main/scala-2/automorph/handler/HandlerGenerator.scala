@@ -19,7 +19,7 @@ object HandlerGenerator {
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Effect effect type
-   * @tparam Context request context type
+   * @tparam Context message context type
    * @tparam Api API type
    * @return mapping of API method names to handler function bindings
    */
@@ -103,7 +103,9 @@ object HandlerGenerator {
     codec: ref.c.Expr[Codec],
     system: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Option[Node]], Context) => Effect[Node]] = {
+  )(implicit
+    effectType: ref.c.WeakTypeTag[Effect[_]]
+  ): ref.c.Expr[(Seq[Option[Node]], Context) => Effect[(Node, Option[Context])]] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
@@ -161,12 +163,12 @@ object HandlerGenerator {
       val apiMethodCall = q"$api.${method.symbol}(...$apiMethodArguments)"
 
       // Create encode result function
-      //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
+      //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result) -> Option.empty[Context]
       val resultValueType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
-      val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result)"
+      val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result) -> Option.empty[Context]"
 
       // Create the effect mapping call using the method call and the encode result function
-      //   system.map(apiMethodCall, encodeResult): Effect[Node]
+      //   system.map(apiMethodCall, encodeResult): Effect[(Node, Option[Context])]
       q"$system.map($apiMethodCall, $encodeResult)"
     }
     """)

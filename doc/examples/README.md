@@ -179,10 +179,10 @@ import java.net.URI
 class ServerApi {
 
   // Use HTTP request metadata context provided by the server message transport plugin
-  def useMetadata(message: String)(implicit request: Default.ServerContext): String = Seq(
+  def useMetadata(message: String)(implicit requestContext: Default.ServerContext): String = Seq(
     Some(message),
-    request.path,
-    request.header("X-Test")
+    requestContext.path,
+    requestContext.header("X-Test")
   ).flatten.mkString(",")
 }
 val api = new ServerApi()

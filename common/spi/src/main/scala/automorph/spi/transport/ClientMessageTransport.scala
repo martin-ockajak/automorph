@@ -11,7 +11,7 @@ import scala.collection.immutable.ArraySeq
  * Used by the RPC client to send requests and receive responses to and from a remote endpoint.
  *
  * @tparam Effect effect type
- * @tparam Context request context type
+ * @tparam Context message context type
  */
 trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
 

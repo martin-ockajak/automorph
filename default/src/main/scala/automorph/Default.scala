@@ -36,7 +36,7 @@ object Default extends DefaultMeta {
    * Default RPC client type.
    *
    * @tparam Effect effect type
-   * @tparam Context request context type
+   * @tparam Context message context type
    */
   type Client[Effect[_], Context] = automorph.Client[Node, Codec, Effect, Context]
 
@@ -44,7 +44,7 @@ object Default extends DefaultMeta {
    * Default RPC request handler type.
    *
    * @tparam Effect effect type
-   * @tparam Context request context type
+   * @tparam Context message context type
    */
   type Handler[Effect[_], Context] = automorph.Handler[Node, Codec, Effect, Context]
 
@@ -95,42 +95,42 @@ object Default extends DefaultMeta {
    *
    * @param transport message transport protocol plugin
    * @tparam Effect effect type
-   * @tparam Context request context type
+   * @tparam Context message context type
    * @return RPC client
    */
   def client[Effect[_], Context](transport: ClientMessageTransport[Effect, Context]): Client[Effect, Context] =
     Client(protocol, transport)
 
   /**
-   * Creates a default asynchronous RPC request handler with specified effect system plugin and providing given request context type.
+   * Creates a default asynchronous RPC request handler with specified effect system plugin and providing given message context type.
    *
    * The handler can be used by a server to invoke bound API methods based on incoming requests.
    *
    * @param system effect system plugin
-   * @tparam Context request context type
+   * @tparam Context message context type
    * @return RPC request handler
    */
   def handler[Effect[_], Context](system: EffectSystem[Effect]): Handler[Effect, Context] =
     Handler(protocol, system)
 
   /**
-   * Creates a default asynchronous RPC request handler using 'Future' as an effect type and providing given request context type.
+   * Creates a default asynchronous RPC request handler using 'Future' as an effect type and providing given message context type.
    *
    * The handler can be used by a server to invoke bound API methods based on incoming requests.
    *
    * @param executionContext execution context
-   * @tparam Context request context type
+   * @tparam Context message context type
    * @return asynchronous RPC request handler
    */
   def asyncHandler[Context](implicit executionContext: ExecutionContext): Handler[Future, Context] =
     Handler(protocol, asyncSystem)
 
   /**
-   * Creates a default synchronous RPC request handler using identity as an effect type and providing given request context type.
+   * Creates a default synchronous RPC request handler using identity as an effect type and providing given message context type.
    *
    * The handler can be used by a server to invoke bound API methods based on incoming requests.
    *
-   * @tparam Context request context type
+   * @tparam Context message context type
    * @return synchronous RPC request handler
    */
   def syncHandler[Context]: Handler[Identity, Context] =

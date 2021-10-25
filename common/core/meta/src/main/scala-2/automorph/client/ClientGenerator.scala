@@ -17,7 +17,7 @@ object ClientGenerator {
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Effect effect type
-   * @tparam Context request context type
+   * @tparam Context message context type
    * @tparam Api API type
    * @return mapping of API method names to client function bindings
    */

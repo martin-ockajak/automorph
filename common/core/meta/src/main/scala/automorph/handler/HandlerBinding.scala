@@ -7,13 +7,13 @@ import automorph.spi.protocol.RpcFunction
  *
  * @param function bound function descriptor
  * @param invoke invokes bound function
- * @param usesContext true if the last parameter of the bound function is contextual
+ * @param acceptsContext true if the method accepts request context as its last parameter, false otherwise
  * @tparam Node message node type
  * @tparam Effect effect type
- * @tparam Context request context type
+ * @tparam Context message context type
  */
 final case class HandlerBinding[Node, Effect[_], Context](
   function: RpcFunction,
-  invoke: (Seq[Option[Node]], Context) => Effect[Node],
-  usesContext: Boolean
+  invoke: (Seq[Option[Node]], Context) => Effect[(Node, Option[Context])],
+  acceptsContext: Boolean
 )

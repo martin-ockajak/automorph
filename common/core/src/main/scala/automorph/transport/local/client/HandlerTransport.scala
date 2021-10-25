@@ -17,7 +17,7 @@ import scala.collection.immutable.ArraySeq
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Effect effect type
- * @tparam Context request context type
+ * @tparam Context message context type
  */
 case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   handler: Handler[Node, Codec, Effect, Context],
@@ -34,7 +34,7 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     implicit val usingContext = context.getOrElse(defaultContext)
     system.flatMap(
       handler.processRequest(request, requestId, None),
-      (result: HandlerResult[ArraySeq.ofByte]) =>
+      (result: HandlerResult[ArraySeq.ofByte, Context]) =>
         result.responseBody.map(response => system.pure(response)).getOrElse {
           system.failed(InvalidResponseException("Missing call response", None.orNull))
         }
@@ -50,7 +50,7 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     implicit val usingContext = context.getOrElse(defaultContext)
     system.map(
       handler.processRequest(request, requestId, None),
-      (_: HandlerResult[ArraySeq.ofByte]) => ()
+      (_: HandlerResult[ArraySeq.ofByte, Context]) => ()
     )
   }
 

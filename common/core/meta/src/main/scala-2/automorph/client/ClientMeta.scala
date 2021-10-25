@@ -11,7 +11,7 @@ import scala.reflect.macros.blackbox
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Effect effect type
- * @tparam Context request context type
+ * @tparam Context message context type
  */
 private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
   this: Client[Node, Codec, Effect, Context] =>
@@ -23,7 +23,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * - can be called at runtime
    * - has no type parameters
    * - returns the specified effect type
-   * - (if request context type is not Context.Empty) accepts the specified request context type as its last parameter
+   * - (if message context type is not Context.Empty) accepts the specified message context type as its last parameter
    *
    * If a bound function definition contains a last parameter of `Context` type or returns a context function accepting o
    * ne
@@ -68,7 +68,7 @@ object ClientMeta {
             // Adjust expected function parameters if it uses context as its last parameter
             val callArguments = Option(arguments).getOrElse(Array.empty[AnyRef])
             val (argumentValues, context) =
-              if (clientBinding.usesContext && callArguments.nonEmpty) {
+              if (clientBinding.acceptsContext && callArguments.nonEmpty) {
                 callArguments.dropRight(1).toSeq -> Some(callArguments.last.asInstanceOf[$contextType])
               } else {
                 callArguments.toSeq -> None

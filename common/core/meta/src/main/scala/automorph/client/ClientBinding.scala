@@ -8,12 +8,12 @@ import automorph.spi.protocol.RpcFunction
  * @param function bound function descriptor
  * @param encodeArguments encodes bound function arguments
  * @param decodeResult decodes bound function result
- * @param usesContext true if the last parameter of the bound function is contextual
+ * @param acceptsContext true if the last parameter of the bound function is contextual
  * @tparam Node message node type
  */
 final case class ClientBinding[Node](
   function: RpcFunction,
   encodeArguments: Seq[Any] => Seq[Node],
   decodeResult: Node => Any,
-  usesContext: Boolean
+  acceptsContext: Boolean
 )

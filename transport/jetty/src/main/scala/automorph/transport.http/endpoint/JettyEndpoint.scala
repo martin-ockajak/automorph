@@ -51,7 +51,7 @@ final case class JettyEndpoint[Effect[_]](
     val path = new URI(request.getRequestURI).getPath
     runEffect(system.map(
       system.either(genericHandler.processRequest(requestMessage, requestId, Some(path))),
-      (handlerResult: Either[Throwable, HandlerResult[InputStream]]) =>
+      (handlerResult: Either[Throwable, HandlerResult[InputStream, Context]]) =>
         handlerResult.fold(
           error => serverError(error, response, request, requestId, requestDetails),
           result => {

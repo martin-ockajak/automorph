@@ -60,7 +60,7 @@ private[automorph] object MethodReflection:
    *
    * @param ref reflection context
    * @param method method descriptor
-   * @tparam Context request context type
+   * @tparam Context message context type
    * @return true if the method accepts request context as its last parameter, false otherwise
    */
   def acceptsContext[Context: Type](ref: Reflection)(method: ref.RefMethod): Boolean =
