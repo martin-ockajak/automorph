@@ -37,7 +37,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }.toSeq
 
   /**
-   * Processes an RPC ''request'' by invoking a bound RPC ''function'' based on and its ''context'' and return an RPC ''response''.
+   * Processes an RPC request by invoking a bound RPC function based on and its context and return an RPC response.
    *
    * @param requestBody request message body
    * @param requestId request correlation identifier
