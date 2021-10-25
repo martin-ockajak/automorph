@@ -104,7 +104,7 @@ final case class NanoServer[Effect[_]] private (
     // Process the request
     implicit val usingContext: Context = createContext(session)
     executeEffect(system.map(
-      system.either(genericHandler.processRequest(request, requestId)),
+      system.either(genericHandler.processRequest(request, requestId, None)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte]]) =>
         handlerResult.fold(
           error => serverError(error, session, protocol, requestId, requestDetails),

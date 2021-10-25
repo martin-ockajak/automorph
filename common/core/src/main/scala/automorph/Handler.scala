@@ -41,16 +41,19 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    *
    * @param requestBody request message body
    * @param requestId request correlation identifier
+   * @param functionName invoked function name, if specified it is used instead of function name obtained from the request body
    * @param context request context
    * @tparam MessageBody message body type
    * @return optional response message
    */
-  def processRequest[MessageBody: Bytes](requestBody: MessageBody, requestId: String)(implicit
-    context: Context
-  ): Effect[HandlerResult[MessageBody]] = {
+  def processRequest[MessageBody: Bytes](
+    requestBody: MessageBody,
+    requestId: String,
+    functionName: Option[String]
+  )(implicit context: Context): Effect[HandlerResult[MessageBody]] = {
     // Parse request
     val rawRequest = implicitly[Bytes[MessageBody]].from(requestBody)
-    protocol.parseRequest(rawRequest, requestId, None).fold(
+    protocol.parseRequest(rawRequest, requestId, functionName).fold(
       error => errorResponse(error.exception, error.message, requestId, Map(LogProperties.requestId -> requestId)),
       rpcRequest => {
         // Invoke requested RPC function

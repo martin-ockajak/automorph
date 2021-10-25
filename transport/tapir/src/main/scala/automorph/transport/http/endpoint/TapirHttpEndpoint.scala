@@ -70,7 +70,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
         // Process the request
         implicit val usingContext: Context = createContext(method, paths, queryParams, headers)
         system.map(
-          system.either(genericHandler.processRequest(requestMessage, requestId)),
+          system.either(genericHandler.processRequest(requestMessage, requestId, Nano)),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
             handlerResult.fold(
               error => Right(serverError(error, clientIp, requestId, requestDetails)),
@@ -120,7 +120,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 ////        // Process the request
 ////        implicit val usingContext: Context = createContext(method, paths, queryParams, headers)
 ////        system.map(
-////          system.either(genericHandler.processRequest(requestMessage)),
+////          system.either(genericHandler.processRequest(requestMessage, requestId, None)),
 ////          (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
 ////            handlerResult.fold(
 ////              error => Right(serverError(error, clientIp, requestId, requestDetails)),

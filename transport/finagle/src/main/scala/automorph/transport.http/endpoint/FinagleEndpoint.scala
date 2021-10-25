@@ -47,7 +47,7 @@ final case class FinagleEndpoint[Effect[_]](
     // Process the request
     implicit val usingContext: Context = createContext(request)
     runAsFuture(system.map(
-      system.either(genericHandler.processRequest(requestMessage, requestId)),
+      system.either(genericHandler.processRequest(requestMessage, requestId, None)),
       (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
         handlerResult.fold(
           error => serverError(error, request, requestId, requestDetails),
