@@ -30,12 +30,12 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     requestId: String,
     mediaType: String,
     context: Option[Context]
-  ): Effect[ArraySeq.ofByte] = {
+  ): Effect[(ArraySeq.ofByte, Context)] = {
     implicit val usingContext = context.getOrElse(defaultContext)
     system.flatMap(
       handler.processRequest(request, requestId, None),
       (result: HandlerResult[ArraySeq.ofByte, Context]) =>
-        result.responseBody.map(response => system.pure(response)).getOrElse {
+        result.responseBody.map(response => system.pure(response -> defaultContext)).getOrElse {
           system.failed(InvalidResponseException("Missing call response", None.orNull))
         }
     )

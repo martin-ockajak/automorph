@@ -24,7 +24,8 @@ import scala.concurrent.duration.Duration
  * @param port request URL authority port
  * @param path request URL path
  * @param fragment request URL fragment
- * @param headers request headers
+ * @param headers request or response headers
+ * @param statusCode response status code
  * @param followRedirects automatically follow redirects if true
  * @param readTimeout response read timeout
  * @param base base properties defined by the specific message transport plugin
@@ -40,6 +41,7 @@ final case class Http[Base](
   parameters: Seq[(String, String)] = Seq.empty,
   fragment: Option[String] = None,
   headers: Seq[(String, String)] = Seq.empty,
+  statusCode: Option[Int] = None,
   followRedirects: Option[Boolean] = None,
   readTimeout: Option[Duration] = None,
   base: Option[Base] = None
@@ -94,9 +96,7 @@ final case class Http[Base](
    * @param scheme URL scheme
    * @return HTTP message properties
    */
-  def scheme(scheme: String): Http[Base] = {
-    copy(scheme = Some(scheme))
-  }
+  def scheme(scheme: String): Http[Base] = copy(scheme = Some(scheme))
 
   /** Request URL authority. */
   def authority: Option[String] = host.map { host =>
@@ -131,9 +131,7 @@ final case class Http[Base](
    * @param userInfo URL user information
    * @return HTTP message properties
    */
-  def userInfo(userInfo: String): Http[Base] = {
-    copy(userInfo = Some(userInfo))
-  }
+  def userInfo(userInfo: String): Http[Base] = copy(userInfo = Some(userInfo))
 
   /**
    * Set request URL host.
@@ -141,9 +139,7 @@ final case class Http[Base](
    * @param host URL host
    * @return HTTP message properties
    */
-  def host(host: String): Http[Base] = {
-    copy(host = Some(host))
-  }
+  def host(host: String): Http[Base] = copy(host = Some(host))
 
   /**
    * Set request URL port.
@@ -151,9 +147,7 @@ final case class Http[Base](
    * @param port URL port
    * @return HTTP message properties
    */
-  def port(port: Int): Http[Base] = {
-    copy(port = Some(port))
-  }
+  def port(port: Int): Http[Base] = copy(port = Some(port))
 
   /**
    * Set request URL user information.
@@ -161,9 +155,7 @@ final case class Http[Base](
    * @param path URL userinfo
    * @return HTTP message properties
    */
-  def path(path: String): Http[Base] = {
-    copy(path = Some(path))
-  }
+  def path(path: String): Http[Base] = copy(path = Some(path))
 
   /**
    * Set request URL fragment.
@@ -171,9 +163,7 @@ final case class Http[Base](
    * @param fragment URL fragment
    * @return HTTP message properties
    */
-  def fragment(fragment: String): Http[Base] = {
-    copy(fragment = Some(fragment))
-  }
+  def fragment(fragment: String): Http[Base] = copy(fragment = Some(fragment))
 
   /** Request URL query. */
   def query: Option[String] = parameters match {
@@ -228,8 +218,7 @@ final case class Http[Base](
    * @param entries query parameter names and values
    * @return HTTP message properties
    */
-  def parameters(entries: (String, String)*): Http[Base] =
-    parameters(entries, false)
+  def parameters(entries: (String, String)*): Http[Base] = parameters(entries, false)
 
   /**
    * Add or replace URL query parameters.
@@ -307,8 +296,7 @@ final case class Http[Base](
    * @param entries header names and values
    * @return HTTP message properties
    */
-  def headers(entries: (String, String)*): Http[Base] =
-    headers(entries, false)
+  def headers(entries: (String, String)*): Http[Base] = headers(entries, false)
 
   /**
    * Add or replace message headers.
@@ -324,6 +312,14 @@ final case class Http[Base](
       else headers
     copy(headers = originalHeaders ++ entries)
   }
+
+  /**
+   * Set response status code.
+   *
+   * @param statusCode status code
+   * @return HTTP message properties
+   */
+  def statusCode(statusCode: Int): Http[Base] = copy(statusCode = Some(statusCode))
 
   /** `Content-Type` header value. */
   def contentType: Option[String] = header(headerContentType)
@@ -348,8 +344,7 @@ final case class Http[Base](
    * @param entries cookie names and values
    * @return HTTP message properties
    */
-  def cookies(entries: (String, String)*): Http[Base] =
-    cookies(entries, headerCookie)
+  def cookies(entries: (String, String)*): Http[Base] = cookies(entries, headerCookie)
 
   /** Set-Cookie names and values. */
   def setCookies: Map[String, Option[String]] = cookies(headerSetCookie)
@@ -473,6 +468,7 @@ final case class Http[Base](
 }
 
 object Http {
+
   private val exceptionToStatusCode: Map[Class[_], Int] = Map[Class[_], Int](
     classOf[ParseErrorException] -> 400,
     classOf[InvalidRequestException] -> 400,

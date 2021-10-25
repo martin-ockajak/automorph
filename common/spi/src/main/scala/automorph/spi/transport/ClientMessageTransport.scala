@@ -27,9 +27,14 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
    * @param requestId request correlation identifier
    * @param mediaType message media (MIME) type.
    * @param context request context
-   * @return response message
+   * @return response message and context
    */
-  def call(requestBody: ArraySeq.ofByte, requestId: String, mediaType: String, context: Option[Context]): Effect[ArraySeq.ofByte]
+  def call(
+    requestBody: ArraySeq.ofByte,
+    requestId: String,
+    mediaType: String,
+    context: Option[Context]
+  ): Effect[(ArraySeq.ofByte, Context)]
 
   /**
    * Sends a request to a remote endpoint without retrieving a response.

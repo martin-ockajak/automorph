@@ -43,7 +43,7 @@ final case class UrlClient[Effect[_]](
     requestId: String,
     mediaType: String,
     context: Option[Context]
-  ): Effect[ArraySeq.ofByte] =
+  ): Effect[(ArraySeq.ofByte, Context)] =
     system.flatMap(
       send(requestBody, requestId, mediaType, context),
       (_: EffectValue) match {
@@ -60,7 +60,7 @@ final case class UrlClient[Effect[_]](
               logger.error("Failed to receive HTTP response", _, responseProperties)
             }.get
             logger.debug("Received HTTP response", responseProperties + ("Status" -> connection.getResponseCode.toString))
-            response
+            response -> responseContext(connection)
           }
       }
     )
@@ -126,7 +126,10 @@ final case class UrlClient[Effect[_]](
     val requestMethod = http.method.orElse(http.base.map(_.connection.getRequestMethod)).getOrElse(method)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
     connection.setRequestMethod(requestMethod)
-    (connectionHeaders(baseConnection) ++ http.headers).foreach { case (name, value) =>
+    val baseHeaders = baseConnection.getRequestProperties.asScala.toSeq.flatMap { case (name, values) =>
+      values.asScala.map(name -> _)
+    }
+    (baseHeaders ++ http.headers).foreach { case (name, value) =>
       connection.setRequestProperty(name, value)
     }
     connection.setRequestProperty(contentLengthHeader, requestBody.size.toString)
@@ -141,10 +144,11 @@ final case class UrlClient[Effect[_]](
     requestMethod
   }
 
-  private def connectionHeaders(connection: HttpURLConnection): Seq[(String, String)] =
-    connection.getRequestProperties.asScala.toSeq.flatMap { case (name, values) =>
-      values.asScala.map(name -> _)
-    }
+  private def responseContext(connection: HttpURLConnection): Context =
+    defaultContext.statusCode(connection.getResponseCode)
+      .headers(connection.getHeaderFields.asScala.toSeq.flatMap { case (name, values) =>
+        values.asScala.map(name -> _)
+      }*)
 }
 
 object UrlClient {

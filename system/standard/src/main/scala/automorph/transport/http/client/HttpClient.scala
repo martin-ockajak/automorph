@@ -62,7 +62,7 @@ final case class HttpClient[Effect[_]](
     requestId: String,
     mediaType: String,
     context: Option[Context]
-  ): Effect[ArraySeq.ofByte] = {
+  ): Effect[(ArraySeq.ofByte, Context)] = {
     val (request, requestUrl) = prepareRequest(requestBody, mediaType, context)
     system.flatMap(
       system.either(send(request, requestUrl, requestId)),
@@ -76,9 +76,10 @@ final case class HttpClient[Effect[_]](
             logger.error(s"Failed to receive $protocol response", error, responseProperties)
             system.failed(error)
           },
-          { case (responseBody, statusCode) =>
+          response => {
+            val (responseBody, statusCode, _) = response
             logger.debug(s"Received $protocol response", responseProperties ++ statusCode.map("Status" -> _))
-            system.pure(responseBody)
+            system.pure(responseBody -> responseContext(response))
           }
         )
       }
@@ -118,7 +119,12 @@ final case class HttpClient[Effect[_]](
         httpRequest =>
           system.map(
             effect(httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray)),
-            response => Bytes.byteArray.from(response.body) -> Some(response.statusCode)
+            response => {
+              val headers = response.headers.map.asScala.toSeq.flatMap { case (name, values) =>
+                values.asScala.map(name -> _)
+              }
+              (Bytes.byteArray.from(response.body), Some(response.statusCode), headers)
+            }
           ),
 
         // Use WebSocket connection
@@ -220,6 +226,10 @@ final case class HttpClient[Effect[_]](
     headersBuilder -> requestUrl
   }
 
+  private def responseContext(response: Response): Context =
+    val (_, statusCode, headers) = response
+    statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers*)
+
   private def effect[T](completableFuture: => CompletableFuture[T]): Effect[T] = {
     val (effectResult, completeEffect, failEffect) = promisedEffect()
     Try(completableFuture).pureFold(
@@ -239,7 +249,7 @@ object HttpClient {
   type Context = Http[HttpContext]
 
   /** Response type. */
-  type Response = (ArraySeq.ofByte, Option[Int])
+  type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
 
   val defaultBuilder = java.net.http.HttpClient.newBuilder
 
@@ -251,7 +261,7 @@ object HttpClient {
   ) extends Listener {
 
     override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[_] = {
-      completeEffect(Bytes.byteBuffer.from(data) -> None)
+      completeEffect((Bytes.byteBuffer.from(data), None, Seq()))
       super.onBinary(webSocket, data, last)
     }
 

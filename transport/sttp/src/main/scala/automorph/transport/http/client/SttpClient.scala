@@ -46,7 +46,7 @@ final case class SttpClient[Effect[_]](
     requestId: String,
     mediaType: String,
     context: Option[Context]
-  ): Effect[ArraySeq.ofByte] = {
+  ): Effect[(ArraySeq.ofByte, Context)] = {
     val sttpRequest = createRequest(requestBody, mediaType, context)
     system.flatMap(
       system.either(send(sttpRequest, requestId)),
@@ -62,7 +62,7 @@ final case class SttpClient[Effect[_]](
           },
           response => {
             logger.debug(s"Received $protocol response", responseProperties + ("Status" -> response.code.toString))
-            system.pure(Bytes.byteArray.from(response.body))
+            system.pure(Bytes.byteArray.from(response.body) -> responseContext(response))
           }
         )
       }
@@ -143,6 +143,12 @@ final case class SttpClient[Effect[_]](
       // Use HTTP connection
       sttpRequest.body(requestBody.unsafeArray).response(asByteArrayAlways)
     }
+  }
+
+  private def responseContext(response: Response[Array[Byte]]): Context = {
+    defaultContext.statusCode(response.code.code).headers(response.headers.map { header =>
+      header.name -> header.value
+    }*)
   }
 }
 
