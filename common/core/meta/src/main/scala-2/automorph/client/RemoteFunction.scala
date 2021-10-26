@@ -339,6 +339,7 @@ object RemoteFunction {
   )(implicit resultType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
+    // FIXME - use response context
     val resultType = weakTypeOf[R]
     val contextType = weakTypeOf[Context]
     c.Expr[Effect[R]](q"""

@@ -139,6 +139,7 @@ object ClientGenerator {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
+    // FIXME - use response context
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
     val nodeType = weakTypeOf[Node]

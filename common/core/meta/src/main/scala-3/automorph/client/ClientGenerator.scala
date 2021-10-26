@@ -121,6 +121,7 @@ private[automorph] object ClientGenerator:
     import ref.q.reflect.asTerm
     given Quotes = ref.q
 
+    // FIXME - use response context
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
     val resultValueType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType.dealias).dealias

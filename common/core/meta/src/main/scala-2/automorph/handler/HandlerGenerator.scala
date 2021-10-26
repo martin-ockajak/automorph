@@ -162,6 +162,7 @@ object HandlerGenerator {
       //   api.method(arguments ...): Effect[ResultValueType]
       val apiMethodCall = q"$api.${method.symbol}(...$apiMethodArguments)"
 
+      // FIXME - use response context
       // Create encode result function
       //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result) -> Option.empty[Context]
       val resultValueType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias

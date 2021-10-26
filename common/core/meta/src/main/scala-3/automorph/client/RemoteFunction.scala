@@ -207,6 +207,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    * @return result value
    */
   inline def call[R](using context: Context): Effect[R] =
+    // FIXME - use response context
     client.call(
       name,
       arguments.map(_._1),
