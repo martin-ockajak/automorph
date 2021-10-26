@@ -132,7 +132,7 @@ final case class HttpClient[Effect[_]](
             (webSocket: WebSocket) =>
               system.flatMap(
                 effect(webSocket.sendBinary(Bytes.byteBuffer.to(requestBody), true)),
-                (_: Effect[WebSocket]) => effectResult
+                (_: WebSocket) => effectResult
               )
           )
         }
