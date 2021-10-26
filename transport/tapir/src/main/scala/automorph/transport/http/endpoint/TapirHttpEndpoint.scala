@@ -11,7 +11,7 @@ import sttp.capabilities.{Streams, WebSockets}
 import sttp.model.headers.Cookie
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.{CodecFormat, byteArrayBody, clientIp, cookies, endpoint, header, headers, paths, queryParams, statusCode, webSocketBody}
+import sttp.tapir.{CodecFormat, byteArrayBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode, webSocketBody}
 
 /**
  * Tapir HTTP endpoint message transport plugin.
@@ -59,9 +59,9 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     val contentType = Header.contentType(MediaType.parse(genericHandler.protocol.codec.mediaType).getOrElse {
       throw new IllegalArgumentException(s"Invalid content type: ${genericHandler.protocol.codec.mediaType}")
     })
-    endpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(cookies).in(clientIp)
+    endpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
       .out(byteArrayBody).out(header(contentType)).out(statusCode)
-      .serverLogic { case (requestMessage, paths, queryParams, headers, cookies, clientIp) =>
+      .serverLogic { case (requestMessage, paths, queryParams, headers, clientIp) =>
         // Receive the request
         val requestId = Random.id
         lazy val requestDetails = requestProperties(clientIp, method, requestId)
