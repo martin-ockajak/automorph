@@ -1,5 +1,6 @@
 package automorph.client
 
+import automorph.Contextual
 import automorph.log.MacroLogger
 import automorph.spi.MessageCodec
 import automorph.spi.protocol.RpcFunction
@@ -144,9 +145,14 @@ object ClientGenerator {
     //   (resultNode: Node, responseContext: Context) => ResultType = codec.decode[ResultType](resultNode)
     val nodeType = weakTypeOf[Node]
     val contextType = weakTypeOf[Context]
-    val resultValueType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
+    val resultType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
+    val (actualResultType, contextual) = if (MethodReflection.returnsContext[Context, Contextual](ref.c)(method)) {
+      resultType -> false
+    } else {
+      resultType -> false
+    }
     ref.c.Expr[(Node, Context) => Any](q"""
-      (resultNode: $nodeType, responseContext: $contextType) => $codec.decode[$resultValueType](resultNode)
+      (resultNode: $nodeType, responseContext: $contextType) => $codec.decode[$actualResultType](resultNode)
     """)
   }
 
