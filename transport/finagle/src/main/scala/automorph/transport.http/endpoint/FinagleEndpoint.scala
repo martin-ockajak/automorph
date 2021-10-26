@@ -45,7 +45,7 @@ final case class FinagleEndpoint[Effect[_]](
     val requestMessage = Buf.ByteArray.Owned.extract(request.content)
 
     // Process the request
-    implicit val usingContext: Context = createContext(request)
+    implicit val usingContext: Context = requestContext(request)
     runAsFuture(system.map(
       system.either(genericHandler.processRequest(requestMessage, requestId, Some(request.path))),
       (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
@@ -56,7 +56,7 @@ final case class FinagleEndpoint[Effect[_]](
             val response = result.responseBody.getOrElse(Array[Byte]())
             val status = result.exception.map(exceptionToStatusCode).map(Status.apply).getOrElse(Status.Ok)
             val message = Reader.fromBuf(Buf.ByteArray.Owned(response))
-            createResponse(message, status, request, requestId)
+            createResponse(message, status, result.context, request, requestId)
           }
         )
     ))
@@ -70,23 +70,30 @@ final case class FinagleEndpoint[Effect[_]](
   ): Response = {
     logger.error("Failed to process HTTP request", error, requestDetails)
     val message = Reader.fromBuf(Buf.Utf8(error.trace.mkString("\n")))
-    val status = Status.InternalServerError
-    createResponse(message, status, request, requestId)
+    createResponse(message, Status.InternalServerError, None, request, requestId)
   }
 
-  private def createResponse(message: Reader[Buf], status: Status, request: Request, requestId: String): Response = {
+  private def createResponse(
+    message: Reader[Buf],
+    status: Status,
+    responseContext: Option[Context],
+    request: Request,
+    requestId: String
+  ): Response = {
+    val responseStatus = responseContext.flatMap(_.statusCode.map(Status.apply)).getOrElse(status)
     lazy val responseDetails = Map(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(request),
-      "Status" -> status.toString
+      "Status" -> responseStatus.toString
     )
-    val response = Response(request.version, status, message)
+    // FIXME - set headers from response context
+    val response = Response(request.version, responseStatus, message)
     response.contentType = genericHandler.protocol.codec.mediaType
     logger.debug("Sending HTTP response", responseDetails)
     response
   }
 
-  private def createContext(request: Request): Context = Http(
+  private def requestContext(request: Request): Context = Http(
     base = Some(request),
     method = Some(request.method.name),
     headers = request.headerMap.iterator.toSeq

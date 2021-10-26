@@ -47,7 +47,7 @@ final case class JettyEndpoint[Effect[_]](
     val requestMessage: InputStream = request.getInputStream
 
     // Process the request
-    implicit val usingContext: Context = createContext(request)
+    implicit val usingContext: Context = requestContext(request)
     val path = new URI(request.getRequestURI).getPath
     runEffect(system.map(
       system.either(genericHandler.processRequest(requestMessage, requestId, Some(path))),
@@ -58,7 +58,7 @@ final case class JettyEndpoint[Effect[_]](
             // Send the response
             val message = result.responseBody.getOrElse(new ByteArrayInputStream(Array()))
             val status = result.exception.map(exceptionToStatusCode).getOrElse(HttpStatus.OK_200)
-            sendResponse(message, status, response, request, requestId)
+            sendResponse(message, status, None, response, request, requestId)
           }
         )
     ))
@@ -74,23 +74,28 @@ final case class JettyEndpoint[Effect[_]](
     logger.error("Failed to process HTTP request", error, requestDetails)
     val message = Bytes.inputStream.to(Bytes.string.from(error.trace.mkString("\n")))
     val status = HttpStatus.INTERNAL_SERVER_ERROR_500
-    sendResponse(message, status, response, request, requestId)
+    sendResponse(message, status, None, response, request, requestId)
   }
 
   private def sendResponse(
     message: InputStream,
     status: Int,
+    responseContext: Option[Context],
     response: HttpServletResponse,
     request: HttpServletRequest,
     requestId: String
   ): Unit = {
+    val responseStatus = responseContext.flatMap(_.statusCode).getOrElse(status)
     lazy val responseDetails = Map(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(request),
-      "Status" -> status.toString
+      "Status" -> responseStatus.toString
     )
     logger.debug("Sending HTTP response", responseDetails)
-    response.setStatus(status)
+    response.setStatus(responseStatus)
+    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
+      response.setHeader(name, value)
+    }
     response.setContentType(genericHandler.protocol.codec.mediaType)
     val outputStream = response.getOutputStream
     IOUtils.copy(message, outputStream)
@@ -98,7 +103,7 @@ final case class JettyEndpoint[Effect[_]](
     logger.debug("Sent HTTP response", responseDetails)
   }
 
-  private def createContext(request: HttpServletRequest): Context = {
+  private def requestContext(request: HttpServletRequest): Context = {
     val headers = request.getHeaderNames.asScala.flatMap { name =>
       request.getHeaders(name).asScala.map(value => name -> value)
     }.toSeq

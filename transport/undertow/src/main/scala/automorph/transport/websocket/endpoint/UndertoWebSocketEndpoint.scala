@@ -85,7 +85,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         logger.debug("Received WebSocket request", requestDetails)
 
         // Process the request
-        implicit val usingContext: Context = createContext(exchange)
+        implicit val usingContext: Context = requestContext(exchange)
         runEffect(system.map(
           system.either(genericHandler.processRequest(request, requestId, None)),
           (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte, Context]]) =>
@@ -135,7 +135,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         WebSockets.sendBinary(Bytes.byteBuffer.to(message), channel, callback, ())
       }
 
-      private def createContext(exchange: WebSocketHttpExchange): Context = {
+      private def requestContext(exchange: WebSocketHttpExchange): Context = {
         val headers = exchange.getRequestHeaders.asScala.view.mapValues(_.asScala).flatMap { case (name, values) =>
           values.map(value => name -> value)
         }.toSeq

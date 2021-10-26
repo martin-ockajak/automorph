@@ -11,7 +11,7 @@ import automorph.util.{Bytes, Network, Random}
 import java.io.IOException
 import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
-import io.undertow.util.{Headers, StatusCodes}
+import io.undertow.util.{Headers, HttpString, StatusCodes}
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
@@ -52,7 +52,7 @@ final case class UndertowHttpEndpoint[Effect[_]] (
 
         override def run(): Unit = {
           // Process the request
-          implicit val usingContext: Context = createContext(exchange)
+          implicit val usingContext: Context = requestContext(exchange)
           runEffect(system.map(
             system.either(genericHandler.processRequest(request, requestId, Some(exchange.getRequestPath))),
             (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte, Context]]) =>
@@ -62,7 +62,7 @@ final case class UndertowHttpEndpoint[Effect[_]] (
                   // Send the response
                   val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
                   val statusCode = result.exception.map(exceptionToStatusCode).getOrElse(StatusCodes.OK)
-                  sendResponse(response, statusCode, exchange, requestId)
+                  sendResponse(response, statusCode, result.context, exchange, requestId)
                 }
               )
           ))
@@ -91,19 +91,21 @@ final case class UndertowHttpEndpoint[Effect[_]] (
     logger.error("Failed to process HTTP request", error, requestDetails)
     val message = Bytes.string.from(error.trace.mkString("\n"))
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
-    sendResponse(message, statusCode, exchange, requestId)
+    sendResponse(message, statusCode, None, exchange, requestId)
   }
 
   private def sendResponse(
     message: ArraySeq.ofByte,
     statusCode: Int,
+    responseContext: Option[Context],
     exchange: HttpServerExchange,
     requestId: String
   ): Unit = {
+    val responseStatusCode = responseContext.flatMap(_.statusCode).getOrElse(statusCode)
     lazy val responseDetails = Map(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(exchange),
-      "Status" -> statusCode.toString
+      "Status" -> responseStatusCode.toString
     )
     logger.trace("Sending HTTP response", responseDetails)
     Try {
@@ -111,13 +113,17 @@ final case class UndertowHttpEndpoint[Effect[_]] (
         throw new IOException("Response channel not available")
       }
       val mediaType = genericHandler.protocol.codec.mediaType
-      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, mediaType)
-      exchange.setStatusCode(statusCode).getResponseSender.send(Bytes.byteBuffer.to(message))
+      exchange.setStatusCode(responseStatusCode).getResponseSender.send(Bytes.byteBuffer.to(message))
+      val responseHeaders = exchange.getResponseHeaders
+      responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
+        responseHeaders.add(new HttpString(name), value)
+      }
+      responseHeaders.put(Headers.CONTENT_TYPE, mediaType)
       logger.debug("Sent HTTP response", responseDetails)
     }.onFailure(logger.error("Failed to send HTTP response", _, responseDetails)).get
   }
 
-  private def createContext(exchange: HttpServerExchange): Context = {
+  private def requestContext(exchange: HttpServerExchange): Context = {
     val headers = exchange.getRequestHeaders.asScala.flatMap { headerValues =>
       headerValues.iterator.asScala.map(value => headerValues.getHeaderName.toString -> value)
     }.toSeq

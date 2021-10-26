@@ -112,7 +112,7 @@ final case class NanoServer[Effect[_]] private (
     logger.debug(s"Received $protocol request", requestDetails)
 
     // Process the request
-    implicit val usingContext: Context = createContext(session)
+    implicit val usingContext: Context = requestContext(session)
     executeEffect(system.map(
       system.either(genericHandler.processRequest(request, requestId, functionName)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte, Context]]) =>
@@ -122,7 +122,7 @@ final case class NanoServer[Effect[_]] private (
             // Send the response
             val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
             val status = result.exception.map(exceptionToStatusCode).map(Status.lookup).getOrElse(Status.OK)
-            createResponse(response, status, session, protocol, requestId)
+            createResponse(response, status, result.context, session, protocol, requestId)
           }
         )
     ))
@@ -136,34 +136,39 @@ final case class NanoServer[Effect[_]] private (
     requestDetails: => Map[String, String]
   ) = {
     logger.error(s"Failed to process $protocol request", error, requestDetails)
-    val status = Status.INTERNAL_ERROR
     val message = Bytes.string.from(error.trace.mkString("\n"))
-    createResponse(message, status, session, protocol, requestId)
+    createResponse(message, Status.INTERNAL_ERROR, None, session, protocol, requestId)
   }
 
   private def createResponse(
     message: ArraySeq.ofByte,
     status: Status,
+    responseContext: Option[Context],
     session: IHTTPSession,
     protocol: Protocol,
     requestId: String
   ): Response = {
+    val responseStatus = responseContext.flatMap(_.statusCode.map(Status.lookup)).getOrElse(status)
     lazy val responseDetails = Map(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(session)
     ) ++ (protocol match {
-      case Protocol.Http => Some("Status" -> status.toString)
+      case Protocol.Http => Some("Status" -> responseStatus.toString)
       case _ => None
     })
     logger.trace(s"Sending $protocol response", responseDetails)
     val inputStream = Bytes.inputStream.to(message)
     val mediaType = genericHandler.protocol.codec.mediaType
-    val response = newFixedLengthResponse(status, mediaType, inputStream, message.size.toLong)
+    val response = newFixedLengthResponse(responseStatus, mediaType, inputStream, message.size.toLong)
+    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
+      response.addHeader(name, value)
+    }
+    response.setMimeType(mediaType)
     logger.debug(s"Sent $protocol response", responseDetails)
     response
   }
 
-  private def createContext(session: IHTTPSession): Context = {
+  private def requestContext(session: IHTTPSession): Context = {
     val http = Http(
       base = Some(session),
       method = Some(session.getMethod.name),

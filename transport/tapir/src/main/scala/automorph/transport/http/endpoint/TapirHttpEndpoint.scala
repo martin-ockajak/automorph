@@ -68,7 +68,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
         logger.debug("Received HTTP request", requestDetails)
 
         // Process the request
-        implicit val usingContext: Context = createContext(method, paths, queryParams, headers)
+        implicit val usingContext: Context = requestContext(method, paths, queryParams, headers)
         system.map(
           system.either(genericHandler.processRequest(requestMessage, requestId, Some(urlPath(paths)))),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
@@ -118,7 +118,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 ////        logger.debug("Received WebSocket request", Map("Client" -> client, "Size" -> requestMessage.length))
 ////
 ////        // Process the request
-////        implicit val usingContext: Context = createContext(method, paths, queryParams, headers)
+////        implicit val usingContext: Context = requestContext(method, paths, queryParams, headers)
 ////        system.map(
 ////          system.either(genericHandler.processRequest(requestMessage, requestId, None)),
 ////          (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
@@ -162,7 +162,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     (message, status)
   }
 
-  private def createContext(
+  private def requestContext(
     method: Method,
     paths: List[String],
     queryParams: QueryParams,
