@@ -228,7 +228,7 @@ object NanoServer {
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true
   ): NanoServer[Effect] = {
-    val server = new NanoServer(handler, runEffectSync, port, path, exceptionToStatusCode)
+    val server = new NanoServer(handler, runEffectSync, port, path, exceptionToStatusCode, webSocket)
     server.start()
     server
   }

@@ -11,11 +11,10 @@ import java.net.http.HttpRequest.BodyPublishers
 import java.net.http.HttpResponse.BodyHandlers
 import java.net.http.WebSocket.Listener
 import java.net.http.{HttpRequest, HttpResponse, WebSocket}
-import java.net.{HttpURLConnection, URI}
+import java.net.URI
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.{CompletableFuture, CompletionStage}
-import java.util.function.BiFunction
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.jdk.OptionConverters.RichOptional
@@ -49,7 +48,6 @@ final case class HttpClient[Effect[_]](
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val httpClient = builder.build
-  private val contentLengthHeader = "Content-Length"
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
@@ -119,7 +117,7 @@ final case class HttpClient[Effect[_]](
         httpRequest =>
           system.map(
             effect(httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray)),
-            response => {
+            (response: HttpResponse[Array[Byte]]) => {
               val headers = response.headers.map.asScala.toSeq.flatMap { case (name, values) =>
                 values.asScala.map(name -> _)
               }
@@ -131,10 +129,10 @@ final case class HttpClient[Effect[_]](
         { case (webSocket, effectResult, requestBody) =>
           system.flatMap(
             webSocket,
-            webSocket =>
+            (webSocket: WebSocket) =>
               system.flatMap(
                 effect(webSocket.sendBinary(Bytes.byteBuffer.to(requestBody), true)),
-                _ => effectResult
+                (_: Effect[WebSocket]) => effectResult
               )
           )
         }
@@ -226,9 +224,10 @@ final case class HttpClient[Effect[_]](
     headersBuilder -> requestUrl
   }
 
-  private def responseContext(response: Response): Context =
+  private def responseContext(response: Response): Context = {
     val (_, statusCode, headers) = response
-    statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers*)
+    statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers *)
+  }
 
   private def effect[T](completableFuture: => CompletableFuture[T]): Effect[T] = {
     val (effectResult, completeEffect, failEffect) = promisedEffect()
