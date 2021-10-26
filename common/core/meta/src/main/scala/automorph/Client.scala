@@ -143,23 +143,23 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   /**
    * Processes an RPC function call response.
    *
-   * @param rawResponse raw response
+   * @param responseBody response message body
    * @param requestProperties request properties
    * @param decodeResult result decoding function
    * @tparam R result type
    * @return result value
    */
   private def processResponse[R](
-    rawResponse: ArraySeq.ofByte,
+    responseBody: ArraySeq.ofByte,
     requestProperties: => Map[String, String],
     decodeResult: Node => R
   ): Effect[R] =
     // Parse response
-    protocol.parseResponse(rawResponse).fold(
+    protocol.parseResponse(responseBody).fold(
       error => raiseError(error.exception, requestProperties),
       rpcResponse => {
         lazy val allProperties = requestProperties ++ rpcResponse.message.properties +
-          (LogProperties.size -> rawResponse.length.toString) ++ rpcResponse.message.text.map(LogProperties.body -> _)
+          (LogProperties.size -> responseBody.length.toString) ++ rpcResponse.message.text.map(LogProperties.body -> _)
         logger.trace(s"Received ${protocol.name} response", allProperties)
         rpcResponse.result.pureFold(
           // Raise error
