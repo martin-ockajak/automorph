@@ -1,5 +1,6 @@
 package automorph.handler
 
+import automorph.Contextual
 import automorph.log.MacroLogger
 import automorph.spi.protocol.RpcFunction
 import automorph.spi.{EffectSystem, MessageCodec}
@@ -166,7 +167,11 @@ object HandlerGenerator {
       // Create encode result function
       //   (result: ResultType) => Node = codec.encode[ResultType](result) -> Option.empty[Context]
       val resultType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
-      val encodeResult = q"(result: $resultType) => $codec.encode[$resultType](result) -> Option.empty[Context]"
+      val encodeResult = MethodReflection.contextualResult[Context, Contextual](ref.c)(resultType).map { contextualResultType =>
+        q"(result: Contextual[$contextualResultType, Context]) => $codec.encode[$contextualResultType](result.result) -> Some(result.context)"
+      }.getOrElse {
+        q"(result: $resultType) => $codec.encode[$resultType](result) -> Option.empty[Context]"
+      }
 
       // Create the effect mapping call using the method call and the encode result function
       //   system.map(apiMethodCall, encodeResult): Effect[(Node, Option[Context])]

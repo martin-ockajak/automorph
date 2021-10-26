@@ -1,5 +1,6 @@
 package automorph.handler
 
+import automorph.Contextual
 import automorph.log.MacroLogger
 import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
@@ -171,18 +172,34 @@ private[automorph] object HandlerGenerator:
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultType](result) -> Option.empty[Context]
         val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
-        val encodeResult = resultType.asType match
-          case '[resultValueType] => '{ (result: resultValueType) =>
-              ${
-                MethodReflection.call(
-                  ref.q,
-                  codec.asTerm,
-                  "encode",
-                  List(resultType),
-                  List(List('{ result }.asTerm))
-                ).asExprOf[Node]
-              } -> Option.empty[Context]
-            }
+        val encodeResult =
+          MethodReflection.contextualResult[Context, Contextual](ref.q)(resultType).map { contextualResultType =>
+            contextualResultType.asType match
+              case '[resultValueType] => '{ (result: Contextual[resultValueType, Context]) =>
+                  ${
+                    MethodReflection.call(
+                      ref.q,
+                      codec.asTerm,
+                      "encode",
+                      List(contextualResultType),
+                      List(List('{ result.result }.asTerm))
+                    ).asExprOf[Node]
+                  } -> Some(result.context)
+                }
+          }.getOrElse {
+            resultType.asType match
+              case '[resultValueType] => '{ (result: resultValueType) =>
+                  ${
+                    MethodReflection.call(
+                      ref.q,
+                      codec.asTerm,
+                      "encode",
+                      List(resultType),
+                      List(List('{ result }.asTerm))
+                    ).asExprOf[Node]
+                  } -> Option.empty[Context]
+                }
+          }
 
         // Create the effect mapping call using the method call and the encode result function
         //   system.map(apiMethodCall, encodeResult): Effect[(Node, Option[Context])]
