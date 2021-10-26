@@ -170,15 +170,15 @@ private[automorph] object HandlerGenerator:
         // FIXME - use response context
         // Create encode result function
         //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result) -> Option.empty[Context]
-        val resultValueType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
-        val encodeResult = resultValueType.asType match
-          case '[resultType] => '{ (result: resultType) =>
+        val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
+        val encodeResult = resultType.asType match
+          case '[resultValueType] => '{ (result: resultValueType) =>
               ${
                 MethodReflection.call(
                   ref.q,
                   codec.asTerm,
                   "encode",
-                  List(resultValueType),
+                  List(resultType),
                   List(List('{ result }.asTerm))
                 ).asExprOf[Node]
               } -> Option.empty[Context]
@@ -191,7 +191,7 @@ private[automorph] object HandlerGenerator:
           ref.q,
           system.asTerm,
           "map",
-          List(resultValueType, TypeRepr.of[(Node, Option[Context])]),
+          List(resultType, TypeRepr.of[(Node, Option[Context])]),
           mapArguments
         ).asExprOf[Effect[(Node, Option[Context])]]
       }

@@ -159,14 +159,14 @@ object HandlerGenerator {
       }
 
       // Create the API method call using the decoded arguments
-      //   api.method(arguments ...): Effect[ResultValueType]
+      //   api.method(arguments ...): Effect[ResultType]
       val apiMethodCall = q"$api.${method.symbol}(...$apiMethodArguments)"
 
       // FIXME - use response context
       // Create encode result function
-      //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result) -> Option.empty[Context]
-      val resultValueType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
-      val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result) -> Option.empty[Context]"
+      //   (result: ResultType) => Node = codec.encode[ResultType](result) -> Option.empty[Context]
+      val resultType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
+      val encodeResult = q"(result: $resultType) => $codec.encode[$resultType](result) -> Option.empty[Context]"
 
       // Create the effect mapping call using the method call and the encode result function
       //   system.map(apiMethodCall, encodeResult): Effect[(Node, Option[Context])]
