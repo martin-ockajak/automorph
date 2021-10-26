@@ -85,13 +85,23 @@ private[automorph] object MethodReflection {
    * @param ref reflection context
    * @param method method descriptor
    * @tparam C macro context type
+   * @tparam Context message context type
    * @tparam Contextual contextual result type
    * @return true if the method returns response context as part of its result
    */
-  def returnsContext[C <: blackbox.Context, Contextual: ref.c.WeakTypeTag](
+  def returnsContext[C <: blackbox.Context, Context: ref.c.WeakTypeTag, Contextual: ref.c.WeakTypeTag](
     ref: Reflection[C]
-  )(method: ref.RefMethod): Boolean =
-    method.resultType =:= ref.c.weakTypeOf[Contextual]
+  )(method: ref.RefMethod): Boolean = {
+    import c.universe.TypeRef
+
+    method.resultType.dealias match {
+      case typeRef: TypeRef =>
+        typeRef.typeConstructor <:< c.weakTypeOf[Contextual] &&
+          typeRef.typeArgs.size > 1 &&
+          typeRef.typeArgs(1) =:= c.weakTypeOf[Context]
+      case _ => false
+    }
+  }
 
   /**
    * Extracts type wrapped in a wrapper type.
@@ -110,11 +120,12 @@ private[automorph] object MethodReflection {
       case typeRef: TypeRef =>
         val expandedType = if (typeRef.typeArgs.nonEmpty) typeRef else typeRef.etaExpand.resultType.dealias
         if (expandedType.typeArgs.nonEmpty) {
-          // Find constructor and type parameter index for an applied type
+          // Find constructor and first type parameter index for an applied type
           (
             expandedType.typeConstructor,
             expandedType.typeArgs.indexWhere {
-              case typeRef: TypeRef => typeRef.typeSymbol.isAbstract &&
+              case typeRef: TypeRef =>
+                typeRef.typeSymbol.isAbstract &&
                   !(typeRef =:= c.typeOf[Any] || typeRef <:< c.typeOf[AnyRef] || typeRef <:< c.typeOf[AnyVal])
               case _ => false
             }

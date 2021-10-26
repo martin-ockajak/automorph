@@ -1,8 +1,9 @@
 package automorph.util
 
+import automorph.Contextual
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import automorph.util.Reflection
-import scala.quoted.{Expr, Quotes, ToExpr, Type, quotes}
+import scala.quoted.{quotes, Expr, Quotes, ToExpr, Type}
 
 /** Method introspection. */
 private[automorph] object MethodReflection:
@@ -73,12 +74,18 @@ private[automorph] object MethodReflection:
    *
    * @param ref reflection context
    * @param method method descriptor
+   * @tparam Context message context type
    * @tparam Contextual contextual result type
    * @return true if the method returns response context as part of its result
    */
-  def returnsContext[Contextual: Type](ref: Reflection)(method: ref.RefMethod): Boolean =
-    method.resultType match {
-      case appliedType: ref.q.reflect.AppliedType => appliedType.tycon <:< ref.q.reflect.TypeRepr.of[Contextual]
+  def returnsContext[Context: Type, Contextual[_, _]: Type](ref: Reflection)(method: ref.RefMethod): Boolean =
+    import ref.q.reflect.{AppliedType, TypeRepr}
+
+    method.resultType.dealias match {
+      case appliedType: AppliedType =>
+        appliedType.tycon <:< TypeRepr.of[Contextual] &&
+          appliedType.args.size > 1 &&
+          appliedType.args(1) =:= TypeRepr.of[Context]
       case _ => false
     }
 
@@ -95,8 +102,8 @@ private[automorph] object MethodReflection:
 
     val wrapperType = resultType(q)(TypeRepr.of[Wrapper])
     val (wrapperTypeConstructor, wrapperTypeParameterIndex) = wrapperType match
-      // Find constructor and type parameter index for an applied type
-      case appliedType: q.reflect.AppliedType => (
+      // Find constructor and first type parameter index for an applied type
+      case appliedType: AppliedType => (
           appliedType.tycon,
           appliedType.args.indexWhere {
             case _: ParamRef => true
