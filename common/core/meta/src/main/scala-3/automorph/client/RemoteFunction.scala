@@ -208,6 +208,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    * @return result value
    */
   inline def call[R](using context: Context): Effect[R] =
+// FIXME - use response context
 //    val decodeResult = RemoteFunction.decodeResult(codec)
     val decodeResult = (resultNode: Node, responseContext: Context) => codec.decode[R](resultNode)
     client.call(
