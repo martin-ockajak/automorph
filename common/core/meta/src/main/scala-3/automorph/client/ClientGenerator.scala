@@ -125,7 +125,7 @@ private[automorph] object ClientGenerator:
     // FIXME - use response context
     // Create decode result function
     //   (resultNode: Node, responseContext: Context) => ResultType = codec.decode[ResultType](resultNode)
-    val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType.dealias).dealias
+    val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
     MethodReflection.returnsContext[Context, Contextual](ref)(method).map { contextualResultType =>
       '{ (resultNode: Node, responseContext: Context) =>
         Contextual(
