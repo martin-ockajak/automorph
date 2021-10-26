@@ -80,21 +80,21 @@ private[automorph] object MethodReflection {
     }
 
   /**
-   * Determines whether a method returns response context as part of its result.
+   * Extracts result type wrapped in a contextual type.
    *
-   * @param ref reflection context
-   * @param method method descriptor
+   * @param c macro context
+   * @param someType wrapped type
    * @tparam C macro context type
    * @tparam Context message context type
    * @tparam Contextual contextual result type
-   * @return contextual result type if the method returns response context as part of its result
+   * @return contextual result type if applicable
    */
-  def returnsContext[C <: blackbox.Context, Context: ref.c.WeakTypeTag, Contextual: ref.c.WeakTypeTag](
-    ref: Reflection[C]
-  )(method: ref.RefMethod): Option[c.Type] = {
+  def contextualResult[C <: blackbox.Context, Context: ref.c.WeakTypeTag, Contextual: ref.c.WeakTypeTag](
+    c: C
+  )(someType: c.Type): Option[c.Type] = {
     import c.universe.TypeRef
 
-    method.resultType.dealias match {
+    someType.dealias match {
       case typeRef: TypeRef
         if typeRef.typeConstructor <:< c.weakTypeOf[Contextual] &&
           typeRef.typeArgs.size > 1 &&

@@ -70,19 +70,20 @@ private[automorph] object MethodReflection:
     }
 
   /**
-   * Determines whether a method returns response context as part of its result.
+   * Extracts result type wrapped in a contextual type.
    *
-   * @param ref reflection context
-   * @param method method descriptor
+   * @param q quotation context
+   * @param someType wrapped type
    * @tparam Context message context type
    * @tparam Contextual contextual result type
-   * @return contextual result type if the method returns response context as part of its result
+   * @return contextual result type if applicable
    */
-  def returnsContext[Context: Type, Contextual[_, _]: Type](ref: Reflection)(method: ref.RefMethod)
-    : Option[ref.q.reflect.TypeRepr] =
-    import ref.q.reflect.{AppliedType, TypeRepr}
+  def contextualResult[Context: Type, Contextual[_, _]: Type](q: Quotes)(
+    someType: q.reflect.TypeRepr
+  ): Option[q.reflect.TypeRepr] =
+    import q.reflect.{AppliedType, TypeRepr}
 
-    method.resultType.dealias match {
+    someType.dealias match {
       case appliedType: AppliedType
         if appliedType.tycon <:< TypeRepr.of[Contextual] &&
           appliedType.args.size > 1 &&

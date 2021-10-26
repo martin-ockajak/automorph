@@ -126,7 +126,7 @@ private[automorph] object ClientGenerator:
     // Create decode result function
     //   (resultNode: Node, responseContext: Context) => ResultType = codec.decode[ResultType](resultNode)
     val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
-    MethodReflection.returnsContext[Context, Contextual](ref)(method).map { contextualResultType =>
+    MethodReflection.contextualResult[Context, Contextual](ref.q)(resultType).map { contextualResultType =>
       '{ (resultNode: Node, responseContext: Context) =>
         Contextual(
           ${
