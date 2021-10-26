@@ -52,13 +52,13 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     functionName: Option[String]
   )(implicit requestContext: Context): Effect[HandlerResult[MessageBody, Context]] = {
     // Parse request
-    val rawRequest = implicitly[Bytes[MessageBody]].from(requestBody)
-    protocol.parseRequest(rawRequest, requestId, functionName).fold(
+    val requestMessageBody = implicitly[Bytes[MessageBody]].from(requestBody)
+    protocol.parseRequest(requestMessageBody, requestId, functionName).fold(
       error => errorResponse(error.exception, error.message, requestId, Map(LogProperties.requestId -> requestId)),
       rpcRequest => {
         // Invoke requested RPC function
         lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++
-          rpcRequest.message.properties + (LogProperties.size -> rawRequest.length.toString)
+          rpcRequest.message.properties + (LogProperties.size -> requestMessageBody.length.toString)
         lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
         logger.trace(s"Received ${protocol.name} request", allProperties)
         callFunction(rpcRequest, requestContext, requestId, requestProperties)
@@ -210,14 +210,14 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     protocol.createResponse(result.map(_._1), message.details).pureFold(
       error => system.failed(error),
       rpcResponse => {
-        val rawResponse = rpcResponse.message.body
+        val responseBody = rpcResponse.message.body
         lazy val requestProperties = rpcResponse.message.properties ++ Map(
           LogProperties.requestId -> requestId,
-          LogProperties.size -> rawResponse.length.toString
+          LogProperties.size -> responseBody.length.toString
         )
         lazy val allProperties = requestProperties ++ rpcResponse.message.text.map(LogProperties.body -> _)
         logger.trace(s"Sending ${protocol.name} response", allProperties)
-        val responseMessage = Some(implicitly[Bytes[MessageBody]].to(rawResponse))
+        val responseMessage = Some(implicitly[Bytes[MessageBody]].to(responseBody))
         system.pure(HandlerResult(responseMessage, result.failed.toOption, result.toOption.flatMap(_._2)))
       }
     )

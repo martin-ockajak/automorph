@@ -83,16 +83,16 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         system.flatMap(
           system.pure(rpcRequest),
           (request: RpcRequest[Node, _]) => {
-            val rawRequest = request.message.body
+            val requestBody = request.message.body
             lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++
-              rpcRequest.message.properties + (LogProperties.size -> rawRequest.length.toString)
+              rpcRequest.message.properties + (LogProperties.size -> requestBody.length.toString)
             lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
             logger.trace(s"Sending ${protocol.name} request", allProperties)
             system.flatMap(
-              transport.call(rawRequest, requestId, protocol.codec.mediaType, requestContext),
+              transport.call(requestBody, requestId, protocol.codec.mediaType, requestContext),
               // Process response
-              { case (rawResponse, responseContext) =>
-                processResponse[R](rawResponse, requestProperties, decodeResult)
+              { case (responseBody, responseContext) =>
+                processResponse[R](responseBody, requestProperties, decodeResult)
               }
             )
           }
@@ -127,10 +127,10 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         system.flatMap(
           system.pure(rpcRequest),
           (request: RpcRequest[Node, _]) => {
-            val rawRequest = request.message.body
+            val requestBody = request.message.body
             lazy val requestProperties = rpcRequest.message.properties ++ Map(
               LogProperties.requestId -> requestId,
-              LogProperties.size -> rawRequest.length.toString
+              LogProperties.size -> requestBody.length.toString
             )
             lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
             logger.trace(s"Sending ${protocol.name} request", allProperties)
