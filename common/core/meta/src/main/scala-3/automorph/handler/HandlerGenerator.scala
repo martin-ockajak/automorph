@@ -169,7 +169,7 @@ private[automorph] object HandlerGenerator:
 
         // FIXME - use response context
         // Create encode result function
-        //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result) -> Option.empty[Context]
+        //   (result: ResultValueType) => Node = codec.encode[ResultType](result) -> Option.empty[Context]
         val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
         val encodeResult = resultType.asType match
           case '[resultValueType] => '{ (result: resultValueType) =>
