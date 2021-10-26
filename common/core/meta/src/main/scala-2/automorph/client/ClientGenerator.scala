@@ -141,7 +141,7 @@ object ClientGenerator {
 
     // FIXME - use response context
     // Create decode result function
-    //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
+    //   (resultNode: Node, responseContext: Context) => ResultType = codec.decode[ResultType](resultNode)
     val nodeType = weakTypeOf[Node]
     val contextType = weakTypeOf[Context]
     val resultValueType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias

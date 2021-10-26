@@ -123,15 +123,15 @@ private[automorph] object ClientGenerator:
 
     // FIXME - use response context
     // Create decode result function
-    //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
-    val resultValueType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType.dealias).dealias
+    //   (resultNode: Node, responseContext: Context) => ResultType = codec.decode[ResultType](resultNode)
+    val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType.dealias).dealias
     '{ (resultNode, responseContext) =>
       ${
         MethodReflection.call(
           ref.q,
           codec.asTerm,
           "decode",
-          List(resultValueType),
+          List(resultType),
           List(List('{ resultNode }.asTerm))
         ).asExprOf[Any]
       }
