@@ -142,7 +142,7 @@ private[automorph] object ClientGenerator:
         )
       }
     }.getOrElse {
-      '{ (resultNode: Node, responseContext: Context) =>
+      '{ (resultNode: Node, _: Context) =>
         ${
           MethodReflection.call(
             ref.q,

@@ -155,7 +155,7 @@ object ClientGenerator {
       """)
     }.getOrElse {
       ref.c.Expr[(Node, Context) => Any](q"""
-        (resultNode: $nodeType, responseContext: $contextType) => $codec.decode[$resultType](resultNode)
+        (resultNode: $nodeType, _: $contextType) => $codec.decode[$resultType](resultNode)
       """)
     }
     val (actualResultType, contextual) = if (MethodReflection.returnsContext[Context, Contextual](ref.c)(method)) {
