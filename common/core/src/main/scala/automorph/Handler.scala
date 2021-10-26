@@ -61,13 +61,13 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           rpcRequest.message.properties + (LogProperties.size -> rawRequest.length.toString)
         lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
         logger.trace(s"Received ${protocol.name} request", allProperties)
-        invokeFunction(rpcRequest, requestContext, requestId, requestProperties)
+        callFunction(rpcRequest, requestContext, requestId, requestProperties)
       }
     )
   }
 
   /**
-   * Invokes bound RPC function specified in a request.
+   * Calls bound RPC function specified in a request and creates a response.
    *
    * Optional request context is used as a last RPC function argument.
    *
@@ -76,9 +76,9 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @param requestId request correlation idendifier
    * @param requestProperties request properties
    * @tparam MessageBody message body type
-   * @return bound function invocation result
+   * @return bound function call RPC response
    */
-  private def invokeFunction[MessageBody: Bytes](
+  private def callFunction[MessageBody: Bytes](
     rpcRequest: RpcRequest[Node, protocol.Metadata],
     context: Context,
     requestId: String,
@@ -93,29 +93,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         Try(system.either(handlerBinding.invoke(arguments, context)))
       }.pureFold(
         error => errorResponse(error, rpcRequest.message, requestId, requestProperties),
-        effect => {
-          system.flatMap(
-            effect,
-            (outcome: Either[Throwable, (Node, Option[Context])]) => {
-              val responseContext = outcome.fold(
-                error => {
-                  logger.error(s"Failed to process ${protocol.name} request", error, requestProperties)
-                  None
-                },
-                { case (_, context) =>
-                  logger.info(s"Processed ${protocol.name} request", requestProperties)
-                  context
-                }
-              )
-              if (rpcRequest.responseRequired) {
-                // Create response
-                response(outcome.toTry, rpcRequest.message, requestId)
-              } else {
-                system.pure(HandlerResult[MessageBody, Context](None, None, responseContext))
-              }
-            }
-          )
-        }
+        result => resultResponse(result, rpcRequest, requestId, requestProperties)
       )
     }.getOrElse {
       val error = FunctionNotFoundException(s"Function not found: ${rpcRequest.function}", None.orNull)
@@ -162,6 +140,38 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       }
     )
   }
+
+  /**
+   * Creates a response for bound RPC function call result.
+   *
+   * @param functionResult RPC function call result
+   * @param rpcRequest RPC request
+   * @param requestId request correlation idendifier
+   * @param requestProperties request properties
+   * @tparam MessageBody message body type
+   * @return bound function call RPC response
+   */
+  private def resultResponse[MessageBody: Bytes](
+    functionResult: Effect[Either[Throwable, (Node, Option[Context])]],
+    rpcRequest: RpcRequest[Node, protocol.Metadata],
+    requestId: String,
+    requestProperties: => Map[String, String]
+  ): Effect[HandlerResult[MessageBody, Context]] = system.flatMap(
+    functionResult,
+    (result: Either[Throwable, (Node, Option[Context])]) => {
+      result.fold(
+        error => logger.error(s"Failed to process ${protocol.name} request", error, requestProperties),
+        _ => logger.info(s"Processed ${protocol.name} request", requestProperties)
+      )
+      if (rpcRequest.responseRequired) {
+        // Create response
+        response(result.toTry, rpcRequest.message, requestId)
+      } else {
+        val responseContext = result.toOption.flatMap(_._2)
+        system.pure(HandlerResult[MessageBody, Context](None, None, responseContext))
+      }
+    }
+  )
 
   /**
    * Creates a handler result containing an RPC response for the specified error.
