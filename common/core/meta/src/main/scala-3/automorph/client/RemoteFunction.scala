@@ -208,9 +208,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    * @return result value
    */
   inline def call[R](using context: Context): Effect[R] =
-// FIXME - use response context
-//    val decodeResult = RemoteFunction.decodeResult(codec)
-    val decodeResult = (resultNode: Node, responseContext: Context) => codec.decode[R](resultNode)
+    val decodeResult = RemoteFunction.decodeResult[Node, Codec, Context, R](codec)
     client.call(
       name,
       arguments.map(_._1),
@@ -244,42 +242,31 @@ object RemoteFunction:
     import quotes.reflect.{TypeRepr, asTerm}
 
     val resultType = TypeRepr.of[R]
-    '{ (resultNode: Node, _: Context) =>
-      ${
-        MethodReflection.call(
-          quotes,
-          codec.asTerm,
-          "decode",
-          List(resultType),
-          List(List('{ resultNode }.asTerm))
-        ).asExprOf[R]
+    MethodReflection.contextualResult[Context, Contextual](quotes)(resultType).map { contextualResultType =>
+      '{ (resultNode: Node, responseContext: Context) =>
+        Contextual(
+          ${
+            MethodReflection.call(
+              quotes,
+              codec.asTerm,
+              "decode",
+              List(contextualResultType),
+              List(List('{ resultNode }.asTerm))
+            ).asExprOf[R]
+          },
+          responseContext
+        )
+      }.asInstanceOf[Expr[(Node, Context) => R]]
+    }.getOrElse {
+      '{ (resultNode: Node, _: Context) =>
+        ${
+          MethodReflection.call(
+            quotes,
+            codec.asTerm,
+            "decode",
+            List(resultType),
+            List(List('{ resultNode }.asTerm))
+          ).asExprOf[R]
+        }
       }
     }
-//    MethodReflection.contextualResult[Context, Contextual](quotes)(resultType).map { contextualResultType =>
-//      '{ (resultNode: Node, responseContext: Context) =>
-//        Contextual(
-//          ${
-//            MethodReflection.call(
-//              quotes,
-//              codec.asTerm,
-//              "decode",
-//              List(contextualResultType),
-//              List(List('{ resultNode }.asTerm))
-//            ).asExprOf[R]
-//          },
-//          responseContext
-//        )
-//      }
-//    }.getOrElse {
-//      '{ (resultNode: Node, _: Context) =>
-//        ${
-//          MethodReflection.call(
-//            quotes,
-//            codec.asTerm,
-//            "decode",
-//            List(resultType),
-//            List(List('{ resultNode }.asTerm))
-//          ).asExprOf[R]
-//        }
-//      }
-//    }.asExprOf[(Node, Context) => R]
