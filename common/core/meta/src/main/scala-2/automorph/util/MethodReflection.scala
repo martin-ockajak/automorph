@@ -87,19 +87,19 @@ private[automorph] object MethodReflection {
    * @tparam C macro context type
    * @tparam Context message context type
    * @tparam Contextual contextual result type
-   * @return true if the method returns response context as part of its result
+   * @return contextual result type if the method returns response context as part of its result
    */
   def returnsContext[C <: blackbox.Context, Context: ref.c.WeakTypeTag, Contextual: ref.c.WeakTypeTag](
     ref: Reflection[C]
-  )(method: ref.RefMethod): Boolean = {
+  )(method: ref.RefMethod): Option[c.Type] = {
     import c.universe.TypeRef
 
     method.resultType.dealias match {
-      case typeRef: TypeRef =>
-        typeRef.typeConstructor <:< c.weakTypeOf[Contextual] &&
+      case typeRef: TypeRef
+        if typeRef.typeConstructor <:< c.weakTypeOf[Contextual] &&
           typeRef.typeArgs.size > 1 &&
-          typeRef.typeArgs(1) =:= c.weakTypeOf[Context]
-      case _ => false
+          typeRef.typeArgs(1) =:= c.weakTypeOf[Context] => Some(typeRef.typeArgs(0))
+      case _ => None
     }
   }
 

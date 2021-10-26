@@ -76,17 +76,18 @@ private[automorph] object MethodReflection:
    * @param method method descriptor
    * @tparam Context message context type
    * @tparam Contextual contextual result type
-   * @return true if the method returns response context as part of its result
+   * @return contextual result type if the method returns response context as part of its result
    */
-  def returnsContext[Context: Type, Contextual[_, _]: Type](ref: Reflection)(method: ref.RefMethod): Boolean =
+  def returnsContext[Context: Type, Contextual[_, _]: Type](ref: Reflection)(method: ref.RefMethod)
+    : Option[ref.q.reflect.TypeRepr] =
     import ref.q.reflect.{AppliedType, TypeRepr}
 
     method.resultType.dealias match {
-      case appliedType: AppliedType =>
-        appliedType.tycon <:< TypeRepr.of[Contextual] &&
+      case appliedType: AppliedType
+        if appliedType.tycon <:< TypeRepr.of[Contextual] &&
           appliedType.args.size > 1 &&
-          appliedType.args(1) =:= TypeRepr.of[Context]
-      case _ => false
+          appliedType.args(1) =:= TypeRepr.of[Context] => Some(appliedType.args(0))
+      case _ => None
     }
 
   /**

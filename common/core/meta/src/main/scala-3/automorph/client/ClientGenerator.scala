@@ -126,20 +126,32 @@ private[automorph] object ClientGenerator:
     // Create decode result function
     //   (resultNode: Node, responseContext: Context) => ResultType = codec.decode[ResultType](resultNode)
     val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType.dealias).dealias
-    val (actualResultType, contextual) =
-      if MethodReflection.returnsContext[Context, Contextual](ref)(method) then
-        resultType -> false
-      else
-        resultType -> false
-    '{ (resultNode, responseContext) =>
-      ${
-        MethodReflection.call(
-          ref.q,
-          codec.asTerm,
-          "decode",
-          List(actualResultType),
-          List(List('{ resultNode }.asTerm))
-        ).asExprOf[Any]
+    MethodReflection.returnsContext[Context, Contextual](ref)(method).map { contextualResultType =>
+      '{ (resultNode: Node, responseContext: Context) =>
+        Contextual(
+          ${
+            MethodReflection.call(
+              ref.q,
+              codec.asTerm,
+              "decode",
+              List(contextualResultType),
+              List(List('{ resultNode }.asTerm))
+            ).asExprOf[Any]
+          },
+          responseContext
+        )
+      }
+    }.getOrElse {
+      '{ (resultNode: Node, responseContext: Context) =>
+        ${
+          MethodReflection.call(
+            ref.q,
+            codec.asTerm,
+            "decode",
+            List(resultType),
+            List(List('{ resultNode }.asTerm))
+          ).asExprOf[Any]
+        }
       }
     }
 

@@ -146,14 +146,23 @@ object ClientGenerator {
     val nodeType = weakTypeOf[Node]
     val contextType = weakTypeOf[Context]
     val resultType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
+    MethodReflection.returnsContext[Context, Contextual](ref.c)(method).map { contextualResultType =>
+      ref.c.Expr[(Node, Context) => Any](q"""
+        (resultNode: $nodeType, responseContext: $contextType) => Contextual(
+          $codec.decode[$contextualResultType](resultNode),
+          responseContext
+        )
+      """)
+    }.getOrElse {
+      ref.c.Expr[(Node, Context) => Any](q"""
+        (resultNode: $nodeType, responseContext: $contextType) => $codec.decode[$resultType](resultNode)
+      """)
+    }
     val (actualResultType, contextual) = if (MethodReflection.returnsContext[Context, Contextual](ref.c)(method)) {
       resultType -> false
     } else {
       resultType -> false
     }
-    ref.c.Expr[(Node, Context) => Any](q"""
-      (resultNode: $nodeType, responseContext: $contextType) => $codec.decode[$actualResultType](resultNode)
-    """)
   }
 
   private def logBoundMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: Reflection[C])(
