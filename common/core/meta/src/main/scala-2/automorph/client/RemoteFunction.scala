@@ -339,12 +339,14 @@ object RemoteFunction {
   )(implicit resultType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
+    val resultType = weakTypeOf[R]
+    val contextType = weakTypeOf[Context]
     c.Expr[Effect[R]](q"""
       ${c.prefix}.client.call(
         ${c.prefix}.name,
         ${c.prefix}.arguments.map(_._1),
         ${c.prefix}.argumentNodes,
-        ${c.prefix}.codec.decode[${weakTypeOf[R]}](_),
+        (resultNode: $resultType, responseContext: $contextType) => ${c.prefix}.codec.decode[$resultType](resultNode),
         Some($context)
       )
     """)

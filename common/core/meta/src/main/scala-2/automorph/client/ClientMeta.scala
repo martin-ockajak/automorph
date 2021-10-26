@@ -65,9 +65,9 @@ object ClientMeta {
         (_, function, arguments) =>
           // Lookup bindings for the specified function
           functionBindings.get(function.getName).map { clientBinding =>
-            // Adjust expected function parameters if it uses context as its last parameter
+            // Adjust expected function parameters if it accepts request context as its last parameter
             val callArguments = Option(arguments).getOrElse(Array.empty[AnyRef])
-            val (argumentValues, context) =
+            val (argumentValues, requestContext) =
               if (clientBinding.acceptsContext && callArguments.nonEmpty) {
                 callArguments.dropRight(1).toSeq -> Some(callArguments.last.asInstanceOf[$contextType])
               } else {
@@ -79,8 +79,9 @@ object ClientMeta {
             val parameterNames = clientBinding.function.parameters.map(_.name)
 
             // Perform the API call
-            ${c.prefix}.call(function.getName, parameterNames, encodedArguments, resultNode =>
-              clientBinding.decodeResult(resultNode), context)
+            ${c.prefix}.call(function.getName, parameterNames, encodedArguments,
+              (resultNode, responseContext) => clientBinding.decodeResult(resultNode, responseContext),
+              requestContext)
           }.getOrElse(throw new UnsupportedOperationException("Invalid function: " + function.getName))
       ).asInstanceOf[$apiType]
     """)

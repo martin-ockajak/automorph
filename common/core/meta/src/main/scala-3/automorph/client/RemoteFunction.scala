@@ -22,6 +22,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
   private val argumentNodes: Seq[Node],
   private val client: Client[Node, Codec, Effect, Context]
 ) extends CannotEqual:
+
   val codec = client.protocol.codec
 
   /** Proxy type. */
@@ -206,7 +207,13 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    * @return result value
    */
   inline def call[R](using context: Context): Effect[R] =
-    client.call(name, arguments.map(_._1), argumentNodes, codec.decode[R](_), Some(context))
+    client.call(
+      name,
+      arguments.map(_._1),
+      argumentNodes,
+      (resultNode, responseContext) => codec.decode[R](resultNode),
+      Some(context)
+    )
 
   /**
    * Sends a remote function notification request disregarding the response.

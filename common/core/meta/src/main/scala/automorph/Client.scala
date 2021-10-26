@@ -62,7 +62,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @param functionName RPC function name
    * @param argumentNames argument names
    * @param encodedArguments function argument nodes
-   * @param decodeResult result node decoding function
+   * @param decodeResult decodes RPC function call result
    * @param requestContext request context
    * @tparam R result type
    * @return result value
@@ -71,7 +71,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     functionName: String,
     argumentNames: Seq[String],
     encodedArguments: Seq[Node],
-    decodeResult: Node => R,
+    decodeResult: (Node, Context) => R,
     requestContext: Option[Context]
   ): Effect[R] = {
     // Create request
@@ -92,7 +92,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
               transport.call(requestBody, requestId, protocol.codec.mediaType, requestContext),
               // Process response
               { case (responseBody, responseContext) =>
-                processResponse[R](responseBody, requestProperties, decodeResult)
+                processResponse[R](responseBody, responseContext, requestProperties, decodeResult)
               }
             )
           }
@@ -144,15 +144,17 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * Processes an RPC function call response.
    *
    * @param responseBody response message body
+   * @param responseContext response context
    * @param requestProperties request properties
-   * @param decodeResult result decoding function
+   * @param decodeResult decodes RPC function call result
    * @tparam R result type
    * @return result value
    */
   private def processResponse[R](
     responseBody: ArraySeq.ofByte,
+    responseContext: Context,
     requestProperties: => Map[String, String],
-    decodeResult: Node => R
+    decodeResult: (Node, Context) => R
   ): Effect[R] =
     // Parse response
     protocol.parseResponse(responseBody).fold(
@@ -166,7 +168,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           error => raiseError(error, requestProperties),
           // Decode result
           result =>
-            Try(decodeResult(result)).pureFold(
+            Try(decodeResult(result, responseContext)).pureFold(
               error => raiseError(InvalidResponseException("Malformed result", error), requestProperties),
               result => {
                 logger.info(s"Performed ${protocol.name} request", requestProperties)

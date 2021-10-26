@@ -23,7 +23,7 @@ private[automorph] object ClientGenerator:
    */
   inline def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec
-  ): Seq[ClientBinding[Node]] = ${ bindingsMacro[Node, Codec, Effect, Context, Api]('codec) }
+  ): Seq[ClientBinding[Node, Context]] = ${ bindingsMacro[Node, Codec, Effect, Context, Api]('codec) }
 
   private def bindingsMacro[
     Node: Type,
@@ -31,7 +31,7 @@ private[automorph] object ClientGenerator:
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
-  ](codec: Expr[Codec])(using quotes: Quotes): Expr[Seq[ClientBinding[Node]]] =
+  ](codec: Expr[Codec])(using quotes: Quotes): Expr[Seq[ClientBinding[Node, Context]]] =
     val ref = Reflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -54,11 +54,11 @@ private[automorph] object ClientGenerator:
     Effect[_]: Type,
     Context: Type,
     Api: Type
-  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[Codec]): Expr[ClientBinding[Node]] =
+  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[Codec]): Expr[ClientBinding[Node, Context]] =
     given Quotes = ref.q
 
     val encodeArguments = generateEncodeArguments[Node, Codec, Context](ref)(method, codec)
-    val decodeResult = generateDecodeResult[Node, Codec, Effect](ref)(method, codec)
+    val decodeResult = generateDecodeResult[Node, Codec, Effect, Context](ref)(method, codec)
     logBoundMethod[Api](ref)(method, encodeArguments, decodeResult)
     '{
       ClientBinding(
@@ -115,17 +115,16 @@ private[automorph] object ClientGenerator:
       }
     }
 
-  private def generateDecodeResult[Node: Type, Codec <: MessageCodec[Node]: Type, Effect[_]: Type](ref: Reflection)(
-    method: ref.RefMethod,
-    codec: Expr[Codec]
-  ): Expr[Node => Any] =
+  private def generateDecodeResult[Node: Type, Codec <: MessageCodec[Node]: Type, Effect[_]: Type, Context: Type](
+    ref: Reflection
+  )(method: ref.RefMethod, codec: Expr[Codec]): Expr[(Node, Context) => Any] =
     import ref.q.reflect.asTerm
     given Quotes = ref.q
 
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
     val resultValueType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType.dealias).dealias
-    '{ resultNode =>
+    '{ (resultNode, responseContext) =>
       ${
         MethodReflection.call(
           ref.q,

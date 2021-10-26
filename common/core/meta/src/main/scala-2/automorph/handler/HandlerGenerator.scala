@@ -116,11 +116,11 @@ object HandlerGenerator {
     val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
     // Create invoke function
-    //   (argumentNodes: Seq[Option[Node]], context: Context) => Effect[Node]
+    //   (argumentNodes: Seq[Option[Node]], requestContext: Context) => Effect[Node]
     val nodeType = weakTypeOf[Node].dealias
     val contextType = weakTypeOf[Context].dealias
     ref.c.Expr[(Seq[Option[Node]], Context) => Effect[Node]](q"""
-      (argumentNodes: Seq[Option[$nodeType]], context: $contextType) => ${
+      (argumentNodes: Seq[Option[$nodeType]], requestContext: $contextType) => ${
       // Create the method argument lists by decoding corresponding argument nodes into values
       //   List(List(
       //     (Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
@@ -137,8 +137,8 @@ object HandlerGenerator {
         parameters.toList.zipWithIndex.map { case (parameter, index) =>
           val argumentIndex = offset + index
           if (argumentIndex == lastArgumentIndex && MethodReflection.acceptsContext[C, Context](ref)(method)) {
-            // Use supplied context as a last argument if the method accepts context as its last parameter
-            q"context"
+            // Use supplied request context as a last argument if the method accepts context as its last parameter
+            q"requestContext"
           } else {
             // Decode an argument node if it exists or an empty node if not into a value
             q"""

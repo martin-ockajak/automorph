@@ -23,7 +23,7 @@ object ClientGenerator {
    */
   def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec
-  ): Seq[ClientBinding[Node]] = macro bindingsMacro[Node, Codec, Effect, Context, Api]
+  ): Seq[ClientBinding[Node, Context]] = macro bindingsMacro[Node, Codec, Effect, Context, Api]
 
   def bindingsMacro[
     Node: c.WeakTypeTag,
@@ -33,7 +33,7 @@ object ClientGenerator {
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(codec: c.Expr[Codec])(implicit
     effectType: c.WeakTypeTag[Effect[_]]
-  ): c.Expr[Seq[ClientBinding[Node]]] = {
+  ): c.Expr[Seq[ClientBinding[Node, Context]]] = {
     import c.universe.Quasiquote
     val ref = Reflection[c.type](c)
 
@@ -52,7 +52,7 @@ object ClientGenerator {
     val clientBindings = validMethods.map { method =>
       generateBinding[c.type, Node, Codec, Effect, Context, Api](ref)(method, codec)
     }
-    c.Expr[Seq[ClientBinding[Node]]](q"""
+    c.Expr[Seq[ClientBinding[Node, Context]]](q"""
       Seq(..$clientBindings)
     """)
   }
@@ -67,17 +67,18 @@ object ClientGenerator {
   ](ref: Reflection[C])(
     method: ref.RefMethod,
     codec: ref.c.Expr[Codec]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[ClientBinding[Node]] = {
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[ClientBinding[Node, Context]] = {
     import ref.c.universe.{Liftable, Quasiquote, weakTypeOf}
 
     val nodeType = weakTypeOf[Node]
+    val contextType = weakTypeOf[Context]
     val encodeArguments = generateEncodeArguments[C, Node, Codec, Context](ref)(method, codec)
-    val decodeResult = generateDecodeResult[C, Node, Codec, Effect](ref)(method, codec)
+    val decodeResult = generateDecodeResult[C, Node, Codec, Effect, Context](ref)(method, codec)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
     implicit val functionLiftable: Liftable[RpcFunction] = MethodReflection.functionLiftable(ref)
     Seq(functionLiftable)
-    ref.c.Expr[ClientBinding[Node]](q"""
-      automorph.client.ClientBinding[$nodeType](
+    ref.c.Expr[ClientBinding[Node, Context]](q"""
+      automorph.client.ClientBinding[$nodeType, $contextType](
         ${method.lift.rpcFunction},
         $encodeArguments,
         $decodeResult,
@@ -130,19 +131,21 @@ object ClientGenerator {
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
     Codec <: MessageCodec[Node]: ref.c.WeakTypeTag,
-    Effect[_]
+    Effect[_],
+    Context: ref.c.WeakTypeTag
   ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[Codec])(implicit
     effectType: ref.c.WeakTypeTag[Effect[_]]
-  ): ref.c.Expr[Node => Any] = {
+  ): ref.c.Expr[(Node, Context) => Any] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
     // Create decode result function
     //   (resultNode: Node) => ResultValueType = codec.dencode[ResultValueType](resultNode)
     val nodeType = weakTypeOf[Node]
+    val contextType = weakTypeOf[Context]
     val resultValueType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
-    ref.c.Expr[Node => Any](q"""
-      (resultNode: $nodeType) => $codec.decode[$resultValueType](resultNode)
+    ref.c.Expr[(Node, Context) => Any](q"""
+      (resultNode: $nodeType, responseContext: $contextType) => $codec.decode[$resultValueType](resultNode)
     """)
   }
 

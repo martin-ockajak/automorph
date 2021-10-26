@@ -49,9 +49,9 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
       (_, method, arguments) =>
         // Lookup bindings for the specified method
         methodBindings.get(method.getName).map { clientBinding =>
-          // Adjust expected method parameters if it uses context as its last parameter
+          // Adjust expected method parameters if it accepts request context as its last parameter
           val callArguments = Option(arguments).getOrElse(Array.empty[AnyRef])
-          val (argumentValues, context) =
+          val (argumentValues, requestContext) =
             if clientBinding.acceptsContext && callArguments.nonEmpty then
               callArguments.dropRight(1).toSeq -> Some(callArguments.last.asInstanceOf[Context])
             else
@@ -66,8 +66,8 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
             method.getName,
             parameterNames,
             encodedArguments,
-            resultNode => clientBinding.decodeResult(resultNode),
-            context
+            (resultNode, responseContext) => clientBinding.decodeResult(resultNode, responseContext),
+            requestContext
           )
         }.getOrElse(throw UnsupportedOperationException(s"Invalid method: ${method.getName}"))
     ).asInstanceOf[Api]
