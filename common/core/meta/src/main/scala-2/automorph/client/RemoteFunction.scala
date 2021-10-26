@@ -1,8 +1,8 @@
 package automorph.client
 
-import automorph.Client
 import automorph.spi.MessageCodec
-import automorph.util.CannotEqual
+import automorph.util.{CannotEqual, MethodReflection}
+import automorph.{Client, Contextual}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -339,15 +339,27 @@ object RemoteFunction {
   )(implicit resultType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    // FIXME - use response context
     val resultType = weakTypeOf[R]
+    val nodeType = weakTypeOf[Node]
     val contextType = weakTypeOf[Context]
+    val decodeResult = MethodReflection.contextualResult[Context, Contextual](ref.c)(resultType).map { contextualResultType =>
+      c.Expr[(Node, Context) => R](q"""
+        (resultNode: $nodeType, responseContext: $contextType) => Contextual(
+          ${c.prefix}.codec.decode[$contextualResultType](resultNode),
+          responseContext
+        )
+      """)
+    }.getOrElse {
+      c.Expr[(Node, Context) => R](q"""
+        (resultNode: $nodeType, _: $contextType) => ${c.prefix}.codec.decode[$resultType](resultNode)
+      """)
+    }
     c.Expr[Effect[R]](q"""
       ${c.prefix}.client.call(
         ${c.prefix}.name,
         ${c.prefix}.arguments.map(_._1),
         ${c.prefix}.argumentNodes,
-        (resultNode: $resultType, responseContext: $contextType) => ${c.prefix}.codec.decode[$resultType](resultNode),
+        $decodeResult,
         Some($context)
       )
     """)

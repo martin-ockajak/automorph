@@ -1,6 +1,6 @@
 package automorph.client
 
-import automorph.Client
+import automorph.{Client, Contextual}
 import automorph.spi.MessageCodec
 import automorph.util.CannotEqual
 
