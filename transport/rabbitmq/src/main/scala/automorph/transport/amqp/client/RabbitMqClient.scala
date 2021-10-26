@@ -131,13 +131,13 @@ final case class RabbitMqClient[Effect[_]](
         consumerTag: String,
         envelope: Envelope,
         properties: BasicProperties,
-        messageBody: Array[Byte]
+        responseBody: Array[Byte]
       ): Unit = {
         lazy val responseProperties =
           RabbitMqCommon.messageProperties(properties.getCorrelationId, routingKey, urlText, None)
         logger.debug("Received AMQP response", responseProperties)
         responseHandlers.get(properties.getCorrelationId).foreach { complete =>
-          complete(Bytes.byteArray.from(messageBody))
+          complete(Bytes.byteArray.from(responseBody))
         }
       }
     }

@@ -57,7 +57,7 @@ final case class RabbitMqServer[Effect[_]](
         consumerTag: String,
         envelope: Envelope,
         amqpProperties: BasicProperties,
-        body: Array[Byte]
+        requestBody: Array[Byte]
       ): Unit = {
         val requestId = Option(amqpProperties.getCorrelationId).getOrElse(Random.id)
         lazy val requestProperties =
@@ -67,8 +67,8 @@ final case class RabbitMqServer[Effect[_]](
         // Process the request
         implicit val usingContext: RabbitMqServer.Context = RabbitMqCommon.context(amqpProperties)
         runEffect(system.map(
-          system.either(genericHandler.processRequest(body, requestId)),
-          (handlerResult: Either[Throwable, HandlerResult[Array[Byte]]]) =>
+          system.either(genericHandler.processRequest(requestBody, requestId, None)),
+          (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
             handlerResult.fold(
               error => sendServerError(error, amqpProperties, requestProperties),
               result => {

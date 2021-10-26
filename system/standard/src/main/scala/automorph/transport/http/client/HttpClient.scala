@@ -163,7 +163,7 @@ final case class HttpClient[Effect[_]](
       }
       case true => {
         val (webSocket, effectResult, requestUrl) = prepareWebSocket(context)
-        Right(webSocket, effectResult, requestBody) -> requestUrl
+        Right((webSocket, effectResult, requestBody)) -> requestUrl
       }
     }
   }
@@ -235,7 +235,9 @@ final case class HttpClient[Effect[_]](
       error => failEffect(error),
       (value: CompletableFuture[T]) =>
         value.handle { case (result, exception) =>
-          Option(result).map(completeEffect).orElse(Option(exception).map(failEffect)).getOrElse(failEffect)
+          Option(result).map(completeEffect).orElse(Option(exception).map(failEffect)).getOrElse {
+            failEffect(new IllegalStateException("Missing completable future result"))
+          }
         }
     )
     effectResult.asInstanceOf[Effect[T]]
