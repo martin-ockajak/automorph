@@ -4,6 +4,8 @@ import automorph.Default.Codec
 import automorph.codec.json.CirceJsonCodec
 import automorph.protocol.JsonRpcProtocol
 import automorph.spi.MessageCodec
+import scala.language.experimental.macros
+import scala.reflect.macros.blackbox
 
 private[automorph] trait DefaultMeta {
 
@@ -50,7 +52,7 @@ private[automorph] trait DefaultMeta {
    * @return RPC protocol plugin
    */
   def protocol[Node, Codec <: MessageCodec[Node]](codec: Codec): Protocol[Node, Codec] =
-    macro applyMacro[Node, Codec]
+    macro protocolMacro[Node, Codec]
 
   def protocolMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](
     c: blackbox.Context

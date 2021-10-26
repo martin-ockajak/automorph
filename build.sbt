@@ -371,25 +371,29 @@ Test / test := ((Test / test) dependsOn testScalastyle).value
 
 
 // Documentation
+lazy val documentation = (project in file("doc")).dependsOn(
+//  testPlugin, core, http, circe, jackson, upickle, argonaut, catsEffect
+  core, http, amqp
+).settings(
+  ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(
+    examples, catsEffect
+  ),
+  ScalaUnidoc / unidoc / target := (LocalRootProject / target).value / "site" / "api",
+  ScalaUnidoc / unidoc / scalacOptions ++= Seq(
+    "-Ymacro-expand:none",
+    "-groups",
+    "-implicits",
+    "-doc-source-url",
+    scmInfo.value.get.browseUrl + "/tree/main${FILE_PATH}.scala",
+    "-sourcepath",
+    (LocalRootProject / baseDirectory).value.getAbsolutePath
+  )
+).enablePlugins(ScalaUnidocPlugin)
 
 // API
 apiURL := Some(url(s"https://javadoc.io/doc/${organization.value}/$projectName-core_3/latest"))
 ThisBuild / autoAPIMappings := true
 Compile / doc / scalacOptions ++= Seq("-groups", "-implicits")
-enablePlugins(ScalaUnidocPlugin)
-ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(
-  examples
-)
-ScalaUnidoc / unidoc / target := (laikaSite / target).value / "api"
-ScalaUnidoc / unidoc / scalacOptions ++= Seq(
-  "-Ymacro-expand:none",
-  "-groups",
-  "-implicits",
-  "-doc-source-url",
-  scmInfo.value.get.browseUrl + "/tree/main${FILE_PATH}.scala",
-  "-sourcepath",
-  (LocalRootProject / baseDirectory).value.getAbsolutePath
-)
 
 // Site settings
 enablePlugins(LaikaPlugin)
@@ -431,7 +435,7 @@ laikaIncludeAPI := true
 // Site tasks
 Laika / sourceDirectories := Seq(baseDirectory.value / "doc")
 laikaSite / target := target.value / "site"
-laikaSite := (laikaSite dependsOn (Compile / unidoc)).value
+laikaSite := (laikaSite dependsOn (documentation / Compile / unidoc)).value
 val site = taskKey[Unit]("Generates documentation website.")
 site := laikaSite.value
 site / fileInputs ++= Seq(

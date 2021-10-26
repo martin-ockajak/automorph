@@ -197,7 +197,10 @@ trait ProtocolCodecSpec extends CoreSpec {
 
   override def fixtures: Seq[TestFixture] = testFixtures
 
-  def customTransport(index: Int): Option[ClientMessageTransport[Effect, Context]] = None
+  def customTransport(index: Int): Option[ClientMessageTransport[Effect, Context]] = {
+    index
+    None
+  }
 
   private def contextValue: Context = arbitraryContext.arbitrary.sample.get
 }

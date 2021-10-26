@@ -4,6 +4,7 @@ import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
+import automorph.transport.amqp.server.RabbitMqServer.Context
 import automorph.transport.amqp.{Amqp, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import automorph.util.{Bytes, Random}

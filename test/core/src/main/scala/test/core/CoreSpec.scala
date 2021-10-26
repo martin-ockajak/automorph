@@ -1,7 +1,6 @@
 package test.core
 
 import automorph.Types
-import automorph.{Client, Handler}
 import automorph.spi.EffectSystem
 import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException, InvalidResponseException}
 import org.scalacheck.Arbitrary
