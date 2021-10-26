@@ -145,7 +145,7 @@ object ClientGenerator {
     val nodeType = weakTypeOf[Node]
     val contextType = weakTypeOf[Context]
     val resultType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
-    MethodReflection.contextualResult[Context, Contextual](ref.c)(resultType).map { contextualResultType =>
+    MethodReflection.contextualResult[C, Context, Contextual[_, _]](ref.c)(resultType).map { contextualResultType =>
       ref.c.Expr[(Node, Context) => Any](q"""
         (resultNode: $nodeType, responseContext: $contextType) => Contextual(
           $codec.decode[$contextualResultType](resultNode),
@@ -156,11 +156,6 @@ object ClientGenerator {
       ref.c.Expr[(Node, Context) => Any](q"""
         (resultNode: $nodeType, _: $contextType) => $codec.decode[$resultType](resultNode)
       """)
-    }
-    val (actualResultType, contextual) = if (MethodReflection.returnsContext[Context, Contextual](ref.c)(method)) {
-      resultType -> false
-    } else {
-      resultType -> false
     }
   }
 

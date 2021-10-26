@@ -89,7 +89,8 @@ private[automorph] object MethodReflection {
    * @tparam Contextual contextual result type
    * @return contextual result type if applicable
    */
-  def contextualResult[C <: blackbox.Context, Context: ref.c.WeakTypeTag, Contextual: ref.c.WeakTypeTag](
+  @nowarn
+  def contextualResult[C <: blackbox.Context, Context: c.WeakTypeTag, Contextual: c.WeakTypeTag](
     c: C
   )(someType: c.Type): Option[c.Type] = {
     import c.universe.TypeRef

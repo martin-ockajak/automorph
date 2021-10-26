@@ -174,7 +174,7 @@ object SttpClient {
   }
 }
 
-final case class SttpContext(request: PartialRequest[Either[String, String], Any])
+final case class SttpContext(request: PartialRequest[Either[String, String], Any], response: )
 
 object SttpContext {
   /** Implicit default context value. */

@@ -120,7 +120,7 @@ object HandlerGenerator {
     //   (argumentNodes: Seq[Option[Node]], requestContext: Context) => Effect[Node]
     val nodeType = weakTypeOf[Node].dealias
     val contextType = weakTypeOf[Context].dealias
-    ref.c.Expr[(Seq[Option[Node]], Context) => Effect[Node]](q"""
+    ref.c.Expr[(Seq[Option[Node]], Context) => Effect[(Node, Option[Context])]](q"""
       (argumentNodes: Seq[Option[$nodeType]], requestContext: $contextType) => ${
       // Create the method argument lists by decoding corresponding argument nodes into values
       //   List(List(
@@ -166,7 +166,8 @@ object HandlerGenerator {
       // Create encode result function
       //   (result: ResultType) => Node = codec.encode[ResultType](result) -> Option.empty[Context]
       val resultType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
-      val encodeResult = MethodReflection.contextualResult[Context, Contextual](ref.c)(resultType).map { contextualResultType =>
+      val encodeResult = MethodReflection.contextualResult[C, Context, Contextual[_, _]](ref.c)(resultType)
+        .map { contextualResultType =>
         q"(result: Contextual[$contextualResultType, Context]) => $codec.encode[$contextualResultType](result.result) -> Some(result.context)"
       }.getOrElse {
         q"(result: $resultType) => $codec.encode[$resultType](result) -> Option.empty[Context]"

@@ -145,7 +145,7 @@ final case class RemoteFunction[Node, Codec <: MessageCodec[Node], Effect[_], Co
    * @param context request context
    * @return result value
    */
-  def call[R](implicit context: Context): Effect[R] = macro RemoteFunction.callMacro[Effect, Context, R]
+  def call[R](implicit context: Context): Effect[R] = macro RemoteFunction.callMacro[Node, Effect, Context, R]
 
   /**
    * Sends a remote function notification request disregarding the response.
@@ -334,15 +334,17 @@ object RemoteFunction {
     """)
   }
 
-  def callMacro[Effect[_], Context, R: c.WeakTypeTag](c: blackbox.Context)(
-    context: c.Expr[Context]
-  )(implicit resultType: c.WeakTypeTag[Effect[R]]): c.Expr[Effect[R]] = {
+  def callMacro[Node: c.WeakTypeTag, Effect[_], Context: c.WeakTypeTag, R: c.WeakTypeTag](
+    c: blackbox.Context
+  )(context: c.Expr[Context])(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Effect[R]] = {
     import c.universe.{Quasiquote, weakTypeOf}
+    Seq(effectType)
 
     val resultType = weakTypeOf[R]
     val nodeType = weakTypeOf[Node]
     val contextType = weakTypeOf[Context]
-    val decodeResult = MethodReflection.contextualResult[Context, Contextual](ref.c)(resultType).map { contextualResultType =>
+    val decodeResult = MethodReflection.contextualResult[c.type, Context, Contextual[_, _]](c)(resultType)
+      .map { contextualResultType =>
       c.Expr[(Node, Context) => R](q"""
         (resultNode: $nodeType, responseContext: $contextType) => Contextual(
           ${c.prefix}.codec.decode[$contextualResultType](resultNode),

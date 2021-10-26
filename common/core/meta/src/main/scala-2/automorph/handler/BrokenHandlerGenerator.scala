@@ -65,7 +65,7 @@ object BrokenHandlerGenerator {
       automorph.handler.HandlerBinding(
         ${method.lift.rpcFunction},
         $invoke,
-        ${MethodReflection.usesContext[C, Context](ref)(method)}
+        ${MethodReflection.acceptsContext[C, Context](ref)(method)}
       )
     """)
   }

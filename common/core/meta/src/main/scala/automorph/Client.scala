@@ -91,7 +91,8 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
             system.flatMap(
               transport.call(requestBody, requestId, protocol.codec.mediaType, requestContext),
               // Process response
-              { case (responseBody, responseContext) =>
+              (result: (ArraySeq.ofByte, Context)) => {
+                val (responseBody, responseContext) = result
                 processResponse[R](responseBody, responseContext, requestProperties, decodeResult)
               }
             )
