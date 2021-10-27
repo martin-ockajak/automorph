@@ -16,7 +16,7 @@ object Generator {
   private val parameter = for {
 // FIXME - restore
 //    name <- Gen.alphaStr.suchThat(value => Range(1, maxSize).contains(value.length))
-//    value <- arbitrary[String]
+//    value <- Gen.asciiPrintableStr.suchThat(_.length < maxSize)
     name <- Gen.const("Test")
     value <- Gen.const("test")
   } yield (name, value)
