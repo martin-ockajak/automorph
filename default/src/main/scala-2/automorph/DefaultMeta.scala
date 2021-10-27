@@ -51,14 +51,17 @@ private[automorph] trait DefaultMeta {
    * @return RPC protocol plugin
    */
   def protocol[PNode, PCodec <: MessageCodec[PNode]](codec: PCodec): Protocol[PNode, PCodec] =
-    macro protocolMacro[PNode, PCodec]
+    macro DefaultMeta.protocolMacro[PNode, PCodec]
+}
+
+object DefaultMeta {
 
   def protocolMacro[PNode, PCodec <: MessageCodec[PNode]](
     c: blackbox.Context
-  )(codec: c.Expr[PCodec]): c.Expr[Protocol[PNode, PCodec]] = {
+  )(codec: c.Expr[PCodec]): c.Expr[JsonRpcProtocol[PNode, PCodec]] = {
     import c.universe.Quasiquote
 
-    c.Expr[Protocol[PNode, PCodec]](q"""
+    c.Expr[JsonRpcProtocol[PNode, PCodec]](q"""
       automorph.protocol.JsonRpcProtocol($codec)
     """)
   }
