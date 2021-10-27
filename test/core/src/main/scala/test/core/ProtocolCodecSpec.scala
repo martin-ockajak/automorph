@@ -2,8 +2,9 @@ package test.core
 
 import argonaut.Argonaut.jNumber
 import argonaut.{Argonaut, CodecJson}
-import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, JacksonJsonCodec, UpickleJsonCodec, UpickleJsonCustom}
-import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
+import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, JacksonJsonCodec}
+//import automorph.codec.json.{UpickleJsonCodec, UpickleJsonCustom}
+//import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import automorph.protocol.JsonRpcProtocol
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.local.client.HandlerTransport
@@ -28,6 +29,7 @@ trait ProtocolCodecSpec extends CoreSpec {
         implicit lazy val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
         implicit lazy val recordEncoder: Encoder[Record] = deriveEncoder[Record]
         implicit lazy val recordDecoder: Decoder[Record] = deriveDecoder[Record]
+        Seq(enumDecoder, enumDecoder, recordEncoder, recordDecoder)
         val port = availablePort
         val codec = CirceJsonCodec()
         val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type](codec)

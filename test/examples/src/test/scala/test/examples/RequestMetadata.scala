@@ -31,7 +31,7 @@ object RequestMetadata extends App {
   val client = Default.syncClient(new URI("http://localhost/api"), "POST")
 
   // Create client request context specifying HTTP request meta-data
-  val requestMetadata = client.context
+  val requestMetadata = client.defaultContext
     .parameters("test" -> "value")
     .headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
     .cookies("Test" -> "value")
