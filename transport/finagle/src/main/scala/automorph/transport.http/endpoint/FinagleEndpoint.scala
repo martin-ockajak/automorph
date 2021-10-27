@@ -38,10 +38,10 @@ final case class FinagleEndpoint[Effect[_]](
   private val system = genericHandler.system
 
   override def apply(request: Request): Future[Response] = {
-    // Receive the request
+    // Log the request
     val requestId = Random.id
-    lazy val requestDetails = requestProperties(request, requestId)
-    logger.debug("Received HTTP request", requestDetails)
+    lazy val requestProperties = extractRequestProperties(request, requestId)
+    logger.debug("Received HTTP request", requestProperties)
     val requestMessage = Buf.ByteArray.Owned.extract(request.content)
 
     // Process the request
@@ -50,7 +50,7 @@ final case class FinagleEndpoint[Effect[_]](
       system.either(genericHandler.processRequest(requestMessage, requestId, Some(request.path))),
       (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
         handlerResult.fold(
-          error => serverError(error, request, requestId, requestDetails),
+          error => serverError(error, request, requestId, requestProperties),
           result => {
             // Send the response
             val response = result.responseBody.getOrElse(Array[Byte]())
@@ -66,9 +66,9 @@ final case class FinagleEndpoint[Effect[_]](
     error: Throwable,
     request: Request,
     requestId: String,
-    requestDetails: => Map[String, String]
+    requestProperties: => Map[String, String]
   ): Response = {
-    logger.error("Failed to process HTTP request", error, requestDetails)
+    logger.error("Failed to process HTTP request", error, requestProperties)
     val message = Reader.fromBuf(Buf.Utf8(error.trace.mkString("\n")))
     createResponse(message, Status.InternalServerError, None, request, requestId)
   }
@@ -80,12 +80,15 @@ final case class FinagleEndpoint[Effect[_]](
     request: Request,
     requestId: String
   ): Response = {
+    // Log the response
     val responseStatus = responseContext.flatMap(_.statusCode.map(Status.apply)).getOrElse(status)
     lazy val responseDetails = Map(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(request),
       "Status" -> responseStatus.toString
     )
+
+    // Send the response
     // FIXME - set headers from response context
     val response = Response(request.version, responseStatus, message)
     response.contentType = genericHandler.protocol.codec.mediaType
@@ -99,7 +102,7 @@ final case class FinagleEndpoint[Effect[_]](
     headers = request.headerMap.iterator.toSeq
   ).url(request.uri)
 
-  private def requestProperties(
+  private def extractRequestProperties(
     request: Request,
     requestId: String
   ): Map[String, String] = Map(

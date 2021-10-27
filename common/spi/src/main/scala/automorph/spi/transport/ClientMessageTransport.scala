@@ -26,14 +26,14 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
    * @param requestBody request message body
    * @param requestId request correlation identifier
    * @param mediaType message media (MIME) type.
-   * @param context request context
+   * @param requestContext request context
    * @return response message and context
    */
   def call(
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
-    context: Option[Context]
+    requestContext: Option[Context]
   ): Effect[(ArraySeq.ofByte, Context)]
 
   /**
@@ -44,10 +44,15 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
    * @param requestBody request message body
    * @param requestId request correlation identifier
    * @param mediaType message media (MIME) type.
-   * @param context request context
+   * @param requestContext request context
    * @return nothing
    */
-  def notify(requestBody: ArraySeq.ofByte, requestId: String, mediaType: String, context: Option[Context]): Effect[Unit]
+  def notify(
+    requestBody: ArraySeq.ofByte,
+    requestId: String,
+    mediaType: String,
+    requestContext: Option[Context]
+  ): Effect[Unit]
 
   /**
    * Creates default request context.

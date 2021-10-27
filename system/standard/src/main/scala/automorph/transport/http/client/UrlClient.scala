@@ -42,10 +42,11 @@ final case class UrlClient[Effect[_]](
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
-    context: Option[Context]
+    requestContext: Option[Context]
   ): Effect[(ArraySeq.ofByte, Context)] =
+    // Send the request
     system.flatMap(
-      send(requestBody, requestId, mediaType, context),
+      send(requestBody, requestId, mediaType, requestContext),
       (_: EffectValue) match {
         case (connection: HttpURLConnection, _) =>
           system.wrap {
@@ -53,6 +54,8 @@ final case class UrlClient[Effect[_]](
               LogProperties.requestId -> requestId,
               "URL" -> connection.getURL.toExternalForm
             )
+
+            // Process the response
             logger.trace("Receiving HTTP response", responseProperties)
             connection.getResponseCode
             val inputStream = Option(connection.getErrorStream).getOrElse(connection.getInputStream)
@@ -69,9 +72,9 @@ final case class UrlClient[Effect[_]](
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
-    context: Option[Context]
+    requestContext: Option[Context]
   ): Effect[Unit] =
-    system.map(send(requestBody, requestId, mediaType, context), (_: EffectValue) => ())
+    system.map(send(requestBody, requestId, mediaType, requestContext), (_: EffectValue) => ())
 
   override def defaultContext: Context = UrlContext.default
 

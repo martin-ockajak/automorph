@@ -61,9 +61,10 @@ final case class HttpClient[Effect[_]](
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
-    context: Option[Context]
+    requestContext: Option[Context]
   ): Effect[(ArraySeq.ofByte, Context)] = {
-    val (request, requestUrl) = prepareRequest(requestBody, mediaType, context)
+    // Send the request
+    val (request, requestUrl) = prepareRequest(requestBody, mediaType, requestContext)
     system.flatMap(
       system.either(send(request, requestUrl, requestId)),
       (result: Either[Throwable, Response]) => {
@@ -71,6 +72,8 @@ final case class HttpClient[Effect[_]](
           LogProperties.requestId -> requestId,
           "URL" -> requestUrl.toString
         )
+
+        // Process the response
         result.fold(
           error => {
             logger.error(s"Failed to receive $protocol response", error, responseProperties)
@@ -90,9 +93,9 @@ final case class HttpClient[Effect[_]](
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
-    context: Option[Context]
+    requestContext: Option[Context]
   ): Effect[Unit] = {
-    val (request, requestUrl) = prepareRequest(requestBody, mediaType, context)
+    val (request, requestUrl) = prepareRequest(requestBody, mediaType, requestContext)
     system.map(send(request, requestUrl, requestId), (_: Response) => ())
   }
 
@@ -200,10 +203,10 @@ final case class HttpClient[Effect[_]](
     val listener = WebSocketListener(
       requestUrl,
       webSockets,
-      completeEffect.asInstanceOf[Response => Unit],
+      completeEffect,
       failEffect
     )
-    val webSocket = effect(webSocketBuilder.buildAsync(requestUrl, listener)).asInstanceOf[Effect[WebSocket]]
+    val webSocket = effect(webSocketBuilder.buildAsync(requestUrl, listener))
     (webSocket, effectResult.asInstanceOf[Effect[Response]], requestUrl)
   }
 
@@ -260,7 +263,7 @@ object HttpClient {
   private case class WebSocketListener[Effect[_]](
     url: URI,
     webSockets: AtomicReference[Map[URI, Effect[WebSocket]]],
-    completeEffect: Response => Unit,
+    completeEffect: Any => Unit,
     failEffect: Throwable => Unit
   ) extends Listener {
 

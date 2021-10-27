@@ -40,10 +40,10 @@ final case class JettyEndpoint[Effect[_]](
   private val system = genericHandler.system
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
-    // Receive the request
+    // Log the request
     val requestId = Random.id
-    lazy val requestDetails = requestProperties(request, requestId)
-    logger.trace("Receiving HTTP request", requestDetails)
+    lazy val requestProperties = extractRequestProperties(request, requestId)
+    logger.trace("Receiving HTTP request", requestProperties)
     val requestMessage: InputStream = request.getInputStream
 
     // Process the request
@@ -53,7 +53,7 @@ final case class JettyEndpoint[Effect[_]](
       system.either(genericHandler.processRequest(requestMessage, requestId, Some(path))),
       (handlerResult: Either[Throwable, HandlerResult[InputStream, Context]]) =>
         handlerResult.fold(
-          error => serverError(error, response, request, requestId, requestDetails),
+          error => serverError(error, response, request, requestId, requestProperties),
           result => {
             // Send the response
             val message = result.responseBody.getOrElse(new ByteArrayInputStream(Array()))
@@ -69,9 +69,9 @@ final case class JettyEndpoint[Effect[_]](
     response: HttpServletResponse,
     request: HttpServletRequest,
     requestId: String,
-    requestDetails: => Map[String, String]
+    requestProperties: => Map[String, String]
   ): Unit = {
-    logger.error("Failed to process HTTP request", error, requestDetails)
+    logger.error("Failed to process HTTP request", error, requestProperties)
     val message = Bytes.inputStream.to(Bytes.string.from(error.trace.mkString("\n")))
     val status = HttpStatus.INTERNAL_SERVER_ERROR_500
     sendResponse(message, status, None, response, request, requestId)
@@ -85,6 +85,7 @@ final case class JettyEndpoint[Effect[_]](
     request: HttpServletRequest,
     requestId: String
   ): Unit = {
+    // Log the response
     val responseStatus = responseContext.flatMap(_.statusCode).getOrElse(status)
     lazy val responseDetails = Map(
       LogProperties.requestId -> requestId,
@@ -92,6 +93,8 @@ final case class JettyEndpoint[Effect[_]](
       "Status" -> responseStatus.toString
     )
     logger.debug("Sending HTTP response", responseDetails)
+
+    // Send the response
     response.setStatus(responseStatus)
     responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
       response.setHeader(name, value)
@@ -114,7 +117,7 @@ final case class JettyEndpoint[Effect[_]](
     ).url(request.getRequestURI)
   }
 
-  private def requestProperties(
+  private def extractRequestProperties(
     request: HttpServletRequest,
     requestId: String
   ): Map[String, String] = Map(

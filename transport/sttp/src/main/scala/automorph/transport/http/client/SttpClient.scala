@@ -44,10 +44,11 @@ final case class SttpClient[Effect[_]](
   override def call(
     requestBody: ArraySeq.ofByte,
     requestId: String,
-    mediaType: String,
+    requestContext: String,
     context: Option[Context]
   ): Effect[(ArraySeq.ofByte, Context)] = {
-    val sttpRequest = createRequest(requestBody, mediaType, context)
+    // Send the request
+    val sttpRequest = createRequest(requestBody, requestContext, context)
     system.flatMap(
       system.either(send(sttpRequest, requestId)),
       (result: Either[Throwable, Response[Array[Byte]]]) => {
@@ -55,6 +56,8 @@ final case class SttpClient[Effect[_]](
           LogProperties.requestId -> requestId,
           "URL" -> sttpRequest.uri.toString
         )
+
+        // Process the response
         result.fold(
           error => {
             logger.error(s"Failed to receive $protocol response", error, responseProperties)
@@ -73,9 +76,9 @@ final case class SttpClient[Effect[_]](
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
-    context: Option[Context]
+    requestContext: Option[Context]
   ): Effect[Unit] = {
-    val sttpRequest = createRequest(requestBody, mediaType, context).response(ignore)
+    val sttpRequest = createRequest(requestBody, mediaType, requestContext).response(ignore)
     system.map(send(sttpRequest, requestId), (_: Response[Unit]) => ())
   }
 

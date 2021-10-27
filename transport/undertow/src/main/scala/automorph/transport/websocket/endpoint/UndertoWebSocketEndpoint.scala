@@ -80,9 +80,10 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         channel: WebSocketChannel,
         discardMessage: () => Unit
       ): Unit = {
+        // Log the request
         val requestId = Random.id
-        lazy val requestDetails = requestProperties(exchange, requestId)
-        logger.debug("Received WebSocket request", requestDetails)
+        lazy val requestProperties = extractRequestProperties(exchange, requestId)
+        logger.debug("Received WebSocket request", requestProperties)
 
         // Process the request
         implicit val usingContext: Context = requestContext(exchange)
@@ -90,7 +91,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
           system.either(genericHandler.processRequest(request, requestId, None)),
           (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte, Context]]) =>
             handlerResult.fold(
-              error => sendServerError(error, exchange, channel, requestId, requestDetails),
+              error => sendServerError(error, exchange, channel, requestId, requestProperties),
               result => {
                 // Send the response
                 val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
@@ -107,9 +108,9 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         exchange: WebSocketHttpExchange,
         channel: WebSocketChannel,
         requestId: String,
-        requestDetails: => Map[String, String]
+        requestProperties: => Map[String, String]
       ): Unit = {
-        logger.error("Failed to process WebSocket request", error, requestDetails)
+        logger.error("Failed to process WebSocket request", error, requestProperties)
         val message = Bytes.string.from(error.trace.mkString("\n"))
         sendResponse(message, exchange, channel, requestId)
       }
@@ -120,11 +121,14 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         channel: WebSocketChannel,
         requestId: String
       ): Unit = {
+        // Log the response
         lazy val responseDetails = Map(
           LogProperties.requestId -> requestId,
           "Client" -> clientAddress(exchange)
         )
         logger.trace("Sending WebSocket response", responseDetails)
+
+        // Send the response
         val callback = new WebSocketCallback[Unit] {
           override def complete(channel: WebSocketChannel, context: Unit): Unit =
             logger.debug("Sent WebSocket response", responseDetails)
@@ -145,7 +149,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         ).url(exchange.getRequestURI)
       }
 
-      private def requestProperties(
+      private def extractRequestProperties(
         exchange: WebSocketHttpExchange,
         requestId: String
       ): Map[String, String] = Map(

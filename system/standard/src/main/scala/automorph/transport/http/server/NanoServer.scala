@@ -65,12 +65,12 @@ final case class NanoServer[Effect[_]] private (
       // Receive the request
       val protocol = Protocol.Http
       val requestId = Random.id
-      lazy val requestDetails = requestProperties(session, protocol, requestId)
-      logger.trace("Receiving HTTP request", requestDetails)
+      lazy val requestProperties = extractRequestProperties(session, protocol, requestId)
+      logger.trace("Receiving HTTP request", requestProperties)
       val request = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
 
       // Handler the request
-      handleRequest(request, session, protocol, Some(url.getPath), requestDetails, requestId)
+      handleRequest(request, session, protocol, Some(url.getPath), requestProperties, requestId)
     }
   }
 
@@ -87,9 +87,9 @@ final case class NanoServer[Effect[_]] private (
       // Receive the request
       val protocol = Protocol.WebSocket
       val requestId = Random.id
-      lazy val requestDetails = requestProperties(session, protocol, requestId)
+      lazy val requestProperties = extractRequestProperties(session, protocol, requestId)
       val request = Bytes.byteArray.from(frame.getBinaryPayload)
-      val response = handleRequest(request, session, protocol, None, requestDetails, requestId)
+      val response = handleRequest(request, session, protocol, None, requestProperties, requestId)
 
       // Handler the request
       send(Bytes.byteArray.to(Bytes.inputStream.from(response.getData)))
@@ -106,10 +106,10 @@ final case class NanoServer[Effect[_]] private (
     session: IHTTPSession,
     protocol: Protocol,
     functionName: Option[String],
-    requestDetails: Map[String, String],
+    requestProperties: => Map[String, String],
     requestId: String
   ): Response = {
-    logger.debug(s"Received $protocol request", requestDetails)
+    logger.debug(s"Received $protocol request", requestProperties)
 
     // Process the request
     implicit val usingContext: Context = requestContext(session)
@@ -117,7 +117,7 @@ final case class NanoServer[Effect[_]] private (
       system.either(genericHandler.processRequest(request, requestId, functionName)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte, Context]]) =>
         handlerResult.fold(
-          error => serverError(error, session, protocol, requestId, requestDetails),
+          error => serverError(error, session, protocol, requestId, requestProperties),
           result => {
             // Send the response
             val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
@@ -133,9 +133,9 @@ final case class NanoServer[Effect[_]] private (
     session: IHTTPSession,
     protocol: Protocol,
     requestId: String,
-    requestDetails: => Map[String, String]
+    requestProperties: => Map[String, String]
   ) = {
-    logger.error(s"Failed to process $protocol request", error, requestDetails)
+    logger.error(s"Failed to process $protocol request", error, requestProperties)
     val message = Bytes.string.from(error.trace.mkString("\n"))
     createResponse(message, Status.INTERNAL_ERROR, None, session, protocol, requestId)
   }
@@ -148,6 +148,7 @@ final case class NanoServer[Effect[_]] private (
     protocol: Protocol,
     requestId: String
   ): Response = {
+    // Log the response
     val responseStatus = responseContext.flatMap(_.statusCode.map(Status.lookup)).getOrElse(status)
     lazy val responseDetails = Map(
       LogProperties.requestId -> requestId,
@@ -157,6 +158,8 @@ final case class NanoServer[Effect[_]] private (
       case _ => None
     })
     logger.trace(s"Sending $protocol response", responseDetails)
+
+    // Create the response
     val inputStream = Bytes.inputStream.to(message)
     val mediaType = genericHandler.protocol.codec.mediaType
     val response = newFixedLengthResponse(responseStatus, mediaType, inputStream, message.size.toLong)
@@ -177,7 +180,7 @@ final case class NanoServer[Effect[_]] private (
     Option(session.getQueryParameterString).map(http.query).getOrElse(http)
   }
 
-  private def requestProperties(
+  private def extractRequestProperties(
     session: IHTTPSession,
     protocol: Protocol,
     requestId: String

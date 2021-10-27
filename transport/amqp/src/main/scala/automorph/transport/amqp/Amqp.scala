@@ -22,8 +22,8 @@ import java.time.Instant
  * @param messageId application message identifier
  * @param timestamp message timestamp
  * @param `type` message type name
- * @param userId creating user identifier
- * @param appId creating application identifier
+ * @param userId user identifier
+ * @param appId application identifier
  * @param base base properties defined by the specific message transport plugin
  * @tparam Base specific message transport plugin base properties type
  */
