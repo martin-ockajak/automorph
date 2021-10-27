@@ -63,11 +63,11 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
       .serverLogic { case (requestMessage, paths, queryParams, headers, clientIp) =>
         // Log the request
         val requestId = Random.id
-        lazy val requestProperties = extractRequestProperties(clientIp, method, requestId)
+        lazy val requestProperties = extractRequestProperties(clientIp, Some(method), requestId)
         logger.debug("Received HTTP request", requestProperties)
 
         // Process the request
-        implicit val usingContext: Context = requestContext(method, paths, queryParams, headers)
+        implicit val usingContext: Context = requestContext(paths, queryParams, headers, Some(method))
         system.map(
           system.either(genericHandler.processRequest(requestMessage, requestId, Some(urlPath(paths)))),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
@@ -100,8 +100,8 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 //   */
 //  def apply[Effect[_], S](
 //    handler: Types.HandlerAnyCodec[Effect, Context],
-//    streams: Streams[S with WebSockets]
-//  ): ServerEndpoint[(List[String], QueryParams, List[Header], Option[String]), Unit, streams.Pipe[Array[Byte], Array[Byte]], WebSockets, Effect] = {
+//    streams: Streams[S]
+//  ): ServerEndpoint[(List[String], QueryParams, List[Header], Option[String]), Unit, streams.Pipe[Array[Byte], Array[Byte]], S with WebSockets, Effect] = {
 //    val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
 //    val system = genericHandler.system
 //    val contentType = Header.contentType(MediaType.parse(genericHandler.protocol.codec.mediaType).getOrElse {
@@ -111,27 +111,26 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 //      .in(paths).in(queryParams).in(headers).in(clientIp)
 //      .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream].apply(streams))
 //      .serverLogic { case (paths, queryParams, headers, clientIp) =>
-//        ???.asInstanceOf[Effect[Either[Unit, streams.Pipe[Array[Byte], Array[Byte]]]]]
-////        // Log the request
-////        val requestId = Random.id
-////        lazy val requestProperties = extractRequestProperties(clientIp, method, requestId)
-////        logger.debug("Received WebSocket request", Map("Client" -> client, "Size" -> requestMessage.length))
-////
-////        // Process the request
-////        implicit val usingContext: Context = requestContext(method, paths, queryParams, headers)
-////        system.map(
-////          system.either(genericHandler.processRequest(requestMessage, requestId, None)),
-////          (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
-////            handlerResult.fold(
-////              error => Right(serverError(error, clientIp, requestId, requestProperties)),
-////              result => {
-////                // Send the response
-////                val message = result.responseBody.getOrElse(Array[Byte]())
-////                val status = result.exception.map(exceptionToStatusCode).map(StatusCode.apply).getOrElse(StatusCode.Ok)
-////                Right(createResponse(message, status, clientIp, requestId))
-////              }
-////            )
-////        )
+//        ???
+//        // Log the request
+//        val requestId = Random.id
+//        lazy val requestProperties = extractRequestProperties(clientIp, None, requestId)
+//        logger.debug("Received WebSocket request", requestProperties)
+//
+//        // Process the request
+//        implicit val usingContext: Context = requestContext(paths, queryParams, headers, None)
+//        system.map(
+//          system.either(genericHandler.processRequest(requestMessage, requestId, None)),
+//          (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
+//            handlerResult.fold(
+//              error => Right(serverError(error, clientIp, requestId, requestProperties)),
+//              result => {
+//                // Send the response
+//                val message = result.responseBody.getOrElse(Array[Byte]())
+//                Right(createResponse(message, status, clientIp, requestId))
+//              }
+//            )
+//        )
 //      }
 //  }
 
@@ -164,14 +163,14 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
   }
 
   private def requestContext(
-    method: Method,
     paths: List[String],
     queryParams: QueryParams,
-    headers: List[Header]
+    headers: List[Header],
+    method: Option[Method]
   ): Context =
     Http(
       base = Some(()),
-      method = Some(method.method),
+      method = method.map(_.method),
       path = Some(urlPath(paths)),
       parameters = queryParams.toSeq,
       headers = headers.map(header => header.name -> header.value).toSeq
@@ -184,13 +183,12 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 
   private def extractRequestProperties(
     clientIp: Option[String],
-    method: Method,
+    method: Option[Method],
     requestId: String
   ): Map[String, String] = Map(
     LogProperties.requestId -> requestId,
-    "Client" -> clientAddress(clientIp),
-    "Method" -> method.toString
-  )
+    "Client" -> clientAddress(clientIp)
+  ) ++ method.map("Method" -> _.toString)
 
   private def clientAddress(clientIp: Option[String]): String = clientIp.getOrElse("[unknown]")
 }
