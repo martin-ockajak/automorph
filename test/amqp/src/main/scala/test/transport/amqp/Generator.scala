@@ -19,9 +19,6 @@ object Generator {
     userId <- arbitrary[Option[String]]
     appId <- arbitrary[Option[String]]
   } yield Amqp(
-    None,
-    None,
-    None,
     headers = headers,
     deliveryMode = deliveryMode,
     priority = priority,
