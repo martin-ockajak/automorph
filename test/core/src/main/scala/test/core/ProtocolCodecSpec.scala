@@ -22,15 +22,15 @@ import test.{Enum, Record, Structure}
 
 trait ProtocolCodecSpec extends CoreSpec {
 
+  @nowarn("msg=used")
   private lazy val testFixtures: Seq[TestFixture] = {
     implicit val usingContext: Context = contextValue
     Seq(
       {
-        implicit lazy val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
-        implicit lazy val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
-        implicit lazy val recordEncoder: Encoder[Record] = deriveEncoder[Record]
-        implicit lazy val recordDecoder: Decoder[Record] = deriveDecoder[Record]
-        Seq(enumDecoder, enumDecoder, recordEncoder, recordDecoder)
+        implicit val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
+        implicit val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
+        implicit val recordEncoder: Encoder[Record] = deriveEncoder[Record]
+        implicit val recordDecoder: Decoder[Record] = deriveDecoder[Record]
         val port = availablePort
         val codec = CirceJsonCodec()
         val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type](codec)
@@ -136,13 +136,13 @@ trait ProtocolCodecSpec extends CoreSpec {
 //          (function, a0) => client.function(function).args(a0).tell
 //        )
 //      }, {
-        implicit lazy val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
+        implicit val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
           (v: Enum.Enum) => jNumber(Enum.toOrdinal(v)),
           cursor => cursor.focus.as[Int].map(Enum.fromOrdinal)
         )
-        implicit lazy val structureCodecJson: CodecJson[Structure] =
+        implicit val structureCodecJson: CodecJson[Structure] =
           Argonaut.codec1(Structure.apply, (v: Structure) => v.value)("value")
-        implicit lazy val recordCodecJson: CodecJson[Record] =
+        implicit val recordCodecJson: CodecJson[Record] =
           Argonaut.codec13(
             Record.apply,
             (v: Record) =>
@@ -199,7 +199,7 @@ trait ProtocolCodecSpec extends CoreSpec {
 
   override def fixtures: Seq[TestFixture] = testFixtures
 
-  @nowarn
+  @nowarn("msg=used")
   def customTransport(index: Int): Option[ClientMessageTransport[Effect, Context]] = None
 
   private def contextValue: Context = arbitraryContext.arbitrary.sample.get
