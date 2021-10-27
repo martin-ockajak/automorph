@@ -28,10 +28,10 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
   type Context = Http[Unit]
 
   /** Endpoint request type. */
-  type RequestType = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
+  type HttpRequestType = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
 
   /** Endpoint request type. */
-  type XRequestType = (List[String], QueryParams, List[Header], Option[String])
+  type WebSocketRequestType = (List[String], QueryParams, List[Header], Option[String])
 
   /**
    * Creates a Tapir HTTP endpoint with the specified RPC request handler.
@@ -52,7 +52,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     handler: Types.HandlerAnyCodec[Effect, Context],
     method: Method,
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
-  ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {
+  ): ServerEndpoint[HttpRequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     val system = genericHandler.system
     val contentType = Header.contentType(MediaType.parse(genericHandler.protocol.codec.mediaType).getOrElse {
@@ -100,8 +100,8 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 //   */
 //  def apply[Effect[_], S](
 //    handler: Types.HandlerAnyCodec[Effect, Context],
-//    streams: Streams[S]
-//  ): ServerEndpoint[XRequestType, Unit, streams.Pipe[Array[Byte], Array[Byte]], WebSockets, Effect] = {
+//    streams: Streams[S with WebSockets]
+//  ): ServerEndpoint[(List[String], QueryParams, List[Header], Option[String]), Unit, streams.Pipe[Array[Byte], Array[Byte]], WebSockets, Effect] = {
 //    val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
 //    val system = genericHandler.system
 //    val contentType = Header.contentType(MediaType.parse(genericHandler.protocol.codec.mediaType).getOrElse {
@@ -109,9 +109,9 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 //    })
 //    endpoint
 //      .in(paths).in(queryParams).in(headers).in(clientIp)
-//      .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream].apply[S](streams))
+//      .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream].apply(streams))
 //      .serverLogic { case (paths, queryParams, headers, clientIp) =>
-//        ???
+//        ???.asInstanceOf[Effect[Either[Unit, streams.Pipe[Array[Byte], Array[Byte]]]]]
 ////        // Log the request
 ////        val requestId = Random.id
 ////        lazy val requestProperties = extractRequestProperties(clientIp, method, requestId)
