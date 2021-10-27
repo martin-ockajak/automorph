@@ -3,6 +3,7 @@ package test.core
 import argonaut.Argonaut.jNumber
 import argonaut.{Argonaut, CodecJson}
 import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, JacksonJsonCodec}
+import scala.annotation.nowarn
 //import automorph.codec.json.{UpickleJsonCodec, UpickleJsonCustom}
 //import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import automorph.protocol.JsonRpcProtocol
@@ -198,10 +199,8 @@ trait ProtocolCodecSpec extends CoreSpec {
 
   override def fixtures: Seq[TestFixture] = testFixtures
 
-  def customTransport(index: Int): Option[ClientMessageTransport[Effect, Context]] = {
-    index
-    None
-  }
+  @nowarn
+  def customTransport(index: Int): Option[ClientMessageTransport[Effect, Context]] = None
 
   private def contextValue: Context = arbitraryContext.arbitrary.sample.get
 }
