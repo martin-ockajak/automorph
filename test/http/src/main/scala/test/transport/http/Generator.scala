@@ -8,11 +8,8 @@ import automorph.transport.http.Http
 object Generator {
 
   private val header = for {
-// FIXME - restore
-//    name <- Gen.alphaStr.suchThat(_.nonEmpty)
-//    value <- Gen.asciiPrintableStr
-    name <- Gen.const("Test")
-    value <- Gen.const("test")
+    name <- Gen.alphaNumStr.suchThat(_.nonEmpty)
+    value <- Gen.asciiPrintableStr
   } yield (name, value)
 
   private val parameter = for {
