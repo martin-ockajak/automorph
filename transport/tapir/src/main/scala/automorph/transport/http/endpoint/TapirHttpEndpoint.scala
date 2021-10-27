@@ -92,7 +92,8 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 //   * The endpoint interprets WebSocket request body as a RPC request and processes it with the specified RPC handler.
 //   * The response returned by the RPC handler is used as WebSocket response body.
 //   *
-//   * @see [[https://tapir.softwaremill.com/ Documentation]]
+//   * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+//   * @see [[https://tapir.softwaremill.com Library documentation]]
 //   * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
 //   * @param handler RPC request handler
 //   * @tparam Effect effect type
