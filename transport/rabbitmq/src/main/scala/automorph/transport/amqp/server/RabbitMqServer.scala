@@ -74,7 +74,7 @@ final case class RabbitMqServer[Effect[_]](
               error => sendServerError(error, amqpProperties, requestProperties),
               result => {
                 // Send the response
-                val response = result.response.getOrElse(Array[Byte]())
+                val response = result.responseBody.getOrElse(Array[Byte]())
                 sendResponse(response, amqpProperties, requestProperties)
               }
             )
