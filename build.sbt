@@ -79,16 +79,16 @@ lazy val spi = (project in file("common/spi")).settings(
     }
   }
 )
-lazy val openapi = (project in file("common/openapi")).dependsOn(
-  spi, testBase % Test
-).settings(
-  name := s"$projectName-open-api"
-)
 lazy val util = (project in file("common/util")).settings(
   name := s"$projectName-util",
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-api" % "1.7.32"
   )
+)
+lazy val openapi = (project in file("common/openapi")).dependsOn(
+  spi, testBase % Test
+).settings(
+  name := s"$projectName-open-api"
 )
 lazy val coreMeta = (project in file("common/core/meta")).dependsOn(
   spi, util
@@ -100,7 +100,7 @@ lazy val coreMeta = (project in file("common/core/meta")).dependsOn(
   }
 )
 lazy val core = (project in file("common/core")).dependsOn(
-  coreMeta, testPlugin % Test
+  coreMeta, testPlugin % Test, jsonrpc % Test, restrpc % Test
 ).settings(
   name := s"$projectName-core"
 )
@@ -298,7 +298,7 @@ lazy val testBase = (project in file("test/base")).dependsOn(
   )
 )
 lazy val testPlugin = (project in file("test/plugin")).dependsOn(
-  testBase, jsonrpc, restrpc
+  testBase
 ).settings(
   libraryDependencies ++= Seq(
     "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.0"
