@@ -15,7 +15,6 @@ import java.util.Date
 import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.jdk.CollectionConverters.{MapHasAsJava, MapHasAsScala}
 import scala.util.{Try, Using}
 
 /**
@@ -43,7 +42,7 @@ final case class RabbitMqClient[Effect[_]](
   routingKey: String,
   system: EffectSystem[Effect],
   blockingEffect: (() => Unit) => Effect[Unit],
-  promisedEffect: () => (Effect[Response], Response => Unit),
+  promisedEffect: () => (Effect[Any], Any => Unit),
   exchange: String = RabbitMqCommon.defaultDirectExchange,
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
@@ -53,75 +52,58 @@ final case class RabbitMqClient[Effect[_]](
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
   private val urlText = url.toURL.toExternalForm
-  private val responseHandlers = TrieMap[String, Response => Unit]()
+  private val responseHandlers = TrieMap[String, Any => Unit]()
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
 
   override def call(
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
-    context: Option[Context]
-  ): Effect[ArraySeq.ofByte] = {
-    val amqpProperties = createProperties(requestId, mediaType, context)
+    requestContext: Option[Context]
+  ): Effect[(ArraySeq.ofByte, Context)] = {
     val (effectResult, completeEffect) = promisedEffect()
-    system.flatMap(send(requestBody, amqpProperties, Some(completeEffect)), (_: Unit) => effectResult)
+    system.flatMap(
+      send(requestBody, requestId, mediaType, requestContext, Some(completeEffect)),
+      (_: Unit) => effectResult.asInstanceOf[Effect[(ArraySeq.ofByte, Context)]]
+    )
   }
 
   override def notify(
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
-    context: Option[Context]
-  ): Effect[Unit] = {
-    val properties = createProperties(requestId, mediaType, context)
-    send(requestBody, properties, None)
-  }
+    requestContext: Option[Context]
+  ): Effect[Unit] = send(requestBody, requestId, mediaType, requestContext, None)
 
   override def defaultContext: Context = RabbitMqContext.default
 
   override def close(): Effect[Unit] = system.wrap(RabbitMqCommon.disconnect(connection))
 
   private def send(
-    request: ArraySeq.ofByte,
-    amqpProperties: BasicProperties,
-    completeEffect: Option[Response => Unit]
+    requestBody: ArraySeq.ofByte,
+    defaultRequestId: String,
+    mediaType: String,
+    requestContext: Option[Context],
+    completeEffect: Option[Any => Unit]
   ): Effect[Unit] = {
     // Log the request
+    val amqpProperties =
+      RabbitMqCommon.amqpProperties(requestContext, mediaType, directReplyToQueue, defaultRequestId, clientId)
     val requestId = amqpProperties.getCorrelationId
-    lazy val requestProperties = RabbitMqCommon.messageProperties(requestId, routingKey, urlText, None)
+    lazy val requestProperties = RabbitMqCommon.extractProperties(requestId, routingKey, urlText, None)
     logger.trace("Sending AMQP request", requestProperties)
-    val consumer = threadConsumer.get
 
-    // Retain response handling promise if available
+    // Register response processing promise if available
     completeEffect.foreach(responseHandlers.put(requestId, _))
 
     // Send the request
     blockingEffect(() =>
       Try {
-        consumer.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, request.unsafeArray)
+        val message = requestBody.unsafeArray
+        threadConsumer.get.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, message)
         logger.debug("Sent AMQP request", requestProperties)
       }.onFailure(logger.error("Failed to send AMQP request", _, requestProperties)).get
     )
-  }
-
-  private def createProperties(requestId: String, mediaType: String, context: Option[Context]): BasicProperties = {
-    val amqp = context.getOrElse(defaultContext)
-    val baseProperties = amqp.base.map(_.properties).getOrElse(new BasicProperties())
-    (new BasicProperties()).builder()
-      .replyTo(amqp.replyTo.orElse(Option(baseProperties.getReplyTo)).getOrElse(directReplyToQueue))
-      .correlationId(amqp.correlationId.orElse(Option(baseProperties.getCorrelationId)).getOrElse(requestId))
-      .contentType(amqp.contentType.getOrElse(mediaType))
-      .contentEncoding(amqp.contentEncoding.orElse(Option(baseProperties.getContentEncoding)).orNull)
-      .appId(amqp.appId.orElse(Option(baseProperties.getAppId)).getOrElse(clientId))
-      .headers((amqp.headers ++ baseProperties.getHeaders.asScala).asJava)
-      .deliveryMode(amqp.deliveryMode.map(new Integer(_)).orElse(Option(baseProperties.getDeliveryMode)).orNull)
-      .priority(amqp.priority.map(new Integer(_)).orElse(Option(baseProperties.getPriority)).orNull)
-      .expiration(amqp.expiration.orElse(Option(baseProperties.getExpiration)).orNull)
-      .messageId(amqp.messageId.orElse(Option(baseProperties.getMessageId)).orNull)
-      .timestamp(amqp.timestamp.map(Date.from).orElse(Option(baseProperties.getTimestamp)).orNull)
-      .`type`(amqp.`type`.orElse(Option(baseProperties.getType)).orNull)
-      .userId(amqp.userId.orElse(Option(baseProperties.getUserId)).orNull)
-      .build
   }
 
   private def createConsumer(channel: Channel): DefaultConsumer = {
@@ -133,11 +115,15 @@ final case class RabbitMqClient[Effect[_]](
         properties: BasicProperties,
         responseBody: Array[Byte]
       ): Unit = {
+        // Log the response
         lazy val responseProperties =
-          RabbitMqCommon.messageProperties(properties.getCorrelationId, routingKey, urlText, None)
+          RabbitMqCommon.extractProperties(properties.getCorrelationId, routingKey, urlText, None)
         logger.debug("Received AMQP response", responseProperties)
+
+        // Fulfill the registered response processing promise
+        val responseContext = RabbitMqCommon.context(properties)
         responseHandlers.get(properties.getCorrelationId).foreach { complete =>
-          complete(Bytes.byteArray.from(responseBody))
+          complete(Bytes.byteArray.from(responseBody) -> responseContext)
         }
       }
     }
@@ -185,7 +171,7 @@ object RabbitMqClient {
   )(implicit executionContext: ExecutionContext): RabbitMqClient[Future] = {
     val blockingEffect = (blocking: () => Unit) => Future(blocking())
     val promisedEffect = () => {
-      val promise = Promise[ArraySeq.ofByte]()
+      val promise = Promise[Any]()
       promise.future -> promise.success.andThen(_ => ())
     }
     RabbitMqClient(

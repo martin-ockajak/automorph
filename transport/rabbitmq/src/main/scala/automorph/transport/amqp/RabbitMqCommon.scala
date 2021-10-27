@@ -2,12 +2,14 @@ package automorph.transport.amqp
 
 import automorph.log.{LogProperties, Logging}
 import automorph.transport.amqp.Amqp
+import automorph.transport.amqp.client.RabbitMqClient.Context
 import automorph.util.Extensions.TryOps
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{AMQP, Address, Channel, Connection, ConnectionFactory, DefaultConsumer}
 import java.io.IOException
 import java.net.{InetAddress, URI}
-import scala.jdk.CollectionConverters.MapHasAsScala
+import java.util.Date
+import scala.jdk.CollectionConverters.{MapHasAsJava, MapHasAsScala}
 import scala.util.Try
 
 /** Common RabbitMQ functionality. */
@@ -79,13 +81,55 @@ private[automorph] object RabbitMqCommon extends Logging {
     }
 
   /**
-   * Converts message properties to request context.
+   * @param requestId
+   * @param mediaType
+   * @param context
+   * @return
+   */
+
+  /**
+   * Create AMQP properties from message context.
+   *
+   * @param context message context
+   * @param contentType MIME content type
+   * @param defaultReplyTo address to reply to
+   * @param defaultRequestId request identifier
+   * @param defaultAppId application identifier
+   * @return AMQP properties
+   */
+  def amqpProperties(
+    context: Option[Context],
+    contentType: String,
+    defaultReplyTo: String,
+    defaultRequestId: String,
+    defaultAppId: String
+  ): BasicProperties = {
+    val amqp = context.getOrElse(Amqp())
+    val baseProperties = amqp.base.map(_.properties).getOrElse(new BasicProperties())
+    (new BasicProperties()).builder()
+      .contentType(contentType)
+      .replyTo(amqp.replyTo.orElse(Option(baseProperties.getReplyTo)).getOrElse(defaultReplyTo))
+      .correlationId(amqp.correlationId.orElse(Option(baseProperties.getCorrelationId)).getOrElse(defaultRequestId))
+      .contentEncoding(amqp.contentEncoding.orElse(Option(baseProperties.getContentEncoding)).orNull)
+      .appId(amqp.appId.orElse(Option(baseProperties.getAppId)).getOrElse(defaultAppId))
+      .headers((amqp.headers ++ baseProperties.getHeaders.asScala).asJava)
+      .deliveryMode(amqp.deliveryMode.map(new Integer(_)).orElse(Option(baseProperties.getDeliveryMode)).orNull)
+      .priority(amqp.priority.map(new Integer(_)).orElse(Option(baseProperties.getPriority)).orNull)
+      .expiration(amqp.expiration.orElse(Option(baseProperties.getExpiration)).orNull)
+      .messageId(amqp.messageId.orElse(Option(baseProperties.getMessageId)).orNull)
+      .timestamp(amqp.timestamp.map(Date.from).orElse(Option(baseProperties.getTimestamp)).orNull)
+      .`type`(amqp.`type`.orElse(Option(baseProperties.getType)).orNull)
+      .userId(amqp.userId.orElse(Option(baseProperties.getUserId)).orNull)
+      .build
+  }
+
+  /**
+   * Create message context from AMQP properties.
    *
    * @param properties message properties
-   * @tparam Source properties source type
-   * @return request context
+   * @return message context
    */
-  def context(properties: BasicProperties): Amqp[RabbitMqContext] = {
+  def context(properties: BasicProperties): Amqp[RabbitMqContext] =
     Amqp(
       contentType = Option(properties.getContentType),
       contentEncoding = Option(properties.getContentEncoding),
@@ -102,10 +146,9 @@ private[automorph] object RabbitMqCommon extends Logging {
       appId = Option(properties.getAppId),
       base = Some(RabbitMqContext(properties))
     )
-  }
 
   /**
-   * Assemble message properties.
+   * Extract message properties from message metadata.
    *
    * @param requestId request correlation identifier
    * @param routingKey routing key
@@ -113,7 +156,7 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @param consumerTag consumer tag
    * @return message properties
    */
-  def messageProperties(
+  def extractProperties(
     requestId: String,
     routingKey: String,
     url: String,
