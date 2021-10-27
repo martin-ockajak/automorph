@@ -13,6 +13,7 @@ ThisBuild / homepage := Some(url(repositoryUrl))
 ThisBuild / licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / developers := List()
 Global / onChangedBuildSource := ReloadOnSourceChanges
+onLoadMessage := ""
 
 // Structure
 lazy val root = project.in(file(".")).settings(
@@ -318,8 +319,8 @@ lazy val testAmqp = (project in file("test/amqp")).dependsOn(
 ThisBuild / scalaVersion := "3.0.0"
 ThisBuild / crossScalaVersions ++= Seq("2.13.6", scalaVersion.value)
 ThisBuild / scalacOptions ++= Seq(
-  "-feature",
   "-language:higherKinds",
+  "-feature",
   "-deprecation",
   "-unchecked",
   "-release",
@@ -347,7 +348,6 @@ ThisBuild / scalacOptions ++= Seq(
     "-Wvalue-discard",
     "-Wunused:imports,patvars,privates,locals,params",
     "-Vfree-terms",
-    "-Vfree-types",
     "-Vimplicits",
     "-Ybackend-parallelism",
     "4"
