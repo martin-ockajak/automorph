@@ -27,8 +27,8 @@ trait ProtocolCodecSpec extends CoreSpec {
       {
         implicit lazy val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
         implicit lazy val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
-        implicit lazy val recordEncoder: Encoder[Record] = deriveEncoder[Record]
-        implicit lazy val recordDecoder: Decoder[Record] = deriveDecoder[Record]
+//        implicit lazy val recordEncoder: Encoder[Record] = deriveEncoder[Record]
+//        implicit lazy val recordDecoder: Decoder[Record] = deriveDecoder[Record]
         val port = availablePort
         val codec = CirceJsonCodec()
         val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type](codec)
