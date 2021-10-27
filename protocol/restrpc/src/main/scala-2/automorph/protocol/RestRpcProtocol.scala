@@ -64,7 +64,7 @@ object RestRpcProtocol extends ErrorMapping {
   def apply[Node, Codec <: MessageCodec[Node]](codec: Codec): RestRpcProtocol[Node, Codec] =
     macro applyDefaultsMacro[Node, Codec]
 
-  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](c: blackbox.Context)(
+  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]](c: blackbox.Context)(
     codec: c.Expr[Codec],
     errorToException: c.Expr[(String, Option[Int]) => Throwable],
     exceptionToError: c.Expr[Throwable => Option[Int]]
@@ -72,35 +72,31 @@ object RestRpcProtocol extends ErrorMapping {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[Codec])
 
-    c.Expr[Any](q"""
+    c.Expr[RestRpcProtocol[Node, Codec]](q"""
       new automorph.protocol.RestRpcProtocol(
-        codec = $codec,
-        errorToException = $errorToException,
-        exceptionToError = $exceptionToError,
-        encodeRequest = request => $codec.encode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](request),
-        decodeRequest = node => $codec.decode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](node),
-        encodeResponse = response => $codec.encode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](response),
-        decodeResponse = node => $codec.decode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](node),
-        encodeString = value => $codec.encode[List[String]](value)
+        $codec,
+        $errorToException,
+        $exceptionToError,
+        request => $codec.encode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](request),
+        node => $codec.decode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](node),
+        response => $codec.encode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](response),
+        node => $codec.decode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](node),
+        value => $codec.encode[List[String]](value)
       )
-    """).asInstanceOf[c.Expr[RestRpcProtocol[Node, Codec]]]
+    """)
   }
 
-  def applyDefaultsMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](c: blackbox.Context)(
+  def applyDefaultsMacro[Node, Codec <: MessageCodec[Node]](c: blackbox.Context)(
     codec: c.Expr[Codec]
   ): c.Expr[RestRpcProtocol[Node, Codec]] = {
-    import c.universe.{Quasiquote, weakTypeOf}
-    Seq(weakTypeOf[Node], weakTypeOf[Codec])
+    import c.universe.Quasiquote
 
-    c.Expr[Any](q"""
-      new automorph.protocol.RestRpcProtocol(
-        codec = $codec,
-        encodeRequest = request => $codec.encode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](request),
-        decodeRequest = node => $codec.decode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](node),
-        encodeResponse = response => $codec.encode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](response),
-        decodeResponse = node => $codec.decode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](node),
-        encodeString = value => $codec.encode[List[String]](value)
+    c.Expr[RestRpcProtocol[Node, Codec]](q"""
+      automorph.protocol.RestRpcProtocol(
+        $codec,
+        automorph.protocol.RestRpcProtocol.defaultErrorToException,
+        automorph.protocol.RestRpcProtocol.defaultExceptionToError
       )
-    """).asInstanceOf[c.Expr[RestRpcProtocol[Node, Codec]]]
+    """)
   }
 }

@@ -63,38 +63,39 @@ object JsonRpcProtocol extends ErrorMapping {
   def apply[Node, Codec <: MessageCodec[Node]](codec: Codec): JsonRpcProtocol[Node, Codec] =
     macro applyDefaultsMacro[Node, Codec]
 
-  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](c: blackbox.Context)(
+  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]](c: blackbox.Context)(
     codec: c.Expr[Codec],
     errorToException: c.Expr[(String, Int) => Throwable],
     exceptionToError: c.Expr[Throwable => ErrorType],
     argumentsByName: c.Expr[Boolean]
   ): c.Expr[JsonRpcProtocol[Node, Codec]] = {
     import c.universe.{Quasiquote, weakTypeOf}
-    Seq(weakTypeOf[Node], weakTypeOf[Codec])
 
-    c.Expr[Any](q"""
+    c.Expr[JsonRpcProtocol[Node, Codec]](q"""
       new automorph.protocol.JsonRpcProtocol(
-        codec = $codec,
-        errorToException = $errorToException,
-        exceptionToError = $exceptionToError,
-        argumentsByName = $argumentsByName,
+        $codec,
+        $errorToException,
+        $exceptionToError,
+        $argumentsByName,
+        message => $codec.encode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](message),
+        node => $codec.decode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](node),
+        value => $codec.encode[List[String]](value)
       )
-    """).asInstanceOf[c.Expr[JsonRpcProtocol[Node, Codec]]]
+    """)
   }
 
-  def applyDefaultsMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](c: blackbox.Context)(
+  def applyDefaultsMacro[Node, Codec <: MessageCodec[Node]](c: blackbox.Context)(
     codec: c.Expr[Codec]
   ): c.Expr[JsonRpcProtocol[Node, Codec]] = {
-    import c.universe.{Quasiquote, weakTypeOf}
-    Seq(weakTypeOf[Node], weakTypeOf[Codec])
+    import c.universe.Quasiquote
 
-    c.Expr[Any](q"""
-      new automorph.protocol.JsonRpcProtocol(
-        codec = $codec,
-        encodeMessage = message => $codec.encode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](message),
-        decodeMessage = node => $codec.decode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](node),
-        encodeStrings = value => $codec.encode[List[String]](value)
+    c.Expr[JsonRpcProtocol[Node, Codec]](q"""
+      automorph.protocol.JsonRpcProtocol(
+        $codec,
+        automorph.protocol.JsonRpcProtocol.defaultErrorToException,
+        automorph.protocol.JsonRpcProtocol.defaultExceptionToError,
+        true
       )
-    """).asInstanceOf[c.Expr[JsonRpcProtocol[Node, Codec]]]
+    """)
   }
 }

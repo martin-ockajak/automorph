@@ -1,6 +1,5 @@
 package automorph
 
-import automorph.Default.Codec
 import automorph.codec.json.CirceJsonCodec
 import automorph.protocol.JsonRpcProtocol
 import automorph.spi.MessageCodec
@@ -18,10 +17,10 @@ private[automorph] trait DefaultMeta {
   /**
    * Default RPC protocol plugin type.
    *
-   * @tparam Node message node type
-   * @tparam Codec message codec plugin type
+   * @tparam PNode message node type
+   * @tparam PCodec message codec plugin type
    */
-  type Protocol[Node, Codec <: MessageCodec[Node]] = JsonRpcProtocol[Node, Codec]
+  type Protocol[PNode, PCodec <: MessageCodec[PNode]] = JsonRpcProtocol[PNode, PCodec]
 
   /**
    * Creates a Circe JSON message codec plugin.
@@ -47,21 +46,20 @@ private[automorph] trait DefaultMeta {
    *
    * @see [[https://www.jsonrpc.org/specification Protocol specification]]
    * @param codec message codec plugin
-   * @tparam Node message node type
-   * @tparam Codec message codec plugin type
+   * @tparam PNode message node type
+   * @tparam PCodec message codec plugin type
    * @return RPC protocol plugin
    */
-  def protocol[Node, Codec <: MessageCodec[Node]](codec: Codec): Protocol[Node, Codec] =
-    macro protocolMacro[Node, Codec]
+  def protocol[PNode, PCodec <: MessageCodec[PNode]](codec: PCodec): Protocol[PNode, PCodec] =
+    macro protocolMacro[PNode, PCodec]
 
-  def protocolMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag](
+  def protocolMacro[PNode, PCodec <: MessageCodec[PNode]](
     c: blackbox.Context
-  )(codec: c.Expr[Codec]): c.Expr[Protocol[Node, Codec]] = {
-    import c.universe.{Quasiquote, weakTypeOf}
-    Seq(weakTypeOf[Node], weakTypeOf[Codec])
+  )(codec: c.Expr[PCodec]): c.Expr[Protocol[PNode, PCodec]] = {
+    import c.universe.Quasiquote
 
-    c.Expr[Any](q"""
+    c.Expr[Protocol[PNode, PCodec]](q"""
       automorph.protocol.JsonRpcProtocol($codec)
-    """).asInstanceOf[c.Expr[Protocol[Node, Codec]]]
+    """)
   }
 }

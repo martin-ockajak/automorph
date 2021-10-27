@@ -1,6 +1,5 @@
 package automorph
 
-import automorph.codec.json.CirceJsonCodec
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity

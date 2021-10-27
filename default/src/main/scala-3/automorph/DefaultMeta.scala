@@ -1,6 +1,5 @@
 package automorph
 
-import automorph.Default.Codec
 import automorph.codec.json.CirceJsonCodec
 import automorph.protocol.JsonRpcProtocol
 import automorph.spi.MessageCodec
@@ -16,10 +15,10 @@ private[automorph] trait DefaultMeta {
   /**
    * Default RPC protocol plugin type.
    *
-   * @tparam Node message node type
-   * @tparam Codec message codec plugin type
+   * @tparam PNode message node type
+   * @tparam PCodec message codec plugin type
    */
-  type Protocol[Node, Codec <: MessageCodec[Node]] = JsonRpcProtocol[Node, Codec]
+  type Protocol[PNode, PCodec <: MessageCodec[PNode]] = JsonRpcProtocol[PNode, PCodec]
 
   /**
    * Creates a Circe JSON message codec plugin.
@@ -46,9 +45,9 @@ private[automorph] trait DefaultMeta {
    * @see [[https://www.jsonrpc.org/specification Protocol specification]]
    * @param codec message codec plugin
    * @return RPC protocol plugin
-   * @tparam Node message node type
-   * @tparam Codec message codec plugin type
+   * @tparam PNode message node type
+   * @tparam PCodec message codec plugin type
    */
-  inline def protocol[Node, Codec <: MessageCodec[Node]](codec: Codec): Protocol[Node, Codec] =
+  inline def protocol[PNode, PCodec <: MessageCodec[PNode]](codec: PCodec): Protocol[PNode, PCodec] =
     JsonRpcProtocol(codec)
 }
