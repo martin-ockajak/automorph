@@ -31,7 +31,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    *
    * @tparam Api API trait type (classes are not supported)
    * @return remote API proxy instance
-   * @throws IllegalArgumentException if invalid public functions are found in the API type
+   * @throws java.lang.IllegalArgumentException if invalid public functions are found in the API type
    */
   def bind[Api <: AnyRef]: Api = macro ClientMeta.bindMacro[Node, Codec, Effect, Context, Api]
 }

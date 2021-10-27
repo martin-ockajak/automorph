@@ -12,7 +12,7 @@ object Generator {
     deliveryMode <- Gen.option(Gen.choose(1, 2))
     priority <- Gen.option(Gen.choose(0, 9))
     correlationId <- arbitrary[Option[String]]
-    expiration <- Gen.option(Gen.choose(0, Int.MaxValue))
+    expiration <- Gen.option(Gen.choose(0, Int.MaxValue).map(_.toString))
     messageId <- arbitrary[Option[String]]
     timestamp <- Gen.option(Gen.choose(0, Long.MaxValue).map(Instant.ofEpochMilli))
     `type` <- arbitrary[Option[String]]
@@ -23,6 +23,9 @@ object Generator {
     deliveryMode = deliveryMode,
     priority = priority,
     correlationId = correlationId,
+    expiration = expiration,
+    messageId = messageId,
+    timestamp = timestamp,
     `type` = `type`,
     userId = userId,
     appId = appId
