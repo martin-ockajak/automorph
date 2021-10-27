@@ -350,9 +350,7 @@ ThisBuild / scalacOptions ++= Seq(
     "-Vfree-terms",
     "-Vimplicits",
     "-Ybackend-parallelism",
-    "4",
-    "-J--add-modules",
-    "-Jjava.net.http"
+    "4"
   )
 })
 ThisBuild / javacOptions ++= Seq(
