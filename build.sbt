@@ -326,7 +326,7 @@ ThisBuild / scalacOptions ++= Seq(
   "-release",
   "8",
   "-encoding",
-  "utf8",
+  "utf8"
 ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
   case Some((3, _)) => Seq(
     "-source",
@@ -350,7 +350,9 @@ ThisBuild / scalacOptions ++= Seq(
     "-Vfree-terms",
     "-Vimplicits",
     "-Ybackend-parallelism",
-    "4"
+    "4",
+    "-J--add-modules",
+    "-Jjava.net.http"
   )
 })
 ThisBuild / javacOptions ++= Seq(
