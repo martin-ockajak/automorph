@@ -7,6 +7,7 @@ import automorph.transport.http.Http
 import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, WebSocketListener, defaultBuilder}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
+import java.net.http.HttpClient.Builder
 import java.net.http.HttpRequest.BodyPublishers
 import java.net.http.HttpResponse.BodyHandlers
 import java.net.http.WebSocket.Listener
@@ -45,7 +46,7 @@ final case class HttpClient[Effect[_]](
   system: EffectSystem[Effect],
   promisedEffect: () => (Effect[Any], Any => Unit, Throwable => Unit),
   webSocket: Boolean = false,
-  builder: java.net.http.HttpClient.Builder = defaultBuilder
+  builder: Builder = defaultBuilder
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val httpClient = builder.build
