@@ -105,10 +105,10 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
     logger.debug("Sending HTTP response", responseDetails)
     responseBody
   }
-}
 
-trait EffectStreams[Effect[_]] extends Streams[EffectStreams[Effect]] with WebSockets {
+  trait EffectStreams[Effect[_]] extends Streams[EffectStreams[Effect]] with WebSockets {
 
-  override type BinaryStream = Effect[Array[Byte]]
-  override type Pipe[A, B] = A => Effect[B]
+    override type BinaryStream = Effect[Array[Byte]]
+    override type Pipe[A, B] = A => Effect[B]
+  }
 }
