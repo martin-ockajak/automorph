@@ -380,15 +380,15 @@ lazy val documentation = (project in file("doc")).dependsOn(
   ),
   ScalaUnidoc / unidoc / target := (LocalRootProject / target).value / "site" / "api",
   ScalaUnidoc / unidoc / scalacOptions ++= Seq(
+    "-doc-source-url",
+    scmInfo.value.get.browseUrl + "/tree/main${FILE_PATH}.scala",
+    "-sourcepath",
+    (LocalRootProject / baseDirectory).value.getAbsolutePath,
     "-groups",
     "-implicits",
     "-Ymacro-expand:none",
     "-skip-packages",
-    "test:automorph.meta:automorph.client.meta:automorph.handler.meta:test:automorph.codec.json.meta:automorph.codec.messagepack.meta:sttp:sttp.client3",
-    "-doc-source-url",
-    scmInfo.value.get.browseUrl + "/tree/main${FILE_PATH}.scala",
-    "-sourcepath",
-    (LocalRootProject / baseDirectory).value.getAbsolutePath
+    "test:automorph.meta:automorph.client.meta:automorph.handler.meta:test:automorph.codec.json.meta:automorph.codec.messagepack.meta:zio:sttp"
   )
 ).enablePlugins(ScalaUnidocPlugin)
 
@@ -400,15 +400,19 @@ Compile / doc / scalacOptions ++= Seq(
   "-implicits",
   "-Ymacro-expand:none",
   "-skip-packages",
-  "test:automorph.meta:automorph.client.meta:automorph.handler.meta:test:automorph.codec.json.meta:automorph.codec.messagepack.meta:sttp:sttp.client3"
+  "test:automorph.meta:automorph.client.meta:automorph.handler.meta:test:automorph.codec.json.meta:automorph.codec.messagepack.meta:zio:sttp"
 )
 
 // Site settings
 enablePlugins(LaikaPlugin)
+import laika.rewrite.link._
 import laika.theme.config._
 import laika.helium.config._
 import laika.ast.LengthUnit._
 import laika.ast.Path._
+laikaConfig := LaikaConfig.defaults.withConfigValue(LinkConfig(
+  excludeFromValidation = Seq(Root / "api")
+))
 laikaTheme := laika.helium.Helium.defaults.all.metadata(
   title = Some("Automorph"),
   description = Some("Remote procedure call client and server library for Scala"),
