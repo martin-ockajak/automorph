@@ -4,14 +4,13 @@ import automorph.log.Logging
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
-import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
+import automorph.transport.amqp.client.RabbitMqClient.Context
 import automorph.transport.amqp.{Amqp, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
-import java.util.Date
 import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -146,9 +145,6 @@ object RabbitMqClient {
 
   /** Request context type. */
   type Context = Amqp[RabbitMqContext]
-
-  /** Response type. */
-  type Response = ArraySeq.ofByte
 
   /**
    * Creates asynchronous RabbitMQ client transport plugin.

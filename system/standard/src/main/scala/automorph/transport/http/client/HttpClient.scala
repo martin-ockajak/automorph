@@ -258,7 +258,7 @@ object HttpClient {
   type Context = Http[HttpContext]
 
   /** Response type. */
-  type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
+  private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
 
   val defaultBuilder = java.net.http.HttpClient.newBuilder
 
