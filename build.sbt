@@ -412,7 +412,7 @@ Test / test := ((Test / test) dependsOn testScalastyle).value
 
 
 // Documentation
-lazy val documentation = (project in file("doc")).dependsOn(
+lazy val docs = (project in file("docs")).dependsOn(
 //  testPlugin, core, http, circe, jackson, upickle, argonaut, catsEffect
   core, http, amqp
 ).settings(
@@ -479,15 +479,15 @@ laikaExtensions := Seq(laika.markdown.github.GitHubFlavor, laika.parse.code.Synt
 laikaIncludeAPI := true
 
 // Site tasks
-Laika / sourceDirectories := Seq(baseDirectory.value / "doc")
+Laika / sourceDirectories := Seq(baseDirectory.value / "docs")
 laikaSite / target := target.value / "site"
-laikaSite := (laikaSite dependsOn (documentation / Compile / unidoc)).value
-val site = taskKey[Unit]("Generates documentation website.")
+laikaSite := (laikaSite dependsOn (docs / Compile / unidoc)).value
+val site = taskKey[Unit]("Generates project website.")
 site := laikaSite.value
 site / fileInputs ++= Seq(
-  baseDirectory.value.toGlob / "doc" / ** / "*.md",
-  baseDirectory.value.toGlob / "doc" / ** / "*.conf",
-  baseDirectory.value.toGlob / "doc" / ** / "*.jpg"
+  baseDirectory.value.toGlob / "docs" / ** / "*.md",
+  baseDirectory.value.toGlob / "docs" / ** / "*.conf",
+  baseDirectory.value.toGlob / "docs" / ** / "*.jpg"
 )
 
 
@@ -496,7 +496,7 @@ val repositoryShell = s"git@github.com:${repositoryPath}.git"
 enablePlugins(GhpagesPlugin)
 siteSourceDirectory := target.value / "site"
 git.remoteRepo := repositoryShell
-val deploySite = taskKey[Unit]("Deploys documentation website.")
+val deploySite = taskKey[Unit]("Deploys project website.")
 deploySite := {}
 deploySite := site.dependsOn(site, ghpagesPushSite).value
 
