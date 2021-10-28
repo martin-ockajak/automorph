@@ -5,12 +5,11 @@ import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
-import automorph.util.{Bytes, Random}
 import automorph.util.Extensions.ThrowableOps
-import sttp.capabilities.{Streams, WebSockets}
+import automorph.util.{Bytes, Random}
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.{CodecFormat, byteArrayBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode, webSocketBody}
+import sttp.tapir.{CodecFormat, byteArrayBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode}
 
 /**
  * Tapir HTTP endpoint message transport plugin.
@@ -28,10 +27,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
   type Context = Http[Unit]
 
   /** Endpoint request type. */
-  type HttpRequestType = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
-
-  /** Endpoint request type. */
-  type WebSocketRequestType = (List[String], QueryParams, List[Header], Option[String])
+  type RequestType = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
 
   /**
    * Creates a Tapir HTTP endpoint with the specified RPC request handler.
@@ -52,7 +48,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     handler: Types.HandlerAnyCodec[Effect, Context],
     method: Method,
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
-  ): ServerEndpoint[HttpRequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {
+  ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     val system = genericHandler.system
     val contentType = Header.contentType(MediaType.parse(genericHandler.protocol.codec.mediaType).getOrElse {
@@ -84,57 +80,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
       }
   }
 
-// FIXME - finish WebSocket support
-//  /**
-//   * Creates a Tapir WebSocket endpoint with the specified RPC request handler.
-//   *
-//   * The endpoint interprets WebSocket request body as a RPC request and processes it with the specified RPC handler.
-//   * The response returned by the RPC handler is used as WebSocket response body.
-//   *
-//   * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
-//   * @see [[https://tapir.softwaremill.com Library documentation]]
-//   * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
-//   * @param handler RPC request handler
-//   * @tparam Effect effect type
-//   * @return Tapir WebSocket endpoint
-//   */
-//  def apply[Effect[_], S](
-//    handler: Types.HandlerAnyCodec[Effect, Context],
-//    streams: Streams[S]
-//  ): ServerEndpoint[(List[String], QueryParams, List[Header], Option[String]), Unit, streams.Pipe[Array[Byte], Array[Byte]], S with WebSockets, Effect] = {
-//    val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-//    val system = genericHandler.system
-//    val contentType = Header.contentType(MediaType.parse(genericHandler.protocol.codec.mediaType).getOrElse {
-//      throw new IllegalArgumentException(s"Invalid content type: ${genericHandler.protocol.codec.mediaType}")
-//    })
-//    endpoint
-//      .in(paths).in(queryParams).in(headers).in(clientIp)
-//      .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream].apply(streams))
-//      .serverLogic { case (paths, queryParams, headers, clientIp) =>
-//        ???
-//        // Log the request
-//        val requestId = Random.id
-//        lazy val requestProperties = extractRequestProperties(clientIp, None, requestId)
-//        logger.debug("Received WebSocket request", requestProperties)
-//
-//        // Process the request
-//        implicit val usingContext: Context = requestContext(paths, queryParams, headers, None)
-//        system.map(
-//          system.either(genericHandler.processRequest(requestMessage, requestId, None)),
-//          (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
-//            handlerResult.fold(
-//              error => Right(serverError(error, clientIp, requestId, requestProperties)),
-//              result => {
-//                // Send the response
-//                val message = result.responseBody.getOrElse(Array[Byte]())
-//                Right(createResponse(message, status, clientIp, requestId))
-//              }
-//            )
-//        )
-//      }
-//  }
-
-  private def serverError(
+  private[automorph] def serverError(
     error: Throwable,
     clientIp: Option[String],
     requestId: String,
@@ -146,7 +92,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     createResponse(message, status, clientIp, requestId)
   }
 
-  private def createResponse(
+  private[automorph] def createResponse(
     message: Array[Byte],
     status: StatusCode,
     clientIp: Option[String],
@@ -162,7 +108,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     (message, status)
   }
 
-  private def requestContext(
+  private[automorph] def requestContext(
     paths: List[String],
     queryParams: QueryParams,
     headers: List[Header],
@@ -176,12 +122,12 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
       headers = headers.map(header => header.name -> header.value).toSeq
     )
 
-  private def urlPath(paths: List[String]): String = paths match {
+  private[automorph] def urlPath(paths: List[String]): String = paths match {
     case Nil => "/"
     case items => items.mkString("/")
   }
 
-  private def extractRequestProperties(
+  private[automorph] def extractRequestProperties(
     clientIp: Option[String],
     method: Option[Method],
     requestId: String
