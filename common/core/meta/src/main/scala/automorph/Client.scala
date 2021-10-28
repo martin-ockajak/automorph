@@ -33,10 +33,10 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   protected val system = transport.system
 
   /**
-   * Creates a remote RPC function proxy with specified function name.
+   * Creates an RPC function proxy.
    *
-   * @param functionName remote RPC function name
-   * @return remote RPC function proxy with specified function name
+   * @param functionName RPC function name
+   * @return RPC function proxy with specified function name
    */
   def function(functionName: String): RemoteFunction[Node, Codec, Effect, Context] =
     RemoteFunction(functionName, Seq.empty, Seq.empty, this)

@@ -17,7 +17,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
   this: Client[Node, Codec, Effect, Context] =>
 
   /**
-   * Creates a remote API proxy instance with RPC bindings for all valid public functions of the specified API type.
+   * Creates a RPC API proxy instance with RPC bindings for all valid public functions of the specified API type.
    *
    * An API function is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -30,7 +30,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * the caller-supplied request context is passed to the underlying message transport plugin.
    *
    * @tparam Api API trait type (classes are not supported)
-   * @return remote API proxy instance
+   * @return RPC API proxy instance
    * @throws java.lang.IllegalArgumentException if invalid public functions are found in the API type
    */
   def bind[Api <: AnyRef]: Api = macro ClientMeta.bindMacro[Node, Codec, Effect, Context, Api]
