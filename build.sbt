@@ -380,11 +380,11 @@ lazy val documentation = (project in file("doc")).dependsOn(
   ),
   ScalaUnidoc / unidoc / target := (LocalRootProject / target).value / "site" / "api",
   ScalaUnidoc / unidoc / scalacOptions ++= Seq(
-    "-Ymacro-expand:none",
     "-groups",
     "-implicits",
+    "-Ymacro-expand:none",
     "-skip-packages",
-    "automorph.meta:test:zio:sttp:sttp.client3",
+    "automorph.meta:automorph.client.meta:automorph.handler.meta:test:zio:sttp:sttp.client3",
     "-doc-source-url",
     scmInfo.value.get.browseUrl + "/tree/main${FILE_PATH}.scala",
     "-sourcepath",
@@ -398,8 +398,9 @@ ThisBuild / autoAPIMappings := true
 Compile / doc / scalacOptions ++= Seq(
   "-groups",
   "-implicits",
+  "-Ymacro-expand:none",
   "-skip-packages",
-  "automorph.meta:test:zio:sttp"
+  "automorph.meta:automorph.client.meta:automorph.handler.meta:test:zio:sttp:sttp.client3"
 )
 
 // Site settings
