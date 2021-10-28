@@ -1,4 +1,4 @@
-package automorph.handler
+package automorph.handler.meta
 
 import automorph.Handler
 import automorph.spi.MessageCodec
@@ -86,7 +86,7 @@ object HandlerMeta {
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
-      automorph.handler.BrokenHandlerGenerator
+      automorph.handler.meta.BrokenHandlerGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec, ${c.prefix}.system, $api)
       ${c.prefix}
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]

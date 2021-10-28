@@ -1,7 +1,6 @@
-package automorph.handler
+package automorph.handler.meta
 
 import automorph.Handler
-import automorph.handler.HandlerGenerator
 import automorph.spi.{EffectSystem, MessageCodec}
 
 /**

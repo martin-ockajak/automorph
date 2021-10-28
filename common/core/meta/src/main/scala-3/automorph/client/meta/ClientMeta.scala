@@ -1,7 +1,6 @@
-package automorph.client
+package automorph.client.meta
 
 import automorph.Client
-import automorph.client.ClientGenerator
 import automorph.spi.MessageCodec
 import java.lang.reflect.Proxy
 import scala.compiletime.summonInline

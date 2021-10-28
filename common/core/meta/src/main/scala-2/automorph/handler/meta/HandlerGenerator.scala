@@ -1,6 +1,7 @@
-package automorph.handler
+package automorph.handler.meta
 
 import automorph.Contextual
+import automorph.handler.HandlerBinding
 import automorph.log.MacroLogger
 import automorph.spi.protocol.RpcFunction
 import automorph.spi.{EffectSystem, MessageCodec}

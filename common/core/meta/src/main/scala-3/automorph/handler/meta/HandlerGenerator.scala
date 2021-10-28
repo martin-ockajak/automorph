@@ -1,6 +1,7 @@
-package automorph.handler
+package automorph.handler.meta
 
 import automorph.Contextual
+import automorph.handler.HandlerBinding
 import automorph.log.MacroLogger
 import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
@@ -95,7 +96,7 @@ private[automorph] object HandlerGenerator:
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   ): Expr[(Seq[Option[Node]], Context) => Effect[(Node, Option[Context])]] =
-    import ref.q.reflect.{asTerm, Term, TypeRepr}
+    import ref.q.reflect.{Term, TypeRepr, asTerm}
     given Quotes = ref.q
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -214,7 +215,7 @@ private[automorph] object HandlerGenerator:
     }
 
   private def logBoundMethod[Api: Type](ref: Reflection)(method: ref.RefMethod, invoke: Expr[Any]): Unit =
-    import ref.q.reflect.{asTerm, Printer}
+    import ref.q.reflect.{Printer, asTerm}
 
     MacroLogger.debug(
       s"""${MethodReflection.signature[Api](ref)(method)} =

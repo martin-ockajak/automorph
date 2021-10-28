@@ -1,6 +1,7 @@
 package automorph
 
-import automorph.handler.{HandlerBinding, HandlerMeta, HandlerResult, ProtocolHandlerBuilder, SystemHandlerBuilder}
+import automorph.handler.meta.HandlerMeta
+import automorph.handler.{HandlerBinding, HandlerResult, ProtocolHandlerBuilder, SystemHandlerBuilder}
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.RpcProtocol.FunctionNotFoundException
 import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}

@@ -1,4 +1,4 @@
-package automorph.client
+package automorph.client.meta
 
 import automorph.Client
 import automorph.spi.MessageCodec

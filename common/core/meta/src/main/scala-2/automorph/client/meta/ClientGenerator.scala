@@ -1,6 +1,7 @@
-package automorph.client
+package automorph.client.meta
 
 import automorph.Contextual
+import automorph.client.ClientBinding
 import automorph.log.MacroLogger
 import automorph.spi.MessageCodec
 import automorph.spi.protocol.RpcFunction

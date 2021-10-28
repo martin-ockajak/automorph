@@ -1,6 +1,7 @@
 package automorph
 
-import automorph.client.{ClientMeta, ProtocolClientBuilder, RemoteFunction, TransportClientBuilder}
+import automorph.client.meta.ClientMeta
+import automorph.client.{ProtocolClientBuilder, RemoteFunction, TransportClientBuilder}
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.RpcRequest
