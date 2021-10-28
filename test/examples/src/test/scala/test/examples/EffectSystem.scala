@@ -24,7 +24,8 @@ object EffectSystem extends App {
   val server = Default.serverSystem(system, unsafeRunTask, _.bind(api), 80, "/api")
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())
+  val backend = AsyncHttpClientZioBackend
+    .usingClient(Runtime.default, new DefaultAsyncHttpClient())
   val client = Default.client(new URI("http://localhost/api"), "POST", backend, system)
 
   // Call the remote APi function via proxy

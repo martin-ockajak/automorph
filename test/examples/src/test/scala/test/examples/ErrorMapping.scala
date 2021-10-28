@@ -26,7 +26,8 @@ object ErrorMapping extends App {
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val system = Default.systemAsync
-  val handler = Handler.protocol(serverProtocol).system(system).context[Default.ServerContext]
+  val handler = Handler
+    .protocol(serverProtocol).system(system).context[Default.ServerContext]
   val server = Default.server(handler, (_: Future[Any]) => (), 80, "/api", {
     // Customize server HTTP status code mapping
     case _: SQLException => 400
@@ -35,7 +36,8 @@ object ErrorMapping extends App {
 
   // Customize client RPC error mapping
   val clientProtocol = protocol.mapError {
-    case (message, InvalidRequest.code) if message.contains("SQL") => new SQLException(message)
+    case (message, InvalidRequest.code) if message.contains("SQL") =>
+      new SQLException(message)
     case (message, code) => protocol.errorToException(message, code)
   }
 

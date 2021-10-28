@@ -25,13 +25,13 @@ object QuickStart extends App {
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.clientAsync(new URI("http://localhost/api"), "POST")
 
-  // Call the remote API function via proxy
+  // Call the remote API function statically
   val remoteApi = client.bind[Api] // Api
   remoteApi.hello("world", 1) // Future[String]
 
   // Call the remote API function dynamically
   val remoteHello = client.function("hello") // RemoteFunction
-  remoteHello.args("what" -> "world", "n" -> 3).call[String] // Future[String]
+  remoteHello.args("what" -> "world", "n" -> 1).call[String] // Future[String]
 
   // Close the client
   client.close()
