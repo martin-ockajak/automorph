@@ -59,8 +59,8 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       rpcRequest => {
         // Invoke requested RPC function
         lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++
-          rpcRequest.message.properties + (LogProperties.size -> requestMessageBody.length.toString)
-        lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
+          rpcRequest.message.properties + (LogProperties.messageSize -> requestMessageBody.length.toString)
+        lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Received ${protocol.name} request", allProperties)
         callFunction(rpcRequest, requestContext, requestId, requestProperties)
       }
@@ -214,9 +214,9 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         val responseBody = rpcResponse.message.body
         lazy val requestProperties = rpcResponse.message.properties ++ Map(
           LogProperties.requestId -> requestId,
-          LogProperties.size -> responseBody.length.toString
+          LogProperties.messageSize -> responseBody.length.toString
         )
-        lazy val allProperties = requestProperties ++ rpcResponse.message.text.map(LogProperties.body -> _)
+        lazy val allProperties = requestProperties ++ rpcResponse.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Sending ${protocol.name} response", allProperties)
         val responseMessage = Some(implicitly[Bytes[MessageBody]].to(responseBody))
         system.pure(HandlerResult(responseMessage, result.failed.toOption, result.toOption.flatMap(_._2)))

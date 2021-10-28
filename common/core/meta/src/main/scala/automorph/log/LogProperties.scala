@@ -7,8 +7,8 @@ object LogProperties {
   val requestId = "Request ID"
 
   /** Message size */
-  val size = "Size"
+  val messageSize = "Message Size"
 
   /** Message body */
-  val body = "Body"
+  val messageBody = "Message Body"
 }

@@ -88,8 +88,8 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           (request: RpcRequest[Node, _]) => {
             val requestBody = request.message.body
             lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++
-              rpcRequest.message.properties + (LogProperties.size -> requestBody.length.toString)
-            lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
+              rpcRequest.message.properties + (LogProperties.messageSize -> requestBody.length.toString)
+            lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
             logger.trace(s"Sending ${protocol.name} request", allProperties)
             system.flatMap(
               transport.call(requestBody, requestId, protocol.codec.mediaType, requestContext),
@@ -134,9 +134,9 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
             val requestBody = request.message.body
             lazy val requestProperties = rpcRequest.message.properties ++ Map(
               LogProperties.requestId -> requestId,
-              LogProperties.size -> requestBody.length.toString
+              LogProperties.messageSize -> requestBody.length.toString
             )
-            lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.body -> _)
+            lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
             logger.trace(s"Sending ${protocol.name} request", allProperties)
             transport.notify(request.message.body, requestId, protocol.codec.mediaType, requestContext)
           }
@@ -165,7 +165,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       error => raiseError(error.exception, requestProperties),
       rpcResponse => {
         lazy val allProperties = requestProperties ++ rpcResponse.message.properties +
-          (LogProperties.size -> responseBody.length.toString) ++ rpcResponse.message.text.map(LogProperties.body -> _)
+          (LogProperties.messageSize -> responseBody.length.toString) ++ rpcResponse.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Received ${protocol.name} response", allProperties)
         rpcResponse.result.pureFold(
           // Raise error
