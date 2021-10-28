@@ -9,9 +9,9 @@ import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, extra
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Random}
 import sttp.capabilities.{Streams, WebSockets}
-import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
+import sttp.model.{Header, QueryParams}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.{CodecFormat, byteArrayBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode, webSocketBody}
+import sttp.tapir.{CodecFormat, clientIp, endpoint, headers, paths, queryParams, webSocketBody}
 
 /**
  * Tapir WebSocket endpoint message transport plugin.
@@ -49,9 +49,6 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
   ): ServerEndpoint[RequestType, Unit, Effect[Array[Byte]] => Effect[Array[Byte]], EffectStreams[Effect], Effect] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     val system = genericHandler.system
-    val contentType = Header.contentType(MediaType.parse(genericHandler.protocol.codec.mediaType).getOrElse {
-      throw new IllegalArgumentException(s"Invalid content type: ${genericHandler.protocol.codec.mediaType}")
-    })
     val streams = new EffectStreams[Effect] {
       override type BinaryStream = Effect[Array[Byte]]
       override type Pipe[A, B] = Effect[A] => Effect[B]
@@ -69,7 +66,7 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
         system.pure(Right { (requestBody: Effect[Array[Byte]]) =>
           implicit val usingContext: Context = requestContext(paths, queryParams, headers, None)
           system.map(
-            system.flatMap(requestBody, request => system.either(genericHandler.processRequest(request, requestId, None))),
+            system.flatMap(requestBody, (request: Array[Byte]) => system.either(genericHandler.processRequest(request, requestId, None))),
             (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
               handlerResult.fold(
                 error => createErrorResponse(error, clientIp, requestId, requestProperties),

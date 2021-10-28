@@ -9,7 +9,7 @@ import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Random}
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.{CodecFormat, byteArrayBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode}
+import sttp.tapir.{byteArrayBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode}
 
 /**
  * Tapir HTTP endpoint message transport plugin.
