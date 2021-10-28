@@ -242,7 +242,7 @@ remoteUseMetadata.args("message" -> "test").call[String] // String
 client.close()
 ```
 
-## FuFunction mapping
+## Function mapping
 
 * [Source](/test/examples/src/test/scala/test/examples/MethodMapping.scala)
 
