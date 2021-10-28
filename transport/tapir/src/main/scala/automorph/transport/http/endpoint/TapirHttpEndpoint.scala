@@ -27,7 +27,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
   type Context = Http[Unit]
 
   /** Endpoint request type. */
-  type RequestType = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
+  type Request = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
 
   /**
    * Creates a Tapir HTTP endpoint with the specified RPC request handler.
@@ -48,7 +48,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     handler: Types.HandlerAnyCodec[Effect, Context],
     method: Method,
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
-  ): ServerEndpoint[RequestType, Unit, (Array[Byte], StatusCode), Any, Effect] = {
+  ): ServerEndpoint[Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     val system = genericHandler.system
     val contentType = Header.contentType(MediaType.parse(genericHandler.protocol.codec.mediaType).getOrElse {

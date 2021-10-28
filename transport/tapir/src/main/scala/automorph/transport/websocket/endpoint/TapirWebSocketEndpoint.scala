@@ -29,7 +29,7 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
   type Context = Http[Unit]
 
   /** Endpoint request type. */
-  type RequestType = (List[String], QueryParams, List[Header], Option[String])
+  type Request = (List[String], QueryParams, List[Header], Option[String])
 
   /**
    * Creates a Tapir WebSocket endpoint with the specified RPC request handler.
@@ -46,7 +46,7 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
    */
   def apply[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context]
-  ): ServerEndpoint[RequestType, Unit, Array[Byte] => Effect[Array[Byte]], EffectStreams[Effect], Effect] = {
+  ): ServerEndpoint[Request, Unit, Array[Byte] => Effect[Array[Byte]], EffectStreams[Effect], Effect] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     val system = genericHandler.system
     val streams = new EffectStreams[Effect] {
