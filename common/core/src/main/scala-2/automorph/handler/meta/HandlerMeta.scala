@@ -63,9 +63,9 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    */
   def bind[Api <: AnyRef](api: Api, aliases: String => Iterable[String]): ThisHandler =
     macro HandlerMeta.bindMacro[Node, Codec, Effect, Context, Api]
-
-  def brokenBind[Api <: AnyRef](api: Api): ThisHandler =
-    macro HandlerMeta.brokenBindMacro[Node, Codec, Effect, Context, Api]
+//
+//  def brokenBind[Api <: AnyRef](api: Api): ThisHandler =
+//    macro HandlerMeta.brokenBindMacro[Node, Codec, Effect, Context, Api]
 }
 
 object HandlerMeta {

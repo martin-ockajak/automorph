@@ -2,7 +2,7 @@
 
 Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
-* [Scaladoc](../api/index.html)
+* [Scaladoc](../api/automorph/index.html)
 * [Artifacts](https://mvnrepository.com/artifact/org.automorph/automorph)
 
 ## Build
