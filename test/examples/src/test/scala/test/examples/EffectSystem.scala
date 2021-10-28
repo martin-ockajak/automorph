@@ -20,7 +20,7 @@ object EffectSystem extends App {
   val system = ZioSystem[Any]()
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val server = Default.systemServer(system, unsafeRunTask, _.bind(api), 80, "/api")
+  val server = Default.serverSystem(system, unsafeRunTask, _.bind(api), 80, "/api")
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val backend = AsyncHttpClientZioBackend.usingClient(Runtime.default, new DefaultAsyncHttpClient())

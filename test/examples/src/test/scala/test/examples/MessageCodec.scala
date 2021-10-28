@@ -26,14 +26,14 @@ object MessageCodec extends App {
   val protocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type](codec)
 
   // Create an effect system plugin
-  val system = Default.asyncSystem
+  val system = Default.systemAsync
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
   val server = Default.server(handler.bind(api), (_: Future[Any]) => (), 80, "/api")
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val transport = Default.asyncClientTransport(new URI("http://localhost/api"), "POST")
+  val transport = Default.clientTransportAsync(new URI("http://localhost/api"), "POST")
   val client = Client(protocol, transport)
 
   // Call the remote API function

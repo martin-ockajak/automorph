@@ -14,7 +14,7 @@ object ClientMessageTransport extends App {
   val api = new Api()
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val server = Default.syncServer(_.bind(api), 80, "/api")
+  val server = Default.serverSync(_.bind(api), 80, "/api")
 
   // Create HttpUrlConnection HTTP client message transport
   val transport = UrlClient(new URI("http://localhost/api"), "POST", IdentitySystem())

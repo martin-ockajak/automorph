@@ -13,11 +13,11 @@ object ServerMessageTransport extends App {
   val api = new Api()
 
   // Start NanoHTTPD JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val handler = Default.syncHandler[NanoServer.Context]
+  val handler = Default.handlerSync[NanoServer.Context]
   val server = NanoServer(handler.bind(api), identity, 80)
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.syncClient(new URI("http://localhost/api"), "POST")
+  val client = Default.clientSync(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function
   val remoteApi = client.bind[Api] // Api

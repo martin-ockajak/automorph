@@ -16,7 +16,7 @@ object EndpointMessageTransport extends App {
   val api = new Api()
 
   // Create Undertow JSON-RPC endpoint
-  val handler = Default.asyncHandler[UndertowHttpEndpoint.Context]
+  val handler = Default.handlerAsync[UndertowHttpEndpoint.Context]
   val endpoint = UndertowHttpEndpoint(handler.bind(api), _ => ())
 
   // Start custom Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
@@ -26,7 +26,7 @@ object EndpointMessageTransport extends App {
     .build()
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.asyncClient(new URI("http://localhost/api"), "POST")
+  val client = Default.clientAsync(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function via proxy
   val remoteApi = client.bind[Api] // Api

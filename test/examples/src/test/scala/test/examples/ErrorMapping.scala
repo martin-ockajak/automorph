@@ -24,7 +24,7 @@ object ErrorMapping extends App {
   }
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val system = Default.asyncSystem
+  val system = Default.systemAsync
   val handler = Handler.protocol(serverProtocol).system(system).context[Default.ServerContext]
   val server = Default.server(handler, (_: Future[Any]) => (), 80, "/api", {
     // Customize server HTTP status code mapping
@@ -39,7 +39,7 @@ object ErrorMapping extends App {
   }
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val transport = Default.asyncClientTransport(new URI("http://localhost/api"), "POST")
+  val transport = Default.clientTransportAsync(new URI("http://localhost/api"), "POST")
   val client = Client.protocol(clientProtocol).transport(transport)
 
   // Call the remote API function
