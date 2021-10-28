@@ -23,7 +23,7 @@ object NameMapping extends App {
   }
   val api = new Api()
 
-  // Customize function name mapping
+  // Customize RPC function names
   val mapNames = (name: String) => name match {
     case "original" => Seq("original", "custom")
     case "omitted" => Seq.empty

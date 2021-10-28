@@ -282,7 +282,7 @@ val api = new Api()
 **Server**
 
 ```scala
-// Customize function names
+// Customize RPC function names
 val mapNames = (name: String) => name match {
   case "original" => Seq("original", "custom")
   case "omitted" => Seq.empty
