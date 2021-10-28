@@ -5,6 +5,7 @@ import automorph.log.MacroLogger
 import automorph.spi.MessageCodec
 import automorph.spi.protocol.RpcFunction
 import automorph.util.{MethodReflection, Reflection}
+import scala.annotation.nowarn
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -58,6 +59,7 @@ object ClientGenerator {
     """)
   }
 
+  @nowarn("msg=used")
   private def generateBinding[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
@@ -77,7 +79,6 @@ object ClientGenerator {
     val decodeResult = generateDecodeResult[C, Node, Codec, Effect, Context](ref)(method, codec)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
     implicit val functionLiftable: Liftable[RpcFunction] = MethodReflection.functionLiftable(ref)
-    Seq(functionLiftable)
     ref.c.Expr[ClientBinding[Node, Context]](q"""
       automorph.client.ClientBinding[$nodeType, $contextType](
         ${method.lift.rpcFunction},

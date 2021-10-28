@@ -5,6 +5,7 @@ import automorph.log.MacroLogger
 import automorph.spi.protocol.RpcFunction
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.{MethodReflection, Reflection}
+import scala.annotation.nowarn
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -64,6 +65,7 @@ object HandlerGenerator {
     """)
   }
 
+  @nowarn("msg=used")
   private def generateBinding[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
@@ -82,7 +84,6 @@ object HandlerGenerator {
     val invoke = generateInvoke[C, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
     logBoundMethod[C, Api](ref)(method, invoke)
     implicit val functionLiftable: Liftable[RpcFunction] = MethodReflection.functionLiftable(ref)
-    Seq(functionLiftable)
     ref.c.Expr[HandlerBinding[Node, Effect, Context]](q"""
       automorph.handler.HandlerBinding(
         ${method.lift.rpcFunction},

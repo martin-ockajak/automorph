@@ -8,6 +8,7 @@ import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.{RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
+import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -69,6 +70,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     }
   }
 
+  @nowarn("msg=used")
   override def parseRequest(
     requestBody: MessageBody,
     requestId: String,
@@ -77,22 +79,21 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     // Deserialize request
     Try(decodeMessage(codec.deserialize(requestBody))).pureFold(
       error => Left(RpcError(ParseErrorException("Malformed request", error), RpcMessage(None, requestBody))),
-      formedRequest => {
+      requestMessage => {
         // Validate request
-        Seq(functionName)
-        val messageText = () => Some(codec.text(encodeMessage(formedRequest)))
-        val message = RpcMessage(formedRequest.id, requestBody, formedRequest.properties, messageText)
-        Try(Request(formedRequest)).pureFold(
+        val messageText = () => Some(codec.text(encodeMessage(requestMessage)))
+        val message = RpcMessage(requestMessage.id, requestBody, requestMessage.properties, messageText)
+        Try(Request(requestMessage)).pureFold(
           error => Left(RpcError(error, message)),
-          validRequest => Right(RpcRequest(message, validRequest.method, validRequest.params, validRequest.id.isDefined, requestId))
+          request => Right(RpcRequest(message, request.method, request.params, request.id.isDefined, requestId))
         )
       }
     )
 
-  override def createResponse(result: Try[Node], details: Metadata): Try[RpcResponse[Node, Metadata]] = {
+  override def createResponse(result: Try[Node], requestMetadata: Metadata): Try[RpcResponse[Node, Metadata]] = {
     // Create response
-    val id = details.getOrElse(unknownId)
-    val formedResponse = result.pureFold(
+    val id = requestMetadata.getOrElse(unknownId)
+    val responseMessage = result.pureFold(
       error => {
         val responseError = error match {
           case JsonRpcException(message, code, data, _) =>
@@ -111,11 +112,11 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     )
 
     // Serialize response
-    val messageText = () => Some(codec.text(encodeMessage(formedResponse)))
-    Try(codec.serialize(encodeMessage(formedResponse))).recoverWith { case error =>
+    val messageText = () => Some(codec.text(encodeMessage(responseMessage)))
+    Try(codec.serialize(encodeMessage(responseMessage))).recoverWith { case error =>
       Failure(ParseErrorException("Malformed response", error))
     }.map { messageBody =>
-      val message = RpcMessage(Option(id), messageBody, formedResponse.properties, messageText)
+      val message = RpcMessage(Option(id), messageBody, responseMessage.properties, messageText)
       RpcResponse(result, message)
     }
   }
@@ -130,11 +131,11 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
         val message = RpcMessage(formedResponse.id, response, formedResponse.properties, messageText)
         Try(Response(formedResponse)).pureFold(
           error => Left(RpcError(ParseErrorException("Malformed response", error), message)),
-          validResponse =>
+          response =>
             // Check for error
-            validResponse.error.fold(
+            response.error.fold(
               // Check for result
-              validResponse.result match {
+              response.result match {
                 case None => Left(RpcError(InvalidResponseException("Invalid result", None.orNull), message))
                 case Some(result) => Right(RpcResponse(Success(result), message))
               }
