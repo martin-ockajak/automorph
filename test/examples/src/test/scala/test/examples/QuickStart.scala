@@ -30,8 +30,9 @@ object QuickStart extends App {
   remoteApi.hello("world", 1) // Future[String]
 
   // Call the remote API function dynamically
-  val remoteHello = client.function("hello") // RemoteFunction
-  remoteHello.args("what" -> "world", "n" -> 1).call[String] // Future[String]
+  client.function("hello")
+    .args("what" -> "world", "n" -> 1)
+    .call[String] // Future[String]
 
   // Close the client
   client.close()
