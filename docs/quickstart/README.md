@@ -30,7 +30,7 @@ trait Api {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Create the API implementation
+// Create the API instance
 class ApiImpl extends Api {
   override def hello(some: String, n: Int): Future[String] =
     Future(s"Hello $some $n!")
