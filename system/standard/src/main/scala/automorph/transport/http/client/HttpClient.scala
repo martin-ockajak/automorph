@@ -16,7 +16,6 @@ import java.net.URI
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.{CompletableFuture, CompletionStage}
-import scala.annotation.nowarn
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.jdk.OptionConverters.RichOptional
@@ -236,17 +235,18 @@ final case class HttpClient[Effect[_]](
     statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers *)
   }
 
-  @nowarn
   private def effect[T](completableFuture: => CompletableFuture[T]): Effect[T] = {
     val (effectResult, completeEffect, failEffect) = promisedEffect()
     Try(completableFuture).pureFold(
       error => failEffect(error),
-      (value: CompletableFuture[T]) =>
+      (value: CompletableFuture[T]) => {
         value.handle { case (result, exception) =>
           Option(result).map(completeEffect).orElse(Option(exception).map(failEffect)).getOrElse {
             failEffect(new IllegalStateException("Missing completable future result"))
           }
         }
+        ()
+      }
     )
     effectResult.asInstanceOf[Effect[T]]
   }
