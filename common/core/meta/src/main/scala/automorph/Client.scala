@@ -41,7 +41,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     RemoteFunction(functionName, Seq.empty, Seq.empty, this)
 
   /**
-   * Creates a default message context.
+   * Creates a default request context.
    *
    * @return request context
    */
