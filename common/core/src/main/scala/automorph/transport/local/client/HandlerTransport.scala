@@ -26,14 +26,14 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
 ) extends ClientMessageTransport[Effect, Context] {
 
   override def call(
-    request: ArraySeq.ofByte,
+    requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
     context: Option[Context]
   ): Effect[(ArraySeq.ofByte, Context)] = {
     implicit val usingContext = context.getOrElse(defaultContext)
     system.flatMap(
-      handler.processRequest(request, requestId, None),
+      handler.processRequest(requestBody, requestId, None),
       (result: HandlerResult[ArraySeq.ofByte, Context]) =>
         result.responseBody.map(response => system.pure(response -> defaultContext)).getOrElse {
           system.failed(InvalidResponseException("Missing call response", None.orNull))
@@ -42,17 +42,18 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
   }
 
   override def notify(
-    request: ArraySeq.ofByte,
+    requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
     context: Option[Context]
   ): Effect[Unit] = {
     implicit val usingContext = context.getOrElse(defaultContext)
     system.map(
-      handler.processRequest(request, requestId, None),
+      handler.processRequest(requestBody, requestId, None),
       (_: HandlerResult[ArraySeq.ofByte, Context]) => ()
     )
   }
 
-  override def close(): Effect[Unit] = system.pure(())
+  override def close(): Effect[Unit] =
+    system.pure(())
 }
