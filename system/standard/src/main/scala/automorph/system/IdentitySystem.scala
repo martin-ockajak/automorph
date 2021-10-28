@@ -14,15 +14,20 @@ import scala.util.Try
  */
 final case class IdentitySystem() extends EffectSystem[Identity] {
 
-  override def wrap[T](value: => T): T = value
+  override def wrap[T](value: => T): T =
+    value
 
-  override def pure[T](value: T): T = value
+  override def pure[T](value: T): T =
+    value
 
-  override def failed[T](exception: Throwable): T = throw exception
+  override def failed[T](exception: Throwable): T =
+    throw exception
 
-  override def either[T](effect: T): Either[Throwable, T] = Try(effect).toEither
+  override def either[T](effect: T): Either[Throwable, T] =
+    Try(effect).toEither
 
-  override def flatMap[T, R](effect: T, function: T => R): R = function(effect)
+  override def flatMap[T, R](effect: T, function: T => R): R =
+    function(effect)
 }
 
 object IdentitySystem {

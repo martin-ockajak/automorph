@@ -13,9 +13,12 @@ class MonixLocalSpec extends ProtocolCodecSpec {
   type Effect[T] = Task[T]
   type Context = String
 
-  override lazy val arbitraryContext: Arbitrary[Context] = Arbitrary(Arbitrary.arbitrary[Context])
+  override lazy val arbitraryContext: Arbitrary[Context] =
+    Arbitrary(Arbitrary.arbitrary[Context])
 
-  override lazy val system: EffectSystem[Effect] = MonixSystem()
+  override lazy val system: EffectSystem[Effect] =
+    MonixSystem()
 
-  override def run[T](effect: Effect[T]): T = effect.runSyncUnsafe(Duration.Inf)
+  override def run[T](effect: Effect[T]): T =
+    effect.runSyncUnsafe(Duration.Inf)
 }

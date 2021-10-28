@@ -12,15 +12,20 @@ import scala.util.{Failure, Success, Try}
  */
 final case class TrySystem() extends EffectSystem[Try] {
 
-  override def wrap[T](value: => T): Try[T] = Try(value)
+  override def wrap[T](value: => T): Try[T] =
+    Try(value)
 
-  override def pure[T](value: T): Try[T] = Success(value)
+  override def pure[T](value: T): Try[T] =
+    Success(value)
 
-  override def failed[T](exception: Throwable): Try[T] = Failure(exception)
+  override def failed[T](exception: Throwable): Try[T] =
+    Failure(exception)
 
-  override def either[T](effect: Try[T]): Try[Either[Throwable, T]] = Success(effect.toEither)
+  override def either[T](effect: Try[T]): Try[Either[Throwable, T]] =
+    Success(effect.toEither)
 
-  override def flatMap[T, R](effect: Try[T], function: T => Try[R]): Try[R] = effect.flatMap(function)
+  override def flatMap[T, R](effect: Try[T], function: T => Try[R]): Try[R] =
+    effect.flatMap(function)
 }
 
 object TrySystem {

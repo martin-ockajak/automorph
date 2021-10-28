@@ -10,5 +10,6 @@ import scala.util.Try
 class MonixSpec extends EffectSystemSpec[Task] {
   def system: EffectSystem[Task] = MonixSystem()
 
-  def run[T](effect: Task[T]): Either[Throwable, T] = Try(effect.runSyncUnsafe(Duration.Inf)).toEither
+  def run[T](effect: Task[T]): Either[Throwable, T] =
+    Try(effect.runSyncUnsafe(Duration.Inf)).toEither
 }
