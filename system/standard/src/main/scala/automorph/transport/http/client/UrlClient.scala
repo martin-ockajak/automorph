@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.UrlClient.{Context, EffectValue}
+import automorph.transport.http.client.UrlClient.{Context, EffectValue, Session}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.{HttpURLConnection, URI}
@@ -78,7 +78,7 @@ final case class UrlClient[Effect[_]](
     system.map(send(requestBody, requestId, mediaType, requestContext), (_: EffectValue) => ())
 
   override def defaultContext: Context =
-    UrlContext.default
+    Session.default
 
   override def close(): Effect[Unit] =
     system.pure(())
@@ -160,15 +160,15 @@ final case class UrlClient[Effect[_]](
 object UrlClient {
 
   /** Request context type. */
-  type Context = HttpContext[UrlContext]
+  type Context = HttpContext[Session]
 
   /** Effect value type. */
   private type EffectValue = (HttpURLConnection, ArraySeq.ofByte)
-}
 
-final case class UrlContext(connection: HttpURLConnection)
+  final case class Session(connection: HttpURLConnection)
 
-object UrlContext {
-  /** Implicit default context value. */
-  implicit val default: HttpContext[UrlContext] = HttpContext()
+  object Session {
+    /** Implicit default context value. */
+    implicit val default: HttpContext[Session] = HttpContext()
+  }
 }

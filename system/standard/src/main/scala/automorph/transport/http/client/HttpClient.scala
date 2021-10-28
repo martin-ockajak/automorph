@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, WebSocketListener, defaultBuilder}
+import automorph.transport.http.client.HttpClient.{Context, Session, Protocol, Response, WebSocketListener, defaultBuilder}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.http.HttpClient.Builder
@@ -99,7 +99,7 @@ final case class HttpClient[Effect[_]](
   }
 
   override def defaultContext: Context =
-    HttpClientContext.default
+    Session.default
 
   override def close(): Effect[Unit] =
     system.wrap(())
@@ -255,7 +255,7 @@ final case class HttpClient[Effect[_]](
 object HttpClient {
 
   /** Request context type. */
-  type Context = HttpContext[HttpClientContext]
+  type Context = HttpContext[Session]
 
   /** Response type. */
   private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
@@ -296,11 +296,11 @@ object HttpClient {
 
     case object WebSocket extends Protocol("WebSocket")
   }
-}
 
-final case class HttpClientContext(request: HttpRequest.Builder)
+  final case class Session(request: HttpRequest.Builder)
 
-object HttpClientContext {
-  /** Implicit default context value. */
-  implicit val default: HttpContext[HttpClientContext] = HttpContext()
+  object Session {
+    /** Implicit default context value. */
+    implicit val default: HttpContext[Session] = HttpContext()
+  }
 }

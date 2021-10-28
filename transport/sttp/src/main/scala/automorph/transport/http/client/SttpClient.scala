@@ -4,12 +4,12 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.SttpClient.{Context, Protocol, WebSocket}
+import automorph.transport.http.client.SttpClient.{Context, Session, Protocol, WebSocket}
 import automorph.util.Bytes
 import java.net.URI
 import scala.collection.immutable.ArraySeq
 import sttp.capabilities.WebSockets
-import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
+import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
@@ -83,7 +83,7 @@ final case class SttpClient[Effect[_]](
   }
 
   override def defaultContext: Context =
-    SttpContext.default
+    Session.default
 
   override def close(): Effect[Unit] =
     backend.close()
@@ -163,7 +163,7 @@ object SttpClient {
   type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
 
   /** Request context type. */
-  type Context = HttpContext[SttpContext]
+  type Context = HttpContext[Session]
 
   /** Transport protocol. */
   sealed abstract private class Protocol(val name: String) {
@@ -177,11 +177,11 @@ object SttpClient {
 
     case object WebSocket extends Protocol("WebSocket")
   }
-}
 
-final case class SttpContext(request: PartialRequest[Either[String, String], Any])
+  final case class Session(request: PartialRequest[Either[String, String], Any])
 
-object SttpContext {
-  /** Implicit default context value. */
-  implicit val default: HttpContext[SttpContext] = HttpContext()
+  object Session {
+    /** Implicit default context value. */
+    implicit val default: HttpContext[Session] = HttpContext()
+  }
 }
