@@ -13,7 +13,7 @@ import org.scalacheck.Arbitrary.arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import test.core.ProtocolCodecSpec
-import test.transport.http.Generator
+import test.transport.http.HttpContextGenerator
 
 class FutureHttpSpec extends ProtocolCodecSpec {
 
@@ -24,7 +24,7 @@ class FutureHttpSpec extends ProtocolCodecSpec {
     NanoServer[Effect](fixture.handler, await, fixture.serverPort)
   }
 
-  override lazy val arbitraryContext: Arbitrary[Context] = Generator.context
+  override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary
 
   override lazy val system: EffectSystem[Effect] = FutureSystem()
 

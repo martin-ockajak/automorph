@@ -5,9 +5,9 @@ import java.time.Instant
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 
-object Generator {
+object AmqpContextGenerator {
 
-  def context[T]: Arbitrary[AmqpContext[T]] = Arbitrary(for {
+  def arbitrary[T]: Arbitrary[AmqpContext[T]] = Arbitrary(for {
     headers <- Gen.listOf(arbitrary[(String, String)].suchThat(_._1.nonEmpty)).map(_.toMap)
     deliveryMode <- Gen.option(Gen.choose(1, 2))
     priority <- Gen.option(Gen.choose(0, 9))
