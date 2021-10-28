@@ -3,7 +3,7 @@ package automorph.transport.amqp
 import java.time.Instant
 
 /**
- * AMQP message properties.
+ * AMQP transport message context.
  *
  * Message transport plugins must set message properties based on their origin in the descending order of priority:
  * - This class

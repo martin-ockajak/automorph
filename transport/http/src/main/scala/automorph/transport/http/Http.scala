@@ -9,7 +9,7 @@ import java.util.Base64
 import scala.concurrent.duration.Duration
 
 /**
- * HTTP message properties.
+ * HTTP transport message context.
  *
  * Message transport plugins must set message properties based on their origin in the descending order of priority:
  * - This class
