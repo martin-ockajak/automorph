@@ -80,9 +80,12 @@ Used to passively receive and reply to requests using specific message transport
 |  | -> | [Akka HTTP](https://tapir.softwaremill.com/en/latest/server/akkahttp.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 |  | -> | [Finatra](https://tapir.softwaremill.com/en/latest/server/finatra.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 |  | -> |  [http4s](https://tapir.softwaremill.com/en/latest/server/http4s.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+|  | -> | [Netty](https://tapir.softwaremill.com/en/latest/server/netty.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 |  | -> | [Play](https://tapir.softwaremill.com/en/latest/server/play.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 |  | -> | [Vert.X](https://tapir.softwaremill.com/en/latest/server/vertx.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 |  | -> | [ZIO Http](https://tapir.softwaremill.com/en/latest/server/ziohttp.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [TapirWebSocketEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-tapir_3.0.0/latest/automorph/transport/http/endpoint/TapirWebSocketEndpoint.html) | [automorph-tapir](https://mvnrepository.com/artifact/org.automorph/automorph-tapir) | [Tapir](https://tapir.softwaremill.com/) | [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
+| [FinagleEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-finagle_3.0.0/latest/automorph/transport/http/endpoint/FinagleEndpoint.html) | [automorph-finagle](https://mvnrepository.com/artifact/org.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [JettyEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-jetty_3.0.0/latest/automorph/transport/http/endpoint/JettyEndpoint.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 
 ## Message codec
