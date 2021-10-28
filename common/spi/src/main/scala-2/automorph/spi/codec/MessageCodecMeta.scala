@@ -1,13 +1,10 @@
 package automorph.spi.codec
 
-import scala.annotation.nowarn
-
 /**
  * Structured message format codec code generation.
  *
  * @tparam Node message codec node representation type
  */
-@nowarn
 trait MessageCodecMeta[Node] {
   /**
    * Encodes a value as a node.
@@ -16,7 +13,7 @@ trait MessageCodecMeta[Node] {
    * @tparam T value type
    * @return message codec node
    */
-  def encode[T](value: T): Node = throw new UnsupportedOperationException("Macro not implemented")
+  def encode[T](value: T): Node
 
   /**
    * Decodes a value from a node.
@@ -25,5 +22,5 @@ trait MessageCodecMeta[Node] {
    * @tparam T value type
    * @return value of the specified type
    */
-  def decode[T](node: Node): T = throw new UnsupportedOperationException("Macro not implemented")
+  def decode[T](node: Node): T
 }
