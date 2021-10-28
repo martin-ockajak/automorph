@@ -24,7 +24,7 @@ private[automorph] object MethodReflection {
         q"""
           automorph.spi.protocol.RpcParameter(
             ${v.name},
-            ${v.dataType}
+            ${v.`type`}
           )
         """
       Seq(parameterLiftable)

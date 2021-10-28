@@ -20,7 +20,7 @@ private[automorph] object MethodReflection:
       override def apply(v: RpcParameter)(using Quotes): Expr[RpcParameter] = '{
         RpcParameter(
           ${ Expr(v.name) },
-          ${ Expr(v.dataType) }
+          ${ Expr(v.`type`) }
         )
       }
 

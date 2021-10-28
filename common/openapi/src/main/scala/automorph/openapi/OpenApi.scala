@@ -45,7 +45,7 @@ private[automorph] object OpenApi {
     function.parameters.map { parameter =>
       // TODO - convert data type to JSON type
       parameter.name -> Schema(
-        Some(parameter.dataType),
+        Some(parameter.`type`),
         Some(parameter.name),
         scaladocField(function.documentation, s"param ${parameter.name}")
       )
@@ -56,7 +56,7 @@ private[automorph] object OpenApi {
     Schema(Some(function.resultType), Some("result"), scaladocField(function.documentation, "return"))
 
   def requiredParameters(function: RpcFunction): List[String] =
-    function.parameters.filter(_.dataType.startsWith(optionTypePrefix)).map(_.name).toList
+    function.parameters.filter(_.`type`.startsWith(optionTypePrefix)).map(_.name).toList
 
   def maybe[T <: Iterable[_]](iterable: T): Option[T] = Option.when(iterable.nonEmpty)(iterable)
 
