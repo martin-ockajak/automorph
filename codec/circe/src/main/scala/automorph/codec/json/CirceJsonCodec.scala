@@ -22,7 +22,8 @@ final case class CirceJsonCodec() extends CirceJsonMeta {
   override def deserialize(data: ArraySeq.ofByte): Json =
     parser.decode[Json](new String(data.unsafeArray, CirceJsonCodec.charset)).toTry.get
 
-  override def text(node: Json): String = node.dropNullValues.spaces2
+  override def text(node: Json): String =
+    node.dropNullValues.spaces2
 }
 
 object CirceJsonCodec {
