@@ -5,7 +5,7 @@ import java.time.Instant
 /**
  * AMQP transport message context.
  *
- * Message transport plugins must set message properties based on their origin in the descending order of priority:
+ * Message transport plugins must use message context properties based on their origin in the descending order of priority:
  * - This class
  * - Base
  * - Defaults
