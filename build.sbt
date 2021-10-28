@@ -384,7 +384,7 @@ lazy val documentation = (project in file("doc")).dependsOn(
     "-groups",
     "-implicits",
     "-skip-packages",
-    "test:zio:sttp:sttp.client3",
+    "automorph.meta:test:zio:sttp:sttp.client3",
     "-doc-source-url",
     scmInfo.value.get.browseUrl + "/tree/main${FILE_PATH}.scala",
     "-sourcepath",
@@ -399,7 +399,7 @@ Compile / doc / scalacOptions ++= Seq(
   "-groups",
   "-implicits",
   "-skip-packages",
-  "test:zio:sttp"
+  "automorph.meta:test:zio:sttp"
 )
 
 // Site settings

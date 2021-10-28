@@ -1,5 +1,6 @@
 package automorph
 
+import automorph.meta.DefaultMeta
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity

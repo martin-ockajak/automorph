@@ -1,4 +1,4 @@
-package automorph
+package automorph.meta
 
 import automorph.codec.json.CirceJsonCodec
 import automorph.protocol.JsonRpcProtocol
