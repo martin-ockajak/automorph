@@ -242,7 +242,7 @@ remoteUseMetadata.args("message" -> "test").call[String] // String
 client.close()
 ```
 
-## Function mapping
+## Name mapping
 
 * [Source](/test/examples/src/test/scala/test/examples/MethodMapping.scala)
 
@@ -263,7 +263,7 @@ import scala.util.Try
 
 // Define an API type and create its instance
 class Api {
-  // Exposed both as 'original' and 'aliased'
+  // Exposed both as 'original' and 'custom'
   def original(value: Option[String]): String =
     value.getOrElse("")
 
@@ -283,14 +283,14 @@ val api = new Api()
 
 ```scala
 // Customize function names
-val aliases = (name: String) => name match {
-  case "original" => Seq("original", "new")
+val mapNames = (name: String) => name match {
+  case "original" => Seq("original", "custom")
   case "omitted" => Seq.empty
   case other => Seq(s"test.$other")
 }
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val server = Default.serverSync(_.bind(api, aliases(_)), 80, "/api")
+val server = Default.serverSync(_.bind(api, mapNames(_)), 80, "/api")
 
 // Stop the server
 server.close()

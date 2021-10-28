@@ -4,11 +4,11 @@ import automorph.Default
 import java.net.URI
 import scala.util.Try
 
-object FunctionMapping extends App {
+object NameMapping extends App {
 
   // Define an API type and create its instance
   class Api {
-    // Exposed both as 'original' and 'new'
+    // Exposed both as 'original' and 'custom'
     def original(value: Option[String]): String =
       value.getOrElse("")
 
@@ -24,14 +24,14 @@ object FunctionMapping extends App {
   val api = new Api()
 
   // Customize function name mapping
-  val aliases = (name: String) => name match {
-    case "original" => Seq("original", "new")
+  val mapNames = (name: String) => name match {
+    case "original" => Seq("original", "custom")
     case "omitted" => Seq.empty
     case other => Seq(s"test.$other")
   }
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val server = Default.serverSync(_.bind(api, aliases(_)), 80, "/api")
+  val server = Default.serverSync(_.bind(api, mapNames(_)), 80, "/api")
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.clientSync(new URI("http://localhost/api"), "POST")
@@ -48,10 +48,10 @@ object FunctionMapping extends App {
   server.close()
 }
 
-class FunctionMapping extends org.scalatest.freespec.AnyFreeSpecLike {
+class NameMapping extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      FunctionMapping.main(Array())
+      NameMapping.main(Array())
     }
   }
 }

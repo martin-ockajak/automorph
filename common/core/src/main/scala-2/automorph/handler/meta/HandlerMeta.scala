@@ -53,15 +53,15 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
-   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `aliases` function.
+   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `mapNames` function.
    *
    * @param api API instance
-   * @param aliases maps API method name to its exposed RPC aliases (empty result causes the method not to be exposed)
+   * @param mapNames maps API method name to its exposed RPC function names (empty result causes the method not to be exposed)
    * @tparam Api API type (only member methods of this type are exposed)
    * @return RPC request handler with specified API bindings
    * @throws java.lang.IllegalArgumentException if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api, aliases: String => Iterable[String]): ThisHandler =
+  def bind[Api <: AnyRef](api: Api, mapNames: String => Iterable[String]): ThisHandler =
     macro HandlerMeta.bindMacro[Node, Codec, Effect, Context, Api]
 //
 //  def brokenBind[Api <: AnyRef](api: Api): ThisHandler =
