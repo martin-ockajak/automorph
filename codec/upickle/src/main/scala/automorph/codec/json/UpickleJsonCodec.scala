@@ -1,5 +1,6 @@
 package automorph.codec.json
 
+import automorph.codec.json.meta.UpickleJsonMeta
 import scala.collection.immutable.ArraySeq
 import ujson.Value
 

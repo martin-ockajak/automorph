@@ -1,4 +1,4 @@
-package automorph.codec.json
+package automorph.codec.json.meta
 
 import io.circe.Json
 import automorph.spi.MessageCodec

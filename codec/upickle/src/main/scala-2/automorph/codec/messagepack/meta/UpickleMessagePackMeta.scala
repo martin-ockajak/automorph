@@ -1,5 +1,6 @@
-package automorph.codec.messagepack
+package automorph.codec.messagepack.meta
 
+import automorph.codec.messagepack.UpickleMessagePackCustom
 import automorph.spi.MessageCodec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox

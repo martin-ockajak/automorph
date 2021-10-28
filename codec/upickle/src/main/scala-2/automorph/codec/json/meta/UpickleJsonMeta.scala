@@ -1,5 +1,6 @@
-package automorph.codec.json
+package automorph.codec.json.meta
 
+import automorph.codec.json.UpickleJsonCustom
 import automorph.spi.MessageCodec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox

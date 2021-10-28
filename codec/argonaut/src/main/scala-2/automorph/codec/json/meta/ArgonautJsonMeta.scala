@@ -1,4 +1,4 @@
-package automorph.codec.json
+package automorph.codec.json.meta
 
 import argonaut.Json
 import automorph.spi.MessageCodec

@@ -1,5 +1,6 @@
 package automorph.codec.messagepack
 
+import automorph.codec.messagepack.meta.UpickleMessagePackMeta
 import scala.collection.immutable.ArraySeq
 import upack.Msg
 
