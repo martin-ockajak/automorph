@@ -1,7 +1,7 @@
 package test.examples
 
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 import automorph.{Client, Default, Handler}
 import java.net.URI
 import java.sql.SQLException
@@ -29,7 +29,7 @@ object ErrorMapping extends App {
   val server = Default.server(handler, (_: Future[Any]) => (), 80, "/api", {
     // Customize server HTTP status code mapping
     case _: SQLException => 400
-    case e => Http.defaultExceptionToStatusCode(e)
+    case e => HttpContext.defaultExceptionToStatusCode(e)
   })
 
   // Customize client RPC error mapping

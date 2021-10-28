@@ -326,7 +326,7 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 import automorph.{Client, Default, Handler}
 import java.net.URI
 import java.sql.SQLException
@@ -337,6 +337,7 @@ import scala.concurrent.Future
 class Api {
   def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
 }
+
 val api = new Api()
 
 ```

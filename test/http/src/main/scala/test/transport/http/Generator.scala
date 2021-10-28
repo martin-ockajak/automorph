@@ -2,7 +2,7 @@ package test.transport.http
 
 import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 
 object Generator {
   private val maxSize = 256
@@ -20,10 +20,10 @@ object Generator {
     value <- Gen.const("test")
   } yield (name, value)
 
-  def context: Arbitrary[Http[_]] = Arbitrary(for {
+  def context[T]: Arbitrary[HttpContext[T]] = Arbitrary(for {
     headers <- Gen.listOf(header)
     parameters <- Gen.listOf(parameter)
-  } yield Http(
+  } yield HttpContext(
     headers = headers,
     parameters = parameters
   ))

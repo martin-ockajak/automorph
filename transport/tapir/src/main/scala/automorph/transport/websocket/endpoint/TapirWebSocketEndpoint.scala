@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, extractRequestProperties, requestContext}
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Random}
@@ -26,7 +26,7 @@ import sttp.tapir.{CodecFormat, clientIp, endpoint, headers, paths, queryParams,
 object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
 
   /** Request context type. */
-  type Context = Http[Unit]
+  type Context = HttpContext[Unit]
 
   /** Endpoint request type. */
   type Request = (List[String], QueryParams, List[Header], Option[String])

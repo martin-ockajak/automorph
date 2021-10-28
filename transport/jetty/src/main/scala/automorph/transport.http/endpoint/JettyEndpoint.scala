@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.JettyEndpoint.Context
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Network, Random}
@@ -33,7 +33,7 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
 final case class JettyEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
-  exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
+  exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends HttpServlet with Logging with EndpointMessageTransport {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -110,7 +110,7 @@ final case class JettyEndpoint[Effect[_]](
     val headers = request.getHeaderNames.asScala.flatMap { name =>
       request.getHeaders(name).asScala.map(value => name -> value)
     }.toSeq
-    Http(
+    HttpContext(
       base = Some(request),
       method = Some(request.getMethod),
       headers = headers
@@ -137,5 +137,5 @@ final case class JettyEndpoint[Effect[_]](
 
 object JettyEndpoint {
   /** Request context type. */
-  type Context = Http[HttpServletRequest]
+  type Context = HttpContext[HttpServletRequest]
 }

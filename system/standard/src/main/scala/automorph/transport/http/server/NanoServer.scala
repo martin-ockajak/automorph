@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.ServerMessageTransport
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
@@ -41,7 +41,7 @@ final case class NanoServer[Effect[_]] private (
   executeEffect: Effect[Response] => Response,
   port: Int,
   path: String = "/",
-  exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
+  exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   webSocket: Boolean = true
 ) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect] {
 
@@ -173,7 +173,7 @@ final case class NanoServer[Effect[_]] private (
   }
 
   private def requestContext(session: IHTTPSession): Context = {
-    val http = Http(
+    val http = HttpContext(
       base = Some(session),
       method = Some(session.getMethod.name),
       headers = session.getHeaders.asScala.toSeq
@@ -205,7 +205,7 @@ final case class NanoServer[Effect[_]] private (
 object NanoServer {
 
   /** Request context type. */
-  type Context = Http[_]
+  type Context = HttpContext[IHTTPSession]
 
   /** Response type. */
   type Response = NanoHTTPD.Response
@@ -229,7 +229,7 @@ object NanoServer {
     runEffectSync: Effect[Response] => Response,
     port: Int,
     path: String = "/",
-    exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true
   ): NanoServer[Effect] = {
     val server = new NanoServer(handler, runEffectSync, port, path, exceptionToStatusCode, webSocket)

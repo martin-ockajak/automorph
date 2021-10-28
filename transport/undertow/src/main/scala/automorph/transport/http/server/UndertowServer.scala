@@ -3,7 +3,7 @@ package automorph.transport.http.server
 import automorph.Types
 import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import automorph.transport.http.server.UndertowServer.{Context, defaultBuilder}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
@@ -39,7 +39,7 @@ final case class UndertowServer[Effect[_]](
   runEffect: Effect[Any] => Unit,
   port: Int,
   path: String = "/",
-  exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
+  exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   webSocket: Boolean = true,
   builder: Undertow.Builder = defaultBuilder
 ) extends Logging with ServerMessageTransport[Effect] {

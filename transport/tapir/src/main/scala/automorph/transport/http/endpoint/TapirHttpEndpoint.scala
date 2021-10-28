@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Random}
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
@@ -24,7 +24,7 @@ import sttp.tapir.{byteArrayBody, clientIp, endpoint, header, headers, paths, qu
 object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 
   /** Request context type. */
-  type Context = Http[Unit]
+  type Context = HttpContext[Unit]
 
   /** Endpoint request type. */
   type Request = (Array[Byte], List[String], QueryParams, List[Header], Option[String])
@@ -47,7 +47,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
   def apply[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
     method: Method,
-    exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
   ): ServerEndpoint[Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     val system = genericHandler.system
@@ -86,7 +86,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     headers: List[Header],
     method: Option[Method]
   ): Context =
-    Http(
+    HttpContext(
       base = Some(()),
       method = method.map(_.method),
       path = Some(urlPath(paths)),

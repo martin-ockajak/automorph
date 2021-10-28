@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import automorph.util.{Bytes, Network, Random}
@@ -35,7 +35,7 @@ import scala.util.Try
 final case class UndertowHttpEndpoint[Effect[_]] (
   handler: Types.HandlerAnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
-  exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
+  exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -130,7 +130,7 @@ final case class UndertowHttpEndpoint[Effect[_]] (
     val headers = exchange.getRequestHeaders.asScala.flatMap { headerValues =>
       headerValues.iterator.asScala.map(value => headerValues.getHeaderName.toString -> value)
     }.toSeq
-    Http(
+    HttpContext(
       base = Some(Left(exchange).withRight[WebSocketHttpExchange]),
       method = Some(exchange.getRequestMethod.toString),
       headers = headers
@@ -168,10 +168,10 @@ object UndertowHttpEndpoint {
     handler: Types.HandlerAnyCodec[Effect, Context],
   )(
     runEffect: Effect[Any] => Unit,
-    exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
   ): UndertowHttpEndpoint[Effect] =
     UndertowHttpEndpoint(handler, runEffect, exceptionToStatusCode)
 
   /** Request context type. */
-  type Context = Http[Either[HttpServerExchange, WebSocketHttpExchange]]
+  type Context = HttpContext[Either[HttpServerExchange, WebSocketHttpExchange]]
 }

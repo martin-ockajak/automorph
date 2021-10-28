@@ -3,8 +3,9 @@ package test.transport.http
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 import automorph.transport.http.client.UrlClient
+import automorph.transport.http.server.NanoHTTPD.IHTTPSession
 import automorph.transport.http.server.NanoServer
 import java.net.URI
 import org.scalacheck.Arbitrary
@@ -17,7 +18,7 @@ import test.transport.http.Generator
 class FutureHttpSpec extends ProtocolCodecSpec {
 
   type Effect[T] = Future[T]
-  type Context = Http[_]
+  type Context = NanoServer.Context
 
   private lazy val servers = fixtures.map { fixture =>
     NanoServer[Effect](fixture.handler, await, fixture.serverPort)

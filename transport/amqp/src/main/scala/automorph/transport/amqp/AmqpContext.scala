@@ -27,7 +27,7 @@ import java.time.Instant
  * @param base base properties defined by the specific message transport plugin
  * @tparam Base specific message transport plugin base properties type
  */
-final case class Amqp[Base](
+final case class AmqpContext[Base](
   contentType: Option[String] = None,
   contentEncoding: Option[String] = None,
   headers: Map[String, Any] = Map.empty,

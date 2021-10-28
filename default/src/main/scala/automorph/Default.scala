@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
 import automorph.system.{FutureSystem, IdentitySystem}
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 import automorph.transport.http.client.SttpClient
 import automorph.transport.http.server.UndertowServer
 import automorph.transport.http.server.UndertowServer.defaultBuilder
@@ -277,7 +277,7 @@ object Default extends DefaultMeta {
     runEffect: Effect[Any] => Unit,
     port: Int,
     path: String = "/",
-    exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
   ): Server[Effect] =
@@ -310,7 +310,7 @@ object Default extends DefaultMeta {
     bindApis: ServerHandler[Effect] => ServerHandler[Effect],
     port: Int,
     path: String = "/",
-    exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
   ): Server[Effect] = {
@@ -341,7 +341,7 @@ object Default extends DefaultMeta {
     bindApis: ServerHandler[Future] => ServerHandler[Future],
     port: Int,
     path: String = "/",
-    exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
   )(implicit executionContext: ExecutionContext): Server[Future] = {
@@ -372,7 +372,7 @@ object Default extends DefaultMeta {
     bindApis: ServerHandler[Identity] => ServerHandler[Identity],
     port: Int,
     path: String = "/",
-    exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
   ): Server[Identity] = {

@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.amqp.client.RabbitMqClient.Context
-import automorph.transport.amqp.{Amqp, RabbitMqCommon, RabbitMqContext}
+import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import com.rabbitmq.client.AMQP.BasicProperties
@@ -144,7 +144,7 @@ final case class RabbitMqClient[Effect[_]](
 object RabbitMqClient {
 
   /** Request context type. */
-  type Context = Amqp[RabbitMqContext]
+  type Context = AmqpContext[RabbitMqContext]
 
   /**
    * Creates asynchronous RabbitMQ client transport plugin.

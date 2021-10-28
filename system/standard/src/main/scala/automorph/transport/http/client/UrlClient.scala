@@ -3,7 +3,7 @@ package automorph.transport.http.client
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 import automorph.transport.http.client.UrlClient.{Context, EffectValue}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
@@ -160,7 +160,7 @@ final case class UrlClient[Effect[_]](
 object UrlClient {
 
   /** Request context type. */
-  type Context = Http[UrlContext]
+  type Context = HttpContext[UrlContext]
 
   /** Effect value type. */
   private type EffectValue = (HttpURLConnection, ArraySeq.ofByte)
@@ -170,5 +170,5 @@ final case class UrlContext(connection: HttpURLConnection)
 
 object UrlContext {
   /** Implicit default context value. */
-  implicit val default: Http[UrlContext] = Http()
+  implicit val default: HttpContext[UrlContext] = HttpContext()
 }

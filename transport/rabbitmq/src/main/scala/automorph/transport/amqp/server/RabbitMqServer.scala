@@ -5,7 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.amqp.server.RabbitMqServer.Context
-import automorph.transport.amqp.{Amqp, RabbitMqCommon, RabbitMqContext}
+import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import automorph.util.{Bytes, Random}
 import com.rabbitmq.client.AMQP.BasicProperties
@@ -33,7 +33,7 @@ import scala.util.Try
  * @tparam Effect effect type
  */
 final case class RabbitMqServer[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, Amqp[BasicProperties]],
+  handler: Types.HandlerAnyCodec[Effect, AmqpContext[BasicProperties]],
   runEffect: Effect[Any] => Any,
   url: URI,
   queues: Seq[String],
@@ -133,5 +133,5 @@ final case class RabbitMqServer[Effect[_]](
 object RabbitMqServer {
 
   /** Request context type. */
-  type Context = Amqp[RabbitMqContext]
+  type Context = AmqpContext[RabbitMqContext]
 }

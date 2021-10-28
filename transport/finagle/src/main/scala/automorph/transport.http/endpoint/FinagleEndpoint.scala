@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.FinagleEndpoint.Context
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Network, Random}
@@ -31,7 +31,7 @@ import com.twitter.util.{Future, Promise}
 final case class FinagleEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
-  exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode
+  exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -96,7 +96,7 @@ final case class FinagleEndpoint[Effect[_]](
     response
   }
 
-  private def requestContext(request: Request): Context = Http(
+  private def requestContext(request: Request): Context = HttpContext(
     base = Some(request),
     method = Some(request.method.name),
     headers = request.headerMap.iterator.toSeq
@@ -135,5 +135,5 @@ final case class FinagleEndpoint[Effect[_]](
 object FinagleEndpoint {
 
   /** Request context type. */
-  type Context = Http[Request]
+  type Context = HttpContext[Request]
 }

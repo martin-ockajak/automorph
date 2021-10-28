@@ -3,7 +3,7 @@ package automorph.transport.http.client
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.Http
+import automorph.transport.http.HttpContext
 import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, WebSocketListener, defaultBuilder}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
@@ -99,7 +99,7 @@ final case class HttpClient[Effect[_]](
   }
 
   override def defaultContext: Context =
-    HttpContext.default
+    HttpClientContext.default
 
   override def close(): Effect[Unit] =
     system.wrap(())
@@ -255,7 +255,7 @@ final case class HttpClient[Effect[_]](
 object HttpClient {
 
   /** Request context type. */
-  type Context = Http[HttpContext]
+  type Context = HttpContext[HttpClientContext]
 
   /** Response type. */
   private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
@@ -298,9 +298,9 @@ object HttpClient {
   }
 }
 
-final case class HttpContext(request: HttpRequest.Builder)
+final case class HttpClientContext(request: HttpRequest.Builder)
 
-object HttpContext {
+object HttpClientContext {
   /** Implicit default context value. */
-  implicit val default: Http[HttpContext] = Http()
+  implicit val default: HttpContext[HttpClientContext] = HttpContext()
 }

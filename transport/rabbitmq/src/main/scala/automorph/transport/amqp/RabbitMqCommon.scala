@@ -1,7 +1,7 @@
 package automorph.transport.amqp
 
 import automorph.log.{LogProperties, Logging}
-import automorph.transport.amqp.Amqp
+import automorph.transport.amqp.AmqpContext
 import automorph.transport.amqp.client.RabbitMqClient.Context
 import automorph.util.Extensions.TryOps
 import com.rabbitmq.client.AMQP.BasicProperties
@@ -104,7 +104,7 @@ private[automorph] object RabbitMqCommon extends Logging {
     defaultRequestId: String,
     defaultAppId: String
   ): BasicProperties = {
-    val amqp = context.getOrElse(Amqp())
+    val amqp = context.getOrElse(AmqpContext())
     val baseProperties = amqp.base.map(_.properties).getOrElse(new BasicProperties())
     (new BasicProperties()).builder()
       .contentType(contentType)
@@ -129,8 +129,8 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @param properties message properties
    * @return message context
    */
-  def context(properties: BasicProperties): Amqp[RabbitMqContext] =
-    Amqp(
+  def context(properties: BasicProperties): AmqpContext[RabbitMqContext] =
+    AmqpContext(
       contentType = Option(properties.getContentType),
       contentEncoding = Option(properties.getContentEncoding),
       headers = Option(properties.getHeaders).map(headers => Map.from(headers.asScala)).getOrElse(Map.empty),
@@ -173,5 +173,5 @@ final case class RabbitMqContext(properties: BasicProperties)
 object RabbitMqContext {
 
   /** Implicit default context value. */
-  implicit val default: Amqp[RabbitMqContext] = Amqp()
+  implicit val default: AmqpContext[RabbitMqContext] = AmqpContext()
 }
