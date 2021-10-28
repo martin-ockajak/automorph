@@ -125,7 +125,7 @@ object HandlerMeta {
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     api: c.Expr[Api],
-    aliases: c.Expr[String => Iterable[String]]
+    mapNames: c.Expr[String => Iterable[String]]
   )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, Codec, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
@@ -137,7 +137,7 @@ object HandlerMeta {
       val newBindings = ${c.prefix}.bindings ++ automorph.handler.HandlerGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec, ${c.prefix}.system, $api)
         .flatMap { binding =>
-          $aliases(binding.function.name).map(_ -> binding)
+          $mapNames(binding.function.name).map(_ -> binding)
         }
       ${c.prefix}.copy(bindings = newBindings)
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
