@@ -42,15 +42,15 @@ final case class FinagleEndpoint[Effect[_]](
     val requestId = Random.id
     lazy val requestProperties = extractRequestProperties(request, requestId)
     logger.debug("Received HTTP request", requestProperties)
-    val requestMessage = Buf.ByteArray.Owned.extract(request.content)
+    val requestBody = Buf.ByteArray.Owned.extract(request.content)
 
     // Process the request
     implicit val usingContext: Context = requestContext(request)
     runAsFuture(system.map(
-      system.either(genericHandler.processRequest(requestMessage, requestId, Some(request.path))),
+      system.either(genericHandler.processRequest(requestBody, requestId, Some(request.path))),
       (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
         handlerResult.fold(
-          error => serverError(error, request, requestId, requestProperties),
+          error => sendErrorResponse(error, request, requestId, requestProperties),
           result => {
             // Send the response
             val response = result.responseBody.getOrElse(Array[Byte]())
@@ -62,7 +62,7 @@ final case class FinagleEndpoint[Effect[_]](
     ))
   }
 
-  private def serverError(
+  private def sendErrorResponse(
     error: Throwable,
     request: Request,
     requestId: String,

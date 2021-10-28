@@ -64,19 +64,19 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
     val receiveListener = new AbstractReceiveListener {
 
       override def onFullTextMessage(channel: WebSocketChannel, message: BufferedTextMessage): Unit = {
-        val request = Bytes.string.from(message.getData)
-        handle(exchange, request, channel, () => ())
+        val requestBody = Bytes.string.from(message.getData)
+        handle(exchange, requestBody, channel, () => ())
       }
 
       override def onFullBinaryMessage(channel: WebSocketChannel, message: BufferedBinaryMessage): Unit = {
         val data = message.getData
-        val request = Bytes.byteBuffer.from(WebSockets.mergeBuffers(data.getResource: _*))
-        handle(exchange, request, channel, () => data.discard())
+        val requestBody = Bytes.byteBuffer.from(WebSockets.mergeBuffers(data.getResource: _*))
+        handle(exchange, requestBody, channel, () => data.discard())
       }
 
       private def handle(
         exchange: WebSocketHttpExchange,
-        request: ArraySeq.ofByte,
+        requestBody: ArraySeq.ofByte,
         channel: WebSocketChannel,
         discardMessage: () => Unit
       ): Unit = {
@@ -88,10 +88,10 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         // Process the request
         implicit val usingContext: Context = requestContext(exchange)
         runEffect(system.map(
-          system.either(genericHandler.processRequest(request, requestId, None)),
+          system.either(genericHandler.processRequest(requestBody, requestId, None)),
           (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte, Context]]) =>
             handlerResult.fold(
-              error => sendServerError(error, exchange, channel, requestId, requestProperties),
+              error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
               result => {
                 // Send the response
                 val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
@@ -103,7 +103,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         ()
       }
 
-      private def sendServerError(
+      private def sendErrorResponse(
         error: Throwable,
         exchange: WebSocketHttpExchange,
         channel: WebSocketChannel,

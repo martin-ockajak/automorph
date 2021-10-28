@@ -82,9 +82,11 @@ final case class SttpClient[Effect[_]](
     system.map(send(sttpRequest, requestId), (_: Response[Unit]) => ())
   }
 
-  override def defaultContext: Context = SttpContext.default
+  override def defaultContext: Context =
+    SttpContext.default
 
-  override def close(): Effect[Unit] = backend.close()
+  override def close(): Effect[Unit] =
+    backend.close()
 
   private def send[R](
     sttpRequest: Request[R, WebSocket[Effect]],

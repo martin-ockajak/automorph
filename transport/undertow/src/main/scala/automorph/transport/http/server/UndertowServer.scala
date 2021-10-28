@@ -48,7 +48,8 @@ final case class UndertowServer[Effect[_]](
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
 
-  override def close(): Effect[Unit] = system.wrap(undertow.stop())
+  override def close(): Effect[Unit] =
+    system.wrap(undertow.stop())
 
   private def start(): Undertow = {
     // Configure the request handler

@@ -99,9 +99,11 @@ final case class HttpClient[Effect[_]](
     system.map(send(request, requestUrl, requestId), (_: Response) => ())
   }
 
-  override def defaultContext: Context = HttpContext.default
+  override def defaultContext: Context =
+    HttpContext.default
 
-  override def close(): Effect[Unit] = system.wrap(())
+  override def close(): Effect[Unit] =
+    system.wrap(())
 
   private def send(
     request: Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)],

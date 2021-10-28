@@ -44,16 +44,16 @@ final case class JettyEndpoint[Effect[_]](
     val requestId = Random.id
     lazy val requestProperties = extractRequestProperties(request, requestId)
     logger.trace("Receiving HTTP request", requestProperties)
-    val requestMessage: InputStream = request.getInputStream
+    val requestBody: InputStream = request.getInputStream
 
     // Process the request
     implicit val usingContext: Context = requestContext(request)
     val path = new URI(request.getRequestURI).getPath
     runEffect(system.map(
-      system.either(genericHandler.processRequest(requestMessage, requestId, Some(path))),
+      system.either(genericHandler.processRequest(requestBody, requestId, Some(path))),
       (handlerResult: Either[Throwable, HandlerResult[InputStream, Context]]) =>
         handlerResult.fold(
-          error => serverError(error, response, request, requestId, requestProperties),
+          error => sendErrorResponse(error, response, request, requestId, requestProperties),
           result => {
             // Send the response
             val message = result.responseBody.getOrElse(new ByteArrayInputStream(Array()))
@@ -64,7 +64,7 @@ final case class JettyEndpoint[Effect[_]](
     ))
   }
 
-  private def serverError(
+  private def sendErrorResponse(
     error: Throwable,
     response: HttpServletResponse,
     request: HttpServletRequest,

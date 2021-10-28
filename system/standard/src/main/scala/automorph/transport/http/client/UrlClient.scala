@@ -37,6 +37,7 @@ final case class UrlClient[Effect[_]](
   private val acceptHeader = "Accept"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   require(httpMethods.contains(method), s"Invalid HTTP method: $method")
+  System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
 
   override def call(
     requestBody: ArraySeq.ofByte,
@@ -76,9 +77,11 @@ final case class UrlClient[Effect[_]](
   ): Effect[Unit] =
     system.map(send(requestBody, requestId, mediaType, requestContext), (_: EffectValue) => ())
 
-  override def defaultContext: Context = UrlContext.default
+  override def defaultContext: Context =
+    UrlContext.default
 
-  override def close(): Effect[Unit] = system.pure(())
+  override def close(): Effect[Unit] =
+    system.pure(())
 
   private def send(
     request: ArraySeq.ofByte,

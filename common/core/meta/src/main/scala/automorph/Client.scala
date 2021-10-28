@@ -45,14 +45,16 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    *
    * @return request context
    */
-  def defaultContext: Context = transport.defaultContext
+  def defaultContext: Context =
+    transport.defaultContext
 
   /**
    * Closes this client freeing the underlying resources.
    *
    * @return nothing
    */
-  def close(): Effect[Unit] = transport.close()
+  def close(): Effect[Unit] =
+    transport.close()
 
   /**
    * Performs an RPC function call using specified arguments.

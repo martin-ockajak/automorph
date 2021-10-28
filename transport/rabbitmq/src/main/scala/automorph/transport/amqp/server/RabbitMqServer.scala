@@ -71,7 +71,7 @@ final case class RabbitMqServer[Effect[_]](
           system.either(genericHandler.processRequest(requestBody, requestId, None)),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
             handlerResult.fold(
-              error => sendServerError(error, Option(amqpProperties.getReplyTo), requestProperties, requestId),
+              error => sendError(error, Option(amqpProperties.getReplyTo), requestProperties, requestId),
               result => {
                 // Send the response
                 val response = result.responseBody.getOrElse(Array[Byte]())
@@ -88,7 +88,7 @@ final case class RabbitMqServer[Effect[_]](
     consumer
   }
 
-  private def sendServerError(
+  private def sendError(
     error: Throwable,
     replyTo: Option[String],
     requestProperties: => Map[String, String],

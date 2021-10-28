@@ -5,7 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.Http
-import automorph.transport.http.endpoint.TapirHttpEndpoint.{extractRequestProperties, requestContext}
+import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, extractRequestProperties, requestContext}
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Random}
 import sttp.capabilities.{Streams, WebSockets}
@@ -31,7 +31,6 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
   /** Endpoint request type. */
   type RequestType = (List[String], QueryParams, List[Header], Option[String])
 
-// FIXME - finish WebSocket support
   /**
    * Creates a Tapir WebSocket endpoint with the specified RPC request handler.
    *
@@ -45,15 +44,18 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
    * @tparam Effect effect type
    * @return Tapir WebSocket endpoint
    */
-  def apply[Effect[_], S](
-    handler: Types.HandlerAnyCodec[Effect, Context],
-    streams: Streams[S with WebSockets]
-  ): ServerEndpoint[RequestType, Unit, streams.Pipe[Array[Byte], Array[Byte]], S with WebSockets, Effect] = {
+  def apply[Effect[_]](
+    handler: Types.HandlerAnyCodec[Effect, Context]
+  ): ServerEndpoint[RequestType, Unit, Effect[Array[Byte]] => Effect[Array[Byte]], EffectStreams[Effect], Effect] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     val system = genericHandler.system
     val contentType = Header.contentType(MediaType.parse(genericHandler.protocol.codec.mediaType).getOrElse {
       throw new IllegalArgumentException(s"Invalid content type: ${genericHandler.protocol.codec.mediaType}")
     })
+    val streams = new EffectStreams[Effect] {
+      override type BinaryStream = Effect[Array[Byte]]
+      override type Pipe[A, B] = Effect[A] => Effect[B]
+    }
     endpoint
       .in(paths).in(queryParams).in(headers).in(clientIp)
       .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream].apply(streams))
@@ -64,26 +66,52 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
         logger.debug("Received WebSocket request", requestProperties)
 
         // Process the request
-        implicit val usingContext: Context = requestContext(paths, queryParams, headers, None)
-        ???
-//        ""
-//        system.map(
-//          system.either(genericHandler.processRequest(requestMessage, requestId, None)),
-//          (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
-//            handlerResult.fold(
-//              error => Right(serverError(error, clientIp, requestId, requestProperties)),
-//              result => {
-//                // Send the response
-//                val message = result.responseBody.getOrElse(Array[Byte]())
-//                Right(createResponse(message, status, clientIp, requestId))
-//              }
-//            )
-//        )
+        system.pure(Right { (requestBody: Effect[Array[Byte]]) =>
+          implicit val usingContext: Context = requestContext(paths, queryParams, headers, None)
+          system.map(
+            system.flatMap(requestBody, request => system.either(genericHandler.processRequest(request, requestId, None))),
+            (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
+              handlerResult.fold(
+                error => createErrorResponse(error, clientIp, requestId, requestProperties),
+                result => {
+                  // Create the response
+                  val responseBody = result.responseBody.getOrElse(Array[Byte]())
+                  createResponse(responseBody, clientIp, requestId)
+                }
+              )
+          )
+        })
       }
+  }
+
+  private def createErrorResponse(
+    error: Throwable,
+    clientIp: Option[String],
+    requestId: String,
+    requestProperties: => Map[String, String]
+  ): Array[Byte] = {
+    logger.error("Failed to process HTTP request", error, requestProperties)
+    val message = Bytes.string.from(error.trace.mkString("\n")).unsafeArray
+    createResponse(message, clientIp, requestId)
+  }
+
+  private def createResponse(
+    responseBody: Array[Byte],
+    clientIp: Option[String],
+    requestId: String
+  ): Array[Byte] = {
+    // Log the response
+    lazy val responseDetails = Map(
+      LogProperties.requestId -> requestId,
+      "Client" -> clientAddress(clientIp)
+    )
+    logger.debug("Sending HTTP response", responseDetails)
+    responseBody
   }
 }
 
-trait EffectStreams[Effect[_]] extends Streams[EffectStreams[Effect]] {
+trait EffectStreams[Effect[_]] extends Streams[EffectStreams[Effect]] with WebSockets {
+
   override type BinaryStream = Effect[Array[Byte]]
   override type Pipe[A, B] = Effect[A] => Effect[B]
 }

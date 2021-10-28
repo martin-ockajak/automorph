@@ -48,17 +48,17 @@ final case class UndertowHttpEndpoint[Effect[_]] (
       val requestId = Random.id
       lazy val requestProperties = extractRequestProperties(exchange, requestId)
       logger.debug("Received HTTP request", requestProperties)
-      val request = Bytes.byteArray.from(message)
+      val requestBody = Bytes.byteArray.from(message)
       exchange.dispatch(new Runnable {
 
         override def run(): Unit = {
           // Process the request
           implicit val usingContext: Context = requestContext(exchange)
           runEffect(system.map(
-            system.either(genericHandler.processRequest(request, requestId, Some(exchange.getRequestPath))),
+            system.either(genericHandler.processRequest(requestBody, requestId, Some(exchange.getRequestPath))),
             (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte, Context]]) =>
               handlerResult.fold(
-                error => sendServerError(error, exchange, requestId, requestProperties),
+                error => sendErrorResponse(error, exchange, requestId, requestProperties),
                 result => {
                   // Send the response
                   val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
@@ -78,11 +78,11 @@ final case class UndertowHttpEndpoint[Effect[_]] (
     lazy val requestProperties = extractRequestProperties(exchange, requestId)
     logger.trace("Receiving HTTP request", requestProperties)
     Try(exchange.getRequestReceiver.receiveFullBytes(receiveCallback)).recover { case error =>
-      sendServerError(error, exchange, requestId, requestProperties)
+      sendErrorResponse(error, exchange, requestId, requestProperties)
     }.get
   }
 
-  private def sendServerError(
+  private def sendErrorResponse(
     error: Throwable,
     exchange: HttpServerExchange,
     requestId: String,

@@ -56,7 +56,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     })
     endpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
       .out(byteArrayBody).out(header(contentType)).out(statusCode)
-      .serverLogic { case (requestMessage, paths, queryParams, headers, clientIp) =>
+      .serverLogic { case (requestBody, paths, queryParams, headers, clientIp) =>
         // Log the request
         val requestId = Random.id
         lazy val requestProperties = extractRequestProperties(clientIp, Some(method), requestId)
@@ -65,47 +65,19 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
         // Process the request
         implicit val usingContext: Context = requestContext(paths, queryParams, headers, Some(method))
         system.map(
-          system.either(genericHandler.processRequest(requestMessage, requestId, Some(urlPath(paths)))),
+          system.either(genericHandler.processRequest(requestBody, requestId, Some(urlPath(paths)))),
           (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
             handlerResult.fold(
-              error => Right(serverError(error, clientIp, requestId, requestProperties)),
+              error => Right(createErrorResponse(error, clientIp, requestId, requestProperties)),
               result => {
-                // Send the response
-                val message = result.responseBody.getOrElse(Array[Byte]())
+                // Create the response
+                val responseBody = result.responseBody.getOrElse(Array[Byte]())
                 val status = result.exception.map(exceptionToStatusCode).map(StatusCode.apply).getOrElse(StatusCode.Ok)
-                Right(createResponse(message, status, clientIp, requestId))
+                Right(createResponse(responseBody, status, clientIp, requestId))
               }
             )
         )
       }
-  }
-
-  private[automorph] def serverError(
-    error: Throwable,
-    clientIp: Option[String],
-    requestId: String,
-    requestProperties: => Map[String, String]
-  ): (Array[Byte], StatusCode) = {
-    logger.error("Failed to process HTTP request", error, requestProperties)
-    val message = Bytes.string.from(error.trace.mkString("\n")).unsafeArray
-    val status = StatusCode.InternalServerError
-    createResponse(message, status, clientIp, requestId)
-  }
-
-  private[automorph] def createResponse(
-    message: Array[Byte],
-    status: StatusCode,
-    clientIp: Option[String],
-    requestId: String
-  ): (Array[Byte], StatusCode) = {
-    // Log the response
-    lazy val responseDetails = Map(
-      LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(clientIp),
-      "Status" -> statusCode.toString
-    )
-    logger.debug("Sending HTTP response", responseDetails)
-    (message, status)
   }
 
   private[automorph] def requestContext(
@@ -136,5 +108,34 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     "Client" -> clientAddress(clientIp)
   ) ++ method.map("Method" -> _.toString)
 
-  private def clientAddress(clientIp: Option[String]): String = clientIp.getOrElse("[unknown]")
+  private[automorph] def clientAddress(clientIp: Option[String]): String =
+    clientIp.getOrElse("[unknown]")
+
+  private def createErrorResponse(
+    error: Throwable,
+    clientIp: Option[String],
+    requestId: String,
+    requestProperties: => Map[String, String]
+  ): (Array[Byte], StatusCode) = {
+    logger.error("Failed to process HTTP request", error, requestProperties)
+    val message = Bytes.string.from(error.trace.mkString("\n")).unsafeArray
+    val status = StatusCode.InternalServerError
+    createResponse(message, status, clientIp, requestId)
+  }
+
+  private def createResponse(
+    responseBody: Array[Byte],
+    status: StatusCode,
+    clientIp: Option[String],
+    requestId: String
+  ): (Array[Byte], StatusCode) = {
+    // Log the response
+    lazy val responseDetails = Map(
+      LogProperties.requestId -> requestId,
+      "Client" -> clientAddress(clientIp),
+      "Status" -> statusCode.toString
+    )
+    logger.debug("Sending HTTP response", responseDetails)
+    (responseBody, status)
+  }
 }

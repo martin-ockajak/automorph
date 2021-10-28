@@ -49,7 +49,8 @@ final case class NanoServer[Effect[_]] private (
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
 
-  override def close(): Effect[Unit] = system.wrap(stop())
+  override def close(): Effect[Unit] =
+    system.wrap(stop())
 
   override def start(): Unit = {
     logger.info("Listening for connections", Map("Port" -> port))
@@ -67,10 +68,10 @@ final case class NanoServer[Effect[_]] private (
       val requestId = Random.id
       lazy val requestProperties = extractRequestProperties(session, protocol, requestId)
       logger.trace("Receiving HTTP request", requestProperties)
-      val request = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
+      val requestBody = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
 
       // Handler the request
-      handleRequest(request, session, protocol, Some(url.getPath), requestProperties, requestId)
+      handleRequest(requestBody, session, protocol, Some(url.getPath), requestProperties, requestId)
     }
   }
 
@@ -102,7 +103,7 @@ final case class NanoServer[Effect[_]] private (
   }
 
   private def handleRequest(
-    request: ArraySeq.ofByte,
+    requestBody: ArraySeq.ofByte,
     session: IHTTPSession,
     protocol: Protocol,
     functionName: Option[String],
@@ -114,10 +115,10 @@ final case class NanoServer[Effect[_]] private (
     // Process the request
     implicit val usingContext: Context = requestContext(session)
     executeEffect(system.map(
-      system.either(genericHandler.processRequest(request, requestId, functionName)),
+      system.either(genericHandler.processRequest(requestBody, requestId, functionName)),
       (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte, Context]]) =>
         handlerResult.fold(
-          error => serverError(error, session, protocol, requestId, requestProperties),
+          error => sendErrorResponse(error, session, protocol, requestId, requestProperties),
           result => {
             // Send the response
             val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
@@ -128,7 +129,7 @@ final case class NanoServer[Effect[_]] private (
     ))
   }
 
-  private def serverError(
+  private def sendErrorResponse(
     error: Throwable,
     session: IHTTPSession,
     protocol: Protocol,

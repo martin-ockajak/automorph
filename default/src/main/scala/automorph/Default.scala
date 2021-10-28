@@ -77,7 +77,8 @@ object Default extends DefaultMeta {
    * @see [[https://www.scala-lang.org/api/current/scala/concurrent/Future.html Effect type]]
    * @return asynchronous effect system plugin
    */
-  def asyncSystem(implicit executionContext: ExecutionContext): AsyncSystem = FutureSystem()
+  def asyncSystem(implicit executionContext: ExecutionContext): AsyncSystem =
+    FutureSystem()
 
   /**
    * Creates a synchronous identity effect system plugin.
@@ -85,7 +86,8 @@ object Default extends DefaultMeta {
    * @see [[https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem$$Identity.html Effect type]]
    * @return synchronous effect system plugin
    */
-  def syncSystem: SyncSystem = IdentitySystem()
+  def syncSystem: SyncSystem =
+    IdentitySystem()
 
   /**
    * Creates a default RPC client with specified message transport plugin.
@@ -155,7 +157,8 @@ object Default extends DefaultMeta {
     backend: SttpBackend[Effect, _],
     system: EffectSystem[Effect],
     webSocket: Boolean = false
-  ): ClientTransport[Effect] = SttpClient(url, method, backend, system, webSocket)
+  ): ClientTransport[Effect] =
+    SttpClient(url, method, backend, system, webSocket)
 
   /**
    * Creates an asynchronous STTP HTTP & WebSocket client message transport plugin using 'Future' as an effect type.
@@ -185,10 +188,8 @@ object Default extends DefaultMeta {
    * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @return synchronous client message transport plugin
    */
-  def syncClientTransport(url: URI, method: String, webSocket: Boolean = false): ClientTransport[Identity] = {
-    System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
+  def syncClientTransport(url: URI, method: String, webSocket: Boolean = false): ClientTransport[Identity] =
     clientTransport(url, method, HttpURLConnectionBackend(), syncSystem, webSocket)
-  }
 
   /**
    * Creates a STTP JSON-RPC HTTP & WebSocket client with specified effect system plugin.
@@ -212,7 +213,8 @@ object Default extends DefaultMeta {
     backend: SttpBackend[Effect, _],
     system: EffectSystem[Effect],
     webSocket: Boolean = false
-  ): Client[Effect, ClientContext] = client(clientTransport(url, method, backend, system, webSocket))
+  ): Client[Effect, ClientContext] =
+    client(clientTransport(url, method, backend, system, webSocket))
 
   /**
    * Creates an asynchronous STTP JSON-RPC HTTP & WebSocket client using 'Future' as an effect type.
@@ -246,10 +248,8 @@ object Default extends DefaultMeta {
    * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @return synchronous RPC client
    */
-  def syncClient(url: URI, method: String, webSocket: Boolean = false): Client[Identity, ClientContext] = {
-    System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
+  def syncClient(url: URI, method: String, webSocket: Boolean = false): Client[Identity, ClientContext] =
     client(url, method, HttpURLConnectionBackend(), syncSystem, webSocket)
-  }
 
   /**
    * Creates an Undertow RPC HTTP & WebSocket server with specified RPC request handler.
@@ -279,7 +279,8 @@ object Default extends DefaultMeta {
     exceptionToStatusCode: Throwable => Int = Http.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): Server[Effect] = UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
+  ): Server[Effect] =
+    UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
 
   /**
    * Creates an Undertow JSON-RPC HTTP & WebSocket server with specified effect system plugin.
@@ -343,7 +344,6 @@ object Default extends DefaultMeta {
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
   )(implicit executionContext: ExecutionContext): Server[Future] = {
-    Seq(executionContext)
     val handler = bindApis(asyncHandler)
     val runEffect = (_: Future[Any]) => ()
     server(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
