@@ -19,7 +19,7 @@ private[automorph] final case class Response[Node](
   error: Option[ResponseError[Node]]
 ) {
 
-  def formed: Message[Node] = Message[Node](
+  def message: Message[Node] = Message[Node](
     jsonrpc = Some(version),
     id = Some(id),
     method = None,

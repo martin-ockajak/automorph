@@ -19,7 +19,7 @@ private[automorph] final case class Request[Node](
   params: Params[Node]
 ) {
 
-  def formed: Message[Node] = Message[Node](
+  def message: Message[Node] = Message[Node](
     jsonrpc = Some(version),
     id = id,
     method = Some(method),

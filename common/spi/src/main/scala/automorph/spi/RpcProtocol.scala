@@ -47,7 +47,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
   /**
    * Parses an RPC request.
    *
-   * @param requestBody request message body
+   * @param requestBody RPC request message body
    * @param requestId request correlation identifier
    * @param functionName invoked function name, if specified it is used instead of function name obtained from the request body
    * @return RPC request if the message is valid or RPC error if the message is invalid
@@ -70,10 +70,10 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
   /**
    * Parses an RPC response.
    *
-   * @param response RPC response message
+   * @param responseBody RPC response message body
    * @return RPC response if the message is valid or RPC error if the message is invalid
    */
-  def parseResponse(response: MessageBody): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
+  def parseResponse(responseBody: MessageBody): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
 
   /**
    * Generates OpenApi speficication for specified RPC API functions.
