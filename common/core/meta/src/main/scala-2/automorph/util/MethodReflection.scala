@@ -20,14 +20,13 @@ private[automorph] object MethodReflection {
 
       import ref.c.universe.{Liftable, Quasiquote, Tree}
 
-      implicit val parameterLiftable: Liftable[RpcParameter] = (v: RpcParameter) =>
-        q"""
-          automorph.spi.protocol.RpcParameter(
-            ${v.name},
-            ${v.`type`}
-          )
-        """
-      Seq(parameterLiftable)
+      @nowarn("msg=used")
+      implicit val parameterLiftable: Liftable[RpcParameter] = (v: RpcParameter) => q"""
+        automorph.spi.protocol.RpcParameter(
+          ${v.name},
+          ${v.`type`}
+        )
+      """
 
       override def apply(v: RpcFunction): Tree = q"""
         automorph.spi.protocol.RpcFunction(
