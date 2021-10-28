@@ -46,12 +46,12 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
    */
   def apply[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context]
-  ): ServerEndpoint[RequestType, Unit, Effect[Array[Byte]] => Effect[Array[Byte]], EffectStreams[Effect], Effect] = {
+  ): ServerEndpoint[RequestType, Unit, Array[Byte] => Effect[Array[Byte]], EffectStreams[Effect], Effect] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     val system = genericHandler.system
     val streams = new EffectStreams[Effect] {
       override type BinaryStream = Effect[Array[Byte]]
-      override type Pipe[A, B] = Effect[A] => Effect[B]
+      override type Pipe[A, B] = A => Effect[B]
     }
     endpoint
       .in(paths).in(queryParams).in(headers).in(clientIp)
@@ -63,10 +63,10 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
         logger.debug("Received WebSocket request", requestProperties)
 
         // Process the request
-        system.pure(Right { (requestBody: Effect[Array[Byte]]) =>
+        system.pure(Right { (requestBody: Array[Byte]) =>
           implicit val usingContext: Context = requestContext(paths, queryParams, headers, None)
           system.map(
-            system.flatMap(requestBody, (request: Array[Byte]) => system.either(genericHandler.processRequest(request, requestId, None))),
+            system.either(genericHandler.processRequest(requestBody, requestId, None)),
             (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
               handlerResult.fold(
                 error => createErrorResponse(error, clientIp, requestId, requestProperties),
@@ -110,5 +110,5 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
 trait EffectStreams[Effect[_]] extends Streams[EffectStreams[Effect]] with WebSockets {
 
   override type BinaryStream = Effect[Array[Byte]]
-  override type Pipe[A, B] = Effect[A] => Effect[B]
+  override type Pipe[A, B] = A => Effect[B]
 }
