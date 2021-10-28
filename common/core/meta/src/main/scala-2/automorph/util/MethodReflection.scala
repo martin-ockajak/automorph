@@ -89,7 +89,7 @@ private[automorph] object MethodReflection {
    * @tparam Contextual contextual result type
    * @return contextual result type if applicable
    */
-  @nowarn
+  @nowarn("msg=check")
   def contextualResult[C <: blackbox.Context, Context: c.WeakTypeTag, Contextual: c.WeakTypeTag](
     c: C
   )(someType: c.Type): Option[c.Type] = {
@@ -112,7 +112,7 @@ private[automorph] object MethodReflection {
    * @tparam C macro context type
    * @return wrapped type
    */
-  @nowarn
+  @nowarn("msg=check")
   def unwrapType[C <: blackbox.Context, Wrapper: c.WeakTypeTag](c: C)(someType: c.Type): c.Type = {
     import c.universe.TypeRef
 
@@ -206,7 +206,7 @@ private[automorph] object MethodReflection {
    * @tparam C macro context type
    * @return result type
    */
-  @nowarn
+  @nowarn("msg=check")
   private def resultType[C <: blackbox.Context](c: C)(someType: c.Type): c.Type =
     someType.dealias match {
       case polyType: c.universe.PolyType => polyType.resultType.dealias
