@@ -97,12 +97,22 @@ lazy val coreMeta = (project in file("common/core/meta")).dependsOn(
   initialize ~= { _ =>
 //    System.setProperty("macro.debug", "true")
     System.setProperty("macro.test", "true")
-  }
+  },
+  Compile / doc / scalacOptions ++= Seq(
+    "-Ymacro-expand:none",
+    "-skip-packages",
+    "automorph.client.meta:automorph.handler.meta"
+  )
 )
 lazy val core = (project in file("common/core")).dependsOn(
   coreMeta, testPlugin % Test, jsonrpc % Test, restrpc % Test
 ).settings(
-  name := s"$projectName-core"
+  name := s"$projectName-core",
+  Compile / doc / scalacOptions ++= Seq(
+    "-Ymacro-expand:none",
+    "-skip-packages",
+    "automorph.handler.meta"
+  )
 )
 
 // Protocol
@@ -139,6 +149,10 @@ lazy val zio = (project in file("system/zio")).dependsOn(
   name := s"$projectName-zio",
   libraryDependencies ++= Seq(
     "dev.zio" %% "zio" % "1.0.12"
+  ),
+  Compile / doc / scalacOptions ++= Seq(
+    "-skip-packages",
+    "zio"
   )
 )
 lazy val monix = (project in file("system/monix")).dependsOn(
@@ -175,6 +189,11 @@ lazy val circe = (project in file(s"codec/circe")).dependsOn(
   libraryDependencies ++= Seq(
     "io.circe" %% "circe-parser" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion
+  ),
+  Compile / doc / scalacOptions ++= Seq(
+    "-Ymacro-expand:none",
+    "-skip-packages",
+    "automorph.codec.json.meta"
   )
 )
 lazy val jackson = (project in file("codec/jackson")).dependsOn(
@@ -192,6 +211,11 @@ lazy val upickle = (project in file("codec/upickle")).dependsOn(
   name := s"$projectName-upickle",
   libraryDependencies ++= Seq(
     "com.lihaoyi" %% "upickle" % "1.4.2"
+  ),
+  Compile / doc / scalacOptions ++= Seq(
+    "-Ymacro-expand:none",
+    "-skip-packages",
+    "automorph.codec.json.meta:automorph.codec.messagepack.meta"
   )
 )
 lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
@@ -200,6 +224,11 @@ lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
   name := s"$projectName-argonaut",
   libraryDependencies ++= Seq(
     "io.argonaut" %% "argonaut" % "6.3.7"
+  ),
+  Compile / doc / scalacOptions ++= Seq(
+    "-Ymacro-expand:none",
+    "-skip-packages",
+    "automorph.codec.json.meta"
   )
 )
 // Message transport
@@ -220,6 +249,10 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test
   ),
+  Compile / doc / scalacOptions ++= Seq(
+    "-skip-packages",
+    "sttp"
+  )
 //  apiMappings += (
 //    (unmanagedBase.value / s"core_3-${sttpVersion}.jar") -> 
 //      url("https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_2.13/latest/")
@@ -276,6 +309,11 @@ lazy val default = project.dependsOn(
   name := s"$projectName-default",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion
+  ),
+  Compile / doc / scalacOptions ++= Seq(
+    "-Ymacro-expand:none",
+    "-skip-packages",
+    "automorph.meta"
   )
 )
 lazy val examples = (project in file("test/examples")).dependsOn(
@@ -395,13 +433,6 @@ lazy val documentation = (project in file("doc")).dependsOn(
 // API
 apiURL := Some(url(s"https://javadoc.io/doc/${organization.value}/$projectName-core_3/latest"))
 ThisBuild / autoAPIMappings := true
-Compile / doc / scalacOptions ++= Seq(
-  "-groups",
-  "-implicits",
-  "-Ymacro-expand:none",
-  "-skip-packages",
-  "test:automorph.meta:automorph.client.meta:automorph.handler.meta:test:automorph.codec.json.meta:automorph.codec.messagepack.meta:zio:sttp"
-)
 
 // Site settings
 enablePlugins(LaikaPlugin)
