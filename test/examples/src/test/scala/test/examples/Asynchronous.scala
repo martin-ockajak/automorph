@@ -9,7 +9,8 @@ object Asynchronous extends App {
 
   // Define an API and create its instance
   class Api {
-    def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+    def hello(some: String, n: Int): Future[String] =
+      Future(s"Hello $some $n!")
   }
   val api = new Api()
 
@@ -30,7 +31,7 @@ object Asynchronous extends App {
   server.close()
 }
 
-class Asynchronous extends test.base.BaseSpec {
+class Asynchronous extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       Asynchronous.main(Array())

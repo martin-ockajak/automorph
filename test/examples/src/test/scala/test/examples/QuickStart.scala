@@ -14,7 +14,8 @@ object QuickStart extends App {
 
   // Create the API instance
   class ApiImpl extends Api {
-    override def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+    override def hello(some: String, n: Int): Future[String] =
+      Future(s"Hello $some $n!")
   }
   val api = new ApiImpl()
 
@@ -39,7 +40,7 @@ object QuickStart extends App {
   server.close()
 }
 
-class QuickStart extends test.base.BaseSpec {
+class QuickStart extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       QuickStart.main(Array())

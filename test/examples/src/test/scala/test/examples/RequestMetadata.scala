@@ -9,7 +9,9 @@ object RequestMetadata extends App {
   class ServerApi {
 
     // Use HTTP request metadata context provided by the server message transport plugin
-    def useMetadata(message: String)(implicit requestContext: Default.ServerContext): String = Seq(
+    def useMetadata(message: String)(
+      implicit requestContext: Default.ServerContext
+    ): String = Seq(
       Some(message),
       requestContext.path,
       requestContext.header("X-Test")
@@ -59,7 +61,7 @@ object RequestMetadata extends App {
   server.close()
 }
 
-class RequestMetadata extends test.base.BaseSpec {
+class RequestMetadata extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       RequestMetadata.main(Array())

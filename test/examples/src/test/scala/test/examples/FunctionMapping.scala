@@ -4,30 +4,34 @@ import automorph.Default
 import java.net.URI
 import scala.util.Try
 
-object MethodMapping extends App {
+object FunctionMapping extends App {
 
   // Define an API type and create its instance
   class Api {
-    // Exposed as 'test.multiParams'
-    def multiParams(add: Boolean)(n: Double): Double = if (add) n + 1 else n - 1
-
-    // Exposed as 'original' and 'aliased'
-    def original(value: Option[String]): String = value.getOrElse("")
+    // Exposed both as 'original' and 'new'
+    def original(value: Option[String]): String =
+      value.getOrElse("")
 
     // Not exposed
-    def omitted(): String = ""
+    def omitted(): String =
+      ""
+
+    // Exposed as 'test.multi'
+    def multi(add: Boolean)(n: Double): Double =
+      if (add) n + 1 else n - 1
+
   }
   val api = new Api()
 
   // Customize function name mapping
-  val functionAliases = (name: String) => name match {
-    case "original" => Seq("original", "aliased")
+  val aliases = (name: String) => name match {
+    case "original" => Seq("original", "new")
     case "omitted" => Seq.empty
     case other => Seq(s"test.$other")
   }
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val server = Default.serverSync(_.bind(api, functionAliases(_)), 80, "/api")
+  val server = Default.serverSync(_.bind(api, aliases(_)), 80, "/api")
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.clientSync(new URI("http://localhost/api"), "POST")
@@ -44,10 +48,10 @@ object MethodMapping extends App {
   server.close()
 }
 
-class MethodMapping extends test.base.BaseSpec {
+class FunctionMapping extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      MethodMapping.main(Array())
+      FunctionMapping.main(Array())
     }
   }
 }

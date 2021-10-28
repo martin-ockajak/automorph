@@ -32,7 +32,8 @@ trait Api {
 
 // Create the API implementation
 class ApiImpl extends Api {
-  override def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+  override def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
 }
 val api = new ApiImpl()
 

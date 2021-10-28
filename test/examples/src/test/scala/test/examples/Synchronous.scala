@@ -7,7 +7,8 @@ object Synchronous extends App {
 
   // Define an API type and create its instance
   class Api {
-    def hello(some: String, n: Int): String = s"Hello $some $n!"
+    def hello(some: String, n: Int): String =
+      s"Hello $some $n!"
   }
   val api = new Api()
 
@@ -28,7 +29,7 @@ object Synchronous extends App {
   server.close()
 }
 
-class Synchronous extends test.base.BaseSpec {
+class Synchronous extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       Synchronous.main(Array())

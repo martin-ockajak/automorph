@@ -11,7 +11,8 @@ object EndpointMessageTransport extends App {
 
   // Define an API type and create its instance
   class Api {
-    def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+    def hello(some: String, n: Int): Future[String] =
+      Future(s"Hello $some $n!")
   }
   val api = new Api()
 
@@ -39,7 +40,7 @@ object EndpointMessageTransport extends App {
   server.stop()
 }
 
-class EndpointMessageTransport extends test.base.BaseSpec {
+class EndpointMessageTransport extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       EndpointMessageTransport.main(Array())

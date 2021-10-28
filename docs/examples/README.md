@@ -20,7 +20,8 @@ import java.net.URI
 
 // Define an API type and create its instance
 class Api {
-  def hello(some: String, n: Int): String = s"Hello $some $n!"
+  def hello(some: String, n: Int): String =
+    s"Hello $some $n!"
 }
 val api = new Api()
 ```
@@ -71,7 +72,8 @@ import scala.concurrent.Future
 
 // Define an API and create its instance
 class Api {
-  def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+  def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
 }
 val api = new Api()
 
@@ -123,7 +125,8 @@ import scala.concurrent.Future
 
 // Define an API and create its instance
 class Api {
-  def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+  def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
 }
 val api = new Api()
 
@@ -179,7 +182,9 @@ import java.net.URI
 class ServerApi {
 
   // Use HTTP request metadata context provided by the server message transport plugin
-  def useMetadata(message: String)(implicit requestContext: Default.ServerContext): String = Seq(
+  def useMetadata(message: String)(
+    implicit requestContext: Default.ServerContext
+  ): String = Seq(
     Some(message),
     requestContext.path,
     requestContext.header("X-Test")
@@ -237,7 +242,7 @@ remoteUseMetadata.args("message" -> "test").call[String] // String
 client.close()
 ```
 
-## Method mapping
+## FuFunction mapping
 
 * [Source](/test/examples/src/test/scala/test/examples/MethodMapping.scala)
 
@@ -258,38 +263,34 @@ import scala.util.Try
 
 // Define an API type and create its instance
 class Api {
-  // Exposed as 'test.multiParams'
-  def multiParams(add: Boolean)(n: Double): Double = if (add) n + 1 else n - 1
-
-  // Exposed as 'original' and 'aliased'
-  def original(value: Option[String]): String = value.getOrElse("")
+  // Exposed both as 'original' and 'aliased'
+  def original(value: Option[String]): String =
+    value.getOrElse("")
 
   // Not exposed
-  def omitted(): String = ""
+  def omitted(): String =
+    ""
+
+  // Exposed as 'test.multi'
+  def multi(add: Boolean)(n: Double): Double =
+    if (add) n + 1 else n - 1
 }
+
 val api = new Api()
-
-// Define client view of the server API
-trait ClientApi {
-  import DefaultHttpClient.Context
-
-  // Supply requets context used by the client transport
-  def requestMetaData(message: String)(implicit context: Context): Future[List[String]]
-}
 ```
 
 **Server**
 
 ```scala
 // Customize function names
-val mapMethodName = (name: String) => name match {
-  case "original" => Seq("original", "aliased")
+val aliases = (name: String) => name match {
+  case "original" => Seq("original", "new")
   case "omitted" => Seq.empty
   case other => Seq(s"test.$other")
 }
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val server = Default.serverSync(_.bind(api, functionAliases(_)), 80, "/api")
+val server = Default.serverSync(_.bind(api, aliases(_)), 80, "/api")
 
 // Stop the server
 server.close()
@@ -335,7 +336,8 @@ import scala.concurrent.Future
 
 // Define an API type and create its instance
 class Api {
-  def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+  def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
 }
 
 val api = new Api()
@@ -413,7 +415,8 @@ import zio.{Runtime, Task}
 
 // Define an API type and create its instance
 class Api {
-  def hello(some: String, n: Int): Task[String] = Task.succeed(s"Hello $some $n!")
+  def hello(some: String, n: Int): Task[String] =
+    Task.succeed(s"Hello $some $n!")
 }
 val api = new Api()
 ```
@@ -469,7 +472,8 @@ import scala.concurrent.Future
 
 // Define an API type and create its instance
 class Api {
-  def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+  def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
 }
 val api = new Api()
 
@@ -530,7 +534,8 @@ import scala.concurrent.Future
 // Define an API type and create its instance
 case class Record(values: List[String])
 class Api {
-  def hello(some: String, n: Int): Future[Record] = Future(Record(List("Hello", some, n.toString)))
+  def hello(some: String, n: Int): Future[Record] =
+    Future(Record(List("Hello", some, n.toString)))
 }
 val api = new Api()
 ```
@@ -595,7 +600,8 @@ import java.net.URI
 
 // Define an API type and create its instance
 class Api {
-  def hello(some: String, n: Int): String = s"Hello $some $n!"
+  def hello(some: String, n: Int): String =
+    s"Hello $some $n!"
 }
 val api = new Api()
 ```
@@ -648,7 +654,8 @@ import java.net.URI
 
 // Define an API type and create its instance
 class Api {
-  def hello(some: String, n: Int): String = s"Hello $some $n!"
+  def hello(some: String, n: Int): String =
+    s"Hello $some $n!"
 }
 val api = new Api()
 ```
@@ -702,7 +709,8 @@ import scala.concurrent.Future
 
 // Define an API type and create its instance
 class Api {
-  def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+  def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
 }
 val api = new Api()
 ```

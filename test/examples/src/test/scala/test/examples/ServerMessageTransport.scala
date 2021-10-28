@@ -8,7 +8,8 @@ object ServerMessageTransport extends App {
 
   // Define an API type and create its instance
   class Api {
-    def hello(some: String, n: Int): String = s"Hello $some $n!"
+    def hello(some: String, n: Int): String =
+      s"Hello $some $n!"
   }
   val api = new Api()
 
@@ -30,7 +31,7 @@ object ServerMessageTransport extends App {
   server.close()
 }
 
-class ServerMessageTransport extends test.base.BaseSpec {
+class ServerMessageTransport extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       ServerMessageTransport.main(Array())

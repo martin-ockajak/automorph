@@ -12,7 +12,8 @@ object EffectSystem extends App {
 
   // Define an API and create its instance
   class Api {
-    def hello(some: String, n: Int): Task[String] = Task(s"Hello $some $n!")
+    def hello(some: String, n: Int): Task[String] =
+      Task(s"Hello $some $n!")
   }
   val api = new Api()
 
@@ -37,7 +38,7 @@ object EffectSystem extends App {
   server.close()
 }
 
-class EffectSystem extends test.base.BaseSpec {
+class EffectSystem extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       EffectSystem.main(Array())

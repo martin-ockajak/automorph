@@ -10,7 +10,8 @@ object RpcProtocol extends App {
 
   // Define an API type and create its instance
   class Api {
-    def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+    def hello(some: String, n: Int): Future[String] =
+      Future(s"Hello $some $n!")
   }
   val api = new Api()
 
@@ -38,7 +39,7 @@ object RpcProtocol extends App {
 }
 
 
-class RpcProtocol extends test.base.BaseSpec {
+class RpcProtocol extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       ErrorMapping.main(Array())

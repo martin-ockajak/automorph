@@ -12,7 +12,8 @@ object MessageCodec extends App {
   case class Record(values: List[String])
 
   class Api {
-    def hello(some: String, n: Int): Future[Record] = Future(Record(List("Hello", some, n.toString)))
+    def hello(some: String, n: Int): Future[Record] =
+      Future(Record(List("Hello", some, n.toString)))
   }
   val api = new Api()
 
@@ -47,7 +48,7 @@ object MessageCodec extends App {
   server.close()
 }
 
-class MessageCodec extends test.base.BaseSpec {
+class MessageCodec extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       MessageCodec.main(Array())

@@ -9,7 +9,8 @@ object DynamicNotification extends App {
 
   // Define an API and create its instance
   class Api {
-    def hello(some: String, n: Int): Future[String] = Future(s"Hello $some $n!")
+    def hello(some: String, n: Int): Future[String] =
+      Future(s"Hello $some $n!")
   }
   val api = new Api()
 
@@ -33,7 +34,7 @@ object DynamicNotification extends App {
   server.close()
 }
 
-class DynamicNotification extends test.base.BaseSpec {
+class DynamicNotification extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       Asynchronous.main(Array())
