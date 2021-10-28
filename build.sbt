@@ -376,7 +376,7 @@ lazy val documentation = (project in file("doc")).dependsOn(
   core, http, amqp
 ).settings(
   ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(
-    examples, catsEffect
+    catsEffect
   ),
   ScalaUnidoc / unidoc / target := (LocalRootProject / target).value / "site" / "api",
   ScalaUnidoc / unidoc / scalacOptions ++= Seq(
