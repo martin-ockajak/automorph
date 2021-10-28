@@ -150,10 +150,7 @@ lazy val zio = (project in file("system/zio")).dependsOn(
   libraryDependencies ++= Seq(
     "dev.zio" %% "zio" % "1.0.12"
   ),
-  Compile / doc / scalacOptions ++= Seq(
-    "-skip-packages",
-    "zio"
-  )
+  Compile / doc / scalacOptions ++= Seq("-skip-packages", "zio")
 )
 lazy val monix = (project in file("system/monix")).dependsOn(
   spi, testCore % Test
@@ -249,10 +246,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test
   ),
-  Compile / doc / scalacOptions ++= Seq(
-    "-skip-packages",
-    "sttp"
-  )
+  Compile / doc / scalacOptions ++= Seq("-skip-packages", "sttp")
 //  apiMappings += (
 //    (unmanagedBase.value / s"core_3-${sttpVersion}.jar") -> 
 //      url("https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_2.13/latest/")
@@ -322,7 +316,8 @@ lazy val examples = (project in file("test/examples")).dependsOn(
   name := s"$projectName-examples",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test
-  )
+  ),
+  Compile / doc / scalacOptions ++= Seq("-skip-packages", "test")
 )
 // Test
 lazy val testBase = (project in file("test/base")).dependsOn(
@@ -333,23 +328,31 @@ lazy val testBase = (project in file("test/base")).dependsOn(
     "org.scalatest" %% "scalatest" % "3.2.9",
     "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0",
     "ch.qos.logback" % "logback-classic" % "1.2.3"
-  )
+  ),
+  Compile / doc / scalacOptions ++= Seq("-skip-packages", "test")
 )
 lazy val testPlugin = (project in file("test/plugin")).dependsOn(
   testBase
 ).settings(
   libraryDependencies ++= Seq(
     "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.0"
-  )
+  ),
+  Compile / doc / scalacOptions ++= Seq("-skip-packages", "test")
 )
 lazy val testCore = (project in file("test/core")).dependsOn(
   testPlugin, core, http, circe, jackson, upickle, argonaut,
+).settings(
+  Compile / doc / scalacOptions ++= Seq("-skip-packages", "test")
 )
 lazy val testHttp = (project in file("test/http")).dependsOn(
   testBase, http
+).settings(
+  Compile / doc / scalacOptions ++= Seq("-skip-packages", "test")
 )
 lazy val testAmqp = (project in file("test/amqp")).dependsOn(
   testBase, amqp
+).settings(
+  Compile / doc / scalacOptions ++= Seq("-skip-packages", "test")
 )
 
 
