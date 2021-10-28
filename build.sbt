@@ -383,6 +383,8 @@ lazy val documentation = (project in file("doc")).dependsOn(
     "-Ymacro-expand:none",
     "-groups",
     "-implicits",
+    "-skip-packages",
+    "test:zio:sttp:sttp.client3",
     "-doc-source-url",
     scmInfo.value.get.browseUrl + "/tree/main${FILE_PATH}.scala",
     "-sourcepath",
@@ -393,7 +395,12 @@ lazy val documentation = (project in file("doc")).dependsOn(
 // API
 apiURL := Some(url(s"https://javadoc.io/doc/${organization.value}/$projectName-core_3/latest"))
 ThisBuild / autoAPIMappings := true
-Compile / doc / scalacOptions ++= Seq("-groups", "-implicits")
+Compile / doc / scalacOptions ++= Seq(
+  "-groups",
+  "-implicits",
+  "-skip-packages",
+  "test:zio:sttp"
+)
 
 // Site settings
 enablePlugins(LaikaPlugin)
