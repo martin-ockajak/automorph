@@ -32,7 +32,12 @@ final case class ZioSystem[Environment]() extends EffectSystem[({ type Effect[T]
 object ZioSystem {
 
   /**
-   * Default ZIO environment.
+   * Creates a ZIO effect system plugin without environment requirements using `Task` as an effect type.
+   *
+   * @see [[https://zio.dev Library documentation]]
+   * @see [[https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html Effect type]]
+   * @return ZIO effect system
    */
-  type DefaultEnvironment = Any
+  def default: ZioSystem[Any] =
+    ZioSystem[Any]()
 }

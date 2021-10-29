@@ -17,11 +17,11 @@ object EffectSystem extends App {
   val api = new Api()
 
   // Create ZIO effect system plugin
-  val system = ZioSystem[Any]()
+  val system = ZioSystem.default
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val server = Default.serverSystem(system, 80, "/api")(_.bind(api)) {
-    (effect: ZioSystem.Effect[Any]) =>
+    (effect: Task[Any]) =>
       Runtime.default.unsafeRunTask(effect)
       ()
   }
