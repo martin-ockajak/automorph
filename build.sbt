@@ -310,7 +310,7 @@ lazy val default = project.dependsOn(
     "automorph.meta"
   )
 )
-lazy val examples = (project in file("test/examples")).dependsOn(
+lazy val examples = (project in file("examples")).dependsOn(
   default, upickle, zio, testPlugin % Test
 ).settings(
   name := s"$projectName-examples",
