@@ -352,15 +352,15 @@ val serverProtocol = protocol.mapException {
   case e => protocol.exceptionToError(e)
 }
 
-// Start JSON-RPC server listening on port 80 for HTTP requests with URL path '/api'
-val system = Default.asyncSystem
+// Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
+val system = Default.systemAsync
 val handler = Handler
-  .protocol(serverProtocol).system(system).context[DefaultHttpServer.Context]
-val server = Default.server(handler, _ => (), 80, "/api", {
+  .protocol(serverProtocol).system(system).context[Default.ServerContext]
+val server = Default.server(handler, 80, "/api", {
   // Customize server HTTP status code mapping
   case _: SQLException => 400
-  case e => Http.defaultExceptionToStatusCode(e)
-})
+  case e => HttpContext.defaultExceptionToStatusCode(e)
+})((_: Future[Any]) => ())
 
 // Stop the server
 server.close()
@@ -489,7 +489,7 @@ val protocol = RestRpcProtocol[Default.Node, Default.Codec](Default.codec)
 // Start Undertow REST-RPC HTTP server listening on port 80 for requests to '/api'
 val system = Default.asyncSystem
 val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-val server = Default.server(handler, _ => (), 80, "/api")
+val server = Default.server(handler, 80, "/api")((_: Future[Any]) => ())
 
 // Stop the server
 server.close()
@@ -558,7 +558,7 @@ val system = Default.asyncSystem
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-val server = Default.server(handler.bind(api), _ => (), 80, "/api")
+val server = Default.server(handler.bind(api), 80, "/api")((_: Future[Any]) => ())
 
 // Stop the server
 server.close()
@@ -666,7 +666,9 @@ val api = new Api()
 ```scala
 // Start NanoHTTPD JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val handler = Default.handlerSync[NanoServer.Context]
-val server = NanoServer(handler.bind(api), identity, 80)
+val server = NanoServer.create(handler.bind(api), 80) {
+  (response: IdentitySystem.Effect[NanoServer.Response]) => response
+}
 
 // Stop the server
 server.close()
@@ -721,7 +723,7 @@ val api = new Api()
 ```scala
 // Create custom Undertow JSON-RPC endpoint
 val handler = Default.handlerAsync[UndertowHttpEndpoint.Context]
-val endpoint = UndertowHttpEndpoint(handler.bind(api), _ => ())
+val endpoint = UndertowHttpEndpoint.create(handler.bind(api))((_: Future[Any]) => ())
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val server = Undertow.builder()

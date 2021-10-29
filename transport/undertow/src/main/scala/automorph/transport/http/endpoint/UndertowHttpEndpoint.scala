@@ -32,10 +32,10 @@ import scala.util.Try
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @tparam Effect effect type
  */
-final case class UndertowHttpEndpoint[Effect[_]] (
+final case class UndertowHttpEndpoint[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
-  exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
+  exceptionToStatusCode: Throwable => Int
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -156,21 +156,21 @@ final case class UndertowHttpEndpoint[Effect[_]] (
 }
 
 object UndertowHttpEndpoint {
+
   /**
    * Creates an Undertow HTTP endpoint message transport plugin.
    *
    * @param handler RPC request handler
-   * @param runEffect executes specified effect asynchronously
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @tparam Effect effect type
+   * @return creates Undertow HTTP endpoint message transport plugin using supplied asynchronous effect execution function
    */
   def create[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
-  )(
-    runEffect: Effect[Any] => Unit,
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
-  ): UndertowHttpEndpoint[Effect] =
-    UndertowHttpEndpoint(handler, runEffect, exceptionToStatusCode)
+  ): (Effect[Any] => Unit) => UndertowHttpEndpoint[Effect] =
+    (runEffect: Effect[Any] => Unit) =>
+      UndertowHttpEndpoint(handler, runEffect, exceptionToStatusCode)
 
   /** Request context type. */
   type Context = HttpContext[Either[HttpServerExchange, WebSocketHttpExchange]]

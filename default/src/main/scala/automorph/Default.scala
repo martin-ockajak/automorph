@@ -15,9 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
 import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 
-/**
- * Default component constructors.
- */
+/** Default component constructors. */
 object Default extends DefaultMeta {
 
   /** Default asynchronous effect type. */
@@ -91,7 +89,7 @@ object Default extends DefaultMeta {
     IdentitySystem()
 
   /**
-   * Creates a default RPC client with specified message transport plugin.
+   * Creates a JSON-RPC client with specified message transport plugin.
    *
    * The client can be used to perform RPC calls and notifications.
    *
@@ -104,7 +102,7 @@ object Default extends DefaultMeta {
     Client(protocol, transport)
 
   /**
-   * Creates a default asynchronous RPC request handler with specified effect system plugin and providing given message context type.
+   * Creates a JSON-RPC request handler with specified effect system plugin while providing given message context type.
    *
    * The handler can be used by a server to invoke bound API methods based on incoming requests.
    *
@@ -116,7 +114,7 @@ object Default extends DefaultMeta {
     Handler(protocol, system)
 
   /**
-   * Creates a default asynchronous RPC request handler using 'Future' as an effect type and providing given message context type.
+   * Creates a JSON-RPC request handler using 'Future' as an effect type while providing given message context type.
    *
    * The handler can be used by a server to invoke bound API methods based on incoming requests.
    *
@@ -128,7 +126,7 @@ object Default extends DefaultMeta {
     Handler(protocol, systemAsync)
 
   /**
-   * Creates a default synchronous RPC request handler using identity as an effect type and providing given message context type.
+   * Creates a JSON-RPC request handler using identity as an effect type while providing given message context type.
    *
    * The handler can be used by a server to invoke bound API methods based on incoming requests.
    *
@@ -162,7 +160,7 @@ object Default extends DefaultMeta {
     SttpClient(url, method, backend, system, webSocket)
 
   /**
-   * Creates an asynchronous STTP HTTP & WebSocket client message transport plugin using 'Future' as an effect type.
+   * Creates an STTP HTTP & WebSocket client message transport plugin using 'Future' as an effect type.
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
@@ -179,7 +177,7 @@ object Default extends DefaultMeta {
     clientTransport(url, method, AsyncHttpClientFutureBackend(), systemAsync, webSocket)
 
   /**
-   * Creates a synchronous STTP HTTP & WebSocket client message transport plugin using identity as an effect type.
+   * Creates an STTP HTTP & WebSocket client message transport plugin using identity as an effect type.
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
@@ -193,7 +191,7 @@ object Default extends DefaultMeta {
     clientTransport(url, method, HttpURLConnectionBackend(), systemSync, webSocket)
 
   /**
-   * Creates a STTP JSON-RPC HTTP & WebSocket client with specified effect system plugin.
+   * Creates an STTP JSON-RPC over HTTP & WebSocket client with specified effect system plugin.
    *
    * The client can be used to perform RPC calls and notifications.
    *
@@ -218,7 +216,7 @@ object Default extends DefaultMeta {
     client(clientTransport(url, method, backend, system, webSocket))
 
   /**
-   * Creates an asynchronous STTP JSON-RPC HTTP & WebSocket client using 'Future' as an effect type.
+   * Creates an STTP JSON-RPC over HTTP & WebSocket client with default RPC protocol using 'Future' as an effect type.
    *
    * The client can be used to perform RPC calls and notifications.
    *
@@ -237,7 +235,7 @@ object Default extends DefaultMeta {
     client(url, method, AsyncHttpClientFutureBackend(), systemAsync, webSocket)
 
   /**
-   * Creates a synchronous STTP JSON-RPC HTTP & WebSocket client using identity as an effect type.
+   * Creates an STTP JSON-RPC over HTTP & WebSocket client with default RPC protocol using identity as an effect type.
    *
    * The client can be used to perform RPC calls and notifications.
    *
@@ -253,7 +251,7 @@ object Default extends DefaultMeta {
     client(url, method, HttpURLConnectionBackend(), systemSync, webSocket)
 
   /**
-   * Creates an Undertow RPC HTTP & WebSocket server with specified RPC request handler.
+   * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -263,28 +261,27 @@ object Default extends DefaultMeta {
    * @see [[https://undertow.io Library documentation]]
    * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
    * @param handler RPC request handler
-   * @param runEffect executes specified effect asynchronously
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @tparam Effect effect type
-   * @return RPC server
+   * @return creates default RPC server using supplied asynchronous effect execution function
    */
   def server[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, ServerContext],
-    runEffect: Effect[Any] => Unit,
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): Server[Effect] =
-    UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
+  ): (Effect[Any] => Unit) => Server[Effect] =
+    (runEffect: Effect[Any] => Unit) =>
+      UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
 
   /**
-   * Creates an Undertow JSON-RPC HTTP & WebSocket server with specified effect system plugin.
+   * Creates an Undertow JSON-RPC over HTTP & WebSocket server with specified effect system plugin.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -294,8 +291,6 @@ object Default extends DefaultMeta {
    * @see [[https://undertow.io Library documentation]]
    * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
    * @param system effect system plugin
-   * @param runEffect executes specified effect asynchronously
-   * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
@@ -306,20 +301,19 @@ object Default extends DefaultMeta {
    */
   def serverSystem[Effect[_]](
     system: EffectSystem[Effect],
-    runEffect: Effect[Any] => Unit,
-    bindApis: ServerHandler[Effect] => ServerHandler[Effect],
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): Server[Effect] = {
-    val handler = bindApis(Handler.protocol(protocol).system(system).context[ServerContext])
-    server(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
-  }
+  ): (ServerHandler[Effect] => ServerHandler[Effect]) => (Effect[Any] => Unit) => Server[Effect] =
+    (bindApis: ServerHandler[Effect] => ServerHandler[Effect]) => {
+      val handler = bindApis(Handler.protocol(protocol).system(system).context[ServerContext])
+      server(handler, port, path, exceptionToStatusCode, webSocket, builder)
+    }
 
   /**
-   * Creates an asynchronous Undertow JSON-RPC HTTP & WebSocket server using 'Future' as an effect type.
+   * Creates an Undertow JSON-RPC over HTTP & WebSocket server using 'Future' as an effect type.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -347,11 +341,11 @@ object Default extends DefaultMeta {
   )(implicit executionContext: ExecutionContext): Server[Future] = {
     val handler = bindApis(handlerAsync)
     val runEffect = (_: Future[Any]) => ()
-    server(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
+    server(handler, port, path, exceptionToStatusCode, webSocket, builder)(runEffect)
   }
 
   /**
-   * Creates a synchronous Undertow JSON-RPC HTTP & WebSocket server using identity as an effect type.
+   * Creates a Undertow JSON-RPC over HTTP & WebSocket server using identity as an effect type.
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -378,6 +372,6 @@ object Default extends DefaultMeta {
   ): Server[Identity] = {
     val handler = bindApis(handlerSync)
     val runEffect = (_: Identity[Any]) => ()
-    server(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
+    server(handler, port, path, exceptionToStatusCode, webSocket, builder)(runEffect)
   }
 }

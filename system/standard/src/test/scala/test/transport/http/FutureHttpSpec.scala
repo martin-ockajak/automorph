@@ -21,7 +21,7 @@ class FutureHttpSpec extends ProtocolCodecSpec {
   type Context = NanoServer.Context
 
   private lazy val servers = fixtures.map { fixture =>
-    NanoServer[Effect](fixture.handler, await, fixture.serverPort)
+    NanoServer.create[Effect](fixture.handler, fixture.serverPort)(await)
   }
 
   override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary

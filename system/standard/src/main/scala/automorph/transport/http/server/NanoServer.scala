@@ -7,7 +7,7 @@ import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
-import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
+import automorph.transport.http.server.NanoHTTPD.{newFixedLengthResponse, IHTTPSession, Response}
 import automorph.transport.http.server.NanoServer.{Context, Protocol}
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
@@ -19,7 +19,7 @@ import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.MapHasAsScala
 
 /**
- * NanoHTTPD HTTP server transport plugin.
+ * NanoHTTPD HTTP & WebSocket server transport plugin.
  *
  * The server interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
  * The response returned by the RPC handler is used as HTTP response body.
@@ -40,9 +40,9 @@ final case class NanoServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
   executeEffect: Effect[Response] => Response,
   port: Int,
-  path: String = "/",
-  exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-  webSocket: Boolean = true
+  path: String,
+  exceptionToStatusCode: Throwable => Int,
+  webSocket: Boolean
 ) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect] {
 
   private val HeaderXForwardedFor = "X-Forwarded-For"
@@ -211,34 +211,34 @@ object NanoServer {
   type Response = NanoHTTPD.Response
 
   /**
-   * Creates a NanoHTTPD web server with the specified RPC request handler.
+   * Creates a NanoHTTPD HTTP & WebSocket server with the specified RPC request handler.
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see [[https://github.com/NanoHttpd/nanohttpd Library documentation]]
    * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
    * @param handler RPC request handler
-   * @param runEffectSync synchronous effect execution function
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
    * @tparam Effect effect type
+   * @return creates NanoHTTPD HTTP & WebSocket server using supplied synchronous effect execution function
    */
-  def apply[Effect[_]](
+  def create[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
-    runEffectSync: Effect[Response] => Response,
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true
-  ): NanoServer[Effect] = {
-    val server = new NanoServer(handler, runEffectSync, port, path, exceptionToStatusCode, webSocket)
-    server.start()
-    server
-  }
+  ): (Effect[Response] => Response) => NanoServer[Effect] =
+    (executeEffect: Effect[Response] => Response) => {
+      val server = new NanoServer(handler, executeEffect, port, path, exceptionToStatusCode, webSocket)
+      server.start()
+      server
+    }
 
   /** Transport protocol. */
-  private sealed abstract class Protocol(val name: String) {
+  sealed abstract private class Protocol(val name: String) {
     override def toString: String = name
   }
 

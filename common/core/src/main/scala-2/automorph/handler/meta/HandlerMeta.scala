@@ -134,7 +134,7 @@ object HandlerMeta {
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
-      val newBindings = ${c.prefix}.bindings ++ automorph.handler.HandlerGenerator
+      val newBindings = ${c.prefix}.bindings ++ automorph.handler.meta.HandlerGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec, ${c.prefix}.system, $api)
         .flatMap { binding =>
           $mapNames(binding.function.name).map(_ -> binding)
