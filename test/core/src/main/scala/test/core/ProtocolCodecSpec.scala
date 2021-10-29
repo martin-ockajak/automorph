@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, SerializerProvider}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.generic.auto._
 import io.circe.{Decoder, Encoder}
 import test.core.CoreSpec
 import test.{Enum, Record, Structure}
@@ -29,8 +29,6 @@ trait ProtocolCodecSpec extends CoreSpec {
       {
         implicit val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
         implicit val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
-        implicit val recordEncoder: Encoder[Record] = deriveEncoder[Record]
-        implicit val recordDecoder: Decoder[Record] = deriveDecoder[Record]
         val port = availablePort
         val codec = CirceJsonCodec()
         val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type](codec)
