@@ -144,6 +144,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         if (redundantNames.nonEmpty) {
           Failure(new IllegalArgumentException(s"Redundant arguments: ${redundantNames.mkString(", ")}"))
         } else {
+          println(parameterNames.map(name => name -> namedArguments.get))
           Success(parameterNames.map(namedArguments.get))
         }
       }
@@ -198,6 +199,9 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     requestId: String,
     requestProperties: => Map[String, String]
   ): Effect[HandlerResult[MessageBody, Context]] = {
+    println("XXXXXXXXX")
+    error.printStackTrace()
+    println()
     logger.error(s"Failed to process ${protocol.name} request", error, requestProperties)
     response(Failure(error), message, requestId)
   }

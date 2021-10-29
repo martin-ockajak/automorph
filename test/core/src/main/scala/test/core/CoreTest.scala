@@ -51,7 +51,7 @@ trait CoreTest extends BaseTest {
   "" - {
 // FIXME - restore
 //    fixtures.foreach { fixture =>
-    fixtures.take(1).foreach { fixture =>
+    fixtures.take(2).foreach { fixture =>
       val codecName = fixture.genericClient.protocol.codec.getClass.getSimpleName.replaceAll("MessageCodec$", "")
       codecName - {
         "Static" - {
@@ -152,7 +152,11 @@ trait CoreTest extends BaseTest {
             }
             "Missing arguments" in {
               val error = intercept[InvalidRequestException] {
-                run(api.method5(true, 0))
+                Try(run(api.method5(true, 0))).recover {
+                  case e =>
+                    e.printStackTrace()
+                    ""
+                }
               }.getMessage.toLowerCase
               error.should(include("missing argument"))
               error.should(include("p2"))
