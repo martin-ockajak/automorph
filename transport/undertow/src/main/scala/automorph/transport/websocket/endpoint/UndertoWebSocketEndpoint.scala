@@ -5,7 +5,6 @@ import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.endpoint.UndertowHttpEndpoint.RunEffect
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Network, Random}

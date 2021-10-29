@@ -5,7 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.endpoint.FinagleEndpoint.Context
+import automorph.transport.http.endpoint.FinagleEndpoint.{Context, RunEffect}
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Network, Random}
 import com.twitter.finagle.Service
@@ -30,7 +30,7 @@ import com.twitter.util.{Future, Promise}
  */
 final case class FinagleEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
-  runEffect: Effect[Any] => Unit,
+  runEffect: RunEffect[Effect],
   exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
 
@@ -133,6 +133,12 @@ final case class FinagleEndpoint[Effect[_]](
 }
 
 object FinagleEndpoint {
+  /**
+   * Asynchronous effect execution function type.
+   *
+   * @tparam Effect effect type
+   */
+  type RunEffect[Effect[_]] = Effect[Any] => Unit
 
   /** Request context type. */
   type Context = HttpContext[Request]
