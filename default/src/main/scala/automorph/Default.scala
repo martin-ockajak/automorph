@@ -297,7 +297,7 @@ object Default extends DefaultMeta {
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @tparam Effect effect type
-   * @return creates RPC server using supplied asynchronous effect execution function
+   * @return creates RPC server using supplied API binding function and asynchronous effect execution function
    */
   def serverSystem[Effect[_]](
     system: EffectSystem[Effect],
@@ -322,27 +322,26 @@ object Default extends DefaultMeta {
    * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see [[https://undertow.io Library documentation]]
    * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
-   * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @param executionContext execution context
-   * @return asynchronous RPC server
+   * @return asynchronous RPC server using supplied API binding function
    */
   def serverAsync(
-    bindApis: ServerHandler[Future] => ServerHandler[Future],
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  )(implicit executionContext: ExecutionContext): Server[Future] = {
-    val handler = bindApis(handlerAsync)
-    val runEffect = (_: Future[Any]) => ()
-    server(handler, port, path, exceptionToStatusCode, webSocket, builder)(runEffect)
-  }
+  )(implicit executionContext: ExecutionContext): (ServerHandler[Future] => ServerHandler[Future]) => Server[Future] =
+    (bindApis: ServerHandler[Future] => ServerHandler[Future]) => {
+      val handler = bindApis(handlerAsync)
+      val runEffect = (_: Future[Any]) => ()
+      server(handler, port, path, exceptionToStatusCode, webSocket, builder)(runEffect)
+    }
 
   /**
    * Creates a Undertow JSON-RPC over HTTP & WebSocket server using identity as an effect type.
@@ -354,24 +353,23 @@ object Default extends DefaultMeta {
    * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see [[https://undertow.io Library documentation]]
    * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
-   * @param bindApis function to bind APIs to the underlying handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
-   * @return synchronous RPC server
+   * @return synchronous RPC server using supplied API binding function
    */
   def serverSync(
-    bindApis: ServerHandler[Identity] => ServerHandler[Identity],
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): Server[Identity] = {
-    val handler = bindApis(handlerSync)
-    val runEffect = (_: Identity[Any]) => ()
-    server(handler, port, path, exceptionToStatusCode, webSocket, builder)(runEffect)
-  }
+  ): (ServerHandler[Identity] => ServerHandler[Identity]) => Server[Identity] =
+    (bindApis: ServerHandler[Identity] => ServerHandler[Identity]) => {
+      val handler = bindApis(handlerSync)
+      val runEffect = (_: Identity[Any]) => ()
+      server(handler, port, path, exceptionToStatusCode, webSocket, builder)(runEffect)
+    }
 }

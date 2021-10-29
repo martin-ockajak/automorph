@@ -30,7 +30,8 @@ val api = new Api()
 
 ```scala
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val server = Default.serverSync(_.bind(api), 80, "/api")
+val createServer = Default.serverSync(80, "/api")
+val server = createServer(_.bind(api))
 
 // Stop the server
 server.close()
@@ -83,7 +84,8 @@ val api = new Api()
 
 ```scala
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val server = Default.serverAsync(_.bind(api), 80, "/api")
+val createServer = Default.serverAsync(80, "/api")
+val server = createServer(_.bind(api))
 
 // Stop the server
 server.close()
@@ -136,7 +138,8 @@ val api = new Api()
 
 ```scala
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val server = Default.serverAsync(_.bind(api), 80, "/api")
+val createServer = Default.serverAsync(80, "/api")
+val server = createServer(_.bind(api))
 
 // Stop the server
 server.close()
@@ -202,7 +205,8 @@ trait ClientApi {
 
 ```scala
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val server = Default.serverSync(_.bind(api), 80, "/api")
+val createServer = Default.serverSync(80, "/api")
+val server = createServer(_.bind(api))
 
 // Stop the server
 server.close()
@@ -288,7 +292,8 @@ val mapNames = (name: String) => name match {
 }
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val server = Default.serverSync(_.bind(api, mapNames(_)), 80, "/api")
+val createServer = Default.serverSync(80, "/api")
+val server = createServer(_.bind(api, mapNames(_)))
 
 // Stop the server
 server.close()
@@ -614,7 +619,8 @@ val api = new Api()
 
 ```scala
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val server = Default.serverSync(_.bind(api), 80, "/api")
+val createServer = Default.serverSync(80, "/api")
+val server = createServer(_.bind(api))
 
 // Stop the server
 server.close()

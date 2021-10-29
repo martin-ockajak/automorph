@@ -31,7 +31,8 @@ object NameMapping extends App {
   }
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val server = Default.serverSync(_.bind(api, mapNames(_)), 80, "/api")
+  val createServer = Default.serverSync(80, "/api")
+  val server = createServer(_.bind(api, mapNames(_)))
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.clientSync(new URI("http://localhost/api"), "POST")

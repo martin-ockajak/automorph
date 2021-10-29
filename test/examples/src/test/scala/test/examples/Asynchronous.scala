@@ -15,7 +15,8 @@ object Asynchronous extends App {
   val api = new Api()
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val server = Default.serverAsync(_.bind(api), 80, "/api")
+  val createServer = Default.serverAsync(80, "/api")
+  val server = createServer(_.bind(api))
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.clientAsync(new URI("http://localhost/api"), "POST")
