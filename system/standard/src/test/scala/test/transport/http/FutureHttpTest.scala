@@ -1,5 +1,6 @@
 package test.transport.http
 
+import automorph.Types
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
@@ -10,6 +11,7 @@ import automorph.transport.http.server.NanoServer
 import java.net.URI
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
+import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import test.core.ProtocolCodecTest
@@ -20,9 +22,7 @@ class FutureHttpTest extends ProtocolCodecTest {
   type Effect[T] = Future[T]
   type Context = NanoServer.Context
 
-  private lazy val servers = fixtures.map { fixture =>
-    NanoServer.create[Effect](fixture.handler, fixture.serverPort)(await)
-  }
+  private lazy val servers = ArrayBuffer.empty[NanoServer[Effect]]
 
   override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary
 
@@ -30,14 +30,13 @@ class FutureHttpTest extends ProtocolCodecTest {
 
   override def run[T](effect: Effect[T]): T = await(effect)
 
-  override def customTransport(port: Int): Option[ClientMessageTransport[Effect, Context]] = synchronized {
-    val url = new URI(s"http://localhost:$port")
+  override def customTransport(
+    handler: Types.HandlerAnyCodec[Effect, Context]
+  ): Option[ClientMessageTransport[Effect, Context]] = {
+    val server = withAvailablePort(port => NanoServer.create[Effect](handler, port)(await))
+    servers += server
+    val url = new URI(s"http://localhost:${server.port}")
     Some(UrlClient(url, "POST", system).asInstanceOf[ClientMessageTransport[Effect, Context]])
-  }
-
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-    servers
   }
 
   override def afterAll(): Unit = {

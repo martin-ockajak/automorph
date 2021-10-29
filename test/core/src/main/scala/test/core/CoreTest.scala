@@ -27,7 +27,6 @@ trait CoreTest extends BaseTest {
   case class TestFixture(
     client: Types.ClientAnyCodec[Effect, Context],
     handler: Types.HandlerAnyCodec[Effect, Context],
-    serverPort: Int,
     simpleApi: SimpleApiType,
     complexApi: ComplexApiType,
     invalidApi: InvalidApiType,
