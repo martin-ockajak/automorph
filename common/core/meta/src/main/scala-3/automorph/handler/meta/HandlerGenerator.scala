@@ -138,7 +138,7 @@ private[automorph] object HandlerGenerator:
               // Use supplied request context as a last argument if the method accepts context as its last parameter
               'requestContext.asTerm
             else
-              // Decode an argument node if it exists or an empty node if not into a value
+              // Decode an argument node if present or otherwise an empty node into a value
               val decodeArguments = List(List('{
                 argumentNodes(${ Expr(argumentIndex) }).getOrElse(${ encodeNoneCall.asExprOf[Node] })
               }.asTerm))
