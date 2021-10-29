@@ -560,6 +560,7 @@ val api = new Api()
 val codec = UpickleMessagePackCodec()
 
 // Create custom data type serializer/deserializer
+import codec.custom._
 implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
 
 // Create an RPC protocol plugin
