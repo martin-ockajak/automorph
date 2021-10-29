@@ -51,11 +51,10 @@ object UndertowWebSocketEndpoint {
   def create[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
     next: HttpHandler
-  ): (RunEffect[Effect]) => WebSocketProtocolHandshakeHandler =
-    (runEffect: RunEffect[Effect]) => {
-      val webSocketCallback = UndertowWebSocketCallback(handler, runEffect)
-      new WebSocketProtocolHandshakeHandler(webSocketCallback, next)
-    }
+  ): (RunEffect[Effect]) => WebSocketProtocolHandshakeHandler = (runEffect: RunEffect[Effect]) => {
+    val webSocketCallback = UndertowWebSocketCallback(handler, runEffect)
+    new WebSocketProtocolHandshakeHandler(webSocketCallback, next)
+  }
 
   /** Request context type. */
   type Context = HttpContext[Either[HttpServerExchange, WebSocketHttpExchange]]

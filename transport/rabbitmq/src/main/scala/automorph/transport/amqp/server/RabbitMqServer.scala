@@ -132,7 +132,6 @@ final case class RabbitMqServer[Effect[_]] private (
 
 object RabbitMqServer {
 
-
   /**
    * Asynchronous effect execution function type.
    *

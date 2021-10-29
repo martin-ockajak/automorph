@@ -54,11 +54,12 @@ final case class UndertowServer[Effect[_]] private (
   private def start(): Undertow = {
     // Configure the request handler
     val httpHandler = UndertowHttpEndpoint.create(handler, exceptionToStatusCode)(runEffect)
-    val webSocketHandler = if (webSocket) {
-      UndertowWebSocketEndpoint.create(handler, httpHandler)(runEffect)
-    } else {
-      httpHandler
-    }
+    val webSocketHandler =
+      if (webSocket) {
+        UndertowWebSocketEndpoint.create(handler, httpHandler)(runEffect)
+      } else {
+        httpHandler
+      }
     val pathHandler = Handlers.path(ResponseCodeHandler.HANDLE_404).addPrefixPath(path, webSocketHandler)
 
     // Configure the web server
@@ -83,6 +84,7 @@ final case class UndertowServer[Effect[_]] private (
 }
 
 object UndertowServer {
+
   /** Request context type. */
   type Context = UndertowHttpEndpoint.Context
 
@@ -115,9 +117,8 @@ object UndertowServer {
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): (RunEffect[Effect]) => UndertowServer[Effect] =
-    (runEffect: RunEffect[Effect]) =>
-      UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
+  ): (RunEffect[Effect]) => UndertowServer[Effect] = (runEffect: RunEffect[Effect]) =>
+    UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
 
   /**
    * Default Undertow web server builder providing the following settings:

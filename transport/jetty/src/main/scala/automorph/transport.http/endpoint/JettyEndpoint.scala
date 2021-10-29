@@ -136,6 +136,7 @@ final case class JettyEndpoint[Effect[_]] private (
 }
 
 object JettyEndpoint {
+
   /**
    * Asynchronous effect execution function type.
    *
@@ -161,7 +162,6 @@ object JettyEndpoint {
   def create[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
-  ): (RunEffect[Effect]) => JettyEndpoint[Effect] =
-    (runEffect: RunEffect[Effect]) =>
-      JettyEndpoint(handler, runEffect, exceptionToStatusCode)
+  ): (RunEffect[Effect]) => JettyEndpoint[Effect] = (runEffect: RunEffect[Effect]) =>
+    JettyEndpoint(handler, runEffect, exceptionToStatusCode)
 }

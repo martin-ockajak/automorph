@@ -163,7 +163,7 @@ object RabbitMqClient {
    *
    * Resulting function requires:
    * - blocking effect function - creates an effect from specified blocking function
-   * - promised effect function - creates a not yet completed effect and its completion function
+   * - promised effect function - provides an uncompleted effect plus its completion function
    *
    * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
    * @param routingKey AMQP routing key (typically a queue name)

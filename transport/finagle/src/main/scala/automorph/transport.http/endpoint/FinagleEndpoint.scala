@@ -133,6 +133,7 @@ final case class FinagleEndpoint[Effect[_]] private (
 }
 
 object FinagleEndpoint {
+
   /**
    * Asynchronous effect execution function type.
    *
@@ -158,7 +159,6 @@ object FinagleEndpoint {
   def create[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
-  ): (RunEffect[Effect]) => FinagleEndpoint[Effect] =
-    (runEffect: RunEffect[Effect]) =>
-      FinagleEndpoint(handler, runEffect, exceptionToStatusCode)
+  ): (RunEffect[Effect]) => FinagleEndpoint[Effect] = (runEffect: RunEffect[Effect]) =>
+    FinagleEndpoint(handler, runEffect, exceptionToStatusCode)
 }

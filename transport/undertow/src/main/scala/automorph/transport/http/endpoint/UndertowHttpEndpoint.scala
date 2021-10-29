@@ -179,9 +179,8 @@ object UndertowHttpEndpoint {
   def create[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
-  ): (RunEffect[Effect]) => UndertowHttpEndpoint[Effect] =
-    (runEffect: RunEffect[Effect]) =>
-      UndertowHttpEndpoint(handler, runEffect, exceptionToStatusCode)
+  ): RunEffect[Effect] => UndertowHttpEndpoint[Effect] = (runEffect: RunEffect[Effect]) =>
+    UndertowHttpEndpoint(handler, runEffect, exceptionToStatusCode)
 
   /** Request context type. */
   type Context = HttpContext[Either[HttpServerExchange, WebSocketHttpExchange]]

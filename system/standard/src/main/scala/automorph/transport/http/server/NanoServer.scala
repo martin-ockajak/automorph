@@ -240,8 +240,7 @@ object NanoServer {
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true
-  ): ExecuteEffect[Effect] => NanoServer[Effect] =
-    (executeEffect: ExecuteEffect[Effect]) => {
+  ): ExecuteEffect[Effect] => NanoServer[Effect] = (executeEffect: ExecuteEffect[Effect]) => {
       val server = new NanoServer(handler, executeEffect, port, path, exceptionToStatusCode, webSocket)
       server.start()
       server

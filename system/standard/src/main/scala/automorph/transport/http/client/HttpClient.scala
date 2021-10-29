@@ -4,15 +4,15 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.HttpClient.{Context, Session, Protocol, Response, WebSocketListener, defaultBuilder}
+import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, PromisedEffect, Protocol, Response, Session, WebSocketListener}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
+import java.net.URI
 import java.net.http.HttpClient.Builder
 import java.net.http.HttpRequest.BodyPublishers
 import java.net.http.HttpResponse.BodyHandlers
 import java.net.http.WebSocket.Listener
 import java.net.http.{HttpRequest, HttpResponse, WebSocket}
-import java.net.URI
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.{CompletableFuture, CompletionStage}
@@ -39,13 +39,13 @@ import scala.util.Try
  * @param builder HttpClient builder
  * @tparam Effect effect type
  */
-final case class HttpClient[Effect[_]](
+final case class HttpClient[Effect[_]] private (
   url: URI,
   method: String,
   system: EffectSystem[Effect],
-  promisedEffect: () => (Effect[Any], Any => Unit, Throwable => Unit),
-  webSocket: Boolean = false,
-  builder: Builder = defaultBuilder
+  promisedEffect: PromisedEffect[Effect],
+  webSocket: Boolean,
+  builder: Builder
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val httpClient = builder.build
@@ -161,7 +161,7 @@ final case class HttpClient[Effect[_]](
     requestBody: ArraySeq.ofByte,
     mediaType: String,
     context: Option[Context]
-  ): (Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)], URI) = {
+  ): (Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)], URI) =
     webSocket match {
       case false => {
         val httpRequest = createHttpRequest(requestBody, mediaType, context)
@@ -172,7 +172,6 @@ final case class HttpClient[Effect[_]](
         Right((webSocket, effectResult, requestBody)) -> requestUrl
       }
     }
-  }
 
   private def createHttpRequest(
     requestBody: ArraySeq.ofByte,
@@ -232,7 +231,7 @@ final case class HttpClient[Effect[_]](
 
   private def responseContext(response: Response): Context = {
     val (_, statusCode, headers) = response
-    statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers *)
+    statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers*)
   }
 
   private def effect[T](completableFuture: => CompletableFuture[T]): Effect[T] = {
@@ -257,10 +256,40 @@ object HttpClient {
   /** Request context type. */
   type Context = HttpContext[Session]
 
+  /**
+   * Promised effect function type.
+   *
+   * @tparam Effect effect type
+   */
+  type PromisedEffect[Effect[_]] = () => (Effect[Any], Any => Unit, Throwable => Unit)
+
   /** Response type. */
   private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
 
   val defaultBuilder = java.net.http.HttpClient.newBuilder
+
+  /**
+   * Creates an HttpClient HTTP & WebSocket message client transport plugin.
+   *
+   * Resulting function requires:
+   * - promised effect function - provides an uncompleted effect plus its completion and error functions
+   *
+   * @param url HTTP server endpoint URL
+   * @param method HTTP method
+   * @param system effect system plugin
+   * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
+   * @param builder HttpClient builder
+   * @tparam Effect effect type
+   * @return creates an HttpClient HTTP & WebSocket message client transport plugin using supplied asynchronous effect execution function
+   */
+  def create[Effect[_]](
+    url: URI,
+    method: String,
+    system: EffectSystem[Effect],
+    webSocket: Boolean = false,
+    builder: Builder = defaultBuilder
+  ): PromisedEffect[Effect] => HttpClient[Effect] = (promisedEffect: PromisedEffect[Effect]) =>
+    HttpClient(url, method, system, promisedEffect, webSocket, builder)
 
   private case class WebSocketListener[Effect[_]](
     url: URI,
@@ -274,9 +303,8 @@ object HttpClient {
       super.onBinary(webSocket, data, last)
     }
 
-    override def onClose(webSocket: WebSocket, statusCode: Int, reason: String): CompletionStage[_] = {
+    override def onClose(webSocket: WebSocket, statusCode: Int, reason: String): CompletionStage[_] =
       super.onClose(webSocket, statusCode, reason)
-    }
 
     override def onError(webSocket: WebSocket, error: Throwable): Unit = {
       failEffect(error)
