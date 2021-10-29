@@ -30,10 +30,10 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @tparam Effect effect type
  */
-final case class JettyEndpoint[Effect[_]](
+final case class JettyEndpoint[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
   runEffect: RunEffect[Effect],
-  exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
+  exceptionToStatusCode: Throwable => Int
 ) extends HttpServlet with Logging with EndpointMessageTransport {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -145,4 +145,23 @@ object JettyEndpoint {
 
   /** Request context type. */
   type Context = HttpContext[HttpServletRequest]
+
+  /**
+   * Creates a Jetty HTTP endpoint message transport plugin with the specified RPC request handler.
+   *
+   * Resulting function requires:
+   * - effect execution function - executes specified effect asynchronously
+   *
+   * @param handler RPC request handler
+   * @param runEffect executes specified effect asynchronously
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+   * @tparam Effect effect type
+   * @return creates an Jetty HTTP servlet using supplied asynchronous effect execution function
+   */
+  def create[Effect[_]](
+    handler: Types.HandlerAnyCodec[Effect, Context],
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
+  ): (RunEffect[Effect]) => JettyEndpoint[Effect] =
+    (runEffect: RunEffect[Effect]) =>
+      JettyEndpoint(handler, runEffect, exceptionToStatusCode)
 }

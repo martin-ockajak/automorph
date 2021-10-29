@@ -94,7 +94,7 @@ object UndertowServer {
   type RunEffect[Effect[_]] = Effect[Any] => Unit
 
   /**
-   * Creates an Undertow HTTP & WebSocket server with the specified HTTP handler.
+   * Creates an Undertow HTTP & WebSocket server with the specified RPC request handler.
    *
    * Resulting function requires:
    * - effect execution function - executes specified effect asynchronously

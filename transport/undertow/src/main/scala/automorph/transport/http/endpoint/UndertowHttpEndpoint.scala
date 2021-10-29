@@ -166,7 +166,7 @@ object UndertowHttpEndpoint {
   type RunEffect[Effect[_]] = Effect[Any] => Unit
 
   /**
-   * Creates an Undertow HTTP endpoint message transport plugin.
+   * Creates an Undertow HTTP endpoint message transport plugin with specified RPC request handler.
    *
    * Resulting function requires:
    * - effect execution function - executes specified effect asynchronously
