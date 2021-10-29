@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, PromisedEffect, Protocol, Response, Session, WebSocketListener}
+import automorph.transport.http.client.HttpClient.{Context, PromisedEffect, Protocol, Response, Session, WebSocketListener}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.URI
