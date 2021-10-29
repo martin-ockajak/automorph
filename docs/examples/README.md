@@ -182,9 +182,7 @@ import java.net.URI
 class ServerApi {
 
   // Use HTTP request metadata context provided by the server message transport plugin
-  def useMetadata(message: String)(
-    implicit requestContext: Default.ServerContext
-  ): String = Seq(
+  def contextual(message: String)(implicit requestContext: Default.ServerContext): String = Seq(
     Some(message),
     requestContext.path,
     requestContext.header("X-Test")
@@ -195,8 +193,8 @@ val api = new ServerApi()
 // Define client view of the server API
 trait ClientApi {
 
-  // Use HTTP request metadata context defined by the client message transport plugin
-  def useMetadata(message: String)(implicit request: Default.ClientContext): String
+  // Use HTTP request context defined by the client message transport plugin
+  def contextual(message: String)(implicit request: Default.ClientContext): String
 }
 ```
 
@@ -217,7 +215,7 @@ server.close()
 val client = Default.clientSync(new URI("http://localhost/api"), "POST")
 
 // Create client request context specifying HTTP request meta-data
-val requestMetadata = client.defaultContext
+val requestContext = client.defaultContext
   .parameters("test" -> "value")
   .headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
   .cookies("Test" -> "value")
@@ -225,18 +223,18 @@ val requestMetadata = client.defaultContext
 
 // Call the remote API function statically with request context supplied directly
 val remoteApi = client.bind[ClientApi] // Api
-remoteApi.useMetadata("test")(requestMetadata) // String
+remoteApi.contextual("test")(using requestContext) // String
 
 // Call the remote API function statically with request context supplied implictly
-implicit val givenRequestMetadata: Default.ClientContext = requestMetadata
-remoteApi.useMetadata("test") // String
+implicit val givenRequestMetadata: Default.ClientContext = requestContext
+remoteApi.contextual("test") // String
 
 // Call the remote API function dynamically with request context supplied directly
-val remoteUseMetadata = client.function("useMetadata")
-remoteUseMetadata.args("message" -> "test").call[String] // String
+val callContextual = client.call[String]("contextual")
+callContextual.args("message" -> "test")(using requestContext) // String
 
 // Call the remote API function dynamically with request context supplied implictly
-remoteUseMetadata.args("message" -> "test").call[String] // String
+callContextual.args("message" -> "test") // String
 
 // Close the client
 client.close()
@@ -303,9 +301,9 @@ server.close()
 val client = Default.clientSync(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function dynamically
-client.function("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
-client.function("aliased").args("value" -> None).tell // ()
-Try(client.function("omitted").args().call[String]) // Failure
+client.call[Double]("test.multiParams").args("add" -> true, "n" -> 1) // 2
+client.notify("custom").args("value" -> None) // ()
+Try(client.call[String]("omitted").args()) // Failure
 
 // Close the client
 client.close()
@@ -358,7 +356,7 @@ val serverProtocol = protocol.mapException {
 val system = Default.asyncSystem
 val handler = Handler
   .protocol(serverProtocol).system(system).context[DefaultHttpServer.Context]
-val server = Default.server(handler, (_: Future[Any]) => (), 80, "/api", {
+val server = Default.server(handler, _ => (), 80, "/api", {
   // Customize server HTTP status code mapping
   case _: SQLException => 400
   case e => Http.defaultExceptionToStatusCode(e)
@@ -486,12 +484,12 @@ val api = new Api()
 
 ```scala
 // Create REST-RPC protocol plugin
-val protocol = RestRpcProtocol(Default.codec)
+val protocol = RestRpcProtocol[Default.Node, Default.Codec](Default.codec)
 
 // Start Undertow REST-RPC HTTP server listening on port 80 for requests to '/api'
 val system = Default.asyncSystem
 val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-val server = Default.server(handler, (_: Future[Any]) => (), 80, "/api")
+val server = Default.server(handler, _ => (), 80, "/api")
 
 // Stop the server
 server.close()
@@ -560,7 +558,7 @@ val system = Default.asyncSystem
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-val server = Default.server(handler.bind(api), (_: Future[Any]) => (), 80, "/api")
+val server = Default.server(handler.bind(api), _ => (), 80, "/api")
 
 // Stop the server
 server.close()

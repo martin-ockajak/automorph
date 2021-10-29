@@ -55,7 +55,7 @@ trait CoreSpec extends BaseSpec {
     fixtures.headOption.foreach { fixture =>
       val codecName = fixture.genericClient.protocol.codec.getClass.getSimpleName.replaceAll("MessageCodec$", "")
       codecName - {
-        "Proxy" - {
+        "Static" - {
           "Simple API" - {
             val apis = (fixture.simpleApi, simpleApi)
             "test" in {
@@ -160,7 +160,7 @@ trait CoreSpec extends BaseSpec {
             }
           }
         }
-        "Direct" - {
+        "Dynamic" - {
           "Simple API" - {
             "Call" in {
               check { (a0: String) =>
@@ -168,7 +168,7 @@ trait CoreSpec extends BaseSpec {
                 execute(fixture.call("test", "test" -> a0)) == expected
               }
             }
-            "Tell" in {
+            "Notify" in {
               check { (a0: String) =>
                 execute(fixture.tell("test", "test" -> a0))
                 true

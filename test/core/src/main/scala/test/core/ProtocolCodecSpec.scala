@@ -45,8 +45,8 @@ trait ProtocolCodecSpec extends CoreSpec {
           client.bind[SimpleApiType],
           client.bind[ComplexApiType],
           client.bind[InvalidApiType],
-          (function, a0) => client.function(function).args(a0).call,
-          (function, a0) => client.function(function).args(a0).tell
+          (function, a0) => client.call[String](function).args(a0),
+          (function, a0) => client.notify(function).args(a0)
         )
       }, {
         val enumModule = new SimpleModule().addSerializer(
@@ -78,8 +78,8 @@ trait ProtocolCodecSpec extends CoreSpec {
           client.bind[SimpleApiType],
           client.bind[ComplexApiType],
           client.bind[InvalidApiType],
-          (function, a0) => client.function(function).args(a0).call,
-          (function, a0) => client.function(function).args(a0).tell
+          (function, a0) => client.call[String](function).args(a0),
+          (function, a0) => client.notify(function).args(a0)
         )
       }, {
 //        class Custom extends UpickleJsonCustom {
@@ -105,8 +105,8 @@ trait ProtocolCodecSpec extends CoreSpec {
 //          client.bind[SimpleApiType],
 //          client.bind[ComplexApiType],
 //          client.bind[InvalidApiType],
-//          (function, a0) => client.function(function).args(a0).call,
-//          (function, a0) => client.function(function).args(a0).tell
+//          (function, a0) => client.call[String](function).args(a0),
+//          (function, a0) => client.notify(function).args(a0)
 //        )
 //      }, {
 //        class Custom extends UpickleMessagePackCustom {
@@ -132,8 +132,8 @@ trait ProtocolCodecSpec extends CoreSpec {
 //          client.bind[SimpleApiType],
 //          client.bind[ComplexApiType],
 //          client.bind[InvalidApiType],
-//          (function, a0) => client.function(function).args(a0).call,
-//          (function, a0) => client.function(function).args(a0).tell
+//          (function, a0) => client.call[String](function).args(a0),
+//          (function, a0) => client.notify(function).args(a0)
 //        )
 //      }, {
         implicit val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
@@ -190,8 +190,8 @@ trait ProtocolCodecSpec extends CoreSpec {
           client.bind[SimpleApiType],
           client.bind[ComplexApiType],
           client.bind[InvalidApiType],
-          (function, a0) => client.function(function).args(a0).call,
-          (function, a0) => client.function(function).args(a0).tell
+          (function, a0) => client.call[String](function).args(a0),
+          (function, a0) => client.notify(function).args(a0)
         )
       }
     )

@@ -1,7 +1,7 @@
 package automorph.client.meta
 
-import automorph.Client
-import automorph.spi.MessageCodec
+import automorph.client.RemoteCall
+import automorph.spi.{MessageCodec, RpcProtocol}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -14,7 +14,8 @@ import scala.reflect.macros.blackbox
  * @tparam Context message context type
  */
 private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
-  this: Client[Node, Codec, Effect, Context] =>
+
+  def protocol: RpcProtocol[Node, Codec]
 
   /**
    * Creates a RPC API proxy instance with RPC bindings for all valid public functions of the specified API type.
@@ -34,6 +35,24 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * @throws java.lang.IllegalArgumentException if invalid public functions are found in the API type
    */
   def bind[Api <: AnyRef]: Api = macro ClientMeta.bindMacro[Node, Codec, Effect, Context, Api]
+
+  /**
+   * Creates an RPC function call.
+   *
+   * @param functionName RPC function name
+   * @tparam Result result type
+   * @return RPC function call proxy with specified function name
+   */
+  def call[Result](functionName: String): RemoteCall[Node, Codec, Effect, Context, Result] =
+    macro ClientMeta.callMacro[Node, Codec, Effect, Context, Result]
+
+  def call[Result](
+    functionName: String,
+    argumentNames: Seq[String],
+    argumentNodes: Seq[Node],
+    decodeResult: (Node, Context) => Result,
+    requestContext: Option[Context]
+  ): Effect[Result]
 }
 
 object ClientMeta {
@@ -53,7 +72,7 @@ object ClientMeta {
     val apiType = weakTypeOf[Api]
     c.Expr[Api](q"""
       // Generate API function bindings
-      val functionBindings = automorph.client.ClientGenerator
+      val functionBindings = automorph.client.meta.ClientGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec).map { binding =>
           binding.function.name -> binding
         }.toMap
@@ -75,15 +94,29 @@ object ClientMeta {
               }
 
             // Encode function arguments
-            val encodedArguments = clientBinding.encodeArguments(argumentValues)
+            val argumentNodes = clientBinding.encodeArguments(argumentValues)
             val parameterNames = clientBinding.function.parameters.map(_.name)
 
             // Perform the API call
-            ${c.prefix}.call(function.getName, parameterNames, encodedArguments,
+            ${c.prefix}.call(function.getName, parameterNames, argumentNodes,
               (resultNode, responseContext) => clientBinding.decodeResult(resultNode, responseContext),
               requestContext)
           }.getOrElse(throw new UnsupportedOperationException("Invalid function: " + function.getName))
       ).asInstanceOf[$apiType]
+    """)
+  }
+
+  def callMacro[
+    Node,
+    Codec <: MessageCodec[Node],
+    Effect[_],
+    Context,
+    Result
+  ](c: blackbox.Context)(functionName: c.Expr[String]): c.Expr[RemoteCall[Node, Codec, Effect, Context, Result]] = {
+    import c.universe.Quasiquote
+
+    c.Expr[RemoteCall[Node, Codec, Effect, Context, Result]](q"""
+      automorph.client.RemoteCall($functionName, ${c.prefix}.protocol.codec, ${c.prefix}.call)
     """)
   }
 }

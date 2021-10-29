@@ -172,7 +172,7 @@ object HandlerGenerator {
         .map { contextualResultType =>
         q"(result: Contextual[$contextualResultType, Context]) => $codec.encode[$contextualResultType](result.result) -> Some(result.context)"
       }.getOrElse {
-        q"(result: $resultType) => $codec.encode[$resultType](result) -> Option.empty[Context]"
+        q"(result: $resultType) => $codec.encode[$resultType](result) -> Option.empty[$contextType]"
       }
 
       // Create the effect mapping call using the method call and the encode result function

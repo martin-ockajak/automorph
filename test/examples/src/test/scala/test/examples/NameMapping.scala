@@ -37,9 +37,9 @@ object NameMapping extends App {
   val client = Default.clientSync(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function dynamically
-  client.function("test.multiParams").args("add" -> true, "n" -> 1).call[Double] // 2
-  client.function("aliased").args("value" -> None).tell // ()
-  Try(client.function("omitted").args().call[String]) // Failure
+  client.call[Double]("test.multiParams").args("add" -> true, "n" -> 1) // 2
+  client.notify("custom").args("value" -> None) // ()
+  Try(client.call[String]("omitted").args()) // Failure
 
   // Close the client
   client.close()

@@ -24,7 +24,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * - can be called at runtime
    * - has no type parameters
    * - returns the specified effect type
-   * - (if message context type is not Context.Empty) accepts the specified message context type as its last parameter
+   * - (if message context type is not EmptyContext.Value) accepts the specified message context type as its last parameter
    *
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
@@ -45,7 +45,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * - can be called at runtime
    * - has no type parameters
    * - returns the specified effect type
-   * - (if message context type is not Context.Empty) accepts the specified message context type as its last parameter
+   * - (if message context type is not EmptyContext.Value) accepts the specified message context type as its last parameter
    *
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.

@@ -67,6 +67,14 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     )
   }
 
+  override def toString: String = {
+    val plugins = Map(
+      "system" -> system,
+      "protocol" -> protocol
+    ).map { case (name, plugin) => s"$name = ${plugin.getClass.getName}" }.mkString(", ")
+    s"${this.getClass.getName}($plugins)"
+  }
+
   /**
    * Calls bound RPC function specified in a request and creates a response.
    *
@@ -222,14 +230,6 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         system.pure(HandlerResult(responseMessage, result.failed.toOption, result.toOption.flatMap(_._2)))
       }
     )
-
-  override def toString: String = {
-    val plugins = Map(
-      "system" -> system,
-      "protocol" -> protocol
-    ).map { case (name, plugin) => s"$name = ${plugin.getClass.getName}" }.mkString(", ")
-    s"${this.getClass.getName}($plugins)"
-  }
 }
 
 object Handler {

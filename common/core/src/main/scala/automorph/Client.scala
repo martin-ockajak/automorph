@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.client.meta.ClientMeta
-import automorph.client.{ProtocolClientBuilder, RemoteFunction, TransportClientBuilder}
+import automorph.client.{ProtocolClientBuilder, RemoteNotify, TransportClientBuilder}
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.RpcRequest
@@ -33,21 +33,21 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   protected val system = transport.system
 
   /**
-   * Creates an RPC function proxy.
-   *
-   * @param functionName RPC function name
-   * @return RPC function proxy with specified function name
-   */
-  def function(functionName: String): RemoteFunction[Node, Codec, Effect, Context] =
-    RemoteFunction(functionName, Seq.empty, Seq.empty, this)
-
-  /**
    * Creates a default request context.
    *
    * @return request context
    */
   def defaultContext: Context =
     transport.defaultContext
+
+  /**
+   * Creates an RPC function notification.
+   *
+   * @param functionName RPC function name
+   * @return RPC function notification proxy with specified function name
+   */
+  def notify(functionName: String): RemoteNotify[Node, Codec, Effect, Context] =
+    RemoteNotify(functionName, protocol.codec, notify)
 
   /**
    * Closes this client freeing the underlying resources.
@@ -57,29 +57,37 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   def close(): Effect[Unit] =
     transport.close()
 
+  override def toString: String = {
+    val plugins = Map(
+      "transport" -> transport,
+      "protocol" -> protocol
+    ).map { case (name, plugin) => s"$name = ${plugin.getClass.getName}" }.mkString(", ")
+    s"${this.getClass.getName}($plugins)"
+  }
+
   /**
-   * Performs an RPC function call using specified arguments.
+   * Performs an RPC call using specified arguments.
    *
    * Optional request context is used as a last RPC function argument.
    *
    * @param functionName RPC function name
    * @param argumentNames argument names
-   * @param encodedArguments function argument nodes
+   * @param argumentNodes function argument nodes
    * @param decodeResult decodes RPC function call result
    * @param requestContext request context
-   * @tparam R result type
+   * @tparam Result result type
    * @return result value
    */
-  def call[R](
+  override def call[Result](
     functionName: String,
     argumentNames: Seq[String],
-    encodedArguments: Seq[Node],
-    decodeResult: (Node, Context) => R,
+    argumentNodes: Seq[Node],
+    decodeResult: (Node, Context) => Result,
     requestContext: Option[Context]
-  ): Effect[R] = {
+  ): Effect[Result] = {
     // Create request
     val requestId = Random.id
-    protocol.createRequest(functionName, Some(argumentNames), encodedArguments, true, requestId).pureFold(
+    protocol.createRequest(functionName, Some(argumentNames), argumentNodes, true, requestId).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest => {
@@ -96,7 +104,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
               // Process response
               (result: (ArraySeq.ofByte, Context)) => {
                 val (responseBody, responseContext) = result
-                processResponse[R](responseBody, responseContext, requestProperties, decodeResult)
+                processResponse[Result](responseBody, responseContext, requestProperties, decodeResult)
               }
             )
           }
@@ -106,25 +114,25 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }
 
   /**
-   * Performs an RPC function notification using specified arguments.
+   * Performs an RPC notification using specified arguments.
    *
    * Optional request context is used as a last RPC function argument.
    *
    * @param functionName RPC function name
    * @param argumentNames argument names
-   * @param encodedArguments function argument nodes
+   * @param argumentNodes function argument nodes
    * @param requestContext request context
    * @return nothing
    */
-  private[automorph] def notify(
+  private def notify(
     functionName: String,
-    argumentNames: Option[Seq[String]],
-    encodedArguments: Seq[Node],
+    argumentNames: Seq[String],
+    argumentNodes: Seq[Node],
     requestContext: Option[Context]
   ): Effect[Unit] = {
     // Create request
     val requestId = Random.id
-    protocol.createRequest(functionName, argumentNames, encodedArguments, false, requestId).pureFold(
+    protocol.createRequest(functionName, Some(argumentNames), argumentNodes, false, requestId).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>
@@ -160,12 +168,14 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     requestProperties: => Map[String, String],
     decodeResult: (Node, Context) => R
   ): Effect[R] =
-    // Parse response
+  // Parse response
     protocol.parseResponse(responseBody).fold(
       error => raiseError(error.exception, requestProperties),
       rpcResponse => {
         lazy val allProperties = requestProperties ++ rpcResponse.message.properties +
-          (LogProperties.messageSize -> responseBody.length.toString) ++ rpcResponse.message.text.map(LogProperties.messageBody -> _)
+          (LogProperties.messageSize -> responseBody.length.toString) ++ rpcResponse.message.text.map(
+          LogProperties.messageBody -> _
+        )
         logger.trace(s"Received ${protocol.name} response", allProperties)
         rpcResponse.result.pureFold(
           // Raise error
@@ -194,14 +204,6 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   private def raiseError[T](error: Throwable, properties: Map[String, String]): Effect[T] = {
     logger.error(s"Failed to perform ${protocol.name} request", error, properties)
     system.failed(error)
-  }
-
-  override def toString: String = {
-    val plugins = Map(
-      "transport" -> transport,
-      "protocol" -> protocol
-    ).map { case (name, plugin) => s"$name = ${plugin.getClass.getName}" }.mkString(", ")
-    s"${this.getClass.getName}($plugins)"
   }
 }
 

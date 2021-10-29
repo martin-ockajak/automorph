@@ -16,6 +16,7 @@ trait BrokenBind {
 
   Handler.protocol(Default.protocol).system(system).context[Unit]
 //    .brokenBind(api)
+  Seq(api)
 }
 
 trait BrokenApi[Effect[_]] {

@@ -1,7 +1,7 @@
 package automorph.client.meta
 
-import automorph.Client
-import automorph.spi.MessageCodec
+import automorph.client.{RemoteCall, RemoteNotify}
+import automorph.spi.{MessageCodec, RpcProtocol}
 import java.lang.reflect.Proxy
 import scala.compiletime.summonInline
 import scala.reflect.ClassTag
@@ -15,7 +15,8 @@ import scala.reflect.ClassTag
  * @tparam Context message context type
  */
 private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
-  this: Client[Node, Codec, Effect, Context] =>
+
+  def protocol: RpcProtocol[Node, Codec]
 
   /**
    * Creates a RPC API proxy instance with RPC bindings for all valid public methods of the specified API type.
@@ -57,16 +58,34 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
               callArguments.toSeq -> None
 
           // Encode method arguments
-          val encodedArguments = clientBinding.encodeArguments(argumentValues)
+          val argumentNodes = clientBinding.encodeArguments(argumentValues)
           val parameterNames = clientBinding.function.parameters.map(_.name)
 
           // Perform the API call
           call(
             method.getName,
             parameterNames,
-            encodedArguments,
+            argumentNodes,
             (resultNode, responseContext) => clientBinding.decodeResult(resultNode, responseContext),
             requestContext
           )
         }.getOrElse(throw UnsupportedOperationException(s"Invalid method: ${method.getName}"))
     ).asInstanceOf[Api]
+
+  /**
+   * Creates an RPC function call.
+   *
+   * @param functionName RPC function name
+   * @tparam Result result type
+   * @return RPC function call proxy with specified function name
+   */
+  inline def call[Result](functionName: String): RemoteCall[Node, Codec, Effect, Context, Result] =
+    RemoteCall(functionName, protocol.codec, call)
+
+  def call[Result](
+    functionName: String,
+    argumentNames: Seq[String],
+    argumentNodes: Seq[Node],
+    decodeResult: (Node, Context) => Result,
+    requestContext: Option[Context]
+  ): Effect[Result]

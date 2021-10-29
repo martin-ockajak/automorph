@@ -21,11 +21,12 @@ object DynamicNotification extends App {
   val client = Default.clientAsync(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function dynamically
-  val remoteHello = client.function("hello")
-  remoteHello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
+  val callHello = client.call[String]("hello")
+  callHello.args("some" -> "world", "n" -> 1) // Future[String]
 
   // Notify the remote API function dynamically without expecting a response
-  remoteHello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
+  val notifyHello = client.notify("hello")
+  notifyHello.args("some" -> "world", "n" -> 1) // Future[Unit]
 
   // Close the client
   client.close()
