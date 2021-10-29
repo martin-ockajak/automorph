@@ -70,10 +70,9 @@ remoteApi.hello("world", 1) // Future[String]
 Call the remote API dynamically without API type definition using JSON-RPC over HTTP(S).
 
 ```scala
+
 // Call the remote API function dynamically
-client.function("hello")
-  .args("what" -> "world", "n" -> 1)
-  .call[String] // Future[String]
+client.call[String]("hello").args("what" -> "world", "n" -> 1) // Future[String]
 
 // Close the client
 client.close()
