@@ -7,8 +7,8 @@ import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
-import automorph.transport.http.server.NanoHTTPD.{newFixedLengthResponse, IHTTPSession, Response}
-import automorph.transport.http.server.NanoServer.{Context, Protocol}
+import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
+import automorph.transport.http.server.NanoServer.{Context, ExecuteEffect, Protocol}
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.util.Extensions.ThrowableOps
@@ -21,13 +21,13 @@ import scala.jdk.CollectionConverters.MapHasAsScala
 /**
  * NanoHTTPD HTTP & WebSocket server transport plugin.
  *
- * The server interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
- * The response returned by the RPC handler is used as HTTP response body.
+ * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
+ * The response returned by the RPC request handler is used as HTTP response body.
  *
  * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
  * @see [[https://github.com/NanoHttpd/nanohttpd Library documentation]]
  * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
- * @constructor Creates a NanoHTTPD HTTP & WebSocket server with the specified RPC request handler.
+ * @constructor Creates a NanoHTTPD HTTP & WebSocket server with specified RPC request handler.
  * @param handler RPC request handler
  * @param executeEffect executes specified effect synchronously
  * @param port port to listen on for HTTP connections
@@ -38,7 +38,7 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  */
 final case class NanoServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
-  executeEffect: Effect[Response] => Response,
+  executeEffect: ExecuteEffect[Effect],
   port: Int,
   path: String,
   exceptionToStatusCode: Throwable => Int,
@@ -211,7 +211,17 @@ object NanoServer {
   type Response = NanoHTTPD.Response
 
   /**
+   * Asynchronous effect execution function type.
+   *
+   * @tparam Effect effect type
+   */
+  type ExecuteEffect[Effect[_]] = Effect[Response] => Response
+
+  /**
    * Creates a NanoHTTPD HTTP & WebSocket server with the specified RPC request handler.
+   *
+   * Resulting function requires:
+   * - effect execution function - executes specified effect synchronously
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see [[https://github.com/NanoHttpd/nanohttpd Library documentation]]
@@ -230,8 +240,8 @@ object NanoServer {
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true
-  ): (Effect[Response] => Response) => NanoServer[Effect] =
-    (executeEffect: Effect[Response] => Response) => {
+  ): ExecuteEffect[Effect] => NanoServer[Effect] =
+    (executeEffect: ExecuteEffect[Effect]) => {
       val server = new NanoServer(handler, executeEffect, port, path, exceptionToStatusCode, webSocket)
       server.start()
       server

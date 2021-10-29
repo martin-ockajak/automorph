@@ -678,9 +678,8 @@ val api = new Api()
 ```scala
 // Start NanoHTTPD JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val handler = Default.handlerSync[NanoServer.Context]
-val server = NanoServer.create(handler.bind(api), 80) {
-  (response: IdentitySystem.Effect[NanoServer.Response]) => response
-}
+val createServer = NanoServer.create(handler.bind(api), 80)
+val server = createServer(identity)
 
 // Stop the server
 server.close()

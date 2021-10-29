@@ -70,6 +70,20 @@ object Default extends DefaultMeta {
   type ServerHandler[Effect[_]] = Handler[Effect, ServerContext]
 
   /**
+   * Asynchronous effect execution function type.
+   *
+   * @tparam Effect effect type
+   */
+  type RunEffect[Effect[_]] = Effect[Any] => Unit
+
+  /**
+   * Server API binding function.
+   *
+   * @tparam Effect effect type
+   * */
+  type ServerBindApis[Effect[_]] = ServerHandler[Effect] => ServerHandler[Effect]
+
+  /**
    * Creates an asynchronous `Future` effect system plugin.
    *
    * @see [[https://docs.scala-lang.org/overviews/core/futures.html Library documentation]]
@@ -253,6 +267,9 @@ object Default extends DefaultMeta {
   /**
    * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
    *
+   * Resulting function requires:
+   * - effect execution function - executes specified effect asynchronously
+   *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
    *
@@ -276,12 +293,16 @@ object Default extends DefaultMeta {
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): (Effect[Any] => Unit) => Server[Effect] =
-    (runEffect: Effect[Any] => Unit) =>
+  ): RunEffect[Effect] => Server[Effect] =
+    (runEffect: RunEffect[Effect]) =>
       UndertowServer.create(handler, port, path, exceptionToStatusCode, webSocket, builder)(runEffect)
 
   /**
    * Creates an Undertow JSON-RPC over HTTP & WebSocket server with specified effect system plugin.
+   *
+   * Resulting function requires:
+   * - API binding function - binds APIs to the underlying handler
+   * - effect execution function - executes specified effect asynchronously
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -306,14 +327,17 @@ object Default extends DefaultMeta {
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): (ServerHandler[Effect] => ServerHandler[Effect]) => (Effect[Any] => Unit) => Server[Effect] =
-    (bindApis: ServerHandler[Effect] => ServerHandler[Effect]) => {
+  ): ServerBindApis[Effect] => RunEffect[Effect] => Server[Effect] =
+    (bindApis: ServerBindApis[Effect]) => {
       val handler = bindApis(Handler.protocol(protocol).system(system).context[ServerContext])
       server(handler, port, path, exceptionToStatusCode, webSocket, builder)
     }
 
   /**
    * Creates an Undertow JSON-RPC over HTTP & WebSocket server using 'Future' as an effect type.
+   *
+   * Resulting function requires:
+   * - API binding function - binds APIs to the underlying handler
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -336,8 +360,8 @@ object Default extends DefaultMeta {
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  )(implicit executionContext: ExecutionContext): (ServerHandler[Future] => ServerHandler[Future]) => Server[Future] =
-    (bindApis: ServerHandler[Future] => ServerHandler[Future]) => {
+  )(implicit executionContext: ExecutionContext): ServerBindApis[Future] => Server[Future] =
+    (bindApis: ServerBindApis[Future]) => {
       val handler = bindApis(handlerAsync)
       val runEffect = (_: Future[Any]) => ()
       server(handler, port, path, exceptionToStatusCode, webSocket, builder)(runEffect)
@@ -345,6 +369,9 @@ object Default extends DefaultMeta {
 
   /**
    * Creates a Undertow JSON-RPC over HTTP & WebSocket server using identity as an effect type.
+   *
+   * Resulting function requires:
+   * - API binding function - binds APIs to the underlying handler
    *
    * The server can be used to receive and reply to requests using specific message transport protocol
    * while invoking server to process them.
@@ -366,8 +393,8 @@ object Default extends DefaultMeta {
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): (ServerHandler[Identity] => ServerHandler[Identity]) => Server[Identity] =
-    (bindApis: ServerHandler[Identity] => ServerHandler[Identity]) => {
+  ): ServerBindApis[Identity] => Server[Identity] =
+    (bindApis: ServerBindApis[Identity]) => {
       val handler = bindApis(handlerSync)
       val runEffect = (_: Identity[Any]) => ()
       server(handler, port, path, exceptionToStatusCode, webSocket, builder)(runEffect)

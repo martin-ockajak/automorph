@@ -3,8 +3,7 @@ package automorph.transport.amqp.client
 import automorph.log.Logging
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
-import automorph.system.FutureSystem
-import automorph.transport.amqp.client.RabbitMqClient.Context
+import automorph.transport.amqp.client.RabbitMqClient.{BlockingEffect, Context, PromisedEffect}
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
@@ -13,7 +12,6 @@ import com.rabbitmq.client.{Address, BuiltinExchangeType, Channel, Connection, C
 import java.net.URI
 import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
-import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Try, Using}
 
 /**
@@ -36,15 +34,15 @@ import scala.util.{Try, Using}
  * @param connectionFactory AMQP broker connection factory
  * @tparam Effect effect type
  */
-final case class RabbitMqClient[Effect[_]](
+final case class RabbitMqClient[Effect[_]] private (
   url: URI,
   routingKey: String,
   system: EffectSystem[Effect],
-  blockingEffect: (() => Unit) => Effect[Unit],
-  promisedEffect: () => (Effect[Any], Any => Unit),
-  exchange: String = RabbitMqCommon.defaultDirectExchange,
-  addresses: Seq[Address] = Seq.empty,
-  connectionFactory: ConnectionFactory = new ConnectionFactory
+  blockingEffect: BlockingEffect[Effect],
+  promisedEffect: PromisedEffect[Effect],
+  exchange: String,
+  addresses: Seq[Address],
+  connectionFactory: ConnectionFactory
 ) extends Logging with ClientMessageTransport[Effect, Context] {
 
   private lazy val connection = createConnection()
@@ -147,38 +145,42 @@ object RabbitMqClient {
   type Context = AmqpContext[RabbitMqContext]
 
   /**
-   * Creates asynchronous RabbitMQ client transport plugin.
+   * Blocking effect function type.
    *
-   * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
-   * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
+   * @tparam Effect effect type
+   */
+  type BlockingEffect[Effect[_]] = (() => Unit) => Effect[Unit]
+
+  /**
+   * Promised effect function type.
+   *
+   * @tparam Effect effect type
+   */
+  type PromisedEffect[Effect[_]] = () => (Effect[Any], Any => Unit)
+
+  /**
+   * Creates a RabbitMQ client transport plugin.
+   *
+   * Resulting function requires:
+   * - blocking effect function - creates an effect from specified blocking function
+   * - promised effect function - creates a not yet completed effect and its completion function
+   *
    * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
    * @param routingKey AMQP routing key (typically a queue name)
    * @param exchange direct non-durable AMQP message exchange name
    * @param addresses broker hostnames and ports for reconnection attempts
    * @param connectionFactory AMQP broker connection factory
    * @param executionContext execution context
+   * @return creates a RabbitMQ client using supplied blocking effect function and promised effect function
    */
-  def async(
+  def create[Effect[_]](
     url: URI,
     routingKey: String,
+    system: EffectSystem[Effect],
     exchange: String = RabbitMqCommon.defaultDirectExchange,
     addresses: Seq[Address] = Seq.empty,
     connectionFactory: ConnectionFactory = new ConnectionFactory
-  )(implicit executionContext: ExecutionContext): RabbitMqClient[Future] = {
-    val blockingEffect = (blocking: () => Unit) => Future(blocking())
-    val promisedEffect = () => {
-      val promise = Promise[Any]()
-      promise.future -> promise.success.andThen(_ => ())
-    }
-    RabbitMqClient(
-      url,
-      routingKey,
-      FutureSystem(),
-      blockingEffect,
-      promisedEffect,
-      exchange,
-      addresses,
-      connectionFactory
-    )
-  }
+  ): (BlockingEffect[Effect], PromisedEffect[Effect]) => RabbitMqClient[Effect] =
+    (blockingEffect: BlockingEffect[Effect], promisedEffect: PromisedEffect[Effect]) =>
+      RabbitMqClient(url, routingKey, system, blockingEffect, promisedEffect, exchange, addresses, connectionFactory)
 }

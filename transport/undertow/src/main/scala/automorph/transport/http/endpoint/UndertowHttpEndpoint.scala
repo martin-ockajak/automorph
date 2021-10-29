@@ -20,13 +20,13 @@ import scala.util.Try
 /**
  * Undertow HTTP endpoint message transport plugin.
  *
- * The handler interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
- * The response returned by the RPC handler is used as HTTP response body.
+ * The handler interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
+ * The response returned by the RPC request handler is used as HTTP response body.
  *
  * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
  * @see [[https://undertow.io Library documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
- * @constructor Creates an Undertow HTTP handler with the specified RPC request handler.
+ * @constructor Creates an Undertow HTTP handler with specified RPC request handler.
  * @param handler RPC request handler
  * @param runEffect executes specified effect asynchronously
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
@@ -159,6 +159,9 @@ object UndertowHttpEndpoint {
 
   /**
    * Creates an Undertow HTTP endpoint message transport plugin.
+   *
+   * Resulting function requires:
+   * - effect execution function - executes specified effect asynchronously
    *
    * @param handler RPC request handler
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code

@@ -5,7 +5,7 @@ import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
-import automorph.transport.http.server.UndertowServer.Context
+import automorph.transport.http.server.UndertowServer.{Context, RunEffect}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.{Handlers, Undertow}
@@ -15,8 +15,8 @@ import scala.jdk.CollectionConverters.ListHasAsScala
 /**
  * Undertow HTTP & WebSocket server transport plugin.
  *
- * The server interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
- * The response returned by the RPC handler is used as HTTP response body.
+ * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
+ * The response returned by the RPC request handler is used as HTTP response body.
  *
  * Processes only HTTP requests starting with specified URL path.
  *
@@ -24,7 +24,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
  * @see [[https://undertow.io Library documentation]]
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
- * @constructor Creates an Undertow HTTP & WebSocket server with the specified HTTP handler.
+ * @constructor Creates an Undertow HTTP & WebSocket server with specified RPC request handler.
  * @param handler RPC request handler
  * @param runEffect executes specified effect asynchronously
  * @param port port to listen on for HTTP connections
@@ -36,7 +36,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  */
 final case class UndertowServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
-  runEffect: Effect[Any] => Unit,
+  runEffect: RunEffect[Effect],
   port: Int,
   path: String,
   exceptionToStatusCode: Throwable => Int,
@@ -87,7 +87,17 @@ object UndertowServer {
   type Context = UndertowHttpEndpoint.Context
 
   /**
+   * Asynchronous effect execution function type.
+   *
+   * @tparam Effect effect type
+   */
+  type RunEffect[Effect[_]] = Effect[Any] => Unit
+
+  /**
    * Creates an Undertow HTTP & WebSocket server with the specified HTTP handler.
+   *
+   * Resulting function requires:
+   * - effect execution function - executes specified effect asynchronously
    *
    * @param handler RPC request handler
    * @param port port to listen on for HTTP connections
@@ -105,8 +115,8 @@ object UndertowServer {
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): (Effect[Any] => Unit) => UndertowServer[Effect] =
-    (runEffect: Effect[Any] => Unit) =>
+  ): (RunEffect[Effect]) => UndertowServer[Effect] =
+    (runEffect: RunEffect[Effect]) =>
       UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
 
   /**
