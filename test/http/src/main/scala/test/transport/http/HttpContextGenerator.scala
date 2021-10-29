@@ -4,7 +4,7 @@ import automorph.transport.http.HttpContext
 import org.scalacheck.{Arbitrary, Gen}
 
 object HttpContextGenerator {
-  private val maxSize = 256
+//  private val maxSize = 256
 
   private val header = for {
 // FIXME - restore
