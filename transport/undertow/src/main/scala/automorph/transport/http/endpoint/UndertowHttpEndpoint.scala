@@ -6,13 +6,14 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
+import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.RunEffect
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import automorph.util.{Bytes, Network, Random}
-import java.io.IOException
 import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, HttpString, StatusCodes}
 import io.undertow.websockets.spi.WebSocketHttpExchange
+import java.io.IOException
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 import scala.util.Try
@@ -34,7 +35,7 @@ import scala.util.Try
  */
 final case class UndertowHttpEndpoint[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
-  runEffect: Effect[Any] => Unit,
+  runEffect: RunEffect[Effect],
   exceptionToStatusCode: Throwable => Int
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
@@ -158,6 +159,13 @@ final case class UndertowHttpEndpoint[Effect[_]] private (
 object UndertowHttpEndpoint {
 
   /**
+   * Asynchronous effect execution function type.
+   *
+   * @tparam Effect effect type
+   */
+  type RunEffect[Effect[_]] = Effect[Any] => Unit
+
+  /**
    * Creates an Undertow HTTP endpoint message transport plugin.
    *
    * Resulting function requires:
@@ -171,8 +179,8 @@ object UndertowHttpEndpoint {
   def create[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
-  ): (Effect[Any] => Unit) => UndertowHttpEndpoint[Effect] =
-    (runEffect: Effect[Any] => Unit) =>
+  ): (RunEffect[Effect]) => UndertowHttpEndpoint[Effect] =
+    (runEffect: RunEffect[Effect]) =>
       UndertowHttpEndpoint(handler, runEffect, exceptionToStatusCode)
 
   /** Request context type. */

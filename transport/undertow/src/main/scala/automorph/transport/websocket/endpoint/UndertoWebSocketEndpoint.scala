@@ -5,6 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
+import automorph.transport.http.endpoint.UndertowHttpEndpoint.RunEffect
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Network, Random}
@@ -23,6 +24,13 @@ import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
  * The response returned by the RPC request handler is used as WebSocket response message.
  */
 object UndertowWebSocketEndpoint {
+
+  /**
+   * Asynchronous effect execution function type.
+   *
+   * @tparam Effect effect type
+   */
+  type RunEffect[Effect[_]] = Effect[Any] => Unit
 
   /**
    * Creates an Undertow WebSocket handler with specified RPC request handler.
@@ -44,8 +52,8 @@ object UndertowWebSocketEndpoint {
   def create[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
     next: HttpHandler
-  ): (Effect[Any] => Unit) => WebSocketProtocolHandshakeHandler =
-    (runEffect: Effect[Any] => Unit) => {
+  ): (RunEffect[Effect]) => WebSocketProtocolHandshakeHandler =
+    (runEffect: RunEffect[Effect]) => {
       val webSocketCallback = UndertowWebSocketCallback(handler, runEffect)
       new WebSocketProtocolHandshakeHandler(webSocketCallback, next)
     }
