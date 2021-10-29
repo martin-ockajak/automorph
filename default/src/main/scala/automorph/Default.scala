@@ -267,7 +267,7 @@ object Default extends DefaultMeta {
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @tparam Effect effect type
-   * @return creates default RPC server using supplied asynchronous effect execution function
+   * @return creates RPC server using supplied asynchronous effect execution function
    */
   def server[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, ServerContext],
@@ -297,7 +297,7 @@ object Default extends DefaultMeta {
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param builder Undertow web server builder
    * @tparam Effect effect type
-   * @return RPC server
+   * @return creates RPC server using supplied asynchronous effect execution function
    */
   def serverSystem[Effect[_]](
     system: EffectSystem[Effect],
