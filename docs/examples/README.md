@@ -185,7 +185,9 @@ import java.net.URI
 class ServerApi {
 
   // Use HTTP request metadata context provided by the server message transport plugin
-  def contextual(message: String)(implicit requestContext: Default.ServerContext): String = Seq(
+  def contextual(message: String)(
+    implicit requestContext: Default.ServerContext
+  ): String = Seq(
     Some(message),
     requestContext.path,
     requestContext.header("X-Test")
