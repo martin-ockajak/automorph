@@ -8,7 +8,7 @@ import automorph.util.EmptyContext
 import automorph.{Client, Handler}
 import test.base.BaseSpec
 
-class EmptyContextSpec extends BaseSpec {
+class EmptyContextTest extends BaseSpec {
 
   "" - {
     "Create" in {
