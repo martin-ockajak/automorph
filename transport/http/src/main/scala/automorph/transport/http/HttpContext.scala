@@ -71,7 +71,7 @@ final case class HttpContext[Base](
    * @return HTTP message properties
    */
   def url(url: URI): HttpContext[Base] = {
-    val http = copy(
+    val httpContext = copy(
       scheme = Option(url.getScheme),
       userInfo = Option(url.getUserInfo),
       host = Option(url.getHost),
@@ -79,7 +79,7 @@ final case class HttpContext[Base](
       path = Option(url.getPath),
       fragment = Option(url.getFragment)
     )
-    Option(url.getQuery).map(http.query).getOrElse(http)
+    Option(url.getQuery).map(httpContext.query).getOrElse(httpContext)
   }
 
   /**
