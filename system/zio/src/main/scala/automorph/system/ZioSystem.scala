@@ -31,9 +31,16 @@ final case class ZioSystem[Environment]() extends EffectSystem[({ type Effect[T]
 
 object ZioSystem {
   /**
-   * Effect type constructor.
+   * Task effect type constructor.
    *
    * @tparam Environment ZIO environment
    */
-  type TaskEffect[Environment] = RIO[Any, Environment]
+  type Effect[Environment] = ({ type ActualEffect[T] = RIO[Environment, T] })#ActualEffect[_]
+
+  /**
+   * Task effect type constructor.
+   *
+   * @tparam Environment ZIO environment
+   */
+  type TaskEffect[Environment] = Effect[Any]
 }

@@ -5,7 +5,6 @@ import automorph.system.ZioSystem
 import java.net.URI
 import org.asynchttpclient.DefaultAsyncHttpClient
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
-import zio.Runtime.default.unsafeRunTask
 import zio.{Runtime, Task}
 
 object EffectSystem extends App {
@@ -21,7 +20,11 @@ object EffectSystem extends App {
   val system = ZioSystem[Any]()
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val server = Default.serverSystem(system, 80, "/api")(_.bind(api))(unsafeRunTask)
+  val server = Default.serverSystem(system, 80, "/api")(_.bind(api)) {
+    (effect: ZioSystem.Effect[Any]) =>
+      Runtime.default.unsafeRunTask(effect)
+      ()
+  }
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val backend = AsyncHttpClientZioBackend
