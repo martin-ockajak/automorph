@@ -306,9 +306,9 @@ server.close()
 val client = Default.clientSync(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function dynamically
-client.call[Double]("test.multiParams").args("add" -> true, "n" -> 1) // 2
 client.notify("custom").args("value" -> None) // ()
 Try(client.call[String]("omitted").args()) // Failure
+client.call[Double]("test.multi").args("add" -> true, "n" -> 1) // 2
 
 // Close the client
 client.close()
