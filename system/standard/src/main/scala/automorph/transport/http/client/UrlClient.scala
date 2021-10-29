@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.UrlClient.{Context, EffectValue, Session}
+import automorph.transport.http.client.UrlClient.{Context, Session}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.{HttpURLConnection, URI}
@@ -48,24 +48,23 @@ final case class UrlClient[Effect[_]](
     // Send the request
     system.flatMap(
       send(requestBody, requestId, mediaType, requestContext),
-      (_: EffectValue) match {
-        case (connection: HttpURLConnection, _) =>
-          system.wrap {
-            lazy val responseProperties = Map(
-              LogProperties.requestId -> requestId,
-              "URL" -> connection.getURL.toExternalForm
-            )
+      (connection: HttpURLConnection) => {
+        system.wrap {
+          lazy val responseProperties = Map(
+            LogProperties.requestId -> requestId,
+            "URL" -> connection.getURL.toExternalForm
+          )
 
-            // Process the response
-            logger.trace("Receiving HTTP response", responseProperties)
-            connection.getResponseCode
-            val inputStream = Option(connection.getErrorStream).getOrElse(connection.getInputStream)
-            val response = Using(inputStream)(Bytes.inputStream.from).onFailure {
-              logger.error("Failed to receive HTTP response", _, responseProperties)
-            }.get
-            logger.debug("Received HTTP response", responseProperties + ("Status" -> connection.getResponseCode.toString))
-            response -> responseContext(connection)
-          }
+          // Process the response
+          logger.trace("Receiving HTTP response", responseProperties)
+          connection.getResponseCode
+          val inputStream = Option(connection.getErrorStream).getOrElse(connection.getInputStream)
+          val response = Using(inputStream)(Bytes.inputStream.from).onFailure {
+            logger.error("Failed to receive HTTP response", _, responseProperties)
+          }.get
+          logger.debug("Received HTTP response", responseProperties + ("Status" -> connection.getResponseCode.toString))
+          response -> responseContext(connection)
+        }
       }
     )
 
@@ -75,7 +74,7 @@ final case class UrlClient[Effect[_]](
     mediaType: String,
     requestContext: Option[Context]
   ): Effect[Unit] =
-    system.map(send(requestBody, requestId, mediaType, requestContext), (_: EffectValue) => ())
+    system.map(send(requestBody, requestId, mediaType, requestContext), (_: HttpURLConnection) => ())
 
   override def defaultContext: Context =
     Session.default
@@ -88,7 +87,7 @@ final case class UrlClient[Effect[_]](
     requestId: String,
     mediaType: String,
     context: Option[Context]
-  ): Effect[EffectValue] =
+  ): Effect[HttpURLConnection] =
     system.wrap {
       // Create the request
       val connection = createConnection(context)
@@ -111,7 +110,7 @@ final case class UrlClient[Effect[_]](
       }
       write.onFailure(logger.error("Failed to send HTTP request", _, requestProperties)).get
       logger.debug("Sent HTTP request", requestProperties)
-      connection -> new ArraySeq.ofByte(Array.empty)
+      connection
     }
 
   private def createConnection(context: Option[Context]): HttpURLConnection = {
@@ -161,9 +160,6 @@ object UrlClient {
 
   /** Request context type. */
   type Context = HttpContext[Session]
-
-  /** Effect value type. */
-  private type EffectValue = (HttpURLConnection, ArraySeq.ofByte)
 
   final case class Session(connection: HttpURLConnection)
 
