@@ -28,11 +28,12 @@ object ErrorMapping extends App {
   val system = Default.systemAsync
   val handler = Handler
     .protocol(serverProtocol).system(system).context[Default.ServerContext]
-  val server = Default.server(handler, 80, "/api", {
+  val createServer = Default.server(handler, 80, "/api", {
     // Customize server HTTP status code mapping
     case _: SQLException => 400
     case e => HttpContext.defaultExceptionToStatusCode(e)
-  })((_: Future[Any]) => ())
+  })
+  val server = createServer(_ => ())
 
   // Customize client RPC error mapping
   val clientProtocol = protocol.mapError {

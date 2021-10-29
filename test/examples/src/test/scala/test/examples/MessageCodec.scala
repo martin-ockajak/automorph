@@ -31,7 +31,8 @@ object MessageCodec extends App {
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-  val server = Default.server(handler.bind(api), 80, "/api")((_: Future[Any]) => ())
+  val createServer = Default.server(handler.bind(api), 80, "/api")
+  val server = createServer(_ => ())
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val transport = Default.clientTransportAsync(new URI("http://localhost/api"), "POST")

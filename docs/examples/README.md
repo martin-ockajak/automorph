@@ -361,11 +361,12 @@ val serverProtocol = protocol.mapException {
 val system = Default.systemAsync
 val handler = Handler
   .protocol(serverProtocol).system(system).context[Default.ServerContext]
-val server = Default.server(handler, 80, "/api", {
+val createServer = Default.server(handler, 80, "/api", {
   // Customize server HTTP status code mapping
   case _: SQLException => 400
   case e => HttpContext.defaultExceptionToStatusCode(e)
-})((_: Future[Any]) => ())
+})
+val server = createServer(_ => ())
 
 // Stop the server
 server.close()
@@ -497,7 +498,8 @@ val protocol = RestRpcProtocol[Default.Node, Default.Codec](Default.codec)
 // Start Undertow REST-RPC HTTP server listening on port 80 for requests to '/api'
 val system = Default.asyncSystem
 val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-val server = Default.server(handler, 80, "/api")((_: Future[Any]) => ())
+val createServer = Default.server(handler, 80, "/api")
+val server = createServer(_ => ())
 
 // Stop the server
 server.close()
@@ -566,7 +568,8 @@ val system = Default.asyncSystem
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-val server = Default.server(handler.bind(api), 80, "/api")((_: Future[Any]) => ())
+val createServer = Default.server(handler.bind(api), 80, "/api")
+val server = createServer(_ => ())
 
 // Stop the server
 server.close()
@@ -732,7 +735,8 @@ val api = new Api()
 ```scala
 // Create custom Undertow JSON-RPC endpoint
 val handler = Default.handlerAsync[UndertowHttpEndpoint.Context]
-val endpoint = UndertowHttpEndpoint.create(handler.bind(api))((_: Future[Any]) => ())
+val createEndpoint = UndertowHttpEndpoint.create(handler.bind(api))
+val endpoint = createEndpoint(_ => ())
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val server = Undertow.builder()
