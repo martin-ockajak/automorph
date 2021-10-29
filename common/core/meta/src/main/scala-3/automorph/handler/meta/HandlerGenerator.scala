@@ -74,7 +74,7 @@ private[automorph] object HandlerGenerator:
   ): Expr[HandlerBinding[Node, Effect, Context]] =
     given Quotes = ref.q
 
-    val invoke = generateInvoke[Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
+    lazy val invoke = generateInvoke[Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
     logBoundMethod[Api](ref)(method, invoke)
     '{
       HandlerBinding(

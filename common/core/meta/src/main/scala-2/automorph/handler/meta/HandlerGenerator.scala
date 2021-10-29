@@ -82,7 +82,7 @@ object HandlerGenerator {
   )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[HandlerBinding[Node, Effect, Context]] = {
     import ref.c.universe.{Liftable, Quasiquote}
 
-    val invoke = generateInvoke[C, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
+    lazy val invoke = generateInvoke[C, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
     logBoundMethod[C, Api](ref)(method, invoke)
     implicit val functionLiftable: Liftable[RpcFunction] = MethodReflection.functionLiftable(ref)
     ref.c.Expr[HandlerBinding[Node, Effect, Context]](q"""

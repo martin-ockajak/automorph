@@ -58,8 +58,8 @@ private[automorph] object ClientGenerator:
   ](ref: Reflection)(method: ref.RefMethod, codec: Expr[Codec]): Expr[ClientBinding[Node, Context]] =
     given Quotes = ref.q
 
-    val encodeArguments = generateEncodeArguments[Node, Codec, Context](ref)(method, codec)
-    val decodeResult = generateDecodeResult[Node, Codec, Effect, Context](ref)(method, codec)
+    lazy val encodeArguments = generateEncodeArguments[Node, Codec, Context](ref)(method, codec)
+    lazy val decodeResult = generateDecodeResult[Node, Codec, Effect, Context](ref)(method, codec)
     logBoundMethod[Api](ref)(method, encodeArguments, decodeResult)
     '{
       ClientBinding(
