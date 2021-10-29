@@ -5,7 +5,7 @@ import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
-import automorph.transport.http.server.UndertowServer.{Context, defaultBuilder}
+import automorph.transport.http.server.UndertowServer.Context
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.{Handlers, Undertow}
@@ -34,14 +34,14 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @param builder Undertow builder
  * @tparam Effect effect type
  */
-final case class UndertowServer[Effect[_]](
+final case class UndertowServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
   runEffect: Effect[Any] => Unit,
   port: Int,
-  path: String = "/",
-  exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-  webSocket: Boolean = true,
-  builder: Undertow.Builder = defaultBuilder
+  path: String,
+  exceptionToStatusCode: Throwable => Int,
+  webSocket: Boolean,
+  builder: Undertow.Builder
 ) extends Logging with ServerMessageTransport[Effect] {
 
   private val undertow = start()
@@ -55,7 +55,7 @@ final case class UndertowServer[Effect[_]](
     // Configure the request handler
     val httpHandler = UndertowHttpEndpoint.create(handler, exceptionToStatusCode)(runEffect)
     val webSocketHandler = if (webSocket) {
-      UndertowWebSocketEndpoint(handler, runEffect, httpHandler)
+      UndertowWebSocketEndpoint.create(handler, httpHandler)(runEffect)
     } else {
       httpHandler
     }
@@ -85,6 +85,29 @@ final case class UndertowServer[Effect[_]](
 object UndertowServer {
   /** Request context type. */
   type Context = UndertowHttpEndpoint.Context
+
+  /**
+   * Creates an Undertow HTTP & WebSocket server with the specified HTTP handler.
+   *
+   * @param handler RPC request handler
+   * @param port port to listen on for HTTP connections
+   * @param path HTTP URL path (default: /)
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+   * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
+   * @param builder Undertow builder
+   * @tparam Effect effect type
+   * @return creates an Undertow HTTP & WebSocket server using supplied asynchronous effect execution function
+   */
+  def create[Effect[_]](
+    handler: Types.HandlerAnyCodec[Effect, Context],
+    port: Int,
+    path: String = "/",
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+    webSocket: Boolean = true,
+    builder: Undertow.Builder = defaultBuilder
+  ): (Effect[Any] => Unit) => UndertowServer[Effect] =
+    (runEffect: Effect[Any] => Unit) =>
+      UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
 
   /**
    * Default Undertow web server builder providing the following settings:

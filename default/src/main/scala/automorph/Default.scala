@@ -278,7 +278,7 @@ object Default extends DefaultMeta {
     builder: Undertow.Builder = defaultBuilder
   ): (Effect[Any] => Unit) => Server[Effect] =
     (runEffect: Effect[Any] => Unit) =>
-      UndertowServer(handler, runEffect, port, path, exceptionToStatusCode, webSocket, builder)
+      UndertowServer.create(handler, port, path, exceptionToStatusCode, webSocket, builder)(runEffect)
 
   /**
    * Creates an Undertow JSON-RPC over HTTP & WebSocket server with specified effect system plugin.

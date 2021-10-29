@@ -34,19 +34,18 @@ object UndertowWebSocketEndpoint {
    * @see [[https://undertow.io Library documentation]]
    * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
    * @param handler RPC request handler
-   * @param runEffect executes specified effect asynchronously
    * @param next Undertow handler invoked if a HTTP request does not contain a WebSocket handshake
-   * @return Undertow web server WebSocket handler
    * @tparam Effect effect type
+   * @return creates an Undertow WebSocket handler using supplied asynchronous effect execution function
    */
-  def apply[Effect[_]](
+  def create[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
-    runEffect: Effect[Any] => Unit,
     next: HttpHandler
-  ): WebSocketProtocolHandshakeHandler = {
-    val webSocketCallback = UndertowWebSocketCallback(handler, runEffect)
-    new WebSocketProtocolHandshakeHandler(webSocketCallback, next)
-  }
+  ): (Effect[Any] => Unit) => WebSocketProtocolHandshakeHandler =
+    (runEffect: Effect[Any] => Unit) => {
+      val webSocketCallback = UndertowWebSocketCallback(handler, runEffect)
+      new WebSocketProtocolHandshakeHandler(webSocketCallback, next)
+    }
 
   /** Request context type. */
   type Context = HttpContext[Either[HttpServerExchange, WebSocketHttpExchange]]

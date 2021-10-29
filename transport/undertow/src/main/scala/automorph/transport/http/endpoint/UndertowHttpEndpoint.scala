@@ -163,7 +163,7 @@ object UndertowHttpEndpoint {
    * @param handler RPC request handler
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @tparam Effect effect type
-   * @return creates Undertow HTTP endpoint message transport plugin using supplied asynchronous effect execution function
+   * @return creates an Undertow HTTP handler using supplied asynchronous effect execution function
    */
   def create[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
