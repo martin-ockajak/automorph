@@ -1,24 +1,24 @@
 package test.transport.local
 
-import automorph.system.ZioSystem
+import automorph.system.MonixSystem
 import automorph.spi.EffectSystem
+import monix.eval.Task
+import monix.execution.Scheduler.Implicits.global
 import org.scalacheck.Arbitrary
-import test.core.ProtocolCodecSpec
-import zio.{RIO, Runtime, ZEnv}
+import scala.concurrent.duration.Duration
+import test.core.ProtocolCodecTest
 
-class ZioLocalSpec extends ProtocolCodecSpec {
+class MonixLocalTest extends ProtocolCodecTest {
 
-  private lazy val runtime = Runtime.default.withReportFailure(_ => ())
-
-  type Effect[T] = RIO[ZEnv, T]
+  type Effect[T] = Task[T]
   type Context = String
 
   override lazy val arbitraryContext: Arbitrary[Context] =
     Arbitrary(Arbitrary.arbitrary[Context])
 
   override lazy val system: EffectSystem[Effect] =
-    ZioSystem[ZEnv]()
+    MonixSystem()
 
   override def run[T](effect: Effect[T]): T =
-    runtime.unsafeRunTask(effect)
+    effect.runSyncUnsafe(Duration.Inf)
 }

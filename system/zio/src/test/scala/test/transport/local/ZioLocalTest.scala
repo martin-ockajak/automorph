@@ -1,23 +1,24 @@
 package test.transport.local
 
-import automorph.system.ScalazSystem
+import automorph.system.ZioSystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
-import scala.util.Try
-import scalaz.effect.IO
-import test.core.ProtocolCodecSpec
+import test.core.ProtocolCodecTest
+import zio.{RIO, Runtime, ZEnv}
 
-class ScalazLocalSpec extends ProtocolCodecSpec {
+class ZioLocalTest extends ProtocolCodecTest {
 
-  type Effect[T] = IO[T]
+  private lazy val runtime = Runtime.default.withReportFailure(_ => ())
+
+  type Effect[T] = RIO[ZEnv, T]
   type Context = String
 
   override lazy val arbitraryContext: Arbitrary[Context] =
     Arbitrary(Arbitrary.arbitrary[Context])
 
   override lazy val system: EffectSystem[Effect] =
-    ScalazSystem()
+    ZioSystem[ZEnv]()
 
   override def run[T](effect: Effect[T]): T =
-    effect.unsafePerformIO()
+    runtime.unsafeRunTask(effect)
 }

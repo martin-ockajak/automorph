@@ -1,7 +1,7 @@
 package test.codec.json
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import test.codec.MessageCodecSpec
+import test.codec.MessageCodecTest
 
 /**
  * JSON message codec test.
@@ -11,7 +11,7 @@ import test.codec.MessageCodecSpec
  * @tparam Node message node type
  * @tparam ActualCodec message codec
  */
-trait JsonMessageCodecSpec extends MessageCodecSpec {
+trait JsonMessageCodecTest extends MessageCodecTest {
   private val objectMapper = new ObjectMapper()
 
   "" - {

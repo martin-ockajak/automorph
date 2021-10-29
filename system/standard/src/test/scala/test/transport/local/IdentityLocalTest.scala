@@ -1,23 +1,22 @@
 package test.transport.local
 
-import cats.effect.IO
-import cats.effect.unsafe.implicits.global
-import automorph.system.CatsEffectSystem
+import automorph.system.IdentitySystem
+import automorph.system.IdentitySystem.Identity
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
-import test.core.ProtocolCodecSpec
+import test.core.ProtocolCodecTest
 
-class CatsEffectLocalSpec extends ProtocolCodecSpec {
+class IdentityLocalTest extends ProtocolCodecTest {
 
-  type Effect[T] = IO[T]
-  type Context = String
+  type Effect[T] = Identity[T]
+  type Context = Option[String]
 
   override lazy val arbitraryContext: Arbitrary[Context] =
     Arbitrary(Arbitrary.arbitrary[Context])
 
   override lazy val system: EffectSystem[Effect] =
-    CatsEffectSystem()
+    IdentitySystem()
 
   override def run[T](effect: Effect[T]): T =
-    effect.unsafeRunSync()
+    effect
 }

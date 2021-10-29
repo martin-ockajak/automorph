@@ -6,7 +6,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Try
 
-class FutureSpec extends EffectSystemSpec[Future] {
+class FutureTest extends EffectSystemTest[Future] {
   def system: EffectSystem[Future] =
     FutureSystem()
 

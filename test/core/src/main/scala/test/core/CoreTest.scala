@@ -6,7 +6,7 @@ import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestExcep
 import org.scalacheck.Arbitrary
 import scala.util.{Failure, Success, Try}
 import test.Generators.arbitraryRecord
-import test.base.BaseSpec
+import test.base.BaseTest
 import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, Record, SimpleApi, SimpleApiImpl}
 
 /**
@@ -14,7 +14,7 @@ import test.{ComplexApi, ComplexApiImpl, InvalidApi, InvalidApiImpl, Record, Sim
  *
  * Checks the results of remote RPC function invocations against identical local invocations.
  */
-trait CoreSpec extends BaseSpec {
+trait CoreTest extends BaseTest {
 
   /** Effect type. */
   type Effect[_]

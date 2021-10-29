@@ -3,16 +3,16 @@ package test.codec.json
 import automorph.codec.json.{UpickleJsonCustom, UpickleJsonCodec}
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
-import test.codec.json.JsonMessageCodecSpec
+import test.codec.json.JsonMessageCodecTest
 import test.{Enum, Record, Structure}
 import ujson.{Arr, Bool, Num, Obj, Str, Value}
 
-class UpickleJsonSpec extends JsonMessageCodecSpec {
+class UpickleJsonTest extends JsonMessageCodecTest {
 
   type Node = Value
-  type ActualCodec = UpickleJsonCodec[UpickleJsonSpec.type]
+  type ActualCodec = UpickleJsonCodec[UpickleJsonTest.type]
 
-  override lazy val codec: ActualCodec = UpickleJsonCodec(UpickleJsonSpec)
+  override lazy val codec: ActualCodec = UpickleJsonCodec(UpickleJsonTest)
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
@@ -38,7 +38,7 @@ class UpickleJsonSpec extends JsonMessageCodecSpec {
   }
 }
 
-object UpickleJsonSpec extends UpickleJsonCustom {
+object UpickleJsonTest extends UpickleJsonCustom {
 
   implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
     value => Enum.toOrdinal(value),

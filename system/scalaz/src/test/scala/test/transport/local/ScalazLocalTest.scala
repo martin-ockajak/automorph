@@ -1,22 +1,23 @@
 package test.transport.local
 
-import automorph.system.IdentitySystem
-import automorph.system.IdentitySystem.Identity
+import automorph.system.ScalazSystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
-import test.core.ProtocolCodecSpec
+import scala.util.Try
+import scalaz.effect.IO
+import test.core.ProtocolCodecTest
 
-class IdentityLocalSpec extends ProtocolCodecSpec {
+class ScalazLocalTest extends ProtocolCodecTest {
 
-  type Effect[T] = Identity[T]
-  type Context = Option[String]
+  type Effect[T] = IO[T]
+  type Context = String
 
   override lazy val arbitraryContext: Arbitrary[Context] =
     Arbitrary(Arbitrary.arbitrary[Context])
 
   override lazy val system: EffectSystem[Effect] =
-    IdentitySystem()
+    ScalazSystem()
 
   override def run[T](effect: Effect[T]): T =
-    effect
+    effect.unsafePerformIO()
 }

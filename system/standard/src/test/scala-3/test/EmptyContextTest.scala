@@ -6,9 +6,9 @@ import automorph.system.IdentitySystem
 import automorph.transport.local.client.HandlerTransport
 import automorph.util.EmptyContext
 import automorph.{Client, Handler}
-import test.base.BaseSpec
+import test.base.BaseTest
 
-class EmptyContextTest extends BaseSpec {
+class EmptyContextTest extends BaseTest {
 
   "" - {
     "Create" in {

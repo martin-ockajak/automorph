@@ -1,9 +1,9 @@
 package automorph.openapi
 
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
-import test.base.BaseSpec
+import test.base.BaseTest
 
-class OpenApiSpec extends BaseSpec {
+class OpenApiTest extends BaseTest {
   private val function = RpcFunction(
     "test",
     Seq(

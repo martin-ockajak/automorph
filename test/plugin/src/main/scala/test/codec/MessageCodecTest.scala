@@ -3,7 +3,7 @@ package test.codec
 import automorph.spi.MessageCodec
 import java.nio.charset.StandardCharsets
 import org.scalacheck.Arbitrary
-import test.base.BaseSpec
+import test.base.BaseTest
 
 /**
  * Message codec test.
@@ -13,7 +13,7 @@ import test.base.BaseSpec
  * @tparam Node message node type
  * @tparam ActualCodec message codec
  */
-trait MessageCodecSpec extends BaseSpec {
+trait MessageCodecTest extends BaseTest {
 
   type Node
   type ActualCodec <: MessageCodec[Node]

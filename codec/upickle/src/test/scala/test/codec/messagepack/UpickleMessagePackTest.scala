@@ -4,16 +4,16 @@ import automorph.codec.messagepack.{UpickleMessagePackCustom, UpickleMessagePack
 import org.scalacheck.{Arbitrary, Gen}
 import scala.collection.mutable.LinkedHashMap
 import test.Generators.arbitraryRecord
-import test.codec.MessageCodecSpec
+import test.codec.MessageCodecTest
 import test.{Enum, Record, Structure}
 import upack.{Arr, Bool, Float64, Msg, Obj, Str}
 
-class UpickleMessagePackSpec extends MessageCodecSpec {
+class UpickleMessagePackTest extends MessageCodecTest {
 
   type Node = Msg
-  type ActualCodec = UpickleMessagePackCodec[UpickleMessagePackSpec.type]
+  type ActualCodec = UpickleMessagePackCodec[UpickleMessagePackTest.type]
 
-  override lazy val codec: ActualCodec = UpickleMessagePackCodec(UpickleMessagePackSpec)
+  override lazy val codec: ActualCodec = UpickleMessagePackCodec(UpickleMessagePackTest)
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
@@ -40,7 +40,7 @@ class UpickleMessagePackSpec extends MessageCodecSpec {
   }
 }
 
-object UpickleMessagePackSpec extends UpickleMessagePackCustom {
+object UpickleMessagePackTest extends UpickleMessagePackCustom {
 
   implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
     value => Enum.toOrdinal(value),

@@ -18,7 +18,7 @@ import org.scalatestplus.scalacheck.Checkers
  * - asynchronous values retrieval
  * - free network port detection
  */
-trait BaseSpec
+trait BaseTest
   extends AnyFreeSpecLike
   with OptionValues
   with BeforeAndAfterEach

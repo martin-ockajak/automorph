@@ -7,7 +7,7 @@ import monix.execution.Scheduler.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.util.Try
 
-class MonixSpec extends EffectSystemSpec[Task] {
+class MonixTest extends EffectSystemTest[Task] {
   def system: EffectSystem[Task] = MonixSystem()
 
   def run[T](effect: Task[T]): Either[Throwable, T] =

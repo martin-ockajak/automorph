@@ -17,10 +17,10 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, SerializerProvider}
 import io.circe.generic.auto._
 import io.circe.{Decoder, Encoder}
-import test.core.CoreSpec
+import test.core.CoreTest
 import test.{Enum, Record, Structure}
 
-trait ProtocolCodecSpec extends CoreSpec {
+trait ProtocolCodecTest extends CoreTest {
 
   @nowarn("msg=used")
   private lazy val testFixtures: Seq[TestFixture] = {

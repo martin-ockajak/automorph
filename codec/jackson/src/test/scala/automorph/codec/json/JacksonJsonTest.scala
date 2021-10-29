@@ -12,10 +12,10 @@ import com.fasterxml.jackson.databind.{DeserializationContext, JsonNode, Seriali
 import org.scalacheck.{Arbitrary, Gen}
 import scala.jdk.CollectionConverters.{MapHasAsJava, SeqHasAsJava}
 import test.Generators.arbitraryRecord
-import test.codec.json.JsonMessageCodecSpec
+import test.codec.json.JsonMessageCodecTest
 import test.{Enum, Record}
 
-class JacksonJsonSpec extends JsonMessageCodecSpec {
+class JacksonJsonTest extends JsonMessageCodecTest {
 
   type Node = JsonNode
   type ActualCodec = JacksonJsonCodec

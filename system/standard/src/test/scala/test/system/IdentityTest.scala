@@ -5,7 +5,7 @@ import automorph.system.IdentitySystem.Identity
 import automorph.spi.EffectSystem
 import scala.util.Try
 
-class IdentitySpec extends EffectSystemSpec[Identity] {
+class IdentityTest extends EffectSystemTest[Identity] {
   def system: EffectSystem[Identity] =
     IdentitySystem()
 

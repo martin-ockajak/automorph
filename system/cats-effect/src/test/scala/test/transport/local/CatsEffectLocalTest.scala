@@ -1,24 +1,23 @@
 package test.transport.local
 
-import automorph.system.MonixSystem
+import cats.effect.IO
+import cats.effect.unsafe.implicits.global
+import automorph.system.CatsEffectSystem
 import automorph.spi.EffectSystem
-import monix.eval.Task
-import monix.execution.Scheduler.Implicits.global
 import org.scalacheck.Arbitrary
-import scala.concurrent.duration.Duration
-import test.core.ProtocolCodecSpec
+import test.core.ProtocolCodecTest
 
-class MonixLocalSpec extends ProtocolCodecSpec {
+class CatsEffectLocalTest extends ProtocolCodecTest {
 
-  type Effect[T] = Task[T]
+  type Effect[T] = IO[T]
   type Context = String
 
   override lazy val arbitraryContext: Arbitrary[Context] =
     Arbitrary(Arbitrary.arbitrary[Context])
 
   override lazy val system: EffectSystem[Effect] =
-    MonixSystem()
+    CatsEffectSystem()
 
   override def run[T](effect: Effect[T]): T =
-    effect.runSyncUnsafe(Duration.Inf)
+    effect.unsafeRunSync()
 }

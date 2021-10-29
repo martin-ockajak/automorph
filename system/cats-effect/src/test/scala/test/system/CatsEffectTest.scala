@@ -6,7 +6,7 @@ import automorph.system.CatsEffectSystem
 import automorph.spi.EffectSystem
 import scala.util.Try
 
-class CatsEffectSpec extends EffectSystemSpec[IO] {
+class CatsEffectTest extends EffectSystemTest[IO] {
   def system: EffectSystem[IO] =
     CatsEffectSystem()
 

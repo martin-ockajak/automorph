@@ -12,10 +12,10 @@ import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import test.core.ProtocolCodecSpec
+import test.core.ProtocolCodecTest
 import test.transport.http.HttpContextGenerator
 
-class FutureHttpSpec extends ProtocolCodecSpec {
+class FutureHttpTest extends ProtocolCodecTest {
 
   type Effect[T] = Future[T]
   type Context = NanoServer.Context

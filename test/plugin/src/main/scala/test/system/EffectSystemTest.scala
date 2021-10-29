@@ -2,7 +2,7 @@ package test.system
 
 import automorph.spi.EffectSystem
 import scala.util.{Failure, Success, Try}
-import test.base.BaseSpec
+import test.base.BaseTest
 
 /**
  * Effect system test.
@@ -11,7 +11,7 @@ import test.base.BaseSpec
  *
  * @tparam Effect effect type
  */
-trait EffectSystemSpec[Effect[_]] extends BaseSpec {
+trait EffectSystemTest[Effect[_]] extends BaseTest {
   private val text = "test"
   private val number = 0
   private val error = TestException(text)
