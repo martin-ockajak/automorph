@@ -417,10 +417,7 @@ Test / test := ((Test / test) dependsOn testScalastyle).value
 
 
 // Documentation
-lazy val docs = (project in file("docs")).dependsOn(
-//  testPlugin, core, http, circe, jackson, upickle, argonaut, catsEffect
-  core, http, amqp
-).settings(
+lazy val docs = (project in file("docs")).settings(
   ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(
     catsEffect
   ),
