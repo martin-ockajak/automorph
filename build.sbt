@@ -417,29 +417,26 @@ Test / test := ((Test / test) dependsOn testScalastyle).value
 
 
 // Documentation
-lazy val docs = (project in file("docs")).settings(
-  ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(
-    catsEffect
-  ),
-  ScalaUnidoc / unidoc / target := (LocalRootProject / target).value / "site" / "api",
-  ScalaUnidoc / unidoc / scalacOptions ++= Seq(
-    "-doc-source-url",
-    scmInfo.value.get.browseUrl + "/tree/main${FILE_PATH}.scala",
-    "-sourcepath",
-    (LocalRootProject / baseDirectory).value.getAbsolutePath,
-    "-groups",
-    "-implicits",
-    "-Ymacro-expand:none",
-    "-skip-packages",
-    "test:automorph.meta:automorph.client.meta:automorph.handler.meta:test:automorph.codec.json.meta:automorph.codec.messagepack.meta:zio:sttp"
-  )
-).enablePlugins(ScalaUnidocPlugin)
-
-// API
 apiURL := Some(url(s"https://javadoc.io/doc/${organization.value}/$projectName-core_3/latest"))
 ThisBuild / autoAPIMappings := true
+ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(
+  catsEffect
+)
+ScalaUnidoc / unidoc / target := target.value / "site" / "api"
+ScalaUnidoc / unidoc / scalacOptions ++= Seq(
+  "-doc-source-url",
+  scmInfo.value.get.browseUrl + "/tree/main${FILE_PATH}.scala",
+  "-sourcepath",
+  (LocalRootProject / baseDirectory).value.getAbsolutePath,
+  "-groups",
+  "-Ymacro-expand:none",
+  "-skip-packages",
+  "test:automorph.meta:automorph.client.meta:automorph.handler.meta:test:automorph.codec.json.meta:automorph.codec.messagepack.meta:zio:sttp"
+)
+enablePlugins(ScalaUnidocPlugin)
 
-// Site settings
+
+// Site
 enablePlugins(LaikaPlugin)
 import laika.rewrite.link._
 import laika.theme.config._
@@ -479,11 +476,9 @@ laikaTheme := laika.helium.Helium.defaults.all.metadata(
 ).build
 laikaExtensions := Seq(laika.markdown.github.GitHubFlavor, laika.parse.code.SyntaxHighlighting)
 laikaIncludeAPI := true
-
-// Site tasks
 Laika / sourceDirectories := Seq(baseDirectory.value / "docs")
 laikaSite / target := target.value / "site"
-laikaSite := (laikaSite dependsOn (docs / Compile / unidoc)).value
+laikaSite := (laikaSite dependsOn (Compile / unidoc)).value
 val site = taskKey[Unit]("Generates project website.")
 site := laikaSite.value
 site / fileInputs ++= Seq(
