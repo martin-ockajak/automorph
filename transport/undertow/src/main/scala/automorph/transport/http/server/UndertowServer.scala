@@ -29,10 +29,10 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @constructor Creates an Undertow HTTP & WebSocket server with specified RPC request handler.
  * @param handler RPC request handler
  * @param port port to listen on for HTTP connections
- * @param path HTTP URL path (default: /)
+ * @param path HTTP URL path
  * @param methods allowed HTTP request methods
- * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
+ * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @param builder Undertow builder
  * @param runEffect executes specified effect asynchronously
  * @tparam Effect effect type
@@ -42,8 +42,8 @@ final case class UndertowServer[Effect[_]] private (
   port: Int,
   path: String,
   methods: Iterable[String],
-  exceptionToStatusCode: Throwable => Int,
   webSocket: Boolean,
+  exceptionToStatusCode: Throwable => Int,
   builder: Undertow.Builder,
   runEffect: Run[Effect]
 ) extends Logging with ServerMessageTransport[Effect] {
@@ -115,9 +115,9 @@ object UndertowServer {
    * @param handler RPC request handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param methods allowed HTTP request methods
-   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+   * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
    * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param builder Undertow builder
    * @tparam Effect effect type
    * @return creates an Undertow HTTP & WebSocket server using supplied asynchronous effect execution function
@@ -127,11 +127,11 @@ object UndertowServer {
     port: Int,
     path: String = "/",
     methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
-    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
   ): (Run[Effect]) => UndertowServer[Effect] = (runEffect: Run[Effect]) => {
-    val server = UndertowServer(handler, port, path, methods, exceptionToStatusCode, webSocket, builder, runEffect)
+    val server = UndertowServer(handler, port, path, methods, webSocket, exceptionToStatusCode, builder, runEffect)
     server.undertow.start()
     server
   }

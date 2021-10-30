@@ -160,7 +160,6 @@ object Default extends DefaultMeta {
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @param backend client message transport backend
    * @param system effect system plugin
-   * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @tparam Effect effect type
    * @return client message transport plugin
    */
@@ -168,10 +167,9 @@ object Default extends DefaultMeta {
     url: URI,
     method: String,
     backend: SttpBackend[Effect, _],
-    system: EffectSystem[Effect],
-    webSocket: Boolean = false
+    system: EffectSystem[Effect]
   ): ClientTransport[Effect] =
-    SttpClient(url, method, backend, system, webSocket)
+    SttpClient(url, method, backend, system)
 
   /**
    * Creates an STTP HTTP & WebSocket client message transport plugin using 'Future' as an effect type.
@@ -181,14 +179,13 @@ object Default extends DefaultMeta {
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
-   * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @param executionContext execution context
    * @return asynchronous client message transport plugin
    */
-  def clientTransportAsync(url: URI, method: String, webSocket: Boolean = false)(implicit
+  def clientTransportAsync(url: URI, method: String)(implicit
     executionContext: ExecutionContext
   ): ClientTransport[Future] =
-    clientTransport(url, method, AsyncHttpClientFutureBackend(), systemAsync, webSocket)
+    clientTransport(url, method, AsyncHttpClientFutureBackend(), systemAsync)
 
   /**
    * Creates an STTP HTTP & WebSocket client message transport plugin using identity as an effect type.
@@ -198,11 +195,10 @@ object Default extends DefaultMeta {
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
-   * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @return synchronous client message transport plugin
    */
-  def clientTransportSync(url: URI, method: String, webSocket: Boolean = false): ClientTransport[Identity] =
-    clientTransport(url, method, HttpURLConnectionBackend(), systemSync, webSocket)
+  def clientTransportSync(url: URI, method: String): ClientTransport[Identity] =
+    clientTransport(url, method, HttpURLConnectionBackend(), systemSync)
 
   /**
    * Creates an STTP JSON-RPC over HTTP & WebSocket client with specified effect system plugin.
@@ -224,10 +220,9 @@ object Default extends DefaultMeta {
     url: URI,
     method: String,
     backend: SttpBackend[Effect, _],
-    system: EffectSystem[Effect],
-    webSocket: Boolean = false
+    system: EffectSystem[Effect]
   ): Client[Effect, ClientContext] =
-    client(clientTransport(url, method, backend, system, webSocket))
+    client(clientTransport(url, method, backend, system))
 
   /**
    * Creates an STTP JSON-RPC over HTTP & WebSocket client with default RPC protocol using 'Future' as an effect type.
@@ -239,14 +234,13 @@ object Default extends DefaultMeta {
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
-   * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @param executionContext execution context
    * @return asynchronous RPC client
    */
-  def clientAsync(url: URI, method: String, webSocket: Boolean = false)(implicit
+  def clientAsync(url: URI, method: String)(implicit
     executionContext: ExecutionContext
   ): Client[Future, ClientContext] =
-    client(url, method, AsyncHttpClientFutureBackend(), systemAsync, webSocket)
+    client(url, method, AsyncHttpClientFutureBackend(), systemAsync)
 
   /**
    * Creates an STTP JSON-RPC over HTTP & WebSocket client with default RPC protocol using identity as an effect type.
@@ -258,11 +252,10 @@ object Default extends DefaultMeta {
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
-   * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @return synchronous RPC client
    */
-  def clientSync(url: URI, method: String, webSocket: Boolean = false): Client[Identity, ClientContext] =
-    client(url, method, HttpURLConnectionBackend(), systemSync, webSocket)
+  def clientSync(url: URI, method: String): Client[Identity, ClientContext] =
+    client(url, method, HttpURLConnectionBackend(), systemSync)
 
   /**
    * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
@@ -280,8 +273,9 @@ object Default extends DefaultMeta {
    * @param handler RPC request handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+   * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param builder Undertow web server builder
    * @tparam Effect effect type
    * @return creates RPC server using supplied asynchronous effect execution function
@@ -290,12 +284,13 @@ object Default extends DefaultMeta {
     handler: Types.HandlerAnyCodec[Effect, ServerContext],
     port: Int,
     path: String = "/",
-    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+    methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
     webSocket: Boolean = true,
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
   ): RunEffect[Effect] => Server[Effect] =
     (runEffect: RunEffect[Effect]) =>
-      UndertowServer.create(handler, port, path, exceptionToStatusCode, webSocket, builder)(runEffect)
+      UndertowServer.create(handler, port, path, methods, webSocket, exceptionToStatusCode, builder)(runEffect)
 
   /**
    * Creates an Undertow JSON-RPC over HTTP & WebSocket server with specified effect system plugin.
@@ -314,8 +309,9 @@ object Default extends DefaultMeta {
    * @param system effect system plugin
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+   * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param builder Undertow web server builder
    * @tparam Effect effect type
    * @return creates RPC server using supplied API binding function and asynchronous effect execution function
@@ -324,13 +320,14 @@ object Default extends DefaultMeta {
     system: EffectSystem[Effect],
     port: Int,
     path: String = "/",
-    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+    methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
     webSocket: Boolean = true,
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
   ): ServerBindApis[Effect] => RunEffect[Effect] => Server[Effect] =
     (bindApis: ServerBindApis[Effect]) => {
       val handler = bindApis(Handler.protocol(protocol).system(system).context[ServerContext])
-      server(handler, port, path, exceptionToStatusCode, webSocket, builder)
+      server(handler, port, path, methods, webSocket, exceptionToStatusCode, builder)
     }
 
   /**
@@ -348,8 +345,9 @@ object Default extends DefaultMeta {
    * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+   * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param builder Undertow web server builder
    * @param executionContext execution context
    * @return asynchronous RPC server using supplied API binding function
@@ -357,14 +355,15 @@ object Default extends DefaultMeta {
   def serverAsync(
     port: Int,
     path: String = "/",
-    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+    methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
     webSocket: Boolean = true,
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
   )(implicit executionContext: ExecutionContext): ServerBindApis[Future] => Server[Future] =
     (bindApis: ServerBindApis[Future]) => {
       val handler = bindApis(handlerAsync)
       val runEffect = (_: Future[Any]) => ()
-      server(handler, port, path, exceptionToStatusCode, webSocket, builder)(runEffect)
+      server(handler, port, path, methods, webSocket, exceptionToStatusCode, builder)(runEffect)
     }
 
   /**
@@ -382,21 +381,23 @@ object Default extends DefaultMeta {
    * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+   * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param builder Undertow web server builder
    * @return synchronous RPC server using supplied API binding function
    */
   def serverSync(
     port: Int,
     path: String = "/",
-    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+    methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
     webSocket: Boolean = true,
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
   ): ServerBindApis[Identity] => Server[Identity] =
     (bindApis: ServerBindApis[Identity]) => {
       val handler = bindApis(handlerSync)
       val runEffect = (_: Identity[Any]) => ()
-      server(handler, port, path, exceptionToStatusCode, webSocket, builder)(runEffect)
+      server(handler, port, path, methods, webSocket, exceptionToStatusCode, builder)(runEffect)
     }
 }

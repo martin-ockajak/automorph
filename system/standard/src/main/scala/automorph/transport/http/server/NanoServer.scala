@@ -30,10 +30,10 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  * @constructor Creates a NanoHTTPD HTTP & WebSocket server with specified RPC request handler.
  * @param handler RPC request handler
  * @param port port to listen on for HTTP connections
- * @param path HTTP URL path (default: /)
+ * @param path HTTP URL path
  * @param methods allowed HTTP request methods
- * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
+ * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @param executeEffect executes specified effect synchronously
  * @tparam Effect effect type
  */
@@ -42,8 +42,8 @@ final case class NanoServer[Effect[_]] private (
   port: Int,
   path: String,
   methods: Iterable[String],
-  exceptionToStatusCode: Throwable => Int,
   webSocket: Boolean,
+  exceptionToStatusCode: Throwable => Int,
   executeEffect: Execute[Effect]
 ) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect] {
 
@@ -237,9 +237,9 @@ object NanoServer {
    * @param handler RPC request handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param methods allowed HTTP request methods
-   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+   * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
    * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
+   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @tparam Effect effect type
    * @return creates NanoHTTPD HTTP & WebSocket server using supplied synchronous effect execution function
    */
@@ -247,11 +247,11 @@ object NanoServer {
     handler: Types.HandlerAnyCodec[Effect, Context],
     port: Int,
     path: String = "/",
-    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
-    webSocket: Boolean = true
+    webSocket: Boolean = true,
+    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
   ): Execute[Effect] => NanoServer[Effect] = (executeEffect: Execute[Effect]) => {
-    val server = new NanoServer(handler, port, path, methods, exceptionToStatusCode, webSocket, executeEffect)
+    val server = new NanoServer(handler, port, path, methods, webSocket, exceptionToStatusCode, executeEffect)
     server.start()
     server
   }
