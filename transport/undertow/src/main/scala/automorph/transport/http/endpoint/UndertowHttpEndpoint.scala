@@ -6,7 +6,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
-import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.RunEffect
+import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Run
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import automorph.util.{Bytes, Network, Random}
 import io.undertow.io.Receiver
@@ -29,14 +29,14 @@ import scala.util.Try
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor Creates an Undertow HTTP handler with specified RPC request handler.
  * @param handler RPC request handler
- * @param runEffect executes specified effect asynchronously
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+ * @param runEffect executes specified effect asynchronously
  * @tparam Effect effect type
  */
 final case class UndertowHttpEndpoint[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
-  runEffect: RunEffect[Effect],
-  exceptionToStatusCode: Throwable => Int
+  exceptionToStatusCode: Throwable => Int,
+  runEffect: Run[Effect]
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -180,7 +180,7 @@ object UndertowHttpEndpoint {
     handler: Types.HandlerAnyCodec[Effect, Context],
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
   ): RunEffect[Effect] => UndertowHttpEndpoint[Effect] = (runEffect: RunEffect[Effect]) =>
-    UndertowHttpEndpoint(handler, runEffect, exceptionToStatusCode)
+    UndertowHttpEndpoint(handler, exceptionToStatusCode, runEffect)
 
   /** Request context type. */
   type Context = HttpContext[Either[HttpServerExchange, WebSocketHttpExchange]]
