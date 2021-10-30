@@ -2,39 +2,30 @@ package test.transport.http
 
 import automorph.Types
 import automorph.spi.EffectSystem
-import automorph.spi.transport.ClientMessageTransport
-import automorph.system.FutureSystem
+import automorph.spi.system.Defer
+import automorph.spi.transport.{ClientMessageTransport, ServerMessageTransport}
 import automorph.transport.http.client.HttpClient
-import automorph.transport.http.server.NanoHTTPD.IHTTPSession
-import automorph.transport.http.server.NanoServer
 import java.net.URI
 import org.scalacheck.Arbitrary
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Future, Promise}
 import test.core.ClientServerTest
 import test.transport.http.HttpContextGenerator
 
-class FutureHttpTest extends ClientServerTest {
+trait StandardHttpServerTest extends ClientServerTest {
 
-  type Effect[T] = Future[T]
-  type Context = NanoServer.Context
-
-  private lazy val deferSystem = FutureSystem()
-
-  override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary
   override lazy val system: EffectSystem[Effect] = deferSystem
 
-  override def run[T](effect: Effect[T]): T = await(effect)
+  def deferSystem: EffectSystem[Effect] with Defer[Effect]
 
-  override def runEffect[T](effect: Effect[T]): Unit = ()
+  def serverTransport(port: Int): (ServerMessageTransport[Effect], Int)
 
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
-    val server = withAvailablePort(port => NanoServer.create[Effect](handler, port)(await))
+    val (server, port) = withAvailablePort(serverTransport)
     servers += server
-    val url = new URI(s"http://localhost:${server.port}")
+    val url = new URI(s"http://localhost:$port")
     val client = HttpClient.create(url, "POST", deferSystem)(runEffect)
       .asInstanceOf[ClientMessageTransport[Effect, Context]]
     clients += client

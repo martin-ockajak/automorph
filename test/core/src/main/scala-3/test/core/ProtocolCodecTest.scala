@@ -5,7 +5,7 @@ import argonaut.{Argonaut, CodecJson}
 import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, JacksonJsonCodec, UpickleJsonCodec, UpickleJsonCustom}
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import automorph.protocol.JsonRpcProtocol
-import automorph.spi.transport.ClientMessageTransport
+import automorph.spi.transport.{ClientMessageTransport, ServerMessageTransport}
 import automorph.transport.local.client.HandlerTransport
 import automorph.{Client, Handler, Types}
 import com.fasterxml.jackson.core.{JsonGenerator, JsonParser}
@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.{DeserializationContext, SerializerProvide
 import io.circe.generic.auto.*
 import io.circe.{Decoder, Encoder}
 import scala.annotation.nowarn
+import scala.collection.mutable.ArrayBuffer
 import test.core.CoreTest
 import test.{Enum, Record, Structure}
 
