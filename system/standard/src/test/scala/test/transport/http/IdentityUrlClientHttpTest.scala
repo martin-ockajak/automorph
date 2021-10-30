@@ -16,7 +16,7 @@ import scala.collection.mutable.ArrayBuffer
 import test.core.ProtocolCodecTest
 import test.transport.http.HttpContextGenerator
 
-class IdentityHttpTest extends ProtocolCodecTest {
+class IdentityUrlClientHttpTest extends ProtocolCodecTest {
 
   type Effect[T] = Identity[T]
   type Context = NanoServer.Context
