@@ -126,14 +126,12 @@ object HandlerGenerator {
       (argumentNodes: Seq[Option[$nodeType]], requestContext: $contextType) => ${
       // Create the method argument lists by decoding corresponding argument nodes into values
       //   List(List(
-      //     (Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
-      //       case Failure(error) => Failure(InvalidRequestException("Malformed argument: " + ${parameter.name}, error))
-      //       case result => result
+      //     (Try(Option(codec.decode[Parameter0Type](argumentNodes(0).getOrElse(codec.encode(None)))).get) match {
+      //       ... error handling ...
       //     }).get
       //     ...
-      //     (Try(codec.decode[ParameterNType](argumentNodes(N))) match {
-      //       case Failure(error) => Failure(InvalidRequestException("Malformed argument: " + ${parameter.name}, error))
-      //       case result => result
+      //     (Try(Option(codec.decode[ParameterNType](argumentNodes(N).getOrElse(codec.encode(None)))).get) match {
+      //       ... error handling ...
       //     }).get
       //   )): List[List[ParameterXType]]
       val apiMethodArguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
@@ -145,9 +143,9 @@ object HandlerGenerator {
           } else {
             // Decode an argument node if present or otherwise an empty node into a value
             q"""
-              (scala.util.Try($codec.decode[${parameter.dataType}](
+              (scala.util.Try(Option($codec.decode[${parameter.dataType}](
                 argumentNodes($argumentIndex).getOrElse($codec.encode(None))
-              )) match {
+              )).get) match {
                 case scala.util.Failure(error) => scala.util.Failure(
                   automorph.spi.RpcProtocol.InvalidRequestException(
                     argumentNodes($argumentIndex).fold("Missing")(_ => "Malformed") + " argument: " + ${parameter.name},

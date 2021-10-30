@@ -121,14 +121,12 @@ private[automorph] object HandlerGenerator:
       ${
         // Create the method argument lists by decoding corresponding argument nodes into values
         //   List(List(
-        //     (Try(codec.decode[Parameter0Type](argumentNodes(0))) match {
-        //       case Failure(error) => Failure(InvalidRequestException("Malformed argument: " + ${ Expr(parameter.name), error))
-        //       case result => result
+        //     (Try(Option(codec.decode[Parameter0Type](argumentNodes(0).getOrElse(codec.encode(None)))).get) match {
+        //       ... error handling ...
         //     }).get
         //     ...
-        //     (Try(codec.decode[ParameterNType](argumentNodes(N))) match {
-        //       case Failure(error) => Failure(InvalidRequestException("Malformed argument: " + ${ Expr(parameter.name), error))
-        //       case result => result
+        //     (Try(Option(codec.decode[ParameterNType](argumentNodes(N).getOrElse(codec.encode(None)))).get) match {
+        //       ... error handling ...
         //     }).get
         //   )): List[List[ParameterXType]]
         val apiMethodArguments = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
@@ -151,7 +149,7 @@ private[automorph] object HandlerGenerator:
               )
               parameter.dataType.asType match
                 case '[argumentType] => '{
-                    (Try(${ decodeCall.asExprOf[argumentType] }) match
+                    (Try(Option(${ decodeCall.asExprOf[argumentType] }).get) match
                       case Failure(error) =>
                         Failure(InvalidRequestException(
                           argumentNodes(${ Expr(argumentIndex) }).fold("Missing")(_ => "Malformed") + " argument: " + ${

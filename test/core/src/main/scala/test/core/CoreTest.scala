@@ -152,11 +152,7 @@ trait CoreTest extends BaseTest {
             }
             "Missing arguments" in {
               val error = intercept[InvalidRequestException] {
-                Try(run(api.method5(true, 0))).recover {
-                  case e =>
-                    e.printStackTrace()
-                    ""
-                }
+                run(api.method5(true, 0))
               }.getMessage.toLowerCase
               error.should(include("missing argument"))
               error.should(include("p2"))
