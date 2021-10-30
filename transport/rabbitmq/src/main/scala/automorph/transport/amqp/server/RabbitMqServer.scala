@@ -25,11 +25,11 @@ import scala.util.Try
  * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
  * @constructor Creates a RabbitMQ server transport plugin.
  * @param handler RPC request handler
- * @param runEffect effect execution function
  * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
  * @param queues names of non-durable exclusive queues to consume messages from
  * @param addresses broker hostnames and ports for reconnection attempts
  * @param connectionFactory AMQP broker connection factory
+ * @param runEffect effect execution function
  * @tparam Effect effect type
  */
 final case class RabbitMqServer[Effect[_]] private (
