@@ -29,20 +29,20 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
  * @constructor Creates a NanoHTTPD HTTP & WebSocket server with specified RPC request handler.
  * @param handler RPC request handler
- * @param executeEffect executes specified effect synchronously
  * @param port port to listen on for HTTP connections
  * @param path HTTP URL path (default: /)
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
+ * @param executeEffect executes specified effect synchronously
  * @tparam Effect effect type
  */
 final case class NanoServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
-  executeEffect: Execute[Effect],
   port: Int,
   path: String,
   exceptionToStatusCode: Throwable => Int,
-  webSocket: Boolean
+  webSocket: Boolean,
+  executeEffect: Execute[Effect]
 ) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect] {
 
   private val HeaderXForwardedFor = "X-Forwarded-For"
@@ -241,7 +241,7 @@ object NanoServer {
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true
   ): Execute[Effect] => NanoServer[Effect] = (executeEffect: Execute[Effect]) => {
-      val server = new NanoServer(handler, executeEffect, port, path, exceptionToStatusCode, webSocket)
+      val server = new NanoServer(handler, port, path, exceptionToStatusCode, webSocket, executeEffect)
       server.start()
       server
     }
