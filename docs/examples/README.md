@@ -287,7 +287,7 @@ val api = new Api()
 
 ```scala
 // Customize RPC function names
-val mapNames = (name: String) => name match {
+val mapName = (name: String) => name match {
   case "original" => Seq("original", "custom")
   case "omitted" => Seq.empty
   case other => Seq(s"test.$other")
@@ -295,7 +295,7 @@ val mapNames = (name: String) => name match {
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val createServer = Default.serverSync(80, "/api")
-val server = createServer(_.bind(api, mapNames(_)))
+val server = createServer(_.bind(api, mapName(_)))
 
 // Stop the server
 server.close()
@@ -352,7 +352,7 @@ val api = new Api()
 **Server**
 
 ```scala
-// Customize server RPC error mapping
+// Customize server exception to RPC error mapping
 val protocol = Default.protocol
 val serverProtocol = protocol.mapException {
   case _: SQLException => InvalidRequest
@@ -361,10 +361,9 @@ val serverProtocol = protocol.mapException {
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val system = Default.systemAsync
-val handler = Handler
-  .protocol(serverProtocol).system(system).context[Default.ServerContext]
-val createServer = Default.server(handler, 80, "/api", {
-  // Customize server HTTP status code mapping
+val handler = Handler.protocol(serverProtocol).system(system).context[Default.ServerContext]
+val createServer = Default.server(handler, 80, "/api", mapException = {
+  // Customize server exception to HTTP status code mapping
   case _: SQLException => 400
   case e => HttpContext.defaultExceptionToStatusCode(e)
 })
@@ -377,7 +376,7 @@ server.close()
 **Client**
 
 ```scala
-// Customize client RPC error mapping
+// Customize client RPC error to exception mapping
 val clientProtocol = protocol.mapError {
   case (message, InvalidRequest.code) if message.contains("SQL") =>
     new SQLException(message)

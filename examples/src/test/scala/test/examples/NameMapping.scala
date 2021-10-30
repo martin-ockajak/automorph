@@ -24,7 +24,7 @@ object NameMapping extends App {
   val api = new Api()
 
   // Customize RPC function names
-  val mapNames = (name: String) => name match {
+  val mapName = (name: String) => name match {
     case "original" => Seq("original", "custom")
     case "omitted" => Seq.empty
     case other => Seq(s"test.$other")
@@ -32,7 +32,7 @@ object NameMapping extends App {
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val createServer = Default.serverSync(80, "/api")
-  val server = createServer(_.bind(api, mapNames(_)))
+  val server = createServer(_.bind(api, mapName(_)))
 
   // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.clientSync(new URI("http://localhost/api"), "POST")

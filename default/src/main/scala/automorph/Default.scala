@@ -275,7 +275,7 @@ object Default extends DefaultMeta {
    * @param path HTTP URL path (default: /)
    * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
-   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+   * @param mapException maps an exception to a corresponding HTTP status code
    * @param builder Undertow web server builder
    * @tparam Effect effect type
    * @return creates RPC server using supplied asynchronous effect execution function
@@ -286,11 +286,11 @@ object Default extends DefaultMeta {
     path: String = "/",
     methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
     webSocket: Boolean = true,
-    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+    mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
   ): RunEffect[Effect] => Server[Effect] =
     (runEffect: RunEffect[Effect]) =>
-      UndertowServer.create(handler, port, path, methods, webSocket, exceptionToStatusCode, builder)(runEffect)
+      UndertowServer.create(handler, port, path, methods, webSocket, mapException, builder)(runEffect)
 
   /**
    * Creates an Undertow JSON-RPC over HTTP & WebSocket server with specified effect system plugin.
@@ -311,7 +311,7 @@ object Default extends DefaultMeta {
    * @param path HTTP URL path (default: /)
    * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
-   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+   * @param mapException maps an exception to a corresponding HTTP status code
    * @param builder Undertow web server builder
    * @tparam Effect effect type
    * @return creates RPC server using supplied API binding function and asynchronous effect execution function
@@ -322,12 +322,12 @@ object Default extends DefaultMeta {
     path: String = "/",
     methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
     webSocket: Boolean = true,
-    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+    mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
   ): ServerBindApis[Effect] => RunEffect[Effect] => Server[Effect] =
     (bindApis: ServerBindApis[Effect]) => {
       val handler = bindApis(Handler.protocol(protocol).system(system).context[ServerContext])
-      server(handler, port, path, methods, webSocket, exceptionToStatusCode, builder)
+      server(handler, port, path, methods, webSocket, mapException, builder)
     }
 
   /**
@@ -347,7 +347,7 @@ object Default extends DefaultMeta {
    * @param path HTTP URL path (default: /)
    * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
-   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+   * @param mapException maps an exception to a corresponding HTTP status code
    * @param builder Undertow web server builder
    * @param executionContext execution context
    * @return asynchronous RPC server using supplied API binding function
@@ -357,13 +357,13 @@ object Default extends DefaultMeta {
     path: String = "/",
     methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
     webSocket: Boolean = true,
-    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+    mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
   )(implicit executionContext: ExecutionContext): ServerBindApis[Future] => Server[Future] =
     (bindApis: ServerBindApis[Future]) => {
       val handler = bindApis(handlerAsync)
       val runEffect = (_: Future[Any]) => ()
-      server(handler, port, path, methods, webSocket, exceptionToStatusCode, builder)(runEffect)
+      server(handler, port, path, methods, webSocket, mapException, builder)(runEffect)
     }
 
   /**
@@ -383,7 +383,7 @@ object Default extends DefaultMeta {
    * @param path HTTP URL path (default: /)
    * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
-   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+   * @param mapException maps an exception to a corresponding HTTP status code
    * @param builder Undertow web server builder
    * @return synchronous RPC server using supplied API binding function
    */
@@ -392,12 +392,12 @@ object Default extends DefaultMeta {
     path: String = "/",
     methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
     webSocket: Boolean = true,
-    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+    mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
   ): ServerBindApis[Identity] => Server[Identity] =
     (bindApis: ServerBindApis[Identity]) => {
       val handler = bindApis(handlerSync)
       val runEffect = (_: Identity[Any]) => ()
-      server(handler, port, path, methods, webSocket, exceptionToStatusCode, builder)(runEffect)
+      server(handler, port, path, methods, webSocket, mapException, builder)(runEffect)
     }
 }
