@@ -16,7 +16,6 @@ import java.net.http.HttpResponse.BodyHandlers
 import java.net.http.WebSocket.Listener
 import java.net.http.{HttpRequest, HttpResponse, WebSocket}
 import java.nio.ByteBuffer
-import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable.ArrayBuffer
@@ -56,7 +55,6 @@ final case class HttpClient[Effect[_]] private (
   private val httpEmptyUrl = new URI("http://empty")
   private val webSocketsSchemePrefix = "ws"
   private val httpClient = builder.build
-  private val urlWebSockets = new AtomicReference[Map[URI, Effect[WebSocket]]](Map.empty)
   require(httpMethods.contains(method), s"Invalid HTTP method: $method")
 
   override def call(
@@ -177,14 +175,6 @@ final case class HttpClient[Effect[_]] private (
         // Create WebSocket request
         val responseEffect = system.deferred[Response]
         val response = system.flatMap(responseEffect, _.effect)
-        val webSockets = urlWebSockets.updateAndGet { webSockets =>
-          webSockets.get(requestUrl).map(_ => webSockets).getOrElse {
-            val webSocketBuilder = createWebSocketBuilder(requestUrl, httpContext)
-            val webSocket = prepareWebSocket(webSocketBuilder, requestUrl, responseEffect)
-            webSockets + (requestUrl -> webSocket)
-          }
-        }
-//        val webSocket = webSockets(requestUrl)
         val webSocketBuilder = createWebSocketBuilder(requestUrl, httpContext)
         val webSocket = prepareWebSocket(webSocketBuilder, requestUrl, responseEffect)
         Right((webSocket, response, requestBody)) -> requestUrl
@@ -232,7 +222,6 @@ final case class HttpClient[Effect[_]] private (
           requestUrl,
           WebSocketListener(
             requestUrl,
-            urlWebSockets,
             response,
             runEffect
           )
@@ -326,14 +315,10 @@ object HttpClient {
 
   private case class WebSocketListener[Effect[_]](
     url: URI,
-    urlWebSockets: AtomicReference[Map[URI, Effect[WebSocket]]],
     response: Deferred[Effect, Response],
     runEffect: Run[Effect]
   ) extends Listener {
     private val buffers = ArrayBuffer.empty[ArraySeq.ofByte]
-
-    override def onOpen(webSocket: WebSocket): Unit =
-      super.onOpen(webSocket)
 
     override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[_] = {
       buffers += Bytes.byteBuffer.from(data)
@@ -348,7 +333,6 @@ object HttpClient {
     }
 
     override def onClose(webSocket: WebSocket, statusCode: Int, reason: String): CompletionStage[_] =
-      urlWebSockets.updateAndGet(webSockets => webSockets - url)
       super.onClose(webSocket, statusCode, reason)
 
     override def onError(webSocket: WebSocket, error: Throwable): Unit = {
