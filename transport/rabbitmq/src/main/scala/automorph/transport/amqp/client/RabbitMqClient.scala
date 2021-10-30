@@ -4,7 +4,7 @@ import automorph.log.Logging
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
+import automorph.transport.amqp.client.RabbitMqClient.{Context, Response, Run}
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
@@ -16,7 +16,7 @@ import scala.collection.immutable.ArraySeq
 import scala.util.{Try, Using}
 
 /**
- * RabbitMQ client transport plugin using AMQP as message transport protocol.
+ * RabbitMQ client message transport plugin.
  *
  * The client uses the supplied RPC request as AMQP request message body and returns AMQP response message body as a result.
  * AMQP request messages are published to the specified exchange using ``direct reply-to``mechanism.
@@ -24,22 +24,24 @@ import scala.util.{Try, Using}
  *
  * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
  * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
- * @constructor Creates a RabbitMQ client transport plugin.
+ * @constructor Creates a RabbitMQ client message transport plugin.
  * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
  * @param routingKey AMQP routing key (typically a queue name)
  * @param system effect system plugin
  * @param exchange direct non-durable AMQP message exchange name
  * @param addresses broker hostnames and ports for reconnection attempts
  * @param connectionFactory AMQP broker connection factory
+ * @param runEffect effect execution function
  * @tparam Effect effect type
  */
-final case class RabbitMqClient[Effect[_]](
+final case class RabbitMqClient[Effect[_]] private (
   url: URI,
   routingKey: String,
   system: EffectSystem[Effect] with Defer[Effect],
-  exchange: String = RabbitMqCommon.defaultDirectExchange,
-  addresses: Seq[Address] = Seq.empty,
-  connectionFactory: ConnectionFactory = new ConnectionFactory
+  exchange: String,
+  addresses: Seq[Address],
+  connectionFactory: ConnectionFactory,
+  runEffect: Run[Effect]
 ) extends Logging with ClientMessageTransport[Effect, Context] {
 
   private lazy val connection = createConnection()
@@ -119,7 +121,7 @@ final case class RabbitMqClient[Effect[_]](
         // Resolve the registered deferred response effect
         val responseContext = RabbitMqCommon.context(properties)
         responseHandlers.get(properties.getCorrelationId).foreach { response =>
-          response.succeed(Bytes.byteArray.from(responseBody) -> responseContext)
+          runEffect(response.succeed(Bytes.byteArray.from(responseBody) -> responseContext).asInstanceOf[Effect[Any]])
         }
       }
     }
@@ -143,5 +145,37 @@ object RabbitMqClient {
   /** Request context type. */
   type Context = AmqpContext[RabbitMqContext]
 
+  /**
+   * Asynchronous effect execution function type.
+   *
+   * @tparam Effect effect type
+   */
+  type Run[Effect[_]] = Effect[Any] => Unit
+
   private type Response = (ArraySeq.ofByte, Context)
+
+  /**
+   * Creates a RabbitMQ client message transport plugin.
+   *
+   * Resulting function requires:
+   * - effect execution function - executes specified effect asynchronously
+   *
+   * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
+   * @param routingKey AMQP routing key (typically a queue name)
+   * @param system effect system plugin
+   * @param exchange direct non-durable AMQP message exchange name
+   * @param addresses broker hostnames and ports for reconnection attempts
+   * @param connectionFactory AMQP broker connection factory
+   * @tparam Effect effect type
+   * @return creates a RabbitMQ client using supplied asynchronous effect execution function
+   */
+  def create[Effect[_]](
+    url: URI,
+    routingKey: String,
+    system: EffectSystem[Effect] with Defer[Effect],
+    exchange: String = RabbitMqCommon.defaultDirectExchange,
+    addresses: Seq[Address] = Seq.empty,
+    connectionFactory: ConnectionFactory = new ConnectionFactory,
+  ): Run[Effect] => RabbitMqClient[Effect] = (runEffect: Run[Effect]) =>
+    RabbitMqClient(url, routingKey, system, exchange, addresses, connectionFactory, runEffect)
 }

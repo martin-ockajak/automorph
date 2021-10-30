@@ -33,7 +33,17 @@ final case class FutureSystem()(implicit executionContext: ExecutionContext)
 
   override def deferred[T]: Future[Deferred[Future, T]] = {
     val promise = Promise[T]
-    Future.successful(Deferred(promise.future, promise.success, promise.failure))
+    Future.successful(Deferred(
+      promise.future,
+      (result: T) => Future {
+        promise.success(result)
+        ()
+      },
+      (error: Throwable) => Future {
+        promise.failure(error)
+        ()
+      }
+    ))
   }
 }
 

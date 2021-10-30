@@ -1,7 +1,8 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
-import zio.RIO
+import automorph.spi.system.{Defer, Deferred}
+import zio.{Queue, RIO, ZQueue}
 
 /**
  * ZIO effect system plugin using `RIO` as an effect type.
@@ -12,7 +13,8 @@ import zio.RIO
  * @tparam Environment ZIO environment type
  */
 final case class ZioSystem[Environment]()
-  extends EffectSystem[({ type Effect[T] = RIO[Environment, T] })#Effect] {
+  extends EffectSystem[({ type Effect[T] = RIO[Environment, T] })#Effect]
+  with Defer[({ type Effect[T] = RIO[Environment, T] })#Effect] {
 
   override def wrap[T](value: => T): RIO[Environment, T] =
     RIO(value)
@@ -28,6 +30,20 @@ final case class ZioSystem[Environment]()
 
   override def flatMap[T, R](effect: RIO[Environment, T], function: T => RIO[Environment, R]): RIO[Environment, R] =
     effect.flatMap(function)
+
+  override def deferred[T]: RIO[Environment, Deferred[({ type Effect[T] = RIO[Environment, T] })#Effect, T]] =
+    map(
+      ZQueue.sliding[Either[Throwable, T]](1),
+      (queue: Queue[Either[Throwable, T]]) =>
+        Deferred(
+          queue.take.flatMap {
+            case Right(result) => pure(result)
+            case Left(error) => failed(error)
+          },
+          result => map(queue.offer(Right(result)), _ => ()),
+          error => map(queue.offer(Left(error)), _ => ())
+        )
+    )
 }
 
 object ZioSystem {

@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Protocol, Response, Session, WebSocketListener}
+import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Protocol, Response, Run, Session, WebSocketListener}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.URI
@@ -37,14 +37,16 @@ import scala.util.Try
  * @param system effect system plugin
  * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
  * @param builder HttpClient builder
+ * @param runEffect effect execution function
  * @tparam Effect effect type
  */
-final case class HttpClient[Effect[_]](
+final case class HttpClient[Effect[_]] private (
   url: URI,
   method: String,
   system: EffectSystem[Effect] with Defer[Effect],
-  webSocket: Boolean = false,
-  builder: Builder = defaultBuilder
+  webSocket: Boolean,
+  builder: Builder,
+  runEffect: Run[Effect]
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val httpClient = builder.build
@@ -248,14 +250,18 @@ final case class HttpClient[Effect[_]](
       system.deferred[T],
       (deferred: Deferred[Effect, T]) =>
         Try(completableFuture).pureFold(
-          error => deferred.fail(error),
+          error => runEffect(deferred.fail(error).asInstanceOf[Effect[Any]]),
           (value: CompletableFuture[T]) => {
             value.handle { case (result, exception) =>
-              Option(result).map(deferred.succeed).orElse(Option(exception).map(deferred.fail)).getOrElse {
-                deferred.fail(new IllegalStateException("Missing completable future result"))
+              Option(result).map { value =>
+                runEffect(deferred.succeed(value).asInstanceOf[Effect[Any]])
+              }.getOrElse {
+                val error = Option(exception).getOrElse {
+                  new IllegalStateException("Missing completable future result")
+                }
+                runEffect(deferred.fail(error).asInstanceOf[Effect[Any]])
               }
             }
-            ()
           }
         )
         deferred.effect
@@ -267,9 +273,39 @@ object HttpClient {
   /** Request context type. */
   type Context = HttpContext[Session]
 
+  /**
+   * Asynchronous effect execution function type.
+   *
+   * @tparam Effect effect type
+   */
+  type Run[Effect[_]] = Effect[Any] => Unit
+
   private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
 
   val defaultBuilder = java.net.http.HttpClient.newBuilder
+
+  /**
+   * Creates an HttpClient HTTP & WebSocket message client transport plugin.
+   *
+   * Resulting function requires:
+   * - effect execution function - executes specified effect asynchronously
+   *
+   * @param url HTTP server endpoint URL
+   * @param method HTTP method
+   * @param system effect system plugin
+   * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
+   * @param builder HttpClient builder
+   * @tparam Effect effect type
+   * @return creates an HttpClient using supplied asynchronous effect execution function
+   */
+  def create[Effect[_]](
+    url: URI,
+    method: String,
+    system: EffectSystem[Effect] with Defer[Effect],
+    webSocket: Boolean = false,
+    builder: Builder = defaultBuilder
+  ): Run[Effect] => HttpClient[Effect] = (runEffect: Run[Effect]) =>
+    HttpClient(url, method, system, webSocket, builder, runEffect)
 
   private case class WebSocketListener[Effect[_]](
     url: URI,

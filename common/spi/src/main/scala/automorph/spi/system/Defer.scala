@@ -1,7 +1,7 @@
 package automorph.spi.system
 
 /**
- * Deferrred effects support.
+ * Deferred effects.
  *
  * @tparam Effect effect type
  */

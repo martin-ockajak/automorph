@@ -3,6 +3,7 @@ package automorph.system
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import monix.eval.Task
+import monix.catnap.MVar
 
 /**
  * Monix effect effect system plugin using `Task` as an effect type.
@@ -28,8 +29,18 @@ final case class MonixSystem() extends EffectSystem[Task] with Defer[Task] {
   override def flatMap[T, R](effect: Task[T], function: T => Task[R]): Task[R] =
     effect.flatMap(function)
 
-  override def deferred[T]: Deferred[Task, T] = {
-    
+  override def deferred[T]: Task[Deferred[Task, T]] = {
+    map(
+      MVar.empty[Task, Either[Throwable, T]](),
+      (mVar: MVar[Task, Either[Throwable, T]]) => Deferred(
+        mVar.read.flatMap {
+          case Right(result) => pure(result)
+          case Left(error) => failed(error)
+        },
+        result => mVar.put(Right(result)),
+        error => mVar.put(Left(error))
+      )
+    )
   }
 }
 

@@ -7,14 +7,12 @@ import test.base.BaseTest
 /**
  * Effect system test.
  *
- * Checks effect type operations.
- *
  * @tparam Effect effect type
  */
 trait EffectSystemTest[Effect[_]] extends BaseTest {
-  private val text = "test"
-  private val number = 0
-  private val error = TestException(text)
+  val text = "test"
+  val number = 0
+  val error = TestException(text)
 
   case class TestException(message: String) extends RuntimeException(message)
 

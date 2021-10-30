@@ -14,7 +14,7 @@ import java.net.URI
 import scala.util.Try
 
 /**
- * RabbitMQ server transport plugin using AMQP as message transport protocol.
+ * RabbitMQ server message transport plugin.
  *
  * The server interprets AMQP request message body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as outgoing AMQP response body.
@@ -23,7 +23,7 @@ import scala.util.Try
  *
  * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
  * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
- * @constructor Creates a RabbitMQ server transport plugin.
+ * @constructor Creates a RabbitMQ server message transport plugin.
  * @param handler RPC request handler
  * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
  * @param queues names of non-durable exclusive queues to consume messages from
@@ -146,7 +146,6 @@ object RabbitMqServer {
    * - effect execution function - executes specified effect asynchronously
    *
    * @param handler RPC request handler
-   * @param runEffect effect execution function
    * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
    * @param queues names of non-durable exclusive queues to consume messages from
    * @param addresses broker hostnames and ports for reconnection attempts
