@@ -144,7 +144,7 @@ lazy val standard = (project in file(s"system/standard")).dependsOn(
   name := s"$projectName-standard"
 )
 lazy val zio = (project in file("system/zio")).dependsOn(
-  spi, testCore % Test
+  spi, testStandard % Test
 ).settings(
   name := s"$projectName-zio",
   libraryDependencies ++= Seq(
@@ -153,7 +153,7 @@ lazy val zio = (project in file("system/zio")).dependsOn(
   Compile / doc / scalacOptions ++= Seq("-skip-packages", "zio")
 )
 lazy val monix = (project in file("system/monix")).dependsOn(
-  spi, testCore % Test
+  spi, testStandard % Test
 ).settings(
   name := s"$projectName-monix",
   libraryDependencies ++= Seq(
@@ -161,7 +161,7 @@ lazy val monix = (project in file("system/monix")).dependsOn(
   )
 )
 lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
-  spi, testCore % Test
+  spi, testStandard % Test
 ).settings(
   name := s"$projectName-cats-effect",
   libraryDependencies ++= Seq(
@@ -169,7 +169,7 @@ lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
   )
 )
 lazy val scalaz = (project in file("system/scalaz")).dependsOn(
-  spi, testCore % Test
+  spi, testStandard % Test
 ).settings(
   name := s"$projectName-scalaz",
   libraryDependencies ++= Seq(
@@ -239,7 +239,7 @@ lazy val amqp = (project in file("transport/amqp")).settings(
 )
 val sttpVersion = "3.3.15"
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
-  core, http, testCore % Test, standard % Test
+  core, http, testStandard % Test, standard % Test
 ).settings(
   name := s"$projectName-sttp",
   libraryDependencies ++= Seq(
@@ -253,7 +253,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
 //  )
 )
 lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
-  amqp, core, standard, testCore % Test
+  amqp, core, standard, testCore % Test, testAmqp % Test
 ).settings(
   name := s"$projectName-rabbitmq",
   libraryDependencies ++= Seq(
@@ -263,7 +263,7 @@ lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
 
 // Server
 lazy val undertow = (project in file("transport/undertow")).dependsOn(
-  core, http, testCore % Test, standard % Test
+  core, http, testStandard % Test, standard % Test
 ).settings(
   name := s"$projectName-undertow",
   libraryDependencies ++= Seq(
@@ -271,7 +271,7 @@ lazy val undertow = (project in file("transport/undertow")).dependsOn(
   )
 )
 lazy val jetty = (project in file("transport/jetty")).dependsOn(
-  core, http, testCore % Test, standard % Test
+  core, http, testStandard % Test, standard % Test
 ).settings(
   name := s"$projectName-jetty",
   libraryDependencies ++= Seq(
@@ -280,7 +280,7 @@ lazy val jetty = (project in file("transport/jetty")).dependsOn(
   )
 )
 lazy val finagle = (project in file("transport/finagle")).dependsOn(
-  core, http, testCore % Test, standard % Test
+  core, http, testStandard % Test, standard % Test
 ).settings(
   name := s"$projectName-finagle",
   libraryDependencies ++= Seq(
@@ -288,7 +288,7 @@ lazy val finagle = (project in file("transport/finagle")).dependsOn(
   )
 )
 lazy val tapir = (project in file("transport/tapir")).dependsOn(
-  core, http, testCore % Test, standard % Test
+  core, http, testStandard % Test, standard % Test
 ).settings(
   name := s"$projectName-tapir",
   libraryDependencies ++= Seq(
@@ -298,7 +298,7 @@ lazy val tapir = (project in file("transport/tapir")).dependsOn(
 
 // Misc
 lazy val default = project.dependsOn(
-  jsonrpc, circe, standard, undertow, sttp, testCore % Test
+  jsonrpc, circe, standard, undertow, sttp, testStandard % Test
 ).settings(
   name := s"$projectName-default",
   libraryDependencies ++= Seq(
@@ -351,6 +351,11 @@ lazy val testHttp = (project in file("test/http")).dependsOn(
 )
 lazy val testAmqp = (project in file("test/amqp")).dependsOn(
   testBase, amqp
+).settings(
+  Compile / doc / scalacOptions ++= Seq("-skip-packages", "test")
+)
+lazy val testStandard = (project in file("test/standard")).dependsOn(
+  testCore, testHttp,
 ).settings(
   Compile / doc / scalacOptions ++= Seq("-skip-packages", "test")
 )
