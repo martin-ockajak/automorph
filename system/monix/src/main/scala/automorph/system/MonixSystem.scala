@@ -29,19 +29,33 @@ final case class MonixSystem() extends EffectSystem[Task] with Defer[Task] {
   override def flatMap[T, R](effect: Task[T], function: T => Task[R]): Task[R] =
     effect.flatMap(function)
 
-  override def deferred[T]: Task[Deferred[Task, T]] = {
+  override def deferred[T]: Task[Deferred[Task, T]] =
     map(
       MVar.empty[Task, Either[Throwable, T]](),
-      (mVar: MVar[Task, Either[Throwable, T]]) => Deferred(
-        mVar.read.flatMap {
-          case Right(result) => pure(result)
-          case Left(error) => failed(error)
-        },
-        result => mVar.put(Right(result)),
-        error => mVar.put(Left(error))
-      )
+      (mVar: MVar[Task, Either[Throwable, T]]) =>
+        Deferred(
+          mVar.read.flatMap {
+            case Right(result) => pure(result)
+            case Left(error) => failed(error)
+          },
+          result =>
+            flatMap(
+              mVar.tryPut(Right(result)),
+              (success: Boolean) =>
+                Option.when(success)(pure(())).getOrElse {
+                  failed(new IllegalStateException("Deferred effect already resolved"))
+                }
+            ),
+          error =>
+            flatMap(
+              mVar.tryPut(Left(error)),
+              (success: Boolean) =>
+                Option.when(success)(pure(())).getOrElse {
+                  failed(new IllegalStateException("Deferred effect already resolved"))
+                }
+            )
+        )
     )
-  }
 }
 
 object MonixSystem {
