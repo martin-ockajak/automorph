@@ -50,8 +50,8 @@ trait CoreTest extends BaseTest {
 
   "" - {
     fixtures.foreach { fixture =>
-      val codecName = fixture.genericClient.protocol.codec.getClass.getSimpleName.replaceAll("MessageCodec$", "")
-      codecName - {
+      val codecName = fixture.genericClient.protocol.codec.getClass.getSimpleName
+      codecName.replaceAll("MessageCodec$", "") - {
         "Static" - {
           "Simple API" - {
             val apis = (fixture.simpleApi, simpleApi)
