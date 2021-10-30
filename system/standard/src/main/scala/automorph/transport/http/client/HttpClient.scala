@@ -34,7 +34,7 @@ import scala.util.Try
  * @param url HTTP server endpoint URL
  * @param method HTTP method
  * @param system effect system plugin
- * @param promisedEffect creates a not yet completed effect and its completion and failure functions
+ * @param promisedEffect creates an uncompleted effect and its completion and failure functions
  * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
  * @param builder HttpClient builder
  * @tparam Effect effect type

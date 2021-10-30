@@ -28,7 +28,7 @@ import scala.util.{Try, Using}
  * @param routingKey AMQP routing key (typically a queue name)
  * @param system effect system plugin
  * @param blockingEffect creates an effect from specified blocking function
- * @param promisedEffect creates a not yet completed effect and its completion function
+ * @param promisedEffect creates an uncompleted effect and its completion function
  * @param exchange direct non-durable AMQP message exchange name
  * @param addresses broker hostnames and ports for reconnection attempts
  * @param connectionFactory AMQP broker connection factory
