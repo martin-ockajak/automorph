@@ -17,7 +17,7 @@ import scala.concurrent.{Future, Promise}
 import test.core.ProtocolCodecTest
 import test.transport.http.HttpContextGenerator
 
-class FutureHttpClientHttpTest extends ProtocolCodecTest {
+class FutureHttpTest extends ProtocolCodecTest {
 
   type Effect[T] = Future[T]
   type Context = NanoServer.Context
