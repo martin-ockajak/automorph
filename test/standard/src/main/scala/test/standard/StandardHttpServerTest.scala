@@ -1,4 +1,4 @@
-package test.transport.http
+package test.standard
 
 import automorph.Types
 import automorph.spi.EffectSystem
@@ -18,12 +18,12 @@ trait StandardHttpServerTest extends ClientServerTest {
 
   def deferSystem: EffectSystem[Effect] with Defer[Effect]
 
-  def serverTransport(port: Int): (ServerMessageTransport[Effect], Int)
+  def serverTransport(handler: Types.HandlerAnyCodec[Effect, Context], port: Int): (ServerMessageTransport[Effect], Int)
 
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
-    val (server, port) = withAvailablePort(serverTransport)
+    val (server, port) = withAvailablePort(port => serverTransport(handler, port))
     servers += server
     val url = new URI(s"http://localhost:$port")
     val client = HttpClient.create(url, "POST", deferSystem)(runEffect)
