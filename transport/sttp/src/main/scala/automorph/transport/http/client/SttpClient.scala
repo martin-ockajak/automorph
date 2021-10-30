@@ -26,20 +26,18 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @param method HTTP method
  * @param backend STTP backend
  * @param system effect system plugin
- * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
  * @tparam Effect effect type
  */
 final case class SttpClient[Effect[_]](
   url: URI,
   method: String,
   backend: SttpBackend[Effect, _],
-  system: EffectSystem[Effect],
-  webSocket: Boolean = false
+  system: EffectSystem[Effect]
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
+  private val webSocketsSchemePrefix = "ws"
   private val defaultUrl = Uri(url)
   private val defaultMethod = Method.unsafeApply(method)
-  private val protocol = if (webSocket) Protocol.WebSocket else Protocol.Http
 
   override def call(
     requestBody: ArraySeq.ofByte,
@@ -49,8 +47,9 @@ final case class SttpClient[Effect[_]](
   ): Effect[(ArraySeq.ofByte, Context)] = {
     // Send the request
     val sttpRequest = createRequest(requestBody, requestContext, context)
+    val protocol = if (sttpRequest.isWebSocket) Protocol.WebSocket else Protocol.Http
     system.flatMap(
-      system.either(send(sttpRequest, requestId)),
+      system.either(send(sttpRequest, requestId, protocol)),
       (result: Either[Throwable, Response[Array[Byte]]]) => {
         lazy val responseProperties = Map(
           LogProperties.requestId -> requestId,
@@ -79,7 +78,8 @@ final case class SttpClient[Effect[_]](
     requestContext: Option[Context]
   ): Effect[Unit] = {
     val sttpRequest = createRequest(requestBody, mediaType, requestContext).response(ignore)
-    system.map(send(sttpRequest, requestId), (_: Response[Unit]) => ())
+    val protocol = if (sttpRequest.isWebSocket) Protocol.WebSocket else Protocol.Http
+    system.map(send(sttpRequest, requestId, protocol), (_: Response[Unit]) => ())
   }
 
   override def defaultContext: Context =
@@ -90,13 +90,14 @@ final case class SttpClient[Effect[_]](
 
   private def send[R](
     sttpRequest: Request[R, WebSocket[Effect]],
-    requestId: String
+    requestId: String,
+    protocol: Protocol
   ): Effect[Response[R]] = {
     // Log the request
     lazy val requestProperties = Map(
       LogProperties.requestId -> requestId,
       "URL" -> sttpRequest.uri.toString
-    ) ++ Option.when(!webSocket)("Method" -> sttpRequest.method.toString)
+    ) ++ Option.when(protocol == Protocol.Http)("Method" -> sttpRequest.method.toString)
     logger.trace(s"Sending $protocol request", requestProperties)
 
     // Send the request
@@ -141,12 +142,13 @@ final case class SttpClient[Effect[_]](
       .followRedirects(httpContext.followRedirects.getOrElse(baseRequest.options.followRedirects))
       .readTimeout(httpContext.readTimeout.getOrElse(baseRequest.options.readTimeout))
       .maxRedirects(baseRequest.options.maxRedirects)
-    if (webSocket) {
-      // Use WebSocket connection
-      sttpRequest.response(asWebSocketAlways(sendWebSocket(requestBody)))
-    } else {
-      // Use HTTP connection
-      sttpRequest.body(requestBody.unsafeArray).response(asByteArrayAlways)
+    requestUrl.toString.toLowerCase match {
+      case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
+        // Create WebSocket request
+        sttpRequest.response(asWebSocketAlways(sendWebSocket(requestBody)))
+      case _ =>
+        // Create HTTP request
+        sttpRequest.body(requestBody.unsafeArray).response(asByteArrayAlways)
     }
   }
 

@@ -48,12 +48,12 @@ final case class HttpClient[Effect[_]] private (
   runEffect: Run[Effect]
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
-  private val httpClient = builder.build
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   private val httpEmptyUrl = new URI("http://empty")
   private val webSocketsSchemePrefix = "ws"
+  private val httpClient = builder.build
   private val webSockets = new AtomicReference[Map[URI, Effect[WebSocket]]](Map.empty)
   require(httpMethods.contains(method), s"Invalid HTTP method: $method")
 
@@ -64,7 +64,7 @@ final case class HttpClient[Effect[_]] private (
     requestContext: Option[Context]
   ): Effect[(ArraySeq.ofByte, Context)] = {
     // Send the request
-    val (request, requestUrl) = prepareRequest(requestBody, mediaType, requestContext)
+    val (request, requestUrl) = createRequest(requestBody, mediaType, requestContext)
     val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
     system.flatMap(
       system.either(send(request, requestUrl, requestId, protocol)),
@@ -96,7 +96,7 @@ final case class HttpClient[Effect[_]] private (
     mediaType: String,
     requestContext: Option[Context]
   ): Effect[Unit] = {
-    val (request, requestUrl) = prepareRequest(requestBody, mediaType, requestContext)
+    val (request, requestUrl) = createRequest(requestBody, mediaType, requestContext)
     val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
     system.map(send(request, requestUrl, requestId, protocol), (_: Response) => ())
   }
@@ -123,7 +123,7 @@ final case class HttpClient[Effect[_]] private (
     // Send the request
     system.flatMap(
       system.either(request.fold(
-        // Use HTTP connection
+        // Send HTTP request
         httpRequest =>
           system.map(
             effect(httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray)),
@@ -135,7 +135,7 @@ final case class HttpClient[Effect[_]] private (
             }
           ),
 
-        // Use WebSocket connection
+        // Send WebSocket request
         { case (webSocket, resultEffect, requestBody) =>
           system.flatMap(
             webSocket,
@@ -161,7 +161,7 @@ final case class HttpClient[Effect[_]] private (
     )
   }
 
-  private def prepareRequest(
+  private def createRequest(
     requestBody: ArraySeq.ofByte,
     mediaType: String,
     requestContext: Option[Context]
@@ -172,12 +172,14 @@ final case class HttpClient[Effect[_]] private (
     val baseRequest = Try(baseBuilder.build).toOption
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
+        // Create WebSocket request
         val responseEffect = system.deferred[Response]
         val response = system.flatMap(responseEffect, _.effect)
         val webSocketBuilder = createWebSocketBuilder(requestUrl, httpContext)
         val webSocket = prepareWebSocket(webSocketBuilder, requestUrl, responseEffect)
         Right((webSocket, response, requestBody)) -> requestUrl
       case _ =>
+        // Create HTTP request
         val httpRequest = createHttpRequest(requestBody, requestUrl, mediaType, httpContext)
         Left(httpRequest) -> httpRequest.uri
     }
