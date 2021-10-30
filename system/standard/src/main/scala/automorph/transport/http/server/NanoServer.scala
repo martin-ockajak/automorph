@@ -47,9 +47,9 @@ final case class NanoServer[Effect[_]] private (
   executeEffect: Execute[Effect]
 ) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect] {
 
-  private val HeaderXForwardedFor = "X-Forwarded-For"
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
+  private val headerXForwardedFor = "X-Forwarded-For"
   private val allowedMethods = methods.map(_.toUpperCase).toSet
 
   override def close(): Effect[Unit] =
@@ -66,7 +66,8 @@ final case class NanoServer[Effect[_]] private (
     if (!url.getPath.startsWith(path)) {
       newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Not Found")
     } else {
-      if (!allowedMethods.contains(session.getMethod.name)) {
+      // Validate HTTP request method
+      if (!allowedMethods.contains(session.getMethod.toString.toUpperCase)) {
         newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "Method Not Allowed")
       } else {
         // Receive the request
@@ -203,7 +204,7 @@ final case class NanoServer[Effect[_]] private (
   })
 
   private def clientAddress(session: IHTTPSession): String = {
-    val forwardedFor = Option(session.getHeaders.get(HeaderXForwardedFor))
+    val forwardedFor = Option(session.getHeaders.get(headerXForwardedFor))
     val address = session.getRemoteHostName
     Network.address(forwardedFor, address)
   }

@@ -7,6 +7,8 @@ import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import automorph.transport.http.server.UndertowServer.{Context, Run}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
+import io.undertow.predicate.{Predicate, Predicates}
+import io.undertow.server.HttpServerExchange
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.{Handlers, Undertow}
 import java.net.InetSocketAddress
@@ -28,6 +30,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @param handler RPC request handler
  * @param port port to listen on for HTTP connections
  * @param path HTTP URL path (default: /)
+ * @param methods allowed HTTP request methods
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
  * @param builder Undertow builder
@@ -38,34 +41,43 @@ final case class UndertowServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
   port: Int,
   path: String,
+  methods: Iterable[String],
   exceptionToStatusCode: Throwable => Int,
   webSocket: Boolean,
   builder: Undertow.Builder,
   runEffect: Run[Effect]
 ) extends Logging with ServerMessageTransport[Effect] {
 
-  private val undertow = start()
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
+  private val allowedMethods = methods.map(_.toUpperCase).toSet
+  private lazy val undertow = createServer()
 
   override def close(): Effect[Unit] =
     system.wrap(undertow.stop())
 
-  private def start(): Undertow = {
-    // Configure the request handler
-    val httpHandler = UndertowHttpEndpoint.create(handler, exceptionToStatusCode)(runEffect)
-    val webSocketHandler =
-      if (webSocket) {
+  private def createServer(): Undertow = {
+    // Validate HTTP request method
+    val httpHandler = Handlers.predicate(
+      new Predicate {
+        override def resolve(exchange: HttpServerExchange): Boolean =
+          allowedMethods.contains(exchange.getRequestMethod.toString.toUpperCase)
+      },
+      UndertowHttpEndpoint.create(handler, exceptionToStatusCode)(runEffect),
+      ResponseCodeHandler.HANDLE_405
+    )
+
+    // Validate URL path
+    val rootHandler = Handlers.predicate(
+      Predicates.prefix(path),
+      Option.when(webSocket) {
         UndertowWebSocketEndpoint.create(handler, httpHandler)(runEffect)
-      } else {
-        httpHandler
-      }
-    val pathHandler = Handlers.path(ResponseCodeHandler.HANDLE_404).addPrefixPath(path, webSocketHandler)
+      }.getOrElse(httpHandler),
+      ResponseCodeHandler.HANDLE_404
+    )
 
-    // Configure the web server
-    val undertow = builder.addHttpListener(port, "0.0.0.0").setHandler(pathHandler).build()
-
-    // Start the web server
+    // Start web server
+    val undertow = builder.addHttpListener(port, "0.0.0.0").setHandler(rootHandler).build()
     undertow.getListenerInfo.asScala.foreach { listener =>
       val properties = Map(
         "Protocol" -> listener.getProtcol
@@ -78,7 +90,6 @@ final case class UndertowServer[Effect[_]] private (
       })
       logger.info("Listening for connections", properties)
     }
-    undertow.start()
     undertow
   }
 }
@@ -104,6 +115,7 @@ object UndertowServer {
    * @param handler RPC request handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
+   * @param methods allowed HTTP request methods
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
    * @param builder Undertow builder
@@ -114,11 +126,15 @@ object UndertowServer {
     handler: Types.HandlerAnyCodec[Effect, Context],
     port: Int,
     path: String = "/",
+    methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true,
     builder: Undertow.Builder = defaultBuilder
-  ): (Run[Effect]) => UndertowServer[Effect] = (runEffect: Run[Effect]) =>
-    UndertowServer(handler, port, path, exceptionToStatusCode, webSocket, builder, runEffect)
+  ): (Run[Effect]) => UndertowServer[Effect] = (runEffect: Run[Effect]) => {
+    val server = UndertowServer(handler, port, path, methods, exceptionToStatusCode, webSocket, builder, runEffect)
+    server.undertow.start()
+    server
+  }
 
   /**
    * Default Undertow web server builder providing the following settings:
