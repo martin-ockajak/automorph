@@ -114,9 +114,9 @@ final case class UrlClient[Effect[_]](
     }
 
   private def createConnection(context: Option[Context]): HttpURLConnection = {
-    val http = context.getOrElse(defaultContext)
-    val baseUrl = http.base.map(_.connection.getURL.toURI).getOrElse(url)
-    val requestUrl = http.overrideUrl(baseUrl)
+    val httpContext = context.getOrElse(defaultContext)
+    val baseUrl = httpContext.base.map(_.connection.getURL.toURI).getOrElse(url)
+    val requestUrl = httpContext.overrideUrl(baseUrl)
     requestUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
   }
 
@@ -126,23 +126,29 @@ final case class UrlClient[Effect[_]](
     mediaType: String,
     requestContext: Option[Context]
   ): String = {
-    val http = requestContext.getOrElse(defaultContext)
-    val baseConnection = http.base.map(_.connection).getOrElse(connection)
-    val requestMethod = http.method.orElse(http.base.map(_.connection.getRequestMethod)).getOrElse(method)
+    val httpContext = requestContext.getOrElse(defaultContext)
+    val baseConnection = httpContext.base.map(_.connection).getOrElse(connection)
+    val requestMethod = httpContext.method.orElse(
+      httpContext.base.map(_.connection.getRequestMethod)
+    ).getOrElse(method)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
     connection.setRequestMethod(requestMethod)
     val baseHeaders = baseConnection.getRequestProperties.asScala.toSeq.flatMap { case (name, values) =>
       values.asScala.map(name -> _)
     }
-    (baseHeaders ++ http.headers).foreach { case (name, value) =>
+    (baseHeaders ++ httpContext.headers).foreach { case (name, value) =>
       connection.setRequestProperty(name, value)
     }
     connection.setRequestProperty(contentLengthHeader, requestBody.size.toString)
     connection.setRequestProperty(contentTypeHeader, mediaType)
     connection.setRequestProperty(acceptHeader, mediaType)
-    connection.setInstanceFollowRedirects(http.followRedirects.getOrElse(baseConnection.getInstanceFollowRedirects))
-    connection.setConnectTimeout(http.readTimeout.map(_.toMillis.toInt).getOrElse(baseConnection.getConnectTimeout))
-    connection.setReadTimeout(http.readTimeout.map {
+    connection.setInstanceFollowRedirects(
+      httpContext.followRedirects.getOrElse(baseConnection.getInstanceFollowRedirects)
+    )
+    connection.setConnectTimeout(
+      httpContext.readTimeout.map(_.toMillis.toInt).getOrElse(baseConnection.getConnectTimeout)
+    )
+    connection.setReadTimeout(httpContext.readTimeout.map {
       case Duration.Inf => 0
       case duration => duration.toMillis.toInt
     }.getOrElse(baseConnection.getReadTimeout))

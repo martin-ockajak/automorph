@@ -1,4 +1,4 @@
-package test.transport.http
+package test.transport.websocket
 
 import automorph.Types
 import automorph.spi.EffectSystem
@@ -17,7 +17,7 @@ import scala.concurrent.{Future, Promise}
 import test.core.ProtocolCodecTest
 import test.transport.http.HttpContextGenerator
 
-class FutureHttpClientHttpTest extends ProtocolCodecTest {
+class FutureHttpClientWebSocketTest extends ProtocolCodecTest {
 
   type Effect[T] = Future[T]
   type Context = NanoServer.Context
@@ -36,7 +36,7 @@ class FutureHttpClientHttpTest extends ProtocolCodecTest {
   ): Option[ClientMessageTransport[Effect, Context]] = {
     val server = withAvailablePort(port => NanoServer.create[Effect](handler, port)(await))
     servers += server
-    val url = new URI(s"http://localhost:${server.port}")
+    val url = new URI(s"ws://localhost:${server.port}")
     Some(HttpClient.create(url, "POST", deferSystem)(_ => ()).asInstanceOf[ClientMessageTransport[Effect, Context]])
   }
 

@@ -32,7 +32,7 @@ import scala.util.Try
  * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
  * @constructor Creates an HttpClient HTTP & WebSocket message client transport plugin.
- * @param url HTTP server endpoint URL
+ * @param url HTTP or WebSocket server endpoint URL
  * @param method HTTP method
  * @param system effect system plugin
  * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
@@ -44,7 +44,6 @@ final case class HttpClient[Effect[_]] private (
   url: URI,
   method: String,
   system: EffectSystem[Effect] with Defer[Effect],
-  webSocket: Boolean,
   builder: Builder,
   runEffect: Run[Effect]
 ) extends ClientMessageTransport[Effect, Context] with Logging {
@@ -53,7 +52,8 @@ final case class HttpClient[Effect[_]] private (
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
-  private val protocol = if (webSocket) Protocol.WebSocket else Protocol.Http
+  private val httpEmptyUrl = new URI("http://empty")
+  private val webSocketsSchemePrefix = "ws"
   private val webSockets = new AtomicReference[Map[URI, Effect[WebSocket]]](Map.empty)
   require(httpMethods.contains(method), s"Invalid HTTP method: $method")
 
@@ -65,8 +65,9 @@ final case class HttpClient[Effect[_]] private (
   ): Effect[(ArraySeq.ofByte, Context)] = {
     // Send the request
     val (request, requestUrl) = prepareRequest(requestBody, mediaType, requestContext)
+    val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
     system.flatMap(
-      system.either(send(request, requestUrl, requestId)),
+      system.either(send(request, requestUrl, requestId, protocol)),
       (result: Either[Throwable, Response]) => {
         lazy val responseProperties = Map(
           LogProperties.requestId -> requestId,
@@ -96,7 +97,8 @@ final case class HttpClient[Effect[_]] private (
     requestContext: Option[Context]
   ): Effect[Unit] = {
     val (request, requestUrl) = prepareRequest(requestBody, mediaType, requestContext)
-    system.map(send(request, requestUrl, requestId), (_: Response) => ())
+    val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
+    system.map(send(request, requestUrl, requestId, protocol), (_: Response) => ())
   }
 
   override def defaultContext: Context =
@@ -108,14 +110,15 @@ final case class HttpClient[Effect[_]] private (
   private def send(
     request: Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)],
     requestUrl: URI,
-    requestId: String
+    requestId: String,
+    protocol: Protocol
   ): Effect[Response] = {
     // Log the request
     lazy val requestProperties = Map(
       LogProperties.requestId -> requestId,
       "URL" -> requestUrl.toString
     ) ++ request.swap.toOption.map("Method" -> _.method)
-    logger.trace(s"Sending $protocol httpRequest", requestProperties)
+    logger.trace(s"Sending $protocol request", requestProperties)
 
     // Send the request
     system.flatMap(
@@ -147,11 +150,11 @@ final case class HttpClient[Effect[_]] private (
       (result: Either[Throwable, Response]) =>
         result.fold(
           error => {
-            logger.error(s"Failed to send $protocol httpRequest", error, requestProperties)
+            logger.error(s"Failed to send $protocol request", error, requestProperties)
             system.failed(error)
           },
           response => {
-            logger.debug(s"Sent $protocol httpRequest", requestProperties)
+            logger.debug(s"Sent $protocol request", requestProperties)
             system.pure(response)
           }
         )
@@ -162,33 +165,35 @@ final case class HttpClient[Effect[_]] private (
     requestBody: ArraySeq.ofByte,
     mediaType: String,
     requestContext: Option[Context]
-  ): (Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)], URI) =
-    webSocket match {
-      case false => {
-        val httpRequest = createHttpRequest(requestBody, mediaType, requestContext)
-        Left(httpRequest) -> httpRequest.uri
-      }
-      case true => {
+  ): (Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)], URI) = {
+    val httpContext = requestContext.getOrElse(defaultContext)
+    val requestUrl = httpContext.base.flatMap(base => Try(base.request.build).toOption).map(_.uri).getOrElse(url)
+    val baseBuilder = httpContext.base.map(_.request).getOrElse(HttpRequest.newBuilder)
+    val baseRequest = Try(baseBuilder.build).toOption
+    requestUrl.getScheme.toLowerCase match {
+      case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         val responseEffect = system.deferred[Response]
         val response = system.flatMap(responseEffect, _.effect)
-        val (webSocketBuilder, requestUrl) = createWebSocketBuilder(requestContext)
+        val webSocketBuilder = createWebSocketBuilder(requestUrl, httpContext)
         val webSocket = prepareWebSocket(webSocketBuilder, requestUrl, responseEffect)
         Right((webSocket, response, requestBody)) -> requestUrl
-      }
+      case _ =>
+        val httpRequest = createHttpRequest(requestBody, requestUrl, mediaType, httpContext)
+        Left(httpRequest) -> httpRequest.uri
     }
+  }
 
   private def createHttpRequest(
     requestBody: ArraySeq.ofByte,
+    requestUrl: URI,
     mediaType: String,
-    requestContext: Option[Context]
+    httpContext: Context
   ): HttpRequest = {
-    val http = requestContext.getOrElse(defaultContext)
-    val baseBuilder = http.base.map(_.request).getOrElse(HttpRequest.newBuilder)
+    val baseBuilder = httpContext.base.map(_.request).getOrElse(HttpRequest.newBuilder)
     val baseRequest = Try(baseBuilder.build).toOption
-    val requestUrl = http.overrideUrl(baseRequest.map(_.uri).getOrElse(url))
-    val requestMethod = http.method.getOrElse(method)
+    val requestMethod = httpContext.method.getOrElse(method)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
-    val headers = http.headers.map { case (name, value) => Seq(name, value) }.flatten
+    val headers = httpContext.headers.map { case (name, value) => Seq(name, value) }.flatten
     val headersBuilder = baseBuilder.uri(requestUrl)
       .method(requestMethod, BodyPublishers.ofByteArray(requestBody.unsafeArray))
     val requestBuilder = (headers match {
@@ -196,7 +201,7 @@ final case class HttpClient[Effect[_]] private (
       case values => headersBuilder.headers(values.toArray*)
     }).header(contentTypeHeader, mediaType)
       .header(acceptHeader, mediaType)
-    http.readTimeout.map { timeout =>
+    httpContext.readTimeout.map { timeout =>
       java.time.Duration.ofMillis(timeout.toMillis)
     }.orElse(baseRequest.flatMap(_.timeout.toScala)).map { timeout =>
       requestBuilder.timeout(timeout)
@@ -221,14 +226,14 @@ final case class HttpClient[Effect[_]] private (
         ))
     )
 
-  private def createWebSocketBuilder(requestContext: Option[Context]): (WebSocket.Builder, URI) = {
-    val http = requestContext.getOrElse(defaultContext)
-    val baseBuilder = http.base.map(_.request).getOrElse(HttpRequest.newBuilder)
-    val baseRequest = Try(baseBuilder.build).toOption
-    val requestUrl = http.overrideUrl(baseRequest.map(_.uri).getOrElse(url))
-    val httpHeaders = baseBuilder.uri(requestUrl).build.headers.map.asScala.toSeq.flatMap { case (name, values) =>
+  private def createWebSocketBuilder(
+    requestUrl: URI,
+    httpContext: Context
+  ): WebSocket.Builder = {
+    val baseBuilder = httpContext.base.map(_.request).getOrElse(HttpRequest.newBuilder)
+    val httpHeaders = baseBuilder.uri(httpEmptyUrl).build.headers.map.asScala.toSeq.flatMap { case (name, values) =>
       values.asScala.map(name -> _)
-    } ++ http.headers
+    } ++ httpContext.headers
     val connectionBuilder = httpClient.connectTimeout.toScala
       .map(httpClient.newWebSocketBuilder.connectTimeout)
       .getOrElse(httpClient.newWebSocketBuilder)
@@ -237,7 +242,7 @@ final case class HttpClient[Effect[_]] private (
         builder.header(name, value) -> headers.tail
       }.getOrElse(builder -> headers)
     }.dropWhile(!_._2.isEmpty).headOption.map(_._1).getOrElse(connectionBuilder)
-    headersBuilder -> requestUrl
+    headersBuilder
   }
 
   private def responseContext(response: Response): Context = {
@@ -290,10 +295,9 @@ object HttpClient {
    * Resulting function requires:
    * - effect execution function - executes specified effect asynchronously
    *
-   * @param url HTTP server endpoint URL
+   * @param url HTTP or WebSocket server endpoint URL
    * @param method HTTP method
    * @param system effect system plugin
-   * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @param builder HttpClient builder
    * @tparam Effect effect type
    * @return creates an HttpClient using supplied asynchronous effect execution function
@@ -302,10 +306,9 @@ object HttpClient {
     url: URI,
     method: String,
     system: EffectSystem[Effect] with Defer[Effect],
-    webSocket: Boolean = false,
     builder: Builder = defaultBuilder
   ): Run[Effect] => HttpClient[Effect] = (runEffect: Run[Effect]) =>
-    HttpClient(url, method, system, webSocket, builder, runEffect)
+    HttpClient(url, method, system, builder, runEffect)
 
   private case class WebSocketListener[Effect[_]](
     url: URI,

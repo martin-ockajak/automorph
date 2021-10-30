@@ -4,12 +4,12 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.SttpClient.{Context, Session, Protocol, WebSocket}
+import automorph.transport.http.client.SttpClient.{Context, Protocol, Session, WebSocket}
 import automorph.util.Bytes
 import java.net.URI
 import scala.collection.immutable.ArraySeq
 import sttp.capabilities.WebSockets
-import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
+import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
@@ -22,7 +22,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
  * @constructor Creates an STTP HTTP & WebSocket client message transport plugin with the specified STTP backend.
- * @param url HTTP server endpoint URL
+ * @param url HTTP or WebSocket server endpoint URL
  * @param method HTTP method
  * @param backend STTP backend
  * @param system effect system plugin
@@ -95,7 +95,7 @@ final case class SttpClient[Effect[_]](
     // Log the request
     lazy val requestProperties = Map(
       LogProperties.requestId -> requestId,
-      "URL" -> sttpRequest.uri.toString,
+      "URL" -> sttpRequest.uri.toString
     ) ++ Option.when(!webSocket)("Method" -> sttpRequest.method.toString)
     logger.trace(s"Sending $protocol request", requestProperties)
 
@@ -128,18 +128,18 @@ final case class SttpClient[Effect[_]](
     mediaType: String,
     requestContext: Option[Context]
   ): Request[Array[Byte], WebSocket[Effect]] = {
-    val http = requestContext.getOrElse(defaultContext)
-    val baseRequest = http.base.map(_.request).getOrElse(basicRequest)
-    val requestUrl = Uri(http.overrideUrl(defaultUrl.toJavaUri))
-    val requestMethod = http.method.map(Method.unsafeApply).getOrElse(defaultMethod)
+    val httpContext = requestContext.getOrElse(defaultContext)
+    val baseRequest = httpContext.base.map(_.request).getOrElse(basicRequest)
+    val requestUrl = Uri(httpContext.overrideUrl(defaultUrl.toJavaUri))
+    val requestMethod = httpContext.method.map(Method.unsafeApply).getOrElse(defaultMethod)
     val contentType = MediaType.unsafeParse(mediaType)
-    val headers = baseRequest.headers ++ http.headers.map { case (name, value) => Header(name, value) }
+    val headers = baseRequest.headers ++ httpContext.headers.map { case (name, value) => Header(name, value) }
     val sttpRequest = baseRequest.method(requestMethod, requestUrl)
       .headers(headers*)
       .contentType(contentType)
       .header(Header.accept(contentType))
-      .followRedirects(http.followRedirects.getOrElse(baseRequest.options.followRedirects))
-      .readTimeout(http.readTimeout.getOrElse(baseRequest.options.readTimeout))
+      .followRedirects(httpContext.followRedirects.getOrElse(baseRequest.options.followRedirects))
+      .readTimeout(httpContext.readTimeout.getOrElse(baseRequest.options.readTimeout))
       .maxRedirects(baseRequest.options.maxRedirects)
     if (webSocket) {
       // Use WebSocket connection
@@ -150,11 +150,10 @@ final case class SttpClient[Effect[_]](
     }
   }
 
-  private def responseContext(response: Response[Array[Byte]]): Context = {
+  private def responseContext(response: Response[Array[Byte]]): Context =
     defaultContext.statusCode(response.code.code).headers(response.headers.map { header =>
       header.name -> header.value
     }*)
-  }
 }
 
 object SttpClient {

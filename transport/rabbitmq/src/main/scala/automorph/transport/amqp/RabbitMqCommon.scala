@@ -104,22 +104,24 @@ private[automorph] object RabbitMqCommon extends Logging {
     defaultRequestId: String,
     defaultAppId: String
   ): BasicProperties = {
-    val amqp = context.getOrElse(AmqpContext())
-    val baseProperties = amqp.base.map(_.properties).getOrElse(new BasicProperties())
+    val amqpContext = context.getOrElse(AmqpContext())
+    val baseProperties = amqpContext.base.map(_.properties).getOrElse(new BasicProperties())
     (new BasicProperties()).builder()
       .contentType(contentType)
-      .replyTo(amqp.replyTo.orElse(Option(baseProperties.getReplyTo)).getOrElse(defaultReplyTo))
-      .correlationId(amqp.correlationId.orElse(Option(baseProperties.getCorrelationId)).getOrElse(defaultRequestId))
-      .contentEncoding(amqp.contentEncoding.orElse(Option(baseProperties.getContentEncoding)).orNull)
-      .appId(amqp.appId.orElse(Option(baseProperties.getAppId)).getOrElse(defaultAppId))
-      .headers((amqp.headers ++ baseProperties.getHeaders.asScala).asJava)
-      .deliveryMode(amqp.deliveryMode.map(new Integer(_)).orElse(Option(baseProperties.getDeliveryMode)).orNull)
-      .priority(amqp.priority.map(new Integer(_)).orElse(Option(baseProperties.getPriority)).orNull)
-      .expiration(amqp.expiration.orElse(Option(baseProperties.getExpiration)).orNull)
-      .messageId(amqp.messageId.orElse(Option(baseProperties.getMessageId)).orNull)
-      .timestamp(amqp.timestamp.map(Date.from).orElse(Option(baseProperties.getTimestamp)).orNull)
-      .`type`(amqp.`type`.orElse(Option(baseProperties.getType)).orNull)
-      .userId(amqp.userId.orElse(Option(baseProperties.getUserId)).orNull)
+      .replyTo(amqpContext.replyTo.orElse(Option(baseProperties.getReplyTo)).getOrElse(defaultReplyTo))
+      .correlationId(amqpContext.correlationId.orElse(Option(baseProperties.getCorrelationId)).getOrElse(
+        defaultRequestId
+      ))
+      .contentEncoding(amqpContext.contentEncoding.orElse(Option(baseProperties.getContentEncoding)).orNull)
+      .appId(amqpContext.appId.orElse(Option(baseProperties.getAppId)).getOrElse(defaultAppId))
+      .headers((amqpContext.headers ++ baseProperties.getHeaders.asScala).asJava)
+      .deliveryMode(amqpContext.deliveryMode.map(new Integer(_)).orElse(Option(baseProperties.getDeliveryMode)).orNull)
+      .priority(amqpContext.priority.map(new Integer(_)).orElse(Option(baseProperties.getPriority)).orNull)
+      .expiration(amqpContext.expiration.orElse(Option(baseProperties.getExpiration)).orNull)
+      .messageId(amqpContext.messageId.orElse(Option(baseProperties.getMessageId)).orNull)
+      .timestamp(amqpContext.timestamp.map(Date.from).orElse(Option(baseProperties.getTimestamp)).orNull)
+      .`type`(amqpContext.`type`.orElse(Option(baseProperties.getType)).orNull)
+      .userId(amqpContext.userId.orElse(Option(baseProperties.getUserId)).orNull)
       .build
   }
 
