@@ -184,17 +184,19 @@ final case class HttpClient[Effect[_]] private (
     val requestUrl = http.overrideUrl(baseRequest.map(_.uri).getOrElse(url))
     val requestMethod = http.method.getOrElse(method)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
-    val headers = http.headers.map { case (name, value) => Seq(name, value) }.flatten.toArray
-    val httpRequestBuilder = baseBuilder.uri(requestUrl)
+    val headers = http.headers.map { case (name, value) => Seq(name, value) }.flatten
+    val headersBuilder = baseBuilder.uri(requestUrl)
       .method(requestMethod, BodyPublishers.ofByteArray(requestBody.unsafeArray))
-      .header(contentTypeHeader, mediaType)
+    val requestBuilder = (headers match {
+      case Seq() => headersBuilder
+      case values => headersBuilder.headers(values.toArray*)
+    }).header(contentTypeHeader, mediaType)
       .header(acceptHeader, mediaType)
-      .headers(headers*)
     http.readTimeout.map { timeout =>
       java.time.Duration.ofMillis(timeout.toMillis)
     }.orElse(baseRequest.flatMap(_.timeout.toScala)).map { timeout =>
-      httpRequestBuilder.timeout(timeout)
-    }.getOrElse(httpRequestBuilder).build
+      requestBuilder.timeout(timeout)
+    }.getOrElse(requestBuilder).build
   }
 
   private def prepareWebSocket(context: Option[Context]): (Effect[WebSocket], Effect[Response], URI) = {
