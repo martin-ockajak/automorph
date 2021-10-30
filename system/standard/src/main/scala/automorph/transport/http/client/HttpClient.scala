@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.HttpClient.{Context, PromisedEffect, Protocol, Response, Session, WebSocketListener}
+import automorph.transport.http.client.HttpClient.{Context, PromisedEffect, Protocol, Session, WebSocketListener}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.URI
@@ -48,6 +48,7 @@ final case class HttpClient[Effect[_]] private (
   builder: Builder
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
+  private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
   private val httpClient = builder.build
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
@@ -132,13 +133,13 @@ final case class HttpClient[Effect[_]] private (
           ),
 
         // Use WebSocket connection
-        { case (webSocket, effectResult, requestBody) =>
+        { case (webSocket, resultEffect, requestBody) =>
           system.flatMap(
             webSocket,
             (webSocket: WebSocket) =>
               system.flatMap(
                 effect(webSocket.sendBinary(Bytes.byteBuffer.to(requestBody), true)),
-                (_: WebSocket) => effectResult
+                (_: WebSocket) => resultEffect
               )
           )
         }
@@ -168,8 +169,8 @@ final case class HttpClient[Effect[_]] private (
         Left(httpRequest) -> httpRequest.uri
       }
       case true => {
-        val (webSocket, effectResult, requestUrl) = prepareWebSocket(context)
-        Right((webSocket, effectResult, requestBody)) -> requestUrl
+        val (webSocket, resultEffect, requestUrl) = prepareWebSocket(context)
+        Right((webSocket, resultEffect, requestBody)) -> requestUrl
       }
     }
 
@@ -201,15 +202,14 @@ final case class HttpClient[Effect[_]] private (
 
   private def prepareWebSocket(context: Option[Context]): (Effect[WebSocket], Effect[Response], URI) = {
     val (webSocketBuilder, requestUrl) = createWebSocketBuilder(context)
-    val (effectResult, completeEffect, failEffect) = promisedEffect()
+    val promised = promisedEffect()
     val listener = WebSocketListener(
       requestUrl,
       webSockets,
-      completeEffect,
-      failEffect
+      promised
     )
     val webSocket = effect(webSocketBuilder.buildAsync(requestUrl, listener))
-    (webSocket, effectResult.asInstanceOf[Effect[Response]], requestUrl)
+    (webSocket, promised.effect.asInstanceOf[Effect[Response]], requestUrl)
   }
 
   private def createWebSocketBuilder(context: Option[Context]): (WebSocket.Builder, URI) = {
@@ -237,19 +237,19 @@ final case class HttpClient[Effect[_]] private (
   }
 
   private def effect[T](completableFuture: => CompletableFuture[T]): Effect[T] = {
-    val (effectResult, completeEffect, failEffect) = promisedEffect()
+    val promised = promisedEffect()
     Try(completableFuture).pureFold(
-      error => failEffect(error),
+      error => promised.failure(error),
       (value: CompletableFuture[T]) => {
         value.handle { case (result, exception) =>
-          Option(result).map(completeEffect).orElse(Option(exception).map(failEffect)).getOrElse {
-            failEffect(new IllegalStateException("Missing completable future result"))
+          Option(result).map(promised.success).orElse(Option(exception).map(promised.failure)).getOrElse {
+            promised.failure(new IllegalStateException("Missing completable future result"))
           }
         }
         ()
       }
     )
-    effectResult.asInstanceOf[Effect[T]]
+    promised.effect.asInstanceOf[Effect[T]]
   }
 }
 
@@ -263,10 +263,21 @@ object HttpClient {
    *
    * @tparam Effect effect type
    */
-  type PromisedEffect[Effect[_]] = () => (Effect[Any], Any => Unit, Throwable => Unit)
+  type PromisedEffect[Effect[_]] = () => Promised[Effect]
 
-  /** Response type. */
-  private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
+  /**
+   * Completable effectful value.
+   *
+   * @param effect effect containing the value
+   * @param success completes the effect with a result value
+   * @param failure completes the effect with an error
+   * @tparam Effect effect type
+   */
+  final case class Promised[Effect[_]](
+    effect: Effect[Any],
+    success: Any => Unit,
+    failure: Throwable => Unit
+  )
 
   val defaultBuilder = java.net.http.HttpClient.newBuilder
 
@@ -296,12 +307,11 @@ object HttpClient {
   private case class WebSocketListener[Effect[_]](
     url: URI,
     webSockets: AtomicReference[Map[URI, Effect[WebSocket]]],
-    completeEffect: Any => Unit,
-    failEffect: Throwable => Unit
+    promised: Promised[Effect]
   ) extends Listener {
 
     override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[_] = {
-      completeEffect((Bytes.byteBuffer.from(data), None, Seq()))
+      promised.success((Bytes.byteBuffer.from(data), None, Seq()))
       super.onBinary(webSocket, data, last)
     }
 
@@ -309,7 +319,7 @@ object HttpClient {
       super.onClose(webSocket, statusCode, reason)
 
     override def onError(webSocket: WebSocket, error: Throwable): Unit = {
-      failEffect(error)
+      promised.failure(error)
       super.onError(webSocket, error)
     }
   }

@@ -6,6 +6,7 @@ import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.HttpContext
 import automorph.transport.http.client.HttpClient
+import automorph.transport.http.client.HttpClient.Promised
 import automorph.transport.http.server.NanoHTTPD.IHTTPSession
 import automorph.transport.http.server.NanoServer
 import java.net.URI
@@ -36,9 +37,9 @@ class FutureHttpClientHttpTest extends ProtocolCodecTest {
     val server = withAvailablePort(port => NanoServer.create[Effect](handler, port)(await))
     servers += server
     val url = new URI(s"http://localhost:${server.port}")
-    val promisedEffect: HttpClient.PromisedEffect[Effect] = () => {
+    val promisedEffect = () => {
       val promise = Promise[Any]
-      (promise.future, promise.success, promise.failure)
+      Promised(promise.future, promise.success, promise.failure)
     }
     Some(HttpClient.create(url, "POST", system)(promisedEffect).asInstanceOf[ClientMessageTransport[Effect, Context]])
   }
