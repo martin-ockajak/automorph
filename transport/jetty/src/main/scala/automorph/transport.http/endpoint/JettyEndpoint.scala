@@ -5,7 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.endpoint.JettyEndpoint.{Context, RunEffect}
+import automorph.transport.http.endpoint.JettyEndpoint.{Context, Run}
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Bytes, Network, Random}
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
@@ -26,14 +26,14 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
  * @see [[https://www.eclipse.org/jetty/javadoc/jetty-11/index.html API]]
  * @constructor Creates a Jetty HTTP servlet with the specified RPC request handler.
  * @param handler RPC request handler
- * @param runEffect executes specified effect asynchronously
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+ * @param runEffect executes specified effect asynchronously
  * @tparam Effect effect type
  */
 final case class JettyEndpoint[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
-  runEffect: RunEffect[Effect],
-  exceptionToStatusCode: Throwable => Int
+  exceptionToStatusCode: Throwable => Int,
+  runEffect: Run[Effect]
 ) extends HttpServlet with Logging with EndpointMessageTransport {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -142,7 +142,7 @@ object JettyEndpoint {
    *
    * @tparam Effect effect type
    */
-  type RunEffect[Effect[_]] = Effect[Any] => Unit
+  type Run[Effect[_]] = Effect[Any] => Unit
 
   /** Request context type. */
   type Context = HttpContext[HttpServletRequest]
@@ -154,7 +154,6 @@ object JettyEndpoint {
    * - effect execution function - executes specified effect asynchronously
    *
    * @param handler RPC request handler
-   * @param runEffect executes specified effect asynchronously
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @tparam Effect effect type
    * @return creates an Jetty HTTP servlet using supplied asynchronous effect execution function
@@ -162,6 +161,6 @@ object JettyEndpoint {
   def create[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
-  ): (RunEffect[Effect]) => JettyEndpoint[Effect] = (runEffect: RunEffect[Effect]) =>
-    JettyEndpoint(handler, runEffect, exceptionToStatusCode)
+  ): (Run[Effect]) => JettyEndpoint[Effect] = (runEffect: Run[Effect]) =>
+    JettyEndpoint(handler, exceptionToStatusCode, runEffect)
 }

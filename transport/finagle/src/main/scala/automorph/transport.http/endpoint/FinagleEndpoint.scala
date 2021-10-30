@@ -5,7 +5,7 @@ import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.endpoint.FinagleEndpoint.{Context, RunEffect}
+import automorph.transport.http.endpoint.FinagleEndpoint.{Context, Run}
 import automorph.util.Extensions.ThrowableOps
 import automorph.util.{Network, Random}
 import com.twitter.finagle.Service
@@ -24,14 +24,14 @@ import com.twitter.util.{Future, Promise}
  * @see [[https://twitter.github.io/finagle/docs/com/twitter/finagle/ API]]
  * @constructor Creates a Finagle HTTP service with the specified RPC request handler.
  * @param handler RPC request handler
- * @param runEffect executes specified effect asynchronously
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+ * @param runEffect executes specified effect asynchronously
  * @tparam Effect effect type
  */
 final case class FinagleEndpoint[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
-  runEffect: RunEffect[Effect],
-  exceptionToStatusCode: Throwable => Int
+  exceptionToStatusCode: Throwable => Int,
+  runEffect: Run[Effect]
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -139,7 +139,7 @@ object FinagleEndpoint {
    *
    * @tparam Effect effect type
    */
-  type RunEffect[Effect[_]] = Effect[Any] => Unit
+  type Run[Effect[_]] = Effect[Any] => Unit
 
   /** Request context type. */
   type Context = HttpContext[Request]
@@ -151,7 +151,6 @@ object FinagleEndpoint {
    * - effect execution function - executes specified effect asynchronously
    *
    * @param handler RPC request handler
-   * @param runEffect executes specified effect asynchronously
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @tparam Effect effect type
    * @return creates an Finagle HTTP service using supplied asynchronous effect execution function
@@ -159,6 +158,6 @@ object FinagleEndpoint {
   def create[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
-  ): (RunEffect[Effect]) => FinagleEndpoint[Effect] = (runEffect: RunEffect[Effect]) =>
-    FinagleEndpoint(handler, runEffect, exceptionToStatusCode)
+  ): (Run[Effect]) => FinagleEndpoint[Effect] = (runEffect: Run[Effect]) =>
+    FinagleEndpoint(handler, exceptionToStatusCode, runEffect)
 }
