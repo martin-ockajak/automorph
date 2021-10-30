@@ -76,8 +76,8 @@ object ClientGenerator {
 
     val nodeType = weakTypeOf[Node]
     val contextType = weakTypeOf[Context]
-    lazy val encodeArguments = generateEncodeArguments[C, Node, Codec, Context](ref)(method, codec)
-    lazy val decodeResult = generateDecodeResult[C, Node, Codec, Effect, Context](ref)(method, codec)
+    val encodeArguments = generateEncodeArguments[C, Node, Codec, Context](ref)(method, codec)
+    val decodeResult = generateDecodeResult[C, Node, Codec, Effect, Context](ref)(method, codec)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
     implicit val functionLiftable: Liftable[RpcFunction] = MethodReflection.functionLiftable(ref)
     ref.c.Expr[ClientBinding[Node, Context]](q"""

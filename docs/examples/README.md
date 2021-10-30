@@ -571,8 +571,8 @@ val system = Default.asyncSystem
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-val createServer = Default.server(handler.bind(api), 80, "/api")
-val server = createServer(_ => ())
+lazy val createServer = Default.server(handler.bind(api), 80, "/api")
+lazy val server = createServer(_ => ())
 
 // Stop the server
 server.close()
