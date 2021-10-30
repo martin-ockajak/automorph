@@ -8,7 +8,7 @@ import automorph.transport.http.HttpContext
 import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
-import automorph.transport.http.server.NanoServer.{Context, ExecuteEffect, Protocol}
+import automorph.transport.http.server.NanoServer.{Context, Execute, Protocol}
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.util.Extensions.ThrowableOps
@@ -38,7 +38,7 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  */
 final case class NanoServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
-  executeEffect: ExecuteEffect[Effect],
+  executeEffect: Execute[Effect],
   port: Int,
   path: String,
   exceptionToStatusCode: Throwable => Int,
@@ -211,11 +211,11 @@ object NanoServer {
   type Response = NanoHTTPD.Response
 
   /**
-   * Asynchronous effect execution function type.
+   * Synchronous effect execution function type.
    *
    * @tparam Effect effect type
    */
-  type ExecuteEffect[Effect[_]] = Effect[Response] => Response
+  type Execute[Effect[_]] = Effect[Response] => Response
 
   /**
    * Creates a NanoHTTPD HTTP & WebSocket server with the specified RPC request handler.
@@ -240,7 +240,7 @@ object NanoServer {
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     webSocket: Boolean = true
-  ): ExecuteEffect[Effect] => NanoServer[Effect] = (executeEffect: ExecuteEffect[Effect]) => {
+  ): Execute[Effect] => NanoServer[Effect] = (executeEffect: Execute[Effect]) => {
       val server = new NanoServer(handler, executeEffect, port, path, exceptionToStatusCode, webSocket)
       server.start()
       server

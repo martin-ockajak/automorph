@@ -3,7 +3,7 @@ package automorph.transport.amqp.client
 import automorph.log.Logging
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.amqp.client.RabbitMqClient.{BlockingEffect, Context, PromisedEffect}
+import automorph.transport.amqp.client.RabbitMqClient.{Context, MakePromise}
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
@@ -27,8 +27,7 @@ import scala.util.{Try, Using}
  * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
  * @param routingKey AMQP routing key (typically a queue name)
  * @param system effect system plugin
- * @param blockingEffect creates an effect from specified blocking function
- * @param promisedEffect creates an uncompleted effect and its completion function
+ * @param makePromise creates an uncompleted effect and its completion function
  * @param exchange direct non-durable AMQP message exchange name
  * @param addresses broker hostnames and ports for reconnection attempts
  * @param connectionFactory AMQP broker connection factory
@@ -38,8 +37,7 @@ final case class RabbitMqClient[Effect[_]] private (
   url: URI,
   routingKey: String,
   system: EffectSystem[Effect],
-  blockingEffect: BlockingEffect[Effect],
-  promisedEffect: PromisedEffect[Effect],
+  makePromise: MakePromise[Effect],
   exchange: String,
   addresses: Seq[Address],
   connectionFactory: ConnectionFactory
@@ -58,7 +56,7 @@ final case class RabbitMqClient[Effect[_]] private (
     mediaType: String,
     requestContext: Option[Context]
   ): Effect[(ArraySeq.ofByte, Context)] = {
-    val (effectResult, completeEffect) = promisedEffect()
+    val (effectResult, completeEffect) = makePromise()
     system.flatMap(
       send(requestBody, requestId, mediaType, requestContext, Some(completeEffect)),
       (_: Unit) => effectResult.asInstanceOf[Effect[(ArraySeq.ofByte, Context)]]
@@ -94,13 +92,13 @@ final case class RabbitMqClient[Effect[_]] private (
     completeEffect.foreach(responseHandlers.put(requestId, _))
 
     // Send the request
-    blockingEffect(() =>
+    system.wrap {
       Try {
         val message = requestBody.unsafeArray
         threadConsumer.get.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, message)
         logger.debug("Sent AMQP request", requestProperties)
       }.onFailure(logger.error("Failed to send AMQP request", _, requestProperties)).get
-    )
+    }
   }
 
   private def createConsumer(channel: Channel): DefaultConsumer = {
@@ -145,25 +143,18 @@ object RabbitMqClient {
   type Context = AmqpContext[RabbitMqContext]
 
   /**
-   * Blocking effect function type.
+   * Promise effect creation function type.
    *
    * @tparam Effect effect type
    */
-  type BlockingEffect[Effect[_]] = (() => Unit) => Effect[Unit]
-
-  /**
-   * Promised effect function type.
-   *
-   * @tparam Effect effect type
-   */
-  type PromisedEffect[Effect[_]] = () => (Effect[Any], Any => Unit)
+  type MakePromise[Effect[_]] = () => (Effect[Any], Any => Unit)
 
   /**
    * Creates a RabbitMQ client transport plugin.
    *
    * Resulting function requires:
    * - blocking effect function - creates an effect from specified blocking function
-   * - promised effect function - provides an uncompleted effect plus its completion function
+   * - promise effect function - provides an uncompleted effect plus its completion function
    *
    * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
    * @param routingKey AMQP routing key (typically a queue name)
@@ -171,7 +162,7 @@ object RabbitMqClient {
    * @param addresses broker hostnames and ports for reconnection attempts
    * @param connectionFactory AMQP broker connection factory
    * @param executionContext execution context
-   * @return creates a RabbitMQ client using supplied blocking effect function and promised effect function
+   * @return creates a RabbitMQ client using supplied blocking effect function and promise effect function
    */
   def create[Effect[_]](
     url: URI,
@@ -180,7 +171,7 @@ object RabbitMqClient {
     exchange: String = RabbitMqCommon.defaultDirectExchange,
     addresses: Seq[Address] = Seq.empty,
     connectionFactory: ConnectionFactory = new ConnectionFactory
-  ): (BlockingEffect[Effect], PromisedEffect[Effect]) => RabbitMqClient[Effect] =
-    (blockingEffect: BlockingEffect[Effect], promisedEffect: PromisedEffect[Effect]) =>
-      RabbitMqClient(url, routingKey, system, blockingEffect, promisedEffect, exchange, addresses, connectionFactory)
+  ): MakePromise[Effect] => RabbitMqClient[Effect] =
+    (promiseEffect: MakePromise[Effect]) =>
+      RabbitMqClient(url, routingKey, system, promiseEffect, exchange, addresses, connectionFactory)
 }

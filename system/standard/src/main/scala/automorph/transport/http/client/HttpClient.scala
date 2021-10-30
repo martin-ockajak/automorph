@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.HttpClient.{Context, PromisedEffect, Protocol, Session, WebSocketListener}
+import automorph.transport.http.client.HttpClient.{Context, MakePromise, Protocol, Session, WebSocketListener}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.URI
@@ -34,7 +34,7 @@ import scala.util.Try
  * @param url HTTP server endpoint URL
  * @param method HTTP method
  * @param system effect system plugin
- * @param promisedEffect creates an uncompleted effect and its completion and failure functions
+ * @param makePromise creates an uncompleted effect and its completion and failure functions
  * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
  * @param builder HttpClient builder
  * @tparam Effect effect type
@@ -43,7 +43,7 @@ final case class HttpClient[Effect[_]] private (
   url: URI,
   method: String,
   system: EffectSystem[Effect],
-  promisedEffect: PromisedEffect[Effect],
+  makePromise: MakePromise[Effect],
   webSocket: Boolean,
   builder: Builder
 ) extends ClientMessageTransport[Effect, Context] with Logging {
@@ -202,14 +202,14 @@ final case class HttpClient[Effect[_]] private (
 
   private def prepareWebSocket(context: Option[Context]): (Effect[WebSocket], Effect[Response], URI) = {
     val (webSocketBuilder, requestUrl) = createWebSocketBuilder(context)
-    val promised = promisedEffect()
+    val promise = makePromise()
     val listener = WebSocketListener(
       requestUrl,
       webSockets,
-      promised
+      promise
     )
     val webSocket = effect(webSocketBuilder.buildAsync(requestUrl, listener))
-    (webSocket, promised.effect.asInstanceOf[Effect[Response]], requestUrl)
+    (webSocket, promise.effect.asInstanceOf[Effect[Response]], requestUrl)
   }
 
   private def createWebSocketBuilder(context: Option[Context]): (WebSocket.Builder, URI) = {
@@ -237,19 +237,19 @@ final case class HttpClient[Effect[_]] private (
   }
 
   private def effect[T](completableFuture: => CompletableFuture[T]): Effect[T] = {
-    val promised = promisedEffect()
+    val promise = makePromise()
     Try(completableFuture).pureFold(
-      error => promised.failure(error),
+      error => promise.failure(error),
       (value: CompletableFuture[T]) => {
         value.handle { case (result, exception) =>
-          Option(result).map(promised.success).orElse(Option(exception).map(promised.failure)).getOrElse {
-            promised.failure(new IllegalStateException("Missing completable future result"))
+          Option(result).map(promise.success).orElse(Option(exception).map(promise.failure)).getOrElse {
+            promise.failure(new IllegalStateException("Missing completable future result"))
           }
         }
         ()
       }
     )
-    promised.effect.asInstanceOf[Effect[T]]
+    promise.effect.asInstanceOf[Effect[T]]
   }
 }
 
@@ -259,11 +259,11 @@ object HttpClient {
   type Context = HttpContext[Session]
 
   /**
-   * Promised effect function type.
+   * Promise effect creation function type.
    *
    * @tparam Effect effect type
    */
-  type PromisedEffect[Effect[_]] = () => Promised[Effect]
+  type MakePromise[Effect[_]] = () => Promise[Effect]
 
   /**
    * Completable effectful value.
@@ -273,7 +273,7 @@ object HttpClient {
    * @param failure completes the effect with an error
    * @tparam Effect effect type
    */
-  final case class Promised[Effect[_]](
+  final case class Promise[Effect[_]](
     effect: Effect[Any],
     success: Any => Unit,
     failure: Throwable => Unit
@@ -285,7 +285,7 @@ object HttpClient {
    * Creates an HttpClient HTTP & WebSocket message client transport plugin.
    *
    * Resulting function requires:
-   * - promised effect function - provides an uncompleted effect plus its completion and error functions
+   * - promise effect function - provides an uncompleted effect plus its completion and error functions
    *
    * @param url HTTP server endpoint URL
    * @param method HTTP method
@@ -301,17 +301,17 @@ object HttpClient {
     system: EffectSystem[Effect],
     webSocket: Boolean = false,
     builder: Builder = defaultBuilder
-  ): PromisedEffect[Effect] => HttpClient[Effect] = (promisedEffect: PromisedEffect[Effect]) =>
-    HttpClient(url, method, system, promisedEffect, webSocket, builder)
+  ): MakePromise[Effect] => HttpClient[Effect] = (promiseEffect: MakePromise[Effect]) =>
+    HttpClient(url, method, system, promiseEffect, webSocket, builder)
 
   private case class WebSocketListener[Effect[_]](
     url: URI,
     webSockets: AtomicReference[Map[URI, Effect[WebSocket]]],
-    promised: Promised[Effect]
+    promise: Promise[Effect]
   ) extends Listener {
 
     override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[_] = {
-      promised.success((Bytes.byteBuffer.from(data), None, Seq()))
+      promise.success((Bytes.byteBuffer.from(data), None, Seq()))
       super.onBinary(webSocket, data, last)
     }
 
@@ -319,7 +319,7 @@ object HttpClient {
       super.onClose(webSocket, statusCode, reason)
 
     override def onError(webSocket: WebSocket, error: Throwable): Unit = {
-      promised.failure(error)
+      promise.failure(error)
       super.onError(webSocket, error)
     }
   }
