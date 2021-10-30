@@ -7,7 +7,7 @@ import org.scalacheck.{Arbitrary, Gen}
 object HttpContextGenerator {
 
   private val charset = "UTF-8"
-  private val methods = Seq("POST", "PUT", "DELETE", "GET")
+  private val methods = Seq("POST", "GET", "PUT", "DELETE")
   private val maxItems = 16
   private val maxNameSize = 16
   private val maxValueSize = 64

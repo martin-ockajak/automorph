@@ -22,7 +22,7 @@ import scala.util.Using
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @constructor Creates an HttpURLConnection HTTP client message transport plugin.
  * @param url HTTP server endpoint URL
- * @param method HTTP method
+ * @param method HTTP request method
  * @param system effect system plugin
  * @tparam Effect effect type
  */

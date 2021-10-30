@@ -33,7 +33,7 @@ import scala.util.Try
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
  * @constructor Creates an HttpClient HTTP & WebSocket message client transport plugin.
  * @param url HTTP or WebSocket server endpoint URL
- * @param method HTTP method
+ * @param method HTTP request method
  * @param system effect system plugin
  * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
  * @param builder HttpClient builder

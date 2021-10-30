@@ -7,7 +7,7 @@ import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
-import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
+import automorph.transport.http.server.NanoHTTPD.{newFixedLengthResponse, IHTTPSession, Response}
 import automorph.transport.http.server.NanoServer.{Context, Execute, Protocol}
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
@@ -31,6 +31,7 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  * @param handler RPC request handler
  * @param port port to listen on for HTTP connections
  * @param path HTTP URL path (default: /)
+ * @param methods allowed HTTP request methods
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
  * @param executeEffect executes specified effect synchronously
@@ -40,6 +41,7 @@ final case class NanoServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
   port: Int,
   path: String,
+  methods: Iterable[String],
   exceptionToStatusCode: Throwable => Int,
   webSocket: Boolean,
   executeEffect: Execute[Effect]
@@ -48,6 +50,7 @@ final case class NanoServer[Effect[_]] private (
   private val HeaderXForwardedFor = "X-Forwarded-For"
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
+  private val allowedMethods = methods.map(_.toUpperCase).toSet
 
   override def close(): Effect[Unit] =
     system.wrap(stop())
@@ -63,15 +66,19 @@ final case class NanoServer[Effect[_]] private (
     if (!url.getPath.startsWith(path)) {
       newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Not Found")
     } else {
-      // Receive the request
-      val protocol = Protocol.Http
-      val requestId = Random.id
-      lazy val requestProperties = extractRequestProperties(session, protocol, requestId)
-      logger.trace("Receiving HTTP request", requestProperties)
-      val requestBody = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
+      if (!allowedMethods.contains(session.getMethod.name)) {
+        newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "Method Not Allowed")
+      } else {
+        // Receive the request
+        val protocol = Protocol.Http
+        val requestId = Random.id
+        lazy val requestProperties = extractRequestProperties(session, protocol, requestId)
+        logger.trace("Receiving HTTP request", requestProperties)
+        val requestBody = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
 
-      // Handler the request
-      handleRequest(requestBody, session, protocol, Some(url.getPath), requestProperties, requestId)
+        // Handler the request
+        handleRequest(requestBody, session, protocol, Some(url.getPath), requestProperties, requestId)
+      }
     }
   }
 
@@ -229,6 +236,7 @@ object NanoServer {
    * @param handler RPC request handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
+   * @param methods allowed HTTP request methods
    * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
    * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
    * @tparam Effect effect type
@@ -239,12 +247,13 @@ object NanoServer {
     port: Int,
     path: String = "/",
     exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+    methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
     webSocket: Boolean = true
   ): Execute[Effect] => NanoServer[Effect] = (executeEffect: Execute[Effect]) => {
-      val server = new NanoServer(handler, port, path, exceptionToStatusCode, webSocket, executeEffect)
-      server.start()
-      server
-    }
+    val server = new NanoServer(handler, port, path, methods, exceptionToStatusCode, webSocket, executeEffect)
+    server.start()
+    server
+  }
 
   /** Transport protocol. */
   sealed abstract private class Protocol(val name: String) {

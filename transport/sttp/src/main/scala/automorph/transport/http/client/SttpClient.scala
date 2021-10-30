@@ -23,7 +23,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
  * @constructor Creates an STTP HTTP & WebSocket client message transport plugin with the specified STTP backend.
  * @param url HTTP or WebSocket server endpoint URL
- * @param method HTTP method
+ * @param method HTTP request method
  * @param backend STTP backend
  * @param system effect system plugin
  * @tparam Effect effect type
