@@ -239,7 +239,7 @@ lazy val amqp = (project in file("transport/amqp")).settings(
 )
 val sttpVersion = "3.3.15"
 lazy val sttp = (project in file("transport/sttp")).dependsOn(
-  core, http, testStandard % Test, standard % Test
+  core, http, testStandard % Test
 ).settings(
   name := s"$projectName-sttp",
   libraryDependencies ++= Seq(
@@ -263,7 +263,7 @@ lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
 
 // Server
 lazy val undertow = (project in file("transport/undertow")).dependsOn(
-  core, http, testStandard % Test, standard % Test
+  core, http, testStandard % Test
 ).settings(
   name := s"$projectName-undertow",
   libraryDependencies ++= Seq(
@@ -271,7 +271,7 @@ lazy val undertow = (project in file("transport/undertow")).dependsOn(
   )
 )
 lazy val jetty = (project in file("transport/jetty")).dependsOn(
-  core, http, testStandard % Test, standard % Test
+  core, http, testStandard % Test
 ).settings(
   name := s"$projectName-jetty",
   libraryDependencies ++= Seq(
@@ -280,7 +280,7 @@ lazy val jetty = (project in file("transport/jetty")).dependsOn(
   )
 )
 lazy val finagle = (project in file("transport/finagle")).dependsOn(
-  core, http, testStandard % Test, standard % Test
+  core, http, testStandard % Test
 ).settings(
   name := s"$projectName-finagle",
   libraryDependencies ++= Seq(
@@ -288,7 +288,7 @@ lazy val finagle = (project in file("transport/finagle")).dependsOn(
   )
 )
 lazy val tapir = (project in file("transport/tapir")).dependsOn(
-  core, http, testStandard % Test, standard % Test
+  core, http, testStandard % Test
 ).settings(
   name := s"$projectName-tapir",
   libraryDependencies ++= Seq(
@@ -355,7 +355,7 @@ lazy val testAmqp = (project in file("test/amqp")).dependsOn(
   Compile / doc / scalacOptions ++= Seq("-skip-packages", "test")
 )
 lazy val testStandard = (project in file("test/standard")).dependsOn(
-  testCore, testHttp,
+  testCore, testHttp, standard
 ).settings(
   Compile / doc / scalacOptions ++= Seq("-skip-packages", "test")
 )
