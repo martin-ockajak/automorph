@@ -126,9 +126,9 @@ final case class SttpClient[Effect[_]](
   private def createRequest(
     requestBody: ArraySeq.ofByte,
     mediaType: String,
-    context: Option[Context]
+    requestContext: Option[Context]
   ): Request[Array[Byte], WebSocket[Effect]] = {
-    val http = context.getOrElse(defaultContext)
+    val http = requestContext.getOrElse(defaultContext)
     val baseRequest = http.base.map(_.request).getOrElse(basicRequest)
     val requestUrl = Uri(http.overrideUrl(defaultUrl.toJavaUri))
     val requestMethod = http.method.map(Method.unsafeApply).getOrElse(defaultMethod)

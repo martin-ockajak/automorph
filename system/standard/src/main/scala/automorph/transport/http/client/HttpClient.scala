@@ -161,17 +161,17 @@ final case class HttpClient[Effect[_]] private (
   private def prepareRequest(
     requestBody: ArraySeq.ofByte,
     mediaType: String,
-    context: Option[Context]
+    requestContext: Option[Context]
   ): (Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)], URI) =
     webSocket match {
       case false => {
-        val httpRequest = createHttpRequest(requestBody, mediaType, context)
+        val httpRequest = createHttpRequest(requestBody, mediaType, requestContext)
         Left(httpRequest) -> httpRequest.uri
       }
       case true => {
         val responseEffect = system.deferred[Response]
         val response = system.flatMap(responseEffect, _.effect)
-        val (webSocketBuilder, requestUrl) = createWebSocketBuilder(context)
+        val (webSocketBuilder, requestUrl) = createWebSocketBuilder(requestContext)
         val webSocket = prepareWebSocket(webSocketBuilder, requestUrl, responseEffect)
         Right((webSocket, response, requestBody)) -> requestUrl
       }
@@ -180,9 +180,9 @@ final case class HttpClient[Effect[_]] private (
   private def createHttpRequest(
     requestBody: ArraySeq.ofByte,
     mediaType: String,
-    context: Option[Context]
+    requestContext: Option[Context]
   ): HttpRequest = {
-    val http = context.getOrElse(defaultContext)
+    val http = requestContext.getOrElse(defaultContext)
     val baseBuilder = http.base.map(_.request).getOrElse(HttpRequest.newBuilder)
     val baseRequest = Try(baseBuilder.build).toOption
     val requestUrl = http.overrideUrl(baseRequest.map(_.uri).getOrElse(url))
@@ -221,8 +221,8 @@ final case class HttpClient[Effect[_]] private (
         ))
     )
 
-  private def createWebSocketBuilder(context: Option[Context]): (WebSocket.Builder, URI) = {
-    val http = context.getOrElse(defaultContext)
+  private def createWebSocketBuilder(requestContext: Option[Context]): (WebSocket.Builder, URI) = {
+    val http = requestContext.getOrElse(defaultContext)
     val baseBuilder = http.base.map(_.request).getOrElse(HttpRequest.newBuilder)
     val baseRequest = Try(baseBuilder.build).toOption
     val requestUrl = http.overrideUrl(baseRequest.map(_.uri).getOrElse(url))

@@ -124,9 +124,9 @@ final case class UrlClient[Effect[_]](
     connection: HttpURLConnection,
     requestBody: ArraySeq.ofByte,
     mediaType: String,
-    context: Option[Context]
+    requestContext: Option[Context]
   ): String = {
-    val http = context.getOrElse(defaultContext)
+    val http = requestContext.getOrElse(defaultContext)
     val baseConnection = http.base.map(_.connection).getOrElse(connection)
     val requestMethod = http.method.orElse(http.base.map(_.connection.getRequestMethod)).getOrElse(method)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
