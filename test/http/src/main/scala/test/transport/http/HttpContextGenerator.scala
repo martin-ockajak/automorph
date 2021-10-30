@@ -2,7 +2,6 @@ package test.transport.http
 
 import automorph.transport.http.HttpContext
 import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import org.scalacheck.{Arbitrary, Gen}
 
 object HttpContextGenerator {

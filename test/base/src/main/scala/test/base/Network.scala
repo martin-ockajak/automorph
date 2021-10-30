@@ -1,7 +1,6 @@
 package test.base
 
 import java.net.ServerSocket
-import scala.util.Try
 
 trait Network {
   /**

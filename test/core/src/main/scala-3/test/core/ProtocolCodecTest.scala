@@ -2,9 +2,7 @@ package test.core
 
 import argonaut.Argonaut.jNumber
 import argonaut.{Argonaut, CodecJson}
-import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, JacksonJsonCodec}
-import scala.annotation.nowarn
-import automorph.codec.json.{UpickleJsonCodec, UpickleJsonCustom}
+import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, JacksonJsonCodec, UpickleJsonCodec, UpickleJsonCustom}
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import automorph.protocol.JsonRpcProtocol
 import automorph.spi.transport.ClientMessageTransport
@@ -15,8 +13,9 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, SerializerProvider}
-import io.circe.generic.auto._
+import io.circe.generic.auto.*
 import io.circe.{Decoder, Encoder}
+import scala.annotation.nowarn
 import test.core.CoreTest
 import test.{Enum, Record, Structure}
 

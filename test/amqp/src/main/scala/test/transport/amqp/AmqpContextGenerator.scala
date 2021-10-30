@@ -13,7 +13,7 @@ object AmqpContextGenerator {
     correlationId <- Arbitrary.arbitrary[Option[String]]
     expiration <- Gen.option(Gen.choose(0, Int.MaxValue).map(_.toString))
     messageId <- Arbitrary.arbitrary[Option[String]]
-    timestamp <- Gen.option(Gen.choose(0, Long.MaxValue).map(Instant.ofEpochMilli))
+    timestamp <- Gen.option(Gen.choose(0L, Long.MaxValue).map(Instant.ofEpochMilli))
     `type` <- Arbitrary.arbitrary[Option[String]]
     userId <- Arbitrary.arbitrary[Option[String]]
     appId <- Arbitrary.arbitrary[Option[String]]
