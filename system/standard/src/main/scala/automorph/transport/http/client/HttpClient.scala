@@ -54,7 +54,7 @@ final case class HttpClient[Effect[_]] private (
   private val httpEmptyUrl = new URI("http://empty")
   private val webSocketsSchemePrefix = "ws"
   private val httpClient = builder.build
-  private val webSockets = new AtomicReference[Map[URI, Effect[WebSocket]]](Map.empty)
+  private val urlWebSockets = new AtomicReference[Map[URI, Effect[WebSocket]]](Map.empty)
   require(httpMethods.contains(method), s"Invalid HTTP method: $method")
 
   override def call(
@@ -175,6 +175,14 @@ final case class HttpClient[Effect[_]] private (
         // Create WebSocket request
         val responseEffect = system.deferred[Response]
         val response = system.flatMap(responseEffect, _.effect)
+        val webSockets = urlWebSockets.updateAndGet { webSockets =>
+          webSockets.get(requestUrl).map(_ => webSockets).getOrElse {
+            val webSocketBuilder = createWebSocketBuilder(requestUrl, httpContext)
+            val webSocket = prepareWebSocket(webSocketBuilder, requestUrl, responseEffect)
+            webSockets + (requestUrl -> webSocket)
+          }
+        }
+//        val webSocket = webSockets(requestUrl)
         val webSocketBuilder = createWebSocketBuilder(requestUrl, httpContext)
         val webSocket = prepareWebSocket(webSocketBuilder, requestUrl, responseEffect)
         Right((webSocket, response, requestBody)) -> requestUrl
@@ -222,7 +230,7 @@ final case class HttpClient[Effect[_]] private (
           requestUrl,
           WebSocketListener(
             requestUrl,
-            webSockets,
+            urlWebSockets,
             response
           )
         ))
@@ -314,9 +322,13 @@ object HttpClient {
 
   private case class WebSocketListener[Effect[_]](
     url: URI,
-    webSockets: AtomicReference[Map[URI, Effect[WebSocket]]],
+    urlWebSockets: AtomicReference[Map[URI, Effect[WebSocket]]],
     response: Deferred[Effect, Response]
   ) extends Listener {
+
+    override def onOpen(webSocket: WebSocket): Unit = {
+      super.onOpen(webSocket)
+    }
 
     override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[_] = {
       response.succeed((Bytes.byteBuffer.from(data), None, Seq()))
@@ -324,6 +336,7 @@ object HttpClient {
     }
 
     override def onClose(webSocket: WebSocket, statusCode: Int, reason: String): CompletionStage[_] =
+      urlWebSockets.updateAndGet(webSockets => webSockets - url)
       super.onClose(webSocket, statusCode, reason)
 
     override def onError(webSocket: WebSocket, error: Throwable): Unit = {
