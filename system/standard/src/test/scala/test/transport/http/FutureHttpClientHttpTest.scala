@@ -22,11 +22,12 @@ class FutureHttpClientHttpTest extends ProtocolCodecTest {
   type Effect[T] = Future[T]
   type Context = NanoServer.Context
 
+  private lazy val actualSystem = FutureSystem()
   private lazy val servers = ArrayBuffer.empty[NanoServer[Effect]]
 
   override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary
 
-  override lazy val system: EffectSystem[Effect] = FutureSystem()
+  override lazy val system: EffectSystem[Effect] = actualSystem
 
   override def run[T](effect: Effect[T]): T = await(effect)
 
@@ -36,11 +37,7 @@ class FutureHttpClientHttpTest extends ProtocolCodecTest {
     val server = withAvailablePort(port => NanoServer.create[Effect](handler, port)(await))
     servers += server
     val url = new URI(s"http://localhost:${server.port}")
-    val promisedEffect = () => {
-      val promise = Promise[Any]
-      HttpClient.Promise(promise.future, promise.success, promise.failure)
-    }
-    Some(HttpClient.create(url, "POST", system)(promisedEffect).asInstanceOf[ClientMessageTransport[Effect, Context]])
+    Some(HttpClient(url, "POST", actualSystem).asInstanceOf[ClientMessageTransport[Effect, Context]])
   }
 
   override def afterAll(): Unit = {

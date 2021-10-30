@@ -2,8 +2,9 @@ package automorph.transport.amqp.client
 
 import automorph.log.Logging
 import automorph.spi.EffectSystem
+import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.amqp.client.RabbitMqClient.{Context, MakePromise}
+import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
@@ -27,27 +28,25 @@ import scala.util.{Try, Using}
  * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
  * @param routingKey AMQP routing key (typically a queue name)
  * @param system effect system plugin
- * @param makePromise creates an uncompleted effect and its completion function
  * @param exchange direct non-durable AMQP message exchange name
  * @param addresses broker hostnames and ports for reconnection attempts
  * @param connectionFactory AMQP broker connection factory
  * @tparam Effect effect type
  */
-final case class RabbitMqClient[Effect[_]] private (
+final case class RabbitMqClient[Effect[_]](
   url: URI,
   routingKey: String,
-  system: EffectSystem[Effect],
-  makePromise: MakePromise[Effect],
-  exchange: String,
-  addresses: Seq[Address],
-  connectionFactory: ConnectionFactory
+  system: EffectSystem[Effect] with Defer[Effect],
+  exchange: String = RabbitMqCommon.defaultDirectExchange,
+  addresses: Seq[Address] = Seq.empty,
+  connectionFactory: ConnectionFactory = new ConnectionFactory
 ) extends Logging with ClientMessageTransport[Effect, Context] {
 
   private lazy val connection = createConnection()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
   private val urlText = url.toURL.toExternalForm
-  private val responseHandlers = TrieMap[String, Any => Unit]()
+  private val responseHandlers = TrieMap[String, Deferred[Effect, Response]]()
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
 
   override def call(
@@ -55,11 +54,11 @@ final case class RabbitMqClient[Effect[_]] private (
     requestId: String,
     mediaType: String,
     requestContext: Option[Context]
-  ): Effect[(ArraySeq.ofByte, Context)] = {
-    val (effectResult, completeEffect) = makePromise()
+  ): Effect[Response] = {
+    val response = system.deferred[Response]
     system.flatMap(
-      send(requestBody, requestId, mediaType, requestContext, Some(completeEffect)),
-      (_: Unit) => effectResult.asInstanceOf[Effect[(ArraySeq.ofByte, Context)]]
+      send(requestBody, requestId, mediaType, requestContext, Some(response)),
+      (_: Unit) => response.effect
     )
   }
 
@@ -79,7 +78,7 @@ final case class RabbitMqClient[Effect[_]] private (
     defaultRequestId: String,
     mediaType: String,
     requestContext: Option[Context],
-    completeEffect: Option[Any => Unit]
+    response: Option[Deferred[Effect, Response]]
   ): Effect[Unit] = {
     // Log the request
     val amqpProperties =
@@ -88,8 +87,8 @@ final case class RabbitMqClient[Effect[_]] private (
     lazy val requestProperties = RabbitMqCommon.extractProperties(requestId, routingKey, urlText, None)
     logger.trace("Sending AMQP request", requestProperties)
 
-    // Register response processing promise if available
-    completeEffect.foreach(responseHandlers.put(requestId, _))
+    // Register deferred response effect if available
+    response.foreach(responseHandlers.put(requestId, _))
 
     // Send the request
     system.wrap {
@@ -115,10 +114,10 @@ final case class RabbitMqClient[Effect[_]] private (
           RabbitMqCommon.extractProperties(properties.getCorrelationId, routingKey, urlText, None)
         logger.debug("Received AMQP response", responseProperties)
 
-        // Fulfill the registered response processing promise
+        // Resolve the registered deferred response effect
         val responseContext = RabbitMqCommon.context(properties)
-        responseHandlers.get(properties.getCorrelationId).foreach { complete =>
-          complete(Bytes.byteArray.from(responseBody) -> responseContext)
+        responseHandlers.get(properties.getCorrelationId).foreach { response =>
+          response.succeed(Bytes.byteArray.from(responseBody) -> responseContext)
         }
       }
     }
@@ -142,36 +141,5 @@ object RabbitMqClient {
   /** Request context type. */
   type Context = AmqpContext[RabbitMqContext]
 
-  /**
-   * Promise effect creation function type.
-   *
-   * @tparam Effect effect type
-   */
-  type MakePromise[Effect[_]] = () => (Effect[Any], Any => Unit)
-
-  /**
-   * Creates a RabbitMQ client transport plugin.
-   *
-   * Resulting function requires:
-   * - blocking effect function - creates an effect from specified blocking function
-   * - promise effect function - provides an uncompleted effect plus its completion function
-   *
-   * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
-   * @param routingKey AMQP routing key (typically a queue name)
-   * @param exchange direct non-durable AMQP message exchange name
-   * @param addresses broker hostnames and ports for reconnection attempts
-   * @param connectionFactory AMQP broker connection factory
-   * @param executionContext execution context
-   * @return creates a RabbitMQ client using supplied blocking effect function and promise effect function
-   */
-  def create[Effect[_]](
-    url: URI,
-    routingKey: String,
-    system: EffectSystem[Effect],
-    exchange: String = RabbitMqCommon.defaultDirectExchange,
-    addresses: Seq[Address] = Seq.empty,
-    connectionFactory: ConnectionFactory = new ConnectionFactory
-  ): MakePromise[Effect] => RabbitMqClient[Effect] =
-    (promiseEffect: MakePromise[Effect]) =>
-      RabbitMqClient(url, routingKey, system, promiseEffect, exchange, addresses, connectionFactory)
+  private type Response = (ArraySeq.ofByte, Context)
 }

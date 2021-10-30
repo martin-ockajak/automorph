@@ -1,7 +1,8 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
-import scala.concurrent.{ExecutionContext, Future}
+import automorph.spi.system.{Defer, Deferred}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Success
 
 /**
@@ -12,7 +13,8 @@ import scala.util.Success
  * @constructor Creates an asynchronous effect system plugin using `Future` as an effect type.
  * @param executionContext execution context
  */
-final case class FutureSystem()(implicit executionContext: ExecutionContext) extends EffectSystem[Future] {
+final case class FutureSystem()(implicit executionContext: ExecutionContext)
+  extends EffectSystem[Future] with Defer[Future] {
 
   override def wrap[T](value: => T): Future[T] =
     Future(value)
@@ -28,6 +30,11 @@ final case class FutureSystem()(implicit executionContext: ExecutionContext) ext
 
   override def flatMap[T, R](effect: Future[T], function: T => Future[R]): Future[R] =
     effect.flatMap(function)
+
+  override def deferred[T]: Deferred[Future, T] = {
+    val promise = Promise[T]
+    Deferred(promise.future, promise.success, promise.failure)
+  }
 }
 
 object FutureSystem {
