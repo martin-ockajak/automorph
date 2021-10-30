@@ -36,7 +36,7 @@ class FutureUrlClientHttpTest extends ProtocolCodecTest {
     val server = withAvailablePort(port => NanoServer.create[Effect](handler, port)(await))
     servers += server
     val url = new URI(s"http://localhost:${server.port}")
-    Some(UrlClient(url, "POST", system).asInstanceOf[ClientMessageTransport[Effect, Context]])
+    Some(UrlClient(url, "PUT", system).asInstanceOf[ClientMessageTransport[Effect, Context]])
   }
 
   override def afterAll(): Unit = {
