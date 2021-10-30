@@ -167,8 +167,8 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     responseContext: Context,
     requestProperties: => Map[String, String],
     decodeResult: (Node, Context) => R
-  ): Effect[R] =
-  // Parse response
+  ): Effect[R] = {
+    // Parse response
     protocol.parseResponse(responseBody).fold(
       error => raiseError(error.exception, requestProperties),
       rpcResponse => {
@@ -192,6 +192,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         )
       }
     )
+  }
 
   /**
    * Creates an error effect from an exception.

@@ -5,9 +5,10 @@ import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Protocol, Response, Run, Session, WebSocketListener}
+import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, Run, Session, WebSocketListener, defaultBuilder}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
+import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.net.http.HttpClient.Builder
 import java.net.http.HttpRequest.BodyPublishers
@@ -18,6 +19,7 @@ import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.collection.immutable.ArraySeq
+import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.jdk.OptionConverters.RichOptional
 import scala.util.Try
@@ -231,7 +233,8 @@ final case class HttpClient[Effect[_]] private (
           WebSocketListener(
             requestUrl,
             urlWebSockets,
-            response
+            response,
+            runEffect
           )
         ))
     )
@@ -241,13 +244,14 @@ final case class HttpClient[Effect[_]] private (
     httpContext: Context
   ): WebSocket.Builder = {
     val baseBuilder = httpContext.base.map(_.request).getOrElse(HttpRequest.newBuilder)
-    val httpHeaders = baseBuilder.uri(httpEmptyUrl).build.headers.map.asScala.toSeq.flatMap { case (name, values) =>
-      values.asScala.map(name -> _)
-    } ++ httpContext.headers
+    val webSocketHeaders =
+      baseBuilder.uri(httpEmptyUrl).build.headers.map.asScala.toSeq.flatMap { case (name, values) =>
+        values.asScala.map(name -> _)
+      } ++ httpContext.headers
     val connectionBuilder = httpClient.connectTimeout.toScala
       .map(httpClient.newWebSocketBuilder.connectTimeout)
       .getOrElse(httpClient.newWebSocketBuilder)
-    val headersBuilder = LazyList.iterate(connectionBuilder -> httpHeaders) { case (builder, headers) =>
+    val headersBuilder = LazyList.iterate(connectionBuilder -> webSocketHeaders) { case (builder, headers) =>
       headers.headOption.map { case (name, value) =>
         builder.header(name, value) -> headers.tail
       }.getOrElse(builder -> headers)
@@ -323,15 +327,23 @@ object HttpClient {
   private case class WebSocketListener[Effect[_]](
     url: URI,
     urlWebSockets: AtomicReference[Map[URI, Effect[WebSocket]]],
-    response: Deferred[Effect, Response]
+    response: Deferred[Effect, Response],
+    runEffect: Run[Effect]
   ) extends Listener {
+    private val buffers = ArrayBuffer.empty[ArraySeq.ofByte]
 
-    override def onOpen(webSocket: WebSocket): Unit = {
+    override def onOpen(webSocket: WebSocket): Unit =
       super.onOpen(webSocket)
-    }
 
     override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[_] = {
-      response.succeed((Bytes.byteBuffer.from(data), None, Seq()))
+      buffers += Bytes.byteBuffer.from(data)
+      if (last) {
+        val outputStream = new ByteArrayOutputStream(buffers.map(_.length).sum)
+        buffers.foreach(buffer => outputStream.write(buffer.unsafeArray, 0, buffer.length))
+        buffers.clear()
+        val responseBody = Bytes.byteArray.from(outputStream.toByteArray)
+        runEffect(response.succeed((responseBody, None, Seq())).asInstanceOf[Effect[Any]])
+      }
       super.onBinary(webSocket, data, last)
     }
 

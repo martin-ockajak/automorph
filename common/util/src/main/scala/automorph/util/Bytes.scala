@@ -105,7 +105,7 @@ object Bytes {
   implicit val inputStream: Bytes[InputStream] = new Bytes[InputStream] {
 
     /** Input stream reading buffer size. */
-    val bufferSize = 4096
+    private val bufferSize = 4096
 
     override def to(bytes: ArraySeq.ofByte): InputStream = new ByteArrayInputStream(bytes.unsafeArray)
 

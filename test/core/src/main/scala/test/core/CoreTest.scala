@@ -102,12 +102,12 @@ trait CoreTest extends BaseTest {
                 consistent(apis, (api: ComplexApiType) => api.method7(a0, a1))
               }
             }
-//            "method8" in {
-//              check { (a0: Record, a1: String, a2: Option[Double], context: Context) =>
-//                implicit val usingContext: Context = context
-//                consistent(apis, (api: ComplexApiType) => api.method8(a0, a1, a2))
-//              }
-//            }
+            "method8" in {
+              check { (a0: Record, a1: String, a2: Option[Double], context: Context) =>
+                implicit val usingContext: Context = context
+                consistent(apis, (api: ComplexApiType) => api.method8(a0, a1, a2))
+              }
+            }
             "method9" in {
               check { (a0: String) =>
                 val (testedApi, referenceApi) = apis
