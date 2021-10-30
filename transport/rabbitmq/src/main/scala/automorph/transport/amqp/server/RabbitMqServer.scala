@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
-import automorph.transport.amqp.server.RabbitMqServer.Context
+import automorph.transport.amqp.server.RabbitMqServer.{Context, Run}
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import automorph.util.{Bytes, Random}
@@ -34,11 +34,11 @@ import scala.util.Try
  */
 final case class RabbitMqServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, AmqpContext[BasicProperties]],
-  runEffect: Effect[Any] => Any,
   url: URI,
   queues: Seq[String],
   addresses: Seq[Address],
-  connectionFactory: ConnectionFactory
+  connectionFactory: ConnectionFactory,
+  runEffect: Run[Effect]
 ) extends Logging with ServerMessageTransport[Effect] {
 
   private lazy val connection = createConnection()
@@ -137,7 +137,7 @@ object RabbitMqServer {
    *
    * @tparam Effect effect type
    */
-  type RunEffect[Effect[_]] = Effect[Any] => Unit
+  type Run[Effect[_]] = Effect[Any] => Unit
 
   /**
    * Creates a RabbitMQ server transport plugin with specified RPC request handler.
@@ -160,8 +160,8 @@ object RabbitMqServer {
     queues: Seq[String],
     addresses: Seq[Address] = Seq.empty,
     connectionFactory: ConnectionFactory = new ConnectionFactory
-  ): RunEffect[Effect] => RabbitMqServer[Effect] = (runEffect: RunEffect[Effect]) =>
-    RabbitMqServer(handler, runEffect, url, queues, addresses, connectionFactory)
+  ): Run[Effect] => RabbitMqServer[Effect] = (runEffect: Run[Effect]) =>
+    RabbitMqServer(handler, url, queues, addresses, connectionFactory, runEffect)
 
   /** Request context type. */
   type Context = AmqpContext[RabbitMqContext]
