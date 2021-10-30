@@ -12,5 +12,5 @@ trait Defer[Effect[_]] {
    * @tparam T effectful value type
    * @return deferred effect
    */
-  def deferred[T]: Deferred[Effect, T]
+  def deferred[T]: Effect[Deferred[Effect, T]]
 }

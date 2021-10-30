@@ -1,6 +1,7 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
+import automorph.spi.system.{Defer, Deferred}
 import monix.eval.Task
 
 /**
@@ -10,7 +11,7 @@ import monix.eval.Task
  * @see [[https://monix.io/api/current/monix/eval/Task.html Effect type]]
  * @constructor Creates a Monix effect system plugin using `Task` as an effect type.
  */
-final case class MonixSystem() extends EffectSystem[Task] {
+final case class MonixSystem() extends EffectSystem[Task] with Defer[Task] {
 
   override def wrap[T](value: => T): Task[T] =
     Task.evalAsync(value)
@@ -26,6 +27,10 @@ final case class MonixSystem() extends EffectSystem[Task] {
 
   override def flatMap[T, R](effect: Task[T], function: T => Task[R]): Task[R] =
     effect.flatMap(function)
+
+  override def deferred[T]: Deferred[Task, T] = {
+    
+  }
 }
 
 object MonixSystem {

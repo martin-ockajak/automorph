@@ -11,7 +11,8 @@ import zio.RIO
  * @constructor Creates a ZIO effect system plugin using `RIO` as an effect type.
  * @tparam Environment ZIO environment type
  */
-final case class ZioSystem[Environment]() extends EffectSystem[({ type Effect[T] = RIO[Environment, T] })#Effect] {
+final case class ZioSystem[Environment]()
+  extends EffectSystem[({ type Effect[T] = RIO[Environment, T] })#Effect] {
 
   override def wrap[T](value: => T): RIO[Environment, T] =
     RIO(value)

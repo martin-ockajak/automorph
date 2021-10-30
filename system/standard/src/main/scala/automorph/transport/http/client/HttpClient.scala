@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, Session, WebSocketListener, defaultBuilder}
+import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Protocol, Response, Session, WebSocketListener}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.net.URI
@@ -167,8 +167,11 @@ final case class HttpClient[Effect[_]](
         Left(httpRequest) -> httpRequest.uri
       }
       case true => {
-        val (webSocket, resultEffect, requestUrl) = prepareWebSocket(context)
-        Right((webSocket, resultEffect, requestBody)) -> requestUrl
+        val responseEffect = system.deferred[Response]
+        val response = system.flatMap(responseEffect, _.effect)
+        val (webSocketBuilder, requestUrl) = createWebSocketBuilder(context)
+        val webSocket = prepareWebSocket(webSocketBuilder, requestUrl, responseEffect)
+        Right((webSocket, response, requestBody)) -> requestUrl
       }
     }
 
@@ -198,17 +201,23 @@ final case class HttpClient[Effect[_]](
     }.getOrElse(requestBuilder).build
   }
 
-  private def prepareWebSocket(context: Option[Context]): (Effect[WebSocket], Effect[Response], URI) = {
-    val (webSocketBuilder, requestUrl) = createWebSocketBuilder(context)
-    val response = system.deferred[Response]
-    val listener = WebSocketListener(
-      requestUrl,
-      webSockets,
-      response
+  private def prepareWebSocket(
+    builder: WebSocket.Builder,
+    requestUrl: URI,
+    responseEffect: Effect[Deferred[Effect, Response]]
+  ): Effect[WebSocket] =
+    system.flatMap(
+      responseEffect,
+      (response: Deferred[Effect, Response]) =>
+        effect(builder.buildAsync(
+          requestUrl,
+          WebSocketListener(
+            requestUrl,
+            webSockets,
+            response
+          )
+        ))
     )
-    val webSocket = effect(webSocketBuilder.buildAsync(requestUrl, listener))
-    (webSocket, response.effect, requestUrl)
-  }
 
   private def createWebSocketBuilder(context: Option[Context]): (WebSocket.Builder, URI) = {
     val http = context.getOrElse(defaultContext)
@@ -234,21 +243,23 @@ final case class HttpClient[Effect[_]](
     statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers*)
   }
 
-  private def effect[T](completableFuture: => CompletableFuture[T]): Effect[T] = {
-    val deferred = system.deferred[T]
-    Try(completableFuture).pureFold(
-      error => deferred.fail(error),
-      (value: CompletableFuture[T]) => {
-        value.handle { case (result, exception) =>
-          Option(result).map(deferred.succeed).orElse(Option(exception).map(deferred.fail)).getOrElse {
-            deferred.fail(new IllegalStateException("Missing completable future result"))
+  private def effect[T](completableFuture: => CompletableFuture[T]): Effect[T] =
+    system.flatMap(
+      system.deferred[T],
+      (deferred: Deferred[Effect, T]) =>
+        Try(completableFuture).pureFold(
+          error => deferred.fail(error),
+          (value: CompletableFuture[T]) => {
+            value.handle { case (result, exception) =>
+              Option(result).map(deferred.succeed).orElse(Option(exception).map(deferred.fail)).getOrElse {
+                deferred.fail(new IllegalStateException("Missing completable future result"))
+              }
+            }
+            ()
           }
-        }
-        ()
-      }
+        )
+        deferred.effect
     )
-    deferred.effect
-  }
 }
 
 object HttpClient {

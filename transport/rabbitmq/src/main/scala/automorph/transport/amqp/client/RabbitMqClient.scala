@@ -54,13 +54,15 @@ final case class RabbitMqClient[Effect[_]](
     requestId: String,
     mediaType: String,
     requestContext: Option[Context]
-  ): Effect[Response] = {
-    val response = system.deferred[Response]
+  ): Effect[Response] =
     system.flatMap(
-      send(requestBody, requestId, mediaType, requestContext, Some(response)),
-      (_: Unit) => response.effect
+      system.deferred[Response],
+      (response: Deferred[Effect, Response]) =>
+        system.flatMap(
+          send(requestBody, requestId, mediaType, requestContext, Some(response)),
+          (_: Unit) => response.effect
+        )
     )
-  }
 
   override def notify(
     requestBody: ArraySeq.ofByte,

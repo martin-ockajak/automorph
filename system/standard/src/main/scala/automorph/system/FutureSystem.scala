@@ -31,9 +31,9 @@ final case class FutureSystem()(implicit executionContext: ExecutionContext)
   override def flatMap[T, R](effect: Future[T], function: T => Future[R]): Future[R] =
     effect.flatMap(function)
 
-  override def deferred[T]: Deferred[Future, T] = {
+  override def deferred[T]: Future[Deferred[Future, T]] = {
     val promise = Promise[T]
-    Deferred(promise.future, promise.success, promise.failure)
+    Future.successful(Deferred(promise.future, promise.success, promise.failure))
   }
 }
 
