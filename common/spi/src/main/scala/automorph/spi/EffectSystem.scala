@@ -10,7 +10,7 @@ package automorph.spi
 trait EffectSystem[Effect[_]] {
 
   /**
-   * Lifts a side-effecting value into a new effect of specified type.
+   * Lifts a potentially blocking side-effecting value into a new effect of specified type.
    *
    * Exceptions thrown while computing the value are translated into a failed effect.
    *
