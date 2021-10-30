@@ -51,7 +51,7 @@ trait CoreTest extends BaseTest {
   "" - {
 // FIXME - restore
 //    fixtures.foreach { fixture =>
-    fixtures.take(2).foreach { fixture =>
+    fixtures.take(3).foreach { fixture =>
       val codecName = fixture.genericClient.protocol.codec.getClass.getSimpleName.replaceAll("MessageCodec$", "")
       codecName - {
         "Static" - {
