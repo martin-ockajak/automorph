@@ -1,8 +1,8 @@
 package automorph.transport.http.server
 
 import automorph.Types
-import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
+import automorph.spi.EffectSystem
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.server.NanoHTTPD
@@ -11,7 +11,7 @@ import automorph.transport.http.server.NanoHTTPD.{newFixedLengthResponse, IHTTPS
 import automorph.transport.http.server.NanoServer.{Context, Execute, Protocol}
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
-import automorph.util.Extensions.ThrowableOps
+import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
 import java.io.IOException
 import java.net.URI
@@ -51,6 +51,7 @@ final case class NanoServer[Effect[_]] private (
   private val system = genericHandler.system
   private val headerXForwardedFor = "X-Forwarded-For"
   private val allowedMethods = methods.map(_.toUpperCase).toSet
+  implicit private val givenSystem: EffectSystem[Effect] = system
 
   override def close(): Effect[Unit] =
     system.wrap(stop())
@@ -122,18 +123,16 @@ final case class NanoServer[Effect[_]] private (
 
     // Process the request
     implicit val usingContext: Context = requestContext(session)
-    executeEffect(system.map(
-      system.either(genericHandler.processRequest(requestBody, requestId, functionName)),
-      (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte, Context]]) =>
-        handlerResult.fold(
-          error => sendErrorResponse(error, session, protocol, requestId, requestProperties),
-          result => {
-            // Send the response
-            val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
-            val status = result.exception.map(mapException).map(Status.lookup).getOrElse(Status.OK)
-            createResponse(response, status, result.context, session, protocol, requestId)
-          }
-        )
+    executeEffect(genericHandler.processRequest(requestBody, requestId, functionName).either.map(handlerResult =>
+      handlerResult.fold(
+        error => sendErrorResponse(error, session, protocol, requestId, requestProperties),
+        result => {
+          // Send the response
+          val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
+          val status = result.exception.map(mapException).map(Status.lookup).getOrElse(Status.OK)
+          createResponse(response, status, result.context, session, protocol, requestId)
+        }
+      )
     ))
   }
 
