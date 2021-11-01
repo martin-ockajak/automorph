@@ -34,7 +34,7 @@ final case class ZioSystem[Environment]()
   override def deferred[T]: RIO[Environment, Deferred[({ type Effect[T] = RIO[Environment, T] })#Effect, T]] =
     map(
       ZQueue.dropping[Either[Throwable, T]](1),
-      (queue: Queue[Either[Throwable, T]]) =>
+      (queue: Queue[Either[Throwable, T]]) => {
         Deferred(
           queue.take.flatMap {
             case Right(result) => pure(result)
@@ -43,6 +43,7 @@ final case class ZioSystem[Environment]()
           result => map(queue.offer(Right(result)), _ => ()),
           error => map(queue.offer(Left(error)), _ => ())
         )
+      }
     )
 }
 

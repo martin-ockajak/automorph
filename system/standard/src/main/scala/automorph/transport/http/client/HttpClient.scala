@@ -174,7 +174,7 @@ final case class HttpClient[Effect[_]] private (
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
         val responseEffect = system.deferred[Response]
-        val response = system.flatMap(responseEffect, _.effect)
+        val response = system.flatMap(responseEffect, (deferred: Deferred[Effect, Response]) => deferred.effect)
         val webSocketBuilder = createWebSocketBuilder(requestUrl, httpContext)
         val webSocket = prepareWebSocket(webSocketBuilder, requestUrl, responseEffect)
         Right((webSocket, response, requestBody)) -> requestUrl
@@ -256,7 +256,7 @@ final case class HttpClient[Effect[_]] private (
   private def effect[T](completableFuture: => CompletableFuture[T]): Effect[T] =
     system.flatMap(
       system.deferred[T],
-      (deferred: Deferred[Effect, T]) =>
+      (deferred: Deferred[Effect, T]) => {
         Try(completableFuture).pureFold(
           error => runEffect(deferred.fail(error).asInstanceOf[Effect[Any]]),
           (value: CompletableFuture[T]) => {
@@ -273,6 +273,7 @@ final case class HttpClient[Effect[_]] private (
           }
         )
         deferred.effect
+      }
     )
 }
 
