@@ -1,5 +1,6 @@
 package automorph.util
 
+import automorph.spi.EffectSystem
 import scala.util.{Failure, Success, Try}
 
 private[automorph] object Extensions {
@@ -55,5 +56,14 @@ private[automorph] object Extensions {
       case Failure(exception) => onFailure(exception)
       case Success(value) => onSuccess(value)
     }
+  }
+
+  implicit final class EffectOps[Effect[_], T](private val effect: Effect[T]) {
+
+    def map[R](system: EffectSystem[Effect], function: T => R): Effect[R] =
+      system.map(effect, function)
+
+    def flatMap[R](system: EffectSystem[Effect], function: T => Effect[R]): Effect[R] =
+      system.flatMap(effect, function)
   }
 }

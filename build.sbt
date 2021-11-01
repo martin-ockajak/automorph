@@ -79,7 +79,9 @@ lazy val spi = (project in file("common/spi")).settings(
     }
   }
 )
-lazy val util = (project in file("common/util")).settings(
+lazy val util = (project in file("common/util")).dependsOn(
+  spi
+).settings(
   name := s"$projectName-util",
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-api" % "1.7.32"

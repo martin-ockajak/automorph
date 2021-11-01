@@ -7,7 +7,7 @@ import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, Run, Session, WebSocketListener}
 import automorph.util.Bytes
-import automorph.util.Extensions.TryOps
+import automorph.util.Extensions.{EffectOps, TryOps}
 import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.net.http.HttpClient.Builder
