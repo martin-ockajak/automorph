@@ -65,7 +65,7 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
 
         // Process the request
         system.pure(Right { (requestBody: Array[Byte]) =>
-          implicit val usingContext: Context = requestContext(paths, queryParams, headers, None)
+          implicit val givenContext: Context = requestContext(paths, queryParams, headers, None)
           genericHandler.processRequest(requestBody, requestId, None).either.map(_.fold(
             error => createErrorResponse(error, clientIp, requestId, requestProperties),
             result => {
