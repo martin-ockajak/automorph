@@ -1,10 +1,10 @@
 package automorph.transport.local.client
 
 import automorph.Handler
-import automorph.handler.HandlerResult
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec}
+import automorph.util.Extensions.EffectOps
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -25,20 +25,20 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
   defaultContext: Context
 ) extends ClientMessageTransport[Effect, Context] {
 
+  implicit private val givenSystem: EffectSystem[Effect] = system
+
   override def call(
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
     context: Option[Context]
   ): Effect[(ArraySeq.ofByte, Context)] = {
-    implicit val usingContext = context.getOrElse(defaultContext)
-    system.flatMap(
-      handler.processRequest(requestBody, requestId, None),
-      (result: HandlerResult[ArraySeq.ofByte, Context]) =>
-        result.responseBody.map(response => system.pure(response -> defaultContext)).getOrElse {
-          system.failed(InvalidResponseException("Missing call response", None.orNull))
-        }
-    )
+    implicit val givenContext = context.getOrElse(defaultContext)
+    handler.processRequest(requestBody, requestId, None).flatMap(_.responseBody.map(responseBody =>
+      system.pure(responseBody -> defaultContext)
+    ).getOrElse {
+      system.failed(InvalidResponseException("Missing call response", None.orNull))
+    })
   }
 
   override def notify(
@@ -47,11 +47,8 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     mediaType: String,
     context: Option[Context]
   ): Effect[Unit] = {
-    implicit val usingContext = context.getOrElse(defaultContext)
-    system.map(
-      handler.processRequest(requestBody, requestId, None),
-      (_: HandlerResult[ArraySeq.ofByte, Context]) => ()
-    )
+    implicit val givenContext = context.getOrElse(defaultContext)
+    handler.processRequest(requestBody, requestId, None).map(_ => ())
   }
 
   override def close(): Effect[Unit] =
