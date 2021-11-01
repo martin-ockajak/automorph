@@ -55,7 +55,7 @@ final case class UndertowHttpEndpoint[Effect[_]] private (
 
         override def run(): Unit = {
           // Process the request
-          implicit val usingContext: Context = requestContext(exchange)
+          implicit val givenContext: Context = requestContext(exchange)
           runEffect(
             genericHandler.processRequest(requestBody, requestId, Some(exchange.getRequestPath)).either.map(_.fold(
               error => sendErrorResponse(error, exchange, requestId, requestProperties),
