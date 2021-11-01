@@ -7,7 +7,7 @@ import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.amqp.client.RabbitMqClient.{Context, Response, Run}
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Bytes
-import automorph.util.Extensions.TryOps
+import automorph.util.Extensions.{EffectOps, TryOps}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
@@ -50,6 +50,7 @@ final case class RabbitMqClient[Effect[_]] private (
   private val urlText = url.toURL.toExternalForm
   private val responseHandlers = TrieMap[String, Deferred[Effect, Response]]()
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
+  implicit private val givenSystem: EffectSystem[Effect] = system
 
   override def call(
     requestBody: ArraySeq.ofByte,
@@ -57,14 +58,9 @@ final case class RabbitMqClient[Effect[_]] private (
     mediaType: String,
     requestContext: Option[Context]
   ): Effect[Response] =
-    system.flatMap(
-      system.deferred[Response],
-      (response: Deferred[Effect, Response]) =>
-        system.flatMap(
-          send(requestBody, requestId, mediaType, requestContext, Some(response)),
-          (_: Unit) => response.effect
-        )
-    )
+    system.deferred[Response].flatMap { response =>
+      send(requestBody, requestId, mediaType, requestContext, Some(response)).flatMap(_ => response.effect)
+    }
 
   override def notify(
     requestBody: ArraySeq.ofByte,
@@ -175,7 +171,7 @@ object RabbitMqClient {
     system: EffectSystem[Effect] with Defer[Effect],
     exchange: String = RabbitMqCommon.defaultDirectExchange,
     addresses: Seq[Address] = Seq.empty,
-    connectionFactory: ConnectionFactory = new ConnectionFactory,
+    connectionFactory: ConnectionFactory = new ConnectionFactory
   ): Run[Effect] => RabbitMqClient[Effect] = (runEffect: Run[Effect]) =>
     RabbitMqClient(url, routingKey, system, exchange, addresses, connectionFactory, runEffect)
 }
