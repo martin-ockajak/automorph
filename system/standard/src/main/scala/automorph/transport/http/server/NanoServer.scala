@@ -122,7 +122,7 @@ final case class NanoServer[Effect[_]] private (
     logger.debug(s"Received $protocol request", requestProperties)
 
     // Process the request
-    implicit val usingContext: Context = requestContext(session)
+    implicit val givenContext: Context = requestContext(session)
     executeEffect(genericHandler.processRequest(requestBody, requestId, functionName).either.map(_.fold(
       error => sendErrorResponse(error, session, protocol, requestId, requestProperties),
       result => {
