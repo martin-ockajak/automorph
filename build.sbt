@@ -260,7 +260,8 @@ lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
 ).settings(
   name := s"$projectName-rabbitmq",
   libraryDependencies ++= Seq(
-    "com.rabbitmq" % "amqp-client" % "5.13.1"
+    "com.rabbitmq" % "amqp-client" % "5.13.1",
+    "io.arivera.oss" % "embedded-rabbitmq" % "1.5.0" % Test
   )
 )
 
