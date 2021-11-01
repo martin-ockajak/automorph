@@ -33,7 +33,7 @@ import scala.util.Try
  * @tparam Effect effect type
  */
 final case class RabbitMqServer[Effect[_]] private (
-  handler: Types.HandlerAnyCodec[Effect, AmqpContext[BasicProperties]],
+  handler: Types.HandlerAnyCodec[Effect, AmqpContext[RabbitMqContext]],
   url: URI,
   queues: Seq[String],
   addresses: Seq[Address],
@@ -157,7 +157,7 @@ object RabbitMqServer {
    * @return creates a RabbitMQ server using supplied asynchronous effect execution function
    */
   def create[Effect[_]](
-    handler: Types.HandlerAnyCodec[Effect, AmqpContext[BasicProperties]],
+    handler: Types.HandlerAnyCodec[Effect, Context],
     url: URI,
     queues: Seq[String],
     addresses: Seq[Address] = Seq.empty,
