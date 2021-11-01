@@ -32,7 +32,7 @@ private[automorph] final case class Request[Node](
 private[automorph] object Request {
 
   def apply[Node](message: Message[Node]): Request[Node] = {
-    val jsonrpc = mandatory(message.jsonrpc, "automorph")
+    val jsonrpc = mandatory(message.jsonrpc, "version")
     if (jsonrpc != version) {
       throw InvalidRequestException(s"Invalid JSON-RPC protocol version: $jsonrpc", None.orNull)
     }
