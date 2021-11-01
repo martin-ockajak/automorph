@@ -1,11 +1,11 @@
 package automorph.transport.http.endpoint
 
 import automorph.Types
-import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
+import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.util.Extensions.ThrowableOps
+import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Random}
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
@@ -51,6 +51,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
   ): ServerEndpoint[Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     val system = genericHandler.system
+    implicit val givenSystem: EffectSystem[Effect] = system
     val contentType = Header.contentType(MediaType.parse(genericHandler.protocol.codec.mediaType).getOrElse {
       throw new IllegalArgumentException(s"Invalid content type: ${genericHandler.protocol.codec.mediaType}")
     })
@@ -64,19 +65,15 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 
         // Process the request
         implicit val usingContext: Context = requestContext(paths, queryParams, headers, Some(method))
-        system.map(
-          system.either(genericHandler.processRequest(requestBody, requestId, Some(urlPath(paths)))),
-          (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
-            handlerResult.fold(
-              error => Right(createErrorResponse(error, clientIp, requestId, requestProperties)),
-              result => {
-                // Create the response
-                val responseBody = result.responseBody.getOrElse(Array[Byte]())
-                val status = result.exception.map(exceptionToStatusCode).map(StatusCode.apply).getOrElse(StatusCode.Ok)
-                Right(createResponse(responseBody, status, clientIp, requestId))
-              }
-            )
-        )
+        genericHandler.processRequest(requestBody, requestId, Some(urlPath(paths))).either.map(_.fold(
+          error => Right(createErrorResponse(error, clientIp, requestId, requestProperties)),
+          result => {
+            // Create the response
+            val responseBody = result.responseBody.getOrElse(Array[Byte]())
+            val status = result.exception.map(exceptionToStatusCode).map(StatusCode.apply).getOrElse(StatusCode.Ok)
+            Right(createResponse(responseBody, status, clientIp, requestId))
+          }
+        ))
       }
   }
 

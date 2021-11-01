@@ -1,17 +1,17 @@
 package automorph.transport.websocket.endpoint
 
 import automorph.Types
-import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
+import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, extractRequestProperties, requestContext}
-import automorph.util.Extensions.ThrowableOps
+import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Random}
 import sttp.capabilities.{Streams, WebSockets}
 import sttp.model.{Header, QueryParams}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.{CodecFormat, clientIp, endpoint, headers, paths, queryParams, webSocketBody}
+import sttp.tapir.{clientIp, endpoint, headers, paths, queryParams, webSocketBody, CodecFormat}
 
 /**
  * Tapir WebSocket endpoint message transport plugin.
@@ -49,6 +49,7 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
   ): ServerEndpoint[Request, Unit, Array[Byte] => Effect[Array[Byte]], EffectStreams[Effect], Effect] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     val system = genericHandler.system
+    implicit val givenSystem: EffectSystem[Effect] = system
     val streams = new EffectStreams[Effect] {
       override type BinaryStream = Effect[Array[Byte]]
       override type Pipe[A, B] = A => Effect[B]
@@ -65,18 +66,14 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
         // Process the request
         system.pure(Right { (requestBody: Array[Byte]) =>
           implicit val usingContext: Context = requestContext(paths, queryParams, headers, None)
-          system.map(
-            system.either(genericHandler.processRequest(requestBody, requestId, None)),
-            (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
-              handlerResult.fold(
-                error => createErrorResponse(error, clientIp, requestId, requestProperties),
-                result => {
-                  // Create the response
-                  val responseBody = result.responseBody.getOrElse(Array[Byte]())
-                  createResponse(responseBody, clientIp, requestId)
-                }
-              )
-          )
+          genericHandler.processRequest(requestBody, requestId, None).either.map(_.fold(
+            error => createErrorResponse(error, clientIp, requestId, requestProperties),
+            result => {
+              // Create the response
+              val responseBody = result.responseBody.getOrElse(Array[Byte]())
+              createResponse(responseBody, clientIp, requestId)
+            }
+          ))
         })
       }
   }
