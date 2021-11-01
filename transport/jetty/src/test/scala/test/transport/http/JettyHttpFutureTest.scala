@@ -6,8 +6,10 @@
 //import automorph.spi.transport.ServerMessageTransport
 //import automorph.system.FutureSystem
 //import automorph.transport.http.endpoint.JettyEndpoint
-//import org.eclipse.jetty.server.Server
-//import org.eclipse.jetty.servlet.{ServletHandler, ServletHolder}
+//import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
+//import org.eclipse.jetty.server.{Request, Server}
+//import org.eclipse.jetty.server.handler.AbstractHandler
+//import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHandler, ServletHolder}
 //import org.scalacheck.Arbitrary
 //import scala.collection.mutable.ArrayBuffer
 //import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,9 +32,19 @@
 //    private val server = {
 //      val endpoint = JettyEndpoint.create(handler)(runEffect)
 //      val server = new Server(port)
-//      val servletHandler = new ServletHandler
-//      servletHandler.addServletWithMapping(new ServletHolder(endpoint), "/*")
+//      val servletHandler = new ServletContextHandler
+//      servletHandler.setContextPath("/")
+//      servletHandler.addServlet(new ServletHolder(endpoint), "/*")
 //      server.setHandler(servletHandler)
+////      server.setHandler(new AbstractHandler {
+////        override def handle(target: String, baseRequest: Request,
+////          request: HttpServletRequest, response: HttpServletResponse): Unit = {
+////          baseRequest.setHandled(true)
+////          response.setStatus(200)
+////          response.setContentType("text/plain")
+////          response.getWriter.print("{TEEEEEEEEEEEEEEST}")
+////        }
+////      })
 //      server.start()
 //      server
 //    }
