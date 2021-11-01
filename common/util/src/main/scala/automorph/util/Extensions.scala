@@ -60,10 +60,13 @@ private[automorph] object Extensions {
 
   implicit final class EffectOps[Effect[_], T](private val effect: Effect[T]) {
 
-    def map[R](system: EffectSystem[Effect], function: T => R): Effect[R] =
+    def either(implicit system: EffectSystem[Effect]): Effect[Either[Throwable, T]] =
+      system.either(effect)
+
+    def map[R](function: T => R)(implicit system: EffectSystem[Effect]): Effect[R] =
       system.map(effect, function)
 
-    def flatMap[R](system: EffectSystem[Effect], function: T => Effect[R]): Effect[R] =
+    def flatMap[R](function: T => Effect[R])(implicit system: EffectSystem[Effect]): Effect[R] =
       system.flatMap(effect, function)
   }
 }
