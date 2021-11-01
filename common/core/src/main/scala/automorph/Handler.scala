@@ -6,7 +6,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.RpcProtocol.FunctionNotFoundException
 import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
-import automorph.util.Extensions.TryOps
+import automorph.util.Extensions.{EffectOps, TryOps}
 import automorph.util.{Bytes, CannotEqual}
 import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
@@ -31,6 +31,8 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   bindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
     ListMap.empty[String, HandlerBinding[Node, Effect, Context]]
 ) extends HandlerMeta[Node, Codec, Effect, Context] with CannotEqual with Logging {
+
+  implicit private val givenSystem: EffectSystem[Effect] = system
 
   /** Bound RPC functions. */
   lazy val boundFunctions: Seq[RpcFunction] = bindings.map { case (name, binding) =>
@@ -99,7 +101,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       // Extract arguments
       extractArguments(rpcRequest, handlerBinding).flatMap { arguments =>
         // Invoke bound function
-        Try(system.either(handlerBinding.invoke(arguments, context)))
+        Try(handlerBinding.invoke(arguments, context).either)
       }.pureFold(
         error => errorResponse(error, rpcRequest.message, requestId, requestProperties),
         result => resultResponse(result, rpcRequest, requestId, requestProperties)
@@ -165,9 +167,8 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     rpcRequest: RpcRequest[Node, protocol.Metadata],
     requestId: String,
     requestProperties: => Map[String, String]
-  ): Effect[HandlerResult[MessageBody, Context]] = system.flatMap(
-    functionResult,
-    (result: Either[Throwable, (Node, Option[Context])]) => {
+  ): Effect[HandlerResult[MessageBody, Context]] =
+    functionResult.flatMap { result =>
       result.fold(
         error => logger.error(s"Failed to process ${protocol.name} request", error, requestProperties),
         _ => logger.info(s"Processed ${protocol.name} request", requestProperties)
@@ -180,7 +181,6 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         system.pure(HandlerResult[MessageBody, Context](None, None, responseContext))
       }
     }
-  )
 
   /**
    * Creates a handler result containing an RPC response for the specified error.
