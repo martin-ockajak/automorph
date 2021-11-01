@@ -12,7 +12,7 @@
 //import test.standard.StandardHttpServerTest
 //import test.transport.http.HttpContextGenerator
 //
-//class FutureUndertowHttpTest extends StandardHttpServerTest {
+//class UndertowHttpFutureTest extends StandardHttpServerTest {
 //
 //  type Effect[T] = Future[T]
 //  type Context = UndertowServer.Context
