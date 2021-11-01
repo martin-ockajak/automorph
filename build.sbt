@@ -296,12 +296,14 @@ lazy val finagle = (project in file("transport/finagle")).dependsOn(
     ("com.twitter" % "finagle-http" % "21.9.0").cross(CrossVersion.for3Use2_13)
   )
 )
+val tapirVersion = "0.18.3"
 lazy val tapir = (project in file("transport/tapir")).dependsOn(
   core, http, testStandard % Test
 ).settings(
   name := s"$projectName-tapir",
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.18.3"
+    "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
+    "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion % Test
   )
 )
 
