@@ -99,6 +99,9 @@ final case class JettyEndpoint[Effect[_]] private (
     response.setContentType(genericHandler.protocol.codec.mediaType)
     val outputStream = response.getOutputStream
     IOUtils.copy(message, outputStream)
+//    outputStream.print("{test}")
+//    response.getWriter.print("{test}")
+//    response.getWriter.flush()
     outputStream.flush()
     logger.debug("Sent HTTP response", responseDetails)
   }

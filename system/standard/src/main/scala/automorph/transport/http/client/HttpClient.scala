@@ -81,6 +81,8 @@ final case class HttpClient[Effect[_]] private (
         },
         response => {
           val (responseBody, statusCode, _) = response
+          println(s"Received $protocol response: " + (responseProperties ++ statusCode.map("Status" -> _)).toString)
+          println(Bytes.string.to(responseBody))
           logger.debug(s"Received $protocol response", responseProperties ++ statusCode.map("Status" -> _))
           system.pure(responseBody -> responseContext(response))
         }
