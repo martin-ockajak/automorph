@@ -14,12 +14,12 @@ trait StandardHttpServerTest extends ClientServerTest {
 
   def deferSystem: EffectSystem[Effect] with Defer[Effect]
 
-  def serverTransport(handler: Types.HandlerAnyCodec[Effect, Context], port: Int): (ServerMessageTransport[Effect], Int)
+  def serverTransport(handler: Types.HandlerAnyCodec[Effect, Context], port: Int): ServerMessageTransport[Effect]
 
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
-    val (server, port) = withAvailablePort(port => serverTransport(handler, port))
+    val (server, port) = withAvailablePort(port => serverTransport(handler, port) -> port)
     servers += server
     val url = new URI(s"http://localhost:$port")
     val client = HttpClient.create(url, "POST", deferSystem)(runEffect)

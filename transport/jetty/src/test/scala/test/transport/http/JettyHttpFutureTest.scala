@@ -5,7 +5,9 @@
 //import automorph.spi.system.Defer
 //import automorph.spi.transport.ServerMessageTransport
 //import automorph.system.FutureSystem
-//import automorph.transport.http.server.UndertowServer
+//import automorph.transport.http.endpoint.JettyEndpoint
+//import org.eclipse.jetty.server.Server
+//import org.eclipse.jetty.servlet.{ServletHandler, ServletHolder}
 //import org.scalacheck.Arbitrary
 //import scala.collection.mutable.ArrayBuffer
 //import scala.concurrent.ExecutionContext.Implicits.global
@@ -13,10 +15,10 @@
 //import test.standard.StandardHttpServerTest
 //import test.transport.http.HttpContextGenerator
 //
-//class UndertowHttpFutureTest extends StandardHttpServerTest {
+//class JettyHttpFutureTest extends StandardHttpServerTest {
 //
 //  type Effect[T] = Future[T]
-//  type Context = UndertowServer.Context
+//  type Context = JettyEndpoint.Context
 //
 //  override lazy val deferSystem: EffectSystem[Effect] with Defer[Effect] = FutureSystem()
 //  override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary
@@ -24,8 +26,18 @@
 //  def serverTransport(
 //    handler: Types.HandlerAnyCodec[Effect, Context],
 //    port: Int
-//  ): ServerMessageTransport[Effect] =
-//    UndertowServer.create(handler, port)(runEffect)
+//  ): ServerMessageTransport[Effect] = new ServerMessageTransport[Effect] {
+//    private val server = {
+//      val endpoint = JettyEndpoint.create(handler)(runEffect)
+//      val server = new Server(port)
+//      val servletHandler = new ServletHandler
+//      servletHandler.addServlet(new ServletHolder(endpoint))
+//      server.setHandler(servletHandler)
+//      server
+//    }
+//
+//    override def close(): Future[Unit] = Future(server.stop())
+//  }
 //
 //  override def run[T](effect: Effect[T]): T = await(effect)
 //
