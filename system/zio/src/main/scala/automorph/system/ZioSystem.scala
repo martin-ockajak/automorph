@@ -2,7 +2,7 @@ package automorph.system
 
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
-import zio.{Queue, RIO, ZQueue}
+import zio.{Queue, RIO, ZIO, ZQueue}
 
 /**
  * ZIO effect system plugin using `RIO` as an effect type.
@@ -40,8 +40,8 @@ final case class ZioSystem[Environment]()
             case Right(result) => pure(result)
             case Left(error) => failed(error)
           },
-          result => map(queue.offer(Right(result)), _ => ()),
-          error => map(queue.offer(Left(error)), _ => ())
+          result => map(queue.offer(Right(result)), (_: Boolean) => ()),
+          error => map(queue.offer(Left(error)), (_: Boolean) => ())
         )
       }
     )
