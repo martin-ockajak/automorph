@@ -1,12 +1,12 @@
 package automorph.transport.http.endpoint
 
 import automorph.Types
-import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
+import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.JettyEndpoint.{Context, Run}
-import automorph.util.Extensions.ThrowableOps
+import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import java.io.{ByteArrayInputStream, InputStream}
@@ -38,6 +38,7 @@ final case class JettyEndpoint[Effect[_]] private (
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
+  implicit private val givenSystem: EffectSystem[Effect] = system
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     // Log the request
@@ -49,19 +50,15 @@ final case class JettyEndpoint[Effect[_]] private (
     // Process the request
     implicit val usingContext: Context = requestContext(request)
     val path = new URI(request.getRequestURI).getPath
-    runEffect(system.map(
-      system.either(genericHandler.processRequest(requestBody, requestId, Some(path))),
-      (handlerResult: Either[Throwable, HandlerResult[InputStream, Context]]) =>
-        handlerResult.fold(
-          error => sendErrorResponse(error, response, request, requestId, requestProperties),
-          result => {
-            // Send the response
-            val message = result.responseBody.getOrElse(new ByteArrayInputStream(Array()))
-            val status = result.exception.map(exceptionToStatusCode).getOrElse(HttpStatus.OK_200)
-            sendResponse(message, status, None, response, request, requestId)
-          }
-        )
-    ))
+    runEffect(genericHandler.processRequest(requestBody, requestId, Some(path)).either.map(_.fold(
+      error => sendErrorResponse(error, response, request, requestId, requestProperties),
+      result => {
+        // Send the response
+        val message = result.responseBody.getOrElse(new ByteArrayInputStream(Array()))
+        val status = result.exception.map(exceptionToStatusCode).getOrElse(HttpStatus.OK_200)
+        sendResponse(message, status, None, response, request, requestId)
+      }
+    )))
   }
 
   private def sendErrorResponse(

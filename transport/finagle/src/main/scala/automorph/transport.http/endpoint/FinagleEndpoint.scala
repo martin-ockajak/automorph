@@ -1,12 +1,12 @@
 package automorph.transport.http.endpoint
 
 import automorph.Types
-import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
+import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.FinagleEndpoint.{Context, Run}
-import automorph.util.Extensions.ThrowableOps
+import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Network, Random}
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
@@ -36,6 +36,7 @@ final case class FinagleEndpoint[Effect[_]] private (
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
+  implicit private val givenSystem: EffectSystem[Effect] = system
 
   override def apply(request: Request): Future[Response] = {
     // Log the request
@@ -46,20 +47,16 @@ final case class FinagleEndpoint[Effect[_]] private (
 
     // Process the request
     implicit val usingContext: Context = requestContext(request)
-    runAsFuture(system.map(
-      system.either(genericHandler.processRequest(requestBody, requestId, Some(request.path))),
-      (handlerResult: Either[Throwable, HandlerResult[Array[Byte], Context]]) =>
-        handlerResult.fold(
-          error => sendErrorResponse(error, request, requestId, requestProperties),
-          result => {
-            // Send the response
-            val response = result.responseBody.getOrElse(Array[Byte]())
-            val status = result.exception.map(exceptionToStatusCode).map(Status.apply).getOrElse(Status.Ok)
-            val message = Reader.fromBuf(Buf.ByteArray.Owned(response))
-            createResponse(message, status, result.context, request, requestId)
-          }
-        )
-    ))
+    runAsFuture(genericHandler.processRequest(requestBody, requestId, Some(request.path)).either.map(_.fold(
+      error => sendErrorResponse(error, request, requestId, requestProperties),
+      result => {
+        // Send the response
+        val response = result.responseBody.getOrElse(Array[Byte]())
+        val status = result.exception.map(exceptionToStatusCode).map(Status.apply).getOrElse(Status.Ok)
+        val message = Reader.fromBuf(Buf.ByteArray.Owned(response))
+        createResponse(message, status, result.context, request, requestId)
+      }
+    )))
   }
 
   private def sendErrorResponse(
@@ -120,14 +117,10 @@ final case class FinagleEndpoint[Effect[_]] private (
 
   private def runAsFuture[T](value: Effect[T]): Future[T] = {
     val promise = Promise[T]()
-    runEffect(system.map(
-      system.either(value),
-      (outcome: Either[Throwable, T]) =>
-        outcome.fold(
-          error => promise.setException(error),
-          result => promise.setValue(result)
-        )
-    ))
+    runEffect(value.either.map(_.fold(
+      error => promise.setException(error),
+      result => promise.setValue(result)
+    )))
     promise
   }
 }
