@@ -6,7 +6,7 @@
 
 ## Goals
 
-* Enable consuming and exposing **remote APIs** transparently **without** the requirement to craft an **intermediate layer**
+* Enable consuming and exposing **remote APIs** transparently **without** needing to create **intermediate layer**
 * Preserve user's **freedom** to make **technical decisions** and **access transport protocol** metadata
 * Strive for **smooth integration** with other **libraries** and existing **applications**
 
