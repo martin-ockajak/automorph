@@ -2,7 +2,6 @@ package automorph.protocol
 
 import automorph.Default
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
-import io.circe.{Decoder, Encoder}
 import test.base.BaseTest
 
 class JsonRpcTest extends BaseTest {
@@ -22,7 +21,7 @@ class JsonRpcTest extends BaseTest {
 
   "" - {
     "OpenApi" in {
-      val protocol = JsonRpcProtocol(Default.codec)
+      val protocol = JsonRpcProtocol[Default.Node, Default.Codec](Default.codec)
       val specification = protocol.openApi(functions, "Test", "0.0", Seq("http://localhost:80/api"))
       specification.should(not(be(empty)))
     }

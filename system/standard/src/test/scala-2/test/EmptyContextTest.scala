@@ -13,7 +13,7 @@ class EmptyContextTest extends BaseTest {
   "" - {
     "Create" in {
       val codec = CirceJsonCodec()
-      val protocol = JsonRpcProtocol(codec)
+      val protocol = JsonRpcProtocol[CirceJsonCodec.Node, CirceJsonCodec](codec)
       val system = IdentitySystem()
       val handler = Handler.protocol(protocol).system(system).emptyContext
       val transport = HandlerTransport(handler, system, EmptyContext.value)
