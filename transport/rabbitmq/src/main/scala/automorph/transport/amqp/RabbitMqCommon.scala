@@ -81,13 +81,6 @@ private[automorph] object RabbitMqCommon extends Logging {
     }
 
   /**
-   * @param requestId
-   * @param mediaType
-   * @param context
-   * @return
-   */
-
-  /**
    * Create AMQP properties from message context.
    *
    * @param context message context

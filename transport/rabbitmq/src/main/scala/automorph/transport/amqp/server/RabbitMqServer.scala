@@ -49,8 +49,12 @@ final case class RabbitMqServer[Effect[_]] private (
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, RabbitMqServer.Context]]
   private val system = genericHandler.system
   implicit private val givenSystem: EffectSystem[Effect] = system
+  start()
 
-  override def close(): Effect[Unit] = system.wrap(connection.abort(AMQP.CONNECTION_FORCED, "Terminated"))
+  override def close(): Effect[Unit] = system.wrap(RabbitMqCommon.disconnect(connection))
+
+  private def start(): Unit =
+    createConsumer(connection.createChannel())
 
   private def createConsumer(channel: Channel): DefaultConsumer = {
     val consumer = new DefaultConsumer(channel) {
