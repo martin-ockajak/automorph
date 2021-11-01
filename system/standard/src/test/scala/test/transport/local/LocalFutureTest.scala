@@ -7,7 +7,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import test.core.ProtocolCodecTest
 
-class FutureLocalTest extends ProtocolCodecTest {
+class LocalFutureTest extends ProtocolCodecTest {
 
   type Effect[T] = Future[T]
   type Context = Map[String, Double]

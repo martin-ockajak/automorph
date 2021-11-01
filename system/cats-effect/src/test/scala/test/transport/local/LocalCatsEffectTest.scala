@@ -1,24 +1,23 @@
 package test.transport.local
 
-import automorph.system.ZioSystem
+import cats.effect.IO
+import cats.effect.unsafe.implicits.global
+import automorph.system.CatsEffectSystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import test.core.ProtocolCodecTest
-import zio.{RIO, Runtime, ZEnv}
 
-class ZioLocalTest extends ProtocolCodecTest {
+class LocalCatsEffectTest extends ProtocolCodecTest {
 
-  private lazy val runtime = Runtime.default.withReportFailure(_ => ())
-
-  type Effect[T] = RIO[ZEnv, T]
+  type Effect[T] = IO[T]
   type Context = String
 
   override lazy val arbitraryContext: Arbitrary[Context] =
     Arbitrary(Arbitrary.arbitrary[Context])
 
   override lazy val system: EffectSystem[Effect] =
-    ZioSystem[ZEnv]()
+    CatsEffectSystem()
 
   override def run[T](effect: Effect[T]): T =
-    runtime.unsafeRunTask(effect)
+    effect.unsafeRunSync()
 }

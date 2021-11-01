@@ -12,7 +12,7 @@ import scala.util.Try
 import test.core.ClientServerTest
 import test.transport.http.HttpContextGenerator
 
-class TryUrlClientHttpTest extends ClientServerTest {
+class UrlClientHttpTryTest extends ClientServerTest {
 
   type Effect[T] = Try[T]
   type Context = NanoServer.Context

@@ -6,7 +6,7 @@ import org.scalacheck.Arbitrary
 import scala.util.Try
 import test.core.ProtocolCodecTest
 
-class TryLocalTest extends ProtocolCodecTest {
+class LocalTryTest extends ProtocolCodecTest {
 
   type Effect[T] = Try[T]
   type Context = Seq[Int]

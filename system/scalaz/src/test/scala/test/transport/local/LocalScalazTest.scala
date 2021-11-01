@@ -6,7 +6,7 @@ import org.scalacheck.Arbitrary
 import scalaz.effect.IO
 import test.core.ProtocolCodecTest
 
-class ScalazLocalTest extends ProtocolCodecTest {
+class LocalScalazTest extends ProtocolCodecTest {
 
   type Effect[T] = IO[T]
   type Context = String

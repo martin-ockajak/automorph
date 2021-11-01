@@ -8,7 +8,7 @@ import org.scalacheck.Arbitrary
 import scala.concurrent.duration.Duration
 import test.core.ProtocolCodecTest
 
-class MonixLocalTest extends ProtocolCodecTest {
+class LocalMonixTest extends ProtocolCodecTest {
 
   type Effect[T] = Task[T]
   type Context = String
