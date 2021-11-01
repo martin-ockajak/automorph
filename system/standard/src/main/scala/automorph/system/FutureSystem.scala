@@ -32,7 +32,7 @@ final case class FutureSystem()(implicit executionContext: ExecutionContext)
     effect.flatMap(function)
 
   override def deferred[T]: Future[Deferred[Future, T]] = {
-    val promise = Promise[T]
+    val promise = Promise[T]()
     Future.successful(Deferred(
       promise.future,
       (result: T) => Future {

@@ -1,6 +1,5 @@
 package test.core
 
-import automorph.spi.EffectSystem
 import automorph.spi.transport.{ClientMessageTransport, ServerMessageTransport}
 import scala.collection.mutable.ArrayBuffer
 import test.core.ProtocolCodecTest

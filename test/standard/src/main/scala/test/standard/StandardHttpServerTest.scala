@@ -6,11 +6,7 @@ import automorph.spi.system.Defer
 import automorph.spi.transport.{ClientMessageTransport, ServerMessageTransport}
 import automorph.transport.http.client.HttpClient
 import java.net.URI
-import org.scalacheck.Arbitrary
-import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
 import test.core.ClientServerTest
-import test.transport.http.HttpContextGenerator
 
 trait StandardHttpServerTest extends ClientServerTest {
 

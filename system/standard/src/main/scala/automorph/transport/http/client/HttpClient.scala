@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, Run, Session, WebSocketListener, defaultBuilder}
+import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, Run, Session, WebSocketListener}
 import automorph.util.Bytes
 import automorph.util.Extensions.TryOps
 import java.io.ByteArrayOutputStream
@@ -168,14 +168,12 @@ final case class HttpClient[Effect[_]] private (
   ): (Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)], URI) = {
     val httpContext = requestContext.getOrElse(defaultContext)
     val requestUrl = httpContext.base.flatMap(base => Try(base.request.build).toOption).map(_.uri).getOrElse(url)
-    val baseBuilder = httpContext.base.map(_.request).getOrElse(HttpRequest.newBuilder)
-    val baseRequest = Try(baseBuilder.build).toOption
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
         val responseEffect = system.deferred[Response]
         val response = system.flatMap(responseEffect, (deferred: Deferred[Effect, Response]) => deferred.effect)
-        val webSocketBuilder = createWebSocketBuilder(requestUrl, httpContext)
+        val webSocketBuilder = createWebSocketBuilder(httpContext)
         val webSocket = prepareWebSocket(webSocketBuilder, requestUrl, responseEffect)
         Right((webSocket, response, requestBody)) -> requestUrl
       case _ =>
@@ -228,10 +226,7 @@ final case class HttpClient[Effect[_]] private (
         ))
     )
 
-  private def createWebSocketBuilder(
-    requestUrl: URI,
-    httpContext: Context
-  ): WebSocket.Builder = {
+  private def createWebSocketBuilder(httpContext: Context): WebSocket.Builder = {
     val baseBuilder = httpContext.base.map(_.request).getOrElse(HttpRequest.newBuilder)
     val webSocketHeaders =
       baseBuilder.uri(httpEmptyUrl).build.headers.map.asScala.toSeq.flatMap { case (name, values) =>
@@ -270,6 +265,7 @@ final case class HttpClient[Effect[_]] private (
                 runEffect(deferred.fail(error).asInstanceOf[Effect[Any]])
               }
             }
+            ()
           }
         )
         deferred.effect
