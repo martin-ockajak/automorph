@@ -48,7 +48,7 @@ final case class JettyEndpoint[Effect[_]] private (
     val requestBody: InputStream = request.getInputStream
 
     // Process the request
-    implicit val usingContext: Context = requestContext(request)
+    implicit val givenContext: Context = requestContext(request)
     val path = new URI(request.getRequestURI).getPath
     runEffect(genericHandler.processRequest(requestBody, requestId, Some(path)).either.map(_.fold(
       error => sendErrorResponse(error, response, request, requestId, requestProperties),

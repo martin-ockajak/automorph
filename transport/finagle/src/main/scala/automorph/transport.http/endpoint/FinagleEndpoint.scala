@@ -46,7 +46,7 @@ final case class FinagleEndpoint[Effect[_]] private (
     val requestBody = Buf.ByteArray.Owned.extract(request.content)
 
     // Process the request
-    implicit val usingContext: Context = requestContext(request)
+    implicit val givenContext: Context = requestContext(request)
     runAsFuture(genericHandler.processRequest(requestBody, requestId, Some(request.path)).either.map(_.fold(
       error => sendErrorResponse(error, request, requestId, requestProperties),
       result => {
