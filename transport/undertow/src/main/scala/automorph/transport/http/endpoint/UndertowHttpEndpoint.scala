@@ -1,13 +1,13 @@
 package automorph.transport.http.endpoint
 
 import automorph.Types
-import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
+import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Run
-import automorph.util.Extensions.{ThrowableOps, TryOps}
+import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
 import automorph.util.{Bytes, Network, Random}
 import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
@@ -41,6 +41,7 @@ final case class UndertowHttpEndpoint[Effect[_]] private (
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
+  implicit private val givenSystem: EffectSystem[Effect] = system
 
   private val receiveCallback = new Receiver.FullBytesCallback {
 
@@ -55,19 +56,17 @@ final case class UndertowHttpEndpoint[Effect[_]] private (
         override def run(): Unit = {
           // Process the request
           implicit val usingContext: Context = requestContext(exchange)
-          runEffect(system.map(
-            system.either(genericHandler.processRequest(requestBody, requestId, Some(exchange.getRequestPath))),
-            (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte, Context]]) =>
-              handlerResult.fold(
-                error => sendErrorResponse(error, exchange, requestId, requestProperties),
-                result => {
-                  // Send the response
-                  val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
-                  val statusCode = result.exception.map(exceptionToStatusCode).getOrElse(StatusCodes.OK)
-                  sendResponse(response, statusCode, result.context, exchange, requestId)
-                }
-              )
-          ))
+          runEffect(
+            genericHandler.processRequest(requestBody, requestId, Some(exchange.getRequestPath)).either.map(_.fold(
+              error => sendErrorResponse(error, exchange, requestId, requestProperties),
+              result => {
+                // Send the response
+                val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
+                val statusCode = result.exception.map(exceptionToStatusCode).getOrElse(StatusCodes.OK)
+                sendResponse(response, statusCode, result.context, exchange, requestId)
+              }
+            ))
+          )
         }
       })
       ()

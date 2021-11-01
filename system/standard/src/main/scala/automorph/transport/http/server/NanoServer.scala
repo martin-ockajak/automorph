@@ -123,17 +123,15 @@ final case class NanoServer[Effect[_]] private (
 
     // Process the request
     implicit val usingContext: Context = requestContext(session)
-    executeEffect(genericHandler.processRequest(requestBody, requestId, functionName).either.map(handlerResult =>
-      handlerResult.fold(
-        error => sendErrorResponse(error, session, protocol, requestId, requestProperties),
-        result => {
-          // Send the response
-          val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
-          val status = result.exception.map(mapException).map(Status.lookup).getOrElse(Status.OK)
-          createResponse(response, status, result.context, session, protocol, requestId)
-        }
-      )
-    ))
+    executeEffect(genericHandler.processRequest(requestBody, requestId, functionName).either.map(_.fold(
+      error => sendErrorResponse(error, session, protocol, requestId, requestProperties),
+      result => {
+        // Send the response
+        val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
+        val status = result.exception.map(mapException).map(Status.lookup).getOrElse(Status.OK)
+        createResponse(response, status, result.context, session, protocol, requestId)
+      }
+    )))
   }
 
   private def sendErrorResponse(

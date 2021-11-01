@@ -3,10 +3,11 @@ package automorph.transport.websocket.endpoint
 import automorph.Types
 import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
+import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.{Context, Run}
-import automorph.util.Extensions.ThrowableOps
+import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.Headers
@@ -67,6 +68,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
+  implicit private val givenSystem: EffectSystem[Effect] = system
 
   override def onConnect(exchange: WebSocketHttpExchange, channel: WebSocketChannel): Unit = {
     val receiveListener = new AbstractReceiveListener {
@@ -95,19 +97,15 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
 
         // Process the request
         implicit val usingContext: Context = requestContext(exchange)
-        runEffect(system.map(
-          system.either(genericHandler.processRequest(requestBody, requestId, None)),
-          (handlerResult: Either[Throwable, HandlerResult[ArraySeq.ofByte, Context]]) =>
-            handlerResult.fold(
-              error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
-              result => {
-                // Send the response
-                val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
-                sendResponse(response, exchange, channel, requestId)
-                discardMessage
-              }
-            )
-        ))
+        runEffect(genericHandler.processRequest(requestBody, requestId, None).either.map(_.fold(
+          error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
+          result => {
+            // Send the response
+            val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
+            sendResponse(response, exchange, channel, requestId)
+            discardMessage
+          }
+        )))
         ()
       }
 
