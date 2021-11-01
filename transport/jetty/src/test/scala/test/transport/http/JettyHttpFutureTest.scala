@@ -31,10 +31,12 @@
 //  ): ServerMessageTransport[Effect] = new ServerMessageTransport[Effect] {
 //    private val server = {
 //      val endpoint = JettyEndpoint.create(handler)(runEffect)
-//      val server = new Server(port)
+//      val servletHolder = new ServletHolder(endpoint)
+//      servletHolder.setAsyncSupported(true)
 //      val servletHandler = new ServletContextHandler
 //      servletHandler.setContextPath("/")
-//      servletHandler.addServlet(new ServletHolder(endpoint), "/*")
+//      servletHandler.addServlet(servletHolder, "/*")
+//      val server = new Server(port)
 //      server.setHandler(servletHandler)
 ////      server.setHandler(new AbstractHandler {
 ////        override def handle(target: String, baseRequest: Request,
