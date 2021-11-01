@@ -60,12 +60,36 @@ private[automorph] object Extensions {
 
   implicit final class EffectOps[Effect[_], T](private val effect: Effect[T]) {
 
+    /**
+     * Creates a new effect by lifting an effect's errors into a value.
+     *
+     * The resulting effect cannot fail.
+     *
+     * @tparam T effectful value type
+     * @return effectful error or the original value
+     */
     def either(implicit system: EffectSystem[Effect]): Effect[Either[Throwable, T]] =
       system.either(effect)
 
+    /**
+     * Creates a new effect by applying a function to an effect's value.
+     *
+     * @param function function applied to the specified effect's value
+     * @tparam T effectful value type
+     * @tparam R function result type
+     * @return transformed effectful value
+     */
     def map[R](function: T => R)(implicit system: EffectSystem[Effect]): Effect[R] =
       system.map(effect, function)
 
+    /**
+     * Creates a new effect by applying an effectful function to an effect's value.
+     *
+     * @param function effectful function applied to the specified effect's value
+     * @tparam T effectful value type
+     * @tparam R effectful function result type
+     * @return effect containing the transformed value
+     */
     def flatMap[R](function: T => Effect[R])(implicit system: EffectSystem[Effect]): Effect[R] =
       system.flatMap(effect, function)
   }
