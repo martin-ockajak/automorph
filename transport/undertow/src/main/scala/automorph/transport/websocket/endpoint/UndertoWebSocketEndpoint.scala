@@ -1,7 +1,6 @@
 package automorph.transport.websocket.endpoint
 
 import automorph.Types
-import automorph.handler.HandlerResult
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport

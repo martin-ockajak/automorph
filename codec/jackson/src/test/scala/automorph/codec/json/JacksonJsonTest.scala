@@ -1,8 +1,6 @@
 package automorph.codec.json
 
 import automorph.codec.json.JacksonJsonCodec
-import automorph.protocol.jsonrpc.Message
-import automorph.util.Bytes
 import com.fasterxml.jackson.core.{JsonGenerator, JsonParser}
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
