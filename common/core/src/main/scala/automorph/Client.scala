@@ -4,7 +4,6 @@ import automorph.client.meta.ClientMeta
 import automorph.client.{ProtocolClientBuilder, RemoteNotify, TransportClientBuilder}
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.RpcProtocol.InvalidResponseException
-import automorph.spi.protocol.RpcRequest
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}

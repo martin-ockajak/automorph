@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
 
-sbt '++2.13.6 site' && (browse target/site/index.html &)
+sbt '++2.13.6 site' && case "$OSTYPE" in
+  linux*)   browse target/site/index.html & ;;
+  bsd*)     browse target/site/index.html & ;;
+  cygwin*)  browse target/site/index.html & ;;
+  win*)     start "" target/site/index.html & ;;
+  msys*)    start "" target/site/index.html & ;;
+  darwin*)  open target/site/index.html & ;; 
+  *)        browse target/site/index.html & ;;
+esac
 
