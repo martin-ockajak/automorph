@@ -6,7 +6,7 @@ import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.client.UrlClient.{Context, Session}
 import automorph.util.Bytes
-import automorph.util.Extensions.TryOps
+import automorph.util.Extensions.{EffectOps, TryOps}
 import java.net.{HttpURLConnection, URI}
 import scala.collection.immutable.ArraySeq
 import scala.concurrent.duration.Duration
@@ -36,6 +36,7 @@ final case class UrlClient[Effect[_]](
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
+  implicit private val givenSystem: EffectSystem[Effect] = system
   require(httpMethods.contains(method), s"Invalid HTTP method: $method")
   System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
 
@@ -46,27 +47,24 @@ final case class UrlClient[Effect[_]](
     requestContext: Option[Context]
   ): Effect[(ArraySeq.ofByte, Context)] =
     // Send the request
-    system.flatMap(
-      send(requestBody, requestId, mediaType, requestContext),
-      (connection: HttpURLConnection) => {
-        system.wrap {
-          lazy val responseProperties = Map(
-            LogProperties.requestId -> requestId,
-            "URL" -> connection.getURL.toExternalForm
-          )
+    send(requestBody, requestId, mediaType, requestContext).flatMap { connection =>
+      system.wrap {
+        lazy val responseProperties = Map(
+          LogProperties.requestId -> requestId,
+          "URL" -> connection.getURL.toExternalForm
+        )
 
-          // Process the response
-          logger.trace("Receiving HTTP response", responseProperties)
-          connection.getResponseCode
-          val inputStream = Option(connection.getErrorStream).getOrElse(connection.getInputStream)
-          val response = Using(inputStream)(Bytes.inputStream.from).onFailure {
-            logger.error("Failed to receive HTTP response", _, responseProperties)
-          }.get
-          logger.debug("Received HTTP response", responseProperties + ("Status" -> connection.getResponseCode.toString))
-          response -> responseContext(connection)
-        }
+        // Process the response
+        logger.trace("Receiving HTTP response", responseProperties)
+        connection.getResponseCode
+        val inputStream = Option(connection.getErrorStream).getOrElse(connection.getInputStream)
+        val response = Using(inputStream)(Bytes.inputStream.from).onFailure {
+          logger.error("Failed to receive HTTP response", _, responseProperties)
+        }.get
+        logger.debug("Received HTTP response", responseProperties + ("Status" -> connection.getResponseCode.toString))
+        response -> responseContext(connection)
       }
-    )
+    }
 
   override def notify(
     requestBody: ArraySeq.ofByte,
@@ -74,7 +72,7 @@ final case class UrlClient[Effect[_]](
     mediaType: String,
     requestContext: Option[Context]
   ): Effect[Unit] =
-    system.map(send(requestBody, requestId, mediaType, requestContext), (_: HttpURLConnection) => ())
+    send(requestBody, requestId, mediaType, requestContext).map(_ => ())
 
   override def defaultContext: Context =
     Session.default
