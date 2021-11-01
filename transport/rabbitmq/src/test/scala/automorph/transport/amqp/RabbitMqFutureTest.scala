@@ -34,7 +34,7 @@ class RabbitMqFutureTest extends ClientServerTest {
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
-    Try((new ErlangVersionChecker((new EmbeddedRabbitMqConfig.Builder).build)).check()).toOption.map { _ =>
+    Try(new ErlangVersionChecker((new EmbeddedRabbitMqConfig.Builder).build).check()).toOption.map { _ =>
       val (server, port) = withAvailablePort(port =>
         new ServerMessageTransport[Effect] {
           private val (server, broker) = {
