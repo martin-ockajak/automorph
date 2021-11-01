@@ -3,7 +3,6 @@ package test.transport.local
 import automorph.system.ScalazSystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
-import scala.util.Try
 import scalaz.effect.IO
 import test.core.ProtocolCodecTest
 

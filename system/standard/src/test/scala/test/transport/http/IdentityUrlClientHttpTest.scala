@@ -6,7 +6,6 @@ import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.client.UrlClient
-import automorph.transport.http.server.NanoHTTPD.IHTTPSession
 import automorph.transport.http.server.NanoServer
 import java.net.URI
 import org.scalacheck.Arbitrary

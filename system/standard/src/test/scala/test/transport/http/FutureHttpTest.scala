@@ -5,13 +5,11 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.client.HttpClient
-import automorph.transport.http.server.NanoHTTPD.IHTTPSession
 import automorph.transport.http.server.NanoServer
 import java.net.URI
 import org.scalacheck.Arbitrary
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.Future
 import test.core.ClientServerTest
 import test.transport.http.HttpContextGenerator
 
