@@ -32,7 +32,7 @@ class FinagleHttpFutureTest extends StandardHttpServerTest {
       Http.serve(s":$port", endpoint)
     }
 
-    override def close(): Future[Unit] = {
+    override def close(): Effect[Unit] = {
       val promise = Promise[Unit]
       server.close().respond {
         case Return(result) => promise.success(result)

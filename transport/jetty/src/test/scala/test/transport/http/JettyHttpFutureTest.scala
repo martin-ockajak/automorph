@@ -38,7 +38,7 @@ class JettyHttpFutureTest extends StandardHttpServerTest {
       server
     }
 
-    override def close(): Future[Unit] = Future(server.stop())
+    override def close(): Effect[Unit] = Future(server.stop())
   }
 
   override def run[T](effect: Effect[T]): T = await(effect)
