@@ -195,12 +195,13 @@ lazy val circe = (project in file(s"codec/circe")).dependsOn(
     "automorph.codec.json.meta"
   )
 )
+val jacksonVersion = "2.13.0"
 lazy val jackson = (project in file("codec/jackson")).dependsOn(
   jsonrpc, restrpc, testPlugin % Test
 ).settings(
   name := s"$projectName-jackson",
   libraryDependencies ++= Seq(
-    ("com.fasterxml.jackson.module" % "jackson-module-scala" % "2.13.0").cross(CrossVersion.for3Use2_13)
+    ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion).cross(CrossVersion.for3Use2_13)
   )
 )
 
@@ -272,14 +273,17 @@ lazy val undertow = (project in file("transport/undertow")).dependsOn(
     "io.undertow" % "undertow-core" % "2.2.12.Final"
   )
 )
+val jettyVersion = "11.0.7"
 lazy val jetty = (project in file("transport/jetty")).dependsOn(
   core, http, testStandard % Test
 ).settings(
   name := s"$projectName-jetty",
   libraryDependencies ++= Seq(
-    "org.eclipse.jetty" % "jetty-servlet" % "11.0.7",
+    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
+    "org.eclipse.jetty.websocket" % "websocket-servlet" % jettyVersion,
     "commons-io" % "commons-io" % "2.11.0",
-    "org.eclipse.jetty" % "jetty-server" % "11.0.7" % Test
+    "org.eclipse.jetty" % "jetty-server" % jettyVersion % Test,
+    "org.eclipse.jetty.websocket" % "websocket-jetty-server" % jettyVersion % Test
   )
 )
 lazy val finagle = (project in file("transport/finagle")).dependsOn(
@@ -338,7 +342,7 @@ lazy val testPlugin = (project in file("test/plugin")).dependsOn(
   testBase
 ).settings(
   libraryDependencies ++= Seq(
-    "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.0"
+    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion
   ),
   Compile / doc / scalacOptions ++= Seq("-skip-packages", "test")
 )
