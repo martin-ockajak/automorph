@@ -9,7 +9,7 @@ import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
 import automorph.util.{Bytes, Random}
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.{AMQP, Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
+import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
 import scala.util.Try
 
@@ -53,8 +53,10 @@ final case class RabbitMqServer[Effect[_]] private (
 
   override def close(): Effect[Unit] = system.wrap(RabbitMqCommon.disconnect(connection))
 
-  private def start(): Unit =
+  private def start(): Unit = {
     createConsumer(connection.createChannel())
+    ()
+  }
 
   private def createConsumer(channel: Channel): DefaultConsumer = {
     val consumer = new DefaultConsumer(channel) {
