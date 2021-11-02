@@ -12,7 +12,6 @@ import automorph.transport.http.server.UndertowServer.defaultBuilder
 import io.undertow.Undertow
 import java.net.URI
 import scala.concurrent.{ExecutionContext, Future}
-import sttp.capabilities.WebSockets
 
 /** Default component constructors. */
 object Default extends DefaultMeta {
