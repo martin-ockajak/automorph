@@ -14,7 +14,7 @@ object RequestMetadata extends App {
       Some(message),
       requestContext.path,
       requestContext.header("X-Test")
-    ).flatten.mkString(",")
+    ).flatten.mkString(", ")
   }
   val api = new ServerApi()
 
