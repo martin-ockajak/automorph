@@ -151,12 +151,9 @@ server.close()
 // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
 
-// Call the remote API function dynamically
-val remoteHello = client.function("hello")
-remoteHello.args("some" -> "world", "n" -> 1).call[String] // Future[String]
-
 // Notify the remote API function dynamically without expecting a response
-remoteHello.args("some" -> "world", "n" -> 1).tell // Future[Unit]
+val notifyHello = client.notify("hello")
+notifyHello.args("some" -> "world", "n" -> 1) // Future[Unit]
 
 // Close the client
 client.close()
