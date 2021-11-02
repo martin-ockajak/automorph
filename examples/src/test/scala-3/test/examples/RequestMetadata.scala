@@ -9,7 +9,7 @@ object RequestMetadata extends App {
   class ServerApi {
 
     // Use HTTP request metadata context provided by the server message transport plugin
-    def contextual(message: String)(
+    def hello(message: String)(
       implicit requestContext: Default.ServerContext
     ): String = Seq(
       Some(message),
@@ -23,7 +23,7 @@ object RequestMetadata extends App {
   trait ClientApi {
 
     // Use HTTP request context defined by the client message transport plugin
-    def contextual(message: String)(implicit request: Default.ClientContext): String
+    def hello(message: String)(implicit request: Default.ClientContext): String
   }
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
@@ -42,17 +42,17 @@ object RequestMetadata extends App {
 
   // Call the remote API function statically with request context supplied directly
   val remoteApi = client.bind[ClientApi] // Api
-  remoteApi.contextual("test")(using requestContext) // String
+  remoteApi.hello("test")(using requestContext) // String
 
   // Call the remote API function statically with request context supplied implictly
   implicit val givenRequestMetadata: Default.ClientContext = requestContext
-  remoteApi.contextual("test") // String
+  remoteApi.hello("test") // String
 
   // Call the remote API function dynamically with request context supplied directly
-  client.call[String]("contextual").args("message" -> "test")(using requestContext) // String
+  client.call[String]("hello").args("message" -> "test")(using requestContext) // String
 
   // Call the remote API function dynamically with request context supplied implictly
-  client.call[String]("contextual").args("message" -> "test") // String
+  client.call[String]("hello").args("message" -> "test") // String
 
   // Close the client
   client.close()
