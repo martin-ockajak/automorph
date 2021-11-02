@@ -1,9 +1,8 @@
----
-**Important**: This is a preview of an upcoming release. Please do not use for any purposes other than design review !
+# Important notice
 
----
+**This is a preview of an upcoming release. Please do not use it for any purposes other than design review !**
 
-![automorph](https://github.com/martin-ockajak/automorph/raw/main/project/docs/images/banner.jpg)
+![automorph](https://github.com/martin-ockajak/automorph/raw/main/docs/images/banner.jpg)
 
 [![Build](https://github.com/martin-ockajak/automorph/workflows/Build/badge.svg)](https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
 [![Releases](https://img.shields.io/maven-central/v/org.automorph/automorph-core_3.0.0.svg)](https://mvnrepository.com/artifact/org.automorph)
