@@ -80,8 +80,9 @@ final case class SttpClient[Effect[_]] private (
     requestContext: Option[Context]
   ): Effect[Unit] = {
     val sttpRequest = createRequest(requestBody, mediaType, requestContext)
-    transportProtocol(sttpRequest).flatMap { protocol =>
-      send(sttpRequest.response(ignore), requestId, protocol).map(_ => ())
+    transportProtocol(sttpRequest).flatMap {
+      case Protocol.Http => send(sttpRequest.response(ignore), requestId, Protocol.Http).map(_ => ())
+      case Protocol.WebSocket => send(sttpRequest, requestId, Protocol.WebSocket).map(_ => ())
     }
   }
 
