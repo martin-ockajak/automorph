@@ -181,7 +181,10 @@ object Default extends DefaultMeta {
   def clientTransportAsync(url: URI, method: String)(implicit
     executionContext: ExecutionContext
   ): ClientTransport[Future] =
-    clientTransport(url, method, systemAsync)(identity)
+    clientTransport(url, method, systemAsync) { effect =>
+      effect
+      ()
+    }
 
   /**
    * Creates a standard JRE HTTP & WebSocket client message transport plugin using identity as an effect type.
@@ -194,7 +197,10 @@ object Default extends DefaultMeta {
    * @return synchronous client message transport plugin
    */
   def clientTransportSync(url: URI, method: String): ClientTransport[Identity] =
-    clientTransport(url, method, systemSync)(identity)
+    clientTransport(url, method, systemSync) { effect =>
+      effect
+      ()
+    }
 
   /**
    * Creates a standard JRE JSON-RPC over HTTP & WebSocket client with specified effect system plugin.
