@@ -14,7 +14,7 @@ object ClientMessageTransport extends App {
   }
   val api = new Api()
 
-  // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
+  // Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val createServer = Default.serverSync(80, "/api")
   val server = createServer(_.bind(api))
 

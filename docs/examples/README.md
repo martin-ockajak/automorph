@@ -29,7 +29,7 @@ val api = new Api()
 **Server**
 
 ```scala
-// Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
+// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val createServer = Default.serverSync(80, "/api")
 val server = createServer(_.bind(api))
 
@@ -40,7 +40,7 @@ server.close()
 **Client**
 
 ```scala
-// Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val client = Default.clientSync(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function
@@ -83,7 +83,7 @@ val api = new Api()
 **Server**
 
 ```scala
-// Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
+// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val createServer = Default.serverAsync(80, "/api")
 val server = createServer(_.bind(api))
 
@@ -94,7 +94,7 @@ server.close()
 **Client**
 
 ```scala
-// Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function
@@ -137,7 +137,7 @@ val api = new Api()
 **Server**
 
 ```scala
-// Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
+// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val createServer = Default.serverAsync(80, "/api")
 val server = createServer(_.bind(api))
 
@@ -148,7 +148,7 @@ server.close()
 **Client**
 
 ```scala
-// Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
 
 // Notify the remote API function dynamically without expecting a response
@@ -201,7 +201,7 @@ trait ClientApi {
 **Server**
 
 ```scala
-// Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
+// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val createServer = Default.serverSync(80, "/api")
 val server = createServer(_.bind(api))
 
@@ -212,7 +212,7 @@ server.close()
 **Client**
 
 ```scala
-// Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val client = Default.clientSync(new URI("http://localhost/api"), "POST")
 
 // Create client request context specifying HTTP request meta-data
@@ -287,7 +287,7 @@ val mapName = (name: String) => name match {
   case other => Seq(s"test.$other")
 }
 
-// Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
+// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val createServer = Default.serverSync(80, "/api")
 val server = createServer(_.bind(api, mapName(_)))
 
@@ -298,7 +298,7 @@ server.close()
 **Client**
 
 ```scala
-// Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val client = Default.clientSync(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function dynamically
@@ -353,7 +353,7 @@ val serverProtocol = protocol.mapException {
   case e => protocol.exceptionToError(e)
 }
 
-// Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
+// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val system = Default.systemAsync
 val handler = Handler.protocol(serverProtocol).system(system).context[Default.ServerContext]
 val server = Default.server(handler, 80, "/api", mapException = {
@@ -376,7 +376,7 @@ val clientProtocol = protocol.mapError {
   case (message, code) => protocol.errorToException(message, code)
 }
 
-// Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val transport = Default.clientAsyncTransport(new URI("http://localhost/api"), "POST")
 val client = Client.protocol(clientProtocol).transport(transport)
 
@@ -424,7 +424,7 @@ val api = new Api()
 // Create an effect system plugin
 val system = ZioSystem[Any]()
 
-// Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
+// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val server = Default.serverSystem(system, 80, "/api")(_.bind(api))
 
 // Stop the server
@@ -434,7 +434,7 @@ server.close()
 **Client**
 
 ```scala
-// Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val client = Default.client(new URI("http://localhost/api"), "POST", system)
 
 // Call the remote API function
@@ -481,7 +481,7 @@ val api = new Api()
 // Create REST-RPC protocol plugin
 val protocol = RestRpcProtocol[Default.Node, Default.Codec](Default.codec)
 
-// Start Undertow REST-RPC HTTP server listening on port 80 for requests to '/api'
+// Start default REST-RPC HTTP server listening on port 80 for requests to '/api'
 val system = Default.asyncSystem
 val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
 val server = Default.server(handler, 80, "/api")
@@ -493,7 +493,7 @@ server.close()
 **Client**
 
 ```scala
-// Setup STTP REST-RPC HTTP client sending POST requests to 'http://localhost/api'
+// Setup default REST-RPC HTTP client sending POST requests to 'http://localhost/api'
 val transport = Default.clientAsyncTransport(new URI("http://localhost/api"), "POST")
 val client = Client.protocol(protocol).transport(transport)
 
@@ -552,7 +552,7 @@ val protocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type](codec)
 // Create an effect system plugin
 val system = Default.asyncSystem
 
-// Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
+// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
 lazy val server = Default.server(handler.bind(api), 80, "/api")
 
@@ -563,7 +563,7 @@ server.close()
 **Client**
 
 ```scala
-// Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val transport = Default.clientAsyncTransport(new URI("http://localhost/api"), "POST")
 val client = Client(protocol, transport)
 
@@ -606,7 +606,7 @@ val api = new Api()
 **Server**
 
 ```scala
-// Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
+// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val createServer = Default.serverSync(80, "/api")
 val server = createServer(_.bind(api))
 
@@ -673,7 +673,7 @@ server.close()
 **Client**
 
 ```scala
-// Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val client = Default.clientSync(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function
@@ -734,7 +734,7 @@ server.stop()
 **Client**
 
 ```scala
-// Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val client = Default.clientAsync(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function

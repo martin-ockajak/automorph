@@ -18,12 +18,12 @@ object RpcProtocol extends App {
   // Create REST-RPC protocol plugin
   val protocol = RestRpcProtocol[Default.Node, Default.Codec](Default.codec)
 
-  // Start Undertow REST-RPC HTTP server listening on port 80 for requests to '/api'
+  // Start default REST-RPC HTTP server listening on port 80 for requests to '/api'
   val system = Default.systemAsync
   val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
   val server = Default.server(handler, 80, "/api")
 
-  // Setup STTP REST-RPC HTTP client sending POST requests to 'http://localhost/api'
+  // Setup default REST-RPC HTTP client sending POST requests to 'http://localhost/api'
   val transport = Default.clientTransportAsync(new URI("http://localhost/api"), "POST")
   val client = Client.protocol(protocol).transport(transport)
 

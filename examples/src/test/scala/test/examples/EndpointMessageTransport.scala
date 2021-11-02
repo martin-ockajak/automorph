@@ -26,7 +26,7 @@ object EndpointMessageTransport extends App {
     .setHandler(Handlers.path().addPrefixPath("/api", endpoint))
     .build()
 
-  // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.clientAsync(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function via proxy

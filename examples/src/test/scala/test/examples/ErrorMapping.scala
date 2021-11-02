@@ -24,7 +24,7 @@ object ErrorMapping extends App {
     case e => protocol.exceptionToError(e)
   }
 
-  // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
+  // Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val system = Default.systemAsync
   val handler = Handler.protocol(serverProtocol).system(system).context[Default.ServerContext]
   val server = Default.server(handler, 80, "/api", mapException = {
@@ -40,7 +40,7 @@ object ErrorMapping extends App {
     case (message, code) => protocol.errorToException(message, code)
   }
 
-  // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val transport = Default.clientTransportAsync(new URI("http://localhost/api"), "POST")
   val client = Client.protocol(clientProtocol).transport(transport)
 

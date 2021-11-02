@@ -19,7 +19,7 @@ object ServerMessageTransport extends App {
   val createServer = NanoServer.create(handler.bind(api), 80)
   val server = createServer(identity)
 
-  // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.clientSync(new URI("http://localhost/api"), "POST")
 
   // Call the remote API function

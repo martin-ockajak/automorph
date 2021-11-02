@@ -18,10 +18,10 @@ object EffectSystem extends App {
   // Create ZIO effect system plugin
   val system = ZioSystem.default
 
-  // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
+  // Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val server = Default.serverSystem(system, 80, "/api")(_.bind(api))
 
-  // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.client(new URI("http://localhost/api"), "POST", system)
 
   // Call the remote APi function via proxy
