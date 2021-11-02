@@ -1,12 +1,12 @@
 package test.transport.local
 
-import automorph.system.ScalazSystem
+import automorph.system.ScalazEffectSystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import scalaz.effect.IO
 import test.core.ProtocolCodecTest
 
-class LocalScalazTest extends ProtocolCodecTest {
+class LocalScalazEffectTest extends ProtocolCodecTest {
 
   type Effect[T] = IO[T]
   type Context = String
@@ -15,7 +15,7 @@ class LocalScalazTest extends ProtocolCodecTest {
     Arbitrary(Arbitrary.arbitrary[Context])
 
   override lazy val system: EffectSystem[Effect] =
-    ScalazSystem()
+    ScalazEffectSystem()
 
   override def run[T](effect: Effect[T]): T =
     effect.unsafePerformIO()

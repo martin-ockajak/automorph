@@ -10,7 +10,7 @@ import scalaz.effect.IO
  * @see [[https://www.javadoc.io/doc/org.scalaz/scalaz_2.13/latest/scalaz/effect/IO.html Effect type]]
  * @constructor Creates a Scalaz effect system plugin using `IO` as an effect type.
  */
-final case class ScalazSystem() extends EffectSystem[IO] {
+final case class ScalazEffectSystem() extends EffectSystem[IO] {
 
   override def wrap[T](value: => T): IO[T] =
     IO(value)
@@ -28,7 +28,7 @@ final case class ScalazSystem() extends EffectSystem[IO] {
     effect.flatMap(function)
 }
 
-object ScalazSystem {
+object ScalazEffectSystem {
   /**
    * Effect type.
    *

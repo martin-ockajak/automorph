@@ -49,7 +49,7 @@ lazy val root = project.in(file(".")).settings(
   zio,
   monix,
   catsEffect,
-  scalaz,
+  scalazEffect,
 
   // Message transport
   sttp,
@@ -170,10 +170,10 @@ lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
     "org.typelevel" %% "cats-effect" % "3.2.9"
   )
 )
-lazy val scalaz = (project in file("system/scalaz")).dependsOn(
+lazy val scalazEffect = (project in file("system/scalaz-effect")).dependsOn(
   spi, testStandard % Test
 ).settings(
-  name := s"$projectName-scalaz",
+  name := s"$projectName-scalaz-effect",
   libraryDependencies ++= Seq(
     "org.scalaz" %% "scalaz-effect" % "7.4.0-M8"
   )
