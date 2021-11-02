@@ -1,6 +1,12 @@
+<br>
+
 # Important notice
 
 **This is a preview of an upcoming release. Please do not use it for any purposes other than design review !**
+
+<br>
+<br>
+<br>
 
 ![automorph](https://github.com/martin-ockajak/automorph/raw/main/docs/images/banner.jpg)
 
