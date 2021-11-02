@@ -9,6 +9,6 @@ class IdentityTest extends EffectSystemTest[Identity] {
   def system: EffectSystem[Identity] =
     IdentitySystem()
 
-  def run[T](effect: Identity[T]): Either[Throwable, T] =
+  def execute[T](effect: Identity[T]): Either[Throwable, T] =
     Try(effect).toEither
 }

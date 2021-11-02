@@ -1,17 +1,17 @@
 package test.system
 
 import automorph.system.MonixSystem
-import automorph.spi.EffectSystem
-import automorph.spi.system.Defer
 import monix.eval.Task
-import monix.execution.Scheduler.Implicits.global
+import monix.execution.Scheduler
 import scala.concurrent.duration.Duration
 import scala.util.Try
 
-class MonixTest extends DeferEffectSystemTest[Task] {
+class MonixTest extends RunTest[Task] with DeferTest[Task] {
 
-  def deferSystem: EffectSystem[Task] with Defer[Task] = MonixSystem()
+  def system: MonixSystem = MonixSystem()
 
-  def run[T](effect: Task[T]): Either[Throwable, T] =
+  def execute[T](effect: Task[T]): Either[Throwable, T] = {
+    implicit val scheduler: Scheduler = system.scheduler
     Try(effect.runSyncUnsafe(Duration.Inf)).toEither
+  }
 }

@@ -1,16 +1,15 @@
 package test.system
 
 import automorph.system.FutureSystem
-import automorph.spi.EffectSystem
-import automorph.spi.system.Defer
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class FutureTest extends DeferEffectSystemTest[Future] {
+class FutureTest extends RunTest[Future] with DeferTest[Future] {
 
-  def deferSystem: EffectSystem[Future] with Defer[Future] = FutureSystem()
+  def system: FutureSystem = FutureSystem()
 
-  def run[T](effect: Future[T]): Either[Throwable, T] =
+  def execute[T](effect: Future[T]): Either[Throwable, T] = {
+    implicit val executionContext: ExecutionContext = system.executionContext
     Try(await(effect)).toEither
+  }
 }

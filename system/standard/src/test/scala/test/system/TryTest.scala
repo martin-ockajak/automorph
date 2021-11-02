@@ -8,6 +8,6 @@ class TryTest extends EffectSystemTest[Try] {
   def system: EffectSystem[Try] =
     TrySystem()
 
-  def run[T](effect: Try[T]): Either[Throwable, T] =
+  def execute[T](effect: Try[T]): Either[Throwable, T] =
     effect.toEither
 }

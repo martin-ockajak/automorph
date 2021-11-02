@@ -14,8 +14,9 @@ import scala.util.Success
  * @constructor Creates an asynchronous effect system plugin using `Future` as an effect type.
  * @param executionContext execution context
  */
-final case class FutureSystem()(implicit executionContext: ExecutionContext)
-  extends EffectSystem[Future] with Run[Future] with Defer[Future] {
+final case class FutureSystem()(
+  implicit val executionContext: ExecutionContext = ExecutionContext.global
+) extends EffectSystem[Future] with Run[Future] with Defer[Future] {
 
   override def wrap[T](value: => T): Future[T] =
     Future(value)

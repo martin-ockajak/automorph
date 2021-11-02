@@ -12,8 +12,11 @@ import monix.execution.Scheduler
  * @see [[https://monix.io/ Library documentation]]
  * @see [[https://monix.io/api/current/monix/eval/Task.html Effect type]]
  * @constructor Creates a Monix effect system plugin using `Task` as an effect type.
+ * @param scheduler task scheduler
  */
-case class MonixSystem() extends EffectSystem[Task] with Defer[Task] {
+final case class MonixSystem()(
+  implicit val scheduler: Scheduler = monix.execution.Scheduler.global
+) extends EffectSystem[Task] with Run[Task] with Defer[Task] {
 
   override def wrap[T](value: => T): Task[T] =
     Task.evalAsync(value)
@@ -29,6 +32,9 @@ case class MonixSystem() extends EffectSystem[Task] with Defer[Task] {
 
   override def flatMap[T, R](effect: Task[T], function: T => Task[R]): Task[R] =
     effect.flatMap(function)
+
+  override def run[T](effect: Task[T]): Unit =
+    effect.runAsyncAndForget
 
   override def deferred[T]: Task[Deferred[Task, T]] =
     map(
@@ -67,19 +73,4 @@ object MonixSystem {
    * @tparam T value type
    */
   type Effect[T] = Task[T]
-
-  /**
-   * Creates Monix effect effect system plugin using `Task` as an effect type.
-   *
-   * @see [[https://monix.io/ Library documentation]]
-   * @see [[https://monix.io/api/current/monix/eval/Task.html Effect type]]
-   * @param scheduler task scheduler
-   * @return Monix effect system plugin
-   */
-  def apply(implicit scheduler: Scheduler): MonixSystem with Run[Task] =
-    new MonixSystem with Run[Task] {
-
-      override def run[T](effect: Task[T]): Unit =
-        effect.runAsyncAndForget
-    }
 }

@@ -1,16 +1,16 @@
 package test.system
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
 import automorph.system.CatsEffectSystem
-import automorph.spi.EffectSystem
-import automorph.spi.system.Defer
+import cats.effect.unsafe.IORuntime
 import scala.util.Try
 
-class CatsEffectTest extends DeferEffectSystemTest[IO] {
+class CatsEffectTest extends RunTest[IO] with DeferTest[IO] {
 
-  def deferSystem: EffectSystem[IO] with Defer[IO] = CatsEffectSystem()
+  def system: CatsEffectSystem = CatsEffectSystem()
 
-  def run[T](effect: IO[T]): Either[Throwable, T] =
+  def execute[T](effect: IO[T]): Either[Throwable, T] = {
+    implicit val runtime: IORuntime = system.runtime
     Try(effect.unsafeRunSync()).toEither
+  }
 }

@@ -11,9 +11,12 @@ import cats.effect.unsafe.IORuntime
  *
  * @see [[https://typelevel.org/cats-effect/ Library documentation]]
  * @see [[https://typelevel.org/cats-effect/api/3.x/cats/effect/IO.html Effect type]]
+ * @param runtime runtime system
  * @constructor Creates a Cats Effect effect system plugin using `IO` as an effect type.
  */
-case class CatsEffectSystem() extends EffectSystem[IO] with Defer[IO] {
+case class CatsEffectSystem()(
+  implicit val runtime: IORuntime = IORuntime.global
+) extends EffectSystem[IO] with Run[IO] with Defer[IO] {
 
   override def wrap[T](value: => T): IO[T] =
     IO(value)
@@ -30,6 +33,8 @@ case class CatsEffectSystem() extends EffectSystem[IO] with Defer[IO] {
   override def flatMap[T, R](effect: IO[T], function: T => IO[R]): IO[R] =
     effect.flatMap(function)
 
+  override def run[T](effect: IO[T]): Unit =
+    effect.unsafeRunAndForget()
 
   override def deferred[T]: IO[Deferred[IO, T]] = {
     map(
@@ -67,19 +72,4 @@ object CatsEffectSystem {
    * @tparam T value type
    */
   type Effect[T] = IO[T]
-
-  /**
-   * Creates a Cats Effect effect system plugin using `IO` as an effect type.
-   *
-   * @see [[https://typelevel.org/cats-effect/ Library documentation]]
-   * @see [[https://typelevel.org/cats-effect/api/3.x/cats/effect/IO.html Effect type]]
-   * @param ioRuntime IO runtime
-   * @return Cats Effect effect system plugin
-   */
-  def apply(implicit ioRuntime: IORuntime): CatsEffectSystem with Run[IO] =
-    new CatsEffectSystem with Run[IO] {
-
-      override def run[T](effect: IO[T]): Unit =
-        effect.unsafeRunAndForget()
-    }
 }

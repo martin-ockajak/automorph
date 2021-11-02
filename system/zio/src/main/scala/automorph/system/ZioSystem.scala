@@ -1,8 +1,8 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
-import automorph.spi.system.{Defer, Deferred}
-import zio.{Queue, RIO, ZQueue}
+import automorph.spi.system.{Defer, Deferred, Run}
+import zio.{Queue, RIO, Runtime, Task, ZEnv, ZQueue}
 
 /**
  * ZIO effect system plugin using `RIO` as an effect type.
@@ -10,10 +10,13 @@ import zio.{Queue, RIO, ZQueue}
  * @see [[https://zio.dev Library documentation]]
  * @see [[https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html Effect type]]
  * @constructor Creates a ZIO effect system plugin using `RIO` as an effect type.
+ * @param runtime runtime system
  * @tparam Environment ZIO environment type
  */
-final case class ZioSystem[Environment]()
-  extends EffectSystem[({ type Effect[A] = RIO[Environment, A] })#Effect]
+case class ZioSystem[Environment]()(
+  implicit val runtime: Runtime[Environment] = Runtime.default.withReportFailure(_ => ())
+) extends EffectSystem[({ type Effect[A] = RIO[Environment, A] })#Effect]
+  with Run[({ type Effect[A] = RIO[Environment, A] })#Effect]
   with Defer[({ type Effect[A] = RIO[Environment, A] })#Effect] {
 
   override def wrap[T](value: => T): RIO[Environment, T] =
@@ -30,6 +33,9 @@ final case class ZioSystem[Environment]()
 
   override def flatMap[T, R](effect: RIO[Environment, T], function: T => RIO[Environment, R]): RIO[Environment, R] =
     effect.flatMap(function)
+
+  override def run[T](effect: RIO[Environment, T]): Unit =
+    runtime.unsafeRunAsync(effect)(_ => ())
 
   override def deferred[T]: RIO[Environment, Deferred[({ type Effect[A] = RIO[Environment, A] })#Effect, T]] =
     map(
@@ -50,12 +56,19 @@ final case class ZioSystem[Environment]()
 object ZioSystem {
 
   /**
-   * Creates a ZIO effect system plugin without environment requirements using `Task` as an effect type.
+   * ZIO with default environment effect type.
+   *
+   * @tparam T effectful value type
+   */
+  type DefaultEffect[T] = RIO[ZEnv, T]
+
+  /**
+   * Creates a ZIO effect system plugin with default environment using `RIO` as an effect type.
    *
    * @see [[https://zio.dev Library documentation]]
    * @see [[https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html Effect type]]
-   * @return ZIO effect system
+   * @return ZIO effect system plugin
    */
-  def default: ZioSystem[Any] =
-    ZioSystem[Any]()
+  def default: ZioSystem[ZEnv] with Run[DefaultEffect] =
+    ZioSystem[ZEnv]()
 }
