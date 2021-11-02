@@ -1,9 +1,10 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
-import automorph.spi.system.{Defer, Deferred}
+import automorph.spi.system.{Defer, Deferred, Run}
 import monix.eval.Task
 import monix.catnap.MVar
+import monix.execution.Scheduler
 
 /**
  * Monix effect effect system plugin using `Task` as an effect type.
@@ -12,7 +13,7 @@ import monix.catnap.MVar
  * @see [[https://monix.io/api/current/monix/eval/Task.html Effect type]]
  * @constructor Creates a Monix effect system plugin using `Task` as an effect type.
  */
-final case class MonixSystem() extends EffectSystem[Task] with Defer[Task] {
+case class MonixSystem() extends EffectSystem[Task] with Defer[Task] {
 
   override def wrap[T](value: => T): Task[T] =
     Task.evalAsync(value)
@@ -59,10 +60,26 @@ final case class MonixSystem() extends EffectSystem[Task] with Defer[Task] {
 }
 
 object MonixSystem {
+
   /**
    * Effect type.
    *
    * @tparam T value type
    */
   type Effect[T] = Task[T]
+
+  /**
+   * Creates Monix effect effect system plugin using `Task` as an effect type.
+   *
+   * @see [[https://monix.io/ Library documentation]]
+   * @see [[https://monix.io/api/current/monix/eval/Task.html Effect type]]
+   * @param scheduler task scheduler
+   * @return Monix effect system plugin
+   */
+  def apply(implicit scheduler: Scheduler): MonixSystem with Run[Task] =
+    new MonixSystem with Run[Task] {
+
+      override def run[T](effect: Task[T]): Unit =
+        effect.runAsyncAndForget
+    }
 }

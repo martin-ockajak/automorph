@@ -1,9 +1,10 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
-import automorph.spi.system.{Defer, Deferred}
+import automorph.spi.system.{Defer, Deferred, Run}
 import cats.effect.IO
 import cats.effect.std.Queue
+import cats.effect.unsafe.IORuntime
 
 /**
  * Cats Effect effect system plugin.
@@ -12,7 +13,7 @@ import cats.effect.std.Queue
  * @see [[https://typelevel.org/cats-effect/api/3.x/cats/effect/IO.html Effect type]]
  * @constructor Creates a Cats Effect effect system plugin using `IO` as an effect type.
  */
-final case class CatsEffectSystem() extends EffectSystem[IO] with Defer[IO] {
+case class CatsEffectSystem() extends EffectSystem[IO] with Defer[IO] {
 
   override def wrap[T](value: => T): IO[T] =
     IO(value)
@@ -66,4 +67,19 @@ object CatsEffectSystem {
    * @tparam T value type
    */
   type Effect[T] = IO[T]
+
+  /**
+   * Creates a Cats Effect effect system plugin using `IO` as an effect type.
+   *
+   * @see [[https://typelevel.org/cats-effect/ Library documentation]]
+   * @see [[https://typelevel.org/cats-effect/api/3.x/cats/effect/IO.html Effect type]]
+   * @param ioRuntime IO runtime
+   * @return Cats Effect effect system plugin
+   */
+  def apply(implicit ioRuntime: IORuntime): CatsEffectSystem with Run[IO] =
+    new CatsEffectSystem with Run[IO] {
+
+      override def run[T](effect: IO[T]): Unit =
+        effect.unsafeRunAndForget()
+    }
 }

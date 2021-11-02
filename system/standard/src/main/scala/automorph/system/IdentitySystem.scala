@@ -1,6 +1,7 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
+import automorph.spi.system.Run
 import automorph.system.IdentitySystem.Identity
 import scala.util.Try
 
@@ -12,7 +13,7 @@ import scala.util.Try
  * @see [[https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem$$Identity.html Effect type]]
  * @constructor Creates a synchronous effect system plugin using identity as an effect type.
  */
-final case class IdentitySystem() extends EffectSystem[Identity] {
+final case class IdentitySystem() extends EffectSystem[Identity] with Run[Identity] {
 
   override def wrap[T](value: => T): T =
     value
@@ -28,6 +29,9 @@ final case class IdentitySystem() extends EffectSystem[Identity] {
 
   override def flatMap[T, R](effect: T, function: T => R): R =
     function(effect)
+
+  override def run[T](effect: T): Unit =
+    ()
 }
 
 object IdentitySystem {

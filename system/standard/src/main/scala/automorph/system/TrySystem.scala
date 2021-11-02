@@ -1,6 +1,7 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
+import automorph.spi.system.Run
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -10,7 +11,7 @@ import scala.util.{Failure, Success, Try}
  * @see [[https://www.scala-lang.org/api/2.13.6/scala/util/Try.html Effect type]]
  * @constructor Creates a synchronous effect system plugin using Try as an effect type.
  */
-final case class TrySystem() extends EffectSystem[Try] {
+final case class TrySystem() extends EffectSystem[Try] with Run[Try] {
 
   override def wrap[T](value: => T): Try[T] =
     Try(value)
@@ -26,6 +27,9 @@ final case class TrySystem() extends EffectSystem[Try] {
 
   override def flatMap[T, R](effect: Try[T], function: T => Try[R]): Try[R] =
     effect.flatMap(function)
+
+  override def run[T](effect: Try[T]): Unit =
+    ()
 }
 
 object TrySystem {
