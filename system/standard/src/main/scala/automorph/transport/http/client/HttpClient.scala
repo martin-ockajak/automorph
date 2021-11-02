@@ -266,8 +266,6 @@ object HttpClient {
    */
   type Run[Effect[_]] = Effect[Any] => Unit
 
-  private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
-
   val defaultBuilder = java.net.http.HttpClient.newBuilder
 
   /**
@@ -319,6 +317,8 @@ object HttpClient {
       super.onError(webSocket, error)
     }
   }
+
+  private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
 
   /** Transport protocol. */
   sealed abstract private class Protocol(val name: String) {

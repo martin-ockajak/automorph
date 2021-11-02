@@ -314,7 +314,7 @@ lazy val default = project.dependsOn(
 ).settings(
   name := s"$projectName-default",
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion
+    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpVersion    
   ),
   Compile / doc / scalacOptions ++= Seq(
     "-Ymacro-expand:none",

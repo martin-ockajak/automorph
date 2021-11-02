@@ -27,13 +27,15 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @param method HTTP request method
  * @param backend STTP backend
  * @param system effect system plugin
+ * @param webSocketSupport true if WebSocket protocol is supported, false otherwise
  * @tparam Effect effect type
  */
-final case class SttpClient[Effect[_]](
+final case class SttpClient[Effect[_]] private (
   url: URI,
   method: String,
   backend: SttpBackend[Effect, _],
-  system: EffectSystem[Effect]
+  system: EffectSystem[Effect],
+  webSocketSupport: Boolean
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val webSocketsSchemePrefix = "ws"
@@ -49,24 +51,25 @@ final case class SttpClient[Effect[_]](
   ): Effect[(ArraySeq.ofByte, Context)] = {
     // Send the request
     val sttpRequest = createRequest(requestBody, requestContext, context)
-    val protocol = if (sttpRequest.isWebSocket) Protocol.WebSocket else Protocol.Http
-    send(sttpRequest, requestId, protocol).either.flatMap { result =>
-      lazy val responseProperties = Map(
-        LogProperties.requestId -> requestId,
-        "URL" -> sttpRequest.uri.toString
-      )
+    transportProtocol(sttpRequest).flatMap { protocol =>
+      send(sttpRequest, requestId, protocol).either.flatMap { result =>
+        lazy val responseProperties = Map(
+          LogProperties.requestId -> requestId,
+          "URL" -> sttpRequest.uri.toString
+        )
 
-      // Process the response
-      result.fold(
-        error => {
-          logger.error(s"Failed to receive $protocol response", error, responseProperties)
-          system.failed(error)
-        },
-        response => {
-          logger.debug(s"Received $protocol response", responseProperties + ("Status" -> response.code.toString))
-          system.pure(Bytes.byteArray.from(response.body) -> responseContext(response))
-        }
-      )
+        // Process the response
+        result.fold(
+          error => {
+            logger.error(s"Failed to receive $protocol response", error, responseProperties)
+            system.failed(error)
+          },
+          response => {
+            logger.debug(s"Received $protocol response", responseProperties + ("Status" -> response.code.toString))
+            system.pure(Bytes.byteArray.from(response.body) -> responseContext(response))
+          }
+        )
+      }
     }
   }
 
@@ -76,9 +79,10 @@ final case class SttpClient[Effect[_]](
     mediaType: String,
     requestContext: Option[Context]
   ): Effect[Unit] = {
-    val sttpRequest = createRequest(requestBody, mediaType, requestContext).response(ignore)
-    val protocol = if (sttpRequest.isWebSocket) Protocol.WebSocket else Protocol.Http
-    send(sttpRequest, requestId, protocol).map(_ => ())
+    val sttpRequest = createRequest(requestBody, mediaType, requestContext)
+    transportProtocol(sttpRequest).flatMap { protocol =>
+      send(sttpRequest.response(ignore), requestId, protocol).map(_ => ())
+    }
   }
 
   override def defaultContext: Context =
@@ -100,7 +104,7 @@ final case class SttpClient[Effect[_]](
     logger.trace(s"Sending $protocol request", requestProperties)
 
     // Send the request
-    sttpRequest.send(backend.asInstanceOf[SttpBackend[Effect, WebSocket[Effect]]]).either.flatMap(_.fold(
+    sttpRequest.send(backend.asInstanceOf[SttpBackend[Effect, WebSockets]]).either.flatMap(_.fold(
       error => {
         logger.error(s"Failed to send $protocol request", error, requestProperties)
         system.failed(error)
@@ -150,15 +154,63 @@ final case class SttpClient[Effect[_]](
     defaultContext.statusCode(response.code.code).headers(response.headers.map { header =>
       header.name -> header.value
     }*)
+
+  private def transportProtocol(sttpRequest: Request[Array[Byte], WebSocket[Effect]]): Effect[Protocol] = {
+    if (sttpRequest.isWebSocket) {
+      if (webSocketSupport) {
+        system.pure(Protocol.WebSocket)
+      } else {
+        system.failed(
+          throw IllegalArgumentException(s"Selected STTP backend does not support WebSocket: ${backend.getClass.getSimpleName}")
+        )
+      }
+    } else system.pure(Protocol.Http)
+  }
 }
 
 object SttpClient {
 
-  /** STTP backend WebSocket capabilities type. */
-  type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
-
   /** Request context type. */
   type Context = HttpContext[Session]
+
+  /**
+   * Creates an STTP HTTP & WebSocket client message transport plugin with the specified STTP backend.
+   *
+   * @param url HTTP or WebSocket server endpoint URL
+   * @param method HTTP request method
+   * @param backend STTP backend
+   * @param system effect system plugin
+   * @tparam Effect effect type
+   * @return
+   */
+  def apply[Effect[_]](
+    url: URI,
+    method: String,
+    backend: SttpBackend[Effect, WebSockets],
+    system: EffectSystem[Effect]
+  ): SttpClient[Effect] =
+    SttpClient[Effect](url, method, backend, system, true)
+
+  /**
+   * Creates an STTP HTTP client message transport plugin with the specified STTP backend.
+   *
+   * @param url HTTP or WebSocket server endpoint URL
+   * @param method HTTP request method
+   * @param backend STTP backend
+   * @param system effect system plugin
+   * @tparam Effect effect type
+   * @return
+   */
+  def http[Effect[_]](
+    url: URI,
+    method: String,
+    backend: SttpBackend[Effect, _],
+    system: EffectSystem[Effect]
+  ): SttpClient[Effect] =
+    SttpClient[Effect](url, method, backend, system, false)
+
+  /** STTP backend WebSocket capabilities type. */
+  private type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
 
   /** Transport protocol. */
   sealed abstract private class Protocol(val name: String) {

@@ -22,7 +22,7 @@ class SttpClientHttpIdentityTest extends StandardHttpClientTest {
   override lazy val system: EffectSystem[Effect] = IdentitySystem()
 
   override def clientTransport(url: URI): ClientMessageTransport[Effect, Context] =
-    SttpClient(url, Method.PUT.toString, HttpURLConnectionBackend(), system)
+    SttpClient.http(url, Method.PUT.toString, HttpURLConnectionBackend(), system)
 
   override def run[T](effect: Effect[T]): T = effect
 

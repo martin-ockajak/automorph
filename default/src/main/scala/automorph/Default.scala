@@ -12,7 +12,8 @@ import automorph.transport.http.server.UndertowServer.defaultBuilder
 import io.undertow.Undertow
 import java.net.URI
 import scala.concurrent.{ExecutionContext, Future}
-import sttp.client3.asynchttpclient.future.AsyncHttpClientFutureBackend
+import sttp.capabilities.WebSockets
+import sttp.client3.httpclient.{HttpClientFutureBackend, HttpClientSyncBackend}
 import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 
 /** Default component constructors. */
@@ -166,7 +167,7 @@ object Default extends DefaultMeta {
   def clientTransport[Effect[_]](
     url: URI,
     method: String,
-    backend: SttpBackend[Effect, _],
+    backend: SttpBackend[Effect, WebSockets],
     system: EffectSystem[Effect]
   ): ClientTransport[Effect] =
     SttpClient(url, method, backend, system)
@@ -185,7 +186,7 @@ object Default extends DefaultMeta {
   def clientTransportAsync(url: URI, method: String)(implicit
     executionContext: ExecutionContext
   ): ClientTransport[Future] =
-    clientTransport(url, method, AsyncHttpClientFutureBackend(), systemAsync)
+    clientTransport(url, method, HttpClientFutureBackend(), systemAsync)
 
   /**
    * Creates an STTP HTTP & WebSocket client message transport plugin using identity as an effect type.
@@ -198,7 +199,7 @@ object Default extends DefaultMeta {
    * @return synchronous client message transport plugin
    */
   def clientTransportSync(url: URI, method: String): ClientTransport[Identity] =
-    clientTransport(url, method, HttpURLConnectionBackend(), systemSync)
+    SttpClient.http(url, method, HttpClientSyncBackend(), systemSync)
 
   /**
    * Creates an STTP JSON-RPC over HTTP & WebSocket client with specified effect system plugin.
@@ -219,7 +220,7 @@ object Default extends DefaultMeta {
   def client[Effect[_]](
     url: URI,
     method: String,
-    backend: SttpBackend[Effect, _],
+    backend: SttpBackend[Effect, WebSockets],
     system: EffectSystem[Effect]
   ): Client[Effect, ClientContext] =
     client(clientTransport(url, method, backend, system))
@@ -240,7 +241,7 @@ object Default extends DefaultMeta {
   def clientAsync(url: URI, method: String)(implicit
     executionContext: ExecutionContext
   ): Client[Future, ClientContext] =
-    client(url, method, AsyncHttpClientFutureBackend(), systemAsync)
+    client(clientTransportAsync(url, method))
 
   /**
    * Creates an STTP JSON-RPC over HTTP & WebSocket client with default RPC protocol using identity as an effect type.
@@ -255,7 +256,7 @@ object Default extends DefaultMeta {
    * @return synchronous RPC client
    */
   def clientSync(url: URI, method: String): Client[Identity, ClientContext] =
-    client(url, method, HttpURLConnectionBackend(), systemSync)
+    client(clientTransportSync(url, method))
 
   /**
    * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
