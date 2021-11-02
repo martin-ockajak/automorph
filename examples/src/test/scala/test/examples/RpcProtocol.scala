@@ -21,8 +21,7 @@ object RpcProtocol extends App {
   // Start Undertow REST-RPC HTTP server listening on port 80 for requests to '/api'
   val system = Default.systemAsync
   val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-  val createServer = Default.server(handler, 80, "/api")
-  val server = createServer(_ => ())
+  val server = Default.server(handler, 80, "/api")
 
   // Setup STTP REST-RPC HTTP client sending POST requests to 'http://localhost/api'
   val transport = Default.clientTransportAsync(new URI("http://localhost/api"), "POST")

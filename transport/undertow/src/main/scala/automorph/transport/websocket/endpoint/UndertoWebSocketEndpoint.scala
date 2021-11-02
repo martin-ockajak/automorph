@@ -5,7 +5,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.{Context, Run}
+import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
@@ -25,17 +25,7 @@ import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 object UndertowWebSocketEndpoint {
 
   /**
-   * Asynchronous effect execution function type.
-   *
-   * @tparam Effect effect type
-   */
-  type Run[Effect[_]] = Effect[Any] => Unit
-
-  /**
    * Creates an Undertow WebSocket handler with specified RPC request handler.
-   *
-   * Resulting function requires:
-   * - effect execution function - executes specified effect asynchronously
    *
    * The handler interprets WebSocket request message as an RPC request and processes it using the specified RPC request handler.
    * The response returned by the RPC request handler is used as WebSocket response message.
@@ -48,11 +38,11 @@ object UndertowWebSocketEndpoint {
    * @tparam Effect effect type
    * @return creates an Undertow WebSocket handler using supplied asynchronous effect execution function
    */
-  def create[Effect[_]](
+  def apply[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
     next: HttpHandler
-  ): (Run[Effect]) => WebSocketProtocolHandshakeHandler = (runEffect: Run[Effect]) => {
-    val webSocketCallback = UndertowWebSocketCallback(handler, runEffect)
+  ): WebSocketProtocolHandshakeHandler = {
+    val webSocketCallback = UndertowWebSocketCallback(handler)
     new WebSocketProtocolHandshakeHandler(webSocketCallback, next)
   }
 
@@ -61,13 +51,11 @@ object UndertowWebSocketEndpoint {
 }
 
 final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, Context],
-  runEffect: Run[Effect]
+  handler: Types.HandlerAnyCodec[Effect, Context]
 ) extends WebSocketConnectionCallback with AutoCloseable with Logging with EndpointMessageTransport {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  private val system = genericHandler.system
-  implicit private val givenSystem: EffectSystem[Effect] = system
+  implicit private val system: EffectSystem[Effect] = genericHandler.system
 
   override def onConnect(exchange: WebSocketHttpExchange, channel: WebSocketChannel): Unit = {
     val receiveListener = new AbstractReceiveListener {
@@ -96,16 +84,15 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
 
         // Process the request
         implicit val givenContext: Context = requestContext(exchange)
-        runEffect(genericHandler.processRequest(requestBody, requestId, None).either.map(_.fold(
+        genericHandler.processRequest(requestBody, requestId, None).either.map(_.fold(
           error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
           result => {
             // Send the response
             val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
             sendResponse(response, exchange, channel, requestId)
-            discardMessage
+            discardMessage()
           }
-        )))
-        ()
+        )).run
       }
 
       private def sendErrorResponse(

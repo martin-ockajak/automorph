@@ -5,7 +5,7 @@ import scala.util.Try
 import test.system.ZioTest.Effect
 import zio.{RIO, ZEnv}
 
-class ZioTest extends RunTest[Effect] with DeferTest[Effect] {
+class ZioTest extends DeferEffectSystemTest[Effect] {
 
   def system: ZioSystem[ZEnv] = ZioSystem.default
 

@@ -22,7 +22,7 @@
 //  type Effect[T] = Future[T]
 //  type Context = TapirHttpEndpoint.Context
 //
-//  override lazy val system: EffectSystem[Effect] = FutureSystem()
+//  override lazy val system: FutureSystem = FutureSystem()
 //
 //  override lazy val arbitraryContext: Arbitrary[Context] =
 //    Arbitrary(HttpContextGenerator.arbitrary.arbitrary.suchThat { context =>

@@ -6,7 +6,6 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
-import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Run
 import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
 import automorph.util.{Bytes, Network, Random}
 import io.undertow.io.Receiver
@@ -30,18 +29,15 @@ import scala.util.Try
  * @constructor Creates an Undertow HTTP handler with specified RPC request handler.
  * @param handler RPC request handler
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
- * @param runEffect executes specified effect asynchronously
  * @tparam Effect effect type
  */
-final case class UndertowHttpEndpoint[Effect[_]] private (
+final case class UndertowHttpEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
-  exceptionToStatusCode: Throwable => Int,
-  runEffect: Run[Effect]
+  exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  private val system = genericHandler.system
-  implicit private val givenSystem: EffectSystem[Effect] = system
+  implicit private val system: EffectSystem[Effect] = genericHandler.system
 
   private val receiveCallback = new Receiver.FullBytesCallback {
 
@@ -56,17 +52,15 @@ final case class UndertowHttpEndpoint[Effect[_]] private (
         override def run(): Unit = {
           // Process the request
           implicit val givenContext: Context = requestContext(exchange)
-          runEffect(
-            genericHandler.processRequest(requestBody, requestId, Some(exchange.getRequestPath)).either.map(_.fold(
-              error => sendErrorResponse(error, exchange, requestId, requestProperties),
-              result => {
-                // Send the response
-                val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
-                val statusCode = result.exception.map(exceptionToStatusCode).getOrElse(StatusCodes.OK)
-                sendResponse(response, statusCode, result.context, exchange, requestId)
-              }
-            ))
-          )
+          genericHandler.processRequest(requestBody, requestId, Some(exchange.getRequestPath)).either.map(_.fold(
+            error => sendErrorResponse(error, exchange, requestId, requestProperties),
+            result => {
+              // Send the response
+              val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
+              val statusCode = result.exception.map(exceptionToStatusCode).getOrElse(StatusCodes.OK)
+              sendResponse(response, statusCode, result.context, exchange, requestId)
+            }
+          )).run
         }
       })
       ()
@@ -156,30 +150,6 @@ final case class UndertowHttpEndpoint[Effect[_]] private (
 }
 
 object UndertowHttpEndpoint {
-
-  /**
-   * Asynchronous effect execution function type.
-   *
-   * @tparam Effect effect type
-   */
-  type RunEffect[Effect[_]] = Effect[Any] => Unit
-
-  /**
-   * Creates an Undertow HTTP endpoint message transport plugin with specified RPC request handler.
-   *
-   * Resulting function requires:
-   * - effect execution function - executes specified effect asynchronously
-   *
-   * @param handler RPC request handler
-   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
-   * @tparam Effect effect type
-   * @return creates an Undertow HTTP handler using supplied asynchronous effect execution function
-   */
-  def create[Effect[_]](
-    handler: Types.HandlerAnyCodec[Effect, Context],
-    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
-  ): RunEffect[Effect] => UndertowHttpEndpoint[Effect] = (runEffect: RunEffect[Effect]) =>
-    UndertowHttpEndpoint(handler, exceptionToStatusCode, runEffect)
 
   /** Request context type. */
   type Context = HttpContext[Either[HttpServerExchange, WebSocketHttpExchange]]

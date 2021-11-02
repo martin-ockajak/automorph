@@ -7,7 +7,7 @@ import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
-import automorph.transport.http.server.NanoHTTPD.{newFixedLengthResponse, IHTTPSession, Response}
+import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.transport.http.server.NanoServer.{Context, Execute, Protocol}
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
@@ -48,10 +48,9 @@ final case class NanoServer[Effect[_]] private (
 ) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect] {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  private val system = genericHandler.system
   private val headerXForwardedFor = "X-Forwarded-For"
   private val allowedMethods = methods.map(_.toUpperCase).toSet
-  implicit private val givenSystem: EffectSystem[Effect] = system
+  implicit private val system: EffectSystem[Effect] = genericHandler.system
 
   override def close(): Effect[Unit] =
     system.wrap(stop())

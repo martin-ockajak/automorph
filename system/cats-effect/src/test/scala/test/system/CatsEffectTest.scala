@@ -5,7 +5,7 @@ import automorph.system.CatsEffectSystem
 import cats.effect.unsafe.IORuntime
 import scala.util.Try
 
-class CatsEffectTest extends RunTest[IO] with DeferTest[IO] {
+class CatsEffectTest extends DeferEffectSystemTest[IO] {
 
   def system: CatsEffectSystem = CatsEffectSystem()
 

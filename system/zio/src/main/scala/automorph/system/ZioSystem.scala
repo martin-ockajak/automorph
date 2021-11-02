@@ -1,8 +1,8 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
-import automorph.spi.system.{Defer, Deferred, Run}
-import zio.{Queue, RIO, Runtime, Task, ZEnv, ZQueue}
+import automorph.spi.system.{Defer, Deferred}
+import zio.{Queue, RIO, Runtime, ZEnv, ZQueue}
 
 /**
  * ZIO effect system plugin using `RIO` as an effect type.
@@ -13,10 +13,9 @@ import zio.{Queue, RIO, Runtime, Task, ZEnv, ZQueue}
  * @param runtime runtime system
  * @tparam Environment ZIO environment type
  */
-case class ZioSystem[Environment]()(
+final case class ZioSystem[Environment]()(
   implicit val runtime: Runtime[Environment] = Runtime.default.withReportFailure(_ => ())
 ) extends EffectSystem[({ type Effect[A] = RIO[Environment, A] })#Effect]
-  with Run[({ type Effect[A] = RIO[Environment, A] })#Effect]
   with Defer[({ type Effect[A] = RIO[Environment, A] })#Effect] {
 
   override def wrap[T](value: => T): RIO[Environment, T] =
@@ -69,6 +68,6 @@ object ZioSystem {
    * @see [[https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html Effect type]]
    * @return ZIO effect system plugin
    */
-  def default: ZioSystem[ZEnv] with Run[DefaultEffect] =
+  def default: ZioSystem[ZEnv] =
     ZioSystem[ZEnv]()
 }

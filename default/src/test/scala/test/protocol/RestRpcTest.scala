@@ -2,7 +2,6 @@ package automorph.protocol
 
 import automorph.Default
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
-import io.circe.{Decoder, Encoder}
 import test.base.BaseTest
 
 class RestRpcTest extends BaseTest {

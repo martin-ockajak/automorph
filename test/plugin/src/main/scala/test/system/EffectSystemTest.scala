@@ -79,5 +79,8 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
         }
       }
     }
+    "Run" in {
+      system.run(system.wrap(text))
+    }
   }
 }

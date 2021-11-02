@@ -19,8 +19,7 @@ trait StandardHttpServerTest extends ClientServerTest {
     servers += server
     val scheme = Option.when(webSocket)("ws").getOrElse("http")
     val url = new URI(s"$scheme://localhost:$port")
-    val client = HttpClient.create(url, "POST", system)(runEffect)
-      .asInstanceOf[ClientMessageTransport[Effect, Context]]
+    val client = HttpClient(url, "POST", system).asInstanceOf[ClientMessageTransport[Effect, Context]]
     clients += client
     Some(client)
   }

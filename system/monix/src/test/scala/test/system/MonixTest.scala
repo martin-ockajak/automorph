@@ -6,7 +6,7 @@ import monix.execution.Scheduler
 import scala.concurrent.duration.Duration
 import scala.util.Try
 
-class MonixTest extends RunTest[Task] with DeferTest[Task] {
+class MonixTest extends DeferEffectSystemTest[Task] {
 
   def system: MonixSystem = MonixSystem()
 

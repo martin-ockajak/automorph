@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.Handler
-import automorph.spi.MessageCodec
+import automorph.spi.{EffectSystem, MessageCodec}
 
 /** Common type aliases. */
 object Types {

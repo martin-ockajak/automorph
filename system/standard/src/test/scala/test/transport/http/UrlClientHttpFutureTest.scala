@@ -1,14 +1,12 @@
 package test.transport.http
 
 import automorph.Types
-import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.client.UrlClient
 import automorph.transport.http.server.NanoServer
 import java.net.URI
 import org.scalacheck.Arbitrary
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import test.core.ClientServerTest
 import test.transport.http.HttpContextGenerator
@@ -18,14 +16,10 @@ class UrlClientHttpFutureTest extends ClientServerTest {
   type Effect[T] = Future[T]
   type Context = NanoServer.Context
 
-  private lazy val deferSystem = FutureSystem()
-
+  override lazy val system: FutureSystem = FutureSystem()
   override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary
-  override lazy val system: EffectSystem[Effect] = deferSystem
 
   override def run[T](effect: Effect[T]): T = await(effect)
-
-  override def runEffect[T](effect: Effect[T]): Unit = ()
 
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]

@@ -356,12 +356,11 @@ val serverProtocol = protocol.mapException {
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val system = Default.systemAsync
 val handler = Handler.protocol(serverProtocol).system(system).context[Default.ServerContext]
-val createServer = Default.server(handler, 80, "/api", mapException = {
+val server = Default.server(handler, 80, "/api", mapException = {
   // Customize server exception to HTTP status code mapping
   case _: SQLException => 400
   case e => HttpContext.defaultExceptionToStatusCode(e)
 })
-val server = createServer(_ => ())
 
 // Stop the server
 server.close()
@@ -409,7 +408,7 @@ libraryDependencies ++= Seq(
 import automorph.Default
 import automorph.system.ZioSystem
 import java.net.URI
-import zio.{Runtime, Task}
+import zio.Task
 
 // Define an API type and create its instance
 class Api {
@@ -426,10 +425,7 @@ val api = new Api()
 val system = ZioSystem[Any]()
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val server = Default.serverSystem(system, 80, "/api")(_.bind(api)) { effect =>
-  Runtime.default.unsafeRunTask(effect)
-  ()
-}
+val server = Default.serverSystem(system, 80, "/api")(_.bind(api))
 
 // Stop the server
 server.close()
@@ -439,10 +435,7 @@ server.close()
 
 ```scala
 // Setup STTP JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.client(new URI("http://localhost/api"), "POST", system) { effect =>
-  Runtime.default.unsafeRunTask(effect)
-  ()
-}
+val client = Default.client(new URI("http://localhost/api"), "POST", system)
 
 // Call the remote API function
 val remoteApi = client.bind[Api] // Api
@@ -491,8 +484,7 @@ val protocol = RestRpcProtocol[Default.Node, Default.Codec](Default.codec)
 // Start Undertow REST-RPC HTTP server listening on port 80 for requests to '/api'
 val system = Default.asyncSystem
 val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-val createServer = Default.server(handler, 80, "/api")
-val server = createServer(_ => ())
+val server = Default.server(handler, 80, "/api")
 
 // Stop the server
 server.close()
@@ -562,8 +554,7 @@ val system = Default.asyncSystem
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-lazy val createServer = Default.server(handler.bind(api), 80, "/api")
-lazy val server = createServer(_ => ())
+lazy val server = Default.server(handler.bind(api), 80, "/api")
 
 // Stop the server
 server.close()
@@ -728,8 +719,7 @@ val api = new Api()
 ```scala
 // Create custom Undertow JSON-RPC endpoint
 val handler = Default.handlerAsync[UndertowHttpEndpoint.Context]
-val createEndpoint = UndertowHttpEndpoint.create(handler.bind(api))
-val endpoint = createEndpoint(_ => ())
+val endpoint = UndertowHttpEndpoint(handler.bind(api))
 
 // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val server = Undertow.builder()

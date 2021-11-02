@@ -1,8 +1,7 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
-import automorph.spi.system.{Defer, Deferred, Run}
-import scala.annotation.nowarn
+import automorph.spi.system.{Defer, Deferred}
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Success
 
@@ -16,7 +15,7 @@ import scala.util.Success
  */
 final case class FutureSystem()(
   implicit val executionContext: ExecutionContext = ExecutionContext.global
-) extends EffectSystem[Future] with Run[Future] with Defer[Future] {
+) extends EffectSystem[Future] with Defer[Future] {
 
   override def wrap[T](value: => T): Future[T] =
     Future(value)

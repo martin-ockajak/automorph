@@ -4,12 +4,12 @@ import automorph.Types
 import automorph.log.Logging
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ServerMessageTransport
-import automorph.transport.amqp.server.RabbitMqServer.{Context, Run}
+import automorph.transport.amqp.server.RabbitMqServer.Context
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
 import automorph.util.{Bytes, Random}
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
+import com.rabbitmq.client.{Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
 import scala.util.Try
 
@@ -29,16 +29,13 @@ import scala.util.Try
  * @param queues names of non-durable exclusive queues to consume messages from
  * @param addresses broker hostnames and ports for reconnection attempts
  * @param connectionFactory AMQP broker connection factory
- * @param runEffect effect execution function
  * @tparam Effect effect type
  */
-final case class RabbitMqServer[Effect[_]] private (
+final case class RabbitMqServer[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, AmqpContext[RabbitMqContext]],
   url: URI,
   queues: Seq[String],
-  addresses: Seq[Address],
-  connectionFactory: ConnectionFactory,
-  runEffect: Run[Effect]
+  connectionFactory: ConnectionFactory
 ) extends Logging with ServerMessageTransport[Effect] {
 
   private lazy val connection = createConnection()
@@ -47,8 +44,7 @@ final case class RabbitMqServer[Effect[_]] private (
   private val urlText = url.toURL.toExternalForm
   private val exchange = RabbitMqCommon.defaultDirectExchange
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, RabbitMqServer.Context]]
-  private val system = genericHandler.system
-  implicit private val givenSystem: EffectSystem[Effect] = system
+  implicit private val system: EffectSystem[Effect] = genericHandler.system
   start()
 
   override def close(): Effect[Unit] = system.wrap(RabbitMqCommon.disconnect(connection))
@@ -74,17 +70,14 @@ final case class RabbitMqServer[Effect[_]] private (
 
         // Process the request
         implicit val usingContext: RabbitMqServer.Context = RabbitMqCommon.context(amqpProperties)
-        runEffect(
-          genericHandler.processRequest(requestBody, requestId, None).either.map(_.fold(
-            error => sendError(error, Option(amqpProperties.getReplyTo), requestProperties, requestId),
-            result => {
-              // Send the response
-              val response = result.responseBody.getOrElse(Array[Byte]())
-              sendResponse(response, Option(amqpProperties.getReplyTo), result.context, requestProperties, requestId)
-            }
-          ))
-        )
-        ()
+        genericHandler.processRequest(requestBody, requestId, None).either.map(_.fold(
+          error => sendError(error, Option(amqpProperties.getReplyTo), requestProperties, requestId),
+          result => {
+            // Send the response
+            val response = result.responseBody.getOrElse(Array[Byte]())
+            sendResponse(response, Option(amqpProperties.getReplyTo), result.context, requestProperties, requestId)
+          }
+        )).run
       }
     }
     queues.foreach { queue =>
@@ -136,36 +129,6 @@ final case class RabbitMqServer[Effect[_]] private (
 }
 
 object RabbitMqServer {
-
-  /**
-   * Asynchronous effect execution function type.
-   *
-   * @tparam Effect effect type
-   */
-  type Run[Effect[_]] = Effect[Any] => Unit
-
-  /**
-   * Creates a RabbitMQ server transport plugin with specified RPC request handler.
-   *
-   * Resulting function requires:
-   * - effect execution function - executes specified effect asynchronously
-   *
-   * @param handler RPC request handler
-   * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
-   * @param queues names of non-durable exclusive queues to consume messages from
-   * @param addresses broker hostnames and ports for reconnection attempts
-   * @param connectionFactory AMQP broker connection factory
-   * @tparam Effect effect type
-   * @return creates a RabbitMQ server using supplied asynchronous effect execution function
-   */
-  def create[Effect[_]](
-    handler: Types.HandlerAnyCodec[Effect, Context],
-    url: URI,
-    queues: Seq[String],
-    addresses: Seq[Address] = Seq.empty,
-    connectionFactory: ConnectionFactory = new ConnectionFactory
-  ): Run[Effect] => RabbitMqServer[Effect] = (runEffect: Run[Effect]) =>
-    RabbitMqServer(handler, url, queues, addresses, connectionFactory, runEffect)
 
   /** Request context type. */
   type Context = AmqpContext[RabbitMqContext]

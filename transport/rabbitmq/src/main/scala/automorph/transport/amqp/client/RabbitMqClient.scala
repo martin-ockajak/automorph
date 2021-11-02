@@ -4,7 +4,7 @@ import automorph.log.Logging
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.amqp.client.RabbitMqClient.{Context, Response, Run}
+import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
@@ -31,17 +31,15 @@ import scala.util.{Try, Using}
  * @param exchange direct non-durable AMQP message exchange name
  * @param addresses broker hostnames and ports for reconnection attempts
  * @param connectionFactory AMQP broker connection factory
- * @param runEffect effect execution function
  * @tparam Effect effect type
  */
-final case class RabbitMqClient[Effect[_]] private (
+final case class RabbitMqClient[Effect[_]](
   url: URI,
   routingKey: String,
   system: EffectSystem[Effect] with Defer[Effect],
-  exchange: String,
-  addresses: Seq[Address],
-  connectionFactory: ConnectionFactory,
-  runEffect: Run[Effect]
+  exchange: String = RabbitMqCommon.defaultDirectExchange,
+  addresses: Seq[Address] = Seq.empty,
+  connectionFactory: ConnectionFactory = new ConnectionFactory
 ) extends Logging with ClientMessageTransport[Effect, Context] {
 
   private lazy val connection = createConnection()
@@ -117,7 +115,7 @@ final case class RabbitMqClient[Effect[_]] private (
         // Resolve the registered deferred response effect
         val responseContext = RabbitMqCommon.context(properties)
         responseHandlers.get(properties.getCorrelationId).foreach { response =>
-          runEffect(response.succeed(Bytes.byteArray.from(responseBody) -> responseContext).asInstanceOf[Effect[Any]])
+          response.succeed(Bytes.byteArray.from(responseBody) -> responseContext).run
         }
       }
     }
@@ -141,37 +139,5 @@ object RabbitMqClient {
   /** Request context type. */
   type Context = AmqpContext[RabbitMqContext]
 
-  /**
-   * Asynchronous effect execution function type.
-   *
-   * @tparam Effect effect type
-   */
-  type Run[Effect[_]] = Effect[Any] => Unit
-
   private type Response = (ArraySeq.ofByte, Context)
-
-  /**
-   * Creates a RabbitMQ client message transport plugin.
-   *
-   * Resulting function requires:
-   * - effect execution function - executes specified effect asynchronously
-   *
-   * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
-   * @param routingKey AMQP routing key (typically a queue name)
-   * @param system effect system plugin
-   * @param exchange direct non-durable AMQP message exchange name
-   * @param addresses broker hostnames and ports for reconnection attempts
-   * @param connectionFactory AMQP broker connection factory
-   * @tparam Effect effect type
-   * @return creates a RabbitMQ client using supplied asynchronous effect execution function
-   */
-  def create[Effect[_]](
-    url: URI,
-    routingKey: String,
-    system: EffectSystem[Effect] with Defer[Effect],
-    exchange: String = RabbitMqCommon.defaultDirectExchange,
-    addresses: Seq[Address] = Seq.empty,
-    connectionFactory: ConnectionFactory = new ConnectionFactory
-  ): Run[Effect] => RabbitMqClient[Effect] = (runEffect: Run[Effect]) =>
-    RabbitMqClient(url, routingKey, system, exchange, addresses, connectionFactory, runEffect)
 }

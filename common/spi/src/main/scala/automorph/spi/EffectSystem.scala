@@ -71,4 +71,13 @@ trait EffectSystem[Effect[_]] {
    */
   def map[T, R](effect: Effect[T], function: T => R): Effect[R] =
     flatMap(effect, (value: T) => pure(function(value)))
+
+  /**
+   * Executes an effect asynchronously without blocking.
+   *
+   * @param effect effectful value
+   * @tparam T effectful value type
+   * @return nothing
+   */
+  def run[T](effect: Effect[T]): Unit
 }

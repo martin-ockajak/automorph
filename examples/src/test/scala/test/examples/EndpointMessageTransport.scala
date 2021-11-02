@@ -18,8 +18,7 @@ object EndpointMessageTransport extends App {
 
   // Create custom Undertow JSON-RPC endpoint
   val handler = Default.handlerAsync[UndertowHttpEndpoint.Context]
-  val createEndpoint = UndertowHttpEndpoint.create(handler.bind(api))
-  val endpoint = createEndpoint(_ => ())
+  val endpoint = UndertowHttpEndpoint(handler.bind(api))
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val server = Undertow.builder()

@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, Run, Session, WebSocketListener}
+import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, Session, WebSocketListener, defaultBuilder}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.io.ByteArrayOutputStream
@@ -36,17 +36,14 @@ import scala.util.Try
  * @param url HTTP or WebSocket server endpoint URL
  * @param method HTTP request method
  * @param system effect system plugin
- * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
  * @param builder HttpClient builder
- * @param runEffect effect execution function
  * @tparam Effect effect type
  */
-final case class HttpClient[Effect[_]] private (
+final case class HttpClient[Effect[_]] (
   url: URI,
   method: String,
   system: EffectSystem[Effect],
-  builder: Builder,
-  runEffect: Run[Effect]
+  builder: Builder = defaultBuilder
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val contentTypeHeader = "Content-Type"
@@ -219,7 +216,7 @@ final case class HttpClient[Effect[_]] private (
           WebSocketListener(
             requestUrl,
             response,
-            runEffect
+            system
           )
         ),
         defer
@@ -261,16 +258,16 @@ final case class HttpClient[Effect[_]] private (
   ): Effect[T] =
     defer.deferred[T].flatMap { deferred =>
       Try(completableFuture).pureFold(
-        error => runEffect(deferred.fail(error).asInstanceOf[Effect[Any]]),
+        error => deferred.fail(error).run,
         (value: CompletableFuture[T]) => {
           value.handle { case (result, exception) =>
             Option(result).map { value =>
-              runEffect(deferred.succeed(value).asInstanceOf[Effect[Any]])
+              deferred.succeed(value).run
             }.getOrElse {
               val error = Option(exception).getOrElse {
                 new IllegalStateException("Missing completable future result")
               }
-              runEffect(deferred.fail(error).asInstanceOf[Effect[Any]])
+              deferred.fail(error).run
             }
           }
           ()
@@ -292,40 +289,12 @@ object HttpClient {
   /** Request context type. */
   type Context = HttpContext[Session]
 
-  /**
-   * Asynchronous effect execution function type.
-   *
-   * @tparam Effect effect type
-   */
-  type Run[Effect[_]] = Effect[Any] => Unit
-
   val defaultBuilder = java.net.http.HttpClient.newBuilder
-
-  /**
-   * Creates an HttpClient HTTP & WebSocket message client transport plugin.
-   *
-   * Resulting function requires:
-   * - effect execution function - executes specified effect asynchronously
-   *
-   * @param url HTTP or WebSocket server endpoint URL
-   * @param method HTTP method
-   * @param system effect system plugin
-   * @param builder HttpClient builder
-   * @tparam Effect effect type
-   * @return creates an HttpClient using supplied asynchronous effect execution function
-   */
-  def create[Effect[_]](
-    url: URI,
-    method: String,
-    system: EffectSystem[Effect],
-    builder: Builder = defaultBuilder
-  ): Run[Effect] => HttpClient[Effect] = (runEffect: Run[Effect]) =>
-    HttpClient(url, method, system, builder, runEffect)
 
   private case class WebSocketListener[Effect[_]](
     url: URI,
     response: Deferred[Effect, Response],
-    runEffect: Run[Effect]
+    system: EffectSystem[Effect]
   ) extends Listener {
 
     private val buffers = ArrayBuffer.empty[ArraySeq.ofByte]
@@ -337,7 +306,7 @@ object HttpClient {
         buffers.foreach(buffer => outputStream.write(buffer.unsafeArray, 0, buffer.length))
         buffers.clear()
         val responseBody = Bytes.byteArray.from(outputStream.toByteArray)
-        runEffect(response.succeed((responseBody, None, Seq())).asInstanceOf[Effect[Any]])
+        system.run(response.succeed((responseBody, None, Seq())).asInstanceOf[Effect[Any]])
       }
       super.onBinary(webSocket, data, last)
     }

@@ -1,7 +1,6 @@
 //package test.transport.http
 //
 //import automorph.Types
-//import automorph.spi.EffectSystem
 //import automorph.spi.transport.{ClientMessageTransport, ServerMessageTransport}
 //import automorph.system.FutureSystem
 //import automorph.transport.amqp.client.RabbitMqClient
@@ -10,7 +9,6 @@
 //import io.arivera.oss.embedded.rabbitmq.{EmbeddedRabbitMq, EmbeddedRabbitMqConfig, PredefinedVersion}
 //import io.arivera.oss.embedded.rabbitmq.helpers.ErlangVersionChecker
 //import org.scalacheck.Arbitrary
-//import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
 //import scala.util.Try
 //import test.core.ClientServerTest
@@ -23,14 +21,11 @@
 //
 //  private lazy val builder = (new EmbeddedRabbitMqConfig.Builder).version(PredefinedVersion.V3_8_1)
 //  private lazy val queue = "Test"
-//  private lazy val deferSystem = FutureSystem()
 //
 //  override lazy val arbitraryContext: Arbitrary[Context] = AmqpContextGenerator.arbitrary
-//  override lazy val system: EffectSystem[Effect] = deferSystem
+//  override lazy val system: FutureSystem = FutureSystem()
 //
 //  override def run[T](effect: Effect[T]): T = await(effect)
-//
-//  override def runEffect[T](effect: Effect[T]): Unit = ()
 //
 //  override def customTransport(
 //    handler: Types.HandlerAnyCodec[Effect, Context]
@@ -43,7 +38,7 @@
 //            val broker = new EmbeddedRabbitMq(config)
 //            broker.start()
 //            val url = new URI(s"amqp://localhost:$port")
-//            val server = RabbitMqServer.create[Effect](handler, url, Seq(queue))(runEffect)
+//            val server = RabbitMqServer[Effect](handler, url, Seq(queue))
 //            server -> broker
 //          }
 //
@@ -53,7 +48,7 @@
 //      )
 //      servers += server
 //      val url = new URI(s"amqp://localhost:$port")
-//      val client = RabbitMqClient.create[Effect](url, queue, deferSystem)(runEffect)
+//      val client = RabbitMqClient[Effect](url, queue, system)
 //      clients += client
 //      client
 //    }

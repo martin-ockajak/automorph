@@ -1,6 +1,5 @@
 package test.system
 
-import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 
 /**
@@ -8,7 +7,7 @@ import automorph.spi.system.{Defer, Deferred}
  *
  * @tparam Effect effect type
  */
-trait DeferTest[Effect[_]] extends EffectSystemTest[Effect] {
+trait DeferEffectSystemTest[Effect[_]] extends EffectSystemTest[Effect] {
 
   "" - {
     system match {

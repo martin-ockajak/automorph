@@ -1,7 +1,6 @@
 package test.transport.http
 
 import automorph.Types
-import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity
@@ -17,12 +16,10 @@ class UrlClientHttpIdentityTest extends ClientServerTest {
   type Effect[T] = Identity[T]
   type Context = NanoServer.Context
 
+  override lazy val system: IdentitySystem = IdentitySystem()
   override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary
-  override lazy val system: EffectSystem[Effect] = IdentitySystem()
 
   override def run[T](effect: Effect[T]): T = effect
-
-  override def runEffect[T](effect: Effect[T]): Unit = ()
 
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]

@@ -1,7 +1,7 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
-import automorph.spi.system.{Defer, Deferred, Run}
+import automorph.spi.system.{Defer, Deferred}
 import monix.eval.Task
 import monix.catnap.MVar
 import monix.execution.Scheduler
@@ -16,7 +16,7 @@ import monix.execution.Scheduler
  */
 final case class MonixSystem()(
   implicit val scheduler: Scheduler = monix.execution.Scheduler.global
-) extends EffectSystem[Task] with Run[Task] with Defer[Task] {
+) extends EffectSystem[Task] with Defer[Task] {
 
   override def wrap[T](value: => T): Task[T] =
     Task.evalAsync(value)

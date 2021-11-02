@@ -5,7 +5,7 @@ import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.HttpContext
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
-import automorph.transport.http.server.UndertowServer.{Context, Run}
+import automorph.transport.http.server.UndertowServer.Context
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
 import io.undertow.predicate.{Predicate, Predicates}
 import io.undertow.server.HttpServerExchange
@@ -34,7 +34,6 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
  * @param mapException maps an exception to a corresponding HTTP status code
  * @param builder Undertow builder
- * @param runEffect executes specified effect asynchronously
  * @tparam Effect effect type
  */
 final case class UndertowServer[Effect[_]] private (
@@ -44,8 +43,7 @@ final case class UndertowServer[Effect[_]] private (
   methods: Iterable[String],
   webSocket: Boolean,
   mapException: Throwable => Int,
-  builder: Undertow.Builder,
-  runEffect: Run[Effect]
+  builder: Undertow.Builder
 ) extends Logging with ServerMessageTransport[Effect] {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -79,7 +77,7 @@ final case class UndertowServer[Effect[_]] private (
         override def resolve(exchange: HttpServerExchange): Boolean =
           allowedMethods.contains(exchange.getRequestMethod.toString.toUpperCase)
       },
-      UndertowHttpEndpoint.create(handler, mapException)(runEffect),
+      UndertowHttpEndpoint(handler, mapException),
       ResponseCodeHandler.HANDLE_405
     )
 
@@ -87,7 +85,7 @@ final case class UndertowServer[Effect[_]] private (
     val rootHandler = Handlers.predicate(
       Predicates.prefix(path),
       Option.when(webSocket) {
-        UndertowWebSocketEndpoint.create(handler, httpHandler)(runEffect)
+        UndertowWebSocketEndpoint(handler, httpHandler)
       }.getOrElse(httpHandler),
       ResponseCodeHandler.HANDLE_404
     )
@@ -100,13 +98,6 @@ object UndertowServer {
 
   /** Request context type. */
   type Context = UndertowHttpEndpoint.Context
-
-  /**
-   * Asynchronous effect execution function type.
-   *
-   * @tparam Effect effect type
-   */
-  type Run[Effect[_]] = Effect[Any] => Unit
 
   /**
    * Creates an Undertow HTTP & WebSocket server with the specified RPC request handler.
@@ -132,8 +123,8 @@ object UndertowServer {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
-  ): (Run[Effect]) => UndertowServer[Effect] = (runEffect: Run[Effect]) => {
-    val server = UndertowServer(handler, port, path, methods, webSocket, mapException, builder, runEffect)
+  ): UndertowServer[Effect] = {
+    val server = new UndertowServer(handler, port, path, methods, webSocket, mapException, builder)
     server.start()
     server
   }

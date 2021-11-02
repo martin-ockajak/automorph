@@ -92,5 +92,14 @@ private[automorph] object Extensions {
      */
     def flatMap[R](function: T => Effect[R])(implicit system: EffectSystem[Effect]): Effect[R] =
       system.flatMap(effect, function)
+
+    /**
+     * Executes an effect asynchronously without blocking.
+     *
+     * @tparam T effectful value type
+     * @return nothing
+     */
+    def run(implicit system: EffectSystem[Effect]): Unit =
+      system.run(effect)
   }
 }
