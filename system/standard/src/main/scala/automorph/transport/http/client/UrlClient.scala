@@ -14,7 +14,7 @@ import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.util.Using
 
 /**
- * HttpURLConnection HTTP client message transport plugin.
+ * Standard JRE HttpURLConnection HTTP client message transport plugin.
  *
  * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *

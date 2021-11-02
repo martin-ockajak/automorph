@@ -310,7 +310,7 @@ lazy val tapir = (project in file("transport/tapir")).dependsOn(
 
 // Misc
 lazy val default = project.dependsOn(
-  jsonrpc, circe, standard, undertow, sttp, testStandard % Test
+  jsonrpc, circe, standard, undertow, testStandard % Test
 ).settings(
   name := s"$projectName-default",
   libraryDependencies ++= Seq(

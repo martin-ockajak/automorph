@@ -6,15 +6,13 @@ import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
 import automorph.system.{FutureSystem, IdentitySystem}
 import automorph.transport.http.HttpContext
-import automorph.transport.http.client.SttpClient
+import automorph.transport.http.client.HttpClient
 import automorph.transport.http.server.UndertowServer
 import automorph.transport.http.server.UndertowServer.defaultBuilder
 import io.undertow.Undertow
 import java.net.URI
 import scala.concurrent.{ExecutionContext, Future}
 import sttp.capabilities.WebSockets
-import sttp.client3.httpclient.{HttpClientFutureBackend, HttpClientSyncBackend}
-import sttp.client3.{HttpURLConnectionBackend, SttpBackend}
 
 /** Default component constructors. */
 object Default extends DefaultMeta {
@@ -48,7 +46,7 @@ object Default extends DefaultMeta {
   type Handler[Effect[_], Context] = automorph.Handler[Node, Codec, Effect, Context]
 
   /** Request context type. */
-  type ClientContext = SttpClient.Context
+  type ClientContext = HttpClient.Context
 
   /**
    * Default RPC client message transport type.
@@ -75,13 +73,13 @@ object Default extends DefaultMeta {
    *
    * @tparam Effect effect type
    */
-  type RunEffect[Effect[_]] = Effect[Any] => Unit
+  type Run[Effect[_]] = Effect[Any] => Unit
 
   /**
    * Server API binding function.
    *
    * @tparam Effect effect type
-   * */
+   */
   type ServerBindApis[Effect[_]] = ServerHandler[Effect] => ServerHandler[Effect]
 
   /**
@@ -152,28 +150,27 @@ object Default extends DefaultMeta {
     Handler(protocol, systemSync)
 
   /**
-   * Creates an STTP HTTP & WebSocket client message transport plugin with specified effect system plugin.
+   * Creates a standard JRE HTTP & WebSocket client message transport plugin with specified effect system plugin.
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
-   * @param backend client message transport backend
    * @param system effect system plugin
    * @tparam Effect effect type
    * @return client message transport plugin
+   * @return creates client message transport plugin using supplied asynchronous effect execution function
    */
   def clientTransport[Effect[_]](
     url: URI,
     method: String,
-    backend: SttpBackend[Effect, WebSockets],
     system: EffectSystem[Effect]
-  ): ClientTransport[Effect] =
-    SttpClient(url, method, backend, system)
+  ): Run[Effect] => ClientTransport[Effect] =
+    HttpClient.create(url, method, system)
 
   /**
-   * Creates an STTP HTTP & WebSocket client message transport plugin using 'Future' as an effect type.
+   * Creates a standard JRE HTTP & WebSocket client message transport plugin using 'Future' as an effect type.
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
@@ -186,10 +183,10 @@ object Default extends DefaultMeta {
   def clientTransportAsync(url: URI, method: String)(implicit
     executionContext: ExecutionContext
   ): ClientTransport[Future] =
-    clientTransport(url, method, HttpClientFutureBackend(), systemAsync)
+    clientTransport(url, method, systemAsync)(identity)
 
   /**
-   * Creates an STTP HTTP & WebSocket client message transport plugin using identity as an effect type.
+   * Creates a standard JRE HTTP & WebSocket client message transport plugin using identity as an effect type.
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
@@ -199,10 +196,10 @@ object Default extends DefaultMeta {
    * @return synchronous client message transport plugin
    */
   def clientTransportSync(url: URI, method: String): ClientTransport[Identity] =
-    SttpClient.http(url, method, HttpClientSyncBackend(), systemSync)
+    clientTransport(url, method, systemSync)(identity)
 
   /**
-   * Creates an STTP JSON-RPC over HTTP & WebSocket client with specified effect system plugin.
+   * Creates a standard JRE JSON-RPC over HTTP & WebSocket client with specified effect system plugin.
    *
    * The client can be used to perform RPC calls and notifications.
    *
@@ -211,22 +208,20 @@ object Default extends DefaultMeta {
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
    * @param url HTTP endpoint URL
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
-   * @param backend STTP client backend
    * @param system effect system plugin
    * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @tparam Effect effect type
-   * @return RPC client
+   * @return creates RPC client using supplied asynchronous effect execution function
    */
   def client[Effect[_]](
     url: URI,
     method: String,
-    backend: SttpBackend[Effect, WebSockets],
     system: EffectSystem[Effect]
-  ): Client[Effect, ClientContext] =
-    client(clientTransport(url, method, backend, system))
+  ): Run[Effect] => Client[Effect, ClientContext] =
+    runEffect => client(clientTransport(url, method, system)(runEffect))
 
   /**
-   * Creates an STTP JSON-RPC over HTTP & WebSocket client with default RPC protocol using 'Future' as an effect type.
+   * Creates a standard JRE JSON-RPC over HTTP & WebSocket client with default RPC protocol using 'Future' as an effect type.
    *
    * The client can be used to perform RPC calls and notifications.
    *
@@ -244,7 +239,7 @@ object Default extends DefaultMeta {
     client(clientTransportAsync(url, method))
 
   /**
-   * Creates an STTP JSON-RPC over HTTP & WebSocket client with default RPC protocol using identity as an effect type.
+   * Creates a standard JRE JSON-RPC over HTTP & WebSocket client with default RPC protocol using identity as an effect type.
    *
    * The client can be used to perform RPC calls and notifications.
    *
@@ -289,8 +284,8 @@ object Default extends DefaultMeta {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
-  ): RunEffect[Effect] => Server[Effect] =
-    (runEffect: RunEffect[Effect]) =>
+  ): Run[Effect] => Server[Effect] =
+    (runEffect: Run[Effect]) =>
       UndertowServer.create(handler, port, path, methods, webSocket, mapException, builder)(runEffect)
 
   /**
@@ -325,7 +320,7 @@ object Default extends DefaultMeta {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
-  ): ServerBindApis[Effect] => RunEffect[Effect] => Server[Effect] =
+  ): ServerBindApis[Effect] => Run[Effect] => Server[Effect] =
     (bindApis: ServerBindApis[Effect]) => {
       val handler = bindApis(Handler.protocol(protocol).system(system).context[ServerContext])
       server(handler, port, path, methods, webSocket, mapException, builder)
