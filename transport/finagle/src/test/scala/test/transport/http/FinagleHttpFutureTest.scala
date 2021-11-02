@@ -2,7 +2,6 @@ package test.transport.http
 
 import automorph.Types
 import automorph.spi.EffectSystem
-import automorph.spi.system.Defer
 import automorph.spi.transport.ServerMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.endpoint.FinagleEndpoint
@@ -20,7 +19,7 @@ class FinagleHttpFutureTest extends StandardHttpServerTest {
   type Effect[T] = Future[T]
   type Context = FinagleEndpoint.Context
 
-  override lazy val deferSystem: EffectSystem[Effect] with Defer[Effect] = FutureSystem()
+  override lazy val system: EffectSystem[Effect] = FutureSystem()
   override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary
 
   def serverTransport(

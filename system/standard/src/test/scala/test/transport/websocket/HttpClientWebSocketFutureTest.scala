@@ -18,9 +18,8 @@ class HttpClientWebSocketFutureTest extends ClientServerTest {
   type Effect[T] = Future[T]
   type Context = NanoServer.Context
 
-  private lazy val deferSystem = FutureSystem()
+  override lazy val system: EffectSystem[Effect] = FutureSystem()
   override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary
-  override lazy val system: EffectSystem[Effect] = deferSystem
 
   override def run[T](effect: Effect[T]): T = await(effect)
 
@@ -32,7 +31,7 @@ class HttpClientWebSocketFutureTest extends ClientServerTest {
     val server = withAvailablePort(port => NanoServer.create[Effect](handler, port)(run(_)))
     servers += server
     val url = new URI(s"ws://localhost:${server.port}")
-    val client = HttpClient.create(url, "POST", deferSystem)(runEffect)
+    val client = HttpClient.create(url, "DELETE", system)(runEffect)
       .asInstanceOf[ClientMessageTransport[Effect, Context]]
     clients += client
     Some(client)

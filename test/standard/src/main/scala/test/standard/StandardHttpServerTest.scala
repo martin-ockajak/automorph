@@ -10,10 +10,6 @@ import test.core.ClientServerTest
 
 trait StandardHttpServerTest extends ClientServerTest {
 
-  override lazy val system: EffectSystem[Effect] = deferSystem
-
-  def deferSystem: EffectSystem[Effect] with Defer[Effect]
-
   def serverTransport(handler: Types.HandlerAnyCodec[Effect, Context], port: Int): ServerMessageTransport[Effect]
 
   def webSocket: Boolean = false
@@ -25,7 +21,7 @@ trait StandardHttpServerTest extends ClientServerTest {
     servers += server
     val scheme = Option.when(webSocket)("ws").getOrElse("http")
     val url = new URI(s"$scheme://localhost:$port")
-    val client = HttpClient.create(url, "POST", deferSystem)(runEffect)
+    val client = HttpClient.create(url, "POST", system)(runEffect)
       .asInstanceOf[ClientMessageTransport[Effect, Context]]
     clients += client
     Some(client)

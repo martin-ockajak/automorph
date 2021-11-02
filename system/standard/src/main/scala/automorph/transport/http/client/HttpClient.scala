@@ -4,6 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
+import automorph.system.IdentitySystem
 import automorph.transport.http.HttpContext
 import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, Run, Session, WebSocketListener}
 import automorph.util.Bytes
@@ -14,7 +15,7 @@ import java.net.http.HttpClient.Builder
 import java.net.http.HttpRequest.BodyPublishers
 import java.net.http.HttpResponse.BodyHandlers
 import java.net.http.WebSocket.Listener
-import java.net.http.{HttpRequest, WebSocket}
+import java.net.http.{HttpRequest, HttpResponse, WebSocket}
 import java.nio.ByteBuffer
 import java.util.concurrent.{CompletableFuture, CompletionStage}
 import scala.collection.immutable.ArraySeq
@@ -44,7 +45,7 @@ import scala.util.Try
 final case class HttpClient[Effect[_]] private (
   url: URI,
   method: String,
-  system: EffectSystem[Effect] with Defer[Effect],
+  system: EffectSystem[Effect],
   builder: Builder,
   runEffect: Run[Effect]
 ) extends ClientMessageTransport[Effect, Context] with Logging {
@@ -65,26 +66,27 @@ final case class HttpClient[Effect[_]] private (
     requestContext: Option[Context]
   ): Effect[(ArraySeq.ofByte, Context)] = {
     // Send the request
-    val (request, requestUrl) = createRequest(requestBody, mediaType, requestContext)
-    val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
-    send(request, requestUrl, requestId, protocol).either.flatMap { result =>
-      lazy val responseProperties = Map(
-        LogProperties.requestId -> requestId,
-        "URL" -> requestUrl.toString
-      )
+    createRequest(requestBody, mediaType, requestContext).flatMap { case (request, requestUrl) =>
+      val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
+      send(request, requestUrl, requestId, protocol).either.flatMap { result =>
+        lazy val responseProperties = Map(
+          LogProperties.requestId -> requestId,
+          "URL" -> requestUrl.toString
+        )
 
-      // Process the response
-      result.fold(
-        error => {
-          logger.error(s"Failed to receive $protocol response", error, responseProperties)
-          system.failed(error)
-        },
-        response => {
-          val (responseBody, statusCode, _) = response
-          logger.debug(s"Received $protocol response", responseProperties ++ statusCode.map("Status" -> _))
-          system.pure(responseBody -> responseContext(response))
-        }
-      )
+        // Process the response
+        result.fold(
+          error => {
+            logger.error(s"Failed to receive $protocol response", error, responseProperties)
+            system.failed(error)
+          },
+          response => {
+            val (responseBody, statusCode, _) = response
+            logger.debug(s"Received $protocol response", responseProperties ++ statusCode.map("Status" -> _))
+            system.pure(responseBody -> responseContext(response))
+          }
+        )
+      }
     }
   }
 
@@ -94,9 +96,10 @@ final case class HttpClient[Effect[_]] private (
     mediaType: String,
     requestContext: Option[Context]
   ): Effect[Unit] = {
-    val (request, requestUrl) = createRequest(requestBody, mediaType, requestContext)
-    val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
-    send(request, requestUrl, requestId, protocol).map(_ => ())
+    createRequest(requestBody, mediaType, requestContext).flatMap { case (request, requestUrl) =>
+      val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
+      send(request, requestUrl, requestId, protocol).map(_ => ())
+    }
   }
 
   override def defaultContext: Context =
@@ -122,18 +125,22 @@ final case class HttpClient[Effect[_]] private (
     request.fold(
       // Send HTTP request
       httpRequest =>
-        effect(httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray)).map { response =>
-          val headers = response.headers.map.asScala.toSeq.flatMap { case (name, values) =>
-            values.asScala.map(name -> _)
-          }
-          (Bytes.byteArray.from(response.body), Some(response.statusCode), headers)
+        system match {
+          case defer: Defer[_] => effect(
+              httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray),
+              defer.asInstanceOf[Defer[Effect]]
+            ).map(httpResponse)
+          case _ => system.wrap(httpResponse(httpClient.send(httpRequest, BodyHandlers.ofByteArray)))
         },
-
       // Send WebSocket request
       { case (webSocketEffect, resultEffect, requestBody) =>
-        webSocketEffect.flatMap { webSocket =>
-          effect(webSocket.sendBinary(Bytes.byteBuffer.to(requestBody), true)).flatMap(_ => resultEffect)
-        }
+        withDefer(defer =>
+          webSocketEffect.flatMap(webSocket =>
+            effect(webSocket.sendBinary(Bytes.byteBuffer.to(requestBody), true), defer).flatMap(_ =>
+              resultEffect
+            )
+          )
+        )
       }
     ).either.flatMap(_.fold(
       error => {
@@ -151,21 +158,27 @@ final case class HttpClient[Effect[_]] private (
     requestBody: ArraySeq.ofByte,
     mediaType: String,
     requestContext: Option[Context]
-  ): (Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)], URI) = {
+  ): Effect[(Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)], URI)] = {
     val httpContext = requestContext.getOrElse(defaultContext)
     val requestUrl = httpContext.base.flatMap(base => Try(base.request.build).toOption).map(_.uri).getOrElse(url)
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
-        val responseEffect = system.deferred[Response]
-        val response = responseEffect.flatMap(_.effect)
-        val webSocketBuilder = createWebSocketBuilder(httpContext)
-        val webSocket = prepareWebSocket(webSocketBuilder, requestUrl, responseEffect)
-        Right((webSocket, response, requestBody)) -> requestUrl
+        withDefer(defer =>
+          system.wrap {
+            val responseEffect = defer.deferred[Response]
+            val response = responseEffect.flatMap(_.effect)
+            val webSocketBuilder = createWebSocketBuilder(httpContext)
+            val webSocket = prepareWebSocket(webSocketBuilder, requestUrl, responseEffect, defer)
+            Right((webSocket, response, requestBody)) -> requestUrl
+          }
+        )
       case _ =>
         // Create HTTP request
-        val httpRequest = createHttpRequest(requestBody, requestUrl, mediaType, httpContext)
-        Left(httpRequest) -> httpRequest.uri
+        system.wrap {
+          val httpRequest = createHttpRequest(requestBody, requestUrl, mediaType, httpContext)
+          Left(httpRequest) -> httpRequest.uri
+        }
     }
   }
 
@@ -197,17 +210,21 @@ final case class HttpClient[Effect[_]] private (
   private def prepareWebSocket(
     builder: WebSocket.Builder,
     requestUrl: URI,
-    responseEffect: Effect[Deferred[Effect, Response]]
+    responseEffect: Effect[Deferred[Effect, Response]],
+    defer: Defer[Effect]
   ): Effect[WebSocket] =
     responseEffect.flatMap(response =>
-      effect(builder.buildAsync(
-        requestUrl,
-        WebSocketListener(
+      effect(
+        builder.buildAsync(
           requestUrl,
-          response,
-          runEffect
-        )
-      ))
+          WebSocketListener(
+            requestUrl,
+            response,
+            runEffect
+          )
+        ),
+        defer
+      )
     )
 
   private def createWebSocketBuilder(httpContext: Context): WebSocket.Builder = {
@@ -232,8 +249,18 @@ final case class HttpClient[Effect[_]] private (
     statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers*)
   }
 
-  private def effect[T](completableFuture: => CompletableFuture[T]): Effect[T] =
-    system.deferred[T].flatMap { deferred =>
+  private def httpResponse(response: HttpResponse[Array[Byte]]): Response = {
+    val headers = response.headers.map.asScala.toSeq.flatMap { case (name, values) =>
+      values.asScala.map(name -> _)
+    }
+    (Bytes.byteArray.from(response.body), Some(response.statusCode), headers)
+  }
+
+  private def effect[T](
+    completableFuture: => CompletableFuture[T],
+    defer: Defer[Effect]
+  ): Effect[T] =
+    defer.deferred[T].flatMap { deferred =>
       Try(completableFuture).pureFold(
         error => runEffect(deferred.fail(error).asInstanceOf[Effect[Any]]),
         (value: CompletableFuture[T]) => {
@@ -252,6 +279,13 @@ final case class HttpClient[Effect[_]] private (
       )
       deferred.effect
     }
+
+  private def withDefer[T](function: Defer[Effect] => Effect[T]): Effect[T] = system.match {
+    case defer: Defer[_] => function(defer.asInstanceOf[Defer[Effect]])
+    case _ => system.failed(new IllegalArgumentException(
+        s"Effect system without deferred effect support cannot be used with WebSocket: ${system.getClass.getName}"
+      ))
+  }
 }
 
 object HttpClient {
@@ -284,7 +318,7 @@ object HttpClient {
   def create[Effect[_]](
     url: URI,
     method: String,
-    system: EffectSystem[Effect] with Defer[Effect],
+    system: EffectSystem[Effect],
     builder: Builder = defaultBuilder
   ): Run[Effect] => HttpClient[Effect] = (runEffect: Run[Effect]) =>
     HttpClient(url, method, system, builder, runEffect)
