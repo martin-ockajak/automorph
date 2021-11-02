@@ -162,7 +162,7 @@ final case class SttpClient[Effect[_]] private (
         system.pure(Protocol.WebSocket)
       } else {
         system.failed(
-          throw IllegalArgumentException(s"Selected STTP backend does not support WebSocket: ${backend.getClass.getSimpleName}")
+          throw new IllegalArgumentException(s"Selected STTP backend does not support WebSocket: ${backend.getClass.getSimpleName}")
         )
       }
     } else system.pure(Protocol.Http)
