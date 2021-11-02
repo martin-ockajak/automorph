@@ -1,6 +1,6 @@
 <br>
 
-# Important notice
+# Important
 
 **This is a preview of an upcoming release. Please do not use it for any purposes other than design review !**
 
