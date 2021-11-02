@@ -11,7 +11,7 @@ object HttpMethod {
   /**
    * Create HTTP method with specified name.
    *
-   * @name HTTP method name
+   * @param name HTTP method name
    * @return HTTP method
    */
   def valueOf(name: String): HttpMethod = {
