@@ -1,6 +1,7 @@
 package test.examples
 
 import automorph.Default
+import automorph.Default.{ClientContext, ServerContext}
 import java.net.URI
 
 object RequestMetadata extends App {
@@ -9,9 +10,7 @@ object RequestMetadata extends App {
   class ServerApi {
 
     // Use HTTP request metadata context provided by the server message transport plugin
-    def hello(message: String)(
-      implicit requestContext: Default.ServerContext
-    ): String = Seq(
+    def hello(message: String)(implicit requestContext: ServerContext): String = Seq(
       Some(message),
       requestContext.path,
       requestContext.header("X-Test")
@@ -23,7 +22,7 @@ object RequestMetadata extends App {
   trait ClientApi {
 
     // Use HTTP request context defined by the client message transport plugin
-    def hello(message: String)(implicit request: Default.ClientContext): String
+    def hello(message: String)(implicit request: ClientContext): String
   }
 
   // Start Undertow JSON-RPC HTTP server listening on port 80 for requests to '/api'
@@ -45,7 +44,7 @@ object RequestMetadata extends App {
   remoteApi.hello("test")(using requestContext) // String
 
   // Call the remote API function statically with request context supplied implictly
-  implicit val givenRequestMetadata: Default.ClientContext = requestContext
+  implicit val givenRequestMetadata: ClientContext = requestContext
   remoteApi.hello("test") // String
 
   // Call the remote API function dynamically with request context supplied directly

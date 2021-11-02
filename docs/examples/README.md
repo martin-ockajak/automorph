@@ -175,15 +175,14 @@ libraryDependencies ++= Seq(
 ```scala
 // Define server API type and create its instance
 import automorph.Default
+import automorph.Default.{ClientContext, ServerContext}
 import java.net.URI
 
 // Define server API type and create its instance
 class ServerApi {
 
   // Use HTTP request metadata context provided by the server message transport plugin
-  def hello(message: String)(
-    implicit requestContext: Default.ServerContext
-  ): String = Seq(
+  def hello(message: String)(implicit requestContext: ServerContext): String = Seq(
     Some(message),
     requestContext.path,
     requestContext.header("X-Test")
@@ -195,7 +194,7 @@ val api = new ServerApi()
 trait ClientApi {
 
   // Use HTTP request context defined by the client message transport plugin
-  def hello(message: String)(implicit request: Default.ClientContext): String
+  def hello(message: String)(implicit request: ClientContext): String
 }
 ```
 
@@ -228,7 +227,7 @@ val remoteApi = client.bind[ClientApi] // Api
 remoteApi.hello("test")(using requestContext) // String
 
 // Call the remote API function statically with request context supplied implictly
-implicit val givenRequestMetadata: Default.ClientContext = requestContext
+implicit val givenRequestMetadata: ClientContext = requestContext
 remoteApi.hello("test") // String
 
 // Call the remote API function dynamically with request context supplied directly
