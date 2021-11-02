@@ -49,11 +49,10 @@ object RequestMetadata extends App {
   remoteApi.contextual("test") // String
 
   // Call the remote API function dynamically with request context supplied directly
-  val callContextual = client.call[String]("contextual")
-  callContextual.args("message" -> "test")(using requestContext) // String
+  client.call[String]("contextual").args("message" -> "test")(using requestContext) // String
 
   // Call the remote API function dynamically with request context supplied implictly
-  callContextual.args("message" -> "test") // String
+  client.call[String]("contextual").args("message" -> "test") // String
 
   // Close the client
   client.close()
