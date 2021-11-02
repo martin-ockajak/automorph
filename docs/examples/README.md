@@ -152,8 +152,7 @@ server.close()
 val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
 
 // Notify the remote API function dynamically without expecting a response
-val notifyHello = client.notify("hello")
-notifyHello.args("some" -> "world", "n" -> 1) // Future[Unit]
+client.notify("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
 
 // Close the client
 client.close()
