@@ -1,8 +1,6 @@
 package test.standard
 
 import automorph.Types
-import automorph.spi.EffectSystem
-import automorph.spi.system.Defer
 import automorph.spi.transport.{ClientMessageTransport, ServerMessageTransport}
 import automorph.transport.http.client.HttpClient
 import java.net.URI
