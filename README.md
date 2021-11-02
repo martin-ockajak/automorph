@@ -9,7 +9,7 @@
 [![Scaladoc](https://javadoc-badge.appspot.com/org.automorph/automorph-core_3.0.0.svg?label=scaladoc)](https://javadoc.io/doc/org.automorph/automorph-core_3.0.0/latest/automorph/)
 
 **Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless
-way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/specification) and [REST-RPC](docs/rest-rpc/README.md) protocols.
+way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/specification) and [REST-RPC](rest-rpc/README.md) protocols.
 
 # [Documentation](https://automorph.org)
 
@@ -40,7 +40,7 @@ way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/sp
 ### RPC protocols
 
 * [JSON-RPC](https://www.jsonrpc.org/specification)
-* [REST-RPC]
+* [REST-RPC](docs/rest-rpc/README.md)
 
 ### Transport protocols
 
