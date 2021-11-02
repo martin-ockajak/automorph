@@ -262,8 +262,8 @@ import scala.util.Try
 
 // Define an API type and create its instance
 class Api {
-  // Exposed both as 'original' and 'custom'
-  def original(value: Option[String]): String =
+  // Exposed both as 'hello' and 'custom'
+  def hello(value: Option[String]): String =
     value.getOrElse("")
 
   // Not exposed
@@ -283,7 +283,7 @@ val api = new Api()
 ```scala
 // Customize RPC function names
 val mapName = (name: String) => name match {
-  case "original" => Seq("original", "custom")
+  case "hello" => Seq("hello", "custom")
   case "omitted" => Seq.empty
   case other => Seq(s"test.$other")
 }
