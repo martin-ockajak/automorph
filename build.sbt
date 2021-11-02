@@ -247,6 +247,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
   name := s"$projectName-sttp",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
+    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpVersion % Test,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test
   ),
   Compile / doc / scalacOptions ++= Seq("-skip-packages", "sttp")
