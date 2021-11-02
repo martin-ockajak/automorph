@@ -158,7 +158,6 @@ object Default extends DefaultMeta {
    * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @param system effect system plugin
    * @tparam Effect effect type
-   * @return client message transport plugin
    * @return creates client message transport plugin using supplied asynchronous effect execution function
    */
   def clientTransport[Effect[_]](
