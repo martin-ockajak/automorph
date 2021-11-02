@@ -22,7 +22,7 @@ The underlying runtime must support monadic composition of effectful values.
 | Class | Artifact | Library | Effect |
 | --- | --- | --- | --- |
 | [FutureSystem](https://www.javadoc.io/doc/org.automorph/automorph-standard_3.0.0/latest/automorph/system/FutureSystem.html) (Default) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/overviews/core/futures.html) | [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html) |
-| [IdentitySystem](https://www.javadoc.io/doc/org.automorph/automorph-standard_3.0.0/latest/automorph/system/IdentitySystem.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://www.scala-lang.org/) | [Identity](https://www.javadoc.io/doc/org.automorph/automorph-standard_3.0.0/latest/automorph/system/IdentitySystem$$Identity.html) |
+| [IdentitySystem](https://www.javadoc.io/doc/org.automorph/automorph-standard_3.0.0/latest/automorph/system/IdentitySystem.html) (Default) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://www.scala-lang.org/) | [Identity](https://www.javadoc.io/doc/org.automorph/automorph-standard_3.0.0/latest/automorph/system/IdentitySystem$$Identity.html) |
 | [TrySystem](https://www.javadoc.io/doc/org.automorph/automorph-standard_3.0.0/latest/automorph/system/TrySystem.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html) | [Try](https://www.scala-lang.org/api/3.0.0.6/scala/util/Try.html) |
 | [ZioSystem](https://www.javadoc.io/doc/org.automorph/automorph-zio_3.0.0/latest/automorph/system/ZioSystem.html) | [automorph-zio](https://mvnrepository.com/artifact/org.automorph/automorph-zio) | [ZIO](https://zio.dev/) | [RIO](https://javadoc.io/doc/dev.zio/zio_3.0.0/latest/zio/RIO$.html) |
 | [MonixSystem](https://www.javadoc.io/doc/org.automorph/automorph-monix_3.0.0/latest/automorph/system/MonixSystem.html) | [automorph-monix](https://mvnrepository.com/artifact/org.automorph/automorph-monix) | [Monix](https://monix.io/) | [Task](https://monix.io/api/current/monix/eval/Task.html) |
@@ -33,7 +33,7 @@ The underlying runtime must support monadic composition of effectful values.
 
 Binary [message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/MessageTransport.html) protocol plugins.
 
-The underlying transport protocol must support request/response messaging pattern.
+The underlying transport protocol must support request & response messaging pattern.
 
 ### Client
 
@@ -47,8 +47,8 @@ Used by the RPC client to send requests and receive responses to and from a remo
 | | -> | [Akka HTTP](https://sttp.softwaremill.com/en/latest/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 | | -> | [Armeria](https://sttp.softwaremill.com/en/latest/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 |  | -> | [HttpClient](https://sttp.softwaremill.com/en/latest/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
+|  | -> | [OkHttp](https://sttp.softwaremill.com/en/latest/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 |  | -> | [AsyncHttpClient](https://sttp.softwaremill.com/en/latest/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
-|  | -> | [OkHttp](https://sttp.softwaremill.com/en/latest/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [HttpClient](https://www.javadoc.io/doc/org.automorph/automorph-standard_3.0.0/latest/automorph/transport/http/client/HttpClient.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 | [UrlClient](https://www.javadoc.io/doc/org.automorph/automorph-standard_3.0.0/latest/automorph/transport/http/client/UrlClient.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [RabbitMqClient](https://www.javadoc.io/doc/org.automorph/automorph-rabbitmq_3.0.0/latest/automorph/transport/amqp/client/RabbitMqClient.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq) | [RabbitMQ](https://www.rabbitmq.com/java-client.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
@@ -57,8 +57,7 @@ Used by the RPC client to send requests and receive responses to and from a remo
 
 [Server message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/ServerMessageTransport.html) protocol plugins.
 
-Used to actively receive and reply to requests using specific message transport protocol
-while invoking RPC request handler to process them.
+Used to actively receive requests and send responses back using specific message transport protocol while invoking RPC request handler to process them.
 
 | Class | Artifact | Library | Protocol |
 | --- | --- | --- | --- |
@@ -70,7 +69,7 @@ while invoking RPC request handler to process them.
 
 [Endpoint message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/EndpointMessageTransport.html) protocol plugins.
 
-Used to passively receive and reply to requests using specific message transport protocol from an active server while invoking RPC request handler to process them.
+Used to passively handle requests into responses using specific message transport protocol from an active server while invoking RPC request handler to process them.
 
 | Class | Artifact | Library | Protocol |
 | --- | --- | --- | --- |

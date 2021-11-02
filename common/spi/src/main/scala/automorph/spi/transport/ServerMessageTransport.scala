@@ -5,8 +5,8 @@ import automorph.spi.MessageTransport
 /**
  * Server message transport protocol plugin.
  *
- * Used to actively receive and reply to requests using specific message transport protocol
- * while invoking RPC request handler to process them.
+ * Used to actively receive requests and send responses back using specific message transport
+ * protocol while invoking RPC request handler to process them.
  *
  * @tparam Effect effect type
  */
