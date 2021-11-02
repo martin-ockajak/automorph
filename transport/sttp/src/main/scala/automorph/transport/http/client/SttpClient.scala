@@ -46,11 +46,11 @@ final case class SttpClient[Effect[_]] private (
   override def call(
     requestBody: ArraySeq.ofByte,
     requestId: String,
-    requestContext: String,
-    context: Option[Context]
+    mediaType: String,
+    requestContext: Option[Context]
   ): Effect[(ArraySeq.ofByte, Context)] = {
     // Send the request
-    val sttpRequest = createRequest(requestBody, requestContext, context)
+    val sttpRequest = createRequest(requestBody, mediaType, requestContext)
     transportProtocol(sttpRequest).flatMap { protocol =>
       send(sttpRequest, requestId, protocol).either.flatMap { result =>
         lazy val responseProperties = Map(
