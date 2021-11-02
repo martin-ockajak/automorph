@@ -4,7 +4,6 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
-import automorph.system.IdentitySystem
 import automorph.transport.http.HttpContext
 import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, Run, Session, WebSocketListener}
 import automorph.util.Bytes
