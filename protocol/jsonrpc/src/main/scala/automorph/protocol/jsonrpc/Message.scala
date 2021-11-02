@@ -71,11 +71,7 @@ final case class MessageError[Node](
 
 /** JSON-RPC message type. */
 sealed abstract class MessageType {
-  /**
-   * Message type name.
-   *
-   * @return message type name
-   */
+  /** Message type name. */
   def name: String = toString
 }
 

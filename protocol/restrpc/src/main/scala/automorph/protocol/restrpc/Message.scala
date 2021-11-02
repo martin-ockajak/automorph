@@ -53,17 +53,13 @@ final case class MessageError[Node](
 
 /** REST-RPC message type. */
 sealed abstract class MessageType {
-  /**
-   * Message type name.
-   *
-   * @return message type name
-   */
+  /** Message type name. */
   def name: String = toString
 }
 
 object MessageType {
 
-  /** REST-RPC method call request. */
+  /** REST-RPC function call request. */
   case object Call extends MessageType
   /** REST-RPC result response. */
   case object Result extends MessageType
