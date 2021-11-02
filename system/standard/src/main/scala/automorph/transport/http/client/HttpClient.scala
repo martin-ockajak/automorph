@@ -25,7 +25,7 @@ import scala.jdk.OptionConverters.RichOptional
 import scala.util.Try
 
 /**
- * HttpClient HTTP & WebSocket client message transport plugin.
+ * Standard JRE HttpClient HTTP & WebSocket client message transport plugin.
  *
  * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
@@ -280,7 +280,7 @@ final case class HttpClient[Effect[_]] private (
       deferred.effect
     }
 
-  private def withDefer[T](function: Defer[Effect] => Effect[T]): Effect[T] = system.match {
+  private def withDefer[T](function: Defer[Effect] => Effect[T]): Effect[T] = system match {
     case defer: Defer[_] => function(defer.asInstanceOf[Defer[Effect]])
     case _ => system.failed(new IllegalArgumentException(
         s"Effect system without deferred effect support cannot be used with WebSocket: ${system.getClass.getName}"
