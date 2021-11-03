@@ -52,22 +52,6 @@ final case class UndertowServer[Effect[_]](
   private lazy val undertow = createServer()
   start()
 
-  def start(): Unit = {
-    undertow.start()
-    undertow.getListenerInfo.asScala.foreach { listener =>
-      val properties = Map(
-        "Protocol" -> listener.getProtcol
-      ) ++ (listener.getAddress match {
-        case address: InetSocketAddress => Map(
-            "Host" -> address.getHostString,
-            "Port" -> address.getPort
-          )
-        case _ => Map.empty
-      })
-      logger.info("Listening for connections", properties)
-    }
-  }
-
   override def close(): Effect[Unit] =
     system.wrap(undertow.stop())
 
@@ -89,6 +73,22 @@ final case class UndertowServer[Effect[_]](
       ResponseCodeHandler.HANDLE_404
     )
     builder.addHttpListener(port, "0.0.0.0", rootHandler).build()
+  }
+
+  private def start(): Unit = {
+    undertow.start()
+    undertow.getListenerInfo.asScala.foreach { listener =>
+      val properties = Map(
+        "Protocol" -> listener.getProtcol
+      ) ++ (listener.getAddress match {
+        case address: InetSocketAddress => Map(
+          "Host" -> address.getHostString,
+          "Port" -> address.getPort
+        )
+        case _ => Map.empty
+      })
+      logger.info("Listening for connections", properties)
+    }
   }
 }
 
