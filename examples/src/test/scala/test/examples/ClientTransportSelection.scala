@@ -5,7 +5,7 @@ import automorph.system.IdentitySystem
 import automorph.transport.http.client.UrlClient
 import java.net.URI
 
-object ClientMessageTransport extends App {
+object ClientTransportSelection extends App {
 
   // Define an API and create its instance
   class Api {
@@ -35,10 +35,10 @@ object ClientMessageTransport extends App {
   server.close()
 }
 
-class ClientMessageTransport extends org.scalatest.freespec.AnyFreeSpecLike {
+class ClientTransportSelection extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      ClientMessageTransport.main(Array())
+      ClientTransportSelection.main(Array())
     }
   }
 }

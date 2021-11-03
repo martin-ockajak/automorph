@@ -6,7 +6,7 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object MessageCodec extends App {
+object MessageCodecSelection extends App {
 
   // Define an API type and create its instance
   case class Record(values: List[String])
@@ -49,10 +49,10 @@ object MessageCodec extends App {
   server.close()
 }
 
-class MessageCodec extends org.scalatest.freespec.AnyFreeSpecLike {
+class MessageCodecSelection extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      MessageCodec.main(Array())
+      MessageCodecSelection.main(Array())
     }
   }
 }

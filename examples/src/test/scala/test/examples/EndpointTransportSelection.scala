@@ -7,7 +7,7 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object EndpointMessageTransport extends App {
+object EndpointTransportSelection extends App {
 
   // Define an API type and create its instance
   class Api {
@@ -40,10 +40,10 @@ object EndpointMessageTransport extends App {
   server.stop()
 }
 
-class EndpointMessageTransport extends org.scalatest.freespec.AnyFreeSpecLike {
+class EndpointTransportSelection extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      EndpointMessageTransport.main(Array())
+      EndpointTransportSelection.main(Array())
     }
   }
 }

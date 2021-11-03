@@ -438,7 +438,7 @@ remoteApi.hello("world", 1) // Future[String]
 client.close()
 ```
 
-## Effect system
+## Effect system selection
 
 * [Source](/test/examples/src/test/scala/test/examples/EffectSystem.scala)
 
@@ -495,7 +495,7 @@ remoteApi.hello("world", 1) // Task[String]
 client.close()
 ```
 
-## RPC protocol
+## RPC protocol selection
 
 * [Source](/test/examples/src/test/scala/test/examples/RpcProtocol.scala)
 
@@ -554,7 +554,7 @@ remoteApi.hello("world", 1) // Future[String]
 client.close()
 ```
 
-## Message codec
+## Message codec selection
 
 * [Source](/test/examples/src/test/scala/test/examples/MessageCodec.scala)
 
@@ -624,7 +624,7 @@ remoteApi.hello("world", 1) // Future[String]
 client.close()
 ```
 
-## Client message transport
+## Client transport selection
 
 * [Source](/test/examples/src/test/scala/test/examples/ClientMessageTransport.scala)
 
@@ -680,7 +680,7 @@ remoteApi.hello("world", 1) // String
 client.close()
 ```
 
-## Server message transport
+## Server transport selection
 
 * [Source](/test/examples/src/test/scala/test/examples/ServerMessageTransport.scala)
 
@@ -733,7 +733,7 @@ remoteApi.hello("world", 1) // String
 client.close()
 ```
 
-## Endpoint message transport
+## Endpoint transport selection
 
 * [Source](/test/examples/src/test/scala/test/examples/EndpointMessageTransport.scala)
 

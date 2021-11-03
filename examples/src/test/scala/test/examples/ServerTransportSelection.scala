@@ -4,7 +4,7 @@ import automorph.Default
 import automorph.transport.http.server.NanoServer
 import java.net.URI
 
-object ServerMessageTransport extends App {
+object ServerTransportSelection extends App {
 
   // Define an API type and create its instance
   class Api {
@@ -33,10 +33,10 @@ object ServerMessageTransport extends App {
   server.close()
 }
 
-class ServerMessageTransport extends org.scalatest.freespec.AnyFreeSpecLike {
+class ServerTransportSelection extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      ServerMessageTransport.main(Array())
+      ServerTransportSelection.main(Array())
     }
   }
 }
