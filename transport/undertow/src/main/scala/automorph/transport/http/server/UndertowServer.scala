@@ -3,12 +3,12 @@ package automorph.transport.http.server
 import automorph.Types
 import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
-import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
-import automorph.transport.http.server.UndertowServer.{defaultBuilder, Context}
+import automorph.transport.http.server.UndertowServer.{Context, defaultBuilder}
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
 import io.undertow.predicate.{Predicate, Predicates}
-import io.undertow.server.HttpServerExchange
+import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.{Handlers, Undertow}
 import java.net.InetSocketAddress
@@ -57,14 +57,7 @@ final case class UndertowServer[Effect[_]](
 
   private def createServer(): Undertow = {
     // Validate HTTP request method
-    val httpHandler = Handlers.predicate(
-      new Predicate {
-        override def resolve(exchange: HttpServerExchange): Boolean =
-          allowedMethods.contains(exchange.getRequestMethod.toString.toUpperCase)
-      },
-      UndertowHttpEndpoint(handler, mapException),
-      ResponseCodeHandler.HANDLE_405
-    )
+    val httpHandler = methodHandler(UndertowHttpEndpoint(handler, mapException))
 
     // Validate URL path
     val rootHandler = Handlers.predicate(
@@ -82,14 +75,25 @@ final case class UndertowServer[Effect[_]](
         "Protocol" -> listener.getProtcol
       ) ++ (listener.getAddress match {
         case address: InetSocketAddress => Map(
-          "Host" -> address.getHostString,
-          "Port" -> address.getPort.toString
-        )
+            "Host" -> address.getHostString,
+            "Port" -> address.getPort.toString
+          )
         case _ => Map.empty
       })
       logger.info("Listening for connections", properties)
     }
   }
+
+  private def methodHandler(handler: HttpHandler): HttpHandler =
+    Handlers.predicate(
+      new Predicate {
+
+        override def resolve(exchange: HttpServerExchange): Boolean =
+          allowedMethods.contains(exchange.getRequestMethod.toString.toUpperCase)
+      },
+      handler,
+      ResponseCodeHandler.HANDLE_405
+    )
 }
 
 object UndertowServer {
