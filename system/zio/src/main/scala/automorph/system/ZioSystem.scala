@@ -1,6 +1,7 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
+import zio.internal.Platform
 import automorph.spi.system.{Defer, Deferred}
 import zio.{Queue, RIO, Runtime, ZEnv, ZQueue}
 
@@ -14,7 +15,7 @@ import zio.{Queue, RIO, Runtime, ZEnv, ZQueue}
  * @tparam Environment ZIO environment type
  */
 final case class ZioSystem[Environment]()(
-  implicit val runtime: Runtime[Environment] = Runtime.default.withReportFailure(_ => ())
+  implicit val runtime: Runtime[Environment]
 ) extends EffectSystem[({ type Effect[A] = RIO[Environment, A] })#Effect]
   with Defer[({ type Effect[A] = RIO[Environment, A] })#Effect] {
 
@@ -69,5 +70,9 @@ object ZioSystem {
    * @return ZIO effect system plugin
    */
   def default: ZioSystem[ZEnv] =
-    ZioSystem[ZEnv]()
+    ZioSystem[ZEnv]()(defaultRuntime)
+
+  /** Default ZIO runtime environment. */
+  def defaultRuntime: Runtime[ZEnv] =
+    Runtime.default.withReportFailure(_ => ())
 }

@@ -1,8 +1,9 @@
 package test.system
 
-import cats.effect.IO
 import automorph.system.CatsEffectSystem
+import cats.effect.IO
 import cats.effect.unsafe.IORuntime
+import cats.effect.unsafe.implicits.global
 import scala.util.Try
 
 class CatsEffectTest extends DeferEffectSystemTest[IO] {

@@ -13,7 +13,7 @@ import scalaz.effect.IO
  * @param executionContext execution context
  */
 final case class ScalazEffectSystem()(
-  implicit val executionContext: ExecutionContext = ExecutionContext.global
+  implicit val executionContext: ExecutionContext
 ) extends EffectSystem[IO] {
 
   override def wrap[T](value: => T): IO[T] =

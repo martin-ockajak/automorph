@@ -15,7 +15,7 @@ import cats.effect.unsafe.IORuntime
  * @param runtime runtime system
  */
 final case class CatsEffectSystem()(
-  implicit val runtime: IORuntime = IORuntime.global
+  implicit val runtime: IORuntime
 ) extends EffectSystem[IO] with Defer[IO] {
 
   override def wrap[T](value: => T): IO[T] =

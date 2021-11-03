@@ -17,7 +17,7 @@ class LocalZioTest extends ProtocolCodecTest {
     Arbitrary(Arbitrary.arbitrary[Context])
 
   override lazy val system: EffectSystem[Effect] =
-    ZioSystem[ZEnv]()
+    ZioSystem[ZEnv]()(ZioSystem.defaultRuntime)
 
   override def run[T](effect: Effect[T]): T =
     runtime.unsafeRunTask(effect)

@@ -1,8 +1,9 @@
 package test.transport.local
 
-import automorph.system.ScalazEffectSystem
 import automorph.spi.EffectSystem
+import automorph.system.ScalazEffectSystem
 import org.scalacheck.Arbitrary
+import scala.concurrent.ExecutionContext.Implicits.global
 import scalaz.effect.IO
 import test.core.ProtocolCodecTest
 

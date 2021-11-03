@@ -2,8 +2,8 @@ package automorph.system
 
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
-import monix.eval.Task
 import monix.catnap.MVar
+import monix.eval.Task
 import monix.execution.Scheduler
 
 /**
@@ -15,7 +15,7 @@ import monix.execution.Scheduler
  * @param scheduler task scheduler
  */
 final case class MonixSystem()(
-  implicit val scheduler: Scheduler = monix.execution.Scheduler.global
+  implicit val scheduler: Scheduler
 ) extends EffectSystem[Task] with Defer[Task] {
 
   override def wrap[T](value: => T): Task[T] =

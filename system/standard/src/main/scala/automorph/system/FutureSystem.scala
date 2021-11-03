@@ -14,7 +14,7 @@ import scala.util.Success
  * @param executionContext execution context
  */
 final case class FutureSystem()(
-  implicit val executionContext: ExecutionContext = ExecutionContext.global
+  implicit val executionContext: ExecutionContext
 ) extends EffectSystem[Future] with Defer[Future] {
 
   override def wrap[T](value: => T): Future[T] =
