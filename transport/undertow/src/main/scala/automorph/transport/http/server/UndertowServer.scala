@@ -50,6 +50,7 @@ final case class UndertowServer[Effect[_]](
   private val system = genericHandler.system
   private val allowedMethods = methods.map(_.name).toSet
   private lazy val undertow = createServer()
+  start()
 
   def start(): Unit = {
     undertow.start()

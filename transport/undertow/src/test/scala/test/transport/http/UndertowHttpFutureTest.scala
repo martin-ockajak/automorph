@@ -16,7 +16,7 @@
 //  type Context = UndertowServer.Context
 //
 //  override lazy val system: FutureSystem = FutureSystem()
-
+//
 //  override def arbitraryContext: Arbitrary[Context] =
 //    HttpContextGenerator.arbitrary
 //
@@ -24,7 +24,7 @@
 //    handler: Types.HandlerAnyCodec[Effect, Context],
 //    port: Int
 //  ): ServerMessageTransport[Effect] =
-//    UndertowServer(handler, port)(runEffect)
+//    UndertowServer(handler, port)
 //
 //  override def run[T](effect: Effect[T]): T = await(effect)
 //}
