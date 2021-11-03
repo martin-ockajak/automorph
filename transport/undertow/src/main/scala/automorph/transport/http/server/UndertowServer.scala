@@ -5,7 +5,7 @@ import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
-import automorph.transport.http.server.UndertowServer.{Context, defaultBuilder}
+import automorph.transport.http.server.UndertowServer.{defaultBuilder, Context}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
 import io.undertow.predicate.{Predicate, Predicates}
 import io.undertow.server.HttpServerExchange
@@ -59,9 +59,9 @@ final case class UndertowServer[Effect[_]](
         "Protocol" -> listener.getProtcol
       ) ++ (listener.getAddress match {
         case address: InetSocketAddress => Map(
-          "Host" -> address.getHostString,
-          "Port" -> address.getPort
-        )
+            "Host" -> address.getHostString,
+            "Port" -> address.getPort
+          )
         case _ => Map.empty
       })
       logger.info("Listening for connections", properties)
@@ -85,9 +85,7 @@ final case class UndertowServer[Effect[_]](
     // Validate URL path
     val rootHandler = Handlers.predicate(
       Predicates.prefix(path),
-      Option.when(webSocket) {
-        UndertowWebSocketEndpoint(handler, httpHandler)
-      }.getOrElse(httpHandler),
+      Option.when(webSocket)(UndertowWebSocketEndpoint(handler, httpHandler)).getOrElse(httpHandler),
       ResponseCodeHandler.HANDLE_404
     )
     println(s"PORT: $port")
