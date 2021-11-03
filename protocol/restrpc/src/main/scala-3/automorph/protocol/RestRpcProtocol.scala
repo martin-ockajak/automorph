@@ -9,8 +9,8 @@ import automorph.spi.{MessageCodec, RpcProtocol}
  * @constructor Creates a REST-RPC 2.0 protocol implementation.
  * @see [[https://automorph.org/rest-rpc Protocol specification]]
  * @param codec message codec plugin
- * @param errorToException maps a REST-RPC error to a corresponding exception
- * @param exceptionToError maps an exception to a corresponding REST-RPC error
+ * @param mapError maps a REST-RPC error to a corresponding exception
+ * @param mapException maps an exception to a corresponding REST-RPC error
  * @param encodeRequest converts a REST-RPC request to message format node
  * @param decodeRequest converts a message format node to REST-RPC request
  * @param encodeResponse converts a REST-RPC response to message format node
@@ -21,8 +21,8 @@ import automorph.spi.{MessageCodec, RpcProtocol}
  */
 final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
   codec: Codec,
-  errorToException: (String, Option[Int]) => Throwable,
-  exceptionToError: Throwable => Option[Int],
+  mapError: (String, Option[Int]) => Throwable,
+  mapException: Throwable => Option[Int],
   protected val encodeRequest: Message.Request[Node] => Node,
   protected val decodeRequest: Node => Message.Request[Node],
   protected val encodeResponse: Message[Node] => Node,
@@ -45,8 +45,8 @@ object RestRpcProtocol extends ErrorMapping:
    */
   inline def apply[Node, Codec <: MessageCodec[Node]](
     codec: Codec,
-    errorToException: (String, Option[Int]) => Throwable = defaultErrorToException,
-    exceptionToError: Throwable => Option[Int] = defaultExceptionToError
+    errorToException: (String, Option[Int]) => Throwable = defaultMapError,
+    exceptionToError: Throwable => Option[Int] = defaultMapException
   ): RestRpcProtocol[Node, Codec] =
     val encodeRequest = (request: Message.Request[Node]) => codec.encode[Message.Request[Node]](request)
     val decodeRequest = (node: Node) => codec.decode[Message.Request[Node]](node)

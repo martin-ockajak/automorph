@@ -102,7 +102,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
             // Assemble error details
             val trace = error.trace
             val message = trace.headOption.getOrElse("Unknown error")
-            val code = exceptionToError(error).code
+            val code = mapException(error).code
             val data = Some(encodeStrings(trace.drop(1).toList))
             ResponseError(message, code, data)
         }
@@ -140,7 +140,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
                 case Some(result) => Right(RpcResponse(Success(result), message))
               }
             ) { error =>
-              Right(RpcResponse(Failure(errorToException(error.message, error.code)), message))
+              Right(RpcResponse(Failure(mapError(error.message, error.code)), message))
             }
         )
       }
@@ -165,7 +165,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
    * @return JSON-RPC protocol
    */
   def mapException(exceptionToError: Throwable => ErrorType): JsonRpcProtocol[Node, Codec] =
-    copy(exceptionToError = exceptionToError)
+    copy(mapException = exceptionToError)
 
   /**
    * Creates a copy of this protocol with specified JSON-RPC error to exception mapping.
@@ -174,7 +174,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
    * @return JSON-RPC protocol
    */
   def mapError(errorToException: (String, Int) => Throwable): JsonRpcProtocol[Node, Codec] =
-    copy(errorToException = errorToException)
+    copy(mapError = errorToException)
 
   /**
    * Creates function invocation argument nodes.

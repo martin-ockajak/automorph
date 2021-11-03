@@ -11,8 +11,8 @@ import scala.reflect.macros.blackbox
  * @constructor Creates a JSON-RPC 2.0 protocol implementation.
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param codec message codec plugin
- * @param errorToException maps a JSON-RPC error to a corresponding exception
- * @param exceptionToError maps an exception to a corresponding JSON-RPC error
+ * @param mapError maps a JSON-RPC error to a corresponding exception
+ * @param mapException maps an exception to a corresponding JSON-RPC error
  * @param argumentsByName if true, pass arguments by name, if false pass arguments by position
  * @param encodeMessage converts a JSON-RPC message to message format node
  * @param decodeMessage converts a message format node to JSON-RPC message
@@ -22,8 +22,8 @@ import scala.reflect.macros.blackbox
  */
 final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
   codec: Codec,
-  errorToException: (String, Int) => Throwable = JsonRpcProtocol.defaultErrorToException,
-  exceptionToError: Throwable => ErrorType = JsonRpcProtocol.defaultExceptionToError,
+  mapError: (String, Int) => Throwable = JsonRpcProtocol.defaultMapError,
+  mapException: Throwable => ErrorType = JsonRpcProtocol.defaultMapException,
   argumentsByName: Boolean = true,
   protected val encodeMessage: Message[Node] => Node,
   protected val decodeMessage: Node => Message[Node],

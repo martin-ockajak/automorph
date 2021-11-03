@@ -39,7 +39,7 @@ private[automorph] trait DefaultMeta {
    * @return RPC protocol plugin
    */
   def protocol: Protocol[Node, Codec] =
-    JsonRpcProtocol(codec, JsonRpcProtocol.defaultErrorToException, JsonRpcProtocol.defaultExceptionToError, true)
+    JsonRpcProtocol(codec, JsonRpcProtocol.defaultMapError, JsonRpcProtocol.defaultMapException, true)
 
   /**
    * Creates a JSON-RPC protocol plugin with specified message codec plugin.

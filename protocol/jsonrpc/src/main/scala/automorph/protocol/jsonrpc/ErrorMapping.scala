@@ -14,7 +14,7 @@ private[automorph] trait ErrorMapping {
    * @param code error code
    * @return exception
    */
-  def defaultErrorToException(message: String, code: Int): Throwable = code match {
+  def defaultMapError(message: String, code: Int): Throwable = code match {
     case ErrorType.ParseError.code => ParseErrorException(message)
     case ErrorType.InvalidRequest.code => InvalidRequestException(message)
     case ErrorType.MethodNotFound.code => FunctionNotFoundException(message)
@@ -31,7 +31,7 @@ private[automorph] trait ErrorMapping {
    * @param exception exception
    * @return JSON-RPC error type
    */
-  def defaultExceptionToError(exception: Throwable): ErrorType = exception match {
+  def defaultMapException(exception: Throwable): ErrorType = exception match {
     case _: ParseErrorException => ErrorType.ParseError
     case _: InvalidRequestException => ErrorType.InvalidRequest
     case _: FunctionNotFoundException => ErrorType.MethodNotFound

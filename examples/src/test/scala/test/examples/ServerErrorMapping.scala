@@ -21,7 +21,7 @@ object ServerErrorMapping extends App {
   val protocol = Default.protocol
   val serverProtocol = protocol.mapException {
     case _: SQLException => InvalidRequest
-    case e => protocol.exceptionToError(e)
+    case e => protocol.mapException(e)
   }
 
   // Start custom JSON-RPC HTTP server listening on port 80 for requests to '/api'

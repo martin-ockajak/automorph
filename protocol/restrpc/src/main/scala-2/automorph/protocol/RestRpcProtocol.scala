@@ -11,8 +11,8 @@ import scala.reflect.macros.blackbox
  * @constructor Creates a REST-RPC protocol plugin.
  * @see [[https://automorph.org/rest-rpc REST-RPC protocol specification]]
  * @param codec message codec plugin
- * @param errorToException maps a REST-RPC error to a corresponding exception
- * @param exceptionToError maps an exception to a corresponding REST-RPC error
+ * @param mapError maps a REST-RPC error to a corresponding exception
+ * @param mapException maps an exception to a corresponding REST-RPC error
  * @param encodeRequest converts a REST-RPC request to message format node
  * @param decodeRequest converts a message format node to REST-RPC request
  * @param encodeResponse converts a REST-RPC response to message format node
@@ -23,8 +23,8 @@ import scala.reflect.macros.blackbox
  */
 final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
   codec: Codec,
-  errorToException: (String, Option[Int]) => Throwable = RestRpcProtocol.defaultErrorToException,
-  exceptionToError: Throwable => Option[Int] = RestRpcProtocol.defaultExceptionToError,
+  mapError: (String, Option[Int]) => Throwable = RestRpcProtocol.defaultMapError,
+  mapException: Throwable => Option[Int] = RestRpcProtocol.defaultMapException,
   protected val encodeRequest: Message.Request[Node] => Node,
   protected val decodeRequest: Node => Message.Request[Node],
   protected val encodeResponse: Message[Node] => Node,

@@ -107,7 +107,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
             // Assemble error details
             val trace = error.trace
             val message = trace.headOption.getOrElse("Unknown error")
-            val code = exceptionToError(error)
+            val code = mapException(error)
             val data = Some(encodeStrings(trace.drop(1).toList))
             ResponseError(message, code, data)
         }
@@ -145,7 +145,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
                 case Some(result) => Right(RpcResponse(Success(result), message))
               }
             ) { error =>
-              Right(RpcResponse(Failure(errorToException(error.message, error.code)), message))
+              Right(RpcResponse(Failure(mapError(error.message, error.code)), message))
             }
         )
       }
@@ -170,7 +170,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
    * @return REST-RPC protocol
    */
   def exceptionToError(exceptionToError: Throwable => Option[Int]): RestRpcProtocol[Node, Codec] =
-    copy(exceptionToError = exceptionToError)
+    copy(mapException = exceptionToError)
 
   /**
    * Creates a copy of this protocol with specified REST-RPC error to exception mapping.
@@ -179,7 +179,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
    * @return REST-RPC protocol
    */
   def errorToException(errorToException: (String, Option[Int]) => Throwable): RestRpcProtocol[Node, Codec] =
-    copy(errorToException = errorToException)
+    copy(mapError = errorToException)
 
   /**
    * Creates function invocation argument nodes.

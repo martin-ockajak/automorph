@@ -9,8 +9,8 @@ import automorph.spi.{MessageCodec, RpcProtocol}
  * @constructor Creates a JSON-RPC protocol plugin.
  * @see [[https://www.jsonrpc.org/specification Protocol specification]]
  * @param codec message codec plugin
- * @param errorToException maps a JSON-RPC error to a corresponding exception
- * @param exceptionToError maps an exception to a corresponding JSON-RPC error
+ * @param mapError maps a JSON-RPC error to a corresponding exception
+ * @param mapException maps an exception to a corresponding JSON-RPC error
  * @param argumentsByName if true, pass arguments by name, if false pass arguments by position
  * @param encodeMessage converts a JSON-RPC message to message format node
  * @param decodeMessage converts a message format node to JSON-RPC message
@@ -20,8 +20,8 @@ import automorph.spi.{MessageCodec, RpcProtocol}
  */
 final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
   codec: Codec,
-  errorToException: (String, Int) => Throwable,
-  exceptionToError: Throwable => ErrorType,
+  mapError: (String, Int) => Throwable,
+  mapException: Throwable => ErrorType,
   argumentsByName: Boolean,
   protected val encodeMessage: Message[Node] => Node,
   protected val decodeMessage: Node => Message[Node],
@@ -44,8 +44,8 @@ object JsonRpcProtocol extends ErrorMapping:
    */
   inline def apply[Node, Codec <: MessageCodec[Node]](
     codec: Codec,
-    errorToException: (String, Int) => Throwable = defaultErrorToException,
-    exceptionToError: Throwable => ErrorType = defaultExceptionToError,
+    errorToException: (String, Int) => Throwable = defaultMapError,
+    exceptionToError: Throwable => ErrorType = defaultMapException,
     argumentsByName: Boolean = true
   ): JsonRpcProtocol[Node, Codec] =
     val encodeMessage = (message: Message[Node]) => codec.encode[Message[Node]](message)

@@ -25,7 +25,7 @@ object ClientErrorMapping extends App {
   val protocol = Default.protocol.mapError {
     case (message, InvalidRequest.code) if message.contains("SQL") =>
       new SQLException(message)
-    case (message, code) => Default.protocol.errorToException(message, code)
+    case (message, code) => Default.protocol.mapError(message, code)
   }
 
   // Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost/api'

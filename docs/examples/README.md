@@ -355,7 +355,7 @@ server.close()
 val protocol = Default.protocol.mapError {
   case (message, InvalidRequest.code) if message.contains("SQL") =>
     new SQLException(message)
-  case (message, code) => Default.protocol.errorToException(message, code)
+  case (message, code) => Default.protocol.mapError(message, code)
 }
 
 // Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
@@ -408,7 +408,7 @@ val api = new Api()
 val protocol = Default.protocol
 val serverProtocol = protocol.mapException {
   case _: SQLException => InvalidRequest
-  case e => protocol.exceptionToError(e)
+  case e => protocol.mapException(e)
 }
 
 // Start custom JSON-RPC HTTP server listening on port 80 for requests to '/api'

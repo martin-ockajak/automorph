@@ -9,7 +9,7 @@ private[automorph] trait ErrorMapping {
    * @param code error code
    * @return exception
    */
-  def defaultErrorToException(message: String, code: Option[Int]): Throwable = code match {
+  def defaultMapError(message: String, code: Option[Int]): Throwable = code match {
     case _ => new RuntimeException(message)
   }
 
@@ -19,7 +19,7 @@ private[automorph] trait ErrorMapping {
    * @param exception exception
    * @return REST-RPC error type
    */
-  def defaultExceptionToError(exception: Throwable): Option[Int] = exception match {
+  def defaultMapException(exception: Throwable): Option[Int] = exception match {
     case _ => None
   }
 }
