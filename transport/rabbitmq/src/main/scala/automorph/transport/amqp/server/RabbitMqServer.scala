@@ -9,7 +9,7 @@ import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
 import automorph.util.{Bytes, Random}
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.{BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
+import com.rabbitmq.client.{Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
 import scala.util.{Try, Using}
 import scala.jdk.CollectionConverters.MapHasAsJava

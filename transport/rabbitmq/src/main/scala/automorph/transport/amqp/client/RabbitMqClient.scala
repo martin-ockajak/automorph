@@ -9,11 +9,11 @@ import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.{Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
+import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
 import scala.collection.concurrent.TrieMap
 import scala.collection.immutable.ArraySeq
-import scala.util.{Try, Using}
+import scala.util.Try
 
 /**
  * RabbitMQ client message transport plugin.
