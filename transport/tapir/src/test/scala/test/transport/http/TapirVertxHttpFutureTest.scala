@@ -4,6 +4,7 @@
 //import automorph.spi.EffectSystem
 //import automorph.spi.transport.ServerMessageTransport
 //import automorph.system.FutureSystem
+//import automorph.transport.http.HttpMethod
 //import automorph.transport.http.endpoint.TapirHttpEndpoint
 //import io.vertx.core.Vertx
 //import io.vertx.ext.web.Router
@@ -25,8 +26,8 @@
 //  override lazy val system: FutureSystem = FutureSystem()
 //
 //  override lazy val arbitraryContext: Arbitrary[Context] =
-//    Arbitrary(HttpContextGenerator.arbitrary.arbitrary.suchThat { context =>
-//      context.method.exists(_ == "POST")
+//    Arbitrary(HttpContextGenerator.arbitrary.arbitrary.map { context =>
+//      context.method(HttpMethod.Post).asInstanceOf[Context]
 //    })
 //
 //  def serverTransport(

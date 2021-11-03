@@ -17,7 +17,6 @@ import scala.concurrent.duration.Duration
  * - Defaults
  *
  * @see [[https://datatracker.ietf.org/doc/html/rfc7232 HTTP specification]]
- * @param method request method
  * @param scheme request URL scheme
  * @param userInfo request URL authority user information
  * @param host request URL authority host
@@ -25,6 +24,7 @@ import scala.concurrent.duration.Duration
  * @param path request URL path
  * @param fragment request URL fragment
  * @param headers request or response headers
+ * @param method request method
  * @param statusCode response status code
  * @param followRedirects automatically follow redirects if true
  * @param readTimeout response read timeout
@@ -32,7 +32,6 @@ import scala.concurrent.duration.Duration
  * @tparam Base specific message transport plugin base properties type
  */
 final case class HttpContext[Base](
-  method: Option[HttpMethod] = None,
   scheme: Option[String] = None,
   userInfo: Option[String] = None,
   host: Option[String] = None,
@@ -41,6 +40,7 @@ final case class HttpContext[Base](
   parameters: Seq[(String, String)] = Seq.empty,
   fragment: Option[String] = None,
   headers: Seq[(String, String)] = Seq.empty,
+  method: Option[HttpMethod] = None,
   statusCode: Option[Int] = None,
   followRedirects: Option[Boolean] = None,
   readTimeout: Option[Duration] = None,
@@ -68,7 +68,7 @@ final case class HttpContext[Base](
    * Set request URL.
    *
    * @param url URL
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def url(url: URI): HttpContext[Base] = {
     val httpContext = copy(
@@ -86,7 +86,7 @@ final case class HttpContext[Base](
    * Set request URL.
    *
    * @param url URL
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def url(url: String): HttpContext[Base] = this.url(new URI(url))
 
@@ -94,7 +94,7 @@ final case class HttpContext[Base](
    * Set request URL scheme.
    *
    * @param scheme URL scheme
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def scheme(scheme: String): HttpContext[Base] = copy(scheme = Some(scheme))
 
@@ -109,7 +109,7 @@ final case class HttpContext[Base](
    * Set request URL authority.
    *
    * @param authority URL authority
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def authority(authority: String): HttpContext[Base] = {
     val (userInfo, endpoint) = authority.split("@", 2) match {
@@ -129,7 +129,7 @@ final case class HttpContext[Base](
    * Set request URL user information.
    *
    * @param userInfo URL user information
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def userInfo(userInfo: String): HttpContext[Base] = copy(userInfo = Some(userInfo))
 
@@ -137,7 +137,7 @@ final case class HttpContext[Base](
    * Set request URL host.
    *
    * @param host URL host
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def host(host: String): HttpContext[Base] = copy(host = Some(host))
 
@@ -145,7 +145,7 @@ final case class HttpContext[Base](
    * Set request URL port.
    *
    * @param port URL port
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def port(port: Int): HttpContext[Base] = copy(port = Some(port))
 
@@ -153,7 +153,7 @@ final case class HttpContext[Base](
    * Set request URL user information.
    *
    * @param path URL userinfo
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def path(path: String): HttpContext[Base] = copy(path = Some(path))
 
@@ -161,7 +161,7 @@ final case class HttpContext[Base](
    * Set request URL fragment.
    *
    * @param fragment URL fragment
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def fragment(fragment: String): HttpContext[Base] = copy(fragment = Some(fragment))
 
@@ -175,7 +175,7 @@ final case class HttpContext[Base](
    * Set request URL query string.
    *
    * @param queryString URL query string
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def query(queryString: String): HttpContext[Base] = {
     val entries = queryString.replaceFirst("^\\?(.*)$", "$1")
@@ -192,7 +192,7 @@ final case class HttpContext[Base](
    *
    * @param name parameter name
    * @param value parameter value
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def parameter(name: String, value: String): HttpContext[Base] = parameter(name, value, false)
 
@@ -202,7 +202,7 @@ final case class HttpContext[Base](
    * @param name query parameter name
    * @param value query parameter value
    * @param replace replace all existing query parameters with the specied name
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def parameter(name: String, value: String, replace: Boolean): HttpContext[Base] = {
     val originalParameters =
@@ -216,7 +216,7 @@ final case class HttpContext[Base](
    * Add URL query parameters.
    *
    * @param entries query parameter names and values
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def parameters(entries: (String, String)*): HttpContext[Base] = parameters(entries, false)
 
@@ -225,7 +225,7 @@ final case class HttpContext[Base](
    *
    * @param entries query parameter names and values
    * @param replace replace all existing query parameters with specified names
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def parameters(entries: Iterable[(String, String)], replace: Boolean): HttpContext[Base] = {
     val entryNames = entries.map { case (name, _) => name }.toSet
@@ -273,7 +273,7 @@ final case class HttpContext[Base](
    *
    * @param name header name
    * @param value header value
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def header(name: String, value: String): HttpContext[Base] = header(name, value, false)
 
@@ -283,7 +283,7 @@ final case class HttpContext[Base](
    * @param name header name
    * @param value header value
    * @param replace replace all existing headers with the specied name
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def header(name: String, value: String, replace: Boolean): HttpContext[Base] = {
     val originalHeaders = if (replace) headers.filter(_._1 != name) else headers
@@ -294,7 +294,7 @@ final case class HttpContext[Base](
    * Add message headers.
    *
    * @param entries header names and values
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def headers(entries: (String, String)*): HttpContext[Base] = headers(entries, false)
 
@@ -303,7 +303,7 @@ final case class HttpContext[Base](
    *
    * @param entries header names and values
    * @param replace replace all existing headers with specified names
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def headers(entries: Iterable[(String, String)], replace: Boolean): HttpContext[Base] = {
     val entryNames = entries.map { case (name, _) => name }.toSet
@@ -314,10 +314,18 @@ final case class HttpContext[Base](
   }
 
   /**
+   * Set request method.
+   *
+   * @param method request method
+   * @return HTTP message context
+   */
+  def method(method: HttpMethod): HttpContext[Base] = copy(method = Some(method))
+
+  /**
    * Set response status code.
    *
    * @param statusCode status code
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def statusCode(statusCode: Int): HttpContext[Base] = copy(statusCode = Some(statusCode))
 
@@ -342,7 +350,7 @@ final case class HttpContext[Base](
    * Set request cookies.
    *
    * @param entries cookie names and values
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def cookies(entries: (String, String)*): HttpContext[Base] = cookies(entries, headerCookie)
 
@@ -353,7 +361,7 @@ final case class HttpContext[Base](
    * Set response cookies.
    *
    * @param entries cookie names and values
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def setCookies(values: (String, String)*): HttpContext[Base] =
     cookies(values, headerSetCookie)
@@ -372,7 +380,7 @@ final case class HttpContext[Base](
    *
    * @param user user
    * @param password password
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def authorizationBasic(user: String, password: String): HttpContext[Base] = {
     val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
@@ -383,7 +391,7 @@ final case class HttpContext[Base](
    * Set `Authorization: Basic` header value.
    *
    * @param token authentication token
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def authorizationBasic(token: String): HttpContext[Base] =
     header(headerAuthorization, s"$headerAuthorizationBasic $token")
@@ -392,7 +400,7 @@ final case class HttpContext[Base](
    * Set `Authorization: Bearer` header value.
    *
    * @param token authentication token
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def authorizationBearer(token: String): HttpContext[Base] =
     header(headerAuthorization, s"$headerAuthorizationBearer $token")
@@ -411,7 +419,7 @@ final case class HttpContext[Base](
    *
    * @param user user
    * @param password password
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def proxyAuthBasic(user: String, password: String): HttpContext[Base] = {
     val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
@@ -422,7 +430,7 @@ final case class HttpContext[Base](
    * Set `Proxy-Authorization: Basic` header value.
    *
    * @param token authentication token
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def proxyAuthBasic(token: String): HttpContext[Base] =
     header(headerProxyAuthorization, s"$headerAuthorizationBasic $token")
@@ -431,7 +439,7 @@ final case class HttpContext[Base](
    * Set `Proxy-Authorization: Bearer` header value.
    *
    * @param token authentication token
-   * @return HTTP message properties
+   * @return HTTP message context
    */
   def proxyAuthBearer(token: String): HttpContext[Base] =
     header(headerProxyAuthorization, s"$headerAuthorizationBearer $token")
