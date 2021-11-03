@@ -123,7 +123,7 @@ private[automorph] object RabbitMqCommon extends Logging {
       ))
       .contentEncoding(amqpContext.contentEncoding.orElse(Option(baseProperties.getContentEncoding)).orNull)
       .appId(amqpContext.appId.orElse(Option(baseProperties.getAppId)).getOrElse(defaultAppId))
-      .headers((amqpContext.headers ++ baseProperties.getHeaders.asScala).asJava)
+      .headers((amqpContext.headers ++ Option(baseProperties.getHeaders).map(_.asScala).getOrElse(Map.empty)).asJava)
       .deliveryMode(amqpContext.deliveryMode.map(new Integer(_)).orElse(Option(baseProperties.getDeliveryMode)).orNull)
       .priority(amqpContext.priority.map(new Integer(_)).orElse(Option(baseProperties.getPriority)).orNull)
       .expiration(amqpContext.expiration.orElse(Option(baseProperties.getExpiration)).orNull)

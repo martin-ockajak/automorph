@@ -45,7 +45,7 @@ final case class RabbitMqClient[Effect[_]](
   private lazy val connection = connect()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
-  private val urlText = url.toURL.toExternalForm
+  private val urlText = url.toString
   private val responseHandlers = TrieMap[String, Deferred[Effect, Response]]()
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
   implicit private val givenSystem: EffectSystem[Effect] = system
