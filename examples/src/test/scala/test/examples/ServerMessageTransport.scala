@@ -20,7 +20,7 @@ object ServerMessageTransport extends App {
   val server = createServer(identity)
 
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.clientSync(new URI("http://localhost/api"), "POST")
+  val client = Default.clientSync(new URI("http://localhost/api"))
 
   // Call the remote API function
   val remoteApi = client.bind[Api] // Api

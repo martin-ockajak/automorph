@@ -29,7 +29,7 @@ object ClientErrorMapping extends App {
   }
 
   // Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val transport = Default.clientTransportAsync(new URI("http://localhost/api"), "POST")
+  val transport = Default.clientTransportAsync(new URI("http://localhost/api"))
   val client = Client.protocol(protocol).transport(transport)
 
   // Call the remote API function

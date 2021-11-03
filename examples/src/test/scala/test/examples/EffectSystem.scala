@@ -22,7 +22,7 @@ object EffectSystem extends App {
   val server = Default.serverSystem(system, 80, "/api")(_.bind(api))
 
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.client(new URI("http://localhost/api"), "POST", system)
+  val client = Default.client(system, new URI("http://localhost/api"))
 
   // Call the remote APi function via proxy
   val remoteApi = client.bind[Api] // Api

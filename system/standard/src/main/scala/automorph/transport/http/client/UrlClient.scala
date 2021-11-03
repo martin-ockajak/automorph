@@ -3,7 +3,7 @@ package automorph.transport.http.client
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.HttpContext
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.client.UrlClient.{Context, Session}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
@@ -21,15 +21,15 @@ import scala.util.Using
  * @see [[https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol Transport protocol]]
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @constructor Creates an HttpURLConnection HTTP client message transport plugin.
+ * @param system effect system plugin
  * @param url HTTP server endpoint URL
  * @param method HTTP request method
- * @param system effect system plugin
  * @tparam Effect effect type
  */
 final case class UrlClient[Effect[_]](
+  system: EffectSystem[Effect],
   url: URI,
-  method: String,
-  system: EffectSystem[Effect]
+  method: HttpMethod = HttpMethod.Post
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val contentLengthHeader = "Content-Length"
@@ -37,7 +37,6 @@ final case class UrlClient[Effect[_]](
   private val acceptHeader = "Accept"
   private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
   implicit private val givenSystem: EffectSystem[Effect] = system
-  require(httpMethods.contains(method), s"Invalid HTTP method: $method")
   System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
 
   override def call(
@@ -128,7 +127,7 @@ final case class UrlClient[Effect[_]](
     val baseConnection = httpContext.base.map(_.connection).getOrElse(connection)
     val requestMethod = httpContext.method.orElse(
       httpContext.base.map(_.connection.getRequestMethod)
-    ).getOrElse(method)
+    ).getOrElse(method.name)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
     connection.setRequestMethod(requestMethod)
     val baseHeaders = baseConnection.getRequestProperties.asScala.toSeq.flatMap { case (name, values) =>

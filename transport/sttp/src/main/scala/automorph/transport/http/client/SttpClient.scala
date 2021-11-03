@@ -10,7 +10,7 @@ import automorph.util.Extensions.EffectOps
 import java.net.URI
 import scala.collection.immutable.ArraySeq
 import sttp.capabilities.WebSockets
-import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
+import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
@@ -23,24 +23,23 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
  * @constructor Creates an STTP HTTP & WebSocket client message transport plugin with the specified STTP backend.
+ * @param system effect system plugin
+ * @param backend STTP backend
  * @param url HTTP or WebSocket server endpoint URL
  * @param method HTTP request method
- * @param backend STTP backend
- * @param system effect system plugin
  * @param webSocketSupport true if WebSocket protocol is supported, false otherwise
  * @tparam Effect effect type
  */
 final case class SttpClient[Effect[_]] private (
-  url: URI,
-  method: String,
-  backend: SttpBackend[Effect, _],
   system: EffectSystem[Effect],
+  backend: SttpBackend[Effect, _],
+  url: URI,
+  method: Method,
   webSocketSupport: Boolean
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
   private val webSocketsSchemePrefix = "ws"
   private val defaultUrl = Uri(url)
-  private val defaultMethod = Method.unsafeApply(method)
   implicit private val givenSystem: EffectSystem[Effect] = system
 
   override def call(
@@ -131,7 +130,7 @@ final case class SttpClient[Effect[_]] private (
     val httpContext = requestContext.getOrElse(defaultContext)
     val baseRequest = httpContext.base.map(_.request).getOrElse(basicRequest)
     val requestUrl = Uri(httpContext.overrideUrl(defaultUrl.toJavaUri))
-    val requestMethod = httpContext.method.map(Method.unsafeApply).getOrElse(defaultMethod)
+    val requestMethod = httpContext.method.map(Method.unsafeApply).getOrElse(method)
     val contentType = MediaType.unsafeParse(mediaType)
     val headers = baseRequest.headers ++ httpContext.headers.map { case (name, value) => Header(name, value) }
     val sttpRequest = baseRequest.method(requestMethod, requestUrl)
@@ -177,38 +176,38 @@ object SttpClient {
   /**
    * Creates an STTP HTTP & WebSocket client message transport plugin with the specified STTP backend.
    *
+   * @param system effect system plugin
+   * @param backend STTP backend
    * @param url HTTP or WebSocket server endpoint URL
    * @param method HTTP request method
-   * @param backend STTP backend
-   * @param system effect system plugin
    * @tparam Effect effect type
-   * @return
+   * @return STTP HTTP & WebSocket client message transport plugin
    */
   def apply[Effect[_]](
+    system: EffectSystem[Effect],
+    backend: SttpBackend[Effect, _],
     url: URI,
-    method: String,
-    backend: SttpBackend[Effect, WebSockets],
-    system: EffectSystem[Effect]
+    method: Method = Method.POST
   ): SttpClient[Effect] =
-    SttpClient[Effect](url, method, backend, system, true)
+    SttpClient[Effect](system, backend, url, method, true)
 
   /**
    * Creates an STTP HTTP client message transport plugin with the specified STTP backend.
    *
+   * @param system effect system plugin
+   * @param backend STTP backend
    * @param url HTTP or WebSocket server endpoint URL
    * @param method HTTP request method
-   * @param backend STTP backend
-   * @param system effect system plugin
    * @tparam Effect effect type
-   * @return
+   * @return STTP HTTP client message transport plugin
    */
   def http[Effect[_]](
-    url: URI,
-    method: String,
+    system: EffectSystem[Effect],
     backend: SttpBackend[Effect, _],
-    system: EffectSystem[Effect]
+    url: URI,
+    method: Method = Method.POST
   ): SttpClient[Effect] =
-    SttpClient[Effect](url, method, backend, system, false)
+    SttpClient[Effect](system, backend, url, method, false)
 
   /** STTP backend WebSocket capabilities type. */
   private type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets

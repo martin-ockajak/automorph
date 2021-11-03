@@ -35,7 +35,7 @@ object MessageCodec extends App {
   lazy val server = Default.server(handler.bind(api), 80, "/api")
 
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val transport = Default.clientTransportAsync(new URI("http://localhost/api"), "POST")
+  val transport = Default.clientTransportAsync(new URI("http://localhost/api"))
   val client = Client(protocol, transport)
 
   // Call the remote API function

@@ -19,7 +19,7 @@ object DynamicNotification extends App {
   val server = createServer(_.bind(api))
 
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.clientAsync(new URI("http://localhost/api"), "POST")
+  val client = Default.clientAsync(new URI("http://localhost/api"))
 
   // Notify the remote API function dynamically without expecting a response
   client.notify("hello").args("some" -> "world", "n" -> 1) // Future[Unit]

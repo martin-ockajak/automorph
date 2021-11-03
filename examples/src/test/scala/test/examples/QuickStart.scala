@@ -24,7 +24,7 @@ object QuickStart extends App {
   val server = createServer(_.bind(api))
 
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.clientAsync(new URI("http://localhost/api"), "POST")
+  val client = Default.clientAsync(new URI("http://localhost/api"))
 
   // Call the remote API function statically
   val remoteApi = client.bind[Api] // Api

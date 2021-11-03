@@ -4,6 +4,7 @@ import automorph.Types
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity
+import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.UrlClient
 import automorph.transport.http.server.NanoServer
 import java.net.URI
@@ -27,7 +28,7 @@ class UrlClientHttpIdentityTest extends ClientServerTest {
     val server = withAvailablePort(port => NanoServer.create[Effect](handler, port)(run(_)))
     servers += server
     val url = new URI(s"http://localhost:${server.port}")
-    val client = UrlClient(url, "GET", system).asInstanceOf[ClientMessageTransport[Effect, Context]]
+    val client = UrlClient(system, url, HttpMethod.Get).asInstanceOf[ClientMessageTransport[Effect, Context]]
     clients += client
     Some(client)
   }

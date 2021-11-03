@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.HttpContext
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, Session, WebSocketListener, defaultBuilder}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
@@ -33,16 +33,16 @@ import scala.util.Try
  * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
  * @constructor Creates an HttpClient HTTP & WebSocket message client transport plugin.
+ * @param system effect system plugin
  * @param url HTTP or WebSocket server endpoint URL
  * @param method HTTP request method
- * @param system effect system plugin
  * @param builder HttpClient builder
  * @tparam Effect effect type
  */
 final case class HttpClient[Effect[_]] (
-  url: URI,
-  method: String,
   system: EffectSystem[Effect],
+  url: URI,
+  method: HttpMethod = HttpMethod.Post,
   builder: Builder = defaultBuilder
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
@@ -53,7 +53,6 @@ final case class HttpClient[Effect[_]] (
   private val webSocketsSchemePrefix = "ws"
   private val httpClient = builder.build
   implicit private val givenSystem: EffectSystem[Effect] = system
-  require(httpMethods.contains(method), s"Invalid HTTP method: $method")
 
   override def call(
     requestBody: ArraySeq.ofByte,
@@ -186,7 +185,7 @@ final case class HttpClient[Effect[_]] (
   ): HttpRequest = {
     val baseBuilder = httpContext.base.map(_.request).getOrElse(HttpRequest.newBuilder)
     val baseRequest = Try(baseBuilder.build).toOption
-    val requestMethod = httpContext.method.getOrElse(method)
+    val requestMethod = httpContext.method.getOrElse(method.name)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
     val headers = httpContext.headers.map { case (name, value) => Seq(name, value) }.flatten
     val headersBuilder = baseBuilder.uri(requestUrl)

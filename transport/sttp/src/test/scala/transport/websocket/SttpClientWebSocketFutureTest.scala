@@ -22,7 +22,7 @@ class SttpClientWebSocketFutureTest extends StandardHttpClientTest {
   override def webSocket: Boolean = true
 
   override def clientTransport(url: URI): ClientMessageTransport[Effect, Context] =
-    SttpClient(url, Method.GET.toString, HttpClientFutureBackend(), system)
+    SttpClient(system, HttpClientFutureBackend(), url, Method.GET)
 
   override def run[T](effect: Effect[T]): T = await(effect)
 }

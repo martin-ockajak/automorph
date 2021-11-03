@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
 import automorph.system.{FutureSystem, IdentitySystem}
-import automorph.transport.http.HttpContext
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.client.HttpClient
 import automorph.transport.http.server.UndertowServer
 import automorph.transport.http.server.UndertowServer.defaultBuilder
@@ -147,18 +147,18 @@ object Default extends DefaultMeta {
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
-   * @param url HTTP endpoint URL
-   * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @param system effect system plugin
+   * @param url HTTP endpoint URL
+   * @param method HTTP request method
    * @tparam Effect effect type
    * @return client message transport plugin
    */
   def clientTransport[Effect[_]](
+    system: EffectSystem[Effect],
     url: URI,
-    method: String,
-    system: EffectSystem[Effect]
+    method: HttpMethod = HttpMethod.Post
   ): ClientTransport[Effect] =
-    HttpClient(url, method, system)
+    HttpClient(system, url, method)
 
   /**
    * Creates a standard JRE HTTP & WebSocket client message transport plugin using 'Future' as an effect type.
@@ -167,14 +167,14 @@ object Default extends DefaultMeta {
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
    * @param url HTTP endpoint URL
-   * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
+   * @param method HTTP request method
    * @param executionContext execution context
    * @return asynchronous client message transport plugin
    */
-  def clientTransportAsync(url: URI, method: String)(implicit
+  def clientTransportAsync(url: URI, method: HttpMethod = HttpMethod.Post)(implicit
     executionContext: ExecutionContext
   ): ClientTransport[Future] =
-    clientTransport(url, method, systemAsync)
+    clientTransport(systemAsync, url, method)
 
   /**
    * Creates a standard JRE HTTP & WebSocket client message transport plugin using identity as an effect type.
@@ -183,11 +183,11 @@ object Default extends DefaultMeta {
    * @see [[https://sttp.softwaremill.com/en/latest Library documentation]]
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
    * @param url HTTP endpoint URL
-   * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
+   * @param method HTTP request method
    * @return synchronous client message transport plugin
    */
-  def clientTransportSync(url: URI, method: String): ClientTransport[Identity] =
-    clientTransport(url, method, systemSync)
+  def clientTransportSync(url: URI, method: HttpMethod = HttpMethod.Post): ClientTransport[Identity] =
+    clientTransport(systemSync, url, method)
 
   /**
    * Creates a standard JRE JSON-RPC over HTTP & WebSocket client with specified effect system plugin.
@@ -197,19 +197,19 @@ object Default extends DefaultMeta {
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see [[https://sttp.softwaremill.com/en/latest/index.html Library documentation]]
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
-   * @param url HTTP endpoint URL
-   * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
    * @param system effect system plugin
+   * @param url HTTP endpoint URL
+   * @param method HTTP request method
    * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @tparam Effect effect type
    * @return RPC client
    */
   def client[Effect[_]](
+    system: EffectSystem[Effect],
     url: URI,
-    method: String,
-    system: EffectSystem[Effect]
+    method: HttpMethod = HttpMethod.Post
   ): Client[Effect, ClientContext] =
-    client(clientTransport(url, method, system))
+    client(clientTransport(system, url, method))
 
   /**
    * Creates a standard JRE JSON-RPC over HTTP & WebSocket client with default RPC protocol using 'Future' as an effect type.
@@ -220,11 +220,11 @@ object Default extends DefaultMeta {
    * @see [[https://sttp.softwaremill.com/en/latest/index.html Library documentation]]
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
    * @param url HTTP endpoint URL
-   * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
+   * @param method HTTP request method
    * @param executionContext execution context
    * @return asynchronous RPC client
    */
-  def clientAsync(url: URI, method: String)(implicit
+  def clientAsync(url: URI, method: HttpMethod = HttpMethod.Post)(implicit
     executionContext: ExecutionContext
   ): Client[Future, ClientContext] =
     client(clientTransportAsync(url, method))
@@ -238,10 +238,10 @@ object Default extends DefaultMeta {
    * @see [[https://sttp.softwaremill.com/en/latest/index.html Library documentation]]
    * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
    * @param url HTTP endpoint URL
-   * @param method HTTP method (GET, POST, PUT, DELETE, HEAD, OPTIONS)
+   * @param method HTTP request method
    * @return synchronous RPC client
    */
-  def clientSync(url: URI, method: String): Client[Identity, ClientContext] =
+  def clientSync(url: URI, method: HttpMethod = HttpMethod.Post): Client[Identity, ClientContext] =
     client(clientTransportSync(url, method))
 
   /**

@@ -34,7 +34,7 @@ object ServerErrorMapping extends App {
   })
 
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.clientAsync(new URI("http://localhost/api"), "POST")
+  val client = Default.clientAsync(new URI("http://localhost/api"))
 
   // Call the remote API function
   val remoteApi = client.bind[Api] // Api

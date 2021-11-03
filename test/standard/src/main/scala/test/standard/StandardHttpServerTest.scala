@@ -2,6 +2,7 @@ package test.standard
 
 import automorph.Types
 import automorph.spi.transport.{ClientMessageTransport, ServerMessageTransport}
+import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.HttpClient
 import java.net.URI
 import test.core.ClientServerTest
@@ -19,7 +20,7 @@ trait StandardHttpServerTest extends ClientServerTest {
     servers += server
     val scheme = Option.when(webSocket)("ws").getOrElse("http")
     val url = new URI(s"$scheme://localhost:$port")
-    val client = HttpClient(url, "POST", system).asInstanceOf[ClientMessageTransport[Effect, Context]]
+    val client = HttpClient(system, url, HttpMethod.Post).asInstanceOf[ClientMessageTransport[Effect, Context]]
     clients += client
     Some(client)
   }

@@ -41,7 +41,7 @@ server.close()
 
 ```scala
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientSync(new URI("http://localhost/api"), "POST")
+val client = Default.clientSync(new URI("http://localhost/api"))
 
 // Call the remote API function
 val remoteApi = client.bind[Api] // Api
@@ -94,7 +94,7 @@ server.close()
 
 ```scala
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
+val client = Default.asyncHttpClient(new URI("http://localhost/api"))
 
 // Call the remote API function
 val remoteApi = client.bind[Api] // Api
@@ -147,7 +147,7 @@ server.close()
 
 ```scala
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
+val client = Default.asyncHttpClient(new URI("http://localhost/api"))
 
 // Notify the remote API function dynamically without expecting a response
 client.notify("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
@@ -211,7 +211,7 @@ server.close()
 
 ```scala
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientSync(new URI("http://localhost/api"), "POST")
+val client = Default.clientSync(new URI("http://localhost/api"))
 
 // Create client request context specifying HTTP request meta-data
 val requestContext = client.defaultContext
@@ -296,7 +296,7 @@ server.close()
 
 ```scala
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientSync(new URI("http://localhost/api"), "POST")
+val client = Default.clientSync(new URI("http://localhost/api"))
 
 // Call the remote API function dynamically
 client.notify("custom").args("value" -> None) // ()
@@ -359,7 +359,7 @@ val protocol = Default.protocol.mapError {
 }
 
 // Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val transport = Default.clientTransportAsync(new URI("http://localhost/api"), "POST")
+val transport = Default.clientTransportAsync(new URI("http://localhost/api"))
 val client = Client.protocol(protocol).transport(transport)
 
 // Call the remote API function
@@ -428,7 +428,7 @@ server.close()
 
 ```scala
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientAsync(new URI("http://localhost/api"), "POST")
+val client = Default.clientAsync(new URI("http://localhost/api"))
 
 // Call the remote API function
 val remoteApi = client.bind[Api] // Api
@@ -485,7 +485,7 @@ server.close()
 
 ```scala
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.client(new URI("http://localhost/api"), "POST", system)
+val client = Default.client(system, new URI("http://localhost/api"))
 
 // Call the remote API function
 val remoteApi = client.bind[Api] // Api
@@ -543,7 +543,7 @@ server.close()
 
 ```scala
 // Setup default REST-RPC HTTP client sending POST requests to 'http://localhost/api'
-val transport = Default.clientAsyncTransport(new URI("http://localhost/api"), "POST")
+val transport = Default.clientAsyncTransport(new URI("http://localhost/api"))
 val client = Client.protocol(protocol).transport(transport)
 
 // Call the remote API function
@@ -613,7 +613,7 @@ server.close()
 
 ```scala
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val transport = Default.clientAsyncTransport(new URI("http://localhost/api"), "POST")
+val transport = Default.clientAsyncTransport(new URI("http://localhost/api"))
 val client = Client(protocol, transport)
 
 // Call the remote API function
@@ -667,7 +667,7 @@ server.close()
 
 ```scala
 // Create HttpUrlConnection HTTP client message transport
-val transport = UrlClient(new URI("http://localhost/api"), "POST", IdentitySystem())
+val transport = UrlClient(IdentitySystem(), new URI("http://localhost/api"))
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val client = Default.client(transport)
@@ -723,7 +723,7 @@ server.close()
 
 ```scala
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientSync(new URI("http://localhost/api"), "POST")
+val client = Default.clientSync(new URI("http://localhost/api"))
 
 // Call the remote API function
 val remoteApi = client.bind[Api] // Api
@@ -784,7 +784,7 @@ server.stop()
 
 ```scala
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientAsync(new URI("http://localhost/api"), "POST")
+val client = Default.clientAsync(new URI("http://localhost/api"))
 
 // Call the remote API function
 val remoteApi = client.bind[Api] // Api

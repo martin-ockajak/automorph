@@ -3,6 +3,7 @@ package test.transport.http
 import automorph.Types
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.TrySystem
+import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.UrlClient
 import automorph.transport.http.server.NanoServer
 import java.net.URI
@@ -27,7 +28,7 @@ class UrlClientHttpTryTest extends ClientServerTest {
     val server = withAvailablePort(port => NanoServer.create[Effect](handler, port)(run(_)))
     servers += server
     val url = new URI(s"http://localhost:${server.port}")
-    val client = UrlClient(url, "DELETE", system).asInstanceOf[ClientMessageTransport[Effect, Context]]
+    val client = UrlClient(system, url, HttpMethod.Delete).asInstanceOf[ClientMessageTransport[Effect, Context]]
     clients += client
     Some(client)
   }

@@ -30,7 +30,7 @@ object HttpRequestMetadata extends App {
   val server = createServer(_.bind(api))
 
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.clientSync(new URI("http://localhost/api"), "POST")
+  val client = Default.clientSync(new URI("http://localhost/api"))
 
   // Create client request context specifying HTTP request meta-data
   val requestContext = client.defaultContext

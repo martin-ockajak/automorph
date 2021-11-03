@@ -35,7 +35,7 @@ object FunctionNameMapping extends App {
   val server = createServer(_.bind(api, mapName(_)))
 
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.clientSync(new URI("http://localhost/api"), "POST")
+  val client = Default.clientSync(new URI("http://localhost/api"))
 
   // Call the remote API function dynamically
   client.notify("custom").args("value" -> None) // ()

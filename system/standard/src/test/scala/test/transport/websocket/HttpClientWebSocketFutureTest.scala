@@ -3,6 +3,7 @@ package test.transport.websocket
 import automorph.Types
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
+import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.HttpClient
 import automorph.transport.http.server.NanoServer
 import java.net.URI
@@ -27,7 +28,7 @@ class HttpClientWebSocketFutureTest extends ClientServerTest {
     val server = withAvailablePort(port => NanoServer.create[Effect](handler, port)(run(_)))
     servers += server
     val url = new URI(s"ws://localhost:${server.port}")
-    val client = HttpClient(url, "DELETE", system).asInstanceOf[ClientMessageTransport[Effect, Context]]
+    val client = HttpClient(system, url, HttpMethod.Get).asInstanceOf[ClientMessageTransport[Effect, Context]]
     clients += client
     Some(client)
   }

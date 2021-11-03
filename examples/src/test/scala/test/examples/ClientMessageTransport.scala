@@ -19,7 +19,7 @@ object ClientMessageTransport extends App {
   val server = createServer(_.bind(api))
 
   // Create HttpUrlConnection HTTP client message transport
-  val transport = UrlClient(new URI("http://localhost/api"), "POST", IdentitySystem())
+  val transport = UrlClient(IdentitySystem(), new URI("http://localhost/api"))
 
   // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.client(transport)
