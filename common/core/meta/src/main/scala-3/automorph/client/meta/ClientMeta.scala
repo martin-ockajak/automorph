@@ -1,6 +1,6 @@
 package automorph.client.meta
 
-import automorph.client.{RemoteCall, RemoteNotify}
+import automorph.client.{RemoteCall, RemoteMessage}
 import automorph.spi.{MessageCodec, RpcProtocol}
 import java.lang.reflect.Proxy
 import scala.compiletime.summonInline

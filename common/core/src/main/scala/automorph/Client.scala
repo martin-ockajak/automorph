@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.client.meta.ClientMeta
-import automorph.client.{ProtocolClientBuilder, RemoteNotify, TransportClientBuilder}
+import automorph.client.{ProtocolClientBuilder, RemoteMessage, TransportClientBuilder}
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.transport.ClientMessageTransport
@@ -46,8 +46,8 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @param functionName RPC function name
    * @return RPC function notification proxy with specified function name
    */
-  def message(functionName: String): RemoteNotify[Node, Codec, Effect, Context] =
-    RemoteNotify(functionName, protocol.codec, message)
+  def message(functionName: String): RemoteMessage[Node, Codec, Effect, Context] =
+    RemoteMessage(functionName, protocol.codec, message)
 
   /**
    * Closes this client freeing the underlying resources.
