@@ -3,7 +3,7 @@ package automorph.transport.http.server
 import automorph.Types
 import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
-import automorph.transport.http.HttpContext
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import automorph.transport.http.server.UndertowServer.Context
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
@@ -40,7 +40,7 @@ final case class UndertowServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
   port: Int,
   path: String,
-  methods: Iterable[String],
+  methods: Iterable[HttpMethod],
   webSocket: Boolean,
   mapException: Throwable => Int,
   builder: Undertow.Builder
@@ -48,7 +48,7 @@ final case class UndertowServer[Effect[_]] private (
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
-  private val allowedMethods = methods.map(_.toUpperCase).toSet
+  private val allowedMethods = methods.map(_.name).toSet
   private lazy val undertow = createServer()
 
   def start(): Unit = {
@@ -108,7 +108,7 @@ object UndertowServer {
    * @param handler RPC request handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
+   * @param methods allowed HTTP request methods (default: any)
    * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
    * @param mapException maps an exception to a corresponding HTTP status code
    * @param builder Undertow builder
@@ -119,7 +119,7 @@ object UndertowServer {
     handler: Types.HandlerAnyCodec[Effect, Context],
     port: Int,
     path: String = "/",
-    methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
+    methods: Iterable[HttpMethod] = HttpMethod.values,
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder

@@ -257,7 +257,7 @@ object Default extends DefaultMeta {
    * @param handler RPC request handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
+   * @param methods allowed HTTP request methods (default: any)
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param mapException maps an exception to a corresponding HTTP status code
    * @param builder Undertow web server builder
@@ -268,7 +268,7 @@ object Default extends DefaultMeta {
     handler: Types.HandlerAnyCodec[Effect, ServerContext],
     port: Int,
     path: String = "/",
-    methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
+    methods: Iterable[HttpMethod] = HttpMethod.values,
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
@@ -291,7 +291,7 @@ object Default extends DefaultMeta {
    * @param system effect system plugin
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
+   * @param methods allowed HTTP request methods (default: any)
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param mapException maps an exception to a corresponding HTTP status code
    * @param builder Undertow web server builder
@@ -302,7 +302,7 @@ object Default extends DefaultMeta {
     system: EffectSystem[Effect],
     port: Int,
     path: String = "/",
-    methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
+    methods: Iterable[HttpMethod] = HttpMethod.values,
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
@@ -327,7 +327,7 @@ object Default extends DefaultMeta {
    * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
+   * @param methods allowed HTTP request methods (default: any)
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param mapException maps an exception to a corresponding HTTP status code
    * @param builder Undertow web server builder
@@ -337,7 +337,7 @@ object Default extends DefaultMeta {
   def serverAsync(
     port: Int,
     path: String = "/",
-    methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
+    methods: Iterable[HttpMethod] = HttpMethod.values,
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
@@ -362,7 +362,7 @@ object Default extends DefaultMeta {
    * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
+   * @param methods allowed HTTP request methods (default: any)
    * @param webSocket both HTTP and WebSocket protocols enabled if true, HTTP only if false
    * @param mapException maps an exception to a corresponding HTTP status code
    * @param builder Undertow web server builder
@@ -371,7 +371,7 @@ object Default extends DefaultMeta {
   def serverSync(
     port: Int,
     path: String = "/",
-    methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
+    methods: Iterable[HttpMethod] = HttpMethod.values,
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder

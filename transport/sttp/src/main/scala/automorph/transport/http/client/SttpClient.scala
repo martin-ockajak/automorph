@@ -25,7 +25,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @constructor Creates an STTP HTTP & WebSocket client message transport plugin with the specified STTP backend.
  * @param system effect system plugin
  * @param backend STTP backend
- * @param url HTTP or WebSocket server endpoint URL
+ * @param url remote API HTTP or WebSocket URL
  * @param method HTTP request method
  * @param webSocketSupport true if WebSocket protocol is supported, false otherwise
  * @tparam Effect effect type
@@ -179,7 +179,7 @@ object SttpClient {
    * @param system effect system plugin
    * @param backend STTP backend
    * @param url HTTP or WebSocket server endpoint URL
-   * @param method HTTP request method
+   * @param method HTTP request method (default: POST)
    * @tparam Effect effect type
    * @return STTP HTTP & WebSocket client message transport plugin
    */
@@ -197,7 +197,7 @@ object SttpClient {
    * @param system effect system plugin
    * @param backend STTP backend
    * @param url HTTP or WebSocket server endpoint URL
-   * @param method HTTP request method
+   * @param method HTTP request method (default: POST)
    * @tparam Effect effect type
    * @return STTP HTTP client message transport plugin
    */

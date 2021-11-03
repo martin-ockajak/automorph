@@ -22,8 +22,8 @@ import scala.util.Using
  * @see [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @constructor Creates an HttpURLConnection HTTP client message transport plugin.
  * @param system effect system plugin
- * @param url HTTP server endpoint URL
- * @param method HTTP request method
+ * @param url remote API HTTP or WebSocket URL
+ * @param method HTTP request method (default: POST)
  * @tparam Effect effect type
  */
 final case class UrlClient[Effect[_]](

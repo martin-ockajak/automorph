@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ServerMessageTransport
-import automorph.transport.http.HttpContext
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
@@ -41,7 +41,7 @@ final case class NanoServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
   port: Int,
   path: String,
-  methods: Iterable[String],
+  methods: Iterable[HttpMethod],
   webSocket: Boolean,
   mapException: Throwable => Int,
   executeEffect: Execute[Effect]
@@ -49,7 +49,7 @@ final case class NanoServer[Effect[_]] private (
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val headerXForwardedFor = "X-Forwarded-For"
-  private val allowedMethods = methods.map(_.toUpperCase).toSet
+  private val allowedMethods = methods.map(_.name).toSet
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 
   override def close(): Effect[Unit] =
@@ -233,7 +233,7 @@ object NanoServer {
    * @param handler RPC request handler
    * @param port port to listen on for HTTP connections
    * @param path HTTP URL path (default: /)
-   * @param methods allowed HTTP request methods (default: POST, GET, PUT, DELETE)
+   * @param methods allowed HTTP request methods (default: any)
    * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
    * @param mapException maps an exception to a corresponding HTTP status code
    * @tparam Effect effect type
@@ -243,7 +243,7 @@ object NanoServer {
     handler: Types.HandlerAnyCodec[Effect, Context],
     port: Int,
     path: String = "/",
-    methods: Iterable[String] = Seq("POST", "GET", "PUT", "DELETE"),
+    methods: Iterable[HttpMethod] = HttpMethod.values,
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode
   ): Execute[Effect] => NanoServer[Effect] = (executeEffect: Execute[Effect]) => {

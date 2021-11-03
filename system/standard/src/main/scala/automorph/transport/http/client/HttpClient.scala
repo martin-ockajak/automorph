@@ -34,9 +34,9 @@ import scala.util.Try
  * @see [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
  * @constructor Creates an HttpClient HTTP & WebSocket message client transport plugin.
  * @param system effect system plugin
- * @param url HTTP or WebSocket server endpoint URL
- * @param method HTTP request method
- * @param builder HttpClient builder
+ * @param url remote API HTTP or WebSocket URL
+ * @param method HTTP request method (default: POST)
+ * @param builder HttpClient builder (default: empty)
  * @tparam Effect effect type
  */
 final case class HttpClient[Effect[_]] (
