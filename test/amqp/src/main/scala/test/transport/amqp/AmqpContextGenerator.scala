@@ -24,7 +24,6 @@ object AmqpContextGenerator {
     messageId <- Gen.option(stringGenerator(1, maxValueSize, Gen.alphaNumChar))
     timestamp <- Gen.option(Gen.choose(0L, Long.MaxValue).map(Instant.ofEpochMilli))
     `type` <- Gen.option(stringGenerator(1, maxValueSize, Gen.alphaNumChar))
-    userId <- Gen.option(stringGenerator(1, maxValueSize, Gen.alphaNumChar))
     appId <- Gen.option(stringGenerator(1, maxValueSize, Gen.alphaNumChar))
   } yield AmqpContext(
     headers = headers,
@@ -35,7 +34,7 @@ object AmqpContextGenerator {
     messageId = messageId,
     timestamp = timestamp,
     `type` = `type`,
-    userId = userId,
+    userId = None,
     appId = appId
   ))
 
