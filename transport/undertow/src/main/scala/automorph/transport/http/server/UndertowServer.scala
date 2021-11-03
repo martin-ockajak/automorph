@@ -104,7 +104,7 @@ object UndertowServer {
    * - Worker threads: number of CPU cores
    * - HTTP listener port: 8080
    */
-  val defaultBuilder: Undertow.Builder = Undertow.builder()
+  def defaultBuilder: Undertow.Builder = Undertow.builder()
     .setIoThreads(Runtime.getRuntime.availableProcessors * 2)
     .setWorkerThreads(Runtime.getRuntime.availableProcessors)
 }
