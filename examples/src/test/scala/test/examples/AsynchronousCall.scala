@@ -1,6 +1,7 @@
 package test.examples
 
 import automorph.Default
+import automorph.transport.http.HttpMethod
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -14,12 +15,12 @@ object AsynchronousCall extends App {
   }
   val api = new Api()
 
-  // Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val createServer = Default.serverAsync(80, "/api")
+  // Start default JSON-RPC HTTP server listening on port 80 for PUT requests to '/api'
+  val createServer = Default.serverAsync(80, "/api", Seq(HttpMethod.Put))
   val server = createServer(_.bind(api))
 
-  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.clientAsync(new URI("http://localhost/api"))
+  // Setup default JSON-RPC HTTP client sending PUT requests to 'http://localhost/api'
+  val client = Default.clientAsync(new URI("http://localhost/api"), HttpMethod.Put)
 
   // Call the remote API function via proxy
   val remoteApi = client.bind[Api] // Api

@@ -1,6 +1,7 @@
 package test.examples
 
 import automorph.Default
+import automorph.transport.http.HttpMethod
 import java.net.URI
 
 object SynchronousCall extends App {
@@ -12,12 +13,12 @@ object SynchronousCall extends App {
   }
   val api = new Api()
 
-  // Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val createServer = Default.serverSync(80, "/api")
+  // Start default JSON-RPC HTTP server listening on port 80 for POST requests to '/api'
+  val createServer = Default.serverSync(80, "/api", Seq(HttpMethod.Post))
   val server = createServer(_.bind(api))
 
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.clientSync(new URI("http://localhost/api"))
+  val client = Default.clientSync(new URI("http://localhost/api"), HttpMethod.Post)
 
   // Call the remote API function
   val remoteApi = client.bind[Api] // Api

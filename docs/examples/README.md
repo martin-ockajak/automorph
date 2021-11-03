@@ -16,6 +16,7 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.Default
+import automorph.transport.http.HttpMethod
 import java.net.URI
 
 // Define an API type and create its instance
@@ -29,8 +30,8 @@ val api = new Api()
 **Server**
 
 ```scala
-// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val createServer = Default.serverSync(80, "/api")
+  // Start default JSON-RPC HTTP server listening on port 80 for POST requests to '/api'
+val createServer = Default.serverSync(80, "/api", Seq(HttpMethod.Post))
 val server = createServer(_.bind(api))
 
 // Stop the server
@@ -41,7 +42,7 @@ server.close()
 
 ```scala
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientSync(new URI("http://localhost/api"))
+val client = Default.clientSync(new URI("http://localhost/api"), HttpMethod.Post)
 
 // Call the remote API function
 val remoteApi = client.bind[Api] // Api
@@ -67,6 +68,7 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.Default
+import automorph.transport.http.HttpMethod
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -82,8 +84,8 @@ val api = new Api()
 **Server**
 
 ```scala
-// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val createServer = Default.serverAsync(80, "/api")
+// Start default JSON-RPC HTTP server listening on port 80 for PUT requests to '/api'
+val createServer = Default.serverAsync(80, "/api", Seq(HttpMethod.Put))
 val server = createServer(_.bind(api))
 
 // Stop the server
@@ -93,8 +95,8 @@ server.close()
 **Client**
 
 ```scala
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.asyncHttpClient(new URI("http://localhost/api"))
+// Setup default JSON-RPC HTTP client sending PUT requests to 'http://localhost/api'
+val client = Default.clientAsync(new URI("http://localhost/api"), HttpMethod.Put)
 
 // Call the remote API function
 val remoteApi = client.bind[Api] // Api
