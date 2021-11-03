@@ -51,6 +51,7 @@ final case class NanoServer[Effect[_]] private (
   private val headerXForwardedFor = "X-Forwarded-For"
   private val allowedMethods = methods.map(_.name).toSet
   implicit private val system: EffectSystem[Effect] = genericHandler.system
+//  asyncRunner = AsyncEffectRunner(system)
 
   override def close(): Effect[Unit] =
     system.wrap(stop())
