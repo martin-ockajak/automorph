@@ -4,7 +4,7 @@ import automorph.Default
 import automorph.Default.{ClientContext, ServerContext}
 import java.net.URI
 
-object RequestMetadata extends App {
+object HttpRequestMetadata extends App {
 
   // Define server API type and create its instance
   class ServerApi {
@@ -14,7 +14,7 @@ object RequestMetadata extends App {
       Some(message),
       requestContext.path,
       requestContext.header("X-Test")
-    ).flatten.mkString(",")
+    ).flatten.mkString(", ")
   }
   val api = new ServerApi()
 
@@ -41,14 +41,14 @@ object RequestMetadata extends App {
 
   // Call the remote API function statically with request context supplied directly
   val remoteApi = client.bind[ClientApi] // Api
-  remoteApi.hello("test")(requestContext) // String
+  remoteApi.hello("test")(using requestContext) // String
 
   // Call the remote API function statically with request context supplied implictly
   implicit val givenRequestMetadata: ClientContext = requestContext
   remoteApi.hello("test") // String
 
   // Call the remote API function dynamically with request context supplied directly
-  client.call[String]("hello").args("message" -> "test")(requestContext) // String
+  client.call[String]("hello").args("message" -> "test")(using requestContext) // String
 
   // Call the remote API function dynamically with request context supplied implictly
   client.call[String]("hello").args("message" -> "test") // String
@@ -60,10 +60,10 @@ object RequestMetadata extends App {
   server.close()
 }
 
-class RequestMetadata extends org.scalatest.freespec.AnyFreeSpecLike {
+class HttpRequestMetadata extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      RequestMetadata.main(Array())
+      HttpRequestMetadata.main(Array())
     }
   }
 }

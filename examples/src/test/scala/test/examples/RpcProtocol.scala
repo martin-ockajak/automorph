@@ -42,7 +42,7 @@ object RpcProtocol extends App {
 class RpcProtocol extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      ErrorMapping.main(Array())
+      ClientErrorMapping.main(Array())
     }
   }
 }

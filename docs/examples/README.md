@@ -77,7 +77,6 @@ class Api {
     Future(s"Hello $some $n!")
 }
 val api = new Api()
-
 ```
 
 **Server**
@@ -105,62 +104,9 @@ remoteApi.hello("world", 1) // Future[String]
 client.close()
 ```
 
-## Dynamic notification
+## HTTP request metadata
 
-* [Source](/test/examples/src/test/scala/test/examples/DynamicNotification.scala)
-
-**Dependencies**
-
-```scala
-libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
-)
-```
-
-**API**
-
-```scala
-import automorph.Default
-import java.net.URI
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
-// Define an API and create its instance
-class Api {
-  def hello(some: String, n: Int): Future[String] =
-    Future(s"Hello $some $n!")
-}
-val api = new Api()
-
-```
-
-**Server**
-
-```scala
-// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val createServer = Default.serverAsync(80, "/api")
-val server = createServer(_.bind(api))
-
-// Stop the server
-server.close()
-```
-
-**Client**
-
-```scala
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
-
-// Notify the remote API function dynamically without expecting a response
-client.notify("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
-
-// Close the client
-client.close()
-```
-
-## Request metadata
-
-* [Source](/test/examples/src/test/scala/test/examples/RequestMetadata.scala)
+* [Source](/test/examples/src/test/scala/test/examples/HttpRequestMetadata.scala)
 
 **Dependencies**
 
@@ -240,9 +186,61 @@ client.call[String]("hello").args("message" -> "test") // String
 client.close()
 ```
 
-## Name mapping
+## Dynamic notification
 
-* [Source](/test/examples/src/test/scala/test/examples/MethodMapping.scala)
+* [Source](/test/examples/src/test/scala/test/examples/DynamicNotification.scala)
+
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "org.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
+**API**
+
+```scala
+import automorph.Default
+import java.net.URI
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+// Define an API and create its instance
+class Api {
+  def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
+}
+val api = new Api()
+```
+
+**Server**
+
+```scala
+// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
+val createServer = Default.serverAsync(80, "/api")
+val server = createServer(_.bind(api))
+
+// Stop the server
+server.close()
+```
+
+**Client**
+
+```scala
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+val client = Default.asyncHttpClient(new URI("http://localhost/api"), "POST")
+
+// Notify the remote API function dynamically without expecting a response
+client.notify("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
+
+// Close the client
+client.close()
+```
+
+## Function name mapping
+
+* [Source](/test/examples/src/test/scala/test/examples/NameMapping.scala)
 
 **Dependencies**
 
@@ -273,7 +271,6 @@ class Api {
   def multi(add: Boolean)(n: Double): Double =
     if (add) n + 1 else n - 1
 }
-
 val api = new Api()
 ```
 
@@ -310,9 +307,72 @@ client.call[Double]("test.multi").args("add" -> true, "n" -> 1) // 2
 client.close()
 ```
 
-## Error mapping
+## Client error mapping
 
-* [Source](/test/examples/src/test/scala/test/examples/ErrorMapping.scala)
+* [Source](/test/examples/src/test/scala/test/examples/ClientErrorMapping.scala)
+
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "org.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
+**API**
+
+```scala
+import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
+import automorph.{Client, Default}
+import java.net.URI
+import java.sql.SQLException
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+// Define an API type and create its instance
+class Api {
+  def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
+}
+val api = new Api()
+```
+
+**Server**
+
+```scala
+// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
+val createServer = Default.serverAsync(80, "/api")
+val server = createServer(_.bind(api))
+
+// Stop the server
+server.close()
+```
+
+**Client**
+
+```scala
+// Customize client RPC error to remote API exception mapping
+val protocol = Default.protocol.mapError {
+  case (message, InvalidRequest.code) if message.contains("SQL") =>
+    new SQLException(message)
+  case (message, code) => Default.protocol.errorToException(message, code)
+}
+
+// Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+val transport = Default.clientTransportAsync(new URI("http://localhost/api"), "POST")
+val client = Client.protocol(protocol).transport(transport)
+
+// Call the remote API function
+val remoteApi = client.bind[Api] // Api
+remoteApi.hello("world", 1) // Future[String]
+
+// Close the client
+client.close()
+```
+
+## Server error mapping
+
+* [Source](/test/examples/src/test/scala/test/examples/ServerErrorMapping.scala)
 
 **Dependencies**
 
@@ -327,7 +387,7 @@ libraryDependencies ++= Seq(
 ```scala
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.transport.http.HttpContext
-import automorph.{Client, Default, Handler}
+import automorph.{Default, Handler}
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -338,26 +398,24 @@ class Api {
   def hello(some: String, n: Int): Future[String] =
     Future(s"Hello $some $n!")
 }
-
 val api = new Api()
-
 ```
 
 **Server**
 
 ```scala
-// Customize server exception to RPC error mapping
+// Customize remote API exception to RPC error mapping
 val protocol = Default.protocol
 val serverProtocol = protocol.mapException {
   case _: SQLException => InvalidRequest
   case e => protocol.exceptionToError(e)
 }
 
-// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
+// Start custom JSON-RPC HTTP server listening on port 80 for requests to '/api'
 val system = Default.systemAsync
 val handler = Handler.protocol(serverProtocol).system(system).context[Default.ServerContext]
 val server = Default.server(handler, 80, "/api", mapException = {
-  // Customize server exception to HTTP status code mapping
+  // Customize remote API exception to HTTP status code mapping
   case _: SQLException => 400
   case e => HttpContext.defaultExceptionToStatusCode(e)
 })
@@ -369,16 +427,8 @@ server.close()
 **Client**
 
 ```scala
-// Customize client RPC error to exception mapping
-val clientProtocol = protocol.mapError {
-  case (message, InvalidRequest.code) if message.contains("SQL") =>
-    new SQLException(message)
-  case (message, code) => protocol.errorToException(message, code)
-}
-
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val transport = Default.clientAsyncTransport(new URI("http://localhost/api"), "POST")
-val client = Client.protocol(clientProtocol).transport(transport)
+val client = Default.clientAsync(new URI("http://localhost/api"), "POST")
 
 // Call the remote API function
 val remoteApi = client.bind[Api] // Api
@@ -472,7 +522,6 @@ class Api {
     Future(s"Hello $some $n!")
 }
 val api = new Api()
-
 ```
 
 **Server**
