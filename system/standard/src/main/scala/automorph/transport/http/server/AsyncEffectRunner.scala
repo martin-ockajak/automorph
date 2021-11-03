@@ -14,7 +14,7 @@ final case class AsyncEffectRunner[Effect[_]](
 
   override def exec(handler: NanoHTTPD#ClientHandler): Unit = {
     handlers += handler -> ()
-    system.wrap(handler.run()).flatMap(_ => system.wrap(handler.close())).run
+    system.wrap(handler.run()).run
   }
 
   override def closed(handler: NanoHTTPD#ClientHandler): Unit =
