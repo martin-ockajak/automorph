@@ -111,7 +111,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
 
     // Send the response
     Try {
-      if (exchange.isResponseChannelAvailable) {
+      if (!exchange.isResponseChannelAvailable) {
         throw new IOException("Response channel not available")
       }
       val mediaType = genericHandler.protocol.codec.mediaType
