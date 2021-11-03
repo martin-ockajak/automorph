@@ -5,7 +5,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.{HttpContext, HttpMethod}
-import automorph.transport.http.endpoint.JettyEndpoint.Context
+import automorph.transport.http.endpoint.JettyHttpEndpoint.Context
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
 import jakarta.servlet.AsyncContext
@@ -30,7 +30,7 @@ import scala.jdk.CollectionConverters.EnumerationHasAsScala
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @tparam Effect effect type
  */
-final case class JettyEndpoint[Effect[_]](
+final case class JettyHttpEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
   exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends HttpServlet with Logging with EndpointMessageTransport {
@@ -138,7 +138,7 @@ final case class JettyEndpoint[Effect[_]](
   }
 }
 
-object JettyEndpoint {
+object JettyHttpEndpoint {
 
   /** Request context type. */
   type Context = HttpContext[HttpServletRequest]

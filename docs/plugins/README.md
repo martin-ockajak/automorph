@@ -86,7 +86,7 @@ Used to passively handle requests into responses using specific message transpor
 |  | -> | [ZIO Http](https://tapir.softwaremill.com/en/latest/server/ziohttp.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [TapirWebSocketEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-tapir_3.0.0/latest/automorph/transport/http/endpoint/TapirWebSocketEndpoint.html) | [automorph-tapir](https://mvnrepository.com/artifact/org.automorph/automorph-tapir) | [Tapir](https://tapir.softwaremill.com/) | [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 | [FinagleEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-finagle_3.0.0/latest/automorph/transport/http/endpoint/FinagleEndpoint.html) | [automorph-finagle](https://mvnrepository.com/artifact/org.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
-| [JettyEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-jetty_3.0.0/latest/automorph/transport/http/endpoint/JettyEndpoint.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [JettyHttpEndpoint](https://www.javadoc.io/doc/org.automorph/automorph-jetty_3.0.0/latest/automorph/transport/http/endpoint/JettyHttpEndpoint.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 
 ## Message codec
 

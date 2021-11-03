@@ -3,7 +3,7 @@ package test.transport.http
 import automorph.Types
 import automorph.spi.transport.ServerMessageTransport
 import automorph.system.FutureSystem
-import automorph.transport.http.endpoint.JettyEndpoint
+import automorph.transport.http.endpoint.JettyHttpEndpoint
 import automorph.transport.http.server.JettyServer
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
@@ -16,7 +16,7 @@ import test.transport.http.HttpContextGenerator
 class JettyHttpFutureTest extends StandardHttpServerTest {
 
   type Effect[T] = Future[T]
-  type Context = JettyEndpoint.Context
+  type Context = JettyHttpEndpoint.Context
 
   override lazy val system: FutureSystem = FutureSystem()
 

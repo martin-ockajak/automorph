@@ -3,7 +3,7 @@ package automorph.transport.http.server
 import automorph.Types
 import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
-import automorph.transport.http.endpoint.JettyEndpoint
+import automorph.transport.http.endpoint.JettyHttpEndpoint
 import automorph.transport.http.server.JettyServer.Context
 import automorph.transport.http.{HttpContext, HttpMethod}
 import org.eclipse.jetty.util.thread.{QueuedThreadPool, ThreadPool}
@@ -53,7 +53,7 @@ final case class JettyServer[Effect[_]](
     system.wrap(jetty.stop())
 
   private def createServer(): Server = {
-    val endpoint = JettyEndpoint(handler, mapException)
+    val endpoint = JettyHttpEndpoint(handler, mapException)
     val servletHandler = new ServletContextHandler
     servletHandler.addServlet(new ServletHolder(endpoint), "/*")
     val server = new Server(port)
@@ -78,5 +78,5 @@ final case class JettyServer[Effect[_]](
 object JettyServer {
 
   /** Request context type. */
-  type Context = JettyEndpoint.Context
+  type Context = JettyHttpEndpoint.Context
 }
