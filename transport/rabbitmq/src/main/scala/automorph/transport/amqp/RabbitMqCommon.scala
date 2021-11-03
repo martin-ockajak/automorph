@@ -36,7 +36,7 @@ private[automorph] object RabbitMqCommon extends Logging {
     name: String,
     connectionFactory: ConnectionFactory
   ): Connection = {
-    val urlText = url.toURL.toExternalForm
+    val urlText = url.toString
     connectionFactory.setUri(url)
     logger.debug(s"Connecting to RabbitMQ broker: $urlText")
     Try(if (addresses.nonEmpty) {

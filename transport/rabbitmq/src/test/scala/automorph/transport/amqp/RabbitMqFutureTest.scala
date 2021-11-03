@@ -18,7 +18,6 @@
 //  type Context = RabbitMqServer.Context
 //
 //  private lazy val defaultPort = 5672
-//  private lazy val queue = "Test"
 //
 //  override lazy val system: FutureSystem = FutureSystem()
 //
@@ -31,19 +30,16 @@
 //    handler: Types.HandlerAnyCodec[Effect, Context]
 //  ): Option[ClientMessageTransport[Effect, Context]] = {
 //    Option.when(brokerPortTaken) {
-//      val (server, port) = withRandomAvailablePort(port =>
+//      val url = new URI(s"amqp://localhost:$defaultPort")
+//      val (server, queue) = withRandomAvailablePort(port =>
 //        new ServerMessageTransport[Effect] {
-//          private val server = {
-//            val url = new URI(s"amqp://localhost:$port")
-//            RabbitMqServer[Effect](handler, url, Seq(queue))
-//          }
+//          private val server = RabbitMqServer[Effect](handler, url, Seq(port.toString))
 //
 //          override def close(): Future[Unit] =
 //            server.close()
-//        } -> port
+//        } -> port.toString
 //      )
 //      servers += server
-//      val url = new URI(s"amqp://localhost:$port")
 //      val client = RabbitMqClient[Effect](url, queue, system)
 //      clients += client
 //      client

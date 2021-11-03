@@ -41,7 +41,7 @@ final case class RabbitMqServer[Effect[_]](
   private lazy val connection = createConnection()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
   private val serverId = RabbitMqCommon.applicationId(getClass.getName)
-  private val urlText = url.toURL.toExternalForm
+  private val urlText = url.toString
   private val exchange = RabbitMqCommon.defaultDirectExchange
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, RabbitMqServer.Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
@@ -50,9 +50,9 @@ final case class RabbitMqServer[Effect[_]](
   override def close(): Effect[Unit] = system.wrap(RabbitMqCommon.disconnect(connection))
 
   private def start(): Unit = {
-    println("AAAAAAAAAAAAAAAAA")
+    println("2")
     createConsumer(connection.createChannel())
-    println("BBBBBBBBBBBBBBBBBB")
+    println("3")
     ()
   }
 
