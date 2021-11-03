@@ -1,7 +1,7 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scalaz.effect.IO
 
 /**
