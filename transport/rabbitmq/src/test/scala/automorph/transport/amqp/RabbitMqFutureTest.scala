@@ -6,8 +6,6 @@
 //import automorph.transport.amqp.client.RabbitMqClient
 //import automorph.transport.amqp.server.RabbitMqServer
 //import java.net.{ServerSocket, URI}
-//import io.arivera.oss.embedded.rabbitmq.{EmbeddedRabbitMq, EmbeddedRabbitMqConfig, PredefinedVersion}
-//import io.arivera.oss.embedded.rabbitmq.helpers.ErlangVersionChecker
 //import org.scalacheck.Arbitrary
 //import scala.concurrent.Future
 //import scala.util.{Failure, Success, Try}
@@ -32,8 +30,8 @@
 //  override def customTransport(
 //    handler: Types.HandlerAnyCodec[Effect, Context]
 //  ): Option[ClientMessageTransport[Effect, Context]] = {
-//    Option.when(brokerAvailable) {
-//      val (server, port) = withAvailablePort(port =>
+//    Option.when(brokerPortTaken) {
+//      val (server, port) = withRandomAvailablePort(port =>
 //        new ServerMessageTransport[Effect] {
 //          private val server = {
 //            val url = new URI(s"amqp://localhost:$port")
@@ -52,7 +50,7 @@
 //    }
 //  }
 //
-//  private def brokerAvailable: Boolean = {
+//  private def brokerPortTaken: Boolean = {
 //    Try(new ServerSocket(defaultPort)) match {
 //      case Success(socket) =>
 //        socket.close()
