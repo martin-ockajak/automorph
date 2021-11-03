@@ -88,7 +88,6 @@ final case class UndertowServer[Effect[_]](
       Option.when(webSocket)(UndertowWebSocketEndpoint(handler, httpHandler)).getOrElse(httpHandler),
       ResponseCodeHandler.HANDLE_404
     )
-    println(s"PORT: $port")
     builder.addHttpListener(port, "0.0.0.0", rootHandler).build()
   }
 }
