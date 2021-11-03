@@ -2,7 +2,7 @@
 
 ## Synchronous call
 
-* [Source](/test/examples/src/test/scala/test/examples/Synchronous.scala)
+* [Source](/test/examples/src/test/scala/test/examples/SynchronousCall.scala)
 
 **Dependencies**
 
@@ -53,7 +53,7 @@ client.close()
 
 ## Asynchronous call
 
-* [Source](/test/examples/src/test/scala/test/examples/Asynchronous.scala)
+* [Source](/test/examples/src/test/scala/test/examples/AsynchronousCall.scala)
 
 **Dependencies**
 
@@ -106,7 +106,7 @@ client.close()
 
 ## JSON-RPC notification
 
-* [Source](/test/examples/src/test/scala/test/examples/DynamicNotification.scala)
+* [Source](/test/examples/src/test/scala/test/examples/JsonRpcNotification.scala)
 
 **Dependencies**
 
@@ -240,7 +240,7 @@ client.close()
 
 ## Function name mapping
 
-* [Source](/test/examples/src/test/scala/test/examples/NameMapping.scala)
+* [Source](/test/examples/src/test/scala/test/examples/FunctionNameMapping.scala)
 
 **Dependencies**
 
@@ -440,7 +440,7 @@ client.close()
 
 ## Effect system selection
 
-* [Source](/test/examples/src/test/scala/test/examples/EffectSystem.scala)
+* [Source](/test/examples/src/test/scala/test/examples/EffectSystemSelection.scala)
 
 **Dependencies**
 
@@ -497,7 +497,7 @@ client.close()
 
 ## RPC protocol selection
 
-* [Source](/test/examples/src/test/scala/test/examples/RpcProtocol.scala)
+* [Source](/test/examples/src/test/scala/test/examples/RpcProtocolSelection.scala)
 
 **Dependencies**
 
@@ -556,7 +556,7 @@ client.close()
 
 ## Message codec selection
 
-* [Source](/test/examples/src/test/scala/test/examples/MessageCodec.scala)
+* [Source](/test/examples/src/test/scala/test/examples/MessageCodecSelection.scala)
 
 **Dependencies**
 
@@ -626,7 +626,7 @@ client.close()
 
 ## Client transport selection
 
-* [Source](/test/examples/src/test/scala/test/examples/ClientMessageTransport.scala)
+* [Source](/test/examples/src/test/scala/test/examples/ClientTransportSelection.scala)
 
 **Dependencies**
 
@@ -682,7 +682,7 @@ client.close()
 
 ## Server transport selection
 
-* [Source](/test/examples/src/test/scala/test/examples/ServerMessageTransport.scala)
+* [Source](/test/examples/src/test/scala/test/examples/ServerTransportSelection.scala)
 
 **Dependencies**
 
@@ -735,7 +735,7 @@ client.close()
 
 ## Endpoint transport selection
 
-* [Source](/test/examples/src/test/scala/test/examples/EndpointMessageTransport.scala)
+* [Source](/test/examples/src/test/scala/test/examples/EndpointTransportSelection.scala)
 
 **Dependencies**
 
