@@ -386,7 +386,6 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
-import automorph.transport.http.HttpContext
 import automorph.{Default, Handler}
 import java.net.URI
 import java.sql.SQLException
@@ -404,7 +403,7 @@ val api = new Api()
 **Server**
 
 ```scala
-// Customize remote API server exception to RPC error mapping
+  // Customize remote API server exception to RPC error mapping
 val protocol = Default.protocol
 val serverProtocol = protocol.mapException {
   case _: SQLException => InvalidRequest
@@ -415,11 +414,67 @@ val serverProtocol = protocol.mapException {
 val system = Default.systemAsync
 val handler = Handler.protocol(serverProtocol).system(system)
   .context[Default.ServerContext]
-val server = Default.server(handler, 80, "/api", mapException = {
-  // Customize remote API server exception to HTTP status code mapping
+val server = Default.server(handler, 80, "/api")
+
+// Stop the server
+server.close()
+```
+
+**Client**
+
+```scala
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+val client = Default.clientAsync(new URI("http://localhost/api"))
+
+// Call the remote API function
+val remoteApi = client.bind[Api] // Api
+remoteApi.hello("world", 1) // Future[String]
+
+// Close the client
+client.close()
+```
+
+## HTTP status mapping
+
+* [Source](/test/examples/src/test/scala/test/examples/HttpStatusMapping.scala)
+
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "org.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
+**API**
+
+```scala
+import automorph.Default
+import automorph.transport.http.HttpContext
+import java.net.URI
+import java.sql.SQLException
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+// Define an API type and create its instance
+class Api {
+  def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
+}
+val api = new Api()
+```
+
+**Server**
+
+```scala
+// Customize remote API server exception to HTTP status code mapping
+val createServer = Default.serverAsync(80, "/api", mapException = {
   case _: SQLException => 400
   case e => HttpContext.defaultExceptionToStatusCode(e)
 })
+
+// Start custom JSON-RPC HTTP server listening on port 80 for requests to '/api'
+val server = createServer(_.bind(api))
 
 // Stop the server
 server.close()

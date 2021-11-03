@@ -1,13 +1,13 @@
 package test.examples
 
-import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
-import automorph.{Default, Handler}
+import automorph.Default
+import automorph.transport.http.HttpContext
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object ServerErrorMapping extends App {
+object HttpStatusMapping extends App {
 
   // Define an API type and create its instance
   class Api {
@@ -16,18 +16,14 @@ object ServerErrorMapping extends App {
   }
   val api = new Api()
 
-  // Customize remote API server exception to RPC error mapping
-  val protocol = Default.protocol
-  val serverProtocol = protocol.mapException {
-    case _: SQLException => InvalidRequest
-    case e => protocol.mapException(e)
-  }
+  // Customize remote API server exception to HTTP status code mapping
+  val createServer = Default.serverAsync(80, "/api", mapException = {
+    case _: SQLException => 400
+    case e => HttpContext.defaultExceptionToStatusCode(e)
+  })
 
   // Start custom JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val system = Default.systemAsync
-  val handler = Handler.protocol(serverProtocol).system(system)
-    .context[Default.ServerContext]
-  val server = Default.server(handler, 80, "/api")
+  val server = createServer(_.bind(api))
 
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.clientAsync(new URI("http://localhost/api"))
@@ -43,7 +39,7 @@ object ServerErrorMapping extends App {
   server.close()
 }
 
-class ServerErrorMapping extends org.scalatest.freespec.AnyFreeSpecLike {
+class HttpStatusMapping extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       ClientErrorMapping.main(Array())
