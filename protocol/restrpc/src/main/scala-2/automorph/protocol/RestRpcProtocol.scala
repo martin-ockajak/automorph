@@ -94,8 +94,8 @@ object RestRpcProtocol extends ErrorMapping {
     c.Expr[RestRpcProtocol[Node, Codec]](q"""
       automorph.protocol.RestRpcProtocol(
         $codec,
-        automorph.protocol.RestRpcProtocol.defaultErrorToException,
-        automorph.protocol.RestRpcProtocol.defaultExceptionToError
+        automorph.protocol.RestRpcProtocol.defaultMapError,
+        automorph.protocol.RestRpcProtocol.defaultMapException
       )
     """)
   }

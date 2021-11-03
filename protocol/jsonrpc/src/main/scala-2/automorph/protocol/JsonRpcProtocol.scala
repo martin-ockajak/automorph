@@ -92,8 +92,8 @@ object JsonRpcProtocol extends ErrorMapping {
     c.Expr[JsonRpcProtocol[Node, Codec]](q"""
       automorph.protocol.JsonRpcProtocol(
         $codec,
-        automorph.protocol.JsonRpcProtocol.defaultErrorToException,
-        automorph.protocol.JsonRpcProtocol.defaultExceptionToError,
+        automorph.protocol.JsonRpcProtocol.defaultMapError,
+        automorph.protocol.JsonRpcProtocol.defaultMapException,
         true
       )
     """)
