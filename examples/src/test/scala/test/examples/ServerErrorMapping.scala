@@ -17,7 +17,7 @@ object ServerErrorMapping extends App {
   }
   val api = new Api()
 
-  // Customize remote API exception to RPC error mapping
+  // Customize remote API server exception to RPC error mapping
   val protocol = Default.protocol
   val serverProtocol = protocol.mapException {
     case _: SQLException => InvalidRequest
@@ -28,7 +28,7 @@ object ServerErrorMapping extends App {
   val system = Default.systemAsync
   val handler = Handler.protocol(serverProtocol).system(system).context[Default.ServerContext]
   val server = Default.server(handler, 80, "/api", mapException = {
-    // Customize remote API exception to HTTP status code mapping
+    // Customize remote API server exception to HTTP status code mapping
     case _: SQLException => 400
     case e => HttpContext.defaultExceptionToStatusCode(e)
   })
