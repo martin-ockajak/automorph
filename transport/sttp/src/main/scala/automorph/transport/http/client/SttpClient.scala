@@ -130,7 +130,7 @@ final case class SttpClient[Effect[_]] private (
     val httpContext = requestContext.getOrElse(defaultContext)
     val baseRequest = httpContext.base.map(_.request).getOrElse(basicRequest)
     val requestUrl = Uri(httpContext.overrideUrl(defaultUrl.toJavaUri))
-    val requestMethod = httpContext.method.map(Method.unsafeApply).getOrElse(method)
+    val requestMethod = httpContext.method.map(_.name).map(Method.unsafeApply).getOrElse(method)
     val contentType = MediaType.unsafeParse(mediaType)
     val headers = baseRequest.headers ++ httpContext.headers.map { case (name, value) => Header(name, value) }
     val sttpRequest = baseRequest.method(requestMethod, requestUrl)

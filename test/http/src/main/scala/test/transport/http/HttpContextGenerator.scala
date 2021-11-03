@@ -1,13 +1,13 @@
 package test.transport.http
 
-import automorph.transport.http.HttpContext
+import automorph.transport.http.{HttpContext, HttpMethod}
 import java.net.URLEncoder
 import org.scalacheck.{Arbitrary, Gen}
 
 object HttpContextGenerator {
 
   private val charset = "UTF-8"
-  private val methods = Seq("POST", "GET", "PUT", "DELETE")
+  private val methods = Seq(HttpMethod.Post, HttpMethod.Get, HttpMethod.Put, HttpMethod.Delete)
   private val maxItems = 16
   private val maxNameSize = 16
   private val maxValueSize = 64

@@ -32,7 +32,7 @@ import scala.concurrent.duration.Duration
  * @tparam Base specific message transport plugin base properties type
  */
 final case class HttpContext[Base](
-  method: Option[String] = None,
+  method: Option[HttpMethod] = None,
   scheme: Option[String] = None,
   userInfo: Option[String] = None,
   host: Option[String] = None,

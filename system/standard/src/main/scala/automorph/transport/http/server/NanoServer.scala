@@ -179,7 +179,7 @@ final case class NanoServer[Effect[_]] private (
   private def requestContext(session: IHTTPSession): Context = {
     val http = HttpContext(
       base = Some(session),
-      method = Some(session.getMethod.name),
+      method = Some(HttpMethod.valueOf(session.getMethod.name)),
       headers = session.getHeaders.asScala.toSeq
     ).url(session.getUri).scheme("http").host("localhost").port(port)
     Option(session.getQueryParameterString).map(http.query).getOrElse(http)
