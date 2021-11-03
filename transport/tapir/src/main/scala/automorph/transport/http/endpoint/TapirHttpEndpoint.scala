@@ -56,7 +56,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
       throw new IllegalArgumentException(s"Invalid content type: ${genericHandler.protocol.codec.mediaType}")
     })
     endpoint.method(method).in(byteArrayBody).in(paths).in(queryParams).in(headers).in(clientIp)
-      .out(byteArrayBody).out(header(contentType)).out(statusCode)
+      .out(byteArrayBody).out(statusCode).out(header(contentType))
       .serverLogic { case (requestBody, paths, queryParams, headers, clientIp) =>
         // Log the request
         val requestId = Random.id

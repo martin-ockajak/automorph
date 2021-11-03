@@ -273,7 +273,7 @@ object Default extends DefaultMeta {
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder
   ): Server[Effect] =
-    UndertowServer.create(handler, port, path, methods, webSocket, mapException, builder)
+    UndertowServer(handler, port, path, methods, webSocket, mapException, builder)
 
   /**
    * Creates an Undertow JSON-RPC over HTTP & WebSocket server with specified effect system plugin.

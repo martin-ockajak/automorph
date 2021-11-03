@@ -24,7 +24,7 @@
 //    handler: Types.HandlerAnyCodec[Effect, Context],
 //    port: Int
 //  ): ServerMessageTransport[Effect] =
-//    UndertowServer.create(handler, port)(runEffect)
+//    UndertowServer(handler, port)(runEffect)
 //
 //  override def run[T](effect: Effect[T]): T = await(effect)
 //}

@@ -24,7 +24,7 @@
 //    handler: Types.HandlerAnyCodec[Effect, Context],
 //    port: Int
 //  ): ServerMessageTransport[Effect] =
-//    UndertowServer.create(handler, port)
+//    UndertowServer(handler, port)
 //
 //  override def webSocket: Boolean = true
 //
