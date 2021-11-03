@@ -5,12 +5,12 @@ import automorph.transport.amqp.AmqpContext
 import automorph.transport.amqp.client.RabbitMqClient.Context
 import automorph.util.Extensions.TryOps
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.{AMQP, Address, Channel, Connection, ConnectionFactory, DefaultConsumer}
+import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer}
 import java.io.IOException
 import java.net.{InetAddress, URI}
 import java.util.Date
 import scala.jdk.CollectionConverters.{MapHasAsJava, MapHasAsScala}
-import scala.util.Try
+import scala.util.{Try, Using}
 
 /** Common RabbitMQ functionality. */
 private[automorph] object RabbitMqCommon extends Logging {
@@ -47,6 +47,22 @@ private[automorph] object RabbitMqCommon extends Logging {
       logger.info(s"Connected to RabbitMQ broker: $urlText")
       connection
     }.onFailure(logger.error(s"Failed to connect to RabbitMQ broker: $urlText", _)).get
+  }
+
+  /**
+   * Declare specified direct non-durable AMQP exchange.
+   *
+   * @param exchange direct non-durable AMQP message exchange name
+   * @param connection AMQP broker connection
+   * @return nothing
+   */
+  def declareExchange(exchange: String, connection: Connection): Unit = {
+    Option.when(exchange != defaultDirectExchange) {
+      Using(connection.createChannel()) { channel =>
+        channel.exchangeDeclare(exchange, BuiltinExchangeType.DIRECT, false)
+        ()
+      }.get
+    }.getOrElse(())
   }
 
   /**

@@ -9,9 +9,10 @@ import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
 import automorph.util.{Bytes, Random}
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.{Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
+import com.rabbitmq.client.{BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
-import scala.util.Try
+import scala.util.{Try, Using}
+import scala.jdk.CollectionConverters.MapHasAsJava
 
 /**
  * RabbitMQ server message transport plugin.
@@ -38,7 +39,7 @@ final case class RabbitMqServer[Effect[_]](
   connectionFactory: ConnectionFactory = new ConnectionFactory
 ) extends Logging with ServerMessageTransport[Effect] {
 
-  private lazy val connection = createConnection()
+  private lazy val connection = connect()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
   private val serverId = RabbitMqCommon.applicationId(getClass.getName)
   private val urlText = url.toString
@@ -125,7 +126,16 @@ final case class RabbitMqServer[Effect[_]](
     }.onFailure(logger.error("Failed to send AMQP response", _, responseProperties)).get
   }
 
-  private def createConnection(): Connection = RabbitMqCommon.connect(url, Seq.empty, serverId, connectionFactory)
+  private def connect(): Connection = {
+    val connection = RabbitMqCommon.connect(url, Seq.empty, serverId, connectionFactory)
+    RabbitMqCommon.declareExchange(exchange, connection)
+    Using(connection.createChannel()) { channel =>
+      queues.foreach { queue =>
+        channel.queueDeclare(queue, false, false, false, Map.empty.asJava)
+      }
+    }
+    connection
+  }
 }
 
 object RabbitMqServer {

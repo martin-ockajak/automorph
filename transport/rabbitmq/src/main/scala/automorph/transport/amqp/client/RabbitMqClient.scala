@@ -42,7 +42,7 @@ final case class RabbitMqClient[Effect[_]](
   connectionFactory: ConnectionFactory = new ConnectionFactory
 ) extends Logging with ClientMessageTransport[Effect, Context] {
 
-  private lazy val connection = createConnection()
+  private lazy val connection = connect()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
   private val urlText = url.toURL.toExternalForm
@@ -123,14 +123,10 @@ final case class RabbitMqClient[Effect[_]](
     consumer
   }
 
-  private def createConnection(): Connection = {
+  private def connect(): Connection = {
     val connection = RabbitMqCommon.connect(url, Seq.empty, clientId, connectionFactory)
-    Option.when(exchange != RabbitMqCommon.defaultDirectExchange) {
-      Using(connection.createChannel()) { channel =>
-        channel.exchangeDeclare(exchange, BuiltinExchangeType.DIRECT, false)
-        connection
-      }.get
-    }.getOrElse(connection)
+    RabbitMqCommon.declareExchange(exchange, connection)
+    connection
   }
 }
 
