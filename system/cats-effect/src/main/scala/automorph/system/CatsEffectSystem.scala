@@ -11,8 +11,8 @@ import cats.effect.unsafe.IORuntime
  *
  * @see [[https://typelevel.org/cats-effect/ Library documentation]]
  * @see [[https://typelevel.org/cats-effect/api/3.x/cats/effect/IO.html Effect type]]
- * @param runtime runtime system
  * @constructor Creates a Cats Effect effect system plugin using `IO` as an effect type.
+ * @param runtime runtime system
  */
 final case class CatsEffectSystem()(
   implicit val runtime: IORuntime = IORuntime.global

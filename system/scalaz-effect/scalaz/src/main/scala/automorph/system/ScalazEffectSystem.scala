@@ -1,6 +1,7 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
+import scala.concurrent.ExecutionContext
 import scalaz.effect.IO
 
 /**
@@ -9,8 +10,11 @@ import scalaz.effect.IO
  * @see [[https://github.com/scalaz Library documentation]]
  * @see [[https://www.javadoc.io/doc/org.scalaz/scalaz_2.13/latest/scalaz/effect/IO.html Effect type]]
  * @constructor Creates a Scalaz effect system plugin using `IO` as an effect type.
+ * @param executionContext execution context
  */
-final case class ScalazEffectSystem() extends EffectSystem[IO] {
+final case class ScalazEffectSystem()(
+  implicit val executionContext: ExecutionContext = ExecutionContext.global
+) extends EffectSystem[IO] {
 
   override def wrap[T](value: => T): IO[T] =
     IO(value)
@@ -27,8 +31,10 @@ final case class ScalazEffectSystem() extends EffectSystem[IO] {
   override def flatMap[T, R](effect: IO[T], function: T => IO[R]): IO[R] =
     effect.flatMap(function)
 
-  override def run[T](effect: IO[T]): Unit =
+  override def run[T](effect: IO[T]): Unit = {
+    Future(effect)
     ()
+  }
 }
 
 object ScalazEffectSystem {
