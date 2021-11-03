@@ -43,6 +43,9 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   /**
    * Prepares an one-way remote API function message.
    *
+   * RPC function name and call arguments are used to send an RPC request
+   * without expecting to receive a response.
+   *
    * @param functionName RPC function name
    * @return RPC function notification proxy with specified function name
    */

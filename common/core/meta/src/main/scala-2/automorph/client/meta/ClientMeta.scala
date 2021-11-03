@@ -38,6 +38,9 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
   /**
    * Prepares a remote API function call.
    *
+   * RPC function name and call arguments are used to form an RPC request and
+   * the corresponding RPC response is interpreted as a return value or an exception.
+   *
    * @param functionName RPC function name
    * @tparam Result result type
    * @return RPC function call proxy with specified function name
