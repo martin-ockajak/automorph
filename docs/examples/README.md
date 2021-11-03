@@ -324,7 +324,6 @@ libraryDependencies ++= Seq(
 **API**
 
 ```scala
-import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.{Client, Default}
 import java.net.URI
 import java.sql.SQLException
@@ -354,11 +353,13 @@ server.close()
 
 ```scala
 // Customize remote API client RPC error to exception mapping
-val protocol = Default.protocol.mapError {
-  case (message, InvalidRequest.code) if message.contains("SQL") =>
+val protocol = Default.protocol.mapError((message, code) =>
+  if (message.contains("SQL")) {
     new SQLException(message)
-  case (message, code) => Default.protocol.mapError(message, code)
-}
+  } else {
+    Default.protocol.mapError(message, code)
+  }
+)
 
 // Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val transport = Default.clientTransportAsync(new URI("http://localhost/api"))
