@@ -5,7 +5,7 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object DynamicNotification extends App {
+object JsonRpcDynamicNotification extends App {
 
   // Define an API and create its instance
   class Api {
@@ -31,7 +31,7 @@ object DynamicNotification extends App {
   server.close()
 }
 
-class DynamicNotification extends org.scalatest.freespec.AnyFreeSpecLike {
+class JsonRpcDynamicNotification extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       AsynchronousCall.main(Array())

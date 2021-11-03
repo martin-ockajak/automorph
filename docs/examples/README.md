@@ -104,7 +104,7 @@ remoteApi.hello("world", 1) // Future[String]
 client.close()
 ```
 
-## Dynamic notification
+## JSON-RPC notification
 
 * [Source](/test/examples/src/test/scala/test/examples/DynamicNotification.scala)
 
