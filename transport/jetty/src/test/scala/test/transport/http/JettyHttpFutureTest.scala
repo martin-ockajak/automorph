@@ -4,6 +4,7 @@ import automorph.Types
 import automorph.spi.transport.ServerMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.endpoint.JettyEndpoint
+import automorph.transport.http.server.JettyServer
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
 import org.scalacheck.Arbitrary
@@ -24,20 +25,8 @@ class JettyHttpFutureTest extends StandardHttpServerTest {
   override def serverTransport(
     handler: Types.HandlerAnyCodec[Effect, Context],
     port: Int
-  ): ServerMessageTransport[Effect] = new ServerMessageTransport[Effect] {
-    private val server = {
-      val endpoint = JettyEndpoint(handler)
-      val servletHandler = new ServletContextHandler
-      servletHandler.addServlet(new ServletHolder(endpoint), "/*")
-      val server = new Server(port)
-      server.setHandler(servletHandler)
-      server.start()
-      server
-    }
-
-    override def close(): Effect[Unit] =
-      system.wrap(server.stop())
-  }
+  ): ServerMessageTransport[Effect] =
+    JettyServer(handler, port)
 
   override def run[T](effect: Effect[T]): T = await(effect)
 }

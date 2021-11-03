@@ -83,7 +83,7 @@ final case class UndertowServer[Effect[_]](
       ) ++ (listener.getAddress match {
         case address: InetSocketAddress => Map(
           "Host" -> address.getHostString,
-          "Port" -> address.getPort
+          "Port" -> address.getPort.toString
         )
         case _ => Map.empty
       })

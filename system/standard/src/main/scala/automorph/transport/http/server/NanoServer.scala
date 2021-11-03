@@ -57,8 +57,15 @@ final case class NanoServer[Effect[_]] private (
     system.wrap(stop())
 
   override def start(): Unit = {
-    logger.info("Listening for connections", Map("Port" -> port))
     super.start()
+    val protocols = if (webSocket) Seq("HTTP", "WebSocket") else Seq("HTTP")
+    protocols.foreach { protocol =>
+      val properties = Map(
+        "Protocol" -> protocol,
+        "Port" -> port.toString
+      )
+      logger.info("Listening for connections", properties)
+    }
   }
 
   override protected def serveHttp(session: IHTTPSession): Response = {
