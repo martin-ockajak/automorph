@@ -91,7 +91,7 @@ final case class UndertowServer[Effect[_]](
       ResponseCodeHandler.HANDLE_404
     )
     println(s"PORT: $port")
-    builder.addHttpListener(port, "0.0.0.0").setHandler(rootHandler).build()
+    builder.addHttpListener(port, "0.0.0.0", rootHandler).build()
   }
 }
 
