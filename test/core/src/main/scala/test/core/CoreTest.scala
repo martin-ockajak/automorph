@@ -49,8 +49,8 @@ trait CoreTest extends BaseTest {
   def fixtures: Seq[TestFixture]
 
   "" - {
-    fixtures.take(1).foreach { fixture =>
-//    fixtures.foreach { fixture =>
+    testFixtures.take(1).foreach { fixture =>
+//    testFixtures.foreach { fixture =>
       val codecName = fixture.genericClient.protocol.codec.getClass.getSimpleName
       codecName.replaceAll("MessageCodec$", "") - {
         "Static" - {
@@ -203,4 +203,11 @@ trait CoreTest extends BaseTest {
         error.printStackTrace(System.out)
         false
     }
+
+  private def testFixtures: Seq[TestFixture] =
+    Try(fixtures).recover {
+      case error =>
+        error.printStackTrace(System.out)
+        throw error
+    }.get
 }

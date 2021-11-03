@@ -50,9 +50,7 @@ final case class RabbitMqServer[Effect[_]](
   override def close(): Effect[Unit] = system.wrap(RabbitMqCommon.disconnect(connection))
 
   private def start(): Unit = {
-    println("2")
     createConsumer(connection.createChannel())
-    println("3")
     ()
   }
 
