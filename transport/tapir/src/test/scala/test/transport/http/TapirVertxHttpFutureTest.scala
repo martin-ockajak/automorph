@@ -49,6 +49,4 @@
 //  }
 //
 //  override def run[T](effect: Effect[T]): T = await(effect)
-//
-//  override def runEffect[T](effect: Effect[T]): Unit = ()
 //}

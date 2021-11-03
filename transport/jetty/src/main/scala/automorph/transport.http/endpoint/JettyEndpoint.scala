@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.HttpContext
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.endpoint.JettyEndpoint.Context
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
@@ -115,7 +115,7 @@ final case class JettyEndpoint[Effect[_]](
     }.toSeq
     HttpContext(
       base = Some(request),
-      method = Some(request.getMethod),
+      method = Some(HttpMethod.valueOf(request.getMethod)),
       headers = headers
     ).url(request.getRequestURI)
   }

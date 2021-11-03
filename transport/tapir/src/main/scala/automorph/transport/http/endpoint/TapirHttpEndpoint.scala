@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.HttpContext
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Random}
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
@@ -85,7 +85,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
   ): Context =
     HttpContext(
       base = Some(()),
-      method = method.map(_.method),
+      method = method.map(_.toString).map(HttpMethod.valueOf),
       path = Some(urlPath(paths)),
       parameters = queryParams.toSeq,
       headers = headers.map(header => header.name -> header.value).toSeq

@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.HttpContext
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
 import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
 import automorph.util.{Bytes, Network, Random}
@@ -126,7 +126,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     }.toSeq
     HttpContext(
       base = Some(Left(exchange).withRight[WebSocketHttpExchange]),
-      method = Some(exchange.getRequestMethod.toString),
+      method = Some(HttpMethod.valueOf(exchange.getRequestMethod.toString)),
       headers = headers
     ).url(exchange.getRequestURI)
   }

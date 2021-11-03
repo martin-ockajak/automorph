@@ -18,9 +18,12 @@ class HttpClientWebSocketFutureTest extends ClientServerTest {
   type Context = NanoServer.Context
 
   override lazy val system: FutureSystem = FutureSystem()
-  override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary
 
-  override def run[T](effect: Effect[T]): T = await(effect)
+  override def arbitraryContext: Arbitrary[Context] =
+    HttpContextGenerator.arbitrary
+
+  override def run[T](effect: Effect[T]): T =
+    await(effect)
 
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]

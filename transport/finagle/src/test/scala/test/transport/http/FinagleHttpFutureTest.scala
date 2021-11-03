@@ -17,7 +17,9 @@ class FinagleHttpFutureTest extends StandardHttpServerTest {
   type Context = FinagleEndpoint.Context
 
   override lazy val system: FutureSystem = FutureSystem()
-  override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary
+
+  override def arbitraryContext: Arbitrary[Context] =
+    HttpContextGenerator.arbitrary
 
   override def serverTransport(
     handler: Types.HandlerAnyCodec[Effect, Context],

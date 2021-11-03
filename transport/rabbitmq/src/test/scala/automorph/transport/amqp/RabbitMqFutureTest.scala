@@ -22,8 +22,10 @@
 //  private lazy val builder = (new EmbeddedRabbitMqConfig.Builder).version(PredefinedVersion.V3_8_1)
 //  private lazy val queue = "Test"
 //
-//  override lazy val arbitraryContext: Arbitrary[Context] = AmqpContextGenerator.arbitrary
 //  override lazy val system: FutureSystem = FutureSystem()
+//
+//  override def arbitraryContext: Arbitrary[Context] =
+//    AmqpContextGenerator.arbitrary
 //
 //  override def run[T](effect: Effect[T]): T = await(effect)
 //

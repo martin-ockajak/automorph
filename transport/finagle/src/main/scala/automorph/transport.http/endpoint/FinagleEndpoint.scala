@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.HttpContext
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.endpoint.FinagleEndpoint.Context
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Network, Random}
@@ -92,7 +92,7 @@ final case class FinagleEndpoint[Effect[_]](
 
   private def requestContext(request: Request): Context = HttpContext(
     base = Some(request),
-    method = Some(request.method.name),
+    method = Some(HttpMethod.valueOf(request.method.name)),
     headers = request.headerMap.iterator.toSeq
   ).url(request.uri)
 

@@ -17,7 +17,9 @@ class SttpClientHttpFutureTest extends StandardHttpClientTest {
   type Context = SttpClient.Context
 
   override lazy val system: FutureSystem = FutureSystem()
-  override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary
+
+  override def arbitraryContext: Arbitrary[Context] =
+    HttpContextGenerator.arbitrary
 
   override def clientTransport(url: URI): ClientMessageTransport[Effect, Context] =
     SttpClient.http(system, AsyncHttpClientFutureBackend(), url, Method.POST)

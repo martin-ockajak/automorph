@@ -11,7 +11,7 @@ class LocalIdentityTest extends ProtocolCodecTest {
   type Effect[T] = Identity[T]
   type Context = Option[String]
 
-  override lazy val arbitraryContext: Arbitrary[Context] =
+  override def arbitraryContext: Arbitrary[Context] =
     Arbitrary(Arbitrary.arbitrary[Context])
 
   override lazy val system: EffectSystem[Effect] =

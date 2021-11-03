@@ -17,7 +17,9 @@ class SttpClientWebSocketFutureTest extends StandardHttpClientTest {
   type Context = SttpClient.Context
 
   override lazy val system: FutureSystem = FutureSystem()
-  override lazy val arbitraryContext: Arbitrary[Context] = HttpContextGenerator.arbitrary
+  
+  override def arbitraryContext: Arbitrary[Context] =
+    HttpContextGenerator.arbitrary
 
   override def webSocket: Boolean = true
 
