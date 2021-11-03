@@ -6,9 +6,12 @@ import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.endpoint.JettyHttpEndpoint
 import automorph.transport.http.server.JettyServer.Context
 import automorph.transport.http.{HttpContext, HttpMethod}
-import org.eclipse.jetty.util.thread.{QueuedThreadPool, ThreadPool}
+import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
+import jakarta.servlet.{DispatcherType, Filter, FilterChain, ServletRequest, ServletResponse}
+import java.util.EnumSet
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
+import org.eclipse.jetty.servlet.{FilterHolder, ServletContextHandler, ServletHolder}
+import org.eclipse.jetty.util.thread.{QueuedThreadPool, ThreadPool}
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
@@ -46,6 +49,16 @@ final case class JettyServer[Effect[_]](
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
   private val allowedMethods = methods.map(_.name).toSet
+
+  private val methodFilter = new Filter {
+
+    override def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain): Unit = {
+      val method = request.asInstanceOf[HttpServletRequest].getMethod
+      Option.when(allowedMethods.contains(method.toUpperCase))(chain.doFilter(request, response)).getOrElse {
+        response.asInstanceOf[HttpServletResponse].sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED)
+      }
+    }
+  }
   private lazy val jetty = createServer()
   start()
 
@@ -55,7 +68,13 @@ final case class JettyServer[Effect[_]](
   private def createServer(): Server = {
     val endpoint = JettyHttpEndpoint(handler, mapException)
     val servletHandler = new ServletContextHandler
-    servletHandler.addServlet(new ServletHolder(endpoint), "/*")
+    val servletPath = s"$path*"
+
+    // Validate URL path
+    servletHandler.addServlet(new ServletHolder(endpoint), servletPath)
+
+    // Validate HTTP request method
+    servletHandler.addFilter(new FilterHolder(methodFilter), servletPath, EnumSet.of(DispatcherType.REQUEST))
     val server = new Server(port)
     server.setHandler(servletHandler)
     server
