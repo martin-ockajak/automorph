@@ -3,7 +3,7 @@ package test.examples
 import automorph.Default
 import java.net.URI
 
-object Synchronous extends App {
+object SynchronousCall extends App {
 
   // Define an API type and create its instance
   class Api {
@@ -30,10 +30,10 @@ object Synchronous extends App {
   server.close()
 }
 
-class Synchronous extends org.scalatest.freespec.AnyFreeSpecLike {
+class SynchronousCall extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      Synchronous.main(Array())
+      SynchronousCall.main(Array())
     }
   }
 }

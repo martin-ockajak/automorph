@@ -1,6 +1,6 @@
 # Examples
 
-## Synchronous
+## Synchronous call
 
 * [Source](/test/examples/src/test/scala/test/examples/Synchronous.scala)
 
@@ -51,7 +51,7 @@ remoteApi.hello("world", 1) // String
 client.close()
 ```
 
-## Asynchronous
+## Asynchronous call
 
 * [Source](/test/examples/src/test/scala/test/examples/Asynchronous.scala)
 

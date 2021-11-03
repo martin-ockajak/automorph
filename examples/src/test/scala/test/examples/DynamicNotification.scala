@@ -34,7 +34,7 @@ object DynamicNotification extends App {
 class DynamicNotification extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      Asynchronous.main(Array())
+      AsynchronousCall.main(Array())
     }
   }
 }

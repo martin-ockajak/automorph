@@ -5,7 +5,7 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object Asynchronous extends App {
+object AsynchronousCall extends App {
 
   // Define an API and create its instance
   class Api {
@@ -32,10 +32,10 @@ object Asynchronous extends App {
   server.close()
 }
 
-class Asynchronous extends org.scalatest.freespec.AnyFreeSpecLike {
+class AsynchronousCall extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      Asynchronous.main(Array())
+      AsynchronousCall.main(Array())
     }
   }
 }
