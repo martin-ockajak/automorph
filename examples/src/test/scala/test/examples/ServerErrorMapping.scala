@@ -26,7 +26,8 @@ object ServerErrorMapping extends App {
 
   // Start custom JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val system = Default.systemAsync
-  val handler = Handler.protocol(serverProtocol).system(system).context[Default.ServerContext]
+  val handler = Handler.protocol(serverProtocol).system(system)
+    .context[Default.ServerContext]
   val server = Default.server(handler, 80, "/api", mapException = {
     // Customize remote API server exception to HTTP status code mapping
     case _: SQLException => 400
