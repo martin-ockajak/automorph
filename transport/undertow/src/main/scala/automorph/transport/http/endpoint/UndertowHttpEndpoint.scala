@@ -47,7 +47,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
       lazy val requestProperties = extractRequestProperties(exchange, requestId)
       logger.debug("Received HTTP request", requestProperties)
       val requestBody = Bytes.byteArray.from(message)
-      exchange.dispatch(new Runnable {
+      val handlerRunnable = new Runnable {
 
         override def run(): Unit = {
           // Process the request
@@ -62,8 +62,13 @@ final case class UndertowHttpEndpoint[Effect[_]](
             }
           )).run
         }
-      })
-      ()
+      }
+      if (exchange.isInIoThread) {
+        exchange.dispatch(handlerRunnable)
+        ()
+      } else {
+        handlerRunnable.run()
+      }
     }
   }
 
