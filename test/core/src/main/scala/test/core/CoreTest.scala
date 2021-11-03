@@ -166,7 +166,7 @@ trait CoreTest extends BaseTest {
                 execute(fixture.call("test", "test" -> a0)) == expected
               }
             }
-            "Notify" in {
+            "Message" in {
               check { (a0: String) =>
                 execute(fixture.tell("test", "test" -> a0))
                 true

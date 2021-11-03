@@ -234,7 +234,7 @@ server.close()
 val client = Default.asyncHttpClient(new URI("http://localhost/api"))
 
 // Notify the remote API function dynamically without expecting a response
-client.notify("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
+client.message("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
 
 // Close the client
 client.close()
@@ -301,7 +301,7 @@ server.close()
 val client = Default.clientSync(new URI("http://localhost/api"))
 
 // Call the remote API function dynamically
-client.notify("custom").args("value" -> None) // ()
+client.call[String]("custom").args("value" -> None) // ""
 Try(client.call[String]("omitted").args()) // Failure
 client.call[Double]("test.multi").args("add" -> true, "n" -> 1) // 2
 

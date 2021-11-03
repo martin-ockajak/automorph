@@ -37,7 +37,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
   def bind[Api <: AnyRef]: Api = macro ClientMeta.bindMacro[Node, Codec, Effect, Context, Api]
 
   /**
-   * Creates an RPC function call.
+   * Prepares a remote API function call.
    *
    * @param functionName RPC function name
    * @tparam Result result type

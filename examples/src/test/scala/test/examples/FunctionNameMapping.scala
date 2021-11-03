@@ -38,7 +38,7 @@ object FunctionNameMapping extends App {
   val client = Default.clientSync(new URI("http://localhost/api"))
 
   // Call the remote API function dynamically
-  client.notify("custom").args("value" -> None) // ()
+  client.call[String]("custom").args("value" -> None) // ""
   Try(client.call[String]("omitted").args()) // Failure
   client.call[Double]("test.multi").args("add" -> true, "n" -> 1) // 2
 

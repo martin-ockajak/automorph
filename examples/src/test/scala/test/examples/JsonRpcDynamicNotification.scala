@@ -22,7 +22,7 @@ object JsonRpcDynamicNotification extends App {
   val client = Default.clientAsync(new URI("http://localhost/api"))
 
   // Notify the remote API function dynamically without expecting a response
-  client.notify("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
+  client.message("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
 
   // Close the client
   client.close()

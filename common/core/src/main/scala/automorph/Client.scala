@@ -41,12 +41,12 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     transport.defaultContext
 
   /**
-   * Creates an RPC function notification.
+   * Prepares an one-way remote API function message.
    *
    * @param functionName RPC function name
    * @return RPC function notification proxy with specified function name
    */
-  def notify(functionName: String): RemoteNotify[Node, Codec, Effect, Context] =
+  def message(functionName: String): RemoteNotify[Node, Codec, Effect, Context] =
     RemoteNotify(functionName, protocol.codec, message)
 
   /**

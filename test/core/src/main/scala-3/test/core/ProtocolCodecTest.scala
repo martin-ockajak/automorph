@@ -43,7 +43,7 @@ trait ProtocolCodecTest extends CoreTest {
           client.bind[ComplexApiType],
           client.bind[InvalidApiType],
           (function, a0) => client.call[String](function).args(a0),
-          (function, a0) => client.notify(function).args(a0)
+          (function, a0) => client.message(function).args(a0)
         )
       }, {
         val enumModule = new SimpleModule().addSerializer(
@@ -74,7 +74,7 @@ trait ProtocolCodecTest extends CoreTest {
           client.bind[ComplexApiType],
           client.bind[InvalidApiType],
           (function, a0) => client.call[String](function).args(a0),
-          (function, a0) => client.notify(function).args(a0)
+          (function, a0) => client.message(function).args(a0)
         )
       }, {
         class Custom extends UpickleJsonCustom {
@@ -99,7 +99,7 @@ trait ProtocolCodecTest extends CoreTest {
           client.bind[ComplexApiType],
           client.bind[InvalidApiType],
           (function, a0) => client.call[String](function).args(a0),
-          (function, a0) => client.notify(function).args(a0)
+          (function, a0) => client.message(function).args(a0)
         )
       }, {
         class Custom extends UpickleMessagePackCustom {
@@ -124,7 +124,7 @@ trait ProtocolCodecTest extends CoreTest {
           client.bind[ComplexApiType],
           client.bind[InvalidApiType],
           (function, a0) => client.call[String](function).args(a0),
-          (function, a0) => client.notify(function).args(a0)
+          (function, a0) => client.message(function).args(a0)
         )
       }, {
         implicit val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
@@ -180,7 +180,7 @@ trait ProtocolCodecTest extends CoreTest {
           client.bind[ComplexApiType],
           client.bind[InvalidApiType],
           (function, a0) => client.call[String](function).args(a0),
-          (function, a0) => client.notify(function).args(a0)
+          (function, a0) => client.message(function).args(a0)
         )
       }
     )

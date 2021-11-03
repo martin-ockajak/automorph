@@ -73,7 +73,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
     ).asInstanceOf[Api]
 
   /**
-   * Creates an RPC function call.
+   * Prepares an remote API function call.
    *
    * @param functionName RPC function name
    * @tparam Result result type
