@@ -294,7 +294,7 @@ lazy val finagle = (project in file("transport/finagle")).dependsOn(
 ).settings(
   name := s"$projectName-finagle",
   libraryDependencies ++= Seq(
-    ("com.twitter" % "finagle-http" % "21.9.0").cross(CrossVersion.for3Use2_13)
+    ("com.twitter" % "finagle-http" % "21.10.0").cross(CrossVersion.for3Use2_13)
   )
 )
 val tapirVersion = "0.18.3"
