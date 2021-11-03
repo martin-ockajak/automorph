@@ -28,7 +28,7 @@ class UrlClientHttpTryTest extends ClientServerTest {
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
-    val server = withAvailablePort(port => NanoServer.create[Effect](handler, port)(run(_)))
+    val server = withRandomAvailablePort(port => NanoServer.create[Effect](handler, port)(run(_)))
     servers += server
     val url = new URI(s"http://localhost:${server.port}")
     val client = UrlClient(system, url, HttpMethod.Delete).asInstanceOf[ClientMessageTransport[Effect, Context]]

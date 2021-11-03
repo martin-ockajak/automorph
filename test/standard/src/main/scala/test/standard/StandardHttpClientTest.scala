@@ -15,7 +15,7 @@ trait StandardHttpClientTest extends ClientServerTest {
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
-    val server = withAvailablePort(port =>
+    val server = withRandomAvailablePort(port =>
       NanoServer.create[Effect](
         handler.asInstanceOf[Types.HandlerAnyCodec[Effect, NanoServer.Context]],
         port

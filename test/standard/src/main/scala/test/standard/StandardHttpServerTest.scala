@@ -16,7 +16,7 @@ trait StandardHttpServerTest extends ClientServerTest {
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
-    val (server, port) = withAvailablePort(port => serverTransport(handler, port) -> port)
+    val (server, port) = withRandomAvailablePort(port => serverTransport(handler, port) -> port)
     servers += server
     val scheme = Option.when(webSocket)("ws").getOrElse("http")
     val url = new URI(s"$scheme://localhost:$port")

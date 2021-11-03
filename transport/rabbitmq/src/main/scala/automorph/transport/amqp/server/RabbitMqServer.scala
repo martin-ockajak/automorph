@@ -35,7 +35,7 @@ final case class RabbitMqServer[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, AmqpContext[RabbitMqContext]],
   url: URI,
   queues: Seq[String],
-  connectionFactory: ConnectionFactory
+  connectionFactory: ConnectionFactory = new ConnectionFactory
 ) extends Logging with ServerMessageTransport[Effect] {
 
   private lazy val connection = createConnection()
@@ -50,7 +50,9 @@ final case class RabbitMqServer[Effect[_]](
   override def close(): Effect[Unit] = system.wrap(RabbitMqCommon.disconnect(connection))
 
   private def start(): Unit = {
+    println("AAAAAAAAAAAAAAAAA")
     createConsumer(connection.createChannel())
+    println("BBBBBBBBBBBBBBBBBB")
     ()
   }
 

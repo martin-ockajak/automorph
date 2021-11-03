@@ -28,7 +28,7 @@ class HttpClientWebSocketFutureTest extends ClientServerTest {
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
-    val server = withAvailablePort(port => NanoServer.create[Effect](handler, port)(run(_)))
+    val server = withRandomAvailablePort(port => NanoServer.create[Effect](handler, port)(run(_)))
     servers += server
     val url = new URI(s"ws://localhost:${server.port}")
     val client = HttpClient(system, url, HttpMethod.Get).asInstanceOf[ClientMessageTransport[Effect, Context]]
