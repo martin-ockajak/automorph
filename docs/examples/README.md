@@ -104,58 +104,6 @@ remoteApi.hello("world", 1) // Future[String]
 client.close()
 ```
 
-## JSON-RPC notification
-
-* [Source](/test/examples/src/test/scala/test/examples/JsonRpcNotification.scala)
-
-**Dependencies**
-
-```scala
-libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
-)
-```
-
-**API**
-
-```scala
-import automorph.Default
-import java.net.URI
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
-// Define an API and create its instance
-class Api {
-  def hello(some: String, n: Int): Future[String] =
-    Future(s"Hello $some $n!")
-}
-val api = new Api()
-```
-
-**Server**
-
-```scala
-// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
-val createServer = Default.serverAsync(80, "/api")
-val server = createServer(_.bind(api))
-
-// Stop the server
-server.close()
-```
-
-**Client**
-
-```scala
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.asyncHttpClient(new URI("http://localhost/api"))
-
-// Notify the remote API function dynamically without expecting a response
-client.notify("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
-
-// Close the client
-client.close()
-```
-
 ## HTTP request metadata
 
 * [Source](/test/examples/src/test/scala/test/examples/HttpRequestMetadata.scala)
@@ -233,6 +181,58 @@ client.call[String]("hello").args("message" -> "test")(using requestContext) // 
 
 // Call the remote API function dynamically with request context supplied implictly
 client.call[String]("hello").args("message" -> "test") // String
+
+// Close the client
+client.close()
+```
+
+## JSON-RPC notification
+
+* [Source](/test/examples/src/test/scala/test/examples/JsonRpcNotification.scala)
+
+**Dependencies**
+
+```scala
+libraryDependencies ++= Seq(
+  "org.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
+**API**
+
+```scala
+import automorph.Default
+import java.net.URI
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+// Define an API and create its instance
+class Api {
+  def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
+}
+val api = new Api()
+```
+
+**Server**
+
+```scala
+// Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
+val createServer = Default.serverAsync(80, "/api")
+val server = createServer(_.bind(api))
+
+// Stop the server
+server.close()
+```
+
+**Client**
+
+```scala
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+val client = Default.asyncHttpClient(new URI("http://localhost/api"))
+
+// Notify the remote API function dynamically without expecting a response
+client.notify("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
 
 // Close the client
 client.close()
