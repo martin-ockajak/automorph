@@ -9,7 +9,7 @@
 //import io.vertx.core.Vertx
 //import io.vertx.ext.web.Router
 //import org.scalacheck.Arbitrary
-//import scala.collection.mutable.ArrayBuffer
+//import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
 //import sttp.model.Method

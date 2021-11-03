@@ -47,7 +47,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @return RPC function notification proxy with specified function name
    */
   def notify(functionName: String): RemoteNotify[Node, Codec, Effect, Context] =
-    RemoteNotify(functionName, protocol.codec, notify)
+    RemoteNotify(functionName, protocol.codec, message)
 
   /**
    * Closes this client freeing the underlying resources.
@@ -66,7 +66,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }
 
   /**
-   * Performs an RPC call using specified arguments.
+   * Calls a remote API function using specified arguments.
    *
    * Optional request context is used as a last RPC function argument.
    *
@@ -107,7 +107,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }
 
   /**
-   * Performs an RPC notification using specified arguments.
+   * Messages a remote API function using specified arguments.
    *
    * Optional request context is used as a last RPC function argument.
    *
@@ -117,7 +117,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @param requestContext request context
    * @return nothing
    */
-  private def notify(
+  private def message(
     functionName: String,
     argumentNames: Seq[String],
     argumentNodes: Seq[Node],
@@ -137,7 +137,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           )
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${protocol.name} request", allProperties)
-          transport.notify(request.message.body, requestId, protocol.codec.mediaType, requestContext)
+          transport.message(request.message.body, requestId, protocol.codec.mediaType, requestContext)
         }
     )
   }

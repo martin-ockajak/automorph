@@ -60,7 +60,7 @@ final case class RabbitMqClient[Effect[_]](
       send(requestBody, requestId, mediaType, requestContext, Some(response)).flatMap(_ => response.effect)
     }
 
-  override def notify(
+  override def message(
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,

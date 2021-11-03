@@ -41,7 +41,7 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     })
   }
 
-  override def notify(
+  override def message(
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,

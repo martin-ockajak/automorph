@@ -7,6 +7,7 @@ import automorph.transport.http.endpoint.FinagleEndpoint
 import com.twitter.finagle.Http
 import com.twitter.util.{Return, Throw}
 import org.scalacheck.Arbitrary
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 import test.standard.StandardHttpServerTest
 import test.transport.http.HttpContextGenerator

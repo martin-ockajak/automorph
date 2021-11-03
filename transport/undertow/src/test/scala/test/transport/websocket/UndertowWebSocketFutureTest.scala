@@ -5,7 +5,7 @@ import automorph.spi.transport.ServerMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.server.UndertowServer
 import org.scalacheck.Arbitrary
-import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import test.standard.StandardHttpServerTest
 import test.transport.http.HttpContextGenerator

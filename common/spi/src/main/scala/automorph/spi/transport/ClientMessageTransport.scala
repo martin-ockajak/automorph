@@ -37,7 +37,7 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
   ): Effect[(ArraySeq.ofByte, Context)]
 
   /**
-   * Sends a request to a remote endpoint without retrieving a response.
+   * Sends a request to a remote endpoint without expecting a response.
    *
    * An optional request context is used to supply additional information needed to send the request.
    *
@@ -47,7 +47,7 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
    * @param requestContext request context
    * @return nothing
    */
-  def notify(
+  def message(
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,

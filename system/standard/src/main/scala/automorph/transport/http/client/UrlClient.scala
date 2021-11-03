@@ -65,7 +65,7 @@ final case class UrlClient[Effect[_]](
       }
     }
 
-  override def notify(
+  override def message(
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,

@@ -5,6 +5,7 @@ import automorph.system.FutureSystem
 import automorph.transport.http.client.SttpClient
 import java.net.URI
 import org.scalacheck.Arbitrary
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import sttp.client3.httpclient.HttpClientFutureBackend
 import sttp.model.Method

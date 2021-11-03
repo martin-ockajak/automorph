@@ -72,7 +72,7 @@ final case class SttpClient[Effect[_]] private (
     }
   }
 
-  override def notify(
+  override def message(
     requestBody: ArraySeq.ofByte,
     requestId: String,
     mediaType: String,
