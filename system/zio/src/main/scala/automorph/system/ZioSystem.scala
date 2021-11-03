@@ -1,7 +1,6 @@
 package automorph.system
 
 import automorph.spi.EffectSystem
-import zio.internal.Platform
 import automorph.spi.system.{Defer, Deferred}
 import zio.{Queue, RIO, Runtime, ZEnv, ZQueue}
 
