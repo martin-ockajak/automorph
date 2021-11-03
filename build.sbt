@@ -331,6 +331,7 @@ lazy val examples = (project in file("examples")).dependsOn(
   ),
   Compile / doc / scalacOptions ++= Seq("-skip-packages", "test")
 )
+
 // Test
 lazy val testBase = (project in file("test/base")).dependsOn(
   spi
