@@ -10,7 +10,7 @@ import scala.concurrent.Future
 import test.standard.StandardHttpServerTest
 import test.transport.http.HttpContextGenerator
 
-class UndertowWebSocketFutureTest extends StandardHttpServerTest {
+class UndertowServerWebSocketFutureTest extends StandardHttpServerTest {
 
   type Effect[T] = Future[T]
   type Context = UndertowServer.Context
