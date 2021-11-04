@@ -29,5 +29,6 @@ class JettyHttpFutureTest extends StandardHttpServerTest {
   ): ServerMessageTransport[Effect] =
     JettyServer(handler, port)
 
-  override def run[T](effect: Effect[T]): T = await(effect)
+  override def run[T](effect: Effect[T]): T =
+    await(effect)
 }

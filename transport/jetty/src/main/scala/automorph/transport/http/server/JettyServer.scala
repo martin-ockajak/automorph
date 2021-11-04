@@ -15,7 +15,7 @@ import org.eclipse.jetty.util.thread.{QueuedThreadPool, ThreadPool}
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
- * Jetty HTTP & WebSocket server transport plugin.
+ * Jetty HTTP server transport plugin.
  *
  * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as HTTP response body.
@@ -23,15 +23,13 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * Processes only HTTP requests starting with specified URL path.
  *
  * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
- * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
  * @see [[https://jetty.io Library documentation]]
  * @see [[https://www.javadoc.io/doc/io.jetty/jetty-core/latest/index.html API]]
- * @constructor Creates an Jetty HTTP & WebSocket server with specified RPC request handler.
+ * @constructor Creates an Jetty HTTP server with specified RPC request handler.
  * @param handler RPC request handler
  * @param port port to listen on for HTTP connections
  * @param path HTTP URL path
  * @param methods allowed HTTP request methods
- * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
  * @param mapException maps an exception to a corresponding HTTP status code
  * @param threadPool thread pool
  * @tparam Effect effect type
