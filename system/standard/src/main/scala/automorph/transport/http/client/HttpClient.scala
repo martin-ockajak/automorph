@@ -4,8 +4,8 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.{HttpContext, HttpMethod}
-import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Protocol, Response, Session}
+import automorph.transport.http.client.HttpClient.{Context, Response, Session, defaultBuilder}
+import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.io.ByteArrayOutputStream
@@ -48,7 +48,7 @@ final case class HttpClient[Effect[_]](
 
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
-  private val httpMethods = Set("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS")
+  private val httpMethods = HttpMethod.values.map(_.name).toSet
   private val httpEmptyUrl = new URI("http://empty")
   private val webSocketsSchemePrefix = "ws"
   private val httpClient = builder.build
@@ -293,7 +293,7 @@ final case class HttpClient[Effect[_]](
   private def withDefer[T](function: Defer[Effect] => Effect[T]): Effect[T] = system match {
     case defer: Defer[_] => function(defer.asInstanceOf[Defer[Effect]])
     case _ => system.failed(new IllegalArgumentException(
-        s"Effect system without deferred effect support cannot be used with WebSocket: ${system.getClass.getName}"
+        s"WebSocket no supported for effect system without deferred effect support: ${system.getClass.getName}"
       ))
   }
 }
@@ -303,22 +303,10 @@ object HttpClient {
   /** Request context type. */
   type Context = HttpContext[Session]
 
+  /** Default HTTP client builder. */
   val defaultBuilder = java.net.http.HttpClient.newBuilder
 
   private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
-
-  /** Transport protocol. */
-  sealed abstract private class Protocol(val name: String) {
-    override def toString: String = name
-  }
-
-  /** Transport protocols. */
-  private object Protocol {
-
-    case object Http extends Protocol("HTTP")
-
-    case object WebSocket extends Protocol("WebSocket")
-  }
 
   final case class Session(request: HttpRequest.Builder)
 

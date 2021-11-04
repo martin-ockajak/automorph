@@ -3,14 +3,14 @@ package automorph.transport.http.client
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.HttpContext
-import automorph.transport.http.client.SttpClient.{Context, Protocol, Session, WebSocket}
+import automorph.transport.http.{HttpContext, Protocol}
+import automorph.transport.http.client.SttpClient.{Context, Session}
 import automorph.util.Bytes
 import automorph.util.Extensions.EffectOps
 import java.net.URI
 import scala.collection.immutable.ArraySeq
 import sttp.capabilities.WebSockets
-import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
+import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
@@ -37,6 +37,8 @@ final case class SttpClient[Effect[_]] private (
   method: Method,
   webSocketSupport: Boolean
 ) extends ClientMessageTransport[Effect, Context] with Logging {
+
+  private type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
 
   private val webSocketsSchemePrefix = "ws"
   private val defaultUrl = Uri(url)
@@ -161,7 +163,9 @@ final case class SttpClient[Effect[_]] private (
         system.pure(Protocol.WebSocket)
       } else {
         system.failed(
-          throw new IllegalArgumentException(s"Selected STTP backend does not support WebSocket: ${backend.getClass.getSimpleName}")
+          throw new IllegalArgumentException(
+            s"Selected STTP backend does not support WebSocket: ${backend.getClass.getSimpleName}"
+          )
         )
       }
     } else system.pure(Protocol.Http)
@@ -208,22 +212,6 @@ object SttpClient {
     method: Method = Method.POST
   ): SttpClient[Effect] =
     SttpClient[Effect](system, backend, url, method, false)
-
-  /** STTP backend WebSocket capabilities type. */
-  private type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
-
-  /** Transport protocol. */
-  sealed abstract private class Protocol(val name: String) {
-    override def toString: String = name
-  }
-
-  /** Transport protocols. */
-  private object Protocol {
-
-    case object Http extends Protocol("HTTP")
-
-    case object WebSocket extends Protocol("WebSocket")
-  }
 
   final case class Session(request: PartialRequest[Either[String, String], Any])
 
