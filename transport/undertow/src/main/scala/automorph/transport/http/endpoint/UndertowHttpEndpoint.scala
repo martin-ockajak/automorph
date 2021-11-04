@@ -51,7 +51,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
 
         override def run(): Unit = {
           // Process the request
-          implicit val givenContext: Context = requestContext(exchange)
+          implicit val requestContext: Context = getRequestContext(exchange)
           genericHandler.processRequest(requestBody, requestId, Some(exchange.getRequestPath)).either.map(_.fold(
             error => sendErrorResponse(error, exchange, requestId, requestProperties),
             result => {
@@ -114,15 +114,14 @@ final case class UndertowHttpEndpoint[Effect[_]](
       if (!exchange.isResponseChannelAvailable) {
         throw new IOException("Response channel not available")
       }
-      val mediaType = genericHandler.protocol.codec.mediaType
+      setResponseContext(exchange, responseContext)
+      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, genericHandler.protocol.codec.mediaType)
       exchange.setStatusCode(responseStatusCode).getResponseSender.send(Bytes.byteBuffer.to(message))
-      setResponseProperties(exchange, responseContext)
-      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, mediaType)
       logger.debug("Sent HTTP response", responseDetails)
     }.onFailure(logger.error("Failed to send HTTP response", _, responseDetails)).get
   }
 
-  private def requestContext(exchange: HttpServerExchange): Context = {
+  private def getRequestContext(exchange: HttpServerExchange): Context = {
     val headers = exchange.getRequestHeaders.asScala.flatMap { headerValues =>
       headerValues.iterator.asScala.map(value => headerValues.getHeaderName.toString -> value)
     }.toSeq
@@ -131,6 +130,13 @@ final case class UndertowHttpEndpoint[Effect[_]](
       method = Some(HttpMethod.valueOf(exchange.getRequestMethod.toString)),
       headers = headers
     ).url(exchange.getRequestURI)
+  }
+
+  private def setResponseContext(exchange: HttpServerExchange, responseContext: Option[Context]): Unit = {
+    val responseHeaders = exchange.getResponseHeaders
+    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
+      responseHeaders.add(new HttpString(name), value)
+    }
   }
 
   private def getRequestProperties(
@@ -143,13 +149,6 @@ final case class UndertowHttpEndpoint[Effect[_]](
       .filter(_.nonEmpty).map("?" + _).getOrElse("")),
     "Method" -> exchange.getRequestMethod.toString
   )
-
-  private def setResponseProperties(exchange: HttpServerExchange, responseContext: Option[Context]): Unit = {
-    val responseHeaders = exchange.getResponseHeaders
-    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
-      responseHeaders.add(new HttpString(name), value)
-    }
-  }
 
   private def clientAddress(exchange: HttpServerExchange): String = {
     val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)

@@ -43,12 +43,12 @@ final case class JettyHttpEndpoint[Effect[_]](
     asyncContext.start(new Runnable {
       override def run(): Unit = {
         val requestId = Random.id
-        lazy val requestProperties = extractRequestProperties(request, requestId)
+        lazy val requestProperties = getRequestProperties(request, requestId)
         logger.trace("Receiving HTTP request", requestProperties)
         val requestBody = Bytes.inputStream.from(request.getInputStream)
 
         // Process the request
-        implicit val givenContext: Context = requestContext(request)
+        implicit val requestContext: Context = getRequestContext(request)
         val path = new URI(request.getRequestURI).getPath
         genericHandler.processRequest(requestBody, requestId, Some(path)).either.map(_.fold(
           error => sendErrorResponse(error, response, asyncContext, request, requestId, requestProperties),
@@ -96,11 +96,9 @@ final case class JettyHttpEndpoint[Effect[_]](
     logger.debug("Sending HTTP response", responseDetails)
 
     // Send the response
-    response.setStatus(responseStatus)
-    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
-      response.setHeader(name, value)
-    }
+    setResponseContext(response, responseContext)
     response.setContentType(genericHandler.protocol.codec.mediaType)
+    response.setStatus(responseStatus)
     val outputStream = response.getOutputStream
     outputStream.write(responseBody.unsafeArray)
     outputStream.flush()
@@ -108,7 +106,7 @@ final case class JettyHttpEndpoint[Effect[_]](
     logger.debug("Sent HTTP response", responseDetails)
   }
 
-  private def requestContext(request: HttpServletRequest): Context = {
+  private def getRequestContext(request: HttpServletRequest): Context = {
     val headers = request.getHeaderNames.asScala.flatMap { name =>
       request.getHeaders(name).asScala.map(value => name -> value)
     }.toSeq
@@ -119,7 +117,13 @@ final case class JettyHttpEndpoint[Effect[_]](
     ).url(request.getRequestURI)
   }
 
-  private def extractRequestProperties(
+  private def setResponseContext(response: HttpServletResponse, responseContext: Option[Context]): Unit = {
+    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
+      response.setHeader(name, value)
+    }
+  }
+
+  private def getRequestProperties(
     request: HttpServletRequest,
     requestId: String
   ): Map[String, String] = Map(

@@ -14,7 +14,7 @@ import io.undertow.websockets.core.{AbstractReceiveListener, BufferedBinaryMessa
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHandshakeHandler}
 import scala.collection.immutable.ArraySeq
-import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
+import scala.jdk.CollectionConverters.{ListHasAsScala, SeqHasAsJava, MapHasAsJava, MapHasAsScala}
 
 /**
  * Undertow WebSocket endpoint message transport plugin.
@@ -83,13 +83,13 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         logger.debug("Received WebSocket request", requestProperties)
 
         // Process the request
-        implicit val givenContext: Context = requestContext(exchange)
+        implicit val requestContext: Context = getRequestContext(exchange)
         genericHandler.processRequest(requestBody, requestId, None).either.map(_.fold(
           error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
           result => {
             // Send the response
             val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
-            sendResponse(response, exchange, channel, requestId)
+            sendResponse(response, result.context, exchange, channel, requestId)
             discardMessage()
           }
         )).run
@@ -104,11 +104,12 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
       ): Unit = {
         logger.error("Failed to process WebSocket request", error, requestProperties)
         val message = Bytes.string.from(error.trace.mkString("\n"))
-        sendResponse(message, exchange, channel, requestId)
+        sendResponse(message, None, exchange, channel, requestId)
       }
 
       private def sendResponse(
         message: ArraySeq.ofByte,
+        responseContext: Option[Context],
         exchange: WebSocketHttpExchange,
         channel: WebSocketChannel,
         requestId: String
@@ -128,10 +129,11 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
           override def onError(channel: WebSocketChannel, context: Unit, throwable: Throwable): Unit =
             logger.error("Failed to send WebSocket response", throwable, responseDetails)
         }
+        setResponseContext(exchange, responseContext)
         WebSockets.sendBinary(Bytes.byteBuffer.to(message), channel, callback, ())
       }
 
-      private def requestContext(exchange: WebSocketHttpExchange): Context = {
+      private def getRequestContext(exchange: WebSocketHttpExchange): Context = {
         val headers = exchange.getRequestHeaders.asScala.view.mapValues(_.asScala).flatMap { case (name, values) =>
           values.map(value => name -> value)
         }.toSeq
@@ -139,6 +141,13 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
           base = Some(Right(exchange).withLeft[HttpServerExchange]),
           headers = headers
         ).url(exchange.getRequestURI)
+      }
+
+      private def setResponseContext(exchange: WebSocketHttpExchange, responseContext: Option[Context]): Unit = {
+        val responseHeaders = exchange.getResponseHeaders
+        val headers = responseContext.toSeq.flatMap(_.headers).groupBy(_._1)
+          .view.mapValues(_.map(_._2).asJava).toMap.asJava
+        exchange.setResponseHeaders(headers)
       }
 
       private def getRequestProperties(

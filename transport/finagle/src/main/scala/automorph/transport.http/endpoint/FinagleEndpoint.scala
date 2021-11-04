@@ -43,7 +43,7 @@ final case class FinagleEndpoint[Effect[_]](
     val requestBody = Buf.ByteArray.Owned.extract(request.content)
 
     // Process the request
-    implicit val givenContext: Context = requestContext(request)
+    implicit val requestContext: Context = getRequestContext(request)
     runAsFuture(genericHandler.processRequest(requestBody, requestId, Some(request.path)).either.map(_.fold(
       error => sendErrorResponse(error, request, requestId, requestProperties),
       result => {
@@ -83,18 +83,24 @@ final case class FinagleEndpoint[Effect[_]](
     )
 
     // Send the response
-    // FIXME - set headers from response context
     val response = Response(request.version, responseStatus, message)
+    setResponseContext(response, responseContext)
     response.contentType = genericHandler.protocol.codec.mediaType
     logger.debug("Sending HTTP response", responseDetails)
     response
   }
 
-  private def requestContext(request: Request): Context = HttpContext(
+  private def getRequestContext(request: Request): Context = HttpContext(
     base = Some(request),
     method = Some(HttpMethod.valueOf(request.method.name)),
     headers = request.headerMap.iterator.toSeq
   ).url(request.uri)
+
+  private def setResponseContext(response: Response, responseContext: Option[Context]): Unit = {
+    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
+      response.headerMap.add(name, value)
+    }
+  }
 
   private def extractRequestProperties(
     request: Request,

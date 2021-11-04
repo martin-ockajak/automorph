@@ -64,7 +64,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
         logger.debug("Received HTTP request", requestProperties)
 
         // Process the request
-        implicit val givenContext: Context = requestContext(paths, queryParams, headers, Some(method))
+        implicit val requestContext: Context = getRequestContext(paths, queryParams, headers, Some(method))
         genericHandler.processRequest(requestBody, requestId, Some(urlPath(paths))).either.map(_.fold(
           error => Right(createErrorResponse(error, clientIp, requestId, requestProperties)),
           result => {
@@ -77,7 +77,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
       }
   }
 
-  private[automorph] def requestContext(
+  private[automorph] def getRequestContext(
     paths: List[String],
     queryParams: QueryParams,
     headers: List[Header],
