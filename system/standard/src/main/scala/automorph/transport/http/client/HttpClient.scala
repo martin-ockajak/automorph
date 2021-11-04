@@ -123,7 +123,8 @@ final case class HttpClient[Effect[_]](
       // Send HTTP request
       httpRequest =>
         system match {
-          case defer: Defer[_] => effect(
+          case defer: Defer[_] =>
+            effect(
               httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray),
               defer.asInstanceOf[Defer[Effect]]
             ).map(httpResponse)
@@ -185,23 +186,28 @@ final case class HttpClient[Effect[_]](
     mediaType: String,
     httpContext: Context
   ): HttpRequest = {
+    // Method
     val baseBuilder = httpContext.base.map(_.request).getOrElse(HttpRequest.newBuilder)
     val baseRequest = Try(baseBuilder.build).toOption
     val requestMethod = httpContext.method.map(_.name).getOrElse(method.name)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
-    val headers = httpContext.headers.map { case (name, value) => Seq(name, value) }.flatten
-    val headersBuilder = baseBuilder.uri(requestUrl)
+    val methodBuilder = baseBuilder.uri(requestUrl)
       .method(requestMethod, BodyPublishers.ofByteArray(requestBody.unsafeArray))
-    val requestBuilder = (headers match {
-      case Seq() => headersBuilder
-      case values => headersBuilder.headers(values.toArray*)
+
+    // Headers
+    val headers = httpContext.headers.map { case (name, value) => Seq(name, value) }.flatten
+    val headersBuilder = (headers match {
+      case Seq() => methodBuilder
+      case values => methodBuilder.headers(values.toArray*)
     }).header(contentTypeHeader, mediaType)
       .header(acceptHeader, mediaType)
-    httpContext.readTimeout.map { timeout =>
+
+    // Timeout
+    httpContext.timeout.map { timeout =>
       java.time.Duration.ofMillis(timeout.toMillis)
     }.orElse(baseRequest.flatMap(_.timeout.toScala)).map { timeout =>
-      requestBuilder.timeout(timeout)
-    }.getOrElse(requestBuilder).build
+      headersBuilder.timeout(timeout)
+    }.getOrElse(headersBuilder).build
   }
 
   private def prepareWebSocket(

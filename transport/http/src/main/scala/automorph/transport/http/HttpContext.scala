@@ -27,7 +27,7 @@ import scala.concurrent.duration.Duration
  * @param method request method
  * @param statusCode response status code
  * @param followRedirects automatically follow redirects if true
- * @param readTimeout response read timeout
+ * @param timeout response read timeout
  * @param base base properties defined by the specific message transport plugin
  * @tparam Base specific message transport plugin base properties type
  */
@@ -43,7 +43,7 @@ final case class HttpContext[Base](
   method: Option[HttpMethod] = None,
   statusCode: Option[Int] = None,
   followRedirects: Option[Boolean] = None,
-  readTimeout: Option[Duration] = None,
+  timeout: Option[Duration] = None,
   base: Option[Base] = None
 ) {
 
