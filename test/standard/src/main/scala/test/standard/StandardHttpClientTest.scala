@@ -19,7 +19,7 @@ trait StandardHttpClientTest extends ClientServerTest {
       NanoServer.create[Effect](
         handler.asInstanceOf[Types.HandlerAnyCodec[Effect, NanoServer.Context]],
         port
-      )(run(_))
+      )(execute(_))
     )
     servers += server
     val scheme = Option.when(webSocket)("ws").getOrElse("http")

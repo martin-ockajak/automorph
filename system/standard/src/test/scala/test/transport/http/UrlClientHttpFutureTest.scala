@@ -20,7 +20,7 @@ class UrlClientHttpFutureTest extends ClientServerTest {
 
   override lazy val system: FutureSystem = FutureSystem()
 
-  override def run[T](effect: Effect[T]): T =
+  override def execute[T](effect: Effect[T]): T =
     await(effect)
 
   override def arbitraryContext: Arbitrary[Context] =
@@ -29,7 +29,7 @@ class UrlClientHttpFutureTest extends ClientServerTest {
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
-    val server = withRandomAvailablePort(port => NanoServer.create[Effect](handler, port)(run(_)))
+    val server = withRandomAvailablePort(port => NanoServer.create[Effect](handler, port)(execute(_)))
     servers += server
     val url = new URI(s"http://localhost:${server.port}")
     val client = UrlClient(system, url, HttpMethod.Put).asInstanceOf[ClientMessageTransport[Effect, Context]]

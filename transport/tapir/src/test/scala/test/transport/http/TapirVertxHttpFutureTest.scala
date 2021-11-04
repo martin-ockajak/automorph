@@ -25,7 +25,7 @@
 //
 //  override lazy val system: FutureSystem = FutureSystem()
 //
-//  override def run[T](effect: Effect[T]): T =
+//  override def execute[T](effect: Effect[T]): T =
 //    await(effect)
 //
 //  override lazy val arbitraryContext: Arbitrary[Context] =
