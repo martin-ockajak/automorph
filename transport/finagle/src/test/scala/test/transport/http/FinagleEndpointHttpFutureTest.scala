@@ -19,6 +19,9 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
 
   override lazy val system: FutureSystem = FutureSystem()
 
+  override def run[T](effect: Effect[T]): T =
+    await(effect)
+
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
@@ -40,6 +43,4 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
       promise.future
     }
   }
-
-  override def run[T](effect: Effect[T]): T = await(effect)
 }

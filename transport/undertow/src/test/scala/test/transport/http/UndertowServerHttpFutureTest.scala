@@ -17,6 +17,9 @@ class UndertowServerHttpFutureTest extends StandardHttpServerTest {
 
   override lazy val system: FutureSystem = FutureSystem()
 
+  override def run[T](effect: Effect[T]): T =
+    await(effect)
+
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
@@ -25,6 +28,4 @@ class UndertowServerHttpFutureTest extends StandardHttpServerTest {
     port: Int
   ): ServerMessageTransport[Effect] =
     UndertowServer(handler, port)
-
-  override def run[T](effect: Effect[T]): T = await(effect)
 }

@@ -19,11 +19,11 @@ class HttpClientHttpIdentityTest extends ClientServerTest {
 
   override lazy val system: IdentitySystem = IdentitySystem()
 
-  override def arbitraryContext: Arbitrary[Context] =
-    HttpContextGenerator.arbitrary
-
   override def run[T](effect: Effect[T]): T =
     effect
+
+  override def arbitraryContext: Arbitrary[Context] =
+    HttpContextGenerator.arbitrary
 
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]

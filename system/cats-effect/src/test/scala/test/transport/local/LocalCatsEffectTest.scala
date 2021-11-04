@@ -12,12 +12,12 @@ class LocalCatsEffectTest extends ProtocolCodecTest {
   type Effect[T] = IO[T]
   type Context = String
 
-  override lazy val arbitraryContext: Arbitrary[Context] =
-    Arbitrary(Arbitrary.arbitrary[Context])
-
   override lazy val system: EffectSystem[Effect] =
     CatsEffectSystem()
 
   override def run[T](effect: Effect[T]): T =
     effect.unsafeRunSync()
+
+  override def arbitraryContext: Arbitrary[Context] =
+    Arbitrary(Arbitrary.arbitrary[Context])
 }

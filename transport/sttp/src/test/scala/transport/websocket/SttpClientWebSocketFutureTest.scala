@@ -18,7 +18,10 @@ class SttpClientWebSocketFutureTest extends StandardHttpClientTest {
   type Context = SttpClient.Context
 
   override lazy val system: FutureSystem = FutureSystem()
-  
+
+  override def run[T](effect: Effect[T]): T =
+    await(effect)
+
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
@@ -26,6 +29,4 @@ class SttpClientWebSocketFutureTest extends StandardHttpClientTest {
 
   override def clientTransport(url: URI): ClientMessageTransport[Effect, Context] =
     SttpClient(system, HttpClientFutureBackend(), url, Method.GET)
-
-  override def run[T](effect: Effect[T]): T = await(effect)
 }

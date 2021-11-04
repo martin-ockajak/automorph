@@ -18,11 +18,12 @@ class SttpClientHttpIdentityTest extends StandardHttpClientTest {
 
   override lazy val system: IdentitySystem = IdentitySystem()
   
+  override def run[T](effect: Effect[T]): T =
+    effect
+
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
   override def clientTransport(url: URI): ClientMessageTransport[Effect, Context] =
     SttpClient.http(system, HttpURLConnectionBackend(), url, Method.PUT)
-
-  override def run[T](effect: Effect[T]): T = effect
 }

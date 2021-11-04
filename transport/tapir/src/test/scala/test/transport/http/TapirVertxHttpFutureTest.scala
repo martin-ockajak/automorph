@@ -25,6 +25,9 @@
 //
 //  override lazy val system: FutureSystem = FutureSystem()
 //
+//  override def run[T](effect: Effect[T]): T =
+//    await(effect)
+//
 //  override lazy val arbitraryContext: Arbitrary[Context] =
 //    Arbitrary(HttpContextGenerator.arbitrary.arbitrary.map { context =>
 //      context.method(HttpMethod.Post).asInstanceOf[Context]
@@ -48,6 +51,4 @@
 //    override def close(): Effect[Unit] =
 //      server.close().asScala.map(_ => ())
 //  }
-//
-//  override def run[T](effect: Effect[T]): T = await(effect)
 //}

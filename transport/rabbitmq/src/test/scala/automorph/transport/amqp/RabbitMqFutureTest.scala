@@ -22,10 +22,11 @@ class RabbitMqFutureTest extends ClientServerTest {
 
   override lazy val system: FutureSystem = FutureSystem()
 
+  override def run[T](effect: Effect[T]): T =
+    await(effect)
+
   override def arbitraryContext: Arbitrary[Context] =
     AmqpContextGenerator.arbitrary
-
-  override def run[T](effect: Effect[T]): T = await(effect)
 
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]

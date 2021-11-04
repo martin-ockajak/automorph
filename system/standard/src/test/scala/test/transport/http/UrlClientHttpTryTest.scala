@@ -19,11 +19,11 @@ class UrlClientHttpTryTest extends ClientServerTest {
 
   override lazy val system: TrySystem = TrySystem()
 
-  override def arbitraryContext: Arbitrary[Context] =
-    HttpContextGenerator.arbitrary
-
   override def run[T](effect: Effect[T]): T =
     effect.get
+
+  override def arbitraryContext: Arbitrary[Context] =
+    HttpContextGenerator.arbitrary
 
   override def customTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
