@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, SerializerProvider}
-import io.circe.generic.auto.*
+import io.circe.generic.auto._
 import io.circe.{Decoder, Encoder}
 import scala.annotation.nowarn
 import scala.collection.mutable.ArrayBuffer
