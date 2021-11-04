@@ -126,7 +126,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
       headerValues.iterator.asScala.map(value => headerValues.getHeaderName.toString -> value)
     }.toSeq
     HttpContext(
-      base = Some(Left(exchange).withRight[WebSocketHttpExchange]),
+      transport = Some(Left(exchange).withRight[WebSocketHttpExchange]),
       method = Some(HttpMethod.valueOf(exchange.getRequestMethod.toString)),
       headers = headers
     ).url(exchange.getRequestURI)

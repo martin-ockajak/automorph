@@ -114,23 +114,23 @@ private[automorph] object RabbitMqCommon extends Logging {
     defaultAppId: String
   ): BasicProperties = {
     val amqpContext = context.getOrElse(AmqpContext())
-    val baseProperties = amqpContext.base.map(_.properties).getOrElse(new BasicProperties())
+    val transportProperties = amqpContext.transport.map(_.properties).getOrElse(new BasicProperties())
     (new BasicProperties()).builder()
       .contentType(contentType)
-      .replyTo(amqpContext.replyTo.orElse(Option(baseProperties.getReplyTo)).getOrElse(defaultReplyTo))
-      .correlationId(amqpContext.correlationId.orElse(Option(baseProperties.getCorrelationId)).getOrElse(
+      .replyTo(amqpContext.replyTo.orElse(Option(transportProperties.getReplyTo)).getOrElse(defaultReplyTo))
+      .correlationId(amqpContext.correlationId.orElse(Option(transportProperties.getCorrelationId)).getOrElse(
         defaultRequestId
       ))
-      .contentEncoding(amqpContext.contentEncoding.orElse(Option(baseProperties.getContentEncoding)).orNull)
-      .appId(amqpContext.appId.orElse(Option(baseProperties.getAppId)).getOrElse(defaultAppId))
-      .headers((amqpContext.headers ++ Option(baseProperties.getHeaders).map(_.asScala).getOrElse(Map.empty)).asJava)
-      .deliveryMode(amqpContext.deliveryMode.map(new Integer(_)).orElse(Option(baseProperties.getDeliveryMode)).orNull)
-      .priority(amqpContext.priority.map(new Integer(_)).orElse(Option(baseProperties.getPriority)).orNull)
-      .expiration(amqpContext.expiration.orElse(Option(baseProperties.getExpiration)).orNull)
-      .messageId(amqpContext.messageId.orElse(Option(baseProperties.getMessageId)).orNull)
-      .timestamp(amqpContext.timestamp.map(Date.from).orElse(Option(baseProperties.getTimestamp)).orNull)
-      .`type`(amqpContext.`type`.orElse(Option(baseProperties.getType)).orNull)
-      .userId(amqpContext.userId.orElse(Option(baseProperties.getUserId)).orNull)
+      .contentEncoding(amqpContext.contentEncoding.orElse(Option(transportProperties.getContentEncoding)).orNull)
+      .appId(amqpContext.appId.orElse(Option(transportProperties.getAppId)).getOrElse(defaultAppId))
+      .headers((amqpContext.headers ++ Option(transportProperties.getHeaders).map(_.asScala).getOrElse(Map.empty)).asJava)
+      .deliveryMode(amqpContext.deliveryMode.map(new Integer(_)).orElse(Option(transportProperties.getDeliveryMode)).orNull)
+      .priority(amqpContext.priority.map(new Integer(_)).orElse(Option(transportProperties.getPriority)).orNull)
+      .expiration(amqpContext.expiration.orElse(Option(transportProperties.getExpiration)).orNull)
+      .messageId(amqpContext.messageId.orElse(Option(transportProperties.getMessageId)).orNull)
+      .timestamp(amqpContext.timestamp.map(Date.from).orElse(Option(transportProperties.getTimestamp)).orNull)
+      .`type`(amqpContext.`type`.orElse(Option(transportProperties.getType)).orNull)
+      .userId(amqpContext.userId.orElse(Option(transportProperties.getUserId)).orNull)
       .build
   }
 
@@ -155,7 +155,7 @@ private[automorph] object RabbitMqCommon extends Logging {
       `type` = Option(properties.getType),
       userId = Option(properties.getUserId),
       appId = Option(properties.getAppId),
-      base = Some(RabbitMqContext(properties))
+      transport = Some(RabbitMqContext(properties))
     )
 
   /**

@@ -107,7 +107,7 @@ final case class RabbitMqServer[Effect[_]](
   ): Unit = {
     // Log the response
     val actualReplyTo = replyTo.orElse(responseContext.flatMap { context =>
-      context.replyTo.orElse(context.base.flatMap(base => Option(base.properties.getReplyTo)))
+      context.replyTo.orElse(context.transport.flatMap(transport => Option(transport.properties.getReplyTo)))
     })
     lazy val responseProperties = actualReplyTo.map { value =>
       requestProperties + (RabbitMqCommon.routingKeyProperty -> value)

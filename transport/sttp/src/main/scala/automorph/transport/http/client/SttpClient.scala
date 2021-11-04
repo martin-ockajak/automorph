@@ -131,19 +131,19 @@ final case class SttpClient[Effect[_]] private (
   ): Request[Array[Byte], WebSocket] = {
     // URL & method
     val httpContext = requestContext.getOrElse(defaultContext)
-    val baseRequest = httpContext.base.map(_.request).getOrElse(basicRequest)
+    val transportRequest = httpContext.transport.map(_.request).getOrElse(basicRequest)
     val requestUrl = Uri(httpContext.overrideUrl(defaultUrl))
     val requestMethod = Method.unsafeApply(httpContext.method.getOrElse(method).name)
 
     // Headers, timeout & follow redirects
     val contentType = MediaType.unsafeParse(mediaType)
-    val sttpRequest = baseRequest.method(requestMethod, requestUrl)
+    val sttpRequest = transportRequest.method(requestMethod, requestUrl)
       .headers(httpContext.headers.map { case (name, value) => Header(name, value) }*)
       .contentType(contentType)
       .header(Header.accept(contentType))
-      .readTimeout(httpContext.timeout.getOrElse(baseRequest.options.readTimeout))
-      .followRedirects(httpContext.followRedirects.getOrElse(baseRequest.options.followRedirects))
-      .maxRedirects(baseRequest.options.maxRedirects)
+      .readTimeout(httpContext.timeout.getOrElse(transportRequest.options.readTimeout))
+      .followRedirects(httpContext.followRedirects.getOrElse(transportRequest.options.followRedirects))
+      .maxRedirects(transportRequest.options.maxRedirects)
 
     // Body & response type
     requestUrl.toString.toLowerCase match {

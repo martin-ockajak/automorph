@@ -5,10 +5,10 @@ import java.time.Instant
 /**
  * AMQP transport message context.
  *
- * Message transport plugins must use message context properties based on their origin in the descending order of priority:
- * - This class
- * - Base
- * - Defaults
+ * Message transport plugins must use message context properties in the descending order of priority by source:
+ * - This context
+ * - Transport plugin context (this.transport)
+ * - Default values
  *
  * @see [[https://www.rabbitmq.com/rebases/specs/amqp-xml-doc0-9-1.pdf AMQP specification]]
  * @param contentType MIME content type
@@ -24,10 +24,10 @@ import java.time.Instant
  * @param `type` message type name
  * @param userId user identifier
  * @param appId application identifier
- * @param base base properties defined by the specific message transport plugin
- * @tparam Base specific message transport plugin base properties type
+ * @param transport specific transport plugin message context
+ * @tparam Transport specific transport plugin message context type
  */
-final case class AmqpContext[Base](
+final case class AmqpContext[Transport](
   contentType: Option[String] = None,
   contentEncoding: Option[String] = None,
   headers: Map[String, Any] = Map.empty,
@@ -41,5 +41,5 @@ final case class AmqpContext[Base](
   `type`: Option[String] = None,
   userId: Option[String] = None,
   appId: Option[String] = None,
-  base: Option[Base] = None
+  transport: Option[Transport] = None
 )

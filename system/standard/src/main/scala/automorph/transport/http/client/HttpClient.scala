@@ -166,7 +166,7 @@ final case class HttpClient[Effect[_]](
   ): Effect[(Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)], URI)] = {
     val httpContext = requestContext.getOrElse(defaultContext)
     val requestUrl = httpContext.overrideUrl {
-      httpContext.base.flatMap(base => Try(base.request.build).toOption).map(_.uri).getOrElse(url)
+      httpContext.transport.flatMap(transport => Try(transport.request.build).toOption).map(_.uri).getOrElse(url)
     }
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
@@ -196,11 +196,11 @@ final case class HttpClient[Effect[_]](
     httpContext: Context
   ): HttpRequest = {
     // Method & body
-    val baseBuilder = httpContext.base.map(_.request).getOrElse(HttpRequest.newBuilder)
-    val baseRequest = Try(baseBuilder.build).toOption
+    val transportBuilder = httpContext.transport.map(_.request).getOrElse(HttpRequest.newBuilder)
+    val transportRequest = Try(transportBuilder.build).toOption
     val requestMethod = httpContext.method.map(_.name).getOrElse(method.name)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
-    val methodBuilder = baseBuilder.uri(requestUrl)
+    val methodBuilder = transportBuilder.uri(requestUrl)
       .method(requestMethod, BodyPublishers.ofByteArray(requestBody.unsafeArray))
 
     // Headers
@@ -214,7 +214,7 @@ final case class HttpClient[Effect[_]](
     // Timeout
     httpContext.timeout.map { timeout =>
       java.time.Duration.ofMillis(timeout.toMillis)
-    }.orElse(baseRequest.flatMap(_.timeout.toScala)).map { timeout =>
+    }.orElse(transportRequest.flatMap(_.timeout.toScala)).map { timeout =>
       headersBuilder.timeout(timeout)
     }.getOrElse(headersBuilder).build
   }
@@ -231,8 +231,8 @@ final case class HttpClient[Effect[_]](
 
   private def createWebSocketBuilder(httpContext: Context): WebSocket.Builder = {
     // Headers
-    val baseBuilder = httpContext.base.map(_.request).getOrElse(HttpRequest.newBuilder)
-    val headers = baseBuilder.uri(httpEmptyUrl).build.headers.map.asScala.toSeq.flatMap { case (name, values) =>
+    val transportBuilder = httpContext.transport.map(_.request).getOrElse(HttpRequest.newBuilder)
+    val headers = transportBuilder.uri(httpEmptyUrl).build.headers.map.asScala.toSeq.flatMap { case (name, values) =>
       values.asScala.map(name -> _)
     } ++ httpContext.headers
     val headersBuilder = LazyList.iterate(httpClient.newWebSocketBuilder -> headers) { case (builder, headers) =>

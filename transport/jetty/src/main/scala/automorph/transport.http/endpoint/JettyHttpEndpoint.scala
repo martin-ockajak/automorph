@@ -111,7 +111,7 @@ final case class JettyHttpEndpoint[Effect[_]](
       request.getHeaders(name).asScala.map(value => name -> value)
     }.toSeq
     HttpContext(
-      base = Some(request),
+      transport = Some(request),
       method = Some(HttpMethod.valueOf(request.getMethod)),
       headers = headers
     ).url(request.getRequestURI)

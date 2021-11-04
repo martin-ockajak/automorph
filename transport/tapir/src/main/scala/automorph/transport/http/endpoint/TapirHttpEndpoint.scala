@@ -84,7 +84,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     method: Option[Method]
   ): Context =
     HttpContext(
-      base = Some(()),
+      transport = Some(()),
       method = method.map(_.toString).map(HttpMethod.valueOf),
       path = Some(urlPath(paths)),
       parameters = queryParams.toSeq,
