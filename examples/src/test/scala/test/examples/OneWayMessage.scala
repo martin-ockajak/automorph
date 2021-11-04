@@ -5,7 +5,7 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object JsonRpcDynamicNotification extends App {
+object OneWayMessage extends App {
 
   // Define an API and create its instance
   class Api {
@@ -21,7 +21,7 @@ object JsonRpcDynamicNotification extends App {
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.clientAsync(new URI("http://localhost/api"))
 
-  // Notify the remote API function dynamically without expecting a response
+  // Message the remote API function dynamically without expecting a response
   client.message("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
 
   // Close the client
@@ -31,7 +31,7 @@ object JsonRpcDynamicNotification extends App {
   server.close()
 }
 
-class JsonRpcDynamicNotification extends org.scalatest.freespec.AnyFreeSpecLike {
+class OneWayMessage extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       AsynchronousCall.main(Array())

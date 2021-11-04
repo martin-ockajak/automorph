@@ -108,9 +108,9 @@ remoteApi.hello("world", 1) // Future[String]
 client.close()
 ```
 
-### JSON-RPC notification
+### One-way message
 
-* [Source](/test/examples/src/test/scala/test/examples/JsonRpcNotification.scala)
+* [Source](/test/examples/src/test/scala/test/examples/OneWayMessage.scala)
 
 **Dependencies**
 
@@ -153,7 +153,7 @@ server.close()
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 val client = Default.asyncHttpClient(new URI("http://localhost/api"))
 
-// Notify the remote API function dynamically without expecting a response
+// Message the remote API function dynamically without expecting a response
 client.message("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
 
 // Close the client
