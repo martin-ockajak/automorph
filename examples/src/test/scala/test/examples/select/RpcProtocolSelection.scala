@@ -8,27 +8,31 @@ import scala.concurrent.Future
 
 object RpcProtocolSelection extends App {
 
-  // Define an API type and create its instance
-  class Api {
+  // Create server API instance
+  class ServerApi {
     def hello(some: String, n: Int): Future[String] =
       Future(s"Hello $some $n!")
   }
-  val api = new Api()
+  val api = new ServerApi()
 
   // Create REST-RPC protocol plugin
   val protocol = RestRpcProtocol[Default.Node, Default.Codec](Default.codec)
 
-  // Start default REST-RPC HTTP server listening on port 80 for requests to '/api'
+  // Start default REST-RPC HTTP server listening on port 8080 for requests to '/api'
   val system = Default.systemAsync
   val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-  val server = Default.server(handler, 80, "/api")
+  val server = Default.server(handler, 8080, "/api")
 
+  // Define client view of a remote API
+  trait ClientApi {
+    def hello(some: String, n: Int): Future[String]
+  }
   // Setup default REST-RPC HTTP client sending POST requests to 'http://localhost/api'
   val transport = Default.clientTransportAsync(new URI("http://localhost/api"))
   val client = Client.protocol(protocol).transport(transport)
 
   // Call the remote API function
-  val remoteApi = client.bind[Api] // Api
+  val remoteApi = client.bind[ClientApi] // ClientApi
   remoteApi.hello("world", 1) // Future[String]
 
   // Close the client

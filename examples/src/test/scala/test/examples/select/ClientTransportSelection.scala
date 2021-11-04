@@ -7,12 +7,12 @@ import java.net.URI
 
 object ClientTransportSelection extends App {
 
-  // Define an API and create its instance
-  class Api {
+  // Create server API instance
+  class ServerApi {
     def hello(some: String, n: Int): String =
       s"Hello $some $n!"
   }
-  val api = new Api()
+  val api = new ServerApi()
 
   // Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
   val createServer = Default.serverSync(80, "/api")
@@ -21,11 +21,15 @@ object ClientTransportSelection extends App {
   // Create HttpUrlConnection HTTP client message transport
   val transport = UrlClient(IdentitySystem(), new URI("http://localhost/api"))
 
+  // Define client view of a remote API
+  trait ClientApi {
+    def hello(some: String, n: Int): String
+  }
   // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.client(transport)
 
   // Call the remote API function via proxy
-  val remoteApi = client.bind[Api] // Api
+  val remoteApi = client.bind[ClientApi] // ClientApi
   remoteApi.hello("world", 1) // : String
 
   // Close the client

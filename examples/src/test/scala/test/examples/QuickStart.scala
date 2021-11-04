@@ -7,18 +7,18 @@ import scala.concurrent.Future
 
 object QuickStart extends App {
 
-  // Create the API instance
+  // Create server API instance
   class ServerApi {
     def hello(some: String, n: Int): Future[String] =
       Future(s"Hello $some $n!")
   }
   val api = new ServerApi()
 
-  // Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val createServer = Default.serverAsync(80, "/api")
+  // Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
+  val createServer = Default.serverAsync(8080, "/api")
   val server = createServer(_.bind(api))
 
-  // Define an API
+  // Define client view of a remote API
   trait ClientApi {
     def hello(some: String, n: Int): Future[String]
   }

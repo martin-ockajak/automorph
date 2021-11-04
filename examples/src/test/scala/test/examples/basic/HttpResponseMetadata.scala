@@ -7,7 +7,7 @@
 //
 //object HttpResponseMetadata extends App {
 //
-//  // Define server API type and create its instance
+//  // Create server API instance
 //  class ServerApi {
 //
 //    // Return HTTP response context consumed by the server message transport plugin
@@ -18,6 +18,10 @@
 //  }
 //  val api = new ServerApi()
 //
+//  // Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
+//  val createServer = Default.serverSync(8080, "/api")
+//  val server = createServer(_.bind(api))
+//
 //  // Define client view of the server API
 //  trait ClientApi {
 //
@@ -25,20 +29,17 @@
 //    def hello(message: String): Contextual[String, ClientContext]
 //  }
 //
-//  // Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
-//  val createServer = Default.serverSync(80, "/api")
-//  val server = createServer(_.bind(api))
-//
 //  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
 //  val client = Default.clientSync(new URI("http://localhost/api"))
 //
 //  // Call the remote API function expecting response context
-//  val remoteApi = client.bind[ClientApi] // Api
+//  val remoteApi = client.bind[ClientApi] // ClientApi
 //  val static = remoteApi.hello("test") // Contextual[String, ClientContext]
 //  static.result -> static.context.header("X-Test") // String -> "value"
 //
 //  // Call the remote API function dynamically expecting response context
-//  val dynamic = client.call[Contextual[String, ClientContext]]("hello")
+//  val dynamic = client
+//    .call[Contextual[String, ClientContext]]("hello")
 //    .args("message" -> "test") // Contextual[String, ClientContext]
 //  dynamic.result -> dynamic.context.header("X-Test") // String -> "value"
 //

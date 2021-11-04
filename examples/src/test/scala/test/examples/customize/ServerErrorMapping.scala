@@ -9,12 +9,12 @@ import scala.concurrent.Future
 
 object ServerErrorMapping extends App {
 
-  // Define an API type and create its instance
-  class Api {
+  // Create server API instance
+  class ServerApi {
     def hello(some: String, n: Int): Future[String] =
       Future(s"Hello $some $n!")
   }
-  val api = new Api()
+  val api = new ServerApi()
 
   // Customize remote API server exception to RPC error mapping
   val protocol = Default.protocol
@@ -23,17 +23,21 @@ object ServerErrorMapping extends App {
     case e => protocol.mapException(e)
   }
 
-  // Start custom JSON-RPC HTTP server listening on port 80 for requests to '/api'
+  // Start custom JSON-RPC HTTP server listening on port 8080 for requests to '/api'
   val system = Default.systemAsync
   val handler = Handler.protocol(serverProtocol).system(system)
     .context[Default.ServerContext]
-  val server = Default.server(handler, 80, "/api")
+  val server = Default.server(handler, 8080, "/api")
 
+  // Define client view of a remote API
+  trait ClientApi {
+    def hello(some: String, n: Int): Future[String]
+  }
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.clientAsync(new URI("http://localhost/api"))
 
   // Call the remote API function
-  val remoteApi = client.bind[Api] // Api
+  val remoteApi = client.bind[ClientApi] // ClientApi
   remoteApi.hello("world", 1) // Future[String]
 
   // Close the client

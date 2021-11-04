@@ -6,7 +6,7 @@ import java.net.URI
 
 object HttpRequestMetadata extends App {
 
-  // Define server API type and create its instance
+  // Create server API instance
   class ServerApi {
 
     // Accept HTTP request context provided by the server message transport plugin
@@ -18,16 +18,16 @@ object HttpRequestMetadata extends App {
   }
   val api = new ServerApi()
 
-  // Define client view of the server API
+  // Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
+  val createServer = Default.serverSync(8080, "/api")
+  val server = createServer(_.bind(api))
+
+  // Define client view of a remote API
   trait ClientApi {
 
     // Accept HTTP request context consumed by the client message transport plugin
     def hello(message: String)(implicit http: ClientContext): String
   }
-
-  // Start default JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val createServer = Default.serverSync(80, "/api")
-  val server = createServer(_.bind(api))
 
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
   val client = Default.clientSync(new URI("http://localhost/api"))
