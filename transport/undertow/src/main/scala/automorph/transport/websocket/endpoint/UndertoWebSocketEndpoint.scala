@@ -144,7 +144,6 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
       }
 
       private def setResponseContext(exchange: WebSocketHttpExchange, responseContext: Option[Context]): Unit = {
-        val responseHeaders = exchange.getResponseHeaders
         val headers = responseContext.toSeq.flatMap(_.headers).groupBy(_._1)
           .view.mapValues(_.map(_._2).asJava).toMap.asJava
         exchange.setResponseHeaders(headers)
