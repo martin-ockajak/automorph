@@ -280,7 +280,7 @@ lazy val jetty = (project in file("transport/jetty")).dependsOn(
 ).settings(
   name := s"$projectName-jetty",
   libraryDependencies ++= Seq(
-    "org.eclipse.jetty" % "jetty-client" % jettyVersion,
+    "org.eclipse.jetty.websocket" % "websocket-jetty-client" % jettyVersion,
     "org.eclipse.jetty" % "jetty-servlet" % jettyVersion
   )
 )

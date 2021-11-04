@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sbt '++2.13.6 site' && case "$OSTYPE" in
+sbt '++2.13.7 site' && case "$OSTYPE" in
   linux*)   browse target/site/index.html & ;;
   bsd*)     browse target/site/index.html & ;;
   cygwin*)  browse target/site/index.html & ;;

@@ -276,22 +276,18 @@ final case class HttpClient[Effect[_]](
     (Bytes.byteArray.from(response.body), Some(response.statusCode), headers)
   }
 
-  private def effect[T](
-    completableFuture: => CompletableFuture[T],
-    defer: Defer[Effect]
-  ): Effect[T] =
+  private def effect[T](completableFuture: => CompletableFuture[T], defer: Defer[Effect]): Effect[T] =
     defer.deferred[T].flatMap { deferred =>
       Try(completableFuture).pureFold(
-        error => deferred.fail(error).run,
-        (value: CompletableFuture[T]) => {
-          value.handle { case (result, exception) =>
+        exception => deferred.fail(exception).run,
+        value => {
+          value.handle { case (result, error) =>
             Option(result).map { value =>
               deferred.succeed(value).run
             }.getOrElse {
-              val error = Option(exception).getOrElse {
+              deferred.fail(Option(error).getOrElse {
                 new IllegalStateException("Missing completable future result")
-              }
-              deferred.fail(error).run
+              }).run
             }
           }
           ()

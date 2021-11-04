@@ -10,7 +10,6 @@ import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
 import jakarta.servlet.AsyncContext
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import java.io.{ByteArrayInputStream, InputStream}
 import java.net.URI
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
 import scala.collection.immutable.ArraySeq

@@ -38,7 +38,7 @@ final case class SttpClient[Effect[_]] private (
   webSocketSupport: Boolean
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
-  private type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
+  private type WebSocket = sttp.capabilities.Effect[Effect] with WebSockets
 
   private val webSocketsSchemePrefix = "ws"
   private val defaultUrl = Uri(url).toJavaUri
@@ -94,7 +94,7 @@ final case class SttpClient[Effect[_]] private (
     backend.close()
 
   private def send[R](
-    sttpRequest: Request[R, WebSocket[Effect]],
+    sttpRequest: Request[R, WebSocket],
     requestId: String,
     protocol: Protocol
   ): Effect[Response[R]] = {
@@ -128,7 +128,7 @@ final case class SttpClient[Effect[_]] private (
     requestBody: ArraySeq.ofByte,
     mediaType: String,
     requestContext: Option[Context]
-  ): Request[Array[Byte], WebSocket[Effect]] = {
+  ): Request[Array[Byte], WebSocket] = {
     // URL & method
     val httpContext = requestContext.getOrElse(defaultContext)
     val baseRequest = httpContext.base.map(_.request).getOrElse(basicRequest)
@@ -161,7 +161,7 @@ final case class SttpClient[Effect[_]] private (
       header.name -> header.value
     }*)
 
-  private def transportProtocol(sttpRequest: Request[Array[Byte], WebSocket[Effect]]): Effect[Protocol] = {
+  private def transportProtocol(sttpRequest: Request[Array[Byte], WebSocket]): Effect[Protocol] = {
     if (sttpRequest.isWebSocket) {
       if (webSocketSupport) {
         system.pure(Protocol.WebSocket)
