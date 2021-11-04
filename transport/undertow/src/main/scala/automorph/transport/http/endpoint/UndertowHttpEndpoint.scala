@@ -44,7 +44,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     override def handle(exchange: HttpServerExchange, message: Array[Byte]): Unit = {
       // Log the request
       val requestId = Random.id
-      lazy val requestProperties = extractRequestProperties(exchange, requestId)
+      lazy val requestProperties = getRequestProperties(exchange, requestId)
       logger.debug("Received HTTP request", requestProperties)
       val requestBody = Bytes.byteArray.from(message)
       val handlerRunnable = new Runnable {
@@ -74,7 +74,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
 
   override def handleRequest(exchange: HttpServerExchange): Unit = {
     val requestId = Random.id
-    lazy val requestProperties = extractRequestProperties(exchange, requestId)
+    lazy val requestProperties = getRequestProperties(exchange, requestId)
     logger.trace("Receiving HTTP request", requestProperties)
     Try(exchange.getRequestReceiver.receiveFullBytes(receiveCallback)).recover { case error =>
       sendErrorResponse(error, exchange, requestId, requestProperties)
@@ -116,11 +116,8 @@ final case class UndertowHttpEndpoint[Effect[_]](
       }
       val mediaType = genericHandler.protocol.codec.mediaType
       exchange.setStatusCode(responseStatusCode).getResponseSender.send(Bytes.byteBuffer.to(message))
-      val responseHeaders = exchange.getResponseHeaders
-      responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
-        responseHeaders.add(new HttpString(name), value)
-      }
-      responseHeaders.put(Headers.CONTENT_TYPE, mediaType)
+      setResponseProperties(exchange, responseContext)
+      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, mediaType)
       logger.debug("Sent HTTP response", responseDetails)
     }.onFailure(logger.error("Failed to send HTTP response", _, responseDetails)).get
   }
@@ -136,7 +133,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     ).url(exchange.getRequestURI)
   }
 
-  private def extractRequestProperties(
+  private def getRequestProperties(
     exchange: HttpServerExchange,
     requestId: String
   ): Map[String, String] = Map(
@@ -146,6 +143,13 @@ final case class UndertowHttpEndpoint[Effect[_]](
       .filter(_.nonEmpty).map("?" + _).getOrElse("")),
     "Method" -> exchange.getRequestMethod.toString
   )
+
+  private def setResponseProperties(exchange: HttpServerExchange, responseContext: Option[Context]): Unit = {
+    val responseHeaders = exchange.getResponseHeaders
+    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
+      responseHeaders.add(new HttpString(name), value)
+    }
+  }
 
   private def clientAddress(exchange: HttpServerExchange): String = {
     val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)

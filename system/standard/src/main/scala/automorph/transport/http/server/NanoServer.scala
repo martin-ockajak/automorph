@@ -81,7 +81,7 @@ final case class NanoServer[Effect[_]] private (
         // Receive the request
         val protocol = Protocol.Http
         val requestId = Random.id
-        lazy val requestProperties = extractRequestProperties(session, protocol, requestId)
+        lazy val requestProperties = getRequestProperties(session, protocol, requestId)
         logger.trace("Receiving HTTP request", requestProperties)
         val requestBody = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
 
@@ -104,7 +104,7 @@ final case class NanoServer[Effect[_]] private (
       // Receive the request
       val protocol = Protocol.WebSocket
       val requestId = Random.id
-      lazy val requestProperties = extractRequestProperties(session, protocol, requestId)
+      lazy val requestProperties = getRequestProperties(session, protocol, requestId)
       val request = Bytes.byteArray.from(frame.getBinaryPayload)
       val response = handleRequest(request, session, protocol, None, requestProperties, requestId)
 
@@ -176,10 +176,7 @@ final case class NanoServer[Effect[_]] private (
     val inputStream = Bytes.inputStream.to(message)
     val mediaType = genericHandler.protocol.codec.mediaType
     val response = newFixedLengthResponse(responseStatus, mediaType, inputStream, message.size.toLong)
-    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
-      response.addHeader(name, value)
-    }
-    response.setMimeType(mediaType)
+    setResponseProperties(response, responseContext)
     logger.debug(s"Sent $protocol response", responseDetails)
     response
   }
@@ -193,7 +190,7 @@ final case class NanoServer[Effect[_]] private (
     Option(session.getQueryParameterString).map(http.query).getOrElse(http)
   }
 
-  private def extractRequestProperties(
+  private def getRequestProperties(
     session: IHTTPSession,
     protocol: Protocol,
     requestId: String
@@ -206,6 +203,12 @@ final case class NanoServer[Effect[_]] private (
     case Protocol.Http => Some("Method" -> session.getMethod.toString)
     case _ => None
   })
+
+  private def setResponseProperties(response: Response, responseContext: Option[Context]): Unit = {
+    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
+      response.addHeader(name, value)
+    }
+  }
 
   private def clientAddress(session: IHTTPSession): String = {
     val forwardedFor = Option(session.getHeaders.get(headerXForwardedFor))

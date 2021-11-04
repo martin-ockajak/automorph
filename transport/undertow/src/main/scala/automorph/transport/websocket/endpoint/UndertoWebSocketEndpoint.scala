@@ -79,7 +79,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
       ): Unit = {
         // Log the request
         val requestId = Random.id
-        lazy val requestProperties = extractRequestProperties(exchange, requestId)
+        lazy val requestProperties = getRequestProperties(exchange, requestId)
         logger.debug("Received WebSocket request", requestProperties)
 
         // Process the request
@@ -141,7 +141,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         ).url(exchange.getRequestURI)
       }
 
-      private def extractRequestProperties(
+      private def getRequestProperties(
         exchange: WebSocketHttpExchange,
         requestId: String
       ): Map[String, String] = Map(
