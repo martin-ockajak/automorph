@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.JettyClient.{Context, Session, defaultClient}
-import automorph.transport.http.{HttpContext, Protocol}
+import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.net.URI
@@ -14,7 +14,8 @@ import java.util.concurrent.{CompletableFuture, TimeUnit}
 import org.eclipse.jetty.client.{HttpClient, api}
 import org.eclipse.jetty.client.api.{Request, Result}
 import org.eclipse.jetty.client.util.{BufferingResponseListener, BytesRequestContent}
-import org.eclipse.jetty.http.{HttpHeader, HttpMethod}
+import org.eclipse.jetty.http.HttpHeader
+import org.eclipse.jetty.http
 import org.eclipse.jetty.websocket
 import org.eclipse.jetty.websocket.api.{WebSocketListener, WriteCallback}
 import org.eclipse.jetty.websocket.client.{ClientUpgradeRequest, WebSocketClient}
@@ -41,7 +42,7 @@ import scala.util.Try
 final case class JettyClient[Effect[_]](
   system: EffectSystem[Effect],
   url: URI,
-  method: HttpMethod = HttpMethod.POST,
+  method: HttpMethod = HttpMethod.Post,
   httpClient: HttpClient = defaultClient
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
@@ -204,9 +205,9 @@ final case class JettyClient[Effect[_]](
     httpContext: Context
   ): Request = {
     // URL, method & body
-    val requestMethod = httpContext.method.map(method => HttpMethod.fromString(method.name)).orElse {
-      httpContext.base.map(base => HttpMethod.fromString(base.request.getMethod))
-    }.getOrElse(method)
+    val requestMethod = http.HttpMethod.valueOf(httpContext.method.orElse {
+      httpContext.base.map(_.request.getMethod).map(HttpMethod.valueOf)
+    }.getOrElse(method).name)
     val baseRequest = httpContext.base.map(_.request).getOrElse(httpClient.newRequest(requestUrl))
     val bodyRequest = baseRequest.method(requestMethod).body(new BytesRequestContent(requestBody.unsafeArray))
 

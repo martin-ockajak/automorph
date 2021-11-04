@@ -3,11 +3,11 @@ package transport.http
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity
+import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.SttpClient
 import java.net.URI
 import org.scalacheck.Arbitrary
 import sttp.client3.HttpURLConnectionBackend
-import sttp.model.Method
 import test.standard.StandardHttpClientTest
 import test.transport.http.HttpContextGenerator
 
@@ -25,5 +25,5 @@ class SttpClientHttpIdentityTest extends StandardHttpClientTest {
     HttpContextGenerator.arbitrary
 
   override def clientTransport(url: URI): ClientMessageTransport[Effect, Context] =
-    SttpClient.http(system, HttpURLConnectionBackend(), url, Method.PUT)
+    SttpClient.http(system, HttpURLConnectionBackend(), url, HttpMethod.Put)
 }

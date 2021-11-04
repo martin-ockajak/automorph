@@ -4,7 +4,7 @@ import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.client.JettyClient
 import java.net.URI
-import org.eclipse.jetty.http.HttpMethod
+import automorph.transport.http.HttpMethod
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -26,6 +26,6 @@ class JettyClientHttpFutureTest extends StandardHttpClientTest {
 
   override def clientTransport(url: URI): ClientMessageTransport[Effect, Context] = {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
-    JettyClient(system, url, HttpMethod.POST)
+    JettyClient(system, url, HttpMethod.Post)
   }
 }

@@ -2,9 +2,9 @@ package test.transport.websocket
 
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
+import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.JettyClient
 import java.net.URI
-import org.eclipse.jetty.http.HttpMethod
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -26,7 +26,7 @@ class JettyClientWebSocketFutureTest extends StandardHttpClientTest {
 
   override def clientTransport(url: URI): ClientMessageTransport[Effect, Context] = {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
-    JettyClient(system, url, HttpMethod.GET)
+    JettyClient(system, url, HttpMethod.Get)
   }
 
   override def webSocket: Boolean = true

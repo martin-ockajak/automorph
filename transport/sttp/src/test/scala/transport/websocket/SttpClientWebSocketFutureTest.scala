@@ -8,7 +8,7 @@ import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import sttp.client3.httpclient.HttpClientFutureBackend
-import sttp.model.Method
+import automorph.transport.http.HttpMethod
 import test.standard.StandardHttpClientTest
 import test.transport.http.HttpContextGenerator
 
@@ -26,7 +26,7 @@ class SttpClientWebSocketFutureTest extends StandardHttpClientTest {
     HttpContextGenerator.arbitrary
 
   override def clientTransport(url: URI): ClientMessageTransport[Effect, Context] =
-    SttpClient(system, HttpClientFutureBackend(), url, Method.GET)
+    SttpClient(system, HttpClientFutureBackend(), url, HttpMethod.Get)
 
   override def webSocket: Boolean = true
 }

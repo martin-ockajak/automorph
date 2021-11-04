@@ -3,14 +3,14 @@ package automorph.transport.http.client
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.http.client.SttpClient.{Context, Session}
+import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.EffectOps
 import java.net.URI
 import scala.collection.immutable.ArraySeq
 import sttp.capabilities.WebSockets
-import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
+import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
@@ -34,7 +34,7 @@ final case class SttpClient[Effect[_]] private (
   system: EffectSystem[Effect],
   backend: SttpBackend[Effect, _],
   url: URI,
-  method: Method,
+  method: HttpMethod,
   webSocketSupport: Boolean
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
@@ -133,7 +133,7 @@ final case class SttpClient[Effect[_]] private (
     val httpContext = requestContext.getOrElse(defaultContext)
     val baseRequest = httpContext.base.map(_.request).getOrElse(basicRequest)
     val requestUrl = Uri(httpContext.overrideUrl(defaultUrl))
-    val requestMethod = httpContext.method.map(_.name).map(Method.unsafeApply).getOrElse(method)
+    val requestMethod = Method.unsafeApply(httpContext.method.getOrElse(method).name)
 
     // Headers, timeout & follow redirects
     val contentType = MediaType.unsafeParse(mediaType)
@@ -195,7 +195,7 @@ object SttpClient {
     system: EffectSystem[Effect],
     backend: SttpBackend[Effect, _],
     url: URI,
-    method: Method = Method.POST
+    method: HttpMethod = HttpMethod.Post
   ): SttpClient[Effect] =
     SttpClient[Effect](system, backend, url, method, true)
 
@@ -213,7 +213,7 @@ object SttpClient {
     system: EffectSystem[Effect],
     backend: SttpBackend[Effect, _],
     url: URI,
-    method: Method = Method.POST
+    method: HttpMethod = HttpMethod.Post
   ): SttpClient[Effect] =
     SttpClient[Effect](system, backend, url, method, false)
 
