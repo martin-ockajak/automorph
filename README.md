@@ -35,7 +35,7 @@ way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/sp
 * **Safe** - optimized API binding code is generated and type checked during compilation
 * **Flexible** - remote API method names and exception to error mapping are customizable
 * **Extensible** - additional plugins and custom data type serialization support can be added with minimal effort
-* **Compatible** - artifacts are currently available for [Scala 3](https://dotty.epfl.ch/) and planned also for [Scala 2.13](https://www.scala-lang.org/news/2.13.0) and [Scala 2.12](https://www.scala-lang.org/news/2.12.0/)
+* **Compatible** - artifacts are currently available for [Scala 3](https://dotty.epfl.ch/) on [JRE 11+](https://openjdk.java.net/) and planned for [Scala 2.13](https://www.scala-lang.org/news/2.13.0) and [Scala 2.12](https://www.scala-lang.org/news/2.12.0/)
 * **Descriptive** - [OpenAPI](https://github.com/OAI/OpenAPI-Specification) specification in [JSON](https://en.wikipedia.org/wiki/JSON) format can be assembled for remote APIs
 * **Dependency free** - core functionality depends on [SLF4J API](http://www.slf4j.org/) only
 * **Boilerplate free** - even advanced use-cases require only a few lines of code
