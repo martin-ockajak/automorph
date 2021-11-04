@@ -22,7 +22,7 @@ object AsynchronousCall extends App {
   // Setup default JSON-RPC HTTP client sending PUT requests to 'http://localhost/api'
   val client = Default.clientAsync(new URI("http://localhost/api"), HttpMethod.Put)
 
-  // Call the remote API function via proxy
+  // Call the remote API function
   val remoteApi = client.bind[Api] // Api
   remoteApi.hello("world", 1) // Future[String]
 
