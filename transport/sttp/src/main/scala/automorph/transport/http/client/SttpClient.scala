@@ -67,7 +67,7 @@ final case class SttpClient[Effect[_]] private (
           },
           response => {
             logger.debug(s"Received $protocol response", responseProperties + ("Status" -> response.code.toString))
-            system.pure(Bytes.byteArray.from(response.body) -> responseContext(response))
+            system.pure(Bytes.byteArray.from(response.body) -> getResponseContext(response))
           }
         )
       }
@@ -156,7 +156,7 @@ final case class SttpClient[Effect[_]] private (
     }
   }
 
-  private def responseContext(response: Response[Array[Byte]]): Context =
+  private def getResponseContext(response: Response[Array[Byte]]): Context =
     defaultContext.statusCode(response.code.code).headers(response.headers.map { header =>
       header.name -> header.value
     }*)

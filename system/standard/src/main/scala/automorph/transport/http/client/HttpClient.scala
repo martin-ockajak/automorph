@@ -80,7 +80,7 @@ final case class HttpClient[Effect[_]](
           response => {
             val (responseBody, statusCode, _) = response
             logger.debug(s"Received $protocol response", responseProperties ++ statusCode.map("Status" -> _))
-            system.pure(responseBody -> responseContext(response))
+            system.pure(responseBody -> getResponseContext(response))
           }
         )
       }
@@ -272,7 +272,7 @@ final case class HttpClient[Effect[_]](
     }
   }
 
-  private def responseContext(response: Response): Context = {
+  private def getResponseContext(response: Response): Context = {
     val (_, statusCode, headers) = response
     statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers*)
   }

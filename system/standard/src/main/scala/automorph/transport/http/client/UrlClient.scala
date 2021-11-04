@@ -61,7 +61,7 @@ final case class UrlClient[Effect[_]](
           logger.error("Failed to receive HTTP response", _, responseProperties)
         }.get
         logger.debug("Received HTTP response", responseProperties + ("Status" -> connection.getResponseCode.toString))
-        response -> responseContext(connection)
+        response -> getResponseContext(connection)
       }
     }
 
@@ -158,7 +158,7 @@ final case class UrlClient[Effect[_]](
     requestMethod
   }
 
-  private def responseContext(connection: HttpURLConnection): Context =
+  private def getResponseContext(connection: HttpURLConnection): Context =
     defaultContext.statusCode(connection.getResponseCode)
       .headers(connection.getHeaderFields.asScala.toSeq.flatMap { case (name, values) =>
         values.asScala.map(name -> _)
