@@ -13,7 +13,7 @@ trait ProtocolCodecTest extends CoreTest {
     testFixtures
 
   @nowarn("msg=used")
-  def customTransport(
+  def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] =
     None

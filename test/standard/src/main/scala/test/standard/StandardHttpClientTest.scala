@@ -12,7 +12,7 @@ trait StandardHttpClientTest extends ClientServerTest {
 
   def webSocket: Boolean = false
 
-  override def customTransport(
+  override def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
     val server = withRandomAvailablePort(port =>

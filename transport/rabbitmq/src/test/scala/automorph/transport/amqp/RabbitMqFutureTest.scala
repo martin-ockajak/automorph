@@ -28,7 +28,7 @@ class RabbitMqFutureTest extends ClientServerTest {
   override def arbitraryContext: Arbitrary[Context] =
     AmqpContextGenerator.arbitrary
 
-  override def customTransport(
+  override def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
     Option.when(brokerPortTaken) {

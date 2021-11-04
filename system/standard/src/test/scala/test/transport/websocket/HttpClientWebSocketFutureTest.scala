@@ -26,7 +26,7 @@ class HttpClientWebSocketFutureTest extends ClientServerTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def customTransport(
+  override def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
     val server = withRandomAvailablePort(port => NanoServer.create[Effect](handler, port)(execute(_)))

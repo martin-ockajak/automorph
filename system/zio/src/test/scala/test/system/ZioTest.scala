@@ -7,7 +7,7 @@ import zio.{RIO, ZEnv}
 
 class ZioTest extends DeferEffectSystemTest[Effect] {
 
-  def system: ZioSystem[ZEnv] = ZioSystem.default
+  lazy val system: ZioSystem[ZEnv] = ZioSystem.default
 
   def execute[T](effect: RIO[ZEnv, T]): Either[Throwable, T] =
     Try(system.runtime.unsafeRunTask(effect)).toEither

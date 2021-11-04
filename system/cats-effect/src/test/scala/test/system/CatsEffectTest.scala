@@ -7,7 +7,7 @@ import scala.util.Try
 
 class CatsEffectTest extends DeferEffectSystemTest[IO] {
 
-  def system: CatsEffectSystem = CatsEffectSystem()
+  lazy val system: CatsEffectSystem = CatsEffectSystem()
 
   def execute[T](effect: IO[T]): Either[Throwable, T] =
     Try(effect.unsafeRunSync()).toEither

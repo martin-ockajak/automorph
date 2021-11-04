@@ -8,7 +8,7 @@ import scala.util.Try
 
 class MonixTest extends DeferEffectSystemTest[Task] {
 
-  def system: MonixSystem = MonixSystem()
+  lazy val system: MonixSystem = MonixSystem()
 
   def execute[T](effect: Task[T]): Either[Throwable, T] =
     Try(effect.runSyncUnsafe(Duration.Inf)).toEither
