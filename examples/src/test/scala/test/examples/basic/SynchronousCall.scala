@@ -21,8 +21,8 @@ object SynchronousCall extends App {
   trait ClientApi {
     def hello(some: String, n: Int): String
   }
-  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api:8080'
-  val client = Default.clientSync(new URI("http://localhost:7000/api:8080"), HttpMethod.Post)
+  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+  val client = Default.clientSync(new URI("http://localhost:7000/api"), HttpMethod.Post)
 
   // Call the remote API function
   val remoteApi = client.bind[ClientApi] // ClientApi
