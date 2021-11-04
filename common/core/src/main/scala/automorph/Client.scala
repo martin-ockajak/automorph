@@ -50,7 +50,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @return RPC function notification proxy with specified function name
    */
   def message(functionName: String): RemoteMessage[Node, Codec, Effect, Context] =
-    RemoteMessage(functionName, protocol.codec, message)
+    RemoteMessage(functionName, protocol.codec, performMessage)
 
   /**
    * Closes this client freeing the underlying resources.
@@ -81,7 +81,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @tparam Result result type
    * @return result value
    */
-  override def call[Result](
+  override def performCall[Result](
     functionName: String,
     argumentNames: Seq[String],
     argumentNodes: Seq[Node],
@@ -120,7 +120,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @param requestContext request context
    * @return nothing
    */
-  private def message(
+  private def performMessage(
     functionName: String,
     argumentNames: Seq[String],
     argumentNodes: Seq[Node],

@@ -48,7 +48,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
   def call[Result](functionName: String): RemoteCall[Node, Codec, Effect, Context, Result] =
     macro ClientMeta.callMacro[Node, Codec, Effect, Context, Result]
 
-  def call[Result](
+  def performCall[Result](
     functionName: String,
     argumentNames: Seq[String],
     argumentNodes: Seq[Node],
@@ -100,7 +100,7 @@ object ClientMeta {
             val parameterNames = clientBinding.function.parameters.map(_.name)
 
             // Perform the API call
-            ${c.prefix}.call(function.getName, parameterNames, argumentNodes,
+            ${c.prefix}.performCall(function.getName, parameterNames, argumentNodes,
               (resultNode, responseContext) => clientBinding.decodeResult(resultNode, responseContext),
               requestContext)
           }.getOrElse(throw new UnsupportedOperationException("Invalid function: " + function.getName))
@@ -118,7 +118,7 @@ object ClientMeta {
     import c.universe.Quasiquote
 
     c.Expr[RemoteCall[Node, Codec, Effect, Context, Result]](q"""
-      automorph.client.RemoteCall($functionName, ${c.prefix}.protocol.codec, ${c.prefix}.call)
+      automorph.client.RemoteCall($functionName, ${c.prefix}.protocol.codec, ${c.prefix}.performCall)
     """)
   }
 }

@@ -62,7 +62,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
           val parameterNames = clientBinding.function.parameters.map(_.name)
 
           // Perform the API call
-          call(
+          performCall(
             method.getName,
             parameterNames,
             argumentNodes,
@@ -83,9 +83,9 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * @return RPC function call proxy with specified function name
    */
   inline def call[Result](functionName: String): RemoteCall[Node, Codec, Effect, Context, Result] =
-    RemoteCall(functionName, protocol.codec, call)
+    RemoteCall(functionName, protocol.codec, performCall)
 
-  def call[Result](
+  def performCall[Result](
     functionName: String,
     argumentNames: Seq[String],
     argumentNodes: Seq[Node],
