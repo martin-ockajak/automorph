@@ -27,7 +27,7 @@ import scala.concurrent.duration.Duration
  * @param method request method
  * @param statusCode response status code
  * @param followRedirects automatically follow redirects if true
- * @param timeout response read timeout
+ * @param timeout response timeout
  * @param base base properties defined by the specific message transport plugin
  * @tparam Base specific message transport plugin base properties type
  */
