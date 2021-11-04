@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.{HttpContext, HttpMethod}
-import automorph.transport.http.client.HttpClient.{Context, Protocol, Response, Session, WebSocketListener, defaultBuilder}
+import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Protocol, Response, Session}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.io.ByteArrayOutputStream
@@ -39,7 +39,7 @@ import scala.util.Try
  * @param builder HttpClient builder (default: empty)
  * @tparam Effect effect type
  */
-final case class HttpClient[Effect[_]] (
+final case class HttpClient[Effect[_]](
   system: EffectSystem[Effect],
   url: URI,
   method: HttpMethod = HttpMethod.Post,
@@ -208,19 +208,9 @@ final case class HttpClient[Effect[_]] (
     responseEffect: Effect[Deferred[Effect, Response]],
     defer: Defer[Effect]
   ): Effect[WebSocket] =
-    responseEffect.flatMap(response =>
-      effect(
-        builder.buildAsync(
-          requestUrl,
-          WebSocketListener(
-            requestUrl,
-            response,
-            system
-          )
-        ),
-        defer
-      )
-    )
+    responseEffect.flatMap { response =>
+      effect(builder.buildAsync(requestUrl, webSocketListener(response)), defer)
+    }
 
   private def createWebSocketBuilder(httpContext: Context): WebSocket.Builder = {
     val baseBuilder = httpContext.base.map(_.request).getOrElse(HttpRequest.newBuilder)
@@ -237,6 +227,31 @@ final case class HttpClient[Effect[_]] (
       }.getOrElse(builder -> headers)
     }.dropWhile(!_._2.isEmpty).headOption.map(_._1).getOrElse(connectionBuilder)
     headersBuilder
+  }
+
+  private def webSocketListener(response: Deferred[Effect, Response]): Listener = new Listener {
+
+    private val buffers = ArrayBuffer.empty[ArraySeq.ofByte]
+
+    override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[_] = {
+      buffers += Bytes.byteBuffer.from(data)
+      if (last) {
+        val outputStream = new ByteArrayOutputStream(buffers.map(_.length).sum)
+        buffers.foreach(buffer => outputStream.write(buffer.unsafeArray, 0, buffer.length))
+        buffers.clear()
+        val responseBody = Bytes.byteArray.from(outputStream.toByteArray)
+        system.run(response.succeed((responseBody, None, Seq())).asInstanceOf[Effect[Any]])
+      }
+      super.onBinary(webSocket, data, last)
+    }
+
+    override def onClose(webSocket: WebSocket, statusCode: Int, reason: String): CompletionStage[_] =
+      super.onClose(webSocket, statusCode, reason)
+
+    override def onError(webSocket: WebSocket, error: Throwable): Unit = {
+      response.fail(error)
+      super.onError(webSocket, error)
+    }
   }
 
   private def responseContext(response: Response): Context = {
@@ -289,35 +304,6 @@ object HttpClient {
   type Context = HttpContext[Session]
 
   val defaultBuilder = java.net.http.HttpClient.newBuilder
-
-  private case class WebSocketListener[Effect[_]](
-    url: URI,
-    response: Deferred[Effect, Response],
-    system: EffectSystem[Effect]
-  ) extends Listener {
-
-    private val buffers = ArrayBuffer.empty[ArraySeq.ofByte]
-
-    override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[_] = {
-      buffers += Bytes.byteBuffer.from(data)
-      if (last) {
-        val outputStream = new ByteArrayOutputStream(buffers.map(_.length).sum)
-        buffers.foreach(buffer => outputStream.write(buffer.unsafeArray, 0, buffer.length))
-        buffers.clear()
-        val responseBody = Bytes.byteArray.from(outputStream.toByteArray)
-        system.run(response.succeed((responseBody, None, Seq())).asInstanceOf[Effect[Any]])
-      }
-      super.onBinary(webSocket, data, last)
-    }
-
-    override def onClose(webSocket: WebSocket, statusCode: Int, reason: String): CompletionStage[_] =
-      super.onClose(webSocket, statusCode, reason)
-
-    override def onError(webSocket: WebSocket, error: Throwable): Unit = {
-      response.fail(error)
-      super.onError(webSocket, error)
-    }
-  }
 
   private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
 
