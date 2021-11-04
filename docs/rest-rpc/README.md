@@ -1,6 +1,6 @@
 # REST-RPC
 
-REST-RPC is an RPC protocol prescribing a standard way to model REST APIs while taking reusing existing tools in the REST ecosystem. 
+REST-RPC is an RPC protocol prescribing a standard way to model REST APIs while reusing existing tools in the REST ecosystem. 
 
 ## Request
 
