@@ -32,8 +32,8 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start default JSON-RPC HTTP server listening on port 8080 for POST requests to '/api'
-val createServer = Default.serverSync(8080, "/api", Seq(HttpMethod.Post))
+// Start default JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
+val createServer = Default.serverSync(7000, "/api", Seq(HttpMethod.Post))
 val server = createServer(_.bind(api))
 
 // Stop the server
@@ -48,8 +48,8 @@ trait ClientApi {
   def hello(some: String, n: Int): String
 }
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientSync(new URI("http://localhost/api"), HttpMethod.Post)
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.clientSync(new URI("http://localhost:7000/api"), HttpMethod.Post)
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi] // ClientApi
@@ -91,8 +91,8 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start default JSON-RPC HTTP server listening on port 8080 for PUT requests to '/api'
-val createServer = Default.serverAsync(8080, "/api", Seq(HttpMethod.Put))
+// Start default JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
+val createServer = Default.serverAsync(7000, "/api", Seq(HttpMethod.Put))
 val server = createServer(_.bind(api))
 
 // Stop the server
@@ -107,8 +107,8 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Setup default JSON-RPC HTTP client sending PUT requests to 'http://localhost/api'
-val client = Default.clientAsync(new URI("http://localhost/api"), HttpMethod.Put)
+// Setup default JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
+val client = Default.clientAsync(new URI("http://localhost:7000/api"), HttpMethod.Put)
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi] // ClientApi
@@ -149,8 +149,8 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
-val createServer = Default.serverAsync(8080, "/api")
+// Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+val createServer = Default.serverAsync(7000, "/api")
 val server = createServer(_.bind(api))
 
 // Stop the server
@@ -165,8 +165,8 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.asyncHttpClient(new URI("http://localhost/api"))
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.asyncHttpClient(new URI("http://localhost:7000/api"))
 
 // Message the remote API function dynamically without expecting a response
 client.message("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
@@ -212,8 +212,8 @@ class ServerApi {
 
 val api = new ServerApi()
 
-// Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
-val createServer = Default.serverSync(8080, "/api")
+// Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+val createServer = Default.serverSync(7000, "/api")
 val server = createServer(_.bind(api))
 
 // Stop the server
@@ -230,8 +230,8 @@ trait ClientApi {
   def hello(message: String)(implicit http: ClientContext): String
 }
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientSync(new URI("http://localhost/api"))
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
 // Create client request context specifying HTTP request meta-data
 implicit val http: ClientContext = client.defaultContext
@@ -293,8 +293,8 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
-val createServer = Default.serverSync(8080, "/api")
+// Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+val createServer = Default.serverSync(7000, "/api")
 val server = createServer(_.bind(api))
 
 // Stop the server
@@ -311,8 +311,8 @@ trait ClientApi {
   def hello(message: String): Contextual[String, ClientContext]
 }
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientSync(new URI("http://localhost/api"))
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function expecting response context
 val remoteApi = client.bind[ClientApi] // ClientApi
@@ -388,8 +388,8 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
-val createServer = Default.serverAsync(8080, "/api")
+// Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+val createServer = Default.serverAsync(7000, "/api")
 lazy val server = createServer(_.bind(api))
 
 // Stop the server
@@ -404,8 +404,8 @@ trait ClientApi {
   def hello(some: String, n: Int, record: Record): Future[Record]
 }
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientAsync(new URI("http://localhost/api"))
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function via proxy
 lazy val remoteApi = client.bind[ClientApi] // ClientApi
@@ -461,8 +461,8 @@ val mapName = (name: String) => name match {
   case other => Seq(s"test.$other")
 }
 
-// Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
-val createServer = Default.serverSync(8080, "/api")
+// Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+val createServer = Default.serverSync(7000, "/api")
 val server = createServer(_.bind(api, mapName(_)))
 
 // Stop the server
@@ -479,8 +479,8 @@ trait ClientApi {
   def custom(value: Option[String]): String
 }
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientSync(new URI("http://localhost/api"))
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function statically
 val remoteApi = client.bind[ClientApi] // ClientApi
@@ -527,8 +527,8 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
-val createServer = Default.serverAsync(8080, "/api")
+// Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+val createServer = Default.serverAsync(7000, "/api")
 val server = createServer(_.bind(api))
 
 // Stop the server
@@ -552,8 +552,8 @@ val protocol = Default.protocol.mapError((message, code) =>
   }
 )
 
-// Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val transport = Default.clientTransportAsync(new URI("http://localhost/api"))
+// Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
 val client = Client.protocol(protocol).transport(transport)
 
 // Call the remote API function
@@ -604,11 +604,11 @@ val serverProtocol = protocol.mapException {
   case e => protocol.mapException(e)
 }
 
-// Start custom JSON-RPC HTTP server listening on port 8080 for requests to '/api'
+// Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val system = Default.systemAsync
 val handler = Handler.protocol(serverProtocol).system(system)
   .context[Default.ServerContext]
-val server = Default.server(handler, 8080, "/api")
+val server = Default.server(handler, 7000, "/api")
 
 // Stop the server
 server.close()
@@ -622,8 +622,8 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientAsync(new URI("http://localhost/api"))
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi] // ClientApi
@@ -667,12 +667,12 @@ class ServerApi {
 val api = new ServerApi()
 
 // Customize remote API server exception to HTTP status code mapping
-val createServer = Default.serverAsync(8080, "/api", mapException = {
+val createServer = Default.serverAsync(7000, "/api", mapException = {
   case _: SQLException => 400
   case e => HttpContext.defaultExceptionToStatusCode(e)
 })
 
-// Start custom JSON-RPC HTTP server listening on port 8080 for requests to '/api'
+// Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val server = createServer(_.bind(api))
 
 // Stop the server
@@ -687,8 +687,8 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientAsync(new URI("http://localhost/api"))
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi] // ClientApi
@@ -736,8 +736,8 @@ val api = new ServerApi()
 // Create an effect system plugin
 val system = ZioSystem[Any]()
 
-// Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
-val server = Default.serverSystem(system, 8080, "/api")(_.bind(api))
+// Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+val server = Default.serverSystem(system, 7000, "/api")(_.bind(api))
 
 // Stop the server
 server.close()
@@ -751,8 +751,8 @@ trait ClientApi {
   def hello(some: String, n: Int): Task[String]
 }
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.client(system, new URI("http://localhost/api"))
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.client(system, new URI("http://localhost:7000/api"))
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi] // ClientApi
@@ -797,10 +797,10 @@ val api = new ServerApi()
 // Create REST-RPC protocol plugin
 val protocol = RestRpcProtocol[Default.Node, Default.Codec](Default.codec)
 
-// Start default REST-RPC HTTP server listening on port 8080 for requests to '/api'
+// Start default REST-RPC HTTP server listening on port 7000 for requests to '/api'
 val system = Default.asyncSystem
 val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-val server = Default.server(handler, 8080, "/api")
+val server = Default.server(handler, 7000, "/api")
 
 // Stop the server
 server.close()
@@ -814,8 +814,8 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Setup default REST-RPC HTTP client sending POST requests to 'http://localhost/api'
-val transport = Default.clientAsyncTransport(new URI("http://localhost/api"))
+// Setup default REST-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val transport = Default.clientAsyncTransport(new URI("http://localhost:7000/api"))
 val client = Client.protocol(protocol).transport(transport)
 
 // Call the remote API function
@@ -878,9 +878,9 @@ val protocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type](codec)
 // Create an effect system plugin
 val system = Default.asyncSystem
 
-// Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
+// Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-lazy val server = Default.server(handler.bind(api), 8080, "/api")
+lazy val server = Default.server(handler.bind(api), 7000, "/api")
 
 // Stop the server
 server.close()
@@ -894,8 +894,8 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[Record]
 }
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val transport = Default.clientAsyncTransport(new URI("http://localhost/api"))
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val transport = Default.clientAsyncTransport(new URI("http://localhost:7000/api"))
 val client = Client(protocol, transport)
 
 // Call the remote API function
@@ -937,8 +937,8 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
-val createServer = Default.serverSync(8080, "/api")
+// Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+val createServer = Default.serverSync(7000, "/api")
 val server = createServer(_.bind(api))
 
 // Stop the server
@@ -954,9 +954,9 @@ trait ClientApi {
 }
 
 // Create HttpUrlConnection HTTP client message transport
-val transport = UrlClient(IdentitySystem(), new URI("http://localhost/api"))
+val transport = UrlClient(IdentitySystem(), new URI("http://localhost:7000/api"))
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val client = Default.client(transport)
 
 // Call the remote API function
@@ -997,9 +997,9 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start NanoHTTPD JSON-RPC HTTP server listening on port 8080 for requests to '/api'
+// Start NanoHTTPD JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val handler = Default.handlerSync[NanoServer.Context]
-val createServer = NanoServer.create(handler.bind(api), 8080)
+val createServer = NanoServer.create(handler.bind(api), 7000)
 val server = createServer(identity)
 
 // Stop the server
@@ -1014,8 +1014,8 @@ trait ClientApi {
   def hello(some: String, n: Int): String
 }
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientSync(new URI("http://localhost/api"))
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi] // ClientApi
@@ -1062,9 +1062,9 @@ val api = new ServerApi()
 val handler = Default.handlerAsync[UndertowHttpEndpoint.Context]
 val endpoint = UndertowHttpEndpoint(handler.bind(api))
 
-// Start Undertow JSON-RPC HTTP server listening on port 8080 for requests to '/api'
+// Start Undertow JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val server = Undertow.builder()
-  .addHttpListener(8080, "0.0.0.0")
+  .addHttpListener(7000, "0.0.0.0")
   .setHandler(Handlers.path().addPrefixPath("/api", endpoint))
   .build()
 
@@ -1080,8 +1080,8 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-val client = Default.clientAsync(new URI("http://localhost/api"))
+// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi] // ClientApi

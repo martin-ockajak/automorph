@@ -18,17 +18,17 @@ object RpcProtocolSelection extends App {
   // Create REST-RPC protocol plugin
   val protocol = RestRpcProtocol[Default.Node, Default.Codec](Default.codec)
 
-  // Start default REST-RPC HTTP server listening on port 8080 for requests to '/api'
+  // Start default REST-RPC HTTP server listening on port 7000 for requests to '/api'
   val system = Default.systemAsync
   val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
-  val server = Default.server(handler, 8080, "/api")
+  val server = Default.server(handler, 7000, "/api")
 
   // Define client view of a remote API
   trait ClientApi {
     def hello(some: String, n: Int): Future[String]
   }
-  // Setup default REST-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val transport = Default.clientTransportAsync(new URI("http://localhost/api"))
+  // Setup default REST-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+  val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
   val client = Client.protocol(protocol).transport(transport)
 
   // Call the remote API function

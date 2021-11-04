@@ -17,16 +17,16 @@ object EffectSystemSelection extends App {
   // Create ZIO effect system plugin
   val system = ZioSystem.default
 
-  // Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
-  val server = Default.serverSystem(system, 8080, "/api")(_.bind(api))
+  // Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+  val server = Default.serverSystem(system, 7000, "/api")(_.bind(api))
 
   // Define client view of a remote API
   trait ClientApi {
     def hello(some: String, n: Int): Task[String]
   }
 
-  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.client(system, new URI("http://localhost/api"))
+  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+  val client = Default.client(system, new URI("http://localhost:7000/api"))
 
   // Call the remote APi function via proxy
   val remoteApi = client.bind[ClientApi] // ClientApi

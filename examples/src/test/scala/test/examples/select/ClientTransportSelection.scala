@@ -19,13 +19,13 @@ object ClientTransportSelection extends App {
   val server = createServer(_.bind(api))
 
   // Create HttpUrlConnection HTTP client message transport
-  val transport = UrlClient(IdentitySystem(), new URI("http://localhost/api"))
+  val transport = UrlClient(IdentitySystem(), new URI("http://localhost:7000/api"))
 
   // Define client view of a remote API
   trait ClientApi {
     def hello(some: String, n: Int): String
   }
-  // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
+  // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
   val client = Default.client(transport)
 
   // Call the remote API function via proxy

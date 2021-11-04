@@ -18,8 +18,8 @@ object HttpRequestMetadata extends App {
   }
   val api = new ServerApi()
 
-  // Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
-  val createServer = Default.serverSync(8080, "/api")
+  // Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+  val createServer = Default.serverSync(7000, "/api")
   val server = createServer(_.bind(api))
 
   // Define client view of a remote API
@@ -29,8 +29,8 @@ object HttpRequestMetadata extends App {
     def hello(message: String)(implicit http: ClientContext): String
   }
 
-  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.clientSync(new URI("http://localhost/api"))
+  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+  val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
   // Create client request context specifying HTTP request meta-data
   implicit val http: ClientContext = client.defaultContext

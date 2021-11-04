@@ -14,16 +14,16 @@ object OneWayMessage extends App {
   }
   val api = new ServerApi()
 
-  // Start default JSON-RPC HTTP server listening on port 8080 for requests to '/api'
-  val createServer = Default.serverAsync(8080, "/api")
+  // Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+  val createServer = Default.serverAsync(7000, "/api")
   val server = createServer(_.bind(api))
 
   // Define client view of a remote API
   trait ClientApi {
     def hello(some: String, n: Int): Future[String]
   }
-  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost/api'
-  val client = Default.clientAsync(new URI("http://localhost/api"))
+  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+  val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
   // Message the remote API function dynamically without expecting a response
   client.message("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
