@@ -112,8 +112,9 @@ final case class UrlClient[Effect[_]](
 
   private def createConnection(context: Option[Context]): HttpURLConnection = {
     val httpContext = context.getOrElse(defaultContext)
-    val baseUrl = httpContext.base.map(_.connection.getURL.toURI).getOrElse(url)
-    val requestUrl = httpContext.overrideUrl(baseUrl)
+    val requestUrl = httpContext.overrideUrl {
+      httpContext.base.map(_.connection.getURL.toURI).getOrElse(url)
+    }
     requestUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
   }
 

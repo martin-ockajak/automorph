@@ -41,7 +41,7 @@ final case class SttpClient[Effect[_]] private (
   private type WebSocket[Effect[_]] = sttp.capabilities.Effect[Effect] with WebSockets
 
   private val webSocketsSchemePrefix = "ws"
-  private val defaultUrl = Uri(url)
+  private val defaultUrl = Uri(url).toJavaUri
   implicit private val givenSystem: EffectSystem[Effect] = system
 
   override def call(
@@ -132,7 +132,7 @@ final case class SttpClient[Effect[_]] private (
     // URL & method
     val httpContext = requestContext.getOrElse(defaultContext)
     val baseRequest = httpContext.base.map(_.request).getOrElse(basicRequest)
-    val requestUrl = Uri(httpContext.overrideUrl(defaultUrl.toJavaUri))
+    val requestUrl = Uri(httpContext.overrideUrl(defaultUrl))
     val requestMethod = httpContext.method.map(_.name).map(Method.unsafeApply).getOrElse(method)
 
     // Headers, timeout & follow redirects

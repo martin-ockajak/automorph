@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.client.HttpClient.{Context, Session, defaultBuilder}
+import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Session}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
@@ -158,7 +158,9 @@ final case class HttpClient[Effect[_]](
     requestContext: Option[Context]
   ): Effect[(Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)], URI)] = {
     val httpContext = requestContext.getOrElse(defaultContext)
-    val requestUrl = httpContext.base.flatMap(base => Try(base.request.build).toOption).map(_.uri).getOrElse(url)
+    val requestUrl = httpContext.overrideUrl {
+      httpContext.base.flatMap(base => Try(base.request.build).toOption).map(_.uri).getOrElse(url)
+    }
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
