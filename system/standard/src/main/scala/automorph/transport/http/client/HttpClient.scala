@@ -111,15 +111,7 @@ final case class HttpClient[Effect[_]](
     requestId: String,
     protocol: Protocol
   ): Effect[Response] = {
-    // Log the request
-    lazy val requestProperties = Map(
-      LogProperties.requestId -> requestId,
-      "URL" -> requestUrl.toString
-    ) ++ request.swap.toOption.map("Method" -> _.method)
-    logger.trace(s"Sending $protocol request", requestProperties)
-
-    // Send the request
-    request.fold(
+    log(requestId, requestUrl, request.swap.toOption.map(_.method), protocol, request.fold(
       // Send HTTP request
       httpRequest =>
         system match {
@@ -140,7 +132,22 @@ final case class HttpClient[Effect[_]](
           )
         )
       }
-    ).either.flatMap(_.fold(
+    ))
+  }
+
+  private def log(
+    requestId: String,
+    requestUrl: URI,
+    requestMethod: Option[String],
+    protocol: Protocol,
+    response: => Effect[Response]
+  ): Effect[Response] = {
+    lazy val requestProperties = Map(
+      LogProperties.requestId -> requestId,
+      "URL" -> requestUrl.toString
+    ) ++ requestMethod.map("Method" -> _)
+    logger.trace(s"Sending $protocol request", requestProperties)
+    response.either.flatMap(_.fold(
       error => {
         logger.error(s"Failed to send $protocol request", error, requestProperties)
         system.failed(error)
