@@ -1,25 +1,24 @@
 package test.transport.http
 
 import automorph.spi.transport.ClientMessageTransport
-import automorph.system.FutureSystem
+import automorph.system.IdentitySystem
+import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.client.JettyClient
 import java.net.URI
 import org.eclipse.jetty.http.HttpMethod
 import org.scalacheck.Arbitrary
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import test.standard.StandardHttpClientTest
 import test.transport.http.HttpContextGenerator
 
-class JettyClientHttpFutureTest extends StandardHttpClientTest {
+class JettyClientHttpIdentityTest extends StandardHttpClientTest {
 
-  type Effect[T] = Future[T]
+  type Effect[T] = Identity[T]
   type Context = JettyClient.Context
 
-  override lazy val system: FutureSystem = FutureSystem()
+  override lazy val system: IdentitySystem = IdentitySystem()
 
   override def run[T](effect: Effect[T]): T =
-    await(effect)
+    effect
 
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary

@@ -18,6 +18,9 @@ class JettyServerHttpFutureTest extends StandardHttpServerTest {
 
   override lazy val system: FutureSystem = FutureSystem()
 
+  override def run[T](effect: Effect[T]): T =
+    await(effect)
+
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
@@ -28,7 +31,4 @@ class JettyServerHttpFutureTest extends StandardHttpServerTest {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
     JettyServer(handler, port)
   }
-
-  override def run[T](effect: Effect[T]): T =
-    await(effect)
 }
