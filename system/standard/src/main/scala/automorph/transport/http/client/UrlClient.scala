@@ -74,7 +74,7 @@ final case class UrlClient[Effect[_]](
     send(requestBody, requestId, mediaType, requestContext).map(_ => ())
 
   override def defaultContext: Context =
-    Session.default
+    Session.defaultContext
 
   override def close(): Effect[Unit] =
     system.pure(())
@@ -174,6 +174,6 @@ object UrlClient {
 
   object Session {
     /** Implicit default context value. */
-    implicit val default: HttpContext[Session] = HttpContext()
+    implicit val defaultContext: HttpContext[Session] = HttpContext()
   }
 }

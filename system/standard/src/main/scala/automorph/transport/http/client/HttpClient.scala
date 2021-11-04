@@ -100,7 +100,7 @@ final case class HttpClient[Effect[_]](
   }
 
   override def defaultContext: Context =
-    Session.default
+    Session.defaultContext
 
   override def close(): Effect[Unit] =
     system.wrap(())
@@ -324,6 +324,6 @@ object HttpClient {
 
   object Session {
     /** Implicit default context value. */
-    implicit val default: HttpContext[Session] = HttpContext()
+    implicit val defaultContext: HttpContext[Session] = HttpContext()
   }
 }

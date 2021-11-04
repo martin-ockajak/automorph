@@ -88,7 +88,7 @@ final case class SttpClient[Effect[_]] private (
   }
 
   override def defaultContext: Context =
-    Session.default
+    Session.defaultContext
 
   override def close(): Effect[Unit] =
     backend.close()
@@ -221,6 +221,6 @@ object SttpClient {
 
   object Session {
     /** Implicit default context value. */
-    implicit val default: HttpContext[Session] = HttpContext()
+    implicit val defaultContext: HttpContext[Session] = HttpContext()
   }
 }

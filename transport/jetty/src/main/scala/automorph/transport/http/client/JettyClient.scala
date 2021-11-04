@@ -100,7 +100,7 @@ final case class JettyClient[Effect[_]](
   }
 
   override def defaultContext: Context =
-    Session.default
+    Session.defaultContext
 
   override def close(): Effect[Unit] =
     system.wrap {
@@ -325,6 +325,6 @@ object JettyClient {
 
   object Session {
     /** Implicit default context value. */
-    implicit val default: HttpContext[Session] = HttpContext()
+    implicit val defaultContext: HttpContext[Session] = HttpContext()
   }
 }
