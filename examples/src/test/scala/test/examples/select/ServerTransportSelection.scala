@@ -1,4 +1,4 @@
-package test.example
+package test.examples.select
 
 import automorph.Default
 import automorph.transport.http.server.NanoServer

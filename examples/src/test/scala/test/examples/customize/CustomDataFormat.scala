@@ -1,4 +1,4 @@
-package test.examples
+package test.examples.customize
 
 import automorph.Default
 import io.circe.{Decoder, Encoder}
@@ -27,7 +27,7 @@ object CustomDataFormat extends App {
   val api = new Api()
 
   // Provide custom data type serialization and deserialization logic
-  import io.circe.generic.auto._
+  import io.circe.generic.auto.*
   implicit lazy val enumEncoder: Encoder[State] = Encoder.encodeInt.contramap[State](Map(
     State.Off -> 0,
     State.On -> 1
@@ -58,7 +58,7 @@ object CustomDataFormat extends App {
 class CustomDataFormat extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      AsynchronousCall.main(Array())
+      CustomDataFormat.main(Array())
     }
   }
 }

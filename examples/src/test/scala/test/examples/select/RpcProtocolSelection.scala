@@ -1,4 +1,4 @@
-package test.examples
+package test.examples.select
 
 import automorph.protocol.RestRpcProtocol
 import automorph.{Client, Default, Handler}
@@ -42,7 +42,7 @@ object RpcProtocolSelection extends App {
 class RpcProtocolSelection extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      ClientErrorMapping.main(Array())
+      RpcProtocolSelection.main(Array())
     }
   }
 }

@@ -1,4 +1,4 @@
-//package test.examples
+//package test.examples.basic
 //
 //import automorph.Default.{ClientContext, ServerContext}
 //import automorph.transport.http.HttpContext

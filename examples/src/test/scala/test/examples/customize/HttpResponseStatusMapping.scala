@@ -1,4 +1,4 @@
-package test.examples
+package test.examples.customize
 
 import automorph.Default
 import automorph.transport.http.HttpContext
@@ -42,7 +42,7 @@ object HttpResponseStatusMapping extends App {
 class HttpResponseStatusMapping extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      ClientErrorMapping.main(Array())
+      HttpResponseStatusMapping.main(Array())
     }
   }
 }

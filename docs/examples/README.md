@@ -4,7 +4,7 @@
 
 ### Synchronous call
 
-* [Source](/test/examples/src/test/scala/test/examples/SynchronousCall.scala)
+* [Source](/test/examples/src/test/scala/test/examples/basic/SynchronousCall.scala)
 
 **Dependencies**
 
@@ -56,7 +56,7 @@ client.close()
 
 ### Asynchronous call
 
-* [Source](/test/examples/src/test/scala/test/examples/AsynchronousCall.scala)
+* [Source](/test/examples/src/test/scala/test/examples/basic/AsynchronousCall.scala)
 
 **Dependencies**
 
@@ -110,7 +110,7 @@ client.close()
 
 ### One-way message
 
-* [Source](/test/examples/src/test/scala/test/examples/OneWayMessage.scala)
+* [Source](/test/examples/src/test/scala/test/examples/basic/OneWayMessage.scala)
 
 **Dependencies**
 
@@ -162,7 +162,7 @@ client.close()
 
 ### HTTP request metadata
 
-* [Source](/test/examples/src/test/scala/test/examples/HttpRequestMetadata.scala)
+* [Source](/test/examples/src/test/scala/test/examples/basic/HttpRequestMetadata.scala)
 
 **Dependencies**
 
@@ -245,7 +245,7 @@ client.close()
 
 ### HTTP response metadata
 
-* [Source](/test/examples/src/test/scala/test/examples/HttpResponseMetadata.scala)
+* [Source](/test/examples/src/test/scala/test/examples/basic/HttpResponseMetadata.scala)
 
 **Dependencies**
 
@@ -315,11 +315,11 @@ dynamic.result -> dynamic.context.header("X-Test") // String -> "value"
 client.close()
 ```
 
-## Customization
+## Customize
 
 ### Data format
 
-* [Source](/test/examples/src/test/scala/test/examples/CustomDataFormat.scala)
+* [Source](/test/examples/src/test/scala/test/examples/customize/CustomDataFormat.scala)
 
 **Dependencies**
 
@@ -395,7 +395,7 @@ client.close()
 
 ### Function names
 
-* [Source](/test/examples/src/test/scala/test/examples/FunctionNameMapping.scala)
+* [Source](/test/examples/src/test/scala/test/examples/customize/FunctionNameMapping.scala)
 
 **Dependencies**
 
@@ -464,7 +464,7 @@ client.close()
 
 ### Client errors
 
-* [Source](/test/examples/src/test/scala/test/examples/ClientErrorMapping.scala)
+* [Source](/test/examples/src/test/scala/test/examples/customize/ClientErrorMapping.scala)
 
 **Dependencies**
 
@@ -528,7 +528,7 @@ client.close()
 
 ### Server errors
 
-* [Source](/test/examples/src/test/scala/test/examples/ServerErrorMapping.scala)
+* [Source](/test/examples/src/test/scala/test/examples/customize/ServerErrorMapping.scala)
 
 **Dependencies**
 
@@ -592,7 +592,7 @@ client.close()
 
 ### HTTP response status
 
-* [Source](/test/examples/src/test/scala/test/examples/HttpResponseStatusMapping.scala)
+* [Source](/test/examples/src/test/scala/test/examples/customize/HttpResponseStatusMapping.scala)
 
 **Dependencies**
 
@@ -650,11 +650,11 @@ remoteApi.hello("world", 1) // Future[String]
 client.close()
 ```
 
-## Component selection
+## Select
 
 ### Effect system
 
-* [Source](/test/examples/src/test/scala/test/examples/EffectSystemSelection.scala)
+* [Source](/test/examples/src/test/scala/test/examples/select/EffectSystemSelection.scala)
 
 **Dependencies**
 
@@ -711,7 +711,7 @@ client.close()
 
 ### RPC protocol
 
-* [Source](/test/examples/src/test/scala/test/examples/RpcProtocolSelection.scala)
+* [Source](/test/examples/src/test/scala/test/examples/select/RpcProtocolSelection.scala)
 
 **Dependencies**
 
@@ -770,7 +770,7 @@ client.close()
 
 ### Message codec
 
-* [Source](/test/examples/src/test/scala/test/examples/MessageCodecSelection.scala)
+* [Source](/test/examples/src/test/scala/test/examples/select/MessageCodecSelection.scala)
 
 **Dependencies**
 
@@ -840,7 +840,7 @@ client.close()
 
 ### Client transport
 
-* [Source](/test/examples/src/test/scala/test/examples/ClientTransportSelection.scala)
+* [Source](/test/examples/src/test/scala/test/examples/select/ClientTransportSelection.scala)
 
 **Dependencies**
 
@@ -896,7 +896,7 @@ client.close()
 
 ### Server transport
 
-* [Source](/test/examples/src/test/scala/test/examples/ServerTransportSelection.scala)
+* [Source](/test/examples/src/test/scala/test/examples/select/ServerTransportSelection.scala)
 
 **Dependencies**
 
@@ -949,7 +949,7 @@ client.close()
 
 ### Endpoint transport
 
-* [Source](/test/examples/src/test/scala/test/examples/EndpointTransportSelection.scala)
+* [Source](/test/examples/src/test/scala/test/examples/select/EndpointTransportSelection.scala)
 
 **Dependencies**
 

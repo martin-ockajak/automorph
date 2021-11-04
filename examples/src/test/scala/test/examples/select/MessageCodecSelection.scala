@@ -1,4 +1,4 @@
-package test.examples
+package test.examples.select
 
 import automorph.codec.messagepack.UpickleMessagePackCodec
 import automorph.{Client, Default, Handler}
@@ -21,7 +21,7 @@ object MessageCodecSelection extends App {
   val codec = UpickleMessagePackCodec()
 
   // Create custom data type serializer/deserializer
-  import codec.custom._
+  import codec.custom.*
   implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
 
   // Create an RPC protocol plugin

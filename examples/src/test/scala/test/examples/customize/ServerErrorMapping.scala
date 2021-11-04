@@ -1,4 +1,4 @@
-package test.examples
+package test.examples.customize
 
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.{Default, Handler}
@@ -46,7 +46,7 @@ object ServerErrorMapping extends App {
 class ServerErrorMapping extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      ClientErrorMapping.main(Array())
+      ServerErrorMapping.main(Array())
     }
   }
 }

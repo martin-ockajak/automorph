@@ -1,4 +1,4 @@
-package test.examples
+package test.examples.customize
 
 import automorph.{Client, Default}
 import java.net.URI

@@ -1,4 +1,4 @@
-package test.examples
+package test.examples.basic
 
 import automorph.Default
 import java.net.URI
@@ -34,7 +34,7 @@ object OneWayMessage extends App {
 class OneWayMessage extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      AsynchronousCall.main(Array())
+      OneWayMessage.main(Array())
     }
   }
 }

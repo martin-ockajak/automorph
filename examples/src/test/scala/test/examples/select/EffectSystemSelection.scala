@@ -1,4 +1,4 @@
-package test.examples
+package test.examples.select
 
 import automorph.Default
 import automorph.system.ZioSystem

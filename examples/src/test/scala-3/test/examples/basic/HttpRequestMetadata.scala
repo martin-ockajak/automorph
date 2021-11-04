@@ -1,4 +1,4 @@
-package test.examples
+package test.examples.basic
 
 import automorph.Default
 import automorph.Default.{ClientContext, ServerContext}
