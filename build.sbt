@@ -282,8 +282,7 @@ lazy val jetty = (project in file("transport/jetty")).dependsOn(
   libraryDependencies ++= Seq(
     "org.eclipse.jetty" % "jetty-client" % jettyVersion,
     "org.eclipse.jetty" % "jetty-server" % jettyVersion,
-    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
-    "commons-io" % "commons-io" % "2.11.0"
+    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion
   )
 )
 lazy val finagle = (project in file("transport/finagle")).dependsOn(

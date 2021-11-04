@@ -12,7 +12,6 @@ import jakarta.servlet.AsyncContext
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import java.io.{ByteArrayInputStream, InputStream}
 import java.net.URI
-import org.apache.commons.io.IOUtils
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.EnumerationHasAsScala
