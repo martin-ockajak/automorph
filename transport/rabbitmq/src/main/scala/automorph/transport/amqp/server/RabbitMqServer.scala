@@ -40,7 +40,7 @@ final case class RabbitMqServer[Effect[_]](
 ) extends Logging with ServerMessageTransport[Effect] {
 
   private lazy val connection = connect()
-  private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
+  private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, consumer)
   private val serverId = RabbitMqCommon.applicationId(getClass.getName)
   private val urlText = url.toString
   private val exchange = RabbitMqCommon.defaultDirectExchange
@@ -51,11 +51,11 @@ final case class RabbitMqServer[Effect[_]](
   override def close(): Effect[Unit] = system.wrap(RabbitMqCommon.disconnect(connection))
 
   private def start(): Unit = {
-    createConsumer(connection.createChannel())
+    consumer(connection.createChannel())
     ()
   }
 
-  private def createConsumer(channel: Channel): DefaultConsumer = {
+  private def consumer(channel: Channel): DefaultConsumer = {
     val consumer = new DefaultConsumer(channel) {
 
       override def handleDelivery(

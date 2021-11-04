@@ -43,7 +43,7 @@ final case class RabbitMqClient[Effect[_]](
 ) extends Logging with ClientMessageTransport[Effect, Context] {
 
   private lazy val connection = connect()
-  private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, createConsumer)
+  private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, consumer)
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
   private val urlText = url.toString
   private val responseHandlers = TrieMap[String, Deferred[Effect, Response]]()
@@ -98,7 +98,7 @@ final case class RabbitMqClient[Effect[_]](
     }
   }
 
-  private def createConsumer(channel: Channel): DefaultConsumer = {
+  private def consumer(channel: Channel): DefaultConsumer = {
     val consumer = new DefaultConsumer(channel) {
 
       override def handleDelivery(
