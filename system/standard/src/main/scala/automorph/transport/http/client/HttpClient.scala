@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.client.HttpClient.{Context, Response, Session, defaultBuilder}
+import automorph.transport.http.client.HttpClient.{Context, Session, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
@@ -45,6 +45,8 @@ final case class HttpClient[Effect[_]](
   method: HttpMethod = HttpMethod.Post,
   builder: Builder = defaultBuilder
 ) extends ClientMessageTransport[Effect, Context] with Logging {
+
+  private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
 
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
@@ -305,8 +307,6 @@ object HttpClient {
 
   /** Default HTTP client builder. */
   val defaultBuilder = java.net.http.HttpClient.newBuilder
-
-  private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
 
   final case class Session(request: HttpRequest.Builder)
 
