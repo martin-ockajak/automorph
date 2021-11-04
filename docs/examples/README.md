@@ -317,9 +317,9 @@ client.close()
 
 ## Customize
 
-### Data format
+### Data serialization
 
-* [Source](/test/examples/src/test/scala/test/examples/customize/CustomDataFormat.scala)
+* [Source](/test/examples/src/test/scala/test/examples/customize/CustomDataSerialization.scala)
 
 **Dependencies**
 

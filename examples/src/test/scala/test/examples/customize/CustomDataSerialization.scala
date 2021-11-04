@@ -6,7 +6,7 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object CustomDataFormat extends App {
+object CustomDataSerialization extends App {
 
   // Introduce custom data types
   sealed abstract class State
@@ -55,10 +55,10 @@ object CustomDataFormat extends App {
   server.close()
 }
 
-class CustomDataFormat extends org.scalatest.freespec.AnyFreeSpecLike {
+class CustomDataSerialization extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      CustomDataFormat.main(Array())
+      CustomDataSerialization.main(Array())
     }
   }
 }
