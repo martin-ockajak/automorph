@@ -8,7 +8,7 @@ REST as a theoretical concept is deemed independent of specific data formats or 
 
 Consequently, **every RESTful API** design requires also designing its own **custom** remote call (RPC) **protocol**.
 
-REST-RPC is an attempt to make the **custom** protocol design step **unnecessary** by **providing a standard** protocol while retaining REST APIs suitability for **web applications**. In other words, REST-RPC prescribes those REST API concerns which make no difference but provides a choice of those which do.
+REST-RPC is an attempt to make the **custom** protocol design step **unnecessary** by **providing a standard** protocol while retaining REST APIs suitability for **web applications**. In other words, REST-RPC prescribes those REST API protocol aspects which make no difference but provides a choice of those aspects which matter.
 
 ## Request
 
