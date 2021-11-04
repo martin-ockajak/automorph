@@ -145,7 +145,7 @@ final case class SttpClient[Effect[_]] private (
       .followRedirects(httpContext.followRedirects.getOrElse(baseRequest.options.followRedirects))
       .maxRedirects(baseRequest.options.maxRedirects)
 
-    // Response
+    // Body & response type
     requestUrl.toString.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
