@@ -441,9 +441,9 @@ remoteApi.hello("world", 1) // Future[String]
 client.close()
 ```
 
-### Server HTTP status
+### HTTP response status
 
-* [Source](/test/examples/src/test/scala/test/examples/HttpStatusMapping.scala)
+* [Source](/test/examples/src/test/scala/test/examples/HttpResponseStatusMapping.scala)
 
 **Dependencies**
 

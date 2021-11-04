@@ -7,7 +7,7 @@ import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object HttpStatusMapping extends App {
+object HttpResponseStatusMapping extends App {
 
   // Define an API type and create its instance
   class Api {
@@ -39,7 +39,7 @@ object HttpStatusMapping extends App {
   server.close()
 }
 
-class HttpStatusMapping extends org.scalatest.freespec.AnyFreeSpecLike {
+class HttpResponseStatusMapping extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       ClientErrorMapping.main(Array())
