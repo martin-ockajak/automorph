@@ -9,6 +9,7 @@ import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connect
 import java.io.IOException
 import java.net.{InetAddress, URI}
 import java.util.Date
+import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.{MapHasAsJava, MapHasAsScala}
 import scala.util.{Try, Using}
 
@@ -179,10 +180,10 @@ private[automorph] object RabbitMqCommon extends Logging {
     url: String,
     consumerTag: Option[String]
   ): Map[String, String] =
-    Map()
+    ListMap()
       ++ requestId.map(
         LogProperties.requestId -> _
-      ) ++ Map(
+      ) ++ ListMap(
         routingKeyProperty -> routingKey,
         "URL" -> url
       ) ++ consumerTag.map(

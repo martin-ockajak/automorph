@@ -11,15 +11,14 @@ import automorph.util.Extensions.{EffectOps, TryOps}
 import java.net.URI
 import java.util
 import java.util.concurrent.{CompletableFuture, TimeUnit}
-import org.eclipse.jetty.client.{HttpClient, api}
 import org.eclipse.jetty.client.api.{Request, Result}
 import org.eclipse.jetty.client.util.{BufferingResponseListener, BytesRequestContent}
+import org.eclipse.jetty.client.{HttpClient, api}
 import org.eclipse.jetty.http.HttpHeader
-import org.eclipse.jetty.http
-import org.eclipse.jetty.websocket
+import org.eclipse.jetty.{http, websocket}
 import org.eclipse.jetty.websocket.api.{WebSocketListener, WriteCallback}
 import org.eclipse.jetty.websocket.client.{ClientUpgradeRequest, WebSocketClient}
-import scala.collection.immutable.ArraySeq
+import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.jdk.CollectionConverters.{IterableHasAsScala, SeqHasAsJava}
 import scala.util.Try
 
@@ -66,7 +65,7 @@ final case class JettyClient[Effect[_]](
     createRequest(requestBody, mediaType, requestContext).flatMap { case (request, requestUrl) =>
       val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
       send(request, requestUrl, requestId, protocol).either.flatMap { result =>
-        lazy val responseProperties = Map(
+        lazy val responseProperties = ListMap(
           LogProperties.requestId -> requestId,
           "URL" -> requestUrl.toString
         )
@@ -158,7 +157,7 @@ final case class JettyClient[Effect[_]](
     protocol: Protocol,
     response: => Effect[Response]
   ): Effect[Response] = {
-    lazy val requestProperties = Map(
+    lazy val requestProperties = ListMap(
       LogProperties.requestId -> requestId,
       "URL" -> requestUrl.toString
     ) ++ requestMethod.map("Method" -> _)

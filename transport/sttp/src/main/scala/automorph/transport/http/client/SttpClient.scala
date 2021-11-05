@@ -8,7 +8,7 @@ import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.EffectOps
 import java.net.URI
-import scala.collection.immutable.ArraySeq
+import scala.collection.immutable.{ArraySeq, ListMap}
 import sttp.capabilities.WebSockets
 import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
 import sttp.model.{Header, MediaType, Method, Uri}
@@ -54,7 +54,7 @@ final case class SttpClient[Effect[_]] private (
     val sttpRequest = createRequest(requestBody, mediaType, requestContext)
     transportProtocol(sttpRequest).flatMap { protocol =>
       send(sttpRequest, requestId, protocol).either.flatMap { result =>
-        lazy val responseProperties = Map(
+        lazy val responseProperties = ListMap(
           LogProperties.requestId -> requestId,
           "URL" -> sttpRequest.uri.toString
         )
@@ -99,7 +99,7 @@ final case class SttpClient[Effect[_]] private (
     protocol: Protocol
   ): Effect[Response[R]] = {
     // Log the request
-    lazy val requestProperties = Map(
+    lazy val requestProperties = ListMap(
       LogProperties.requestId -> requestId,
       "URL" -> sttpRequest.uri.toString
     ) ++ Option.when(protocol == Protocol.Http)("Method" -> sttpRequest.method.toString)

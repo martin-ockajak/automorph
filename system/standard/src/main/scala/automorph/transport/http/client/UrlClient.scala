@@ -3,12 +3,12 @@ package automorph.transport.http.client
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.client.UrlClient.{Context, Session}
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.net.{HttpURLConnection, URI}
-import scala.collection.immutable.ArraySeq
+import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.util.Using
@@ -48,7 +48,7 @@ final case class UrlClient[Effect[_]](
     // Send the request
     send(requestBody, requestId, mediaType, requestContext).flatMap { connection =>
       system.wrap {
-        lazy val responseProperties = Map(
+        lazy val responseProperties = ListMap(
           LogProperties.requestId -> requestId,
           "URL" -> connection.getURL.toExternalForm
         )
@@ -91,7 +91,7 @@ final case class UrlClient[Effect[_]](
       val httpMethod = setConnectionProperties(connection, request, mediaType, context)
 
       // Log the request
-      lazy val requestProperties = Map(
+      lazy val requestProperties = ListMap(
         LogProperties.requestId -> requestId,
         "URL" -> connection.getURL.toExternalForm,
         "Method" -> httpMethod

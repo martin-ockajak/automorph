@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Session}
+import automorph.transport.http.client.HttpClient.{Context, Session, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
@@ -17,7 +17,7 @@ import java.net.http.WebSocket.Listener
 import java.net.http.{HttpRequest, HttpResponse, WebSocket}
 import java.nio.ByteBuffer
 import java.util.concurrent.{CompletableFuture, CompletionStage}
-import scala.collection.immutable.ArraySeq
+import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.jdk.OptionConverters.RichOptional
@@ -66,7 +66,7 @@ final case class HttpClient[Effect[_]](
     createRequest(requestBody, mediaType, requestContext).flatMap { case (request, requestUrl) =>
       val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
       send(request, requestUrl, requestId, protocol).either.flatMap { result =>
-        lazy val responseProperties = Map(
+        lazy val responseProperties = ListMap(
           LogProperties.requestId -> requestId,
           "URL" -> requestUrl.toString
         )
@@ -142,7 +142,7 @@ final case class HttpClient[Effect[_]](
     protocol: Protocol,
     response: => Effect[Response]
   ): Effect[Response] = {
-    lazy val requestProperties = Map(
+    lazy val requestProperties = ListMap(
       LogProperties.requestId -> requestId,
       "URL" -> requestUrl.toString
     ) ++ requestMethod.map("Method" -> _)
