@@ -37,7 +37,7 @@ object SynchronousCall extends App {
 
 class SynchronousCall extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Test" ignore {
       SynchronousCall.main(Array())
     }
   }

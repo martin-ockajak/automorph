@@ -55,13 +55,11 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     functionName: Option[String]
   )(implicit requestContext: Context): Effect[HandlerResult[MessageBody, Context]] = {
     // Parse request
-    println("A")
     val requestMessageBody = implicitly[Bytes[MessageBody]].from(requestBody)
     protocol.parseRequest(requestMessageBody, requestId, functionName).fold(
       error => errorResponse(error.exception, error.message, requestId, Map(LogProperties.requestId -> requestId)),
       rpcRequest => {
         // Invoke requested RPC function
-        println("B")
         lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++
           rpcRequest.message.properties + (LogProperties.messageSize -> requestMessageBody.length.toString)
         lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
@@ -101,13 +99,9 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     logger.debug(s"Processing ${protocol.name} request", requestProperties)
     bindings.get(rpcRequest.function).map { handlerBinding =>
       // Extract arguments
-      println("C")
       extractArguments(rpcRequest, handlerBinding).flatMap { arguments =>
         // Invoke bound function
-        println("D")
-        val x = Try(handlerBinding.invoke(arguments, context).either)
-        println("E")
-        x
+        Try(handlerBinding.invoke(arguments, context).either)
       }.pureFold(
         error => errorResponse(error, rpcRequest.message, requestId, requestProperties),
         result => resultResponse(result, rpcRequest, requestId, requestProperties)
