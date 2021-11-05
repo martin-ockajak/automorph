@@ -18,7 +18,7 @@ object RpcProtocolSelection extends App {
   // Create a server REST-RPC protocol plugin with '/api' path prefix
   val serverProtocol = RestRpcProtocol[Default.Node, Default.Codec, Default.ServerContext](
     Default.codec,
-    "/api"
+    "/api/"
   )
 
   // Start default REST-RPC HTTP server listening on port 7000 for requests to '/api'
@@ -34,7 +34,7 @@ object RpcProtocolSelection extends App {
   // Create a client REST-RPC protocol plugin with '/api' path prefix
   val clientProtocol = RestRpcProtocol[Default.Node, Default.Codec, Default.ClientContext](
     Default.codec,
-    "/api"
+    "/api/"
   )
 
   // Setup default REST-RPC HTTP client sending POST requests to 'http://localhost:7000/api'

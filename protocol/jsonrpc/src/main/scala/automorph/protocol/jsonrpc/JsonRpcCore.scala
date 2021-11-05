@@ -75,8 +75,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
   override def parseRequest(
     requestBody: MessageBody,
     requestContext: Context,
-    requestId: String,
-    functionName: Option[String]
+    requestId: String
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
     // Deserialize request
     Try(decodeMessage(codec.deserialize(requestBody))).pureFold(

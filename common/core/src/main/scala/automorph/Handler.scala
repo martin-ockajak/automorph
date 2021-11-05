@@ -56,7 +56,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   )(implicit requestContext: Context): Effect[HandlerResult[MessageBody, Context]] = {
     // Parse request
     val requestMessageBody = implicitly[Bytes[MessageBody]].from(requestBody)
-    protocol.parseRequest(requestMessageBody, requestContext, requestId, functionName).fold(
+    protocol.parseRequest(requestMessageBody, requestContext, requestId).fold(
       error => errorResponse(error.exception, error.message, requestId, Map(LogProperties.requestId -> requestId)),
       rpcRequest => {
         // Invoke requested RPC function

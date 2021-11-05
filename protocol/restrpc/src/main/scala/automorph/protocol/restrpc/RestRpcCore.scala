@@ -75,8 +75,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
   override def parseRequest(
     requestBody: MessageBody,
     requestContext: Context,
-    requestId: String,
-    functionName: Option[String]
+    requestId: String
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
     // Deserialize request
     Try(decodeRequest(codec.deserialize(requestBody))).pureFold(
@@ -88,12 +87,18 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
           "Type" -> MessageType.Call.toString,
           "Arguments" -> request.size.toString
         )
-        functionName.map { functionName =>
-          val message = RpcMessage((), requestBody, requestProperties ++ Option("Function" -> functionName), messageText)
-          Right(RpcRequest(message, functionName, Right(request), true, requestId))
+        requestContext.path.map { path =>
+          if (path.startsWith(pathPrefix) && path.length > pathPrefix.length) {
+            val functionName = path.substring(pathPrefix.length, path.length)
+            val message = RpcMessage((), requestBody, requestProperties ++ Option("Function" -> functionName), messageText)
+            Right(RpcRequest(message, functionName, Right(request), true, requestId))
+          } else {
+            val message = RpcMessage((), requestBody, requestProperties, messageText)
+            Left(RpcError(InvalidRequestException(s"Invalid URL path: $path"), message))
+          }
         }.getOrElse {
           val message = RpcMessage((), requestBody, requestProperties, messageText)
-          Left(RpcError(InvalidRequestException("Missing invoked function name"), message))
+          Left(RpcError(InvalidRequestException("Missing URL path"), message))
         }
       }
     )

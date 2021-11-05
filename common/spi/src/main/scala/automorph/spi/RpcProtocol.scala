@@ -51,14 +51,12 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
    * @param requestBody RPC request message body
    * @param requestContext request context
    * @param requestId request correlation identifier
-   * @param functionName invoked function name, if specified it is used instead of function name obtained from the request body
    * @return RPC request if the message is valid or RPC error if the message is invalid
    */
   def parseRequest(
     requestBody: MessageBody,
     requestContext: Context,
-    requestId: String,
-    functionName: Option[String]
+    requestId: String
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]]
 
   /**
