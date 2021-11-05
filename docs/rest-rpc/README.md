@@ -1,6 +1,6 @@
 # REST-RPC
 
-REST-RPC is an RPC protocol prescribing a standard way to model REST APIs while reusing existing tools in the REST ecosystem.
+REST-RPC is an RPC protocol prescribing a standard way to model REST APIs while reusing existing practices and tools in the REST ecosystem.
 
 ## Motivation
 
@@ -33,7 +33,11 @@ When external constraints require use of REST-style API but minimal amount of ef
 
 ### Why call it REST-RPC though it has little in common with REST concepts ?
 
-To illustrate the fact that it provides API authors with a solution equivalent to typical REST API protocols by employing RPC principles.
+To illustrate the fact that it provides remote API authors with a solution equivalent to typical REST API protocols by employing RPC principles.
+
+### Can it be used in practice without having a specific REST-RPC library ?
+
+Absolutely. Any REST client or server library will suffice. However, using a specific REST-RPC library reduces the implementation effort.
 
 ## Request
 
