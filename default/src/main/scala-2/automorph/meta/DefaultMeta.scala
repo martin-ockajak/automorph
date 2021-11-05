@@ -40,7 +40,7 @@ private[automorph] trait DefaultMeta {
    * @tparam Context message context type
    * @return RPC protocol plugin
    */
-  def protocol: Protocol[Node, Codec, Context] =
+  def protocol[Context]: Protocol[Node, Codec, Context] =
     JsonRpcProtocol(codec, JsonRpcProtocol.defaultMapError, JsonRpcProtocol.defaultMapException, true)
 
   /**
@@ -56,7 +56,7 @@ private[automorph] trait DefaultMeta {
   def protocol[NodeType, CodecType <: MessageCodec[NodeType], Context](
     codec: CodecType
   ): Protocol[NodeType, CodecType, Context] =
-    macro DefaultMeta.protocolMacro[NodeType, CodecType]
+    macro DefaultMeta.protocolMacro[NodeType, CodecType, Context]
 }
 
 object DefaultMeta {
