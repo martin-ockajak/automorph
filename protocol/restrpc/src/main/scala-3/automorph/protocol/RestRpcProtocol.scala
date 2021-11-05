@@ -2,6 +2,7 @@ package automorph.protocol
 
 import automorph.protocol.restrpc.{ErrorMapping, Message, RestRpcCore}
 import automorph.spi.{MessageCodec, RpcProtocol}
+import automorph.transport.http.HttpContext
 
 /**
  * REST-RPC protocol implementation.
@@ -20,7 +21,7 @@ import automorph.spi.{MessageCodec, RpcProtocol}
  * @tparam Codec message codec plugin type
  * @tparam Context message context type
  */
-final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
+final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](
   codec: Codec,
   mapError: (String, Option[Int]) => Throwable,
   mapException: Throwable => Option[Int],
@@ -45,7 +46,7 @@ object RestRpcProtocol extends ErrorMapping:
    * @tparam Context message context type
    * @return REST-RPC protocol plugin
    */
-  inline def apply[Node, Codec <: MessageCodec[Node], Context](
+  inline def apply[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](
     codec: Codec,
     mapError: (String, Option[Int]) => Throwable = defaultMapError,
     mapException: Throwable => Option[Int] = defaultMapException

@@ -2,6 +2,7 @@ package automorph.protocol
 
 import automorph.protocol.restrpc.{ErrorMapping, Message, RestRpcCore}
 import automorph.spi.{MessageCodec, RpcProtocol}
+import automorph.transport.http.HttpContext
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -22,7 +23,7 @@ import scala.reflect.macros.blackbox
  * @tparam Codec message codec plugin type
  * @tparam Context message context type
  */
-final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
+final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](
   codec: Codec,
   mapError: (String, Option[Int]) => Throwable = RestRpcProtocol.defaultMapError,
   mapException: Throwable => Option[Int] = RestRpcProtocol.defaultMapException,
@@ -47,7 +48,7 @@ object RestRpcProtocol extends ErrorMapping {
    * @tparam Context message context type
    * @return REST-RPC protocol plugin
    */
-  def apply[Node, Codec <: MessageCodec[Node], Context](
+  def apply[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](
     codec: Codec,
     mapError: (String, Option[Int]) => Throwable,
     mapException: Throwable => Option[Int]
@@ -64,10 +65,10 @@ object RestRpcProtocol extends ErrorMapping {
    * @tparam Context message context type
    * @return REST-RPC protocol plugin
    */
-  def apply[Node, Codec <: MessageCodec[Node], Context](codec: Codec): RestRpcProtocol[Node, Codec, Context] =
+  def apply[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](codec: Codec): RestRpcProtocol[Node, Codec, Context] =
     macro applyDefaultsMacro[Node, Codec, Context]
 
-  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node], Context](c: blackbox.Context)(
+  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node], Context <: HttpContext[_]](c: blackbox.Context)(
     codec: c.Expr[Codec],
     mapError: c.Expr[(String, Option[Int]) => Throwable],
     mapException: c.Expr[Throwable => Option[Int]]
@@ -89,7 +90,7 @@ object RestRpcProtocol extends ErrorMapping {
     """)
   }
 
-  def applyDefaultsMacro[Node, Codec <: MessageCodec[Node], Context](c: blackbox.Context)(
+  def applyDefaultsMacro[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](c: blackbox.Context)(
     codec: c.Expr[Codec]
   ): c.Expr[RestRpcProtocol[Node, Codec, Context]] = {
     import c.universe.Quasiquote

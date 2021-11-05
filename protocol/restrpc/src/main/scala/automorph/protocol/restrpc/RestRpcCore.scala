@@ -7,6 +7,7 @@ import automorph.protocol.restrpc.{Response, ResponseError, RestRpcException}
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
 import automorph.spi.protocol.{RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
+import automorph.transport.http.HttpContext
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
@@ -18,7 +19,7 @@ import scala.util.{Failure, Success, Try}
  * @tparam Codec message codec plugin type
  * @tparam Context message context type
  */
-private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context] {
+private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]] {
   this: RestRpcProtocol[Node, Codec, Context] =>
 
   /** REST-RPC message metadata. */
