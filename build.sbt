@@ -1,14 +1,14 @@
 // Project
 
 // Repository
-val projectGroup = "org"
+val projectRoot = "org"
 val projectName = "automorph"
 val repositoryPath = s"martin-ockajak/$projectName"
 val repositoryUrl = s"https://github.com/$repositoryPath"
 val documentationUrl = repositoryUrl
 
 // Metadata
-ThisBuild / organization := s"$projectGroup.$projectName"
+ThisBuild / organization := s"$projectRoot.$projectName"
 ThisBuild / homepage := Some(url(repositoryUrl))
 ThisBuild / licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / developers := List()
@@ -470,7 +470,7 @@ laikaTheme := laika.helium.Helium.defaults.all.metadata(
   defaultLineHeight = 1.5,
   anchorPlacement = AnchorPlacement.Right
 ).site.topNavigationBar(
-  homeLink = IconLink.external(s"https://$projectName.$projectGroup", HeliumIcon.home),
+  homeLink = IconLink.external(s"https://$projectName.$projectRoot", HeliumIcon.home),
   navLinks = Seq(
     IconLink.external(repositoryUrl, HeliumIcon.github),
     IconLink.external(s"${documentationUrl}/api", HeliumIcon.api),
