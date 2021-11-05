@@ -511,5 +511,5 @@ ThisBuild / scmInfo := Some(ScmInfo(
 ThisBuild / releaseVcsSign := true
 ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
 ThisBuild / versionScheme := Some("semver-spec")
-ThisBuild / publishTo := Some(MavenCache("local-maven", file("target/maven-releases")))
+credentials += Credentials("GnuPG Key ID", "gpg", "1735B0FD9A286C8696EB5E6117F23799295F187F", "")
 
