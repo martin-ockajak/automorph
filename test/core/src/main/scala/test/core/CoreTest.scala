@@ -1,9 +1,8 @@
 package test.core
 
-import automorph.Types
+import automorph.{Contextual, Types}
 import automorph.spi.EffectSystem
 import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException, InvalidResponseException}
-import automorph.util.EmptyContext
 import org.scalacheck.Arbitrary
 import scala.util.{Failure, Success, Try}
 import test.Generators.arbitraryRecord
@@ -111,7 +110,7 @@ trait CoreTest extends BaseTest {
                   (api: ComplexApiType) =>
                     system.map(
                       api.method8(a0, a1, a2),
-                      result =>
+                      (result: Contextual[String, Context]) =>
                         s"${result.result} - ${result.context.getClass.getName}"
                     )
                 )
