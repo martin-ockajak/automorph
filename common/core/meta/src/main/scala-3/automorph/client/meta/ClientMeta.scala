@@ -78,15 +78,15 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * RPC function name and call arguments are used to send an RPC request and
    * a result value or an error is extracted from the received RPC response.
    *
-   * @param functionName RPC function name
+   * @param function RPC function name
    * @tparam Result result type
    * @return RPC function call proxy with specified function name
    */
-  inline def call[Result](functionName: String): RemoteCall[Node, Codec, Effect, Context, Result] =
-    RemoteCall(functionName, protocol.codec, performCall)
+  inline def call[Result](function: String): RemoteCall[Node, Codec, Effect, Context, Result] =
+    RemoteCall(function, protocol.codec, performCall)
 
   def performCall[Result](
-    functionName: String,
+    function: String,
     argumentNames: Seq[String],
     argumentNodes: Seq[Node],
     decodeResult: (Node, Context) => Result,

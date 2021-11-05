@@ -46,11 +46,11 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * RPC function name and call arguments are used to send an RPC request
    * without expecting to receive a response.
    *
-   * @param functionName RPC function name
+   * @param function RPC function name
    * @return RPC function notification proxy with specified function name
    */
-  def message(functionName: String): RemoteMessage[Node, Codec, Effect, Context] =
-    RemoteMessage(functionName, protocol.codec, performMessage)
+  def message(function: String): RemoteMessage[Node, Codec, Effect, Context] =
+    RemoteMessage(function, protocol.codec, sendMessage)
 
   /**
    * Closes this client freeing the underlying resources.
@@ -73,7 +73,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    *
    * Optional request context is used as a last RPC function argument.
    *
-   * @param functionName RPC function name
+   * @param function RPC function name
    * @param argumentNames argument names
    * @param argumentNodes function argument nodes
    * @param decodeResult decodes RPC function call result
@@ -82,7 +82,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @return result value
    */
   override def performCall[Result](
-    functionName: String,
+    function: String,
     argumentNames: Seq[String],
     argumentNodes: Seq[Node],
     decodeResult: (Node, Context) => Result,
@@ -90,7 +90,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   ): Effect[Result] = {
     // Create request
     val requestId = Random.id
-    protocol.createRequest(functionName, Some(argumentNames), argumentNodes, true, requestId).pureFold(
+    protocol.createRequest(function, Some(argumentNames), argumentNodes, true, requestId).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>
@@ -114,21 +114,21 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    *
    * Optional request context is used as a last RPC function argument.
    *
-   * @param functionName RPC function name
+   * @param function RPC function name
    * @param argumentNames argument names
    * @param argumentNodes function argument nodes
    * @param requestContext request context
    * @return nothing
    */
-  private def performMessage(
-    functionName: String,
+  private def sendMessage(
+    function: String,
     argumentNames: Seq[String],
     argumentNodes: Seq[Node],
     requestContext: Option[Context]
   ): Effect[Unit] = {
     // Create request
     val requestId = Random.id
-    protocol.createRequest(functionName, Some(argumentNames), argumentNodes, false, requestId).pureFold(
+    protocol.createRequest(function, Some(argumentNames), argumentNodes, false, requestId).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>

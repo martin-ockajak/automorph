@@ -41,15 +41,15 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * RPC function name and call arguments are used to form an RPC request and
    * the corresponding RPC response is interpreted as a return value or an exception.
    *
-   * @param functionName RPC function name
+   * @param function RPC function name
    * @tparam Result result type
    * @return RPC function call proxy with specified function name
    */
-  def call[Result](functionName: String): RemoteCall[Node, Codec, Effect, Context, Result] =
+  def call[Result](function: String): RemoteCall[Node, Codec, Effect, Context, Result] =
     macro ClientMeta.callMacro[Node, Codec, Effect, Context, Result]
 
   def performCall[Result](
-    functionName: String,
+    function: String,
     argumentNames: Seq[String],
     argumentNodes: Seq[Node],
     decodeResult: (Node, Context) => Result,
@@ -114,11 +114,11 @@ object ClientMeta {
     Effect[_],
     Context,
     Result
-  ](c: blackbox.Context)(functionName: c.Expr[String]): c.Expr[RemoteCall[Node, Codec, Effect, Context, Result]] = {
+  ](c: blackbox.Context)(function: c.Expr[String]): c.Expr[RemoteCall[Node, Codec, Effect, Context, Result]] = {
     import c.universe.Quasiquote
 
     c.Expr[RemoteCall[Node, Codec, Effect, Context, Result]](q"""
-      automorph.client.RemoteCall($functionName, ${c.prefix}.protocol.codec, ${c.prefix}.performCall)
+      automorph.client.RemoteCall($function, ${c.prefix}.protocol.codec, ${c.prefix}.performCall)
     """)
   }
 }
