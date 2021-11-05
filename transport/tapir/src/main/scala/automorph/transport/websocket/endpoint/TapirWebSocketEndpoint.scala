@@ -5,13 +5,14 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, getRequestProperties, getRequestContext}
+import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, getRequestContext, getRequestProperties}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Random}
+import scala.collection.immutable.ListMap
 import sttp.capabilities.{Streams, WebSockets}
 import sttp.model.{Header, QueryParams}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.{clientIp, endpoint, headers, paths, queryParams, webSocketBody, CodecFormat}
+import sttp.tapir.{CodecFormat, clientIp, endpoint, headers, paths, queryParams, webSocketBody}
 
 /**
  * Tapir WebSocket endpoint message transport plugin.
