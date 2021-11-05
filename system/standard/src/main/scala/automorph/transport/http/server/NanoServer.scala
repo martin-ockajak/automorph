@@ -85,8 +85,8 @@ final case class NanoServer[Effect[_]] private (
         logger.trace("Receiving HTTP request", requestProperties)
         val requestBody = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
 
-        // Handler the request
-        handleRequest(requestBody, session, protocol, Some(url.getPath), requestProperties, requestId)
+        // Handler the equest
+        handleRequest(requestBody, session, protocol, requestProperties, requestId)
       }
     }
   }
@@ -106,7 +106,7 @@ final case class NanoServer[Effect[_]] private (
       val requestId = Random.id
       lazy val requestProperties = getRequestProperties(session, protocol, requestId)
       val request = Bytes.byteArray.from(frame.getBinaryPayload)
-      val response = handleRequest(request, session, protocol, None, requestProperties, requestId)
+      val response = handleRequest(request, session, protocol, requestProperties, requestId)
 
       // Handler the request
       send(Bytes.byteArray.to(Bytes.inputStream.from(response.getData)))
@@ -122,15 +122,13 @@ final case class NanoServer[Effect[_]] private (
     requestBody: ArraySeq.ofByte,
     session: IHTTPSession,
     protocol: Protocol,
-    functionName: Option[String],
     requestProperties: => Map[String, String],
     requestId: String
   ): Response = {
     logger.debug(s"Received $protocol request", requestProperties)
 
     // Process the request
-    implicit val requestContext: Context = getRequestContext(session)
-    executeEffect(genericHandler.processRequest(requestBody, requestId, functionName).either.map(_.fold(
+    executeEffect(genericHandler.processRequest(requestBody, getRequestContext(session), requestId).either.map(_.fold(
       error => sendErrorResponse(error, session, protocol, requestId, requestProperties),
       result => {
         // Send the response

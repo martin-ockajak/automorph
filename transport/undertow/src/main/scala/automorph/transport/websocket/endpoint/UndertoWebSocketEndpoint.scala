@@ -83,8 +83,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         logger.debug("Received WebSocket request", requestProperties)
 
         // Process the request
-        implicit val requestContext: Context = getRequestContext(exchange)
-        genericHandler.processRequest(requestBody, requestId, None).either.map(_.fold(
+        genericHandler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(_.fold(
           error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
           result => {
             // Send the response

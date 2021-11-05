@@ -41,9 +41,9 @@ final case class UrlClient[Effect[_]](
 
   override def call(
     requestBody: ArraySeq.ofByte,
+    requestContext: Option[Context],
     requestId: String,
-    mediaType: String,
-    requestContext: Option[Context]
+    mediaType: String
   ): Effect[(ArraySeq.ofByte, Context)] =
     // Send the request
     send(requestBody, requestId, mediaType, requestContext).flatMap { connection =>
@@ -67,9 +67,9 @@ final case class UrlClient[Effect[_]](
 
   override def message(
     requestBody: ArraySeq.ofByte,
+    requestContext: Option[Context],
     requestId: String,
-    mediaType: String,
-    requestContext: Option[Context]
+    mediaType: String
   ): Effect[Unit] =
     send(requestBody, requestId, mediaType, requestContext).map(_ => ())
 

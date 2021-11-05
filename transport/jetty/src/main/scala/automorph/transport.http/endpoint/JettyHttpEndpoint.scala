@@ -10,7 +10,6 @@ import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
 import jakarta.servlet.AsyncContext
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-import java.net.URI
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
 import scala.collection.immutable.ArraySeq
 import scala.jdk.CollectionConverters.EnumerationHasAsScala
@@ -48,9 +47,7 @@ final case class JettyHttpEndpoint[Effect[_]](
         val requestBody = Bytes.inputStream.from(request.getInputStream)
 
         // Process the request
-        implicit val requestContext: Context = getRequestContext(request)
-        val path = new URI(request.getRequestURI).getPath
-        genericHandler.processRequest(requestBody, requestId, Some(path)).either.map(_.fold(
+        genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
           error => sendErrorResponse(error, response, asyncContext, request, requestId, requestProperties),
           result => {
             // Send the response

@@ -29,27 +29,24 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
 
   override def call(
     requestBody: ArraySeq.ofByte,
+    requestContext: Option[Context],
     requestId: String,
-    mediaType: String,
-    context: Option[Context]
-  ): Effect[(ArraySeq.ofByte, Context)] = {
-    implicit val givenContext = context.getOrElse(defaultContext)
-    handler.processRequest(requestBody, requestId, None).flatMap(_.responseBody.map(responseBody =>
+    mediaType: String
+  ): Effect[(ArraySeq.ofByte, Context)] =
+    handler.processRequest(requestBody, requestContext.getOrElse(defaultContext), requestId)
+      .flatMap(_.responseBody.map(responseBody =>
       system.pure(responseBody -> defaultContext)
     ).getOrElse {
       system.failed(InvalidResponseException("Missing call response", None.orNull))
     })
-  }
 
   override def message(
     requestBody: ArraySeq.ofByte,
+    requestContext: Option[Context],
     requestId: String,
-    mediaType: String,
-    context: Option[Context]
-  ): Effect[Unit] = {
-    implicit val givenContext = context.getOrElse(defaultContext)
-    handler.processRequest(requestBody, requestId, None).map(_ => ())
-  }
+    mediaType: String
+  ): Effect[Unit] =
+    handler.processRequest(requestBody, requestContext.getOrElse(defaultContext), requestId).map(_ => ())
 
   override def close(): Effect[Unit] =
     system.pure(())

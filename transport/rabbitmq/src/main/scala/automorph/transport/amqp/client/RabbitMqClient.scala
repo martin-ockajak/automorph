@@ -52,9 +52,9 @@ final case class RabbitMqClient[Effect[_]](
 
   override def call(
     requestBody: ArraySeq.ofByte,
+    requestContext: Option[Context],
     requestId: String,
-    mediaType: String,
-    requestContext: Option[Context]
+    mediaType: String
   ): Effect[Response] =
     system.deferred[Response].flatMap { response =>
       send(requestBody, requestId, mediaType, requestContext, Some(response)).flatMap(_ => response.effect)
@@ -62,9 +62,9 @@ final case class RabbitMqClient[Effect[_]](
 
   override def message(
     requestBody: ArraySeq.ofByte,
+    requestContext: Option[Context],
     requestId: String,
-    mediaType: String,
-    requestContext: Option[Context]
+    mediaType: String
   ): Effect[Unit] = send(requestBody, requestId, mediaType, requestContext, None)
 
   override def defaultContext: Context = RabbitMqContext.default

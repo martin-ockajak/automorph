@@ -70,8 +70,8 @@ final case class RabbitMqServer[Effect[_]](
         logger.debug("Received AMQP request", requestProperties)
 
         // Process the request
-        implicit val requestContext: RabbitMqServer.Context = RabbitMqCommon.context(amqpProperties)
-        genericHandler.processRequest(requestBody, requestId, None).either.map(_.fold(
+        val requestContext = RabbitMqCommon.context(amqpProperties)
+        genericHandler.processRequest(requestBody, requestContext, requestId).either.map(_.fold(
           error => sendError(error, Option(amqpProperties.getReplyTo), requestProperties, requestId),
           result => {
             // Send the response

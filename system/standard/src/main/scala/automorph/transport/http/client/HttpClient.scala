@@ -58,9 +58,9 @@ final case class HttpClient[Effect[_]](
 
   override def call(
     requestBody: ArraySeq.ofByte,
+    requestContext: Option[Context],
     requestId: String,
-    mediaType: String,
-    requestContext: Option[Context]
+    mediaType: String
   ): Effect[(ArraySeq.ofByte, Context)] = {
     // Send the request
     createRequest(requestBody, mediaType, requestContext).flatMap { case (request, requestUrl) =>
@@ -89,9 +89,9 @@ final case class HttpClient[Effect[_]](
 
   override def message(
     requestBody: ArraySeq.ofByte,
+    requestContext: Option[Context],
     requestId: String,
-    mediaType: String,
-    requestContext: Option[Context]
+    mediaType: String
   ): Effect[Unit] = {
     createRequest(requestBody, mediaType, requestContext).flatMap { case (request, requestUrl) =>
       val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)

@@ -24,16 +24,16 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
    * An optional request context is used to supply additional information needed to send the request.
    *
    * @param requestBody request message body
+   * @param requestContext request context
    * @param requestId request correlation identifier
    * @param mediaType message media (MIME) type.
-   * @param requestContext request context
    * @return response message and context
    */
   def call(
     requestBody: ArraySeq.ofByte,
+    requestContext: Option[Context],
     requestId: String,
-    mediaType: String,
-    requestContext: Option[Context]
+    mediaType: String
   ): Effect[(ArraySeq.ofByte, Context)]
 
   /**
@@ -42,16 +42,16 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
    * An optional request context is used to supply additional information needed to send the request.
    *
    * @param requestBody request message body
+   * @param requestContext request context
    * @param requestId request correlation identifier
    * @param mediaType message media (MIME) type.
-   * @param requestContext request context
    * @return nothing
    */
   def message(
     requestBody: ArraySeq.ofByte,
+    requestContext: Option[Context],
     requestId: String,
-    mediaType: String,
-    requestContext: Option[Context]
+    mediaType: String
   ): Effect[Unit]
 
   /**

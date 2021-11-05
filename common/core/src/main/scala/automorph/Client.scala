@@ -100,7 +100,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
             rpcRequest.message.properties + (LogProperties.messageSize -> requestBody.length.toString)
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${protocol.name} request", allProperties)
-          transport.call(requestBody, requestId, protocol.codec.mediaType, requestContext)
+          transport.call(requestBody, requestContext, requestId, protocol.codec.mediaType)
             .flatMap { case (responseBody, responseContext) =>
               // Process response
               processResponse[Result](responseBody, responseContext, requestProperties, decodeResult)
@@ -140,7 +140,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           )
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${protocol.name} request", allProperties)
-          transport.message(request.message.body, requestId, protocol.codec.mediaType, requestContext)
+          transport.message(request.message.body, requestContext, requestId, protocol.codec.mediaType)
         }
     )
   }

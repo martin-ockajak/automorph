@@ -43,17 +43,16 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * Processes an RPC request by invoking a bound RPC function based on the specified RPC request and its context and return an RPC response.
    *
    * @param requestBody request message body
-   * @param requestId request correlation identifier
-   * @param functionName invoked function name, if specified it is used instead of function name obtained from the request body
    * @param requestContext request context
+   * @param requestId request correlation identifier
    * @tparam MessageBody message body type
    * @return optional response message
    */
   def processRequest[MessageBody: Bytes](
     requestBody: MessageBody,
-    requestId: String,
-    functionName: Option[String]
-  )(implicit requestContext: Context): Effect[HandlerResult[MessageBody, Context]] = {
+    requestContext: Context,
+    requestId: String
+  ): Effect[HandlerResult[MessageBody, Context]] = {
     // Parse request
     val requestMessageBody = implicitly[Bytes[MessageBody]].from(requestBody)
     protocol.parseRequest(requestMessageBody, requestContext, requestId).fold(
