@@ -4,18 +4,18 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ServerMessageTransport
-import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.transport.http.server.NanoServer.{Context, Execute, Protocol}
-import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
+import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
 import java.io.IOException
 import java.net.URI
-import scala.collection.immutable.ArraySeq
+import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.jdk.CollectionConverters.MapHasAsScala
 
 /**
@@ -198,15 +198,17 @@ final case class NanoServer[Effect[_]] private (
     session: IHTTPSession,
     protocol: Protocol,
     requestId: String
-  ): Map[String, String] = Map(
-    LogProperties.requestId -> requestId,
-    "Client" -> clientAddress(session),
-    "URL" -> (session.getUri + Option(session.getQueryParameterString)
-      .filter(_.nonEmpty).map("?" + _).getOrElse(""))
-  ) ++ (protocol match {
-    case Protocol.Http => Some("Method" -> session.getMethod.toString)
-    case _ => None
-  })
+  ): Map[String, String] = {
+    val url = session.getUri + Option(session.getQueryParameterString).filter(_.nonEmpty).map("?" + _).getOrElse("")
+    ListMap(
+      LogProperties.requestId -> requestId,
+      "Client" -> clientAddress(session),
+      "Protocol" -> protocol.toString,
+      "URL" -> url
+    ) ++ Option.when(protocol == Protocol.Http)(
+      "Method" -> session.getMethod.toString
+    )
+  }
 
   private def clientAddress(session: IHTTPSession): String = {
     val forwardedFor = Option(session.getHeaders.get(headerXForwardedFor))

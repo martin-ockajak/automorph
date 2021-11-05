@@ -7,6 +7,7 @@ import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Random}
+import scala.collection.immutable.ListMap
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.{byteArrayBody, clientIp, endpoint, header, headers, paths, queryParams, statusCode}
@@ -60,7 +61,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
       .serverLogic { case (requestBody, paths, queryParams, headers, clientIp) =>
         // Log the request
         val requestId = Random.id
-        lazy val requestProperties = extractRequestProperties(clientIp, Some(method), requestId)
+        lazy val requestProperties = getRequestProperties(clientIp, Some(method), requestId)
         logger.debug("Received HTTP request", requestProperties)
 
         // Process the request
@@ -96,11 +97,11 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     case items => items.mkString("/")
   }
 
-  private[automorph] def extractRequestProperties(
+  private[automorph] def getRequestProperties(
     clientIp: Option[String],
     method: Option[Method],
     requestId: String
-  ): Map[String, String] = Map(
+  ): Map[String, String] = ListMap(
     LogProperties.requestId -> requestId,
     "Client" -> clientAddress(clientIp)
   ) ++ method.map("Method" -> _.toString)

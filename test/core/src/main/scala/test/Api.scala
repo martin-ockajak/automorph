@@ -2,6 +2,7 @@ package test
 
 import automorph.Contextual
 import automorph.spi.EffectSystem
+import scala.util.Try
 import test.{Enum, Record}
 
 trait SimpleApi[Effect[_]] {
@@ -82,7 +83,7 @@ final case class ComplexApiImpl[Effect[_], Context](
     backend.pure(
       p0.int match {
         case Some(int) => Contextual(s"${int.toString} - $p1", defaultContext)
-        case _ => Contextual(s"${p2.getOrElse(true)}", defaultContext)
+        case _ => Contextual(s"${p2.getOrElse(0)}", defaultContext)
       }
     )
 

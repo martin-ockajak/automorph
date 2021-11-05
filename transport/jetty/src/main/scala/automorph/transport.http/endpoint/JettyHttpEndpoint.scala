@@ -11,7 +11,7 @@ import automorph.util.{Bytes, Network, Random}
 import jakarta.servlet.AsyncContext
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
-import scala.collection.immutable.ArraySeq
+import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.jdk.CollectionConverters.EnumerationHasAsScala
 
 /**
@@ -120,16 +120,15 @@ final case class JettyHttpEndpoint[Effect[_]](
     }
   }
 
-  private def getRequestProperties(
-    request: HttpServletRequest,
-    requestId: String
-  ): Map[String, String] = Map(
-    LogProperties.requestId -> requestId,
-    "Client" -> clientAddress(request),
-    "URL" -> (request.getRequestURI + Option(request.getQueryString)
-      .filter(_.nonEmpty).map("?" + _).getOrElse("")),
-    "Method" -> request.getMethod
-  )
+  private def getRequestProperties(request: HttpServletRequest, requestId: String): Map[String, String] = {
+    val url = request.getRequestURI + Option(request.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")
+    ListMap(
+      LogProperties.requestId -> requestId,
+      "Client" -> clientAddress(request),
+      "URL" -> url,
+      "Method" -> request.getMethod
+    )
+  }
 
   private def clientAddress(request: HttpServletRequest): String = {
     val forwardedFor = Option(request.getHeader(HttpHeader.X_FORWARDED_FOR.name))

@@ -13,8 +13,8 @@ import io.undertow.util.Headers
 import io.undertow.websockets.core.{AbstractReceiveListener, BufferedBinaryMessage, BufferedTextMessage, WebSocketCallback, WebSocketChannel, WebSockets}
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHandshakeHandler}
-import scala.collection.immutable.ArraySeq
-import scala.jdk.CollectionConverters.{ListHasAsScala, SeqHasAsJava, MapHasAsJava, MapHasAsScala}
+import scala.collection.immutable.{ArraySeq, ListMap}
+import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsJava, MapHasAsScala, SeqHasAsJava}
 
 /**
  * Undertow WebSocket endpoint message transport plugin.
@@ -148,15 +148,14 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         exchange.setResponseHeaders(headers)
       }
 
-      private def getRequestProperties(
-        exchange: WebSocketHttpExchange,
-        requestId: String
-      ): Map[String, String] = Map(
-        LogProperties.requestId -> requestId,
-        "Client" -> clientAddress(exchange),
-        "URL" -> (exchange.getRequestURI + Option(exchange.getQueryString)
-          .filter(_.nonEmpty).map("?" + _).getOrElse(""))
-      )
+      private def getRequestProperties(exchange: WebSocketHttpExchange, requestId: String): Map[String, String] = {
+        val url = exchange.getRequestURI + Option(exchange.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")
+        Map(
+          LogProperties.requestId -> requestId,
+          "Client" -> clientAddress(exchange),
+          "URL" -> url
+        )
+      }
 
       private def clientAddress(exchange: WebSocketHttpExchange): String = {
         val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.get(0))

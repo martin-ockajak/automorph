@@ -64,21 +64,29 @@ final case class RabbitMqServer[Effect[_]](
         amqpProperties: BasicProperties,
         requestBody: Array[Byte]
       ): Unit = {
-        val requestId = Option(amqpProperties.getCorrelationId).getOrElse(Random.id)
-        lazy val requestProperties =
-          RabbitMqCommon.extractProperties(requestId, envelope.getRoutingKey, urlText, Option(consumerTag))
+        // Log the request
+        val requestId = Option(amqpProperties.getCorrelationId)
+        lazy val requestProperties = RabbitMqCommon
+          .messageProperties(requestId, envelope.getRoutingKey, urlText, Option(consumerTag))
         logger.debug("Received AMQP request", requestProperties)
-
-        // Process the request
-        val requestContext = RabbitMqCommon.context(amqpProperties)
-        genericHandler.processRequest(requestBody, requestContext, requestId).either.map(_.fold(
-          error => sendError(error, Option(amqpProperties.getReplyTo), requestProperties, requestId),
-          result => {
-            // Send the response
-            val response = result.responseBody.getOrElse(Array[Byte]())
-            sendResponse(response, Option(amqpProperties.getReplyTo), result.context, requestProperties, requestId)
+        Option(amqpProperties.getReplyTo).map { replyTo =>
+          requestId.map { actualRequestId =>
+            // Process the request
+            val requestContext = RabbitMqCommon.messageContext(amqpProperties)
+            genericHandler.processRequest(requestBody, requestContext, actualRequestId).either.map(_.fold(
+              error => sendError(error, replyTo, requestProperties, actualRequestId),
+              result => {
+                // Send the response
+                val response = result.responseBody.getOrElse(Array[Byte]())
+                sendResponse(response, replyTo, result.context, requestProperties, actualRequestId)
+              }
+            )).run
+          }.getOrElse {
+            logger.error(s"Received AMQP request header: correlation-id", requestProperties)
           }
-        )).run
+        }.getOrElse {
+          logger.error("Missing AMQP request header: reply-to", requestProperties)
+        }
       }
     }
     queues.foreach { queue =>
@@ -89,7 +97,7 @@ final case class RabbitMqServer[Effect[_]](
 
   private def sendError(
     error: Throwable,
-    replyTo: Option[String],
+    replyTo: String,
     requestProperties: => Map[String, String],
     requestId: String
   ): Unit = {
@@ -100,28 +108,26 @@ final case class RabbitMqServer[Effect[_]](
 
   private def sendResponse(
     message: Array[Byte],
-    replyTo: Option[String],
+    replyTo: String,
     responseContext: Option[Context],
     requestProperties: => Map[String, String],
     requestId: String
   ): Unit = {
     // Log the response
-    val actualReplyTo = replyTo.orElse(responseContext.flatMap { context =>
-      context.replyTo.orElse(context.transport.flatMap(transport => Option(transport.properties.getReplyTo)))
-    })
-    lazy val responseProperties = actualReplyTo.map { value =>
-      requestProperties + (RabbitMqCommon.routingKeyProperty -> value)
-    }.getOrElse(requestProperties - RabbitMqCommon.routingKeyProperty)
+    val actualReplyTo = responseContext.flatMap { context =>
+      context.replyTo.orElse(context.transport.flatMap {
+        transport => Option(transport.properties.getReplyTo)
+      })
+    }.getOrElse(replyTo)
+    lazy val responseProperties = requestProperties + (RabbitMqCommon.routingKeyProperty -> actualReplyTo)
     logger.trace("Sending AMQP response", responseProperties)
 
     // Send the response
     Try {
-      val routingKey = actualReplyTo.getOrElse {
-        throw new IllegalArgumentException("Missing request header: reply-to")
-      }
       val mediaType = genericHandler.protocol.codec.mediaType
-      val amqpProperties = RabbitMqCommon.amqpProperties(responseContext, mediaType, routingKey, requestId, serverId)
-      threadConsumer.get.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, message)
+      val amqpProperties = RabbitMqCommon
+        .amqpProperties(responseContext, mediaType, actualReplyTo, requestId, serverId, true)
+      threadConsumer.get.getChannel.basicPublish(exchange, actualReplyTo, true, false, amqpProperties, message)
       logger.debug("Sent AMQP response", responseProperties)
     }.onFailure(logger.error("Failed to send AMQP response", _, responseProperties)).get
   }

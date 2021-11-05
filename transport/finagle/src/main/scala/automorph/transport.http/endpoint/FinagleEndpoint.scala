@@ -4,14 +4,15 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.endpoint.FinagleEndpoint.Context
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Network, Random}
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}
 import com.twitter.util.{Future, Promise}
+import scala.collection.immutable.ListMap
 
 /**
  * Finagle HTTP endpoint message transport plugin.
@@ -38,7 +39,7 @@ final case class FinagleEndpoint[Effect[_]](
   override def apply(request: Request): Future[Response] = {
     // Log the request
     val requestId = Random.id
-    lazy val requestProperties = extractRequestProperties(request, requestId)
+    lazy val requestProperties = getRequestProperties(request, requestId)
     logger.debug("Received HTTP request", requestProperties)
     val requestBody = Buf.ByteArray.Owned.extract(request.content)
 
@@ -101,10 +102,7 @@ final case class FinagleEndpoint[Effect[_]](
     }
   }
 
-  private def extractRequestProperties(
-    request: Request,
-    requestId: String
-  ): Map[String, String] = Map(
+  private def getRequestProperties(request: Request, requestId: String): Map[String, String] = ListMap(
     LogProperties.requestId -> requestId,
     "Client" -> clientAddress(request),
     "URL" -> request.uri,

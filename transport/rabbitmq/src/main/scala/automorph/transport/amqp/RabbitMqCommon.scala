@@ -99,38 +99,44 @@ private[automorph] object RabbitMqCommon extends Logging {
   /**
    * Create AMQP properties from message context.
    *
-   * @param context message context
+   * @param messageContext message context
    * @param contentType MIME content type
    * @param defaultReplyTo address to reply to
    * @param defaultRequestId request identifier
    * @param defaultAppId application identifier
+   * @param useDefaultRequestId if true, always use specified request identifier as correlation identifier
    * @return AMQP properties
    */
   def amqpProperties(
-    context: Option[Context],
+    messageContext: Option[Context],
     contentType: String,
     defaultReplyTo: String,
     defaultRequestId: String,
-    defaultAppId: String
+    defaultAppId: String,
+    useDefaultRequestId: Boolean
   ): BasicProperties = {
-    val amqpContext = context.getOrElse(AmqpContext())
-    val transportProperties = amqpContext.transport.map(_.properties).getOrElse(new BasicProperties())
+    val context = messageContext.getOrElse(AmqpContext())
+    val transportProperties = context.transport.map(_.properties).getOrElse(new BasicProperties())
     (new BasicProperties()).builder()
       .contentType(contentType)
-      .replyTo(amqpContext.replyTo.orElse(Option(transportProperties.getReplyTo)).getOrElse(defaultReplyTo))
-      .correlationId(amqpContext.correlationId.orElse(Option(transportProperties.getCorrelationId)).getOrElse(
-        defaultRequestId
-      ))
-      .contentEncoding(amqpContext.contentEncoding.orElse(Option(transportProperties.getContentEncoding)).orNull)
-      .appId(amqpContext.appId.orElse(Option(transportProperties.getAppId)).getOrElse(defaultAppId))
-      .headers((amqpContext.headers ++ Option(transportProperties.getHeaders).map(_.asScala).getOrElse(Map.empty)).asJava)
-      .deliveryMode(amqpContext.deliveryMode.map(new Integer(_)).orElse(Option(transportProperties.getDeliveryMode)).orNull)
-      .priority(amqpContext.priority.map(new Integer(_)).orElse(Option(transportProperties.getPriority)).orNull)
-      .expiration(amqpContext.expiration.orElse(Option(transportProperties.getExpiration)).orNull)
-      .messageId(amqpContext.messageId.orElse(Option(transportProperties.getMessageId)).orNull)
-      .timestamp(amqpContext.timestamp.map(Date.from).orElse(Option(transportProperties.getTimestamp)).orNull)
-      .`type`(amqpContext.`type`.orElse(Option(transportProperties.getType)).orNull)
-      .userId(amqpContext.userId.orElse(Option(transportProperties.getUserId)).orNull)
+      .replyTo(context.replyTo.orElse(Option(transportProperties.getReplyTo)).getOrElse(defaultReplyTo))
+      .correlationId(Option.when(useDefaultRequestId)(defaultRequestId).getOrElse {
+        context.correlationId.orElse(Option(transportProperties.getCorrelationId)).getOrElse(defaultRequestId)
+      })
+      .contentEncoding(context.contentEncoding.orElse(Option(transportProperties.getContentEncoding)).orNull)
+      .appId(context.appId.orElse(Option(transportProperties.getAppId)).getOrElse(defaultAppId))
+      .headers((context.headers ++ Option(transportProperties.getHeaders).map(_.asScala).getOrElse(
+        Map.empty
+      )).asJava)
+      .deliveryMode(context.deliveryMode.map(new Integer(_)).orElse(
+        Option(transportProperties.getDeliveryMode)
+      ).orNull)
+      .priority(context.priority.map(new Integer(_)).orElse(Option(transportProperties.getPriority)).orNull)
+      .expiration(context.expiration.orElse(Option(transportProperties.getExpiration)).orNull)
+      .messageId(context.messageId.orElse(Option(transportProperties.getMessageId)).orNull)
+      .timestamp(context.timestamp.map(Date.from).orElse(Option(transportProperties.getTimestamp)).orNull)
+      .`type`(context.`type`.orElse(Option(transportProperties.getType)).orNull)
+      .userId(context.userId.orElse(Option(transportProperties.getUserId)).orNull)
       .build
   }
 
@@ -140,7 +146,7 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @param properties message properties
    * @return message context
    */
-  def context(properties: BasicProperties): AmqpContext[RabbitMqContext] =
+  def messageContext(properties: BasicProperties): AmqpContext[RabbitMqContext] =
     AmqpContext(
       contentType = Option(properties.getContentType),
       contentEncoding = Option(properties.getContentEncoding),
@@ -167,16 +173,21 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @param consumerTag consumer tag
    * @return message properties
    */
-  def extractProperties(
-    requestId: String,
+  def messageProperties(
+    requestId: Option[String],
     routingKey: String,
     url: String,
     consumerTag: Option[String]
-  ): Map[String, String] = Map(
-    LogProperties.requestId -> requestId,
-    routingKeyProperty -> routingKey,
-    "URL" -> url
-  ) ++ consumerTag.map("Consumer Tag" -> _)
+  ): Map[String, String] =
+    Map()
+      ++ requestId.map(
+        LogProperties.requestId -> _
+      ) ++ Map(
+        routingKeyProperty -> routingKey,
+        "URL" -> url
+      ) ++ consumerTag.map(
+        "Consumer Tag" -> _
+      )
 }
 
 final case class RabbitMqContext(properties: BasicProperties)

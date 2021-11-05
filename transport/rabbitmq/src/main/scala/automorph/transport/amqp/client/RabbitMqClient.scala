@@ -79,10 +79,10 @@ final case class RabbitMqClient[Effect[_]](
     response: Option[Deferred[Effect, Response]]
   ): Effect[Unit] = {
     // Log the request
-    val amqpProperties =
-      RabbitMqCommon.amqpProperties(requestContext, mediaType, directReplyToQueue, defaultRequestId, clientId)
+    val amqpProperties = RabbitMqCommon
+      .amqpProperties(requestContext, mediaType, directReplyToQueue, defaultRequestId, clientId, false)
     val requestId = amqpProperties.getCorrelationId
-    lazy val requestProperties = RabbitMqCommon.extractProperties(requestId, routingKey, urlText, None)
+    lazy val requestProperties = RabbitMqCommon.messageProperties(Some(requestId), routingKey, urlText, None)
     logger.trace("Sending AMQP request", requestProperties)
 
     // Register deferred response effect if available
@@ -108,12 +108,12 @@ final case class RabbitMqClient[Effect[_]](
         responseBody: Array[Byte]
       ): Unit = {
         // Log the response
-        lazy val responseProperties =
-          RabbitMqCommon.extractProperties(properties.getCorrelationId, routingKey, urlText, None)
+        lazy val responseProperties = RabbitMqCommon
+          .messageProperties(Option(properties.getCorrelationId), routingKey, urlText, None)
         logger.debug("Received AMQP response", responseProperties)
 
         // Resolve the registered deferred response effect
-        val responseContext = RabbitMqCommon.context(properties)
+        val responseContext = RabbitMqCommon.messageContext(properties)
         responseHandlers.get(properties.getCorrelationId).foreach { response =>
           response.succeed(Bytes.byteArray.from(responseBody) -> responseContext).run
         }

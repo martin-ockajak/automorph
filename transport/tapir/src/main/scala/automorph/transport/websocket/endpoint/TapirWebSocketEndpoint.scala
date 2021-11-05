@@ -5,7 +5,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.HttpContext
-import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, extractRequestProperties, getRequestContext}
+import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, getRequestProperties, getRequestContext}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Random}
 import sttp.capabilities.{Streams, WebSockets}
@@ -59,7 +59,7 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
       .serverLogic { case (paths, queryParams, headers, clientIp) =>
         // Log the request
         val requestId = Random.id
-        lazy val requestProperties = extractRequestProperties(clientIp, None, requestId)
+        lazy val requestProperties = getRequestProperties(clientIp, None, requestId)
         logger.debug("Received WebSocket request", requestProperties)
 
         // Process the request

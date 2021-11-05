@@ -4,8 +4,8 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
 import automorph.util.{Bytes, Network, Random}
 import io.undertow.io.Receiver
@@ -13,7 +13,7 @@ import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, HttpString, StatusCodes}
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import java.io.IOException
-import scala.collection.immutable.ArraySeq
+import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 import scala.util.Try
 
@@ -52,8 +52,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
         override def run(): Unit = {
           // Process the request
           genericHandler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(_.fold(
-            error => sendErrorResponse(error, exchange, requestId, requestProperties)
-            ,
+            error => sendErrorResponse(error, exchange, requestId, requestProperties),
             result => {
               // Send the response
               val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
@@ -139,16 +138,15 @@ final case class UndertowHttpEndpoint[Effect[_]](
     }
   }
 
-  private def getRequestProperties(
-    exchange: HttpServerExchange,
-    requestId: String
-  ): Map[String, String] = Map(
-    LogProperties.requestId -> requestId,
-    "Client" -> clientAddress(exchange),
-    "URL" -> (exchange.getRequestURI + Option(exchange.getQueryString)
-      .filter(_.nonEmpty).map("?" + _).getOrElse("")),
-    "Method" -> exchange.getRequestMethod.toString
-  )
+  private def getRequestProperties(exchange: HttpServerExchange, requestId: String): Map[String, String] = {
+    val url = exchange.getRequestURI + Option(exchange.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")
+    ListMap(
+      LogProperties.requestId -> requestId,
+      "Client" -> clientAddress(exchange),
+      "URL" -> url,
+      "Method" -> exchange.getRequestMethod.toString
+    )
+  }
 
   private def clientAddress(exchange: HttpServerExchange): String = {
     val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)
