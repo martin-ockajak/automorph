@@ -85,7 +85,7 @@ final case class JettyHttpEndpoint[Effect[_]](
   ): Unit = {
     // Log the response
     val responseStatus = responseContext.flatMap(_.statusCode).getOrElse(status)
-    lazy val responseDetails = Map(
+    lazy val responseDetails = ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(request),
       "Status" -> responseStatus.toString

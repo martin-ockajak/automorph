@@ -114,7 +114,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         requestId: String
       ): Unit = {
         // Log the response
-        lazy val responseDetails = Map(
+        lazy val responseDetails = ListMap(
           LogProperties.requestId -> requestId,
           "Client" -> clientAddress(exchange)
         )

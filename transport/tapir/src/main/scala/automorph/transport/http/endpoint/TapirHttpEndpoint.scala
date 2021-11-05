@@ -128,7 +128,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     requestId: String
   ): (Array[Byte], StatusCode) = {
     // Log the response
-    lazy val responseDetails = Map(
+    lazy val responseDetails = ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(clientIp),
       "Status" -> statusCode.toString

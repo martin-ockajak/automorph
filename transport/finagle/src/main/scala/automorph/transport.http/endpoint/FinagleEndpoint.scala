@@ -76,7 +76,7 @@ final case class FinagleEndpoint[Effect[_]](
   ): Response = {
     // Log the response
     val responseStatus = responseContext.flatMap(_.statusCode.map(Status.apply)).getOrElse(status)
-    lazy val responseDetails = Map(
+    lazy val responseDetails = ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(request),
       "Status" -> responseStatus.toString

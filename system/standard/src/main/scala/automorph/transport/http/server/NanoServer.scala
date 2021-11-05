@@ -60,7 +60,7 @@ final case class NanoServer[Effect[_]] private (
     super.start()
     val protocols = if (webSocket) Seq("HTTP", "WebSocket") else Seq("HTTP")
     protocols.foreach { protocol =>
-      val properties = Map(
+      val properties = ListMap(
         "Protocol" -> protocol,
         "Port" -> port.toString
       )

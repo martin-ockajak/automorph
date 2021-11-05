@@ -101,7 +101,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
   ): Unit = {
     // Log the response
     val responseStatusCode = responseContext.flatMap(_.statusCode).getOrElse(statusCode)
-    lazy val responseDetails = Map(
+    lazy val responseDetails = ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(exchange),
       "Status" -> responseStatusCode.toString
