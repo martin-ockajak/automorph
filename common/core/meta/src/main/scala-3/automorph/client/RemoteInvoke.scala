@@ -225,22 +225,24 @@ object RemoteInvoke:
   )(codec: Expr[Codec]): Expr[(Node, Context) => R] =
     import quotes.reflect.{TypeRepr, asTerm}
 
-    val resultType = TypeRepr.of[R]
+    val resultType = TypeRepr.of[R].dealias
     MethodReflection.contextualResult[Context, Contextual](quotes)(resultType).map { contextualResultType =>
-      '{ (resultNode: Node, responseContext: Context) =>
-        Contextual(
-          ${
-            MethodReflection.call(
-              quotes,
-              codec.asTerm,
-              "decode",
-              List(contextualResultType),
-              List(List('{ resultNode }.asTerm))
-            ).asExprOf[R]
-          },
-          responseContext
-        )
-      }.asInstanceOf[Expr[(Node, Context) => R]]
+      contextualResultType.asType match
+        case '[resultValueType] =>
+          '{ (resultNode: Node, responseContext: Context) =>
+            Contextual(
+              ${
+                MethodReflection.call(
+                  quotes,
+                  codec.asTerm,
+                   "decode",
+                  List(contextualResultType),
+                  List(List('{ resultNode }.asTerm))
+                ).asExprOf[resultValueType]
+              },
+              responseContext
+            )
+          }.asInstanceOf[Expr[(Node, Context) => R]]
     }.getOrElse {
       '{ (resultNode: Node, _: Context) =>
         ${
