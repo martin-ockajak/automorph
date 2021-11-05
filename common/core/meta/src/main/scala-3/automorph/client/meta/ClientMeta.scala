@@ -16,7 +16,7 @@ import scala.reflect.ClassTag
  */
 private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
 
-  def protocol: RpcProtocol[Node, Codec]
+  def protocol: RpcProtocol[Node, Codec, Context]
 
   /**
    * Creates a RPC API proxy instance with RPC bindings for all valid public methods of the specified API type.

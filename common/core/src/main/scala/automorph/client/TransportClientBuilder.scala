@@ -25,6 +25,6 @@ case class TransportClientBuilder[Effect[_], Context](
    * @return RPC request client builder
    */
   def protocol[Node, Codec <: MessageCodec[Node]](
-    protocol: RpcProtocol[Node, Codec]
+    protocol: RpcProtocol[Node, Codec, Context]
   ): Client[Node, Codec, Effect, Context] = Client(protocol, transport)
 }

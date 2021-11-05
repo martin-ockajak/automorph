@@ -19,8 +19,9 @@ import scala.reflect.macros.blackbox
  * @param encodeStrings converts list of strings to message format node
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
+ * @tparam Context message context type
  */
-final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
+final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
   codec: Codec,
   mapError: (String, Int) => Throwable = JsonRpcProtocol.defaultMapError,
   mapException: Throwable => ErrorType = JsonRpcProtocol.defaultMapException,
@@ -28,7 +29,7 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node]](
   protected val encodeMessage: Message[Node] => Node,
   protected val decodeMessage: Node => Message[Node],
   protected val encodeStrings: List[String] => Node
-) extends JsonRpcCore[Node, Codec] with RpcProtocol[Node, Codec]
+) extends JsonRpcCore[Node, Codec, Context] with RpcProtocol[Node, Codec, Context]
 
 object JsonRpcProtocol extends ErrorMapping {
   /**
@@ -36,20 +37,21 @@ object JsonRpcProtocol extends ErrorMapping {
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec message codec plugin
-   * @param errorToException maps a JSON-RPC error to a corresponding exception
-   * @param exceptionToError maps an exception to a corresponding JSON-RPC error
+   * @param mapError maps a JSON-RPC error to a corresponding exception
+   * @param mapException maps an exception to a corresponding JSON-RPC error
    * @param argumentsByName if true, pass arguments by name, if false pass arguments by position
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
+   * @tparam Context message context type
    * @return JSON-RPC protocol plugin
    */
-  def apply[Node, Codec <: MessageCodec[Node]](
+  def apply[Node, Codec <: MessageCodec[Node], Context](
     codec: Codec,
-    errorToException: (String, Int) => Throwable,
-    exceptionToError: Throwable => ErrorType,
+    mapError: (String, Int) => Throwable,
+    mapException: Throwable => ErrorType,
     argumentsByName: Boolean
-  ): JsonRpcProtocol[Node, Codec] =
-    macro applyMacro[Node, Codec]
+  ): JsonRpcProtocol[Node, Codec, Context] =
+    macro applyMacro[Node, Codec, Context]
 
   /**
    * Creates a JSON-RPC protocol plugin.
@@ -58,24 +60,25 @@ object JsonRpcProtocol extends ErrorMapping {
    * @param codec message codec plugin
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
+   * @tparam Context message context type
    * @return JSON-RPC protocol plugin
    */
-  def apply[Node, Codec <: MessageCodec[Node]](codec: Codec): JsonRpcProtocol[Node, Codec] =
-    macro applyDefaultsMacro[Node, Codec]
+  def apply[Node, Codec <: MessageCodec[Node], Context](codec: Codec): JsonRpcProtocol[Node, Codec, Context] =
+    macro applyDefaultsMacro[Node, Codec, Context]
 
-  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]](c: blackbox.Context)(
+  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node], Context](c: blackbox.Context)(
     codec: c.Expr[Codec],
-    errorToException: c.Expr[(String, Int) => Throwable],
-    exceptionToError: c.Expr[Throwable => ErrorType],
+    mapError: c.Expr[(String, Int) => Throwable],
+    mapException: c.Expr[Throwable => ErrorType],
     argumentsByName: c.Expr[Boolean]
-  ): c.Expr[JsonRpcProtocol[Node, Codec]] = {
+  ): c.Expr[JsonRpcProtocol[Node, Codec, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    c.Expr[JsonRpcProtocol[Node, Codec]](q"""
+    c.Expr[JsonRpcProtocol[Node, Codec, Context]](q"""
       new automorph.protocol.JsonRpcProtocol(
         $codec,
-        $errorToException,
-        $exceptionToError,
+        $mapError,
+        $mapException,
         $argumentsByName,
         message => $codec.encode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](message),
         node => $codec.decode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](node),
@@ -84,12 +87,12 @@ object JsonRpcProtocol extends ErrorMapping {
     """)
   }
 
-  def applyDefaultsMacro[Node, Codec <: MessageCodec[Node]](c: blackbox.Context)(
+  def applyDefaultsMacro[Node, Codec <: MessageCodec[Node], Context](c: blackbox.Context)(
     codec: c.Expr[Codec]
-  ): c.Expr[JsonRpcProtocol[Node, Codec]] = {
+  ): c.Expr[JsonRpcProtocol[Node, Codec, Context]] = {
     import c.universe.Quasiquote
 
-    c.Expr[JsonRpcProtocol[Node, Codec]](q"""
+    c.Expr[JsonRpcProtocol[Node, Codec, Context]](q"""
       automorph.protocol.JsonRpcProtocol(
         $codec,
         automorph.protocol.JsonRpcProtocol.defaultMapError,

@@ -127,7 +127,7 @@ lazy val jsonrpc = (project in file("protocol/jsonrpc")).dependsOn(
   name := s"$projectName-jsonrpc"
 )
 lazy val restrpcMeta = (project in file("protocol/restrpc/meta")).dependsOn(
-  spi
+  spi, http
 ).settings(
   name := s"$projectName-restrpc-meta"
 )

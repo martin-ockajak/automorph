@@ -25,14 +25,15 @@ object MessageCodecSelection extends App {
   }
   val api = new ServerApi()
 
-  // Create an RPC protocol plugin
-  val protocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type](codec)
+  // Create a server RPC protocol plugin
+  val serverProtocol =
+    Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ServerContext](codec)
 
   // Create an effect system plugin
   val system = Default.systemAsync
 
   // Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-  val handler = Handler.protocol(protocol).system(system).context[Default.ServerContext]
+  val handler = Handler.protocol(serverProtocol).system(system)
   lazy val server = Default.server(handler.bind(api), 7000, "/api")
 
   // Define client view of a remote API
@@ -40,9 +41,13 @@ object MessageCodecSelection extends App {
     def hello(some: String, n: Int): Future[Record]
   }
 
+  // Create a client RPC protocol plugin
+  val clientProtocol =
+    Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ClientContext](codec)
+
   // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
   val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
-  val client = Client(protocol, transport)
+  val client = Client(clientProtocol, transport)
 
   // Call the remote API function
   val remoteApi = client.bind[ClientApi] // ClientApi

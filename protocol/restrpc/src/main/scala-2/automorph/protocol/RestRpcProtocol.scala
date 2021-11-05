@@ -20,8 +20,9 @@ import scala.reflect.macros.blackbox
  * @param encodeStrings converts list of strings to message format node
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
+ * @tparam Context message context type
  */
-final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
+final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
   codec: Codec,
   mapError: (String, Option[Int]) => Throwable = RestRpcProtocol.defaultMapError,
   mapException: Throwable => Option[Int] = RestRpcProtocol.defaultMapException,
@@ -30,7 +31,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node]](
   protected val encodeResponse: Message[Node] => Node,
   protected val decodeResponse: Node => Message[Node],
   protected val encodeStrings: List[String] => Node
-) extends RestRpcCore[Node, Codec] with RpcProtocol[Node, Codec]
+) extends RestRpcCore[Node, Codec, Context] with RpcProtocol[Node, Codec, Context]
 
 object RestRpcProtocol extends ErrorMapping {
 
@@ -39,18 +40,19 @@ object RestRpcProtocol extends ErrorMapping {
    *
    * @see [[https://www.jsonrpc.org/specification REST-RPC protocol specification]]
    * @param codec message codec plugin
-   * @param errorToException maps a REST-RPC error to a corresponding exception
-   * @param exceptionToError maps an exception to a corresponding REST-RPC error
+   * @param mapError maps a REST-RPC error to a corresponding exception
+   * @param mapException maps an exception to a corresponding REST-RPC error
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
+   * @tparam Context message context type
    * @return REST-RPC protocol plugin
    */
-  def apply[Node, Codec <: MessageCodec[Node]](
+  def apply[Node, Codec <: MessageCodec[Node], Context](
     codec: Codec,
-    errorToException: (String, Option[Int]) => Throwable,
-    exceptionToError: Throwable => Option[Int]
-  ): RestRpcProtocol[Node, Codec] =
-    macro applyMacro[Node, Codec]
+    mapError: (String, Option[Int]) => Throwable,
+    mapException: Throwable => Option[Int]
+  ): RestRpcProtocol[Node, Codec, Context] =
+    macro applyMacro[Node, Codec, Context]
 
   /**
    * Creates a REST-RPC protocol plugin.
@@ -59,24 +61,25 @@ object RestRpcProtocol extends ErrorMapping {
    * @param codec message codec plugin
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
+   * @tparam Context message context type
    * @return REST-RPC protocol plugin
    */
-  def apply[Node, Codec <: MessageCodec[Node]](codec: Codec): RestRpcProtocol[Node, Codec] =
-    macro applyDefaultsMacro[Node, Codec]
+  def apply[Node, Codec <: MessageCodec[Node], Context](codec: Codec): RestRpcProtocol[Node, Codec, Context] =
+    macro applyDefaultsMacro[Node, Codec, Context]
 
-  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]](c: blackbox.Context)(
+  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node], Context](c: blackbox.Context)(
     codec: c.Expr[Codec],
-    errorToException: c.Expr[(String, Option[Int]) => Throwable],
-    exceptionToError: c.Expr[Throwable => Option[Int]]
-  ): c.Expr[RestRpcProtocol[Node, Codec]] = {
+    mapError: c.Expr[(String, Option[Int]) => Throwable],
+    mapException: c.Expr[Throwable => Option[Int]]
+  ): c.Expr[RestRpcProtocol[Node, Codec, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[Codec])
 
-    c.Expr[RestRpcProtocol[Node, Codec]](q"""
+    c.Expr[RestRpcProtocol[Node, Codec, Context]](q"""
       new automorph.protocol.RestRpcProtocol(
         $codec,
-        $errorToException,
-        $exceptionToError,
+        $mapError,
+        $mapException,
         request => $codec.encode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](request),
         node => $codec.decode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](node),
         response => $codec.encode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](response),
@@ -86,12 +89,12 @@ object RestRpcProtocol extends ErrorMapping {
     """)
   }
 
-  def applyDefaultsMacro[Node, Codec <: MessageCodec[Node]](c: blackbox.Context)(
+  def applyDefaultsMacro[Node, Codec <: MessageCodec[Node], Context](c: blackbox.Context)(
     codec: c.Expr[Codec]
-  ): c.Expr[RestRpcProtocol[Node, Codec]] = {
+  ): c.Expr[RestRpcProtocol[Node, Codec, Context]] = {
     import c.universe.Quasiquote
 
-    c.Expr[RestRpcProtocol[Node, Codec]](q"""
+    c.Expr[RestRpcProtocol[Node, Codec, Context]](q"""
       automorph.protocol.RestRpcProtocol(
         $codec,
         automorph.protocol.RestRpcProtocol.defaultMapError,

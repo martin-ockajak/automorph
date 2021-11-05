@@ -20,7 +20,7 @@ object ClientErrorMapping extends App {
   val server = createServer(_.bind(api))
 
   // Customize remote API client RPC error to exception mapping
-  val protocol = Default.protocol.mapError((message, code) =>
+  val protocol = Default.protocol[Default.ClientContext].mapError((message, code) =>
     if (message.contains("SQL")) {
       new SQLException(message)
     } else {

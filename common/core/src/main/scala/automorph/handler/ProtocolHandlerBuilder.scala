@@ -1,5 +1,6 @@
 package automorph.handler
 
+import automorph.Handler
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 
 /**
@@ -9,9 +10,10 @@ import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
  * @param protocol RPC protocol plugin
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
+ * @tparam Context message context type
  */
-case class ProtocolHandlerBuilder[Node, Codec <: MessageCodec[Node]](
-  protocol: RpcProtocol[Node, Codec]
+case class ProtocolHandlerBuilder[Node, Codec <: MessageCodec[Node], Context](
+  protocol: RpcProtocol[Node, Codec, Context]
 ) {
 
   /**
@@ -21,6 +23,6 @@ case class ProtocolHandlerBuilder[Node, Codec <: MessageCodec[Node]](
    * @tparam Effect effect type
    * @return RPC request handler builder
    */
-  def system[Effect[_]](system: EffectSystem[Effect]): FullHandlerBuilder[Node, Codec, Effect] =
-    FullHandlerBuilder(protocol, system)
+  def system[Effect[_]](system: EffectSystem[Effect]): Handler[Node, Codec, Effect, Context] =
+    Handler(protocol, system)
 }

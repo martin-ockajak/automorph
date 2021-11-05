@@ -308,7 +308,7 @@ object Default extends DefaultMeta {
     builder: Undertow.Builder = defaultBuilder
   ): ServerBindApis[Effect] => Server[Effect] =
     (bindApis: ServerBindApis[Effect]) => {
-      val handler = bindApis(Handler.protocol(protocol).system(system).context[ServerContext])
+      val handler = bindApis(Handler.protocol(protocol[ServerContext]).system(system))
       server(handler, port, path, methods, webSocket, mapException, builder)
     }
 

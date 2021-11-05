@@ -11,8 +11,9 @@ import scala.util.Try
  *
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
+ * @tparam Context message context type
  */
-trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
+trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
 
   /** RPC message body type. */
   type MessageBody = ArraySeq.ofByte
@@ -48,12 +49,14 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
    * Parses an RPC request.
    *
    * @param requestBody RPC request message body
+   * @param requestContext request context
    * @param requestId request correlation identifier
    * @param functionName invoked function name, if specified it is used instead of function name obtained from the request body
    * @return RPC request if the message is valid or RPC error if the message is invalid
    */
   def parseRequest(
     requestBody: MessageBody,
+    requestContext: Context,
     requestId: String,
     functionName: Option[String]
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]]
@@ -71,9 +74,13 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node]] {
    * Parses an RPC response.
    *
    * @param responseBody RPC response message body
+   * @param responseContext response context
    * @return RPC response if the message is valid or RPC error if the message is invalid
    */
-  def parseResponse(responseBody: MessageBody): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
+  def parseResponse(
+    responseBody: MessageBody,
+    responseContext: Context
+  ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
 
   /**
    * Generates OpenApi speficication for specified RPC API functions.

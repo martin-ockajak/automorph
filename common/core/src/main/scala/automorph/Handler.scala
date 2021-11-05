@@ -26,7 +26,7 @@ import scala.util.{Failure, Success, Try}
  * @tparam Context message context type
  */
 final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
-  protocol: RpcProtocol[Node, Codec],
+  protocol: RpcProtocol[Node, Codec, Context],
   system: EffectSystem[Effect],
   bindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
     ListMap.empty[String, HandlerBinding[Node, Effect, Context]]
@@ -56,7 +56,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   )(implicit requestContext: Context): Effect[HandlerResult[MessageBody, Context]] = {
     // Parse request
     val requestMessageBody = implicitly[Bytes[MessageBody]].from(requestBody)
-    protocol.parseRequest(requestMessageBody, requestId, functionName).fold(
+    protocol.parseRequest(requestMessageBody, requestContext, requestId, functionName).fold(
       error => errorResponse(error.exception, error.message, requestId, Map(LogProperties.requestId -> requestId)),
       rpcRequest => {
         // Invoke requested RPC function
@@ -243,11 +243,12 @@ object Handler {
    * @param protocol RPC protocol plugin
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
+   * @tparam Context message context type
    * @return RPC request handler builder
    */
-  def protocol[Node, Codec <: MessageCodec[Node]](
-    protocol: RpcProtocol[Node, Codec]
-  ): ProtocolHandlerBuilder[Node, Codec] =
+  def protocol[Node, Codec <: MessageCodec[Node], Context](
+    protocol: RpcProtocol[Node, Codec, Context]
+  ): ProtocolHandlerBuilder[Node, Codec, Context] =
     ProtocolHandlerBuilder(protocol)
 
   /**

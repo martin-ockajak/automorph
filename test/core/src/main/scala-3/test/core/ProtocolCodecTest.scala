@@ -31,8 +31,8 @@ trait ProtocolCodecTest extends CoreTest {
         implicit val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
         implicit val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
         val codec = CirceJsonCodec()
-        val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type](codec)
-        val handler = Handler.protocol(protocol).system(system).context[Context]
+        val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type, Context](codec)
+        val handler = Handler.protocol(protocol).system(system)
           .bind(simpleApi).bind(complexApi)
         val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, contextValue))
         val client = Client.protocol(protocol).transport(transport)
@@ -62,8 +62,8 @@ trait ProtocolCodecTest extends CoreTest {
           }
         )
         val codec = JacksonJsonCodec(JacksonJsonCodec.defaultMapper.registerModule(enumModule))
-        val protocol = JsonRpcProtocol[JacksonJsonCodec.Node, codec.type](codec)
-        val handler = Handler.protocol(protocol).system(system).context[Context]
+        val protocol = JsonRpcProtocol[JacksonJsonCodec.Node, codec.type, Context](codec)
+        val handler = Handler.protocol(protocol).system(system)
           .bind(simpleApi).bind(complexApi)
         val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, contextValue))
         val client = Client.protocol(protocol).transport(transport)
@@ -87,8 +87,8 @@ trait ProtocolCodecTest extends CoreTest {
         }
         val custom = new Custom
         val codec = UpickleJsonCodec(custom)
-        val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type](codec)
-        val handler = Handler.protocol(protocol).system(system).context[Context]
+        val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type, Context](codec)
+        val handler = Handler.protocol(protocol).system(system)
           .bind(simpleApi).bind(complexApi)
         val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, contextValue))
         val client = Client.protocol(protocol).transport(transport)
@@ -112,8 +112,8 @@ trait ProtocolCodecTest extends CoreTest {
         }
         val custom = new Custom
         val codec = UpickleMessagePackCodec(custom)
-        val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type](codec)
-        val handler = Handler.protocol(protocol).system(system).context[Context]
+        val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type, Context](codec)
+        val handler = Handler.protocol(protocol).system(system)
           .bind(simpleApi).bind(complexApi)
         val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, contextValue))
         val client = Client.protocol(protocol).transport(transport)
@@ -168,8 +168,8 @@ trait ProtocolCodecTest extends CoreTest {
             "none"
           )
         val codec = ArgonautJsonCodec()
-        val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type](codec)
-        val handler = Handler.protocol(protocol).system(system).context[Context]
+        val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type, Context](codec)
+        val handler = Handler.protocol(protocol).system(system)
           .bind(simpleApi).bind(complexApi)
         val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, contextValue))
         val client = Client.protocol(protocol).transport(transport)

@@ -21,7 +21,7 @@ class JsonRpcTest extends BaseTest {
 
   "" - {
     "OpenApi" in {
-      val protocol = JsonRpcProtocol[Default.Node, Default.Codec](Default.codec)
+      val protocol = JsonRpcProtocol[Default.Node, Default.Codec, Default.ServerContext](Default.codec)
       val specification = protocol.openApi(functions, "Test", "0.0", Seq("http://localhost:80/api"))
       specification.should(not(be(empty)))
     }

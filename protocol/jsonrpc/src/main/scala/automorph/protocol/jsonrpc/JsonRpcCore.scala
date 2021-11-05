@@ -16,9 +16,10 @@ import scala.util.{Failure, Success, Try}
  *
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
+ * @tparam Context message context type
  */
-private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
-  this: JsonRpcProtocol[Node, Codec] =>
+private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context] {
+  this: JsonRpcProtocol[Node, Codec, Context] =>
 
   /** JSON-RPC message metadata. */
   type Metadata = Option[Message.Id]
@@ -73,6 +74,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
   @nowarn("msg=used")
   override def parseRequest(
     requestBody: MessageBody,
+    requestContext: Context,
     requestId: String,
     functionName: Option[String]
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
@@ -121,7 +123,10 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
     }
   }
 
-  override def parseResponse(responseBody: MessageBody): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
+  override def parseResponse(
+    responseBody: MessageBody,
+    responseContext: Context
+  ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
     // Deserialize response
     Try(decodeMessage(codec.deserialize(responseBody))).pureFold(
       error => Left(RpcError(ParseErrorException("Malformed response", error), RpcMessage(None, responseBody))),
@@ -164,7 +169,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
    * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
    * @return JSON-RPC protocol
    */
-  def mapException(exceptionToError: Throwable => ErrorType): JsonRpcProtocol[Node, Codec] =
+  def mapException(exceptionToError: Throwable => ErrorType): JsonRpcProtocol[Node, Codec, Context] =
     copy(mapException = exceptionToError)
 
   /**
@@ -173,7 +178,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node]] {
    * @param errorToException maps a JSON-RPC error to a corresponding exception
    * @return JSON-RPC protocol
    */
-  def mapError(errorToException: (String, Int) => Throwable): JsonRpcProtocol[Node, Codec] =
+  def mapError(errorToException: (String, Int) => Throwable): JsonRpcProtocol[Node, Codec, Context] =
     copy(mapError = errorToException)
 
   /**

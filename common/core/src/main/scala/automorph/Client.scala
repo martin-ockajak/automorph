@@ -25,7 +25,7 @@ import scala.util.Try
  * @tparam Context message context type
  */
 final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
-  protocol: RpcProtocol[Node, Codec],
+  protocol: RpcProtocol[Node, Codec, Context],
   transport: ClientMessageTransport[Effect, Context]
 ) extends ClientMeta[Node, Codec, Effect, Context] with CannotEqual with Logging {
 
@@ -162,7 +162,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     decodeResult: (Node, Context) => R
   ): Effect[R] = {
     // Parse response
-    protocol.parseResponse(responseBody).fold(
+    protocol.parseResponse(responseBody, responseContext).fold(
       error => raiseError(error.exception, requestProperties),
       rpcResponse => {
         lazy val allProperties = requestProperties ++ rpcResponse.message.properties +
@@ -209,11 +209,12 @@ object Client {
    * @param protocol RPC protocol plugin
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
+   * @tparam Context message context type
    * @return RPC client builder
    */
-  def protocol[Node, Codec <: MessageCodec[Node]](
-    protocol: RpcProtocol[Node, Codec]
-  ): ProtocolClientBuilder[Node, Codec] =
+  def protocol[Node, Codec <: MessageCodec[Node], Context](
+    protocol: RpcProtocol[Node, Codec, Context]
+  ): ProtocolClientBuilder[Node, Codec, Context] =
     ProtocolClientBuilder(protocol)
 
   /**

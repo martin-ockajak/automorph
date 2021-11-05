@@ -16,9 +16,10 @@ import scala.util.{Failure, Success, Try}
  *
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
+ * @tparam Context message context type
  */
-private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
-  this: RestRpcProtocol[Node, Codec] =>
+private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context] {
+  this: RestRpcProtocol[Node, Codec, Context] =>
 
   /** REST-RPC message metadata. */
   type Metadata = Unit
@@ -72,6 +73,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
 
   override def parseRequest(
     requestBody: MessageBody,
+    requestContext: Context,
     requestId: String,
     functionName: Option[String]
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
@@ -126,7 +128,10 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
     }
   }
 
-  override def parseResponse(responseBody: MessageBody): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
+  override def parseResponse(
+    responseBody: MessageBody,
+    responseContext: Context
+  ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
     // Deserialize response
     Try(decodeResponse(codec.deserialize(responseBody))).pureFold(
       error => Left(RpcError(InvalidResponseException("Malformed response", error), RpcMessage((), responseBody))),
@@ -169,7 +174,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
    * @param exceptionToError maps an exception classs to a corresponding REST-RPC error type
    * @return REST-RPC protocol
    */
-  def exceptionToError(exceptionToError: Throwable => Option[Int]): RestRpcProtocol[Node, Codec] =
+  def mapException(exceptionToError: Throwable => Option[Int]): RestRpcProtocol[Node, Codec, Context] =
     copy(mapException = exceptionToError)
 
   /**
@@ -178,7 +183,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node]] {
    * @param errorToException maps a REST-RPC error to a corresponding exception
    * @return REST-RPC protocol
    */
-  def errorToException(errorToException: (String, Option[Int]) => Throwable): RestRpcProtocol[Node, Codec] =
+  def mapError(errorToException: (String, Option[Int]) => Throwable): RestRpcProtocol[Node, Codec, Context] =
     copy(mapError = errorToException)
 
   /**
