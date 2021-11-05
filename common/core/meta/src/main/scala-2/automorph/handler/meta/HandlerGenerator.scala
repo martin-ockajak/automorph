@@ -168,10 +168,16 @@ object HandlerGenerator {
       val resultType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
       val encodeResult = MethodReflection.contextualResult[C, Context, Contextual[_, _]](ref.c)(resultType)
         .map { contextualResultType =>
-        q"(result: Contextual[$contextualResultType, Context]) => $codec.encode[$contextualResultType](result.result) -> Some(result.context)"
-      }.getOrElse {
-        q"(result: $resultType) => $codec.encode[$resultType](result) -> Option.empty[$contextType]"
-      }
+          q"""
+            (result: Contextual[$contextualResultType, $contextType]) =>
+              $codec.encode[$contextualResultType](result.result) -> Some(result.context)
+          """
+        }.getOrElse {
+          q"""
+            (result: $resultType) =>
+              $codec.encode[$resultType](result) -> Option.empty[$contextType]
+          """
+        }
 
       // Create the effect mapping call using the method call and the encode result function
       //   system.map(apiMethodCall, encodeResult): Effect[(Node, Option[Context])]

@@ -96,7 +96,7 @@ private[automorph] object MethodReflection {
 
     someType.dealias match {
       case typeRef: TypeRef
-        if typeRef.typeConstructor <:< c.weakTypeOf[Contextual] &&
+        if typeRef.typeConstructor <:< c.weakTypeOf[Contextual].typeConstructor &&
           typeRef.typeArgs.size > 1 &&
           typeRef.typeArgs(1) =:= c.weakTypeOf[Context] => Some(typeRef.typeArgs(0))
       case _ => None
