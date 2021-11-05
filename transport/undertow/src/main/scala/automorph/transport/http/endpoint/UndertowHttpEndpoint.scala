@@ -50,11 +50,16 @@ final case class UndertowHttpEndpoint[Effect[_]](
       val handlerRunnable = new Runnable {
 
         override def run(): Unit = {
+          println("1")
           // Process the request
           implicit val requestContext: Context = getRequestContext(exchange)
           genericHandler.processRequest(requestBody, requestId, Some(exchange.getRequestPath)).either.map(_.fold(
-            error => sendErrorResponse(error, exchange, requestId, requestProperties),
+            error => {
+              println("2")
+              sendErrorResponse(error, exchange, requestId, requestProperties)
+            },
             result => {
+              println("3")
               // Send the response
               val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
               val statusCode = result.exception.map(exceptionToStatusCode).getOrElse(StatusCodes.OK)
@@ -68,6 +73,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
         ()
       } else {
         handlerRunnable.run()
+        println("4")
       }
     }
   }
