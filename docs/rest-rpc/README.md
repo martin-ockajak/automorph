@@ -84,7 +84,7 @@ Message in binary format. Request body is interpreted as a first argument of the
 
 ## Response
 
-### Structured response body
+### Structured result response body
 
 Message in JSON format.
 
@@ -96,9 +96,9 @@ Message in JSON format.
 }
 ```
 
-### Binary response body
+### Binary result response body
 
-Message in binary format. Response body is interpreted as a result of the invoked function.
+Message in binary format. Response body is interpreted as a successful result of the invoked function.
 
 - Method: POST
 - Content-Type: application/octet-stream
