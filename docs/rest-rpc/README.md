@@ -20,7 +20,7 @@ REST-RPC is an attempt to demonstrate that the custom RPC protocol design and im
 * API function name in URL path
 * API function arguments must have names
 * API function arguments can be supplied either in the request body or as URL query parameters
-* HTTP POST or GET method must be used for standard or cached call semantics
+* HTTP POST or GET method must be used to obtain standard or cached call semantics respectively
 
 ## Fairly anticipated questions (FAQ)
 
