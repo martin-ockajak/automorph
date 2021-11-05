@@ -15,7 +15,14 @@ ThisBuild / description := projectDescription
 ThisBuild / organization := s"$projectRoot.$projectName"
 ThisBuild / organizationName := projectName
 ThisBuild / organizationHomepage := Some(url(siteUrl))
-ThisBuild / developers := List()
+ThisBuild / developers := List(
+  Developer(
+    id = "m",
+    name = "Martin Ockajak",
+    email = "automorph.release@gmail.com",
+    url = url(s"https://github.com/martin-ockajak")
+  )
+)
 Global / onChangedBuildSource := ReloadOnSourceChanges
 onLoadMessage := ""
 
@@ -506,7 +513,6 @@ deploySite := site.dependsOn(site, ghpagesPushSite).value
 
 // Release
 ThisBuild / releaseCrossBuild := false
-ThisBuild / publishMavenStyle := true
 ThisBuild / scmInfo := Some(ScmInfo(
   url(repositoryUrl),
   s"scm:$repositoryShell"
