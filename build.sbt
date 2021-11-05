@@ -3,14 +3,18 @@
 // Repository
 val projectRoot = "org"
 val projectName = "automorph"
+val projectDescription = "RPC client and server library for Scala"
 val repositoryPath = s"martin-ockajak/$projectName"
 val repositoryUrl = s"https://github.com/$repositoryPath"
-val documentationUrl = repositoryUrl
+val siteUrl = s"https://$projectName.$projectRoot"
 
 // Metadata
-ThisBuild / organization := s"$projectRoot.$projectName"
-ThisBuild / homepage := Some(url(repositoryUrl))
+ThisBuild / homepage := Some(url(siteUrl))
 ThisBuild / licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
+ThisBuild / description := projectDescription
+ThisBuild / organization := s"$projectRoot.$projectName"
+ThisBuild / organizationName := projectName
+ThisBuild / organizationHomepage := Some(url(siteUrl))
 ThisBuild / developers := List()
 Global / onChangedBuildSource := ReloadOnSourceChanges
 onLoadMessage := ""
@@ -18,7 +22,6 @@ onLoadMessage := ""
 // Structure
 lazy val root = project.in(file(".")).settings(
   name := projectName,
-  description := "Remote procedure call client and server library for Scala ",
   publish / skip := true
 ).aggregate(
   // Common
@@ -247,7 +250,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
   ),
   Compile / doc / scalacOptions ++= Seq("-skip-packages sttp")
 //  apiMappings += (
-//    (unmanagedBase.value / s"core_3-${sttpVersion}.jar") -> 
+//    (unmanagedBase.value / s"core_3-$sttpVersion.jar") -> 
 //      url("https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_2.13/latest/")
 //  )
 )
@@ -451,7 +454,7 @@ laikaConfig := LaikaConfig.defaults.withConfigValue(LinkConfig(
 ))
 laikaTheme := laika.helium.Helium.defaults.all.metadata(
   title = Some("Automorph"),
-  description = Some("Remote procedure call client and server library for Scala"),
+  description = Some(projectDescription),
   version = Some(version.value),
   language = Some("en")
 ).all.themeColors(
@@ -470,10 +473,10 @@ laikaTheme := laika.helium.Helium.defaults.all.metadata(
   defaultLineHeight = 1.5,
   anchorPlacement = AnchorPlacement.Right
 ).site.topNavigationBar(
-  homeLink = IconLink.external(s"https://$projectName.$projectRoot", HeliumIcon.home),
+  homeLink = IconLink.external(siteUrl, HeliumIcon.home),
   navLinks = Seq(
     IconLink.external(repositoryUrl, HeliumIcon.github),
-    IconLink.external(s"${documentationUrl}/api", HeliumIcon.api),
+    IconLink.external(s"$siteUrl/api", HeliumIcon.api),
     IconLink.external(s"https://mvnrepository.com/artifact/${organization.value}", HeliumIcon.download)
   )
 ).build
@@ -492,7 +495,7 @@ site / fileInputs ++= Seq(
 
 
 // Deployment
-val repositoryShell = s"git@github.com:${repositoryPath}.git"
+val repositoryShell = s"git@github.com:$repositoryPath.git"
 enablePlugins(GhpagesPlugin)
 siteSourceDirectory := target.value / "site"
 git.remoteRepo := repositoryShell
@@ -502,14 +505,15 @@ deploySite := site.dependsOn(site, ghpagesPushSite).value
 
 
 // Release
-//ThisBuild / releaseCrossBuild := true
 ThisBuild / releaseCrossBuild := false
+ThisBuild / publishMavenStyle := true
 ThisBuild / scmInfo := Some(ScmInfo(
   url(repositoryUrl),
-  s"scm:${repositoryShell}"
+  s"scm:$repositoryShell"
 ))
 ThisBuild / releaseVcsSign := true
 ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
 ThisBuild / versionScheme := Some("semver-spec")
 credentials += Credentials("GnuPG Key ID", "gpg", "1735B0FD9A286C8696EB5E6117F23799295F187F", "")
+credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
 
