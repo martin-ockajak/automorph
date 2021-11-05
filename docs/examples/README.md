@@ -792,9 +792,11 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Create a server REST-RPC protocol plugin
-val serverProtocol =
-  RestRpcProtocol[Default.Node, Default.Codec, Default.ServerContext](Default.codec)
+// Create a server REST-RPC protocol plugin with '/api' path prefix
+val serverProtocol = RestRpcProtocol[Default.Node, Default.Codec, Default.ServerContext](
+  Default.codec,
+  "/api"
+)
 
 // Start default REST-RPC HTTP server listening on port 7000 for requests to '/api'
 val system = Default.systemAsync
@@ -813,9 +815,11 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Create a client REST-RPC protocol plugin
-val clientProtocol =
-  RestRpcProtocol[Default.Node, Default.Codec, Default.ClientContext](Default.codec)
+// Create a client REST-RPC protocol plugin with '/api' path prefix
+val clientProtocol = RestRpcProtocol[Default.Node, Default.Codec, Default.ClientContext](
+  Default.codec,
+  "/api"
+)
 
 // Setup default REST-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))

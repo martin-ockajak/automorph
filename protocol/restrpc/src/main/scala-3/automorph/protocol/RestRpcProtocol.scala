@@ -10,6 +10,7 @@ import automorph.transport.http.HttpContext
  * @constructor Creates a REST-RPC 2.0 protocol implementation.
  * @see [[https://automorph.org/rest-rpc Protocol specification]]
  * @param codec message codec plugin
+ * @param pathPrefix API path prefix
  * @param mapError maps a REST-RPC error to a corresponding exception
  * @param mapException maps an exception to a corresponding REST-RPC error
  * @param encodeRequest converts a REST-RPC request to message format node
@@ -23,6 +24,7 @@ import automorph.transport.http.HttpContext
  */
 final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](
   codec: Codec,
+  pathPrefix: String,
   mapError: (String, Option[Int]) => Throwable,
   mapException: Throwable => Option[Int],
   protected val encodeRequest: Message.Request[Node] => Node,
@@ -39,6 +41,7 @@ object RestRpcProtocol extends ErrorMapping:
    *
    * @see [[https://automorph.org/rest-rpc REST-RPC protocol specification]]
    * @param codec message codec plugin
+   * @param pathPrefix API path prefix
    * @param mapError maps a REST-RPC error to a corresponding exception
    * @param mapException maps an exception to a corresponding REST-RPC error
    * @tparam Node message node type
@@ -48,6 +51,7 @@ object RestRpcProtocol extends ErrorMapping:
    */
   inline def apply[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](
     codec: Codec,
+    pathPrefix: String,
     mapError: (String, Option[Int]) => Throwable = defaultMapError,
     mapException: Throwable => Option[Int] = defaultMapException
   ): RestRpcProtocol[Node, Codec, Context] =
@@ -58,6 +62,7 @@ object RestRpcProtocol extends ErrorMapping:
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
     RestRpcProtocol(
       codec,
+      pathPrefix,
       mapError,
       mapException,
       encodeRequest,
