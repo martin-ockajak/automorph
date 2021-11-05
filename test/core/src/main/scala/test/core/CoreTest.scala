@@ -3,6 +3,7 @@ package test.core
 import automorph.Types
 import automorph.spi.EffectSystem
 import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException, InvalidResponseException}
+import automorph.util.EmptyContext
 import org.scalacheck.Arbitrary
 import scala.util.{Failure, Success, Try}
 import test.Generators.arbitraryRecord
@@ -37,7 +38,7 @@ trait CoreTest extends BaseTest {
   }
 
   val simpleApi: SimpleApiType = SimpleApiImpl(system)
-  val complexApi: ComplexApiType = ComplexApiImpl(system)
+  val complexApi: ComplexApiType = ComplexApiImpl(system, arbitraryContext.arbitrary.sample.get)
   val invalidApi: InvalidApiType = InvalidApiImpl(system)
 
   implicit def arbitraryContext: Arbitrary[Context]
@@ -104,9 +105,16 @@ trait CoreTest extends BaseTest {
               }
             }
             "method8" in {
-              check { (a0: Record, a1: String, a2: Option[Double], context: Context) =>
-                implicit val usingContext: Context = context
-                consistent(apis, (api: ComplexApiType) => api.method8(a0, a1, a2))
+              check { (a0: Record, a1: String, a2: Option[Double]) =>
+                consistent(
+                  apis,
+                  (api: ComplexApiType) =>
+                    system.map(
+                      api.method8(a0, a1, a2),
+                      result =>
+                        s"${result.result} - ${result.context.getClass.getName}"
+                    )
+                )
               }
             }
             "method9" in {
