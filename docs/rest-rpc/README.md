@@ -19,7 +19,7 @@ REST-RPC is an attempt to demonstrate that the custom RPC protocol design and im
 * Binary data messages
 * API function name in URL path
 * API function arguments must have names
-* API function arguments can be supplied either in the request body or as URL query parameters
+* API function arguments can be supplied either in the request body or in special cases as URL query parameters
 * HTTP POST or GET method must be used to obtain standard or cached call semantics respectively
 
 ## Fairly anticipated questions (FAQ)
@@ -40,64 +40,128 @@ In other situations it is [probably](https://youtu.be/XyJh3qKjSMk?t=53) better t
 
 To illustrate the fact that it provides remote API authors with a solution equivalent to typical REST API protocols by employing RPC principles.
 
-### Can it be used in practice without having a specific REST-RPC library ?
+### Can it be used in practice without a specific REST-RPC library ?
 
-Absolutely. Any REST client or server library will suffice. However, using a specific REST-RPC library reduces the implementation effort.
+Absolutely. Any REST client or server library will suffice. However, using a specific REST-RPC library minimizes the implementation effort.
 
 ## Request
 
-### Method
+### HTTP method
 
 HTTP methods are not specified by the API but chosen by the client from the following options depending on the desired call semantics:
-* POST - standard non-cached call with arguments either in the request body or as URL query parameters
+* POST - standard non-cached call with arguments either in the request body or in special cases as URL query parameters
 * GET - cacheable call with arguments as URL query parameters only
 
-### URL
+### URL format
+
+* Remote API endpoint: http://example.org/api
+* Remote API function: hello
+* Remote API function arguments:
+  * some = world
+  * n = 1
 
 ```html
-http://authority/API/FUNCTION?PARAMETER1=argument1&PARAMETER2=argument2 ...
+http://example.org/api/hello?some=world&n=1
 ```
 
 * URL path components following an API-dependent prefix must specify the invoked function
-* URL query parameters may specify additional string arguments for the invoked function
+* URL query parameters may specify additional arguments for the invoked function for GET requests or binary POST requests
 
 Identically named invoked function arguments must not be supplied both in the request body and as URL query parameter. Such an ambiguous call must cause an error.
 
 ### Structured request body
 
-Message in JSON format.
+All invoked function arguments must be supplied in the request body consisting of a JSON object with its field names representing the remote function parameter names and field values their respective argument values. Invoked function arguments must not be specified as URL query parameters
 
+- Message format: JSON
 - Method: POST
 - Content-Type: application/json
 
+**Remote call**
+
+```scala
+hello(some = "world", n = 1)
+```
+
+**Request headers**
+
+```html
+POST http://example.org/api/hello
+Content-Type: application/json
+```
+
+**Request body**
+
 ```json
 {
-  "argument1": "test",
-  "argument2": 0,
-  "argument3": true
+  "some": "world",
+  "n": 1
 }
 ```
 
 ### Empty request body
 
-All invoked function arguments must be specified as URL query parameters.
+All invoked function arguments must be supplied as URL query parameters with query parameter names representing the remote function parameter names and query parameter values their respective argument values. Multiple instances of identically named query parameters must not be used.
 
 - Method: GET
 
+**Remote call**
+
+```scala
+hello(some = "world", n = 1)
+```
+
+**Request headers**
+
+```html
+GET http://example.org/api/hello?some=world&n=1
+```
+
+**Request body**
+
+*Empty*
+
 ### Binary request body
 
-Message in binary format. Request body is interpreted as a first argument of the invoked function.
+Request body is interpreted as a first argument of the invoked function representing an array of bytes. Additional invoked function arguments may be supplied as URL query parameters with query parameter names representing the remote function parameter names and query parameter values their respective argument values. Multiple instances of identically named query parameters must not be used.
 
+- Message format: binary
 - Method: POST
 - Content-Type: application/octet-stream
 
+**Remote call**
+
+```scala
+hello(data = binary, some = "world", n = 1)
+```
+
+**Request headers**
+
+```html
+POST http://example.org/api/hello?some=test&n=1
+Content-Type: application/octet-stream
+```
+
+**Request body**
+
+*Binary data*
+
 ## Response
 
-### Structured result response body
+### Structured response body
 
-Message in JSON format.
+Response body is interpreted as a successful invocation result if it consists of a JSON object containing a `result` field. The `result` field value represents the return value of the invoked remote function.
 
+- Message format: JSON
 - Content-Type: application/json
+
+**Response headers**
+
+```html
+Content-Type: application/json
+```
+
+**Response body**
 
 ```json
 {
@@ -105,26 +169,46 @@ Message in JSON format.
 }
 ```
 
-### Binary result response body
+### Binary response body
 
-Message in binary format. Response body is interpreted as a successful result of the invoked function.
+Response body is interpreted as a return value of successfully invoked remote function representing an array of bytes.
 
-- Method: POST
+- Message format: binary
 - Content-Type: application/octet-stream
+
+**Response headers**
+
+```html
+Content-Type: application/octet-stream
+```
+
+**Response body**
+
+*Binary data*
 
 ### Error response body
 
-Message in JSON format.
+Response body is interpreted as a failed invocation result if it consists of a JSON object containing an `error` field. The `error` field value is a JSON object providing further information about the failure and consisting of the following fields:
 
+* `message` - A JSON string representing an error message. This field is mandatory.
+* `code` - A JSON number representing an error code. This field is optional.
+
+- Message format: JSON
 - Content-Type: application/json
+
+**Response headers**
+
+```html
+Content-Type: application/json
+```
+
+**Response body**
 
 ```json
 {
   "error": {
-    "code": 0,
     "message": "Some error",
-    "data": {
-    }
+    "code": 1
   }
 }
 ```
