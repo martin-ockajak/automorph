@@ -44,7 +44,7 @@ To illustrate that it provides remote API authors with a solution of equivalent 
 
 ### Can it be used in practice without a specific REST-RPC library ?
 
-Absolutely. Any REST client or server library will suffice. However, using a specific REST-RPC library minimizes the implementation effort.
+Yes. Any REST client or server library will suffice. However, using a specific REST-RPC library minimizes the implementation effort.
 
 ## Request
 
