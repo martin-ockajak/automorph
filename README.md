@@ -15,9 +15,9 @@
 [![Artifacts](https://img.shields.io/badge/Releases-Artifacts-yellow)](https://mvnrepository.com/artifact/org.automorph/automorph)
 [![Build](https://github.com/martin-ockajak/automorph/workflows/Build/badge.svg)](https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
 
-* [QuickStart](docs/quickstart)
+* [Quick Start](docs/quickstart)
 * [Documentation](https://automorph.org)
-* [API reference](https://automorph.org/api/automorph/index.html)
+* [API Reference](https://automorph.org/api/automorph/index.html)
 * [Artifacts](https://mvnrepository.com/artifact/org.automorph/automorph)
 
 # Overview

@@ -183,7 +183,7 @@ lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
   libraryDependencies ++= Seq(
     "org.typelevel" %% "cats-effect" % "3.2.9"
   )
-).enablePlugins(ScalaUnidocPlugin)
+)
 lazy val scalazEffect = (project in file("system/scalaz-effect")).dependsOn(
   spi, testStandard % Test
 ).settings(
@@ -502,9 +502,21 @@ laikaExtensions := Seq(laika.markdown.github.GitHubFlavor, laika.parse.code.Synt
 laikaIncludeAPI := true
 Laika / sourceDirectories := Seq(baseDirectory.value / "docs")
 laikaSite / target := target.value / "site"
-laikaSite := (laikaSite.dependsOn(
-  Compile / unidoc, catsEffect / Compile / doc)
+laikaSite := laikaSite.dependsOn(
+  Compile / unidoc, catsEffect / Compile / doc
 ).value
+val apidoc = taskKey[Unit]("Generates API documentation.")
+apidoc := {
+  (Compile / unidoc).value
+  (catsEffect / Compile / doc).value
+  val systemApiSuffix = "api/automorph/system"
+  val catsEffectApiPath = (catsEffect / target).value / "scala-2.13" / systemApiSuffix
+  val systemApiPath = (laikaSite / target).value / systemApiSuffix
+  IO.listFiles(catsEffectApiPath).filter(_.name != "index.html").foreach { file =>
+    IO.copy(Seq(file -> systemApiPath / file.name))
+  }
+}
+
 val site = taskKey[Unit]("Generates project website.")
 site := laikaSite.value
 site / fileInputs ++= Seq(
