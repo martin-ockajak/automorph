@@ -27,7 +27,7 @@ final case class ZioSystem[Environment]()(
   override def failed[T](exception: Throwable): RIO[Environment, T] =
     RIO.fail(exception)
 
-  override def either[T](effect: RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] =
+  override def either[T](effect: => RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] =
     effect.either
 
   override def flatMap[T, R](effect: RIO[Environment, T], function: T => RIO[Environment, R]): RIO[Environment, R] =

@@ -27,7 +27,7 @@ final case class CatsEffectSystem()(
   override def failed[T](exception: Throwable): IO[T] =
     IO.raiseError(exception)
 
-  override def either[T](effect: IO[T]): IO[Either[Throwable, T]] =
+  override def either[T](effect: => IO[T]): IO[Either[Throwable, T]] =
     effect.attempt
 
   override def flatMap[T, R](effect: IO[T], function: T => IO[R]): IO[R] =

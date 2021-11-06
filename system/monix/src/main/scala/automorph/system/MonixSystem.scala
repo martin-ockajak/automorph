@@ -27,7 +27,7 @@ final case class MonixSystem()(
   override def failed[T](exception: Throwable): Task[T] =
     Task.raiseError(exception)
 
-  override def either[T](effect: Task[T]): Task[Either[Throwable, T]] =
+  override def either[T](effect: => Task[T]): Task[Either[Throwable, T]] =
     effect.attempt
 
   override def flatMap[T, R](effect: Task[T], function: T => Task[R]): Task[R] =

@@ -26,7 +26,7 @@ final case class FutureSystem()(
   override def failed[T](exception: Throwable): Future[T] =
     Future.failed(exception)
 
-  override def either[T](effect: Future[T]): Future[Either[Throwable, T]] =
+  override def either[T](effect: => Future[T]): Future[Either[Throwable, T]] =
     effect.transform(value => Success(value.toEither))
 
   override def flatMap[T, R](effect: Future[T], function: T => Future[R]): Future[R] =

@@ -47,7 +47,7 @@ trait EffectSystem[Effect[_]] {
    * @tparam T effectful value type
    * @return effectful error or the original value
    */
-  def either[T](effect: Effect[T]): Effect[Either[Throwable, T]]
+  def either[T](effect: => Effect[T]): Effect[Either[Throwable, T]]
 
   /**
    * Creates a new effect by applying an effectful function to an effect's value.
