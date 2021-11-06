@@ -1,6 +1,6 @@
-# Automorph examples project
+# Automorph example project
 
-* [Documentation](https://automorph.org)
+* [Documentation](https://automorph.org/overview.html)
 
 
 ## Try

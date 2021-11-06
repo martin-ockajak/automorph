@@ -5,6 +5,9 @@
 **Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless
 way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/specification) and [REST-RPC] protocols.
 
+* [Scaladoc](../api/automorph/index.html)
+* [Artifacts](https://mvnrepository.com/artifact/org.automorph/automorph)
+
 ## Goals
 
 * Enable consuming and exposing **remote APIs** transparently **without** needing to create **intermediate layer**
@@ -23,11 +26,6 @@ way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/sp
 * **Descriptive** - [OpenAPI](https://github.com/OAI/OpenAPI-Specification) specification in [JSON](https://en.wikipedia.org/wiki/JSON) format can be assembled for remote APIs
 * **Dependency free** - core functionality depends on [SLF4J API](http://www.slf4j.org/) only
 * **Boilerplate free** - even advanced use-cases require only a few lines of code
-
-## Resources
-
-* [Scaladoc](../api/automorph/index.html)
-* [Artifacts](https://mvnrepository.com/artifact/org.automorph/automorph)
 
 ## Supported standards
 
