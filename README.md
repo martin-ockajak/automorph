@@ -11,7 +11,7 @@
 ![automorph](https://github.com/martin-ockajak/automorph/raw/main/docs/images/banner.jpg)
 
 [![Documentation](https://img.shields.io/badge/Website-Documentation-blueviolet)](https://automorph.org/overview.html)
-[![API](https://img.shields.io/badge/API-Scaladoc-blue)](https://automorph.org/api/automorph/index.html)
+[![API](https://img.shields.io/badge/Scaladoc-API-blue)](https://automorph.org/api/automorph/index.html)
 [![Build](https://github.com/martin-ockajak/automorph/workflows/Build/badge.svg)](https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
 [![Releases](https://img.shields.io/maven-central/v/org.automorph/automorph-core_3.0.0.svg)](https://mvnrepository.com/artifact/org.automorph/automorph)
 
