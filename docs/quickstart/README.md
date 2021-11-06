@@ -6,10 +6,11 @@ Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
 ### Download
 
-Clone the repository:
+Clone the repository and enter example project directory:
 
 ```shell
 git clone https://github.com/martin-ockajak/automorph
+cd examples/project
 ```
 
 ### Customize
