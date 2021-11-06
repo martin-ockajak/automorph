@@ -15,6 +15,7 @@ import scala.reflect.macros.blackbox
  * @param pathPrefix API path prefix
  * @param mapError maps a REST-RPC error to a corresponding exception
  * @param mapException maps an exception to a corresponding REST-RPC error
+ * @param discovery if true, provides OpenAPI specification via 'api.discover' API function
  * @param encodeRequest converts a REST-RPC request to message format node
  * @param decodeRequest converts a message format node to REST-RPC request
  * @param encodeResponse converts a REST-RPC response to message format node
@@ -29,6 +30,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: H
   pathPrefix: String,
   mapError: (String, Option[Int]) => Throwable = RestRpcProtocol.defaultMapError,
   mapException: Throwable => Option[Int] = RestRpcProtocol.defaultMapException,
+  discovery: Boolean,
   protected val encodeRequest: Message.Request[Node] => Node,
   protected val decodeRequest: Node => Message.Request[Node],
   protected val encodeResponse: Message[Node] => Node,
@@ -46,6 +48,7 @@ object RestRpcProtocol extends ErrorMapping {
    * @param pathPrefix API path prefix
    * @param mapError maps a REST-RPC error to a corresponding exception
    * @param mapException maps an exception to a corresponding REST-RPC error
+   * @param discovery if true, provides OpenAPI specification via 'api.discover' API function
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Context message context type
@@ -55,7 +58,8 @@ object RestRpcProtocol extends ErrorMapping {
     codec: Codec,
     pathPrefix: String,
     mapError: (String, Option[Int]) => Throwable,
-    mapException: Throwable => Option[Int]
+    mapException: Throwable => Option[Int],
+    discovery: Boolean
   ): RestRpcProtocol[Node, Codec, Context] =
     macro applyMacro[Node, Codec, Context]
 
@@ -80,7 +84,8 @@ object RestRpcProtocol extends ErrorMapping {
     codec: c.Expr[Codec],
     pathPrefix: c.Expr[String],
     mapError: c.Expr[(String, Option[Int]) => Throwable],
-    mapException: c.Expr[Throwable => Option[Int]]
+    mapException: c.Expr[Throwable => Option[Int]],
+    discovery: c.Expr[Boolean]
   ): c.Expr[RestRpcProtocol[Node, Codec, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[Codec])
@@ -91,6 +96,7 @@ object RestRpcProtocol extends ErrorMapping {
         $pathPrefix,
         $mapError,
         $mapException,
+        $discovery,
         request => $codec.encode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](request),
         node => $codec.decode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](node),
         response => $codec.encode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](response),
@@ -111,7 +117,8 @@ object RestRpcProtocol extends ErrorMapping {
         $codec,
         $pathPrefix,
         automorph.protocol.RestRpcProtocol.defaultMapError,
-        automorph.protocol.RestRpcProtocol.defaultMapException
+        automorph.protocol.RestRpcProtocol.defaultMapException,
+        true
       )
     """)
   }

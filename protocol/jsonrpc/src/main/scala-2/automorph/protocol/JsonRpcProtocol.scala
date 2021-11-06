@@ -13,7 +13,8 @@ import scala.reflect.macros.blackbox
  * @param codec message codec plugin
  * @param mapError maps a JSON-RPC error to a corresponding exception
  * @param mapException maps an exception to a corresponding JSON-RPC error
- * @param argumentsByName if true, pass arguments by name, if false pass arguments by position
+ * @param discovery if true, provides OpenRPC and OpenAPI specifications via `rpc.discover` and 'api.discover' API methods
+ * @param namedArguments if true, pass arguments by name, if false pass arguments by position
  * @param encodeMessage converts a JSON-RPC message to message format node
  * @param decodeMessage converts a message format node to JSON-RPC message
  * @param encodeStrings converts list of strings to message format node
@@ -25,7 +26,8 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
   codec: Codec,
   mapError: (String, Int) => Throwable = JsonRpcProtocol.defaultMapError,
   mapException: Throwable => ErrorType = JsonRpcProtocol.defaultMapException,
-  argumentsByName: Boolean = true,
+  discovery: Boolean,
+  namedArguments: Boolean = true,
   protected val encodeMessage: Message[Node] => Node,
   protected val decodeMessage: Node => Message[Node],
   protected val encodeStrings: List[String] => Node
@@ -39,7 +41,8 @@ object JsonRpcProtocol extends ErrorMapping {
    * @param codec message codec plugin
    * @param mapError maps a JSON-RPC error to a corresponding exception
    * @param mapException maps an exception to a corresponding JSON-RPC error
-   * @param argumentsByName if true, pass arguments by name, if false pass arguments by position
+   * @param discovery if true, provides OpenRPC and OpenAPI specifications via `rpc.discover` and 'api.discover' API methods
+   * @param namedArguments if true, pass arguments by name, if false pass arguments by position
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Context message context type
@@ -49,7 +52,8 @@ object JsonRpcProtocol extends ErrorMapping {
     codec: Codec,
     mapError: (String, Int) => Throwable,
     mapException: Throwable => ErrorType,
-    argumentsByName: Boolean
+    discovery: Boolean,
+    namedArguments: Boolean
   ): JsonRpcProtocol[Node, Codec, Context] =
     macro applyMacro[Node, Codec, Context]
 
@@ -70,7 +74,8 @@ object JsonRpcProtocol extends ErrorMapping {
     codec: c.Expr[Codec],
     mapError: c.Expr[(String, Int) => Throwable],
     mapException: c.Expr[Throwable => ErrorType],
-    argumentsByName: c.Expr[Boolean]
+    discovery: c.Expr[Boolean],
+    namedArguments: c.Expr[Boolean]
   ): c.Expr[JsonRpcProtocol[Node, Codec, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
@@ -79,7 +84,8 @@ object JsonRpcProtocol extends ErrorMapping {
         $codec,
         $mapError,
         $mapException,
-        $argumentsByName,
+        $discovery,
+        $namedArguments,
         message => $codec.encode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](message),
         node => $codec.decode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](node),
         value => $codec.encode[List[String]](value)
@@ -97,6 +103,7 @@ object JsonRpcProtocol extends ErrorMapping {
         $codec,
         automorph.protocol.JsonRpcProtocol.defaultMapError,
         automorph.protocol.JsonRpcProtocol.defaultMapException,
+        true,
         true
       )
     """)

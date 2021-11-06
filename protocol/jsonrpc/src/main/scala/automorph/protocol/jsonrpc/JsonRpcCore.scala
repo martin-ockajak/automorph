@@ -59,7 +59,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     // Create request
     require(requestId.nonEmpty, "Empty request identifier")
     val id = Option.when(responseRequired)(Right(requestId).withLeft[BigDecimal])
-    val argumentNodes = createArgumentNodes(Option.when(argumentsByName)(argumentNames).flatten, argumentValues)
+    val argumentNodes = createArgumentNodes(Option.when(namedArguments)(argumentNames).flatten, argumentValues)
     val requestMessage = Request(id, function, argumentNodes).message
 
     // Serialize request

@@ -13,6 +13,7 @@ import automorph.transport.http.HttpContext
  * @param pathPrefix API path prefix
  * @param mapError maps a REST-RPC error to a corresponding exception
  * @param mapException maps an exception to a corresponding REST-RPC error
+ * @param discovery if true, provides OpenAPI specification via 'api.discover' API function
  * @param encodeRequest converts a REST-RPC request to message format node
  * @param decodeRequest converts a message format node to REST-RPC request
  * @param encodeResponse converts a REST-RPC response to message format node
@@ -27,6 +28,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: H
   pathPrefix: String,
   mapError: (String, Option[Int]) => Throwable,
   mapException: Throwable => Option[Int],
+  discovery: Boolean,
   protected val encodeRequest: Message.Request[Node] => Node,
   protected val decodeRequest: Node => Message.Request[Node],
   protected val encodeResponse: Message[Node] => Node,
@@ -44,6 +46,7 @@ object RestRpcProtocol extends ErrorMapping:
    * @param pathPrefix API path prefix
    * @param mapError maps a REST-RPC error to a corresponding exception
    * @param mapException maps an exception to a corresponding REST-RPC error
+   * @param discovery if true, provides OpenAPI specification via 'api.discover' API function
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Context message context type
@@ -53,7 +56,8 @@ object RestRpcProtocol extends ErrorMapping:
     codec: Codec,
     pathPrefix: String,
     mapError: (String, Option[Int]) => Throwable = defaultMapError,
-    mapException: Throwable => Option[Int] = defaultMapException
+    mapException: Throwable => Option[Int] = defaultMapException,
+    discovery: Boolean = true,
   ): RestRpcProtocol[Node, Codec, Context] =
     val encodeRequest = (request: Message.Request[Node]) => codec.encode[Message.Request[Node]](request)
     val decodeRequest = (node: Node) => codec.decode[Message.Request[Node]](node)
@@ -65,6 +69,7 @@ object RestRpcProtocol extends ErrorMapping:
       pathPrefix,
       mapError,
       mapException,
+      discovery,
       encodeRequest,
       decodeRequest,
       encodeResponse,
