@@ -3,13 +3,6 @@
 * [Documentation](https://automorph.org)
 
 
-## Customize
-
-Make changes:
-
-`edit src/main/scala/examples/QuickStart.scala`
-
-
 ## Try
 
 Run the application:
@@ -17,10 +10,17 @@ Run the application:
 `sbt run`
 
 
+## Customize
+
+Make changes:
+
+`edit src/main/scala/examples/QuickStart.scala`
+
+
 ### Explore
 
 Review additional examples:
 ```shell
-find src/test/scala/
+find src/test
 ```
 
