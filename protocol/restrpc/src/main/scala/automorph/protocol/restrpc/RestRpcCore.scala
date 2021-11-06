@@ -25,6 +25,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
   /** REST-RPC message metadata. */
   type Metadata = Unit
 
+  private val contentTypeHeader = "Content-Type"
+  private val binaryContentType = "application/octet-stream"
   private lazy val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.errorTitle),
