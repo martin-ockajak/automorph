@@ -26,7 +26,12 @@ REST-RPC is an attempt to demonstrate that the custom RPC protocol design and im
 
 ### When to use REST-RPC ?
 
-When external constraints require use of REST-style API but minimal amount of effort is desired. In other situations it is [probably](https://youtu.be/XyJh3qKjSMk?t=53) better to use an established remote call protocol such as:
+When any of these are concerns need to be addressed with minimal effort:
+* Caching GET requests
+* Submitting or retrieving binary data
+* External constraints requiring a REST-style API
+ 
+In other situations it is [probably](https://youtu.be/XyJh3qKjSMk?t=53) better to use an established remote call protocol such as:
 - [JSON-RPC](https://en.wikipedia.org/wiki/JSON-RPC)
 - [Avro](https://en.wikipedia.org/wiki/Apache_Avro)
 - [GraphQL](https://en.wikipedia.org/wiki/GraphQL)
