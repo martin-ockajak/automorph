@@ -13,6 +13,7 @@
 [![Build](https://github.com/martin-ockajak/automorph/workflows/Build/badge.svg)](https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
 [![Releases](https://img.shields.io/maven-central/v/org.automorph/automorph-core_3.0.0.svg)](https://mvnrepository.com/artifact/org.automorph/automorph)
 [![Scaladoc](https://javadoc-badge.appspot.com/org.automorph/automorph-core_3.0.0.svg?label=scaladoc)](https://automorph.org/api/automorph/index.html)
+[![Documentation](https://img.shields.io/badge/Documentation-Site-blue)](https://automorph.org//index.html)
 
 * [Documentation](https://automorph.org)
 
