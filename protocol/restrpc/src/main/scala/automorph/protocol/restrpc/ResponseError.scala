@@ -5,7 +5,7 @@ import automorph.protocol.restrpc.Response.mandatory
 /**
  * REST-RPC call response error.
  *
- * @param message error description
+ * @param message error message
  * @param code error code
  * @param details additional error information
  * @tparam Node message node type

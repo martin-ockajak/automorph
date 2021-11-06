@@ -8,7 +8,7 @@ import automorph.protocol.jsonrpc.Response.mandatory
  * JSON-RPC call response error.
  *
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @param message error description
+ * @param message error message
  * @param code error code
  * @param data additional error information
  * @tparam Node message node type

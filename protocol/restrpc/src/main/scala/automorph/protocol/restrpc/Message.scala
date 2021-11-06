@@ -40,7 +40,7 @@ object Message {
  * REST-RPC protocol message error structure.
  *
  * @see [[https://www.jsonrpc.org/specification REST-RPC protocol specification]]
- * @param message error description
+ * @param message error message
  * @param code error code
  * @param details additional error information
  * @tparam Node message node type

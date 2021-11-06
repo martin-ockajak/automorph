@@ -10,7 +10,9 @@ Such transformations require deciding where to store various REST API call data 
 
 ## Goals
 
-REST-RPC is an attempt to demonstrate that the custom RPC protocol design and implementation effort is unnecessary by providing the simplest possible standard protocol which still supports features typically used by REST APIs. In other words, REST-RPC prescribes those REST API aspects which make no practical difference but provides enough flexibility for those aspects which do.
+REST-RPC is an attempt to demonstrate that the custom RPC protocol design and implementation effort is unnecessary by providing the simplest possible standard protocol which still supports features typically used by REST APIs. It is directly inspired by [JSON-RPC](https://www.jsonrpc.org/specification) and can be understood as its minimalistic HTTP-protocol dependent sibling.
+
+In other words, REST-RPC prescribes those REST API aspects which make no practical difference but preserves the flexibility to choose those aspects which do.
 
 ## Features
 
@@ -192,6 +194,7 @@ Response body is interpreted as a failed invocation result if it consists of a J
 
 * `message` - A JSON string representing an error message. This field is mandatory.
 * `code` - A JSON number representing an error code. This field is optional.
+* `details` - An arbitrary JSON value representing additional error information. This field is optional.
 
 - Message format: JSON
 - Content-Type: application/json
@@ -208,7 +211,10 @@ Content-Type: application/json
 {
   "error": {
     "message": "Some error",
-    "code": 1
+    "code": 1,
+    "details": {
+      ...
+    }
   }
 }
 ```
