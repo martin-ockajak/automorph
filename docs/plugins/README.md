@@ -7,7 +7,7 @@
 *Automorph* defines default but easily adjustable choices for various technical concerns aiming at a good balance of capability, performance and simplicity:
 
 * Asynchronous effect: [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html)
-* Synchronous effect: [Identity](https://www.scala-lang.org/)
+* Synchronous effect: [Identity](https://www.scala-lang.org/api/2.13.7/scala/Predef$.html#identity[A](x:A):A)
 * Message format: [JSON](https://www.json.org/)
 * Message codec: [Circe](https://circe.github.io/circe)
 * Transport protocol: [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)
@@ -36,7 +36,7 @@ The underlying runtime must support monadic composition of effectful values.
 | Class | Artifact | Library | Effect type |
 | --- | --- | --- | --- |
 | [FutureSystem](../api/automorph/system/FutureSystem.html) (*Default*) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/overviews/core/futures.html) | [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html) |
-| [IdentitySystem](../api/automorph/system/IdentitySystem.html) (Default) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://www.scala-lang.org/) | [Identity](https://www.javadoc.io/doc/org.automorph/automorph-standard_3.0.0/latest/automorph/system/IdentitySystem$$Identity.html) |
+| [IdentitySystem](../api/automorph/system/IdentitySystem.html) (Default) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://www.scala-lang.org/api/2.13.7/scala/Predef$.html#identity[A](x:A):A) | [Identity](https://www.javadoc.io/doc/org.automorph/automorph-standard_3.0.0/latest/automorph/system/IdentitySystem$$Identity.html) |
 | [TrySystem](../api/automorph/system/TrySystem.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html) | [Try](https://www.scala-lang.org/api/3.0.0.6/scala/util/Try.html) |
 | [ZioSystem](../api/automorph/system/ZioSystem.html) | [automorph-zio](https://mvnrepository.com/artifact/org.automorph/automorph-zio) | [ZIO](https://zio.dev/) | [RIO](https://javadoc.io/doc/dev.zio/zio_3.0.0/latest/zio/RIO$.html) |
 | [MonixSystem](../api/automorph/system/MonixSystem.html) | [automorph-monix](https://mvnrepository.com/artifact/org.automorph/automorph-monix) | [Monix](https://monix.io/) | [Task](https://monix.io/api/current/monix/eval/Task.html) |
