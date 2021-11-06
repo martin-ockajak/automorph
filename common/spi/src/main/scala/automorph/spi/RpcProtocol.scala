@@ -79,18 +79,6 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
     responseBody: MessageBody,
     responseContext: Context
   ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
-
-  /**
-   * Generates OpenApi speficication for specified RPC API functions.
-   *
-   * @see https://github.com/OAI/OpenAPI-Specification
-   * @param functions RPC API functions
-   * @param title API title
-   * @param version API specification version
-   * @param serverUrls API server URLs
-   * @return OpenAPI specification
-   */
-  def openApi(functions: Iterable[RpcFunction], title: String, version: String, serverUrls: Iterable[String]): String
 }
 
 object RpcProtocol {

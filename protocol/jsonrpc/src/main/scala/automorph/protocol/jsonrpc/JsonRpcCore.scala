@@ -1,6 +1,6 @@
 package automorph.protocol.jsonrpc
 
-import automorph.openapi.{OpenApi, RpcSchema, Schema}
+import automorph.openapi.{OpenApi, OpenRpc, RpcSchema, Schema}
 import automorph.protocol.JsonRpcProtocol
 import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
 import automorph.protocol.jsonrpc.Message.Params
@@ -151,7 +151,39 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
       }
     )
 
-  override def openApi(
+  /**
+   * Generates OpenRPC speficication for specified RPC API functions.
+   *
+   * @see https://spec.open-rpc.org
+   * @param functions RPC API functions
+   * @param title API title
+   * @param version API specification version
+   * @param serverUrls API server URLs
+   * @return OpenRPC specification
+   */
+  def openRpc(
+    functions: Iterable[RpcFunction],
+    title: String,
+    version: String,
+    serverUrls: Iterable[String]
+  ): String = {
+    val functionSchemas = functions.map { function =>
+      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
+    }
+    OpenRpc.specification(functionSchemas, title, version, serverUrls).json
+  }
+
+  /**
+   * Generates OpenAPI speficication for specified RPC API functions.
+   *
+   * @see https://github.com/OAI/OpenAPI-Specification
+   * @param functions RPC API functions
+   * @param title API title
+   * @param version API specification version
+   * @param serverUrls API server URLs
+   * @return OpenAPI specification
+   */
+  def openApi(
     functions: Iterable[RpcFunction],
     title: String,
     version: String,

@@ -33,6 +33,7 @@ lazy val root = project.in(file(".")).settings(
 ).aggregate(
   // Common
   spi,
+  openrpc,
   openapi,
   util,
   coreMeta,
@@ -97,6 +98,11 @@ lazy val util = (project in file("common/util")).dependsOn(
     "org.slf4j" % "slf4j-api" % "1.7.32"
   )
 )
+lazy val openrpc = (project in file("common/openrpc")).dependsOn(
+  spi, testBase % Test
+).settings(
+  name := s"$projectName-open-rpc"
+)
 lazy val openapi = (project in file("common/openapi")).dependsOn(
   spi, testBase % Test
 ).settings(
@@ -132,7 +138,7 @@ lazy val jsonrpcMeta = (project in file("protocol/jsonrpc/meta")).dependsOn(
   name := s"$projectName-jsonrpc-meta"
 )
 lazy val jsonrpc = (project in file("protocol/jsonrpc")).dependsOn(
-  jsonrpcMeta, openapi, util
+  jsonrpcMeta, openrpc, openapi, util
 ).settings(
   name := s"$projectName-jsonrpc"
 )
