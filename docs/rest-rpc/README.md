@@ -12,7 +12,7 @@ Such transformations require deciding where to store various REST API call data 
 
 REST-RPC is an attempt to demonstrate that the custom RPC protocol design and implementation effort is unnecessary by providing the simplest possible standard protocol which still supports features typically used by REST APIs. It is directly inspired by [JSON-RPC](https://www.jsonrpc.org/specification) and can be understood as its minimalistic HTTP-dependent sibling.
 
-In other words, REST-RPC prescribes those REST API aspects which make no practical difference but preserves the flexibility to choose those aspects which do.
+In other words, REST-RPC prescribes those REST-style API aspects which make no practical difference but preserves the flexibility to choose those aspects which do.
 
 ## Features
 
