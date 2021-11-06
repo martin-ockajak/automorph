@@ -2,40 +2,6 @@
 
 Expose and call a remote JSON-RPC API over HTTP.
 
-## [Example project](/examples/project)
-
-### Download
-
-Clone the repository and enter example project directory:
-
-```shell
-git clone https://github.com/martin-ockajak/automorph
-cd automorph/examples/project
-```
-
-### Try
-
-Run the application:
-
-```shell
-sbt run
-```
-
-### Customize
-
-Make changes:
-
-```shell
-edit src/main/scala/examples/QuickStart.scala
-```
-
-### Explore
-
-Review additional examples:
-```shell
-find src/test
-```
-
 ## Custom project
 
 * [Source](/examples/src/main/scala/examples/QuickStart.scala)
@@ -122,3 +88,38 @@ client.call[String]("hello").args("what" -> "world", "n" -> 1) // Future[String]
 // Close the client
 client.close()
 ```
+
+## [Example project](/examples/project)
+
+### Download
+
+Clone the repository and enter example project directory:
+
+```shell
+git clone https://github.com/martin-ockajak/automorph
+cd automorph/examples/project
+```
+
+### Try
+
+Run the application:
+
+```shell
+sbt run
+```
+
+### Customize
+
+Make changes:
+
+```shell
+edit src/main/scala/examples/QuickStart.scala
+```
+
+### Explore
+
+Review additional examples:
+```shell
+find src/test
+```
+
