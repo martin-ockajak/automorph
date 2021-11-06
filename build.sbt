@@ -502,9 +502,7 @@ laikaExtensions := Seq(laika.markdown.github.GitHubFlavor, laika.parse.code.Synt
 laikaIncludeAPI := true
 Laika / sourceDirectories := Seq(baseDirectory.value / "docs")
 laikaSite / target := target.value / "site"
-laikaSite := laikaSite.dependsOn(
-  Compile / unidoc, catsEffect / Compile / doc
-).value
+laikaSite := laikaSite.dependsOn(apidoc).value
 val apidoc = taskKey[Unit]("Generates API documentation.")
 apidoc := {
   (Compile / unidoc).value
