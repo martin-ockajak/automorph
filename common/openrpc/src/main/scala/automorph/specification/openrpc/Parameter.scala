@@ -1,4 +1,4 @@
-package automorph.openapi
+package automorph.specification.openrpc
 
 private [automorph] final case class Parameter(
   name: String,

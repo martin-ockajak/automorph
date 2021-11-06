@@ -1,4 +1,4 @@
-package automorph.openapi
+package automorph.specification.openrpc
 
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import test.base.BaseTest
@@ -17,30 +17,30 @@ class OpenRpcTest extends BaseTest {
   private val functionSchemas = Seq(
     function -> RpcSchema(
     Schema(
-      Some(OpenApi.objectType),
-      Some(OpenApi.requestTitle),
-      Some(s"Test ${OpenApi.requestTitle}"),
+      Some(OpenRpc.objectType),
+      Some(OpenRpc.requestTitle),
+      Some(s"Test ${OpenRpc.requestTitle}"),
       Some(Map(
         "function" -> Schema(Some("string"), Some("function"), Some("Invoked function name")),
         "arguments" -> Schema(
-          Some(OpenApi.objectType),
+          Some(OpenRpc.objectType),
           Some(function.name),
-          Some(OpenApi.argumentsDescription),
-          OpenApi.maybe(OpenApi.parameterSchemas(function)),
-          OpenApi.maybe(OpenApi.requiredParameters(function))
+          Some(OpenRpc.argumentsDescription),
+          OpenRpc.maybe(OpenRpc.parameterSchemas(function)),
+          OpenRpc.maybe(OpenRpc.requiredParameters(function))
         )
       )),
       Some(List("function", "arguments"))
     ), Schema(
-      Some(OpenApi.objectType),
-      Some(OpenApi.resultTitle),
-      Some(s"Test ${OpenApi.resultTitle}"),
-      Some(Map("result" -> OpenApi.resultSchema(function))),
+      Some(OpenRpc.objectType),
+      Some(OpenRpc.resultTitle),
+      Some(s"Test ${OpenRpc.resultTitle}"),
+      Some(Map("result" -> OpenRpc.resultSchema(function))),
       Some(List("result"))
     ), Schema(
-      Some(OpenApi.objectType),
-      Some(OpenApi.errorTitle),
-      Some(s"Test ${OpenApi.errorTitle}"),
+      Some(OpenRpc.objectType),
+      Some(OpenRpc.errorTitle),
+      Some(s"Test ${OpenRpc.errorTitle}"),
       Some(Map(
         "error" -> Schema(
           Some("string"),
@@ -175,7 +175,7 @@ class OpenRpcTest extends BaseTest {
 
   "" - {
     "Specification" in {
-      val specification = OpenApi.specification(functionSchemas, "Test", "0.0", Seq("http://localhost:80/api"))
+      val specification = OpenRpc.specification(functionSchemas, "Test", "0.0", Seq("http://localhost:80/api"))
 //      println(specification.json)
 //      specification.json.should(equal(jsonSpecification))
     }

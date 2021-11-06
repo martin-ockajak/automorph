@@ -1,6 +1,6 @@
-package automorph.openapi
+package automorph.specification.openrpc
 
-import automorph.openapi.Operation.Responses
+import automorph.specification.openrpc.Operation.Responses
 
 private [automorph] final case class Operation(
   requestBody: Option[RequestBody] = None,

@@ -1,4 +1,4 @@
-package automorph.openapi
+package automorph.specification.openrpc
 
 final private[automorph] case class Info(
   title: String,

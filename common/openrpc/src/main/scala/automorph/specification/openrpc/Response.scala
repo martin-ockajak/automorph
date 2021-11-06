@@ -1,6 +1,6 @@
-package automorph.openapi
+package automorph.specification.openrpc
 
-import automorph.openapi.Response.Content
+import automorph.specification.openrpc.Response.Content
 
 private [automorph] final case class Response(
   description: String,
