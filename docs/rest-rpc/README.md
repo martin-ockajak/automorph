@@ -31,7 +31,7 @@ In other words, REST-RPC prescribes those REST API aspects which make no practic
 When any of the following remote API concerns need to be addressed with minimal effort:
 * Caching GET requests
 * Submitting or retrieving binary data
-* External constraints requiring a REST-style API
+* External constraints requiring a JSON over HTTP REST-style API
  
 In other situations it is [probably](https://youtu.be/XyJh3qKjSMk?t=53) better to use an established remote call protocol such as:
 - [JSON-RPC](https://en.wikipedia.org/wiki/JSON-RPC)
