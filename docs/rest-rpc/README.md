@@ -42,7 +42,7 @@ In other situations it is [probably](https://youtu.be/XyJh3qKjSMk?t=53) better t
 
 To illustrate that it provides remote API authors with a solution of equivalent capability to typical REST API protocols but does so by openly embracing RPC principles.
 
-### Can it be used in practice without a specific REST-RPC library ?
+### Can REST-RPC be used in practice without a specific REST-RPC library ?
 
 Yes. Any REST client or server library will suffice. However, using a specific REST-RPC library minimizes the implementation effort.
 
