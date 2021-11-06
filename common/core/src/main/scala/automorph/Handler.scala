@@ -4,11 +4,11 @@ import automorph.handler.meta.HandlerMeta
 import automorph.handler.{HandlerBinding, HandlerResult, ProtocolHandlerBuilder, SystemHandlerBuilder}
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.RpcProtocol.FunctionNotFoundException
-import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
+import automorph.spi.protocol.{RpcDiscover, RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
 import automorph.util.{Bytes, CannotEqual}
-import scala.collection.immutable.ListMap
+import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -32,12 +32,27 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     ListMap.empty[String, HandlerBinding[Node, Effect, Context]]
 ) extends HandlerMeta[Node, Codec, Effect, Context] with CannotEqual with Logging {
 
+  private lazy val discoveryBindings: ListMap[String, (HandlerBinding[Node, Effect, Context], ArraySeq.ofByte)] = {
+    ListMap(protocol.discovery.map { discover =>
+      val (binding, specification) = discoveryBinding(discover)
+      binding.function.name -> (binding -> specification)
+    }*)
+  }
   implicit private val givenSystem: EffectSystem[Effect] = system
 
+  private def discoveryBinding(discover: RpcDiscover): (HandlerBinding[Node, Effect, Context], ArraySeq.ofByte) = {
+    HandlerBinding[Node, Effect, Context](
+      discover.function,
+      (_, _) => system.pure((None.orNull, None).asInstanceOf[(Node, Option[Context])]),
+      false
+    ) -> discover.specification(functions)
+  }
+
   /** Bound RPC functions. */
-  lazy val boundFunctions: Seq[RpcFunction] = bindings.map { case (name, binding) =>
-    binding.function.copy(name = name)
-  }.toSeq
+  lazy val functions: Seq[RpcFunction] =
+    (bindings ++ discoveryBindings.view.mapValues(_._1).toSeq).map { case (name, binding) =>
+      binding.function.copy(name = name)
+    }.toSeq
 
   /**
    * Processes an RPC request by invoking a bound RPC function based on the specified RPC request and its context and return an RPC response.
@@ -56,7 +71,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     // Parse request
     val requestMessageBody = implicitly[Bytes[MessageBody]].from(requestBody)
     protocol.parseRequest(requestMessageBody, requestContext, requestId).fold(
-      error => errorResponse(error.exception, error.message, requestId, Map(LogProperties.requestId -> requestId)),
+      error => errorResponse(error.exception, error.message, requestId, ListMap(LogProperties.requestId -> requestId)),
       rpcRequest => {
         // Invoke requested RPC function
         lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++
