@@ -177,7 +177,7 @@ lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
   libraryDependencies ++= Seq(
     "org.typelevel" %% "cats-effect" % "3.2.9"
   )
-)
+).enablePlugins(ScalaUnidocPlugin)
 lazy val scalazEffect = (project in file("system/scalaz-effect")).dependsOn(
   spi, testStandard % Test
 ).settings(
@@ -431,7 +431,7 @@ Compile / scalastyleSources ++= (Compile / unmanagedSourceDirectories).value
 scalastyleFailOnError := true
 lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 testScalastyle := (Test / scalastyle).toTask("").value
-Test / test := ((Test / test) dependsOn testScalastyle).value
+Test / test := ((Test / test).dependsOn(testScalastyle)).value
 
 
 // Documentation
@@ -496,7 +496,9 @@ laikaExtensions := Seq(laika.markdown.github.GitHubFlavor, laika.parse.code.Synt
 laikaIncludeAPI := true
 Laika / sourceDirectories := Seq(baseDirectory.value / "docs")
 laikaSite / target := target.value / "site"
-laikaSite := (laikaSite dependsOn (Compile / unidoc)).value
+laikaSite := (laikaSite.dependsOn(
+  Compile / unidoc, catsEffect / Compile / doc)
+).value
 val site = taskKey[Unit]("Generates project website.")
 site := laikaSite.value
 site / fileInputs ++= Seq(
