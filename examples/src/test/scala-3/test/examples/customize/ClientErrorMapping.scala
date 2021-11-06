@@ -4,7 +4,8 @@ import automorph.{Client, Default}
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 object ClientErrorMapping extends App {
 
@@ -42,15 +43,15 @@ object ClientErrorMapping extends App {
   remoteApi.hello("world", 1) // Future[String]
 
   // Close the client
-  client.close()
+  Await.result(client.close(), Duration.Inf)
 
   // Stop the server
-  server.close()
+  Await.result(server.close(), Duration.Inf)
 }
 
 class ClientErrorMapping extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Test" in {
       ClientErrorMapping.main(Array())
     }
   }
