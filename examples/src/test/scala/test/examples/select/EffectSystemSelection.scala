@@ -3,7 +3,7 @@ package test.examples.select
 import automorph.Default
 import automorph.system.ZioSystem
 import java.net.URI
-import zio.Task
+import zio.{Runtime, Task}
 
 object EffectSystemSelection extends App {
 
@@ -33,10 +33,10 @@ object EffectSystemSelection extends App {
   remoteApi.hello("world", 1) // Task[String]
 
   // Close the client
-  client.close()
+  Runtime.default.unsafeRunTask(client.close())
 
   // Stop the server
-  server.close()
+  Runtime.default.unsafeRunTask(server.close())
 }
 
 class EffectSystemSelection extends org.scalatest.freespec.AnyFreeSpecLike {

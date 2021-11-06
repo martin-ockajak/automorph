@@ -3,7 +3,8 @@ package test.examples
 import automorph.Default
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 object QuickStart extends App {
 
@@ -34,10 +35,10 @@ object QuickStart extends App {
   client.call[String]("hello").args("what" -> "world", "n" -> 1) // Future[String]
 
   // Close the client
-  client.close()
+  Await.result(client.close(), Duration.Inf)
 
   // Stop the server
-  server.close()
+  Await.result(server.close(), Duration.Inf)
 }
 
 class QuickStart extends org.scalatest.freespec.AnyFreeSpecLike {

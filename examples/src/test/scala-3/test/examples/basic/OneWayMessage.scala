@@ -3,7 +3,9 @@ package test.examples.basic
 import automorph.Default
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.Duration
+import test.examples.basic.AsynchronousCall.{client, server}
 
 object OneWayMessage extends App {
 
@@ -29,15 +31,15 @@ object OneWayMessage extends App {
   client.message("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
 
   // Close the client
-  client.close()
+  Await.result(client.close(), Duration.Inf)
 
   // Stop the server
-  server.close()
+  Await.result(server.close(), Duration.Inf)
 }
 
 class OneWayMessage extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Test" in {
       OneWayMessage.main(Array())
     }
   }

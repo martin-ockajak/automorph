@@ -4,7 +4,8 @@ import automorph.Default
 import automorph.transport.http.HttpMethod
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 object AsynchronousCall extends App {
 
@@ -31,15 +32,15 @@ object AsynchronousCall extends App {
   remoteApi.hello("world", 1) // Future[String]
 
   // Close the client
-  client.close()
+  Await.result(client.close(), Duration.Inf)
 
   // Stop the server
-  server.close()
+  Await.result(server.close(), Duration.Inf)
 }
 
 class AsynchronousCall extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Test" in {
       AsynchronousCall.main(Array())
     }
   }

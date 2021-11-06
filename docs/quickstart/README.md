@@ -23,7 +23,8 @@ Expose the API instance for remote calls using JSON-RPC over HTTP(S).
 ```scala
 import automorph.Default
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 // Create server API instance
 class ServerApi {
@@ -37,7 +38,7 @@ val createServer = Default.serverAsync(7000, "/api")
 val server = createServer(_.bind(api))
 
 // Stop the server
-server.close()
+Await.result(server.close(), Duration.Inf)
 ```
 
 ## Static Client
@@ -48,7 +49,8 @@ Call the remote API instance via proxy created from API type using JSON-RPC over
 import automorph.Default
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 // Define client view of a remote API
 trait ClientApi {
@@ -63,7 +65,7 @@ val remoteApi = client.bind[ClientApi] // ClientApi
 remoteApi.hello("world", 1) // Future[String]
 
 // Close the client
-client.close()
+Await.result(client.close(), Duration.Inf)
 ```
 
 ## Dynamic Client
@@ -74,7 +76,8 @@ Call the remote API dynamically without API type definition using JSON-RPC over 
 import automorph.Default
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientAsync(new URI("http://localhost:7000/api"))

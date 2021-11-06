@@ -329,7 +329,7 @@ lazy val examples = (project in file("examples")).dependsOn(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test
   ),
   Compile / doc / scalacOptions ++= Seq("-skip-packages test"),
-  Test/ testOptions += Tests.Argument("-P1")
+  Test / parallelExecution := false
 )
 
 // Test
