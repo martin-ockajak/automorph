@@ -24,6 +24,11 @@ way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/sp
 * **Dependency free** - core functionality depends on [SLF4J API](http://www.slf4j.org/) only
 * **Boilerplate free** - even advanced use-cases require only a few lines of code
 
+## Resources
+
+* [Scaladoc](../api/automorph/index.html)
+* [Artifacts](https://mvnrepository.com/artifact/org.automorph/automorph)
+
 ## Supported standards
 
 ### RPC protocols

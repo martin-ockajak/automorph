@@ -1,12 +1,48 @@
 # Quickstart
 
+## [Example project](/examples/project)
+
 Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
-* [Scaladoc](../api/automorph/index.html)
-* [Artifacts](https://mvnrepository.com/artifact/org.automorph/automorph)
-* [Source](/test/examples/src/test/scala/test/examples/Synchronous.scala)
+### Download
 
-## Build
+Clone the repository:
+
+```shell
+git clone https://github.com/martin-ockajak/automorph
+```
+
+### Customize
+
+Make changes:
+
+```shell
+edit src/main/scala/examples/QuickStart.scala
+```
+
+### Try
+
+Run the application:
+
+```shell
+sbt run
+```
+
+### Explore
+
+Review additional examples:
+```shell
+find src/test/scala/
+```
+
+
+## Custom project
+
+Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
+
+* [Source](/examples/src/main/scala/examples/QuickStart.scala)
+
+### Build
 
 Add the following to your `build.sbt` file:
 
@@ -16,7 +52,7 @@ libraryDependencies ++= Seq(
 )
 ```
 
-## Server
+### Server
 
 Expose the API instance for remote calls using JSON-RPC over HTTP(S).
 
@@ -41,7 +77,7 @@ val server = createServer(_.bind(api))
 Await.result(server.close(), Duration.Inf)
 ```
 
-## Static Client
+### Static Client
 
 Call the remote API instance via proxy created from API type using JSON-RPC over HTTP(S).
 
@@ -68,7 +104,7 @@ remoteApi.hello("world", 1) // Future[String]
 Await.result(client.close(), Duration.Inf)
 ```
 
-## Dynamic Client
+### Dynamic Client
 
 Call the remote API dynamically without API type definition using JSON-RPC over HTTP(S).
 

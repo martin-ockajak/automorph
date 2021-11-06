@@ -328,7 +328,12 @@ lazy val examples = (project in file("examples")).dependsOn(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test
   ),
-  Compile / doc / scalacOptions ++= Seq("-skip-packages test"),
+  Compile / doc / scalacOptions ++= Seq("-skip-packages examples"),
+  Compile / scalaSource := baseDirectory.value / "project" / "src" / "main" / "scala",
+  Test / scalaSource := (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((3, _)) => baseDirectory.value / "project" / "src" / "test" / "scala-3"
+    case _ => baseDirectory.value / "project" / "src" / "test" / "scala-2"
+  }),
   Test / parallelExecution := false
 )
 
@@ -444,7 +449,7 @@ ScalaUnidoc / unidoc / scalacOptions ++= Seq(
   "-groups",
   "-Ymacro-expand:none",
   "-skip-packages",
-  "test:automorph.meta:automorph.client.meta:automorph.handler.meta:test:automorph.codec.json.meta:automorph.codec.messagepack.meta:zio:sttp"
+  "test:examples:automorph.meta:automorph.client.meta:automorph.handler.meta:test:automorph.codec.json.meta:automorph.codec.messagepack.meta:zio:sttp"
 )
 enablePlugins(ScalaUnidocPlugin)
 
