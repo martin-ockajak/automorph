@@ -1,6 +1,7 @@
 package automorph.protocol.jsonrpc
 
-import automorph.openapi.{OpenApi, OpenRpc, RpcSchema, Schema}
+import automorph.specification.openapi.{OpenApi, RpcSchema, Schema}
+import automorph.specification.openrpc.OpenRpc
 import automorph.protocol.JsonRpcProtocol
 import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
 import automorph.protocol.jsonrpc.Message.Params
@@ -167,10 +168,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     version: String,
     serverUrls: Iterable[String]
   ): String = {
-    val functionSchemas = functions.map { function =>
-      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
-    }
-    OpenRpc.specification(functionSchemas, title, version, serverUrls).json
+    OpenRpc.specification(Seq(), title, version, serverUrls).json
   }
 
   /**

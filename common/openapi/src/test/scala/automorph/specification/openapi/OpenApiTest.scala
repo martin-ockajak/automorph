@@ -1,4 +1,4 @@
-package automorph.openapi
+package automorph.specification.openapi
 
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import test.base.BaseTest

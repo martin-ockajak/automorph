@@ -1,6 +1,6 @@
-package automorph.openapi
+package automorph.specification.openapi
 
-import automorph.openapi.Operation.Responses
+import automorph.specification.openapi.Operation.Responses
 
 private [automorph] final case class Operation(
   requestBody: Option[RequestBody] = None,

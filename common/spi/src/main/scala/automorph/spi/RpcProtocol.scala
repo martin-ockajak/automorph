@@ -1,6 +1,6 @@
 package automorph.spi
 
-import automorph.spi.protocol.{RpcError, RpcFunction, RpcRequest, RpcResponse}
+import automorph.spi.protocol.{RpcError, RpcRequest, RpcResponse}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 

@@ -1,4 +1,4 @@
-package automorph.openapi
+package automorph.specification.openapi
 
 /**
  * RPC API function schema.

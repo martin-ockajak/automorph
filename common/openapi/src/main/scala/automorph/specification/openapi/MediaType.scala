@@ -1,4 +1,4 @@
-package automorph.openapi
+package automorph.specification.openapi
 
 private [automorph] final case class MediaType (
   schema: Option[Schema] = None

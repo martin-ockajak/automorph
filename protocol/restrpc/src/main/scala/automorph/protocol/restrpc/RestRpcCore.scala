@@ -1,6 +1,6 @@
 package automorph.protocol.restrpc
 
-import automorph.openapi.{OpenApi, RpcSchema, Schema}
+import automorph.specification.openapi.{OpenApi, RpcSchema, Schema}
 import automorph.protocol.RestRpcProtocol
 import automorph.protocol.restrpc.Message.Request
 import automorph.protocol.restrpc.{Response, ResponseError, RestRpcException}

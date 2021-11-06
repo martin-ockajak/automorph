@@ -1,6 +1,6 @@
-package automorph.openapi
+package automorph.specification.openapi
 
-import automorph.openapi.Schema.Properties
+import automorph.specification.openapi.Schema.Properties
 
 private [automorph] final case class Schema(
   `type`: Option[String] = None,

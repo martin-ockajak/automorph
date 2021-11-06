@@ -1,4 +1,4 @@
-package automorph.openapi
+package automorph.specification.openapi
 
 final private[automorph] case class License(
   name: String,

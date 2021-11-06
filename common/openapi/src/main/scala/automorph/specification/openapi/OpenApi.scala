@@ -1,6 +1,6 @@
-package automorph.openapi
+package automorph.specification.openapi
 
-import automorph.openapi.Specification.{Components, Paths, Servers}
+import automorph.specification.openapi.Specification.{Components, Paths, Servers}
 import automorph.spi.protocol.RpcFunction
 
 /**

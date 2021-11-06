@@ -1,6 +1,6 @@
-package automorph.openapi
+package automorph.specification.openapi
 
-import automorph.openapi.RequestBody.Content
+import automorph.specification.openapi.RequestBody.Content
 
 private [automorph] final case class RequestBody(
   content: Content,
