@@ -40,7 +40,7 @@ In other situations it is [probably](https://youtu.be/XyJh3qKjSMk?t=53) better t
 
 ### Why call it REST-RPC though it has little in common with REST concepts ?
 
-To illustrate that it provides remote API authors with a solution of equivalent capability to typical REST API protocols by employing RPC principles.
+To illustrate that it provides remote API authors with a solution of equivalent capability to typical REST API protocols but does so by openly embracing RPC principles.
 
 ### Can it be used in practice without a specific REST-RPC library ?
 
