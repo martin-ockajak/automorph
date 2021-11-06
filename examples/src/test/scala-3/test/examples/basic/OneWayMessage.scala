@@ -5,7 +5,6 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
-import test.examples.basic.AsynchronousCall.{client, server}
 
 object OneWayMessage extends App {
 

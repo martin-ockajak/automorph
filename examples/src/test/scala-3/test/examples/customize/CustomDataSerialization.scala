@@ -4,7 +4,8 @@ import automorph.Default
 import io.circe.{Decoder, Encoder}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 object CustomDataSerialization extends App {
 
@@ -20,7 +21,7 @@ object CustomDataSerialization extends App {
   )
 
   // Provide custom data type serialization and deserialization logic
-  import io.circe.generic.auto._
+  import io.circe.generic.auto.*
   implicit lazy val enumEncoder: Encoder[State] = Encoder.encodeInt.contramap[State](Map(
     State.Off -> 0,
     State.On -> 1
@@ -54,15 +55,15 @@ object CustomDataSerialization extends App {
   remoteApi.hello("world", 1, Record("test", State.On)) // Future[String]
 
   // Close the client
-  client.close()
+  Await.result(client.close(), Duration.Inf)
 
   // Stop the server
-  server.close()
+  Await.result(server.close(), Duration.Inf)
 }
 
 class CustomDataSerialization extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Test" in {
       CustomDataSerialization.main(Array())
     }
   }

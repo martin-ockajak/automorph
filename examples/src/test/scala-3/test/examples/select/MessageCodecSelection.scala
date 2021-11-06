@@ -4,7 +4,8 @@ import automorph.codec.messagepack.UpickleMessagePackCodec
 import automorph.{Client, Default, Handler}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 object MessageCodecSelection extends App {
 
@@ -15,7 +16,7 @@ object MessageCodecSelection extends App {
   val codec = UpickleMessagePackCodec()
 
   // Provide custom data type serialization and deserialization logic
-  import codec.custom._
+  import codec.custom.*
   implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
 
   // Create server API instance
@@ -54,10 +55,10 @@ object MessageCodecSelection extends App {
   remoteApi.hello("world", 1) // : Future[String]
 
   // Close the client
-  client.close()
+  Await.result(client.close(), Duration.Inf)
 
   // Stop the server
-  server.close()
+  Await.result(server.close(), Duration.Inf)
 }
 
 class MessageCodecSelection extends org.scalatest.freespec.AnyFreeSpecLike {

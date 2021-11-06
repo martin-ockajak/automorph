@@ -5,7 +5,8 @@ import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import io.undertow.{Handlers, Undertow}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 object EndpointTransportSelection extends App {
 
@@ -38,7 +39,7 @@ object EndpointTransportSelection extends App {
   remoteApi.hello("world", 1) // Future[String]
 
   // Close the client
-  client.close()
+  Await.result(client.close(), Duration.Inf)
 
   // Stop the server
   server.stop()
@@ -46,7 +47,7 @@ object EndpointTransportSelection extends App {
 
 class EndpointTransportSelection extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Test" in {
       EndpointTransportSelection.main(Array())
     }
   }

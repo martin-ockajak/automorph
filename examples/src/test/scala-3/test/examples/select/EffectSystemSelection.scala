@@ -41,7 +41,7 @@ object EffectSystemSelection extends App {
 
 class EffectSystemSelection extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Test" in {
       EffectSystemSelection.main(Array())
     }
   }

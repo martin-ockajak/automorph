@@ -43,7 +43,7 @@ object QuickStart extends App {
 
 class QuickStart extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Test" in {
       QuickStart.main(Array())
     }
   }
