@@ -8,10 +8,10 @@ Remote procedure call [protocol](../api/automorph/spi/RpcProtocol.html) plugins.
 
 The underlying RPC protocol must support remote function invocation.
 
-| Class | Artifact |  Protocol |
-| --- | --- | --- |
-| [JsonRpcProtocol](../api/automorph/protocol/JsonRpcProtocol.html) (*Default*) | [automorph-jsonrpc](https://mvnrepository.com/artifact/org.automorph/automorph-jsonrpc) | [JSON-RPC](https://www.jsonrpc.org/specification) |
-| [RestRpcProtocol](../api/automorph/protocol/RestRpcProtocol.html) | [automorph-restrpc](https://mvnrepository.com/artifact/org.automorph/automorph-restrpc) | [REST-RPC] |
+| Class | Artifact | Protocol | Service discovery |
+| --- | --- | --- | --- |
+| [JsonRpcProtocol](../api/automorph/protocol/JsonRpcProtocol.html) (*Default*) | [automorph-jsonrpc](https://mvnrepository.com/artifact/org.automorph/automorph-jsonrpc) | [JSON-RPC](https://www.jsonrpc.org/specification) | [OpenRPC](https://spec.open-rpc.org), [OpenAPI](https://github.com/OAI/OpenAPI-Specification) |
+| [RestRpcProtocol](../api/automorph/protocol/RestRpcProtocol.html) | [automorph-restrpc](https://mvnrepository.com/artifact/org.automorph/automorph-restrpc) | [REST-RPC] | [OpenAPI](https://github.com/OAI/OpenAPI-Specification) |
 
 ## Effect system
 
@@ -19,7 +19,7 @@ Computational [effect system](../api/automorph/spi/EffectSystem.html) plugins.
 
 The underlying runtime must support monadic composition of effectful values.
 
-| Class | Artifact | Library | Effect |
+| Class | Artifact | Library | Effect type |
 | --- | --- | --- | --- |
 | [FutureSystem](../api/automorph/system/FutureSystem.html) (*Default*) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/overviews/core/futures.html) | [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html) |
 | [IdentitySystem](../api/automorph/system/IdentitySystem$$Identity.html) |
