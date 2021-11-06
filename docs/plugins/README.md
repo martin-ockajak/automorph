@@ -41,7 +41,7 @@ The underlying runtime must support monadic composition of effectful values.
 | [ZioSystem](../api/automorph/system/ZioSystem.html) | [automorph-zio](https://mvnrepository.com/artifact/org.automorph/automorph-zio) | [ZIO](https://zio.dev/) | [RIO](https://javadoc.io/doc/dev.zio/zio_3.0.0/latest/zio/RIO$.html) |
 | [MonixSystem](../api/automorph/system/MonixSystem.html) | [automorph-monix](https://mvnrepository.com/artifact/org.automorph/automorph-monix) | [Monix](https://monix.io/) | [Task](https://monix.io/api/current/monix/eval/Task.html) |
 | [CatsEffectSystem](https://www.javadoc.io/doc/org.automorph/automorph-cats-effect_3.0.0/latest/automorph/system/CatsEffectSystem.html) | [automorph-cats-effect](https://mvnrepository.com/artifact/org.automorph/automorph-cats-effect) | [Cats Effect](https://typelevel.org/cats-effect/) | [IO](https://typelevel.org/cats-effect/api/3.x/cats/effect/IO.html) |
-| [ScalazEffectSystem](../api/scalaz/effect/IO.html) |
+| [ScalazEffectSystem](https://www.javadoc.io/doc/org.automorph/automorph-scalaz-effect_3.0.0/latest/automorph/system/ScalazEffectSystem.html) | [automorph-scalaz-effect](https://mvnrepository.com/artifact/org.automorph/automorph-scalaz-effect) | [Scalaz Effect](https://github.com/scalaz) | [IO](../api/scalaz/effect/IO.html) |
 
 ## Message transport
 
