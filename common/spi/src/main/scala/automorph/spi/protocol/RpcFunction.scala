@@ -15,7 +15,7 @@ final case class RpcFunction(
   documentation: Option[String]
 ) {
 
-  /** Method signature. */
+  /** Function signature. */
   lazy val signature: String = {
     val parametersText = s"(${parameters.map { parameter =>
       s"${parameter.name}: ${parameter.`type`}"
@@ -25,7 +25,7 @@ final case class RpcFunction(
 }
 
 /**
- * Method parameter descriptor.
+ * Function parameter descriptor.
  *
  * @param name name
  * @param `type` type

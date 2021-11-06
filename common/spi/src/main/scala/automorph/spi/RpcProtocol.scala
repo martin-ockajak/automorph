@@ -1,6 +1,6 @@
 package automorph.spi
 
-import automorph.spi.protocol.{RpcError, RpcRequest, RpcResponse}
+import automorph.spi.protocol.{RpcDiscover, RpcError, RpcRequest, RpcResponse}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -79,6 +79,9 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
     responseBody: MessageBody,
     responseContext: Context
   ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
+
+  /** RPC service discovery operations. */
+  def discovery: Seq[RpcDiscover]
 }
 
 object RpcProtocol {

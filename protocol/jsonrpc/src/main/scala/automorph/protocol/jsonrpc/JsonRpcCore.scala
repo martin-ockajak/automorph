@@ -7,7 +7,7 @@ import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
 import automorph.protocol.jsonrpc.Message.Params
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
-import automorph.spi.protocol.{RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
+import automorph.spi.protocol.{RpcDiscover, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
@@ -152,46 +152,8 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
       }
     )
 
-  /**
-   * Generates OpenRPC speficication for specified RPC API functions.
-   *
-   * @see https://spec.open-rpc.org
-   * @param functions RPC API functions
-   * @param title API title
-   * @param version API specification version
-   * @param serverUrls API server URLs
-   * @return OpenRPC specification
-   */
-  def openRpc(
-    functions: Iterable[RpcFunction],
-    title: String,
-    version: String,
-    serverUrls: Iterable[String]
-  ): String = {
-    OpenRpc.specification(Seq(), title, version, serverUrls).json
-  }
-
-  /**
-   * Generates OpenAPI speficication for specified RPC API functions.
-   *
-   * @see https://github.com/OAI/OpenAPI-Specification
-   * @param functions RPC API functions
-   * @param title API title
-   * @param version API specification version
-   * @param serverUrls API server URLs
-   * @return OpenAPI specification
-   */
-  def openApi(
-    functions: Iterable[RpcFunction],
-    title: String,
-    version: String,
-    serverUrls: Iterable[String]
-  ): String = {
-    val functionSchemas = functions.map { function =>
-      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
-    }
-    OpenApi.specification(functionSchemas, title, version, serverUrls).json
-  }
+  override def discovery: Seq[RpcDiscover] =
+    Seq()
 
   /**
    * Creates a copy of this protocol with specified exception to JSON-RPC error mapping.
@@ -210,6 +172,47 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
    */
   def mapError(errorToException: (String, Int) => Throwable): JsonRpcProtocol[Node, Codec, Context] =
     copy(mapError = errorToException)
+
+  /**
+   * Generates OpenRPC speficication for specified RPC API functions.
+   *
+   * @see https://spec.open-rpc.org
+   * @param functions RPC API functions
+   * @param title API title
+   * @param version API specification version
+   * @param serverUrls API server URLs
+   * @return OpenRPC specification
+   */
+  private def openRpc(
+    functions: Iterable[RpcFunction],
+    title: String,
+    version: String,
+    serverUrls: Iterable[String]
+  ): String = {
+    OpenRpc.specification(Seq(), title, version, serverUrls).json
+  }
+
+  /**
+   * Generates OpenAPI speficication for specified RPC API functions.
+   *
+   * @see https://github.com/OAI/OpenAPI-Specification
+   * @param functions RPC API functions
+   * @param title API title
+   * @param version API specification version
+   * @param serverUrls API server URLs
+   * @return OpenAPI specification
+   */
+  private def openApi(
+    functions: Iterable[RpcFunction],
+    title: String,
+    version: String,
+    serverUrls: Iterable[String]
+  ): String = {
+    val functionSchemas = functions.map { function =>
+      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
+    }
+    OpenApi.specification(functionSchemas, title, version, serverUrls).json
+  }
 
   /**
    * Creates function invocation argument nodes.

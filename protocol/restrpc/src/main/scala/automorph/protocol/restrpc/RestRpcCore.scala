@@ -6,7 +6,7 @@ import automorph.protocol.restrpc.Message.Request
 import automorph.protocol.restrpc.{Response, ResponseError, RestRpcException}
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
-import automorph.spi.protocol.{RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
+import automorph.spi.protocol.{RpcDiscover, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.transport.http.HttpContext
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.annotation.nowarn
@@ -164,27 +164,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
       }
     )
 
-  /**
-   * Generates OpenAPI speficication for specified RPC API functions.
-   *
-   * @see https://github.com/OAI/OpenAPI-Specification
-   * @param functions RPC API functions
-   * @param title API title
-   * @param version API specification version
-   * @param serverUrls API server URLs
-   * @return OpenAPI specification
-   */
-  def openApi(
-    functions: Iterable[RpcFunction],
-    title: String,
-    version: String,
-    serverUrls: Iterable[String]
-  ): String = {
-    val functionSchemas = functions.map { function =>
-      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
-    }
-    OpenApi.specification(functionSchemas, title, version, serverUrls).json
-  }
+  override def discovery: Seq[RpcDiscover] =
+    Seq()
 
   /**
    * Creates a copy of this protocol with specified exception to REST-RPC error mapping.
@@ -203,6 +184,28 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
    */
   def mapError(errorToException: (String, Option[Int]) => Throwable): RestRpcProtocol[Node, Codec, Context] =
     copy(mapError = errorToException)
+
+  /**
+   * Generates OpenAPI speficication for specified RPC API functions.
+   *
+   * @see https://github.com/OAI/OpenAPI-Specification
+   * @param functions RPC API functions
+   * @param title API title
+   * @param version API specification version
+   * @param serverUrls API server URLs
+   * @return OpenAPI specification
+   */
+  private def openApi(
+    functions: Iterable[RpcFunction],
+    title: String,
+    version: String,
+    serverUrls: Iterable[String]
+  ): String = {
+    val functionSchemas = functions.map { function =>
+      function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
+    }
+    OpenApi.specification(functionSchemas, title, version, serverUrls).json
+  }
 
   /**
    * Creates function invocation argument nodes.

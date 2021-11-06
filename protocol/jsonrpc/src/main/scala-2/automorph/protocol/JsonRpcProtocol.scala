@@ -8,12 +8,15 @@ import scala.reflect.macros.blackbox
 /**
  * JSON-RPC protocol implementation.
  *
+ * Provides the following JSON-RPC methods for service discovery:
+ * - `rpc.discover` - OpenRPC specification
+ * - `api.discover` - OpenAPI specification
+ *
  * @constructor Creates a JSON-RPC 2.0 protocol implementation.
  * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param codec message codec plugin
  * @param mapError maps a JSON-RPC error to a corresponding exception
  * @param mapException maps an exception to a corresponding JSON-RPC error
- * @param discovery if true, provides OpenRPC and OpenAPI specifications via `rpc.discover` and 'api.discover' API methods
  * @param namedArguments if true, pass arguments by name, if false pass arguments by position
  * @param encodeMessage converts a JSON-RPC message to message format node
  * @param decodeMessage converts a message format node to JSON-RPC message
@@ -26,7 +29,6 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
   codec: Codec,
   mapError: (String, Int) => Throwable = JsonRpcProtocol.defaultMapError,
   mapException: Throwable => ErrorType = JsonRpcProtocol.defaultMapException,
-  discovery: Boolean,
   namedArguments: Boolean = true,
   protected val encodeMessage: Message[Node] => Node,
   protected val decodeMessage: Node => Message[Node],
@@ -34,14 +36,23 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
 ) extends JsonRpcCore[Node, Codec, Context] with RpcProtocol[Node, Codec, Context]
 
 object JsonRpcProtocol extends ErrorMapping {
+
+  /** Service discovery method providing OpenRpc specification. */
+  val discoveryOpenRpc = "rpc.discover"
+  /** Service discovery method providing OpenAPI specification. */
+  val discoveryOpenApi = "api.discover"
+
   /**
    * Creates a JSON-RPC protocol plugin.
+   *
+   * Provides the following JSON-RPC methods for service discovery:
+   * - `rpc.discover` - OpenRPC specification
+   * - `api.discover` - OpenAPI specification
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec message codec plugin
    * @param mapError maps a JSON-RPC error to a corresponding exception
    * @param mapException maps an exception to a corresponding JSON-RPC error
-   * @param discovery if true, provides OpenRPC and OpenAPI specifications via `rpc.discover` and 'api.discover' API methods
    * @param namedArguments if true, pass arguments by name, if false pass arguments by position
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
@@ -52,13 +63,16 @@ object JsonRpcProtocol extends ErrorMapping {
     codec: Codec,
     mapError: (String, Int) => Throwable,
     mapException: Throwable => ErrorType,
-    discovery: Boolean,
     namedArguments: Boolean
   ): JsonRpcProtocol[Node, Codec, Context] =
     macro applyMacro[Node, Codec, Context]
 
   /**
    * Creates a JSON-RPC protocol plugin.
+   *
+   * Provides the following JSON-RPC methods for service discovery:
+   * - `rpc.discover` - OpenRPC specification
+   * - `api.discover` - OpenAPI specification
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec message codec plugin
@@ -74,7 +88,6 @@ object JsonRpcProtocol extends ErrorMapping {
     codec: c.Expr[Codec],
     mapError: c.Expr[(String, Int) => Throwable],
     mapException: c.Expr[Throwable => ErrorType],
-    discovery: c.Expr[Boolean],
     namedArguments: c.Expr[Boolean]
   ): c.Expr[JsonRpcProtocol[Node, Codec, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
@@ -84,7 +97,6 @@ object JsonRpcProtocol extends ErrorMapping {
         $codec,
         $mapError,
         $mapException,
-        $discovery,
         $namedArguments,
         message => $codec.encode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](message),
         node => $codec.decode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](node),
@@ -103,7 +115,6 @@ object JsonRpcProtocol extends ErrorMapping {
         $codec,
         automorph.protocol.JsonRpcProtocol.defaultMapError,
         automorph.protocol.JsonRpcProtocol.defaultMapException,
-        true,
         true
       )
     """)
