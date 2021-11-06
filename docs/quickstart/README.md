@@ -10,7 +10,7 @@ Clone the repository and enter example project directory:
 
 ```shell
 git clone https://github.com/martin-ockajak/automorph
-cd examples/project
+cd automorph/examples/project
 ```
 
 ### Customize
