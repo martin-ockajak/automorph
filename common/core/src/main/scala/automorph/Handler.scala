@@ -107,7 +107,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         arguments =>
           discoveryBindings.get(rpcRequest.function).map { case (_, specification) =>
             // Retrieve the API specification
-            directResponse(specification, rpcRequest, requestProperties)
+            directResponse(specification(), rpcRequest, requestProperties)
           }.getOrElse {
             // Invoke bound function
             Try(handlerBinding.invoke(arguments, context).either).pureFold(
@@ -261,7 +261,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       }
     )
 
-  private def createDiscoveryBindings: ListMap[String, (HandlerBinding[Node, Effect, Context], ArraySeq.ofByte)] = {
+  private def createDiscoveryBindings: ListMap[String, (HandlerBinding[Node, Effect, Context], () => ArraySeq.ofByte)] = {
     Option.when(true) {
       ListMap(protocol.discovery.map { discover =>
         val binding = HandlerBinding[Node, Effect, Context](
@@ -270,7 +270,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           false
         )
         val specification = discover.specification(bindings.values.toSeq.map(_.function))
-        binding.function.name -> (binding -> specification)
+        binding.function.name -> (binding -> (() => specification))
       }*)
     }.getOrElse(ListMap.empty)
   }
