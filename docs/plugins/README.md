@@ -4,7 +4,7 @@
 
 ## Defaults
 
-*Automorph* defines default but easily adjustable choices for various technical concerns aiming at a good balance of capability and simplicity:
+*Automorph* defines default but easily adjustable choices for various technical concerns aiming at a good balance of capability, performance and simplicity:
 
 * Asynchronous effect: [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html)
 * Synchronous effect: [Identity](https://www.scala-lang.org/)
