@@ -28,7 +28,7 @@ In other words, REST-RPC prescribes those REST-style API aspects which make no p
 
 ### When to use REST-RPC ?
 
-When any of the following remote API concerns need to be addressed with minimal effort:
+In case any of the following remote API concerns need to be addressed with minimal effort:
 * Caching GET requests
 * Submitting or retrieving binary data
 * External constraints requiring a JSON over HTTP REST-style API
