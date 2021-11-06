@@ -174,6 +174,16 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     copy(mapError = errorToException)
 
   /**
+   * Creates a copy of this protocol with specified named arguments setting.
+   *
+   * @param namedArguments if true, pass arguments by name, if false pass arguments by position
+   * @see [[https://www.jsonrpc.org/specification#parameter_structures Protocol specification]]
+   * @return JSON-RPC protocol
+   */
+  def namedArguments(namedArguments: Boolean): JsonRpcProtocol[Node, Codec, Context] =
+    copy(namedArguments = namedArguments)
+
+  /**
    * Generates OpenRPC speficication for specified RPC API functions.
    *
    * @see https://spec.open-rpc.org
