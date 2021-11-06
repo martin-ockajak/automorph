@@ -1,8 +1,8 @@
 # Quickstart
 
-## [Example project](/examples/project)
+Expose and call a remote JSON-RPC API over HTTP.
 
-Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
+## [Example project](/examples/project)
 
 ### Download
 
@@ -36,10 +36,7 @@ Review additional examples:
 find src/test
 ```
 
-
 ## Custom project
-
-Exposing and invoking a JSON-RPC API using HTTP as transport protocol.
 
 * [Source](/examples/src/main/scala/examples/QuickStart.scala)
 

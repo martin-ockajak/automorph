@@ -10,7 +10,7 @@ The underlying RPC protocol must support remote function invocation.
 
 | Class | Artifact |  Protocol |
 | --- | --- | --- |
-| [JsonRpcProtocol](../api/automorph/protocol/JsonRpcProtocol.html) (Default) | [automorph-jsonrpc](https://mvnrepository.com/artifact/org.automorph/automorph-jsonrpc) | [JSON-RPC](https://www.jsonrpc.org/specification) |
+| [JsonRpcProtocol](../api/automorph/protocol/JsonRpcProtocol.html) (*Default*) | [automorph-jsonrpc](https://mvnrepository.com/artifact/org.automorph/automorph-jsonrpc) | [JSON-RPC](https://www.jsonrpc.org/specification) |
 | [RestRpcProtocol](../api/automorph/protocol/RestRpcProtocol.html) | [automorph-restrpc](https://mvnrepository.com/artifact/org.automorph/automorph-restrpc) | [REST-RPC] |
 
 ## Effect system
@@ -21,7 +21,7 @@ The underlying runtime must support monadic composition of effectful values.
 
 | Class | Artifact | Library | Effect |
 | --- | --- | --- | --- |
-| [FutureSystem](../api/automorph/system/FutureSystem.html) (Default) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/overviews/core/futures.html) | [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html) |
+| [FutureSystem](../api/automorph/system/FutureSystem.html) (*Default*) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/overviews/core/futures.html) | [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html) |
 | [IdentitySystem](../api/automorph/system/IdentitySystem$$Identity.html) |
 | [TrySystem](../api/automorph/system/TrySystem.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html) | [Try](https://www.scala-lang.org/api/3.0.0.6/scala/util/Try.html) |
 | [ZioSystem](../api/zio/RIO$.html) |
@@ -43,7 +43,7 @@ Used by the RPC client to send requests and receive responses to and from a remo
 
 | Class | Artifact | Library | Protocol |
 | --- | --- | --- | --- |
-| [HttpClient](../api/automorph/transport/http/client/HttpClient.html) (Default) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
+| [HttpClient](../api/automorph/transport/http/client/HttpClient.html) (*Default*) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 | [SttpClient](../api/)|  |
 |  | ../api/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 | | ../api/backends/summary.html)| [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
@@ -62,7 +62,7 @@ Used to actively receive requests and send responses back using specific message
 
 | Class | Artifact | Library | Protocol |
 | --- | --- | --- | --- |
-| [UndertowServer](../api/automorph/transport/http/server/UndertowServer.html) (Default) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
+| [UndertowServer](../api/automorph/transport/http/server/UndertowServer.html) (*Default*) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 | [NanoServer](../api/automorph/transport/http/server/NanoServer.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
 | [JettyServer](../api/automorph/transport/http/server/JettyServer.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [RabbitMqServer](../api/automorph/transport/amqp/server/RabbitMqServer.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq) | [RabbitMq](https://www.rabbitmq.com/java-client.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
@@ -97,7 +97,7 @@ The underlying format must support storing arbitrarily nested structures of basi
 
 | Class | Artifact | Library | Node Type | Codec |
 | --- | --- | --- | --- | --- |
-| [CirceJsonCodec](../api/automorph/format/json/CirceJsonCodec.html) (Default) | [automorph-circe](https://mvnrepository.com/artifact/org.automorph/automorph-circe) | [Circe](https://circe.github.io/circe) |[Json](https://circe.github.io/circe/api/io/circe/Json.html) | [JSON](https://www.json.org/) |
+| [CirceJsonCodec](../api/automorph/format/json/CirceJsonCodec.html) (*Default*) | [automorph-circe](https://mvnrepository.com/artifact/org.automorph/automorph-circe) | [Circe](https://circe.github.io/circe) |[Json](https://circe.github.io/circe/api/io/circe/Json.html) | [JSON](https://www.json.org/) |
 | [JacksonJsonCodec](../api/automorph/format/json/JacksonJsonCodec.html) | [automorph-jackson](https://mvnrepository.com/artifact/org.automorph/automorph-jackson) | [Jackson](https://github.com/FasterXML/jackson-module-scala/) |[JsonNode](https://fasterxml.github.io/jackson-databind/javadoc/3.0.0/index.html?com/fasterxml/jackson/databind/JsonNode.html) | [JSON](https://www.json.org/) |
 | [UpickleJsonCodec](../api/automorph/format/json/UpickleJsonCodec.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Value](http://com-lihaoyi.github.io/upickle/#uJson) | [JSON](https://www.json.org/) |
 | [UpickleMessagePackCodec](../api/automorph/format/messagepack/UpickleMessagePackCodec.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Msg](https://com-lihaoyi.github.io/upickle/#uPack) | [MessagePack](https://msgpack.org/) |

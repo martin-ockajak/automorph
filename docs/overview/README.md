@@ -31,18 +31,18 @@ way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/sp
 
 ### RPC protocols
 
-* [JSON-RPC](https://www.jsonrpc.org/specification)
+* [JSON-RPC](https://www.jsonrpc.org/specification) (*Default*)
 * [REST-RPC]
 
 ### Transport protocols
 
-* [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)
+* [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) (*Default*)
 * [WebSocket](https://en.wikipedia.org/wiki/WebSocket)
 * [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
 
 ### Message formats
 
-* [JSON](https://www.json.org/)
+* [JSON](https://www.json.org/) (*Default*)
 * [MessagePack](https://msgpack.org/)
 
 ## Inspired by
