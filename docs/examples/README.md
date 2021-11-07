@@ -881,72 +881,6 @@ Await.result(server.close(), Duration.Inf)
 
 ## Select
 
-### Effect system
-
-* [Source](/examples/project/src/test/scala/examples/select/EffectSystemSelection.scala)
-
-**Build**
-
-```scala
-libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1",
-  "org.automorph" %% "automorph-zio" % "0.0.1",
-  "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.3.9"
-)
-```
-
-**Imports**
-
-```scala
-import automorph.Default
-import automorph.system.ZioSystem
-import java.net.URI
-import zio.{Runtime, Task}
-```
-
-**Server**
-
-```scala
-// Create server API instance
-class ServerApi {
-  def hello(some: String, n: Int): Task[String] =
-    Task.succeed(s"Hello $some $n!")
-}
-val api = new ServerApi()
-
-// Create an effect system plugin
-val system = ZioSystem[Any]()
-
-// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val server = Default.serverSystem(system, 7000, "/api")(_.bind(api))
-```
-
-**Client**
-
-```scala
-// Define client view of a remote API
-trait ClientApi {
-  def hello(some: String, n: Int): Task[String]
-}
-
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.client(system, new URI("http://localhost:7000/api"))
-
-// Call the remote API function
-val remoteApi = client.bind[ClientApi] // ClientApi
-remoteApi.hello("world", 1) // Task[String]
-```
-
-**Cleanup**
-
-```scala
-// Close the client
-Runtime.default.unsafeRunTask(client.close())
-
-// Stop the server
-Runtime.default.unsafeRunTask(server.close())
-```
-
 ### RPC protocol
 
 * [Source](/examples/project/src/test/scala/examples/select/RpcProtocolSelection.scala)
@@ -1025,6 +959,72 @@ Await.result(client.close(), Duration.Inf)
 
 // Stop the server
 Await.result(server.close(), Duration.Inf)
+```
+
+### Effect system
+
+* [Source](/examples/project/src/test/scala/examples/select/EffectSystemSelection.scala)
+
+**Build**
+
+```scala
+libraryDependencies ++= Seq(
+  "org.automorph" %% "automorph-default" % "0.0.1",
+  "org.automorph" %% "automorph-zio" % "0.0.1",
+  "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.3.9"
+)
+```
+
+**Imports**
+
+```scala
+import automorph.Default
+import automorph.system.ZioSystem
+import java.net.URI
+import zio.{Runtime, Task}
+```
+
+**Server**
+
+```scala
+// Create server API instance
+class ServerApi {
+  def hello(some: String, n: Int): Task[String] =
+    Task.succeed(s"Hello $some $n!")
+}
+val api = new ServerApi()
+
+// Create an effect system plugin
+val system = ZioSystem[Any]()
+
+// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+val server = Default.serverSystem(system, 7000, "/api")(_.bind(api))
+```
+
+**Client**
+
+```scala
+// Define client view of a remote API
+trait ClientApi {
+  def hello(some: String, n: Int): Task[String]
+}
+
+// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.client(system, new URI("http://localhost:7000/api"))
+
+// Call the remote API function
+val remoteApi = client.bind[ClientApi] // ClientApi
+remoteApi.hello("world", 1) // Task[String]
+```
+
+**Cleanup**
+
+```scala
+// Close the client
+Runtime.default.unsafeRunTask(client.close())
+
+// Stop the server
+Runtime.default.unsafeRunTask(server.close())
 ```
 
 ### Message codec
