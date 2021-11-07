@@ -37,10 +37,10 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
 
 object JsonRpcProtocol extends ErrorMapping {
 
-  /** Service discovery method providing OpenRpc specification. */
-  val openRpcDiscoveryFunction = "rpc.discover"
+  /** Service discovery method providing OpenRPC specification. */
+  val openRpcSpecFunction: String = "rpc.discover"
   /** Service discovery method providing OpenAPI specification. */
-  val openApiDiscoveryFunction = "api.discover"
+  val openApiSpecFunction: String = "api.discover"
 
   /**
    * Creates a JSON-RPC protocol plugin.

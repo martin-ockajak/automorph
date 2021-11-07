@@ -170,7 +170,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
 
   override def discovery: Seq[RpcDiscover[Metadata]] = Seq(
     RpcDiscover(
-      RpcFunction(RestRpcProtocol.openApiDiscoveryFunction, Seq(), jsonDataType, None),
+      RpcFunction(RestRpcProtocol.openApiSpecFunction, Seq(), jsonDataType, None),
       (functions, _) => Bytes.string.from(openApi(functions, "", "", Seq()))
     )
   )

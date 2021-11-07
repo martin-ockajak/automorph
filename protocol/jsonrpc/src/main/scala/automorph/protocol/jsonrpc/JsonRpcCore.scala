@@ -156,15 +156,14 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
 
   override def discovery: Seq[RpcDiscover[Metadata]] = Seq(
     RpcDiscover(
-      RpcFunction(JsonRpcProtocol.openApiDiscoveryFunction, Seq(), jsonDataType, None),
+      RpcFunction(JsonRpcProtocol.openApiSpecFunction, Seq(), jsonDataType, None),
       (functions, metadata) => Bytes.string.from(openApi(functions, "", "", Seq()))
     ),
     RpcDiscover(
-      RpcFunction(JsonRpcProtocol.openRpcDiscoveryFunction, Seq(), jsonDataType, None),
+      RpcFunction(JsonRpcProtocol.openRpcSpecFunction, Seq(), jsonDataType, None),
       (functions, metadata) => Bytes.string.from(openRpc(functions, "", "", Seq()))
     )
   )
-
 
   /**
    * Creates a copy of this protocol with specified exception to JSON-RPC error mapping.
