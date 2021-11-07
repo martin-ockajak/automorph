@@ -1,9 +1,11 @@
-package automorph.specification.openrpc
+package automorph.specification
 
+import automorph.specification.jsonschema.Schema
+import automorph.specification.openapi.RpcSchema
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import test.base.BaseTest
 
-class OpenRpcTest extends BaseTest {
+class OpenApiTest extends BaseTest {
   private val function = RpcFunction(
     "test",
     Seq(
@@ -17,30 +19,30 @@ class OpenRpcTest extends BaseTest {
   private val functionSchemas = Seq(
     function -> RpcSchema(
     Schema(
-      Some(OpenRpc.objectType),
-      Some(OpenRpc.requestTitle),
-      Some(s"Test ${OpenRpc.requestTitle}"),
+      Some(OpenApi.objectType),
+      Some(OpenApi.requestTitle),
+      Some(s"Test ${OpenApi.requestTitle}"),
       Some(Map(
         "function" -> Schema(Some("string"), Some("function"), Some("Invoked function name")),
         "arguments" -> Schema(
-          Some(OpenRpc.objectType),
+          Some(OpenApi.objectType),
           Some(function.name),
-          Some(OpenRpc.argumentsDescription),
-          OpenRpc.maybe(OpenRpc.parameterSchemas(function)),
-          OpenRpc.maybe(OpenRpc.requiredParameters(function))
+          Some(OpenApi.argumentsDescription),
+          Option(Schema.parameters(function)).filter(_.nonEmpty),
+          Option(Schema.requiredParameters(function)).filter(_.nonEmpty)
         )
       )),
       Some(List("function", "arguments"))
     ), Schema(
-      Some(OpenRpc.objectType),
-      Some(OpenRpc.resultTitle),
-      Some(s"Test ${OpenRpc.resultTitle}"),
-      Some(Map("result" -> OpenRpc.resultSchema(function))),
+      Some(OpenApi.objectType),
+      Some(OpenApi.resultTitle),
+      Some(s"Test ${OpenApi.resultTitle}"),
+      Some(Map("result" -> Schema.result(function))),
       Some(List("result"))
     ), Schema(
-      Some(OpenRpc.objectType),
-      Some(OpenRpc.errorTitle),
-      Some(s"Test ${OpenRpc.errorTitle}"),
+      Some(OpenApi.objectType),
+      Some(OpenApi.errorTitle),
+      Some(s"Test ${OpenApi.errorTitle}"),
       Some(Map(
         "error" -> Schema(
           Some("string"),
@@ -55,7 +57,7 @@ class OpenRpcTest extends BaseTest {
       Some(List("error"))
     )
   ))
-  private val jsonSpecification =
+  private val expectedJson =
    """|{
       |  "paths": {
       |    "/test": {
@@ -161,23 +163,24 @@ class OpenRpcTest extends BaseTest {
       |      "description": "Test function"
       |    }
       |  },
-      |  "openrpc": "1.2.1",
+      |  "openapi": "3.1.0",
       |  "info": {
       |    "version": "0.0",
       |    "title": "Test"
       |  },
       |  "servers": [
       |    {
-      |      "url": "http://localhost:80/api"
+      |      "url": "http://localhost:7000/api"
       |    }
       |  ]
       |}""".stripMargin
 
   "" - {
     "Specification" in {
-      val specification = OpenRpc.specification(functionSchemas, "Test", "0.0", Seq("http://localhost:80/api"))
-//      println(specification.json)
-//      specification.json.should(equal(jsonSpecification))
+//      val specification = OpenApi.specification(functionSchemas, "Test", "0.0", Seq("http://localhost:7000/api"))
+//      val specificationJson = Json.serialize(specification)
+//      println(specificationJson)
+//      specificationJson.should(equal(expectedJson))
     }
   }
 }

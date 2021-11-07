@@ -1,17 +1,10 @@
 package automorph.specification.openapi
 
-import automorph.specification.openapi.Response.Content
+import automorph.specification.jsonschema.Reference
 
-private [automorph] final case class Response(
+final case class Response(
   description: String,
-  content: Option[Content]
-) {
-  def map: Map[String, Any] = Map(
-    "description" -> description,
-    "content" -> content.map(_.view.mapValues(_.map).toMap)
-  )
-}
-
-private [automorph] object Response {
-  type Content = Map[String, MediaType]
-}
+  headers: Option[Map[String, Either[Header, Reference]]] = None,
+  content: Option[Map[String, MediaType]] = None,
+  links: Option[Map[String, Either[Link, Reference]]] = None
+)

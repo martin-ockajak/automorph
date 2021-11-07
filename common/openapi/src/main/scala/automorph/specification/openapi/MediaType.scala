@@ -1,9 +1,10 @@
 package automorph.specification.openapi
 
-private [automorph] final case class MediaType (
-  schema: Option[Schema] = None
-) {
-  def map: Map[String, Any] = Map(
-    "schema" -> schema.map(_.map)
-  )
-}
+import automorph.specification.jsonschema.{Reference, Schema}
+
+case class MediaType (
+  schema: Option[Either[Schema, Reference]] = None,
+  example: Option[String] = None,
+  examples: Option[Map[String, Either[Example, Reference]]] = None,
+  encoding: Option[Map[String, Encoding]] = None
+)

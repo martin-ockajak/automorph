@@ -1,9 +1,9 @@
-package automorph.specification.openapi
+package automorph.specification
 
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import test.base.BaseTest
 
-class OpenApiTest extends BaseTest {
+class OpenRpcTest extends BaseTest {
   private val function = RpcFunction(
     "test",
     Seq(
@@ -14,48 +14,7 @@ class OpenApiTest extends BaseTest {
     "Seq[String]",
     Some("Test function")
   )
-  private val functionSchemas = Seq(
-    function -> RpcSchema(
-    Schema(
-      Some(OpenApi.objectType),
-      Some(OpenApi.requestTitle),
-      Some(s"Test ${OpenApi.requestTitle}"),
-      Some(Map(
-        "function" -> Schema(Some("string"), Some("function"), Some("Invoked function name")),
-        "arguments" -> Schema(
-          Some(OpenApi.objectType),
-          Some(function.name),
-          Some(OpenApi.argumentsDescription),
-          OpenApi.maybe(OpenApi.parameterSchemas(function)),
-          OpenApi.maybe(OpenApi.requiredParameters(function))
-        )
-      )),
-      Some(List("function", "arguments"))
-    ), Schema(
-      Some(OpenApi.objectType),
-      Some(OpenApi.resultTitle),
-      Some(s"Test ${OpenApi.resultTitle}"),
-      Some(Map("result" -> OpenApi.resultSchema(function))),
-      Some(List("result"))
-    ), Schema(
-      Some(OpenApi.objectType),
-      Some(OpenApi.errorTitle),
-      Some(s"Test ${OpenApi.errorTitle}"),
-      Some(Map(
-        "error" -> Schema(
-          Some("string"),
-          Some("error"),
-          Some("Failed function call error details"),
-          Some(Map(
-            "message" -> Schema(Some("string"), Some("message"), Some("Error message"))
-          )),
-          Some(List("message"))
-        )
-      )),
-      Some(List("error"))
-    )
-  ))
-  private val jsonSpecification =
+  private val expectedJson =
    """|{
       |  "paths": {
       |    "/test": {
@@ -161,22 +120,24 @@ class OpenApiTest extends BaseTest {
       |      "description": "Test function"
       |    }
       |  },
-      |  "openapi": "3.1.0",
+      |  "openrpc": "1.2.1",
       |  "info": {
       |    "version": "0.0",
       |    "title": "Test"
       |  },
       |  "servers": [
       |    {
-      |      "url": "http://localhost:80/api"
+      |      "url": "http://localhost:7000/api"
       |    }
       |  ]
       |}""".stripMargin
 
   "" - {
     "Specification" in {
-      val specification = OpenApi.specification(functionSchemas, "Test", "0.0", Seq("http://localhost:80/api"))
-      specification.json.should(equal(jsonSpecification))
+//      val specification = OpenRpc.specification(functionSchemas, "Test", "0.0", Seq("http://localhost:7000/api"))
+//      val specificationJson = Json.serialize(specification)
+//      println(specificationJson)
+//      specificationJson.should(equal(expectedJson))
     }
   }
 }

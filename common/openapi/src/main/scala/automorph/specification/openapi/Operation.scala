@@ -1,21 +1,25 @@
 package automorph.specification.openapi
 
-import automorph.specification.openapi.Operation.Responses
+import automorph.specification.jsonschema.Reference
+import automorph.specification.openapi.Operation.{Callback, Responses, SecurityRequirement}
 
-private [automorph] final case class Operation(
-  requestBody: Option[RequestBody] = None,
-  responses: Option[Responses] = None,
+case class Operation(
+  tags: Option[List[String]] = None,
   summary: Option[String] = None,
-  description: Option[String] = None
-) {
-  def map: Map[String, Any] = Map(
-    "requestBody" -> requestBody.map(_.map),
-    "responses" -> responses.map(_.view.mapValues(_.map).toMap),
-    "summary" -> summary,
-    "description" -> description
-  )
-}
+  description: Option[String] = None,
+  externalDocs: Option[ExternalDocumentation] = None,
+  operationId: Option[String] = None,
+  parameters: Option[List[Either[Parameter, Reference]]] = None,
+  requestBody: Option[Either[RequestBody, Reference]] = None,
+  responses: Responses,
+  callbacks: Option[Map[String, Either[Callback, Reference]]] = None,
+  deprecated: Option[Boolean] = None,
+  security: Option[List[SecurityRequirement]] = None,
+  servers: Option[List[Server]] = None
+)
 
-private [automorph] object Operation {
-  type Responses = Map[String, Response]
+object Operation {
+  type Responses = Map[String, Either[Response, Reference]]
+  type Callback = Map[String, PathItem]
+  type SecurityRequirement = Map[String, List[String]]
 }

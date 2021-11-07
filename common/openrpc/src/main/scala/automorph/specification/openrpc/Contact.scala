@@ -1,14 +1,7 @@
 package automorph.specification.openrpc
 
-final private[automorph] case class Contact(
+case class Contact(
   name: Option[String],
   url: Option[String],
   email: Option[String]
-) {
-
-  def map: Map[String, Any] = Map(
-    "name" -> name,
-    "url" -> url,
-    "email" -> email
-  )
-}
+)

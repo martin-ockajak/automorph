@@ -33,11 +33,14 @@ lazy val root = project.in(file(".")).settings(
 ).aggregate(
   // Common
   spi,
-  openrpc,
-  openapi,
   util,
   coreMeta,
   core,
+
+  // Specification
+  jsonSchema,
+  openRpc,
+  openApi,
 
   // RPC protocol
   jsonrpcMeta,
@@ -77,7 +80,7 @@ lazy val root = project.in(file(".")).settings(
 
 // Dependencies
 
-// Basic
+// Common
 lazy val spi = (project in file("common/spi")).settings(
   name := s"$projectName-spi"
 ).settings(
@@ -97,16 +100,6 @@ lazy val util = (project in file("common/util")).dependsOn(
   libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-api" % "1.7.32"
   )
-)
-lazy val openrpc = (project in file("common/openrpc")).dependsOn(
-  spi, testBase % Test
-).settings(
-  name := s"$projectName-open-rpc"
-)
-lazy val openapi = (project in file("common/openapi")).dependsOn(
-  spi, testBase % Test
-).settings(
-  name := s"$projectName-open-api"
 )
 lazy val coreMeta = (project in file("common/core/meta")).dependsOn(
   spi, util
@@ -131,6 +124,26 @@ lazy val core = (project in file("common/core")).dependsOn(
   )
 )
 
+// Specification
+lazy val jsonSchema = (project in file("specification/json-schema")).dependsOn(
+  spi, testBase % Test
+).settings(
+  name := s"$projectName-json-schema",
+  libraryDependencies ++= Seq(
+    ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion).cross(CrossVersion.for3Use2_13)
+  )
+)
+lazy val openRpc = (project in file("common/openrpc")).dependsOn(
+  jsonSchema, testBase % Test
+).settings(
+  name := s"$projectName-open-rpc"
+)
+lazy val openApi = (project in file("common/openapi")).dependsOn(
+  jsonSchema, testBase % Test
+).settings(
+  name := s"$projectName-open-api"
+)
+
 // Protocol
 lazy val jsonrpcMeta = (project in file("protocol/jsonrpc/meta")).dependsOn(
   spi
@@ -138,7 +151,7 @@ lazy val jsonrpcMeta = (project in file("protocol/jsonrpc/meta")).dependsOn(
   name := s"$projectName-jsonrpc-meta"
 )
 lazy val jsonrpc = (project in file("protocol/jsonrpc")).dependsOn(
-  jsonrpcMeta, openrpc, openapi, util
+  jsonrpcMeta, openRpc, openApi, util
 ).settings(
   name := s"$projectName-jsonrpc"
 )
@@ -148,7 +161,7 @@ lazy val restrpcMeta = (project in file("protocol/restrpc/meta")).dependsOn(
   name := s"$projectName-restrpc-meta"
 )
 lazy val restrpc = (project in file("protocol/restrpc")).dependsOn(
-  restrpcMeta, openapi, util
+  restrpcMeta, openApi, util
 ).settings(
   name := s"$projectName-restrpc"
 )

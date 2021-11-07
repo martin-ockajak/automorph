@@ -1,9 +1,8 @@
 package automorph.specification.openrpc
 
-case class Server(
+case class Tag(
   name: String,
-  url: String,
   summary: Option[String] = None,
   description: Option[String] = None,
-  variables: Option[Map[String, String]] = None
+  externalDocs: Option[ExternalDocumentation] = None
 )

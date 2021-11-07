@@ -2,9 +2,7 @@ package automorph.specification.openapi
 
 import automorph.specification.jsonschema.{Reference, Schema}
 
-case class Parameter(
-  name: String,
-  in: String,
+case class Header(
   descriptipon: Option[String] = None,
   required: Option[Boolean] = None,
   deprecated: Option[Boolean] = None,

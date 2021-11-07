@@ -1,9 +1,10 @@
 package automorph.specification.openrpc
 
-case class Server(
+case class Link(
   name: String,
-  url: String,
   summary: Option[String] = None,
   description: Option[String] = None,
-  variables: Option[Map[String, String]] = None
+  method: Option[String] = None,
+  params: Option[Map[String, String]] = None,
+  server: Option[Server] = None
 )

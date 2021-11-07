@@ -3,8 +3,9 @@ package automorph.protocol.jsonrpc
 import automorph.protocol.JsonRpcProtocol
 import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
 import automorph.protocol.jsonrpc.Message.Params
-import automorph.specification.openapi.{OpenApi, RpcSchema, Schema}
-import automorph.specification.openrpc.OpenRpc
+import automorph.specification.jsonschema.Schema
+import automorph.specification.openapi.RpcSchema
+import automorph.specification.{OpenApi, OpenRpc}
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.{RpcDiscover, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
@@ -26,8 +27,8 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
   /** JSON-RPC message metadata. */
   type Metadata = Option[Message.Id]
 
+  private val requestTitle = "Request"
   private val unknownId = Right("[unknown]")
-  private val jsonDataType = "JSON"
 
   private lazy val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
@@ -156,12 +157,12 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
 
   override def discovery: Seq[RpcDiscover[Metadata]] = Seq(
     RpcDiscover(
-      RpcFunction(JsonRpcProtocol.openApiSpecFunction, Seq(), jsonDataType, None),
-      (functions, metadata) => Bytes.string.from(openApi(functions, "", "", Seq()))
+      RpcFunction(JsonRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
+      (functions, metadata) => Bytes.string.from(openApi(functions).toString)
     ),
     RpcDiscover(
-      RpcFunction(JsonRpcProtocol.openRpcSpecFunction, Seq(), jsonDataType, None),
-      (functions, metadata) => Bytes.string.from(openRpc(functions, "", "", Seq()))
+      RpcFunction(JsonRpcProtocol.openRpcFunction, Seq(), OpenRpc.getClass.getSimpleName, None),
+      (functions, metadata) => Bytes.string.from(openRpc(functions).toString)
     )
   )
 
@@ -194,44 +195,45 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     copy(namedArguments = namedArguments)
 
   /**
-   * Generates OpenRPC speficication for specified RPC API functions.
+   * Creates a copy of this protocol with given OpenRPC specification transformation.
    *
-   * @see https://spec.open-rpc.org
-   * @param functions RPC API functions
-   * @param title API title
-   * @param version API specification version
-   * @param serverUrls API server URLs
-   * @return OpenRPC specification
+   * @param mapOpenRpc transforms generated OpenRPC specification
+   * @return JSON-RPC protocol
    */
-  private def openRpc(
-    functions: Iterable[RpcFunction],
-    title: String,
-    version: String,
-    serverUrls: Iterable[String]
-  ): String = {
-    OpenRpc.specification(Seq(), title, version, serverUrls).json
-  }
+  def mapOpenRpc(mapOpenRpc: OpenRpc => OpenRpc): JsonRpcProtocol[Node, Codec, Context] =
+    copy(mapOpenRpc = mapOpenRpc)
 
   /**
-   * Generates OpenAPI speficication for specified RPC API functions.
+   * Creates a copy of this protocol with given OpenAPI specification transformation.
    *
-   * @see https://github.com/OAI/OpenAPI-Specification
-   * @param functions RPC API functions
-   * @param title API title
-   * @param version API specification version
-   * @param serverUrls API server URLs
+   * @param mapOpenApi transforms generated OpenAPI specification
+   * @return JSON-RPC protocol
+   */
+  def mapOpenApi(mapOpenApi: OpenApi => OpenApi): JsonRpcProtocol[Node, Codec, Context] =
+    copy(mapOpenApi = mapOpenApi)
+
+  /**
+   * Generates OpenRPC specification for given RPC functions.
+   *
+   * @see [[https://spec.open-rpc.org OpenRPC specification]]
+   * @param functions RPC functions
+   * @return OpenRPC specification
+   */
+  def openRpc(functions: Iterable[RpcFunction]): OpenRpc =
+    OpenRpc(functions)
+
+  /**
+   * Generates OpenAPI specification for given RPC functions.
+   *
+   * @see [[https://github.com/OAI/OpenAPI-Specification OpenAPI specification]]
+   * @param functions RPC functions
    * @return OpenAPI specification
    */
-  private def openApi(
-    functions: Iterable[RpcFunction],
-    title: String,
-    version: String,
-    serverUrls: Iterable[String]
-  ): String = {
+  def openApi(functions: Iterable[RpcFunction]): OpenApi = {
     val functionSchemas = functions.map { function =>
       function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
     }
-    OpenApi.specification(functionSchemas, title, version, serverUrls).json
+    OpenApi(functionSchemas)
   }
 
   /**
@@ -260,8 +262,8 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
         Some(OpenApi.objectType),
         Some(function.name),
         Some(OpenApi.argumentsDescription),
-        OpenApi.maybe(OpenApi.parameterSchemas(function)),
-        OpenApi.maybe(OpenApi.requiredParameters(function))
+        Option(Schema.parameters(function)).filter(_.nonEmpty),
+        Option(Schema.requiredParameters(function)).filter(_.nonEmpty)
       ),
       "id" -> Schema(
         Some("integer"),
@@ -276,7 +278,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     Some(OpenApi.objectType),
     Some(OpenApi.resultTitle),
     Some(s"$name ${OpenApi.resultTitle}"),
-    Some(Map("result" -> OpenApi.resultSchema(function))),
-    Some(List("result"))
+    Some(Map(OpenApi.resultName -> Schema.result(function))),
+    Some(List(OpenApi.resultName))
   )
 }

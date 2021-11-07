@@ -1,9 +1,9 @@
 package automorph.specification.openrpc
 
-case class Server(
-  name: String,
-  url: String,
+case class Example(
+  name: Option[String] = None,
   summary: Option[String] = None,
   description: Option[String] = None,
-  variables: Option[Map[String, String]] = None
+  value: Option[String],
+  externalValue: Option[String] = None
 )

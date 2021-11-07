@@ -1,21 +1,19 @@
 package automorph.specification.openapi
 
-private [automorph] final case class PathItem(
+import automorph.specification.jsonschema.Reference
+
+case class PathItem(
+  $ref: Option[String] = None,
+  summary: Option[String] = None,
+  description: Option[String] = None,
   get: Option[Operation] = None,
   put: Option[Operation] = None,
   post: Option[Operation] = None,
   delete: Option[Operation] = None,
-  parameters: Option[List[Parameter]] = None,
-  summary: Option[String] = None,
-  description: Option[String] = None
-) {
-  def map: Map[String, Any] = Map(
-    "get" -> get.map(_.map),
-    "put" -> put.map(_.map),
-    "post" -> post.map(_.map),
-    "delete" -> delete.map(_.map),
-    "parameters" -> parameters.map(_.map(_.map)),
-    "summary" -> summary,
-    "description" -> description
-  )
-}
+  options: Option[Operation] = None,
+  head: Option[Operation] = None,
+  patch: Option[Operation] = None,
+  trace: Option[Operation] = None,
+  servers: Option[List[Server]] = None,
+  parameters: Option[List[Either[Parameter, Reference]]] = None,
+)

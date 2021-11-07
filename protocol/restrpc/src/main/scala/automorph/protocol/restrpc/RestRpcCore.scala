@@ -1,9 +1,11 @@
 package automorph.protocol.restrpc
 
-import automorph.specification.openapi.{OpenApi, RpcSchema, Schema}
 import automorph.protocol.RestRpcProtocol
 import automorph.protocol.restrpc.Message.Request
 import automorph.protocol.restrpc.{Response, ResponseError, RestRpcException}
+import automorph.specification.OpenApi
+import automorph.specification.jsonschema.Schema
+import automorph.specification.openapi.RpcSchema
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
 import automorph.spi.protocol.{RpcDiscover, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
@@ -28,7 +30,6 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
 
   private val contentTypeHeader = "Content-Type"
   private val binaryContentType = "application/octet-stream"
-  private val jsonDataType = "JSON"
 
   private lazy val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
@@ -170,8 +171,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
 
   override def discovery: Seq[RpcDiscover[Metadata]] = Seq(
     RpcDiscover(
-      RpcFunction(RestRpcProtocol.openApiSpecFunction, Seq(), jsonDataType, None),
-      (functions, _) => Bytes.string.from(openApi(functions, "", "", Seq()))
+      RpcFunction(RestRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
+      (functions, _) => Bytes.string.from(openApi(functions).toString)
     )
   )
 
@@ -194,25 +195,26 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
     copy(mapError = errorToException)
 
   /**
-   * Generates OpenAPI speficication for specified RPC API functions.
+   * Creates a copy of this protocol with given OpenAPI specification transformation.
    *
-   * @see https://github.com/OAI/OpenAPI-Specification
-   * @param functions RPC API functions
-   * @param title API title
-   * @param version API specification version
-   * @param serverUrls API server URLs
+   * @param mapOpenApi transforms generated OpenAPI specification
+   * @return REST-RPC protocol
+   */
+  def mapOpenApi(mapOpenApi: OpenApi => OpenApi): RestRpcProtocol[Node, Codec, Context] =
+    copy(mapOpenApi = mapOpenApi)
+
+  /**
+   * Generates OpenAPI speficication for given RPC functions.
+   *
+   * @see [[https://github.com/OAI/OpenAPI-Specification OpenAPI specification]]
+   * @param functions RPC functions
    * @return OpenAPI specification
    */
-  private def openApi(
-    functions: Iterable[RpcFunction],
-    title: String,
-    version: String,
-    serverUrls: Iterable[String]
-  ): String = {
+  def openApi(functions: Iterable[RpcFunction]): OpenApi = {
     val functionSchemas = functions.map { function =>
       function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
     }
-    OpenApi.specification(functionSchemas, title, version, serverUrls).json
+    OpenApi(functionSchemas)
   }
 
   /**
@@ -236,14 +238,14 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
     Some(OpenApi.objectType),
     Some(function.name),
     Some(OpenApi.argumentsDescription),
-    OpenApi.maybe(OpenApi.parameterSchemas(function))
+    Option(Schema.parameters(function)).filter(_.nonEmpty)
   )
 
   private def resultSchema(function: RpcFunction): Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.resultTitle),
     Some(s"$name ${OpenApi.resultTitle}"),
-    Some(Map("result" -> OpenApi.resultSchema(function))),
-    Some(List("result"))
+    Some(Map(OpenApi.resultName -> Schema.result(function))),
+    Some(List(OpenApi.resultName))
   )
 }
