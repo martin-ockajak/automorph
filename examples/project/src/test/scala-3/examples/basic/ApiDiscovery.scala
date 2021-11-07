@@ -24,13 +24,13 @@ object ApiDiscovery extends App {
   // Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
   val client = Default.clientAsync(new URI("http://localhost:7000/api"), HttpMethod.Put)
 
-  // Retrieve OpenRPC specification for the remote API
+  // Retrieve remote API description in OpenRPC format
   val openRpcFunction = JsonRpcProtocol.openRpcFunction
   val openRpcSpec = client.call[Default.Node](openRpcFunction).args()
     .map(client.protocol.codec.text) // Future[String]
   println(Await.result(openRpcSpec, Duration.Inf))
 
-  // Retrieve OpenAPI specification for the remote API
+  // Retrieve remote API description in OpenAPI format
   val openApiFunction = JsonRpcProtocol.openApiFunction
   val openApiSpec = client.call[Default.Node](openApiFunction).args()
     .map(client.protocol.codec.text) // Future[String]
