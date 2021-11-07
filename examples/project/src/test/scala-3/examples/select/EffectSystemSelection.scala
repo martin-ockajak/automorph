@@ -17,7 +17,7 @@ object EffectSystemSelection extends App {
   // Create ZIO effect system plugin
   val system = ZioSystem.default
 
-  // Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+  // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
   val server = Default.serverSystem(system, 7000, "/api")(_.bind(api))
 
   // Define client view of a remote API
@@ -25,7 +25,7 @@ object EffectSystemSelection extends App {
     def hello(some: String, n: Int): Task[String]
   }
 
-  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+  // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
   val client = Default.client(system, new URI("http://localhost:7000/api"))
 
   // Call the remote APi function via proxy

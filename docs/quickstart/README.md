@@ -33,7 +33,7 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val createServer = Default.serverAsync(7000, "/api")
 val server = createServer(_.bind(api))
 
@@ -57,7 +57,7 @@ trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function statically
@@ -79,7 +79,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-// Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function dynamically

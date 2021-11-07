@@ -16,7 +16,7 @@ object ArgumentsByPosition extends App {
   }
   val api = new ServerApi()
 
-  // Start default JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
+  // Start JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
   val createServer = Default.serverAsync(7000, "/api", Seq(HttpMethod.Put))
   val server = createServer(_.bind(api))
 
@@ -29,7 +29,8 @@ object ArgumentsByPosition extends App {
   val protocol = Default.protocol[Default.ClientContext].namedArguments(false)
 
   // Setup custom JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
-  val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"), HttpMethod.Put)
+  val url = new URI("http://localhost:7000/api")
+  val clientTransport = Default.clientTransportAsync(url, HttpMethod.Put)
   val client = Client.protocol(protocol).transport(clientTransport)
 
   // Call the remote API function

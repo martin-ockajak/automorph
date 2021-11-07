@@ -16,7 +16,7 @@ object ClientErrorMapping extends App {
   }
   val api = new ServerApi()
 
-  // Start default JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+  // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
   val createServer = Default.serverAsync(7000, "/api")
   val server = createServer(_.bind(api))
 

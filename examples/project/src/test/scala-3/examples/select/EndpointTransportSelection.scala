@@ -31,7 +31,7 @@ object EndpointTransportSelection extends App {
   trait ClientApi {
     def hello(some: String, n: Int): Future[String]
   }
-  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+  // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
   val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
   // Call the remote API function via proxy

@@ -23,7 +23,7 @@ object ServerTransportSelection extends App {
     def hello(some: String, n: Int): String
   }
 
-  // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+  // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
   val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
   // Call the remote API function
