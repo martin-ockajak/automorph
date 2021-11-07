@@ -1,13 +1,14 @@
 package automorph.protocol.jsonrpc
 
-import automorph.specification.openapi.{OpenApi, RpcSchema, Schema}
-import automorph.specification.openrpc.OpenRpc
 import automorph.protocol.JsonRpcProtocol
 import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
 import automorph.protocol.jsonrpc.Message.Params
+import automorph.specification.openapi.{OpenApi, RpcSchema, Schema}
+import automorph.specification.openrpc.OpenRpc
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.{RpcDiscover, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
+import automorph.util.Bytes
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
@@ -26,6 +27,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
   type Metadata = Option[Message.Id]
 
   private val unknownId = Right("[unknown]")
+  private val jsonDataType = "JSON"
 
   private lazy val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
@@ -152,8 +154,17 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
       }
     )
 
-  override def discovery: Seq[RpcDiscover] =
-    Seq()
+  override def discovery: Seq[RpcDiscover[Metadata]] = Seq(
+    RpcDiscover(
+      RpcFunction(JsonRpcProtocol.openApiDiscoveryFunction, Seq(), jsonDataType, None),
+      (functions, metadata) => Bytes.string.from(openApi(functions, "", "", Seq()))
+    ),
+    RpcDiscover(
+      RpcFunction(JsonRpcProtocol.openRpcDiscoveryFunction, Seq(), jsonDataType, None),
+      (functions, metadata) => Bytes.string.from(openRpc(functions, "", "", Seq()))
+    )
+  )
+
 
   /**
    * Creates a copy of this protocol with specified exception to JSON-RPC error mapping.

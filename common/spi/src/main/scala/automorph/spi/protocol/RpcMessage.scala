@@ -6,14 +6,14 @@ import scala.collection.immutable.ArraySeq
  * RPC message.
  *
  * @constructor Creates RPC message.
- * @param details protocol-specific message details
+ * @param metadata protocol-specific message metadata
  * @param body message body
  * @param properties message properties
  * @param text message in human-readable textual form
- * @tparam Details protocol-specific message details type
+ * @tparam Metadata protocol-specific message metadata type
  */
-final case class RpcMessage[Details](
-  details: Details,
+final case class RpcMessage[Metadata](
+  metadata: Metadata,
   body: ArraySeq.ofByte,
   properties: Map[String, String] = Map.empty,
   private val messageText: () => Option[String] = () => None

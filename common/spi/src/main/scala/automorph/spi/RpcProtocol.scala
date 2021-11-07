@@ -81,7 +81,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
   ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
 
   /** RPC service discovery operations. */
-  def discovery: Seq[RpcDiscover]
+  def discovery: Seq[RpcDiscover[Metadata]]
 }
 
 object RpcProtocol {

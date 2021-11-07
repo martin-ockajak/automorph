@@ -8,6 +8,7 @@ import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
 import automorph.spi.protocol.{RpcDiscover, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.transport.http.HttpContext
+import automorph.util.Bytes
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
@@ -27,6 +28,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
 
   private val contentTypeHeader = "Content-Type"
   private val binaryContentType = "application/octet-stream"
+  private val jsonDataType = "JSON"
+
   private lazy val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.errorTitle),
@@ -92,7 +95,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
         requestContext.path.map { path =>
           if (path.startsWith(pathPrefix) && path.length > pathPrefix.length) {
             val functionName = path.substring(pathPrefix.length, path.length)
-            val message = RpcMessage((), requestBody, requestProperties ++ Option("Function" -> functionName), messageText)
+            val message =
+              RpcMessage((), requestBody, requestProperties ++ Option("Function" -> functionName), messageText)
             Right(RpcRequest(message, functionName, Right(request), true, requestId))
           } else {
             val message = RpcMessage((), requestBody, requestProperties, messageText)
@@ -164,8 +168,12 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
       }
     )
 
-  override def discovery: Seq[RpcDiscover] =
-    Seq()
+  override def discovery: Seq[RpcDiscover[Metadata]] = Seq(
+    RpcDiscover(
+      RpcFunction(RestRpcProtocol.openApiDiscoveryFunction, Seq(), jsonDataType, None),
+      (functions, _) => Bytes.string.from(openApi(functions, "", "", Seq()))
+    )
+  )
 
   /**
    * Creates a copy of this protocol with specified exception to REST-RPC error mapping.

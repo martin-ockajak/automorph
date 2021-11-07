@@ -106,9 +106,9 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       extractArguments(rpcRequest, handlerBinding).pureFold(
         error => errorResponse(error, rpcRequest.message, responseRequred, requestProperties),
         arguments =>
-          discoveryBindings.get(rpcRequest.function).map { case (_, specification) =>
+          discoveryBindings.get(rpcRequest.function).map { case (_, apiSpecification) =>
             // Retrieve the API specification
-            directResponse(specification(), rpcRequest, requestProperties)
+            directResponse(apiSpecification(rpcRequest.message.metadata), rpcRequest, requestProperties)
           }.getOrElse {
             // Invoke bound function
             Try(handlerBinding.invoke(arguments, context).either).pureFold(
@@ -256,7 +256,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     message: RpcMessage[protocol.Metadata],
     requestProperties: => Map[String, String]
   ): Effect[HandlerResult[MessageBody, Context]] =
-    protocol.createResponse(result.map(_._1), message.details).pureFold(
+    protocol.createResponse(result.map(_._1), message.metadata).pureFold(
       error => system.failed(error),
       rpcResponse => {
         val responseBody = rpcResponse.message.body
@@ -268,7 +268,8 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       }
     )
 
-  private def createDiscoveryBindings: ListMap[String, (HandlerBinding[Node, Effect, Context], () => ArraySeq.ofByte)] = {
+  private def createDiscoveryBindings
+    : ListMap[String, (HandlerBinding[Node, Effect, Context], protocol.Metadata => ArraySeq.ofByte)] = {
     Option.when(true) {
       ListMap(protocol.discovery.map { discover =>
         val binding = HandlerBinding[Node, Effect, Context](
@@ -276,8 +277,10 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           (_, _) => system.pure((None.orNull, None).asInstanceOf[(Node, Option[Context])]),
           false
         )
-        val specification = discover.specification(bindings.values.toSeq.map(_.function))
-        binding.function.name -> (binding -> (() => specification))
+        val apiSpecification = (metadata: protocol.Metadata) => {
+          discover.apiSpecification(bindings.values.toSeq.map(_.function), metadata)
+        }
+        binding.function.name -> (binding -> apiSpecification)
       }*)
     }.getOrElse(ListMap.empty)
   }

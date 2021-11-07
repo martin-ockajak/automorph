@@ -42,7 +42,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: H
 object RestRpcProtocol extends ErrorMapping {
 
   /** Service discovery method providing OpenAPI specification. */
-  val discoveryOpenApi = "api.discover"
+  val openApiDiscoveryFunction = "api.discover"
 
   /**
    * Creates a REST-RPC protocol plugin.

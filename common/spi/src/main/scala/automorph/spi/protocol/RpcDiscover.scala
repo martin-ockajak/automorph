@@ -7,9 +7,10 @@ import scala.collection.immutable.ArraySeq
  *
  * @constructor Creates RPC service discovery operation.
  * @param function service discovery RPC function description
- * @param specification creates API specification for supplied arguments and RPC functions
+ * @param apiSpecification creates API specification for specified RPC functions and RPC request metadata
+ * @tparam Metadata RPC message metadata
  */
-final case class RpcDiscover(
+final case class RpcDiscover[Metadata](
   function: RpcFunction,
-  specification: Seq[RpcFunction] => ArraySeq.ofByte
+  apiSpecification: (Seq[RpcFunction], Metadata) => ArraySeq.ofByte
 )

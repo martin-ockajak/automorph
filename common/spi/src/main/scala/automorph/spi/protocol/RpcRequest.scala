@@ -10,10 +10,10 @@ package automorph.spi.protocol
  * @param responseRequired true if this request mandates a response, false if there should be no response
  * @param id request correlation identifier
  * @tparam Node message node type
- * @tparam Details protocol-specific message details type
+ * @tparam Metadata protocol-specific message metadata type
  */
-final case class RpcRequest[Node, Details](
-  message: RpcMessage[Details],
+final case class RpcRequest[Node, Metadata](
+  message: RpcMessage[Metadata],
   function: String,
   arguments: Either[List[Node], Map[String, Node]],
   responseRequired: Boolean,
