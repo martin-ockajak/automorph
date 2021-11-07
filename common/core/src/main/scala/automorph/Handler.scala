@@ -58,7 +58,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     // Parse request
     val requestMessageBody = implicitly[Bytes[MessageBody]].from(requestBody)
     protocol.parseRequest(requestMessageBody, requestContext, requestId).fold(
-      error => errorResponse(error.exception, error.message, ListMap(LogProperties.requestId -> requestId)),
+      error => errorResponse(error.exception, error.message, true, ListMap(LogProperties.requestId -> requestId)),
       rpcRequest => {
         // Invoke requested RPC function
         lazy val requestProperties = ListMap(
@@ -99,11 +99,12 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     requestProperties: => Map[String, String]
   ): Effect[HandlerResult[MessageBody, Context]] = {
     // Lookup bindings for the specified RPC function
+    val responseRequred = rpcRequest.responseRequired
     logger.debug(s"Processing ${protocol.name} request", requestProperties)
     allBindings.get(rpcRequest.function).map { handlerBinding =>
       // Extract arguments
       extractArguments(rpcRequest, handlerBinding).pureFold(
-        error => errorResponse(error, rpcRequest.message, requestProperties),
+        error => errorResponse(error, rpcRequest.message, responseRequred, requestProperties),
         arguments =>
           discoveryBindings.get(rpcRequest.function).map { case (_, specification) =>
             // Retrieve the API specification
@@ -111,14 +112,14 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           }.getOrElse {
             // Invoke bound function
             Try(handlerBinding.invoke(arguments, context).either).pureFold(
-              error => errorResponse(error, rpcRequest.message, requestProperties),
+              error => errorResponse(error, rpcRequest.message, responseRequred, requestProperties),
               result => resultResponse(result, rpcRequest, requestProperties)
             )
           }
       )
     }.getOrElse {
       val error = FunctionNotFoundException(s"Function not found: ${rpcRequest.function}", None.orNull)
-      errorResponse(error, rpcRequest.message, requestProperties)
+      errorResponse(error, rpcRequest.message, responseRequred, requestProperties)
     }
   }
 
@@ -165,18 +166,18 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   /**
    * Creates a response for bound RPC function call result.
    *
-   * @param functionResult RPC function call result
+   * @param callResult RPC function call result
    * @param rpcRequest RPC request
    * @param requestProperties request properties
    * @tparam MessageBody message body type
    * @return bound function call RPC response
    */
   private def resultResponse[MessageBody: Bytes](
-    functionResult: Effect[Either[Throwable, (Node, Option[Context])]],
+    callResult: Effect[Either[Throwable, (Node, Option[Context])]],
     rpcRequest: RpcRequest[Node, protocol.Metadata],
     requestProperties: => Map[String, String]
   ): Effect[HandlerResult[MessageBody, Context]] =
-    functionResult.flatMap { result =>
+    callResult.flatMap { result =>
       result.fold(
         error => logger.error(s"Failed to process ${protocol.name} request", error, requestProperties),
         _ => logger.info(s"Processed ${protocol.name} request", requestProperties)
@@ -196,6 +197,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    *
    * @param error exception
    * @param message RPC message
+   * @param responseRequired true if response is required
    * @param requestProperties request properties
    * @tparam MessageBody message body type
    * @return handler result
@@ -203,10 +205,15 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   private def errorResponse[MessageBody: Bytes](
     error: Throwable,
     message: RpcMessage[protocol.Metadata],
+    responseRequired: Boolean,
     requestProperties: => Map[String, String]
   ): Effect[HandlerResult[MessageBody, Context]] = {
     logger.error(s"Failed to process ${protocol.name} request", error, requestProperties)
-    response(Failure(error), message, requestProperties)
+    Option.when(responseRequired) {
+      response(Failure(error), message, requestProperties)
+    }.getOrElse {
+      system.pure(HandlerResult(None, None, None))
+    }
   }
 
   /**
