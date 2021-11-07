@@ -4,7 +4,7 @@ import automorph.handler.meta.HandlerMeta
 import automorph.handler.{HandlerBinding, HandlerResult, ProtocolHandlerBuilder, SystemHandlerBuilder}
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.RpcProtocol.FunctionNotFoundException
-import automorph.spi.protocol.{RpcDiscover, RpcFunction, RpcMessage, RpcRequest}
+import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
 import automorph.util.{Bytes, CannotEqual}
@@ -236,9 +236,9 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       lazy val allProperties = requestProperties + (LogProperties.messageBody -> Bytes.string.to(responseBody))
       logger.trace(s"Sending ${protocol.name} response", allProperties)
       val responseMessageBody = Some(implicitly[Bytes[MessageBody]].to(responseBody))
-      system.pure(HandlerResult(responseMessageBody, None, None))
+      system.pure(HandlerResult[MessageBody, Context](responseMessageBody, None, None))
     }.getOrElse {
-      system.pure(HandlerResult(None, None, None))
+      system.pure(HandlerResult[MessageBody, Context](None, None, None))
     }
   }
 

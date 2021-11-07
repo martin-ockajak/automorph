@@ -301,7 +301,6 @@ import java.net.URI
 **Server**
 
 ```scala
-
 // Create server API instance
 class ServerApi {
 
@@ -658,6 +657,74 @@ trait ClientApi {
 
 // Setup default JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+
+// Call the remote API function
+val remoteApi = client.bind[ClientApi] // ClientApi
+remoteApi.hello("world", 1) // Future[String]
+```
+
+**Cleanup**
+
+```scala
+// Close the client
+Await.result(client.close(), Duration.Inf)
+
+// Stop the server
+Await.result(server.close(), Duration.Inf)
+```
+
+### Arguments by position
+
+* [Source](/examples/project/src/test/scala/examples/basic/ArgumentsByPosition.scala)
+
+**Build**
+
+```scala
+libraryDependencies ++= Seq(
+  "org.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
+**Imports**
+
+```scala
+import automorph.{Client, Default}
+import automorph.transport.http.HttpMethod
+import java.net.URI
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
+```
+
+**Server**
+
+```scala
+// Create server API instance
+class ServerApi {
+  def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
+}
+val api = new ServerApi()
+
+// Start default JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
+val createServer = Default.serverAsync(7000, "/api", Seq(HttpMethod.Put))
+val server = createServer(_.bind(api))
+```
+
+**Client**
+
+```scala
+// Define client view of a remote API
+trait ClientApi {
+  def hello(some: String, n: Int): Future[String]
+}
+
+// Configure JSON-RPC to pass arguments by position instead of by name
+val protocol = Default.protocol[Default.ClientContext].namedArguments(false)
+
+// Setup custom JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
+val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"), HttpMethod.Put)
+val client = Client.protocol(protocol).transport(clientTransport)
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi] // ClientApi
