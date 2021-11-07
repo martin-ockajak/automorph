@@ -191,7 +191,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### API specification
+### API discovery
 
 * [Source](/examples/project/src/test/scala/examples/basic/ApiSpecification.scala)
 

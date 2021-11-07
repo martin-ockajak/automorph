@@ -8,8 +8,8 @@ import automorph.spi.{MessageCodec, RpcProtocol}
  * JSON-RPC protocol plugin.
  *
  * Provides the following JSON-RPC methods for service discovery:
- * - `rpc.discover` - API specification in OpenRPC format
- * - `api.discover` - API specification in OpenAPI format
+ * - `rpc.discover` - API description in OpenRPC format
+ * - `api.discover` - API description in OpenAPI format
  *
  * @constructor Creates a JSON-RPC protocol plugin.
  * @see [[https://www.jsonrpc.org/specification Protocol specification]]
@@ -18,7 +18,7 @@ import automorph.spi.{MessageCodec, RpcProtocol}
  * @param mapException maps an exception to a corresponding JSON-RPC error
  * @param namedArguments if true, pass arguments by name, if false pass arguments by position
  * @param mapOpenRpc transforms generated OpenRPC specification
- * @param mapOpenApi transforms generated OpenAPI specification
+ * @param mapOpenApi transforms generated OpenAPI description
  * @param encodeMessage converts a JSON-RPC message to message format node
  * @param decodeMessage converts a message format node to JSON-RPC message
  * @param encodeStrings converts list of strings to message format node
@@ -40,17 +40,17 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
 
 object JsonRpcProtocol extends ErrorMapping:
 
-  /** Service discovery method providing API specification in OpenRPC format. */
+  /** Service discovery method providing API description in OpenRPC format. */
   val openRpcFunction: String = "rpc.discover"
-  /** Service discovery method providing API specification in OpenAPI format. */
+  /** Service discovery method providing API description in OpenAPI format. */
   val openApiFunction: String = "api.discover"
 
   /**
    * Creates a JSON-RPC protocol plugin.
    *
    * Provides the following JSON-RPC methods for service discovery:
-   * - `rpc.discover` - API specification in OpenRPC format
-   * - `api.discover` - API specification in OpenAPI format
+   * - `rpc.discover` - API description in OpenRPC format
+   * - `api.discover` - API description in OpenAPI format
    *
    * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
    * @param codec message codec plugin
@@ -58,7 +58,7 @@ object JsonRpcProtocol extends ErrorMapping:
    * @param mapException maps an exception to a corresponding JSON-RPC error
    * @param namedArguments if true, pass arguments by name, if false pass arguments by position
    * @param mapOpenRpc transforms generated OpenRPC specification
-   * @param mapOpenApi transforms generated OpenAPI specification
+   * @param mapOpenApi transforms generated OpenAPI description
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Context message context type

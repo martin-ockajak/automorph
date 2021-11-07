@@ -195,7 +195,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     copy(namedArguments = namedArguments)
 
   /**
-   * Creates a copy of this protocol with given OpenRPC specification transformation.
+   * Creates a copy of this protocol with given OpenRPC description transformation.
    *
    * @param mapOpenRpc transforms generated OpenRPC specification
    * @return JSON-RPC protocol
@@ -204,7 +204,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     copy(mapOpenRpc = mapOpenRpc)
 
   /**
-   * Creates a copy of this protocol with given OpenAPI specification transformation.
+   * Creates a copy of this protocol with given OpenAPI description transformation.
    *
    * @param mapOpenApi transforms generated OpenAPI specification
    * @return JSON-RPC protocol

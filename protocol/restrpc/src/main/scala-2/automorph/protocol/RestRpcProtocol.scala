@@ -11,7 +11,7 @@ import scala.reflect.macros.blackbox
  * REST-RPC protocol plugin.
  *
  * Provides the following REST-RPC functions for service discovery:
- * - `api.discover` - API specification in OpenAPI format
+ * - `api.discover` - API description in OpenAPI format
  *
  * @constructor Creates a REST-RPC protocol plugin.
  * @see [[https://automorph.org/rest-rpc REST-RPC protocol specification]]
@@ -19,7 +19,7 @@ import scala.reflect.macros.blackbox
  * @param pathPrefix API path prefix
  * @param mapError maps a REST-RPC error to a corresponding exception
  * @param mapException maps an exception to a corresponding REST-RPC error
- * @param mapOpenApi transforms generated OpenAPI specification
+ * @param mapOpenApi transforms generated OpenAPI description
  * @param encodeRequest converts a REST-RPC request to message format node
  * @param decodeRequest converts a message format node to REST-RPC request
  * @param encodeResponse converts a REST-RPC response to message format node
@@ -44,21 +44,21 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: H
 
 object RestRpcProtocol extends ErrorMapping {
 
-  /** Service discovery method providing API specification in OpenAPI format. */
+  /** Service discovery method providing API description in OpenAPI format. */
   val openApiFunction: String = "api.discover"
 
   /**
    * Creates a REST-RPC protocol plugin.
    *
    * Provides the following JSON-RPC functions for service discovery:
-   * - `api.discover` - API specification in OpenAPI format
+   * - `api.discover` - API description in OpenAPI format
    *
    * @see [[https://www.jsonrpc.org/specification REST-RPC protocol specification]]
    * @param codec message codec plugin
    * @param pathPrefix API path prefix
    * @param mapError maps a REST-RPC error to a corresponding exception
    * @param mapException maps an exception to a corresponding REST-RPC error
-   * @param mapOpenApi transforms generated OpenAPI specification
+   * @param mapOpenApi transforms generated OpenAPI description
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Context message context type
@@ -77,7 +77,7 @@ object RestRpcProtocol extends ErrorMapping {
    * Creates a REST-RPC protocol plugin.
    *
    * Provides the following REST-RPC functions for service discovery:
-   * - `api.discover` - API specification in OpenAPI format
+   * - `api.discover` - API description in OpenAPI format
    *
    * @see [[https://www.jsonrpc.org/specification REST-RPC protocol specification]]
    * @param codec message codec plugin

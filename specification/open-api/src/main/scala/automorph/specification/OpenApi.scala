@@ -7,9 +7,9 @@ import automorph.specification.openapi.{ExternalDocumentation, Info, MediaType, 
 import automorph.spi.protocol.RpcFunction
 
 /**
- * Open API specification.
+ * Open API description.
  *
- * @see [[https://github.com/OAI/OpenAPI-Specification OpenAPI specification]]
+ * @see [[https://github.com/OAI/OpenAPI-Specification OpenAPI description]]
  */
 case class OpenApi(
   openapi: String = "3.1.0",
@@ -44,10 +44,10 @@ object OpenApi {
   private val scaladocMarkup = "^[/\\* ]*$".r
 
   /**
-   * Generates OpenAPI specification for given RPC functions.
+   * Generates OpenAPI description for given RPC functions.
    *
    * @param functionSchemas RPC function schemas
-   * @return OpenAPI specification
+   * @return OpenAPI description
    */
   def apply(functionSchemas: Iterable[(RpcFunction, RpcSchema)]): OpenApi = {
     val paths = functionSchemas.map { case (function, schema) =>

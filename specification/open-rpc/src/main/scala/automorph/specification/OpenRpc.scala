@@ -5,9 +5,9 @@ import automorph.specification.openrpc.{Components, ContentDescriptor, ExternalD
 import automorph.spi.protocol.RpcFunction
 
 /**
- * Open API specification.
+ * Open API description.
  *
- * @see [[https://spec.open-rpc.org OpenRPC specification]]
+ * @see [[https://spec.open-rpc.org OpenRPC description]]
  */
 case class OpenRpc(
   openrpc: String = "1.2.6",
@@ -28,10 +28,10 @@ object OpenRpc {
   private val scaladocMarkup = "^[/\\* ]*$".r
 
   /**
-   * Generates OpenRPC specification for given RPC functions.
+   * Generates OpenRPC description for given RPC functions.
    *
    * @param functions RPC functions
-   * @return OpenRPC specification
+   * @return OpenRPC description
    */
   def apply(functions: Iterable[RpcFunction]): OpenRpc = {
     val methods = functions.map { function =>

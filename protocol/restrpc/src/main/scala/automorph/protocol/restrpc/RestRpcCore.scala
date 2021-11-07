@@ -195,7 +195,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
     copy(mapError = errorToException)
 
   /**
-   * Creates a copy of this protocol with given OpenAPI specification transformation.
+   * Creates a copy of this protocol with given OpenAPI description transformation.
    *
    * @param mapOpenApi transforms generated OpenAPI specification
    * @return REST-RPC protocol
