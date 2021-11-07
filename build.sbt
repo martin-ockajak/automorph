@@ -133,12 +133,12 @@ lazy val jsonSchema = (project in file("specification/json-schema")).dependsOn(
     ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion).cross(CrossVersion.for3Use2_13)
   )
 )
-lazy val openRpc = (project in file("common/openrpc")).dependsOn(
+lazy val openRpc = (project in file("specification/open-rpc")).dependsOn(
   jsonSchema, testBase % Test
 ).settings(
   name := s"$projectName-open-rpc"
 )
-lazy val openApi = (project in file("common/openapi")).dependsOn(
+lazy val openApi = (project in file("specification/open-api")).dependsOn(
   jsonSchema, testBase % Test
 ).settings(
   name := s"$projectName-open-api"
