@@ -214,7 +214,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
     val functionSchemas = functions.map { function =>
       function -> RpcSchema(requestSchema(function), resultSchema(function), errorSchema)
     }
-    OpenApi(functionSchemas)
+    mapOpenApi(OpenApi(functionSchemas))
   }
 
   /**
