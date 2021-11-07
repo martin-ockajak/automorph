@@ -7,7 +7,7 @@ import automorph.specification.openapi.{ExternalDocumentation, Info, MediaType, 
 import automorph.spi.protocol.RpcFunction
 
 /**
- * Open API description.
+ * OpenAPI API description.
  *
  * @see [[https://github.com/OAI/OpenAPI-Specification OpenAPI description]]
  */

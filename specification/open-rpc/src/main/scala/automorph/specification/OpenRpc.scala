@@ -5,7 +5,7 @@ import automorph.specification.openrpc.{Components, ContentDescriptor, ExternalD
 import automorph.spi.protocol.RpcFunction
 
 /**
- * Open API description.
+ * OpenRPC API description.
  *
  * @see [[https://spec.open-rpc.org OpenRPC description]]
  */
