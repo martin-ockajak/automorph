@@ -17,7 +17,7 @@ case class OpenApi(
   jsonSchemaDialect: Option[String] = None,
   servers: Option[List[Server]] = None,
   paths: Option[Paths] = None,
-  webhooks: Option[Map[String, Either[PathItem, Reference]]] = None,
+  webhooks: Option[Map[String, PathItem]] = None,
   components: Option[Components] = None,
   security: Option[List[SecurityRequirement]] = None,
   tags: Option[List[Tag]] = None,
@@ -52,21 +52,21 @@ object OpenApi {
   def apply(functionSchemas: Iterable[(RpcFunction, RpcSchema)]): OpenApi = {
     val paths = functionSchemas.map { case (function, schema) =>
       // Request
-      val requestMediaType = MediaType(schema = Some(Left(schema.request)))
-      val resultMediaType = MediaType(schema = Some(Left(schema.result)))
-      val errorMediaType = MediaType(schema = Some(Left(schema.error)))
-      val requestBody = Left(RequestBody(content = Map(contentType -> requestMediaType), required = Some(true)))
+      val requestMediaType = MediaType(schema = Some(schema.request))
+      val resultMediaType = MediaType(schema = Some(schema.result))
+      val errorMediaType = MediaType(schema = Some(schema.error))
+      val requestBody = RequestBody(content = Map(contentType -> requestMediaType), required = Some(true))
       val responses = Map(
         // Error response
-        "default" -> Left(Response(
+        "default" -> Response(
           description = "Failed function call error details",
           content = Some(Map(contentType -> errorMediaType))
-        )),
+        ),
         // Result response
-        httpStatusCodeOk -> Left(Response(
+        httpStatusCodeOk -> Response(
           description = "Succesful function call result value",
           content = Some(Map(contentType -> resultMediaType))
-        ))
+        )
       )
 
       // Path

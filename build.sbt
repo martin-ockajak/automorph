@@ -128,20 +128,23 @@ lazy val core = (project in file("common/core")).dependsOn(
 lazy val jsonSchema = (project in file("specification/json-schema")).dependsOn(
   spi, testBase % Test
 ).settings(
-  name := s"$projectName-json-schema",
-  libraryDependencies ++= Seq(
-    ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion).cross(CrossVersion.for3Use2_13)
-  )
+  name := s"$projectName-json-schema"
 )
 lazy val openRpc = (project in file("specification/open-rpc")).dependsOn(
   jsonSchema, testBase % Test
 ).settings(
-  name := s"$projectName-open-rpc"
+  name := s"$projectName-open-rpc",
+  libraryDependencies ++= Seq(
+    ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion % Test).cross(CrossVersion.for3Use2_13)
+  )
 )
 lazy val openApi = (project in file("specification/open-api")).dependsOn(
   jsonSchema, testBase % Test
 ).settings(
-  name := s"$projectName-open-api"
+  name := s"$projectName-open-api",
+  libraryDependencies ++= Seq(
+    ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion % Test).cross(CrossVersion.for3Use2_13)
+  )
 )
 
 // Protocol

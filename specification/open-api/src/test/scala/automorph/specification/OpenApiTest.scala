@@ -1,11 +1,21 @@
 package automorph.specification
 
+import automorph.specification.OpenApi
 import automorph.specification.jsonschema.Schema
 import automorph.specification.openapi.RpcSchema
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
+import com.fasterxml.jackson.annotation.JsonInclude.Include
+import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
+import com.fasterxml.jackson.module.scala.{ClassTagExtensions, DefaultScalaModule}
 import test.base.BaseTest
 
 class OpenApiTest extends BaseTest {
+  private lazy val objectMapper = (new ObjectMapper() with ClassTagExtensions)
+    .registerModule(DefaultScalaModule)
+    .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
+    .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
+    .setSerializationInclusion(Include.NON_ABSENT)
+    .setDefaultLeniency(false)
   private val function = RpcFunction(
     "test",
     Seq(
@@ -176,11 +186,12 @@ class OpenApiTest extends BaseTest {
       |}""".stripMargin
 
   "" - {
-    "Specification" in {
-//      val specification = OpenApi.specification(functionSchemas, "Test", "0.0", Seq("http://localhost:7000/api"))
-//      val specificationJson = Json.serialize(specification)
-//      println(specificationJson)
-//      specificationJson.should(equal(expectedJson))
+    "Description" in {
+      val description = OpenApi(functionSchemas)
+      val descriptionJson = objectMapper.writerWithDefaultPrettyPrinter
+        .writeValueAsString(objectMapper.valueToTree(description))
+//      println(descriptionJson)
+//      descriptionJson.should(equal(expectedJson))
     }
   }
 }

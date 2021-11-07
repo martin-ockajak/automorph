@@ -4,7 +4,8 @@ import automorph.specification.jsonschema.Reference
 
 final case class Response(
   description: String,
-  headers: Option[Map[String, Either[Header, Reference]]] = None,
+  headers: Option[Map[String, Header]] = None,
   content: Option[Map[String, MediaType]] = None,
-  links: Option[Map[String, Either[Link, Reference]]] = None
-)
+  links: Option[Map[String, Link]] = None,
+  $ref: Option[String] = None
+) extends Reference

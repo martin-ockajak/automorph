@@ -1,9 +1,19 @@
 package automorph.specification
 
+import automorph.specification.OpenRpc
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
+import com.fasterxml.jackson.annotation.JsonInclude.Include
+import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
+import com.fasterxml.jackson.module.scala.{ClassTagExtensions, DefaultScalaModule}
 import test.base.BaseTest
 
 class OpenRpcTest extends BaseTest {
+  private lazy val objectMapper = (new ObjectMapper() with ClassTagExtensions)
+    .registerModule(DefaultScalaModule)
+    .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
+    .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
+    .setSerializationInclusion(Include.NON_ABSENT)
+    .setDefaultLeniency(false)
   private val function = RpcFunction(
     "test",
     Seq(
@@ -133,11 +143,19 @@ class OpenRpcTest extends BaseTest {
       |}""".stripMargin
 
   "" - {
-    "Specification" in {
-//      val specification = OpenRpc.specification(functionSchemas, "Test", "0.0", Seq("http://localhost:7000/api"))
-//      val specificationJson = Json.serialize(specification)
-//      println(specificationJson)
-//      specificationJson.should(equal(expectedJson))
+    "Description" in {
+      val description = OpenRpc(Seq(function))
+      val descriptionJson = objectMapper.writerWithDefaultPrettyPrinter
+        .writeValueAsString(objectMapper.valueToTree(description))
+//      println(descriptionJson)
+//      descriptionJson.should(equal(expectedJson))
     }
   }
+
+  private def createObjectMapper: ObjectMapper = (new ObjectMapper() with ClassTagExtensions)
+    .registerModule(DefaultScalaModule)
+    .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
+    .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
+    .setSerializationInclusion(Include.NON_ABSENT)
+    .setDefaultLeniency(false)
 }

@@ -1,5 +1,7 @@
 package automorph.specification.openapi
 
+import automorph.specification.jsonschema.Reference
+
 case class SecurityScheme(
   `type`: String,
   description: Option[String] = None,
@@ -8,5 +10,6 @@ case class SecurityScheme(
   scheme: Option[String] = None,
   bearerFormat: Option[String] = None,
   flows: Option[OAuthFlows] = None,
-  openIdConnectUrl: Option[String] = None
-)
+  openIdConnectUrl: Option[String] = None,
+  $ref: Option[String] = None
+) extends Reference

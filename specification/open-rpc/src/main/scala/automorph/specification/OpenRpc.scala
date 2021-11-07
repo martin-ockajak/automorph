@@ -1,6 +1,6 @@
 package automorph.specification
 
-import automorph.specification.jsonschema.{Reference, Schema}
+import automorph.specification.jsonschema.Schema
 import automorph.specification.openrpc.{Components, ContentDescriptor, ExternalDocumentation, Info, Method, Server}
 import automorph.spi.protocol.RpcFunction
 
@@ -13,7 +13,7 @@ case class OpenRpc(
   openrpc: String = "1.2.6",
   info: Info,
   servers: Option[List[Server]] = None,
-  methods: List[Either[Method, Reference]] = List(),
+  methods: List[Method] = List(),
   components: Option[Components] = None,
   externalDocs: Option[ExternalDocumentation] = None
 )
@@ -39,21 +39,21 @@ object OpenRpc {
       val parameterSchemas = Schema.parameters(function)
       val requiredParameters = Schema.requiredParameters(function).toSet
       val params = function.parameters.map { parameter =>
-        Left(ContentDescriptor(
+        ContentDescriptor(
           name = parameter.name,
           summary = Some(parameter.`type`),
           required = Some(requiredParameters.contains(parameter.name)),
           schema = parameterSchemas(parameter.name)
-        )).withRight[Reference]
+        )
       }.toList
 
       // Result
-      val result = Left(ContentDescriptor(
+      val result = ContentDescriptor(
         name = resultName,
         summary = Some(function.resultType),
         required = Some(true),
         schema = Schema.result(function)
-      ))
+      )
 
       // Method
       val summary = function.documentation.flatMap(_.split('\n').find {
@@ -68,7 +68,7 @@ object OpenRpc {
         description = function.documentation,
         paramStructure = Some("either")
       )
-      Left(method).withRight[Reference]
+      method
     }.toList
     val info = Info(title = defaultTitle, version = defaultVersion)
     OpenRpc(info = info, methods = methods)

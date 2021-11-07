@@ -1,6 +1,6 @@
 package automorph.specification.openrpc
 
-import automorph.specification.jsonschema.Schema
+import automorph.specification.jsonschema.{Reference, Schema}
 
 case class ContentDescriptor(
   name: String,
@@ -8,5 +8,6 @@ case class ContentDescriptor(
   description: Option[String] = None,
   required: Option[Boolean] = None,
   schema: Schema,
-  deprecated: Option[Boolean] = None
-)
+  deprecated: Option[Boolean] = None,
+  $ref: Option[String] = None
+) extends Reference

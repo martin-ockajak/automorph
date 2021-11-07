@@ -14,6 +14,7 @@ case class Parameter(
   allowReserved: Option[Boolean] = None,
   schema: Option[Schema] = None,
   example: Option[String] = None,
-  examples: Option[Map[String, Either[Example, Reference]]] = None,
-  content: Option[Map[String, MediaType]] = None
-)
+  examples: Option[Map[String, Example]] = None,
+  content: Option[Map[String, MediaType]] = None,
+  $ref: Option[String] = None
+) extends Reference

@@ -4,16 +4,17 @@ import automorph.specification.jsonschema.Reference
 
 case class Method(
   name: String,
-  tags: Option[List[Either[Tag, Reference]]] = None,
+  tags: Option[List[Tag]] = None,
   summary: Option[String] = None,
   description: Option[String] = None,
   externalDocs: Option[ExternalDocumentation] = None,
-  params: List[Either[ContentDescriptor, Reference]],
-  result: Either[ContentDescriptor, Reference],
+  params: List[ContentDescriptor],
+  result: ContentDescriptor,
   deprecated: Option[Boolean] = None,
   servers: Option[List[Server]] = None,
-  errors: Option[List[Either[Error, Reference]]] = None,
-  links: Option[List[Either[Link, Reference]]] = None,
+  errors: Option[List[Error]] = None,
+  links: Option[List[Link]] = None,
   paramStructure: Option[String] = None,
-  examples: Option[List[ExamplePairing]] = None
-)
+  examples: Option[List[ExamplePairing]] = None,
+  $ref: Option[String] = None
+) extends Reference
