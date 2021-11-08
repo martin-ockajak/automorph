@@ -8,7 +8,7 @@ import automorph.description.jsonschema.Schema
 import automorph.description.openapi.RpcSchema
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
-import automorph.spi.protocol.{RpcDiscover, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
+import automorph.spi.protocol.{RpcApiDescription, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.transport.http.HttpContext
 import automorph.util.Bytes
 import automorph.util.Extensions.{ThrowableOps, TryOps}
@@ -169,8 +169,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
       }
     )
 
-  override def discovery: Seq[RpcDiscover[Metadata]] = Seq(
-    RpcDiscover(
+  override def apiDescriptions: Seq[RpcApiDescription[Metadata]] = Seq(
+    RpcApiDescription(
       RpcFunction(RestRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
       (functions, _) => Bytes.string.from(openApi(functions).toString)
     )
