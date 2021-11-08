@@ -1,7 +1,6 @@
 package automorph.description
 
-import automorph.description.jsonschema.Schema
-import automorph.description.openrpc.{Components, ContentDescriptor, ExternalDocumentation, Info, Method, Server}
+import automorph.description.openrpc.{Components, ContentDescriptor, ExternalDocumentation, Info, Method, Schema, Server}
 import automorph.spi.protocol.RpcFunction
 
 /**

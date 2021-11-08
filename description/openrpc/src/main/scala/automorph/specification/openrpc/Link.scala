@@ -1,7 +1,5 @@
 package automorph.description.openrpc
 
-import automorph.description.jsonschema.Reference
-
 case class Link(
   name: String,
   summary: Option[String] = None,

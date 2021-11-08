@@ -1,7 +1,5 @@
 package automorph.description.openapi
 
-import automorph.description.jsonschema.{Reference, Schema}
-
 case class Parameter(
   name: String,
   in: String,

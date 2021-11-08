@@ -1,7 +1,5 @@
 package automorph.description.openrpc
 
-import automorph.description.jsonschema.Reference
-
 final case class Error(
   code: Int,
   message: String,

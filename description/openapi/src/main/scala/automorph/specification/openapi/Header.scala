@@ -1,7 +1,5 @@
 package automorph.description.openapi
 
-import automorph.description.jsonschema.{Reference, Schema}
-
 case class Header(
   descriptipon: Option[String] = None,
   required: Option[Boolean] = None,

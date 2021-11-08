@@ -1,8 +1,7 @@
 package automorph.description
 
 import automorph.description.OpenRpc
-import automorph.description.jsonschema.Schema
-import automorph.description.openrpc.{ContentDescriptor, Info, Method}
+import automorph.description.openrpc.{ContentDescriptor, Info, Method, Schema}
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import test.base.BaseTest
 

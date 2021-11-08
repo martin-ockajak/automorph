@@ -1,7 +1,5 @@
 package automorph.description.openapi
 
-import automorph.description.jsonschema.Reference
-
 final case class Response(
   description: String,
   headers: Option[Map[String, Header]] = None,

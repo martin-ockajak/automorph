@@ -1,7 +1,5 @@
 package automorph.description.openapi
 
-import automorph.description.jsonschema.Reference
-
 case class Example(
   summary: Option[String] = None,
   description: Option[String] = None,

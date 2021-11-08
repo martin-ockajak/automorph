@@ -1,7 +1,5 @@
 package automorph.description.openapi
 
-import automorph.description.jsonschema.Reference
-
 case class SecurityScheme(
   `type`: String,
   description: Option[String] = None,

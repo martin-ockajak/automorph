@@ -1,7 +1,5 @@
 package automorph.description.openrpc
 
-import automorph.description.jsonschema.Schema
-
 case class Components(
   contentDescriptors: Option[Map[String, ContentDescriptor]] = None,
   schemas: Option[Map[String, Schema]] = None,

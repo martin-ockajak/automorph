@@ -38,7 +38,6 @@ lazy val root = project.in(file(".")).settings(
   core,
 
   // Specification
-  jsonSchema,
   openrpc,
   openapi,
 
@@ -125,18 +124,13 @@ lazy val core = (project in file("common/core")).dependsOn(
 )
 
 // Specification
-lazy val jsonSchema = (project in file("description/json-schema")).dependsOn(
-  spi, testBase % Test
-).settings(
-  name := s"$projectName-json-schema"
-)
 lazy val openrpc = (project in file("description/openrpc")).dependsOn(
-  jsonSchema, testBase % Test
+  spi, testBase % Test
 ).settings(
   name := s"$projectName-openrpc"
 )
 lazy val openapi = (project in file("description/openapi")).dependsOn(
-  jsonSchema, testBase % Test
+  spi, testBase % Test
 ).settings(
   name := s"$projectName-openapi"
 )

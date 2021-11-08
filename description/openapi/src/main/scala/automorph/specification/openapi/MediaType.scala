@@ -1,7 +1,5 @@
 package automorph.description.openapi
 
-import automorph.description.jsonschema.Schema
-
 case class MediaType (
   schema: Option[Schema] = None,
   example: Option[String] = None,

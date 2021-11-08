@@ -1,6 +1,5 @@
 package automorph.description.openapi
 
-import automorph.description.jsonschema.Schema
 import automorph.description.openapi.Operation.Callback
 
 case class Components(

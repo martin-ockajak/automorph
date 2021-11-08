@@ -1,8 +1,7 @@
 package automorph.description
 
 import automorph.description.OpenApi
-import automorph.description.jsonschema.Schema
-import automorph.description.openapi.{Info, MediaType, Operation, PathItem, RequestBody, Response, RpcSchema}
+import automorph.description.openapi.{Info, MediaType, Operation, PathItem, RequestBody, Response, RpcSchema, Schema}
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import test.base.BaseTest
 

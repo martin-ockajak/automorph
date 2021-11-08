@@ -1,7 +1,5 @@
 package automorph.description.openrpc
 
-import automorph.description.jsonschema.Reference
-
 case class Method(
   name: String,
   tags: Option[List[Tag]] = None,

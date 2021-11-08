@@ -1,7 +1,5 @@
 package automorph.description.openrpc
 
-import automorph.description.jsonschema.{Reference, Schema}
-
 case class ContentDescriptor(
   name: String,
   summary: Option[String] = None,

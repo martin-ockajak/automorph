@@ -1,7 +1,5 @@
 package automorph.description.openapi
 
-import automorph.description.jsonschema.Reference
-
 case class Link(
   operationRef: Option[String] = None,
   operationId: Option[String] = None,

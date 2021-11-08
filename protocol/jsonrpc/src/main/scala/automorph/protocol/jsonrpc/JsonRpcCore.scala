@@ -1,11 +1,10 @@
 package automorph.protocol.jsonrpc
 
+import automorph.description.openapi.{RpcSchema, Schema}
+import automorph.description.{OpenApi, OpenRpc}
 import automorph.protocol.JsonRpcProtocol
 import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
 import automorph.protocol.jsonrpc.Message.Params
-import automorph.description.jsonschema.Schema
-import automorph.description.openapi.RpcSchema
-import automorph.description.{OpenApi, OpenRpc}
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.{RpcApiDescription, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}

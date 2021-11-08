@@ -1,7 +1,5 @@
 package automorph.description.openapi
 
-import automorph.description.jsonschema.Schema
-
 /**
  * RPC function schema.
  *

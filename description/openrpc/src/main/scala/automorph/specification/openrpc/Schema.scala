@@ -1,6 +1,6 @@
-package automorph.description.jsonschema
+package automorph.description.openrpc
 
-import automorph.description.jsonschema.Schema.Properties
+import automorph.description.openrpc.Schema.Properties
 import automorph.spi.protocol.RpcFunction
 
 final case class Schema(
