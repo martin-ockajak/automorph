@@ -207,6 +207,7 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.Default
+import automorph.description.{OpenApi, OpenRpc}
 import automorph.protocol.JsonRpcProtocol
 import automorph.transport.http.HttpMethod
 import java.net.URI

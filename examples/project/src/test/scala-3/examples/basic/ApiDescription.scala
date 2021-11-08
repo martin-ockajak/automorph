@@ -1,6 +1,7 @@
 package examples.basic
 
 import automorph.Default
+import automorph.description.{OpenApi, OpenRpc}
 import automorph.protocol.JsonRpcProtocol
 import automorph.transport.http.HttpMethod
 import java.net.URI
@@ -26,14 +27,12 @@ object ApiDescription extends App {
 
   // Retrieve remote API description in OpenRPC format
   val openRpcFunction = JsonRpcProtocol.openRpcFunction
-  val openRpc = client.call[Default.Node](openRpcFunction).args()
-    .map(client.protocol.codec.text) // Future[String]
+  val openRpc = client.call[Default.Node](openRpcFunction).args() // Future[OpenRpc]
   println(Await.result(openRpc, Duration.Inf))
 
   // Retrieve remote API description in OpenAPI format
   val openApiFunction = JsonRpcProtocol.openApiFunction
-  val openApi = client.call[Default.Node](openApiFunction).args()
-    .map(client.protocol.codec.text) // Future[String]
+  val openApi = client.call[Default.Node](openApiFunction).args() // Future[OpenApi]
   println(Await.result(openApi, Duration.Inf))
 
   // Close the client
