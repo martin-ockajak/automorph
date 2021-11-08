@@ -3,6 +3,7 @@ package automorph.codec.json
 import argonaut.Argonaut.{StringToParseWrap, jNull}
 import argonaut.{CodecJson, DecodeResult, Json}
 import automorph.codec.json.meta.ArgonautJsonMeta
+import automorph.description.{OpenApi, OpenRpc}
 import java.nio.charset.StandardCharsets
 import scala.collection.immutable.ArraySeq
 
@@ -46,6 +47,10 @@ object ArgonautJsonCodec {
 
   implicit lazy val restRpcMessageCodecJson: CodecJson[ArgonautRestRpc.RpcMessage] =
     ArgonautRestRpc.messageCodecJson
+
+  implicit lazy val openRpcCodecJson: CodecJson[OpenRpc] = ArgonautOpenRpc.openRpcCodecJson
+
+  implicit lazy val openApiCodecJson: CodecJson[OpenApi] = ArgonautOpenApi.openApiCodecJson
 
   private val charset = StandardCharsets.UTF_8
 }
