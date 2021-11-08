@@ -167,6 +167,15 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
   )
 
   /**
+   * Creates a copy of this protocol with specified message contex type.
+   *
+   * @tparam NewContext message context type
+   * @return JSON-RPC protocol
+   */
+  def context[NewContext]: JsonRpcProtocol[Node, Codec, NewContext] =
+    copy()
+
+  /**
    * Creates a copy of this protocol with specified exception to JSON-RPC error mapping.
    *
    * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
