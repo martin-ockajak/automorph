@@ -11,16 +11,16 @@ private[automorph] object CirceOpenApi {
   def openApiEncoder: Encoder[OpenApi] = {
     implicit val schemaEncoder: Encoder[Schema] = new Encoder[Schema] {
 
-      override def apply(a: Schema): Json = {
+      override def apply(schema: Schema): Json = {
         val fields = Seq(
-          a.`type`.map(v => "type" -> Json.fromString(v)),
-          a.title.map(v => "title" -> Json.fromString(v)),
-          a.description.map(v => "description" -> Json.fromString(v)),
-          a.properties.map(v => "properties" -> Json.obj(v.view.mapValues(apply).toSeq*)),
-          a.required.map(v => "required" -> Json.arr(v.map(Json.fromString)*)),
-          a.default.map(v => "default" -> Json.fromString(v)),
-          a.allOf.map(v => "allOf" -> Json.arr(v.map(apply)*)),
-          a.$ref.map(v => "$ref" -> Json.fromString(v))
+          schema.`type`.map(v => "type" -> Json.fromString(v)),
+          schema.title.map(v => "title" -> Json.fromString(v)),
+          schema.description.map(v => "description" -> Json.fromString(v)),
+          schema.properties.map(v => "properties" -> Json.obj(v.view.mapValues(apply).toSeq*)),
+          schema.required.map(v => "required" -> Json.arr(v.map(Json.fromString)*)),
+          schema.default.map(v => "default" -> Json.fromString(v)),
+          schema.allOf.map(v => "allOf" -> Json.arr(v.map(apply)*)),
+          schema.$ref.map(v => "$ref" -> Json.fromString(v))
         ).flatten
         Json.obj(fields*)
       }
