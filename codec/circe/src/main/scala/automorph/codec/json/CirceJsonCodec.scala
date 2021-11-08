@@ -1,7 +1,7 @@
 package automorph.codec.json
 
 import automorph.codec.json.meta.CirceJsonMeta
-import automorph.description.OpenRpc
+import automorph.description.{OpenApi, OpenRpc}
 import io.circe.{Decoder, Encoder, Json, parser}
 import java.nio.charset.StandardCharsets
 import scala.collection.immutable.ArraySeq
@@ -37,7 +37,9 @@ object CirceJsonCodec {
   implicit lazy val jsonRpcMessageDecoder: Decoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageDecoder
   implicit lazy val restRpcMessageEncoder: Encoder[CirceRestRpc.RpcMessage] = CirceRestRpc.messageEncoder
   implicit lazy val restRpcMessageDecoder: Decoder[CirceRestRpc.RpcMessage] = CirceRestRpc.messageDecoder
-  implicit lazy val openRpcEncoder: Encoder[OpenRpc] = CirceJsonRpc.openRpcEncoder
-  implicit lazy val openRpcDecoder: Decoder[OpenRpc] = CirceJsonRpc.openRpcDecoder
+  implicit lazy val openRpcEncoder: Encoder[OpenRpc] = CirceOpenRpc.openRpcEncoder
+  implicit lazy val openRpcDecoder: Decoder[OpenRpc] = CirceOpenRpc.openRpcDecoder
+  implicit lazy val openApiEncoder: Encoder[OpenApi] = CirceOpenApi.openApiEncoder
+  implicit lazy val openApiDecoder: Decoder[OpenApi] = CirceOpenApi.openApiDecoder
   private val charset = StandardCharsets.UTF_8
 }
