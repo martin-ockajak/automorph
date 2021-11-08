@@ -32,7 +32,7 @@ object ApiDescription extends App {
 
   // Retrieve remote API description in OpenAPI format
   val openApiFunction = JsonRpcProtocol.openApiFunction
-  val openApi = client.call[OpenRpc](openApiFunction).args() // Future[OpenApi]
+  val openApi = client.call[OpenApi](openApiFunction).args() // Future[OpenApi]
   println(Await.result(openApi, Duration.Inf))
 
   // Close the client
