@@ -22,6 +22,7 @@ import automorph.transport.http.HttpContext
  * @param decodeRequest converts a message format node to REST-RPC request
  * @param encodeResponse converts a REST-RPC response to message format node
  * @param decodeResponse converts a message format node to REST-RPC response
+ * @param encodeOpenApi converts an OpenAPI description to message format node
  * @param encodeStrings converts list of strings to message format node
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
@@ -37,6 +38,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: H
   protected val decodeRequest: Node => Message.Request[Node],
   protected val encodeResponse: Message[Node] => Node,
   protected val decodeResponse: Node => Message[Node],
+  protected val encodeOpenApi: OpenApi => Node,
   protected val encodeStrings: List[String] => Node
 ) extends RestRpcCore[Node, Codec, Context] with RpcProtocol[Node, Codec, Context]
 
@@ -73,6 +75,7 @@ object RestRpcProtocol extends ErrorMapping:
     val decodeRequest = (node: Node) => codec.decode[Message.Request[Node]](node)
     val encodeResponse = (mesponse: Message[Node]) => codec.encode[Message[Node]](mesponse)
     val decodeResponse = (node: Node) => codec.decode[Message[Node]](node)
+    val encodeOpenApi = (value: OpenApi) => codec.encode[OpenApi](value)
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
     RestRpcProtocol(
       codec,
@@ -84,5 +87,6 @@ object RestRpcProtocol extends ErrorMapping:
       decodeRequest,
       encodeResponse,
       decodeResponse,
+      encodeOpenApi,
       encodeStrings
     )

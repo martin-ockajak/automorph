@@ -23,6 +23,8 @@ import scala.reflect.macros.blackbox
  * @param mapOpenApi transforms generated OpenAPI description
  * @param encodeMessage converts a JSON-RPC message to message format node
  * @param decodeMessage converts a message format node to JSON-RPC message
+ * @param encodeOpenRpc converts an OpenRPC description to message format node
+ * @param encodeOpenApi converts an OpenAPI description to message format node
  * @param encodeStrings converts list of strings to message format node
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
@@ -37,6 +39,8 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
   mapOpenRpc: OpenRpc => OpenRpc = identity,
   protected val encodeMessage: Message[Node] => Node,
   protected val decodeMessage: Node => Message[Node],
+  protected val encodeOpenRpc: OpenRpc => Node,
+  protected val encodeOpenApi: OpenApi => Node,
   protected val encodeStrings: List[String] => Node
 ) extends JsonRpcCore[Node, Codec, Context] with RpcProtocol[Node, Codec, Context]
 
@@ -113,6 +117,8 @@ object JsonRpcProtocol extends ErrorMapping {
         $mapOpenRpc,
         message => $codec.encode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](message),
         node => $codec.decode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](node),
+        openRpc => $codec.encode[automorph.description.OpenRpc](openRpc),
+        openApi => $codec.encode[automorph.description.OpenApi](openApi),
         value => $codec.encode[List[String]](value)
       )
     """)

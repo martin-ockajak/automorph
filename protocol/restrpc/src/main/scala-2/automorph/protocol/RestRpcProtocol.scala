@@ -24,6 +24,7 @@ import scala.reflect.macros.blackbox
  * @param decodeRequest converts a message format node to REST-RPC request
  * @param encodeResponse converts a REST-RPC response to message format node
  * @param decodeResponse converts a message format node to REST-RPC response
+ * @param encodeOpenApi converts an OpenAPI description to message format node
  * @param encodeStrings converts list of strings to message format node
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
@@ -39,6 +40,7 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: H
   protected val decodeRequest: Node => Message.Request[Node],
   protected val encodeResponse: Message[Node] => Node,
   protected val decodeResponse: Node => Message[Node],
+  protected val encodeOpenApi: OpenApi => Node,
   protected val encodeStrings: List[String] => Node
 ) extends RestRpcCore[Node, Codec, Context] with RpcProtocol[Node, Codec, Context]
 
@@ -114,6 +116,7 @@ object RestRpcProtocol extends ErrorMapping {
         node => $codec.decode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](node),
         response => $codec.encode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](response),
         node => $codec.decode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](node),
+        openApi => $codec.encode[automorph.description.OpenApi](openApi),
         value => $codec.encode[List[String]](value)
       )
     """)

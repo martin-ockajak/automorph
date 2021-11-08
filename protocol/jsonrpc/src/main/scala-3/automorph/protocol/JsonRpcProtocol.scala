@@ -21,6 +21,8 @@ import automorph.spi.{MessageCodec, RpcProtocol}
  * @param mapOpenApi transforms generated OpenAPI description
  * @param encodeMessage converts a JSON-RPC message to message format node
  * @param decodeMessage converts a message format node to JSON-RPC message
+ * @param encodeOpenRpc converts an OpenRPC description to message format node
+ * @param encodeOpenApi converts an OpenAPI description to message format node
  * @param encodeStrings converts list of strings to message format node
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
@@ -35,6 +37,8 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
   mapOpenRpc: OpenRpc => OpenRpc,
   protected val encodeMessage: Message[Node] => Node,
   protected val decodeMessage: Node => Message[Node],
+  protected val encodeOpenRpc: OpenRpc => Node,
+  protected val encodeOpenApi: OpenApi => Node,
   protected val encodeStrings: List[String] => Node
 ) extends JsonRpcCore[Node, Codec, Context] with RpcProtocol[Node, Codec, Context]
 
@@ -74,6 +78,8 @@ object JsonRpcProtocol extends ErrorMapping:
   ): JsonRpcProtocol[Node, Codec, Context] =
     val encodeMessage = (message: Message[Node]) => codec.encode[Message[Node]](message)
     val decodeMessage = (node: Node) => codec.decode[Message[Node]](node)
+    val encodeOpenRpc = (value: OpenRpc) => codec.encode[OpenRpc](value)
+    val encodeOpenApi = (value: OpenApi) => codec.encode[OpenApi](value)
     val encodeStrings = (value: List[String]) => codec.encode[List[String]](value)
     JsonRpcProtocol(
       codec,
@@ -84,5 +90,7 @@ object JsonRpcProtocol extends ErrorMapping:
       mapOpenRpc,
       encodeMessage,
       decodeMessage,
+      encodeOpenRpc,
+      encodeOpenApi,
       encodeStrings
     )
