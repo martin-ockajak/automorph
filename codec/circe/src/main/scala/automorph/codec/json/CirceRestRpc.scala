@@ -10,13 +10,13 @@ private[automorph] object CirceRestRpc {
   type RpcMessage = Message[Json]
 
   def messageEncoder: Encoder[Message[Json]] = {
-    implicit val messageErrorEncoder: Encoder[MessageError[Json]] = deriveEncoder[MessageError[Json]]
+    implicit val messageErrorEncoder: Encoder[MessageError] = deriveEncoder[MessageError]
 
     deriveEncoder[Message[Json]]
   }
 
   def messageDecoder: Decoder[Message[Json]] = {
-    implicit val messageErrorDecoder: Decoder[MessageError[Json]] = deriveDecoder[MessageError[Json]]
+    implicit val messageErrorDecoder: Decoder[MessageError] = deriveDecoder[MessageError]
 
     deriveDecoder[Message[Json]]
   }

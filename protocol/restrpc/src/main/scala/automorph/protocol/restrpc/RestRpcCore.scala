@@ -41,8 +41,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
         Some("Failed function call error details"),
         Some(Map(
           "code" -> Schema(Some("integer"), Some("code"), Some("Error code")),
-          "message" -> Schema(Some("string"), Some("message"), Some("Error message")),
-          "details" -> Schema(Some("object"), Some("details"), Some("Additional error information"))
+          "message" -> Schema(Some("string"), Some("message"), Some("Error message"))
         )),
         Some(List("code", "message"))
       )
@@ -115,15 +114,14 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
     val responseMessage = result.pureFold(
       error => {
         val responseError = error match {
-          case RestRpcException(message, code, data, _) =>
-            ResponseError(message, code, data.asInstanceOf[Option[Node]])
+          case RestRpcException(message, code, _) =>
+            ResponseError(message, code)
           case _ =>
             // Assemble error details
             val trace = error.trace
-            val message = trace.headOption.getOrElse("Unknown error")
+            val message = trace.mkString("\n")
             val code = mapException(error)
-            val data = Some(encodeStrings(trace.drop(1).toList))
-            ResponseError(message, code, data)
+            ResponseError(message, code)
         }
         Response[Node](None, Some(responseError)).message
       },

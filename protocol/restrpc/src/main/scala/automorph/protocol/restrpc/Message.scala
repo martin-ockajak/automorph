@@ -12,7 +12,7 @@ import scala.collection.immutable.ListMap
  */
 final case class Message[Node](
   result: Option[Node],
-  error: Option[MessageError[Node]]
+  error: Option[MessageError]
 ) {
 
   /** Message type. */
@@ -42,13 +42,10 @@ object Message {
  * @see [[https://www.jsonrpc.org/specification REST-RPC protocol specification]]
  * @param message error message
  * @param code error code
- * @param details additional error information
- * @tparam Node message node type
  */
-final case class MessageError[Node](
+final case class MessageError(
   message: Option[String],
-  code: Option[Int],
-  details: Option[Node]
+  code: Option[Int]
 )
 
 /** REST-RPC message type. */

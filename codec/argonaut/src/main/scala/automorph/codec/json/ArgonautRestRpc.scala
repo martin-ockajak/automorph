@@ -10,11 +10,10 @@ private[automorph] object ArgonautRestRpc {
   type RpcMessage = Message[Json]
 
   def messageCodecJson: CodecJson[Message[Json]] = {
-    implicit val messageErrorCodecJson: CodecJson[MessageError[Json]] =
-      Argonaut.codec3(MessageError.apply[Json], (v: MessageError[Json]) => (v.message, v.code, v.details))(
+    implicit val messageErrorCodecJson: CodecJson[MessageError] =
+      Argonaut.codec2(MessageError.apply, (v: MessageError) => (v.message, v.code))(
         "message",
-        "code",
-        "details"
+        "code"
       )
 
     Argonaut.codec2(Message.apply[Json], (v: Message[Json]) => (v.result, v.error))(

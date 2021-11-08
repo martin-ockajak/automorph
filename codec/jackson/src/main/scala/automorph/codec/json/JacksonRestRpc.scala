@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.{DeserializationContext, JsonNode, Seriali
 private[automorph] object JacksonRestRpc {
 
   type RpcMessage = Message[JsonNode]
-  type RpcError = MessageError[JsonNode]
+  type RpcError = MessageError
 
   def module = new SimpleModule()
     .addSerializer(classOf[JacksonRestRpc.RpcError], JacksonRestRpc.messageErrorSerializer)
@@ -35,10 +35,9 @@ private[automorph] object JacksonRestRpc {
 
     override def deserialize(parser: JsonParser, context: DeserializationContext): RpcError =
       context.readTree(parser) match {
-        case node: ObjectNode => MessageError[JsonNode](
+        case node: ObjectNode => MessageError(
             field("message", value => Option.when(value.isTextual)(value.asText), node, parser),
-            field("code", value => Option.when(value.isInt)(value.asInt), node, parser),
-            field("details", Some(_), node, parser)
+            field("code", value => Option.when(value.isInt)(value.asInt), node, parser)
           )
         case _ => throw new JsonParseException(parser, "Invalid message error", parser.getCurrentLocation)
       }

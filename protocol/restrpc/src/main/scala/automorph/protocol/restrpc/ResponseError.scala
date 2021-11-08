@@ -7,27 +7,23 @@ import automorph.protocol.restrpc.Response.mandatory
  *
  * @param message error message
  * @param code error code
- * @param details additional error information
- * @tparam Node message node type
  */
-private[automorph] final case class ResponseError[Node](
+private[automorph] final case class ResponseError(
   message: String,
-  code: Option[Int],
-  details: Option[Node]
+  code: Option[Int]
 ) {
 
-  def formed: MessageError[Node] = MessageError[Node](
+  def formed: MessageError = MessageError(
     message = Some(message),
-    code = code,
-    details = details
+    code = code
   )
 }
 
 private[automorph] object ResponseError {
 
-  def apply[Node](error: MessageError[Node]): ResponseError[Node] = {
+  def apply(error: MessageError): ResponseError = {
     val message = mandatory(error.message, "message")
     val code = mandatory(error.code, "code")
-    new ResponseError(message, Some(code), error.details)
+    new ResponseError(message, Some(code))
   }
 }

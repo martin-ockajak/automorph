@@ -18,12 +18,12 @@ private[automorph] object UpickleRestRpc {
   //    at ujson.ByteParser.parseTopLevel0(ByteParser.scala:323)
   final private[automorph] case class UpickleMessage(
     result: Option[Msg],
-    error: Option[UpickleMessageError]
+    error: Option[MessageError]
   ) {
 
     def toProtocol: Message[Msg] = Message[Msg](
       result,
-      error.map(_.toProtocol)
+      error
     )
   }
 
@@ -31,35 +31,13 @@ private[automorph] object UpickleRestRpc {
 
     def fromProtocol(v: Message[Msg]): UpickleMessage = UpickleMessage(
       v.result,
-      v.error.map(UpickleMessageError.fromProtocol)
-    )
-  }
-
-  final private[automorph] case class UpickleMessageError(
-    message: Option[String],
-    code: Option[Int],
-    details: Option[Msg]
-  ) {
-
-    def toProtocol: MessageError[Msg] = MessageError[Msg](
-      message,
-      code,
-      details
-    )
-  }
-
-  private[automorph] object UpickleMessageError {
-
-    def fromProtocol(v: MessageError[Msg]): UpickleMessageError = UpickleMessageError(
-      v.message,
-      v.code,
-      v.details
+      v.error
     )
   }
 
   def readWriter[Custom <: UpickleMessagePackCustom](custom: Custom): custom.ReadWriter[Message[Msg]] = {
     import custom._
-    implicit val messageErrorRw: custom.ReadWriter[UpickleMessageError] = custom.macroRW
+    implicit val messageErrorRw: custom.ReadWriter[MessageError] = custom.macroRW
     implicit val customMessageRw: custom.ReadWriter[UpickleMessage] = custom.macroRW
 
     Seq(messageErrorRw, customMessageRw)

@@ -11,7 +11,7 @@ import automorph.spi.RpcProtocol.InvalidResponseException
  */
 private[automorph] final case class Response[Node](
   result: Option[Node],
-  error: Option[ResponseError[Node]]
+  error: Option[ResponseError]
 ) {
 
   def message: Message[Node] = Message[Node](
