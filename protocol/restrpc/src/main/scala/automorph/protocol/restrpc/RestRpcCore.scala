@@ -238,7 +238,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
     Some(OpenApi.objectType),
     Some(function.name),
     Some(OpenApi.argumentsDescription),
-    Option(Schema.parameters(function)).filter(_.nonEmpty)
+    Option(Schema.parameters(function)).filter(_.nonEmpty),
+    Option(Schema.requiredParameters(function).toList).filter(_.nonEmpty)
   )
 
   private def resultSchema(function: RpcFunction): Schema = Schema(

@@ -133,18 +133,12 @@ lazy val jsonSchema = (project in file("specification/json-schema")).dependsOn(
 lazy val openRpc = (project in file("specification/open-rpc")).dependsOn(
   jsonSchema, testBase % Test
 ).settings(
-  name := s"$projectName-open-rpc",
-  libraryDependencies ++= Seq(
-    ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion % Test).cross(CrossVersion.for3Use2_13)
-  )
+  name := s"$projectName-open-rpc"
 )
 lazy val openApi = (project in file("specification/open-api")).dependsOn(
   jsonSchema, testBase % Test
 ).settings(
-  name := s"$projectName-open-api",
-  libraryDependencies ++= Seq(
-    ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion % Test).cross(CrossVersion.for3Use2_13)
-  )
+  name := s"$projectName-open-api"
 )
 
 // Protocol
@@ -367,7 +361,8 @@ lazy val testBase = (project in file("test/base")).dependsOn(
     // Test
     "org.scalatest" %% "scalatest" % "3.2.10",
     "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0",
-    "ch.qos.logback" % "logback-classic" % "1.3.0-alpha10"
+    "ch.qos.logback" % "logback-classic" % "1.3.0-alpha10",
+    "com.lihaoyi" %% "pprint" % "0.6.6"
   ),
   Compile / doc / scalacOptions ++= Seq("-skip-packages test")
 )

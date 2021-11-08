@@ -263,7 +263,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
         Some(function.name),
         Some(OpenApi.argumentsDescription),
         Option(Schema.parameters(function)).filter(_.nonEmpty),
-        Option(Schema.requiredParameters(function)).filter(_.nonEmpty)
+        Option(Schema.requiredParameters(function).toList).filter(_.nonEmpty)
       ),
       "id" -> Schema(
         Some("integer"),

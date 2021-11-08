@@ -1,7 +1,5 @@
 package automorph.specification.openapi
 
-import automorph.specification.jsonschema.Reference
-
 case class PathItem(
   $ref: Option[String] = None,
   summary: Option[String] = None,

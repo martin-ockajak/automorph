@@ -17,10 +17,10 @@ final case class Schema(
 object Schema {
   type Properties = Map[String, Schema]
 
-  private val optionTypePrefix = s"${classOf[Option[Unit]].getName}"
+  private val optionTypePrefix = s"${classOf[Option[Unit]].getSimpleName}"
 
-  private[automorph] def requiredParameters(function: RpcFunction): List[String] =
-    function.parameters.filter(_.`type`.startsWith(optionTypePrefix)).map(_.name).toList
+  private[automorph] def requiredParameters(function: RpcFunction): Seq[String] =
+    function.parameters.filterNot(_.`type`.startsWith(optionTypePrefix)).map(_.name)
 
   private[automorph] def parameters(function: RpcFunction): Map[String, Schema] =
     function.parameters.map { parameter =>

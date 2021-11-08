@@ -1,161 +1,75 @@
 package automorph.specification
 
 import automorph.specification.OpenRpc
+import automorph.specification.jsonschema.Schema
+import automorph.specification.openrpc.{ContentDescriptor, Info, Method}
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
-import com.fasterxml.jackson.annotation.JsonInclude.Include
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
-import com.fasterxml.jackson.module.scala.{ClassTagExtensions, DefaultScalaModule}
 import test.base.BaseTest
 
 class OpenRpcTest extends BaseTest {
-  private lazy val objectMapper = (new ObjectMapper() with ClassTagExtensions)
-    .registerModule(DefaultScalaModule)
-    .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
-    .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
-    .setSerializationInclusion(Include.NON_ABSENT)
-    .setDefaultLeniency(false)
   private val function = RpcFunction(
     "test",
     Seq(
       RpcParameter("foo", "String"),
       RpcParameter("bar", "Integer"),
-      RpcParameter("alt", "Option[Map[String, Boolean]"),
+      RpcParameter("alt", "Option[Map[String, Boolean]")
     ),
     "Seq[String]",
     Some("Test function")
   )
-  private val expectedJson =
-   """|{
-      |  "paths": {
-      |    "/test": {
-      |      "post": {
-      |        "requestBody": {
-      |          "content": {
-      |            "application/json": {
-      |              "schema": {
-      |                "description": "Test Request",
-      |                "properties": {
-      |                  "function": {
-      |                    "description": "Invoked function name",
-      |                    "title": "function",
-      |                    "type": "string"
-      |                  },
-      |                  "arguments": {
-      |                    "description": "Function argument values by name",
-      |                    "properties": {
-      |                      "foo": {
-      |                        "title": "foo",
-      |                        "type": "String"
-      |                      },
-      |                      "bar": {
-      |                        "title": "bar",
-      |                        "type": "Integer"
-      |                      },
-      |                      "alt": {
-      |                        "title": "alt",
-      |                        "type": "Option[Map[String, Boolean]"
-      |                      }
-      |                    },
-      |                    "title": "test",
-      |                    "type": "object"
-      |                  }
-      |                },
-      |                "title": "Request",
-      |                "type": "object",
-      |                "required": [
-      |                  "function",
-      |                  "arguments"
-      |                ]
-      |              }
-      |            }
-      |          },
-      |          "required": "true"
-      |        },
-      |        "responses": {
-      |          "default": {
-      |            "description": "Failed function call error details",
-      |            "content": {
-      |              "application/json": {
-      |                "schema": {
-      |                  "description": "Test Error",
-      |                  "properties": {
-      |                    "error": {
-      |                      "description": "Failed function call error details",
-      |                      "properties": {
-      |                        "message": {
-      |                          "description": "Error message",
-      |                          "title": "message",
-      |                          "type": "string"
-      |                        }
-      |                      },
-      |                      "title": "error",
-      |                      "type": "string",
-      |                      "required": [
-      |                        "message"
-      |                      ]
-      |                    }
-      |                  },
-      |                  "title": "Error",
-      |                  "type": "object",
-      |                  "required": [
-      |                    "error"
-      |                  ]
-      |                }
-      |              }
-      |            }
-      |          },
-      |          "200": {
-      |            "description": "Succesful function call result value",
-      |            "content": {
-      |              "application/json": {
-      |                "schema": {
-      |                  "description": "Test Result",
-      |                  "properties": {
-      |                    "result": {
-      |                      "title": "result",
-      |                      "type": "Seq[String]"
-      |                    }
-      |                  },
-      |                  "title": "Result",
-      |                  "type": "object",
-      |                  "required": [
-      |                    "result"
-      |                  ]
-      |                }
-      |              }
-      |            }
-      |          }
-      |        }
-      |      },
-      |      "description": "Test function"
-      |    }
-      |  },
-      |  "openrpc": "1.2.1",
-      |  "info": {
-      |    "version": "0.0",
-      |    "title": "Test"
-      |  },
-      |  "servers": [
-      |    {
-      |      "url": "http://localhost:7000/api"
-      |    }
-      |  ]
-      |}""".stripMargin
 
+  private val expected = OpenRpc(
+    openrpc = "1.2.6",
+    info = Info(
+      title = "",
+      version = ""
+    ),
+    methods = List(
+      Method(
+        name = "test",
+        description = Some(value = "Test function"),
+        params = List(
+          ContentDescriptor(
+            name = "foo",
+            required = Some(value = true),
+            schema = Schema(
+              `type` = Some(value = "String"),
+              title = Some(value = "foo")
+            )
+          ),
+          ContentDescriptor(
+            name = "bar",
+            required = Some(value = true),
+            schema = Schema(
+              `type` = Some(value = "Integer"),
+              title = Some(value = "bar")
+            )
+          ),
+          ContentDescriptor(
+            name = "alt",
+            required = Some(value = false),
+            schema = Schema(
+              `type` = Some(value = "Option[Map[String, Boolean]"),
+              title = Some(value = "alt")
+            )
+          )
+        ),
+        result = ContentDescriptor(
+          name = "result",
+          required = Some(value = true),
+          schema = Schema(
+            `type` = Some(value = "Seq[String]"),
+            title = Some(value = "result")
+          )
+        ),
+        paramStructure = Some(value = "either")
+      )
+    )
+  )
   "" - {
     "Description" in {
       val description = OpenRpc(Seq(function))
-      val descriptionJson = objectMapper.writerWithDefaultPrettyPrinter
-        .writeValueAsString(objectMapper.valueToTree(description))
-//      println(descriptionJson)
-//      descriptionJson.should(equal(expectedJson))
+      description.should(equal(expected))
     }
   }
-
-  private def createObjectMapper: ObjectMapper = (new ObjectMapper() with ClassTagExtensions)
-    .registerModule(DefaultScalaModule)
-    .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
-    .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
-    .setSerializationInclusion(Include.NON_ABSENT)
-    .setDefaultLeniency(false)
 }

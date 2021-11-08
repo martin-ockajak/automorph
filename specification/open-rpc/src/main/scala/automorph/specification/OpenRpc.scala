@@ -41,7 +41,6 @@ object OpenRpc {
       val params = function.parameters.map { parameter =>
         ContentDescriptor(
           name = parameter.name,
-          summary = Some(parameter.`type`),
           required = Some(requiredParameters.contains(parameter.name)),
           schema = parameterSchemas(parameter.name)
         )
@@ -50,7 +49,6 @@ object OpenRpc {
       // Result
       val result = ContentDescriptor(
         name = resultName,
-        summary = Some(function.resultType),
         required = Some(true),
         schema = Schema.result(function)
       )

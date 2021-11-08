@@ -1,7 +1,7 @@
 package automorph.specification
 
 import automorph.specification.OpenApi.{Components, Paths}
-import automorph.specification.jsonschema.{Reference, Schema}
+import automorph.specification.jsonschema.Schema
 import automorph.specification.openapi.Operation.SecurityRequirement
 import automorph.specification.openapi.{ExternalDocumentation, Info, MediaType, Operation, PathItem, RequestBody, Response, RpcSchema, Server, Tag}
 import automorph.spi.protocol.RpcFunction
