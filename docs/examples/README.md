@@ -238,15 +238,15 @@ val client = Default.clientAsync(new URI("http://localhost:7000/api"), HttpMetho
 
 // Retrieve remote API description in OpenRPC format
 val openRpcFunction = JsonRpcProtocol.openRpcFunction
-val openRpcSpec = client.call[Default.Node](openRpcFunction).args()
+val openRpc = client.call[Default.Node](openRpcFunction).args()
   .map(client.protocol.codec.text) // Future[String]
-println(Await.result(openRpcSpec, Duration.Inf))
+println(Await.result(openRpc, Duration.Inf))
 
 // Retrieve remote API description in OpenAPI format
 val openApiFunction = JsonRpcProtocol.openApiFunction
-val openApiSpec = client.call[Default.Node](openApiFunction).args()
+val openApi = client.call[Default.Node](openApiFunction).args()
   .map(client.protocol.codec.text) // Future[String]
-println(Await.result(openApiSpec, Duration.Inf))
+println(Await.result(openApi, Duration.Inf))
 ```
 
 **Cleanup**
