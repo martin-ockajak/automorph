@@ -3,9 +3,9 @@ package automorph.protocol.jsonrpc
 import automorph.protocol.JsonRpcProtocol
 import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
 import automorph.protocol.jsonrpc.Message.Params
-import automorph.specification.jsonschema.Schema
-import automorph.specification.openapi.RpcSchema
-import automorph.specification.{OpenApi, OpenRpc}
+import automorph.description.jsonschema.Schema
+import automorph.description.openapi.RpcSchema
+import automorph.description.{OpenApi, OpenRpc}
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.{RpcDiscover, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}

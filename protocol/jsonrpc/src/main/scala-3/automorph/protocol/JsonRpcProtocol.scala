@@ -1,7 +1,7 @@
 package automorph.protocol
 
 import automorph.protocol.jsonrpc.{ErrorMapping, ErrorType, JsonRpcCore, Message}
-import automorph.specification.{OpenApi, OpenRpc}
+import automorph.description.{OpenApi, OpenRpc}
 import automorph.spi.{MessageCodec, RpcProtocol}
 
 /**
