@@ -10,13 +10,13 @@ import io.circe.{Decoder, Encoder, Json}
 private[automorph] object CirceRestRpc {
   type RpcMessage = Message[Json]
 
-  def messageEncoder: Encoder[Message[Json]] = {
+  lazy val messageEncoder: Encoder[Message[Json]] = {
     implicit val messageErrorEncoder: Encoder[MessageError[Json]] = deriveEncoder[MessageError[Json]]
 
     deriveEncoder[Message[Json]]
   }
 
-  def messageDecoder: Decoder[Message[Json]] = {
+  lazy val messageDecoder: Decoder[Message[Json]] = {
     implicit val messageErrorDecoder: Decoder[MessageError[Json]] = deriveDecoder[MessageError[Json]]
 
     deriveDecoder[Message[Json]]
