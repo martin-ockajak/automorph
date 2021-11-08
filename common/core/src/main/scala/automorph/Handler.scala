@@ -271,16 +271,14 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   private def createDiscoveryBindings
     : ListMap[String, (HandlerBinding[Node, Effect, Context], protocol.Metadata => ArraySeq.ofByte)] = {
     Option.when(true) {
-      ListMap(protocol.discovery.map { discover =>
+      ListMap(protocol.apiDescriptions.map { discover =>
         val binding = HandlerBinding[Node, Effect, Context](
           discover.function,
           (_, _) => system.pure((None.orNull, None).asInstanceOf[(Node, Option[Context])]),
           false
         )
-        val apiSpecification = (metadata: protocol.Metadata) => {
-          discover.apiSpecification(bindings.values.toSeq.map(_.function), metadata)
-        }
-        binding.function.name -> (binding -> apiSpecification)
+        val invoke = (metadata: protocol.Metadata) => discover.invoke(bindings.values.toSeq.map(_.function), metadata)
+        binding.function.name -> (binding -> invoke)
       }*)
     }.getOrElse(ListMap.empty)
   }
