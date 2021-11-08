@@ -10,7 +10,7 @@ import io.circe.{Decoder, Encoder, HCursor, Json, JsonObject}
 private[automorph] object CirceJsonRpc {
   type RpcMessage = Message[Json]
 
-  lazy val messageEncoder: Encoder[Message[Json]] = {
+  def messageEncoder: Encoder[Message[Json]] = {
     implicit val idEncoder: Encoder[Message.Id] = Encoder.encodeJson.contramap[Message.Id] {
       case Right(id) => Json.fromString(id)
       case Left(id) => Json.fromBigDecimal(id)
@@ -25,7 +25,7 @@ private[automorph] object CirceJsonRpc {
     deriveEncoder[Message[Json]]
   }
 
-  lazy val messageDecoder: Decoder[Message[Json]] = {
+  def messageDecoder: Decoder[Message[Json]] = {
     implicit val idDecoder: Decoder[Message.Id] = Decoder.decodeJson.map(_.fold(
       invalidId(None.orNull),
       invalidId,
