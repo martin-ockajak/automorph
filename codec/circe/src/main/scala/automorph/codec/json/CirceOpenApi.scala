@@ -3,7 +3,7 @@ package automorph.codec.json
 import automorph.description.OpenApi
 import automorph.description.openapi._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{ACursor, Decoder, DecodingFailure, Encoder, HCursor, Json, JsonObject}
+import io.circe.{ACursor, Decoder, DecodingFailure, Encoder, HCursor, Json}
 
 /** JSON-RPC protocol support for Circe message codec plugin using JSON format. */
 private[automorph] object CirceOpenApi {

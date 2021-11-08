@@ -8,7 +8,7 @@ class RestRpcTest extends BaseTest {
   "" - {
     "API description" - {
       "OpenAPI" in {
-        val protocol = RestRpcProtocol(Default.codec, "/api/").context[Default.ServerContext]
+        val protocol = RestRpcProtocol[Default.Node, Default.Codec, Default.ServerContext](Default.codec, "/api/")
         val description = protocol.apiDescriptions.find(_.function.name == RestRpcProtocol.openApiFunction)
         description.should(not(be(empty)))
       }
