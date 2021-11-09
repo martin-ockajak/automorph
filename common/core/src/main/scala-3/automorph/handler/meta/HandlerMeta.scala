@@ -36,7 +36,8 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * @return RPC request handler with specified API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](api: Api): ThisHandler = bind(api, name => Seq(name))
+  inline def bind[Api <: AnyRef](api: Api): ThisHandler =
+    bind(api, Seq(_))
 
   /**
    * Creates a copy of this handler with generated RPC bindings for all valid public methods of the specified API instance.
