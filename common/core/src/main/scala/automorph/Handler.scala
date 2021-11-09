@@ -19,7 +19,7 @@ import scala.util.{Failure, Success, Try}
  * @constructor Creates a new RPC request handler with specified system and protocol plugins providing corresponding message context type.
  * @param protocol RPC protocol plugin
  * @param system effect system plugin
- * @param mapName maps API description function to its exposed RPC function name (empty result causes the method not to be exposed)
+ * @param mapName maps API description function to the exposed RPC function name (empty result causes the method not to be exposed)
  * @param apiBindings API method bindings
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
@@ -79,10 +79,10 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   /**
    * Creates a copy of this handler with specified global bound API method name mapping function.
    *
-   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `mapName` function.
-   * The `mapName` function is applied globally to all bound APIs after the name mapping applied when calling 'bind' method.
+   * Bound API methods are exposed using their transformed via the `mapName` function.
+   * The `mapName` function is applied globally to the results to all bound APIs and their specific name mapping provided by the 'bind' method.
    *
-   * @param mapName maps API method name to its exposed RPC function name (empty result causes the method not to be exposed)
+   * @param mapName maps API method name to the exposed RPC function name (empty result causes the method not to be exposed)
    * @return RPC request handler with specified global API method name mapping
    */
   def mapName(mapName: String => Iterable[String]): Handler[Node, Codec, Effect, Context] =

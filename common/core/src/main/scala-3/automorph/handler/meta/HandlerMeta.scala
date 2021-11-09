@@ -29,7 +29,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
-   * Bound API methods are exposed using their actual names.
+   * Bound API methods are exposed as RPC functions using their actual names.
    *
    * @param api API instance
    * @tparam Api API type (only member methods of this type are exposed)
@@ -50,10 +50,10 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
    *
-   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `mapName` function.
+   * Bound API methods are exposed as RPC functions using their names transformed via the `mapName` function.
    *
    * @param api API instance
-   * @param mapName maps API method name to its exposed RPC function names (empty result causes the method not to be exposed)
+   * @param mapName maps API method name to the exposed RPC function names (empty result causes the method not to be exposed)
    * @tparam Api API type (only member methods of this type are exposed)
    * @return RPC request handler with specified API bindings
    * @throws IllegalArgumentException if invalid public methods are found in the API type

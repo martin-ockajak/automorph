@@ -30,6 +30,9 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
    * the caller-supplied request context is passed to the underlying message transport plugin.
    *
+   * RPC functions represented by bound API methods are invoked using their name transformed via the `mapName` function.
+   *
+   * @param mapName maps API method name to the invoked RPC function name
    * @tparam Api API trait type (classes are not supported)
    * @return RPC API proxy instance
    * @throws java.lang.IllegalArgumentException if invalid public methods are found in the API type
