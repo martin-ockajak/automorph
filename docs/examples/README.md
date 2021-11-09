@@ -578,7 +578,7 @@ Await.result(server.close(), Duration.Inf)
 
 ### Client function names
 
-* [Source](/examples/project/src/test/scala/examples/customize/ClientFunctionName.scala)
+* [Source](/examples/project/src/test/scala/examples/customize/ClientFunctionNames.scala)
 
 **Build**
 
@@ -652,7 +652,7 @@ server.close()
 
 ### Server function names
 
-* [Source](/examples/project/src/test/scala/examples/customize/ServerFunctionName.scala)
+* [Source](/examples/project/src/test/scala/examples/customize/ServerFunctionNames.scala)
 
 **Build**
 
