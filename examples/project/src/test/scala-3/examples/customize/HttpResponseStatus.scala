@@ -1,14 +1,14 @@
-package examples.select
+package examples.customize
 
 import automorph.Default
-import automorph.transport.http.endpoint.UndertowHttpEndpoint
-import io.undertow.{Handlers, Undertow}
+import automorph.transport.http.HttpContext
 import java.net.URI
+import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-object EndpointTransportSelection extends App {
+object HttpResponseStatus extends App {
 
   // Create server API instance
   class ServerApi {
@@ -17,15 +17,14 @@ object EndpointTransportSelection extends App {
   }
   val api = new ServerApi()
 
-  // Create custom Undertow JSON-RPC endpoint
-  val handler = Default.handlerAsync[UndertowHttpEndpoint.Context]
-  val endpoint = UndertowHttpEndpoint(handler.bind(api))
+  // Customize remote API server exception to HTTP status code mapping
+  val createServer = Default.serverAsync(7000, "/api", mapException = {
+    case _: SQLException => 400
+    case e => HttpContext.defaultExceptionToStatusCode(e)
+  })
 
-  // Start Undertow JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-  val server = Undertow.builder()
-    .addHttpListener(7000, "0.0.0.0")
-    .setHandler(Handlers.path().addPrefixPath("/api", endpoint))
-    .build()
+  // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+  val server = createServer(_.bind(api))
 
   // Define client view of a remote API
   trait ClientApi {
@@ -34,7 +33,7 @@ object EndpointTransportSelection extends App {
   // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
   val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
-  // Call the remote API function via proxy
+  // Call the remote API function
   val remoteApi = client.bind[ClientApi] // ClientApi
   remoteApi.hello("world", 1) // Future[String]
 
@@ -42,13 +41,13 @@ object EndpointTransportSelection extends App {
   Await.result(client.close(), Duration.Inf)
 
   // Stop the server
-  server.stop()
+  Await.result(server.close(), Duration.Inf)
 }
 
-class EndpointTransportSelection extends org.scalatest.freespec.AnyFreeSpecLike {
+class HttpResponseStatus extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" in {
-      EndpointTransportSelection.main(Array())
+      HttpResponseStatus.main(Array())
     }
   }
 }

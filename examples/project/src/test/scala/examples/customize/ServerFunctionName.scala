@@ -4,7 +4,7 @@ import automorph.Default
 import java.net.URI
 import scala.util.Try
 
-object ServerFunctionNameMapping extends App {
+object ServerFunctionName extends App {
 
   // Create server API instance
   class ServerApi {
@@ -59,10 +59,10 @@ object ServerFunctionNameMapping extends App {
   server.close()
 }
 
-class ServerFunctionNameMapping extends org.scalatest.freespec.AnyFreeSpecLike {
+class ServerFunctionName extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      ServerFunctionNameMapping.main(Array())
+      ServerFunctionName.main(Array())
     }
   }
 }

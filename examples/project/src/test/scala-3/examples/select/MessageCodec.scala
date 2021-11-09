@@ -7,7 +7,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-object MessageCodecSelection extends App {
+object MessageCodec extends App {
 
   // Introduce custom data types
   case class Record(values: List[String])
@@ -66,10 +66,10 @@ object MessageCodecSelection extends App {
   Await.result(server.close(), Duration.Inf)
 }
 
-class MessageCodecSelection extends org.scalatest.freespec.AnyFreeSpecLike {
+class MessageCodec extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      MessageCodecSelection.main(Array())
+      MessageCodec.main(Array())
     }
   }
 }

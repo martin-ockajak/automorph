@@ -3,7 +3,7 @@ package examples.customize
 import automorph.Default
 import java.net.URI
 
-object ClientFunctionNameMapping extends App {
+object ClientFunctionName extends App {
 
   // Create server API instance
   class ServerApi {
@@ -42,7 +42,7 @@ object ClientFunctionNameMapping extends App {
   server.close()
 }
 
-class ClientFunctionNameMapping extends org.scalatest.freespec.AnyFreeSpecLike {
+class ClientFunctionName extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
       ServerFunctionNameMapping.main(Array())

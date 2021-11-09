@@ -5,7 +5,7 @@ import automorph.system.ZioSystem
 import java.net.URI
 import zio.{Runtime, Task}
 
-object EffectSystemSelection extends App {
+object EffectSystem extends App {
 
   // Create server API instance
   class ServerApi {
@@ -39,10 +39,10 @@ object EffectSystemSelection extends App {
   Runtime.default.unsafeRunTask(server.close())
 }
 
-class EffectSystemSelection extends org.scalatest.freespec.AnyFreeSpecLike {
+class EffectSystem extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" in {
-      EffectSystemSelection.main(Array())
+      EffectSystem.main(Array())
     }
   }
 }

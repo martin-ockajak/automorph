@@ -578,7 +578,7 @@ Await.result(server.close(), Duration.Inf)
 
 ### Client function names
 
-* [Source](/examples/project/src/test/scala/examples/customize/ClientFunctionNameMapping.scala)
+* [Source](/examples/project/src/test/scala/examples/customize/ClientFunctionName.scala)
 
 **Build**
 
@@ -652,7 +652,7 @@ server.close()
 
 ### Server function names
 
-* [Source](/examples/project/src/test/scala/examples/customize/ServerFunctionNameMapping.scala)
+* [Source](/examples/project/src/test/scala/examples/customize/ServerFunctionName.scala)
 
 **Build**
 
@@ -736,7 +736,7 @@ server.close()
 
 ### Client errors
 
-* [Source](/examples/project/src/test/scala/examples/customize/ClientErrorMapping.scala)
+* [Source](/examples/project/src/test/scala/examples/customize/ClientError.scala)
 
 **Build**
 
@@ -810,7 +810,7 @@ Await.result(server.close(), Duration.Inf)
 
 ### Server errors
 
-* [Source](/examples/project/src/test/scala/examples/customize/ServerErrorMapping.scala)
+* [Source](/examples/project/src/test/scala/examples/customize/ServerError.scala)
 
 **Build**
 
@@ -955,7 +955,7 @@ Await.result(server.close(), Duration.Inf)
 
 ### HTTP response status
 
-* [Source](/examples/project/src/test/scala/examples/customize/HttpResponseStatusMapping.scala)
+* [Source](/examples/project/src/test/scala/examples/customize/HttpResponseStatus.scala)
 
 **Build**
 
@@ -1027,7 +1027,7 @@ Await.result(server.close(), Duration.Inf)
 
 ### RPC protocol
 
-* [Source](/examples/project/src/test/scala/examples/select/RpcProtocolSelection.scala)
+* [Source](/examples/project/src/test/scala/examples/select/RpcProtocol.scala)
 
 **Build**
 
@@ -1101,7 +1101,7 @@ Await.result(server.close(), Duration.Inf)
 
 ### Effect system
 
-* [Source](/examples/project/src/test/scala/examples/select/EffectSystemSelection.scala)
+* [Source](/examples/project/src/test/scala/examples/select/EffectSystem.scala)
 
 **Build**
 
@@ -1167,7 +1167,7 @@ Runtime.default.unsafeRunTask(server.close())
 
 ### Message codec
 
-* [Source](/examples/project/src/test/scala/examples/select/MessageCodecSelection.scala)
+* [Source](/examples/project/src/test/scala/examples/select/MessageCodec.scala)
 
 **Build**
 
@@ -1261,7 +1261,7 @@ Await.result(server.close(), Duration.Inf)
 
 ### Client transport
 
-* [Source](/examples/project/src/test/scala/examples/select/ClientTransportSelection.scala)
+* [Source](/examples/project/src/test/scala/examples/select/ClientTransport.scala)
 
 **Build**
 
@@ -1326,7 +1326,7 @@ server.close()
 
 ### Server transport
 
-* [Source](/examples/project/src/test/scala/examples/select/ServerTransportSelection.scala)
+* [Source](/examples/project/src/test/scala/examples/select/ServerTransport.scala)
 
 **Build**
 
@@ -1388,7 +1388,7 @@ server.close()
 
 ### [Endpoint transport]
 
-* [Source](/examples/project/src/test/scala/examples/select/EndpointTransportSelection.scala)
+* [Source](/examples/project/src/test/scala/examples/select/EndpointTransport.scala)
 
 **Build**
 

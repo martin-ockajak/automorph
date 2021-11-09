@@ -6,7 +6,7 @@ import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object RpcProtocolSelection extends App {
+object RpcProtocol extends App {
 
   // Create server API instance
   class ServerApi {
@@ -49,10 +49,10 @@ object RpcProtocolSelection extends App {
   server.close()
 }
 
-class RpcProtocolSelection extends org.scalatest.freespec.AnyFreeSpecLike {
+class RpcProtocol extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      RpcProtocolSelection.main(Array())
+      RpcProtocol.main(Array())
     }
   }
 }
