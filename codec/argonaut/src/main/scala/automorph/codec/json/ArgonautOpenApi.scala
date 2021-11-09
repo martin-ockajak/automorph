@@ -1,12 +1,14 @@
 package automorph.codec.json
 
 import argonaut.Argonaut.{jArray, jObjectFields, jString}
-import argonaut.{ACursor, Argonaut, CodecJson, CursorHistory, DecodeJson, DecodeResult, Json}
+import argonaut.{ACursor, Argonaut, CodecJson, CursorHistory, DecodeJson, DecodeResult, HCursor, Json}
 import automorph.description.OpenApi
-import automorph.description.openapi._
+import automorph.description.openapi.*
 
 /** JSON-RPC protocol support for uPickle message codec plugin using JSON format. */
 private[automorph] object ArgonautOpenApi {
+  private val propertiesField = "properties"
+  private val allOfField = "allOf"
 
   def openApiCodecJson: CodecJson[OpenApi] = {
 //    implicit val idCodecJson: CodecJson[Schema] = CodecJson(fromSchema, toSchema)
@@ -24,40 +26,46 @@ private[automorph] object ArgonautOpenApi {
         val info = c.downField("info")
         for {
           openapi <- c.downField("openapi").as[String]
-            title <- info.downField("title").as[String]
-            version <- info.downField("version").as[String]
+          title <- info.downField("title").as[String]
+          version <- info.downField("version").as[String]
         } yield OpenApi(openapi = openapi, info = Info(title = title, version = version))
       }
     )
   }
 
-//  private def toSchema(c: ACursor): Schema = {
-//    c.keys.map(_.toSet).map { keys =>
+//  private def toSchema(c: HCursor): DecodeResult[Schema] = {
+//    c.fields.map(_.toSet).map { keys =>
 //      for {
 //        `type` <- field[String](c, keys, "type")
-//          title <- field[String](c, keys, "title")
-//          description <- field[String](c, keys, "description")
-//          properties <- Option.when(keys.contains(propertiesField)) {
-//            val jsonObject = c.downField(propertiesField)
-//            jsonObject.keys.getOrElse(Seq())
+//        title <- field[String](c, keys, "title")
+//        description <- field[String](c, keys, "description")
+//        properties <- Option.when(keys.contains(propertiesField)) {
+//          c.downField(propertiesField).hcursor.map { jsonObject =>
+//            jsonObject.fields.getOrElse(Seq())
 //              .foldLeft(Right(Map[String, Schema]()).withLeft[(String, CursorHistory)]) { case (result, key) =>
 //                result.flatMap { schemas =>
-//                  decode(jsonObject.downField(key)).map(schema => schemas + (key -> schema))
+//                  jsonObject.downField(key).hcursor.map { jsonValue =>
+//                    toSchema(jsonValue).map(schema => schemas + (key -> schema))
+//                  }.getOrElse(DecodeResult(Right(schemas)))
 //                }
 //              }.map(Some.apply)
 //          }.getOrElse(Right(None))
-//          required <- field[List[String]](c, keys, "required")
-//          default <- field[String](c, keys, "default")
-//          allOf <- Option.when(keys.contains(allOfField)) {
-//            val jsonArray = c.downField(allOfField)
-//            jsonArray.values.map(_.toSeq).getOrElse(Seq()).indices
-//              .foldLeft(Right(List[Schema]()).withLeft[DecodingFailure]) { case (result, index) =>
+//        }.getOrElse(Right(None))
+//        required <- field[List[String]](c, keys, "required")
+//        default <- field[String](c, keys, "default")
+//        allOf <- Option.when(keys.contains(allOfField)) {
+//          c.downField(allOfField).hcursor.map { jsonArray =>
+//            jsonArray.fields.getOrElse(Seq()).indices
+//              .foldLeft(Right(List[Schema]()).withLeft[(String, CursorHistory)]) { case (result, index) =>
 //                result.flatMap { schemas =>
-//                  decode(jsonArray.downN(index)).map(schemas :+ _)
+//                  jsonArray.downN(index).hcursor.map { jsonValue =>
+//                    toSchema(jsonValue).map(schemas :+ _)
+//                  }.getOrElse(DecodeResult(Right(schemas)))
 //                }
 //              }.map(Some.apply)
 //          }.getOrElse(Right(None))
-//          $ref <- field[String](c, keys, "$ref")
+//        }.getOrElse(Right(None))
+//        $ref <- field[String](c, keys, "$ref")
 //      } yield Schema(
 //        `type` = `type`,
 //        title = title,
@@ -85,7 +93,7 @@ private[automorph] object ArgonautOpenApi {
     Json.obj(fields*)
   }
 
-  private def field[T](c: ACursor, keys: Set[String], name: String)(implicit
+  private def field[T](c: HCursor, keys: Set[String], name: String)(implicit
     decoder: DecodeJson[Option[T]]
   ): DecodeResult[Option[T]] = {
     if (keys.contains(name)) {
