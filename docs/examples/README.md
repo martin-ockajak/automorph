@@ -763,7 +763,7 @@ import scala.concurrent.{Await, Future}
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
-    Future(s"Hello $some $n!")
+    Future.failed("Data error")
 }
 val api = new ServerApi()
 
@@ -795,7 +795,7 @@ val client = Client.protocol(protocol).transport(transport)
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi] // ClientApi
-remoteApi.hello("world", 1) // Future[String]
+remoteApi.hello("world", 1) // SQLException
 ```
 
 **Cleanup**

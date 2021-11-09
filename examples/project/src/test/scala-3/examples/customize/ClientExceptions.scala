@@ -12,7 +12,7 @@ object ClientExceptions extends App {
   // Create server API instance
   class ServerApi {
     def hello(some: String, n: Int): Future[String] =
-      Future(s"Hello $some $n!")
+      Future.failed("Data error")
   }
   val api = new ServerApi()
 
@@ -22,7 +22,7 @@ object ClientExceptions extends App {
 
   // Customize remote API client RPC error to exception mapping
   val protocol = Default.protocol[Default.ClientContext].mapError((message, code) =>
-    if (message.contains("SQL")) {
+    if (message.contains("Data")) {
       new SQLException(message)
     } else {
       Default.protocol.mapError(message, code)
@@ -40,7 +40,7 @@ object ClientExceptions extends App {
 
   // Call the remote API function
   val remoteApi = client.bind[ClientApi] // ClientApi
-  remoteApi.hello("world", 1) // Future[String]
+  remoteApi.hello("world", 1) // SQLException
 
   // Close the client
   Await.result(client.close(), Duration.Inf)
