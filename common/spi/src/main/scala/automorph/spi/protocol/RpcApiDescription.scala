@@ -8,9 +8,9 @@ import scala.collection.immutable.ArraySeq
  * @constructor Creates RPC API description operation.
  * @param function RPC function description
  * @param invoke creates API description for specified RPC functions and RPC request metadata
- * @tparam Metadata RPC message metadata
+ * @tparam Node message node type
  */
-final case class RpcApiDescription[Metadata](
+final case class RpcApiDescription[Node](
   function: RpcFunction,
-  invoke: (Seq[RpcFunction], Metadata) => ArraySeq.ofByte
+  invoke: Iterable[RpcFunction] => Node
 )

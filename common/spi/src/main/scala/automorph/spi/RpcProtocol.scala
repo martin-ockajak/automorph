@@ -81,7 +81,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
   ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
 
   /** RPC API description operations. */
-  def apiDescriptions: Seq[RpcApiDescription[Metadata]]
+  def apiDescriptions: Seq[RpcApiDescription[Node]]
 }
 
 object RpcProtocol {

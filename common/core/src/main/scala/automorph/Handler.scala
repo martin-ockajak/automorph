@@ -19,7 +19,8 @@ import scala.util.{Failure, Success, Try}
  * @constructor Creates a new RPC request handler with specified system and protocol plugins providing corresponding message context type.
  * @param protocol RPC protocol plugin
  * @param system effect system plugin
- * @param bindings API method bindings
+ * @param mapName maps API description function to its exposed RPC function name (empty result causes the method not to be exposed)
+ * @param apiBindings API method bindings
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Effect effect type
@@ -28,16 +29,18 @@ import scala.util.{Failure, Success, Try}
 final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   protocol: RpcProtocol[Node, Codec, Context],
   system: EffectSystem[Effect],
-  bindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
-    ListMap.empty[String, HandlerBinding[Node, Effect, Context]]
+  mapName: String => Iterable[String] = Seq(_),
+  apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
+   ListMap[String, HandlerBinding[Node, Effect, Context]]()
 ) extends HandlerMeta[Node, Codec, Effect, Context] with CannotEqual with Logging {
 
-  private val discoveryBindings = createDiscoveryBindings
-  private val allBindings = bindings ++ discoveryBindings.view.mapValues(_._1).toSeq
+  private val bindings = (descriptionBindings ++ apiBindings).flatMap { case (name, binding) =>
+    mapName(name).map(_ -> binding)
+  }
   implicit private val givenSystem: EffectSystem[Effect] = system
 
   /** Bound RPC functions. */
-  lazy val functions: Seq[RpcFunction] = allBindings.map { case (name, binding) =>
+  lazy val functions: Seq[RpcFunction] = bindings.map { case (name, binding) =>
     binding.function.copy(name = name)
   }.toSeq
 
@@ -73,6 +76,18 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     )
   }
 
+  /**
+   * Creates a copy of this handler with specified global bound API method name mapping function.
+   *
+   * Bound API methods are exposed using names resulting from a transformation of their actual names via the `mapName` function.
+   * The `mapName` function is applied globally to all bound APIs after the name mapping applied when calling 'bind' method.
+   *
+   * @param mapName maps API method name to its exposed RPC function name (empty result causes the method not to be exposed)
+   * @return RPC request handler with specified global API method name mapping
+   */
+  def mapName(mapName: String => Iterable[String]): Handler[Node, Codec, Effect, Context] =
+    copy(mapName = mapName)
+
   override def toString: String = {
     val plugins = Map(
       "system" -> system,
@@ -101,21 +116,16 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     // Lookup bindings for the specified RPC function
     val responseRequred = rpcRequest.responseRequired
     logger.debug(s"Processing ${protocol.name} request", requestProperties)
-    allBindings.get(rpcRequest.function).map { handlerBinding =>
+    bindings.get(rpcRequest.function).map { handlerBinding =>
       // Extract arguments
       extractArguments(rpcRequest, handlerBinding).pureFold(
         error => errorResponse(error, rpcRequest.message, responseRequred, requestProperties),
         arguments =>
-          discoveryBindings.get(rpcRequest.function).map { case (_, apiSpecification) =>
-            // Retrieve the API specification
-            directResponse(apiSpecification(rpcRequest.message.metadata), rpcRequest, requestProperties)
-          }.getOrElse {
-            // Invoke bound function
-            Try(handlerBinding.invoke(arguments, context).either).pureFold(
-              error => errorResponse(error, rpcRequest.message, responseRequred, requestProperties),
-              result => resultResponse(result, rpcRequest, requestProperties)
-            )
-          }
+          // Invoke bound function
+          Try(handlerBinding.invoke(arguments, context).either).pureFold(
+            error => errorResponse(error, rpcRequest.message, responseRequred, requestProperties),
+            result => resultResponse(result, rpcRequest, requestProperties)
+          )
       )
     }.getOrElse {
       val error = FunctionNotFoundException(s"Function not found: ${rpcRequest.function}", None.orNull)
@@ -268,20 +278,17 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       }
     )
 
-  private def createDiscoveryBindings
-    : ListMap[String, (HandlerBinding[Node, Effect, Context], protocol.Metadata => ArraySeq.ofByte)] = {
-    Option.when(true) {
-      ListMap(protocol.apiDescriptions.map { discover =>
-        val binding = HandlerBinding[Node, Effect, Context](
-          discover.function,
-          (_, _) => system.pure((None.orNull, None).asInstanceOf[(Node, Option[Context])]),
-          false
-        )
-        val invoke = (metadata: protocol.Metadata) => discover.invoke(bindings.values.toSeq.map(_.function), metadata)
-        binding.function.name -> (binding -> invoke)
-      }*)
-    }.getOrElse(ListMap.empty)
-  }
+  private def descriptionBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
+    ListMap(protocol.apiDescriptions.map { apiDescription =>
+      val describedFunctions = protocol.apiDescriptions.filter { apiDescription =>
+        !apiBindings.contains(apiDescription.function.name)
+      }.map(_.function) ++ apiBindings.values.map(_.function)
+      apiDescription.function.name -> HandlerBinding[Node, Effect, Context](
+        apiDescription.function,
+        (_, _) => system.pure(apiDescription.invoke(describedFunctions), None),
+        false
+      )
+    }*)
 }
 
 object Handler {

@@ -108,12 +108,12 @@ object HandlerMeta {
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
-      val newBindings = ${c.prefix}.bindings ++ automorph.handler.meta.HandlerGenerator
+      val newBindings = ${c.prefix}.apiBindings ++ automorph.handler.meta.HandlerGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec, ${c.prefix}.system, $api)
         .map { binding =>
           binding.function.name -> binding
         }
-      ${c.prefix}.copy(bindings = newBindings)
+      ${c.prefix}.copy(apiBindings = newBindings)
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
   }
 
@@ -134,12 +134,12 @@ object HandlerMeta {
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
-      val newBindings = ${c.prefix}.bindings ++ automorph.handler.meta.HandlerGenerator
+      val newBindings = ${c.prefix}.apiBindings ++ automorph.handler.meta.HandlerGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec, ${c.prefix}.system, $api)
         .flatMap { binding =>
           $mapName(binding.function.name).map(_ -> binding)
         }
-      ${c.prefix}.copy(bindings = newBindings)
+      ${c.prefix}.copy(apiBindings = newBindings)
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
   }
 }

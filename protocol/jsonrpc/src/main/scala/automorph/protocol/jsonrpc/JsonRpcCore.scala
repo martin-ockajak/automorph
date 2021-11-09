@@ -154,14 +154,14 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
       }
     )
 
-  override def apiDescriptions: Seq[RpcApiDescription[Metadata]] = Seq(
+  override def apiDescriptions: Seq[RpcApiDescription[Node]] = Seq(
     RpcApiDescription(
       RpcFunction(JsonRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
-      (functions, metadata) => Bytes.string.from(openApi(functions).toString)
+      functions => encodeOpenApi(openApi(functions))
     ),
     RpcApiDescription(
       RpcFunction(JsonRpcProtocol.openRpcFunction, Seq(), OpenRpc.getClass.getSimpleName, None),
-      (functions, metadata) => Bytes.string.from(openRpc(functions).toString)
+      functions => encodeOpenRpc(openRpc(functions))
     )
   )
 

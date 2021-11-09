@@ -166,10 +166,10 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
       }
     )
 
-  override def apiDescriptions: Seq[RpcApiDescription[Metadata]] = Seq(
+  override def apiDescriptions: Seq[RpcApiDescription[Node]] = Seq(
     RpcApiDescription(
       RpcFunction(RestRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
-      (functions, _) => Bytes.string.from(openApi(functions).toString)
+      functions => encodeOpenApi(openApi(functions))
     )
   )
 
