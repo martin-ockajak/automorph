@@ -734,9 +734,9 @@ client.close()
 server.close()
 ```
 
-### Client errors
+### Client exceptions
 
-* [Source](/examples/project/src/test/scala/examples/customize/ClientError.scala)
+* [Source](/examples/project/src/test/scala/examples/customize/ClientExceptions.scala)
 
 **Build**
 
@@ -808,9 +808,9 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### Server errors
+### Server protocol errors
 
-* [Source](/examples/project/src/test/scala/examples/customize/ServerError.scala)
+* [Source](/examples/project/src/test/scala/examples/customize/ServerProtocolErrors.scala)
 
 **Build**
 

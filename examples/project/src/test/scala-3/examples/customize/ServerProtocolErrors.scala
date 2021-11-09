@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-object ServerError extends App {
+object ServerProtocolErrors extends App {
 
   // Create server API instance
   class ServerApi {
@@ -52,10 +52,10 @@ object ServerError extends App {
   Await.result(server.close(), Duration.Inf)
 }
 
-class ServerError extends org.scalatest.freespec.AnyFreeSpecLike {
+class ServerProtocolErrors extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" in {
-      ServerError.main(Array())
+      ServerProtocolErrors.main(Array())
     }
   }
 }
