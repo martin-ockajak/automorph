@@ -20,28 +20,6 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
   type ThisHandler = Handler[Node, Codec, Effect, Context]
 
   /**
-   * Creates a copy of this handler with generated RPC bindings for all valid public methods of the specified API instance.
-   *
-   * An API method is considered valid if it satisfies all of these conditions:
-   * - can be called at runtime
-   * - has no type parameters
-   * - returns the specified effect type
-   * - (if message context type is not EmptyContext.Value) accepts the specified message context type as its last parameter
-   *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
-   * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
-   *
-   * Bound API methods are exposed using their actual names.
-   *
-   * @param api API instance
-   * @tparam Api API type (only member methods of this type are exposed)
-   * @return RPC request handler with specified API bindings
-   * @throws java.lang.IllegalArgumentException if invalid public methods are found in the API type
-   */
-  def bind[Api <: AnyRef](api: Api): ThisHandler =
-    macro HandlerMeta.basicBindMacro[Node, Codec, Effect, Context, Api]
-
-  /**
    * Creates a copy of this handler with generated RPC bindings for all valid public methods of the specified API.
    *
    * A method is considered valid if it satisfies all of these conditions:
@@ -62,8 +40,30 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * @throws java.lang.IllegalArgumentException if invalid public methods are found in the API type
    */
   def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): ThisHandler =
+    macro HandlerMeta.bindMapNamesMacro[Node, Codec, Effect, Context, Api]
+
+  /**
+   * Creates a copy of this handler with generated RPC bindings for all valid public methods of the specified API instance.
+   *
+   * An API method is considered valid if it satisfies all of these conditions:
+   * - can be called at runtime
+   * - has no type parameters
+   * - returns the specified effect type
+   * - (if message context type is not EmptyContext.Value) accepts the specified message context type as its last parameter
+   *
+   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
+   * the server-supplied ''request context'' is passed to the bound method or the returned context function as its last argument.
+   *
+   * Bound API methods are exposed using their actual names.
+   *
+   * @param api API instance
+   * @tparam Api API type (only member methods of this type are exposed)
+   * @return RPC request handler with specified API bindings
+   * @throws java.lang.IllegalArgumentException if invalid public methods are found in the API type
+   */
+  def bind[Api <: AnyRef](api: Api): ThisHandler =
     macro HandlerMeta.bindMacro[Node, Codec, Effect, Context, Api]
-//
+
 //  def brokenBind[Api <: AnyRef](api: Api): ThisHandler =
 //    macro HandlerMeta.brokenBindMacro[Node, Codec, Effect, Context, Api]
 }
@@ -92,32 +92,7 @@ object HandlerMeta {
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
   }
 
-  def basicBindMacro[
-    Node: c.WeakTypeTag,
-    Codec <: MessageCodec[Node]: c.WeakTypeTag,
-    Effect[_],
-    Context: c.WeakTypeTag,
-    Api <: AnyRef: c.WeakTypeTag
-  ](c: blackbox.Context)(
-    api: c.Expr[Api]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, Codec, Effect, Context]] = {
-    import c.universe.{weakTypeOf, Quasiquote}
-
-    val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[Codec]
-    val contextType = weakTypeOf[Context]
-    val apiType = weakTypeOf[Api]
-    c.Expr[Any](q"""
-      val newBindings = ${c.prefix}.apiBindings ++ automorph.handler.meta.HandlerGenerator
-        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec, ${c.prefix}.system, $api)
-        .map { binding =>
-          binding.function.name -> binding
-        }
-      ${c.prefix}.copy(apiBindings = newBindings)
-    """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
-  }
-
-  def bindMacro[
+  def bindMapNamesMacro[
     Node: c.WeakTypeTag,
     Codec <: MessageCodec[Node]: c.WeakTypeTag,
     Effect[_],
@@ -140,6 +115,26 @@ object HandlerMeta {
           $mapName(binding.function.name).map(_ -> binding)
         }
       ${c.prefix}.copy(apiBindings = newBindings)
+    """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
+  }
+
+  def bindMacro[
+    Node: c.WeakTypeTag,
+    Codec <: MessageCodec[Node]: c.WeakTypeTag,
+    Effect[_],
+    Context: c.WeakTypeTag,
+    Api <: AnyRef: c.WeakTypeTag
+  ](c: blackbox.Context)(
+    api: c.Expr[Api]
+  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, Codec, Effect, Context]] = {
+    import c.universe.{weakTypeOf, Quasiquote}
+
+    val nodeType = weakTypeOf[Node]
+    val codecType = weakTypeOf[Codec]
+    val contextType = weakTypeOf[Context]
+    val apiType = weakTypeOf[Api]
+    c.Expr[Any](q"""
+      ${c.prefix}.bind($api, Seq(_))
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
   }
 }
