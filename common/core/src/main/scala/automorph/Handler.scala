@@ -116,13 +116,13 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     // Lookup bindings for the specified RPC function
     val responseRequred = rpcRequest.responseRequired
     logger.debug(s"Processing ${protocol.name} request", requestProperties)
-    bindings.get(rpcRequest.function).map { handlerBinding =>
+    bindings.get(rpcRequest.function).map { binding =>
       // Extract arguments
-      extractArguments(rpcRequest, handlerBinding).pureFold(
+      extractArguments(rpcRequest, binding).pureFold(
         error => errorResponse(error, rpcRequest.message, responseRequred, requestProperties),
         arguments =>
           // Invoke bound function
-          Try(handlerBinding.invoke(arguments, context).either).pureFold(
+          Try(binding.invoke(arguments, context).either).pureFold(
             error => errorResponse(error, rpcRequest.message, responseRequred, requestProperties),
             result => resultResponse(result, rpcRequest, requestProperties)
           )
@@ -139,16 +139,16 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * Optional request context is used as a last RPC function argument.
    *
    * @param rpcRequest RPC request
-   * @param handlerBinding handler RPC function binding
+   * @param binding handler RPC function binding
    * @return bound function arguments
    */
   private def extractArguments(
     rpcRequest: RpcRequest[Node, _],
-    handlerBinding: HandlerBinding[Node, Effect, Context]
+    binding: HandlerBinding[Node, Effect, Context]
   ): Try[Seq[Option[Node]]] = {
     // Adjust expected function parameters if it uses context as its last parameter
-    val parameters = handlerBinding.function.parameters
-    val parameterNames = parameters.map(_.name).dropRight(if (handlerBinding.acceptsContext) 1 else 0)
+    val parameters = binding.function.parameters
+    val parameterNames = parameters.map(_.name).dropRight(if (binding.acceptsContext) 1 else 0)
     rpcRequest.arguments.fold(
       positionalArguments => {
         // Arguments by position

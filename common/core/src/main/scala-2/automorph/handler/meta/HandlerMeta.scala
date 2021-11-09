@@ -93,20 +93,16 @@ object HandlerMeta {
   }
 
   def bindMacro[
-    Node: c.WeakTypeTag,
-    Codec <: MessageCodec[Node]: c.WeakTypeTag,
+    Node,
+    Codec <: MessageCodec[Node],
     Effect[_],
-    Context: c.WeakTypeTag,
-    Api <: AnyRef: c.WeakTypeTag
+    Context,
+    Api <: AnyRef
   ](c: blackbox.Context)(
     api: c.Expr[Api]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Handler[Node, Codec, Effect, Context]] = {
-    import c.universe.{weakTypeOf, Quasiquote}
+  ): c.Expr[Handler[Node, Codec, Effect, Context]] = {
+    import c.universe.Quasiquote
 
-    val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[Codec]
-    val contextType = weakTypeOf[Context]
-    val apiType = weakTypeOf[Api]
     c.Expr[Any](q"""
       ${c.prefix}.bind($api, Seq(_))
     """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
