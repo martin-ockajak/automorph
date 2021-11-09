@@ -26,7 +26,6 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
   /** REST-RPC message metadata. */
   type Metadata = Unit
 
-  private val contentTypeHeader = "Content-Type"
   private val binaryContentType = "application/octet-stream"
 
   private lazy val errorSchema: Schema = Schema(
@@ -236,11 +235,15 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
         }.toMap)
       }
     }.getOrElse {
-      // Other HTTP methods - deserialize request
-      Try(decodeRequest(codec.deserialize(requestBody))).pureFold(
-        error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), requestBody))),
-        request => Right(request)
-      )
+      requestContext.contentType.filter(_ == binaryContentType).map { _ =>
+        Left(RpcError(InvalidRequestException("Binary requests not supported"), RpcMessage((), requestBody)))
+      }.getOrElse {
+        // Other HTTP methods - deserialize request
+        Try(decodeRequest(codec.deserialize(requestBody))).pureFold(
+          error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), requestBody))),
+          request => Right(request)
+        )
+      }
     }
 
   private def createArgumentNodes(
