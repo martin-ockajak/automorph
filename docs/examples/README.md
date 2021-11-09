@@ -623,6 +623,7 @@ val server = createServer(_.bind(api))
 ```scala
 // Define client view of a remote API
 trait ClientApi {
+  // Invoked as 'hello'
   def hi(some: String, n: Int): String
 }
 
@@ -684,8 +685,8 @@ class ServerApi {
     ""
 
   // Exposed as 'test.welcome'
-  def welcome(add: Boolean)(n: Double): Double =
-    if (add) n + 1 else n - 1
+  def welcome(who: Boolean): String =
+    s"Welcome $who"
 }
 val api = new ServerApi()
 
@@ -720,8 +721,8 @@ remoteApi.hello("world", 1) // String
 remoteApi.hi("world", 1) // String
 
 // Call the remote API function dynamically
-Try(client.call[String]("skip").args()) // Failure
-client.call[Double]("test.welcome").args("add" -> true, "n" -> 1) // Double
+Try(client.call[String]("skip").args()) // Failure - method not found
+client.call[Double]("test.welcome").args("all") // String
 ```
 
 **Cleanup**
