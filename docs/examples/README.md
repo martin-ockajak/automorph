@@ -510,9 +510,83 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### Function names
+### Client function names
 
-* [Source](/examples/project/src/test/scala/examples/customize/FunctionNameMapping.scala)
+* [Source](/examples/project/src/test/scala/examples/customize/ClientFunctionNameMapping.scala)
+
+**Build**
+
+```scala
+libraryDependencies ++= Seq(
+  "org.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
+**Imports**
+
+```scala
+import automorph.Default
+import java.net.URI
+```
+
+**Server**
+
+```scala
+// Create server API instance
+class ServerApi {
+  // Exposed both as 'hello' and 'hi'
+  def hello(some: String, n: Int): String =
+    s"Hello $some $n!"
+}
+val api = new ServerApi()
+
+// Customize exposed API to RPC function name mapping
+val mapName = (name: String) => name match {
+  case "hello" => Seq("hello", "hi")
+  case "skip" => Seq.empty
+  case other => Seq(s"test.$other")
+}
+
+// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+val createServer = Default.serverSync(7000, "/api")
+val server = createServer(_.bind(api))
+```
+
+**Client**
+
+```scala
+// Define client view of a remote API
+trait ClientApi {
+  def hi(some: String, n: Int): String
+}
+
+// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.clientSync(new URI("http://localhost:7000/api"))
+
+// Customize invoked API to RPC function name mapping
+val mapName = (name: String) => name match {
+  case "hi" => "hello"
+  case other => other
+}
+
+// Call the remote API function
+val remoteApi = client.bind[ClientApi](mapName) // ClientApi
+remoteApi.hi("world", 1) // String
+```
+
+**Cleanup**
+
+```scala
+// Close the client
+client.close()
+
+// Stop the server
+server.close()
+```
+
+### Server function names
+
+* [Source](/examples/project/src/test/scala/examples/customize/ServerFunctionNameMapping.scala)
 
 **Build**
 
@@ -535,30 +609,30 @@ import scala.util.Try
 ```scala
 // Create server API instance
 class ServerApi {
-  // Exposed both as 'hello' and 'custom'
-  def hello(value: Option[String]): String =
-    value.getOrElse("")
+  // Exposed both as 'hello' and 'hi'
+  def hello(some: String, n: Int): String =
+    s"Hello $some $n!"
 
   // Not exposed
-  def omitted(): String =
+  def skip(): String =
     ""
 
-  // Exposed as 'test.multi'
-  def multi(add: Boolean)(n: Double): Double =
+  // Exposed as 'test.welcome'
+  def welcome(add: Boolean)(n: Double): Double =
     if (add) n + 1 else n - 1
 }
 val api = new ServerApi()
 
-// Customize RPC function names
+// Customize exposed API to RPC function name mapping
 val mapName = (name: String) => name match {
-  case "hello" => Seq("hello", "custom")
-  case "omitted" => Seq.empty
+  case "hello" => Seq("hello", "hi")
+  case "skip" => Seq.empty
   case other => Seq(s"test.$other")
 }
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val createServer = Default.serverSync(7000, "/api")
-val server = createServer(_.bind(api, mapName(_)))
+val server = createServer(_.bind(api, mapName))
 ```
 
 **Client**
@@ -566,9 +640,9 @@ val server = createServer(_.bind(api, mapName(_)))
 ```scala
 // Define client view of a remote API
 trait ClientApi {
-  def hello(value: Option[String]): String
-  
-  def custom(value: Option[String]): String
+  def hello(some: String, n: Int): String
+
+  def hi(some: String, n: Int): String
 }
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
@@ -576,12 +650,12 @@ val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function statically
 val remoteApi = client.bind[ClientApi] // ClientApi
-remoteApi.hello(None) // ""
-remoteApi.custom(None) // ""
+remoteApi.hello("world", 1) // String
+remoteApi.hi("world", 1) // String
 
 // Call the remote API function dynamically
-Try(client.call[String]("omitted").args()) // Failure
-client.call[Double]("test.multi").args("add" -> true, "n" -> 1) // 2
+Try(client.call[String]("skip").args()) // Failure
+client.call[Double]("test.welcome").args("add" -> true, "n" -> 1) // Double
 ```
 
 **Cleanup**
