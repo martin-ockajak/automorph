@@ -764,7 +764,7 @@ import scala.concurrent.{Await, Future}
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
-    Future.failed("Data error")
+    Future.failed(new IllegalArgumentException("Data error"))
 }
 val api = new ServerApi()
 
