@@ -1,7 +1,5 @@
 package automorph.spi.protocol
 
-import scala.collection.immutable.ArraySeq
-
 /**
  * RPC API description operation.
  *
