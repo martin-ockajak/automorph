@@ -88,11 +88,11 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
         "Arguments" -> request.size.toString
       )
       requestContext.path.map { path =>
-        Option.when(path.startsWith(pathPrefix) && path.length > pathPrefix.length) {
+        if (path.startsWith(pathPrefix) && path.length > pathPrefix.length) {
           val function = path.substring(pathPrefix.length, path.length)
           val message = RpcMessage((), requestBody, requestProperties ++ Seq("Function" -> function), messageText)
           Right(RpcRequest(message, function, Right(request), true, requestId))
-        }.getOrElse {
+        } else {
           val message = RpcMessage((), requestBody, requestProperties, messageText)
           Left(RpcError(InvalidRequestException(s"Invalid URL path: $path"), message))
         }
@@ -224,13 +224,13 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
     requestContext.method.filter(_ == HttpMethod.Get).map { _ =>
       // HTTP GET method - assemble request from URL query parameters
       val parameterNames = requestContext.parameters.map(_._1)
-      val duplicateParameters = parameterNames.diff(parameterNames).distinct
-      Option.when(duplicateParameters.nonEmpty) {
+      val duplicateParameters = parameterNames.diff(parameterNames.distinct)
+      if (duplicateParameters.nonEmpty) {
         Left(RpcError(
           InvalidRequestException(s"Duplicate query parameters: ${duplicateParameters.mkString(", ")}"),
           RpcMessage((), requestBody)
         ))
-      }.getOrElse {
+      } else {
         Right(requestContext.parameters.map { case (name, value) =>
           name -> encodeString(value)
         }.toMap)
