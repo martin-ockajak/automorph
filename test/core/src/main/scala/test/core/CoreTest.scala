@@ -212,9 +212,11 @@ trait CoreTest extends BaseTest {
     }
 
   private def testFixtures: Seq[TestFixture] =
-    Try(fixtures).recover {
-      case error =>
-        error.printStackTrace(System.out)
-        throw error
-    }.get
+    fixtures.map { fixture =>
+      Try(fixture).recover {
+        case error =>
+          error.printStackTrace(System.out)
+          throw error
+      }.get
+    }
 }
