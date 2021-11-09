@@ -129,134 +129,6 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### Optional parameters
-
-* [Source](/examples/project/src/test/scala/examples/basic/OptionalParameters.scala)
-
-**Build**
-
-```scala
-libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
-)
-```
-
-**Imports**
-
-```scala
-import automorph.Default
-import automorph.transport.http.HttpMethod
-import java.net.URI
-```
-
-**Server**
-
-```scala
-// Create server API instance
-class ServerApi {
-  def hello(some: String, n: Option[Int]): String =
-    s"Hello $some ${n.getOrElse(0)}!"
-
-  def hi(some: Option[String])(n: Int): String =
-    s"Hi ${some.getOrElse("all")} $n!"
-}
-val api = new ServerApi()
-
-// Start JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
-val createServer = Default.serverSync(7000, "/api", Seq(HttpMethod.Put))
-val server = createServer(_.bind(api))
-```
-
-**Client**
-
-```scala
-// Define client view of a remote API
-trait ClientApi {
-  def hello(some: String): String
-}
-// Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
-val client = Default.clientSync(new URI("http://localhost:7000/api"), HttpMethod.Put)
-
-// Call the remote API function statically
-val remoteApi = client.bind[ClientApi] // ClientApi
-remoteApi.hello("world") // String
-
-// Call the remote API function dynamically
-client.call[String]("hi").args("n" -> 1) // String
-```
-
-**Cleanup**
-
-```scala
-// Close the client
-client.close()
-
-// Stop the server
-server.close()
-```
-
-### One-way message
-
-* [Source](/examples/project/src/test/scala/examples/basic/OneWayMessage.scala)
-
-**Build**
-
-```scala
-libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
-)
-```
-
-**Imports**
-
-```scala
-import automorph.Default
-import java.net.URI
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
-```
-
-**Server**
-
-```scala
-// Create server API instance
-class ServerApi {
-  def hello(some: String, n: Int): Future[String] =
-    Future(s"Hello $some $n!")
-}
-val api = new ServerApi()
-
-// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val createServer = Default.serverAsync(7000, "/api")
-val server = createServer(_.bind(api))
-```
-
-**Client**
-
-```scala
-// Define client view of a remote API
-trait ClientApi {
-  def hello(some: String, n: Int): Future[String]
-}
-
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.asyncHttpClient(new URI("http://localhost:7000/api"))
-
-// Message the remote API function dynamically without expecting a response
-client.message("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
-```
-
-**Cleanup**
-
-```scala
-// Close the client
-Await.result(client.close(), Duration.Inf)
-
-// Stop the server
-Await.result(server.close(), Duration.Inf)
-```
-
 ### API description
 
 * [Source](/examples/project/src/test/scala/examples/basic/ApiSpecification.scala)
@@ -322,6 +194,134 @@ Await.result(client.close(), Duration.Inf)
 
 // Stop the server
 Await.result(server.close(), Duration.Inf)
+```
+
+### One-way message
+
+* [Source](/examples/project/src/test/scala/examples/basic/OneWayMessage.scala)
+
+**Build**
+
+```scala
+libraryDependencies ++= Seq(
+  "org.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
+**Imports**
+
+```scala
+import automorph.Default
+import java.net.URI
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
+```
+
+**Server**
+
+```scala
+// Create server API instance
+class ServerApi {
+  def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
+}
+val api = new ServerApi()
+
+// Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+val createServer = Default.serverAsync(7000, "/api")
+val server = createServer(_.bind(api))
+```
+
+**Client**
+
+```scala
+// Define client view of a remote API
+trait ClientApi {
+  def hello(some: String, n: Int): Future[String]
+}
+
+// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.asyncHttpClient(new URI("http://localhost:7000/api"))
+
+// Message the remote API function dynamically without expecting a response
+client.message("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
+```
+
+**Cleanup**
+
+```scala
+// Close the client
+Await.result(client.close(), Duration.Inf)
+
+// Stop the server
+Await.result(server.close(), Duration.Inf)
+```
+
+### Optional parameters
+
+* [Source](/examples/project/src/test/scala/examples/basic/OptionalParameters.scala)
+
+**Build**
+
+```scala
+libraryDependencies ++= Seq(
+  "org.automorph" %% "automorph-default" % "0.0.1"
+)
+```
+
+**Imports**
+
+```scala
+import automorph.Default
+import automorph.transport.http.HttpMethod
+import java.net.URI
+```
+
+**Server**
+
+```scala
+// Create server API instance
+class ServerApi {
+  def hello(some: String, n: Option[Int]): String =
+    s"Hello $some ${n.getOrElse(0)}!"
+
+  def hi(some: Option[String])(n: Int): String =
+    s"Hi ${some.getOrElse("all")} $n!"
+}
+val api = new ServerApi()
+
+// Start JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
+val createServer = Default.serverSync(7000, "/api", Seq(HttpMethod.Put))
+val server = createServer(_.bind(api))
+```
+
+**Client**
+
+```scala
+// Define client view of a remote API
+trait ClientApi {
+  def hello(some: String): String
+}
+// Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
+val client = Default.clientSync(new URI("http://localhost:7000/api"), HttpMethod.Put)
+
+// Call the remote API function statically
+val remoteApi = client.bind[ClientApi] // ClientApi
+remoteApi.hello("world") // String
+
+// Call the remote API function dynamically
+client.call[String]("hi").args("n" -> 1) // String
+```
+
+**Cleanup**
+
+```scala
+// Close the client
+client.close()
+
+// Stop the server
+server.close()
 ```
 
 ### HTTP request metadata
