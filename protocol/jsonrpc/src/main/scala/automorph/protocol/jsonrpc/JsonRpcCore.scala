@@ -243,13 +243,6 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     mapOpenApi(OpenApi(functionSchemas))
   }
 
-  /**
-   * Creates function invocation argument nodes.
-   *
-   * @param argumentNames argument names
-   * @param encodedArguments encoded arguments
-   * @return argument nodes
-   */
   private def createArgumentNodes(
     argumentNames: Option[Iterable[String]],
     encodedArguments: Iterable[Node]

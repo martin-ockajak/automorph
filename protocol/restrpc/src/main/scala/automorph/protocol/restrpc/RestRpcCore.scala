@@ -8,7 +8,7 @@ import automorph.protocol.restrpc.{Response, ResponseError, RestRpcException}
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
 import automorph.spi.protocol.{RpcApiDescription, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
-import automorph.transport.http.HttpContext
+import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
@@ -80,32 +80,27 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
     requestContext: Context,
     requestId: String
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
-    // Deserialize request
-    Try(decodeRequest(codec.deserialize(requestBody))).pureFold(
-      error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), requestBody))),
-      request => {
-        // Validate request
-        val messageText = () => Some(codec.text(encodeRequest(request)))
-        val requestProperties = Map(
-          "Type" -> MessageType.Call.toString,
-          "Arguments" -> request.size.toString
-        )
-        requestContext.path.map { path =>
-          if (path.startsWith(pathPrefix) && path.length > pathPrefix.length) {
-            val functionName = path.substring(pathPrefix.length, path.length)
-            val message =
-              RpcMessage((), requestBody, requestProperties ++ Option("Function" -> functionName), messageText)
-            Right(RpcRequest(message, functionName, Right(request), true, requestId))
-          } else {
-            val message = RpcMessage((), requestBody, requestProperties, messageText)
-            Left(RpcError(InvalidRequestException(s"Invalid URL path: $path"), message))
-          }
+    assembleRequest(requestBody, requestContext).flatMap { request =>
+      // Validate request
+      val messageText = () => Some(codec.text(encodeRequest(request)))
+      val requestProperties = Map(
+        "Type" -> MessageType.Call.toString,
+        "Arguments" -> request.size.toString
+      )
+      requestContext.path.map { path =>
+        Option.when(path.startsWith(pathPrefix) && path.length > pathPrefix.length) {
+          val function = path.substring(pathPrefix.length, path.length)
+          val message = RpcMessage((), requestBody, requestProperties ++ Seq("Function" -> function), messageText)
+          Right(RpcRequest(message, function, Right(request), true, requestId))
         }.getOrElse {
           val message = RpcMessage((), requestBody, requestProperties, messageText)
-          Left(RpcError(InvalidRequestException("Missing URL path"), message))
+          Left(RpcError(InvalidRequestException(s"Invalid URL path: $path"), message))
         }
+      }.getOrElse {
+        val message = RpcMessage((), requestBody, requestProperties, messageText)
+        Left(RpcError(InvalidRequestException("Missing URL path"), message))
       }
-    )
+    }
 
   @nowarn("msg=used")
   override def createResponse(result: Try[Node], requestMetadata: Metadata): Try[RpcResponse[Node, Metadata]] = {
@@ -222,13 +217,32 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
     mapOpenApi(OpenApi(functionSchemas))
   }
 
-  /**
-   * Creates function invocation argument nodes.
-   *
-   * @param argumentNames argument names
-   * @param encodedArguments encoded arguments
-   * @return argument nodes
-   */
+  private def assembleRequest(
+    requestBody: MessageBody,
+    requestContext: Context
+  ): Either[RpcError[Metadata], Request[Node]] =
+    requestContext.method.filter(_ == HttpMethod.Get).map { _ =>
+      // HTTP GET method - assemble request from URL query parameters
+      val parameterNames = requestContext.parameters.map(_._1)
+      val duplicateParameters = parameterNames.diff(parameterNames).distinct
+      Option.when(duplicateParameters.nonEmpty) {
+        Left(RpcError(
+          InvalidRequestException(s"Duplicate query parameters: ${duplicateParameters.mkString(", ")}"),
+          RpcMessage((), requestBody)
+        ))
+      }.getOrElse {
+        Right(requestContext.parameters.map { case (name, value) =>
+          name -> encodeString(value)
+        }.toMap)
+      }
+    }.getOrElse {
+      // Other HTTP methods - deserialize request
+      Try(decodeRequest(codec.deserialize(requestBody))).pureFold(
+        error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), requestBody))),
+        request => Right(request)
+      )
+    }
+
   private def createArgumentNodes(
     argumentNames: Option[Iterable[String]],
     encodedArguments: Iterable[Node]
