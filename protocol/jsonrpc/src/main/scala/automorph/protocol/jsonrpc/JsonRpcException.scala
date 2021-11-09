@@ -16,6 +16,6 @@ package automorph.protocol.jsonrpc
 final case class JsonRpcException[Node](
   message: String,
   code: Int,
-  data: Option[Node],
-  cause: Throwable
+  data: Option[Node] = None,
+  cause: Throwable = None.orNull
 ) extends RuntimeException(message, cause)

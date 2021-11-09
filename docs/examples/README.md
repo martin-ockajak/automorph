@@ -838,7 +838,11 @@ import scala.concurrent.{Await, Future}
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
-    Future(s"Hello $some $n!")
+    if (n >= 0) {
+      Future.failed(SQLException("Data error"))
+    } else {
+      Future.failed(JsonRpcException("Other error", 1))
+    }
 }
 val api = new ServerApi()
 
@@ -867,7 +871,8 @@ val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi] // ClientApi
-remoteApi.hello("world", 1) // Future[String]
+remoteApi.hello("world", 1) // JSON-RPC invalid request error with code: -32600
+remoteApi.hello("world", -1) // JSON-RPC application error with code: 1
 ```
 
 **Cleanup**
