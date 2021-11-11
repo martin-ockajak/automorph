@@ -497,6 +497,7 @@ site := {
   IO.copyDirectory((examples / baseDirectory).value / "project" / "src", (LocalRootProject / baseDirectory).value / "website" / "static" / "examples" / "project" / "src", true)
   s"yarn --cwd ${(docs / baseDirectory).value} build" !
 }
+//  (docs / mdoc).evaluated
 
 
 // Deployment
@@ -505,7 +506,7 @@ siteSourceDirectory := target.value / "website"
 git.remoteRepo := repositoryShell
 val deploySite = taskKey[Unit]("Deploys project website.")
 deploySite := {}
-deploySite := site.dependsOn(site, ghpagesPushSite).value
+deploySite := deploySite.dependsOn(site, ghpagesPushSite).value
 
 
 // Release
