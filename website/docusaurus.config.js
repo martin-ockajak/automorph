@@ -30,6 +30,12 @@ const config = {
     ],
   ],
 
+  plugins: [
+    require.resolve('docusaurus-lunr-search', {
+      indexBaseUrl: true
+    }) 
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -46,7 +52,7 @@ const config = {
             position: 'left'
           },
           {
-            href: '/docs/api/index.html',
+            href: '/api/index.html',
             label: 'API',
             position: 'left',
           },
