@@ -19,6 +19,8 @@ const config = {
       '@docusaurus/preset-classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
+        blog: false,
+        sitemap: false,
         docs: {
           path: process.env['DOCS_PATH'] ?? 'docs',
           sidebarPath: require.resolve('./sidebars.js'),
@@ -39,6 +41,9 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      algolia: false,
+      googleAnalytics: false,
+      gtag: false,
       navbar: {
         title: 'Automorph',
         logo: {
