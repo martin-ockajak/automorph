@@ -41,7 +41,7 @@ val server = createServer(_.bind(api))
 Await.result(server.close(), Duration.Inf)
 ```
 
-### Static Client
+### Static client
 
 Call the remote API instance via proxy created from API type using JSON-RPC over HTTP(S).
 
@@ -68,7 +68,7 @@ remoteApi.hello("world", 1) // Future[String]
 Await.result(client.close(), Duration.Inf)
 ```
 
-### Dynamic Client
+### Dynamic client
 
 Call the remote API dynamically without API type definition using JSON-RPC over HTTP(S).
 
