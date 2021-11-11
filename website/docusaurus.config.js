@@ -12,7 +12,7 @@ const config = {
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   organizationName: 'automorph',
-  projectName: 'automoroph',
+  projectName: 'automorph',
 
   presets: [
     [
