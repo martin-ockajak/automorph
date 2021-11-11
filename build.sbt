@@ -491,6 +491,7 @@ lazy val docs = project.in(file("website")).settings(
 ).enablePlugins(MdocPlugin, DocusaurusPlugin)
 val site = taskKey[Unit]("Generates project website.")
 site := {
+  import scala.sys.process._
   (Compile / unidoc).value
   catsEffectDocs.value
   IO.copyDirectory((examples / baseDirectory).value / "project" / "src", (LocalRootProject / baseDirectory).value / "website" / "static" / "examples" / "project" / "src", true)

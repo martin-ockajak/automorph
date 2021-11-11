@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-object ApiDescription extends App {
+object ApiSchemaDiscovery extends App {
 
   // Create server API instance
   class ServerApi {
@@ -42,10 +42,10 @@ object ApiDescription extends App {
   Await.result(server.close(), Duration.Inf)
 }
 
-class ApiDescription extends org.scalatest.freespec.AnyFreeSpecLike {
+class ApiSchemaDiscovery extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      ApiDescription.main(Array())
+      ApiSchemaDiscovery.main(Array())
     }
   }
 }
