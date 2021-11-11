@@ -412,7 +412,7 @@ server.close()
 
 ### HTTP response metadata
 
-* [Source](../../examples/project/src/test/scala/examples/basic/HttpResponseMetadata.scala)
+* [Source](../examples/project/src/test/scala/examples/basic/HttpResponseMetadata.scala)
 
 **Build**
 
