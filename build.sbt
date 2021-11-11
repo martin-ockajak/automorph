@@ -495,9 +495,9 @@ site := {
   (Compile / unidoc).value
   catsEffectDocs.value
   IO.copyDirectory((examples / baseDirectory).value / "project" / "src", (LocalRootProject / baseDirectory).value / "website" / "static" / "examples" / "project" / "src", true)
+  (docs / mdoc).toTask("").value
   s"yarn --cwd ${(docs / baseDirectory).value} build" !
 }
-//  (docs / mdoc).evaluated
 
 
 // Deployment
