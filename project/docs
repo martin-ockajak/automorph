@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-cd website && DOCS_PATH=../docs yarn start
+DOCS_PATH=../docs yarn --cwd website start
 

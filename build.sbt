@@ -493,7 +493,8 @@ val site = taskKey[Unit]("Generates project website.")
 site := {
   (Compile / unidoc).value
   catsEffectDocs.value
-  s"yarn --cwd ${(docs / baseDirectory).value} build"
+  IO.copyDirectory((examples / baseDirectory).value / "project" / "src", (LocalRootProject / baseDirectory).value / "website" / "static" / "examples" / "project" / "src", true)
+  s"yarn --cwd ${(docs / baseDirectory).value} build" !
 }
 
 

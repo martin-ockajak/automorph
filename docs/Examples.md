@@ -6,7 +6,7 @@ Most of the following examples are using [default plugins](Plugins).
 
 ### Synchronous call
 
-* [Source](examples/project/src/test/scala/examples/basic/SynchronousCall.scala)
+* [Source](../../examples/project/src/test/scala/examples/basic/SynchronousCall.scala)
 
 **Build**
 
