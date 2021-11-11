@@ -11,7 +11,23 @@ const features = [
     title: 'Convenient',
     description: (
       <>
-        Client-side or server-side remote API bindings are created automatically from public methods of existing API classes.
+        Generate RPC client or server layer automatically at compile-time from public methods of API classes.
+      </>
+    ),
+  },
+  {
+    title: 'Practical',
+    description: (
+      <>
+        Access transport protocol request and response metadata using optional API abstractions.
+      </>
+    ),
+  },
+  {
+    title: 'Flexible',
+    description: (
+      <>
+        Customize remote API function names and mapping between exceptions and RPC protocol errors.
       </>
     ),
   },
@@ -19,39 +35,39 @@ const features = [
     title: 'Modular',
     description: (
       <>
-        <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> protocol, <a href="https://en.wikipedia.org/wiki/Effect_system">effect</a> type, <a href="https://en.wikipedia.org/wiki/Transport_layer">transport</a> protocol and message <a href="https://en.wikipedia.org/wiki/File_format">format</a> can be freely combined by choosing appropriate plugins.
+        Choose plugins to select <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> protocol, <a href="https://en.wikipedia.org/wiki/Effect_system">effect</a> type, <a href="https://en.wikipedia.org/wiki/Transport_layer">transport</a> protocol and message <a href="https://en.wikipedia.org/wiki/File_format">format</a>.
       </>
     ),
   },
   {
-    title: 'Modular',
+    title: 'Discoverable',
     description: (
       <>
-        <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> protocol, <a href="https://en.wikipedia.org/wiki/Effect_system">effect</a> type, <a href="https://en.wikipedia.org/wiki/Transport_layer">transport</a> protocol and message <a href="https://en.wikipedia.org/wiki/File_format">format</a> can be freely combined by choosing appropriate plugins.
+        Provide and consume API schemas via discovery functions for <a href="https://spec.open-rpc.org">OpenRPC</a> and <a href="https://github.com/OAI/OpenAPI-Specification">OpenAPI</a> standards.
       </>
     ),
   },
   {
-    title: 'Modular',
+    title: 'Extensible',
     description: (
       <>
-        <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> protocol, <a href="https://en.wikipedia.org/wiki/Effect_system">effect</a> type, <a href="https://en.wikipedia.org/wiki/Transport_layer">transport</a> protocol and message <a href="https://en.wikipedia.org/wiki/File_format">format</a> can be freely combined by choosing appropriate plugins.
+        Easily implement custom data type serialization support or additional integration plugins.
       </>
     ),
   },
   {
-    title: 'Modular',
+    title: 'Manageable',
     description: (
       <>
-        <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> protocol, <a href="https://en.wikipedia.org/wiki/Effect_system">effect</a> type, <a href="https://en.wikipedia.org/wiki/Transport_layer">transport</a> protocol and message <a href="https://en.wikipedia.org/wiki/File_format">format</a> can be freely combined by choosing appropriate plugins.
+        Leverage extensive error handling and structured logging via <a href="http://www.slf4j.org/">SLF4J</a> to diagnose issues.
       </>
     ),
   },
   {
-    title: 'Clean',
+    title: 'Compatible',
     description: (
       <>
-        Underlying transport protocol request and response metadata can be accessed using optional API abstractions.
+        Artifacts are available for <a href="https://dotty.epfl.ch/">Scala 3</a> on <a href="https://openjdk.java.net/">JRE 11+</a> with support <a href="https://www.scala-lang.org/news/2.13.0">Scala 2.13</a> and <a href="https://www.scala-lang.org/news/2.12.0">Scala 2.12</a> planned.
       </>
     ),
   },
@@ -86,7 +102,7 @@ const style = {
 
 function Feature({title, description}) {
   return (
-    <div className={clsx('col col--4')}>
+    <div className={clsx('col col--3')}>
       <div className="text--center padding-horiz--md">
         <h3>{title}</h3>
         <p>{description}</p>
