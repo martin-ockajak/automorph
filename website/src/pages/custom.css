@@ -22,9 +22,9 @@
   --doc-sidebar-width: 10rem !important;
 
   --ifm-color-black: #000000;
-  --ifm-color-white: #cccccc;
+  --ifm-color-white: #dddddd;
   --ifm-background-color: #ffffff;
-  --ifm-color-primary: #289ad7;
+  --ifm-color-primary: #2878d8;
   --ifm-color-primary-dark: rgb(33, 175, 144);
   --ifm-color-primary-darker: rgb(31, 165, 136);
   --ifm-color-primary-darkest: rgb(26, 136, 112);
@@ -35,7 +35,7 @@
 }
 
 aside > div > nav {
-  background-color: #00000011;
+  background-color: #00000022;
 }
 
 .docusaurus-highlight-code-line {
