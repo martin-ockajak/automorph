@@ -35,7 +35,8 @@ const config = {
   plugins: [
     require.resolve('docusaurus-lunr-search', {
       indexBaseUrl: true
-    }) 
+    }),
+//    'docusaurus-plugin-relative-paths'
   ],
 
   themeConfig:
