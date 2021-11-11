@@ -6,7 +6,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 const config = {
   title: 'Automorph',
-  tagline: 'RPC client and server library for Scala',
+  tagline: 'RPC client and server for Scala',
   url: 'https://automorph.org',
   baseUrl: '/',
   onBrokenLinks: 'warn',
@@ -59,7 +59,7 @@ const config = {
           },
           {
             href: '/api/index.html',
-            label: 'API',
+            label: 'API Reference',
             position: 'left',
           },
           {

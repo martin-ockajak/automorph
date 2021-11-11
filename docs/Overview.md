@@ -1,15 +1,5 @@
 
-![automorph](https://github.com/martin-ockajak/automorph/raw/main/docs/images/banner.jpg)
-
-[![Documentation](https://img.shields.io/badge/Website-Documentation-blueviolet)](https://automorph.org/overview.html)
-[![API](https://img.shields.io/badge/Scaladoc-API-blue)](https://automorph.org/api/automorph/index.html)
-[![Artifacts](https://img.shields.io/badge/Releases-Artifacts-yellow)](https://mvnrepository.com/artifact/org.automorph/automorph)
-[![Build](https://github.com/martin-ockajak/automorph/workflows/Build/badge.svg)](https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
-
-* [Quick Start](docs/quickstart)
-* [Documentation](https://automorph.org)
-* [API Reference](https://automorph.org/api/automorph/index.html)
-
+**Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/specification) and [REST-RPC](docs/rest-rpc/README.md) protocols.
 
 ## Goals
 
