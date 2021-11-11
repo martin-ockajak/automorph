@@ -6,7 +6,7 @@ addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.3")
 addSbtPlugin("com.github.sbt" % "sbt-release" % "1.1.0")
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.1.2")
 addSbtPlugin("com.typesafe" % "sbt-mima-plugin" % "1.0.0")
-addSbtPlugin("org.planet42" % "laika-sbt" % "0.18.0")
+addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.2.24" )
 addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.6.3")
 addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.5.7")
 
