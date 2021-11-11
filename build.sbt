@@ -487,18 +487,14 @@ lazy val docs = project.in(file("website")).settings(
   scalacOptions ++= Seq(
     "-Yno-imports",
     "-Xfatal-warnings"
-  ),
-  docusaurusCreateSite := docusaurusCreateSite.dependsOn(
-    LocalRootProject / Compile / unidoc,
-    LocalRootProject / catsEffectDocs
-  ).value,
-  docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(
-    LocalRootProject / Compile / unidoc,
-    LocalRootProject / catsEffectDocs
-  ).value
+  )
 ).enablePlugins(MdocPlugin, DocusaurusPlugin)
 val site = taskKey[Unit]("Generates project website.")
-site := (docs / docusaurusCreateSite).value
+site := {
+  (Compile / unidoc).value
+  catsEffectDocs.value
+  s"yarn --cwd ${(docs / baseDirectory).value} build"
+}
 
 
 // Deployment
