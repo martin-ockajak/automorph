@@ -11,6 +11,7 @@ package-lock.json
 .cache-loader
 docs
 static/api
+static/examples
 
 # Misc
 .DS_Store

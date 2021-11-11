@@ -1,13 +1,13 @@
 package automorph.protocol.jsonrpc
 
-import automorph.description.openapi.{RpcSchema, Schema}
-import automorph.description.{OpenApi, OpenRpc}
+import automorph.schema.openapi.{RpcSchema, Schema}
+import automorph.schema.{OpenApi, OpenRpc}
 import automorph.protocol.JsonRpcProtocol
 import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
 import automorph.protocol.jsonrpc.Message.Params
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
-import automorph.spi.protocol.{RpcApiDescription, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
+import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
@@ -152,12 +152,12 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
       }
     )
 
-  override def apiDescriptions: Seq[RpcApiDescription[Node]] = Seq(
-    RpcApiDescription(
+  override def apiSchemas: Seq[RpcApiSchema[Node]] = Seq(
+    RpcApiSchema(
       RpcFunction(JsonRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
       functions => encodeOpenApi(openApi(functions))
     ),
-    RpcApiDescription(
+    RpcApiSchema(
       RpcFunction(JsonRpcProtocol.openRpcFunction, Seq(), OpenRpc.getClass.getSimpleName, None),
       functions => encodeOpenRpc(openRpc(functions))
     )

@@ -3,7 +3,7 @@ package automorph.codec.json
 import argonaut.Argonaut.{StringToParseWrap, jNull}
 import argonaut.{CodecJson, DecodeResult, Json}
 import automorph.codec.json.meta.ArgonautJsonMeta
-import automorph.description.{OpenApi, OpenRpc}
+import automorph.schema.{OpenApi, OpenRpc}
 import java.nio.charset.StandardCharsets
 import scala.collection.immutable.ArraySeq
 

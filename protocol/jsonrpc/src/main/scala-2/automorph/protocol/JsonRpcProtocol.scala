@@ -1,7 +1,7 @@
 package automorph.protocol
 
 import automorph.protocol.jsonrpc.{ErrorMapping, ErrorType, JsonRpcCore, Message}
-import automorph.description.{OpenApi, OpenRpc}
+import automorph.schema.{OpenApi, OpenRpc}
 import automorph.spi.{MessageCodec, RpcProtocol}
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -117,8 +117,8 @@ object JsonRpcProtocol extends ErrorMapping {
         $mapOpenRpc,
         message => $codec.encode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](message),
         messageNode => $codec.decode[automorph.protocol.jsonrpc.Message[${weakTypeOf[Node]}]](messageNode),
-        openRpc => $codec.encode[automorph.description.OpenRpc](openRpc),
-        openApi => $codec.encode[automorph.description.OpenApi](openApi),
+        openRpc => $codec.encode[automorph.schema.OpenRpc](openRpc),
+        openApi => $codec.encode[automorph.schema.OpenApi](openApi),
         strings => $codec.encode[List[String]](strings)
       )
     """)

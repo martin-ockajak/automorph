@@ -1,13 +1,13 @@
 package automorph.protocol.restrpc
 
-import automorph.description.OpenApi
-import automorph.description.openapi.{RpcSchema, Schema}
+import automorph.schema.OpenApi
+import automorph.schema.openapi.{RpcSchema, Schema}
 import automorph.protocol.RestRpcProtocol
 import automorph.protocol.restrpc.Message.Request
 import automorph.protocol.restrpc.{Response, ResponseError, RestRpcException}
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
-import automorph.spi.protocol.{RpcApiDescription, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
+import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.annotation.nowarn
@@ -159,8 +159,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
       }
     )
 
-  override def apiDescriptions: Seq[RpcApiDescription[Node]] = Seq(
-    RpcApiDescription(
+  override def apiSchemas: Seq[RpcApiSchema[Node]] = Seq(
+    RpcApiSchema(
       RpcFunction(RestRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
       functions => encodeOpenApi(openApi(functions))
     )

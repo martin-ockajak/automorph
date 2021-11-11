@@ -1,6 +1,6 @@
 package automorph.spi
 
-import automorph.spi.protocol.{RpcApiDescription, RpcError, RpcRequest, RpcResponse}
+import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcRequest, RpcResponse}
 import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
@@ -80,8 +80,8 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
     responseContext: Context
   ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]]
 
-  /** RPC API description operations. */
-  def apiDescriptions: Seq[RpcApiDescription[Node]]
+  /** RPC API schema operations. */
+  def apiSchemas: Seq[RpcApiSchema[Node]]
 }
 
 object RpcProtocol {

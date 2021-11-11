@@ -125,12 +125,12 @@ lazy val core = project.in(file("common/core")).dependsOn(
 )
 
 // Specification
-lazy val openrpc = project.in(file("description/openrpc")).dependsOn(
+lazy val openrpc = project.in(file("schema/openrpc")).dependsOn(
   spi, testBase % Test
 ).settings(
   name := s"$projectName-openrpc"
 )
-lazy val openapi = project.in(file("description/openapi")).dependsOn(
+lazy val openapi = project.in(file("schema/openapi")).dependsOn(
   spi, testBase % Test
 ).settings(
   name := s"$projectName-openapi"

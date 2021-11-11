@@ -19,7 +19,7 @@ import scala.util.{Failure, Success, Try}
  * @constructor Creates a new RPC request handler with specified system and protocol plugins providing corresponding message context type.
  * @param protocol RPC protocol plugin
  * @param system effect system plugin
- * @param mapName maps API description function to the exposed RPC function name (empty result causes the method not to be exposed)
+ * @param mapName maps API schema function to the exposed RPC function name (empty result causes the method not to be exposed)
  * @param apiBindings API method bindings
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
@@ -34,7 +34,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    ListMap[String, HandlerBinding[Node, Effect, Context]]()
 ) extends HandlerMeta[Node, Codec, Effect, Context] with CannotEqual with Logging {
 
-  private val bindings = (descriptionBindings ++ apiBindings).flatMap { case (name, binding) =>
+  private val bindings = (schemaBindings ++ apiBindings).flatMap { case (name, binding) =>
     mapName(name).map(_ -> binding)
   }
   implicit private val givenSystem: EffectSystem[Effect] = system
@@ -278,14 +278,14 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       }
     )
 
-  private def descriptionBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
-    ListMap(protocol.apiDescriptions.map { apiDescription =>
-      val describedFunctions = protocol.apiDescriptions.filter { apiDescription =>
-        !apiBindings.contains(apiDescription.function.name)
+  private def schemaBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
+    ListMap(protocol.apiSchemas.map { apiSchema =>
+      val describedFunctions = protocol.apiSchemas.filter { apiSchema =>
+        !apiBindings.contains(apiSchema.function.name)
       }.map(_.function) ++ apiBindings.values.map(_.function)
-      apiDescription.function.name -> HandlerBinding[Node, Effect, Context](
-        apiDescription.function,
-        (_, _) => system.pure(apiDescription.invoke(describedFunctions), None),
+      apiSchema.function.name -> HandlerBinding[Node, Effect, Context](
+        apiSchema.function,
+        (_, _) => system.pure(apiSchema.invoke(describedFunctions), None),
         false
       )
     }*)

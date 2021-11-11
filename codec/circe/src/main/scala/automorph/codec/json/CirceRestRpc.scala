@@ -2,7 +2,7 @@ package automorph.codec.json
 
 import automorph.protocol.restrpc.{Message, MessageError}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.{Decoder, Encoder, HCursor, Json}
+import io.circe.{Decoder, Encoder, Json}
 
 /** REST-RPC protocol support for Circe message codec plugin using JSON format. */
 private[automorph] object CirceRestRpc {

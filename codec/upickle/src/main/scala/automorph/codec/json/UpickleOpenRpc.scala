@@ -1,7 +1,7 @@
 package automorph.codec.json
 
-import automorph.description.OpenRpc
-import automorph.description.openrpc._
+import automorph.schema.OpenRpc
+import automorph.schema.openrpc._
 import ujson.{Arr, Obj, Str, Value}
 import upickle.core.Abort
 

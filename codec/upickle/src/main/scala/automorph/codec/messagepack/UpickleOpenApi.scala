@@ -1,7 +1,7 @@
 package automorph.codec.messagepack
 
-import automorph.description.OpenApi
-import automorph.description.openapi._
+import automorph.schema.OpenApi
+import automorph.schema.openapi._
 import scala.annotation.nowarn
 import scala.collection.mutable.LinkedHashMap
 import upack.{Arr, Obj, Str, Msg}

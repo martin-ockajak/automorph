@@ -1,7 +1,7 @@
 package automorph.codec.messagepack
 
-import automorph.description.OpenRpc
-import automorph.description.openrpc._
+import automorph.schema.OpenRpc
+import automorph.schema.openrpc._
 import scala.annotation.nowarn
 import scala.collection.mutable.LinkedHashMap
 import upack.{Arr, Msg, Obj, Str}

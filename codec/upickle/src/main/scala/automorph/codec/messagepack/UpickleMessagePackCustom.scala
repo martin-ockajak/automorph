@@ -1,7 +1,7 @@
 package automorph.codec.messagepack
 
 import automorph.codec.UpickleCustom
-import automorph.description.{OpenApi, OpenRpc}
+import automorph.schema.{OpenApi, OpenRpc}
 
 /** Basic null-safe data types and RPC protocol message support for uPickle message codec using MessagePack format. */
 trait UpickleMessagePackCustom extends UpickleCustom {

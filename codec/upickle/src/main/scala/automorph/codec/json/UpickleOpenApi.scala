@@ -1,7 +1,7 @@
 package automorph.codec.json
 
-import automorph.description.OpenApi
-import automorph.description.openapi._
+import automorph.schema.OpenApi
+import automorph.schema.openapi._
 import ujson.{Arr, Obj, Str, Value}
 import upickle.core.Abort
 

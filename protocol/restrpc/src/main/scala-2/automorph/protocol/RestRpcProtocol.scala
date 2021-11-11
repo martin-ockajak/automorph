@@ -1,7 +1,7 @@
 package automorph.protocol
 
 import automorph.protocol.restrpc.{ErrorMapping, Message, RestRpcCore}
-import automorph.description.OpenApi
+import automorph.schema.OpenApi
 import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.transport.http.HttpContext
 import scala.language.experimental.macros
@@ -116,7 +116,7 @@ object RestRpcProtocol extends ErrorMapping {
         requestNode => $codec.decode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](requestNode),
         response => $codec.encode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](response),
         responseNode => $codec.decode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](responseNode),
-        openApi => $codec.encode[automorph.description.OpenApi](openApi),
+        openApi => $codec.encode[automorph.schema.OpenApi](openApi),
         string => $codec.encode[String](string)
       )
     """)

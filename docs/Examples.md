@@ -139,7 +139,7 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.Default
-import automorph.description.{OpenApi, OpenRpc}
+import automorph.schema.{OpenApi, OpenRpc}
 import automorph.protocol.JsonRpcProtocol
 import automorph.transport.http.HttpMethod
 import java.net.URI
@@ -169,12 +169,12 @@ val server = createServer(_.bind(api))
 // Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
 val client = Default.clientAsync(new URI("http://localhost:7000/api"), HttpMethod.Put)
 
-// Retrieve remote API description in OpenRPC format
+// Retrieve remote API schema in OpenRPC format
 val openRpcFunction = JsonRpcProtocol.openRpcFunction
 val openRpc = client.call[OpenRpc](openRpcFunction).args() // Future[OpenRpc]
 println(Await.result(openRpc, Duration.Inf))
 
-// Retrieve remote API description in OpenAPI format
+// Retrieve remote API schema in OpenAPI format
 val openApiFunction = JsonRpcProtocol.openApiFunction
 val openApi = client.call[OpenApi](openApiFunction).args() // Future[OpenApi]
 println(Await.result(openApi, Duration.Inf))
