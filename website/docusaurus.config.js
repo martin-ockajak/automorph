@@ -9,6 +9,7 @@ const config = {
   tagline: 'RPC client and server for Scala',
   url: 'https://automorph.org',
   baseUrl: '/',
+  favicon: 'icon.png',
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   organizationName: 'automorph',

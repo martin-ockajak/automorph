@@ -62,7 +62,7 @@ HTTP methods are not specified by the API but chosen by the client from the foll
   * some = world
   * n = 1
 
-```html
+```http
 http://example.org/api/hello?some=world&n=1
 ```
 
@@ -87,7 +87,7 @@ hello(some = "world", n = 1)
 
 **Request headers**
 
-```html
+```http
 POST http://example.org/api/hello
 Content-Type: application/json
 ```
@@ -115,7 +115,7 @@ hello(some = "world", n = 1)
 
 **Request headers**
 
-```html
+```http
 GET http://example.org/api/hello?some=world&n=1
 ```
 
@@ -139,7 +139,7 @@ hello(data = binary, some = "world", n = 1)
 
 **Request headers**
 
-```html
+```http
 POST http://example.org/api/hello?some=test&n=1
 Content-Type: application/octet-stream
 ```
@@ -159,7 +159,7 @@ Response body is interpreted as a successful invocation result if it consists of
 
 **Response headers**
 
-```html
+```http
 Content-Type: application/json
 ```
 
@@ -180,7 +180,7 @@ Response body is interpreted as a return value of successfully invoked remote fu
 
 **Response headers**
 
-```html
+```http
 Content-Type: application/octet-stream
 ```
 
@@ -201,7 +201,7 @@ Response body is interpreted as a failed invocation result if it consists of a J
 
 **Response headers**
 
-```html
+```http
 Content-Type: application/json
 ```
 
