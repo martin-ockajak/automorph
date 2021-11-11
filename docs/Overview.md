@@ -1,12 +1,3 @@
-<br>
-
-# Important
-
-**This is a preview of an upcoming release. Please do not use it for any purposes other than design review !**
-
-<br>
-<br>
-<br>
 
 ![automorph](https://github.com/martin-ockajak/automorph/raw/main/docs/images/banner.jpg)
 
@@ -18,12 +9,7 @@
 * [Quick Start](docs/quickstart)
 * [Documentation](https://automorph.org)
 * [API Reference](https://automorph.org/api/automorph/index.html)
-* [Artifacts](https://mvnrepository.com/artifact/org.automorph/automorph)
 
-# Overview
-
-**Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless
-way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/specification) and [REST-RPC](docs/rest-rpc/README.md) protocols.
 
 ## Goals
 
@@ -33,7 +19,7 @@ way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/sp
 
 ## Features
 
-* **Convenient** - Client-side or server-side remote API bindings are created automatically from public methods of API classes.
+* **Convenient** - Client-side or server-side remote API bindings are created automatically from public methods of existing API classes.
 * **Modular** - [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) protocol, [effect](https://en.wikipedia.org/wiki/Effect_system) type, [transport](https://en.wikipedia.org/wiki/Transport_layer) protocol and message [format](https://en.wikipedia.org/wiki/File_format) can be freely combined by choosing appropriate plugins.
 * **Clean** - Underlying transport protocol request and response metadata can be accessed using optional API abstractions.
 * **Safe** - Optimized API binding code is generated and type checked during compilation.
@@ -45,11 +31,6 @@ way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/sp
 * **Boilerplate free** - Even complex or highly specific use-cases require only a few lines of code.
 
 ## Supported standards
-
-### RPC protocols
-
-* [JSON-RPC](https://www.jsonrpc.org/specification) (*Default*)
-* [REST-RPC](docs/rest-rpc/README.md)
 
 ### Transport protocols
 

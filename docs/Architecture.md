@@ -13,7 +13,7 @@ The library provides the following components to assemble either fully standalon
 
 ## Diagram
 
-![architecture](../images/architecture.jpg)
+![architecture](images/architecture.jpg)
 
 ## Client
 

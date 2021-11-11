@@ -6,6 +6,7 @@ val projectName = "automorph"
 val projectDescription = "RPC client and server library for Scala"
 val repositoryPath = s"martin-ockajak/$projectName"
 val repositoryUrl = s"https://github.com/$repositoryPath"
+val repositoryShell = s"git@github.com:$repositoryPath.git"
 val siteUrl = s"https://$projectName.$projectRoot"
 
 // Metadata
@@ -80,7 +81,7 @@ lazy val root = project.in(file(".")).settings(
 // Dependencies
 
 // Common
-lazy val spi = (project in file("common/spi")).settings(
+lazy val spi = project.in(file("common/spi")).settings(
   name := s"$projectName-spi"
 ).settings(
   libraryDependencies ++= {
@@ -92,7 +93,7 @@ lazy val spi = (project in file("common/spi")).settings(
     }
   }
 )
-lazy val util = (project in file("common/util")).dependsOn(
+lazy val util = project.in(file("common/util")).dependsOn(
   spi
 ).settings(
   name := s"$projectName-util",
@@ -100,7 +101,7 @@ lazy val util = (project in file("common/util")).dependsOn(
     "org.slf4j" % "slf4j-api" % "1.7.32"
   )
 )
-lazy val coreMeta = (project in file("common/core/meta")).dependsOn(
+lazy val coreMeta = project.in(file("common/core/meta")).dependsOn(
   spi, util
 ).settings(
   name := s"$projectName-core-meta",
@@ -113,7 +114,7 @@ lazy val coreMeta = (project in file("common/core/meta")).dependsOn(
     "-skip-packages automorph.client.meta:automorph.handler.meta"
   )
 )
-lazy val core = (project in file("common/core")).dependsOn(
+lazy val core = project.in(file("common/core")).dependsOn(
   coreMeta, testPlugin % Test, jsonrpc % Test, restrpc % Test
 ).settings(
   name := s"$projectName-core",
@@ -124,46 +125,46 @@ lazy val core = (project in file("common/core")).dependsOn(
 )
 
 // Specification
-lazy val openrpc = (project in file("description/openrpc")).dependsOn(
+lazy val openrpc = project.in(file("description/openrpc")).dependsOn(
   spi, testBase % Test
 ).settings(
   name := s"$projectName-openrpc"
 )
-lazy val openapi = (project in file("description/openapi")).dependsOn(
+lazy val openapi = project.in(file("description/openapi")).dependsOn(
   spi, testBase % Test
 ).settings(
   name := s"$projectName-openapi"
 )
 
 // Protocol
-lazy val jsonrpcMeta = (project in file("protocol/jsonrpc/meta")).dependsOn(
+lazy val jsonrpcMeta = project.in(file("protocol/jsonrpc/meta")).dependsOn(
   spi
 ).settings(
   name := s"$projectName-jsonrpc-meta"
 )
-lazy val jsonrpc = (project in file("protocol/jsonrpc")).dependsOn(
+lazy val jsonrpc = project.in(file("protocol/jsonrpc")).dependsOn(
   jsonrpcMeta, openrpc, openapi, util
 ).settings(
   name := s"$projectName-jsonrpc"
 )
-lazy val restrpcMeta = (project in file("protocol/restrpc/meta")).dependsOn(
+lazy val restrpcMeta = project.in(file("protocol/restrpc/meta")).dependsOn(
   spi, http
 ).settings(
   name := s"$projectName-restrpc-meta"
 )
-lazy val restrpc = (project in file("protocol/restrpc")).dependsOn(
+lazy val restrpc = project.in(file("protocol/restrpc")).dependsOn(
   restrpcMeta, openapi, util
 ).settings(
   name := s"$projectName-restrpc"
 )
 
 // Effect system
-lazy val standard = (project in file(s"system/standard")).dependsOn(
+lazy val standard = project.in(file(s"system/standard")).dependsOn(
   core, http, testCore % Test, testHttp % Test
 ).settings(
   name := s"$projectName-standard"
 )
-lazy val zio = (project in file("system/zio")).dependsOn(
+lazy val zio = project.in(file("system/zio")).dependsOn(
   spi, testStandard % Test
 ).settings(
   name := s"$projectName-zio",
@@ -172,7 +173,7 @@ lazy val zio = (project in file("system/zio")).dependsOn(
   ),
   Compile / doc / scalacOptions ++= Seq("-skip-packages zio")
 )
-lazy val monix = (project in file("system/monix")).dependsOn(
+lazy val monix = project.in(file("system/monix")).dependsOn(
   spi, testStandard % Test
 ).settings(
   name := s"$projectName-monix",
@@ -180,7 +181,7 @@ lazy val monix = (project in file("system/monix")).dependsOn(
     "io.monix" %% "monix-eval" % "3.4.0"
   )
 )
-lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
+lazy val catsEffect = project.in(file("system/cats-effect")).dependsOn(
   spi, testStandard % Test
 ).settings(
   name := s"$projectName-cats-effect",
@@ -188,7 +189,7 @@ lazy val catsEffect = (project in file("system/cats-effect")).dependsOn(
     "org.typelevel" %% "cats-effect" % "3.2.9"
   )
 )
-lazy val scalazEffect = (project in file("system/scalaz-effect")).dependsOn(
+lazy val scalazEffect = project.in(file("system/scalaz-effect")).dependsOn(
   spi, testStandard % Test
 ).settings(
   name := s"$projectName-scalaz-effect",
@@ -199,7 +200,7 @@ lazy val scalazEffect = (project in file("system/scalaz-effect")).dependsOn(
 
 // Message codec
 val circeVersion = "0.14.1"
-lazy val circe = (project in file(s"codec/circe")).dependsOn(
+lazy val circe = project.in(file(s"codec/circe")).dependsOn(
   jsonrpc, restrpc, testPlugin % Test
 ).settings(
   name := s"$projectName-circe",
@@ -213,7 +214,7 @@ lazy val circe = (project in file(s"codec/circe")).dependsOn(
   )
 )
 val jacksonVersion = "2.13.0"
-lazy val jackson = (project in file("codec/jackson")).dependsOn(
+lazy val jackson = project.in(file("codec/jackson")).dependsOn(
   jsonrpc, restrpc, testPlugin % Test
 ).settings(
   name := s"$projectName-jackson",
@@ -222,7 +223,7 @@ lazy val jackson = (project in file("codec/jackson")).dependsOn(
   )
 )
 
-lazy val upickle = (project in file("codec/upickle")).dependsOn(
+lazy val upickle = project.in(file("codec/upickle")).dependsOn(
   jsonrpc, restrpc, testPlugin % Test
 ).settings(
   name := s"$projectName-upickle",
@@ -234,7 +235,7 @@ lazy val upickle = (project in file("codec/upickle")).dependsOn(
     "-skip-packages automorph.codec.json.meta:automorph.codec.messagepack.meta"
   )
 )
-lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
+lazy val argonaut = project.in(file("codec/argonaut")).dependsOn(
   jsonrpc, restrpc, testPlugin % Test
 ).settings(
   name := s"$projectName-argonaut",
@@ -247,16 +248,16 @@ lazy val argonaut = (project in file("codec/argonaut")).dependsOn(
   )
 )
 // Message transport
-lazy val http = (project in file("transport/http")).settings(
+lazy val http = project.in(file("transport/http")).settings(
   name := s"$projectName-http",
 ).dependsOn(
   jsonrpc
 )
-lazy val amqp = (project in file("transport/amqp")).settings(
+lazy val amqp = project.in(file("transport/amqp")).settings(
   name := s"$projectName-amqp"
 )
 val sttpVersion = "3.3.15"
-lazy val sttp = (project in file("transport/sttp")).dependsOn(
+lazy val sttp = project.in(file("transport/sttp")).dependsOn(
   core, http, testStandard % Test
 ).settings(
   name := s"$projectName-sttp",
@@ -271,7 +272,7 @@ lazy val sttp = (project in file("transport/sttp")).dependsOn(
 //      url("https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_2.13/latest/")
 //  )
 )
-lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
+lazy val rabbitmq = project.in(file("transport/rabbitmq")).dependsOn(
   amqp, core, standard, testCore % Test, testAmqp % Test
 ).settings(
   name := s"$projectName-rabbitmq",
@@ -281,7 +282,7 @@ lazy val rabbitmq = (project in file("transport/rabbitmq")).dependsOn(
 )
 
 // Server
-lazy val undertow = (project in file("transport/undertow")).dependsOn(
+lazy val undertow = project.in(file("transport/undertow")).dependsOn(
   core, http, testStandard % Test
 ).settings(
   name := s"$projectName-undertow",
@@ -290,7 +291,7 @@ lazy val undertow = (project in file("transport/undertow")).dependsOn(
   )
 )
 val jettyVersion = "11.0.7"
-lazy val jetty = (project in file("transport/jetty")).dependsOn(
+lazy val jetty = project.in(file("transport/jetty")).dependsOn(
   core, http, testStandard % Test
 ).settings(
   name := s"$projectName-jetty",
@@ -299,7 +300,7 @@ lazy val jetty = (project in file("transport/jetty")).dependsOn(
     "org.eclipse.jetty" % "jetty-servlet" % jettyVersion
   )
 )
-lazy val finagle = (project in file("transport/finagle")).dependsOn(
+lazy val finagle = project.in(file("transport/finagle")).dependsOn(
   core, http, testStandard % Test
 ).settings(
   name := s"$projectName-finagle",
@@ -308,7 +309,7 @@ lazy val finagle = (project in file("transport/finagle")).dependsOn(
   )
 )
 val tapirVersion = "0.18.3"
-lazy val tapir = (project in file("transport/tapir")).dependsOn(
+lazy val tapir = project.in(file("transport/tapir")).dependsOn(
   core, http, testStandard % Test
 ).settings(
   name := s"$projectName-tapir",
@@ -331,7 +332,7 @@ lazy val default = project.dependsOn(
     "-skip-packages automorph.meta"
   )
 )
-lazy val examples = (project in file("examples")).dependsOn(
+lazy val examples = project.in(file("examples")).dependsOn(
   default, upickle, zio, testPlugin % Test
 ).settings(
   name := s"$projectName-examples",
@@ -348,7 +349,7 @@ lazy val examples = (project in file("examples")).dependsOn(
 )
 
 // Test
-lazy val testBase = (project in file("test/base")).dependsOn(
+lazy val testBase = project.in(file("test/base")).dependsOn(
   spi
 ).settings(
   libraryDependencies ++= Seq(
@@ -360,7 +361,7 @@ lazy val testBase = (project in file("test/base")).dependsOn(
   ),
   Compile / doc / scalacOptions ++= Seq("-skip-packages test")
 )
-lazy val testPlugin = (project in file("test/plugin")).dependsOn(
+lazy val testPlugin = project.in(file("test/plugin")).dependsOn(
   testBase
 ).settings(
   libraryDependencies ++= Seq(
@@ -368,22 +369,22 @@ lazy val testPlugin = (project in file("test/plugin")).dependsOn(
   ),
   Compile / doc / scalacOptions ++= Seq("-skip-packages test")
 )
-lazy val testCore = (project in file("test/core")).dependsOn(
+lazy val testCore = project.in(file("test/core")).dependsOn(
   testPlugin, core, http, circe, jackson, upickle, argonaut,
 ).settings(
   Compile / doc / scalacOptions ++= Seq("-skip-packages test")
 )
-lazy val testHttp = (project in file("test/http")).dependsOn(
+lazy val testHttp = project.in(file("test/http")).dependsOn(
   testBase, http
 ).settings(
   Compile / doc / scalacOptions ++= Seq("-skip-packages test")
 )
-lazy val testAmqp = (project in file("test/amqp")).dependsOn(
+lazy val testAmqp = project.in(file("test/amqp")).dependsOn(
   testBase, amqp
 ).settings(
   Compile / doc / scalacOptions ++= Seq("-skip-packages test")
 )
-lazy val testStandard = (project in file("test/standard")).dependsOn(
+lazy val testStandard = project.in(file("test/standard")).dependsOn(
   testCore, testHttp, standard
 ).settings(
   Compile / doc / scalacOptions ++= Seq("-skip-packages test")
@@ -448,10 +449,25 @@ Test / test := ((Test / test).dependsOn(testScalastyle)).value
 // Documentation
 apiURL := Some(url(s"https://javadoc.io/doc/${organization.value}/$projectName-core_3/latest"))
 ThisBuild / autoAPIMappings := true
+val catsEffectDocs = taskKey[Unit]("Generates Cats Effect API documentation.")
+catsEffectDocs := {
+  (catsEffect / Compile / doc).value
+  val systemApiSuffix = "api/automorph/system"
+  val catsEffectApiPath = (catsEffect / target).value / "scala-2.13" / systemApiSuffix
+  val systemApiPath = baseDirectory.value / "website" / "static" / systemApiSuffix
+  IO.listFiles(catsEffectApiPath).filter(_.name != "index.html").foreach { file =>
+    IO.copy(Seq(file -> systemApiPath / file.name))
+  }
+}
+
+
+// Site
+enablePlugins(ScalaUnidocPlugin)
+ScalaUnidoc / unidoc / target := (LocalRootProject / baseDirectory).value / "website" / "static" / "api"
+cleanFiles += (ScalaUnidoc / unidoc / target).value
 ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(
   catsEffect
 )
-ScalaUnidoc / unidoc / target := target.value / "site" / "api"
 ScalaUnidoc / unidoc / scalacOptions ++= Seq(
   "-doc-source-url",
   scmInfo.value.get.browseUrl + "/tree/main${FILE_PATH}.scala",
@@ -462,77 +478,32 @@ ScalaUnidoc / unidoc / scalacOptions ++= Seq(
   "-skip-packages",
   "test:examples:automorph.meta:automorph.client.meta:automorph.handler.meta:test:automorph.codec.json.meta:automorph.codec.messagepack.meta:zio:sttp"
 )
-enablePlugins(ScalaUnidocPlugin)
-
-
-// Site
-enablePlugins(LaikaPlugin)
-import laika.rewrite.link._
-import laika.theme.config._
-import laika.helium.config._
-import laika.ast.LengthUnit._
-import laika.ast.Path._
-laikaConfig := LaikaConfig.defaults.withConfigValue(LinkConfig(
-  excludeFromValidation = Seq(Root / "api")
-))
-laikaTheme := laika.helium.Helium.defaults.all.metadata(
-  title = Some("Automorph"),
-  description = Some(projectDescription),
-  version = Some(version.value),
-  language = Some("en")
-).all.themeColors(
-  primary = Color.hex("11698E"),
-  primaryMedium = Color.hex("A7D4DE"),
-  primaryLight = Color.hex("EFEFEF"),
-  secondary = Color.hex("289AD7"),
-  text = Color.hex("5F3F3F"),
-  background = Color.hex("FFFFFF"),
-  bgGradient = (Color.hex("095269"), Color.hex("007c99"))
-).site.layout(
-  contentWidth = vw(85),
-  navigationWidth = vw(16),
-  topBarHeight = px(32),
-  defaultBlockSpacing = px(20),
-  defaultLineHeight = 1.5,
-  anchorPlacement = AnchorPlacement.Right
-).site.topNavigationBar(
-  homeLink = IconLink.external(siteUrl, HeliumIcon.home),
-  navLinks = Seq(
-    IconLink.external(repositoryUrl, HeliumIcon.github),
-    IconLink.external(s"$siteUrl/api", HeliumIcon.api),
-    IconLink.external(s"https://mvnrepository.com/artifact/${organization.value}", HeliumIcon.download)
-  )
-).build
-laikaExtensions := Seq(laika.markdown.github.GitHubFlavor, laika.parse.code.SyntaxHighlighting)
-laikaIncludeAPI := true
-Laika / sourceDirectories := Seq(baseDirectory.value / "docs")
-laikaSite / target := target.value / "site"
-laikaSite := laikaSite.dependsOn(apidoc).value
-val apidoc = taskKey[Unit]("Generates API documentation.")
-apidoc := {
-  (Compile / unidoc).value
-  (catsEffect / Compile / doc).value
-  val systemApiSuffix = "api/automorph/system"
-  val catsEffectApiPath = (catsEffect / target).value / "scala-2.13" / systemApiSuffix
-  val systemApiPath = (laikaSite / target).value / systemApiSuffix
-  IO.listFiles(catsEffectApiPath).filter(_.name != "index.html").foreach { file =>
-    IO.copy(Seq(file -> systemApiPath / file.name))
-  }
-}
-
+lazy val docs = project.in(file("website")).settings(
+  mdocOut := (LocalRootProject / baseDirectory).value / "website" / "docs",
+  mdoc / fileInputs ++= Seq(
+    (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.md",
+    (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.jpg"
+  ),
+  scalacOptions ++= Seq(
+    "-Yno-imports",
+    "-Xfatal-warnings"
+  ),
+  docusaurusCreateSite := docusaurusCreateSite.dependsOn(
+    LocalRootProject / Compile / unidoc,
+    LocalRootProject / catsEffectDocs
+  ).value,
+  docusaurusPublishGhpages := docusaurusPublishGhpages.dependsOn(
+    LocalRootProject / Compile / unidoc,
+    LocalRootProject / catsEffectDocs
+  ).value
+).enablePlugins(MdocPlugin, DocusaurusPlugin)
 val site = taskKey[Unit]("Generates project website.")
-site := laikaSite.value
-site / fileInputs ++= Seq(
-  baseDirectory.value.toGlob / "docs" / ** / "*.md",
-  baseDirectory.value.toGlob / "docs" / ** / "*.conf",
-  baseDirectory.value.toGlob / "docs" / ** / "*.jpg"
-)
+site := (docs / docusaurusCreateSite).value
 
 
 // Deployment
-val repositoryShell = s"git@github.com:$repositoryPath.git"
 enablePlugins(GhpagesPlugin)
-siteSourceDirectory := target.value / "site"
+siteSourceDirectory := target.value / "website"
 git.remoteRepo := repositoryShell
 val deploySite = taskKey[Unit]("Deploys project website.")
 deploySite := {}
