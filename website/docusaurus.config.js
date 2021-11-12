@@ -59,7 +59,7 @@ const config = {
           },
           {
             href: '/api/index.html',
-            label: 'API Reference',
+            label: 'API',
             position: 'left',
           },
           {
