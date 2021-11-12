@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
 
-DOCS_PATH=../docs yarn --cwd website start
+SITE_DIR=website
+
+[ ! -d "${SITE_DIR}/node_modules" ] && yarn --cwd ${SITE_DIR}
+DOCS_PATH=../docs yarn --cwd ${SITE_DIR} start
 
