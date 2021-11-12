@@ -12,7 +12,7 @@ Add the following to your `build.sbt` file:
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 

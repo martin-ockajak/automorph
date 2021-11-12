@@ -479,7 +479,11 @@ ScalaUnidoc / unidoc / scalacOptions ++= Seq(
   "test:examples:automorph.meta:automorph.client.meta:automorph.handler.meta:test:automorph.codec.json.meta:automorph.codec.messagepack.meta:zio:sttp"
 )
 lazy val docs = project.in(file("website")).settings(
+  mdocVariables := Map(
+    "VERSION" -> version.value
+  ),
   mdocOut := (LocalRootProject / baseDirectory).value / "website" / "docs",
+  mdocExtraArguments := Seq("--no-link-hygiene"),
   mdoc / fileInputs ++= Seq(
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.md",
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.jpg"

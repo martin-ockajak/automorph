@@ -10,7 +10,7 @@ Most of the following examples are using [default plugins](Plugins).
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -69,7 +69,7 @@ server.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -131,7 +131,7 @@ Await.result(server.close(), Duration.Inf)
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -197,7 +197,7 @@ Await.result(server.close(), Duration.Inf)
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -257,7 +257,7 @@ Await.result(server.close(), Duration.Inf)
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -321,7 +321,7 @@ server.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -405,7 +405,7 @@ server.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -480,7 +480,7 @@ server.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -567,7 +567,7 @@ Await.result(server.close(), Duration.Inf)
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -633,7 +633,7 @@ server.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -715,7 +715,7 @@ server.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -787,7 +787,7 @@ Await.result(server.close(), Duration.Inf)
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -861,7 +861,7 @@ Await.result(server.close(), Duration.Inf)
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -928,7 +928,7 @@ Await.result(server.close(), Duration.Inf)
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -998,7 +998,7 @@ Await.result(server.close(), Duration.Inf)
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -1070,8 +1070,8 @@ Await.result(server.close(), Duration.Inf)
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1",
-  "org.automorph" %% "automorph-zio" % "0.0.1",
+  "org.automorph" %% "automorph-default" % "@VERSION@",
+  "org.automorph" %% "automorph-zio" % "@VERSION@",
   "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.3.9"
 )
 ```
@@ -1134,8 +1134,8 @@ Runtime.default.unsafeRunTask(server.close())
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1",
-  "org.automorph" %% "automorph-upickle" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@",
+  "org.automorph" %% "automorph-upickle" % "@VERSION@"
 )
 ```
 
@@ -1226,7 +1226,7 @@ Await.result(server.close(), Duration.Inf)
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -1289,7 +1289,7 @@ server.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
@@ -1349,7 +1349,7 @@ server.close()
 
 ```scala
 libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "0.0.1"
+  "org.automorph" %% "automorph-default" % "@VERSION@"
 )
 ```
 
