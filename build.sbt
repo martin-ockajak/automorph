@@ -342,7 +342,7 @@ lazy val examples = project.in(file("examples")).dependsOn(
   Compile / doc / scalacOptions ++= Seq("-skip-packages examples"),
   Compile / scalaSource := baseDirectory.value / "project" / "src" / "main" / "scala",
   Test / scalaSource := (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((3, _)) => baseDirectory.value / "project" / "src" / "test" / "scala-3"
+    case Some((3, _)) => baseDirectory.value / "project" / "src" / "test" / "scala"
     case _ => baseDirectory.value / "project" / "src" / "test" / "scala-2"
   }),
   Test / parallelExecution := false
@@ -498,10 +498,9 @@ site := {
   import scala.sys.process.{Process, stringToProcess}
   (Compile / unidoc).value
   catsEffectDocs.value
-  IO.copyDirectory((examples / baseDirectory).value / "project" / "src", (LocalRootProject / baseDirectory).value / "website" / "static" / "examples" / "project" / "src", true)
+  IO.copyDirectory((examples / baseDirectory).value / "project", (LocalRootProject / baseDirectory).value / "website" / "static" / "examples" / "project", true)
   (docs / mdoc).toTask("").value
   val siteDir = baseDirectory.value / "website"
-  println(siteDir)
   if (!(siteDir / "node_modules").exists) {
     s"yarn --cwd $siteDir install" !
   }

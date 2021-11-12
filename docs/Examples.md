@@ -278,7 +278,7 @@ class ServerApi {
     s"Hello $some ${n.getOrElse(0)}!"
 
   def hi(some: Option[String])(n: Int): String =
-    s"Hi ${some.getOrElse("all")} $n!"
+    s"Hi ${some.getOrElse("who" -> "all")} $n!"
 }
 val api = new ServerApi()
 
@@ -315,7 +315,7 @@ client.close()
 server.close()
 ```
 
-### [HTTP request metadata](../../examples/project/src/test/scala/examples/basic/HttpRequestMetadata.scala)
+### [HTTP request metadata](../../examples/project/src/test/scala-3/examples/basic/HttpRequestMetadata.scala)
 
 **Build**
 
@@ -855,7 +855,7 @@ Await.result(client.close(), Duration.Inf)
 // Stop the server
 Await.result(server.close(), Duration.Inf)
 ```
-### [Arguments by position](../../examples/project/src/test/scala/examples/basic/ArgumentsByPosition.scala)
+### [Arguments by position](../../examples/project/src/test/scala/examples/customize/ArgumentsByPosition.scala)
 
 **Build**
 

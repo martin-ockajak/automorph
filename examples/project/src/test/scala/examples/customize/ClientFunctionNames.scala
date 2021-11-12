@@ -46,7 +46,7 @@ object ClientFunctionNames extends App {
 class ClientFunctionNames extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      ServerFunctionNameMapping.main(Array())
+      ClientFunctionNames.main(Array())
     }
   }
 }

@@ -2,9 +2,7 @@
 
 Expose and call a remote JSON-RPC API over HTTP.
 
-## Custom project
-
-* [Source](/examples/src/main/scala/examples/QuickStart.scala)
+## [Source](../../examples/project/src/main/scala/examples/QuickStart.scala)
 
 ### Build
 
@@ -89,7 +87,7 @@ client.call[String]("hello").args("what" -> "world", "n" -> 1) // Future[String]
 client.close()
 ```
 
-## [Example project](/examples/project)
+## [Project](../../examples/project/README.md)
 
 ### Download
 

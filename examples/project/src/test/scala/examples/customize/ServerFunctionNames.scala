@@ -50,7 +50,7 @@ object ServerFunctionNames extends App {
 
   // Call the remote API function dynamically
   Try(client.call[String]("skip").args()) // Failure - method not found
-  client.call[Double]("test.welcome").args("all") // String
+  client.call[Double]("test.welcome").args("who" -> "all") // String
 
   // Close the client
   client.close()
