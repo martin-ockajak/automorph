@@ -4,7 +4,7 @@ Most of the following examples are using [default plugins](Plugins).
 
 ## Basic
 
-### [Synchronous call](../examples/project/src/test/scala/examples/basic/SynchronousCall.scala)
+### [Synchronous call](../../examples/project/src/test/scala/examples/basic/SynchronousCall.scala)
 
 **Build**
 
@@ -63,7 +63,7 @@ client.close()
 server.close()
 ```
 
-### [Asynchronous call](../examples/project/src/test/scala/examples/basic/AsynchronousCall.scala)
+### [Asynchronous call](../../examples/project/src/test/scala/examples/basic/AsynchronousCall.scala)
 
 **Build**
 
@@ -125,7 +125,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [API schema discovery](../examples/project/src/test/scala/examples/basic/ApiSchemaDiscovery.scala)
+### [API schema discovery](../../examples/project/src/test/scala/examples/basic/ApiSchemaDiscovery.scala)
 
 **Build**
 
@@ -190,7 +190,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [One-way message](../examples/project/src/test/scala/examples/basic/OneWayMessage.scala)
+### [One-way message](../../examples/project/src/test/scala/examples/basic/OneWayMessage.scala)
 * 
 
 **Build**
@@ -251,7 +251,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [Optional parameters](../examples/project/src/test/scala/examples/basic/OptionalParameters.scala)
+### [Optional parameters](../../examples/project/src/test/scala/examples/basic/OptionalParameters.scala)
 
 **Build**
 
@@ -315,7 +315,7 @@ client.close()
 server.close()
 ```
 
-### [HTTP request metadata](../examples/project/src/test/scala/examples/basic/HttpRequestMetadata.scala)
+### [HTTP request metadata](../../examples/project/src/test/scala/examples/basic/HttpRequestMetadata.scala)
 
 **Build**
 
@@ -399,7 +399,7 @@ client.close()
 server.close()
 ```
 
-### [HTTP response metadata](../examples/project/src/test/scala/examples/basic/HttpResponseMetadata.scala)
+### [HTTP response metadata](../../examples/project/src/test/scala/examples/basic/HttpResponseMetadata.scala)
 
 **Build**
 
@@ -474,7 +474,7 @@ server.close()
 
 ## Customize
 
-### [Data serialization](../examples/project/src/test/scala/examples/customize/CustomDataSerialization.scala)
+### [Data serialization](../../examples/project/src/test/scala/examples/customize/CustomDataSerialization.scala)
 
 **Build**
 
@@ -561,7 +561,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [Client function names](../examples/project/src/test/scala/examples/customize/ClientFunctionNames.scala)
+### [Client function names](../../examples/project/src/test/scala/examples/customize/ClientFunctionNames.scala)
 
 **Build**
 
@@ -627,7 +627,7 @@ client.close()
 server.close()
 ```
 
-### [Server function names](../examples/project/src/test/scala/examples/customize/ServerFunctionNames.scala)
+### [Server function names](../../examples/project/src/test/scala/examples/customize/ServerFunctionNames.scala)
 
 **Build**
 
@@ -709,7 +709,7 @@ client.close()
 server.close()
 ```
 
-### [Client exceptions](../examples/project/src/test/scala/examples/customize/ClientExceptions.scala)
+### [Client exceptions](../../examples/project/src/test/scala/examples/customize/ClientExceptions.scala)
 
 **Build**
 
@@ -781,7 +781,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [Server protocol errors](../examples/project/src/test/scala/examples/customize/ServerProtocolErrors.scala)
+### [Server protocol errors](../../examples/project/src/test/scala/examples/customize/ServerProtocolErrors.scala)
 
 **Build**
 
@@ -855,7 +855,7 @@ Await.result(client.close(), Duration.Inf)
 // Stop the server
 Await.result(server.close(), Duration.Inf)
 ```
-### [Arguments by position](../examples/project/src/test/scala/examples/basic/ArgumentsByPosition.scala)
+### [Arguments by position](../../examples/project/src/test/scala/examples/basic/ArgumentsByPosition.scala)
 
 **Build**
 
@@ -922,7 +922,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [HTTP response status](../examples/project/src/test/scala/examples/customize/HttpResponseStatus.scala)
+### [HTTP response status](../../examples/project/src/test/scala/examples/customize/HttpResponseStatus.scala)
 
 **Build**
 
@@ -992,7 +992,7 @@ Await.result(server.close(), Duration.Inf)
 
 ## Select
 
-### [RPC protocol](../examples/project/src/test/scala/examples/select/RpcProtocol.scala)
+### [RPC protocol](../../examples/project/src/test/scala/examples/select/RpcProtocol.scala)
 
 **Build**
 
@@ -1064,7 +1064,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [Effect system](../examples/project/src/test/scala/examples/select/EffectSystem.scala)
+### [Effect system](../../examples/project/src/test/scala/examples/select/EffectSystem.scala)
 
 **Build**
 
@@ -1128,7 +1128,7 @@ Runtime.default.unsafeRunTask(client.close())
 Runtime.default.unsafeRunTask(server.close())
 ```
 
-### [Message codec](../examples/project/src/test/scala/examples/select/MessageCodec.scala)
+### [Message codec](../../examples/project/src/test/scala/examples/select/MessageCodec.scala)
 
 **Build**
 
@@ -1220,7 +1220,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [Client transport](../examples/project/src/test/scala/examples/select/ClientTransport.scala)
+### [Client transport](../../examples/project/src/test/scala/examples/select/ClientTransport.scala)
 
 **Build**
 
@@ -1283,7 +1283,7 @@ client.close()
 server.close()
 ```
 
-### [Server transport](../examples/project/src/test/scala/examples/select/ServerTransport.scala)
+### [Server transport](../../examples/project/src/test/scala/examples/select/ServerTransport.scala)
 
 **Build**
 
@@ -1343,7 +1343,7 @@ client.close()
 server.close()
 ```
 
-### [Endpoint transport](../examples/project/src/test/scala/examples/select/EndpointTransport.scala)
+### [Endpoint transport](../../examples/project/src/test/scala/examples/select/EndpointTransport.scala)
 
 **Build**
 
