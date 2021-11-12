@@ -497,9 +497,9 @@ site := {
   IO.copyDirectory((examples / baseDirectory).value / "project" / "src", (LocalRootProject / baseDirectory).value / "website" / "static" / "examples" / "project" / "src", true)
   (docs / mdoc).toTask("").value
   if (!((docs / baseDirectory).value / "node_modules").exists) {
-    s"yarn --cwd ${(docs / baseDirectory).value} install" !
+    s"bash yarn --cwd ${(docs / baseDirectory).value} install" !
   }
-  s"yarn --cwd ${(docs / baseDirectory).value} build" !
+  s"bash yarn --cwd ${(docs / baseDirectory).value} build" !
 }
 
 
