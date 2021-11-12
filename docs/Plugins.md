@@ -51,11 +51,11 @@ The underlying format must support storing arbitrarily nested structures of basi
 
 | Class | Artifact | Library | Node Type | Codec |
 | --- | --- | --- | --- | --- |
-| [CirceJsonCodec](/api/automorph/format/json/CirceJsonCodec.html) (*Default*) | [automorph-circe](https://mvnrepository.com/artifact/org.automorph/automorph-circe) | [Circe](https://circe.github.io/circe) |[Json](https://circe.github.io/circe/api/io/circe/Json.html) | [JSON](https://www.json.org/) |
-| [JacksonJsonCodec](/api/automorph/format/json/JacksonJsonCodec.html) | [automorph-jackson](https://mvnrepository.com/artifact/org.automorph/automorph-jackson) | [Jackson](https://github.com/FasterXML/jackson-module-scala/) |[JsonNode](https://fasterxml.github.io/jackson-databind/javadoc/3.0.0/index.html?com/fasterxml/jackson/databind/JsonNode.html) | [JSON](https://www.json.org/) |
-| [UpickleJsonCodec](/api/automorph/format/json/UpickleJsonCodec.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Value](http://com-lihaoyi.github.io/upickle/#uJson) | [JSON](https://www.json.org/) |
-| [UpickleMessagePackCodec](/api/automorph/format/messagepack/UpickleMessagePackCodec.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Msg](https://com-lihaoyi.github.io/upickle/#uPack) | [MessagePack](https://msgpack.org/) |
-| [ArgonautJsonCodec](/api/automorph/format/json/ArgonautJsonCodec.html) | [automorph-argonaut](https://mvnrepository.com/artifact/org.automorph/automorph-argonaut) | [Argonaut](http://argonaut.io/doc/) |[Json](http://argonaut.io/scaladocs/#argonaut.Json) | [JSON](https://www.json.org/) |
+| [CirceJsonCodec](/api/automorph/codec/json/CirceJsonCodec.html) (*Default*) | [automorph-circe](https://mvnrepository.com/artifact/org.automorph/automorph-circe) | [Circe](https://circe.github.io/circe) |[Json](https://circe.github.io/circe/api/io/circe/Json.html) | [JSON](https://www.json.org/) |
+| [JacksonJsonCodec](/api/automorph/codec/json/JacksonJsonCodec.html) | [automorph-jackson](https://mvnrepository.com/artifact/org.automorph/automorph-jackson) | [Jackson](https://github.com/FasterXML/jackson-module-scala/) |[JsonNode](https://fasterxml.github.io/jackson-databind/javadoc/3.0.0/index.html?com/fasterxml/jackson/databind/JsonNode.html) | [JSON](https://www.json.org/) |
+| [UpickleJsonCodec](/api/automorph/codec/json/UpickleJsonCodec.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Value](http://com-lihaoyi.github.io/upickle/#uJson) | [JSON](https://www.json.org/) |
+| [UpickleMessagePackCodec](/api/automorph/codec/messagepack/UpickleMessagePackCodec.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Msg](https://com-lihaoyi.github.io/upickle/#uPack) | [MessagePack](https://msgpack.org/) |
+| [ArgonautJsonCodec](/api/automorph/codec/json/ArgonautJsonCodec.html) | [automorph-argonaut](https://mvnrepository.com/artifact/org.automorph/automorph-argonaut) | [Argonaut](http://argonaut.io/doc/) |[Json](http://argonaut.io/scaladocs/#argonaut.Json) | [JSON](https://www.json.org/) |
 
 ## Message transport
 
@@ -65,7 +65,7 @@ The underlying transport protocol must support request & response messaging patt
 
 ### Client
 
-[Client message transport](/api/automorph/spi/ClientMessageTransport.html) protocol plugins.
+[Client message transport](/api/automorph/spi/transport/ClientMessageTransport.html) protocol plugins.
 
 Used by the RPC client to send requests and receive responses to and from a remote endpoint.
 
@@ -84,7 +84,7 @@ Used by the RPC client to send requests and receive responses to and from a remo
 
 ### Server
 
-[Server message transport](/api/automorph/spi/ServerMessageTransport.html) protocol plugins.
+[Server message transport](/api/automorph/spi/transport/ServerMessageTransport.html) protocol plugins.
 
 Used to actively receive requests and send responses back using specific message transport protocol while invoking RPC request handler to process them.
 
@@ -97,7 +97,7 @@ Used to actively receive requests and send responses back using specific message
 
 ### Endpoint
 
-[Endpoint message transport](/api/automorph/spi/EndpointMessageTransport.html) protocol plugins.
+[Endpoint message transport](/api/automorph/spi/transport/EndpointMessageTransport.html) protocol plugins.
 
 Used to passively handle requests into responses using specific message transport protocol from an active server while invoking RPC request handler to process them.
 
