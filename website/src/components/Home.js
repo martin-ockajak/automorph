@@ -67,7 +67,7 @@ const features = [
     title: 'Compatible',
     description: (
       <>
-        Artifacts are available for <a href="https://dotty.epfl.ch/">Scala 3</a> on <a href="https://openjdk.java.net/">JRE 11+</a> with support <a href="https://www.scala-lang.org/news/2.13.0">Scala 2.13</a> and <a href="https://www.scala-lang.org/news/2.12.0">Scala 2.12</a> planned.
+        Artifacts are available for <a href="https://dotty.epfl.ch/">Scala 3</a> on <a href="https://openjdk.java.net/">JRE 11+</a> with support for <a href="https://www.scala-lang.org/news/2.13.0">Scala 2.13</a> and <a href="https://www.scala-lang.org/news/2.12.0">Scala 2.12</a> planned.
       </>
     ),
   },

@@ -589,13 +589,6 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Customize exposed API to RPC function name mapping
-val mapName = (name: String) => name match {
-  case "hello" => Seq("hello", "hi")
-  case "skip" => Seq.empty
-  case other => Seq(s"test.$other")
-}
-
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val createServer = Default.serverSync(7000, "/api")
 val server = createServer(_.bind(api))
