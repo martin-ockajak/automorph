@@ -492,10 +492,10 @@ lazy val docs = project.in(file("website")).settings(
 val site = taskKey[Unit]("Generates project website.")
 site := {
   import scala.sys.process.{Process, stringToProcess}
-//  (Compile / unidoc).value
-//  catsEffectDocs.value
-//  IO.copyDirectory((examples / baseDirectory).value / "project" / "src", (LocalRootProject / baseDirectory).value / "website" / "static" / "examples" / "project" / "src", true)
-//  (docs / mdoc).toTask("").value
+  (Compile / unidoc).value
+  catsEffectDocs.value
+  IO.copyDirectory((examples / baseDirectory).value / "project" / "src", (LocalRootProject / baseDirectory).value / "website" / "static" / "examples" / "project" / "src", true)
+  (docs / mdoc).toTask("").value
   val siteDir = baseDirectory.value / "website"
   println(siteDir)
   if (!(siteDir / "node_modules").exists) {
