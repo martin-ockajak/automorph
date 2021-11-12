@@ -69,3 +69,40 @@
 * [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
 * [Autowire](https://github.com/lihaoyi/autowire)
 * [STTP](https://github.com/softwaremill/sttp)
+
+# Build
+
+## Requirements
+
+* [JDK 11+](https://openjdk.java.net/)
+* [SBT](https://www.scala-sbt.org/)
+* [NodeJS 16+](https://nodejs.org/) *(Documentation)*
+* [Yarn](https://yarnpkg.com/) *(Documentation)*
+
+## Commands
+
+### Build
+
+```bash
+sbt '+ build'
+```
+
+### Documentation
+
+```bash
+sbt '++2.13.7 site'
+```
+
+### Local dynamic documentation
+
+```bash
+yarn --cwd website
+DOCS_PATH=../docs yarn --cwd $website start
+```
+
+## Notes
+
+* Unified Scaladoc generation does not work for Scala 3
+* uPickle codec compilation takes a long time
+* Static documentation build breaks API reference links
+
