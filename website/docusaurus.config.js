@@ -23,7 +23,7 @@ const config = {
         blog: false,
         sitemap: false,
         docs: {
-          path: process.env['DOCS_PATH'] ?? 'docs',
+          path: process.env['SITE_DOCS'] ?? '../docs',
           sidebarPath: require.resolve('./sidebars.js'),
         },
         theme: {

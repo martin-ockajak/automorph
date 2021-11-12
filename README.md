@@ -93,16 +93,15 @@ sbt '+ build'
 sbt '++2.13.7 site'
 ```
 
-### Local dynamic documentation
+### Local documentation
 
 ```bash
-yarn --cwd website
-DOCS_PATH=../docs yarn --cwd $website start
+yarn --cwd website start
 ```
 
 ## Notes
 
 * Unified Scaladoc generation does not work for Scala 3
 * uPickle codec compilation takes a long time
-* Static documentation build breaks API reference links
+* Documentation build breaks API reference links
 

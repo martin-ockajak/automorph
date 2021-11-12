@@ -491,15 +491,17 @@ lazy val docs = project.in(file("website")).settings(
 ).enablePlugins(MdocPlugin, DocusaurusPlugin)
 val site = taskKey[Unit]("Generates project website.")
 site := {
-  import scala.sys.process.stringToProcess
-  (Compile / unidoc).value
-  catsEffectDocs.value
-  IO.copyDirectory((examples / baseDirectory).value / "project" / "src", (LocalRootProject / baseDirectory).value / "website" / "static" / "examples" / "project" / "src", true)
-  (docs / mdoc).toTask("").value
-  if (!((docs / baseDirectory).value / "node_modules").exists) {
-    s"bash yarn --cwd ${(docs / baseDirectory).value} install" !
+  import scala.sys.process.{Process, stringToProcess}
+//  (Compile / unidoc).value
+//  catsEffectDocs.value
+//  IO.copyDirectory((examples / baseDirectory).value / "project" / "src", (LocalRootProject / baseDirectory).value / "website" / "static" / "examples" / "project" / "src", true)
+//  (docs / mdoc).toTask("").value
+  val siteDir = baseDirectory.value / "website"
+  println(siteDir)
+  if (!(siteDir / "node_modules").exists) {
+    s"yarn --cwd $siteDir install" !
   }
-  s"bash yarn --cwd ${(docs / baseDirectory).value} build" !
+  Process(s"yarn --cwd $siteDir build", None, "SITE_DOCS" -> "docs") !
 }
 
 
