@@ -393,7 +393,7 @@ lazy val testStandard = project.in(file("test/standard")).dependsOn(
 
 // Compile
 ThisBuild / scalaVersion := "3.0.0"
-ThisBuild / crossScalaVersions ++= Seq("2.13.7", scalaVersion.value)
+ThisBuild / crossScalaVersions ++= Seq("2.13.7", "3.0.0")
 ThisBuild / scalacOptions ++= Seq(
   "-language:higherKinds",
   "-feature",
@@ -416,6 +416,8 @@ ThisBuild / scalacOptions ++= Seq(
   )
   case _ => Seq(
     "-language:existentials",
+    "-J--add-modules",
+    "-Jjava.net.http",
     "-Xsource:3",
     "-Xlint",
     "-Wconf:site=[^.]+\\.codec\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
