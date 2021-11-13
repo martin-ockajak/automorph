@@ -189,6 +189,9 @@ lazy val catsEffect = project.in(file("system/cats-effect")).dependsOn(
     "org.typelevel" %% "cats-effect" % "3.2.9"
   )
 )
+lazy val catsEffectDoc = project.in(file("system/cats-effect/doc")).dependsOn(
+  spi
+)
 lazy val scalazEffect = project.in(file("system/scalaz-effect")).dependsOn(
   spi, testStandard % Test
 ).settings(
@@ -269,7 +272,7 @@ lazy val sttp = project.in(file("transport/sttp")).dependsOn(
   Compile / doc / scalacOptions ++= Seq("-skip-packages sttp")
 //  apiMappings += (
 //    (unmanagedBase.value / s"core_3-$sttpVersion.jar") -> 
-//      url("https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_2.13/latest/")
+//      url(s"https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_${scalaVersion.value}/latest/")
 //  )
 )
 lazy val rabbitmq = project.in(file("transport/rabbitmq")).dependsOn(
@@ -457,12 +460,17 @@ allDoc := {
   (Compile / unidoc).value
   (catsEffect / Compile / doc).value
   val systemApiSuffix = "api/automorph/system"
-  val catsEffectApiPath = (catsEffect / target).value / "scala-2.13" / systemApiSuffix
+  val scalaVersionSuffix = (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, _)) => scalaVersion.value.split("\\.").init.mkString(".")
+    case _ => scalaVersion.value
+  })
+  val catsEffectApiPath = (catsEffect / target).value / s"scala-$scalaVersionSuffix" / systemApiSuffix
   val systemApiPath = docsDirectory.value / "static" / systemApiSuffix
   IO.listFiles(catsEffectApiPath).filter(_.name != "index.html").foreach { file =>
-    IO.copy(Seq(file -> systemApiPath / file.name))
+    IO.copyFile(file, systemApiPath / file.name)
   }
 }
+//allDoc / fileInputs += (docsDirectory.value / "static/api").toGlob / ** / "*.html"
 ScalaUnidoc / unidoc / target := docsDirectory.value / "static/api"
 ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(
   catsEffect
