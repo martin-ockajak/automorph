@@ -33,8 +33,9 @@ const config = {
   plugins: [
     [require.resolve("@easyops-cn/docusaurus-search-local"), {
       highlightSearchTermsOnTargetPage: true
-    }]
-  ].concat(process.env['SITE_LOCAL'] ? ['docusaurus-plugin-relative-paths'] : []),
+    }],
+    'docusaurus-plugin-relative-paths'
+  ],
 
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
