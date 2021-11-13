@@ -86,7 +86,7 @@
 ### Build
 
 ```bash
-sbt '+ build'
+sbt '+ test'
 ```
 
 ### Documentation
