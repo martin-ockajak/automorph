@@ -452,7 +452,7 @@ lazy val placeholderDoc = project.in(file("system/doc")).dependsOn(
   spi
 )
 val docsDirectory = settingKey[File]("Website generator directory.")
-docsDirectory := baseDirectory.value / "website"
+docsDirectory := baseDirectory.value / "site"
 apiURL := Some(url(s"$siteUrl/api"))
 ThisBuild / autoAPIMappings := true
 val allDoc = taskKey[Unit]("Generates all API documentation.")
@@ -490,7 +490,7 @@ clean := clean.dependsOn(unidoc / clean).value
 
 
 // Site
-lazy val docs = project.in(file("website")).settings(
+lazy val docs = project.in(file("site")).settings(
   mdocVariables := Map(
     "VERSION" -> version.value
   ),
