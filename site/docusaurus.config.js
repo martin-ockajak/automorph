@@ -73,8 +73,8 @@ const config = {
         ],
       },
       prism: {
-        theme: require('prism-react-renderer/themes/vsDark'),
-        darkTheme: require('prism-react-renderer/themes/vsLight'),
+        theme: require('prism-react-renderer/themes/nightOwl'),
+        darkTheme: require('prism-react-renderer/themes/nightOwl'),
         additionalLanguages: ['java', 'scala']
       },
     }),
