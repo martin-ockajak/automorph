@@ -189,9 +189,6 @@ lazy val catsEffect = project.in(file("system/cats-effect")).dependsOn(
     "org.typelevel" %% "cats-effect" % "3.2.9"
   )
 )
-lazy val catsEffectDoc = project.in(file("system/cats-effect/doc")).dependsOn(
-  spi
-)
 lazy val scalazEffect = project.in(file("system/scalaz-effect")).dependsOn(
   spi, testStandard % Test
 ).settings(
@@ -451,6 +448,9 @@ Test / test := ((Test / test).dependsOn(testScalastyle)).value
 
 // Documentation
 enablePlugins(ScalaUnidocPlugin)
+lazy val placeholderDoc = project.in(file("system/doc")).dependsOn(
+  spi
+)
 val docsDirectory = settingKey[File]("Website generator directory.")
 docsDirectory := baseDirectory.value / "website"
 apiURL := Some(url(s"$siteUrl/api"))
