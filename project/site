@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-SITE_HOME=website/build/index.html
+SITE_HOME=site/build/index.html
 
-sbt '++2.13.7 site' #&& case "$OSTYPE" in
-#  linux*)   browse ${SITE_HOME} & ;;
-#  bsd*)     browse ${SITE_HOME} & ;;
-#  cygwin*)  browse ${SITE_HOME} & ;;
-#  win*)     start "" ${SITE_HOME} & ;;
-#  msys*)    start "" ${SITE_HOME} & ;;
-#  darwin*)  open ${SITE_HOME} & ;; 
-#  *)        browse ${SITE_HOME} & ;;
-#esac
+sbt '++2.13.7 site' && case "$OSTYPE" in
+  linux*)   browse ${SITE_HOME} & ;;
+  bsd*)     browse ${SITE_HOME} & ;;
+  cygwin*)  browse ${SITE_HOME} & ;;
+  win*)     start "" ${SITE_HOME} & ;;
+  msys*)    start "" ${SITE_HOME} & ;;
+  darwin*)  open ${SITE_HOME} & ;; 
+  *)        browse ${SITE_HOME} & ;;
+esac
 
