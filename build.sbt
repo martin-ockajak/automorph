@@ -451,8 +451,8 @@ enablePlugins(ScalaUnidocPlugin)
 lazy val placeholderDoc = project.in(file("system/doc")).dependsOn(
   spi
 )
-val docsDirectory = settingKey[File]("Website generator directory.")
-docsDirectory := baseDirectory.value / "site"
+val sitePath = settingKey[File]("Website generator directory.")
+sitePath := baseDirectory.value / "site"
 apiURL := Some(url(s"$siteUrl/api"))
 ThisBuild / autoAPIMappings := true
 val allDoc = taskKey[Unit]("Generates all API documentation.")
@@ -465,13 +465,13 @@ allDoc := {
     case _ => scalaVersion.value
   })
   val catsEffectApiPath = (catsEffect / target).value / s"scala-$scalaVersionSuffix" / systemApiSuffix
-  val systemApiPath = docsDirectory.value / "static" / systemApiSuffix
+  val systemApiPath = sitePath.value / "static" / systemApiSuffix
   IO.listFiles(catsEffectApiPath).filter(_.name != "index.html").foreach { file =>
     IO.copyFile(file, systemApiPath / file.name)
   }
 }
-//allDoc / fileInputs += (docsDirectory.value / "static/api").toGlob / ** / "*.html"
-ScalaUnidoc / unidoc / target := docsDirectory.value / "static/api"
+//allDoc / fileInputs += (sitePath.value / "static/api").toGlob / ** / "*.html"
+ScalaUnidoc / unidoc / target := sitePath.value / "static/api"
 ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(
   catsEffect
 )
@@ -494,7 +494,7 @@ lazy val docs = project.in(file("site")).settings(
   mdocVariables := Map(
     "VERSION" -> version.value
   ),
-  mdocOut := (LocalRootProject / docsDirectory).value / "docs",
+  mdocOut := (LocalRootProject / sitePath).value / "docs",
   mdocExtraArguments := Seq("--no-link-hygiene"),
   mdoc / fileInputs ++= Seq(
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.md",
@@ -509,23 +509,23 @@ val site = taskKey[Unit]("Generates project website.")
 site := {
   import scala.sys.process.{Process, stringToProcess}
   allDoc.value
-  IO.copyDirectory((examples / baseDirectory).value / "project", docsDirectory.value / "static/examples/project", true)
+  IO.copyDirectory((examples / baseDirectory).value / "project", sitePath.value / "static/examples/project", true)
   (docs / mdoc).toTask("").value
-  if (!(docsDirectory.value / "node_modules").exists) {
-    Process(Seq("bash", "-c", s"cd ${docsDirectory.value} && yarn install")) !
+  if (!(sitePath.value / "node_modules").exists) {
+    Process(Seq("bash", "-c", "cd site && yarn install")) !
   }
-  Process(Seq("bash", "-c", s"cd ${docsDirectory.value} && yarn build"), None, "SITE_DOCS" -> "docs") !
+  Process(Seq("bash", "-c", "cd site && yarn build"), None, "SITE_DOCS" -> "docs") !
 }
 cleanFiles ++= Seq(
-  docsDirectory.value / "docs",
-  docsDirectory.value / "static/examples",
-  docsDirectory.value / "build"
+  sitePath.value / "docs",
+  sitePath.value / "static/examples",
+  sitePath.value / "build"
 )
 
 
 // Deployment
 enablePlugins(GhpagesPlugin)
-siteSourceDirectory := docsDirectory.value / "build"
+siteSourceDirectory := sitePath.value / "build"
 git.remoteRepo := repositoryShell
 val deploySite = taskKey[Unit]("Deploys project website.")
 deploySite := {}
