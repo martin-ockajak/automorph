@@ -10,11 +10,12 @@ object HttpRequestMetadata extends App {
   class ServerApi {
 
     // Accept HTTP request context provided by the server message transport plugin
-    def hello(message: String)(implicit http: ServerContext): String = Seq(
-      Some(message),
-      http.path,
-      http.header("X-Test")
-    ).flatten.mkString(",")
+    def hello(message: String)(implicit http: ServerContext): String =
+      Seq(
+        Some(message),
+        http.path,
+        http.header("X-Test")
+      ).flatten.mkString(",")
   }
   val api = new ServerApi()
 

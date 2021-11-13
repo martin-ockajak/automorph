@@ -341,11 +341,12 @@ import java.net.URI
 class ServerApi {
 
   // Accept HTTP request context provided by the server message transport plugin
-  def hello(message: String)(implicit http: ServerContext): String = Seq(
-    Some(message),
-    http.path,
-    http.header("X-Test")
-  ).flatten.mkString(", ")
+  def hello(message: String)(implicit http: ServerContext): String =
+    Seq(
+      Some(message),
+      http.path,
+      http.header("X-Test")
+    ).flatten.mkString(",")
 }
 
 val api = new ServerApi()
@@ -824,8 +825,7 @@ val protocol = Default.protocol[Default.ServerContext].mapException {
 }
 
 // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val system = Default.systemAsync
-val handler = Handler.protocol(protocol).system(system)
+val handler = Handler.protocol(protocol).system(Default.systemAsync)
 val server = Default.server(handler, 7000, "/api")
 ```
 
@@ -902,9 +902,8 @@ trait ClientApi {
 // Configure JSON-RPC to pass arguments by position instead of by name
 val protocol = Default.protocol[Default.ClientContext].namedArguments(false)
 
-// Setup custom JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
-val url = new URI("http://localhost:7000/api")
-val clientTransport = Default.clientTransportAsync(url, HttpMethod.Put)
+// Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
 val client = Client.protocol(protocol).transport(clientTransport)
 
 // Call the remote API function
@@ -1024,12 +1023,10 @@ class ServerApi {
 val api = new ServerApi()
 
 // Create a server REST-RPC protocol plugin with '/api' path prefix
-val serverProtocol = RestRpcProtocol(Default.codec, "/api/" )
-  .context[Default.ServerContext]
+val serverProtocol = RestRpcProtocol(Default.codec, "/api/" ).context[Default.ServerContext]
 
 // Start default REST-RPC HTTP server listening on port 7000 for requests to '/api'
-val system = Default.systemAsync
-val handler = Handler.protocol(serverProtocol).system(system)
+val handler = Handler.protocol(serverProtocol).system(Default.systemAsync)
 val server = Default.server(handler, 7000, "/api")
 ```
 
@@ -1042,8 +1039,7 @@ trait ClientApi {
 }
 
 // Create a client REST-RPC protocol plugin with '/api' path prefix
-val clientProtocol = RestRpcProtocol(Default.codec, "/api/")
-  .context[Default.ClientContext]
+val clientProtocol = RestRpcProtocol(Default.codec, "/api/").context[Default.ClientContext]
 
 // Setup default REST-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
@@ -1175,9 +1171,7 @@ val api = new ServerApi()
 
 // Create a server RPC protocol plugin
 val serverProtocol =
-  Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ServerContext](
-    codec
-  )
+  Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ServerContext](codec)
 
 // Create an effect system plugin
 val system = Default.systemAsync
@@ -1197,9 +1191,7 @@ trait ClientApi {
 
 // Create a client RPC protocol plugin
 val clientProtocol =
-  Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ClientContext](
-    codec
-  )
+  Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ClientContext](codec)
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
