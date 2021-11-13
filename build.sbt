@@ -512,9 +512,9 @@ site := {
   IO.copyDirectory((examples / baseDirectory).value / "project", docsDirectory.value / "static/examples/project", true)
   (docs / mdoc).toTask("").value
   if (!(docsDirectory.value / "node_modules").exists) {
-    s"yarn --cwd ${docsDirectory.value} install" !
+    Process(Seq("bash", "-c", s"cd ${docsDirectory.value} && yarn install")) !
   }
-  Process(s"yarn --cwd ${docsDirectory.value} build", None, "SITE_DOCS" -> "docs") !
+  Process(Seq("bash", "-c", s"cd ${docsDirectory.value} && yarn build"), None, "SITE_DOCS" -> "docs") !
 }
 cleanFiles ++= Seq(
   docsDirectory.value / "docs",
