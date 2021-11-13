@@ -51,16 +51,14 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
 
   override def createRequest(
     function: String,
-    argumentNames: Option[Iterable[String]],
-    argumentValues: Iterable[Node],
+    arguments: Iterable[(String, Node)],
     responseRequired: Boolean,
     requestId: String
   ): Try[RpcRequest[Node, Metadata]] = {
     // Create request
     require(requestId.nonEmpty, "Empty request identifier")
     val id = Option.when(responseRequired)(Right(requestId).withLeft[BigDecimal])
-    val argumentNodes = createArgumentNodes(Option.when(namedArguments)(argumentNames).flatten, argumentValues)
-    val requestMessage = Request(id, function, argumentNodes).message
+    val requestMessage = Request(id, function, Right(arguments.toMap)).message
 
     // Serialize request
     val messageText = () => Some(codec.text(encodeMessage(requestMessage)))
@@ -68,7 +66,8 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
       Failure(ParseErrorException("Malformed request", error))
     }.map { messageBody =>
       val message = RpcMessage(id, messageBody, requestMessage.properties, messageText)
-      RpcRequest(message, function, argumentNodes, responseRequired, requestId)
+      val requestArguments = arguments.map(Right[Node, (String, Node)].apply).toSeq
+      RpcRequest(message, function, requestArguments, responseRequired, requestId)
     }
   }
 
@@ -87,7 +86,13 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
         val message = RpcMessage(requestMessage.id, requestBody, requestMessage.properties, messageText)
         Try(Request(requestMessage)).pureFold(
           error => Left(RpcError(error, message)),
-          request => Right(RpcRequest(message, request.method, request.params, request.id.isDefined, requestId))
+          request => {
+            val requestArguments = request.params.fold(
+              _.map(Left.apply[Node, (String, Node)]),
+              _.map(Right.apply[Node, (String, Node)]).toSeq
+            )
+            Right(RpcRequest(message, request.method, requestArguments, request.id.isDefined, requestId))
+          }
         )
       }
     )
@@ -241,14 +246,6 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     }
     mapOpenApi(OpenApi(functionSchemas))
   }
-
-  private def createArgumentNodes(
-    argumentNames: Option[Iterable[String]],
-    encodedArguments: Iterable[Node]
-  ): Params[Node] =
-    argumentNames.filter(_.size >= encodedArguments.size).map { names =>
-      Right(names.zip(encodedArguments).toMap)
-    }.getOrElse(Left(encodedArguments.toList))
 
   private def requestSchema(function: RpcFunction): Schema = Schema(
     Some(OpenApi.objectType),

@@ -51,28 +51,28 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
 
   override def createRequest(
     function: String,
-    argumentNames: Option[Iterable[String]],
-    argumentValues: Iterable[Node],
+    arguments: Iterable[(String, Node)],
     responseRequired: Boolean,
     requestId: String
-  ): Try[RpcRequest[Node, Metadata]] =
+  ): Try[RpcRequest[Node, Metadata]] = {
     // Create request
-    createArgumentNodes(argumentNames, argumentValues).flatMap { request =>
-      val requestProperties = Map(
-        "Type" -> MessageType.Call.toString,
-        "Function" -> function,
-        "Arguments" -> argumentValues.size.toString
-      )
+    val request = arguments.toMap
+    val requestProperties = Map(
+      "Type" -> MessageType.Call.toString,
+      "Function" -> function,
+      "Arguments" -> arguments.size.toString
+    )
 
-      // Serialize request
-      val messageText = () => Some(codec.text(encodeRequest(request)))
-      Try(codec.serialize(encodeRequest(request))).recoverWith { case error =>
-        Failure(InvalidRequestException("Malformed request", error))
-      }.map { messageBody =>
-        val message = RpcMessage((), messageBody, requestProperties, messageText)
-        RpcRequest(message, function, Right(request), responseRequired, requestId)
-      }
+    // Serialize request
+    val messageText = () => Some(codec.text(encodeRequest(request)))
+    Try(codec.serialize(encodeRequest(request))).recoverWith { case error =>
+      Failure(InvalidRequestException("Malformed request", error))
+    }.map { messageBody =>
+      val message = RpcMessage((), messageBody, requestProperties, messageText)
+      val requestArguments = arguments.map(Right.apply[Node, (String, Node)]).toSeq
+      RpcRequest(message, function, requestArguments, responseRequired, requestId)
     }
+  }
 
   override def parseRequest(
     requestBody: MessageBody,
@@ -90,7 +90,8 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
         if (path.startsWith(pathPrefix) && path.length > pathPrefix.length) {
           val function = path.substring(pathPrefix.length, path.length)
           val message = RpcMessage((), requestBody, requestProperties ++ Seq("Function" -> function), messageText)
-          Right(RpcRequest(message, function, Right(request), true, requestId))
+          val requestArguments = request.map(Right.apply[Node, (String, Node)]).toSeq
+          Right(RpcRequest(message, function, requestArguments, true, requestId))
         } else {
           val message = RpcMessage((), requestBody, requestProperties, messageText)
           Left(RpcError(InvalidRequestException(s"Invalid URL path: $path"), message))
@@ -245,16 +246,6 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
           request => Right(request)
         )
       }
-    }
-
-  private def createArgumentNodes(
-    argumentNames: Option[Iterable[String]],
-    encodedArguments: Iterable[Node]
-  ): Try[Request[Node]] =
-    argumentNames.filter(_.size >= encodedArguments.size).map { names =>
-      Success(names.zip(encodedArguments).toMap)
-    }.getOrElse {
-      Failure(InvalidRequestException("Missing REST-RPC request argument names"))
     }
 
   private def requestSchema(function: RpcFunction): Schema = Schema(

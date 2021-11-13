@@ -15,7 +15,7 @@ package automorph.spi.protocol
 final case class RpcRequest[Node, Metadata](
   message: RpcMessage[Metadata],
   function: String,
-  arguments: Either[List[Node], Map[String, Node]],
+  arguments: Seq[Either[Node, (String, Node)]],
   responseRequired: Boolean,
   id: String
 )

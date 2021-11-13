@@ -90,7 +90,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   ): Effect[Result] = {
     // Create request
     val requestId = Random.id
-    protocol.createRequest(function, Some(argumentNames), argumentNodes, true, requestId).pureFold(
+    protocol.createRequest(function, argumentNames.zip(argumentNodes), true, requestId).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>
@@ -128,7 +128,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   ): Effect[Unit] = {
     // Create request
     val requestId = Random.id
-    protocol.createRequest(function, Some(argumentNames), argumentNodes, false, requestId).pureFold(
+    protocol.createRequest(function, argumentNames.zip(argumentNodes), false, requestId).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>

@@ -149,28 +149,30 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     // Adjust expected function parameters if it uses context as its last parameter
     val parameters = binding.function.parameters
     val parameterNames = parameters.map(_.name).dropRight(if (binding.acceptsContext) 1 else 0)
-    rpcRequest.arguments.fold(
-      positionalArguments => {
-        // Arguments by position
-        val redundantSize = positionalArguments.size - parameterNames.size
-        if (redundantSize > 0) {
-          Failure(new IllegalArgumentException(
-            s"Redundant arguments: ${Range(parameterNames.size, redundantSize).mkString(", ")}"
-          ))
-        } else {
-          Success(positionalArguments.map(Some(_)) ++ Seq.fill(-redundantSize)(None))
+
+    // Identify redundant arguments
+    val namedArguments = rpcRequest.arguments.flatMap(_.toOption).toMap
+    val positionalArguments = rpcRequest.arguments.flatMap(_.swap.toOption)
+    val argumentNames = namedArguments.keys.toSeq
+    val matchedNamedArguments = argumentNames.intersect(parameterNames)
+    val requiredPositionalArguments = parameterNames.size - matchedNamedArguments.size
+    val redundantNames = argumentNames.diff(parameterNames)
+    val redundantIndices = Range(requiredPositionalArguments, positionalArguments.size)
+
+    // Assemble required arguments
+    if (redundantNames.size + redundantIndices.size > 0) {
+      val redundantIdentifiers = redundantNames ++ redundantIndices.map(_.toString)
+      Failure(new IllegalArgumentException(s"Redundant arguments: ${redundantIdentifiers.mkString(", ")}"))
+    } else {
+      Success(parameterNames.foldLeft(Seq[Option[Node]]() -> 0) { case ((arguments, index), name) =>
+        val (argument, newIndex) = namedArguments.get(name) match {
+          case Some(value) => Some(value) -> index
+          case _ if index < positionalArguments.size => Some(positionalArguments(index)) -> (index + 1)
+          case _ => None -> index
         }
-      },
-      namedArguments => {
-        // Arguments by name
-        val redundantNames = namedArguments.keys.toSeq.diff(parameterNames)
-        if (redundantNames.nonEmpty) {
-          Failure(new IllegalArgumentException(s"Redundant arguments: ${redundantNames.mkString(", ")}"))
-        } else {
-          Success(parameterNames.map(namedArguments.get))
-        }
-      }
-    )
+        (arguments :+ argument) -> newIndex
+      }._1)
+    }
   }
 
   /**

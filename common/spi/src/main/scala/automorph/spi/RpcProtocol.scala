@@ -31,16 +31,14 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
    * Creates an RPC request.
    *
    * @param functionName invoked function name
-   * @param argumentNames argument names
-   * @param argumentValues argument values
+   * @param arguments named arguments
    * @param responseRequired true if the request mandates a response, false if there should be no response
    * @param requestId request correlation identifier
    * @return RPC request
    */
   def createRequest(
     functionName: String,
-    argumentNames: Option[Iterable[String]],
-    argumentValues: Iterable[Node],
+    arguments: Iterable[(String, Node)],
     responseRequired: Boolean,
     requestId: String
   ): Try[RpcRequest[Node, Metadata]]
