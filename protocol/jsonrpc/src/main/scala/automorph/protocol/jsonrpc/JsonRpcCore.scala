@@ -4,7 +4,6 @@ import automorph.schema.openapi.{RpcSchema, Schema}
 import automorph.schema.{OpenApi, OpenRpc}
 import automorph.protocol.JsonRpcProtocol
 import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
-import automorph.protocol.jsonrpc.Message.Params
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}

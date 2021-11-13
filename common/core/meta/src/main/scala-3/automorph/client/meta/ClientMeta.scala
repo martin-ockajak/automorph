@@ -89,8 +89,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
           // Perform the RPC call
           performCall(
             mapName(method.getName),
-            parameterNames,
-            argumentNodes,
+            parameterNames.zip(argumentNodes),
             (resultNode, responseContext) => binding.decodeResult(resultNode, responseContext),
             requestContext
           )
@@ -112,8 +111,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
 
   def performCall[Result](
     function: String,
-    argumentNames: Seq[String],
-    argumentNodes: Seq[Node],
+    arguments: Seq[(String, Node)],
     decodeResult: (Node, Context) => Result,
     requestContext: Option[Context]
   ): Effect[Result]

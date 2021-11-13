@@ -74,23 +74,21 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * Optional request context is used as a last RPC function argument.
    *
    * @param function RPC function name
-   * @param argumentNames argument names
-   * @param argumentNodes function argument nodes
-   * @param decodeResult decodes RPC function call result
+   * @param argument named arguments
+   * @param decodeResult decodes RPC function result
    * @param requestContext request context
    * @tparam Result result type
    * @return result value
    */
   override def performCall[Result](
     function: String,
-    argumentNames: Seq[String],
-    argumentNodes: Seq[Node],
+    arguments: Seq[(String, Node)],
     decodeResult: (Node, Context) => Result,
     requestContext: Option[Context]
   ): Effect[Result] = {
     // Create request
     val requestId = Random.id
-    protocol.createRequest(function, argumentNames.zip(argumentNodes), true, requestId).pureFold(
+    protocol.createRequest(function, arguments, true, requestId).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>
@@ -115,20 +113,18 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * Optional request context is used as a last RPC function argument.
    *
    * @param function RPC function name
-   * @param argumentNames argument names
-   * @param argumentNodes function argument nodes
+   * @param arguments named arguments
    * @param requestContext request context
    * @return nothing
    */
   private def sendMessage(
     function: String,
-    argumentNames: Seq[String],
-    argumentNodes: Seq[Node],
+    arguments: Seq[(String, Node)],
     requestContext: Option[Context]
   ): Effect[Unit] = {
     // Create request
     val requestId = Random.id
-    protocol.createRequest(function, argumentNames.zip(argumentNodes), false, requestId).pureFold(
+    protocol.createRequest(function, arguments, false, requestId).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>

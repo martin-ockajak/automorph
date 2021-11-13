@@ -17,7 +17,7 @@ import automorph.spi.MessageCodec
 final case class RemoteCall[Node, Codec <: MessageCodec[Node], Effect[_], Context, Result] (
   functionName: String,
   codec: Codec,
-  private val performCall: (String, Seq[String], Seq[Node], (Node, Context) => Result, Option[Context]) => Effect[Result],
+  private val performCall: (String, Seq[(String, Node)], (Node, Context) => Result, Option[Context]) => Effect[Result],
   private val decodeResult: (Node, Context) => Result
 ) extends RemoteInvoke[Node, Codec, Effect, Context, Result]:
 
@@ -26,7 +26,7 @@ final case class RemoteCall[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     argumentNodes: Seq[Node],
     requestContext: Context
   ): Effect[Result] =
-    performCall(functionName, arguments.map(_._1), argumentNodes, decodeResult, Some(requestContext))
+    performCall(functionName, arguments.map(_._1).zip(argumentNodes), decodeResult, Some(requestContext))
 
 object RemoteCall:
 
@@ -45,7 +45,7 @@ object RemoteCall:
   inline def apply[Node, Codec <: MessageCodec[Node], Effect[_], Context, Result](
     functionName: String,
     codec: Codec,
-    performCall: (String, Seq[String], Seq[Node], (Node, Context) => Result, Option[Context]) => Effect[Result]
+    performCall: (String, Seq[(String, Node)], (Node, Context) => Result, Option[Context]) => Effect[Result]
   ): RemoteCall[Node, Codec, Effect, Context, Result] =
     new RemoteCall(
       functionName,

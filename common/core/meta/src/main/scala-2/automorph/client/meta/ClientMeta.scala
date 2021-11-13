@@ -75,8 +75,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
 
   def performCall[Result](
     function: String,
-    argumentNames: Seq[String],
-    argumentNodes: Seq[Node],
+    arguments: Seq[(String, Node)],
     decodeResult: (Node, Context) => Result,
     requestContext: Option[Context]
   ): Effect[Result]
@@ -143,8 +142,7 @@ object ClientMeta {
             // Perform the RPC call
             ${c.prefix}.performCall(
               $mapName(method.getName),
-              parameterNames,
-              argumentNodes,
+              parameterNames.zip(argumentNodes),
               (resultNode, responseContext) => binding.decodeResult(resultNode, responseContext),
               requestContext)
           }.getOrElse(throw new UnsupportedOperationException("Invalid method: " + method.getName))
