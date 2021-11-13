@@ -68,7 +68,9 @@
 
 * [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
 * [Autowire](https://github.com/lihaoyi/autowire)
-* [STTP](https://github.com/softwaremill/sttp)
+* [STTP](https://sttp.softwaremill.com)
+* [Tapir](https://tapir.softwaremill.com)
+* [ZIO](https://zio.dev)
 
 # Build
 
