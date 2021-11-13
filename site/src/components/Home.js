@@ -115,7 +115,10 @@ export function Header() {
   const config = useDocusaurusContext().siteConfig
   return (
     <header>
-      <div style={{position: 'relative'}}>
+      <div style={{
+        backgroundColor: 'var(--sidebar-background-color)',
+        position: 'relative'
+      }}>
         <img src={homeImage} alt={config.title} />
         <div style={style.headerText}>
 	  <p className="hero__subtitle" style={style.subtitle}>{config.tagline}</p>
@@ -149,7 +152,9 @@ export function Home() {
   return (
     <Layout title='Home' description={config.tagline}>
       <Header />
-      <main>
+      <main style={{
+	backgroundColor: 'var(--sidebar-background-color)'
+      }}>
         <Features />
       </main>
     </Layout>
