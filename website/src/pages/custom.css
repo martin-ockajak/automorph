@@ -5,17 +5,8 @@
 
  * You can override the default Infima variables here.
 
- * Color variables: https://github.com/facebook/docusaurus/issues/3955
+ * Infima CSS variables: https://github.com/facebook/docusaurus/issues/3955
  */
-/*
-  primary = "11698e",
-  primaryMedium = "a7d4de",
-  primaryLight = "efefef",
-  secondary = "289ad7",
-  text = "5f3f3f",
-  background = "ffffff",
-  bgGradient = ("095269", "007c99")
-*/
 
 :root {
   --ifm-navbar-height: 3rem;
@@ -24,28 +15,63 @@
   --ifm-color-black: #000000;
   --ifm-color-white: #eeeeee;
   --ifm-background-color: #ffffff;
-  --ifm-color-primary: #2878d8;
-  --ifm-color-primary-dark: rgb(33, 175, 144);
-  --ifm-color-primary-darker: rgb(31, 165, 136);
-  --ifm-color-primary-darkest: rgb(26, 136, 112);
-  --ifm-color-primary-light: rgb(70, 203, 174);
-  --ifm-color-primary-lighter: rgb(102, 212, 189);
-  --ifm-color-primary-lightest: rgb(146, 224, 208);
+  --ifm-color-primary: #2f7fdf;
+  --ifm-color-primary-dark: var(--ifm-color-primary);
+  --ifm-color-primary-darker: var(--ifm-color-primary);
+  --ifm-color-primary-darkest: var(--ifm-color-primary);
+  --ifm-color-primary-light: var(--ifm-color-primary);
+  --ifm-color-primary-lighter: var(--ifm-color-primary);
+  --ifm-color-primary-lightest: var(--ifm-color-primary);
   --ifm-code-font-size: 90%;
+
+  --sidebar-background-color: var(--ifm-color-white);
+  --theme-toggle-background-color: #bbbbbb;
+  --search-background-color: #cccccc;
+  --search-color: var(--ifm-color-black);
+  --placeholder-color: #222222;
+  --code-background-color: #00000011;
 }
 
-aside > div > nav {
-  background-color: #00000011;
+html[data-theme="dark"] {
+  --sidebar-background-color: #222222;
+  --search-color: var(--ifm-color-white);
+  --search-background-color: #444444;
+  --theme-toggle-background-color: #555555;
+  --placeholder-color: #aaaaaa;
+  --code-background-color: rgba(0, 0, 0, 0.3);
 }
 
-.docusaurus-highlight-code-line {
-  background-color: rgba(0, 0, 0, 0.1);
-  display: block;
+div[class*='toggleTrack_'] {
+  background-color: var(--theme-toggle-background-color);
+}
+
+.navbar__search-input {
+  color: var(--search-color);
+  background-color: var(--search-background-color);
+}
+
+.navbar__search-input::-moz-placeholder {
+  color: var(--placeholder-color);
+}
+
+.navbar__search-input:-moz-placeholder {
+  color: var(--placeholder-color);
+}
+
+.navbar__search-input::-webkit-input-placeholder {
+  color: var(--placeholder-color);
+}
+
+.navbar__search-input:-ms-input-placeholder {
+  color: var(--placeholder-color);
+}
+
+.menu {
+  background-color: var(--sidebar-background-color);
+}
+
+.prism-code {
   margin: 0 calc(-1 * var(--ifm-pre-padding));
   padding: 0 var(--ifm-pre-padding);
-}
-
-html[data-theme='dark'] .docusaurus-highlight-code-line {
-  background-color: rgba(0, 0, 0, 0.3);
 }
 

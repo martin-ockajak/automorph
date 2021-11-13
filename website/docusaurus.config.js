@@ -1,9 +1,6 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
-
 const config = {
   title: 'Automorph',
   tagline: 'RPC client and server for Scala',
@@ -34,9 +31,9 @@ const config = {
   ],
 
   plugins: [
-    require.resolve('docusaurus-lunr-search', {
-      indexBaseUrl: true
-    }),
+    [require.resolve("@easyops-cn/docusaurus-search-local"), {
+      highlightSearchTermsOnTargetPage: true
+    }]
   ].concat(process.env['SITE_LOCAL'] ? ['docusaurus-plugin-relative-paths'] : []),
 
   themeConfig:
@@ -75,8 +72,8 @@ const config = {
         ],
       },
       prism: {
-        theme: lightCodeTheme,
-        darkTheme: darkCodeTheme,
+        theme: require('prism-react-renderer/themes/vsDark'),
+        darkTheme: require('prism-react-renderer/themes/vsLight'),
         additionalLanguages: ['java', 'scala']
       },
     }),
