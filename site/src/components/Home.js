@@ -71,7 +71,7 @@ const features = [
     title: 'Discoverable',
     description: (
       <>
-        Consume or provide API schemas through generated yet adjustable discovery functions.
+        Consume or provide API schemas via generated yet adjustable discovery functions.
       </>
     ),
   },
@@ -87,7 +87,7 @@ const features = [
     title: 'Manageable',
     description: (
       <>
-        Leverage extensive error handling and structured logging via <a href="http://www.slf4j.org/">SLF4J</a> to diagnose issues.
+        Leverage extensive error handling and structured <a href="http://www.slf4j.org/">SLF4J</a>-based logging to diagnose issues.
       </>
     ),
   },
