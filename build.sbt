@@ -447,24 +447,23 @@ Test / test := ((Test / test).dependsOn(testScalastyle)).value
 
 
 // Documentation
-apiURL := Some(url(s"https://javadoc.io/doc/${organization.value}/$projectName-core_3/latest"))
+enablePlugins(ScalaUnidocPlugin)
+val docsDirectory = settingKey[File]("Website generator directory.")
+docsDirectory := baseDirectory.value / "website"
+apiURL := Some(url(s"$siteUrl/api"))
 ThisBuild / autoAPIMappings := true
-val catsEffectDocs = taskKey[Unit]("Generates Cats Effect API documentation.")
-catsEffectDocs := {
+val allDoc = taskKey[Unit]("Generates all API documentation.")
+allDoc := {
+  (Compile / unidoc).value
   (catsEffect / Compile / doc).value
   val systemApiSuffix = "api/automorph/system"
   val catsEffectApiPath = (catsEffect / target).value / "scala-2.13" / systemApiSuffix
-  val systemApiPath = baseDirectory.value / "website" / "static" / systemApiSuffix
+  val systemApiPath = docsDirectory.value / "static" / systemApiSuffix
   IO.listFiles(catsEffectApiPath).filter(_.name != "index.html").foreach { file =>
     IO.copy(Seq(file -> systemApiPath / file.name))
   }
 }
-
-
-// Site
-enablePlugins(ScalaUnidocPlugin)
-ScalaUnidoc / unidoc / target := (LocalRootProject / baseDirectory).value / "website" / "static" / "api"
-cleanFiles += (ScalaUnidoc / unidoc / target).value
+ScalaUnidoc / unidoc / target := docsDirectory.value / "static/api"
 ScalaUnidoc / unidoc / unidocProjectFilter := inAnyProject -- inProjects(
   catsEffect
 )
@@ -472,17 +471,22 @@ ScalaUnidoc / unidoc / scalacOptions ++= Seq(
   "-doc-source-url",
   scmInfo.value.get.browseUrl + "/tree/main${FILE_PATH}.scala",
   "-sourcepath",
-  (LocalRootProject / baseDirectory).value.getAbsolutePath,
+  baseDirectory.value.getAbsolutePath,
   "-groups",
   "-Ymacro-expand:none",
   "-skip-packages",
   "test:examples:automorph.meta:automorph.client.meta:automorph.handler.meta:test:automorph.codec.json.meta:automorph.codec.messagepack.meta:zio:sttp"
 )
+cleanFiles += (ScalaUnidoc / unidoc / target).value
+clean := clean.dependsOn(unidoc / clean).value
+
+
+// Site
 lazy val docs = project.in(file("website")).settings(
   mdocVariables := Map(
     "VERSION" -> version.value
   ),
-  mdocOut := (LocalRootProject / baseDirectory).value / "website" / "docs",
+  mdocOut := (LocalRootProject / docsDirectory).value / "docs",
   mdocExtraArguments := Seq("--no-link-hygiene"),
   mdoc / fileInputs ++= Seq(
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.md",
@@ -492,25 +496,28 @@ lazy val docs = project.in(file("website")).settings(
     "-Yno-imports",
     "-Xfatal-warnings"
   )
-).enablePlugins(MdocPlugin, DocusaurusPlugin)
+).enablePlugins(MdocPlugin)
 val site = taskKey[Unit]("Generates project website.")
 site := {
   import scala.sys.process.{Process, stringToProcess}
-  (Compile / unidoc).value
-  catsEffectDocs.value
-  IO.copyDirectory((examples / baseDirectory).value / "project", (LocalRootProject / baseDirectory).value / "website" / "static" / "examples" / "project", true)
+  allDoc.value
+  IO.copyDirectory((examples / baseDirectory).value / "project", docsDirectory.value / "static/examples/project", true)
   (docs / mdoc).toTask("").value
-  val siteDir = baseDirectory.value / "website"
-  if (!(siteDir / "node_modules").exists) {
-    s"yarn --cwd $siteDir install" !
+  if (!(docsDirectory.value / "node_modules").exists) {
+    s"yarn --cwd ${docsDirectory.value} install" !
   }
-  Process(s"yarn --cwd $siteDir build", None, "SITE_DOCS" -> "docs") !
+  Process(s"yarn --cwd ${docsDirectory.value} build", None, "SITE_DOCS" -> "docs") !
 }
+cleanFiles ++= Seq(
+  docsDirectory.value / "docs",
+  docsDirectory.value / "static/examples",
+  docsDirectory.value / "build"
+)
 
 
 // Deployment
 enablePlugins(GhpagesPlugin)
-siteSourceDirectory := target.value / "website"
+siteSourceDirectory := docsDirectory.value / "build"
 git.remoteRepo := repositoryShell
 val deploySite = taskKey[Unit]("Deploys project website.")
 deploySite := {}

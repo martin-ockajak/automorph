@@ -2,13 +2,13 @@
 
 SITE_PATH=website/build/index.html
 
-sbt '++2.13.7 site' && case "$OSTYPE" in
-  linux*)   browse ${SITE_PATH} & ;;
-  bsd*)     browse ${SITE_PATH} & ;;
-  cygwin*)  browse ${SITE_PATH} & ;;
-  win*)     start "" ${SITE_PATH} & ;;
-  msys*)    start "" ${SITE_PATH} & ;;
-  darwin*)  open ${SITE_PATH} & ;; 
-  *)        browse ${SITE_PATH} & ;;
-esac
+sbt '++2.13.7 site' #&& case "$OSTYPE" in
+#  linux*)   browse ${SITE_PATH} & ;;
+#  bsd*)     browse ${SITE_PATH} & ;;
+#  cygwin*)  browse ${SITE_PATH} & ;;
+#  win*)     start "" ${SITE_PATH} & ;;
+#  msys*)    start "" ${SITE_PATH} & ;;
+#  darwin*)  open ${SITE_PATH} & ;; 
+#  *)        browse ${SITE_PATH} & ;;
+#esac
 

@@ -8,7 +8,7 @@ import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
 import automorph.util.{Bytes, CannotEqual}
-import scala.collection.immutable.{ArraySeq, ListMap}
+import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -227,32 +227,6 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }
 
   /**
-   * Creates a specified response direcly.
-   *
-   * @param responseBody RPC response body
-   * @param rpcRequest RPC request
-   * @param requestProperties request properties
-   * @tparam MessageBody message body type
-   * @return direct RPC response
-   */
-  private def directResponse[MessageBody: Bytes](
-    responseBody: ArraySeq.ofByte,
-    rpcRequest: RpcRequest[Node, protocol.Metadata],
-    requestProperties: => Map[String, String]
-  ): Effect[HandlerResult[MessageBody, Context]] = {
-    logger.info(s"Processed ${protocol.name} request", requestProperties)
-    // Create response
-    Option.when(rpcRequest.responseRequired) {
-      lazy val allProperties = requestProperties + (LogProperties.messageBody -> Bytes.string.to(responseBody))
-      logger.trace(s"Sending ${protocol.name} response", allProperties)
-      val responseMessageBody = Some(implicitly[Bytes[MessageBody]].to(responseBody))
-      system.pure(HandlerResult[MessageBody, Context](responseMessageBody, None, None))
-    }.getOrElse {
-      system.pure(HandlerResult[MessageBody, Context](None, None, None))
-    }
-  }
-
-  /**
    * Creates a handler result containing an RPC response for the specified resul value.
    *
    * @param result a call result on success or an exception on failure
@@ -285,7 +259,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       }.map(_.function) ++ apiBindings.values.map(_.function)
       apiSchema.function.name -> HandlerBinding[Node, Effect, Context](
         apiSchema.function,
-        (_, _) => system.pure(apiSchema.invoke(describedFunctions), None),
+        (_, _) => system.pure(apiSchema.invoke(describedFunctions) -> None),
         false
       )
     }*)
