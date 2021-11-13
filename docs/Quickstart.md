@@ -87,15 +87,14 @@ client.call[String]("hello").args("what" -> "world", "n" -> 1) // Future[String]
 client.close()
 ```
 
-## [Project](../../examples/project/README.md)
+## [Project](https://github.com/martin-ockajak/automorph/examples/project)
 
 ### Download
 
 Clone the repository and enter example project directory:
 
 ```shell
-git clone https://github.com/martin-ockajak/automorph
-cd automorph/examples/project
+git clone https://github.com/martin-ockajak/automorph && cd automorph/examples/project
 ```
 
 ### Try
