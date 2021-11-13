@@ -25,7 +25,7 @@ private[automorph] object CirceOpenApi {
         Json.obj(fields*)
       }
     }
-    implicit val authFlowEncoder: Encoder[OAuthFlow] = deriveEncoder[OAuthFlow]
+    implicit val oauthFlowEncoder: Encoder[OAuthFlow] = deriveEncoder[OAuthFlow]
     implicit val contactEncoder: Encoder[Contact] = deriveEncoder[Contact]
     implicit val externalDocumentationEncoder: Encoder[ExternalDocumentation] = deriveEncoder[ExternalDocumentation]
     implicit val exampleEncoder: Encoder[Example] = deriveEncoder[Example]
@@ -33,7 +33,7 @@ private[automorph] object CirceOpenApi {
     implicit val licenseEncoder: Encoder[License] = deriveEncoder[License]
     implicit val pathItemReferenceEncoder: Encoder[PathItemReference] = deriveEncoder[PathItemReference]
     implicit val serverVariableEncoder: Encoder[ServerVariable] = deriveEncoder[ServerVariable]
-    implicit val authFlowsEncoder: Encoder[OAuthFlows] = deriveEncoder[OAuthFlows]
+    implicit val oauthFlowsEncoder: Encoder[OAuthFlows] = deriveEncoder[OAuthFlows]
     implicit val infoEncoder: Encoder[Info] = deriveEncoder[Info]
     implicit val securitySchemeEncoder: Encoder[SecurityScheme] = deriveEncoder[SecurityScheme]
     implicit val serverEncoder: Encoder[Server] = deriveEncoder[Server]
@@ -69,23 +69,23 @@ private[automorph] object CirceOpenApi {
             description <- field[String](c, keys, "description")
             properties <- Option.when(keys.contains(propertiesField)) {
               val jsonObject = c.downField(propertiesField)
-              jsonObject.keys.getOrElse(Seq())
-                .foldLeft(Right(Map[String, Schema]()).withLeft[DecodingFailure]) { case (result, key) =>
-                  result.flatMap { schemas =>
-                    decode(jsonObject.downField(key)).map(schema => schemas + (key -> schema))
-                  }
-                }.map(Some.apply)
+              val objectFields = jsonObject.keys.getOrElse(Seq())
+              objectFields.foldLeft(Right(Map[String, Schema]()).withLeft[DecodingFailure]) { case (result, key) =>
+                result.flatMap { schemas =>
+                  decode(jsonObject.downField(key)).map(schema => schemas + (key -> schema))
+                }
+              }.map(Some.apply)
             }.getOrElse(Right(None))
             required <- field[List[String]](c, keys, "required")
             default <- field[String](c, keys, "default")
             allOf <- Option.when(keys.contains(allOfField)) {
               val jsonArray = c.downField(allOfField)
-              jsonArray.values.map(_.toSeq).getOrElse(Seq()).indices
-                .foldLeft(Right(List[Schema]()).withLeft[DecodingFailure]) { case (result, index) =>
-                  result.flatMap { schemas =>
-                    decode(jsonArray.downN(index)).map(schemas :+ _)
-                  }
-                }.map(Some.apply)
+              val arrayIndices = jsonArray.values.map(_.toSeq).getOrElse(Seq()).indices
+              arrayIndices.foldLeft(Right(List[Schema]()).withLeft[DecodingFailure]) { case (result, index) =>
+                result.flatMap { schemas =>
+                  decode(jsonArray.downN(index)).map(schemas :+ _)
+                }
+              }.map(Some.apply)
             }.getOrElse(Right(None))
             $ref <- field[String](c, keys, "$ref")
           } yield Schema(
@@ -111,7 +111,7 @@ private[automorph] object CirceOpenApi {
         }
       }
     }
-    implicit val authFlowDecoder: Decoder[OAuthFlow] = deriveDecoder[OAuthFlow]
+    implicit val oauthFlowDecoder: Decoder[OAuthFlow] = deriveDecoder[OAuthFlow]
     implicit val contactDecoder: Decoder[Contact] = deriveDecoder[Contact]
     implicit val externalDocumentationDecoder: Decoder[ExternalDocumentation] = deriveDecoder[ExternalDocumentation]
     implicit val exampleDecoder: Decoder[Example] = deriveDecoder[Example]
@@ -119,7 +119,7 @@ private[automorph] object CirceOpenApi {
     implicit val licenseDecoder: Decoder[License] = deriveDecoder[License]
     implicit val pathItemReferenceDecoder: Decoder[PathItemReference] = deriveDecoder[PathItemReference]
     implicit val serverVariableDecoder: Decoder[ServerVariable] = deriveDecoder[ServerVariable]
-    implicit val authFlowsDecoder: Decoder[OAuthFlows] = deriveDecoder[OAuthFlows]
+    implicit val oauthFlowsDecoder: Decoder[OAuthFlows] = deriveDecoder[OAuthFlows]
     implicit val infoDecoder: Decoder[Info] = deriveDecoder[Info]
     implicit val securitySchemeDecoder: Decoder[SecurityScheme] = deriveDecoder[SecurityScheme]
     implicit val serverDecoder: Decoder[Server] = deriveDecoder[Server]

@@ -56,29 +56,29 @@ private[automorph] object CirceOpenRpc {
         c.keys.map(_.toSet).map { keys =>
           for {
             `type` <- field[String](c, keys, "type")
-            title <- field[String](c, keys, "title")
-            description <- field[String](c, keys, "description")
-            properties <- Option.when(keys.contains(propertiesField)) {
-              val jsonObject = c.downField(propertiesField)
-              jsonObject.keys.getOrElse(Seq())
-                .foldLeft(Right(Map[String, Schema]()).withLeft[DecodingFailure]) { case (result, key) =>
+              title <- field[String](c, keys, "title")
+              description <- field[String](c, keys, "description")
+              properties <- Option.when(keys.contains(propertiesField)) {
+                val jsonObject = c.downField(propertiesField)
+                val objectFields = jsonObject.keys.getOrElse(Seq())
+                objectFields.foldLeft(Right(Map[String, Schema]()).withLeft[DecodingFailure]) { case (result, key) =>
                   result.flatMap { schemas =>
                     decode(jsonObject.downField(key)).map(schema => schemas + (key -> schema))
                   }
                 }.map(Some.apply)
-            }.getOrElse(Right(None))
-            required <- field[List[String]](c, keys, "required")
-            default <- field[String](c, keys, "default")
-            allOf <- Option.when(keys.contains(allOfField)) {
-              val jsonArray = c.downField(allOfField)
-              jsonArray.values.map(_.toSeq).getOrElse(Seq()).indices
-                .foldLeft(Right(List[Schema]()).withLeft[DecodingFailure]) { case (result, index) =>
+              }.getOrElse(Right(None))
+              required <- field[List[String]](c, keys, "required")
+              default <- field[String](c, keys, "default")
+              allOf <- Option.when(keys.contains(allOfField)) {
+                val jsonArray = c.downField(allOfField)
+                val arrayIndices = jsonArray.values.map(_.toSeq).getOrElse(Seq()).indices
+                arrayIndices.foldLeft(Right(List[Schema]()).withLeft[DecodingFailure]) { case (result, index) =>
                   result.flatMap { schemas =>
                     decode(jsonArray.downN(index)).map(schemas :+ _)
                   }
                 }.map(Some.apply)
-            }.getOrElse(Right(None))
-            $ref <- field[String](c, keys, "$ref")
+              }.getOrElse(Right(None))
+              $ref <- field[String](c, keys, "$ref")
           } yield Schema(
             `type` = `type`,
             title = title,
