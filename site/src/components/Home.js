@@ -6,6 +6,34 @@ import Link from '@docusaurus/Link'
 import React from 'react'
 import homeImage from "../../../docs/images/home.jpg";
 
+const style = {
+  headerText: {
+    position: 'absolute',
+    top: '80%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    textAlign: 'center'
+  },
+  subtitle: {
+    fontSize: '2rem',
+    color: '#222222'
+  },
+  button: {
+    margin: '0rem 1rem 3rem 1rem',
+    color: '#000000',
+    fontSize: '1.4rem'
+  },
+  features: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '2rem 0'
+  },
+  list: {
+    listStyle: 'none',
+    padding: '0'
+  }
+}
+
 const features = [
   {
     title: 'Convenient',
@@ -43,7 +71,7 @@ const features = [
     title: 'Discoverable',
     description: (
       <>
-        Provide and consume API schemas via discovery functions for <a href="https://spec.open-rpc.org">OpenRPC</a> and <a href="https://github.com/OAI/OpenAPI-Specification">OpenAPI</a> standards.
+        Consume or provide API schemas through generated yet adjustable discovery functions.
       </>
     ),
   },
@@ -71,31 +99,52 @@ const features = [
       </>
     ),
   },
+  {
+    title: 'RPC protocols',
+    description: (
+      <>
+        <ul style={style.list}>
+          <li><a href="https://www.jsonrpc.org/specification">JSON-RPC</a></li>
+          <li><a href="docs/REST-RPC/index.html">REST-RPC</a></li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    title: 'Transport protocols',
+    description: (
+      <>
+        <ul style={style.list}>
+          <li><a href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">HTTP</a></li>
+          <li><a href="https://en.wikipedia.org/wiki/WebSocket">WebSocket</a></li>
+          <li><a href="https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol">AMQP</a></li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    title: 'Message formats',
+    description: (
+      <>
+        <ul style={style.list}>
+          <li><a href="https://www.json.org">JSON</a></li>
+          <li><a href="https://msgpack.org">MessagePack</a></li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    title: 'API schemas',
+    description: (
+      <>
+        <ul style={style.list}>
+          <li><a href="https://spec.open-rpc.org">OpenRPC</a></li>
+          <li><a href="https://github.com/OAI/OpenAPI-Specification">OpenAPI</a></li>
+        </ul>
+      </>
+    ),
+  },
 ]
-
-const style = {
-  headerText: {
-    position: 'absolute',
-    top: '80%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    textAlign: 'center'
-  },
-  subtitle: {
-    fontSize: '1.8rem',
-    color: '#222222'
-  },
-  button: {
-    margin: '0rem 1rem 3rem 1rem',
-    color: '#000000',
-    fontSize: '1.4rem'
-  },
-  features: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '2rem 0'
-  }
-}
 
 function Feature({title, description}) {
   return (

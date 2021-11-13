@@ -36,7 +36,7 @@
 * **Practical** - Access transport protocol request and response metadata using optional API abstractions.
 * **Flexible** - Customize remote API function names and mapping between exceptions and RPC protocol errors.
 * **Modular** - Choose plugins to select [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) protocol, [effect](https://en.wikipedia.org/wiki/Effect_system) type, [transport](https://en.wikipedia.org/wiki/Transport_layer) protocol and message [format](https://en.wikipedia.org/wiki/File_format).
-* **Discoverable** - Provide and consume API schemas via discovery functions [OpenRPC](https://spec.open-rpc.org) and [OpenAPI](https://github.com/OAI/OpenAPI-Specification) standards.
+* **Discoverable** - Consume or provide API schemas through generated yet adjustable discovery functions.
 * **Extensible** - Easily implement custom data type serialization support or additional integration plugins.
 * **Manageable** - Leverage extensive error handling and structured logging via [SLF4J](http://www.slf4j.org/) to diagnose issues.
 * **Compatible** - Artifacts are available for [Scala 3](https://dotty.epfl.ch/) on [JRE 11+](https://openjdk.java.net/) with support for [Scala 2.13](https://www.scala-lang.org/news/2.13.0) and [Scala 2.12](https://www.scala-lang.org/news/2.12.0/) planned.
@@ -56,8 +56,8 @@
 
 ### Message formats
 
-* [JSON](https://www.json.org/) (*Default*)
-* [MessagePack](https://msgpack.org/)
+* [JSON](https://www.json.org) (*Default*)
+* [MessagePack](https://msgpack.org)
 
 ### API schemas
 
