@@ -20,6 +20,11 @@
 
 ## Supported standards
 
+### RPC protocols
+
+* [JSON-RPC](https://www.jsonrpc.org/specification) (*Default*)
+* [REST-RPC](REST-RPC)
+
 ### Transport protocols
 
 * [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) (*Default*)

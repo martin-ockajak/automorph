@@ -82,16 +82,13 @@ const style = {
     textAlign: 'center'
   },
   subtitle: {
-    fontSize: '2rem',
-    color: '#000000'
+    fontSize: '1.8rem',
+    color: '#222222'
   },
   button: {
     margin: '0rem 1rem 3rem 1rem',
     color: '#000000',
-    fontSize: '1.5rem',
-    '&:hover': {
-      background: '#ffffff',
-    }
+    fontSize: '1.4rem'
   },
   features: {
     display: 'flex',
@@ -121,7 +118,7 @@ export function Header() {
       }}>
         <img src={homeImage} alt={config.title} />
         <div style={style.headerText}>
-	  <p className="hero__subtitle" style={style.subtitle}>{config.tagline}</p>
+	  <p style={style.subtitle}>{config.tagline}</p>
 	  <div>
 	    <Link className="button button--lg" to="docs/Quickstart" style={style.button}>
 	      Get Started
