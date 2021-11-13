@@ -3,7 +3,7 @@
 
 const config = {
   title: 'Automorph',
-  tagline: 'RPC client and server for Scala',
+  tagline: 'JSON-RPC and REST-RPC for Scala',
   url: 'https://automorph.org',
   baseUrl: '/',
   favicon: 'icon.png',

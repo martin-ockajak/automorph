@@ -3,7 +3,7 @@
 // Repository
 val projectRoot = "org"
 val projectName = "automorph"
-val projectDescription = "RPC client and server for Scala"
+val projectDescription = "JSON-RPC and REST-RPC for Scala"
 val repositoryPath = s"martin-ockajak/$projectName"
 val repositoryUrl = s"https://github.com/$repositoryPath"
 val repositoryShell = s"git@github.com:$repositoryPath.git"

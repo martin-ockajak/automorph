@@ -66,6 +66,10 @@ div[class*='toggleTrack_'] {
   color: var(--placeholder-color);
 }
 
+.button:hover {
+  background-color: #ffffff66;
+}
+
 .menu {
   background-color: var(--sidebar-background-color);
 }
