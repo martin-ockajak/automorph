@@ -6,7 +6,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
-import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
+import automorph.transport.http.server.NanoHTTPD.{newFixedLengthResponse, IHTTPSession, Response}
 import automorph.transport.http.server.NanoServer.{Context, Execute}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}

@@ -39,14 +39,16 @@ final case class FutureSystem()(
     val promise = Promise[T]()
     Future.successful(Deferred(
       promise.future,
-      (result: T) => Future {
-        promise.success(result)
-        ()
-      },
-      (error: Throwable) => Future {
-        promise.failure(error)
-        ()
-      }
+      (result: T) =>
+        Future {
+          promise.success(result)
+          ()
+        },
+      (error: Throwable) =>
+        Future {
+          promise.failure(error)
+          ()
+        }
     ))
   }
 }

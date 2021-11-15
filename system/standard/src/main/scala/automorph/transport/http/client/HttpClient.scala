@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.client.HttpClient.{Context, Session, defaultBuilder}
+import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Session}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
@@ -112,28 +112,34 @@ final case class HttpClient[Effect[_]](
     requestId: String,
     protocol: Protocol
   ): Effect[Response] = {
-    log(requestId, requestUrl, request.swap.toOption.map(_.method), protocol, request.fold(
-      // Send HTTP request
-      httpRequest =>
-        system match {
-          case defer: Defer[_] =>
-            effect(
-              httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray),
-              defer.asInstanceOf[Defer[Effect]]
-            ).map(httpResponse)
-          case _ => system.wrap(httpResponse(httpClient.send(httpRequest, BodyHandlers.ofByteArray)))
-        },
-      // Send WebSocket request
-      { case (webSocketEffect, resultEffect, requestBody) =>
-        withDefer(defer =>
-          webSocketEffect.flatMap(webSocket =>
-            effect(webSocket.sendBinary(Bytes.byteBuffer.to(requestBody), true), defer).flatMap(_ =>
-              resultEffect
+    log(
+      requestId,
+      requestUrl,
+      request.swap.toOption.map(_.method),
+      protocol,
+      request.fold(
+        // Send HTTP request
+        httpRequest =>
+          system match {
+            case defer: Defer[_] =>
+              effect(
+                httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray),
+                defer.asInstanceOf[Defer[Effect]]
+              ).map(httpResponse)
+            case _ => system.wrap(httpResponse(httpClient.send(httpRequest, BodyHandlers.ofByteArray)))
+          },
+        // Send WebSocket request
+        { case (webSocketEffect, resultEffect, requestBody) =>
+          withDefer(defer =>
+            webSocketEffect.flatMap(webSocket =>
+              effect(webSocket.sendBinary(Bytes.byteBuffer.to(requestBody), true), defer).flatMap(_ =>
+                resultEffect
+              )
             )
           )
-        )
-      }
-    ))
+        }
+      )
+    )
   }
 
   private def log(

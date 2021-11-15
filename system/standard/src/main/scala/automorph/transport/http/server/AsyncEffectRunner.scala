@@ -8,6 +8,7 @@ import scala.collection.concurrent.TrieMap
 final case class AsyncEffectRunner[Effect[_]](
   system: EffectSystem[Effect]
 ) extends AsyncRunner {
+
   implicit private val givenSystem: EffectSystem[Effect] = system
 
   private val handlers: TrieMap[NanoHTTPD#ClientHandler, Unit] = TrieMap.empty

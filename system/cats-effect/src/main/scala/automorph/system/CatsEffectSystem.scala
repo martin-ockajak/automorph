@@ -39,28 +39,29 @@ final case class CatsEffectSystem()(
   override def deferred[T]: IO[Deferred[IO, T]] = {
     map(
       Queue.dropping[IO, Either[Throwable, T]](1),
-      (queue: Queue[IO, Either[Throwable, T]]) => Deferred(
-        queue.take.flatMap {
-          case Right(result) => pure(result)
-          case Left(error) => failed(error)
-        },
-        result =>
-          flatMap(
-            queue.tryOffer(Right(result)),
-            (success: Boolean) =>
-              Option.when(success)(pure(())).getOrElse {
-                failed(new IllegalStateException("Deferred effect already resolved"))
-              }
-          ),
-        error =>
-          flatMap(
-            queue.tryOffer(Left(error)),
-            (success: Boolean) =>
-              Option.when(success)(pure(())).getOrElse {
-                failed(new IllegalStateException("Deferred effect already resolved"))
-              }
-          )
-      )
+      (queue: Queue[IO, Either[Throwable, T]]) =>
+        Deferred(
+          queue.take.flatMap {
+            case Right(result) => pure(result)
+            case Left(error) => failed(error)
+          },
+          result =>
+            flatMap(
+              queue.tryOffer(Right(result)),
+              (success: Boolean) =>
+                Option.when(success)(pure(())).getOrElse {
+                  failed(new IllegalStateException("Deferred effect already resolved"))
+                }
+            ),
+          error =>
+            flatMap(
+              queue.tryOffer(Left(error)),
+              (success: Boolean) =>
+                Option.when(success)(pure(())).getOrElse {
+                  failed(new IllegalStateException("Deferred effect already resolved"))
+                }
+            )
+        )
     )
   }
 }

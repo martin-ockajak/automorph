@@ -34,6 +34,7 @@ final case class IdentitySystem() extends EffectSystem[Identity] {
 }
 
 object IdentitySystem {
+
   /**
    * Effect type.
    *
