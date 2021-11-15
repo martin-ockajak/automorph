@@ -5,7 +5,7 @@ import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.endpoint.VertxHttpEndpoint
 import automorph.transport.http.server.VertxServer.{defaultHttpServerOptions, defaultVertxOptions, Context}
-import automorph.transport.http.{HttpContext, HttpMethod}
+import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint
 import io.vertx.core.http.{HttpServer, HttpServerOptions}
 import io.vertx.core.{Vertx, VertxOptions}
@@ -70,8 +70,7 @@ final case class VertxServer[Effect[_]](
   private def start(): Unit = {
     val activeServer = httpServer.listen()
     Option(activeServer.result).map { server =>
-      val protocols = if (webSocket) Seq("HTTP", "WebSocket") else Seq("HTTP")
-      protocols.foreach { protocol =>
+      (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
         val properties = ListMap(
           "Protocol" -> protocol,
           "Port" -> server.actualPort.toString

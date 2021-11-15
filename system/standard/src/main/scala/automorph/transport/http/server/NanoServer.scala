@@ -7,10 +7,10 @@ import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
-import automorph.transport.http.server.NanoServer.{Context, Execute, Protocol}
+import automorph.transport.http.server.NanoServer.{Context, Execute}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
-import automorph.transport.http.{HttpContext, HttpMethod}
+import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
 import java.io.IOException
@@ -58,8 +58,7 @@ final case class NanoServer[Effect[_]] private (
 
   override def start(): Unit = {
     super.start()
-    val protocols = if (webSocket) Seq("HTTP", "WebSocket") else Seq("HTTP")
-    protocols.foreach { protocol =>
+    (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
       val properties = ListMap(
         "Protocol" -> protocol,
         "Port" -> port.toString
@@ -266,13 +265,5 @@ object NanoServer {
   /** Transport protocol. */
   sealed abstract private class Protocol(val name: String) {
     override def toString: String = name
-  }
-
-  /** Transport protocols. */
-  private object Protocol {
-
-    case object Http extends Protocol("HTTP")
-
-    case object WebSocket extends Protocol("WebSocket")
   }
 }
