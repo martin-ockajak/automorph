@@ -71,6 +71,7 @@ lazy val root = project.in(file(".")).settings(
   undertow,
   vertx,
   jetty,
+  rapidoid,
   finagle,
   rabbitmq,
 
@@ -307,6 +308,14 @@ lazy val jetty = project.in(file("transport/jetty")).dependsOn(
   libraryDependencies ++= Seq(
     "org.eclipse.jetty.websocket" % "websocket-jetty-client" % jettyVersion,
     "org.eclipse.jetty" % "jetty-servlet" % jettyVersion
+  )
+)
+lazy val rapidoid = project.in(file("transport/rapidoid")).dependsOn(
+  core, http, testStandard % Test
+).settings(
+  name := s"$projectName-rapidoid",
+  libraryDependencies ++= Seq(
+    "org.rapidoid" % "rapidoid-http-server" % "5.5.5"
   )
 )
 lazy val finagle = project.in(file("transport/finagle")).dependsOn(
