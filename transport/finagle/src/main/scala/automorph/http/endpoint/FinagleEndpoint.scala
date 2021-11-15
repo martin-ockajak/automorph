@@ -5,7 +5,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.FinagleEndpoint.Context
-import automorph.transport.http.{HttpContext, HttpMethod}
+import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Network, Random}
 import com.twitter.finagle.Service
@@ -33,6 +33,7 @@ final case class FinagleEndpoint[Effect[_]](
   exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
 
+  private val log = HttpLog(logger, Protocol.Http)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 
@@ -40,7 +41,7 @@ final case class FinagleEndpoint[Effect[_]](
     // Log the request
     val requestId = Random.id
     lazy val requestProperties = getRequestProperties(request, requestId)
-    logger.debug("Received HTTP request", requestProperties)
+    log.receivedRequest(requestProperties)
     val requestBody = Buf.ByteArray.Owned.extract(request.content)
 
     // Process the request
@@ -62,7 +63,7 @@ final case class FinagleEndpoint[Effect[_]](
     requestId: String,
     requestProperties: => Map[String, String]
   ): Response = {
-    logger.error("Failed to process HTTP request", error, requestProperties)
+    log.failedProcessing(error, requestProperties)
     val responseBody = Reader.fromBuf(Buf.Utf8(error.trace.mkString("\n")))
     createResponse(responseBody, Status.InternalServerError, None, request, requestId)
   }
@@ -86,7 +87,7 @@ final case class FinagleEndpoint[Effect[_]](
     val response = Response(request.version, responseStatus, responseBody)
     setResponseContext(response, responseContext)
     response.contentType = genericHandler.protocol.codec.mediaType
-    logger.debug("Sending HTTP response", responseProperties)
+    log.sendingResponse(responseProperties)
     response
   }
 

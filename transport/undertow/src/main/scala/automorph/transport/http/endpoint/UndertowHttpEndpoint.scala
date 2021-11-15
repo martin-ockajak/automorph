@@ -5,7 +5,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
-import automorph.transport.http.{HttpContext, HttpMethod}
+import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
 import automorph.util.{Bytes, Network, Random}
 import io.undertow.io.Receiver
@@ -36,6 +36,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
+  private val log = HttpLog(logger, Protocol.Http)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 
@@ -43,11 +44,11 @@ final case class UndertowHttpEndpoint[Effect[_]](
     // Log the request
     val requestId = Random.id
     lazy val requestProperties = getRequestProperties(exchange, requestId)
-    logger.trace("Receiving HTTP request", requestProperties)
+    log.receivingRequest(requestProperties)
     val receiveCallback = new Receiver.FullBytesCallback {
 
       override def handle(exchange: HttpServerExchange, message: Array[Byte]): Unit = {
-        logger.debug("Received HTTP request", requestProperties)
+        log.receivedRequest(requestProperties)
         val requestBody = Bytes.byteArray.from(message)
         val handlerRunnable = new Runnable {
 
@@ -83,7 +84,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     requestId: String,
     requestProperties: => Map[String, String]
   ): Unit = {
-    logger.error("Failed to process HTTP request", error, requestProperties)
+    log.failedProcessing(error, requestProperties)
     val responseBody = Bytes.string.from(error.trace.mkString("\n"))
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
     sendResponse(responseBody, statusCode, None, exchange, requestId)
@@ -103,7 +104,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
       "Client" -> clientAddress(exchange),
       "Status" -> responseStatusCode.toString
     )
-    logger.trace("Sending HTTP response", responseProperties)
+    log.sendingResponse(responseProperties)
 
     // Send the response
     Try {
@@ -113,9 +114,9 @@ final case class UndertowHttpEndpoint[Effect[_]](
       setResponseContext(exchange, responseContext)
       exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, genericHandler.protocol.codec.mediaType)
       exchange.setStatusCode(responseStatusCode).getResponseSender.send(Bytes.byteBuffer.to(responseBody))
-      logger.debug("Sent HTTP response", responseProperties)
+      log.sentResponse(responseProperties)
     }.onFailure { error =>
-      logger.error("Failed to send HTTP response", error, responseProperties)
+      log.failedResponse(error, responseProperties)
     }.get
   }
 

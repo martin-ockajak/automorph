@@ -5,7 +5,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.JettyHttpEndpoint.Context
-import automorph.transport.http.{HttpContext, HttpMethod}
+import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
 import automorph.util.{Bytes, Network, Random}
 import jakarta.servlet.AsyncContext
@@ -34,6 +34,7 @@ final case class JettyHttpEndpoint[Effect[_]](
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends HttpServlet with Logging with EndpointMessageTransport {
 
+  private val log = HttpLog(logger, Protocol.Http)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 
@@ -44,7 +45,7 @@ final case class JettyHttpEndpoint[Effect[_]](
       override def run(): Unit = {
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(request, requestId)
-        logger.trace("Receiving HTTP request", requestProperties)
+        log.receivedRequest(requestProperties)
         val requestBody = Bytes.inputStream.from(request.getInputStream)
 
         // Process the request
@@ -69,7 +70,7 @@ final case class JettyHttpEndpoint[Effect[_]](
     requestId: String,
     requestProperties: => Map[String, String]
   ): Unit = {
-    logger.error("Failed to process HTTP request", error, requestProperties)
+    log.failedProcessing(error, requestProperties)
     val responseBody = Bytes.string.from(error.trace.mkString("\n"))
     val status = HttpStatus.INTERNAL_SERVER_ERROR_500
     sendResponse(responseBody, status, None, response, asyncContext, request, requestId)
@@ -91,7 +92,7 @@ final case class JettyHttpEndpoint[Effect[_]](
       "Client" -> clientAddress(request),
       "Status" -> responseStatus.toString
     )
-    logger.debug("Sending HTTP response", responseProperties)
+    log.sendingResponse(responseProperties)
 
     // Send the response
     Try {
@@ -102,9 +103,9 @@ final case class JettyHttpEndpoint[Effect[_]](
       outputStream.write(responseBody.unsafeArray)
       outputStream.flush()
       asyncContext.complete()
-      logger.debug("Sent HTTP response", responseProperties)
+      log.sentResponse(responseProperties)
     }.onFailure { error =>
-      logger.error("Failed to send HTTP response", error, responseProperties)
+      log.failedResponse(error, responseProperties)
     }.get
   }
 

@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.HttpContext
+import automorph.transport.http.{HttpContext, HttpLog, Protocol}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
@@ -54,6 +54,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context]
 ) extends WebSocketConnectionCallback with AutoCloseable with Logging with EndpointMessageTransport {
 
+  private val log = HttpLog(logger, Protocol.WebSocket)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 
@@ -80,7 +81,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         // Log the request
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(exchange, requestId)
-        logger.debug("Received WebSocket request", requestProperties)
+        log.receivedRequest(requestProperties)
 
         // Process the request
         genericHandler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(_.fold(
@@ -101,7 +102,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         requestId: String,
         requestProperties: => Map[String, String]
       ): Unit = {
-        logger.error("Failed to process WebSocket request", error, requestProperties)
+        log.failedProcessing(error, requestProperties)
         val responseBody = Bytes.string.from(error.trace.mkString("\n"))
         sendResponse(responseBody, None, exchange, channel, requestId)
       }
@@ -118,15 +119,15 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
           LogProperties.requestId -> requestId,
           "Client" -> clientAddress(exchange)
         )
-        logger.trace("Sending WebSocket response", responseProperties)
+        log.sendingResponse(responseProperties)
 
         // Send the response
         val callback = new WebSocketCallback[Unit] {
           override def complete(channel: WebSocketChannel, context: Unit): Unit =
-            logger.debug("Sent WebSocket response", responseProperties)
+            log.sentResponse(responseProperties)
 
-          override def onError(channel: WebSocketChannel, context: Unit, throwable: Throwable): Unit =
-            logger.error("Failed to send WebSocket response", throwable, responseProperties)
+          override def onError(channel: WebSocketChannel, context: Unit, error: Throwable): Unit =
+            log.failedResponse(error, responseProperties)
         }
         setResponseContext(exchange, responseContext)
         WebSockets.sendBinary(Bytes.byteBuffer.to(message), channel, callback, ())
