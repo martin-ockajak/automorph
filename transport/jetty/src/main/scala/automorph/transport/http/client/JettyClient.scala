@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.JettyClient.{Context, Session, defaultClient}
-import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
+import automorph.transport.http.{HttpContext, MessageLog, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.net.URI
@@ -49,7 +49,7 @@ final case class JettyClient[Effect[_]](
 
   private val webSocketsSchemePrefix = "ws"
   private val webSocketClient = new WebSocketClient(httpClient)
-  private val log = HttpLog(logger, Protocol.Http.name)
+  private val log = MessageLog(logger, Protocol.Http.name)
   implicit private val givenSystem: EffectSystem[Effect] = system
   if (!httpClient.isStarted) {
     httpClient.start()

@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.HttpClient.{Context, Session, defaultBuilder}
-import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
+import automorph.transport.http.{HttpContext, MessageLog, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.io.ByteArrayOutputStream
@@ -54,7 +54,7 @@ final case class HttpClient[Effect[_]](
   private val httpEmptyUrl = new URI("http://empty")
   private val webSocketsSchemePrefix = "ws"
   private val httpClient = builder.build
-  private val log = HttpLog(logger, Protocol.Http.name)
+  private val log = MessageLog(logger, Protocol.Http.name)
   implicit private val givenSystem: EffectSystem[Effect] = system
 
   override def call(

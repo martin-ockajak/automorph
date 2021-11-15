@@ -5,7 +5,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.VertxHttpEndpoint.Context
-import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
+import automorph.transport.http.{HttpContext, MessageLog, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
 import io.vertx.core.Handler
@@ -36,7 +36,7 @@ final case class VertxHttpEndpoint[Effect[_]](
   private val statusOk = 200
   private val statusInternalServerError = 500
   private val headerXForwardedFor = "X-Forwarded-For"
-  private val log = HttpLog(logger, Protocol.Http.name)
+  private val log = MessageLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 

@@ -5,7 +5,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.JettyHttpEndpoint.Context
-import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
+import automorph.transport.http.{HttpContext, MessageLog, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
 import automorph.util.{Bytes, Network, Random}
 import jakarta.servlet.AsyncContext
@@ -34,7 +34,7 @@ final case class JettyHttpEndpoint[Effect[_]](
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends HttpServlet with Logging with EndpointMessageTransport {
 
-  private val log = HttpLog(logger, Protocol.Http.name)
+  private val log = MessageLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 

@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.UrlClient.{Context, Session}
-import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
+import automorph.transport.http.{HttpContext, MessageLog, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.net.{HttpURLConnection, URI}
@@ -36,7 +36,7 @@ final case class UrlClient[Effect[_]](
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
   private val httpMethods = HttpMethod.values.map(_.name).toSet
-  private val log = HttpLog(logger, Protocol.Http.name)
+  private val log = MessageLog(logger, Protocol.Http.name)
   implicit private val givenSystem: EffectSystem[Effect] = system
   System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
 

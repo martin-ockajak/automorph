@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.{HttpContext, HttpLog, Protocol}
+import automorph.transport.http.{HttpContext, MessageLog, Protocol}
 import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint.Context
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
@@ -32,7 +32,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
 ) extends Handler[ServerWebSocket] with Logging with EndpointMessageTransport {
 
   private val headerXForwardedFor = "X-Forwarded-For"
-  private val log = HttpLog(logger, Protocol.WebSocket.name)
+  private val log = MessageLog(logger, Protocol.WebSocket.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 
