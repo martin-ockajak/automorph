@@ -68,11 +68,11 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
         system.pure(Right { (requestBody: Array[Byte]) =>
           val requestContext = getRequestContext(paths, queryParams, headers, None)
           genericHandler.processRequest(requestBody, requestContext, requestId).either.map(_.fold(
-            error => createErrorResponse(error, clientIp, requestId, requestProperties),
+            error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
             result => {
               // Create the response
               val responseBody = result.responseBody.getOrElse(Array[Byte]())
-              createResponse(responseBody, clientIp, requestId)
+              createResponse(responseBody, clientIp, requestId, log)
             }
           ))
         })
@@ -83,24 +83,26 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
     error: Throwable,
     clientIp: Option[String],
     requestId: String,
-    requestProperties: => Map[String, String]
+    requestProperties: => Map[String, String],
+    log: MessageLog
   ): Array[Byte] = {
-    logger.error("Failed to process HTTP request", error, requestProperties)
+    log.failedProcessRequest(error, requestProperties)
     val message = Bytes.string.from(error.trace.mkString("\n")).unsafeArray
-    createResponse(message, clientIp, requestId)
+    createResponse(message, clientIp, requestId, log)
   }
 
   private def createResponse(
     responseBody: Array[Byte],
     clientIp: Option[String],
-    requestId: String
+    requestId: String,
+    log: MessageLog
   ): Array[Byte] = {
     // Log the response
     lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(clientIp)
     )
-    logger.debug("Sending HTTP response", responseProperties)
+    log.sendingResponse(responseProperties)
     responseBody
   }
 
