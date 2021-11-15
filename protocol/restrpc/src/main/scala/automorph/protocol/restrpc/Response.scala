@@ -9,7 +9,7 @@ import automorph.spi.RpcProtocol.InvalidResponseException
  * @param error call error
  * @tparam Node message node type
  */
-private[automorph] final case class Response[Node](
+final private[automorph] case class Response[Node](
   result: Option[Node],
   error: Option[ResponseError]
 ) {

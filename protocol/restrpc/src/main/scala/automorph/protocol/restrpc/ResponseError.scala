@@ -8,7 +8,7 @@ import automorph.protocol.restrpc.Response.mandatory
  * @param message error message
  * @param code error code
  */
-private[automorph] final case class ResponseError(
+final private[automorph] case class ResponseError(
   message: String,
   code: Option[Int]
 ) {

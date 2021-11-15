@@ -25,7 +25,6 @@ object ErrorType {
   case object ReservedError extends ErrorType(-32768)
   case object ApplicationError extends ErrorType(0)
 
-
   /** JSON-RPC parse error. */
   final case class ParseErrorException(
     message: String,

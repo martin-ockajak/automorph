@@ -1,7 +1,7 @@
 package automorph.protocol.jsonrpc
 
 import automorph.protocol.jsonrpc.Message
-import automorph.protocol.jsonrpc.Message.{Id, version}
+import automorph.protocol.jsonrpc.Message.{version, Id}
 import automorph.spi.RpcProtocol.InvalidResponseException
 
 /**
@@ -13,7 +13,7 @@ import automorph.spi.RpcProtocol.InvalidResponseException
  * @param error call error
  * @tparam Node message node type
  */
-private[automorph] final case class Response[Node](
+final private[automorph] case class Response[Node](
   id: Id,
   result: Option[Node],
   error: Option[ResponseError[Node]]

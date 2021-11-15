@@ -3,7 +3,6 @@ package automorph.protocol.jsonrpc
 import automorph.protocol.jsonrpc.MessageError
 import automorph.protocol.jsonrpc.Response.mandatory
 
-
 /**
  * JSON-RPC call response error.
  *
@@ -13,7 +12,7 @@ import automorph.protocol.jsonrpc.Response.mandatory
  * @param data additional error information
  * @tparam Node message node type
  */
-private[automorph] final case class ResponseError[Node](
+final private[automorph] case class ResponseError[Node](
   message: String,
   code: Int,
   data: Option[Node]

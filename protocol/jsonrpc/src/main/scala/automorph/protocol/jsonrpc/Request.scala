@@ -1,7 +1,7 @@
 package automorph.protocol.jsonrpc
 
 import automorph.protocol.jsonrpc.Message
-import automorph.protocol.jsonrpc.Message.{Id, Params, version}
+import automorph.protocol.jsonrpc.Message.{version, Id, Params}
 import automorph.spi.RpcProtocol.InvalidRequestException
 
 /**
@@ -13,7 +13,7 @@ import automorph.spi.RpcProtocol.InvalidRequestException
  * @param params invoked method argument values by position or by name
  * @tparam Node message node type
  */
-private[automorph] final case class Request[Node](
+final private[automorph] case class Request[Node](
   id: Option[Id],
   method: String,
   params: Params[Node]
