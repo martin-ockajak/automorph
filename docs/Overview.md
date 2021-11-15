@@ -45,7 +45,7 @@
 
 * [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
 * [Autowire](https://github.com/lihaoyi/autowire)
+* [http4s](https://http4s.org)
 * [STTP](https://sttp.softwaremill.com)
-* [Tapir](https://tapir.softwaremill.com)
 * [ZIO](https://zio.dev)
 
