@@ -25,12 +25,12 @@ import scala.collection.immutable.ListMap
  * @see [[https://twitter.github.io/finagle/docs/com/twitter/finagle/ API]]
  * @constructor Creates a Finagle HTTP service with the specified RPC request handler.
  * @param handler RPC request handler
- * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+ * @param mapException maps an exception to a corresponding HTTP status code
  * @tparam Effect effect type
  */
 final case class FinagleHttpEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
-  exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
+  mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
 
   private val log = MessageLog(logger, Protocol.Http.name)
@@ -50,7 +50,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
       result => {
         // Send the response
         val response = result.responseBody.getOrElse(Array[Byte]())
-        val status = result.exception.map(exceptionToStatusCode).map(Status.apply).getOrElse(Status.Ok)
+        val status = result.exception.map(mapException).map(Status.apply).getOrElse(Status.Ok)
         val responseBody = Reader.fromBuf(Buf.ByteArray.Owned(response))
         createResponse(responseBody, status, result.context, request, requestId)
       }
