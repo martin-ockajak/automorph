@@ -1,13 +1,13 @@
 package automorph.transport.websocket.endpoint
 
 import automorph.Types
-import automorph.log.{LogProperties, Logging}
+import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, getRequestContext, getRequestProperties}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
-import automorph.util.{Bytes, MessageLog, Random}
+import automorph.util.{Bytes, Random}
 import scala.collection.immutable.ListMap
 import sttp.capabilities.{Streams, WebSockets}
 import sttp.model.{Header, QueryParams}

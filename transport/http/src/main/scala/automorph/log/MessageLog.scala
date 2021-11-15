@@ -1,4 +1,4 @@
-package automorph.util
+package automorph.log
 
 import automorph.log.Logger
 

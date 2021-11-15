@@ -1,13 +1,13 @@
 package automorph.transport.http.endpoint
 
 import automorph.Types
-import automorph.log.{LogProperties, Logging}
+import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.FinagleEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
-import automorph.util.{MessageLog, Network, Random}
+import automorph.util.{Network, Random}
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}

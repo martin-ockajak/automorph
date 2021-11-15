@@ -1,12 +1,12 @@
 package automorph.transport.http.client
 
-import automorph.log.{LogProperties, Logging}
+import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.HttpClient.{Context, Session, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.{Bytes, MessageLog}
+import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.io.ByteArrayOutputStream
 import java.net.URI

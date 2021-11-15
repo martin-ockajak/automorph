@@ -1,11 +1,11 @@
 package automorph.transport.http.client
 
-import automorph.log.{LogProperties, Logging}
+import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.UrlClient.{Context, Session}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.{Bytes, MessageLog}
+import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.net.{HttpURLConnection, URI}
 import scala.collection.immutable.{ArraySeq, ListMap}

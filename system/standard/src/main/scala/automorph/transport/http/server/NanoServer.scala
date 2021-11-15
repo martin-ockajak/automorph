@@ -1,7 +1,7 @@
 package automorph.transport.http.server
 
 import automorph.Types
-import automorph.log.{LogProperties, Logging}
+import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.server.NanoHTTPD
@@ -12,7 +12,7 @@ import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
-import automorph.util.{Bytes, MessageLog, Network, Random}
+import automorph.util.{Bytes, Network, Random}
 import java.io.IOException
 import java.net.URI
 import scala.collection.immutable.{ArraySeq, ListMap}
