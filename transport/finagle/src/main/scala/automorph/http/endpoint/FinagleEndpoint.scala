@@ -63,7 +63,7 @@ final case class FinagleEndpoint[Effect[_]](
     requestId: String,
     requestProperties: => Map[String, String]
   ): Response = {
-    log.failedProcessing(error, requestProperties)
+    log.failedProcessRequest(error, requestProperties)
     val responseBody = Reader.fromBuf(Buf.Utf8(error.trace.mkString("\n")))
     createResponse(responseBody, Status.InternalServerError, None, request, requestId)
   }

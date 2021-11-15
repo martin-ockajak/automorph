@@ -25,10 +25,10 @@ private[automorph] final case class HttpLog(logger: Logger, defaultProtocol: Pro
   def receivedRequest(requestProperties: => Map[String, String], protocol: Protocol = defaultProtocol): Unit =
     logger.debug(s"Received $protocol request", requestProperties)
 
-  def failedRequest(error: Throwable, requestProperties: => Map[String, String], protocol: Protocol = defaultProtocol): Unit =
+  def failedReceiveRequest(error: Throwable, requestProperties: => Map[String, String], protocol: Protocol = defaultProtocol): Unit =
     logger.error(s"Failed to receive $protocol request", error, requestProperties)
 
-  def failedProcessing(error: Throwable, requestProperties: => Map[String, String], protocol: Protocol = defaultProtocol): Unit =
+  def failedProcessRequest(error: Throwable, requestProperties: => Map[String, String], protocol: Protocol = defaultProtocol): Unit =
     logger.error(s"Failed to process $protocol request", error, requestProperties)
 
   def sendingResponse(responseProperties: => Map[String, String], protocol: Protocol = defaultProtocol): Unit =
@@ -37,7 +37,7 @@ private[automorph] final case class HttpLog(logger: Logger, defaultProtocol: Pro
   def sentResponse(responseProperties: => Map[String, String], protocol: Protocol = defaultProtocol): Unit =
     logger.debug(s"Sent $protocol response", responseProperties)
 
-  def failedResponse(error: Throwable, responseProperties: => Map[String, String], protocol: Protocol = defaultProtocol): Unit =
+  def failedSendResponse(error: Throwable, responseProperties: => Map[String, String], protocol: Protocol = defaultProtocol): Unit =
     logger.error(s"Failed to send $protocol response", error, responseProperties)
 
   def receivingResponse(responseProperties: => Map[String, String], protocol: Protocol = defaultProtocol): Unit =

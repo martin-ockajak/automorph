@@ -84,7 +84,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     requestId: String,
     requestProperties: => Map[String, String]
   ): Unit = {
-    log.failedProcessing(error, requestProperties)
+    log.failedProcessRequest(error, requestProperties)
     val responseBody = Bytes.string.from(error.trace.mkString("\n"))
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
     sendResponse(responseBody, statusCode, None, exchange, requestId)
@@ -116,7 +116,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
       exchange.setStatusCode(responseStatusCode).getResponseSender.send(Bytes.byteBuffer.to(responseBody))
       log.sentResponse(responseProperties)
     }.onFailure { error =>
-      log.failedResponse(error, responseProperties)
+      log.failedSendResponse(error, responseProperties)
     }.get
   }
 

@@ -102,7 +102,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         requestId: String,
         requestProperties: => Map[String, String]
       ): Unit = {
-        log.failedProcessing(error, requestProperties)
+        log.failedProcessRequest(error, requestProperties)
         val responseBody = Bytes.string.from(error.trace.mkString("\n"))
         sendResponse(responseBody, None, exchange, channel, requestId)
       }
@@ -127,7 +127,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
             log.sentResponse(responseProperties)
 
           override def onError(channel: WebSocketChannel, context: Unit, error: Throwable): Unit =
-            log.failedResponse(error, responseProperties)
+            log.failedSendResponse(error, responseProperties)
         }
         setResponseContext(exchange, responseContext)
         WebSockets.sendBinary(Bytes.byteBuffer.to(message), channel, callback, ())

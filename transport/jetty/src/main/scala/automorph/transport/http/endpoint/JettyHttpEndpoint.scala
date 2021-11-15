@@ -70,7 +70,7 @@ final case class JettyHttpEndpoint[Effect[_]](
     requestId: String,
     requestProperties: => Map[String, String]
   ): Unit = {
-    log.failedProcessing(error, requestProperties)
+    log.failedProcessRequest(error, requestProperties)
     val responseBody = Bytes.string.from(error.trace.mkString("\n"))
     val status = HttpStatus.INTERNAL_SERVER_ERROR_500
     sendResponse(responseBody, status, None, response, asyncContext, request, requestId)
@@ -105,7 +105,7 @@ final case class JettyHttpEndpoint[Effect[_]](
       asyncContext.complete()
       log.sentResponse(responseProperties)
     }.onFailure { error =>
-      log.failedResponse(error, responseProperties)
+      log.failedSendResponse(error, responseProperties)
     }.get
   }
 

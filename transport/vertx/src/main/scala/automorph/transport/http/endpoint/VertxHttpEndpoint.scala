@@ -71,7 +71,7 @@ final case class VertxHttpEndpoint[Effect[_]](
     requestId: String,
     requestProperties: => Map[String, String]
   ): Unit = {
-    log.failedProcessing(error, requestProperties)
+    log.failedProcessRequest(error, requestProperties)
     val responseBody = Bytes.string.from(error.trace.mkString("\n"))
     sendResponse(responseBody, statusInternalServerError, None, request, requestId)
   }
@@ -99,7 +99,7 @@ final case class VertxHttpEndpoint[Effect[_]](
       .end(Buffer.buffer(Bytes.byteArray.to(responseBody))).onSuccess { _ =>
         log.sentResponse(responseProperties)
       }.onFailure { error =>
-        log.failedResponse(error, responseProperties)
+        log.failedSendResponse(error, responseProperties)
       }
     ()
   }
