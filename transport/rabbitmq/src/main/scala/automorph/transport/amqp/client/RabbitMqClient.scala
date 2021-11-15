@@ -1,6 +1,6 @@
 package automorph.transport.amqp.client
 
-import automorph.log.Logging
+import automorph.log.{Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
@@ -42,12 +42,13 @@ final case class RabbitMqClient[Effect[_]](
   connectionFactory: ConnectionFactory = new ConnectionFactory
 ) extends Logging with ClientMessageTransport[Effect, Context] {
 
+  private val directReplyToQueue = "amq.rabbitmq.reply-to"
   private lazy val connection = connect()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, consumer)
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
   private val urlText = url.toString
   private val responseHandlers = TrieMap[String, Deferred[Effect, Response]]()
-  private val directReplyToQueue = "amq.rabbitmq.reply-to"
+  private val log = MessageLog(logger, RabbitMqCommon.protocol)
   implicit private val givenSystem: EffectSystem[Effect] = system
 
   override def call(
@@ -83,7 +84,7 @@ final case class RabbitMqClient[Effect[_]](
       .amqpProperties(requestContext, mediaType, directReplyToQueue, defaultRequestId, clientId, false)
     val requestId = amqpProperties.getCorrelationId
     lazy val requestProperties = RabbitMqCommon.messageProperties(Some(requestId), routingKey, urlText, None)
-    logger.trace("Sending AMQP request", requestProperties)
+    log.sendingRequest(requestProperties)
 
     // Register deferred response effect if available
     response.foreach(responseHandlers.put(requestId, _))
@@ -93,8 +94,10 @@ final case class RabbitMqClient[Effect[_]](
       Try {
         val message = requestBody.unsafeArray
         threadConsumer.get.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, message)
-        logger.debug("Sent AMQP request", requestProperties)
-      }.onFailure(logger.error("Failed to send AMQP request", _, requestProperties)).get
+        log.sentRequest(requestProperties)
+      }.onFailure { error =>
+        log.failedSendRequest(error, requestProperties)
+      }.get
     }
   }
 
@@ -110,7 +113,7 @@ final case class RabbitMqClient[Effect[_]](
         // Log the response
         lazy val responseProperties = RabbitMqCommon
           .messageProperties(Option(properties.getCorrelationId), routingKey, urlText, None)
-        logger.debug("Received AMQP response", responseProperties)
+        log.receivedResponse(responseProperties)
 
         // Resolve the registered deferred response effect
         val responseContext = RabbitMqCommon.messageContext(properties)

@@ -22,6 +22,9 @@ private[automorph] object RabbitMqCommon extends Logging {
   /** Routing key property. */
   val routingKeyProperty = "Routing Key"
 
+  /** Protocol name. */
+  val protocol = "AMQP"
+
   /**
    * Initialize AMQP broker connection.
    *
@@ -39,15 +42,15 @@ private[automorph] object RabbitMqCommon extends Logging {
   ): Connection = {
     val urlText = url.toString
     connectionFactory.setUri(url)
-    logger.debug(s"Connecting to RabbitMQ broker: $urlText")
+    logger.debug(s"Connecting to $protocol broker: $urlText")
     Try(if (addresses.nonEmpty) {
       connectionFactory.newConnection(addresses.toArray, name)
     } else {
       connectionFactory.newConnection(name)
     }).map { connection =>
-      logger.info(s"Connected to RabbitMQ broker: $urlText")
+      logger.info(s"Connected to $protocol broker: $urlText")
       connection
-    }.onFailure(logger.error(s"Failed to connect to RabbitMQ broker: $urlText", _)).get
+    }.onFailure(logger.error(s"Failed to connect to $protocol broker: $urlText", _)).get
   }
 
   /**

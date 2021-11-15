@@ -1,7 +1,7 @@
 package automorph.transport.amqp.server
 
 import automorph.Types
-import automorph.log.Logging
+import automorph.log.{Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.amqp.server.RabbitMqServer.Context
@@ -39,11 +39,12 @@ final case class RabbitMqServer[Effect[_]](
   connectionFactory: ConnectionFactory = new ConnectionFactory
 ) extends Logging with ServerMessageTransport[Effect] {
 
+  private val exchange = RabbitMqCommon.defaultDirectExchange
   private lazy val connection = connect()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, consumer)
   private val serverId = RabbitMqCommon.applicationId(getClass.getName)
   private val urlText = url.toString
-  private val exchange = RabbitMqCommon.defaultDirectExchange
+  private val log = MessageLog(logger, RabbitMqCommon.protocol)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, RabbitMqServer.Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
   start()
@@ -68,7 +69,7 @@ final case class RabbitMqServer[Effect[_]](
         val requestId = Option(amqpProperties.getCorrelationId)
         lazy val requestProperties = RabbitMqCommon
           .messageProperties(requestId, envelope.getRoutingKey, urlText, Option(consumerTag))
-        logger.debug("Received AMQP request", requestProperties)
+        log.receivedRequest(requestProperties)
         Option(amqpProperties.getReplyTo).map { replyTo =>
           requestId.map { actualRequestId =>
             // Process the request
@@ -82,10 +83,10 @@ final case class RabbitMqServer[Effect[_]](
               }
             )).run
           }.getOrElse {
-            logger.error(s"Received AMQP request header: correlation-id", requestProperties)
+            logger.error(s"Missing ${log.defaultProtocol} request header: correlation-id", requestProperties)
           }
         }.getOrElse {
-          logger.error("Missing AMQP request header: reply-to", requestProperties)
+          logger.error(s"Missing ${log.defaultProtocol} request header: reply-to", requestProperties)
         }
       }
     }
@@ -101,7 +102,7 @@ final case class RabbitMqServer[Effect[_]](
     requestProperties: => Map[String, String],
     requestId: String
   ): Unit = {
-    logger.debug("Failed to process AMQP request", error, requestProperties)
+    log.failedProcessRequest(error, requestProperties)
     val message = Bytes.string.from(error.trace.mkString("\n")).unsafeArray
     sendResponse(message, replyTo, None, requestProperties, requestId)
   }
@@ -120,7 +121,7 @@ final case class RabbitMqServer[Effect[_]](
       })
     }.getOrElse(replyTo)
     lazy val responseProperties = requestProperties + (RabbitMqCommon.routingKeyProperty -> actualReplyTo)
-    logger.trace("Sending AMQP response", responseProperties)
+    log.sendingResponse(responseProperties)
 
     // Send the response
     Try {
@@ -128,8 +129,10 @@ final case class RabbitMqServer[Effect[_]](
       val amqpProperties = RabbitMqCommon
         .amqpProperties(responseContext, mediaType, actualReplyTo, requestId, serverId, true)
       threadConsumer.get.getChannel.basicPublish(exchange, actualReplyTo, true, false, amqpProperties, message)
-      logger.debug("Sent AMQP response", responseProperties)
-    }.onFailure(logger.error("Failed to send AMQP response", _, responseProperties)).get
+      log.sentResponse(responseProperties)
+    }.onFailure { error =>
+      log.failedSendResponse(error, responseProperties)
+    }.get
   }
 
   private def connect(): Connection = {
