@@ -86,12 +86,12 @@ final case class JettyHttpEndpoint[Effect[_]](
   ): Unit = {
     // Log the response
     val responseStatus = responseContext.flatMap(_.statusCode).getOrElse(status)
-    lazy val responseDetails = ListMap(
+    lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(request),
       "Status" -> responseStatus.toString
     )
-    logger.debug("Sending HTTP response", responseDetails)
+    logger.debug("Sending HTTP response", responseProperties)
 
     // Send the response
     Try {
@@ -102,9 +102,9 @@ final case class JettyHttpEndpoint[Effect[_]](
       outputStream.write(responseBody.unsafeArray)
       outputStream.flush()
       asyncContext.complete()
-      logger.debug("Sent HTTP response", responseDetails)
+      logger.debug("Sent HTTP response", responseProperties)
     }.onFailure { error =>
-      logger.error("Failed to send HTTP response", error, responseDetails)
+      logger.error("Failed to send HTTP response", error, responseProperties)
     }.get
   }
 

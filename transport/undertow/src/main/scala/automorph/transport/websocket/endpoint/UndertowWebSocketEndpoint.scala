@@ -114,19 +114,19 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         requestId: String
       ): Unit = {
         // Log the response
-        lazy val responseDetails = ListMap(
+        lazy val responseProperties = ListMap(
           LogProperties.requestId -> requestId,
           "Client" -> clientAddress(exchange)
         )
-        logger.trace("Sending WebSocket response", responseDetails)
+        logger.trace("Sending WebSocket response", responseProperties)
 
         // Send the response
         val callback = new WebSocketCallback[Unit] {
           override def complete(channel: WebSocketChannel, context: Unit): Unit =
-            logger.debug("Sent WebSocket response", responseDetails)
+            logger.debug("Sent WebSocket response", responseProperties)
 
           override def onError(channel: WebSocketChannel, context: Unit, throwable: Throwable): Unit =
-            logger.error("Failed to send WebSocket response", throwable, responseDetails)
+            logger.error("Failed to send WebSocket response", throwable, responseProperties)
         }
         setResponseContext(exchange, responseContext)
         WebSockets.sendBinary(Bytes.byteBuffer.to(message), channel, callback, ())

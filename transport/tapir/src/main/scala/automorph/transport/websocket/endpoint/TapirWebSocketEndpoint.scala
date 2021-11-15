@@ -95,11 +95,11 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
     requestId: String
   ): Array[Byte] = {
     // Log the response
-    lazy val responseDetails = ListMap(
+    lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(clientIp)
     )
-    logger.debug("Sending HTTP response", responseDetails)
+    logger.debug("Sending HTTP response", responseProperties)
     responseBody
   }
 

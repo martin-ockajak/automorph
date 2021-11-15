@@ -98,12 +98,12 @@ final case class UndertowHttpEndpoint[Effect[_]](
   ): Unit = {
     // Log the response
     val responseStatusCode = responseContext.flatMap(_.statusCode).getOrElse(statusCode)
-    lazy val responseDetails = ListMap(
+    lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(exchange),
       "Status" -> responseStatusCode.toString
     )
-    logger.trace("Sending HTTP response", responseDetails)
+    logger.trace("Sending HTTP response", responseProperties)
 
     // Send the response
     Try {
@@ -113,9 +113,9 @@ final case class UndertowHttpEndpoint[Effect[_]](
       setResponseContext(exchange, responseContext)
       exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, genericHandler.protocol.codec.mediaType)
       exchange.setStatusCode(responseStatusCode).getResponseSender.send(Bytes.byteBuffer.to(responseBody))
-      logger.debug("Sent HTTP response", responseDetails)
+      logger.debug("Sent HTTP response", responseProperties)
     }.onFailure { error =>
-      logger.error("Failed to send HTTP response", error, responseDetails)
+      logger.error("Failed to send HTTP response", error, responseProperties)
     }.get
   }
 

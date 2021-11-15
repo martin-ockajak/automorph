@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.UrlClient.{Context, Session}
-import automorph.transport.http.{HttpContext, HttpMethod}
+import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.net.{HttpURLConnection, URI}
@@ -36,6 +36,7 @@ final case class UrlClient[Effect[_]](
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
   private val httpMethods = HttpMethod.values.map(_.name).toSet
+  private val log = HttpLog(logger, Protocol.Http)
   implicit private val givenSystem: EffectSystem[Effect] = system
   System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
 
@@ -54,13 +55,13 @@ final case class UrlClient[Effect[_]](
         )
 
         // Process the response
-        logger.trace("Receiving HTTP response", responseProperties)
+        log.receivingResponse(responseProperties)
         connection.getResponseCode
         val inputStream = Option(connection.getErrorStream).getOrElse(connection.getInputStream)
-        val response = Using(inputStream)(Bytes.inputStream.from).onFailure {
-          logger.error("Failed to receive HTTP response", _, responseProperties)
+        val response = Using(inputStream)(Bytes.inputStream.from).onFailure { error =>
+          log.failedResponse(error, responseProperties)
         }.get
-        logger.debug("Received HTTP response", responseProperties + ("Status" -> connection.getResponseCode.toString))
+        log.receivedResponse(responseProperties + ("Status" -> connection.getResponseCode.toString))
         response -> getResponseContext(connection)
       }
     }
@@ -96,7 +97,7 @@ final case class UrlClient[Effect[_]](
         "URL" -> connection.getURL.toExternalForm,
         "Method" -> httpMethod
       )
-      logger.trace("Sending HTTP request", requestProperties)
+      log.sendingRequest(requestProperties)
 
       // Send the request
       connection.setDoOutput(true)
@@ -105,8 +106,10 @@ final case class UrlClient[Effect[_]](
         stream.write(request.unsafeArray)
         stream.flush()
       }
-      write.onFailure(logger.error("Failed to send HTTP request", _, requestProperties)).get
-      logger.debug("Sent HTTP request", requestProperties)
+      write.onFailure { error =>
+        log.failedRequest(error, requestProperties)
+      }.get
+      log.sentRequest(requestProperties)
       connection
     }
 

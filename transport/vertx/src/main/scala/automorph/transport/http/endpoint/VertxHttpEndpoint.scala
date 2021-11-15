@@ -5,7 +5,7 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.VertxHttpEndpoint.Context
-import automorph.transport.http.{HttpContext, HttpMethod}
+import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
 import io.vertx.core.Handler
@@ -36,6 +36,7 @@ final case class VertxHttpEndpoint[Effect[_]](
   private val statusOk = 200
   private val statusInternalServerError = 500
   private val headerXForwardedFor = "X-Forwarded-For"
+  private val log = HttpLog(logger, Protocol.Http)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 
@@ -43,10 +44,10 @@ final case class VertxHttpEndpoint[Effect[_]](
     // Log the request
     val requestId = Random.id
     lazy val requestProperties = getRequestProperties(request, requestId)
-    logger.trace("Receiving HTTP request", requestProperties)
+    log.receivingRequest(requestProperties)
     request.bodyHandler { buffer =>
       val requestBody = Bytes.byteArray.from(buffer.getBytes)
-      logger.debug("Received HTTP request", requestProperties)
+      log.receivedRequest(requestProperties)
 
       // Process the request
       genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
@@ -70,7 +71,7 @@ final case class VertxHttpEndpoint[Effect[_]](
     requestId: String,
     requestProperties: => Map[String, String]
   ): Unit = {
-    logger.error("Failed to process HTTP request", error, requestProperties)
+    log.failedProcessing(error, requestProperties)
     val responseBody = Bytes.string.from(error.trace.mkString("\n"))
     sendResponse(responseBody, statusInternalServerError, None, request, requestId)
   }
@@ -84,21 +85,21 @@ final case class VertxHttpEndpoint[Effect[_]](
   ): Unit = {
     // Log the response
     val responseStatusCode = responseContext.flatMap(_.statusCode).getOrElse(statusCode)
-    lazy val responseDetails = ListMap(
+    lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(request),
       "Status" -> responseStatusCode.toString
     )
-    logger.trace("Sending HTTP response", responseDetails)
+    log.sendingResponse(responseProperties)
 
     // Send the response
     setResponseContext(request.response, responseContext)
       .putHeader(HttpHeaders.CONTENT_TYPE, genericHandler.protocol.codec.mediaType)
       .setStatusCode(statusCode)
       .end(Buffer.buffer(Bytes.byteArray.to(responseBody))).onSuccess { _ =>
-        logger.debug("Sent HTTP response", responseDetails)
+        log.sentResponse(responseProperties)
       }.onFailure { error =>
-        logger.error("Failed to send HTTP response", error, responseDetails)
+        log.failedResponse(error, responseProperties)
       }
     ()
   }

@@ -160,21 +160,21 @@ final case class NanoServer[Effect[_]] private (
   ): Response = {
     // Log the response
     val responseStatus = responseContext.flatMap(_.statusCode.map(Status.lookup)).getOrElse(status)
-    lazy val responseDetails = Map(
+    lazy val responseProperties = Map(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(session)
     ) ++ (protocol match {
       case Protocol.Http => Some("Status" -> responseStatus.toString)
       case _ => None
     })
-    logger.trace(s"Sending $protocol response", responseDetails)
+    logger.trace(s"Sending $protocol response", responseProperties)
 
     // Create the response
     val inputStream = Bytes.inputStream.to(responseBody)
     val mediaType = genericHandler.protocol.codec.mediaType
     val response = newFixedLengthResponse(responseStatus, mediaType, inputStream, responseBody.size.toLong)
     setResponseContext(response, responseContext)
-    logger.debug(s"Sent $protocol response", responseDetails)
+    logger.debug(s"Sent $protocol response", responseProperties)
     response
   }
 
