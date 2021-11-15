@@ -10,6 +10,7 @@ object QuickStart extends App {
 
   // Create server API instance
   class ServerApi {
+
     def hello(some: String, n: Int): Future[String] =
       Future(s"Hello $some $n!")
   }
