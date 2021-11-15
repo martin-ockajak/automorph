@@ -41,14 +41,14 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
    * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
    * @param handler RPC request handler
    * @param method HTTP method to server
-   * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+   * @param mapException maps an exception to a corresponding HTTP status code
    * @tparam Effect effect type
    * @return Tapir HTTP endpoint
    */
   def apply[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
     method: Method,
-    exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
+    mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode
   ): ServerEndpoint[Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     val system = genericHandler.system
@@ -71,7 +71,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
           result => {
             // Create the response
             val responseBody = result.responseBody.getOrElse(Array[Byte]())
-            val status = result.exception.map(exceptionToStatusCode).map(StatusCode.apply).getOrElse(StatusCode.Ok)
+            val status = result.exception.map(mapException).map(StatusCode.apply).getOrElse(StatusCode.Ok)
             Right(createResponse(responseBody, status, clientIp, requestId))
           }
         ))

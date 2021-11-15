@@ -28,53 +28,50 @@ import scala.util.Try
  * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor Creates an Undertow HTTP handler with specified RPC request handler.
  * @param handler RPC request handler
- * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
+ * @param mapException maps an exception to a corresponding HTTP status code
  * @tparam Effect effect type
  */
 final case class UndertowHttpEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
-  exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
+  mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 
-  private val receiveCallback = new Receiver.FullBytesCallback {
-
-    override def handle(exchange: HttpServerExchange, message: Array[Byte]): Unit = {
-      // Log the request
-      val requestId = Random.id
-      lazy val requestProperties = getRequestProperties(exchange, requestId)
-      logger.debug("Received HTTP request", requestProperties)
-      val requestBody = Bytes.byteArray.from(message)
-      val handlerRunnable = new Runnable {
-
-        override def run(): Unit = {
-          // Process the request
-          genericHandler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(_.fold(
-            error => sendErrorResponse(error, exchange, requestId, requestProperties),
-            result => {
-              // Send the response
-              val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
-              val statusCode = result.exception.map(exceptionToStatusCode).getOrElse(StatusCodes.OK)
-              sendResponse(response, statusCode, result.context, exchange, requestId)
-            }
-          )).run
-        }
-      }
-      if (exchange.isInIoThread) {
-        exchange.dispatch(handlerRunnable)
-        ()
-      } else {
-        handlerRunnable.run()
-      }
-    }
-  }
-
   override def handleRequest(exchange: HttpServerExchange): Unit = {
+    // Log the request
     val requestId = Random.id
     lazy val requestProperties = getRequestProperties(exchange, requestId)
     logger.trace("Receiving HTTP request", requestProperties)
+    val receiveCallback = new Receiver.FullBytesCallback {
+
+      override def handle(exchange: HttpServerExchange, message: Array[Byte]): Unit = {
+        logger.debug("Received HTTP request", requestProperties)
+        val requestBody = Bytes.byteArray.from(message)
+        val handlerRunnable = new Runnable {
+
+          override def run(): Unit = {
+            // Process the request
+            genericHandler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(_.fold(
+              error => sendErrorResponse(error, exchange, requestId, requestProperties),
+              result => {
+                // Send the response
+                val responseBody = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
+                val statusCode = result.exception.map(mapException).getOrElse(StatusCodes.OK)
+                sendResponse(responseBody, statusCode, result.context, exchange, requestId)
+              }
+            )).run
+          }
+        }
+        if (exchange.isInIoThread) {
+          exchange.dispatch(handlerRunnable)
+          ()
+        } else {
+          handlerRunnable.run()
+        }
+      }
+    }
     Try(exchange.getRequestReceiver.receiveFullBytes(receiveCallback)).recover { case error =>
       sendErrorResponse(error, exchange, requestId, requestProperties)
     }.get
@@ -87,13 +84,13 @@ final case class UndertowHttpEndpoint[Effect[_]](
     requestProperties: => Map[String, String]
   ): Unit = {
     logger.error("Failed to process HTTP request", error, requestProperties)
-    val message = Bytes.string.from(error.trace.mkString("\n"))
+    val responseBody = Bytes.string.from(error.trace.mkString("\n"))
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
-    sendResponse(message, statusCode, None, exchange, requestId)
+    sendResponse(responseBody, statusCode, None, exchange, requestId)
   }
 
   private def sendResponse(
-    message: ArraySeq.ofByte,
+    responseBody: ArraySeq.ofByte,
     statusCode: Int,
     responseContext: Option[Context],
     exchange: HttpServerExchange,
@@ -115,9 +112,11 @@ final case class UndertowHttpEndpoint[Effect[_]](
       }
       setResponseContext(exchange, responseContext)
       exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, genericHandler.protocol.codec.mediaType)
-      exchange.setStatusCode(responseStatusCode).getResponseSender.send(Bytes.byteBuffer.to(message))
+      exchange.setStatusCode(responseStatusCode).getResponseSender.send(Bytes.byteBuffer.to(responseBody))
       logger.debug("Sent HTTP response", responseDetails)
-    }.onFailure(logger.error("Failed to send HTTP response", _, responseDetails)).get
+    }.onFailure { error =>
+      logger.error("Failed to send HTTP response", error, responseDetails)
+    }.get
   }
 
   private def getRequestContext(exchange: HttpServerExchange): Context = {

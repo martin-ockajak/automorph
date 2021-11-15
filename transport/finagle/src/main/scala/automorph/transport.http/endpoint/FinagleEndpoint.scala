@@ -50,8 +50,8 @@ final case class FinagleEndpoint[Effect[_]](
         // Send the response
         val response = result.responseBody.getOrElse(Array[Byte]())
         val status = result.exception.map(exceptionToStatusCode).map(Status.apply).getOrElse(Status.Ok)
-        val message = Reader.fromBuf(Buf.ByteArray.Owned(response))
-        createResponse(message, status, result.context, request, requestId)
+        val responseBody = Reader.fromBuf(Buf.ByteArray.Owned(response))
+        createResponse(responseBody, status, result.context, request, requestId)
       }
     )))
   }
@@ -63,12 +63,12 @@ final case class FinagleEndpoint[Effect[_]](
     requestProperties: => Map[String, String]
   ): Response = {
     logger.error("Failed to process HTTP request", error, requestProperties)
-    val message = Reader.fromBuf(Buf.Utf8(error.trace.mkString("\n")))
-    createResponse(message, Status.InternalServerError, None, request, requestId)
+    val responseBody = Reader.fromBuf(Buf.Utf8(error.trace.mkString("\n")))
+    createResponse(responseBody, Status.InternalServerError, None, request, requestId)
   }
 
   private def createResponse(
-    message: Reader[Buf],
+    responseBody: Reader[Buf],
     status: Status,
     responseContext: Option[Context],
     request: Request,
@@ -83,7 +83,7 @@ final case class FinagleEndpoint[Effect[_]](
     )
 
     // Send the response
-    val response = Response(request.version, responseStatus, message)
+    val response = Response(request.version, responseStatus, responseBody)
     setResponseContext(response, responseContext)
     response.contentType = genericHandler.protocol.codec.mediaType
     logger.debug("Sending HTTP response", responseDetails)

@@ -1,0 +1,103 @@
+package automorph.transport.http.server
+
+import automorph.Types
+import automorph.log.Logging
+import automorph.spi.transport.ServerMessageTransport
+import automorph.transport.http.endpoint.VertxHttpEndpoint
+import automorph.transport.http.server.VertxServer.{defaultHttpServerOptions, defaultVertxOptions, Context}
+import automorph.transport.http.{HttpContext, HttpMethod}
+import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint
+import io.vertx.core.http.{HttpServer, HttpServerOptions}
+import io.vertx.core.{Vertx, VertxOptions}
+import scala.collection.immutable.ListMap
+
+/**
+ * Vert.x HTTP & WebSocket server transport plugin.
+ *
+ * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
+ * The response returned by the RPC request handler is used as HTTP response body.
+ *
+ * Processes only HTTP requests starting with specified URL path.
+ *
+ * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
+ * @see [[https://vertx.io Library documentation]]
+ * @see [[https://vertx.io/docs/apidocs/index.html API]]
+ * @constructor Creates an Vert.x HTTP & WebSocket server with specified RPC request handler.
+ * @param handler RPC request handler
+ * @param port port to listen on for HTTP connections
+ * @param path HTTP URL path
+ * @param methods allowed HTTP request methods
+ * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
+ * @param mapException maps an exception to a corresponding HTTP status code
+ * @param vertxOptions VertX options
+ * @param httpServerOptions HTTP server options
+ * @tparam Effect effect type
+ */
+final case class VertxServer[Effect[_]](
+  handler: Types.HandlerAnyCodec[Effect, Context],
+  port: Int,
+  path: String = "/",
+  methods: Iterable[HttpMethod] = HttpMethod.values,
+  webSocket: Boolean = true,
+  mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+  vertxOptions: VertxOptions = defaultVertxOptions,
+  httpServerOptions: HttpServerOptions = defaultHttpServerOptions
+) extends Logging with ServerMessageTransport[Effect] {
+
+  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
+  private val system = genericHandler.system
+  private val allowedMethods = methods.map(_.name).toSet
+  private lazy val httpServer = createServer()
+  start()
+
+  override def close(): Effect[Unit] =
+    system.wrap {
+      val closedServer = httpServer.close()
+      Option(closedServer.result).getOrElse {
+        throw closedServer.cause
+      }
+      ()
+    }
+
+  private def createServer(): HttpServer = {
+    // Validate HTTP request method
+    Vertx.vertx(vertxOptions).createHttpServer(httpServerOptions)
+      .requestHandler(VertxHttpEndpoint(handler, mapException))
+      .webSocketHandler(VertxWebSocketEndpoint(handler))
+  }
+
+  private def start(): Unit = {
+    val activeServer = httpServer.listen()
+    Option(activeServer.result).map { server =>
+      val protocols = if (webSocket) Seq("HTTP", "WebSocket") else Seq("HTTP")
+      protocols.foreach { protocol =>
+        val properties = ListMap(
+          "Protocol" -> protocol,
+          "Port" -> server.actualPort.toString
+        )
+        logger.info("Listening for connections", properties)
+      }
+    }.getOrElse {
+      throw activeServer.cause
+    }
+  }
+}
+
+object VertxServer {
+
+  /** Request context type. */
+  type Context = VertxHttpEndpoint.Context
+
+  /**
+   * Default Vert.x server options providing the following settings.
+   * - Event loop threads: 2 * number of CPU cores
+   * - Worker threads: number of CPU cores
+   */
+  def defaultVertxOptions: VertxOptions = new VertxOptions()
+    .setEventLoopPoolSize(Runtime.getRuntime.availableProcessors * 2)
+    .setWorkerPoolSize(Runtime.getRuntime.availableProcessors)
+
+  /** Default HTTP server options. */
+  def defaultHttpServerOptions: HttpServerOptions = new HttpServerOptions()
+}

@@ -87,8 +87,8 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
           error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
           result => {
             // Send the response
-            val response = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
-            sendResponse(response, result.context, exchange, channel, requestId)
+            val responseBody = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
+            sendResponse(responseBody, result.context, exchange, channel, requestId)
             discardMessage()
           }
         )).run
@@ -102,8 +102,8 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         requestProperties: => Map[String, String]
       ): Unit = {
         logger.error("Failed to process WebSocket request", error, requestProperties)
-        val message = Bytes.string.from(error.trace.mkString("\n"))
-        sendResponse(message, None, exchange, channel, requestId)
+        val responseBody = Bytes.string.from(error.trace.mkString("\n"))
+        sendResponse(responseBody, None, exchange, channel, requestId)
       }
 
       private def sendResponse(

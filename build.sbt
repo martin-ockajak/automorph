@@ -69,6 +69,7 @@ lazy val root = project.in(file(".")).settings(
   sttp,
   tapir,
   undertow,
+  vertx,
   jetty,
   finagle,
   rabbitmq,
@@ -290,6 +291,14 @@ lazy val undertow = project.in(file("transport/undertow")).dependsOn(
     "io.undertow" % "undertow-core" % "2.2.12.Final"
   )
 )
+lazy val vertx = project.in(file("transport/vertx")).dependsOn(
+  core, http, testStandard % Test
+).settings(
+  name := s"$projectName-vertx",
+  libraryDependencies ++= Seq(
+    "io.vertx" % "vertx-core" % "4.2.1"
+  )
+)
 val jettyVersion = "11.0.7"
 lazy val jetty = project.in(file("transport/jetty")).dependsOn(
   core, http, testStandard % Test
@@ -312,7 +321,6 @@ val tapirVersion = "0.18.3"
 lazy val tapir = project.in(file("transport/tapir")).dependsOn(
   core, http, testStandard % Test
 ).settings(
-  name := s"$projectName-tapir",
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion % Test

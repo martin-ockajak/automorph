@@ -8,10 +8,11 @@ import automorph.transport.http.server.UndertowServer.{Context, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
 import io.undertow.predicate.{Predicate, Predicates}
-import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.server.handlers.ResponseCodeHandler
+import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.{Handlers, Undertow}
 import java.net.InetSocketAddress
+import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
@@ -71,14 +72,14 @@ final case class UndertowServer[Effect[_]](
   private def start(): Unit = {
     undertow.start()
     undertow.getListenerInfo.asScala.foreach { listener =>
-      val properties = Map(
+      val properties = ListMap(
         "Protocol" -> listener.getProtcol
       ) ++ (listener.getAddress match {
-        case address: InetSocketAddress => Map(
+        case address: InetSocketAddress => ListMap(
             "Host" -> address.getHostString,
             "Port" -> address.getPort.toString
           )
-        case _ => Map.empty
+        case _ => ListMap()
       })
       logger.info("Listening for connections", properties)
     }
@@ -102,10 +103,9 @@ object UndertowServer {
   type Context = UndertowHttpEndpoint.Context
 
   /**
-   * Default Undertow web server builder providing the following settings:
+   * Default Undertow server builder providing the following settings:
    * - IO threads: 2 * number of CPU cores
    * - Worker threads: number of CPU cores
-   * - HTTP listener port: 8080
    */
   def defaultBuilder: Undertow.Builder = Undertow.builder()
     .setIoThreads(Runtime.getRuntime.availableProcessors * 2)

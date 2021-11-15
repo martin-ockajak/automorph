@@ -47,8 +47,8 @@ final case class NanoServer[Effect[_]] private (
   executeEffect: Execute[Effect]
 ) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect] {
 
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val headerXForwardedFor = "X-Forwarded-For"
+  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val allowedMethods = methods.map(_.name).toSet
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 //  asyncRunner = AsyncEffectRunner(system)
@@ -152,7 +152,7 @@ final case class NanoServer[Effect[_]] private (
   }
 
   private def createResponse(
-    message: ArraySeq.ofByte,
+    responseBody: ArraySeq.ofByte,
     status: Status,
     responseContext: Option[Context],
     session: IHTTPSession,
@@ -171,9 +171,9 @@ final case class NanoServer[Effect[_]] private (
     logger.trace(s"Sending $protocol response", responseDetails)
 
     // Create the response
-    val inputStream = Bytes.inputStream.to(message)
+    val inputStream = Bytes.inputStream.to(responseBody)
     val mediaType = genericHandler.protocol.codec.mediaType
-    val response = newFixedLengthResponse(responseStatus, mediaType, inputStream, message.size.toLong)
+    val response = newFixedLengthResponse(responseStatus, mediaType, inputStream, responseBody.size.toLong)
     setResponseContext(response, responseContext)
     logger.debug(s"Sent $protocol response", responseDetails)
     response
