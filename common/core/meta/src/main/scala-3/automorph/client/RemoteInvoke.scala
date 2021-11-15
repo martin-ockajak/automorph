@@ -235,7 +235,7 @@ object RemoteInvoke:
                 MethodReflection.call(
                   quotes,
                   codec.asTerm,
-                   "decode",
+                  "decode",
                   List(contextualResultType),
                   List(List('{ resultNode }.asTerm))
                 ).asExprOf[resultValueType]

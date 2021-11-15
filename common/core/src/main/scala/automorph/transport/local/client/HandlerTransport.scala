@@ -35,10 +35,10 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
   ): Effect[(ArraySeq.ofByte, Context)] =
     handler.processRequest(requestBody, requestContext.getOrElse(defaultContext), requestId)
       .flatMap(_.responseBody.map(responseBody =>
-      system.pure(responseBody -> defaultContext)
-    ).getOrElse {
-      system.failed(InvalidResponseException("Missing call response", None.orNull))
-    })
+        system.pure(responseBody -> defaultContext)
+      ).getOrElse {
+        system.failed(InvalidResponseException("Missing call response", None.orNull))
+      })
 
   override def message(
     requestBody: ArraySeq.ofByte,

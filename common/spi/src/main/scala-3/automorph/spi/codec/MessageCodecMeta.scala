@@ -6,6 +6,7 @@ package automorph.spi.codec
  * @tparam Node message codec node representation type
  */
 trait MessageCodecMeta[Node]:
+
   /**
    * Encodes a value as a message codec node.
    *

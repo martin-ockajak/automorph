@@ -42,7 +42,6 @@ trait Bytes[T] {
 
 object Bytes {
 
-
   /** `ArraySeq.ofByte` <-> byte sequence converter. */
   implicit val arraySeqOfByte: Bytes[ArraySeq.ofByte] = new Bytes[ArraySeq.ofByte] {
 

@@ -14,7 +14,7 @@ import automorph.spi.MessageCodec
  * @tparam Context message context type
  * @tparam Result result type
  */
-final case class RemoteCall[Node, Codec <: MessageCodec[Node], Effect[_], Context, Result] (
+final case class RemoteCall[Node, Codec <: MessageCodec[Node], Effect[_], Context, Result](
   functionName: String,
   codec: Codec,
   private val performCall: (String, Seq[(String, Node)], (Node, Context) => Result, Option[Context]) => Effect[Result],
