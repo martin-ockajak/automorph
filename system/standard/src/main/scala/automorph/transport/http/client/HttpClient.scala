@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.HttpClient.{Context, Session, defaultBuilder}
-import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
+import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.io.ByteArrayOutputStream
@@ -54,6 +54,7 @@ final case class HttpClient[Effect[_]](
   private val httpEmptyUrl = new URI("http://empty")
   private val webSocketsSchemePrefix = "ws"
   private val httpClient = builder.build
+  private val log = HttpLog(logger, Protocol.Http.name)
   implicit private val givenSystem: EffectSystem[Effect] = system
 
   override def call(
@@ -74,12 +75,12 @@ final case class HttpClient[Effect[_]](
         // Process the response
         result.fold(
           error => {
-            logger.error(s"Failed to receive $protocol response", error, responseProperties)
+            log.failedReceiveResponse(error, responseProperties, protocol.name)
             system.failed(error)
           },
           response => {
             val (responseBody, statusCode, _) = response
-            logger.debug(s"Received $protocol response", responseProperties ++ statusCode.map("Status" -> _))
+            log.receivedResponse(responseProperties, protocol.name)
             system.pure(responseBody -> getResponseContext(response))
           }
         )
@@ -146,14 +147,14 @@ final case class HttpClient[Effect[_]](
       LogProperties.requestId -> requestId,
       "URL" -> requestUrl.toString
     ) ++ requestMethod.map("Method" -> _)
-    logger.trace(s"Sending $protocol request", requestProperties)
+    log.sendingRequest(requestProperties, protocol.name)
     response.either.flatMap(_.fold(
       error => {
-        logger.error(s"Failed to send $protocol request", error, requestProperties)
+        log.failedSendRequest(error, requestProperties, protocol.name)
         system.failed(error)
       },
       response => {
-        logger.debug(s"Sent $protocol request", requestProperties)
+        log.sentRequest(requestProperties, protocol.name)
         system.pure(response)
       }
     ))
