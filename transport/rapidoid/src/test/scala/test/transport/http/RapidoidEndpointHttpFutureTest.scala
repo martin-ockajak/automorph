@@ -5,7 +5,8 @@
 //import automorph.system.FutureSystem
 //import automorph.transport.http.endpoint.RapidoidHttpEndpoint
 //import org.rapidoid.http.Req
-//import org.rapidoid.setup.On
+//import org.rapidoid.net.ServerBuilder
+//import org.rapidoid.setup.{App, On, ServerSetup}
 //import org.scalacheck.Arbitrary
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
@@ -31,9 +32,9 @@
 //  ): ServerMessageTransport[Effect] = new ServerMessageTransport[Effect] {
 //    private val server = {
 //      val endpoint = RapidoidHttpEndpoint(handler)
-//      val setup = On.req(endpoint).port(port)
-//      setup.activate()
-//      setup
+//      val app = new App()
+//      On.port(port)
+//      On.req(endpoint).port(port)
 //    }
 //
 //    override def close(): Effect[Unit] =
