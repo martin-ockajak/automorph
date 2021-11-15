@@ -262,9 +262,4 @@ object NanoServer {
     server.start()
     server
   }
-
-  /** Transport protocol. */
-  sealed abstract private class Protocol(val name: String) {
-    override def toString: String = name
-  }
 }
