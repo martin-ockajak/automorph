@@ -12,7 +12,7 @@ import scala.collection.immutable.ListMap
 import sttp.capabilities.{Streams, WebSockets}
 import sttp.model.{Header, QueryParams}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.{CodecFormat, clientIp, endpoint, headers, paths, queryParams, webSocketBody}
+import sttp.tapir.{clientIp, endpoint, headers, paths, queryParams, webSocketBody, CodecFormat}
 
 /**
  * Tapir WebSocket endpoint message transport plugin.

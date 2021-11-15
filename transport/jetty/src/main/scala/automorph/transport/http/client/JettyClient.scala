@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.client.JettyClient.{Context, Session, defaultClient}
+import automorph.transport.http.client.JettyClient.{defaultClient, Context, Session}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
@@ -13,7 +13,7 @@ import java.util
 import java.util.concurrent.{CompletableFuture, TimeUnit}
 import org.eclipse.jetty.client.api.{Request, Result}
 import org.eclipse.jetty.client.util.{BufferingResponseListener, BytesRequestContent}
-import org.eclipse.jetty.client.{HttpClient, api}
+import org.eclipse.jetty.client.{api, HttpClient}
 import org.eclipse.jetty.http.HttpHeader
 import org.eclipse.jetty.{http, websocket}
 import org.eclipse.jetty.websocket.api.{WebSocketListener, WriteCallback}
@@ -114,41 +114,50 @@ final case class JettyClient[Effect[_]](
     requestId: String,
     protocol: Protocol
   ): Effect[Response] = {
-    log(requestId, requestUrl, request.swap.toOption.map(_.getMethod), protocol, request.fold(
-      // Send HTTP request
-      httpRequest =>
-        system match {
-          case defer: Defer[_] =>
-            defer.asInstanceOf[Defer[Effect]].deferred[Response].flatMap { deferredResponse =>
-              httpRequest.send(new BufferingResponseListener {
+    log(
+      requestId,
+      requestUrl,
+      request.swap.toOption.map(_.getMethod),
+      protocol,
+      request.fold(
+        // Send HTTP request
+        httpRequest =>
+          system match {
+            case defer: Defer[_] =>
+              defer.asInstanceOf[Defer[Effect]].deferred[Response].flatMap { deferredResponse =>
+                httpRequest.send(new BufferingResponseListener {
 
-                override def onComplete(result: Result): Unit =
-                  Option(result.getResponseFailure).map(error => deferredResponse.fail(error).run).getOrElse {
-                    deferredResponse.succeed(httpResponse(result.getResponse, getContent)).run
+                  override def onComplete(result: Result): Unit =
+                    Option(result.getResponseFailure).map(error => deferredResponse.fail(error).run).getOrElse {
+                      deferredResponse.succeed(httpResponse(result.getResponse, getContent)).run
+                    }
+                })
+                deferredResponse.effect
+              }
+            case _ => system.wrap(httpRequest.send()).map(response => httpResponse(response, response.getContent))
+          },
+        // Send WebSocket request
+        { case (webSocketEffect, resultEffect, requestBody) =>
+          withDefer(defer =>
+            defer.deferred[Unit].flatMap { deferredSent =>
+              webSocketEffect.flatMap { webSocket =>
+                webSocket.getRemote.sendBytes(
+                  Bytes.byteBuffer.to(requestBody),
+                  new WriteCallback {
+                    override def writeSuccess(): Unit =
+                      deferredSent.succeed(()).run
+
+                    override def writeFailed(error: Throwable): Unit =
+                      deferredSent.fail(error).run
                   }
-              })
-              deferredResponse.effect
+                )
+                deferredSent.effect.flatMap(_ => resultEffect)
+              }
             }
-          case _ => system.wrap(httpRequest.send()).map(response => httpResponse(response, response.getContent))
-        },
-      // Send WebSocket request
-      { case (webSocketEffect, resultEffect, requestBody) =>
-        withDefer(defer =>
-          defer.deferred[Unit].flatMap { deferredSent =>
-            webSocketEffect.flatMap { webSocket =>
-              webSocket.getRemote.sendBytes(Bytes.byteBuffer.to(requestBody), new WriteCallback {
-                override def writeSuccess(): Unit =
-                  deferredSent.succeed(()).run
-
-                override def writeFailed(error: Throwable): Unit =
-                  deferredSent.fail(error).run
-              })
-              deferredSent.effect.flatMap(_ => resultEffect)
-            }
-          }
-        )
-      }
-    ))
+          )
+        }
+      )
+    )
   }
 
   private def log(
@@ -250,7 +259,8 @@ final case class JettyClient[Effect[_]](
   private def createWebSocketRequest(httpContext: Context, requestUrl: URI): ClientUpgradeRequest = {
     // Headers
     val transportRequest = httpContext.transport.map(_.request).getOrElse(httpClient.newRequest(requestUrl))
-    val headers = transportRequest.getHeaders.asScala.map(field => field.getName -> field.getValue) ++ httpContext.headers
+    val headers =
+      transportRequest.getHeaders.asScala.map(field => field.getName -> field.getValue) ++ httpContext.headers
     val request = new ClientUpgradeRequest
     headers.toSeq.groupBy(_._1).view.mapValues(_.map(_._2)).toSeq.foreach { case (name, values) =>
       request.setHeader(name, values.asJava)
