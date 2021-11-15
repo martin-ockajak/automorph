@@ -1,6 +1,6 @@
 package automorph.codec.json
 
-import argonaut.Argonaut.{StringToParseWrap, jNull}
+import argonaut.Argonaut.{jNull, StringToParseWrap}
 import argonaut.{CodecJson, DecodeResult, Json}
 import automorph.codec.json.meta.ArgonautJsonMeta
 import automorph.schema.{OpenApi, OpenRpc}

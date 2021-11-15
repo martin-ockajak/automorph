@@ -2,7 +2,7 @@ package automorph.codec.json
 
 import automorph.codec.json.meta.CirceJsonMeta
 import automorph.schema.{OpenApi, OpenRpc}
-import io.circe.{Decoder, Encoder, Json, parser}
+import io.circe.{parser, Decoder, Encoder, Json}
 import java.nio.charset.StandardCharsets
 import scala.collection.immutable.ArraySeq
 

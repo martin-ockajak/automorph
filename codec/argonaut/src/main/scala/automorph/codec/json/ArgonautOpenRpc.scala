@@ -33,8 +33,8 @@ private[automorph] object ArgonautOpenRpc {
         val info = c.downField("info")
         for {
           openrpc <- c.downField("openrpc").as[String]
-            title <- info.downField("title").as[String]
-            version <- info.downField("version").as[String]
+          title <- info.downField("title").as[String]
+          version <- info.downField("version").as[String]
         } yield OpenRpc(openrpc = openrpc, info = Info(title = title, version = version))
       }
     )
@@ -44,35 +44,35 @@ private[automorph] object ArgonautOpenRpc {
     c.fields.map(_.toSet).map { keys =>
       for {
         `type` <- field[String](c, keys, "type")
-          title <- field[String](c, keys, "title")
-          description <- field[String](c, keys, "description")
-          properties <- Option.when(keys.contains(propertiesField)) {
-            c.downField(propertiesField).hcursor.map { jsonObject =>
-              val objectFields = jsonObject.fields.getOrElse(Seq())
-              objectFields.foldLeft(DecodeResult.ok(Map[String, Schema]())) { case (result, key) =>
-                result.flatMap { schemas =>
-                  jsonObject.downField(key).hcursor.map { jsonValue =>
-                    toSchema(jsonValue).map(schema => schemas + (key -> schema))
-                  }.getOrElse(DecodeResult.ok(schemas))
-                }
-              }.map(Some.apply)
-            }.getOrElse(DecodeResult.ok(None))
+        title <- field[String](c, keys, "title")
+        description <- field[String](c, keys, "description")
+        properties <- Option.when(keys.contains(propertiesField)) {
+          c.downField(propertiesField).hcursor.map { jsonObject =>
+            val objectFields = jsonObject.fields.getOrElse(Seq())
+            objectFields.foldLeft(DecodeResult.ok(Map[String, Schema]())) { case (result, key) =>
+              result.flatMap { schemas =>
+                jsonObject.downField(key).hcursor.map { jsonValue =>
+                  toSchema(jsonValue).map(schema => schemas + (key -> schema))
+                }.getOrElse(DecodeResult.ok(schemas))
+              }
+            }.map(Some.apply)
           }.getOrElse(DecodeResult.ok(None))
-          required <- field[List[String]](c, keys, "required")
-          default <- field[String](c, keys, "default")
-          allOf <- Option.when(keys.contains(allOfField)) {
-            c.downField(allOfField).hcursor.map { jsonArray =>
-              val arrayIndices = jsonArray.fields.getOrElse(Seq()).indices
-              arrayIndices.foldLeft(DecodeResult.ok(List[Schema]())) { case (result, index) =>
-                result.flatMap { schemas =>
-                  jsonArray.downN(index).hcursor.map { jsonValue =>
-                    toSchema(jsonValue).map(schemas :+ _)
-                  }.getOrElse(DecodeResult(Right(schemas)))
-                }
-              }.map(Some.apply)
-            }.getOrElse(DecodeResult.ok(None))
+        }.getOrElse(DecodeResult.ok(None))
+        required <- field[List[String]](c, keys, "required")
+        default <- field[String](c, keys, "default")
+        allOf <- Option.when(keys.contains(allOfField)) {
+          c.downField(allOfField).hcursor.map { jsonArray =>
+            val arrayIndices = jsonArray.fields.getOrElse(Seq()).indices
+            arrayIndices.foldLeft(DecodeResult.ok(List[Schema]())) { case (result, index) =>
+              result.flatMap { schemas =>
+                jsonArray.downN(index).hcursor.map { jsonValue =>
+                  toSchema(jsonValue).map(schemas :+ _)
+                }.getOrElse(DecodeResult(Right(schemas)))
+              }
+            }.map(Some.apply)
           }.getOrElse(DecodeResult.ok(None))
-          $ref <- field[String](c, keys, "$ref")
+        }.getOrElse(DecodeResult.ok(None))
+        $ref <- field[String](c, keys, "$ref")
       } yield Schema(
         `type` = `type`,
         title = title,

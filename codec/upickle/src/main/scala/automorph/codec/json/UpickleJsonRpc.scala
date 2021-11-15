@@ -4,10 +4,9 @@ import automorph.protocol.jsonrpc.{Message, MessageError}
 import ujson.{Arr, Null, Num, Obj, Str, Value}
 import upickle.core.Abort
 
-/**
- * JSON-RPC protocol support for uPickle message codec using JSON format.
- */
+/** JSON-RPC protocol support for uPickle message codec using JSON format. */
 private[automorph] object UpickleJsonRpc {
+
   private[automorph] type RpcMessage = Message[Value]
 
   // Workaround for upickle bug causing the following error when using its
@@ -18,7 +17,7 @@ private[automorph] object UpickleJsonRpc {
   //    at ujson.ByteParser.tryCloseCollection(ByteParser.scala:496)
   //    at ujson.ByteParser.parseNested(ByteParser.scala:462)
   //    at ujson.ByteParser.parseTopLevel0(ByteParser.scala:323)
-  private[automorph] final case class UpickleMessage(
+  final private[automorph] case class UpickleMessage(
     jsonrpc: Option[String],
     id: Option[Either[BigDecimal, String]],
     method: Option[String],
@@ -49,7 +48,7 @@ private[automorph] object UpickleJsonRpc {
     )
   }
 
-  private[automorph] final case class UpickleMessageError(
+  final private[automorph] case class UpickleMessageError(
     message: Option[String],
     code: Option[Int],
     data: Option[Value]
@@ -87,19 +86,20 @@ private[automorph] object UpickleJsonRpc {
         case id => throw Abort(s"Invalid request identifier: $id")
       }
     )
-    implicit val paramsRw: ReadWriter[Option[Message.Params[Value]]] = readwriter[Value].bimap[Option[Message.Params[Value]]](
-      {
-        case Some(Right(params)) => Obj.from(params)
-        case Some(Left(params)) => Arr(params)
-        case None => Null
-      },
-      {
-        case Obj(params) => Some(Right(params.toMap))
-        case Arr(params) => Some(Left(params.toList))
-        case Null => None
-        case params => throw Abort(s"Invalid request parameters: $params")
-      }
-    )
+    implicit val paramsRw: ReadWriter[Option[Message.Params[Value]]] =
+      readwriter[Value].bimap[Option[Message.Params[Value]]](
+        {
+          case Some(Right(params)) => Obj.from(params)
+          case Some(Left(params)) => Arr(params)
+          case None => Null
+        },
+        {
+          case Obj(params) => Some(Right(params.toMap))
+          case Arr(params) => Some(Left(params.toList))
+          case Null => None
+          case params => throw Abort(s"Invalid request parameters: $params")
+        }
+      )
     implicit val messageErrorRw: custom.ReadWriter[UpickleMessageError] = custom.macroRW
     implicit val customMessageRw: custom.ReadWriter[UpickleMessage] = custom.macroRW
 

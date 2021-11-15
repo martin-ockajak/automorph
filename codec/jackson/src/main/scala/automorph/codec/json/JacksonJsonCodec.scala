@@ -75,8 +75,8 @@ object JacksonJsonCodec {
       override def deserialize(parser: JsonParser, context: DeserializationContext): BigDecimal =
         parser.readValueAsTree[TreeNode]() match {
           case value: NumericNode => Try(BigDecimal(value.decimalValue)).recoverWith { case error =>
-            Failure(new JsonParseException(parser, "Invalid numeric value", parser.getCurrentLocation, error))
-          }.get
+              Failure(new JsonParseException(parser, "Invalid numeric value", parser.getCurrentLocation, error))
+            }.get
           case _ => throw new JsonParseException(parser, "Invalid numeric value", parser.getCurrentLocation)
         }
     }

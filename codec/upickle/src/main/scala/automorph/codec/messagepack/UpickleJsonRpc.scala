@@ -5,10 +5,9 @@ import scala.collection.mutable
 import upack.{Arr, Float64, Msg, Null, Obj, Str}
 import upickle.core.Abort
 
-/**
- * JSON-RPC protocol support for uPickle message codec using MessagePack format.
- */
+/** JSON-RPC protocol support for uPickle message codec using MessagePack format. */
 private[automorph] object UpickleJsonRpc {
+
   private[automorph] type RpcMessage = Message[Msg]
 
   // Workaround for upickle bug causing the following error when using its
@@ -19,7 +18,7 @@ private[automorph] object UpickleJsonRpc {
   //    at ujson.ByteParser.tryCloseCollection(ByteParser.scala:496)
   //    at ujson.ByteParser.parseNested(ByteParser.scala:462)
   //    at ujson.ByteParser.parseTopLevel0(ByteParser.scala:323)
-  private[automorph] final case class UpickleMessage(
+  final private[automorph] case class UpickleMessage(
     jsonrpc: Option[String],
     id: Option[Either[BigDecimal, String]],
     method: Option[String],
@@ -50,7 +49,7 @@ private[automorph] object UpickleJsonRpc {
     )
   }
 
-  private[automorph] final case class UpickleMessageError(
+  final private[automorph] case class UpickleMessageError(
     message: Option[String],
     code: Option[Int],
     data: Option[Msg]
@@ -91,16 +90,16 @@ private[automorph] object UpickleJsonRpc {
     implicit val paramsRw: ReadWriter[Option[Message.Params[Msg]]] = readwriter[Msg].bimap[Option[Message.Params[Msg]]](
       {
         case Some(Right(params)) => Obj(mutable.LinkedHashMap[Msg, Msg](params.map { case (key, value) =>
-          Str(key) -> value
-        }.toSeq: _*))
+            Str(key) -> value
+          }.toSeq: _*))
         case Some(Left(params)) => Arr(params: _*)
         case None => Null
       },
       {
         case Obj(params) => Some(Right(params.toMap.map {
-          case (Str(key), value) => key -> value
-          case _ => throw Abort(s"Invalid request parameters: $params")
-        }))
+            case (Str(key), value) => key -> value
+            case _ => throw Abort(s"Invalid request parameters: $params")
+          }))
         case Arr(params) => Some(Left(params.toList))
         case Null => None
         case params => throw Abort(s"Invalid request parameters: $params")

@@ -7,7 +7,8 @@ import upickle.core.{Abort, Util}
 trait UpickleCustom extends AttributeTagged {
 
   implicit override def OptionWriter[T: Writer]: Writer[Option[T]] = new Writer.MapWriter(
-    implicitly[Writer[T]], {
+    implicitly[Writer[T]],
+    {
       case Some(value) => value
       case None => null.asInstanceOf[T]
     }
