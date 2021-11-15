@@ -45,6 +45,11 @@ final case class VertxServer[Effect[_]](
   httpServerOptions: HttpServerOptions = defaultHttpServerOptions
 ) extends Logging with ServerMessageTransport[Effect] {
 
+  private val statusWebSocketApplication = 4000
+  private val statusNotFound = 404
+  private val statusMethodNotAllowed = 405
+  private val messageNotFound = "Not Found"
+  private val messageMethodNotAllowed = "Method Not Allowed"
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
   private val allowedMethods = methods.map(_.name).toSet
@@ -61,10 +66,32 @@ final case class VertxServer[Effect[_]](
     }
 
   private def createServer(): HttpServer = {
-    // Validate HTTP request method
-    Vertx.vertx(vertxOptions).createHttpServer(httpServerOptions)
-      .requestHandler(VertxHttpEndpoint(handler, mapException))
-      .webSocketHandler(VertxWebSocketEndpoint(handler))
+    val httpHandler = VertxHttpEndpoint(handler, mapException)
+    val server = Vertx.vertx(vertxOptions).createHttpServer(httpServerOptions.setPort(port))
+      .requestHandler { request =>
+        // Validate URL path
+        if (request.path.startsWith(path)) {
+          // Validate HTTP request method
+          if (allowedMethods.contains(request.method.name.toUpperCase)) {
+            httpHandler.handle(request)
+          } else {
+            request.response.setStatusCode(statusMethodNotAllowed).end(messageMethodNotAllowed)
+          }
+        } else {
+          request.response.setStatusCode(statusNotFound).end(messageNotFound)
+        }
+    }
+    Option.when(webSocket) {
+      val webSocketHandler = VertxWebSocketEndpoint(handler)
+      server.webSocketHandler { request =>
+        // Validate URL path
+        if (request.path.startsWith(path)) {
+          webSocketHandler.handle(request)
+        } else {
+          request.close((statusWebSocketApplication + statusNotFound).toShort, messageNotFound)
+        }
+      }
+    }.getOrElse(server)
   }
 
   private def start(): Unit = {
