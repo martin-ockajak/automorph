@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+sbt scalafmtCheck && sbt '+ publishLocal'
+
