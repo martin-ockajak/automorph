@@ -59,7 +59,7 @@ final case class UrlClient[Effect[_]](
         connection.getResponseCode
         val inputStream = Option(connection.getErrorStream).getOrElse(connection.getInputStream)
         val response = Using(inputStream)(Bytes.inputStream.from).onFailure { error =>
-          log.failedResponse(error, responseProperties)
+          log.failedReceiveResponse(error, responseProperties)
         }.get
         log.receivedResponse(responseProperties + ("Status" -> connection.getResponseCode.toString))
         response -> getResponseContext(connection)
@@ -107,7 +107,7 @@ final case class UrlClient[Effect[_]](
         stream.flush()
       }
       write.onFailure { error =>
-        log.failedRequest(error, requestProperties)
+        log.failedSendRequest(error, requestProperties)
       }.get
       log.sentRequest(requestProperties)
       connection

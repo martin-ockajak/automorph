@@ -5,7 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.JettyClient.{Context, Session, defaultClient}
-import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
+import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.net.URI
@@ -49,6 +49,7 @@ final case class JettyClient[Effect[_]](
 
   private val webSocketsSchemePrefix = "ws"
   private val webSocketClient = new WebSocketClient(httpClient)
+  private val log = HttpLog(logger, Protocol.Http)
   implicit private val givenSystem: EffectSystem[Effect] = system
   if (!httpClient.isStarted) {
     httpClient.start()
@@ -73,12 +74,12 @@ final case class JettyClient[Effect[_]](
         // Process the response
         result.fold(
           error => {
-            logger.error(s"Failed to receive $protocol response", error, responseProperties)
+            log.failedReceiveResponse(error, responseProperties, protocol)
             system.failed(error)
           },
           response => {
             val (responseBody, statusCode, _) = response
-            logger.debug(s"Received $protocol response", responseProperties ++ statusCode.map("Status" -> _))
+            log.receivedResponse(responseProperties ++ statusCode.map("Status" -> _.toString), protocol)
             system.pure(responseBody -> responseContext(response))
           }
         )
@@ -161,14 +162,14 @@ final case class JettyClient[Effect[_]](
       LogProperties.requestId -> requestId,
       "URL" -> requestUrl.toString
     ) ++ requestMethod.map("Method" -> _)
-    logger.trace(s"Sending $protocol request", requestProperties)
+    log.sendingRequest(requestProperties, protocol)
     response.either.flatMap(_.fold(
       error => {
-        logger.error(s"Failed to send $protocol request", error, requestProperties)
+        log.failedSendRequest(error, requestProperties, protocol)
         system.failed(error)
       },
       response => {
-        logger.debug(s"Sent $protocol request", requestProperties)
+        log.sentRequest(requestProperties, protocol)
         system.pure(response)
       }
     ))
@@ -307,7 +308,7 @@ final case class JettyClient[Effect[_]](
   private def withDefer[T](function: Defer[Effect] => Effect[T]): Effect[T] = system match {
     case defer: Defer[_] => function(defer.asInstanceOf[Defer[Effect]])
     case _ => system.failed(new IllegalArgumentException(
-        s"WebSocket no supported for effect system without deferred effect support: ${system.getClass.getName}"
+        s"${Protocol.WebSocket} not supported for effect system without deferred effect support: ${system.getClass.getName}"
       ))
   }
 }
