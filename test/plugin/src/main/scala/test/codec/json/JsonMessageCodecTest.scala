@@ -12,6 +12,7 @@ import test.codec.MessageCodecTest
  * @tparam ActualCodec message codec
  */
 trait JsonMessageCodecTest extends MessageCodecTest {
+
   private val objectMapper = new ObjectMapper()
 
   "" - {

@@ -90,10 +90,10 @@ final case class ComplexApiImpl[Effect[_], Context](
     backend.failed(new IllegalArgumentException(p0))
 
   protected def protectedMethod(): Unit =
-      privateMethod()
+    privateMethod()
 
   private def privateMethod(): Unit =
-      ()
+    ()
 }
 
 trait InvalidApi[Effect[_]] {

@@ -10,6 +10,7 @@ import test.base.BaseTest
  * @tparam Effect effect type
  */
 trait EffectSystemTest[Effect[_]] extends BaseTest {
+
   val text = "test"
   val number = 0
   val error = TestException(text)

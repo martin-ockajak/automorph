@@ -12,7 +12,7 @@ object AmqpContextGenerator {
 
   private val header = for {
     name <- stringGenerator(1, maxNameSize, Gen.alphaNumChar)
-      value <- stringGenerator(0, maxValueSize, Gen.asciiPrintableChar)
+    value <- stringGenerator(0, maxValueSize, Gen.asciiPrintableChar)
   } yield (name, value)
 
   def arbitrary[T]: Arbitrary[AmqpContext[T]] = Arbitrary(for {

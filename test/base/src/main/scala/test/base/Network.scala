@@ -3,6 +3,7 @@ package test.base
 import java.net.ServerSocket
 
 trait Network {
+
   /**
    * Determine random available network port.
    *
