@@ -3,7 +3,7 @@ package test.transport.http
 import automorph.Types
 import automorph.spi.transport.ServerMessageTransport
 import automorph.system.FutureSystem
-import automorph.transport.http.endpoint.FinagleEndpoint
+import automorph.transport.http.endpoint.FinagleHttpEndpoint
 import com.twitter.finagle.Http
 import com.twitter.util.{Return, Throw}
 import org.scalacheck.Arbitrary
@@ -15,7 +15,7 @@ import test.transport.http.HttpContextGenerator
 class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
 
   type Effect[T] = Future[T]
-  type Context = FinagleEndpoint.Context
+  type Context = FinagleHttpEndpoint.Context
 
   override lazy val system: FutureSystem = FutureSystem()
 
@@ -30,7 +30,7 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
     port: Int
   ): ServerMessageTransport[Effect] = new ServerMessageTransport[Effect] {
     private val server = {
-      val endpoint = FinagleEndpoint(handler)
+      val endpoint = FinagleHttpEndpoint(handler)
       Http.serve(s":$port", endpoint)
     }
 

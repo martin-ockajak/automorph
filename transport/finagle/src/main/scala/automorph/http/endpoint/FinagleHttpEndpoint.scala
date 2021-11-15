@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.endpoint.FinagleEndpoint.Context
+import automorph.transport.http.endpoint.FinagleHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Network, Random}
@@ -28,7 +28,7 @@ import scala.collection.immutable.ListMap
  * @param exceptionToStatusCode maps an exception to a corresponding HTTP status code
  * @tparam Effect effect type
  */
-final case class FinagleEndpoint[Effect[_]](
+final case class FinagleHttpEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
   exceptionToStatusCode: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
@@ -126,7 +126,7 @@ final case class FinagleEndpoint[Effect[_]](
   }
 }
 
-object FinagleEndpoint {
+object FinagleHttpEndpoint {
 
   /** Request context type. */
   type Context = HttpContext[Request]
