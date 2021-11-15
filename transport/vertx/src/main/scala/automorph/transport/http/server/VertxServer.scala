@@ -66,6 +66,7 @@ final case class VertxServer[Effect[_]](
     }
 
   private def createServer(): HttpServer = {
+    // HTTP
     val httpHandler = VertxHttpEndpoint(handler, mapException)
     val server = Vertx.vertx(vertxOptions).createHttpServer(httpServerOptions.setPort(port))
       .requestHandler { request =>
@@ -81,6 +82,8 @@ final case class VertxServer[Effect[_]](
           request.response.setStatusCode(statusNotFound).end(messageNotFound)
         }
     }
+
+    // WebSocket
     Option.when(webSocket) {
       val webSocketHandler = VertxWebSocketEndpoint(handler)
       server.webSocketHandler { request =>

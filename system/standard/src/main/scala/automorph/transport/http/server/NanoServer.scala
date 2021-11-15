@@ -68,6 +68,12 @@ final case class NanoServer[Effect[_]] private (
     }
   }
 
+  /**
+   * Serve HTTP session.
+   *
+   * @param session HTTP session
+   * @return HTTP Response
+   */
   override protected def serveHttp(session: IHTTPSession): Response = {
     // Validate URL path
     val url = new URI(session.getUri)
@@ -91,6 +97,12 @@ final case class NanoServer[Effect[_]] private (
     }
   }
 
+  /**
+   * Serve WebSocket handshake session.
+   *
+   * @param session WebSocket handshake session
+   * @return WebSocket handler
+   */
   override protected def openWebSocket(session: IHTTPSession) = new WebSocket(session) {
 
     override protected def onOpen(): Unit =

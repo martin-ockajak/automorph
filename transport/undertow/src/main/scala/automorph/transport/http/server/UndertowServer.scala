@@ -62,7 +62,9 @@ final case class UndertowServer[Effect[_]](
 
     // Validate URL path
     val rootHandler = Handlers.predicate(
+      // HTTP
       Predicates.prefix(path),
+      // WebSocket
       Option.when(webSocket)(UndertowWebSocketEndpoint(handler, httpHandler)).getOrElse(httpHandler),
       ResponseCodeHandler.HANDLE_404
     )
