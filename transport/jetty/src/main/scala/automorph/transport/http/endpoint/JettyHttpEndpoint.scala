@@ -120,11 +120,10 @@ final case class JettyHttpEndpoint[Effect[_]](
     ).url(request.getRequestURI)
   }
 
-  private def setResponseContext(response: HttpServletResponse, responseContext: Option[Context]): Unit = {
+  private def setResponseContext(response: HttpServletResponse, responseContext: Option[Context]): Unit =
     responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
       response.setHeader(name, value)
     }
-  }
 
   private def getRequestProperties(request: HttpServletRequest, requestId: String): Map[String, String] = {
     val url = request.getRequestURI + Option(request.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")

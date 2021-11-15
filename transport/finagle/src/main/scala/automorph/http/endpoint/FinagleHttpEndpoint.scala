@@ -91,24 +91,25 @@ final case class FinagleHttpEndpoint[Effect[_]](
     response
   }
 
-  private def getRequestContext(request: Request): Context = HttpContext(
-    transport = Some(request),
-    method = Some(HttpMethod.valueOf(request.method.name)),
-    headers = request.headerMap.iterator.toSeq
-  ).url(request.uri)
+  private def getRequestContext(request: Request): Context =
+    HttpContext(
+      transport = Some(request),
+      method = Some(HttpMethod.valueOf(request.method.name)),
+      headers = request.headerMap.iterator.toSeq
+    ).url(request.uri)
 
-  private def setResponseContext(response: Response, responseContext: Option[Context]): Unit = {
+  private def setResponseContext(response: Response, responseContext: Option[Context]): Unit =
     responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
       response.headerMap.add(name, value)
     }
-  }
 
-  private def getRequestProperties(request: Request, requestId: String): Map[String, String] = ListMap(
-    LogProperties.requestId -> requestId,
-    "Client" -> clientAddress(request),
-    "URL" -> request.uri,
-    "Method" -> request.method.toString
-  )
+  private def getRequestProperties(request: Request, requestId: String): Map[String, String] =
+    ListMap(
+      LogProperties.requestId -> requestId,
+      "Client" -> clientAddress(request),
+      "URL" -> request.uri,
+      "Method" -> request.method.toString
+    )
 
   private def clientAddress(request: Request): String = {
     val forwardedFor = request.xForwardedFor

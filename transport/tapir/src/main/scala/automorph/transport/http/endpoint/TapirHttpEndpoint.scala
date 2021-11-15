@@ -93,19 +93,21 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
       headers = headers.map(header => header.name -> header.value).toSeq
     )
 
-  private[automorph] def urlPath(paths: List[String]): String = paths match {
-    case Nil => "/"
-    case items => items.mkString("/")
-  }
+  private[automorph] def urlPath(paths: List[String]): String =
+    paths match {
+      case Nil => "/"
+      case items => items.mkString("/")
+    }
 
   private[automorph] def getRequestProperties(
     clientIp: Option[String],
     method: Option[Method],
     requestId: String
-  ): Map[String, String] = ListMap(
-    LogProperties.requestId -> requestId,
-    "Client" -> clientAddress(clientIp)
-  ) ++ method.map("Method" -> _.toString)
+  ): Map[String, String] =
+    ListMap(
+      LogProperties.requestId -> requestId,
+      "Client" -> clientAddress(clientIp)
+    ) ++ method.map("Method" -> _.toString)
 
   private[automorph] def clientAddress(clientIp: Option[String]): String =
     clientIp.getOrElse("[unknown]")
