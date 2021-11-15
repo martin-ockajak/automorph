@@ -18,6 +18,7 @@ case class Operation(
 )
 
 object Operation {
+
   type Responses = Map[String, Response]
   type Callback = Map[String, PathItemReference]
   type SecurityRequirement = Map[String, List[String]]

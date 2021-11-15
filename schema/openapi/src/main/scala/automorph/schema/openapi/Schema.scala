@@ -15,6 +15,7 @@ final case class Schema(
 )
 
 object Schema {
+
   type Properties = Map[String, Schema]
 
   private val optionTypePrefix = s"${classOf[Option[Unit]].getSimpleName}"
@@ -33,7 +34,7 @@ object Schema {
     }.toMap
 
   private[automorph] def result(function: RpcFunction): Schema =
-  // TODO - convert data type to JSON type
+    // TODO - convert data type to JSON type
     Schema(Some(function.resultType), Some("result"), scaladocField(function.documentation, "return"))
 
   private def scaladocField(scaladoc: Option[String], field: String): Option[String] = {
