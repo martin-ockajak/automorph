@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.HttpContext
+import automorph.transport.http.{HttpContext, HttpLog, Protocol}
 import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, getRequestContext, getRequestProperties}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Random}
@@ -48,6 +48,7 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
   def apply[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): ServerEndpoint[Request, Unit, Array[Byte] => Effect[Array[Byte]], EffectStreams[Effect], Effect] = {
+    val log = HttpLog(logger, Protocol.WebSocket.name)
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     implicit val system: EffectSystem[Effect] = genericHandler.system
     val streams = new EffectStreams[Effect] {

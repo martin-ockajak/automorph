@@ -49,7 +49,7 @@ final case class JettyClient[Effect[_]](
 
   private val webSocketsSchemePrefix = "ws"
   private val webSocketClient = new WebSocketClient(httpClient)
-  private val log = HttpLog(logger, Protocol.Http)
+  private val log = HttpLog(logger, Protocol.Http.name)
   implicit private val givenSystem: EffectSystem[Effect] = system
   if (!httpClient.isStarted) {
     httpClient.start()
@@ -74,12 +74,12 @@ final case class JettyClient[Effect[_]](
         // Process the response
         result.fold(
           error => {
-            log.failedReceiveResponse(error, responseProperties, protocol)
+            log.failedReceiveResponse(error, responseProperties, protocol.name)
             system.failed(error)
           },
           response => {
             val (responseBody, statusCode, _) = response
-            log.receivedResponse(responseProperties ++ statusCode.map("Status" -> _.toString), protocol)
+            log.receivedResponse(responseProperties ++ statusCode.map("Status" -> _.toString), protocol.name)
             system.pure(responseBody -> responseContext(response))
           }
         )
@@ -162,14 +162,14 @@ final case class JettyClient[Effect[_]](
       LogProperties.requestId -> requestId,
       "URL" -> requestUrl.toString
     ) ++ requestMethod.map("Method" -> _)
-    log.sendingRequest(requestProperties, protocol)
+    log.sendingRequest(requestProperties, protocol.name)
     response.either.flatMap(_.fold(
       error => {
-        log.failedSendRequest(error, requestProperties, protocol)
+        log.failedSendRequest(error, requestProperties, protocol.name)
         system.failed(error)
       },
       response => {
-        log.sentRequest(requestProperties, protocol)
+        log.sentRequest(requestProperties, protocol.name)
         system.pure(response)
       }
     ))

@@ -36,7 +36,7 @@ final case class UrlClient[Effect[_]](
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
   private val httpMethods = HttpMethod.values.map(_.name).toSet
-  private val log = HttpLog(logger, Protocol.Http)
+  private val log = HttpLog(logger, Protocol.Http.name)
   implicit private val givenSystem: EffectSystem[Effect] = system
   System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
 

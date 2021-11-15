@@ -36,7 +36,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode
 ) extends HttpHandler with Logging with EndpointMessageTransport {
 
-  private val log = HttpLog(logger, Protocol.Http)
+  private val log = HttpLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 

@@ -32,7 +32,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
 ) extends Handler[ServerWebSocket] with Logging with EndpointMessageTransport {
 
   private val headerXForwardedFor = "X-Forwarded-For"
-  private val log = HttpLog(logger, Protocol.WebSocket)
+  private val log = HttpLog(logger, Protocol.WebSocket.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 

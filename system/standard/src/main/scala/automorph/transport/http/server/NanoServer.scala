@@ -10,7 +10,7 @@ import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFix
 import automorph.transport.http.server.NanoServer.{Context, Execute}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
-import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
+import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Network, Random}
 import java.io.IOException
@@ -48,6 +48,7 @@ final case class NanoServer[Effect[_]] private (
 ) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect] {
 
   private val headerXForwardedFor = "X-Forwarded-For"
+  private val log = HttpLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val allowedMethods = methods.map(_.name).toSet
   implicit private val system: EffectSystem[Effect] = genericHandler.system
@@ -81,7 +82,7 @@ final case class NanoServer[Effect[_]] private (
         val protocol = Protocol.Http
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(session, protocol, requestId)
-        logger.trace("Receiving HTTP request", requestProperties)
+        log.receivingRequest(requestProperties, Protocol.Http.name)
         val requestBody = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
 
         // Handler the equest
@@ -113,8 +114,8 @@ final case class NanoServer[Effect[_]] private (
 
     override protected def onPong(pong: WebSocketFrame): Unit = ()
 
-    override protected def onException(exception: IOException): Unit =
-      logger.error(s"Failed to receive ${Protocol.WebSocket} request", exception)
+    override protected def onException(error: IOException): Unit =
+      log.failedReceiveRequest(error, Map(), Protocol.WebSocket.name)
   }
 
   private def handleRequest(
@@ -124,7 +125,7 @@ final case class NanoServer[Effect[_]] private (
     requestProperties: => Map[String, String],
     requestId: String
   ): Response = {
-    logger.debug(s"Received $protocol request", requestProperties)
+    log.receivedRequest(requestProperties, protocol.name)
 
     // Process the request
     executeEffect(genericHandler.processRequest(requestBody, getRequestContext(session), requestId).either.map(_.fold(
@@ -145,7 +146,7 @@ final case class NanoServer[Effect[_]] private (
     requestId: String,
     requestProperties: => Map[String, String]
   ) = {
-    logger.error(s"Failed to process $protocol request", error, requestProperties)
+    log.failedProcessRequest(error, requestProperties, protocol.name)
     val message = Bytes.string.from(error.trace.mkString("\n"))
     createResponse(message, Status.INTERNAL_ERROR, None, session, protocol, requestId)
   }
@@ -167,14 +168,14 @@ final case class NanoServer[Effect[_]] private (
       case Protocol.Http => Some("Status" -> responseStatus.toString)
       case _ => None
     })
-    logger.trace(s"Sending $protocol response", responseProperties)
+    log.sendingResponse(responseProperties, protocol.name)
 
     // Create the response
     val inputStream = Bytes.inputStream.to(responseBody)
     val mediaType = genericHandler.protocol.codec.mediaType
     val response = newFixedLengthResponse(responseStatus, mediaType, inputStream, responseBody.size.toLong)
     setResponseContext(response, responseContext)
-    logger.debug(s"Sent $protocol response", responseProperties)
+    log.sentResponse(responseProperties, protocol.name)
     response
   }
 

@@ -36,7 +36,7 @@ final case class VertxHttpEndpoint[Effect[_]](
   private val statusOk = 200
   private val statusInternalServerError = 500
   private val headerXForwardedFor = "X-Forwarded-For"
-  private val log = HttpLog(logger, Protocol.Http)
+  private val log = HttpLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 

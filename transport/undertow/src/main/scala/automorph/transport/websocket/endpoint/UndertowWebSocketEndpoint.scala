@@ -54,7 +54,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context]
 ) extends WebSocketConnectionCallback with AutoCloseable with Logging with EndpointMessageTransport {
 
-  private val log = HttpLog(logger, Protocol.WebSocket)
+  private val log = HttpLog(logger, Protocol.WebSocket.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 

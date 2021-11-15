@@ -4,7 +4,7 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.{HttpContext, HttpMethod}
+import automorph.transport.http.{HttpContext, HttpLog, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
 import automorph.util.{Bytes, Random}
 import scala.collection.immutable.ListMap
@@ -50,6 +50,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     method: Method,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode
   ): ServerEndpoint[Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
+    val log = HttpLog(logger, Protocol.Http.name)
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     val system = genericHandler.system
     implicit val givenSystem: EffectSystem[Effect] = system
@@ -62,7 +63,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
         // Log the request
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(clientIp, Some(method), requestId)
-        logger.debug("Received HTTP request", requestProperties)
+        log.receivedRequest(requestProperties)
 
         // Process the request
         val requestContext = getRequestContext(paths, queryParams, headers, Some(method))
