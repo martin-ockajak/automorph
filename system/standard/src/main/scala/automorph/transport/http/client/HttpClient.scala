@@ -80,7 +80,7 @@ final case class HttpClient[Effect[_]](
           },
           response => {
             val (responseBody, statusCode, _) = response
-            log.receivedResponse(responseProperties, protocol.name)
+            log.receivedResponse(responseProperties ++ statusCode.map("Status" -> _.toString), protocol.name)
             system.pure(responseBody -> getResponseContext(response))
           }
         )
