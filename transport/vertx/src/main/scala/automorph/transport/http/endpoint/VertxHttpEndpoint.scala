@@ -115,12 +115,10 @@ final case class VertxHttpEndpoint[Effect[_]](
     ).url(request.absoluteURI)
   }
 
-  private def setResponseContext(response: HttpServerResponse, responseContext: Option[Context]): HttpServerResponse = {
-    val headers = responseContext.toSeq.flatMap(_.headers)
-    headers.foldLeft(response) { case (current, (name, value)) =>
+  private def setResponseContext(response: HttpServerResponse, responseContext: Option[Context]): HttpServerResponse =
+    responseContext.toSeq.flatMap(_.headers).foldLeft(response) { case (current, (name, value)) =>
       current.putHeader(name, value)
     }
-  }
 
   private def getRequestProperties(request: HttpServerRequest, requestId: String): Map[String, String] = {
     ListMap(
