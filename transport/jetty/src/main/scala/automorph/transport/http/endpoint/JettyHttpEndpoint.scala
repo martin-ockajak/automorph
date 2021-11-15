@@ -5,9 +5,9 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.JettyHttpEndpoint.Context
-import automorph.transport.http.{HttpContext, MessageLog, HttpMethod, Protocol}
+import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
-import automorph.util.{Bytes, Network, Random}
+import automorph.util.{Bytes, MessageLog, Network, Random}
 import jakarta.servlet.AsyncContext
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}

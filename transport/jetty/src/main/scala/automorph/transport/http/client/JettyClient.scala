@@ -5,8 +5,8 @@ import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.JettyClient.{Context, Session, defaultClient}
-import automorph.transport.http.{HttpContext, MessageLog, HttpMethod, Protocol}
-import automorph.util.Bytes
+import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
+import automorph.util.{Bytes, MessageLog}
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.net.URI
 import java.util

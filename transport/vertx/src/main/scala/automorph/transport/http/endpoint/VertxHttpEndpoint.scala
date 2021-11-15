@@ -5,9 +5,9 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.VertxHttpEndpoint.Context
-import automorph.transport.http.{HttpContext, MessageLog, HttpMethod, Protocol}
+import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
-import automorph.util.{Bytes, Network, Random}
+import automorph.util.{Bytes, MessageLog, Network, Random}
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpHeaders, HttpServerRequest, HttpServerResponse, ServerWebSocket}

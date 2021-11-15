@@ -1,4 +1,4 @@
-package automorph.transport.http
+package automorph.util
 
 import automorph.log.Logger
 

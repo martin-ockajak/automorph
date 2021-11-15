@@ -4,9 +4,9 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.{HttpContext, MessageLog, HttpMethod, Protocol}
+import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
-import automorph.util.{Bytes, Random}
+import automorph.util.{Bytes, MessageLog, Random}
 import scala.collection.immutable.ListMap
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint

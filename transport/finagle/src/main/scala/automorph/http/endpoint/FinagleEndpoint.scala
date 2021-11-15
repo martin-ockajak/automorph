@@ -5,9 +5,9 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.FinagleEndpoint.Context
-import automorph.transport.http.{HttpContext, MessageLog, HttpMethod, Protocol}
+import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, ThrowableOps}
-import automorph.util.{Network, Random}
+import automorph.util.{MessageLog, Network, Random}
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
 import com.twitter.io.{Buf, Reader}
