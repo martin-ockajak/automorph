@@ -71,7 +71,7 @@ lazy val root = project.in(file(".")).settings(
   undertow,
   vertx,
   jetty,
-  rapidoid,
+  akkaHttp,
   finagle,
   rabbitmq,
 
@@ -310,12 +310,13 @@ lazy val jetty = project.in(file("transport/jetty")).dependsOn(
     "org.eclipse.jetty" % "jetty-servlet" % jettyVersion
   )
 )
-lazy val rapidoid = project.in(file("transport/rapidoid")).dependsOn(
+lazy val akkaHttp = project.in(file("transport/akka-http")).dependsOn(
   core, http, testStandard % Test
 ).settings(
-  name := s"$projectName-rapidoid",
+  name := s"$projectName-akka-http",
   libraryDependencies ++= Seq(
-    "org.rapidoid" % "rapidoid-http-server" % "5.5.5"
+    ("com.typesafe.akka" %% "akka-http" % "10.2.7").cross(CrossVersion.for3Use2_13),
+    ("com.typesafe.akka" %% "akka-actor-typed" % "2.6.16").cross(CrossVersion.for3Use2_13)
   )
 )
 lazy val finagle = project.in(file("transport/finagle")).dependsOn(
