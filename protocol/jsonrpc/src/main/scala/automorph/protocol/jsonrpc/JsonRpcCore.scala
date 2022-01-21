@@ -65,7 +65,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
       Failure(ParseErrorException("Malformed request", error))
     }.map { messageBody =>
       val message = RpcMessage(id, messageBody, requestMessage.properties, messageText)
-      val requestArguments = arguments.map(Right[Node, (String, Node)].apply).toSeq
+      val requestArguments = arguments.map(Right.apply[Node, (String, Node)]).toSeq
       RpcRequest(message, function, requestArguments, responseRequired, requestId)
     }
   }
