@@ -10,67 +10,6 @@ private[automorph] object UpickleJsonRpc {
 
   private[automorph] type RpcMessage = Message[Msg]
 
-  // Workaround for upickle bug causing the following error when using its
-  // macroRW method to generate readers and writers for case classes with type parameters:
-  //   java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
-  //    at upickle.implicits.CaseClassReaderPiece$$anon$1.visitEnd(CaseClassReader.scala:30)
-  //    at ujson.ByteParser.liftedTree1$1(ByteParser.scala:496)
-  //    at ujson.ByteParser.tryCloseCollection(ByteParser.scala:496)
-  //    at ujson.ByteParser.parseNested(ByteParser.scala:462)
-  //    at ujson.ByteParser.parseTopLevel0(ByteParser.scala:323)
-  final private[automorph] case class UpickleMessage(
-    jsonrpc: Option[String],
-    id: Option[Either[BigDecimal, String]],
-    method: Option[String],
-    params: Option[Either[List[Msg], Map[String, Msg]]],
-    result: Option[Msg],
-    error: Option[UpickleMessageError]
-  ) {
-
-    def toProtocol: Message[Msg] = Message[Msg](
-      jsonrpc,
-      id,
-      method,
-      params,
-      result,
-      error.map(_.toProtocol)
-    )
-  }
-
-  private[automorph] object UpickleMessage {
-
-    def fromProtocol(v: Message[Msg]): UpickleMessage = UpickleMessage(
-      v.jsonrpc,
-      v.id,
-      v.method,
-      v.params,
-      v.result,
-      v.error.map(UpickleMessageError.fromProtocol)
-    )
-  }
-
-  final private[automorph] case class UpickleMessageError(
-    message: Option[String],
-    code: Option[Int],
-    data: Option[Msg]
-  ) {
-
-    def toProtocol: MessageError[Msg] = MessageError[Msg](
-      message,
-      code,
-      data
-    )
-  }
-
-  private[automorph] object UpickleMessageError {
-
-    def fromProtocol(v: MessageError[Msg]): UpickleMessageError = UpickleMessageError(
-      v.message,
-      v.code,
-      v.data
-    )
-  }
-
   def readWriter[Custom <: UpickleMessagePackCustom](custom: Custom): custom.ReadWriter[Message[Msg]] = {
     import custom._
 
@@ -105,13 +44,8 @@ private[automorph] object UpickleJsonRpc {
         case params => throw Abort(s"Invalid request parameters: $params")
       }
     )
-    implicit val messageErrorRw: custom.ReadWriter[UpickleMessageError] = custom.macroRW
-    implicit val customMessageRw: custom.ReadWriter[UpickleMessage] = custom.macroRW
-
-    Seq(idRw, paramsRw, messageErrorRw, customMessageRw)
-    readwriter[UpickleMessage].bimap[Message[Msg]](
-      UpickleMessage.fromProtocol,
-      _.toProtocol
-    )
+    implicit val messageErrorRw: custom.ReadWriter[MessageError[Msg]] = custom.macroRW
+    Seq(idRw, paramsRw, messageErrorRw)
+    custom.macroRW[Message[Msg]]
   }
 }
