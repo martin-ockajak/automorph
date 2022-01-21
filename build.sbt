@@ -215,7 +215,7 @@ lazy val circe = project.in(file(s"codec/circe")).dependsOn(
     "-skip-packages automorph.codec.json.meta"
   )
 )
-val jacksonVersion = "2.13.0"
+val jacksonVersion = "2.13.1"
 lazy val jackson = project.in(file("codec/jackson")).dependsOn(
   jsonrpc, restrpc, testPlugin % Test
 ).settings(
@@ -230,7 +230,7 @@ lazy val upickle = project.in(file("codec/upickle")).dependsOn(
 ).settings(
   name := s"$projectName-upickle",
   libraryDependencies ++= Seq(
-    "com.lihaoyi" %% "upickle" % "1.4.2"
+    "com.lihaoyi" %% "upickle" % "1.4.4"
   ),
   Compile / doc / scalacOptions ++= Seq(
     "-Ymacro-expand:none",
