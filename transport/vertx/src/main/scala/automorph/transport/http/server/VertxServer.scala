@@ -77,9 +77,11 @@ final case class VertxServer[Effect[_]](
             httpHandler.handle(request)
           } else {
             request.response.setStatusCode(statusMethodNotAllowed).end(messageMethodNotAllowed)
+            ()
           }
         } else {
           request.response.setStatusCode(statusNotFound).end(messageNotFound)
+          ()
         }
     }
 
@@ -92,6 +94,7 @@ final case class VertxServer[Effect[_]](
           webSocketHandler.handle(request)
         } else {
           request.close((statusWebSocketApplication + statusNotFound).toShort, messageNotFound)
+          ()
         }
       }
     }.getOrElse(server)
