@@ -100,7 +100,7 @@ lazy val util = project.in(file("common/util")).dependsOn(
 ).settings(
   name := s"$projectName-util",
   libraryDependencies ++= Seq(
-    "org.slf4j" % "slf4j-api" % "1.7.32"
+    "org.slf4j" % "slf4j-api" % "1.7.33"
   )
 )
 lazy val coreMeta = project.in(file("common/core/meta")).dependsOn(
