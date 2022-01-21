@@ -279,7 +279,7 @@ lazy val rabbitmq = project.in(file("transport/rabbitmq")).dependsOn(
 ).settings(
   name := s"$projectName-rabbitmq",
   libraryDependencies ++= Seq(
-    "com.rabbitmq" % "amqp-client" % "5.13.1"
+    "com.rabbitmq" % "amqp-client" % "5.14.1"
   )
 )
 
@@ -289,7 +289,7 @@ lazy val undertow = project.in(file("transport/undertow")).dependsOn(
 ).settings(
   name := s"$projectName-undertow",
   libraryDependencies ++= Seq(
-    "io.undertow" % "undertow-core" % "2.2.12.Final"
+    "io.undertow" % "undertow-core" % "2.2.14.Final"
   )
 )
 lazy val vertx = project.in(file("transport/vertx")).dependsOn(
@@ -297,7 +297,7 @@ lazy val vertx = project.in(file("transport/vertx")).dependsOn(
 ).settings(
   name := s"$projectName-vertx",
   libraryDependencies ++= Seq(
-    "io.vertx" % "vertx-core" % "4.2.1"
+    "io.vertx" % "vertx-core" % "4.2.4"
   )
 )
 val jettyVersion = "11.0.7"
@@ -316,7 +316,7 @@ lazy val akkaHttp = project.in(file("transport/akka-http")).dependsOn(
   name := s"$projectName-akka-http",
   libraryDependencies ++= Seq(
     ("com.typesafe.akka" %% "akka-http" % "10.2.7").cross(CrossVersion.for3Use2_13),
-    ("com.typesafe.akka" %% "akka-actor-typed" % "2.6.16").cross(CrossVersion.for3Use2_13)
+    ("com.typesafe.akka" %% "akka-actor-typed" % "2.6.18").cross(CrossVersion.for3Use2_13)
   )
 )
 lazy val finagle = project.in(file("transport/finagle")).dependsOn(
@@ -324,7 +324,7 @@ lazy val finagle = project.in(file("transport/finagle")).dependsOn(
 ).settings(
   name := s"$projectName-finagle",
   libraryDependencies ++= Seq(
-    ("com.twitter" % "finagle-http" % "21.10.0").cross(CrossVersion.for3Use2_13)
+    ("com.twitter" % "finagle-http" % "22.1.0").cross(CrossVersion.for3Use2_13)
   )
 )
 val tapirVersion = "0.18.3"
