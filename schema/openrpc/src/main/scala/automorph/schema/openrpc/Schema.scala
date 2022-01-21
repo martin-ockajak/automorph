@@ -43,7 +43,7 @@ object Schema {
       val description = doc.split('\n').flatMap { line =>
         line.split('@') match {
           case Array(_, tag, rest @ _*) if tag.startsWith(fieldPrefix) =>
-            Some((tag.substring(fieldPrefix.size) +: rest).mkString("@").trim)
+            Some((tag.substring(fieldPrefix.length) +: rest).mkString("@").trim)
           case _ => None
         }
       }.toSeq
