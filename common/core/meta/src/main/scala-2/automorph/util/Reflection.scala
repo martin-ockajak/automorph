@@ -11,7 +11,7 @@ import scala.reflect.macros.blackbox.Context
 final private[automorph] case class Reflection[C <: Context](c: C) {
 
   // All meta-programming data types are path-dependent on the compiler-generated reflection context
-  import c.universe._
+  import c.universe.*
 
   case class RefParameter(
     name: String,

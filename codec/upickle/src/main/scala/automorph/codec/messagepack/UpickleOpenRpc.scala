@@ -1,7 +1,7 @@
 package automorph.codec.messagepack
 
 import automorph.schema.OpenRpc
-import automorph.schema.openrpc._
+import automorph.schema.openrpc.*
 import scala.annotation.nowarn
 import scala.collection.mutable.LinkedHashMap
 import upack.{Arr, Msg, Obj, Str}
@@ -12,7 +12,7 @@ private[automorph] object UpickleOpenRpc {
 
   @nowarn("msg=used")
   def readWriter[Custom <: UpickleMessagePackCustom](custom: Custom): custom.ReadWriter[OpenRpc] = {
-    import custom._
+    import custom.*
 
     implicit val schemaRw: custom.ReadWriter[Schema] = readwriter[Msg].bimap[Schema](
       fromSchema,

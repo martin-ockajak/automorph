@@ -22,7 +22,7 @@ private[automorph] object ArgonautJsonMeta {
 
     c.Expr[Json](q"""
       import argonaut.Argonaut.ToJsonIdentity
-      import automorph.codec.json.ArgonautJsonCodec._
+      import automorph.codec.json.ArgonautJsonCodec.*
       $value.asJson
     """)
   }
@@ -32,7 +32,7 @@ private[automorph] object ArgonautJsonMeta {
 
     c.Expr[T](q"""
       import argonaut.Argonaut.ToJsonIdentity
-      import automorph.codec.json.ArgonautJsonCodec._
+      import automorph.codec.json.ArgonautJsonCodec.*
       $node.as[${weakTypeOf[T]}].fold(
         (errorMessage, _) => throw new IllegalArgumentException(errorMessage),
         identity

@@ -18,7 +18,7 @@ final case class UpickleMessagePackCodec[Custom <: UpickleMessagePackCustom](
   custom: Custom = UpickleMessagePackCustom.default
 ) extends UpickleMessagePackMeta[Custom] {
 
-  import custom._
+  import custom.*
 
   private val indent = 2
 

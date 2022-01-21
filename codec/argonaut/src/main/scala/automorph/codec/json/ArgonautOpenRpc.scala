@@ -3,7 +3,7 @@ package automorph.codec.json
 import argonaut.Argonaut.{jArray, jObjectFields, jString}
 import argonaut.{Argonaut, CodecJson, DecodeJson, DecodeResult, HCursor, Json}
 import automorph.schema.OpenRpc
-import automorph.schema.openrpc._
+import automorph.schema.openrpc.*
 
 /** JSON-RPC protocol support for uPickle message codec plugin using JSON format. */
 private[automorph] object ArgonautOpenRpc {

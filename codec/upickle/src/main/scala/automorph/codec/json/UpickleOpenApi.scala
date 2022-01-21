@@ -1,7 +1,7 @@
 package automorph.codec.json
 
 import automorph.schema.OpenApi
-import automorph.schema.openapi._
+import automorph.schema.openapi.*
 import ujson.{Arr, Obj, Str, Value}
 import upickle.core.Abort
 
@@ -9,7 +9,7 @@ import upickle.core.Abort
 private[automorph] object UpickleOpenApi {
 
   def readWriter[Custom <: UpickleJsonCustom](custom: Custom): custom.ReadWriter[OpenApi] = {
-    import custom._
+    import custom.*
 
     implicit val schemaRw: custom.ReadWriter[Schema] = readwriter[Value].bimap[Schema](
       fromSchema,

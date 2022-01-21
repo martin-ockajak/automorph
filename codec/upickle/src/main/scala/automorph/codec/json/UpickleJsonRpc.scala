@@ -10,7 +10,7 @@ private[automorph] object UpickleJsonRpc {
   private[automorph] type RpcMessage = Message[Value]
 
   def readWriter[Custom <: UpickleJsonCustom](custom: Custom): custom.ReadWriter[Message[Value]] = {
-    import custom._
+    import custom.*
 
     implicit val idRw: ReadWriter[Option[Message.Id]] = readwriter[Value].bimap[Option[Message.Id]](
       {

@@ -3,7 +3,6 @@ package test.core
 import automorph.spi.transport.ClientMessageTransport
 import automorph.Types
 import scala.annotation.nowarn
-import test.core.CoreTest
 
 trait ProtocolCodecTest extends CoreTest {
 

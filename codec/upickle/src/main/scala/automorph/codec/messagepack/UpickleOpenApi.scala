@@ -1,7 +1,7 @@
 package automorph.codec.messagepack
 
 import automorph.schema.OpenApi
-import automorph.schema.openapi._
+import automorph.schema.openapi.*
 import scala.annotation.nowarn
 import scala.collection.mutable.LinkedHashMap
 import upack.{Arr, Msg, Obj, Str}
@@ -12,7 +12,7 @@ private[automorph] object UpickleOpenApi {
 
   @nowarn("msg=used")
   def readWriter[Custom <: UpickleMessagePackCustom](custom: Custom): custom.ReadWriter[OpenApi] = {
-    import custom._
+    import custom.*
 
     implicit val schemaRw: custom.ReadWriter[Schema] = readwriter[Msg].bimap[Schema](
       fromSchema,

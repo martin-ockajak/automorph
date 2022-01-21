@@ -18,7 +18,7 @@ final case class UpickleJsonCodec[Custom <: UpickleJsonCustom](
   custom: Custom = UpickleJsonCustom.default
 ) extends UpickleJsonMeta[Custom] {
 
-  import custom._
+  import custom.*
 
   private val indent = 2
 

@@ -9,7 +9,7 @@ private[automorph] object UpickleRestRpc {
   type RpcMessage = Message[Msg]
 
   def readWriter[Custom <: UpickleMessagePackCustom](custom: Custom): custom.ReadWriter[Message[Msg]] = {
-    import custom._
+    import custom.*
 
     implicit val messageErrorRw: custom.ReadWriter[MessageError] = custom.macroRW
     Seq(messageErrorRw)

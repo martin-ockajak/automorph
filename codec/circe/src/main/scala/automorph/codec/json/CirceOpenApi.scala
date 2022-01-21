@@ -1,7 +1,7 @@
 package automorph.codec.json
 
 import automorph.schema.OpenApi
-import automorph.schema.openapi._
+import automorph.schema.openapi.*
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{ACursor, Decoder, DecodingFailure, Encoder, HCursor, Json}
 
