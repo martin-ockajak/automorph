@@ -2,8 +2,10 @@
   <!-- Disable Logback internal logging at startup -->
   <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
 
-  <!-- Release logging resources on application termination -->
-  <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
+  <!-- Set log levels in Java Util Logging configuration -->
+  <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+    <resetJUL>true</resetJUL>
+  </contextListener>
 
   <!-- Default pattern -->
   <property name="defaultPattern" value="%date \(%level\) %message" />

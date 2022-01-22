@@ -375,6 +375,7 @@ lazy val testBase = project.in(file("test/base")).dependsOn(
     "org.scalatest" %% "scalatest" % "3.2.10",
     "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0",
     "ch.qos.logback" % "logback-classic" % "1.3.0-alpha10",
+    "org.slf4j" % "jul-to-slf4j" % "1.7.33",
     "com.lihaoyi" %% "pprint" % "0.6.6"
   ),
   Compile / doc / scalacOptions ++= Seq("-skip-packages test")
