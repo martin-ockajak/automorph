@@ -45,8 +45,8 @@ lazy val root = project.in(file(".")).settings(
   // RPC protocol
   jsonrpcMeta,
   jsonrpc,
-  restrpcMeta,
-  restrpc,
+  webrpcMeta,
+  webrpc,
 
   // Transport protocol
   http,
@@ -117,7 +117,7 @@ lazy val coreMeta = project.in(file("common/core/meta")).dependsOn(
   )
 )
 lazy val core = project.in(file("common/core")).dependsOn(
-  coreMeta, testPlugin % Test, jsonrpc % Test, restrpc % Test
+  coreMeta, testPlugin % Test, jsonrpc % Test, webrpc % Test
 ).settings(
   name := s"$projectName-core",
   Compile / doc / scalacOptions ++= Seq(
@@ -149,15 +149,15 @@ lazy val jsonrpc = project.in(file("protocol/jsonrpc")).dependsOn(
 ).settings(
   name := s"$projectName-jsonrpc"
 )
-lazy val restrpcMeta = project.in(file("protocol/restrpc/meta")).dependsOn(
+lazy val webrpcMeta = project.in(file("protocol/webrpc/meta")).dependsOn(
   spi, http
 ).settings(
-  name := s"$projectName-restrpc-meta"
+  name := s"$projectName-webrpc-meta"
 )
-lazy val restrpc = project.in(file("protocol/restrpc")).dependsOn(
-  restrpcMeta, openapi, util
+lazy val webrpc = project.in(file("protocol/webrpc")).dependsOn(
+  webrpcMeta, openapi, util
 ).settings(
-  name := s"$projectName-restrpc"
+  name := s"$projectName-webrpc"
 )
 
 // Effect system
@@ -203,7 +203,7 @@ lazy val scalazEffect = project.in(file("system/scalaz-effect")).dependsOn(
 // Message codec
 val circeVersion = "0.14.1"
 lazy val circe = project.in(file(s"codec/circe")).dependsOn(
-  jsonrpc, restrpc, testPlugin % Test
+  jsonrpc, webrpc, testPlugin % Test
 ).settings(
   name := s"$projectName-circe",
   libraryDependencies ++= Seq(
@@ -217,7 +217,7 @@ lazy val circe = project.in(file(s"codec/circe")).dependsOn(
 )
 val jacksonVersion = "2.13.1"
 lazy val jackson = project.in(file("codec/jackson")).dependsOn(
-  jsonrpc, restrpc, testPlugin % Test
+  jsonrpc, webrpc, testPlugin % Test
 ).settings(
   name := s"$projectName-jackson",
   libraryDependencies ++= Seq(
@@ -226,7 +226,7 @@ lazy val jackson = project.in(file("codec/jackson")).dependsOn(
 )
 
 lazy val upickle = project.in(file("codec/upickle")).dependsOn(
-  jsonrpc, restrpc, testPlugin % Test
+  jsonrpc, webrpc, testPlugin % Test
 ).settings(
   name := s"$projectName-upickle",
   libraryDependencies ++= Seq(
@@ -238,7 +238,7 @@ lazy val upickle = project.in(file("codec/upickle")).dependsOn(
   )
 )
 lazy val argonaut = project.in(file("codec/argonaut")).dependsOn(
-  jsonrpc, restrpc, testPlugin % Test
+  jsonrpc, webrpc, testPlugin % Test
 ).settings(
   name := s"$projectName-argonaut",
   libraryDependencies ++= Seq(
