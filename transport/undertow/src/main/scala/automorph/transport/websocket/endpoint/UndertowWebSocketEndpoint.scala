@@ -68,7 +68,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
 
       override def onFullBinaryMessage(channel: WebSocketChannel, message: BufferedBinaryMessage): Unit = {
         val data = message.getData
-        val requestBody = Bytes.byteBuffer.from(WebSockets.mergeBuffers(data.getResource: _*))
+        val requestBody = Bytes.byteBuffer.from(WebSockets.mergeBuffers(data.getResource*))
         handle(exchange, requestBody, channel, () => data.discard())
       }
 
@@ -150,7 +150,8 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
       }
 
       private def getRequestProperties(exchange: WebSocketHttpExchange, requestId: String): Map[String, String] = {
-        val url = exchange.getRequestURI + Option(exchange.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")
+        val query = Option(exchange.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")
+        val url = s"${exchange.getRequestURI}$query"
         Map(
           LogProperties.requestId -> requestId,
           "Client" -> clientAddress(exchange),

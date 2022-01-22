@@ -139,7 +139,8 @@ final case class UndertowHttpEndpoint[Effect[_]](
   }
 
   private def getRequestProperties(exchange: HttpServerExchange, requestId: String): Map[String, String] = {
-    val url = exchange.getRequestURI + Option(exchange.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")
+    val query = Option(exchange.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")
+    val url = s"${exchange.getRequestURI}$query"
     ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(exchange),

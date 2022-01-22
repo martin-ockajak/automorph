@@ -16,7 +16,7 @@ import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
- * Undertow HTTP & WebSocket server transport plugin.
+ * Undertow HTTP & WebSocket server message transport plugin.
  *
  * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as HTTP response body.
@@ -30,7 +30,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @constructor Creates an Undertow HTTP & WebSocket server with specified RPC request handler.
  * @param handler RPC request handler
  * @param port port to listen on for HTTP connections
- * @param path HTTP URL path
+ * @param pathPrefix HTTP URL path prefix, only requests starting with this path prefix are considered valid
  * @param methods allowed HTTP request methods
  * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
  * @param mapException maps an exception to a corresponding HTTP status code
@@ -40,7 +40,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
 final case class UndertowServer[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
   port: Int,
-  path: String = "/",
+  pathPrefix: String = "/",
   methods: Iterable[HttpMethod] = HttpMethod.values,
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
@@ -63,7 +63,7 @@ final case class UndertowServer[Effect[_]](
     // Validate URL path
     val rootHandler = Handlers.predicate(
       // HTTP
-      Predicates.prefix(path),
+      Predicates.prefix(pathPrefix),
       // WebSocket
       Option.when(webSocket)(UndertowWebSocketEndpoint(handler, httpHandler)).getOrElse(httpHandler),
       ResponseCodeHandler.HANDLE_404
@@ -89,11 +89,7 @@ final case class UndertowServer[Effect[_]](
 
   private def methodHandler(handler: HttpHandler): HttpHandler =
     Handlers.predicate(
-      new Predicate {
-
-        override def resolve(exchange: HttpServerExchange): Boolean =
-          allowedMethods.contains(exchange.getRequestMethod.toString.toUpperCase)
-      },
+      (exchange: HttpServerExchange) => allowedMethods.contains(exchange.getRequestMethod.toString.toUpperCase),
       handler,
       ResponseCodeHandler.HANDLE_405
     )
