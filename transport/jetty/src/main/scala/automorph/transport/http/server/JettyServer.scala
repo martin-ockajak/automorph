@@ -26,7 +26,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @constructor Creates an Jetty HTTP server with specified RPC request handler.
  * @param handler RPC request handler
  * @param port port to listen on for HTTP connections
- * @param pathPrefix HTTP URL path prefix, only requests starting with this path prefix are considered valid
+ * @param pathPrefix HTTP URL path prefix, only requests starting with this path prefix are allowed
  * @param methods allowed HTTP request methods
  * @param mapException maps an exception to a corresponding HTTP status code
  * @param threadPool thread pool
