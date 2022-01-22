@@ -1,16 +1,6 @@
 package automorph.transport.http.endpoint
 
-import automorph.Types
-import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.EffectSystem
-import automorph.spi.transport.EndpointMessageTransport
-import automorph.transport.http.endpoint.RapidoidHttpEndpoint.Context
-import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
-import automorph.util.{Bytes, Network, Random}
-import org.rapidoid.http.{HttpHeaders, Req, ReqHandler, Resp}
 import scala.collection.immutable.{ArraySeq, ListMap}
-import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.util.Try
 
 /**
