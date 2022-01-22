@@ -81,13 +81,25 @@
 sbt '+ test'
 ```
 
+#### Set log level
+
+```bash
+export LOG_LEVEL=OFF
+```
+
+#### Review test logs
+
+```
+target/test.log
+```
+
 ### Documentation
 
 ```bash
-sbt '++2.13.7 site'
+sbt '++2.13.8 site'
 ```
 
-### Local documentation
+#### Continuous rendering
 
 ```bash
 yarn --cwd website start
