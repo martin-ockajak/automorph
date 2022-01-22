@@ -1,6 +1,6 @@
 # Web-RPC
 
-Web-RPC is a very simple RPC protocol which enables all the flexibility typically offered by REST APIs without any boilerplate while alllowing to reuse the existing REST API tools.
+Web-RPC is a very simple RPC protocol which enables all the flexibility typically offered by REST APIs without any boilerplate while allowing reuse of the existing REST API tools.
 
 ## Motivation
 
