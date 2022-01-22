@@ -55,6 +55,8 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
       override type BinaryStream = Effect[Array[Byte]]
       override type Pipe[A, B] = A => Effect[B]
     }
+
+    // Define server endpoint
     endpoint
       .in(paths).in(queryParams).in(headers).in(clientIp)
       .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream].apply(streams))
