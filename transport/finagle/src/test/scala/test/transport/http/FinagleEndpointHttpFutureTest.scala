@@ -10,7 +10,6 @@ import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 import test.standard.StandardHttpServerTest
-import test.transport.http.HttpContextGenerator
 
 class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
 
