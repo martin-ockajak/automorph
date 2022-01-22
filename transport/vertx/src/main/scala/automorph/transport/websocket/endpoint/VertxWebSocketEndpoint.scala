@@ -12,7 +12,7 @@ import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerRequest, ServerWebSocket}
 import scala.collection.immutable.{ArraySeq, ListMap}
-import scala.jdk.CollectionConverters.{IterableHasAsScala, ListHasAsScala}
+import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
  * Vert.x WebSocket endpoint message transport plugin.

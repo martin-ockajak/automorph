@@ -8,7 +8,6 @@ import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import test.standard.StandardHttpServerTest
-import test.transport.http.HttpContextGenerator
 
 class VertxServerHttpFutureTest extends StandardHttpServerTest {
 

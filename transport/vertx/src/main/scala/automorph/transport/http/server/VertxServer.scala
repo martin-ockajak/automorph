@@ -12,7 +12,7 @@ import io.vertx.core.{Vertx, VertxOptions}
 import scala.collection.immutable.ListMap
 
 /**
- * Vert.x HTTP & WebSocket server transport plugin.
+ * Vert.x HTTP & WebSocket server message transport plugin.
  *
  * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as HTTP response body.
