@@ -45,8 +45,8 @@ object ArgonautJsonCodec {
   implicit lazy val jsonRpcMessageCodecJson: CodecJson[ArgonautJsonRpc.RpcMessage] =
     ArgonautJsonRpc.messageCodecJson
 
-  implicit lazy val restRpcMessageCodecJson: CodecJson[ArgonautRestRpc.RpcMessage] =
-    ArgonautRestRpc.messageCodecJson
+  implicit lazy val restRpcMessageCodecJson: CodecJson[ArgonautWebRpc.RpcMessage] =
+    ArgonautWebRpc.messageCodecJson
 
   implicit lazy val openRpcCodecJson: CodecJson[OpenRpc] = ArgonautOpenRpc.openRpcCodecJson
 

@@ -9,16 +9,16 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, JsonNode, SerializerProvider}
 
 /** JSON-RPC protocol support for Jackson message codec plugin using JSON format. */
-private[automorph] object JacksonRestRpc {
+private[automorph] object JacksonWebRpc {
 
   type RpcMessage = Message[JsonNode]
   type RpcError = MessageError
 
   def module = new SimpleModule()
-    .addSerializer(classOf[JacksonRestRpc.RpcError], JacksonRestRpc.messageErrorSerializer)
-    .addDeserializer(classOf[JacksonRestRpc.RpcError], JacksonRestRpc.messageErrorDeserializer)
-    .addSerializer(classOf[JacksonRestRpc.RpcMessage], JacksonRestRpc.messageSerializer)
-    .addDeserializer(classOf[JacksonRestRpc.RpcMessage], JacksonRestRpc.messageDeserializer)
+    .addSerializer(classOf[JacksonWebRpc.RpcError], JacksonWebRpc.messageErrorSerializer)
+    .addDeserializer(classOf[JacksonWebRpc.RpcError], JacksonWebRpc.messageErrorDeserializer)
+    .addSerializer(classOf[JacksonWebRpc.RpcMessage], JacksonWebRpc.messageSerializer)
+    .addDeserializer(classOf[JacksonWebRpc.RpcMessage], JacksonWebRpc.messageDeserializer)
 
   private def messageErrorSerializer = new StdSerializer[RpcError](classOf[RpcError]) {
 

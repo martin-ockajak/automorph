@@ -88,7 +88,7 @@ object JacksonJsonCodec {
     .registerModule(unitModule)
     .registerModule(bigDecimalModule)
     .registerModule(JacksonJsonRpc.module)
-    .registerModule(JacksonRestRpc.module)
+    .registerModule(JacksonWebRpc.module)
     .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
     .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
     .setSerializationInclusion(Include.NON_ABSENT)

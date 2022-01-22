@@ -35,8 +35,8 @@ object CirceJsonCodec {
 
   implicit lazy val jsonRpcMessageEncoder: Encoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageEncoder
   implicit lazy val jsonRpcMessageDecoder: Decoder[CirceJsonRpc.RpcMessage] = CirceJsonRpc.messageDecoder
-  implicit lazy val restRpcMessageEncoder: Encoder[CirceRestRpc.RpcMessage] = CirceRestRpc.messageEncoder
-  implicit lazy val restRpcMessageDecoder: Decoder[CirceRestRpc.RpcMessage] = CirceRestRpc.messageDecoder
+  implicit lazy val restRpcMessageEncoder: Encoder[CirceWebRpc.RpcMessage] = CirceWebRpc.messageEncoder
+  implicit lazy val restRpcMessageDecoder: Decoder[CirceWebRpc.RpcMessage] = CirceWebRpc.messageDecoder
   implicit lazy val openRpcEncoder: Encoder[OpenRpc] = CirceOpenRpc.openRpcEncoder
   implicit lazy val openRpcDecoder: Decoder[OpenRpc] = CirceOpenRpc.openRpcDecoder
   implicit lazy val openApiEncoder: Encoder[OpenApi] = CirceOpenApi.openApiEncoder

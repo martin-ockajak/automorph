@@ -4,7 +4,7 @@ import automorph.protocol.restrpc.{Message, MessageError}
 import ujson.Value
 
 /** JSON-RPC protocol support for uPickle message codec using JSON format. */
-private[automorph] object UpickleRestRpc {
+private[automorph] object UpickleWebRpc {
 
   type RpcMessage = Message[Value]
 
