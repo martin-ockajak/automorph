@@ -1,6 +1,6 @@
-package automorph.protocol.restrpc
+package automorph.protocol.webrpc
 
-import automorph.protocol.restrpc.Response.mandatory
+import automorph.protocol.webrpc.Response.mandatory
 
 /**
  * Web-RPC call response error.

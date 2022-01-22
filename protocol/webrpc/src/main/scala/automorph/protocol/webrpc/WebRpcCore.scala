@@ -1,10 +1,10 @@
-package automorph.protocol.restrpc
+package automorph.protocol.webrpc
 
 import automorph.schema.OpenApi
 import automorph.schema.openapi.{RpcSchema, Schema}
 import automorph.protocol.WebRpcProtocol
-import automorph.protocol.restrpc.Message.Request
-import automorph.protocol.restrpc.{Response, ResponseError, WebRpcException}
+import automorph.protocol.webrpc.Message.Request
+import automorph.protocol.webrpc.{Response, ResponseError, WebRpcException}
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
 import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}

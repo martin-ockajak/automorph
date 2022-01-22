@@ -1,6 +1,6 @@
 package automorph.codec.json
 
-import automorph.protocol.restrpc.{Message, MessageError}
+import automorph.protocol.webrpc.{Message, MessageError}
 import com.fasterxml.jackson.core.{JsonGenerator, JsonParseException, JsonParser}
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
@@ -8,13 +8,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, JsonNode, SerializerProvider}
 
-/** JSON-RPC protocol support for Jackson message codec plugin using JSON format. */
+/** Web-RPC protocol support for Jackson message codec plugin using JSON format. */
 private[automorph] object JacksonWebRpc {
 
   type RpcMessage = Message[JsonNode]
   type RpcError = MessageError
 
-  def module = new SimpleModule()
+  def module: SimpleModule = new SimpleModule()
     .addSerializer(classOf[JacksonWebRpc.RpcError], JacksonWebRpc.messageErrorSerializer)
     .addDeserializer(classOf[JacksonWebRpc.RpcError], JacksonWebRpc.messageErrorDeserializer)
     .addSerializer(classOf[JacksonWebRpc.RpcMessage], JacksonWebRpc.messageSerializer)

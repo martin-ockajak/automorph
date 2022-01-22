@@ -1,9 +1,10 @@
-package automorph.protocol
+package test.protocol
 
 import automorph.Default
+import automorph.protocol.WebRpcProtocol
 import test.base.BaseTest
 
-class RestRpcTest extends BaseTest {
+class WebRpcTest extends BaseTest {
 
   "" - {
     "API description" - {

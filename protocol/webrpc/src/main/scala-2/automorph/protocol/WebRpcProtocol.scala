@@ -1,6 +1,6 @@
 package automorph.protocol
 
-import automorph.protocol.restrpc.{ErrorMapping, Message, WebRpcCore}
+import automorph.protocol.webrpc.{ErrorMapping, Message, WebRpcCore}
 import automorph.schema.OpenApi
 import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.transport.http.HttpContext
@@ -106,16 +106,16 @@ object WebRpcProtocol extends ErrorMapping {
     Seq(weakTypeOf[Node], weakTypeOf[Codec])
 
     c.Expr[WebRpcProtocol[Node, Codec, Context]](q"""
-      new automorph.protocol.RestRpcProtocol(
+      new automorph.protocol.WebRpcProtocol(
         $codec,
         $pathPrefix,
         $mapError,
         $mapException,
         $mapOpenApi,
-        request => $codec.encode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](request),
-        requestNode => $codec.decode[automorph.protocol.restrpc.Message.Request[${weakTypeOf[Node]}]](requestNode),
-        response => $codec.encode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](response),
-        responseNode => $codec.decode[automorph.protocol.restrpc.Message[${weakTypeOf[Node]}]](responseNode),
+        request => $codec.encode[automorph.protocol.webrpc.Message.Request[${weakTypeOf[Node]}]](request),
+        requestNode => $codec.decode[automorph.protocol.webrpc.Message.Request[${weakTypeOf[Node]}]](requestNode),
+        response => $codec.encode[automorph.protocol.webrpc.Message[${weakTypeOf[Node]}]](response),
+        responseNode => $codec.decode[automorph.protocol.webrpc.Message[${weakTypeOf[Node]}]](responseNode),
         openApi => $codec.encode[automorph.schema.OpenApi](openApi),
         string => $codec.encode[String](string)
       )
@@ -129,11 +129,11 @@ object WebRpcProtocol extends ErrorMapping {
     import c.universe.Quasiquote
 
     c.Expr[WebRpcProtocol[Node, Codec, Context]](q"""
-      automorph.protocol.RestRpcProtocol(
+      automorph.protocol.WebRpcProtocol(
         $codec,
         $pathPrefix,
-        automorph.protocol.RestRpcProtocol.defaultMapError,
-        automorph.protocol.RestRpcProtocol.defaultMapException,
+        automorph.protocol.WebRpcProtocol.defaultMapError,
+        automorph.protocol.WebRpcProtocol.defaultMapException,
         identity
       )
     """)

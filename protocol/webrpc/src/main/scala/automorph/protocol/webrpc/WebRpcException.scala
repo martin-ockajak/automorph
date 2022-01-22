@@ -1,4 +1,4 @@
-package automorph.protocol.restrpc
+package automorph.protocol.webrpc
 
 /**
  * Web-RPC API error exception.

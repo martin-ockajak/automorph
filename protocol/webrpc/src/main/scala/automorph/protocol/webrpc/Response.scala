@@ -1,4 +1,4 @@
-package automorph.protocol.restrpc
+package automorph.protocol.webrpc
 
 import automorph.spi.RpcProtocol.InvalidResponseException
 

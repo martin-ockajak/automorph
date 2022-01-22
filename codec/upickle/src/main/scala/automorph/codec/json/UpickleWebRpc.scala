@@ -1,9 +1,9 @@
 package automorph.codec.json
 
-import automorph.protocol.restrpc.{Message, MessageError}
+import automorph.protocol.webrpc.{Message, MessageError}
 import ujson.Value
 
-/** JSON-RPC protocol support for uPickle message codec using JSON format. */
+/** Web-RPC protocol support for uPickle message codec using JSON format. */
 private[automorph] object UpickleWebRpc {
 
   type RpcMessage = Message[Value]

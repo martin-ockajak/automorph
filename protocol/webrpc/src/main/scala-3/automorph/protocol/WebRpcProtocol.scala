@@ -1,6 +1,6 @@
 package automorph.protocol
 
-import automorph.protocol.restrpc.{ErrorMapping, Message, WebRpcCore}
+import automorph.protocol.webrpc.{ErrorMapping, Message, WebRpcCore}
 import automorph.schema.OpenApi
 import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.transport.http.HttpContext

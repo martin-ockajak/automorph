@@ -1,6 +1,7 @@
-package automorph.protocol
+package test.protocol
 
 import automorph.Default
+import automorph.protocol.JsonRpcProtocol
 import test.base.BaseTest
 
 class JsonRpcTest extends BaseTest {
