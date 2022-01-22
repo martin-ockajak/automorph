@@ -269,7 +269,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
 object Handler {
 
   /** Handler with arbitrary node type. */
-  type AnyCodec[Effect[_], Context] = Handler[_, _, Effect, Context]
+  type AnyCodec[Effect[_], Context] = Handler[?, ?, Effect, Context]
 
   /**
    * Creates an RPC request handler builder with specified RPC protocol plugin.
