@@ -27,18 +27,18 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @param backend STTP backend
  * @param url remote API HTTP or WebSocket URL
  * @param method HTTP request method
- * @param webSocketSupport true if WebSocket protocol is supported, false otherwise
+ * @param webSocket true if WebSocket protocol is supported, false otherwise
  * @tparam Effect effect type
  */
 final case class SttpClient[Effect[_]] private (
   system: EffectSystem[Effect],
-  backend: SttpBackend[Effect, _],
+  backend: SttpBackend[Effect, ?],
   url: URI,
   method: HttpMethod,
-  webSocketSupport: Boolean
+  webSocket: Boolean
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
-  private type WebSocket = sttp.capabilities.Effect[Effect] with WebSockets
+  private type WebSocket = sttp.capabilities.Effect[Effect] & WebSockets
 
   private val webSocketsSchemePrefix = "ws"
   private val defaultUrl = Uri(url).toJavaUri
@@ -164,7 +164,7 @@ final case class SttpClient[Effect[_]] private (
 
   private def transportProtocol(sttpRequest: Request[Array[Byte], WebSocket]): Effect[Protocol] = {
     if (sttpRequest.isWebSocket) {
-      if (webSocketSupport) {
+      if (webSocket) {
         system.pure(Protocol.WebSocket)
       } else {
         system.failed(
@@ -194,11 +194,11 @@ object SttpClient {
    */
   def apply[Effect[_]](
     system: EffectSystem[Effect],
-    backend: SttpBackend[Effect, _],
+    backend: SttpBackend[Effect, ?],
     url: URI,
     method: HttpMethod = HttpMethod.Post
   ): SttpClient[Effect] =
-    SttpClient[Effect](system, backend, url, method, true)
+    SttpClient[Effect](system, backend, url, method, webSocket = true)
 
   /**
    * Creates an STTP HTTP client message transport plugin with the specified STTP backend.
@@ -212,11 +212,11 @@ object SttpClient {
    */
   def http[Effect[_]](
     system: EffectSystem[Effect],
-    backend: SttpBackend[Effect, _],
+    backend: SttpBackend[Effect, ?],
     url: URI,
     method: HttpMethod = HttpMethod.Post
   ): SttpClient[Effect] =
-    SttpClient[Effect](system, backend, url, method, false)
+    SttpClient[Effect](system, backend, url, method, webSocket = false)
 
   final case class Session(request: PartialRequest[Either[String, String], Any])
 
