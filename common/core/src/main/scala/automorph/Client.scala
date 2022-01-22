@@ -29,7 +29,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   transport: ClientMessageTransport[Effect, Context]
 ) extends ClientMeta[Node, Codec, Effect, Context] with CannotEqual with Logging {
 
-  protected val system = transport.system
+  protected val system: EffectSystem[Effect] = transport.system
   implicit private val givenSystem: EffectSystem[Effect] = transport.system
 
   /**
@@ -74,7 +74,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * Optional request context is used as a last RPC function argument.
    *
    * @param function RPC function name
-   * @param argument named arguments
+   * @param arguments named arguments
    * @param decodeResult decodes RPC function result
    * @param requestContext request context
    * @tparam Result result type
@@ -88,7 +88,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   ): Effect[Result] = {
     // Create request
     val requestId = Random.id
-    protocol.createRequest(function, arguments, true, requestId).pureFold(
+    protocol.createRequest(function, arguments, responseRequired = true, requestId).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>
@@ -124,7 +124,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   ): Effect[Unit] = {
     // Create request
     val requestId = Random.id
-    protocol.createRequest(function, arguments, false, requestId).pureFold(
+    protocol.createRequest(function, arguments, responseRequired = false, requestId).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>

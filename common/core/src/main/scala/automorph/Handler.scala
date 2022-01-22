@@ -61,7 +61,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     // Parse request
     val requestMessageBody = implicitly[Bytes[MessageBody]].from(requestBody)
     protocol.parseRequest(requestMessageBody, requestContext, requestId).fold(
-      error => errorResponse(error.exception, error.message, true, ListMap(LogProperties.requestId -> requestId)),
+      error => errorResponse(error.exception, error.message, responseRequired = true, ListMap(LogProperties.requestId -> requestId)),
       rpcRequest => {
         // Invoke requested RPC function
         lazy val requestProperties = ListMap(
@@ -103,7 +103,6 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    *
    * @param rpcRequest RPC request
    * @param context request context
-   * @param requestId request correlation idendifier
    * @param requestProperties request properties
    * @tparam MessageBody message body type
    * @return bound function call RPC response
@@ -143,7 +142,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @return bound function arguments
    */
   private def extractArguments(
-    rpcRequest: RpcRequest[Node, _],
+    rpcRequest: RpcRequest[Node, ?],
     binding: HandlerBinding[Node, Effect, Context]
   ): Try[Seq[Option[Node]]] = {
     // Adjust expected function parameters if it uses context as its last parameter
@@ -262,7 +261,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       apiSchema.function.name -> HandlerBinding[Node, Effect, Context](
         apiSchema.function,
         (_, _) => system.pure(apiSchema.invoke(describedFunctions) -> None),
-        false
+        acceptsContext = false
       )
     }*)
 }
