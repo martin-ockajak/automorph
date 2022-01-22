@@ -41,24 +41,22 @@ final case class JettyHttpEndpoint[Effect[_]](
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     // Log the request
     val asyncContext = request.startAsync()
-    asyncContext.start(new Runnable {
-      override def run(): Unit = {
-        val requestId = Random.id
-        lazy val requestProperties = getRequestProperties(request, requestId)
-        log.receivedRequest(requestProperties)
-        val requestBody = Bytes.inputStream.from(request.getInputStream)
+    asyncContext.start(() => {
+      val requestId = Random.id
+      lazy val requestProperties = getRequestProperties(request, requestId)
+      log.receivedRequest(requestProperties)
+      val requestBody = Bytes.inputStream.from(request.getInputStream)
 
-        // Process the request
-        genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
-          error => sendErrorResponse(error, response, asyncContext, request, requestId, requestProperties),
-          result => {
-            // Send the response
-            val responseBody = result.responseBody.getOrElse(Bytes.byteArray.from(Array()))
-            val status = result.exception.map(mapException).getOrElse(HttpStatus.OK_200)
-            sendResponse(responseBody, status, None, response, asyncContext, request, requestId)
-          }
-        )).run
-      }
+      // Process the request
+      genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
+        error => sendErrorResponse(error, response, asyncContext, request, requestId, requestProperties),
+        result => {
+          // Send the response
+          val responseBody = result.responseBody.getOrElse(Bytes.byteArray.from(Array()))
+          val status = result.exception.map(mapException).getOrElse(HttpStatus.OK_200)
+          sendResponse(responseBody, status, None, response, asyncContext, request, requestId)
+        }
+      )).run
     })
   }
 
@@ -126,7 +124,8 @@ final case class JettyHttpEndpoint[Effect[_]](
     }
 
   private def getRequestProperties(request: HttpServletRequest, requestId: String): Map[String, String] = {
-    val url = request.getRequestURI + Option(request.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")
+    val query = Option(request.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")
+    val url = s"${request.getRequestURI}$query"
     ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(request),

@@ -8,7 +8,7 @@ import automorph.transport.http.server.JettyServer.Context
 import automorph.transport.http.{HttpContext, HttpMethod}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import jakarta.servlet.{DispatcherType, Filter, FilterChain, ServletRequest, ServletResponse}
-import java.util.EnumSet
+import java.util
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{FilterHolder, ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.util.thread.{QueuedThreadPool, ThreadPool}
@@ -72,7 +72,7 @@ final case class JettyServer[Effect[_]](
     servletHandler.addServlet(new ServletHolder(endpoint), servletPath)
 
     // Validate HTTP request method
-    servletHandler.addFilter(new FilterHolder(methodFilter), servletPath, EnumSet.of(DispatcherType.REQUEST))
+    servletHandler.addFilter(new FilterHolder(methodFilter), servletPath, util.EnumSet.of(DispatcherType.REQUEST))
     val server = new Server(port)
     server.setHandler(servletHandler)
     server
