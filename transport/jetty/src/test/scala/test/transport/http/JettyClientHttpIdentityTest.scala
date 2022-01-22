@@ -3,12 +3,11 @@ package test.transport.http
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity
+import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.JettyClient
 import java.net.URI
-import automorph.transport.http.HttpMethod
 import org.scalacheck.Arbitrary
 import test.standard.StandardHttpClientTest
-import test.transport.http.HttpContextGenerator
 
 class JettyClientHttpIdentityTest extends StandardHttpClientTest {
 

@@ -15,12 +15,10 @@ import org.eclipse.jetty.util.thread.{QueuedThreadPool, ThreadPool}
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
- * Jetty HTTP server transport plugin.
+ * Jetty HTTP server message transport plugin.
  *
  * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as HTTP response body.
- *
- * Processes only HTTP requests starting with specified URL path.
  *
  * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
  * @see [[https://jetty.io Library documentation]]
@@ -28,7 +26,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @constructor Creates an Jetty HTTP server with specified RPC request handler.
  * @param handler RPC request handler
  * @param port port to listen on for HTTP connections
- * @param path HTTP URL path
+ * @param pathPrefix HTTP URL path prefix, only requests starting with this path prefix are considered valid
  * @param methods allowed HTTP request methods
  * @param mapException maps an exception to a corresponding HTTP status code
  * @param threadPool thread pool
@@ -37,7 +35,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
 final case class JettyServer[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
   port: Int,
-  path: String = "/",
+  pathPrefix: String = "/",
   methods: Iterable[HttpMethod] = HttpMethod.values,
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
@@ -66,7 +64,7 @@ final case class JettyServer[Effect[_]](
   private def createServer(): Server = {
     val endpoint = JettyHttpEndpoint(handler, mapException)
     val servletHandler = new ServletContextHandler
-    val servletPath = s"$path*"
+    val servletPath = s"$pathPrefix*"
 
     // Validate URL path
     servletHandler.addServlet(new ServletHolder(endpoint), servletPath)

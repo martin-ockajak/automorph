@@ -4,7 +4,7 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.client.JettyClient.{defaultClient, Context, Session}
+import automorph.transport.http.client.JettyClient.{Context, Session, defaultClient}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Bytes
 import automorph.util.Extensions.{EffectOps, TryOps}
@@ -13,11 +13,11 @@ import java.util
 import java.util.concurrent.{CompletableFuture, TimeUnit}
 import org.eclipse.jetty.client.api.{Request, Result}
 import org.eclipse.jetty.client.util.{BufferingResponseListener, BytesRequestContent}
-import org.eclipse.jetty.client.{api, HttpClient}
+import org.eclipse.jetty.client.{HttpClient, api}
 import org.eclipse.jetty.http.HttpHeader
-import org.eclipse.jetty.{http, websocket}
 import org.eclipse.jetty.websocket.api.{WebSocketListener, WriteCallback}
 import org.eclipse.jetty.websocket.client.{ClientUpgradeRequest, WebSocketClient}
+import org.eclipse.jetty.{http, websocket}
 import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.jdk.CollectionConverters.{IterableHasAsScala, SeqHasAsJava}
 import scala.util.Try
