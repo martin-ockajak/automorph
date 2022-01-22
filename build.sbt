@@ -67,7 +67,6 @@ lazy val root = project.in(file(".")).settings(
 
   // Message transport
   sttp,
-  tapir,
   undertow,
   vertx,
   jetty,
@@ -326,15 +325,6 @@ lazy val finagle = project.in(file("transport/finagle")).dependsOn(
   name := s"$projectName-finagle",
   libraryDependencies ++= Seq(
     ("com.twitter" % "finagle-http" % "22.1.0").cross(CrossVersion.for3Use2_13)
-  )
-)
-val tapirVersion = "0.18.3"
-lazy val tapir = project.in(file("transport/tapir")).dependsOn(
-  core, http, testStandard % Test
-).settings(
-  libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
-    "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion % Test
   )
 )
 

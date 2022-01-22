@@ -92,7 +92,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
       method = method.map(_.toString).map(HttpMethod.valueOf),
       path = Some(urlPath(paths)),
       parameters = queryParams.toSeq,
-      headers = headers.map(header => header.name -> header.value).toSeq
+      headers = headers.map(header => header.name -> header.value)
     )
 
   private[automorph] def urlPath(paths: List[String]): String =
