@@ -2,9 +2,9 @@ package automorph.protocol.restrpc
 
 import automorph.schema.OpenApi
 import automorph.schema.openapi.{RpcSchema, Schema}
-import automorph.protocol.RestRpcProtocol
+import automorph.protocol.WebRpcProtocol
 import automorph.protocol.restrpc.Message.Request
-import automorph.protocol.restrpc.{Response, ResponseError, RestRpcException}
+import automorph.protocol.restrpc.{Response, ResponseError, WebRpcException}
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
 import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
@@ -14,16 +14,16 @@ import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
 
 /**
- * REST-RPC protocol core logic.
+ * Web-RPC protocol core logic.
  *
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Context message context type
  */
-private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]] {
-  this: RestRpcProtocol[Node, Codec, Context] =>
+private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]] {
+  this: WebRpcProtocol[Node, Codec, Context] =>
 
-  /** REST-RPC message metadata. */
+  /** Web-RPC message metadata. */
   type Metadata = Unit
 
   private val binaryContentType = "application/octet-stream"
@@ -47,7 +47,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
     Some(List("error"))
   )
 
-  override val name: String = "REST-RPC"
+  override val name: String = "Web-RPC"
 
   override def createRequest(
     function: String,
@@ -108,7 +108,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
     val responseMessage = result.pureFold(
       error => {
         val responseError = error match {
-          case RestRpcException(message, code, _) =>
+          case WebRpcException(message, code, _) =>
             ResponseError(message, code)
           case _ =>
             // Assemble error details
@@ -163,7 +163,7 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
 
   override def apiSchemas: Seq[RpcApiSchema[Node]] = Seq(
     RpcApiSchema(
-      RpcFunction(RestRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
+      RpcFunction(WebRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
       functions => encodeOpenApi(openApi(functions))
     )
   )
@@ -174,34 +174,34 @@ private[automorph] trait RestRpcCore[Node, Codec <: MessageCodec[Node], Context 
    * @tparam NewContext message context type
    * @return JSON-RPC protocol
    */
-  def context[NewContext <: HttpContext[_]]: RestRpcProtocol[Node, Codec, NewContext] =
+  def context[NewContext <: HttpContext[_]]: WebRpcProtocol[Node, Codec, NewContext] =
     copy()
 
   /**
-   * Creates a copy of this protocol with specified exception to REST-RPC error mapping.
+   * Creates a copy of this protocol with specified exception to Web-RPC error mapping.
    *
-   * @param exceptionToError maps an exception classs to a corresponding REST-RPC error type
-   * @return REST-RPC protocol
+   * @param exceptionToError maps an exception classs to a corresponding Web-RPC error type
+   * @return Web-RPC protocol
    */
-  def mapException(exceptionToError: Throwable => Option[Int]): RestRpcProtocol[Node, Codec, Context] =
+  def mapException(exceptionToError: Throwable => Option[Int]): WebRpcProtocol[Node, Codec, Context] =
     copy(mapException = exceptionToError)
 
   /**
-   * Creates a copy of this protocol with specified REST-RPC error to exception mapping.
+   * Creates a copy of this protocol with specified Web-RPC error to exception mapping.
    *
-   * @param errorToException maps a REST-RPC error to a corresponding exception
-   * @return REST-RPC protocol
+   * @param errorToException maps a Web-RPC error to a corresponding exception
+   * @return Web-RPC protocol
    */
-  def mapError(errorToException: (String, Option[Int]) => Throwable): RestRpcProtocol[Node, Codec, Context] =
+  def mapError(errorToException: (String, Option[Int]) => Throwable): WebRpcProtocol[Node, Codec, Context] =
     copy(mapError = errorToException)
 
   /**
    * Creates a copy of this protocol with given OpenAPI description transformation.
    *
    * @param mapOpenApi transforms generated OpenAPI specification
-   * @return REST-RPC protocol
+   * @return Web-RPC protocol
    */
-  def mapOpenApi(mapOpenApi: OpenApi => OpenApi): RestRpcProtocol[Node, Codec, Context] =
+  def mapOpenApi(mapOpenApi: OpenApi => OpenApi): WebRpcProtocol[Node, Codec, Context] =
     copy(mapOpenApi = mapOpenApi)
 
   /**

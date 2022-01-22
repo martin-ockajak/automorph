@@ -1,6 +1,6 @@
 package automorph.protocol
 
-import automorph.protocol.restrpc.{ErrorMapping, Message, RestRpcCore}
+import automorph.protocol.restrpc.{ErrorMapping, Message, WebRpcCore}
 import automorph.schema.OpenApi
 import automorph.spi.{MessageCodec, RpcProtocol}
 import automorph.transport.http.HttpContext
@@ -8,33 +8,33 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /**
- * REST-RPC protocol plugin.
+ * Web-RPC protocol plugin.
  *
- * Provides the following REST-RPC functions for service discovery:
+ * Provides the following Web-RPC functions for service discovery:
  * - `api.discover` - API description in OpenAPI format
  *
- * @constructor Creates a REST-RPC protocol plugin.
- * @see [[https://automorph.org/rest-rpc REST-RPC protocol specification]]
+ * @constructor Creates a Web-RPC protocol plugin.
+ * @see [[https://automorph.org/rest-rpc Web-RPC protocol specification]]
  * @param codec message codec plugin
  * @param pathPrefix API path prefix
- * @param mapError maps a REST-RPC error to a corresponding exception
- * @param mapException maps an exception to a corresponding REST-RPC error
+ * @param mapError maps a Web-RPC error to a corresponding exception
+ * @param mapException maps an exception to a corresponding Web-RPC error
  * @param mapOpenApi transforms generated OpenAPI description
- * @param encodeRequest converts a REST-RPC request to message format node
- * @param decodeRequest converts a message format node to REST-RPC request
- * @param encodeResponse converts a REST-RPC response to message format node
- * @param decodeResponse converts a message format node to REST-RPC response
+ * @param encodeRequest converts a Web-RPC request to message format node
+ * @param decodeRequest converts a message format node to Web-RPC request
+ * @param encodeResponse converts a Web-RPC response to message format node
+ * @param decodeResponse converts a message format node to Web-RPC response
  * @param encodeOpenApi converts an OpenAPI description to message format node
  * @param encodeString converts a string to message format node
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
  * @tparam Context message context type
  */
-final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](
+final case class WebRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](
   codec: Codec,
   pathPrefix: String,
-  mapError: (String, Option[Int]) => Throwable = RestRpcProtocol.defaultMapError,
-  mapException: Throwable => Option[Int] = RestRpcProtocol.defaultMapException,
+  mapError: (String, Option[Int]) => Throwable = WebRpcProtocol.defaultMapError,
+  mapException: Throwable => Option[Int] = WebRpcProtocol.defaultMapException,
   mapOpenApi: OpenApi => OpenApi = identity,
   protected val encodeRequest: Message.Request[Node] => Node,
   protected val decodeRequest: Node => Message.Request[Node],
@@ -42,29 +42,29 @@ final case class RestRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: H
   protected val decodeResponse: Node => Message[Node],
   protected val encodeOpenApi: OpenApi => Node,
   protected val encodeString: String => Node
-) extends RestRpcCore[Node, Codec, Context] with RpcProtocol[Node, Codec, Context]
+) extends WebRpcCore[Node, Codec, Context] with RpcProtocol[Node, Codec, Context]
 
-object RestRpcProtocol extends ErrorMapping {
+object WebRpcProtocol extends ErrorMapping {
 
   /** Service discovery method providing API description in OpenAPI format. */
   val openApiFunction: String = "api.discover"
 
   /**
-   * Creates a REST-RPC protocol plugin.
+   * Creates a Web-RPC protocol plugin.
    *
    * Provides the following JSON-RPC functions for service discovery:
    * - `api.discover` - API description in OpenAPI format
    *
-   * @see [[https://www.jsonrpc.org/specification REST-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification Web-RPC protocol specification]]
    * @param codec message codec plugin
    * @param pathPrefix API path prefix
-   * @param mapError maps a REST-RPC error to a corresponding exception
-   * @param mapException maps an exception to a corresponding REST-RPC error
+   * @param mapError maps a Web-RPC error to a corresponding exception
+   * @param mapException maps an exception to a corresponding Web-RPC error
    * @param mapOpenApi transforms generated OpenAPI description
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Context message context type
-   * @return REST-RPC protocol plugin
+   * @return Web-RPC protocol plugin
    */
   def apply[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](
     codec: Codec,
@@ -72,27 +72,27 @@ object RestRpcProtocol extends ErrorMapping {
     mapError: (String, Option[Int]) => Throwable,
     mapException: Throwable => Option[Int],
     mapOpenApi: OpenApi => OpenApi
-  ): RestRpcProtocol[Node, Codec, Context] =
+  ): WebRpcProtocol[Node, Codec, Context] =
     macro applyMacro[Node, Codec, Context]
 
   /**
-   * Creates a REST-RPC protocol plugin.
+   * Creates a Web-RPC protocol plugin.
    *
-   * Provides the following REST-RPC functions for service discovery:
+   * Provides the following Web-RPC functions for service discovery:
    * - `api.discover` - API description in OpenAPI format
    *
-   * @see [[https://www.jsonrpc.org/specification REST-RPC protocol specification]]
+   * @see [[https://www.jsonrpc.org/specification Web-RPC protocol specification]]
    * @param codec message codec plugin
    * @param pathPrefix API path prefix
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Context message context type
-   * @return REST-RPC protocol plugin
+   * @return Web-RPC protocol plugin
    */
   def apply[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](
     codec: Codec,
     pathPrefix: String
-  ): RestRpcProtocol[Node, Codec, Context] =
+  ): WebRpcProtocol[Node, Codec, Context] =
     macro applyDefaultsMacro[Node, Codec, Context]
 
   def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node], Context <: HttpContext[_]](c: blackbox.Context)(
@@ -101,11 +101,11 @@ object RestRpcProtocol extends ErrorMapping {
     mapError: c.Expr[(String, Option[Int]) => Throwable],
     mapException: c.Expr[Throwable => Option[Int]],
     mapOpenApi: c.Expr[OpenApi => OpenApi]
-  ): c.Expr[RestRpcProtocol[Node, Codec, Context]] = {
+  ): c.Expr[WebRpcProtocol[Node, Codec, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
     Seq(weakTypeOf[Node], weakTypeOf[Codec])
 
-    c.Expr[RestRpcProtocol[Node, Codec, Context]](q"""
+    c.Expr[WebRpcProtocol[Node, Codec, Context]](q"""
       new automorph.protocol.RestRpcProtocol(
         $codec,
         $pathPrefix,
@@ -125,10 +125,10 @@ object RestRpcProtocol extends ErrorMapping {
   def applyDefaultsMacro[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](c: blackbox.Context)(
     codec: c.Expr[Codec],
     pathPrefix: c.Expr[String]
-  ): c.Expr[RestRpcProtocol[Node, Codec, Context]] = {
+  ): c.Expr[WebRpcProtocol[Node, Codec, Context]] = {
     import c.universe.Quasiquote
 
-    c.Expr[RestRpcProtocol[Node, Codec, Context]](q"""
+    c.Expr[WebRpcProtocol[Node, Codec, Context]](q"""
       automorph.protocol.RestRpcProtocol(
         $codec,
         $pathPrefix,

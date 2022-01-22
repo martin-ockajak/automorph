@@ -3,7 +3,7 @@ package automorph.protocol.restrpc
 import automorph.spi.RpcProtocol.InvalidResponseException
 
 /**
- * REST-RPC call response.
+ * Web-RPC call response.
  *
  * @param result call result
  * @param error call error

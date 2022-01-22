@@ -1,6 +1,6 @@
 package examples.select
 
-import automorph.protocol.RestRpcProtocol
+import automorph.protocol.WebRpcProtocol
 import automorph.{Client, Default, Handler}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -17,7 +17,7 @@ object RpcProtocol extends App {
   val api = new ServerApi()
 
   // Create a server Web-RPC protocol plugin with '/api' path prefix
-  val serverProtocol = RestRpcProtocol(Default.codec, "/api/" ).context[Default.ServerContext]
+  val serverProtocol = WebRpcProtocol(Default.codec, "/api/" ).context[Default.ServerContext]
 
   // Start default Web-RPC HTTP server listening on port 7000 for requests to '/api'
   val handler = Handler.protocol(serverProtocol).system(Default.systemAsync)
@@ -29,7 +29,7 @@ object RpcProtocol extends App {
   }
 
   // Create a client Web-RPC protocol plugin with '/api' path prefix
-  val clientProtocol = RestRpcProtocol(Default.codec, "/api/").context[Default.ClientContext]
+  val clientProtocol = WebRpcProtocol(Default.codec, "/api/").context[Default.ClientContext]
 
   // Setup default Web-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
   val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))

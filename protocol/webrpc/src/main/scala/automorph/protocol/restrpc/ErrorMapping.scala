@@ -3,7 +3,7 @@ package automorph.protocol.restrpc
 private[automorph] trait ErrorMapping {
 
   /**
-   * Maps a REST-RPC error to a corresponding default exception.
+   * Maps a Web-RPC error to a corresponding default exception.
    *
    * @param message error message
    * @param code error code
@@ -14,10 +14,10 @@ private[automorph] trait ErrorMapping {
   }
 
   /**
-   * Maps an exception to a corresponding default REST-RPC error type.
+   * Maps an exception to a corresponding default Web-RPC error type.
    *
    * @param exception exception
-   * @return REST-RPC error type
+   * @return Web-RPC error type
    */
   def defaultMapException(exception: Throwable): Option[Int] = exception match {
     case _ => None

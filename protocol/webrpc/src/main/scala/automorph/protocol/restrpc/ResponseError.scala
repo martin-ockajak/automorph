@@ -3,7 +3,7 @@ package automorph.protocol.restrpc
 import automorph.protocol.restrpc.Response.mandatory
 
 /**
- * REST-RPC call response error.
+ * Web-RPC call response error.
  *
  * @param message error message
  * @param code error code

@@ -3,9 +3,9 @@ package automorph.protocol.restrpc
 import scala.collection.immutable.ListMap
 
 /**
- * REST-RPC protocol message structure.
+ * Web-RPC protocol message structure.
  *
- * @see [[https://automorph.org/rest-rpc REST-RPC protocol specification]]
+ * @see [[https://automorph.org/rest-rpc Web-RPC protocol specification]]
  * @param result succesful method call result value
  * @param error failed method call error details
  * @tparam Node message node type
@@ -37,9 +37,9 @@ object Message {
 }
 
 /**
- * REST-RPC protocol message error structure.
+ * Web-RPC protocol message error structure.
  *
- * @see [[https://www.jsonrpc.org/specification REST-RPC protocol specification]]
+ * @see [[https://www.jsonrpc.org/specification Web-RPC protocol specification]]
  * @param message error message
  * @param code error code
  */
@@ -48,7 +48,7 @@ final case class MessageError(
   code: Option[Int]
 )
 
-/** REST-RPC message type. */
+/** Web-RPC message type. */
 sealed abstract class MessageType {
   /** Message type name. */
   def name: String = toString
@@ -56,10 +56,10 @@ sealed abstract class MessageType {
 
 object MessageType {
 
-  /** REST-RPC function call request. */
+  /** Web-RPC function call request. */
   case object Call extends MessageType
-  /** REST-RPC result response. */
+  /** Web-RPC result response. */
   case object Result extends MessageType
-  /** REST-RPC error response. */
+  /** Web-RPC error response. */
   case object Error extends MessageType
 }
