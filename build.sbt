@@ -316,7 +316,8 @@ lazy val akkaHttp = project.in(file("transport/akka-http")).dependsOn(
   name := s"$projectName-akka-http",
   libraryDependencies ++= Seq(
     ("com.typesafe.akka" %% "akka-http" % "10.2.7").cross(CrossVersion.for3Use2_13),
-    ("com.typesafe.akka" %% "akka-actor-typed" % "2.6.18").cross(CrossVersion.for3Use2_13)
+    ("com.typesafe.akka" %% "akka-actor-typed" % "2.6.18").cross(CrossVersion.for3Use2_13),
+    ("com.typesafe.akka" %% "akka-stream" % "2.6.18").cross(CrossVersion.for3Use2_13)
   )
 )
 lazy val finagle = project.in(file("transport/finagle")).dependsOn(
