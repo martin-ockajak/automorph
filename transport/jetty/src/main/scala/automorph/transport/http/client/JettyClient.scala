@@ -35,7 +35,7 @@ import scala.util.Try
  * @param system effect system plugin
  * @param url remote API HTTP or WebSocket URL
  * @param method HTTP request method (default: POST)
- * @param builder Jetty client builder (default: empty)
+ * @param httpClient Jetty HTTP client
  * @tparam Effect effect type
  */
 final case class JettyClient[Effect[_]](
@@ -123,15 +123,17 @@ final case class JettyClient[Effect[_]](
         // Send HTTP request
         httpRequest =>
           system match {
-            case defer: Defer[_] =>
+            case defer: Defer[?] =>
               defer.asInstanceOf[Defer[Effect]].deferred[Response].flatMap { deferredResponse =>
-                httpRequest.send(new BufferingResponseListener {
+                val responseListener = new BufferingResponseListener {
 
-                  override def onComplete(result: Result): Unit =
+                  override def onComplete(result: Result): Unit = {
                     Option(result.getResponseFailure).map(error => deferredResponse.fail(error).run).getOrElse {
                       deferredResponse.succeed(httpResponse(result.getResponse, getContent)).run
                     }
-                })
+                  }
+                }
+                httpRequest.send(responseListener)
                 deferredResponse.effect
               }
             case _ => system.wrap(httpRequest.send()).map(response => httpResponse(response, response.getContent))
@@ -316,7 +318,7 @@ final case class JettyClient[Effect[_]](
     }
 
   private def withDefer[T](function: Defer[Effect] => Effect[T]): Effect[T] = system match {
-    case defer: Defer[_] => function(defer.asInstanceOf[Defer[Effect]])
+    case defer: Defer[?] => function(defer.asInstanceOf[Defer[Effect]])
     case _ => system.failed(new IllegalArgumentException(
         s"${Protocol.WebSocket} not supported for effect system without deferred effect support: ${system.getClass.getName}"
       ))
