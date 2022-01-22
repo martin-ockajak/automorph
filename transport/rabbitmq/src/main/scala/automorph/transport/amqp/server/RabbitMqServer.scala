@@ -9,7 +9,7 @@ import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
 import automorph.util.Bytes
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.{Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
+import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
 import scala.util.{Try, Using}
 import scala.jdk.CollectionConverters.MapHasAsJava
@@ -36,6 +36,7 @@ final case class RabbitMqServer[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, AmqpContext[RabbitMqContext]],
   url: URI,
   queues: Seq[String],
+  addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
 ) extends Logging with ServerMessageTransport[Effect] {
 
@@ -127,7 +128,7 @@ final case class RabbitMqServer[Effect[_]](
     Try {
       val mediaType = genericHandler.protocol.codec.mediaType
       val amqpProperties = RabbitMqCommon
-        .amqpProperties(responseContext, mediaType, actualReplyTo, requestId, serverId, true)
+        .amqpProperties(responseContext, mediaType, actualReplyTo, requestId, serverId, useDefaultRequestId = true)
       threadConsumer.get.getChannel.basicPublish(exchange, actualReplyTo, true, false, amqpProperties, message)
       log.sentResponse(responseProperties)
     }.onFailure { error =>
@@ -136,7 +137,7 @@ final case class RabbitMqServer[Effect[_]](
   }
 
   private def connect(): Connection = {
-    val connection = RabbitMqCommon.connect(url, Seq.empty, serverId, connectionFactory)
+    val connection = RabbitMqCommon.connect(url, addresses, serverId, connectionFactory)
     RabbitMqCommon.declareExchange(exchange, connection)
     Using(connection.createChannel()) { channel =>
       queues.foreach { queue =>

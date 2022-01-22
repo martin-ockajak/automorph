@@ -1,7 +1,6 @@
 package automorph.transport.amqp
 
 import automorph.log.{LogProperties, Logging}
-import automorph.transport.amqp.AmqpContext
 import automorph.transport.amqp.client.RabbitMqClient.Context
 import automorph.util.Extensions.TryOps
 import com.rabbitmq.client.AMQP.BasicProperties
@@ -121,7 +120,7 @@ private[automorph] object RabbitMqCommon extends Logging {
   ): BasicProperties = {
     val context = messageContext.getOrElse(AmqpContext())
     val transportProperties = context.transport.map(_.properties).getOrElse(new BasicProperties())
-    (new BasicProperties()).builder()
+    new BasicProperties().builder()
       .contentType(contentType)
       .replyTo(context.replyTo.orElse(Option(transportProperties.getReplyTo)).getOrElse(defaultReplyTo))
       .correlationId(Option.when(useDefaultRequestId)(defaultRequestId).getOrElse {
@@ -132,10 +131,10 @@ private[automorph] object RabbitMqCommon extends Logging {
       .headers((context.headers ++ Option(transportProperties.getHeaders).map(_.asScala).getOrElse(
         Map.empty
       )).asJava)
-      .deliveryMode(context.deliveryMode.map(new Integer(_)).orElse(
+      .deliveryMode(context.deliveryMode.map(Integer.valueOf).orElse(
         Option(transportProperties.getDeliveryMode)
       ).orNull)
-      .priority(context.priority.map(new Integer(_)).orElse(Option(transportProperties.getPriority)).orNull)
+      .priority(context.priority.map(Integer.valueOf).orElse(Option(transportProperties.getPriority)).orNull)
       .expiration(context.expiration.orElse(Option(transportProperties.getExpiration)).orNull)
       .messageId(context.messageId.orElse(Option(transportProperties.getMessageId)).orNull)
       .timestamp(context.timestamp.map(Date.from).orElse(Option(transportProperties.getTimestamp)).orNull)

@@ -36,7 +36,7 @@ import scala.util.Try
 final case class RabbitMqClient[Effect[_]](
   url: URI,
   routingKey: String,
-  system: EffectSystem[Effect] with Defer[Effect],
+  system: EffectSystem[Effect] & Defer[Effect],
   exchange: String = RabbitMqCommon.defaultDirectExchange,
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
@@ -81,7 +81,7 @@ final case class RabbitMqClient[Effect[_]](
   ): Effect[Unit] = {
     // Log the request
     val amqpProperties = RabbitMqCommon
-      .amqpProperties(requestContext, mediaType, directReplyToQueue, defaultRequestId, clientId, false)
+      .amqpProperties(requestContext, mediaType, directReplyToQueue, defaultRequestId, clientId, useDefaultRequestId = false)
     val requestId = amqpProperties.getCorrelationId
     lazy val requestProperties = RabbitMqCommon.messageProperties(Some(requestId), routingKey, urlText, None)
     log.sendingRequest(requestProperties)
@@ -127,7 +127,7 @@ final case class RabbitMqClient[Effect[_]](
   }
 
   private def connect(): Connection = {
-    val connection = RabbitMqCommon.connect(url, Seq.empty, clientId, connectionFactory)
+    val connection = RabbitMqCommon.connect(url, addresses, clientId, connectionFactory)
     RabbitMqCommon.declareExchange(exchange, connection)
     connection
   }
