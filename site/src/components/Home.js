@@ -105,7 +105,7 @@ const features = [
       <>
         <ul style={style.list}>
           <li><a href="https://www.jsonrpc.org/specification">JSON-RPC</a></li>
-          <li><a href="docs/REST-RPC/index.html">REST-RPC</a></li>
+          <li><a href="docs/Web-RPC/index.html">Web-RPC</a></li>
         </ul>
       </>
     ),

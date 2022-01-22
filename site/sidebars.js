@@ -11,7 +11,7 @@ const sidebars = {
         'Quickstart',
         'Plugins',
         'Architecture',
-        'REST-RPC',
+        'Web-RPC',
         'Examples'
       ]
     }

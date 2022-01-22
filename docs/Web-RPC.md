@@ -1,50 +1,55 @@
-# REST-RPC
+# Web-RPC
 
-REST-RPC is an RPC protocol prescribing a standard way to model REST APIs while reusing existing practices and tools in the REST ecosystem.
+Web-RPC is a very simple RPC protocol which enables all the flexibility typically offered by REST APIs without any boilerplate while alllowing to reuse the existing REST API tools.
 
 ## Motivation
 
-[REST](https://en.wikipedia.org/wiki/Representational_state_transfer) as a theoretical concept is deemed independent of specific data formats, transport protocols or even calling conventions. However, in practice the vast majority REST APIs are created for web applications and services by transforming HTTP requests and responses in JSON format to remote API function calls.
+[REST](https://en.wikipedia.org/wiki/Representational_state_transfer) as a theoretical concept is deemed to be independent of specific data formats, transport protocols or even calling conventions. However, the vast majority of REST APIs created for web applications and online services involve translating HTTP requests and responses carrying JSON payload into function calls on the remote site.
 
-Such transformations require deciding where to store various REST API call data and metadata in the underlying transport protocol and message format in the same way [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) protocols do. Consequently, creation of a typical REST API requires additional effort to design and implement its own unique custom RPC protocol.
+Such translation requires deciding how to represent REST API call data and metadata using the underlying transport protocol. This includes determining the message format, its structure, transport protocol meta-data such as various headers and so on. There are many ways how to do this ultimately achieving exactly the same result using slightly differrent means. And while some good practices can be discussed, there does not seem to be an agreed upon standard.
+
+These are virtually the same concerns which various [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) or messaging protocols need to solve. Consequently, creation of a typical REST API requires additional effort largely equivalent to designing and implementing an unique custom RPC protocol.
 
 ## Goals
 
-REST-RPC is an attempt to demonstrate that the custom RPC protocol design and implementation effort is unnecessary by providing the simplest possible standard protocol which still supports features typically used by REST APIs. It is directly inspired by [JSON-RPC](https://www.jsonrpc.org/specification) and can be understood as its minimalistic HTTP-dependent sibling.
+Web-RPC is an attempt to demonstrate that the REST-compatible remote API functionality required by web applications and online services can be achieved without effectivelly ending up designing a RPC protocol for each API.
 
-In other words, REST-RPC prescribes those REST-style API aspects which make no practical difference but preserves the flexibility to choose those aspects which do.
+Web-RPC can be understood to be all of the following:
+* Minimalistic sibling of [JSON-RPC](https://www.jsonrpc.org/specification) using HTTP as transport protocol
+* RPC protocol supporting various practical mechanisms often provided by typical REST APIs
+* REST-style protocol prescribing a standard way to represent data and meta-data in REST API requests and responses
 
 ## Features
 
 * HTTP as transport protocol
-* Structured data messages in JSON format
-* Binary data messages
-* API function name in URL path
+* Structured messages in JSON format
+* Binary messages as octet stream
+* API function name as a last URL path element
+* API function arguments can be supplied either in the request body or as URL query parameters
 * API function arguments must have names
-* API function arguments can be supplied either in the request body or in special cases as URL query parameters
-* HTTP POST or GET method must be used to obtain standard or cached call semantics respectively
+* Meta-data in HTTP headers
 
 ## Fairly anticipated questions (FAQ)
 
-### When to use REST-RPC ?
+### When to use Web-RPC ?
 
 In case any of the following remote API concerns need to be addressed with minimal effort:
 * Caching GET requests
 * Submitting or retrieving binary data
-* External constraints requiring a JSON over HTTP REST-style API
+* External constraints requiring a REST-style JSON over HTTP API
  
 In other situations it is [probably](https://youtu.be/XyJh3qKjSMk?t=53) better to use an established remote call protocol such as:
-- [JSON-RPC](https://en.wikipedia.org/wiki/JSON-RPC)
-- [Avro](https://en.wikipedia.org/wiki/Apache_Avro)
-- [GraphQL](https://en.wikipedia.org/wiki/GraphQL)
+* [JSON-RPC](https://en.wikipedia.org/wiki/JSON-RPC)
+* [Avro](https://en.wikipedia.org/wiki/Apache_Avro)
+* [GraphQL](https://en.wikipedia.org/wiki/GraphQL)
 
-### Why call it REST-RPC though it has little in common with REST concepts ?
+### Can Web-RPC be used in without a specific Web-RPC library ?
 
-To illustrate that it provides remote API authors with a solution of equivalent capability to typical REST API protocols but does so by openly embracing RPC principles.
+Yes. Any REST client or server library will suffice. However, using a specific Web-RPC library minimizes the implementation effort.
 
-### Can REST-RPC be used in practice without a specific REST-RPC library ?
+### Why call it a REST-style RPC when it is conceptually unrelated to REST ?
 
-Yes. Any REST client or server library will suffice. However, using a specific REST-RPC library minimizes the implementation effort.
+To illustrate that it provides remote API authors with a solution with capabilities equivalent to and compatible with typical REST API protocols but does so by openly embracing RPC principles.
 
 ## Request
 

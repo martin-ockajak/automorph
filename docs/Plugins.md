@@ -25,7 +25,7 @@ The underlying RPC protocol must support remote function invocation.
 | Class | Artifact | Protocol | Service discovery |
 | --- | --- | --- | --- |
 | [JsonRpcProtocol](/api/automorph/protocol/JsonRpcProtocol.html) (*Default*) | [automorph-jsonrpc](https://mvnrepository.com/artifact/org.automorph/automorph-jsonrpc) | [JSON-RPC](https://www.jsonrpc.org/specification) | [OpenRPC](https://spec.open-rpc.org), [OpenAPI](https://github.com/OAI/OpenAPI-Specification) |
-| [RestRpcProtocol](/api/automorph/protocol/RestRpcProtocol.html) | [automorph-restrpc](https://mvnrepository.com/artifact/org.automorph/automorph-restrpc) | [REST-RPC](REST-RPC) | [OpenAPI](https://github.com/OAI/OpenAPI-Specification) |
+| [WebRpcProtocol](/api/automorph/protocol/WebRpcProtocol.html) | [automorph-restrpc](https://mvnrepository.com/artifact/org.automorph/automorph-restrpc) | [Web-RPC](Web-RPC) | [OpenAPI](https://github.com/OAI/OpenAPI-Specification) |
 
 ## Effect system
 
