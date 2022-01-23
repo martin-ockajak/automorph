@@ -1,4 +1,4 @@
-package automorph.util
+package automorph.reflection
 
 import scala.quoted.{quotes, Expr, Quotes, Type}
 

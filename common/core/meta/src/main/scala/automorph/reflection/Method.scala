@@ -1,4 +1,4 @@
-package automorph.util
+package automorph.reflection
 
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 

@@ -3,10 +3,10 @@ package automorph.handler.meta
 import automorph.Contextual
 import automorph.handler.HandlerBinding
 import automorph.log.MacroLogger
+import automorph.reflection.MethodReflection.functionToExpr
+import automorph.reflection.{ClassReflection, MethodReflection}
 import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
-import automorph.util.MethodReflection.functionToExpr
-import automorph.util.{Method, ClassReflection, MethodReflection}
 import scala.quoted.{Expr, Quotes, Type}
 import scala.util.{Failure, Try}
 

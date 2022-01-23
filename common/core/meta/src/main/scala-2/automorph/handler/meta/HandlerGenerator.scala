@@ -3,9 +3,9 @@ package automorph.handler.meta
 import automorph.Contextual
 import automorph.handler.HandlerBinding
 import automorph.log.MacroLogger
+import automorph.reflection.{MethodReflection, ClassReflection}
 import automorph.spi.protocol.RpcFunction
 import automorph.spi.{EffectSystem, MessageCodec}
-import automorph.util.{MethodReflection, ClassReflection}
 import scala.annotation.nowarn
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
