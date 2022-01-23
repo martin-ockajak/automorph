@@ -24,7 +24,7 @@ object OpenRpc {
 
   private val defaultTitle = ""
   private val defaultVersion = ""
-  private val scaladocMarkup = "^[/\\* ]*$".r
+  private val scaladocMarkup = "^[/* ]*$".r
 
   /**
    * Generates OpenRPC description for given RPC functions.

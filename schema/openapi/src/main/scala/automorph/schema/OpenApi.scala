@@ -40,7 +40,7 @@ object OpenApi {
   private val defaultVersion = ""
   private val contentType = "application/json"
   private val httpStatusCodeOk = 200.toString
-  private val scaladocMarkup = "^[/\\* ]*$".r
+  private val scaladocMarkup = "^[/* ]*$".r
 
   /**
    * Generates OpenAPI description for given RPC functions.
