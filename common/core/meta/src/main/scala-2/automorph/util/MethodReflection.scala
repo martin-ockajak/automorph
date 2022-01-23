@@ -197,7 +197,7 @@ private[automorph] object MethodReflection {
   }
 
   /**
-   * Determines result type if specified type is a lambda type.
+   * Determines result type if the specified type is a lambda type.
    *
    * @param c macro context
    * @param someType some type

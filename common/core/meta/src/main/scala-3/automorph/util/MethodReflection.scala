@@ -184,21 +184,20 @@ private[automorph] object MethodReflection:
     // Returns the effect type
     else
       val effectType = resultType(ref.q)(TypeRepr.of[Effect])
-      val matchingResultType =
-        effectType.dealias match
-          case appliedEffectType: AppliedType =>
-            method.resultType.dealias match
-              case resultType: AppliedType =>
-                resultType.tycon <:< appliedEffectType.tycon
-              case _ => false
-          case _ => true
+      val matchingResultType = effectType match
+        case appliedEffectType: AppliedType =>
+          method.resultType.dealias match
+            case resultType: AppliedType =>
+              resultType.tycon <:< appliedEffectType.tycon
+            case _ => false
+        case _ => true
       if !matchingResultType then
         Left(s"Bound API method '$signature' must return the specified effect type '${effectType.show}'")
       else
         Right(method)
 
   /**
-   * Determines result type if specified type is a lambda type.
+   * Determines result type if the specified type is a lambda type.
    *
    * @param q quotation context
    * @param someType some type
