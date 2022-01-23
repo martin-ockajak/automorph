@@ -6,7 +6,7 @@ import automorph.log.MacroLogger
 import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.MethodReflection.functionToExpr
-import automorph.util.{Method, MethodReflection, Reflection}
+import automorph.util.{Method, ClassReflection, MethodReflection}
 import scala.quoted.{Expr, Quotes, Type}
 import scala.util.{Failure, Try}
 
@@ -44,7 +44,7 @@ private[automorph] object HandlerGenerator:
     system: Expr[EffectSystem[Effect]],
     api: Expr[Api]
   )(using quotes: Quotes): Expr[Seq[HandlerBinding[Node, Effect, Context]]] =
-    val ref = Reflection(quotes)
+    val ref = ClassReflection(quotes)
 
     // Detect and validate public methods in the API type
     val apiMethods = MethodReflection.apiMethods[Api, Effect](ref)
@@ -66,7 +66,7 @@ private[automorph] object HandlerGenerator:
     Effect[_]: Type,
     Context: Type,
     Api: Type
-  ](ref: Reflection)(
+  ](ref: ClassReflection)(
     method: ref.RefMethod,
     codec: Expr[Codec],
     system: Expr[EffectSystem[Effect]],
@@ -90,7 +90,7 @@ private[automorph] object HandlerGenerator:
     Effect[_]: Type,
     Context: Type,
     Api: Type
-  ](ref: Reflection)(
+  ](ref: ClassReflection)(
     method: ref.RefMethod,
     codec: Expr[Codec],
     system: Expr[EffectSystem[Effect]],
@@ -212,7 +212,7 @@ private[automorph] object HandlerGenerator:
       }
     }
 
-  private def logBoundMethod[Api: Type](ref: Reflection)(method: ref.RefMethod, invoke: Expr[Any]): Unit =
+  private def logBoundMethod[Api: Type](ref: ClassReflection)(method: ref.RefMethod, invoke: Expr[Any]): Unit =
     import ref.q.reflect.{Printer, asTerm}
 
     MacroLogger.debug(

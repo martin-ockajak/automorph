@@ -5,7 +5,7 @@ import automorph.client.ClientBinding
 import automorph.log.MacroLogger
 import automorph.spi.MessageCodec
 import automorph.util.MethodReflection.functionToExpr
-import automorph.util.{MethodReflection, Reflection}
+import automorph.util.{ClassReflection, MethodReflection}
 import scala.quoted.{Expr, Quotes, Type}
 
 /** RPC client layer bindings code generation. */
@@ -33,7 +33,7 @@ private[automorph] object ClientGenerator:
     Context: Type,
     Api <: AnyRef: Type
   ](codec: Expr[Codec])(using quotes: Quotes): Expr[Seq[ClientBinding[Node, Context]]] =
-    val ref = Reflection(quotes)
+    val ref = ClassReflection(quotes)
 
     // Detect and validate public methods in the API type
     val apiMethods = MethodReflection.apiMethods[Api, Effect](ref)
@@ -55,7 +55,7 @@ private[automorph] object ClientGenerator:
     Effect[_]: Type,
     Context: Type,
     Api: Type
-  ](ref: Reflection)(method: ref.RefMethod, codec: Expr[Codec]): Expr[ClientBinding[Node, Context]] =
+  ](ref: ClassReflection)(method: ref.RefMethod, codec: Expr[Codec]): Expr[ClientBinding[Node, Context]] =
     given Quotes = ref.q
 
     val encodeArguments = generateEncodeArguments[Node, Codec, Context](ref)(method, codec)
@@ -70,7 +70,7 @@ private[automorph] object ClientGenerator:
       )
     }
 
-  private def generateEncodeArguments[Node: Type, Codec <: MessageCodec[Node]: Type, Context: Type](ref: Reflection)(
+  private def generateEncodeArguments[Node: Type, Codec <: MessageCodec[Node]: Type, Context: Type](ref: ClassReflection)(
     method: ref.RefMethod,
     codec: Expr[Codec]
   ): Expr[Seq[Any] => Seq[Node]] =
@@ -117,7 +117,7 @@ private[automorph] object ClientGenerator:
     }
 
   private def generateDecodeResult[Node: Type, Codec <: MessageCodec[Node]: Type, Effect[_]: Type, Context: Type](
-    ref: Reflection
+    ref: ClassReflection
   )(method: ref.RefMethod, codec: Expr[Codec]): Expr[(Node, Context) => Any] =
     import ref.q.reflect.asTerm
     given Quotes = ref.q
@@ -154,7 +154,7 @@ private[automorph] object ClientGenerator:
       }
     }
 
-  private def logBoundMethod[Api: Type](ref: Reflection)(
+  private def logBoundMethod[Api: Type](ref: ClassReflection)(
     method: ref.RefMethod,
     encodeArguments: Expr[Any],
     decodeResult: Expr[Any]
