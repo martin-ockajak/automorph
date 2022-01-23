@@ -13,7 +13,7 @@ import scala.collection.immutable.ArraySeq
 trait MessageCodec[Node] extends MessageCodecMeta[Node] {
 
   /** Message format media (MIME) type. */
-  val mediaType: String
+  def mediaType: String
 
   /**
    * Serializes a node as binary data.

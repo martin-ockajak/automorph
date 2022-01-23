@@ -22,7 +22,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
   type Metadata
 
   /** Protocol name. */
-  val name: String
+  def name: String
 
   /** Message codec plugin. */
   val codec: Codec

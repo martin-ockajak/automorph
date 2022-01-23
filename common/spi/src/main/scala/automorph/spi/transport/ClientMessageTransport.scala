@@ -16,7 +16,7 @@ import scala.collection.immutable.ArraySeq
 trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
 
   /** Effect system plugin. */
-  val system: EffectSystem[Effect]
+  def system: EffectSystem[Effect]
 
   /**
    * Sends a request to a remote endpoint and retrieves the response.

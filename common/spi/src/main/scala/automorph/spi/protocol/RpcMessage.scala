@@ -9,7 +9,6 @@ import scala.collection.immutable.ArraySeq
  * @param metadata protocol-specific message metadata
  * @param body message body
  * @param properties message properties
- * @param text message in human-readable textual form
  * @tparam Metadata protocol-specific message metadata type
  */
 final case class RpcMessage[Metadata](
