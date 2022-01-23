@@ -16,7 +16,7 @@ import org.slf4j.{LoggerFactory, MDC}
 final private[automorph] case class Logger private (private val underlying: slf4j.Logger) {
 
   type Not[T] = T => Nothing
-  type Or[T, U] = Not[Not[T] with Not[U]]
+  type Or[T, U] = Not[Not[T] & Not[U]]
 
   def error[T](message: => String): Unit = underlying.error(message)
 
@@ -132,7 +132,7 @@ final private[automorph] case class Logger private (private val underlying: slf4
 
   private def unpackProperties[T](properties: => T): Iterable[(String, Any)] = properties match {
     case product: Product => productProperties(product)
-    case iterable: Iterable[_] => iterable.asInstanceOf[Iterable[(String, Any)]]
+    case iterable: Iterable[?] => iterable.asInstanceOf[Iterable[(String, Any)]]
     case _ => Iterable()
   }
 

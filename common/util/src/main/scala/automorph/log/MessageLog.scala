@@ -1,7 +1,5 @@
 package automorph.log
 
-import automorph.log.Logger
-
 /**
  * Request & response message logger.
  *

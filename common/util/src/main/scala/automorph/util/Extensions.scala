@@ -10,15 +10,13 @@ private[automorph] object Extensions {
     /**
      * Assemble detailed trace of an exception and its causes.
      *
-     * @param throwable exception
      * @return error messages
      */
-    def trace: Seq[String] = trace(100)
+    def trace: Seq[String] = trace()
 
     /**
      * Assemble detailed trace of an exception and its causes.
      *
-     * @param throwable exception
      * @param maxCauses maximum number of included exception causes
      * @return error messages
      */
@@ -65,7 +63,6 @@ private[automorph] object Extensions {
      *
      * The resulting effect cannot fail.
      *
-     * @tparam T effectful value type
      * @return effectful error or the original value
      */
     def either(implicit system: EffectSystem[Effect]): Effect[Either[Throwable, T]] =
@@ -75,7 +72,6 @@ private[automorph] object Extensions {
      * Creates a new effect by applying a function to an effect's value.
      *
      * @param function function applied to the specified effect's value
-     * @tparam T effectful value type
      * @tparam R function result type
      * @return transformed effectful value
      */
@@ -86,7 +82,6 @@ private[automorph] object Extensions {
      * Creates a new effect by applying an effectful function to an effect's value.
      *
      * @param function effectful function applied to the specified effect's value
-     * @tparam T effectful value type
      * @tparam R effectful function result type
      * @return effect containing the transformed value
      */
@@ -96,7 +91,6 @@ private[automorph] object Extensions {
     /**
      * Executes an effect asynchronously without blocking.
      *
-     * @tparam T effectful value type
      * @return nothing
      */
     def run(implicit system: EffectSystem[Effect]): Unit =

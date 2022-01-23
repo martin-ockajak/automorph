@@ -126,7 +126,7 @@ object Bytes {
       val outputStream = new ByteArrayOutputStream(length)
       val buffer = Array.ofDim[Byte](bufferSize)
       LazyList.iterate(length) { remaining =>
-        data.read(buffer, 0, Math.min(remaining, buffer.size)) match {
+        data.read(buffer, 0, Math.min(remaining, buffer.length)) match {
           case read if read >= 0 =>
             outputStream.write(buffer, 0, read)
             remaining - read
