@@ -2,7 +2,6 @@ package test
 
 import automorph.Contextual
 import automorph.spi.EffectSystem
-import test.{Enum, Record}
 
 trait SimpleApi[Effect[_]] {
 

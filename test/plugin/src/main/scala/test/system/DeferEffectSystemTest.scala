@@ -11,7 +11,7 @@ trait DeferEffectSystemTest[Effect[_]] extends EffectSystemTest[Effect] {
 
   "" - {
     system match {
-      case _: Defer[_] =>
+      case _: Defer[?] =>
         "Deferred" - {
           "Success" in {
             val outcome = system.flatMap(

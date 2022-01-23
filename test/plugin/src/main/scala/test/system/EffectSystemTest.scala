@@ -11,11 +11,11 @@ import test.base.BaseTest
  */
 trait EffectSystemTest[Effect[_]] extends BaseTest {
 
+  case class TestException(message: String) extends RuntimeException(message)
+
   val text = "test"
   val number = 0
-  val error = TestException(text)
-
-  case class TestException(message: String) extends RuntimeException(message)
+  val error: TestException = TestException(text)
 
   def system: EffectSystem[Effect]
 

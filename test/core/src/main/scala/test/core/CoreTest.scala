@@ -33,7 +33,8 @@ trait CoreTest extends BaseTest {
     call: (String, (String, String)) => Effect[String],
     tell: (String, (String, String)) => Effect[Unit]
   ) {
-    val genericClient = client.asInstanceOf[Types.ClientGenericCodec[Effect, Context]]
+    val genericClient: Types.ClientGenericCodec[Effect, Context] =
+      client.asInstanceOf[Types.ClientGenericCodec[Effect, Context]]
   }
 
   val simpleApi: SimpleApiType = SimpleApiImpl(system)
@@ -158,7 +159,7 @@ trait CoreTest extends BaseTest {
             }
             "Missing arguments" in {
               val error = intercept[InvalidRequestException] {
-                execute(api.method5(true, 0))
+                execute(api.method5(p0 = true, 0))
               }.getMessage.toLowerCase
               error.should(include("missing argument"))
               error.should(include("p2"))

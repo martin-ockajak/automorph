@@ -9,9 +9,6 @@ import test.base.BaseTest
  * Message codec test.
  *
  * Checks message serialization, deserialization and textual representation.
- *
- * @tparam Node message node type
- * @tparam ActualCodec message codec
  */
 trait MessageCodecTest extends BaseTest {
 
