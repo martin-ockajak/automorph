@@ -8,7 +8,7 @@ import scala.reflect.macros.blackbox
  * @tparam C macro context type
  * @param c macro context
  */
-final private[automorph] case class Reflection[C <: blackbox.Context](c: C) {
+final private[automorph] case class ClassReflection[C <: blackbox.Context](c: C) {
 
   // All meta-programming data types are path-dependent on the compiler-generated reflection context
   import c.universe.*

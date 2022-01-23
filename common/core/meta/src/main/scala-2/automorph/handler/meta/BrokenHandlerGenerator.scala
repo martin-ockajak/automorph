@@ -4,7 +4,7 @@ import automorph.handler.HandlerBinding
 import automorph.log.MacroLogger
 import automorph.spi.protocol.RpcFunction
 import automorph.spi.{EffectSystem, MessageCodec}
-import automorph.util.{MethodReflection, Reflection}
+import automorph.util.{MethodReflection, ClassReflection}
 import scala.annotation.nowarn
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -30,7 +30,7 @@ object BrokenHandlerGenerator {
     api: c.Expr[Api]
   )(implicit effectType: c.WeakTypeTag[Effect[?]]): c.Expr[Seq[HandlerBinding[Node, Effect, Context]]] = {
     import c.universe.Quasiquote
-    val ref = Reflection[c.type](c)
+    val ref = ClassReflection[c.type](c)
 
     // Detect and validate public methods in the API type
     val validMethods = MethodReflection.apiMethods[c.type, Api, Effect[_]](ref).map(_.getOrElse(???))
@@ -52,7 +52,7 @@ object BrokenHandlerGenerator {
     Effect[_],
     Context: ref.c.WeakTypeTag,
     Api: ref.c.WeakTypeTag
-  ](ref: Reflection[C])(
+  ](ref: ClassReflection[C])(
     method: ref.RefMethod,
     codec: ref.c.Expr[Codec],
     system: ref.c.Expr[EffectSystem[Effect]],
@@ -79,7 +79,7 @@ object BrokenHandlerGenerator {
     Effect[_],
     Context: ref.c.WeakTypeTag,
     Api
-  ](ref: Reflection[C])(
+  ](ref: ClassReflection[C])(
     method: ref.RefMethod,
     codec: ref.c.Expr[Codec],
     system: ref.c.Expr[EffectSystem[Effect]],
@@ -139,7 +139,7 @@ object BrokenHandlerGenerator {
     """)
   }
 
-  private def logBoundMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: Reflection[C])(
+  private def logBoundMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: ClassReflection[C])(
     method: ref.RefMethod,
     invoke: ref.c.Expr[Any]
   ): Unit = MacroLogger.debug(

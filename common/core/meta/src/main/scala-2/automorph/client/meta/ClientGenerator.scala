@@ -5,7 +5,7 @@ import automorph.client.ClientBinding
 import automorph.log.MacroLogger
 import automorph.spi.MessageCodec
 import automorph.spi.protocol.RpcFunction
-import automorph.util.{MethodReflection, Reflection}
+import automorph.util.{MethodReflection, ClassReflection}
 import scala.annotation.nowarn
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -38,7 +38,7 @@ object ClientGenerator {
     effectType: c.WeakTypeTag[Effect[?]]
   ): c.Expr[Seq[ClientBinding[Node, Context]]] = {
     import c.universe.Quasiquote
-    val ref = Reflection[c.type](c)
+    val ref = ClassReflection[c.type](c)
 
     // Detect and validate public methods in the API type
     val apiMethods = MethodReflection.apiMethods[c.type, Api, Effect[?]](ref)
@@ -68,7 +68,7 @@ object ClientGenerator {
     Effect[_],
     Context: ref.c.WeakTypeTag,
     Api: ref.c.WeakTypeTag
-  ](ref: Reflection[C])(
+  ](ref: ClassReflection[C])(
     method: ref.RefMethod,
     codec: ref.c.Expr[Codec]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[?]]): ref.c.Expr[ClientBinding[Node, Context]] = {
@@ -95,7 +95,7 @@ object ClientGenerator {
     Node: ref.c.WeakTypeTag,
     Codec <: MessageCodec[Node]: ref.c.WeakTypeTag,
     Context: ref.c.WeakTypeTag
-  ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[Codec]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
+  ](ref: ClassReflection[C])(method: ref.RefMethod, codec: ref.c.Expr[Codec]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
@@ -136,7 +136,7 @@ object ClientGenerator {
     Codec <: MessageCodec[Node]: ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag
-  ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[Codec])(implicit
+  ](ref: ClassReflection[C])(method: ref.RefMethod, codec: ref.c.Expr[Codec])(implicit
     effectType: ref.c.WeakTypeTag[Effect[?]]
   ): ref.c.Expr[(Node, Context) => Any] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
@@ -161,7 +161,7 @@ object ClientGenerator {
     }
   }
 
-  private def logBoundMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: Reflection[C])(
+  private def logBoundMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: ClassReflection[C])(
     method: ref.RefMethod,
     encodeArguments: ref.c.Expr[Any],
     decodeResult: ref.c.Expr[Any]

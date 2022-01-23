@@ -14,7 +14,7 @@ private[automorph] object MethodReflection {
    * @tparam C macro context type
    * @return method quoted tree converter
    */
-  def functionLiftable[C <: blackbox.Context](ref: Reflection[C]): ref.c.universe.Liftable[RpcFunction] =
+  def functionLiftable[C <: blackbox.Context](ref: ClassReflection[C]): ref.c.universe.Liftable[RpcFunction] =
     new ref.c.universe.Liftable[RpcFunction] {
 
       import ref.c.universe.{Liftable, Quasiquote, Tree}
@@ -47,7 +47,7 @@ private[automorph] object MethodReflection {
    * @return valid method descriptors or error messages by method name
    */
   def apiMethods[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
-    ref: Reflection[C]
+    ref: ClassReflection[C]
   ): Seq[Either[String, ref.RefMethod]] = {
     // Omit base data type methods
     val baseMethodNames = Seq(ref.c.weakTypeOf[AnyRef], ref.c.weakTypeOf[Product]).flatMap {
@@ -71,7 +71,7 @@ private[automorph] object MethodReflection {
    * @return true if the method accept request context as its last parameter, false otherwise
    */
   def acceptsContext[C <: blackbox.Context, Context: ref.c.WeakTypeTag](
-    ref: Reflection[C]
+    ref: ClassReflection[C]
   )(method: ref.RefMethod): Boolean =
     method.parameters.flatten.lastOption.exists { parameter =>
       parameter.contextual && parameter.dataType =:= ref.c.weakTypeOf[Context]
@@ -155,7 +155,7 @@ private[automorph] object MethodReflection {
    * @return method description
    */
   def signature[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag](
-    ref: Reflection[C]
+    ref: ClassReflection[C]
   )(method: ref.RefMethod): String =
     s"${ref.c.weakTypeOf[ApiType].typeSymbol.fullName}.${method.lift.signature}"
 
@@ -170,7 +170,7 @@ private[automorph] object MethodReflection {
    * @return valid API method or an error message
    */
   private def validateApiMethod[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
-    ref: Reflection[C]
+    ref: ClassReflection[C]
   )(method: ref.RefMethod): Either[String, ref.RefMethod] = {
     // No type parameters
     val methodSignature = signature[C, ApiType](ref)(method)
