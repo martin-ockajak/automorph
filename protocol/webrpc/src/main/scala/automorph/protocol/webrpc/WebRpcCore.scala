@@ -1,10 +1,9 @@
 package automorph.protocol.webrpc
 
-import automorph.schema.OpenApi
-import automorph.schema.openapi.{RpcSchema, Schema}
 import automorph.protocol.WebRpcProtocol
 import automorph.protocol.webrpc.Message.Request
-import automorph.protocol.webrpc.{Response, ResponseError, WebRpcException}
+import automorph.schema.OpenApi
+import automorph.schema.openapi.{RpcSchema, Schema}
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
 import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
@@ -20,7 +19,7 @@ import scala.util.{Failure, Success, Try}
  * @tparam Codec message codec plugin type
  * @tparam Context message context type
  */
-private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]] {
+private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <: HttpContext[?]] {
   this: WebRpcProtocol[Node, Codec, Context] =>
 
   /** Web-RPC message metadata. */
@@ -47,7 +46,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     Some(List("error"))
   )
 
-  override val name: String = "Web-RPC"
+  val name: String = "Web-RPC"
 
   override def createRequest(
     function: String,
@@ -91,7 +90,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
           val function = path.substring(pathPrefix.length, path.length)
           val message = RpcMessage((), requestBody, requestProperties ++ Seq("Function" -> function), messageText)
           val requestArguments = request.map(Right.apply[Node, (String, Node)]).toSeq
-          Right(RpcRequest(message, function, requestArguments, true, requestId))
+          Right(RpcRequest(message, function, requestArguments, responseRequired = true, requestId))
         } else {
           val message = RpcMessage((), requestBody, requestProperties, messageText)
           Left(RpcError(InvalidRequestException(s"Invalid URL path: $path"), message))
@@ -174,7 +173,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
    * @tparam NewContext message context type
    * @return JSON-RPC protocol
    */
-  def context[NewContext <: HttpContext[_]]: WebRpcProtocol[Node, Codec, NewContext] =
+  def context[NewContext <: HttpContext[?]]: WebRpcProtocol[Node, Codec, NewContext] =
     copy()
 
   /**

@@ -30,7 +30,7 @@ import scala.reflect.macros.blackbox
  * @tparam Codec message codec plugin type
  * @tparam Context message context type
  */
-final case class WebRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](
+final case class WebRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: HttpContext[?]](
   codec: Codec,
   pathPrefix: String,
   mapError: (String, Option[Int]) => Throwable = WebRpcProtocol.defaultMapError,
@@ -66,7 +66,7 @@ object WebRpcProtocol extends ErrorMapping {
    * @tparam Context message context type
    * @return Web-RPC protocol plugin
    */
-  def apply[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](
+  def apply[Node, Codec <: MessageCodec[Node], Context <: HttpContext[?]](
     codec: Codec,
     pathPrefix: String,
     mapError: (String, Option[Int]) => Throwable,
@@ -89,13 +89,13 @@ object WebRpcProtocol extends ErrorMapping {
    * @tparam Context message context type
    * @return Web-RPC protocol plugin
    */
-  def apply[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](
+  def apply[Node, Codec <: MessageCodec[Node], Context <: HttpContext[?]](
     codec: Codec,
     pathPrefix: String
   ): WebRpcProtocol[Node, Codec, Context] =
     macro applyDefaultsMacro[Node, Codec, Context]
 
-  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node], Context <: HttpContext[_]](c: blackbox.Context)(
+  def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node], Context <: HttpContext[?]](c: blackbox.Context)(
     codec: c.Expr[Codec],
     pathPrefix: c.Expr[String],
     mapError: c.Expr[(String, Option[Int]) => Throwable],
@@ -122,7 +122,7 @@ object WebRpcProtocol extends ErrorMapping {
     """)
   }
 
-  def applyDefaultsMacro[Node, Codec <: MessageCodec[Node], Context <: HttpContext[_]](c: blackbox.Context)(
+  def applyDefaultsMacro[Node, Codec <: MessageCodec[Node], Context <: HttpContext[?]](c: blackbox.Context)(
     codec: c.Expr[Codec],
     pathPrefix: c.Expr[String]
   ): c.Expr[WebRpcProtocol[Node, Codec, Context]] = {

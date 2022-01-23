@@ -1,6 +1,5 @@
 package automorph.protocol.jsonrpc
 
-import automorph.protocol.jsonrpc.ErrorType
 import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorException, ServerErrorException}
 import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException}
 

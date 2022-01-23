@@ -1,6 +1,5 @@
 package automorph.protocol.jsonrpc
 
-import automorph.protocol.jsonrpc.MessageError
 import automorph.protocol.jsonrpc.Response.mandatory
 
 /**

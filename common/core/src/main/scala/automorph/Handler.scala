@@ -30,7 +30,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   protocol: RpcProtocol[Node, Codec, Context],
   system: EffectSystem[Effect],
   mapName: String => Iterable[String] = Seq(_),
-  protected val apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
+  apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
     ListMap[String, HandlerBinding[Node, Effect, Context]]()
 ) extends HandlerMeta[Node, Codec, Effect, Context] with CannotEqual with Logging {
 

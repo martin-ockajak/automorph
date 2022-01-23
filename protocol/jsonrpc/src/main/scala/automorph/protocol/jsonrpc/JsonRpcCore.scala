@@ -46,7 +46,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     Some(List("error"))
   )
 
-  override val name: String = "JSON-RPC"
+  val name: String = "JSON-RPC"
 
   override def createRequest(
     function: String,

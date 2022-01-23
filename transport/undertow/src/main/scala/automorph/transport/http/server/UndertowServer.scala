@@ -4,10 +4,10 @@ import automorph.Types
 import automorph.log.Logging
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
-import automorph.transport.http.server.UndertowServer.{defaultBuilder, Context}
+import automorph.transport.http.server.UndertowServer.{Context, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
-import io.undertow.predicate.{Predicate, Predicates}
+import io.undertow.predicate.Predicates
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.{Handlers, Undertow}
