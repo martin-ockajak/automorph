@@ -8,7 +8,7 @@ import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
 /**
- * Remote function invocation.
+ * Remote function invocation proxy.
  *
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
@@ -25,7 +25,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
   def codec: Codec
 
   /**
-   * Sends a remote function invocation request with specified result type extracted from the response.
+   * Sends a remote function invocation request using specified result type extracted from the response.
    *
    * The specified request context is passed to the underlying message transport plugin.
    *
@@ -36,45 +36,45 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
   def invoke(arguments: Seq[(String, Any)], argumentNodes: Seq[Node], requestContext: Context): Effect[Result]
 
   /**
-   * Creates a copy of this function proxy with specified argument names and values.
+   * Invokes the remote function using specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
    * Effect[R] parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return function proxy
+   * @return remote function invocation result
    */
   def args()(implicit requestContext: Context): Effect[Result] =
     invoke(Seq(), Seq(), requestContext)
 
   /**
-   * Creates a copy of this function proxy with specified argument names and values.
+   * Invokes the remote function using specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
    * Effect[R] parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return function proxy
+   * @return remote function invocation result
    */
   def args[T1](p1: (String, T1))(implicit requestContext: Context): Effect[Result] =
     macro RemoteInvoke.args1Macro[Effect[Result], T1, Context]
 
   /**
-   * Creates a copy of this function proxy with specified argument names and values.
+   * Invokes the remote function using specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
    * Effect[R] parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return function proxy
+   * @return remote function invocation result
    */
   def args[T1, T2](p1: (String, T1), p2: (String, T2))(implicit requestContext: Context): Effect[Result] =
     macro RemoteInvoke.args2Macro[Effect[Result], T1, T2, Context]
 
   /**
-   * Creates a copy of this function proxy with specified argument names and values.
+   * Invokes the remote function using specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
    * Effect[R] parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return function proxy
+   * @return remote function invocation result
    */
   def args[T1, T2, T3](
     p1: (String, T1),
@@ -84,12 +84,12 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
     macro RemoteInvoke.args3Macro[Effect[Result], T1, T2, T3, Context]
 
   /**
-   * Creates a copy of this function proxy with specified argument names and values.
+   * Invokes the remote function using specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
    * Effect[R] parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return function proxy
+   * @return remote function invocation result
    */
   def args[T1, T2, T3, T4](
     p1: (String, T1),
@@ -100,12 +100,12 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
     macro RemoteInvoke.args4Macro[Effect[Result], T1, T2, T3, T4, Context]
 
   /**
-   * Creates a copy of this function proxy with specified argument names and values.
+   * Invokes the remote function using specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
    * Effect[R] parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return function proxy
+   * @return remote function invocation result
    */
   def args[T1, T2, T3, T4, T5](
     p1: (String, T1),
@@ -117,12 +117,12 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
     macro RemoteInvoke.args5Macro[Effect[Result], T1, T2, T3, T4, T5, Context]
 
   /**
-   * Creates a copy of this function proxy with specified argument names and values.
+   * Invokes the remote function using specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
    * Effect[R] parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return function proxy
+   * @return remote function invocation result
    */
   def args[T1, T2, T3, T4, T5, T6](
     p1: (String, T1),
@@ -135,12 +135,12 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
     macro RemoteInvoke.args6Macro[Effect[Result], T1, T2, T3, T4, T5, T6, Context]
 
   /**
-   * Creates a copy of this function proxy with specified argument names and values.
+   * Invokes the remote function using specified argument names and values.
    *
    * Parameters 'p1', 'p2' ... 'pN' represent function argument values.
    * Effect[R] parameters 'T1', 'T2' ... 'TN' represent function parameter types.
    *
-   * @return function proxy
+   * @return remote function invocation result
    */
   def args[T1, T2, T3, T4, T5, T6, T7](
     p1: (String, T1),

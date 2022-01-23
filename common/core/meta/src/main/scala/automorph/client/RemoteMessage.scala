@@ -3,7 +3,7 @@ package automorph.client
 import automorph.spi.MessageCodec
 
 /**
- * Remote function message.
+ * Remote function one-way message proxy.
  *
  * @constructor Creates a new one-way remote function message with specified RPC function name.
  * @param functionName RPC function name.

@@ -43,11 +43,11 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   /**
    * Prepares an one-way remote API function message.
    *
-   * RPC function name and call arguments are used to send an RPC request
+   * The remote function name and arguments are used to send an RPC request
    * without expecting to receive a response.
    *
-   * @param function RPC function name
-   * @return RPC function notification proxy with specified function name
+   * @param function remote function name
+   * @return specified remote function one-way message proxy
    */
   def message(function: String): RemoteMessage[Node, Codec, Effect, Context] =
     RemoteMessage(function, protocol.codec, sendMessage)

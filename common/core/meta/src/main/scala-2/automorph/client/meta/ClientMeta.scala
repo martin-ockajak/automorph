@@ -39,7 +39,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
     macro ClientMeta.bindMacro[Node, Codec, Effect, Context, Api]
 
   /**
-   * Creates a RPC API proxy instance with RPC bindings for all valid public functions of the specified API type.
+   * Creates a remote API proxy instance with RPC bindings for all valid public functions of the specified API type.
    *
    * An API function is considered valid if it satisfies all of these conditions:
    * - can be called at runtime
@@ -53,8 +53,8 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * RPC functions represented by bound API methods are invoked using their names transformed via the `mapName` function.
    *
    * @param mapName maps API method name to the invoked RPC function name
-   * @tparam Api API trait type (classes are not supported)
-   * @return RPC API proxy instance
+   * @tparam Api remote API trait type (classes are not supported)
+   * @return remote API proxy instance
    * @throws java.lang.IllegalArgumentException if invalid public functions are found in the API type
    */
   def bind[Api <: AnyRef](mapName: String => String): Api =
@@ -63,12 +63,12 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
   /**
    * Prepares a remote API function call.
    *
-   * RPC function name and call arguments are used to form an RPC request and
-   * the corresponding RPC response is interpreted as a return value or an exception.
+   * Uses the remote function name and arguments to send an RPC request and
+   * extracts a result value or an error from the received RPC response.
    *
-   * @param function RPC function name
+   * @param function remote function name
    * @tparam Result result type
-   * @return RPC function call proxy with specified function name
+   * @return specified remote function call proxy
    */
   def call[Result](function: String): RemoteCall[Node, Codec, Effect, Context, Result] =
     macro ClientMeta.callMacro[Node, Codec, Effect, Context, Result]
