@@ -7,7 +7,7 @@ import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
-import automorph.util.{CannotEqual, Random}
+import automorph.util.Random
 import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.util.Try
 
@@ -27,7 +27,7 @@ import scala.util.Try
 final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   protocol: RpcProtocol[Node, Codec, Context],
   transport: ClientMessageTransport[Effect, Context]
-) extends ClientMeta[Node, Codec, Effect, Context] with CannotEqual with Logging {
+) extends ClientMeta[Node, Codec, Effect, Context] with Logging {
 
   protected val system: EffectSystem[Effect] = transport.system
   implicit private val givenSystem: EffectSystem[Effect] = transport.system

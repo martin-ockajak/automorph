@@ -7,7 +7,7 @@ import automorph.spi.RpcProtocol.FunctionNotFoundException
 import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
-import automorph.util.{Bytes, CannotEqual}
+import automorph.util.Bytes
 import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 
@@ -32,7 +32,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   mapName: String => Iterable[String] = Seq(_),
   apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
     ListMap[String, HandlerBinding[Node, Effect, Context]]()
-) extends HandlerMeta[Node, Codec, Effect, Context] with CannotEqual with Logging {
+) extends HandlerMeta[Node, Codec, Effect, Context] with Logging {
 
   private val bindings = (schemaBindings ++ apiBindings).flatMap { case (name, binding) =>
     mapName(name).map(_ -> binding)

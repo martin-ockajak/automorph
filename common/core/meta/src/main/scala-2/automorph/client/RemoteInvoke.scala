@@ -2,7 +2,6 @@ package automorph.client
 
 import automorph.reflection.MethodReflection
 import automorph.spi.MessageCodec
-import automorph.util.CannotEqual
 import automorph.Contextual
 import scala.annotation.nowarn
 import scala.language.experimental.macros
@@ -17,7 +16,7 @@ import scala.reflect.macros.blackbox
  * @tparam Context message context type
  * @tparam Result result type
  */
-private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[_], Context, Result] extends CannotEqual {
+private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[_], Context, Result] {
 
   /** RPC function name. */
   def functionName: String
