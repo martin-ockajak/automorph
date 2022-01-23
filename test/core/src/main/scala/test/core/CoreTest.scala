@@ -1,6 +1,6 @@
 package test.core
 
-import automorph.{Contextual, Types}
+import automorph.Types
 import automorph.spi.EffectSystem
 import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException, InvalidResponseException}
 import org.scalacheck.Arbitrary
@@ -33,6 +33,7 @@ trait CoreTest extends BaseTest {
     call: (String, (String, String)) => Effect[String],
     tell: (String, (String, String)) => Effect[Unit]
   ) {
+
     val genericClient: Types.ClientGenericCodec[Effect, Context] =
       client.asInstanceOf[Types.ClientGenericCodec[Effect, Context]]
   }
@@ -59,62 +60,58 @@ trait CoreTest extends BaseTest {
             val apis = (fixture.simpleApi, simpleApi)
             "test" in {
               check { (a0: String) =>
-                consistent(apis, (api: SimpleApiType) => api.test(a0))
+                consistent(apis)(_.test(a0))
               }
             }
           }
           "Complex API" - {
             val apis = (fixture.complexApi, complexApi)
             "method0" in {
-              check((_: Unit) => consistent(apis, (api: ComplexApiType) => api.method0()))
+              check((_: Unit) => consistent(apis)(_.method0()))
             }
             "method1" in {
               check { (_: Unit) =>
-                consistent(apis, (api: ComplexApiType) => api.method1())
+                consistent(apis)(_.method1())
               }
             }
             "method2" in {
               check { (a0: String) =>
-                consistent(apis, (api: ComplexApiType) => api.method2(a0))
+                consistent(apis)(_.method2(a0))
               }
             }
             "method3" in {
               check { (a0: Float, a1: Long, a2: Option[List[Int]]) =>
-                consistent(apis, (api: ComplexApiType) => api.method3(a0, a1, a2))
+                consistent(apis)(_.method3(a0, a1, a2))
               }
             }
             "method4" in {
               check { (a0: Double, a1: Byte, a2: Map[String, Int], a3: Option[String]) =>
-                consistent(apis, (api: ComplexApiType) => api.method4(BigDecimal(a0), a1, a2, a3))
+                consistent(apis)(_.method4(BigDecimal(a0), a1, a2, a3))
               }
             }
             "method5" in {
               check { (a0: Boolean, a1: Short, a2: List[Int]) =>
-                consistent(apis, (api: ComplexApiType) => api.method5(a0, a1)(a2))
+                consistent(apis)(_.method5(a0, a1)(a2))
               }
             }
             "method6" in {
               check { (a0: Record, a1: Double) =>
-                consistent(apis, (api: ComplexApiType) => api.method6(a0, a1))
+                consistent(apis)(_.method6(a0, a1))
               }
             }
             "method7" in {
               check { (a0: Record, a1: Boolean, context: Context) =>
                 implicit val usingContext: Context = context
-                consistent(apis, (api: ComplexApiType) => api.method7(a0, a1))
+                consistent(apis)(_.method7(a0, a1))
               }
             }
             "method8" in {
               check { (a0: Record, a1: String, a2: Option[Double]) =>
-                consistent(
-                  apis,
-                  (api: ComplexApiType) =>
-                    system.map(
-                      api.method8(a0, a1, a2),
-                      (result: Contextual[String, Context]) =>
-                        s"${result.result} - ${result.context.getClass.getName}"
-                    )
-                )
+                consistent(apis) { api =>
+                  system.map(api.method8(a0, a1, a2)) { result =>
+                    s"${result.result} - ${result.context.getClass.getName}"
+                  }
+                }
               }
             }
             "method9" in {
@@ -199,7 +196,7 @@ trait CoreTest extends BaseTest {
         throw error
     }
 
-  private def consistent[Api, Result](apis: (Api, Api), function: Api => Effect[Result]): Boolean =
+  private def consistent[Api, Result](apis: (Api, Api))(function: Api => Effect[Result]): Boolean =
     Try {
       val (testedApi, referenceApi) = apis
       val result = execute(function(testedApi))

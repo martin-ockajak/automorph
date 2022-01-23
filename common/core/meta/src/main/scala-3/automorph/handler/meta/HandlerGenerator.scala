@@ -201,7 +201,7 @@ private[automorph] object HandlerGenerator:
 
         // Create the effect mapping call using the method call and the encode result function
         //   system.map(apiMethodCall, encodeResult): Effect[(Node, Option[Context])]
-        val mapArguments = List(List(apiMethodCall, encodeResult.asTerm))
+        val mapArguments = List(List(apiMethodCall), List(encodeResult.asTerm))
         MethodReflection.call(
           ref.q,
           system.asTerm,

@@ -14,21 +14,15 @@ trait DeferEffectSystemTest[Effect[_]] extends EffectSystemTest[Effect] {
       case _: Defer[?] =>
         "Deferred" - {
           "Success" in {
-            val outcome = system.flatMap(
-              system.asInstanceOf[Defer[Effect]].deferred[String],
-              (deferred: Deferred[Effect, String]) => {
-                system.flatMap(deferred.succeed(text), (_: Unit) => deferred.effect)
-              }
-            )
+            val outcome = system.flatMap(system.asInstanceOf[Defer[Effect]].deferred[String]) { deferred =>
+              system.flatMap(deferred.succeed(text))(_ => deferred.effect)
+            }
             execute(outcome).should(equal(Right(text)))
           }
           "Failure" in {
-            val outcome = system.flatMap(
-              system.asInstanceOf[Defer[Effect]].deferred[String],
-              (deferred: Deferred[Effect, String]) => {
-                system.flatMap(deferred.fail(error), (_: Unit) => deferred.effect)
-              }
-            )
+            val outcome = system.flatMap(system.asInstanceOf[Defer[Effect]].deferred[String]) { deferred =>
+              system.flatMap(deferred.fail(error))(_ => deferred.effect)
+            }
             execute(outcome).should(equal(Left(error)))
           }
         }

@@ -76,7 +76,7 @@ private[automorph] object Extensions {
      * @return transformed effectful value
      */
     def map[R](function: T => R)(implicit system: EffectSystem[Effect]): Effect[R] =
-      system.map(effect, function)
+      system.map(effect)(function)
 
     /**
      * Creates a new effect by applying an effectful function to an effect's value.
@@ -86,7 +86,7 @@ private[automorph] object Extensions {
      * @return effect containing the transformed value
      */
     def flatMap[R](function: T => Effect[R])(implicit system: EffectSystem[Effect]): Effect[R] =
-      system.flatMap(effect, function)
+      system.flatMap(effect)(function)
 
     /**
      * Executes an effect asynchronously without blocking.

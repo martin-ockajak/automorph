@@ -58,7 +58,7 @@ trait EffectSystem[Effect[_]] {
    * @tparam R effectful function result type
    * @return effect containing the transformed value
    */
-  def flatMap[T, R](effect: Effect[T], function: T => Effect[R]): Effect[R]
+  def flatMap[T, R](effect: Effect[T])(function: T => Effect[R]): Effect[R]
 
   /**
    * Creates a new effect by applying a function to an effect's value.
@@ -69,8 +69,8 @@ trait EffectSystem[Effect[_]] {
    * @tparam R function result type
    * @return transformed effectful value
    */
-  def map[T, R](effect: Effect[T], function: T => R): Effect[R] =
-    flatMap(effect, (value: T) => pure(function(value)))
+  def map[T, R](effect: Effect[T])(function: T => R): Effect[R] =
+    flatMap(effect)(value => pure(function(value)))
 
   /**
    * Executes an effect asynchronously without blocking.

@@ -12,7 +12,7 @@ import automorph.spi.protocol.RpcFunction
  * @tparam Effect effect type
  * @tparam Context message context type
  */
-final private[automorph] case class HandlerBinding[Node, Effect[_], Context](
+final case class HandlerBinding[Node, Effect[_], Context](
   function: RpcFunction,
   invoke: (Seq[Option[Node]], Context) => Effect[(Node, Option[Context])],
   acceptsContext: Boolean

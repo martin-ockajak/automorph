@@ -29,7 +29,7 @@ final case class FutureSystem()(
   override def either[T](effect: => Future[T]): Future[Either[Throwable, T]] =
     effect.transform(value => Success(value.toEither))
 
-  override def flatMap[T, R](effect: Future[T], function: T => Future[R]): Future[R] =
+  override def flatMap[T, R](effect: Future[T])(function: T => Future[R]): Future[R] =
     effect.flatMap(function)
 
   override def run[T](effect: Future[T]): Unit =

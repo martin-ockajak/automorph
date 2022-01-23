@@ -46,11 +46,11 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
     }
     "Map" - {
       "Success" in {
-        val outcome = system.map(system.pure(text), (result: String) => s"$result$number")
+        val outcome = system.map(system.pure(text))(result => s"$result$number")
         execute(outcome).should(equal(Right(s"$text$number")))
       }
       "Failure" in {
-        Try(system.map(system.failed(error), (_: Unit) => ())) match {
+        Try(system.map(system.failed(error))(_ => ())) match {
           case Success(outcome) => execute(outcome).should(equal(Left(error)))
           case Failure(error) => error.should(equal(error))
         }
@@ -58,11 +58,11 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
     }
     "Flatmap" - {
       "Success" in {
-        val outcome = system.flatMap(system.pure(text), (result: String) => system.pure(s"$result$number"))
+        val outcome = system.flatMap(system.pure(text))(result => system.pure(s"$result$number"))
         execute(outcome).should(equal(Right(s"$text$number")))
       }
       "Failure" in {
-        Try(system.flatMap(system.failed(error), (_: Unit) => system.pure(()))) match {
+        Try(system.flatMap(system.failed(error))(_ => system.pure(()))) match {
           case Success(outcome) => execute(outcome).should(equal(Left(error)))
           case Failure(error) => error.should(equal(error))
         }

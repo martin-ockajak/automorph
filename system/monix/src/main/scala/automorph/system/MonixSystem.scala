@@ -30,39 +30,33 @@ final case class MonixSystem()(
   override def either[T](effect: => Task[T]): Task[Either[Throwable, T]] =
     effect.attempt
 
-  override def flatMap[T, R](effect: Task[T], function: T => Task[R]): Task[R] =
+  override def flatMap[T, R](effect: Task[T])(function: T => Task[R]): Task[R] =
     effect.flatMap(function)
 
   override def run[T](effect: Task[T]): Unit =
     effect.runAsyncAndForget
 
   override def deferred[T]: Task[Deferred[Task, T]] =
-    map(
-      MVar.empty[Task, Either[Throwable, T]](),
-      (mVar: MVar[Task, Either[Throwable, T]]) =>
-        Deferred(
-          mVar.read.flatMap {
-            case Right(result) => pure(result)
-            case Left(error) => failed(error)
+    map(MVar.empty[Task, Either[Throwable, T]]()) { mVar =>
+      Deferred(
+        mVar.read.flatMap {
+          case Right(result) => pure(result)
+          case Left(error) => failed(error)
+        },
+        result =>
+          flatMap(mVar.tryPut(Right(result))) { success =>
+            Option.when(success)(pure(())).getOrElse {
+              failed(new IllegalStateException("Deferred effect already resolved"))
+            }
           },
-          result =>
-            flatMap(
-              mVar.tryPut(Right(result)),
-              (success: Boolean) =>
-                Option.when(success)(pure(())).getOrElse {
-                  failed(new IllegalStateException("Deferred effect already resolved"))
-                }
-            ),
-          error =>
-            flatMap(
-              mVar.tryPut(Left(error)),
-              (success: Boolean) =>
-                Option.when(success)(pure(())).getOrElse {
-                  failed(new IllegalStateException("Deferred effect already resolved"))
-                }
-            )
-        )
-    )
+        error =>
+          flatMap(mVar.tryPut(Left(error))) { success =>
+            Option.when(success)(pure(())).getOrElse {
+              failed(new IllegalStateException("Deferred effect already resolved"))
+            }
+          }
+      )
+    }
 }
 
 object MonixSystem {

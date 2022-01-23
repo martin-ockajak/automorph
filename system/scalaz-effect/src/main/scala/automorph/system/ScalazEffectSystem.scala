@@ -28,7 +28,7 @@ final case class ScalazEffectSystem()(
   override def either[T](effect: => IO[T]): IO[Either[Throwable, T]] =
     effect.catchLeft.map(_.toEither)
 
-  override def flatMap[T, R](effect: IO[T], function: T => IO[R]): IO[R] =
+  override def flatMap[T, R](effect: IO[T])(function: T => IO[R]): IO[R] =
     effect.flatMap(function)
 
   override def run[T](effect: IO[T]): Unit = {

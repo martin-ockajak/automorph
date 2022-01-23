@@ -30,26 +30,23 @@ final case class ZioSystem[Environment]()(
   override def either[T](effect: => RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] =
     effect.either
 
-  override def flatMap[T, R](effect: RIO[Environment, T], function: T => RIO[Environment, R]): RIO[Environment, R] =
+  override def flatMap[T, R](effect: RIO[Environment, T])(function: T => RIO[Environment, R]): RIO[Environment, R] =
     effect.flatMap(function)
 
   override def run[T](effect: RIO[Environment, T]): Unit =
     runtime.unsafeRunAsync(effect)(_ => ())
 
   override def deferred[T]: RIO[Environment, Deferred[({ type Effect[A] = RIO[Environment, A] })#Effect, T]] =
-    map(
-      ZQueue.dropping[Either[Throwable, T]](1),
-      (queue: Queue[Either[Throwable, T]]) => {
-        Deferred(
-          queue.take.flatMap {
-            case Right(result) => pure(result)
-            case Left(error) => failed(error)
-          },
-          result => map(queue.offer(Right(result)), (_: Boolean) => ()),
-          error => map(queue.offer(Left(error)), (_: Boolean) => ())
-        )
-      }
-    )
+    map(ZQueue.dropping[Either[Throwable, T]](1)) { queue =>
+      Deferred(
+        queue.take.flatMap {
+          case Right(result) => pure(result)
+          case Left(error) => failed(error)
+        },
+        result => map(queue.offer(Right(result)))(_ => ()),
+        error => map(queue.offer(Left(error)))(_ => ())
+      )
+    }
 }
 
 object ZioSystem {

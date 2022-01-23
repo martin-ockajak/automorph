@@ -181,7 +181,7 @@ object HandlerGenerator {
 
       // Create the effect mapping call using the method call and the encode result function
       //   system.map(apiMethodCall, encodeResult): Effect[(Node, Option[Context])]
-      q"$system.map($apiMethodCall, $encodeResult)"
+      q"$system.map($apiMethodCall)($encodeResult)"
     }
     """)
   }

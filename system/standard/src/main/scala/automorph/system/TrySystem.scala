@@ -24,7 +24,7 @@ final case class TrySystem() extends EffectSystem[Try] {
   override def either[T](effect: => Try[T]): Try[Either[Throwable, T]] =
     Success(effect.toEither)
 
-  override def flatMap[T, R](effect: Try[T], function: T => Try[R]): Try[R] =
+  override def flatMap[T, R](effect: Try[T])(function: T => Try[R]): Try[R] =
     effect.flatMap(function)
 
   override def run[T](effect: Try[T]): Unit =
