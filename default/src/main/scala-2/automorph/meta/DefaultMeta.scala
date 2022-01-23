@@ -45,7 +45,7 @@ private[automorph] trait DefaultMeta {
       codec,
       JsonRpcProtocol.defaultMapError,
       JsonRpcProtocol.defaultMapException,
-      true,
+      namedArguments = true,
       identity,
       identity
     )

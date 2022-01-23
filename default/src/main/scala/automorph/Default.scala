@@ -200,7 +200,6 @@ object Default extends DefaultMeta {
    * @param system effect system plugin
    * @param url HTTP endpoint URL
    * @param method HTTP request method
-   * @param webSocket upgrade HTTP connections to use WebSocket protocol if true, use HTTP if false
    * @tparam Effect effect type
    * @return RPC client
    */
