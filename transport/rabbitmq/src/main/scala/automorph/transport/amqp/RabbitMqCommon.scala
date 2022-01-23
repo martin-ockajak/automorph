@@ -2,7 +2,6 @@ package automorph.transport.amqp
 
 import automorph.log.{LogProperties, Logging}
 import automorph.transport.amqp.client.RabbitMqClient.Context
-import automorph.util.Extensions.TryOps
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{AMQP, Address, BuiltinExchangeType, Channel, Connection, ConnectionFactory, DefaultConsumer}
 import java.io.IOException

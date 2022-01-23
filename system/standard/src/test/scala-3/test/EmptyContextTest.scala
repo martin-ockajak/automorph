@@ -2,9 +2,9 @@ package test
 
 import automorph.codec.json.CirceJsonCodec
 import automorph.protocol.JsonRpcProtocol
+import automorph.reflection.EmptyContext
 import automorph.system.IdentitySystem
 import automorph.transport.local.client.HandlerTransport
-import automorph.util.EmptyContext
 import automorph.{Client, Handler}
 import test.base.BaseTest
 

@@ -3,9 +3,9 @@ package automorph.client.meta
 import automorph.Contextual
 import automorph.client.ClientBinding
 import automorph.log.MacroLogger
+import automorph.reflection.{ClassReflection, MethodReflection}
 import automorph.spi.MessageCodec
 import automorph.spi.protocol.RpcFunction
-import automorph.util.{MethodReflection, ClassReflection}
 import scala.annotation.nowarn
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox

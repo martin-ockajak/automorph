@@ -6,8 +6,6 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.RpcProtocol.FunctionNotFoundException
 import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
-import automorph.util.Extensions.{EffectOps, TryOps}
-import automorph.util.{Bytes, CannotEqual}
 import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 

@@ -2,7 +2,6 @@ package automorph.client
 
 import automorph.spi.MessageCodec
 import automorph.Contextual
-import automorph.util.{CannotEqual, MethodReflection}
 import scala.quoted.{Expr, Quotes, Type}
 
 /**

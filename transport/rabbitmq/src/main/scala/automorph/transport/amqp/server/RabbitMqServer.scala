@@ -6,8 +6,6 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.amqp.server.RabbitMqServer.Context
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
-import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
-import automorph.util.Bytes
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI

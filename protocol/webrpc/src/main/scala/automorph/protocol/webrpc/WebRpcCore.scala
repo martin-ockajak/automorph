@@ -8,7 +8,6 @@ import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
 import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.transport.http.{HttpContext, HttpMethod}
-import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
 

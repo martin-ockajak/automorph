@@ -7,7 +7,6 @@ import automorph.protocol.jsonrpc.ErrorType.ParseErrorException
 import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
-import automorph.util.Extensions.{ThrowableOps, TryOps}
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
 

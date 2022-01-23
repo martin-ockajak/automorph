@@ -2,7 +2,6 @@ package automorph.util
 
 import automorph.Contextual
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
-import automorph.util.Reflection
 import scala.quoted.{quotes, Expr, Quotes, ToExpr, Type}
 
 /** Method introspection. */

@@ -2,7 +2,6 @@ package automorph.transport.http.server
 
 import automorph.spi.EffectSystem
 import automorph.transport.http.server.NanoHTTPD.AsyncRunner
-import automorph.util.Extensions.EffectOps
 import scala.collection.concurrent.TrieMap
 
 final case class AsyncEffectRunner[Effect[_]](

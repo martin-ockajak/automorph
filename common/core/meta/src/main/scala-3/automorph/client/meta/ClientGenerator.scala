@@ -4,8 +4,6 @@ import automorph.Contextual
 import automorph.client.ClientBinding
 import automorph.log.MacroLogger
 import automorph.spi.MessageCodec
-import automorph.util.MethodReflection.functionToExpr
-import automorph.util.{MethodReflection, Reflection}
 import scala.quoted.{Expr, Quotes, Type}
 
 /** RPC client layer bindings code generation. */
