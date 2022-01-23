@@ -28,7 +28,7 @@
 //    port: Int
 //  ): ServerMessageTransport[Effect] = new ServerMessageTransport[Effect] {
 //    private val server = {
-//      val endpoint = RapidoidHttpEndpoint(handler)
+//      val endpoint = AkkaHttpEndpoint(handler)
 //      val app = new App()
 //      On.port(port)
 //      On.req(endpoint).port(port)
