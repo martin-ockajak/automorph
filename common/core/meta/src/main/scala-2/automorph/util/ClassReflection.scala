@@ -1,4 +1,4 @@
-package automorph.reflection
+package automorph.util
 
 import scala.reflect.macros.blackbox
 

@@ -6,6 +6,8 @@ import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Session}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
+import automorph.util.Bytes
+import automorph.util.Extensions.{EffectOps, TryOps}
 import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.net.http.HttpClient.Builder

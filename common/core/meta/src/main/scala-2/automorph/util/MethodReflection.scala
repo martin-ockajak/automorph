@@ -1,4 +1,4 @@
-package automorph.reflection
+package automorph.util
 
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
 import scala.annotation.nowarn

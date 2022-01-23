@@ -6,6 +6,8 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
+import automorph.util.Extensions.{EffectOps, ThrowableOps}
+import automorph.util.{Bytes, Network, Random}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.Headers
 import io.undertow.websockets.core.{AbstractReceiveListener, BufferedBinaryMessage, BufferedTextMessage, WebSocketCallback, WebSocketChannel, WebSockets}

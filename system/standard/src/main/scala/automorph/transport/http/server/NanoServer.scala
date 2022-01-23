@@ -10,6 +10,8 @@ import automorph.transport.http.server.NanoServer.{Context, Execute}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
+import automorph.util.Extensions.{EffectOps, ThrowableOps}
+import automorph.util.{Bytes, Network, Random}
 import java.io.IOException
 import java.net.URI
 import scala.collection.immutable.{ArraySeq, ListMap}

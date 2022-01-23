@@ -6,6 +6,8 @@ import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.JettyClient.{Context, Session, defaultClient}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
+import automorph.util.Bytes
+import automorph.util.Extensions.{EffectOps, TryOps}
 import java.net.URI
 import java.util
 import java.util.concurrent.{CompletableFuture, TimeUnit}

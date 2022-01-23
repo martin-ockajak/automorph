@@ -6,6 +6,8 @@ import automorph.log.{LogProperties, Logging}
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
+import automorph.util.Extensions.{EffectOps, TryOps}
+import automorph.util.{CannotEqual, Random}
 import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.util.Try
 

@@ -1,8 +1,8 @@
 package automorph.client
 
 import automorph.spi.MessageCodec
+import automorph.util.{CannotEqual, MethodReflection}
 import automorph.Contextual
-import automorph.reflection.MethodReflection
 import scala.annotation.nowarn
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox

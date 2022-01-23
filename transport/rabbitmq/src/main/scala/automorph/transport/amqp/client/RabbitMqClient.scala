@@ -6,6 +6,8 @@ import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
+import automorph.util.Bytes
+import automorph.util.Extensions.{EffectOps, TryOps}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
