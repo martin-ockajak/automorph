@@ -146,7 +146,7 @@ private[automorph] object ClientGenerator:
           MethodReflection.call(
             ref.q,
             codec.asTerm,
-            "decode",
+            MessageCodec.decodeMethod,
             List(resultType),
             List(List('{ resultNode }.asTerm))
           ).asExprOf[Any]
