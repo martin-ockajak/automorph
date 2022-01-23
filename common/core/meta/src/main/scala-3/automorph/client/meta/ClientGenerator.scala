@@ -102,7 +102,7 @@ private[automorph] object ClientGenerator:
               MethodReflection.call(
                 ref.q,
                 codec.asTerm,
-                "encode",
+                MessageCodec.encodeMethod,
                 List(parameter.dataType),
                 List(List(argument.asTerm))
               )
@@ -132,7 +132,7 @@ private[automorph] object ClientGenerator:
             MethodReflection.call(
               ref.q,
               codec.asTerm,
-              "decode",
+              MessageCodec.decodeMethod,
               List(contextualResultType),
               List(List('{ resultNode }.asTerm))
             ).asExprOf[Any]

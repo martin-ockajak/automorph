@@ -363,7 +363,7 @@ object RemoteInvoke {
     val resultType = weakTypeOf[Result]
     val nodeType = weakTypeOf[Node]
     val contextType = weakTypeOf[Context]
-    MethodReflection.contextualResult[c.type, Context, Contextual[_, _]](c)(resultType)
+    MethodReflection.contextualResult[c.type, Context, Contextual[?, ?]](c)(resultType)
       .map { contextualResultType =>
         c.Expr[(Node, Context) => Result](q"""
           (resultNode: $nodeType, responseContext: $contextType) => Contextual(

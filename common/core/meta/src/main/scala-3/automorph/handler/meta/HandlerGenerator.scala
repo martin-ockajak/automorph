@@ -110,7 +110,7 @@ private[automorph] object HandlerGenerator:
     val encodeNoneCall = MethodReflection.call(
       ref.q,
       codec.asTerm,
-      "encode",
+      MessageCodec.encodeMethod,
       List(TypeRepr.of[None.type]),
       encodeNoneArguments
     )
@@ -143,7 +143,7 @@ private[automorph] object HandlerGenerator:
               val decodeCall = MethodReflection.call(
                 ref.q,
                 codec.asTerm,
-                "decode",
+                MessageCodec.decodeMethod,
                 List(parameter.dataType),
                 decodeArguments
               )
@@ -178,7 +178,7 @@ private[automorph] object HandlerGenerator:
                     MethodReflection.call(
                       ref.q,
                       codec.asTerm,
-                      "encode",
+                      MessageCodec.encodeMethod,
                       List(contextualResultType),
                       List(List('{ result.result }.asTerm))
                     ).asExprOf[Node]
@@ -191,7 +191,7 @@ private[automorph] object HandlerGenerator:
                     MethodReflection.call(
                       ref.q,
                       codec.asTerm,
-                      "encode",
+                      MessageCodec.encodeMethod,
                       List(resultType),
                       List(List('{ result }.asTerm))
                     ).asExprOf[Node]

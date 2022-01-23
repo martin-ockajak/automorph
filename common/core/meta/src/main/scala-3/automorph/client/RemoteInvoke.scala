@@ -233,7 +233,7 @@ object RemoteInvoke:
                 MethodReflection.call(
                   quotes,
                   codec.asTerm,
-                  "decode",
+                  MessageCodec.decodeMethod,
                   List(contextualResultType),
                   List(List('{ resultNode }.asTerm))
                 ).asExprOf[resultValueType]
@@ -247,7 +247,7 @@ object RemoteInvoke:
           MethodReflection.call(
             quotes,
             codec.asTerm,
-            "decode",
+            MessageCodec.decodeMethod,
             List(resultType),
             List(List('{ resultNode }.asTerm))
           ).asExprOf[R]
