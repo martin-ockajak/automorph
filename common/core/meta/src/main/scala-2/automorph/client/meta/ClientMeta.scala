@@ -61,7 +61,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
     macro ClientMeta.bindMapNamesMacro[Node, Codec, Effect, Context, Api]
 
   /**
-   * Prepares a remote API function call.
+   * Creates a remote API function call proxy.
    *
    * Uses the remote function name and arguments to send an RPC request and
    * extracts a result value or an error from the received RPC response.

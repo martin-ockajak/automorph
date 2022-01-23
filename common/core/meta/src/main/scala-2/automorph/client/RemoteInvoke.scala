@@ -18,7 +18,7 @@ import scala.reflect.macros.blackbox
  */
 private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[_], Context, Result] {
 
-  /** RPC function name. */
+  /** Remote function name. */
   def functionName: String
 
   /** Message codec plugin. */

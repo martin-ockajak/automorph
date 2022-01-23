@@ -41,7 +41,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     transport.defaultContext
 
   /**
-   * Prepares an one-way remote API function message.
+   * Creates an one-way remote API function message proxy.
    *
    * The remote function name and arguments are used to send an RPC request
    * without expecting to receive a response.

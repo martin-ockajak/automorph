@@ -5,8 +5,8 @@ import automorph.spi.MessageCodec
 /**
  * Remote function one-way message proxy.
  *
- * @constructor Creates a new one-way remote function message with specified RPC function name.
- * @param functionName RPC function name.
+ * @constructor Creates a new remote function one-way message proxy.
+ * @param functionName remote function name.
  * @param codec message codec plugin
  * @tparam Node message node type
  * @tparam Codec message codec plugin type

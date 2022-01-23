@@ -3,10 +3,10 @@ package automorph.client
 import automorph.spi.MessageCodec
 
 /**
- * Remote function call.
+ * Remote function call proxy.
  *
- * @constructor Creates a new remote function call with specified RPC function name.
- * @param functionName RPC function name.
+ * @constructor Creates a new remote function call proxy.
+ * @param functionName remote function name
  * @param codec message codec plugin
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
@@ -31,9 +31,9 @@ final case class RemoteCall[Node, Codec <: MessageCodec[Node], Effect[_], Contex
 object RemoteCall:
 
   /**
-   * Creates a new remote function call with specified RPC function name.
+   * Creates a new remote function call proxy.
    *
-   * @param functionName RPC function name
+   * @param functionName remote function name
    * @param codec message codec plugin
    * @param peformCall performs an RPC call using specified arguments
    * @tparam Node message node type
