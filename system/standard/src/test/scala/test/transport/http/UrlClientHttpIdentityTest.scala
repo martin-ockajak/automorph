@@ -10,7 +10,6 @@ import automorph.transport.http.server.NanoServer
 import java.net.URI
 import org.scalacheck.Arbitrary
 import test.core.ClientServerTest
-import test.transport.http.HttpContextGenerator
 
 class UrlClientHttpIdentityTest extends ClientServerTest {
 

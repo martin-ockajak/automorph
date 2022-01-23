@@ -10,7 +10,6 @@ import java.net.URI
 import org.scalacheck.Arbitrary
 import scala.util.Try
 import test.core.ClientServerTest
-import test.transport.http.HttpContextGenerator
 
 class UrlClientHttpTryTest extends ClientServerTest {
 
