@@ -27,8 +27,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    *
    * The specified request context is passed to the underlying message transport plugin.
    *
-   * @param argumentNames argument names
-   * @param argumentNodes function argument nodes
+   * @param arguments argument names and values
    * @param requestContext request context
    * @return result value
    */
