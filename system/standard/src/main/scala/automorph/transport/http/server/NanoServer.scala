@@ -4,9 +4,8 @@ import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.ServerMessageTransport
-import automorph.transport.http.server.NanoHTTPD
 import automorph.transport.http.server.NanoHTTPD.Response.Status
-import automorph.transport.http.server.NanoHTTPD.{newFixedLengthResponse, IHTTPSession, Response}
+import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.transport.http.server.NanoServer.{Context, Execute}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
@@ -19,7 +18,7 @@ import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.jdk.CollectionConverters.MapHasAsScala
 
 /**
- * NanoHTTPD HTTP & WebSocket server transport plugin.
+ * NanoHTTPD HTTP & WebSocket server message transport plugin.
  *
  * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as HTTP response body.
@@ -30,7 +29,7 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  * @constructor Creates a NanoHTTPD HTTP & WebSocket server with specified RPC request handler.
  * @param handler RPC request handler
  * @param port port to listen on for HTTP connections
- * @param path HTTP URL path
+ * @param pathPrefix HTTP URL path prefix, only requests starting with this path prefix are allowed
  * @param methods allowed HTTP request methods
  * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
  * @param mapException maps an exception to a corresponding HTTP status code
@@ -40,7 +39,7 @@ import scala.jdk.CollectionConverters.MapHasAsScala
 final case class NanoServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
   port: Int,
-  path: String,
+  pathPrefix: String,
   methods: Iterable[HttpMethod],
   webSocket: Boolean,
   mapException: Throwable => Int,
@@ -77,7 +76,7 @@ final case class NanoServer[Effect[_]] private (
   override protected def serveHttp(session: IHTTPSession): Response = {
     // Validate URL path
     val url = new URI(session.getUri)
-    if (!url.getPath.startsWith(path)) {
+    if (!url.getPath.startsWith(pathPrefix)) {
       newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Not Found")
     } else {
       // Validate HTTP request method
@@ -103,7 +102,7 @@ final case class NanoServer[Effect[_]] private (
    * @param session WebSocket handshake session
    * @return WebSocket handler
    */
-  override protected def openWebSocket(session: IHTTPSession) = new WebSocket(session) {
+  override protected def openWebSocket(session: IHTTPSession): WebSocket = new WebSocket(session) {
 
     override protected def onOpen(): Unit =
       if (!webSocket) {
@@ -211,7 +210,8 @@ final case class NanoServer[Effect[_]] private (
     protocol: Protocol,
     requestId: String
   ): Map[String, String] = {
-    val url = session.getUri + Option(session.getQueryParameterString).filter(_.nonEmpty).map("?" + _).getOrElse("")
+    val query = Option(session.getQueryParameterString).filter(_.nonEmpty).map("?" + _).getOrElse("")
+    val url = s"${session.getUri}$query"
     ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(session),

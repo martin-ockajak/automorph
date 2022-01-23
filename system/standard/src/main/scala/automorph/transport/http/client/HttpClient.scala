@@ -121,7 +121,7 @@ final case class HttpClient[Effect[_]](
         // Send HTTP request
         httpRequest =>
           system match {
-            case defer: Defer[_] =>
+            case defer: Defer[?] =>
               effect(
                 httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray),
                 defer.asInstanceOf[Defer[Effect]]
@@ -211,7 +211,9 @@ final case class HttpClient[Effect[_]](
       .method(requestMethod, BodyPublishers.ofByteArray(requestBody.unsafeArray))
 
     // Headers
-    val headers = httpContext.headers.map { case (name, value) => Seq(name, value) }.flatten
+    val headers = httpContext.headers.flatMap { case (name, value) =>
+      Seq(name, value)
+    }
     val headersBuilder = (headers match {
       case Seq() => methodBuilder
       case values => methodBuilder.headers(values.toArray*)
@@ -246,7 +248,7 @@ final case class HttpClient[Effect[_]](
       headers.headOption.map { case (name, value) =>
         builder.header(name, value) -> headers.tail
       }.getOrElse(builder -> headers)
-    }.dropWhile(!_._2.isEmpty).headOption.map(_._1).getOrElse(httpClient.newWebSocketBuilder)
+    }.dropWhile(_._2.nonEmpty).headOption.map(_._1).getOrElse(httpClient.newWebSocketBuilder)
 
     // Timeout
     httpClient.connectTimeout.toScala
@@ -258,7 +260,7 @@ final case class HttpClient[Effect[_]](
 
     private val buffers = ArrayBuffer.empty[ArraySeq.ofByte]
 
-    override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[_] = {
+    override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[?] = {
       buffers += Bytes.byteBuffer.from(data)
       if (last) {
         val outputStream = new ByteArrayOutputStream(buffers.map(_.length).sum)
@@ -270,7 +272,7 @@ final case class HttpClient[Effect[_]](
       super.onBinary(webSocket, data, last)
     }
 
-    override def onClose(webSocket: WebSocket, statusCode: Int, reason: String): CompletionStage[_] =
+    override def onClose(webSocket: WebSocket, statusCode: Int, reason: String): CompletionStage[?] =
       super.onClose(webSocket, statusCode, reason)
 
     override def onError(webSocket: WebSocket, error: Throwable): Unit = {
@@ -312,7 +314,7 @@ final case class HttpClient[Effect[_]](
     }
 
   private def withDefer[T](function: Defer[Effect] => Effect[T]): Effect[T] = system match {
-    case defer: Defer[_] => function(defer.asInstanceOf[Defer[Effect]])
+    case defer: Defer[?] => function(defer.asInstanceOf[Defer[Effect]])
     case _ => system.failed(new IllegalArgumentException(
         s"WebSocket no supported for effect system without deferred effect support: ${system.getClass.getName}"
       ))
@@ -325,7 +327,7 @@ object HttpClient {
   type Context = HttpContext[Session]
 
   /** Default HTTP client builder. */
-  val defaultBuilder = java.net.http.HttpClient.newBuilder
+  val defaultBuilder: Builder = java.net.http.HttpClient.newBuilder
 
   final case class Session(request: HttpRequest.Builder)
 
