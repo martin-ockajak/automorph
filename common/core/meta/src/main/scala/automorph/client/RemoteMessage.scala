@@ -13,7 +13,7 @@ import automorph.spi.MessageCodec
  * @tparam Effect effect type
  * @tparam Context message context type
  */
-final case class RemoteMessage[Node, Codec <: MessageCodec[Node], Effect[_], Context] private (
+final private[automorph] case class RemoteMessage[Node, Codec <: MessageCodec[Node], Effect[_], Context] private (
   functionName: String,
   codec: Codec,
   private val sendMessage: (String, Seq[(String, Node)], Option[Context]) => Effect[Unit]
@@ -23,14 +23,14 @@ final case class RemoteMessage[Node, Codec <: MessageCodec[Node], Effect[_], Con
     sendMessage(functionName, arguments.map(_._1).zip(argumentNodes), Some(requestContext))
 }
 
-object RemoteMessage {
+private[automorph] object RemoteMessage {
 
   /**
    * Creates a new one-way remote function message with specified RPC function name.
    *
    * @param functionName RPC function name
    * @param codec message codec plugin
-   * @param peformNotify performs an RPC message using specified arguments
+   * @param sendMessage sends an RPC message with specified function name, arguments and request context
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Effect effect type

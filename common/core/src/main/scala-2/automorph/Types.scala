@@ -1,6 +1,5 @@
 package automorph
 
-import automorph.Handler
 import automorph.spi.MessageCodec
 
 /** Common type aliases. */

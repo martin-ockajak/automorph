@@ -12,7 +12,7 @@ import automorph.spi.protocol.RpcFunction
  * @tparam Node message node type
  * @tparam Context message context type
  */
-final case class ClientBinding[Node, Context](
+final private[automorph] case class ClientBinding[Node, Context](
   function: RpcFunction,
   encodeArguments: Seq[Any] => Seq[Node],
   decodeResult: (Node, Context) => Any,

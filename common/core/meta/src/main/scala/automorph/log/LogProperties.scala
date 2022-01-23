@@ -1,7 +1,7 @@
 package automorph.log
 
 /** RPC message logging properties. */
-object LogProperties {
+private[automorph] object LogProperties {
 
   /** Request correlation identifier */
   val requestId = "Request ID"

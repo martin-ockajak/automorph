@@ -105,7 +105,7 @@ object ClientMeta {
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(
     mapName: c.Expr[String => String]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Api] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[?]]): c.Expr[Api] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
     val nodeType = weakTypeOf[Node]

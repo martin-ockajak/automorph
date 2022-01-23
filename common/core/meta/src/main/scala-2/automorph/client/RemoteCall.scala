@@ -38,7 +38,7 @@ object RemoteCall {
    *
    * @param functionName RPC function name
    * @param codec message codec plugin
-   * @param peformCall performs an RPC call using specified arguments
+   * @param performCall performs an RPC call using specified arguments
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
    * @tparam Effect effect type

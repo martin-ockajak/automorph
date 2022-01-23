@@ -1,7 +1,6 @@
 package automorph.util
 
 import automorph.spi.protocol.{RpcFunction, RpcParameter}
-import automorph.util.Reflection
 import scala.annotation.nowarn
 import scala.reflect.macros.blackbox
 

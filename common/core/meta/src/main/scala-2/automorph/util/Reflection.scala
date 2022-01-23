@@ -1,6 +1,6 @@
 package automorph.util
 
-import scala.reflect.macros.blackbox.Context
+import scala.reflect.macros.blackbox
 
 /**
  * Data type reflection tools.
@@ -8,7 +8,7 @@ import scala.reflect.macros.blackbox.Context
  * @tparam C macro context type
  * @param c macro context
  */
-final private[automorph] case class Reflection[C <: Context](c: C) {
+final private[automorph] case class Reflection[C <: blackbox.Context](c: C) {
 
   // All meta-programming data types are path-dependent on the compiler-generated reflection context
   import c.universe.*

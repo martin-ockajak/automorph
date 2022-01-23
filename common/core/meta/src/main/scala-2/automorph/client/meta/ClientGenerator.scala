@@ -35,13 +35,13 @@ object ClientGenerator {
     Context: c.WeakTypeTag,
     Api <: AnyRef: c.WeakTypeTag
   ](c: blackbox.Context)(codec: c.Expr[Codec])(implicit
-    effectType: c.WeakTypeTag[Effect[_]]
+    effectType: c.WeakTypeTag[Effect[?]]
   ): c.Expr[Seq[ClientBinding[Node, Context]]] = {
     import c.universe.Quasiquote
     val ref = Reflection[c.type](c)
 
     // Detect and validate public methods in the API type
-    val apiMethods = MethodReflection.apiMethods[c.type, Api, Effect[_]](ref)
+    val apiMethods = MethodReflection.apiMethods[c.type, Api, Effect[?]](ref)
     val validMethods = apiMethods.flatMap(_.swap.toOption) match {
       case Seq() => apiMethods.flatMap(_.toOption)
       case errors =>
@@ -71,7 +71,7 @@ object ClientGenerator {
   ](ref: Reflection[C])(
     method: ref.RefMethod,
     codec: ref.c.Expr[Codec]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[ClientBinding[Node, Context]] = {
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[?]]): ref.c.Expr[ClientBinding[Node, Context]] = {
     import ref.c.universe.{Liftable, Quasiquote, weakTypeOf}
 
     val nodeType = weakTypeOf[Node]
@@ -137,7 +137,7 @@ object ClientGenerator {
     Effect[_],
     Context: ref.c.WeakTypeTag
   ](ref: Reflection[C])(method: ref.RefMethod, codec: ref.c.Expr[Codec])(implicit
-    effectType: ref.c.WeakTypeTag[Effect[_]]
+    effectType: ref.c.WeakTypeTag[Effect[?]]
   ): ref.c.Expr[(Node, Context) => Any] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
@@ -146,8 +146,8 @@ object ClientGenerator {
     //   (resultNode: Node, responseContext: Context) => ResultType = codec.decode[ResultType](resultNode)
     val nodeType = weakTypeOf[Node]
     val contextType = weakTypeOf[Context]
-    val resultType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
-    MethodReflection.contextualResult[C, Context, Contextual[_, _]](ref.c)(resultType).map { contextualResultType =>
+    val resultType = MethodReflection.unwrapType[C, Effect[?]](ref.c)(method.resultType).dealias
+    MethodReflection.contextualResult[C, Context, Contextual[?, ?]](ref.c)(resultType).map { contextualResultType =>
       ref.c.Expr[(Node, Context) => Any](q"""
         (resultNode: $nodeType, responseContext: $contextType) => Contextual(
           $codec.decode[$contextualResultType](resultNode),

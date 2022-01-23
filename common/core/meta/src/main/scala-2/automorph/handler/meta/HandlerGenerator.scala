@@ -42,12 +42,12 @@ object HandlerGenerator {
     codec: c.Expr[Codec],
     system: c.Expr[EffectSystem[Effect]],
     api: c.Expr[Api]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Seq[HandlerBinding[Node, Effect, Context]]] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[?]]): c.Expr[Seq[HandlerBinding[Node, Effect, Context]]] = {
     import c.universe.Quasiquote
     val ref = Reflection[c.type](c)
 
     // Detect and validate public methods in the API type
-    val apiMethods = MethodReflection.apiMethods[c.type, Api, Effect[_]](ref)
+    val apiMethods = MethodReflection.apiMethods[c.type, Api, Effect[?]](ref)
     val validMethods = apiMethods.flatMap(_.swap.toOption) match {
       case Seq() => apiMethods.flatMap(_.toOption)
       case errors =>
@@ -79,7 +79,7 @@ object HandlerGenerator {
     codec: ref.c.Expr[Codec],
     system: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[HandlerBinding[Node, Effect, Context]] = {
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[?]]): ref.c.Expr[HandlerBinding[Node, Effect, Context]] = {
     import ref.c.universe.{Liftable, Quasiquote}
 
     val invoke = generateInvoke[C, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
@@ -107,7 +107,7 @@ object HandlerGenerator {
     system: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
   )(implicit
-    effectType: ref.c.WeakTypeTag[Effect[_]]
+    effectType: ref.c.WeakTypeTag[Effect[?]]
   ): ref.c.Expr[(Seq[Option[Node]], Context) => Effect[(Node, Option[Context])]] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
@@ -165,8 +165,8 @@ object HandlerGenerator {
 
       // Create encode result function
       //   (result: ResultType) => Node = codec.encode[ResultType](result) -> Option.empty[Context]
-      val resultType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
-      val encodeResult = MethodReflection.contextualResult[C, Context, Contextual[_, _]](ref.c)(resultType)
+      val resultType = MethodReflection.unwrapType[C, Effect[?]](ref.c)(method.resultType).dealias
+      val encodeResult = MethodReflection.contextualResult[C, Context, Contextual[?, ?]](ref.c)(resultType)
         .map { contextualResultType =>
           q"""
             (result: Contextual[$contextualResultType, $contextType]) =>

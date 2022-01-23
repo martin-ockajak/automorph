@@ -19,7 +19,7 @@ import scala.reflect.macros.blackbox
 private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[_], Context, Result] extends CannotEqual {
 
   /** RPC function name. */
-  val functionName: String
+  def functionName: String
 
   /** Message codec plugin. */
   def codec: Codec

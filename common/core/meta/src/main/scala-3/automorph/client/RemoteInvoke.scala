@@ -18,7 +18,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
   extends CannotEqual:
 
   /** RPC function name. */
-  val functionName: String
+  def functionName: String
 
   /** Message codec plugin. */
   def codec: Codec

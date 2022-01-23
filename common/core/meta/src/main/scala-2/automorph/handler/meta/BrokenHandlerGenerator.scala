@@ -28,7 +28,7 @@ object BrokenHandlerGenerator {
     codec: c.Expr[Codec],
     system: c.Expr[EffectSystem[Effect]],
     api: c.Expr[Api]
-  )(implicit effectType: c.WeakTypeTag[Effect[_]]): c.Expr[Seq[HandlerBinding[Node, Effect, Context]]] = {
+  )(implicit effectType: c.WeakTypeTag[Effect[?]]): c.Expr[Seq[HandlerBinding[Node, Effect, Context]]] = {
     import c.universe.Quasiquote
     val ref = Reflection[c.type](c)
 
@@ -57,7 +57,7 @@ object BrokenHandlerGenerator {
     codec: ref.c.Expr[Codec],
     system: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[HandlerBinding[Node, Effect, Context]] = {
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[?]]): ref.c.Expr[HandlerBinding[Node, Effect, Context]] = {
     import ref.c.universe.{Liftable, Quasiquote}
 
     val invoke = generateInvoke[C, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
@@ -84,7 +84,7 @@ object BrokenHandlerGenerator {
     codec: ref.c.Expr[Codec],
     system: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[_]]): ref.c.Expr[(Seq[Option[Node]], Context) => Effect[Node]] = {
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[?]]): ref.c.Expr[(Seq[Option[Node]], Context) => Effect[Node]] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
@@ -126,7 +126,7 @@ object BrokenHandlerGenerator {
 
       // Create encode result function
       //   (result: ResultValueType) => Node = codec.encode[ResultValueType](result)
-      val resultValueType = MethodReflection.unwrapType[C, Effect[_]](ref.c)(method.resultType).dealias
+      val resultValueType = MethodReflection.unwrapType[C, Effect[?]](ref.c)(method.resultType).dealias
       val encodeResult = q"(result: $resultValueType) => $codec.encode[$resultValueType](result)"
 
       // Create the effect mapping call using the method call and the encode result function
