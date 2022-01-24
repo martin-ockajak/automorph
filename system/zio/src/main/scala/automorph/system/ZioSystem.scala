@@ -2,7 +2,7 @@ package automorph.system
 
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
-import zio.{Queue, RIO, Runtime, ZEnv, ZQueue}
+import zio.{RIO, Runtime, ZEnv, ZQueue}
 
 /**
  * ZIO effect system plugin using `RIO` as an effect type.

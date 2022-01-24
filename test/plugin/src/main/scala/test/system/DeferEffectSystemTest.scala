@@ -1,6 +1,6 @@
 package test.system
 
-import automorph.spi.system.{Defer, Deferred}
+import automorph.spi.system.Defer
 
 /**
  * Effect system with deferred effects test.
