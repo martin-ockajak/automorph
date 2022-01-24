@@ -12,7 +12,7 @@ import jakarta.servlet.AsyncContext
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import java.io.InputStream
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
-import scala.collection.immutable.{ArraySeq, ListMap}
+import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.EnumerationHasAsScala
 import scala.util.Try
 

@@ -14,7 +14,7 @@ import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputS
 import automorph.util.{Network, Random}
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
-import scala.collection.immutable.{ArraySeq, ListMap}
+import scala.collection.immutable.ListMap
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Try

@@ -8,7 +8,7 @@ import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, InputStreamOps, TryOps}
 import java.io.InputStream
 import java.net.{HttpURLConnection, URI}
-import scala.collection.immutable.{ArraySeq, ListMap}
+import scala.collection.immutable.ListMap
 import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.util.Using

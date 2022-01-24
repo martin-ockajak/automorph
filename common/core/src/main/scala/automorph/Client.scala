@@ -9,7 +9,7 @@ import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
 import automorph.util.Random
 import java.io.InputStream
-import scala.collection.immutable.{ArraySeq, ListMap}
+import scala.collection.immutable.ListMap
 import scala.util.Try
 
 /**
@@ -94,12 +94,10 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       // Send request
       rpcRequest =>
         system.pure(rpcRequest).flatMap { request =>
-          val requestBody = request.message.body
-          lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++
-            rpcRequest.message.properties
+          lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++ rpcRequest.message.properties
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${protocol.name} request", allProperties)
-          transport.call(requestBody, requestContext, requestId, protocol.codec.mediaType)
+          transport.call(request.message.body, requestContext, requestId, protocol.codec.mediaType)
             .flatMap { case (responseBody, responseContext) =>
               // Process response
               processResponse[Result](responseBody, responseContext, requestProperties, decodeResult)
@@ -130,7 +128,6 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       // Send request
       rpcRequest =>
         system.pure(rpcRequest).flatMap { request =>
-          val requestBody = request.message.body
           lazy val requestProperties = rpcRequest.message.properties + (LogProperties.requestId -> requestId)
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${protocol.name} request", allProperties)

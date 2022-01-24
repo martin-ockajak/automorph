@@ -1,7 +1,6 @@
 package automorph.spi.protocol
 
 import java.io.InputStream
-import scala.collection.immutable.ArraySeq
 
 /**
  * RPC message.

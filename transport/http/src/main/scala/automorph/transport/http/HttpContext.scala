@@ -5,7 +5,6 @@ import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestExcep
 import automorph.util.Extensions.{ByteArrayOps, StringOps}
 import java.io.IOException
 import java.net.URI
-import java.nio.charset.StandardCharsets
 import java.util.Base64
 import scala.concurrent.duration.Duration
 
@@ -48,7 +47,6 @@ final case class HttpContext[Transport](
   transport: Option[Transport] = None
 ) {
 
-  private val charset = StandardCharsets.UTF_8
   private val headerAuthorizationBasic = "Basic"
   private val headerAuthorizationBearer = "Bearer"
   private val headerAuthorization = "Authorization"
@@ -413,7 +411,7 @@ final case class HttpContext[Transport](
    * @return HTTP message context
    */
   def authorizationBasic(user: String, password: String): HttpContext[Transport] = {
-    val value = Base64.getEncoder.encode(s"$user:$password".toArray).asString
+    val value = Base64.getEncoder.encode(s"$user:$password".asArray).asString
     header(headerAuthorization, s"$headerAuthorizationBasic $value")
   }
 
@@ -455,7 +453,7 @@ final case class HttpContext[Transport](
    * @return HTTP message context
    */
   def proxyAuthBasic(user: String, password: String): HttpContext[Transport] = {
-    val value = Base64.getEncoder.encode(s"$user:$password".toArray).asString
+    val value = Base64.getEncoder.encode(s"$user:$password".asArray).asString
     header(headerProxyAuthorization, s"$headerAuthorizationBasic $value")
   }
 

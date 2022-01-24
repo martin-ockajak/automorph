@@ -16,7 +16,7 @@ import java.net.http.WebSocket.Listener
 import java.net.http.{HttpRequest, HttpResponse, WebSocket}
 import java.nio.ByteBuffer
 import java.util.concurrent.{CompletableFuture, CompletionStage}
-import scala.collection.immutable.{ArraySeq, ListMap}
+import scala.collection.immutable.ListMap
 import scala.collection.mutable.ArrayBuffer
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 import scala.jdk.OptionConverters.RichOptional

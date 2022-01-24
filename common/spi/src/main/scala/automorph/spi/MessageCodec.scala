@@ -2,7 +2,6 @@ package automorph.spi
 
 import automorph.spi.codec.MessageCodecMeta
 import java.io.InputStream
-import scala.collection.immutable.ArraySeq
 
 /**
  * Structured message format codec plugin.

@@ -1,7 +1,6 @@
 package automorph.handler
 
 import java.io.InputStream
-import scala.collection.immutable.ArraySeq
 
 /**
  * RPC handler request processing result.

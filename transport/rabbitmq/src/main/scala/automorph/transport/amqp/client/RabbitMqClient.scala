@@ -12,7 +12,6 @@ import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, Def
 import java.io.InputStream
 import java.net.URI
 import scala.collection.concurrent.TrieMap
-import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
 /**

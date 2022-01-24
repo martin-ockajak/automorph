@@ -14,7 +14,7 @@ import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, Strin
 import automorph.util.{Network, Random}
 import java.io.{IOException, InputStream}
 import java.net.URI
-import scala.collection.immutable.{ArraySeq, ListMap}
+import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.MapHasAsScala
 
 /**

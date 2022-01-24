@@ -5,7 +5,6 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
 import java.nio.ByteBuffer
 import java.nio.charset.{Charset, StandardCharsets}
 import java.util
-import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
 
 private[automorph] object Extensions {
@@ -182,7 +181,7 @@ private[automorph] object Extensions {
 
   implicit class StringOps(data: String) {
 
-    def toArray: Array[Byte] =
+    def asArray: Array[Byte] =
       data.getBytes(charset)
 
     def toInputStream: InputStream =

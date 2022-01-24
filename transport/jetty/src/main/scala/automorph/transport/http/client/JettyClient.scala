@@ -18,7 +18,7 @@ import org.eclipse.jetty.http.HttpHeader
 import org.eclipse.jetty.websocket.api.{WebSocketListener, WriteCallback}
 import org.eclipse.jetty.websocket.client.{ClientUpgradeRequest, WebSocketClient}
 import org.eclipse.jetty.{http, websocket}
-import scala.collection.immutable.{ArraySeq, ListMap}
+import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.{IterableHasAsScala, SeqHasAsJava}
 import scala.util.Try
 

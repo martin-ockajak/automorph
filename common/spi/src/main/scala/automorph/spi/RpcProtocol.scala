@@ -2,7 +2,6 @@ package automorph.spi
 
 import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcRequest, RpcResponse}
 import java.io.InputStream
-import scala.collection.immutable.ArraySeq
 import scala.util.Try
 
 /**
