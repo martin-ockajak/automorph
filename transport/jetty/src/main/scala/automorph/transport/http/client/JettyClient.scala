@@ -6,8 +6,7 @@ import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.JettyClient.{Context, Session, defaultClient}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Bytes
-import automorph.util.Extensions.{EffectOps, TryOps}
+import automorph.util.Extensions.{BinaryOps, ByteArrayOps, EffectOps, TryOps}
 import java.net.URI
 import java.util
 import java.util.concurrent.{CompletableFuture, TimeUnit}
@@ -144,7 +143,7 @@ final case class JettyClient[Effect[_]](
             defer.deferred[Unit].flatMap { deferredSent =>
               webSocketEffect.flatMap { webSocket =>
                 webSocket.getRemote.sendBytes(
-                  Bytes.byteBuffer.to(requestBody),
+                  requestBody.toByteBuffer,
                   new WriteCallback {
                     override def writeSuccess(): Unit =
                       deferredSent.succeed(()).run
@@ -278,7 +277,7 @@ final case class JettyClient[Effect[_]](
 
     override def onWebSocketBinary(payload: Array[Byte], offset: Int, length: Int): Unit = {
       val message = util.Arrays.copyOfRange(payload, offset, offset + length)
-      val responseBody = Bytes.byteArray.from(message)
+      val responseBody = message.toBinary
       system.run(response.succeed((responseBody, None, Seq())).asInstanceOf[Effect[Any]])
     }
 
@@ -294,7 +293,7 @@ final case class JettyClient[Effect[_]](
 
   private def httpResponse(response: api.Response, responseBody: Array[Byte]): Response = {
     val headers = response.getHeaders.asScala.map(field => field.getName -> field.getValue).toSeq
-    (Bytes.byteArray.from(responseBody), Some(response.getStatus), headers)
+    (responseBody.toBinary, Some(response.getStatus), headers)
   }
 
   private def effect[T](completableFuture: => CompletableFuture[T], defer: Defer[Effect]): Effect[T] =

@@ -10,8 +10,8 @@ import automorph.transport.http.server.NanoServer.{Context, Execute}
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{EffectOps, ThrowableOps}
-import automorph.util.{Bytes, Network, Random}
+import automorph.util.Extensions.{BinaryOps, ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
+import automorph.util.{Network, Random}
 import java.io.IOException
 import java.net.URI
 import scala.collection.immutable.{ArraySeq, ListMap}
@@ -88,7 +88,7 @@ final case class NanoServer[Effect[_]] private (
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(session, protocol, requestId)
         log.receivingRequest(requestProperties, Protocol.Http.name)
-        val requestBody = Bytes.inputStream.from(session.getInputStream, session.getBodySize.toInt)
+        val requestBody = session.getInputStream.asBinary(session.getBodySize.toInt)
 
         // Handler the equest
         handleRequest(requestBody, session, protocol, requestProperties, requestId)
@@ -116,11 +116,11 @@ final case class NanoServer[Effect[_]] private (
       val protocol = Protocol.WebSocket
       val requestId = Random.id
       lazy val requestProperties = getRequestProperties(session, protocol, requestId)
-      val request = Bytes.byteArray.from(frame.getBinaryPayload)
+      val request = frame.getBinaryPayload.toBinary
       val response = handleRequest(request, session, protocol, requestProperties, requestId)
 
       // Handler the request
-      send(Bytes.byteArray.to(Bytes.inputStream.from(response.getData)))
+      send(response.getData.toBinary.toArray)
     }
 
     override protected def onPong(pong: WebSocketFrame): Unit = ()
@@ -158,7 +158,7 @@ final case class NanoServer[Effect[_]] private (
     requestProperties: => Map[String, String]
   ) = {
     log.failedProcessRequest(error, requestProperties, protocol.name)
-    val message = Bytes.string.from(error.description)
+    val message = error.description.toBinary
     createResponse(message, Status.INTERNAL_ERROR, None, session, protocol, requestId)
   }
 
@@ -182,7 +182,7 @@ final case class NanoServer[Effect[_]] private (
     log.sendingResponse(responseProperties, protocol.name)
 
     // Create the response
-    val inputStream = Bytes.inputStream.to(responseBody)
+    val inputStream = responseBody.toInputStream
     val mediaType = genericHandler.protocol.codec.mediaType
     val response = newFixedLengthResponse(responseStatus, mediaType, inputStream, responseBody.size.toLong)
     setResponseContext(response, responseContext)

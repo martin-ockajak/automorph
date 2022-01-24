@@ -6,8 +6,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.amqp.server.RabbitMqServer.Context
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
-import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
-import automorph.util.Bytes
+import automorph.util.Extensions.{EffectOps, StringOps, ThrowableOps, TryOps}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
@@ -104,7 +103,7 @@ final case class RabbitMqServer[Effect[_]](
     requestId: String
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val message = Bytes.string.from(error.description).unsafeArray
+    val message = error.description.toBinary.toArray
     sendResponse(message, replyTo, None, requestProperties, requestId)
   }
 

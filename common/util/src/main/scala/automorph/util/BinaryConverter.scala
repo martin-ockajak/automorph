@@ -88,6 +88,6 @@ object BinaryConverter {
     override def from(data: InputStream): Binary = data.toBinary
 
     override def from(data: InputStream, length: Int): Binary =
-      data.toBinary(length)
+      data.asBinary(length)
   }
 }

@@ -6,8 +6,7 @@ import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
-import automorph.util.Bytes
-import automorph.util.Extensions.{EffectOps, TryOps}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, TryOps}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
@@ -118,7 +117,7 @@ final case class RabbitMqClient[Effect[_]](
         // Resolve the registered deferred response effect
         val responseContext = RabbitMqCommon.messageContext(properties)
         responseHandlers.get(properties.getCorrelationId).foreach { response =>
-          response.succeed(Bytes.byteArray.from(responseBody) -> responseContext).run
+          response.succeed(responseBody.toBinary -> responseContext).run
         }
       }
     }

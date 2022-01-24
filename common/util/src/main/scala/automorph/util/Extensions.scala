@@ -160,7 +160,7 @@ private[automorph] object Extensions {
     def toBinary: Binary = {
       val outputStream = new ByteArrayOutputStream()
       val buffer = Array.ofDim[Byte](bufferSize)
-      LazyList.iterate(0) { case _ =>
+      LazyList.iterate(0) { _ =>
         data.read(buffer) match {
           case length if length > 0 =>
             outputStream.write(buffer, 0, length)
@@ -171,10 +171,10 @@ private[automorph] object Extensions {
       new ArraySeq.ofByte(outputStream.toByteArray)
     }
 
-    def toBinary(length: Int): Binary = {
+    def asBinary(length: Int): Binary = {
       val outputStream = new ByteArrayOutputStream(length)
       val buffer = Array.ofDim[Byte](bufferSize)
-      LazyList.iterate(length) { case remaining =>
+      LazyList.iterate(length) { remaining =>
         data.read(buffer, 0, Math.min(remaining, buffer.length)) match {
           case length if length >= 0 =>
             outputStream.write(buffer, 0, length)
