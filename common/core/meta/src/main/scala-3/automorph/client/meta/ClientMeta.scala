@@ -85,9 +85,10 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
 
           // Encode RPC function arguments
           val argumentNodes = binding.function.parameters.zip(argumentValues).map { (parameter, argument) =>
-            val encodeArgument = binding.argumentEncoders.get(parameter.name).getOrElse {
+            val encodeArgument = binding.argumentEncoders.getOrElse(
+              parameter.name,
               throw new IllegalStateException(s"Missing method parameter encoder: ${parameter.name}")
-            }
+            )
             parameter.name -> scala.util.Try(encodeArgument(argument)).recoverWith { case error =>
               Failure(new IllegalArgumentException(s"Malformed argument: ${parameter.name}", error))
             }.get

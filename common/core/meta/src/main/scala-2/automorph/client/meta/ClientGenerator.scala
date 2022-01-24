@@ -76,7 +76,7 @@ object ClientGenerator {
 
     val nodeType = weakTypeOf[Node]
     val contextType = weakTypeOf[Context]
-    val encodeArguments = generateEncodeArguments[C, Node, Codec, Context](ref)(method, codec)
+    val encodeArguments = generateArgumentEncoders[C, Node, Codec, Context](ref)(method, codec)
     val decodeResult = generateDecodeResult[C, Node, Codec, Effect, Context](ref)(method, codec)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
     implicit val functionLiftable: Liftable[RpcFunction] = MethodReflection.functionLiftable(ref)
@@ -90,7 +90,7 @@ object ClientGenerator {
     """)
   }
 
-  private def generateEncodeArguments[
+  private def generateArgumentEncoders[
     C <: blackbox.Context,
     Node: ref.c.WeakTypeTag,
     Codec <: MessageCodec[Node]: ref.c.WeakTypeTag,
@@ -107,7 +107,9 @@ object ClientGenerator {
 
     // Create a map of method parameter names to functions encoding method argument value into a node
     //   Map(
-    //     parameterNName -> (argument: Any) => codec.encode[ParameterNType](argument.asInstanceOf[ParameterNType])
+    //     parameterNName -> (
+    //       (argument: Any) => codec.encode[ParameterNType](argument.asInstanceOf[ParameterNType])
+    //     )
     //     ...
     //   ): Map[String, Any => Node]
     val argumentEncoders = method.parameters.toList.zip(parameterListOffsets).flatMap { case (parameters, offset) =>
@@ -136,8 +138,13 @@ object ClientGenerator {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
-    // Create decode result function
-    //   (resultNode: Node, responseContext: Context) => ResultType = codec.decode[ResultType](resultNode)
+    // Create a result decoding function
+    //   (resultNode: Node, responseContext: Context) => codec.decode[ResultType](resultNode)
+    //     OR
+    //   (resultNode: Node, responseContext: Context) => Contextual(
+    //     codec.decode[ContextualResultType](resultNode),
+    //     responseContext
+    //   )
     val nodeType = weakTypeOf[Node]
     val contextType = weakTypeOf[Context]
     val resultType = MethodReflection.unwrapType[C, Effect[?]](ref.c)(method.resultType).dealias

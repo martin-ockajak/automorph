@@ -260,6 +260,8 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       }.map(_.function) ++ apiBindings.values.map(_.function)
       apiSchema.function.name -> HandlerBinding[Node, Effect, Context](
         apiSchema.function,
+        Map.empty,
+        result => result.asInstanceOf[Node] -> None,
         (_, _) => system.pure(apiSchema.invoke(describedFunctions) -> None),
         acceptsContext = false
       )

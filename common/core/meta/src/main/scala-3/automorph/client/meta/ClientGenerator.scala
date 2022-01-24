@@ -58,7 +58,7 @@ private[automorph] object ClientGenerator:
   ](ref: ClassReflection)(method: ref.RefMethod, codec: Expr[Codec]): Expr[ClientBinding[Node, Context]] =
     given Quotes = ref.q
 
-    val encodeArguments = generateEncodeArguments[Node, Codec, Context](ref)(method, codec)
+    val encodeArguments = generateArgumentEncoders[Node, Codec, Context](ref)(method, codec)
     val decodeResult = generateDecodeResult[Node, Codec, Effect, Context](ref)(method, codec)
     logBoundMethod[Api](ref)(method, encodeArguments, decodeResult)
     '{
@@ -70,7 +70,7 @@ private[automorph] object ClientGenerator:
       )
     }
 
-  private def generateEncodeArguments[Node: Type, Codec <: MessageCodec[Node]: Type, Context: Type](ref: ClassReflection)(
+  private def generateArgumentEncoders[Node: Type, Codec <: MessageCodec[Node]: Type, Context: Type](ref: ClassReflection)(
     method: ref.RefMethod,
     codec: Expr[Codec]
   ): Expr[Map[String, Any => Node]] =
@@ -85,26 +85,28 @@ private[automorph] object ClientGenerator:
 
     // Create a map of method parameter names to functions encoding method argument value into a node
     //   Map(
-    //     parameterNName -> (argument: Any) => codec.encode[ParameterNType](argument.asInstanceOf[ParameterNType])
+    //     parameterNName -> (
+    //       (argument: Any) => codec.encode[ParameterNType](argument.asInstanceOf[ParameterNType])
+    //     )
     //     ...
     //   ): Map[String, Any => Node]
     val argumentEncoders = method.parameters.toList.zip(parameterListOffsets).flatMap((parameters, offset) =>
       parameters.toList.zipWithIndex.flatMap { (parameter, index) =>
         Option.when((offset + index) != lastArgumentIndex || !MethodReflection.acceptsContext[Context](ref)(method)) {
-          '{ ${Expr(parameter.name)} -> (
-              (argument: Any) => ${
-                val argumentValue = parameter.dataType.asType match
-                  case '[parameterType] => '{ argument.asInstanceOf[parameterType] }
-                MethodReflection.call(
-                  ref.q,
-                  codec.asTerm,
-                  MessageCodec.encodeMethod,
-                  List(parameter.dataType),
-                  List(List(argumentValue.asTerm))
-                ).asExprOf[Node]
-              }
-            )
-          }
+          parameter.dataType.asType match
+            case '[parameterType] => '{
+              ${ Expr(parameter.name) } -> (
+                (argument: Any) => ${
+                  MethodReflection.call(
+                    ref.q,
+                    codec.asTerm,
+                    MessageCodec.encodeMethod,
+                    List(parameter.dataType),
+                    List(List('{ argument.asInstanceOf[parameterType] }.asTerm))
+                  ).asExprOf[Node]
+                }
+              )
+            }
         }
       }
     )
@@ -116,12 +118,17 @@ private[automorph] object ClientGenerator:
     import ref.q.reflect.asTerm
     given Quotes = ref.q
 
-    // Create decode result function
-    //   (resultNode: Node, responseContext: Context) => ResultType = codec.decode[ResultType](resultNode)
+    // Create a result decoding function
+    //   (resultNode: Node, responseContext: Context) => codec.decode[ResultType](resultNode)
+    //     OR
+    //   (resultNode: Node, responseContext: Context) => Contextual(
+    //     codec.decode[ContextualResultType](resultNode),
+    //     responseContext
+    //   )
     val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
     MethodReflection.contextualResult[Context, Contextual](ref.q)(resultType).map { contextualResultType =>
-      '{ (resultNode: Node, responseContext: Context) =>
-        Contextual(
+      '{
+        (resultNode: Node, responseContext: Context) => Contextual(
           ${
             MethodReflection.call(
               ref.q,
@@ -135,8 +142,8 @@ private[automorph] object ClientGenerator:
         )
       }
     }.getOrElse {
-      '{ (resultNode: Node, _: Context) =>
-        ${
+      '{
+        (resultNode: Node, _: Context) => ${
           MethodReflection.call(
             ref.q,
             codec.asTerm,
