@@ -136,13 +136,16 @@ object ClientMeta {
               }
 
             // Encode RPC function arguments
-            lazy val argumentNodes = binding.function.parameters.zip(argumentValues).map { case (parameter, argument) =>
+            val argumentNodes = binding.function.parameters.zip(argumentValues).map { case (parameter, argument) =>
               val encodeArgument = binding.argumentEncoders.getOrElse(
                 parameter.name,
                 throw new IllegalStateException("Missing method parameter encoder: " + parameter.name)
               )
               parameter.name -> scala.util.Try(encodeArgument(argument)).recoverWith { case error =>
-                scala.util.Failure(new IllegalArgumentException("Malformed argument: " + parameter.name, error))
+                scala.util.Failure(automorph.spi.RpcProtocol.InvalidRequestException(
+                  "Malformed argument: " + parameter.name,
+                  error
+                ))
               }.get
             }
 

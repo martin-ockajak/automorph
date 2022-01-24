@@ -6,7 +6,9 @@ import automorph.spi.protocol.RpcFunction
  * RPC handler remote API function binding.
  *
  * @param function bound function descriptor
- * @param invoke invokes bound function
+ * @param argumentDecoders map of method parameter names to argument decoding functions
+ * @param encodeResult encodes bound function result
+ * @param call calls bound function
  * @param acceptsContext true if the method accepts request context as its last parameter, false otherwise
  * @tparam Node message node type
  * @tparam Effect effect type
@@ -17,6 +19,5 @@ final case class HandlerBinding[Node, Effect[_], Context](
   argumentDecoders: Map[String, Option[Node] => Any],
   encodeResult: Any => (Node, Option[Context]),
   call: (Seq[Any], Context) => Effect[Any],
-  invoke: (Seq[Option[Node]], Context) => Effect[(Node, Option[Context])],
   acceptsContext: Boolean
 )

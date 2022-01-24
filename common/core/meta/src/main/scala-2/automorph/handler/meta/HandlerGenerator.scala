@@ -85,7 +85,6 @@ object HandlerGenerator {
     val argumentDecoders = generateArgumentDecoders[C, Node, Codec, Context](ref)(method, codec)
     val encodeResult = generateEncodeResult[C, Node, Codec, Effect, Context](ref)(method, codec)
     val call = generateCall[C, Effect, Context, Api](ref)(method, api)
-    val invoke = generateInvoke[C, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
     logMethod[C, Api](ref)(method)
     logCode[C](ref)("Argument decoders", argumentDecoders)
     logCode[C](ref)("Encode result", encodeResult)
@@ -98,7 +97,6 @@ object HandlerGenerator {
         $argumentDecoders,
         $encodeResult,
         null,
-        $invoke,
         ${MethodReflection.acceptsContext[C, Context](ref)(method)}
       )
     """)
@@ -225,99 +223,6 @@ object HandlerGenerator {
         //   api.method(arguments*).asInstanceOf[Effect[Any]]: Effect[Any]
         q"$api.${method.symbol}(...$apiMethodArguments).asInstanceOf[$effectAnyType]"
     }
-    """)
-  }
-
-  private def generateInvoke[
-    C <: blackbox.Context,
-    Node: ref.c.WeakTypeTag,
-    Codec <: MessageCodec[Node] : ref.c.WeakTypeTag,
-    Effect[_],
-    Context: ref.c.WeakTypeTag,
-    Api
-  ](ref: ClassReflection[C])(
-    method: ref.RefMethod,
-    codec: ref.c.Expr[Codec],
-    system: ref.c.Expr[EffectSystem[Effect]],
-    api: ref.c.Expr[Api]
-  )(implicit
-    effectType: ref.c.WeakTypeTag[Effect[?]]
-   ): ref.c.Expr[(Seq[Option[Node]], Context) => Effect[(Node, Option[Context])]] = {
-    import ref.c.universe.{Quasiquote, weakTypeOf}
-    (weakTypeOf[Node], weakTypeOf[Codec])
-
-    // Map multiple parameter lists to flat argument node list offsets
-    val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
-      indices :+ (indices.last + size)
-    }
-    val lastArgumentIndex = method.parameters.map(_.size).sum - 1
-
-    // Create invoke function
-    //   (argumentNodes: Seq[Option[Node]], requestContext: Context) => Effect[Node]
-    val nodeType = weakTypeOf[Node].dealias
-    val contextType = weakTypeOf[Context].dealias
-    ref.c.Expr[(Seq[Option[Node]], Context) => Effect[(Node, Option[Context])]](
-      q"""
-      (argumentNodes: Seq[Option[$nodeType]], requestContext: $contextType) => ${
-        // Create the method argument lists by decoding corresponding argument nodes into values
-        //   List(List(
-        //     (Try(Option(codec.decode[Parameter0Type](argumentNodes(0).getOrElse(codec.encode(None)))).get) match {
-        //       ... error handling ...
-        //     }).get
-        //     ...
-        //     (Try(Option(codec.decode[ParameterNType](argumentNodes(N).getOrElse(codec.encode(None)))).get) match {
-        //       ... error handling ...
-        //     }).get
-        //   )): List[List[ParameterXType]]
-        val apiMethodArguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
-          parameters.toList.zipWithIndex.map { case (parameter, index) =>
-            val argumentIndex = offset + index
-            if (argumentIndex == lastArgumentIndex && MethodReflection.acceptsContext[C, Context](ref)(method)) {
-              // Use supplied request context as a last argument if the method accepts context as its last parameter
-              q"requestContext"
-            } else {
-              // Decode an argument node if present or otherwise an empty node into a value
-              q"""
-              (scala.util.Try(Option($codec.decode[${parameter.dataType}](
-                argumentNodes($argumentIndex).getOrElse($codec.encode(None))
-              )).get) match {
-                case scala.util.Failure(error) => scala.util.Failure(
-                  automorph.spi.RpcProtocol.InvalidRequestException(
-                    argumentNodes($argumentIndex).fold("Missing")(_ => "Malformed") + " argument: " + ${parameter.name},
-                    error
-                  )
-                )
-                case result => result
-              }).get
-            """
-            }
-          }
-        }
-
-        // Create the API method call using the decoded arguments
-        //   api.method(arguments ...): Effect[ResultType]
-        val apiMethodCall = q"$api.${method.symbol}(...$apiMethodArguments)"
-
-        // Create encode result function
-        //   (result: ResultType) => Node = codec.encode[ResultType](result) -> Option.empty[Context]
-        val resultType = MethodReflection.unwrapType[C, Effect[?]](ref.c)(method.resultType).dealias
-        val encodeResult = MethodReflection.contextualResult[C, Context, Contextual[?, ?]](ref.c)(resultType)
-          .map { contextualResultType =>
-            q"""
-            (result: Contextual[$contextualResultType, $contextType]) =>
-              $codec.encode[$contextualResultType](result.result) -> Some(result.context)
-          """
-          }.getOrElse {
-          q"""
-            (result: $resultType) =>
-              $codec.encode[$resultType](result) -> Option.empty[$contextType]
-          """
-        }
-
-        // Create the effect mapping call using the method call and the encode result function
-        //   system.map(apiMethodCall, encodeResult): Effect[(Node, Option[Context])]
-        q"$system.map($apiMethodCall)($encodeResult)"
-      }
     """)
   }
 

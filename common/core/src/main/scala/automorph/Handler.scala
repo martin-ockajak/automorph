@@ -3,7 +3,7 @@ package automorph
 import automorph.handler.meta.HandlerMeta
 import automorph.handler.{HandlerBinding, HandlerResult, ProtocolHandlerBuilder, SystemHandlerBuilder}
 import automorph.log.{LogProperties, Logging}
-import automorph.spi.RpcProtocol.FunctionNotFoundException
+import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException}
 import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
@@ -62,7 +62,13 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     // Parse request
     val requestMessageBody = implicitly[BinaryConverter[MessageBody]].from(requestBody)
     protocol.parseRequest(requestMessageBody, requestContext, requestId).fold(
-      error => errorResponse(error.exception, error.message, responseRequired = true, ListMap(LogProperties.requestId -> requestId)),
+      error =>
+        errorResponse(
+          error.exception,
+          error.message,
+          responseRequired = true,
+          ListMap(LogProperties.requestId -> requestId)
+        ),
       rpcRequest => {
         // Invoke requested remote function
         lazy val requestProperties = ListMap(
@@ -114,64 +120,30 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     requestProperties: => Map[String, String]
   ): Effect[HandlerResult[MessageBody, Context]] = {
     // Lookup bindings for the specified remote function
-    val responseRequred = rpcRequest.responseRequired
+    val responseRequired = rpcRequest.responseRequired
     logger.debug(s"Processing ${protocol.name} request", requestProperties)
     bindings.get(rpcRequest.function).map { binding =>
-      // Extract arguments
-      extractArguments(rpcRequest, binding).pureFold(
-        error => errorResponse(error, rpcRequest.message, responseRequred, requestProperties),
-        arguments =>
-          // Invoke bound function
-          Try(binding.invoke(arguments, context).either).pureFold(
-            error => errorResponse(error, rpcRequest.message, responseRequred, requestProperties),
-            result => resultResponse(result, rpcRequest, requestProperties)
-          )
+      // Extract bound function argument nodes
+      extractArguments(rpcRequest, binding).map { argumentNodes =>
+        // Decode bound function arguments
+        decodeArguments(argumentNodes, binding)
+      }.map { arguments =>
+        // Call bound function
+        binding.call(arguments, context)
+      }.pureFold(
+        error => errorResponse(error, rpcRequest.message, responseRequired, requestProperties),
+        result => {
+          // Encode bound function result
+          val contextualResultNode = result.map(resultValue => encodeResult(resultValue, binding))
+
+          // Create RPC response
+          resultResponse(contextualResultNode, rpcRequest, requestProperties)
+        }
       )
     }.getOrElse {
       val error = FunctionNotFoundException(s"Function not found: ${rpcRequest.function}", None.orNull)
-      errorResponse(error, rpcRequest.message, responseRequred, requestProperties)
+      errorResponse(error, rpcRequest.message, responseRequired, requestProperties)
     }
-  }
-
-  /**
-   * Decodes specified bound remote function argument nodes into values.
-   *
-   * @param argumentNodes remote function argument nodes
-   * @param binding remote function binding
-   * @return remote function arguments
-   */
-  private def decodeArguments(
-    argumentNodes: Seq[Option[Node]],
-    binding: HandlerBinding[Node, Effect, Context]
-  ): Seq[Any] = {
-    binding.function.parameters.zip(argumentNodes).map { case (parameter, argumentNode) =>
-      val decodeArgument = binding.argumentDecoders.getOrElse(
-        parameter.name,
-        throw new IllegalStateException(s"Missing method parameter decoder: ${parameter.name}")
-      )
-      parameter.name -> scala.util.Try(Option(decodeArgument(argumentNode)).get).recoverWith { case error =>
-        Failure(new IllegalArgumentException(
-          s"${argumentNode.fold("Missing")(_ => "Malformed")} argument: ${parameter.name}",
-          error
-        ))
-      }.get
-    }
-  }
-
-  /**
-   * Decodes specified bound remote function argument nodes into values.
-   *
-   * @param result remote function result
-   * @param binding remote function binding
-   * @return remote function result node
-   */
-  private def encodeResult(
-     result: Any,
-     binding: HandlerBinding[Node, Effect, Context]
-   ): (Node, Option[Context]) = {
-    Try(binding.encodeResult(result)).recoverWith { case error =>
-      Failure(new IllegalArgumentException("Malformed result", error))
-    }.get
   }
 
   /**
@@ -217,6 +189,47 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }
 
   /**
+   * Decodes specified bound remote function argument nodes into values.
+   *
+   * @param argumentNodes bound remote function argument nodes
+   * @param binding remote function binding
+   * @return bound remote function arguments
+   */
+  private def decodeArguments(
+    argumentNodes: Seq[Option[Node]],
+    binding: HandlerBinding[Node, Effect, Context]
+  ): Seq[Any] = {
+    binding.function.parameters.zip(argumentNodes).map { case (parameter, argumentNode) =>
+      val decodeArgument = binding.argumentDecoders.getOrElse(
+        parameter.name,
+        throw new IllegalStateException(s"Missing method parameter decoder: ${parameter.name}")
+      )
+      Try(Option(decodeArgument(argumentNode)).get).recoverWith { case error =>
+        Failure(new InvalidRequestException(
+          s"${argumentNode.fold("Missing")(_ => "Malformed")} argument: ${parameter.name}",
+          error
+        ))
+      }.get
+    }
+  }
+
+  /**
+   * Decodes specified bound remote function argument nodes into values.
+   *
+   * @param result bound remote function result
+   * @param binding remote function binding
+   * @return bound remote function result node
+   */
+  private def encodeResult(
+    result: Any,
+    binding: HandlerBinding[Node, Effect, Context]
+  ): (Node, Option[Context]) = {
+    Try(binding.encodeResult(result)).recoverWith { case error =>
+      Failure(new IllegalArgumentException("Malformed result", error))
+    }.get
+  }
+
+  /**
    * Creates a response for bound remote function call result.
    *
    * @param callResult remote function call result
@@ -226,11 +239,11 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @return bound function call RPC response
    */
   private def resultResponse[MessageBody: BinaryConverter](
-    callResult: Effect[Either[Throwable, (Node, Option[Context])]],
+    callResult: Effect[(Node, Option[Context])],
     rpcRequest: RpcRequest[Node, protocol.Metadata],
     requestProperties: => Map[String, String]
   ): Effect[HandlerResult[MessageBody, Context]] =
-    callResult.flatMap { result =>
+    callResult.either.flatMap { result =>
       result.fold(
         error => logger.error(s"Failed to process ${protocol.name} request", error, requestProperties),
         _ => logger.info(s"Processed ${protocol.name} request", requestProperties)
@@ -305,7 +318,6 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         Map.empty,
         result => result.asInstanceOf[Node] -> None,
         (_, _) => system.pure(apiSchema.invoke(describedFunctions)),
-        (_, _) => system.pure(apiSchema.invoke(describedFunctions) -> None),
         acceptsContext = false
       )
     }*)
