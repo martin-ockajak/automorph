@@ -5,6 +5,7 @@ import automorph.spi.{MessageCodec, RpcProtocol}
 import java.lang.reflect.Proxy
 import scala.compiletime.summonInline
 import scala.reflect.ClassTag
+import scala.util.Failure
 
 /**
  * Client method bindings code generation.
@@ -83,13 +84,19 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
               callArguments.toSeq -> None
 
           // Encode RPC function arguments
-          val argumentNodes = binding.encodeArguments(argumentValues)
-          val parameterNames = binding.function.parameters.map(_.name)
+          val argumentNodes = binding.function.parameters.zip(argumentValues).map { (parameter, argument) =>
+            val encodeArgument = binding.argumentEncoders.get(parameter.name).getOrElse {
+              throw new IllegalStateException(s"Missing method parameter encoder: ${parameter.name}")
+            }
+            parameter.name -> scala.util.Try(encodeArgument(argument)).recoverWith { case error =>
+              Failure(new IllegalArgumentException(s"Malformed argument: ${parameter.name}", error))
+            }.get
+          }
 
           // Perform the RPC call
           performCall(
             mapName(method.getName),
-            parameterNames.zip(argumentNodes),
+            argumentNodes,
             (resultNode, responseContext) => binding.decodeResult(resultNode, responseContext),
             requestContext
           )

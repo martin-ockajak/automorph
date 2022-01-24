@@ -95,7 +95,7 @@ object ClientGenerator {
     Node: ref.c.WeakTypeTag,
     Codec <: MessageCodec[Node]: ref.c.WeakTypeTag,
     Context: ref.c.WeakTypeTag
-  ](ref: ClassReflection[C])(method: ref.RefMethod, codec: ref.c.Expr[Codec]): ref.c.Expr[Seq[Any] => Seq[Node]] = {
+  ](ref: ClassReflection[C])(method: ref.RefMethod, codec: ref.c.Expr[Codec]): ref.c.Expr[Map[String, Any => Node]] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
@@ -105,29 +105,23 @@ object ClientGenerator {
     }
     val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
-    // Create encode arguments function
-    //   (arguments: Seq[Any]) => Seq[Node]
-    ref.c.Expr[Seq[Any] => Seq[Node]](q"""
-      (arguments: Seq[Any]) => ${
-      // Create the method argument lists by encoding corresponding argument values into nodes
-      //   List(
-      //     codec.encode[Parameter0Type](arguments(0).asInstanceOf[Parameter0Type]),
-      //     ...
-      //     codec.encode[ParameterNType](arguments(N).asInstanceOf[ParameterNType])
-      //   ): List[Node]
-      val argumentNodes = method.parameters.toList.zip(parameterListOffsets).flatMap { case (parameters, offset) =>
-        parameters.toList.zipWithIndex.flatMap { case (parameter, index) =>
-          Option.when((offset + index) != lastArgumentIndex || !MethodReflection.acceptsContext[C, Context](ref)(method)) {
-            q"$codec.encode[${parameter.dataType}](arguments(${offset + index}).asInstanceOf[${parameter.dataType}])"
-          }
+    // Create a map of method parameter names to functions encoding method argument value into a node
+    //   Map(
+    //     parameterNName -> (argument: Any) => codec.encode[ParameterNType](argument.asInstanceOf[ParameterNType])
+    //     ...
+    //   ): Map[String, Any => Node]
+    val argumentEncoders = method.parameters.toList.zip(parameterListOffsets).flatMap { case (parameters, offset) =>
+      parameters.toList.zipWithIndex.flatMap { case (parameter, index) =>
+        Option.when((offset + index) != lastArgumentIndex || !MethodReflection.acceptsContext[C, Context](ref)(method)) {
+          q"""
+            ${parameter.name} -> (
+              (argument: Any) => $codec.encode[${parameter.dataType}](argument.asInstanceOf[${parameter.dataType}])
+            )
+          """
         }
       }
-
-      // Create the encoded arguments sequence construction call
-      //   Seq(encodedArguments*): Seq[Node]
-      q"Seq(..$argumentNodes)"
     }
-    """)
+    ref.c.Expr[Map[String, Any => Node]](q"Map(..$argumentEncoders)")
   }
 
   private def generateDecodeResult[

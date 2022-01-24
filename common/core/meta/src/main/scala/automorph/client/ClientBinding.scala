@@ -6,7 +6,7 @@ import automorph.spi.protocol.RpcFunction
  * RPC client remote API function binding.
  *
  * @param function bound function descriptor
- * @param encodeArguments encodes bound function arguments
+ * @param argumentEncoders map of method parameter names to argument encoding functions
  * @param decodeResult decodes bound function result
  * @param acceptsContext true if the last parameter of the bound function is contextual
  * @tparam Node message node type
@@ -14,7 +14,7 @@ import automorph.spi.protocol.RpcFunction
  */
 final private[automorph] case class ClientBinding[Node, Context](
   function: RpcFunction,
-  encodeArguments: Seq[Any] => Seq[Node],
+  argumentEncoders: Map[String, Any => Node],
   decodeResult: (Node, Context) => Any,
   acceptsContext: Boolean
 )

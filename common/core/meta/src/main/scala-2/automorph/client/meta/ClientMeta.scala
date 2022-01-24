@@ -136,13 +136,19 @@ object ClientMeta {
               }
 
             // Encode RPC function arguments
-            val argumentNodes = binding.encodeArguments(argumentValues)
-            val parameterNames = binding.function.parameters.map(_.name)
+            val argumentNodes = binding.function.parameters.zip(argumentValues).map { case (parameter, argument) =>
+              val encodeArgument = binding.argumentEncoders.get(parameter.name).getOrElse {
+                throw new IllegalStateException("Missing method parameter encoder: " + parameter.name)
+              }
+              parameter.name -> scala.util.Try(encodeArgument(argument)).recoverWith { case error =>
+                scala.util.Failure(new IllegalArgumentException("Malformed argument: " + parameter.name, error))
+              }.get
+            }
 
             // Perform the RPC call
             ${c.prefix}.performCall(
               $mapName(method.getName),
-              parameterNames.zip(argumentNodes),
+              argumentNodes,
               (resultNode, responseContext) => binding.decodeResult(resultNode, responseContext),
               requestContext)
           }.getOrElse(throw new UnsupportedOperationException("Invalid method: " + method.getName))
