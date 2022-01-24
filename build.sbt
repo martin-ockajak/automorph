@@ -403,7 +403,7 @@ lazy val testStandard = project.in(file("test/standard")).dependsOn(
 
 // Compile
 ThisBuild / scalaVersion := "3.0.0"
-ThisBuild / crossScalaVersions ++= Seq("2.13.8", "3.0.0")
+ThisBuild / crossScalaVersions ++= Seq("2.13.8", scalaVersion.value)
 ThisBuild / scalacOptions ++= Seq(
   "-language:higherKinds",
   "-feature",
