@@ -84,7 +84,7 @@ object HandlerGenerator {
 
     val argumentDecoders = generateArgumentDecoders[C, Node, Codec, Context](ref)(method, codec)
     val encodeResult = generateEncodeResult[C, Node, Codec, Effect, Context](ref)(method, codec)
-//    val call = generateCall[C, Effect, Context, Api](ref)(method, api)
+    val call = generateCall[C, Effect, Context, Api](ref)(method, api)
     val invoke = generateInvoke[C, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
     logBoundMethod[C, Api](ref)(method, invoke)
     implicit val functionLiftable: Liftable[RpcFunction] = MethodReflection.functionLiftable(ref)
