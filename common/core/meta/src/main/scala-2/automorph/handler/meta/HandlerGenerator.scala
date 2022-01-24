@@ -222,8 +222,7 @@ object HandlerGenerator {
 
         // Call the API method and type coerce the result
         //   api.method(arguments*).asInstanceOf[Effect[Any]]: Effect[Any]
-//        q"$api.${method.symbol}(...$apiMethodArguments).asInstanceOf[$effectAnyType]"
-        q"$api.${method.symbol}(...$apiMethodArguments).asInstanceOf[$effectType[Any]]"
+        q"$api.${method.symbol}(...$apiMethodArguments).asInstanceOf[$effectAnyType]"
     }
     """)
   }
