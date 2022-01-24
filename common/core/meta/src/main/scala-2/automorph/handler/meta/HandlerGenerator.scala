@@ -86,7 +86,10 @@ object HandlerGenerator {
     val encodeResult = generateEncodeResult[C, Node, Codec, Effect, Context](ref)(method, codec)
     val call = generateCall[C, Effect, Context, Api](ref)(method, api)
     val invoke = generateInvoke[C, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
-    logBoundMethod[C, Api](ref)(method, invoke)
+    logMethod[C, Api](ref)(method)
+    logCode[C](ref)("Argument decoders", argumentDecoders)
+    logCode[C](ref)("Encode result", encodeResult)
+    logCode[C](ref)("Call", call)
     implicit val functionLiftable: Liftable[RpcFunction] = MethodReflection.functionLiftable(ref)
     ref.c.Expr[HandlerBinding[Node, Effect, Context]](
       q"""
@@ -148,9 +151,10 @@ object HandlerGenerator {
     Codec <: MessageCodec[Node] : ref.c.WeakTypeTag,
     Effect[_],
     Context: ref.c.WeakTypeTag
-  ](ref: ClassReflection[C])(method: ref.RefMethod, codec: ref.c.Expr[Codec])(
-    implicit effectType: ref.c.WeakTypeTag[Effect[?]]
-  ): ref.c.Expr[Any => (Node, Option[Context])] = {
+  ](ref: ClassReflection[C])(
+    method: ref.RefMethod,
+    codec: ref.c.Expr[Codec]
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[?]]): ref.c.Expr[Any => (Node, Option[Context])] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
 
@@ -184,9 +188,7 @@ object HandlerGenerator {
   private def generateCall[C <: blackbox.Context, Effect[_], Context: ref.c.WeakTypeTag, Api](ref: ClassReflection[C])(
     method: ref.RefMethod,
     api: ref.c.Expr[Api]
-  )(implicit
-    effectType: ref.c.WeakTypeTag[Effect[?]]
-  ): ref.c.Expr[(Seq[Any], Context) => Effect[Any]] = {
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[?]]): ref.c.Expr[(Seq[Any], Context) => Effect[Any]] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -317,12 +319,13 @@ object HandlerGenerator {
     """)
   }
 
-  private def logBoundMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: ClassReflection[C])(
-    method: ref.RefMethod,
-    invoke: ref.c.Expr[Any]
-  ): Unit = MacroLogger.debug(
-    s"""${MethodReflection.signature[C, Api](ref)(method)} =
-       |  ${ref.c.universe.showCode(invoke.tree)}
-       |""".stripMargin
-  )
+  private def logMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: ClassReflection[C])(
+    method: ref.RefMethod
+  ): Unit =
+    MacroLogger.debug(s"\n${MethodReflection.signature[C, Api](ref)(method)}")
+
+  private def logCode[C <: blackbox.Context](ref: ClassReflection[C])(
+    name: String, expression: ref.c.Expr[Any]
+  ): Unit =
+    MacroLogger.debug(s"  $name:\n    ${ref.c.universe.showCode(expression.tree)}\n")
 }

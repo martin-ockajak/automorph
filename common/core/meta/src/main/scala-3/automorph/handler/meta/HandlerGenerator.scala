@@ -78,7 +78,10 @@ private[automorph] object HandlerGenerator:
     val encodeResult = generateEncodeResult[Node, Codec, Effect, Context](ref)(method, codec)
     val call = generateCall[Effect, Context, Api](ref)(method, api)
     val invoke = generateInvoke[Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
-    logBoundMethod[Api](ref)(method, invoke)
+    logMethod[Api](ref)(method)
+    logCode(ref)("Argument decoders", argumentDecoders)
+    logCode(ref)("Encode result", encodeResult)
+    logCode(ref)("Call", call)
     '{
       HandlerBinding(
         ${ Expr(method.lift.rpcFunction) },
@@ -369,11 +372,12 @@ private[automorph] object HandlerGenerator:
       }
     }
 
-  private def logBoundMethod[Api: Type](ref: ClassReflection)(method: ref.RefMethod, invoke: Expr[Any]): Unit =
+  private def logMethod[Api: Type](ref: ClassReflection)(method: ref.RefMethod): Unit =
     import ref.q.reflect.{Printer, asTerm}
 
-    MacroLogger.debug(
-      s"""${MethodReflection.signature[Api](ref)(method)} =
-        |  ${invoke.asTerm.show(using Printer.TreeShortCode)}
-        |""".stripMargin
-    )
+    MacroLogger.debug(s"\n${MethodReflection.signature[Api](ref)(method)}")
+
+  private def logCode(ref: ClassReflection)(name: String, expression: Expr[Any]): Unit =
+    import ref.q.reflect.{Printer, asTerm}
+
+    MacroLogger.debug(s"  $name:\n    ${expression.asTerm.show(using Printer.TreeShortCode)}\n")
