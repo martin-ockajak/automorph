@@ -6,8 +6,7 @@ import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Session}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Bytes
-import automorph.util.Extensions.{EffectOps, TryOps}
+import automorph.util.Extensions.{BinaryOps, ByteArrayOps, ByteBufferOps, EffectOps, TryOps}
 import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.net.http.HttpClient.Builder
@@ -132,7 +131,7 @@ final case class HttpClient[Effect[_]](
         { case (webSocketEffect, resultEffect, requestBody) =>
           withDefer(defer =>
             webSocketEffect.flatMap(webSocket =>
-              effect(webSocket.sendBinary(Bytes.byteBuffer.to(requestBody), true), defer).flatMap(_ =>
+              effect(webSocket.sendBinary(requestBody.toByteBuffer, true), defer).flatMap(_ =>
                 resultEffect
               )
             )
@@ -261,12 +260,12 @@ final case class HttpClient[Effect[_]](
     private val buffers = ArrayBuffer.empty[ArraySeq.ofByte]
 
     override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[?] = {
-      buffers += Bytes.byteBuffer.from(data)
+      buffers += data.toBinary
       if (last) {
         val outputStream = new ByteArrayOutputStream(buffers.map(_.length).sum)
         buffers.foreach(buffer => outputStream.write(buffer.unsafeArray, 0, buffer.length))
         buffers.clear()
-        val responseBody = Bytes.byteArray.from(outputStream.toByteArray)
+        val responseBody = outputStream.toByteArray.toBinary
         system.run(response.succeed((responseBody, None, Seq())).asInstanceOf[Effect[Any]])
       }
       super.onBinary(webSocket, data, last)
@@ -290,7 +289,7 @@ final case class HttpClient[Effect[_]](
     val headers = response.headers.map.asScala.toSeq.flatMap { case (name, values) =>
       values.asScala.map(name -> _)
     }
-    (Bytes.byteArray.from(response.body), Some(response.statusCode), headers)
+    (response.body.toBinary, Some(response.statusCode), headers)
   }
 
   private def effect[T](completableFuture: => CompletableFuture[T], defer: Defer[Effect]): Effect[T] =

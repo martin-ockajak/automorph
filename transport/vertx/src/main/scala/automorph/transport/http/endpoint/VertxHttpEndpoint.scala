@@ -6,8 +6,8 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.VertxHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{EffectOps, ThrowableOps}
-import automorph.util.{Bytes, Network, Random}
+import automorph.util.Extensions.{BinaryOps, ByteArrayOps, EffectOps, StringOps, ThrowableOps}
+import automorph.util.{Network, Random}
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpHeaders, HttpServerRequest, HttpServerResponse, ServerWebSocket}
@@ -46,7 +46,7 @@ final case class VertxHttpEndpoint[Effect[_]](
     lazy val requestProperties = getRequestProperties(request, requestId)
     log.receivingRequest(requestProperties)
     request.bodyHandler { buffer =>
-      val requestBody = Bytes.byteArray.from(buffer.getBytes)
+      val requestBody = buffer.getBytes.toBinary
       log.receivedRequest(requestProperties)
 
       // Process the request
@@ -72,7 +72,7 @@ final case class VertxHttpEndpoint[Effect[_]](
     requestProperties: => Map[String, String]
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = Bytes.string.from(error.description)
+    val responseBody = error.description.toBinary
     sendResponse(responseBody, statusInternalServerError, None, request, requestId)
   }
 
@@ -96,7 +96,7 @@ final case class VertxHttpEndpoint[Effect[_]](
     setResponseContext(request.response, responseContext)
       .putHeader(HttpHeaders.CONTENT_TYPE, genericHandler.protocol.codec.mediaType)
       .setStatusCode(statusCode)
-      .end(Buffer.buffer(Bytes.byteArray.to(responseBody))).onSuccess { _ =>
+      .end(Buffer.buffer(responseBody.toArray)).onSuccess { _ =>
         log.sentResponse(responseProperties)
       }.onFailure { error =>
         log.failedSendResponse(error, responseProperties)

@@ -6,8 +6,8 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
-import automorph.util.{Bytes, Network, Random}
+import automorph.util.Extensions.{BinaryOps, ByteArrayOps, EffectOps, StringOps, ThrowableOps, TryOps}
+import automorph.util.{Network, Random}
 import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, HttpString, StatusCodes}
@@ -49,7 +49,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
 
       override def handle(exchange: HttpServerExchange, message: Array[Byte]): Unit = {
         log.receivedRequest(requestProperties)
-        val requestBody = Bytes.byteArray.from(message)
+        val requestBody = message.toBinary
         val handlerRunnable = new Runnable {
 
           override def run(): Unit = {
@@ -85,7 +85,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     requestProperties: => Map[String, String]
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = Bytes.string.from(error.description)
+    val responseBody = error.description.toBinary
     val statusCode = StatusCodes.INTERNAL_SERVER_ERROR
     sendResponse(responseBody, statusCode, None, exchange, requestId)
   }
@@ -113,7 +113,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
       }
       setResponseContext(exchange, responseContext)
       exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, genericHandler.protocol.codec.mediaType)
-      exchange.setStatusCode(responseStatusCode).getResponseSender.send(Bytes.byteBuffer.to(responseBody))
+      exchange.setStatusCode(responseStatusCode).getResponseSender.send(responseBody.toByteBuffer)
       log.sentResponse(responseProperties)
     }.onFailure { error =>
       log.failedSendResponse(error, responseProperties)

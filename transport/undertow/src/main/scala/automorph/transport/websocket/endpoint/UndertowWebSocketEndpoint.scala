@@ -6,8 +6,8 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
-import automorph.util.Extensions.{EffectOps, ThrowableOps}
-import automorph.util.{Bytes, Network, Random}
+import automorph.util.Extensions.{BinaryOps, ByteBufferOps, EffectOps, StringOps, ThrowableOps}
+import automorph.util.{Network, Random}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.Headers
 import io.undertow.websockets.core.{AbstractReceiveListener, BufferedBinaryMessage, BufferedTextMessage, WebSocketCallback, WebSocketChannel, WebSockets}
@@ -62,13 +62,13 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
     val receiveListener = new AbstractReceiveListener {
 
       override def onFullTextMessage(channel: WebSocketChannel, message: BufferedTextMessage): Unit = {
-        val requestBody = Bytes.string.from(message.getData)
+        val requestBody = message.getData.toBinary
         handle(exchange, requestBody, channel, () => ())
       }
 
       override def onFullBinaryMessage(channel: WebSocketChannel, message: BufferedBinaryMessage): Unit = {
         val data = message.getData
-        val requestBody = Bytes.byteBuffer.from(WebSockets.mergeBuffers(data.getResource*))
+        val requestBody = WebSockets.mergeBuffers(data.getResource*).toBinary
         handle(exchange, requestBody, channel, () => data.discard())
       }
 
@@ -103,7 +103,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         requestProperties: => Map[String, String]
       ): Unit = {
         log.failedProcessRequest(error, requestProperties)
-        val responseBody = Bytes.string.from(error.description)
+        val responseBody = error.description.toBinary
         sendResponse(responseBody, None, exchange, channel, requestId)
       }
 
@@ -130,7 +130,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
             log.failedSendResponse(error, responseProperties)
         }
         setResponseContext(exchange, responseContext)
-        WebSockets.sendBinary(Bytes.byteBuffer.to(message), channel, callback, ())
+        WebSockets.sendBinary(message.toByteBuffer, channel, callback, ())
       }
 
       private def getRequestContext(exchange: WebSocketHttpExchange): Context = {

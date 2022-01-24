@@ -6,8 +6,8 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint.Context
-import automorph.util.Extensions.{EffectOps, ThrowableOps}
-import automorph.util.{Bytes, Network, Random}
+import automorph.util.Extensions.{BinaryOps, ByteArrayOps, EffectOps, StringOps, ThrowableOps}
+import automorph.util.{Network, Random}
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerRequest, ServerWebSocket}
@@ -42,7 +42,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
     lazy val requestProperties = getRequestProperties(request, requestId)
     log.receivingRequest(requestProperties)
     request.binaryMessageHandler { buffer =>
-      val requestBody = Bytes.byteArray.from(buffer.getBytes)
+      val requestBody = buffer.getBytes.toBinary
       log.receivedRequest(requestProperties)
 
       // Process the request
@@ -50,7 +50,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
         error => sendErrorResponse(error, request, requestId, requestProperties),
         result => {
           // Send the response
-          val responseBody = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
+          val responseBody = result.responseBody.getOrElse(Array[Byte]().toBinary)
           sendResponse(responseBody, request, requestId)
         }
       )).run
@@ -65,7 +65,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
     requestProperties: => Map[String, String]
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = Bytes.string.from(error.trace.mkString("\n"))
+    val responseBody = error.description.toBinary
     sendResponse(responseBody, request, requestId)
   }
 
@@ -82,7 +82,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
     log.sendingResponse(responseProperties)
 
     // Send the response
-    request.writeBinaryMessage(Buffer.buffer(Bytes.byteArray.to(responseBody))).onSuccess { _ =>
+    request.writeBinaryMessage(Buffer.buffer(responseBody.toArray)).onSuccess { _ =>
       log.sentResponse(responseProperties)
     }.onFailure { error =>
       log.failedSendResponse(error, responseProperties)

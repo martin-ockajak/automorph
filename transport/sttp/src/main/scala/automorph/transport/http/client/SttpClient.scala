@@ -5,8 +5,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.SttpClient.{Context, Session}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Bytes
-import automorph.util.Extensions.EffectOps
+import automorph.util.Extensions.{ByteArrayOps, EffectOps}
 import java.net.URI
 import scala.collection.immutable.{ArraySeq, ListMap}
 import sttp.capabilities.WebSockets
@@ -68,7 +67,7 @@ final case class SttpClient[Effect[_]] private (
           },
           response => {
             log.receivedResponse(responseProperties + ("Status" -> response.code.toString), protocol.name)
-            system.pure(Bytes.byteArray.from(response.body) -> getResponseContext(response))
+            system.pure(response.body.toBinary -> getResponseContext(response))
           }
         )
       }
