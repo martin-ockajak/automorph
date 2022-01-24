@@ -27,10 +27,10 @@ object HandlerGenerator {
    * @return mapping of API method names to handler function bindings
    */
   def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
-    codec: Codec,
-    system: EffectSystem[Effect],
-    api: Api
-  ): Seq[HandlerBinding[Node, Effect, Context]] = macro bindingsMacro[Node, Codec, Effect, Context, Api]
+                                                                                      codec: Codec,
+                                                                                      system: EffectSystem[Effect],
+                                                                                      api: Api
+                                                                                    ): Seq[HandlerBinding[Node, Effect, Context]] = macro bindingsMacro[Node, Codec, Effect, Context, Api]
 
   def bindingsMacro[
     Node: c.WeakTypeTag,
@@ -178,6 +178,50 @@ object HandlerGenerator {
         """
       }
     )
+  }
+
+  private def generateCall[C <: blackbox.Context, Effect[_], Context: ref.c.WeakTypeTag, Api](ref: ClassReflection[C])(
+    method: ref.RefMethod,
+    api: ref.c.Expr[Api]
+  )(implicit
+    effectType: ref.c.WeakTypeTag[Effect[?]]
+                                                                                             ): ref.c.Expr[(Seq[Any], Context) => Effect[Any]] = {
+    import ref.c.universe.{Quasiquote, weakTypeOf}
+
+    // Map multiple parameter lists to flat argument node list offsets
+    val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
+      indices :+ (indices.last + size)
+    }
+    val lastArgumentIndex = method.parameters.map(_.size).sum - 1
+
+    // Create API method call function
+    //   (arguments: Seq[Any], requestContext: Context) => Effect[Any]
+    val contextType = weakTypeOf[Context].dealias
+    ref.c.Expr[(Seq[Any], Context) => Effect[Any]](
+      q"""
+        (arguments: Seq[Any], requestContext: $contextType) => ${
+        // Create the method argument lists by type coercing supplied arguments
+        // List(List(
+        //   arguments(N).asInstanceOf[Any]
+        // )): List[List[ParameterXType]]
+        val apiMethodArguments = method.parameters.toList.zip(parameterListOffsets).map { case (parameters, offset) =>
+          parameters.toList.zipWithIndex.map { case (parameter, index) =>
+            val argumentIndex = offset + index
+            if (argumentIndex == lastArgumentIndex && MethodReflection.acceptsContext[C, Context](ref)(method)) {
+              // Use supplied request context as a last argument if the method accepts context as its last parameter
+              q"requestContext"
+            } else {
+              // Coerce argument type
+              q"arguments($argumentIndex).asInstanceOf[${parameter.dataType}]"
+            }
+          }
+        }
+
+        // Call the API method and type coerce the result
+        //   api.method(arguments*).asInstanceOf[Effect[Any]]: Effect[Any]
+        q"$api.${method.symbol}(...$apiMethodArguments).asInstanceOf[$effectType[Any]]"
+      }
+    """)
   }
 
   private def generateInvoke[

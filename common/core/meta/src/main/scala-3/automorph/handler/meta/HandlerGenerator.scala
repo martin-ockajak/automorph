@@ -185,6 +185,55 @@ private[automorph] object HandlerGenerator:
         }
     }
 
+  private def generateCall[Effect[_]: Type, Context: Type, Api: Type](ref: ClassReflection)(
+    method: ref.RefMethod,
+    api: Expr[Api]
+  ): Expr[(Seq[Any], Context) => Effect[Any]] =
+    import ref.q.reflect.{Term, TypeRepr, asTerm}
+    given Quotes = ref.q
+
+    // Map multiple parameter lists to flat argument node list offsets
+    val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
+      indices :+ (indices.last + size)
+    }
+    val lastArgumentIndex = method.parameters.map(_.size).sum - 1
+
+    // Create API method call function
+    //   (arguments: Seq[Any], requestContext: Context) => Effect[Any]
+    val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
+    '{ (arguments, requestContext) =>
+      ${
+        // Create the method argument lists by type coercing supplied arguments
+        // List(List(
+        //   arguments(N).asInstanceOf[Any]
+        // )): List[List[ParameterXType]]
+        val apiMethodArguments = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
+          parameters.toList.zipWithIndex.map { (parameter, index) =>
+            val argumentIndex = offset + index
+            if argumentIndex == lastArgumentIndex && MethodReflection.acceptsContext[Context](ref)(method) then
+              // Use supplied request context as a last argument if the method accepts context as its last parameter
+              'requestContext.asTerm
+            else
+              // Coerce argument type
+              parameter.dataType.asType match
+                case '[parameterType] => '{
+                  arguments(${ Expr(argumentIndex) }).asInstanceOf[parameterType]
+                }.asTerm
+          }
+        ).asInstanceOf[List[List[Term]]]
+
+        // Call the API method and type coerce the result
+        //   api.method(arguments*).asInstanceOf[Effect[Any]]: Effect[Any]
+        resultType.asType match
+          case '[resultValueType] => '{
+            ${
+              MethodReflection.call(ref.q, api.asTerm, method.name, List.empty, apiMethodArguments)
+                .asExprOf[Effect[resultValueType]]
+            }.asInstanceOf[Effect[Any]]
+          }
+      }
+    }
+
   private def generateInvoke[
     Node: Type,
     Codec <: MessageCodec[Node]: Type,
