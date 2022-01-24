@@ -7,7 +7,8 @@ import automorph.spi.RpcProtocol.FunctionNotFoundException
 import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
-import automorph.util.Bytes
+import automorph.util.BinaryConverter
+
 import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 
@@ -53,13 +54,13 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @tparam MessageBody message body type
    * @return optional response message
    */
-  def processRequest[MessageBody: Bytes](
+  def processRequest[MessageBody: BinaryConverter](
     requestBody: MessageBody,
     requestContext: Context,
     requestId: String
   ): Effect[HandlerResult[MessageBody, Context]] = {
     // Parse request
-    val requestMessageBody = implicitly[Bytes[MessageBody]].from(requestBody)
+    val requestMessageBody = implicitly[BinaryConverter[MessageBody]].from(requestBody)
     protocol.parseRequest(requestMessageBody, requestContext, requestId).fold(
       error => errorResponse(error.exception, error.message, responseRequired = true, ListMap(LogProperties.requestId -> requestId)),
       rpcRequest => {
@@ -107,7 +108,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @tparam MessageBody message body type
    * @return bound function call RPC response
    */
-  private def callFunction[MessageBody: Bytes](
+  private def callFunction[MessageBody: BinaryConverter](
     rpcRequest: RpcRequest[Node, protocol.Metadata],
     context: Context,
     requestProperties: => Map[String, String]
@@ -183,7 +184,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @tparam MessageBody message body type
    * @return bound function call RPC response
    */
-  private def resultResponse[MessageBody: Bytes](
+  private def resultResponse[MessageBody: BinaryConverter](
     callResult: Effect[Either[Throwable, (Node, Option[Context])]],
     rpcRequest: RpcRequest[Node, protocol.Metadata],
     requestProperties: => Map[String, String]
@@ -213,7 +214,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @tparam MessageBody message body type
    * @return handler result
    */
-  private def errorResponse[MessageBody: Bytes](
+  private def errorResponse[MessageBody: BinaryConverter](
     error: Throwable,
     message: RpcMessage[protocol.Metadata],
     responseRequired: Boolean,
@@ -236,7 +237,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @tparam MessageBody message body type
    * @return handler result
    */
-  private def response[MessageBody: Bytes](
+  private def response[MessageBody: BinaryConverter](
     result: Try[(Node, Option[Context])],
     message: RpcMessage[protocol.Metadata],
     requestProperties: => Map[String, String]
@@ -248,7 +249,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         lazy val allProperties = rpcResponse.message.properties ++ requestProperties ++
           rpcResponse.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Sending ${protocol.name} response", allProperties)
-        val responseMessageBody = Some(implicitly[Bytes[MessageBody]].to(responseBody))
+        val responseMessageBody = Some(implicitly[BinaryConverter[MessageBody]].to(responseBody))
         system.pure(HandlerResult(responseMessageBody, result.failed.toOption, result.toOption.flatMap(_._2)))
       }
     )
