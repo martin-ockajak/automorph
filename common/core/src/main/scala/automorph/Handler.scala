@@ -7,9 +7,8 @@ import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestExcep
 import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
-import automorph.util.BinaryConverter
 
-import scala.collection.immutable.ListMap
+import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -51,17 +50,15 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @param requestBody request message body
    * @param requestContext request context
    * @param requestId request correlation identifier
-   * @tparam MessageBody message body type
    * @return optional response message
    */
-  def processRequest[MessageBody: BinaryConverter](
-    requestBody: MessageBody,
+  def processRequest(
+    requestBody: ArraySeq.ofByte,
     requestContext: Context,
     requestId: String
-  ): Effect[HandlerResult[MessageBody, Context]] = {
+  ): Effect[HandlerResult[Context]] = {
     // Parse request
-    val requestMessageBody = implicitly[BinaryConverter[MessageBody]].from(requestBody)
-    protocol.parseRequest(requestMessageBody, requestContext, requestId).fold(
+    protocol.parseRequest(requestBody, requestContext, requestId).fold(
       error =>
         errorResponse(
           error.exception,
@@ -74,7 +71,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         lazy val requestProperties = ListMap(
           LogProperties.requestId -> requestId
         ) ++ rpcRequest.message.properties + (
-          LogProperties.messageSize -> requestMessageBody.length.toString
+          LogProperties.messageSize -> requestBody.length.toString
         )
         lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Received ${protocol.name} request", allProperties)
@@ -111,14 +108,13 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @param rpcRequest RPC request
    * @param context request context
    * @param requestProperties request properties
-   * @tparam MessageBody message body type
    * @return bound function call RPC response
    */
-  private def callFunction[MessageBody: BinaryConverter](
+  private def callFunction(
     rpcRequest: RpcRequest[Node, protocol.Metadata],
     context: Context,
     requestProperties: => Map[String, String]
-  ): Effect[HandlerResult[MessageBody, Context]] = {
+  ): Effect[HandlerResult[Context]] = {
     // Lookup bindings for the specified remote function
     val responseRequired = rpcRequest.responseRequired
     logger.debug(s"Processing ${protocol.name} request", requestProperties)
@@ -205,7 +201,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         throw new IllegalStateException(s"Missing method parameter decoder: ${parameter.name}")
       )
       Try(Option(decodeArgument(argumentNode)).get).recoverWith { case error =>
-        Failure(new InvalidRequestException(
+        Failure(InvalidRequestException(
           s"${argumentNode.fold("Missing")(_ => "Malformed")} argument: ${parameter.name}",
           error
         ))
@@ -235,14 +231,13 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @param callResult remote function call result
    * @param rpcRequest RPC request
    * @param requestProperties request properties
-   * @tparam MessageBody message body type
    * @return bound function call RPC response
    */
-  private def resultResponse[MessageBody: BinaryConverter](
+  private def resultResponse(
     callResult: Effect[(Node, Option[Context])],
     rpcRequest: RpcRequest[Node, protocol.Metadata],
     requestProperties: => Map[String, String]
-  ): Effect[HandlerResult[MessageBody, Context]] =
+  ): Effect[HandlerResult[Context]] =
     callResult.either.flatMap { result =>
       result.fold(
         error => logger.error(s"Failed to process ${protocol.name} request", error, requestProperties),
@@ -265,15 +260,14 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @param message RPC message
    * @param responseRequired true if response is required
    * @param requestProperties request properties
-   * @tparam MessageBody message body type
    * @return handler result
    */
-  private def errorResponse[MessageBody: BinaryConverter](
+  private def errorResponse(
     error: Throwable,
     message: RpcMessage[protocol.Metadata],
     responseRequired: Boolean,
     requestProperties: => Map[String, String]
-  ): Effect[HandlerResult[MessageBody, Context]] = {
+  ): Effect[HandlerResult[Context]] = {
     logger.error(s"Failed to process ${protocol.name} request", error, requestProperties)
     Option.when(responseRequired) {
       response(Failure(error), message, requestProperties)
@@ -288,14 +282,13 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @param result a call result on success or an exception on failure
    * @param message RPC message
    * @param requestProperties request properties
-   * @tparam MessageBody message body type
    * @return handler result
    */
-  private def response[MessageBody: BinaryConverter](
+  private def response(
     result: Try[(Node, Option[Context])],
     message: RpcMessage[protocol.Metadata],
     requestProperties: => Map[String, String]
-  ): Effect[HandlerResult[MessageBody, Context]] =
+  ): Effect[HandlerResult[Context]] =
     protocol.createResponse(result.map(_._1), message.metadata).pureFold(
       error => system.failed(error),
       rpcResponse => {
@@ -303,8 +296,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         lazy val allProperties = rpcResponse.message.properties ++ requestProperties ++
           rpcResponse.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Sending ${protocol.name} response", allProperties)
-        val responseMessageBody = Some(implicitly[BinaryConverter[MessageBody]].to(responseBody))
-        system.pure(HandlerResult(responseMessageBody, result.failed.toOption, result.toOption.flatMap(_._2)))
+        system.pure(HandlerResult(Some(responseBody), result.failed.toOption, result.toOption.flatMap(_._2)))
       }
     )
 

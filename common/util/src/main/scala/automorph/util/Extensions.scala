@@ -1,8 +1,6 @@
 package automorph.util
 
 import automorph.spi.EffectSystem
-import automorph.util.BinaryConverter.Binary
-
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
 import java.nio.ByteBuffer
 import java.nio.charset.{Charset, StandardCharsets}
@@ -13,6 +11,9 @@ private[automorph] object Extensions {
 
   /** String character set */
   private val charset: Charset = StandardCharsets.UTF_8
+
+  /** Immutable byte array. */
+  type Binary = ArraySeq.ofByte
 
   implicit final class ThrowableOps(private val throwable: Throwable) {
 
@@ -42,7 +43,7 @@ private[automorph] object Extensions {
      *
      * @return error messages
      */
-     def description: String = trace.mkString("\n")
+    def description: String = trace.mkString("\n")
   }
 
   implicit final class TryOps[T](private val tryValue: Try[T]) {
@@ -114,6 +115,7 @@ private[automorph] object Extensions {
   }
 
   implicit class BinaryOps(data: Binary) {
+
     def toArray: Array[Byte] = data.unsafeArray
 
     def toByteBuffer: ByteBuffer = ByteBuffer.wrap(data.toArray)
@@ -124,18 +126,21 @@ private[automorph] object Extensions {
   }
 
   implicit class ByteArrayOps(data: Array[Byte]) {
+
     def toBinary: Binary = new ArraySeq.ofByte(data)
 
     def toBinary(length: Int): Binary = data.take(length).toBinary
   }
 
   implicit class StringOps(data: String) {
+
     def toBinary: Binary = data.getBytes(charset).toBinary
 
     def toBinary(length: Int): Binary = data.getBytes(charset).toBinary(length)
   }
 
   implicit class ByteBufferOps(data: ByteBuffer) {
+
     def toBinary: Binary = {
       if (data.hasArray) {
         data.array.toBinary
@@ -154,6 +159,7 @@ private[automorph] object Extensions {
   }
 
   implicit class InputStreamOps(data: InputStream) {
+
     /** Input stream reading buffer size. */
     private val bufferSize = 4096
 
