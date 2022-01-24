@@ -136,7 +136,7 @@ object ClientMeta {
               }
 
             // Encode RPC function arguments
-            val argumentNodes = binding.function.parameters.zip(argumentValues).map { case (parameter, argument) =>
+            lazy val argumentNodes = binding.function.parameters.zip(argumentValues).map { case (parameter, argument) =>
               val encodeArgument = binding.argumentEncoders.getOrElse(
                 parameter.name,
                 throw new IllegalStateException("Missing method parameter encoder: " + parameter.name)

@@ -16,6 +16,7 @@ final case class HandlerBinding[Node, Effect[_], Context](
   function: RpcFunction,
   argumentDecoders: Map[String, Option[Node] => Any],
   encodeResult: Any => (Node, Option[Context]),
+  call: (Seq[Any], Context) => Effect[Any],
   invoke: (Seq[Option[Node]], Context) => Effect[(Node, Option[Context])],
   acceptsContext: Boolean
 )

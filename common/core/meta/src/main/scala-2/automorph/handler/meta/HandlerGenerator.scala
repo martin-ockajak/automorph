@@ -27,10 +27,10 @@ object HandlerGenerator {
    * @return mapping of API method names to handler function bindings
    */
   def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
-                                                                                      codec: Codec,
-                                                                                      system: EffectSystem[Effect],
-                                                                                      api: Api
-                                                                                    ): Seq[HandlerBinding[Node, Effect, Context]] = macro bindingsMacro[Node, Codec, Effect, Context, Api]
+    codec: Codec,
+    system: EffectSystem[Effect],
+    api: Api
+  ): Seq[HandlerBinding[Node, Effect, Context]] = macro bindingsMacro[Node, Codec, Effect, Context, Api]
 
   def bindingsMacro[
     Node: c.WeakTypeTag,
@@ -61,8 +61,7 @@ object HandlerGenerator {
     val handlerBindings = validMethods.map { method =>
       generateBinding[c.type, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
     }
-    c.Expr[Seq[HandlerBinding[Node, Effect, Context]]](
-      q"""
+    c.Expr[Seq[HandlerBinding[Node, Effect, Context]]](q"""
       Seq(..$handlerBindings)
     """)
   }
@@ -85,6 +84,7 @@ object HandlerGenerator {
 
     val argumentDecoders = generateArgumentDecoders[C, Node, Codec, Context](ref)(method, codec)
     val encodeResult = generateEncodeResult[C, Node, Codec, Effect, Context](ref)(method, codec)
+//    val call = generateCall[C, Effect, Context, Api](ref)(method, api)
     val invoke = generateInvoke[C, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
     logBoundMethod[C, Api](ref)(method, invoke)
     implicit val functionLiftable: Liftable[RpcFunction] = MethodReflection.functionLiftable(ref)
@@ -94,6 +94,7 @@ object HandlerGenerator {
         ${method.lift.rpcFunction},
         $argumentDecoders,
         $encodeResult,
+        null,
         $invoke,
         ${MethodReflection.acceptsContext[C, Context](ref)(method)}
       )
@@ -185,7 +186,7 @@ object HandlerGenerator {
     api: ref.c.Expr[Api]
   )(implicit
     effectType: ref.c.WeakTypeTag[Effect[?]]
-                                                                                             ): ref.c.Expr[(Seq[Any], Context) => Effect[Any]] = {
+  ): ref.c.Expr[(Seq[Any], Context) => Effect[Any]] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -197,9 +198,8 @@ object HandlerGenerator {
     // Create API method call function
     //   (arguments: Seq[Any], requestContext: Context) => Effect[Any]
     val contextType = weakTypeOf[Context].dealias
-    ref.c.Expr[(Seq[Any], Context) => Effect[Any]](
-      q"""
-        (arguments: Seq[Any], requestContext: $contextType) => ${
+    ref.c.Expr[(Seq[Any], Context) => Effect[Any]](q"""
+      (arguments: Seq[Any], requestContext: $contextType) => ${
         // Create the method argument lists by type coercing supplied arguments
         // List(List(
         //   arguments(N).asInstanceOf[Any]

@@ -84,7 +84,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
               callArguments.toSeq -> None
 
           // Encode RPC function arguments
-          val argumentNodes = binding.function.parameters.zip(argumentValues).map { (parameter, argument) =>
+          lazy val argumentNodes = binding.function.parameters.zip(argumentValues).map { (parameter, argument) =>
             val encodeArgument = binding.argumentEncoders.getOrElse(
               parameter.name,
               throw new IllegalStateException(s"Missing method parameter encoder: ${parameter.name}")

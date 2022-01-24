@@ -262,6 +262,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         apiSchema.function,
         Map.empty,
         result => result.asInstanceOf[Node] -> None,
+        (_, _) => system.pure(apiSchema.invoke(describedFunctions)),
         (_, _) => system.pure(apiSchema.invoke(describedFunctions) -> None),
         acceptsContext = false
       )

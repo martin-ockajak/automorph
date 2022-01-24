@@ -76,6 +76,7 @@ private[automorph] object HandlerGenerator:
 
     val argumentDecoders = generateArgumentDecoders[Node, Codec, Context](ref)(method, codec)
     val encodeResult = generateEncodeResult[Node, Codec, Effect, Context](ref)(method, codec)
+    val call = generateCall[Effect, Context, Api](ref)(method, api)
     val invoke = generateInvoke[Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
     logBoundMethod[Api](ref)(method, invoke)
     '{
@@ -83,6 +84,7 @@ private[automorph] object HandlerGenerator:
         ${ Expr(method.lift.rpcFunction) },
         $argumentDecoders,
         $encodeResult,
+        $call,
         $invoke,
         ${ Expr(MethodReflection.acceptsContext[Context](ref)(method)) }
       )
@@ -227,8 +229,13 @@ private[automorph] object HandlerGenerator:
         resultType.asType match
           case '[resultValueType] => '{
             ${
-              MethodReflection.call(ref.q, api.asTerm, method.name, List.empty, apiMethodArguments)
-                .asExprOf[Effect[resultValueType]]
+              MethodReflection.call(
+                ref.q,
+                api.asTerm,
+                method.name,
+                List.empty,
+                apiMethodArguments
+              ).asExprOf[Effect[resultValueType]]
             }.asInstanceOf[Effect[Any]]
           }
       }
