@@ -2,6 +2,7 @@ package automorph.transport.http
 
 import automorph.protocol.jsonrpc.ErrorType.{InternalErrorException, ParseErrorException, ServerErrorException}
 import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException}
+import automorph.util.Extensions.{ByteArrayOps, StringOps}
 import java.io.IOException
 import java.net.URI
 import java.nio.charset.StandardCharsets
@@ -389,8 +390,8 @@ final case class HttpContext[Transport](
    * @param entries cookie names and values
    * @return HTTP message context
    */
-  def setCookies(values: (String, String)*): HttpContext[Transport] =
-    cookies(values, headerSetCookie)
+  def setCookies(entries: (String, String)*): HttpContext[Transport] =
+    cookies(entries, headerSetCookie)
 
   /** `Authorization` header value. */
   def authorization: Option[String] =
@@ -412,7 +413,7 @@ final case class HttpContext[Transport](
    * @return HTTP message context
    */
   def authorizationBasic(user: String, password: String): HttpContext[Transport] = {
-    val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
+    val value = Base64.getEncoder.encode(s"$user:$password".toArray).asString
     header(headerAuthorization, s"$headerAuthorizationBasic $value")
   }
 
@@ -454,7 +455,7 @@ final case class HttpContext[Transport](
    * @return HTTP message context
    */
   def proxyAuthBasic(user: String, password: String): HttpContext[Transport] = {
-    val value = new String(Base64.getEncoder.encode(s"$user:$password".getBytes(charset)), charset)
+    val value = Base64.getEncoder.encode(s"$user:$password".toArray).asString
     header(headerProxyAuthorization, s"$headerAuthorizationBasic $value")
   }
 

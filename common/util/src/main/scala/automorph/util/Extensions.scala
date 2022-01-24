@@ -13,9 +13,6 @@ private[automorph] object Extensions {
   /** String character set */
   private val charset: Charset = StandardCharsets.UTF_8
 
-  /** Immutable byte array. */
-  type Binary = ArraySeq.ofByte
-
   implicit final class ThrowableOps(private val throwable: Throwable) {
 
     /**
@@ -117,32 +114,14 @@ private[automorph] object Extensions {
 
   implicit class ByteArrayOps(data: Array[Byte]) {
 
-    def toBinary: Binary =
-      new ArraySeq.ofByte(data)
-
-    def toBinary(length: Int): Binary =
-      data.take(length).toBinary
-
     def toInputStream: InputStream =
       ArrayInputStream(data)
+
+    def asString: String =
+      new String(data, charset)
   }
 
   implicit class ByteBufferOps(data: ByteBuffer) {
-
-    def toBinary: Binary =
-      if (data.hasArray) {
-        data.array.toBinary
-      } else {
-        val array = Array.ofDim[Byte](data.remaining)
-        data.get(array)
-        new ArraySeq.ofByte(array)
-      }
-
-    def toBinary(length: Int): Binary = {
-      val array = Array.ofDim[Byte](length)
-      data.get(array)
-      new ArraySeq.ofByte(array)
-    }
 
     def toArray: Array[Byte] =
       if (data.hasArray) {
@@ -183,14 +162,8 @@ private[automorph] object Extensions {
     def toByteBuffer: ByteBuffer =
       ByteBuffer.wrap(data.toArray)
 
-    def toBinary: Binary =
-      new ArraySeq.ofByte(toArray)
-
-    def asBinary(length: Int): Binary =
-      new ArraySeq.ofByte(asArray(length))
-
     def asString: String =
-      new String(data.toArray, charset)
+      data.toArray.asString
 
     private def toByteArray(length: Option[Int]): Array[Byte] = {
       val outputStream = new ByteArrayOutputStream(length.getOrElse(bufferSize))
@@ -208,12 +181,6 @@ private[automorph] object Extensions {
   }
 
   implicit class StringOps(data: String) {
-
-    def toBinary: Binary =
-      data.getBytes(charset).toBinary
-
-    def toBinary(length: Int): Binary =
-      data.getBytes(charset).toBinary(length)
 
     def toArray: Array[Byte] =
       data.getBytes(charset)
