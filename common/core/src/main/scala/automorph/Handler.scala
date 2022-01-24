@@ -20,7 +20,7 @@ import scala.util.{Failure, Success, Try}
  * @constructor Creates a new RPC request handler with specified system and protocol plugins providing corresponding message context type.
  * @param protocol RPC protocol plugin
  * @param system effect system plugin
- * @param mapName maps API schema function to the exposed RPC function name (empty result causes the method not to be exposed)
+ * @param mapName maps API schema function to the exposed remote function name (empty result causes the method not to be exposed)
  * @param apiBindings API method bindings
  * @tparam Node message node type
  * @tparam Codec message codec plugin type
@@ -40,13 +40,13 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }
   implicit private val givenSystem: EffectSystem[Effect] = system
 
-  /** Bound RPC functions. */
+  /** Bound remote functions. */
   lazy val functions: Seq[RpcFunction] = bindings.map { case (name, binding) =>
     binding.function.copy(name = name)
   }.toSeq
 
   /**
-   * Processes an RPC request by invoking a bound RPC function based on the specified RPC request and its context and return an RPC response.
+   * Processes an RPC request by invoking a bound remote function based on the specified RPC request and its context and return an RPC response.
    *
    * @param requestBody request message body
    * @param requestContext request context
@@ -64,7 +64,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     protocol.parseRequest(requestMessageBody, requestContext, requestId).fold(
       error => errorResponse(error.exception, error.message, responseRequired = true, ListMap(LogProperties.requestId -> requestId)),
       rpcRequest => {
-        // Invoke requested RPC function
+        // Invoke requested remote function
         lazy val requestProperties = ListMap(
           LogProperties.requestId -> requestId
         ) ++ rpcRequest.message.properties + (
@@ -83,7 +83,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * Bound API methods are exposed using their transformed via the `mapName` function.
    * The `mapName` function is applied globally to the results to all bound APIs and their specific name mapping provided by the 'bind' method.
    *
-   * @param mapName maps API method name to the exposed RPC function name (empty result causes the method not to be exposed)
+   * @param mapName maps API method name to the exposed remote function name (empty result causes the method not to be exposed)
    * @return RPC request handler with specified global API method name mapping
    */
   def mapName(mapName: String => Iterable[String]): Handler[Node, Codec, Effect, Context] =
@@ -98,9 +98,9 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }
 
   /**
-   * Calls bound RPC function specified in a request and creates a response.
+   * Calls bound remote function specified in a request and creates a response.
    *
-   * Optional request context is used as a last RPC function argument.
+   * Optional request context is used as a last remote function argument.
    *
    * @param rpcRequest RPC request
    * @param context request context
@@ -113,7 +113,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     context: Context,
     requestProperties: => Map[String, String]
   ): Effect[HandlerResult[MessageBody, Context]] = {
-    // Lookup bindings for the specified RPC function
+    // Lookup bindings for the specified remote function
     val responseRequred = rpcRequest.responseRequired
     logger.debug(s"Processing ${protocol.name} request", requestProperties)
     bindings.get(rpcRequest.function).map { binding =>
@@ -134,12 +134,53 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }
 
   /**
-   * Validates and extracts specified bound RPC function arguments from a request.
+   * Decodes specified bound remote function argument nodes into values.
    *
-   * Optional request context is used as a last RPC function argument.
+   * @param argumentNodes remote function argument nodes
+   * @param binding remote function binding
+   * @return remote function arguments
+   */
+  private def decodeArguments(
+    argumentNodes: Seq[Option[Node]],
+    binding: HandlerBinding[Node, Effect, Context]
+  ): Seq[Any] = {
+    binding.function.parameters.zip(argumentNodes).map { case (parameter, argumentNode) =>
+      val decodeArgument = binding.argumentDecoders.getOrElse(
+        parameter.name,
+        throw new IllegalStateException(s"Missing method parameter decoder: ${parameter.name}")
+      )
+      parameter.name -> scala.util.Try(Option(decodeArgument(argumentNode)).get).recoverWith { case error =>
+        Failure(new IllegalArgumentException(
+          s"${argumentNode.fold("Missing")(_ => "Malformed")} argument: ${parameter.name}",
+          error
+        ))
+      }.get
+    }
+  }
+
+  /**
+   * Decodes specified bound remote function argument nodes into values.
+   *
+   * @param result remote function result
+   * @param binding remote function binding
+   * @return remote function result node
+   */
+  private def encodeResult(
+     result: Any,
+     binding: HandlerBinding[Node, Effect, Context]
+   ): (Node, Option[Context]) = {
+    Try(binding.encodeResult(result)).recoverWith { case error =>
+      Failure(new IllegalArgumentException("Malformed result", error))
+    }.get
+  }
+
+  /**
+   * Validates and extracts specified bound remote function arguments from a request.
+   *
+   * Optional request context is used as a last remote function argument.
    *
    * @param rpcRequest RPC request
-   * @param binding handler RPC function binding
+   * @param binding remote function binding
    * @return bound function arguments
    */
   private def extractArguments(
@@ -176,9 +217,9 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }
 
   /**
-   * Creates a response for bound RPC function call result.
+   * Creates a response for bound remote function call result.
    *
-   * @param callResult RPC function call result
+   * @param callResult remote function call result
    * @param rpcRequest RPC request
    * @param requestProperties request properties
    * @tparam MessageBody message body type

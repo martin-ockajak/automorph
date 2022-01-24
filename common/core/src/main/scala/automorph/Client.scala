@@ -71,11 +71,11 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   /**
    * Calls a remote API function using specified arguments.
    *
-   * Optional request context is used as a last RPC function argument.
+   * Optional request context is used as a last remote function argument.
    *
-   * @param function RPC function name
+   * @param function remote function name
    * @param arguments named arguments
-   * @param decodeResult decodes RPC function result
+   * @param decodeResult decodes remote function result
    * @param requestContext request context
    * @tparam Result result type
    * @return result value
@@ -110,9 +110,9 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   /**
    * Messages a remote API function using specified arguments.
    *
-   * Optional request context is used as a last RPC function argument.
+   * Optional request context is used as a last remote function argument.
    *
-   * @param function RPC function name
+   * @param function remote function name
    * @param arguments named arguments
    * @param requestContext request context
    * @return nothing
@@ -142,12 +142,12 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }
 
   /**
-   * Processes an RPC function call response.
+   * Processes an remote function call response.
    *
    * @param responseBody response message body
    * @param responseContext response context
    * @param requestProperties request properties
-   * @param decodeResult decodes RPC function call result
+   * @param decodeResult decodes remote function call result
    * @tparam R result type
    * @return result value
    */

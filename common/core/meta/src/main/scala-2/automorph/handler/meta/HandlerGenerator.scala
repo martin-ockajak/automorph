@@ -200,6 +200,7 @@ object HandlerGenerator {
     // Create API method call function
     //   (arguments: Seq[Any], requestContext: Context) => Effect[Any]
     val contextType = weakTypeOf[Context].dealias
+    val anyType = weakTypeOf[Any]
     val effectAnyType = weakTypeOf[Effect[Any]]
     ref.c.Expr[(Seq[Any], Context) => Effect[Any]](q"""
       (arguments: Seq[Any], requestContext: $contextType) => ${
