@@ -37,9 +37,9 @@ private[automorph] object Extensions {
      * @param onFailure function to apply if this is a `Failure`
      * @return a transformed `Try`
      */
-    def onFailure(onFailure: Throwable => Unit): Try[T] = tryValue recoverWith { case exception =>
-      onFailure(exception)
-      Failure(exception)
+    def onFailure(onFailure: Throwable => Unit): Try[T] = tryValue.recoverWith { case error =>
+      onFailure(error)
+      Failure(error)
     }
 
     /**
@@ -51,7 +51,7 @@ private[automorph] object Extensions {
      * @return applied function result
      */
     def pureFold[U](onFailure: Throwable => U, onSuccess: T => U): U = tryValue match {
-      case Failure(exception) => onFailure(exception)
+      case Failure(error) => onFailure(error)
       case Success(value) => onSuccess(value)
     }
   }
