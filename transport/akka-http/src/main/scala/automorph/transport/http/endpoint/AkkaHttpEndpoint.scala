@@ -10,8 +10,8 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
-import automorph.util.{Bytes, Network, Random}
+import automorph.util.Extensions.{BinaryOps, ByteBufferOps, EffectOps, ThrowableOps, StringOps, TryOps}
+import automorph.util.{Network, Random}
 import java.util.concurrent.TimeUnit
 import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.concurrent.ExecutionContext
@@ -74,7 +74,7 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
 
       // Process the request
       request.entity.toStrict(readTimeout).map { requestEntity =>
-        val requestBody = Bytes.byteBuffer.from(requestEntity.data.asByteBuffer)
+        val requestBody = requestEntity.data.asByteBuffer.toBinary
         genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
           error => sendErrorResponse(error, contentType, message.replyTo, remoteAddress, requestId, requestProperties),
           result => {
@@ -98,7 +98,7 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
     requestProperties: => Map[String, String]
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = Bytes.string.from(error.description)
+    val responseBody = error.description.toBinary
     sendResponse(responseBody, StatusCodes.InternalServerError, contentType, None, replyTo, remoteAddress, requestId)
   }
 
@@ -126,7 +126,7 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
       val response = baseResponse
         .withStatus(responseStatusCode)
         .withHeaders(baseResponse.headers)
-        .withEntity(contentType, Bytes.byteArray.to(responseBody))
+        .withEntity(contentType, responseBody.toArray)
       replyTo.tell(response)
       log.sentResponse(responseProperties)
     }.onFailure { error =>

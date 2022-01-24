@@ -6,8 +6,8 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.JettyHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{EffectOps, ThrowableOps, TryOps}
-import automorph.util.{Bytes, Network, Random}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, ThrowableOps, StringOps, TryOps}
+import automorph.util.{Network, Random}
 import jakarta.servlet.AsyncContext
 import jakarta.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 import org.eclipse.jetty.http.{HttpHeader, HttpStatus}
@@ -45,14 +45,14 @@ final case class JettyHttpEndpoint[Effect[_]](
       val requestId = Random.id
       lazy val requestProperties = getRequestProperties(request, requestId)
       log.receivedRequest(requestProperties)
-      val requestBody = Bytes.inputStream.from(request.getInputStream)
+      val requestBody = request.getInputStream.toBinary
 
       // Process the request
       genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
         error => sendErrorResponse(error, response, asyncContext, request, requestId, requestProperties),
         result => {
           // Send the response
-          val responseBody = result.responseBody.getOrElse(Bytes.byteArray.from(Array()))
+          val responseBody = result.responseBody.getOrElse(Array[Byte]().toBinary)
           val status = result.exception.map(mapException).getOrElse(HttpStatus.OK_200)
           sendResponse(responseBody, status, None, response, asyncContext, request, requestId)
         }
@@ -69,7 +69,7 @@ final case class JettyHttpEndpoint[Effect[_]](
     requestProperties: => Map[String, String]
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = Bytes.string.from(error.description)
+    val responseBody = error.description.toBinary
     val status = HttpStatus.INTERNAL_SERVER_ERROR_500
     sendResponse(responseBody, status, None, response, asyncContext, request, requestId)
   }
