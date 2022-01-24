@@ -216,10 +216,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @param binding remote function binding
    * @return bound remote function result node
    */
-  private def encodeResult(
-    result: Any,
-    binding: HandlerBinding[Node, Effect, Context]
-  ): (Node, Option[Context]) = {
+  private def encodeResult(result: Any, binding: HandlerBinding[Node, Effect, Context]): (Node, Option[Context]) = {
     Try(binding.encodeResult(result)).recoverWith { case error =>
       Failure(new IllegalArgumentException("Malformed result", error))
     }.get
