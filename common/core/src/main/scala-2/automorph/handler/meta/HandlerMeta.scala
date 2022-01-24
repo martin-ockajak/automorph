@@ -103,9 +103,9 @@ object HandlerMeta {
   ): c.Expr[Handler[Node, Codec, Effect, Context]] = {
     import c.universe.Quasiquote
 
-    c.Expr[Any](q"""
+    c.Expr[Handler[Node, Codec, Effect, Context]](q"""
       ${c.prefix}.bind($api, Seq(_))
-    """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
+    """)
   }
 
   def bindMapNamesMacro[
@@ -124,13 +124,14 @@ object HandlerMeta {
     val codecType = weakTypeOf[Codec]
     val contextType = weakTypeOf[Context]
     val apiType = weakTypeOf[Api]
-    c.Expr[Any](q"""
+    c.Expr[Handler[Node, Codec, Effect, Context]](q"""
       val newBindings = ${c.prefix}.apiBindings ++ automorph.handler.meta.HandlerGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec, ${c.prefix}.system, $api)
         .flatMap { binding =>
           $mapName(binding.function.name).map(_ -> binding)
         }
       ${c.prefix}.copy(apiBindings = newBindings)
-    """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
+    """)
+//    automorph.log.MacroLogger.debug(s"${c.universe.showCode(x.tree)}\n")
   }
 }

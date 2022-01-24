@@ -107,7 +107,7 @@ lazy val coreMeta = project.in(file("common/core/meta")).dependsOn(
 ).settings(
   name := s"$projectName-core-meta",
   initialize ~= { _ =>
-//    System.setProperty("macro.debug", "true")
+    System.setProperty("macro.debug", "true")
     System.setProperty("macro.test", "true")
   },
   Compile / doc / scalacOptions ++= Seq(
