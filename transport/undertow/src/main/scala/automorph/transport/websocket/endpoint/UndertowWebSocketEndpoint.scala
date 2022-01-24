@@ -103,7 +103,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         requestProperties: => Map[String, String]
       ): Unit = {
         log.failedProcessRequest(error, requestProperties)
-        val responseBody = Bytes.string.from(error.trace.mkString("\n"))
+        val responseBody = Bytes.string.from(error.description)
         sendResponse(responseBody, None, exchange, channel, requestId)
       }
 

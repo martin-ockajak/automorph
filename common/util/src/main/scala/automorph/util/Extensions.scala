@@ -1,6 +1,8 @@
 package automorph.util
 
 import automorph.spi.EffectSystem
+
+import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
 
 private[automorph] object Extensions {
@@ -27,6 +29,13 @@ private[automorph] object Extensions {
           val message = Option(throwable.getMessage).getOrElse("")
           s"[$exceptionName] $message"
         }
+
+    /**
+     * Assemble detailed description of an exception and its causes.
+     *
+     * @return error messages
+     */
+     def description: String = trace.mkString("\n")
   }
 
   implicit final class TryOps[T](private val tryValue: Try[T]) {

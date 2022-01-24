@@ -104,7 +104,7 @@ final case class RabbitMqServer[Effect[_]](
     requestId: String
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val message = Bytes.string.from(error.trace.mkString("\n")).unsafeArray
+    val message = Bytes.string.from(error.description).unsafeArray
     sendResponse(message, replyTo, None, requestProperties, requestId)
   }
 

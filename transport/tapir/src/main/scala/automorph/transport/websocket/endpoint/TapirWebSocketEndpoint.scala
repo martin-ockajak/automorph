@@ -89,7 +89,7 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
     log: MessageLog
   ): Array[Byte] = {
     log.failedProcessRequest(error, requestProperties)
-    val message = Bytes.string.from(error.trace.mkString("\n")).unsafeArray
+    val message = Bytes.string.from(error.description).unsafeArray
     createResponse(message, clientIp, requestId, log)
   }
 

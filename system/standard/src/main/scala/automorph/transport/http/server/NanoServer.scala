@@ -158,7 +158,7 @@ final case class NanoServer[Effect[_]] private (
     requestProperties: => Map[String, String]
   ) = {
     log.failedProcessRequest(error, requestProperties, protocol.name)
-    val message = Bytes.string.from(error.trace.mkString("\n"))
+    val message = Bytes.string.from(error.description)
     createResponse(message, Status.INTERNAL_ERROR, None, session, protocol, requestId)
   }
 

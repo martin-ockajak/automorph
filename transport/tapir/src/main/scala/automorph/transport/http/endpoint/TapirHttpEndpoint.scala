@@ -122,7 +122,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     log: MessageLog
   ): (Array[Byte], StatusCode) = {
     log.failedProcessRequest(error, requestProperties)
-    val message = Bytes.string.from(error.trace.mkString("\n")).unsafeArray
+    val message = Bytes.string.from(error.description).unsafeArray
     val status = StatusCode.InternalServerError
     createResponse(message, status, clientIp, requestId, log)
   }
