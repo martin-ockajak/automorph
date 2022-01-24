@@ -1,5 +1,6 @@
 package automorph.transport.http.endpoint
 
+import automorph.util.Extensions.{ByteArrayOps, InputStreamOps, StringOps}
 import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.util.Try
 
@@ -38,12 +39,12 @@ final case class RapidoidHttpEndpoint[Effect[_]](
     }
 
     // Process the request
-    val requestBody = Bytes.byteArray.from(request.body)
+    val requestBody = request.body.toInputStream
     genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
       error => sendErrorResponse(error, request, requestId, requestProperties),
       result => {
         // Send the response
-        val responseBody = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
+        val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
         val statusCode = result.exception.map(mapException).getOrElse(statusOk)
         sendResponse(responseBody, statusCode, result.context, request, requestId)
       }
@@ -58,12 +59,12 @@ final case class RapidoidHttpEndpoint[Effect[_]](
     requestProperties: => Map[String, String]
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = Bytes.string.from(error.description)
+    val responseBody = error.description.toInputStream
     sendResponse(responseBody, statusInternalServerError, None, request, requestId)
   }
 
   private def sendResponse(
-    responseBody: ArraySeq.ofByte,
+    responseBody: InputStream,
     statusCode: Int,
     responseContext: Option[Context],
     request: Req,
@@ -84,7 +85,7 @@ final case class RapidoidHttpEndpoint[Effect[_]](
       setResponseContext(response, responseContext)
         .header(HttpHeaders.CONTENT_TYPE.name, genericHandler.protocol.codec.mediaType)
         .code(responseStatusCode)
-        .body(Bytes.byteArray.to(responseBody))
+        .body(responseBody.toArray)
         .done()
       log.sentResponse(responseProperties)
     }.onFailure { error =>

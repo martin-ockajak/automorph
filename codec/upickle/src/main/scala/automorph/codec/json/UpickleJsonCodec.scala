@@ -1,7 +1,8 @@
 package automorph.codec.json
 
 import automorph.codec.json.meta.UpickleJsonMeta
-import scala.collection.immutable.ArraySeq
+import automorph.util.Extensions.ByteArrayOps
+import java.io.InputStream
 import ujson.Value
 
 /**
@@ -24,11 +25,11 @@ final case class UpickleJsonCodec[Custom <: UpickleJsonCustom](
 
   override val mediaType: String = "application/json"
 
-  override def serialize(node: Value): ArraySeq.ofByte =
-    new ArraySeq.ofByte(custom.writeToByteArray(node))
+  override def serialize(node: Value): InputStream =
+    custom.writeToByteArray(node).toInputStream
 
-  override def deserialize(data: ArraySeq.ofByte): Value =
-    custom.read[Value](data.unsafeArray)
+  override def deserialize(data: InputStream): Value =
+    custom.read[Value](data)
 
   override def text(node: Value): String =
     custom.write(node, indent)

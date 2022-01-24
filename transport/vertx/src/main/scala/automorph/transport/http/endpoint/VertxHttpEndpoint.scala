@@ -6,11 +6,12 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.VertxHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{BinaryOps, ByteArrayOps, EffectOps, StringOps, ThrowableOps}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
 import automorph.util.{Network, Random}
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpHeaders, HttpServerRequest, HttpServerResponse, ServerWebSocket}
+import java.io.{ByteArrayInputStream, InputStream}
 import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.jdk.CollectionConverters.ListHasAsScala
 
@@ -46,7 +47,7 @@ final case class VertxHttpEndpoint[Effect[_]](
     lazy val requestProperties = getRequestProperties(request, requestId)
     log.receivingRequest(requestProperties)
     request.bodyHandler { buffer =>
-      val requestBody = buffer.getBytes.toBinary
+      val requestBody = buffer.getBytes.toInputStream
       log.receivedRequest(requestProperties)
 
       // Process the request
@@ -54,7 +55,7 @@ final case class VertxHttpEndpoint[Effect[_]](
         error => sendErrorResponse(error, request, requestId, requestProperties),
         result => {
           // Send the response
-          val responseBody = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
+          val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
           val statusCode = result.exception.map(mapException).getOrElse(statusOk)
           sendResponse(responseBody, statusCode, result.context, request, requestId)
         }
@@ -72,12 +73,12 @@ final case class VertxHttpEndpoint[Effect[_]](
     requestProperties: => Map[String, String]
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = error.description.toBinary
+    val responseBody = error.description.toInputStream
     sendResponse(responseBody, statusInternalServerError, None, request, requestId)
   }
 
   private def sendResponse(
-    responseBody: ArraySeq.ofByte,
+    responseBody: InputStream,
     statusCode: Int,
     responseContext: Option[Context],
     request: HttpServerRequest,

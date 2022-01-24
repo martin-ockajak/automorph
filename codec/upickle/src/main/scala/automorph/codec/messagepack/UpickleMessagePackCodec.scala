@@ -1,7 +1,8 @@
 package automorph.codec.messagepack
 
 import automorph.codec.messagepack.meta.UpickleMessagePackMeta
-import scala.collection.immutable.ArraySeq
+import automorph.util.Extensions.ByteArrayOps
+import java.io.InputStream
 import upack.Msg
 
 /**
@@ -24,11 +25,11 @@ final case class UpickleMessagePackCodec[Custom <: UpickleMessagePackCustom](
 
   override val mediaType: String = "application/msgpack"
 
-  override def serialize(node: Msg): ArraySeq.ofByte =
-    new ArraySeq.ofByte(custom.writeBinary(node))
+  override def serialize(node: Msg): InputStream =
+    custom.writeBinary(node).toInputStream
 
-  override def deserialize(data: ArraySeq.ofByte): Msg =
-    custom.readBinary[Msg](data.unsafeArray)
+  override def deserialize(data: InputStream): Msg =
+    custom.readBinary[Msg](data)
 
   override def text(node: Msg): String =
     custom.write(node, indent)

@@ -10,8 +10,9 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{BinaryOps, ByteBufferOps, EffectOps, ThrowableOps, StringOps, TryOps}
+import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
+import java.io.InputStream
 import java.util.concurrent.TimeUnit
 import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.concurrent.ExecutionContext
@@ -74,12 +75,12 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
 
       // Process the request
       request.entity.toStrict(readTimeout).map { requestEntity =>
-        val requestBody = requestEntity.data.asByteBuffer.toBinary
+        val requestBody = requestEntity.data.asByteBuffer.toInputStream
         genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
           error => sendErrorResponse(error, contentType, message.replyTo, remoteAddress, requestId, requestProperties),
           result => {
             // Send the response
-            val responseBody = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
+            val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
             val statusCode = result.exception.map(mapException).map(StatusCode.int2StatusCode).getOrElse(StatusCodes.OK)
             sendResponse(responseBody, statusCode, contentType, result.context, message.replyTo, remoteAddress, requestId)
           }
@@ -98,12 +99,12 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
     requestProperties: => Map[String, String]
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = error.description.toBinary
+    val responseBody = error.description.toInputStream
     sendResponse(responseBody, StatusCodes.InternalServerError, contentType, None, replyTo, remoteAddress, requestId)
   }
 
   private def sendResponse[Effect[_]](
-    responseBody: ArraySeq.ofByte,
+    responseBody: InputStream,
     statusCode: StatusCode,
     contentType: ContentType,
     responseContext: Option[Context],
@@ -126,7 +127,7 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
       val response = baseResponse
         .withStatus(responseStatusCode)
         .withHeaders(baseResponse.headers)
-        .withEntity(contentType, responseBody.toArray)
+        .withEntity(contentType, responseBody.toBinary.toArray)
       replyTo.tell(response)
       log.sentResponse(responseProperties)
     }.onFailure { error =>

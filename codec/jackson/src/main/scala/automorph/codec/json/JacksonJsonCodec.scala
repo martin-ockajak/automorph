@@ -1,16 +1,16 @@
 package automorph.codec.json
 
+import automorph.util.Extensions.ByteArrayOps
+import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.core.{JsonGenerator, JsonParseException, JsonParser, TreeNode}
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.{NumericNode, ObjectNode}
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, DeserializationFeature, JsonNode, ObjectMapper, SerializerProvider}
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.module.scala.ClassTagExtensions
-import scala.collection.immutable.ArraySeq
+import com.fasterxml.jackson.module.scala.{ClassTagExtensions, DefaultScalaModule}
+import java.io.InputStream
 import scala.runtime.BoxedUnit
-import com.fasterxml.jackson.annotation.JsonInclude.Include
 import scala.util.{Failure, Try}
 
 /**
@@ -28,11 +28,11 @@ final case class JacksonJsonCodec(
 
   override val mediaType: String = "application/json"
 
-  def serialize(node: JsonNode): ArraySeq.ofByte =
-    new ArraySeq.ofByte(objectMapper.writeValueAsBytes(node))
+  def serialize(node: JsonNode): InputStream =
+    objectMapper.writeValueAsBytes(node).toInputStream
 
-  def deserialize(data: ArraySeq.ofByte): JsonNode =
-    objectMapper.readTree(data.unsafeArray)
+  def deserialize(data: InputStream): JsonNode =
+    objectMapper.readTree(data)
 
   override def text(node: JsonNode): String =
     objectMapper.writerWithDefaultPrettyPrinter.writeValueAsString(node)

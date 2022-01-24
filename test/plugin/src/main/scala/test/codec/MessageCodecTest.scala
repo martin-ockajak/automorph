@@ -2,6 +2,7 @@ package test.codec
 
 import automorph.spi.MessageCodec
 import java.nio.charset.StandardCharsets
+import org.apache.commons.io.IOUtils
 import org.scalacheck.Arbitrary
 import test.base.BaseTest
 
@@ -31,8 +32,8 @@ trait MessageCodecTest extends BaseTest {
     "Text" in {
       check { (node: Node) =>
         val text = codec.text(node)
-        val serializedNode = codec.serialize(node)
-        text.getBytes(charset).length >= serializedNode.length
+        val serialized = codec.serialize(node)
+        text.getBytes(charset).length >= IOUtils.toByteArray(serialized).length
       }
     }
   }

@@ -6,7 +6,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.amqp.server.RabbitMqServer.Context
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
-import automorph.util.Extensions.{BinaryOps, ByteArrayOps, EffectOps, StringOps, ThrowableOps, TryOps}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
 import java.net.URI
@@ -74,7 +74,7 @@ final case class RabbitMqServer[Effect[_]](
           requestId.map { actualRequestId =>
             // Process the request
             val requestContext = RabbitMqCommon.messageContext(amqpProperties)
-            genericHandler.processRequest(requestBody.toBinary, requestContext, actualRequestId).either.map(_.fold(
+            genericHandler.processRequest(requestBody.toInputStream, requestContext, actualRequestId).either.map(_.fold(
               error => sendError(error, replyTo, requestProperties, actualRequestId),
               result => {
                 // Send the response
@@ -103,7 +103,7 @@ final case class RabbitMqServer[Effect[_]](
     requestId: String
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val message = error.description.toBinary.toArray
+    val message = error.description.toInputStream.toArray
     sendResponse(message, replyTo, None, requestProperties, requestId)
   }
 

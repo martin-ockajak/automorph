@@ -6,13 +6,14 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
-import automorph.util.Extensions.{BinaryOps, ByteBufferOps, EffectOps, StringOps, ThrowableOps}
+import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
 import automorph.util.{Network, Random}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.Headers
 import io.undertow.websockets.core.{AbstractReceiveListener, BufferedBinaryMessage, BufferedTextMessage, WebSocketCallback, WebSocketChannel, WebSockets}
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHandshakeHandler}
+import java.io.InputStream
 import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsJava, MapHasAsScala, SeqHasAsJava}
 
@@ -62,19 +63,19 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
     val receiveListener = new AbstractReceiveListener {
 
       override def onFullTextMessage(channel: WebSocketChannel, message: BufferedTextMessage): Unit = {
-        val requestBody = message.getData.toBinary
+        val requestBody = message.getData.toInputStream
         handle(exchange, requestBody, channel, () => ())
       }
 
       override def onFullBinaryMessage(channel: WebSocketChannel, message: BufferedBinaryMessage): Unit = {
         val data = message.getData
-        val requestBody = WebSockets.mergeBuffers(data.getResource*).toBinary
+        val requestBody = WebSockets.mergeBuffers(data.getResource*).toInputStream
         handle(exchange, requestBody, channel, () => data.discard())
       }
 
       private def handle(
         exchange: WebSocketHttpExchange,
-        requestBody: ArraySeq.ofByte,
+        requestBody: InputStream,
         channel: WebSocketChannel,
         discardMessage: () => Unit
       ): Unit = {
@@ -88,7 +89,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
           error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
           result => {
             // Send the response
-            val responseBody = result.responseBody.getOrElse(new ArraySeq.ofByte(Array()))
+            val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
             sendResponse(responseBody, result.context, exchange, channel, requestId)
             discardMessage()
           }
@@ -103,12 +104,12 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         requestProperties: => Map[String, String]
       ): Unit = {
         log.failedProcessRequest(error, requestProperties)
-        val responseBody = error.description.toBinary
+        val responseBody = error.description.toInputStream
         sendResponse(responseBody, None, exchange, channel, requestId)
       }
 
       private def sendResponse(
-        message: ArraySeq.ofByte,
+        message: InputStream,
         responseContext: Option[Context],
         exchange: WebSocketHttpExchange,
         channel: WebSocketChannel,

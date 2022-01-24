@@ -7,9 +7,6 @@ import test.codec.MessageCodecTest
  * JSON message codec test.
  *
  * Checks message serialization.
- *
- * @tparam Node message node type
- * @tparam ActualCodec message codec
  */
 trait JsonMessageCodecTest extends MessageCodecTest {
 
@@ -20,7 +17,7 @@ trait JsonMessageCodecTest extends MessageCodecTest {
       "Serialize" in {
         check { (node: Node) =>
           val serialized = codec.serialize(node)
-          objectMapper.readTree(serialized.unsafeArray)
+          objectMapper.readTree(serialized)
           true
         }
       }

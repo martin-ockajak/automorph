@@ -2,9 +2,9 @@ package automorph.codec.json
 
 import automorph.codec.json.meta.CirceJsonMeta
 import automorph.schema.{OpenApi, OpenRpc}
+import automorph.util.Extensions.{InputStreamOps, StringOps}
 import io.circe.{parser, Decoder, Encoder, Json}
-import java.nio.charset.StandardCharsets
-import scala.collection.immutable.ArraySeq
+import java.io.InputStream
 
 /**
  * Circe JSON message codec plugin.
@@ -18,11 +18,11 @@ final case class CirceJsonCodec() extends CirceJsonMeta {
 
   override val mediaType: String = "application/json"
 
-  override def serialize(node: Json): ArraySeq.ofByte =
-    new ArraySeq.ofByte(node.dropNullValues.noSpaces.getBytes(CirceJsonCodec.charset))
+  override def serialize(node: Json): InputStream =
+    node.dropNullValues.noSpaces.toInputStream
 
-  override def deserialize(data: ArraySeq.ofByte): Json =
-    parser.decode[Json](new String(data.unsafeArray, CirceJsonCodec.charset)).toTry.get
+  override def deserialize(data: InputStream): Json =
+    parser.decode[Json](data.asString).toTry.get
 
   override def text(node: Json): String =
     node.dropNullValues.spaces2
@@ -41,5 +41,4 @@ object CirceJsonCodec {
   implicit lazy val openRpcDecoder: Decoder[OpenRpc] = CirceOpenRpc.openRpcDecoder
   implicit lazy val openApiEncoder: Encoder[OpenApi] = CirceOpenApi.openApiEncoder
   implicit lazy val openApiDecoder: Decoder[OpenApi] = CirceOpenApi.openApiDecoder
-  private val charset = StandardCharsets.UTF_8
 }

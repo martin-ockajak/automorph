@@ -4,6 +4,7 @@ import automorph.spi.EffectSystem
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
 import java.nio.ByteBuffer
 import java.nio.charset.{Charset, StandardCharsets}
+import java.util
 import scala.collection.immutable.ArraySeq
 import scala.util.{Failure, Success, Try}
 
@@ -114,34 +115,21 @@ private[automorph] object Extensions {
       system.run(effect)
   }
 
-  implicit class BinaryOps(data: Binary) {
-
-    def toArray: Array[Byte] = data.unsafeArray
-
-    def toByteBuffer: ByteBuffer = ByteBuffer.wrap(data.toArray)
-
-    def toInputStream: InputStream = new ByteArrayInputStream(data.toArray)
-
-    def asString: String = new String(data.toArray, charset)
-  }
-
   implicit class ByteArrayOps(data: Array[Byte]) {
 
-    def toBinary: Binary = new ArraySeq.ofByte(data)
+    def toBinary: Binary =
+      new ArraySeq.ofByte(data)
 
-    def toBinary(length: Int): Binary = data.take(length).toBinary
-  }
+    def toBinary(length: Int): Binary =
+      data.take(length).toBinary
 
-  implicit class StringOps(data: String) {
-
-    def toBinary: Binary = data.getBytes(charset).toBinary
-
-    def toBinary(length: Int): Binary = data.getBytes(charset).toBinary(length)
+    def toInputStream: InputStream =
+      ArrayInputStream(data)
   }
 
   implicit class ByteBufferOps(data: ByteBuffer) {
 
-    def toBinary: Binary = {
+    def toBinary: Binary =
       if (data.hasArray) {
         data.array.toBinary
       } else {
@@ -149,13 +137,30 @@ private[automorph] object Extensions {
         data.get(array)
         new ArraySeq.ofByte(array)
       }
-    }
 
     def toBinary(length: Int): Binary = {
       val array = Array.ofDim[Byte](length)
       data.get(array)
       new ArraySeq.ofByte(array)
     }
+
+    def toArray: Array[Byte] =
+      if (data.hasArray) {
+        data.array
+      } else {
+        val array = Array.ofDim[Byte](data.remaining)
+        data.get(array)
+        array
+      }
+
+    def toInputStream: InputStream =
+      if (data.hasArray) {
+        data.array.toInputStream
+      } else {
+        val array = Array.ofDim[Byte](data.remaining)
+        data.get(array)
+        array.toInputStream
+      }
   }
 
   implicit class InputStreamOps(data: InputStream) {
@@ -163,24 +168,34 @@ private[automorph] object Extensions {
     /** Input stream reading buffer size. */
     private val bufferSize = 4096
 
-    def toBinary: Binary = {
-      val outputStream = new ByteArrayOutputStream()
-      val buffer = Array.ofDim[Byte](bufferSize)
-      LazyList.iterate(0) { _ =>
-        data.read(buffer) match {
-          case length if length > 0 =>
-            outputStream.write(buffer, 0, length)
-            length
-          case length => length
-        }
-      }.takeWhile(_ >= 0).lastOption
-      new ArraySeq.ofByte(outputStream.toByteArray)
-    }
+    def asArray(length: Int): Array[Byte] =
+      data match {
+        case arrayInputStream: ArrayInputStream => util.Arrays.copyOf(arrayInputStream.data, length)
+        case _ => toByteArray(Some(length))
+      }
 
-    def asBinary(length: Int): Binary = {
-      val outputStream = new ByteArrayOutputStream(length)
+    def toArray: Array[Byte] =
+      data match {
+        case arrayInputStream: ArrayInputStream => arrayInputStream.data
+        case _ => toByteArray(None)
+      }
+
+    def toByteBuffer: ByteBuffer =
+      ByteBuffer.wrap(data.toArray)
+
+    def toBinary: Binary =
+      new ArraySeq.ofByte(toArray)
+
+    def asBinary(length: Int): Binary =
+      new ArraySeq.ofByte(asArray(length))
+
+    def asString: String =
+      new String(data.toArray, charset)
+
+    private def toByteArray(length: Option[Int]): Array[Byte] = {
+      val outputStream = new ByteArrayOutputStream(length.getOrElse(bufferSize))
       val buffer = Array.ofDim[Byte](bufferSize)
-      LazyList.iterate(length) { remaining =>
+      LazyList.iterate(length.getOrElse(Int.MaxValue)) { remaining =>
         data.read(buffer, 0, Math.min(remaining, buffer.length)) match {
           case length if length >= 0 =>
             outputStream.write(buffer, 0, length)
@@ -188,7 +203,24 @@ private[automorph] object Extensions {
           case _ => 0
         }
       }.takeWhile(_ > 0).lastOption
-      new ArraySeq.ofByte(outputStream.toByteArray)
+      outputStream.toByteArray
     }
   }
+
+  implicit class StringOps(data: String) {
+
+    def toBinary: Binary =
+      data.getBytes(charset).toBinary
+
+    def toBinary(length: Int): Binary =
+      data.getBytes(charset).toBinary(length)
+
+    def toArray: Array[Byte] =
+      data.getBytes(charset)
+
+    def toInputStream: InputStream =
+      ArrayInputStream(data.getBytes(charset))
+  }
+
+  private case class ArrayInputStream(data: Array[Byte]) extends ByteArrayInputStream(data)
 }

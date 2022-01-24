@@ -8,6 +8,7 @@ import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
 import automorph.util.Random
+import java.io.InputStream
 import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.util.Try
 
@@ -95,7 +96,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         system.pure(rpcRequest).flatMap { request =>
           val requestBody = request.message.body
           lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++
-            rpcRequest.message.properties + (LogProperties.messageSize -> requestBody.length.toString)
+            rpcRequest.message.properties
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${protocol.name} request", allProperties)
           transport.call(requestBody, requestContext, requestId, protocol.codec.mediaType)
@@ -130,10 +131,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       rpcRequest =>
         system.pure(rpcRequest).flatMap { request =>
           val requestBody = request.message.body
-          lazy val requestProperties = rpcRequest.message.properties ++ Map(
-            LogProperties.requestId -> requestId,
-            LogProperties.messageSize -> requestBody.length.toString
-          )
+          lazy val requestProperties = rpcRequest.message.properties + (LogProperties.requestId -> requestId)
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${protocol.name} request", allProperties)
           transport.message(request.message.body, requestContext, requestId, protocol.codec.mediaType)
@@ -152,7 +150,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @return result value
    */
   private def processResponse[R](
-    responseBody: ArraySeq.ofByte,
+    responseBody: InputStream,
     responseContext: Context,
     requestProperties: => Map[String, String],
     decodeResult: (Node, Context) => R
@@ -161,10 +159,9 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     protocol.parseResponse(responseBody, responseContext).fold(
       error => raiseError(error.exception, requestProperties),
       rpcResponse => {
-        lazy val allProperties = requestProperties ++ rpcResponse.message.properties +
-          (LogProperties.messageSize -> responseBody.length.toString) ++ rpcResponse.message.text.map(
-            LogProperties.messageBody -> _
-          )
+        lazy val allProperties = requestProperties ++ rpcResponse.message.properties ++ rpcResponse.message.text.map(
+          LogProperties.messageBody -> _
+        )
         logger.trace(s"Received ${protocol.name} response", allProperties)
         rpcResponse.result.pureFold(
           // Raise error

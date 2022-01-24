@@ -5,11 +5,12 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.SttpClient.{Context, Session}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps}
+import java.io.InputStream
 import java.net.URI
 import scala.collection.immutable.{ArraySeq, ListMap}
 import sttp.capabilities.WebSockets
-import sttp.client3.{asByteArrayAlways, asWebSocketAlways, basicRequest, ignore, PartialRequest, Request, Response, SttpBackend}
+import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
@@ -45,11 +46,11 @@ final case class SttpClient[Effect[_]] private (
   implicit private val givenSystem: EffectSystem[Effect] = system
 
   override def call(
-    requestBody: ArraySeq.ofByte,
+    requestBody: InputStream,
     requestContext: Option[Context],
     requestId: String,
     mediaType: String
-  ): Effect[(ArraySeq.ofByte, Context)] = {
+  ): Effect[(InputStream, Context)] = {
     // Send the request
     val sttpRequest = createRequest(requestBody, mediaType, requestContext)
     transportProtocol(sttpRequest).flatMap { protocol =>
@@ -67,7 +68,7 @@ final case class SttpClient[Effect[_]] private (
           },
           response => {
             log.receivedResponse(responseProperties + ("Status" -> response.code.toString), protocol.name)
-            system.pure(response.body.toBinary -> getResponseContext(response))
+            system.pure(response.body.toInputStream -> getResponseContext(response))
           }
         )
       }
@@ -75,7 +76,7 @@ final case class SttpClient[Effect[_]] private (
   }
 
   override def message(
-    requestBody: ArraySeq.ofByte,
+    requestBody: InputStream,
     requestContext: Option[Context],
     requestId: String,
     mediaType: String
@@ -118,14 +119,14 @@ final case class SttpClient[Effect[_]] private (
     ))
   }
 
-  private def sendWebSocket(request: ArraySeq.ofByte): sttp.ws.WebSocket[Effect] => Effect[Array[Byte]] =
+  private def sendWebSocket(request: InputStream): sttp.ws.WebSocket[Effect] => Effect[Array[Byte]] =
     webSocket =>
-      webSocket.sendBinary(request.unsafeArray).flatMap(_ =>
+      webSocket.sendBinary(request.toArray).flatMap(_ =>
         webSocket.receiveBinary(true)
       )
 
   private def createRequest(
-    requestBody: ArraySeq.ofByte,
+    requestBody: InputStream,
     mediaType: String,
     requestContext: Option[Context]
   ): Request[Array[Byte], WebSocket] = {
@@ -152,7 +153,7 @@ final case class SttpClient[Effect[_]] private (
         sttpRequest.response(asWebSocketAlways(sendWebSocket(requestBody)))
       case _ =>
         // Create HTTP request
-        sttpRequest.body(requestBody.unsafeArray).response(asByteArrayAlways)
+        sttpRequest.body(requestBody.toArray).response(asByteArrayAlways)
     }
   }
 

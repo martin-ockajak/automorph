@@ -8,6 +8,7 @@ import automorph.spi.MessageCodec
 import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
+import java.io.InputStream
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
 
@@ -72,7 +73,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
 
   @nowarn("msg=used")
   override def parseRequest(
-    requestBody: MessageBody,
+    requestBody: InputStream,
     requestContext: Context,
     requestId: String
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
@@ -129,7 +130,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
 
   @nowarn("msg=used")
   override def parseResponse(
-    responseBody: MessageBody,
+    responseBody: InputStream,
     responseContext: Context
   ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
     // Deserialize response

@@ -4,8 +4,8 @@ import argonaut.Argonaut.{jNull, StringToParseWrap}
 import argonaut.{CodecJson, DecodeResult, Json}
 import automorph.codec.json.meta.ArgonautJsonMeta
 import automorph.schema.{OpenApi, OpenRpc}
-import java.nio.charset.StandardCharsets
-import scala.collection.immutable.ArraySeq
+import automorph.util.Extensions.{InputStreamOps, StringOps}
+import java.io.InputStream
 
 /**
  * Argonaut JSON message codec plugin.
@@ -19,11 +19,11 @@ final case class ArgonautJsonCodec() extends ArgonautJsonMeta {
 
   override val mediaType: String = "application/json"
 
-  override def serialize(node: Json): ArraySeq.ofByte =
-    new ArraySeq.ofByte(node.nospaces.getBytes(ArgonautJsonCodec.charset))
+  override def serialize(node: Json): InputStream =
+    node.nospaces.toInputStream
 
-  override def deserialize(data: ArraySeq.ofByte): Json =
-    new String(data.unsafeArray, ArgonautJsonCodec.charset).decodeEither[Json].fold(
+  override def deserialize(data: InputStream): Json =
+    data.asString.decodeEither[Json].fold(
       errorMessage => throw new IllegalArgumentException(errorMessage),
       identity
     )
@@ -51,6 +51,4 @@ object ArgonautJsonCodec {
   implicit lazy val openRpcCodecJson: CodecJson[OpenRpc] = ArgonautOpenRpc.openRpcCodecJson
 
   implicit lazy val openApiCodecJson: CodecJson[OpenApi] = ArgonautOpenApi.openApiCodecJson
-
-  private val charset = StandardCharsets.UTF_8
 }

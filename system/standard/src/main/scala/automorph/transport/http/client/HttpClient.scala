@@ -4,10 +4,10 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
 import automorph.spi.transport.ClientMessageTransport
-import automorph.transport.http.client.HttpClient.{defaultBuilder, Context, Session}
+import automorph.transport.http.client.HttpClient.{Context, Session, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{BinaryOps, ByteArrayOps, ByteBufferOps, EffectOps, TryOps}
-import java.io.ByteArrayOutputStream
+import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, TryOps}
+import java.io.{ByteArrayOutputStream, InputStream}
 import java.net.URI
 import java.net.http.HttpClient.Builder
 import java.net.http.HttpRequest.BodyPublishers
@@ -45,7 +45,7 @@ final case class HttpClient[Effect[_]](
   builder: Builder = defaultBuilder
 ) extends ClientMessageTransport[Effect, Context] with Logging {
 
-  private type Response = (ArraySeq.ofByte, Option[Int], Seq[(String, String)])
+  private type Response = (InputStream, Option[Int], Seq[(String, String)])
 
   private val contentTypeHeader = "Content-Type"
   private val acceptHeader = "Accept"
@@ -57,11 +57,11 @@ final case class HttpClient[Effect[_]](
   implicit private val givenSystem: EffectSystem[Effect] = system
 
   override def call(
-    requestBody: ArraySeq.ofByte,
+    requestBody: InputStream,
     requestContext: Option[Context],
     requestId: String,
     mediaType: String
-  ): Effect[(ArraySeq.ofByte, Context)] = {
+  ): Effect[(InputStream, Context)] = {
     // Send the request
     createRequest(requestBody, mediaType, requestContext).flatMap { case (request, requestUrl) =>
       val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
@@ -88,7 +88,7 @@ final case class HttpClient[Effect[_]](
   }
 
   override def message(
-    requestBody: ArraySeq.ofByte,
+    requestBody: InputStream,
     requestContext: Option[Context],
     requestId: String,
     mediaType: String
@@ -106,7 +106,7 @@ final case class HttpClient[Effect[_]](
     system.wrap(())
 
   private def send(
-    request: Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)],
+    request: Either[HttpRequest, (Effect[WebSocket], Effect[Response], InputStream)],
     requestUrl: URI,
     requestId: String,
     protocol: Protocol
@@ -166,10 +166,10 @@ final case class HttpClient[Effect[_]](
   }
 
   private def createRequest(
-    requestBody: ArraySeq.ofByte,
+    requestBody: InputStream,
     mediaType: String,
     requestContext: Option[Context]
-  ): Effect[(Either[HttpRequest, (Effect[WebSocket], Effect[Response], ArraySeq.ofByte)], URI)] = {
+  ): Effect[(Either[HttpRequest, (Effect[WebSocket], Effect[Response], InputStream)], URI)] = {
     val httpContext = requestContext.getOrElse(defaultContext)
     val requestUrl = httpContext.overrideUrl {
       httpContext.transport.flatMap(transport => Try(transport.request.build).toOption).map(_.uri).getOrElse(url)
@@ -196,7 +196,7 @@ final case class HttpClient[Effect[_]](
   }
 
   private def createHttpRequest(
-    requestBody: ArraySeq.ofByte,
+    requestBody: InputStream,
     requestUrl: URI,
     mediaType: String,
     httpContext: Context
@@ -207,7 +207,7 @@ final case class HttpClient[Effect[_]](
     val requestMethod = httpContext.method.map(_.name).getOrElse(method.name)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
     val methodBuilder = transportBuilder.uri(requestUrl)
-      .method(requestMethod, BodyPublishers.ofByteArray(requestBody.unsafeArray))
+      .method(requestMethod, BodyPublishers.ofByteArray(requestBody.toArray))
 
     // Headers
     val headers = httpContext.headers.flatMap { case (name, value) =>
@@ -257,15 +257,15 @@ final case class HttpClient[Effect[_]](
 
   private def webSocketListener(response: Deferred[Effect, Response]): Listener = new Listener {
 
-    private val buffers = ArrayBuffer.empty[ArraySeq.ofByte]
+    private val buffers = ArrayBuffer.empty[Array[Byte]]
 
     override def onBinary(webSocket: WebSocket, data: ByteBuffer, last: Boolean): CompletionStage[?] = {
-      buffers += data.toBinary
+      buffers += data.toArray
       if (last) {
         val outputStream = new ByteArrayOutputStream(buffers.map(_.length).sum)
-        buffers.foreach(buffer => outputStream.write(buffer.unsafeArray, 0, buffer.length))
+        buffers.foreach(buffer => outputStream.write(buffer, 0, buffer.length))
         buffers.clear()
-        val responseBody = outputStream.toByteArray.toBinary
+        val responseBody = outputStream.toByteArray.toInputStream
         system.run(response.succeed((responseBody, None, Seq())).asInstanceOf[Effect[Any]])
       }
       super.onBinary(webSocket, data, last)
@@ -289,7 +289,7 @@ final case class HttpClient[Effect[_]](
     val headers = response.headers.map.asScala.toSeq.flatMap { case (name, values) =>
       values.asScala.map(name -> _)
     }
-    (response.body.toBinary, Some(response.statusCode), headers)
+    (response.body.toInputStream, Some(response.statusCode), headers)
   }
 
   private def effect[T](completableFuture: => CompletableFuture[T], defer: Defer[Effect]): Effect[T] =

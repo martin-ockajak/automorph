@@ -1,5 +1,6 @@
 package automorph.spi.protocol
 
+import java.io.InputStream
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -13,7 +14,7 @@ import scala.collection.immutable.ArraySeq
  */
 final case class RpcMessage[Metadata](
   metadata: Metadata,
-  body: ArraySeq.ofByte,
+  body: InputStream,
   properties: Map[String, String] = Map.empty,
   private val messageText: () => Option[String] = () => None
 ) {

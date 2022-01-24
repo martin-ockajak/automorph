@@ -365,6 +365,7 @@ lazy val testBase = project.in(file("test/base")).dependsOn(
     // Test
     "org.scalatest" %% "scalatest" % "3.2.10",
     "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0",
+    "commons-io" % "commons-io" % "2.11.0",
     "ch.qos.logback" % "logback-classic" % "1.3.0-alpha10",
     "org.slf4j" % "jul-to-slf4j" % "1.7.33",
     "com.lihaoyi" %% "pprint" % "0.6.6"
@@ -410,7 +411,7 @@ ThisBuild / scalacOptions ++= Seq(
   "-deprecation",
   "-unchecked",
   "-release",
-  "8",
+  "9",
   "-encoding",
   "utf8"
 ) ++ (CrossVersion.partialVersion(scalaVersion.value) match {
@@ -443,9 +444,9 @@ ThisBuild / scalacOptions ++= Seq(
 })
 ThisBuild / javacOptions ++= Seq(
   "-source",
-  "8",
+  "11",
   "-target",
-  "8"
+  "11"
 )
 
 

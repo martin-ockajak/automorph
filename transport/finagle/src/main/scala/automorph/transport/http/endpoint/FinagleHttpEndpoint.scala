@@ -6,7 +6,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.FinagleHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{BinaryOps, ByteArrayOps, EffectOps, ThrowableOps}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, ThrowableOps}
 import automorph.util.{Network, Random}
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response, Status}
@@ -42,7 +42,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
     val requestId = Random.id
     lazy val requestProperties = getRequestProperties(request, requestId)
     log.receivedRequest(requestProperties)
-    val requestBody = Buf.ByteArray.Owned.extract(request.content).toBinary
+    val requestBody = Buf.ByteArray.Owned.extract(request.content).toInputStream
 
     // Process the request
     runAsFuture(genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
@@ -50,7 +50,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
       result => {
         // Send the response
         val responseBody = Reader.fromBuf(
-          Buf.ByteArray.Owned(result.responseBody.map(_.toArray).getOrElse(Array[Byte]()))
+          Buf.ByteArray.Owned(result.responseBody.map(_.toArray).getOrElse(Array()))
         )
         val status = result.exception.map(mapException).map(Status.apply).getOrElse(Status.Ok)
         createResponse(responseBody, status, result.context, request, requestId)

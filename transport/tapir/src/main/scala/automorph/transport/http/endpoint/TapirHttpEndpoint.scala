@@ -5,8 +5,8 @@ import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{EffectOps, ThrowableOps}
-import automorph.util.{Bytes, Random}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
+import automorph.util.Random
 import scala.collection.immutable.ListMap
 import sttp.model.{Header, MediaType, Method, QueryParams, StatusCode}
 import sttp.tapir.server.ServerEndpoint
@@ -69,11 +69,11 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
 
         // Process the request
         val requestContext = getRequestContext(paths, queryParams, headers, Some(method))
-        genericHandler.processRequest(requestBody, requestContext, requestId).either.map(_.fold(
+        genericHandler.processRequest(requestBody.toInputStream, requestContext, requestId).either.map(_.fold(
           error => Right(createErrorResponse(error, clientIp, requestId, requestProperties, log)),
           result => {
             // Create the response
-            val responseBody = result.responseBody.getOrElse(Array[Byte]())
+            val responseBody = result.responseBody.map(_.toArray).getOrElse(Array[Byte]())
             val status = result.exception.map(mapException).map(StatusCode.apply).getOrElse(StatusCode.Ok)
             Right(createResponse(responseBody, status, clientIp, requestId, log))
           }
@@ -122,7 +122,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     log: MessageLog
   ): (Array[Byte], StatusCode) = {
     log.failedProcessRequest(error, requestProperties)
-    val message = Bytes.string.from(error.description).unsafeArray
+    val message = error.description.toArray
     val status = StatusCode.InternalServerError
     createResponse(message, status, clientIp, requestId, log)
   }

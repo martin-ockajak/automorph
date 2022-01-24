@@ -1,5 +1,6 @@
 package automorph.handler
 
+import java.io.InputStream
 import scala.collection.immutable.ArraySeq
 
 /**
@@ -12,7 +13,7 @@ import scala.collection.immutable.ArraySeq
  * @tparam Context response context type
  */
 final case class HandlerResult[Context](
-  responseBody: Option[ArraySeq.ofByte],
+  responseBody: Option[InputStream],
   exception: Option[Throwable],
   context: Option[Context]
 )

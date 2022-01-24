@@ -6,8 +6,8 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, getRequestContext, getRequestProperties}
 import automorph.transport.http.{HttpContext, Protocol}
-import automorph.util.Extensions.{EffectOps, ThrowableOps}
-import automorph.util.{Bytes, Random}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
+import automorph.util.Random
 import scala.collection.immutable.ListMap
 import sttp.capabilities.{Streams, WebSockets}
 import sttp.model.{Header, QueryParams}
@@ -73,7 +73,7 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
             error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
             result => {
               // Create the response
-              val responseBody = result.responseBody.getOrElse(Array[Byte]())
+              val responseBody = result.responseBody.map(_.toArray).getOrElse(Array[Byte]())
               createResponse(responseBody, clientIp, requestId, log)
             }
           ))
@@ -89,7 +89,7 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
     log: MessageLog
   ): Array[Byte] = {
     log.failedProcessRequest(error, requestProperties)
-    val message = Bytes.string.from(error.description).unsafeArray
+    val message = error.description.toArray
     createResponse(message, clientIp, requestId, log)
   }
 

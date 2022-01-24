@@ -9,6 +9,7 @@ import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseExcept
 import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.util.Extensions.{ThrowableOps, TryOps}
+import java.io.InputStream
 import scala.annotation.nowarn
 import scala.util.{Failure, Success, Try}
 
@@ -74,7 +75,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
   }
 
   override def parseRequest(
-    requestBody: MessageBody,
+    requestBody: InputStream,
     requestContext: Context,
     requestId: String
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
@@ -133,7 +134,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
 
   @nowarn("msg=used")
   override def parseResponse(
-    responseBody: MessageBody,
+    responseBody: InputStream,
     responseContext: Context
   ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
     // Deserialize response
@@ -218,7 +219,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
   }
 
   private def assembleRequest(
-    requestBody: MessageBody,
+    requestBody: InputStream,
     requestContext: Context
   ): Either[RpcError[Metadata], Request[Node]] =
     requestContext.method.filter(_ == HttpMethod.Get).map { _ =>

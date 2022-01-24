@@ -1,7 +1,7 @@
 package automorph.spi.transport
 
 import automorph.spi.{EffectSystem, MessageTransport}
-import scala.collection.immutable.ArraySeq
+import java.io.InputStream
 
 /**
  * Client message transport protocol plugin.
@@ -30,11 +30,11 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
    * @return response message and context
    */
   def call(
-    requestBody: ArraySeq.ofByte,
+    requestBody: InputStream,
     requestContext: Option[Context],
     requestId: String,
     mediaType: String
-  ): Effect[(ArraySeq.ofByte, Context)]
+  ): Effect[(InputStream, Context)]
 
   /**
    * Sends a request to a remote endpoint without expecting a response.
@@ -48,7 +48,7 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
    * @return nothing
    */
   def message(
-    requestBody: ArraySeq.ofByte,
+    requestBody: InputStream,
     requestContext: Option[Context],
     requestId: String,
     mediaType: String

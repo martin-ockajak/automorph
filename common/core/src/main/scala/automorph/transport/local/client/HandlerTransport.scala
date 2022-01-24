@@ -5,7 +5,7 @@ import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.util.Extensions.EffectOps
-import scala.collection.immutable.ArraySeq
+import java.io.InputStream
 
 /**
  * Local handler transport passing requests directly to specified ''handler'' using specified ''backend''.
@@ -28,11 +28,11 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
   implicit private val givenSystem: EffectSystem[Effect] = system
 
   override def call(
-    requestBody: ArraySeq.ofByte,
+    requestBody: InputStream,
     requestContext: Option[Context],
     requestId: String,
     mediaType: String
-  ): Effect[(ArraySeq.ofByte, Context)] =
+  ): Effect[(InputStream, Context)] =
     handler.processRequest(requestBody, requestContext.getOrElse(defaultContext), requestId)
       .flatMap(_.responseBody.map { responseBody =>
         system.pure(responseBody -> defaultContext)
@@ -41,7 +41,7 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
       })
 
   override def message(
-    requestBody: ArraySeq.ofByte,
+    requestBody: InputStream,
     requestContext: Option[Context],
     requestId: String,
     mediaType: String

@@ -6,11 +6,12 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.EndpointMessageTransport
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint.Context
-import automorph.util.Extensions.{BinaryOps, ByteArrayOps, EffectOps, StringOps, ThrowableOps}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
 import automorph.util.{Network, Random}
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerRequest, ServerWebSocket}
+import java.io.InputStream
 import scala.collection.immutable.{ArraySeq, ListMap}
 import scala.jdk.CollectionConverters.ListHasAsScala
 
@@ -42,7 +43,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
     lazy val requestProperties = getRequestProperties(request, requestId)
     log.receivingRequest(requestProperties)
     request.binaryMessageHandler { buffer =>
-      val requestBody = buffer.getBytes.toBinary
+      val requestBody = buffer.getBytes.toInputStream
       log.receivedRequest(requestProperties)
 
       // Process the request
@@ -50,7 +51,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](
         error => sendErrorResponse(error, request, requestId, requestProperties),
         result => {
           // Send the response
-          val responseBody = result.responseBody.getOrElse(Array[Byte]().toBinary)
+          val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
           sendResponse(responseBody, request, requestId)
         }
       )).run
@@ -65,12 +66,12 @@ final case class VertxWebSocketEndpoint[Effect[_]](
     requestProperties: => Map[String, String]
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
-    val responseBody = error.description.toBinary
+    val responseBody = error.description.toInputStream
     sendResponse(responseBody, request, requestId)
   }
 
   private def sendResponse(
-    responseBody: ArraySeq.ofByte,
+    responseBody: InputStream,
     request: ServerWebSocket,
     requestId: String
   ): Unit = {

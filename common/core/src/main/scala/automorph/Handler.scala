@@ -7,8 +7,8 @@ import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestExcep
 import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
-
-import scala.collection.immutable.{ArraySeq, ListMap}
+import java.io.InputStream
+import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -53,7 +53,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @return optional response message
    */
   def processRequest(
-    requestBody: ArraySeq.ofByte,
+    requestBody: InputStream,
     requestContext: Context,
     requestId: String
   ): Effect[HandlerResult[Context]] = {
@@ -70,9 +70,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         // Invoke requested remote function
         lazy val requestProperties = ListMap(
           LogProperties.requestId -> requestId
-        ) ++ rpcRequest.message.properties + (
-          LogProperties.messageSize -> requestBody.length.toString
-        )
+        ) ++ rpcRequest.message.properties
         lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Received ${protocol.name} request", allProperties)
         callFunction(rpcRequest, requestContext, requestProperties)
