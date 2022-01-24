@@ -127,7 +127,7 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
       val response = baseResponse
         .withStatus(responseStatusCode)
         .withHeaders(baseResponse.headers)
-        .withEntity(contentType, responseBody.toBinary.toArray)
+        .withEntity(contentType, responseBody.toArray)
       replyTo.tell(response)
       log.sentResponse(responseProperties)
     }.onFailure { error =>
