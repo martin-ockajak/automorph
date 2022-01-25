@@ -1,12 +1,12 @@
 package automorph.transport.http.endpoint
 
-import akka.actor.typed.scaladsl.AskPattern.{Askable, schedulerFromActorSystem}
+import akka.actor.typed.scaladsl.AskPattern.{schedulerFromActorSystem, Askable}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.http.scaladsl.model.StatusCodes.{InternalServerError, MethodNotAllowed, NotFound}
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ContentType, HttpRequest, HttpResponse, RemoteAddress, StatusCode, StatusCodes}
-import akka.http.scaladsl.server.Directives.{complete, extractClientIP, extractMethod, extractRequest, onComplete, onSuccess, rawPathPrefixTest}
+import akka.http.scaladsl.server.Directives.{complete, extractClientIP, extractRequest, onComplete}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.RouteResult.Complete
 import akka.util.Timeout
@@ -51,41 +51,27 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
    * @see [[https://doc.akka.io/docs/akka-http Library documentation]]
    * @see [[https://doc.akka.io/api/akka-http/current/akka/http/ API]]
    * @param handlerActor Akka actor with RPC handler behavior
-   * @param pathPrefix HTTP URL path prefix, only requests starting with this path prefix are allowed
-   * @param methods allowed HTTP request methods
    * @param requestTimeout HTTP request processing timeout
    * @param actorSystem Akka actor system
    * @return RPC handler Akka HTTP route
    */
-  def route(
+  def apply(
     handlerActor: ActorRef[RpcHttpRequest],
-    pathPrefix: String = "/",
-    methods: Iterable[HttpMethod] = HttpMethod.values,
     requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS)
   )(implicit actorSystem: ActorSystem[_]): Route = {
     implicit val executionContext: ExecutionContext = actorSystem.executionContext
 
-    // Validate HTTP request method
+    // Process request
     extractRequest { httpRequest =>
-      if (methods.exists(_.name == httpRequest.method.value.toUpperCase)) {
-        // Validate URL path
-        if (httpRequest.uri.path.toString.startsWith(pathPrefix)) {
-          extractClientIP { remoteAddress =>
-            // Process request
-//            implicit val timeout: Timeout = Timeout.durationToTimeout(requestTimeout)
-            implicit val timeout: Timeout = Timeout.durationToTimeout(FiniteDuration(100, TimeUnit.MILLISECONDS))
-            onComplete(handlerActor.ask[HttpResponse](RpcHttpRequest(_, httpRequest, remoteAddress))) {
-              case Success(httpResponse) => complete(httpResponse)
-              case Failure(error) =>
-                log.failedProcessRequest(error, Map())
-                complete(InternalServerError, error.description)
-            }
-          }
-        } else {
-          complete(NotFound)
+      extractClientIP { remoteAddress =>
+        //    implicit val timeout: Timeout = Timeout.durationToTimeout(requestTimeout)
+        implicit val timeout: Timeout = Timeout.durationToTimeout(FiniteDuration(100, TimeUnit.MILLISECONDS))
+        onComplete(handlerActor.ask[HttpResponse](RpcHttpRequest(_, httpRequest, remoteAddress))) {
+          case Success(httpResponse) => complete(httpResponse)
+          case Failure(error) =>
+            log.failedProcessRequest(error, Map())
+            complete(InternalServerError, error.description)
         }
-      } else {
-        complete(MethodNotAllowed)
       }
     }
   }

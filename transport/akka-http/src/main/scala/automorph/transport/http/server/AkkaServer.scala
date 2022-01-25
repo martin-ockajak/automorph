@@ -4,19 +4,25 @@ import akka.actor.typed.scaladsl.AskPattern.Askable
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, ActorSystem}
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.HttpResponse
+import akka.http.scaladsl.model.StatusCodes.{InternalServerError, MethodNotAllowed, NotFound}
+import akka.http.scaladsl.server.Directives.{complete, extractClientIP, extractRequest, onComplete, onSuccess}
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.settings.ServerSettings
 import akka.util.Timeout
 import automorph.Types
-import automorph.log.Logging
+import automorph.log.{Logging, MessageLog}
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.endpoint.AkkaHttpEndpoint
-import automorph.transport.http.endpoint.AkkaHttpEndpoint.RpcHttpRequest
+import automorph.transport.http.endpoint.AkkaHttpEndpoint.{RpcHttpRequest, log}
 import automorph.transport.http.server.AkkaServer.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
+import automorph.util.Extensions.ThrowableOps
 import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration.{Duration, FiniteDuration}
-import scala.concurrent.Await
+import scala.concurrent.{Await, ExecutionContext}
+import scala.util.{Failure, Success}
 
 /**
  * Akka HTTP server transport plugin.
@@ -49,6 +55,8 @@ final case class AkkaServer[Effect[_]](
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
+  private val allowedMethods = methods.map(_.name).toSet
+  private val log = MessageLog(logger, Protocol.Http.name)
   private val actorSystem = start()
 
   override def close(): Effect[Unit] = {
@@ -59,8 +67,8 @@ final case class AkkaServer[Effect[_]](
     }
   }
 
-  private def start(): ActorSystem[Nothing] = {
-    val rootBehavior = Behaviors.setup[Nothing] { actorContext =>
+  private def start(): ActorSystem[Nothing] =
+    ActorSystem(Behaviors.setup[Nothing] { actorContext =>
       // Create handler actor
       implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
       val handlerBehavior = AkkaHttpEndpoint.behavior(handler)
@@ -68,11 +76,12 @@ final case class AkkaServer[Effect[_]](
       actorContext.watch(handlerActor)
 
       // Create HTTP route
-      val route = AkkaHttpEndpoint.route(handlerActor, pathPrefix, methods, requestTimeout)
+      val handlerRoute = AkkaHttpEndpoint(handlerActor, requestTimeout)
+      val serverRoute = route(handlerRoute)
 
       // Start HTTP server
       val serverBinding = Await.result(
-        Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(route),
+        Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(serverRoute),
         Duration.Inf
       )
       logger.info("Listening for connections", ListMap(
@@ -80,9 +89,22 @@ final case class AkkaServer[Effect[_]](
         "Port" -> serverBinding.localAddress.getPort.toString
       ))
       Behaviors.empty
+    }, getClass.getName)
+
+  private def route(handlerRoute: Route): Route =
+    // Validate HTTP request method
+    extractRequest { httpRequest =>
+      if (allowedMethods.contains(httpRequest.method.value.toUpperCase)) {
+        // Validate URL path
+        if (httpRequest.uri.path.toString.startsWith(pathPrefix)) {
+          handlerRoute
+        } else {
+          complete(NotFound)
+        }
+      } else {
+        complete(MethodNotAllowed)
+      }
     }
-    ActorSystem[Nothing](rootBehavior, "HelloAkkaHttpServer")
-  }
 }
 
 object AkkaServer {
