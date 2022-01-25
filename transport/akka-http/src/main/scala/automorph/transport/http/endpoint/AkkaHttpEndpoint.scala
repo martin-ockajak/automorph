@@ -102,43 +102,39 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
       new IllegalStateException(s"Invalid response content type: ${errors.map(_.toString).mkString("\n")}")
     }.swap.toTry.get
 
-    // Define actor behavior
-    Behaviors.setup { actorContext =>
+    Behaviors.receive[RpcHttpRequest] { case (actorContext, message) =>
       implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
       implicit val executionContext: ExecutionContext = actorContext.executionContext
-      val behavior = Behaviors.receiveMessage[RpcHttpRequest] { message =>
-        // Log the request
-        val requestId = Random.id
-        val request = message.request
-        val remoteAddress = message.clientAddress
-        lazy val requestProperties = getRequestProperties(request, requestId, remoteAddress)
-        log.receivedRequest(requestProperties)
+      // Log the request
+      val requestId = Random.id
+      val request = message.request
+      val remoteAddress = message.clientAddress
+      lazy val requestProperties = getRequestProperties(request, requestId, remoteAddress)
+      log.receivedRequest(requestProperties)
 
-        // Process the request
-        request.entity.toStrict(readTimeout).map { requestEntity =>
-          val requestBody = requestEntity.data.asByteBuffer.toInputStream
-          genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
-            error => sendErrorResponse(error, contentType, message.replyTo, remoteAddress, requestId, requestProperties),
-            result => {
-              // Send the response
-              val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
-              val statusCode =
-                result.exception.map(mapException).map(StatusCode.int2StatusCode).getOrElse(StatusCodes.OK)
-              sendResponse(
-                responseBody,
-                statusCode,
-                contentType,
-                result.context,
-                message.replyTo,
-                remoteAddress,
-                requestId
-              )
-            }
-          ))
-        }
-        Behaviors.same
+      // Process the request
+      request.entity.toStrict(readTimeout).map { requestEntity =>
+        val requestBody = requestEntity.data.asByteBuffer.toInputStream
+        genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
+          error => sendErrorResponse(error, contentType, message.replyTo, remoteAddress, requestId, requestProperties),
+          result => {
+            // Send the response
+            val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
+            val statusCode =
+              result.exception.map(mapException).map(StatusCode.int2StatusCode).getOrElse(StatusCodes.OK)
+            sendResponse(
+              responseBody,
+              statusCode,
+              contentType,
+              result.context,
+              message.replyTo,
+              remoteAddress,
+              requestId
+            )
+          }
+        ))
       }
-      Behaviors.empty
+      Behaviors.same
     }
   }
 
