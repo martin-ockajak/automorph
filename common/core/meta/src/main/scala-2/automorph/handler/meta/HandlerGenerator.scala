@@ -96,7 +96,7 @@ object HandlerGenerator {
         ${method.lift.rpcFunction},
         $argumentDecoders,
         $encodeResult,
-        null,
+        $call,
         ${MethodReflection.acceptsContext[C, Context](ref)(method)}
       )
     """)
@@ -186,8 +186,9 @@ object HandlerGenerator {
   private def generateCall[C <: blackbox.Context, Effect[_], Context: ref.c.WeakTypeTag, Api](ref: ClassReflection[C])(
     method: ref.RefMethod,
     api: ref.c.Expr[Api]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[?]]): ref.c.Expr[(Seq[Any], Context) => Effect[Any]] = {
+  )(implicit effectType: ref.c.WeakTypeTag[Effect[?]]): ref.c.Expr[(Seq[Any], Context) => Any] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
+    (effectType)
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
@@ -196,11 +197,9 @@ object HandlerGenerator {
     val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
     // Create API method call function
-    //   (arguments: Seq[Any], requestContext: Context) => Effect[Any]
+    //   (arguments: Seq[Any], requestContext: Context) => Any
     val contextType = weakTypeOf[Context].dealias
-    val anyType = weakTypeOf[Any]
-    val effectAnyType = weakTypeOf[Effect[Any]]
-    ref.c.Expr[(Seq[Any], Context) => Effect[Any]](q"""
+    ref.c.Expr[(Seq[Any], Context) => Any](q"""
       (arguments: Seq[Any], requestContext: $contextType) => ${
         // Create the method argument lists by type coercing supplied arguments
         // List(List(
@@ -220,8 +219,10 @@ object HandlerGenerator {
         }
 
         // Call the API method and type coerce the result
-        //   api.method(arguments*).asInstanceOf[Effect[Any]]: Effect[Any]
-        q"$api.${method.symbol}(...$apiMethodArguments).asInstanceOf[$effectAnyType]"
+        //   api.method(arguments*).asInstanceOf[Any]: Any
+        // FIXME - coerce the result to a generic effect type
+        //   q"$api.${method.symbol}(...$apiMethodArguments).asInstanceOf[$effectType[Any]]"
+        q"$api.${method.symbol}(...$apiMethodArguments).asInstanceOf[Any]"
     }
     """)
   }

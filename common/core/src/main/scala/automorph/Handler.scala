@@ -128,7 +128,9 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         error => errorResponse(error, rpcRequest.message, responseRequired, requestProperties),
         result => {
           // Encode bound function result
-          val contextualResultNode = result.map(resultValue => encodeResult(resultValue, binding))
+          val contextualResultNode = result.asInstanceOf[Effect[Any]].map { resultValue =>
+            encodeResult(resultValue, binding)
+          }
 
           // Create RPC response
           resultResponse(contextualResultNode, rpcRequest, requestProperties)

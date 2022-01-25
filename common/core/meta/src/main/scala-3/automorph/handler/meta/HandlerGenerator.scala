@@ -191,7 +191,7 @@ private[automorph] object HandlerGenerator:
   private def generateCall[Effect[_]: Type, Context: Type, Api: Type](ref: ClassReflection)(
     method: ref.RefMethod,
     api: Expr[Api]
-  ): Expr[(Seq[Any], Context) => Effect[Any]] =
+  ): Expr[(Seq[Any], Context) => Any] =
     import ref.q.reflect.{Term, TypeRepr, asTerm}
     given Quotes = ref.q
 
@@ -202,7 +202,7 @@ private[automorph] object HandlerGenerator:
     val lastArgumentIndex = method.parameters.map(_.size).sum - 1
 
     // Create API method call function
-    //   (arguments: Seq[Any], requestContext: Context) => Effect[Any]
+    //   (arguments: Seq[Any], requestContext: Context) => Any
     val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
     '{ (arguments, requestContext) =>
       ${
@@ -226,7 +226,7 @@ private[automorph] object HandlerGenerator:
         ).asInstanceOf[List[List[Term]]]
 
         // Call the API method and type coerce the result
-        //   api.method(arguments*).asInstanceOf[Effect[Any]]: Effect[Any]
+        //   api.method(arguments*).asInstanceOf[Any]: Any
         resultType.asType match
           case '[resultValueType] => '{
             ${
@@ -238,6 +238,8 @@ private[automorph] object HandlerGenerator:
                 apiMethodArguments
               ).asExprOf[Effect[resultValueType]]
             }.asInstanceOf[Effect[Any]]
+            // FIXME - coerce the result to a generic effect type
+            //  .asInstanceOf[Effect[Any]]
           }
       }
     }

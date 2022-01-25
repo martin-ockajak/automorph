@@ -132,6 +132,5 @@ object HandlerMeta {
         }
       ${c.prefix}.copy(apiBindings = newBindings)
     """)
-//    automorph.log.MacroLogger.debug(s"${c.universe.showCode(x.tree)}\n")
   }
 }
