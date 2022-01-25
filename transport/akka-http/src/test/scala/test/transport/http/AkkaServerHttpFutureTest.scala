@@ -3,17 +3,18 @@
 //import automorph.Types
 //import automorph.spi.transport.ServerMessageTransport
 //import automorph.system.FutureSystem
-//import automorph.transport.http.endpoint.RapidoidHttpEndpoint
+//import automorph.transport.http.endpoint.AkkaHttpEndpoint
+//import automorph.transport.http.server.AkkaServer
 //import org.scalacheck.Arbitrary
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
 //import test.standard.StandardHttpServerTest
 //import test.transport.http.HttpContextGenerator
 //
-//class RapidoidEndpointHttpFutureTest extends StandardHttpServerTest {
+//class AkkaServerHttpFutureTest extends StandardHttpServerTest {
 //
 //  type Effect[T] = Future[T]
-//  type Context = RapidoidHttpEndpoint.Context
+//  type Context = AkkaHttpEndpoint.Context
 //
 //  override lazy val system: FutureSystem = FutureSystem()
 //
@@ -26,15 +27,6 @@
 //  override def serverTransport(
 //    handler: Types.HandlerAnyCodec[Effect, Context],
 //    port: Int
-//  ): ServerMessageTransport[Effect] = new ServerMessageTransport[Effect] {
-//    private val server = {
-//      val endpoint = AkkaHttpEndpoint(handler)
-//      val app = new App()
-//      On.port(port)
-//      On.req(endpoint).port(port)
-//    }
-//
-//    override def close(): Effect[Unit] =
-//      Future(server.destroy())
-//  }
+//  ): ServerMessageTransport[Effect] =
+//    AkkaServer(handler, port)
 //}
