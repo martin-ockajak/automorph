@@ -7,6 +7,7 @@ import java.nio.charset.{Charset, StandardCharsets}
 import java.util
 import scala.util.{Failure, Success, Try}
 
+/** Extension methods for utility types. */
 private[automorph] object Extensions {
 
   /** String character set */
