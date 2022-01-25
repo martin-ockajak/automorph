@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 /**
  * Akka HTTP endpoint message transport plugin.
@@ -59,19 +59,19 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
     handlerActor: ActorRef[RpcHttpRequest],
     requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS)
   )(implicit actorSystem: ActorSystem[_]): Route = {
-    implicit val executionContext: ExecutionContext = actorSystem.executionContext
 
     // Process request
     extractRequest { httpRequest =>
       extractClientIP { remoteAddress =>
         //    implicit val timeout: Timeout = Timeout.durationToTimeout(requestTimeout)
         implicit val timeout: Timeout = Timeout.durationToTimeout(FiniteDuration(100, TimeUnit.MILLISECONDS))
-        onComplete(handlerActor.ask[HttpResponse](RpcHttpRequest(_, httpRequest, remoteAddress))) {
-          case Success(httpResponse) => complete(httpResponse)
-          case Failure(error) =>
+        onComplete(handlerActor.ask[HttpResponse](RpcHttpRequest(_, httpRequest, remoteAddress)))(_.pureFold(
+          error => {
             log.failedProcessRequest(error, Map())
             complete(InternalServerError, error.description)
-        }
+          },
+          httpResponse => complete(httpResponse)
+        ))
       }
     }
   }
