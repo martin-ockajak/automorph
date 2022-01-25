@@ -354,6 +354,7 @@ lazy val examples = project.in(file("examples")).dependsOn(
 )
 
 // Test
+Test / testOptions += Tests.Argument("-oD")
 lazy val testBase = project.in(file("test/base")).dependsOn(
   spi
 ).settings(
