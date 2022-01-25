@@ -3,7 +3,7 @@ package automorph.transport.http.endpoint
 import akka.actor.typed.scaladsl.AskPattern.{Askable, schedulerFromActorSystem}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
-import akka.http.scaladsl.model.StatusCodes.MethodNotAllowed
+import akka.http.scaladsl.model.StatusCodes.{MethodNotAllowed, NotFound}
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ContentType, HttpRequest, HttpResponse, RemoteAddress, StatusCode, StatusCodes}
 import akka.http.scaladsl.server.Directives.{complete, extractClientIP, extractMethod, extractRequest, onSuccess, rawPathPrefixTest}
@@ -38,7 +38,6 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
   /** Request context type. */
   type Context = HttpContext[HttpRequest]
 
-  private val messageMethodNotAllowed = "Method Not Allowed"
   private val log = MessageLog(logger, Protocol.Http.name)
 
   /**
@@ -66,24 +65,22 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
     implicit val executionContext: ExecutionContext = actorSystem.executionContext
 
     // Validate HTTP request method
-    val allowedMethods = methods.map(_.name).toSet
-    extractMethod { httpMethod =>
-      // Validate URL path
-      rawPathPrefixTest(pathPrefix) {
-        // Process request
-        extractRequest { httpRequest =>
-          if (allowedMethods.contains(httpMethod.value.toUpperCase)) {
-            extractClientIP { remoteAddress =>
-              val message = RpcHttpRequest(httpRequest, null, remoteAddress)
-              implicit val timeout: Timeout = Timeout.durationToTimeout(requestTimeout)
-              onSuccess(handlerActor.ask[HttpResponse](RpcHttpRequest(httpRequest, _, remoteAddress))) { httpResponse =>
-                complete(httpResponse)
-              }
+    extractRequest { httpRequest =>
+      if (methods.exists(_.name == httpRequest.method.value.toUpperCase)) {
+        // Validate URL path
+        if (httpRequest.uri.path.toString.startsWith(pathPrefix)) {
+          extractClientIP { remoteAddress =>
+            // Process request
+            implicit val timeout: Timeout = Timeout.durationToTimeout(requestTimeout)
+            onSuccess(handlerActor.ask[HttpResponse](RpcHttpRequest(_, httpRequest, remoteAddress))) { httpResponse =>
+              complete(httpResponse)
             }
-          } else {
-            complete(MethodNotAllowed, messageMethodNotAllowed)
           }
+        } else {
+          complete(NotFound)
         }
+      } else {
+        complete(MethodNotAllowed)
       }
     }
   }
@@ -231,8 +228,8 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
 
   /** Actor behavior message */
   final case class RpcHttpRequest(
-    request: HttpRequest,
     replyTo: ActorRef[HttpResponse],
+    request: HttpRequest,
     clientAddress: RemoteAddress = RemoteAddress.Unknown
   )
 }
