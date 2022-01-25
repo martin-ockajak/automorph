@@ -11,7 +11,7 @@ import automorph.util.{Network, Random}
 import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpHeaders, HttpServerRequest, HttpServerResponse, ServerWebSocket}
-import java.io.{ByteArrayInputStream, InputStream}
+import java.io.InputStream
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.ListHasAsScala
 
