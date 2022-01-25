@@ -1,7 +1,7 @@
 package automorph.transport.http.endpoint
 
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ContentType, HttpRequest, HttpResponse, RemoteAddress, StatusCode, StatusCodes}
 import akka.stream.Materializer
@@ -48,8 +48,6 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
    * @param handler RPC request handler
    * @param mapException maps an exception to a corresponding HTTP status code
    * @param readTimeout request body read timeout
-   * @param materializer Akka stream materializer
-   * @param executionContext execution context
    * @tparam Effect effect type
    * @return Akka HTTP actor behavior
    */
@@ -57,7 +55,7 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
     handler: Types.HandlerAnyCodec[Effect, Context],
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS)
-  )(implicit materializer: Materializer, executionContext: ExecutionContext): Behavior[Message] = {
+  ): Behavior[Nothing] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     implicit val system: EffectSystem[Effect] = genericHandler.system
     val contentType = ContentType.parse(genericHandler.protocol.codec.mediaType).swap.map { errors =>
@@ -65,28 +63,35 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
     }.swap.toTry.get
 
     // Define actor behavior
-    Behaviors.receiveMessage { message =>
-      // Log the request
-      val requestId = Random.id
-      val request = message.request
-      val remoteAddress = message.clientAddress
-      lazy val requestProperties = getRequestProperties(request, requestId, remoteAddress)
-      log.receivedRequest(requestProperties)
+    Behaviors.setup { actorContext =>
+      implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
+      implicit val executionContext: ExecutionContext = actorContext.executionContext
+      val behavior = Behaviors.receiveMessage[Message] { message =>
+        // Log the request
+        val requestId = Random.id
+        val request = message.request
+        val remoteAddress = message.clientAddress
+        lazy val requestProperties = getRequestProperties(request, requestId, remoteAddress)
+        log.receivedRequest(requestProperties)
 
-      // Process the request
-      request.entity.toStrict(readTimeout).map { requestEntity =>
-        val requestBody = requestEntity.data.asByteBuffer.toInputStream
-        genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
-          error => sendErrorResponse(error, contentType, message.replyTo, remoteAddress, requestId, requestProperties),
-          result => {
-            // Send the response
-            val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
-            val statusCode = result.exception.map(mapException).map(StatusCode.int2StatusCode).getOrElse(StatusCodes.OK)
-            sendResponse(responseBody, statusCode, contentType, result.context, message.replyTo, remoteAddress, requestId)
-          }
-        ))
+        // Process the request
+        request.entity.toStrict(readTimeout).map { requestEntity =>
+          val requestBody = requestEntity.data.asByteBuffer.toInputStream
+          genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
+            error => sendErrorResponse(error, contentType, message.replyTo, remoteAddress, requestId, requestProperties),
+            result => {
+              // Send the response
+              val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
+              val statusCode = result.exception.map(mapException).map(StatusCode.int2StatusCode).getOrElse(StatusCodes.OK)
+              sendResponse(responseBody, statusCode, contentType, result.context, message.replyTo, remoteAddress, requestId)
+            }
+          ))
+        }
+        Behaviors.same
       }
-      Behaviors.same
+      val actor = actorContext.spawn(behavior, getClass.getName)
+      actorContext.watch(actor)
+      Behaviors.empty
     }
   }
 

@@ -8,6 +8,7 @@
 //import akka.http.scaladsl.server.Directives.{complete, extractClientIP, extractMethod, extractRequest, rawPathPrefixTest}
 //import akka.http.scaladsl.server.Route
 //import akka.http.scaladsl.settings.ServerSettings
+//import akka.stream.ActorMaterializer
 //import automorph.Types
 //import automorph.log.Logging
 //import automorph.spi.transport.ServerMessageTransport
@@ -38,8 +39,6 @@
 // * @param actorSystem Akka actor system
 // * @param serverSettings HTTP server settings
 // * @param terminationTimeout timeout after which all requests and connections shall be forcefully terminated
-// * @param materializer Akka stream materializer
-// * @param executionContext execution context
 // * @tparam Effect effect type
 // */
 //final case class AkkaServer[Effect[_]](
