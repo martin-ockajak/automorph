@@ -57,8 +57,8 @@ trait CoreTest extends BaseTest {
         "Static" - {
           "Simple API" - {
             val apis = (fixture.simpleApi, simpleApi)
-            "test" in {
-              consistent(apis)(_.test("test")).should(be(true))
+            "method" in {
+              consistent(apis)(_.method("value")).should(be(true))
             }
           }
         }
@@ -72,9 +72,9 @@ trait CoreTest extends BaseTest {
           "Static" - {
             "Simple API" - {
               val apis = (fixture.simpleApi, simpleApi)
-              "test" in {
+              "method" in {
                 check { (a0: String) =>
-                  consistent(apis)(_.test(a0))
+                  consistent(apis)(_.method(a0))
                 }
               }
             }
@@ -181,13 +181,13 @@ trait CoreTest extends BaseTest {
             "Simple API" - {
               "Call" in {
                 check { (a0: String) =>
-                  val expected = execute(simpleApi.test(a0))
-                  executeLogError(fixture.call("test", "test" -> a0)) == expected
+                  val expected = execute(simpleApi.method(a0))
+                  executeLogError(fixture.call("method", "test" -> a0)) == expected
                 }
               }
               "Message" in {
                 check { (a0: String) =>
-                  executeLogError(fixture.tell("test", "test" -> a0))
+                  executeLogError(fixture.tell("method", "test" -> a0))
                   true
                 }
               }
