@@ -67,12 +67,12 @@ final case class AkkaServer[Effect[_]](
     }
   }
 
-  private def start(): ActorSystem[Nothing] =
+  private def start(): ActorSystem[Nothing] = {
     ActorSystem(Behaviors.setup[Nothing] { actorContext =>
       // Create handler actor
       implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
       val handlerBehavior = AkkaHttpEndpoint.behavior(handler)
-      val handlerActor = actorContext.spawn(handlerBehavior, handlerBehavior.getClass.getSimpleName)
+      val handlerActor = actorContext.spawn(handlerBehavior, AkkaHttpEndpoint.getClass.getSimpleName)
       actorContext.watch(handlerActor)
 
       // Create HTTP route
@@ -90,6 +90,7 @@ final case class AkkaServer[Effect[_]](
       ))
       Behaviors.empty
     }, getClass.getSimpleName)
+  }
 
   private def route(handlerRoute: Route): Route =
     // Validate HTTP request method
