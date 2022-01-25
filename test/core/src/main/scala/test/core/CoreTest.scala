@@ -182,12 +182,12 @@ trait CoreTest extends BaseTest {
               "Call" in {
                 check { (a0: String) =>
                   val expected = execute(simpleApi.method(a0))
-                  executeLogError(fixture.call("method", "test" -> a0)) == expected
+                  executeLogError(fixture.call("method", "argument" -> a0)) == expected
                 }
               }
               "Message" in {
                 check { (a0: String) =>
-                  executeLogError(fixture.tell("method", "test" -> a0))
+                  executeLogError(fixture.tell("method", "argument" -> a0))
                   true
                 }
               }

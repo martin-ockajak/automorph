@@ -5,13 +5,13 @@ import automorph.spi.EffectSystem
 
 trait SimpleApi[Effect[_]] {
 
-  def method(test: String): Effect[String]
+  def method(argument: String): Effect[String]
 }
 
 final case class SimpleApiImpl[Effect[_]](backend: EffectSystem[Effect]) extends SimpleApi[Effect] {
 
-  override def method(test: String): Effect[String] =
-    backend.pure(test)
+  override def method(argument: String): Effect[String] =
+    backend.pure(argument)
 }
 
 trait ComplexApi[Effect[_], Context] {
