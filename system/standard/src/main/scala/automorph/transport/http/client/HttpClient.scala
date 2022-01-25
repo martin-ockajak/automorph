@@ -286,6 +286,7 @@ final case class HttpClient[Effect[_]](
   }
 
   private def httpResponse(response: HttpResponse[Array[Byte]]): Response = {
+    println(response.body().asString)
     val headers = response.headers.map.asScala.toSeq.flatMap { case (name, values) =>
       values.asScala.map(name -> _)
     }

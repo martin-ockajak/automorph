@@ -3,11 +3,12 @@ package automorph.transport.http.endpoint
 import akka.actor.typed.scaladsl.AskPattern.{Askable, schedulerFromActorSystem}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
-import akka.http.scaladsl.model.StatusCodes.{MethodNotAllowed, NotFound}
+import akka.http.scaladsl.model.StatusCodes.{InternalServerError, MethodNotAllowed, NotFound}
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ContentType, HttpRequest, HttpResponse, RemoteAddress, StatusCode, StatusCodes}
-import akka.http.scaladsl.server.Directives.{complete, extractClientIP, extractMethod, extractRequest, onSuccess, rawPathPrefixTest}
+import akka.http.scaladsl.server.Directives.{complete, extractClientIP, extractMethod, extractRequest, onComplete, onSuccess, rawPathPrefixTest}
 import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.RouteResult.Complete
 import akka.util.Timeout
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
  * Akka HTTP endpoint message transport plugin.
@@ -71,9 +72,13 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
         if (httpRequest.uri.path.toString.startsWith(pathPrefix)) {
           extractClientIP { remoteAddress =>
             // Process request
-            implicit val timeout: Timeout = Timeout.durationToTimeout(requestTimeout)
-            onSuccess(handlerActor.ask[HttpResponse](RpcHttpRequest(_, httpRequest, remoteAddress))) { httpResponse =>
-              complete(httpResponse)
+//            implicit val timeout: Timeout = Timeout.durationToTimeout(requestTimeout)
+            implicit val timeout: Timeout = Timeout.durationToTimeout(FiniteDuration(100, TimeUnit.MILLISECONDS))
+            onComplete(handlerActor.ask[HttpResponse](RpcHttpRequest(_, httpRequest, remoteAddress))) {
+              case Success(httpResponse) => complete(httpResponse)
+              case Failure(error) =>
+                log.failedProcessRequest(error, Map())
+                complete(InternalServerError, error.description)
             }
           }
         } else {
