@@ -188,7 +188,7 @@ object HandlerGenerator {
     api: ref.c.Expr[Api]
   )(implicit effectType: ref.c.WeakTypeTag[Effect[?]]): ref.c.Expr[(Seq[Any], Context) => Any] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
-    (effectType)
+    Seq(effectType)
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>
