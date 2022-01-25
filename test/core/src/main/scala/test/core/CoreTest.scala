@@ -58,7 +58,7 @@ trait CoreTest extends BaseTest {
           "Simple API" - {
             val apis = (fixture.simpleApi, simpleApi)
             "test" in {
-              consistent(apis)(_.test("test"))
+              consistent(apis)(_.test("test")).should(be(true))
             }
           }
         }
