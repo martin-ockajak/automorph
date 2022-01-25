@@ -106,10 +106,6 @@ lazy val coreMeta = project.in(file("common/core/meta")).dependsOn(
   spi, util
 ).settings(
   name := s"$projectName-core-meta",
-  initialize ~= { _ =>
-//    System.setProperty("macro.debug", "true")
-    System.setProperty("macro.test", "true")
-  },
   Compile / doc / scalacOptions ++= Seq(
     "-Ymacro-expand:none",
     "-skip-packages automorph.client.meta:automorph.handler.meta"

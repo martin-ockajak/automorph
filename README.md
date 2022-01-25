@@ -93,6 +93,18 @@ export LOG_LEVEL=OFF
 target/test.log
 ```
 
+#### Enable generated code logging
+
+```bash
+export LOG_CODE=true
+```
+
+#### Enable basic tests only
+
+```bash
+export TEST_BASIC=true
+```
+
 ### Documentation
 
 ```bash

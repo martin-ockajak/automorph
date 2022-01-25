@@ -3,8 +3,9 @@ package automorph.log
 /** Compile-time logger used in macros. */
 private[automorph] object MacroLogger {
 
-  private val debugProperty = "macro.debug"
+  /** Enable generated code logging environment variable. */
+  private val logCodeEnvironment = "LOG_CODE"
 
   def debug(message: => String): Unit =
-    Option(System.getProperty(debugProperty)).foreach(_ => println(message))
+    Option(System.getenv(logCodeEnvironment)).foreach(_ => println(message))
 }
