@@ -1,10 +1,14 @@
 package automorph.transport.http.endpoint
 
+import akka.actor.typed.scaladsl.AskPattern.{Askable, schedulerFromActorSystem}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
+import akka.http.scaladsl.model.StatusCodes.MethodNotAllowed
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ContentType, HttpRequest, HttpResponse, RemoteAddress, StatusCode, StatusCodes}
-import akka.stream.Materializer
+import akka.http.scaladsl.server.Directives.{complete, extractClientIP, extractMethod, extractRequest, onSuccess, rawPathPrefixTest}
+import akka.http.scaladsl.server.Route
+import akka.util.Timeout
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
@@ -22,7 +26,7 @@ import scala.util.Try
 /**
  * Akka HTTP endpoint message transport plugin.
  *
- * The service interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
+ * The endpoint interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
  * The response returned by the RPC handler is used as HTTP response body.
  *
  * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -34,12 +38,60 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
   /** Request context type. */
   type Context = HttpContext[HttpRequest]
 
+  private val messageMethodNotAllowed = "Method Not Allowed"
   private val log = MessageLog(logger, Protocol.Http.name)
 
   /**
-   * Creates a Akka HTTP actor behavior with the specified RPC request handler.
+   * Creates an Akka HTTP route with the specified RPC request handler.
    *
-   * The endpoint interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
+   * The route interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
+   * The response returned by the RPC handler is used as HTTP response body.
+   *
+   * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   * @see [[https://doc.akka.io/docs/akka-http Library documentation]]
+   * @see [[https://doc.akka.io/api/akka-http/current/akka/http/ API]]
+   * @param handlerActor Akka actor with RPC handler behavior
+   * @param pathPrefix HTTP URL path prefix, only requests starting with this path prefix are allowed
+   * @param methods allowed HTTP request methods
+   * @param requestTimeout HTTP request processing timeout
+   * @param actorSystem Akka actor system
+   * @return RPC handler Akka HTTP route
+   */
+  def route(
+    handlerActor: ActorRef[RpcHttpRequest],
+    pathPrefix: String = "/",
+    methods: Iterable[HttpMethod] = HttpMethod.values,
+    requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS)
+  )(implicit actorSystem: ActorSystem[_]): Route = {
+    implicit val executionContext: ExecutionContext = actorSystem.executionContext
+
+    // Validate HTTP request method
+    val allowedMethods = methods.map(_.name).toSet
+    extractMethod { httpMethod =>
+      // Validate URL path
+      rawPathPrefixTest(pathPrefix) {
+        // Process request
+        extractRequest { httpRequest =>
+          if (allowedMethods.contains(httpMethod.value.toUpperCase)) {
+            extractClientIP { remoteAddress =>
+              val message = RpcHttpRequest(httpRequest, null, remoteAddress)
+              implicit val timeout: Timeout = Timeout.durationToTimeout(requestTimeout)
+              onSuccess(handlerActor.ask[HttpResponse](RpcHttpRequest(httpRequest, _, remoteAddress))) { httpResponse =>
+                complete(httpResponse)
+              }
+            }
+          } else {
+            complete(MethodNotAllowed, messageMethodNotAllowed)
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Creates an Akka actor behavior with the specified RPC request handler.
+   *
+   * The actor behavior interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
    * The response returned by the RPC handler is used as HTTP response body.
    *
    * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -49,13 +101,13 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
    * @param mapException maps an exception to a corresponding HTTP status code
    * @param readTimeout request body read timeout
    * @tparam Effect effect type
-   * @return Akka HTTP actor behavior
+   * @return RPC handler Akka actor behavior
    */
-  def apply[Effect[_]](
+  def behavior[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS)
-  ): Behavior[Nothing] = {
+  ): Behavior[RpcHttpRequest] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     implicit val system: EffectSystem[Effect] = genericHandler.system
     val contentType = ContentType.parse(genericHandler.protocol.codec.mediaType).swap.map { errors =>
@@ -66,7 +118,7 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
     Behaviors.setup { actorContext =>
       implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
       implicit val executionContext: ExecutionContext = actorContext.executionContext
-      val behavior = Behaviors.receiveMessage[Message] { message =>
+      val behavior = Behaviors.receiveMessage[RpcHttpRequest] { message =>
         // Log the request
         val requestId = Random.id
         val request = message.request
@@ -82,15 +134,22 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
             result => {
               // Send the response
               val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
-              val statusCode = result.exception.map(mapException).map(StatusCode.int2StatusCode).getOrElse(StatusCodes.OK)
-              sendResponse(responseBody, statusCode, contentType, result.context, message.replyTo, remoteAddress, requestId)
+              val statusCode =
+                result.exception.map(mapException).map(StatusCode.int2StatusCode).getOrElse(StatusCodes.OK)
+              sendResponse(
+                responseBody,
+                statusCode,
+                contentType,
+                result.context,
+                message.replyTo,
+                remoteAddress,
+                requestId
+              )
             }
           ))
         }
         Behaviors.same
       }
-      val actor = actorContext.spawn(behavior, getClass.getName)
-      actorContext.watch(actor)
       Behaviors.empty
     }
   }
@@ -152,15 +211,17 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
       RawHeader(name, value)
     })
 
-  private def getRequestProperties(request: HttpRequest, requestId: String, remoteAddress: RemoteAddress): Map[String, String] = {
-    request.httpMessage.attributes
+  private def getRequestProperties(
+    request: HttpRequest,
+    requestId: String,
+    remoteAddress: RemoteAddress
+  ): Map[String, String] =
     ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(remoteAddress),
       "URL" -> request.uri.toString,
       "Method" -> request.method.value
     )
-  }
 
   private def clientAddress(remoteAddress: RemoteAddress): String = {
     remoteAddress.toOption.flatMap { address =>
@@ -169,7 +230,7 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
   }
 
   /** Actor behavior message */
-  final case class Message(
+  final case class RpcHttpRequest(
     request: HttpRequest,
     replyTo: ActorRef[HttpResponse],
     clientAddress: RemoteAddress = RemoteAddress.Unknown

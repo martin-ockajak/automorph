@@ -112,7 +112,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     ) ++ method.map("Method" -> _.toString)
 
   private[automorph] def clientAddress(clientIp: Option[String]): String =
-    clientIp.getOrElse("[unknown]")
+    clientIp.getOrElse("")
 
   private def createErrorResponse(
     error: Throwable,

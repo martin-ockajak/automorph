@@ -12,6 +12,7 @@ import java.util
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{FilterHolder, ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.util.thread.{QueuedThreadPool, ThreadPool}
+import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
@@ -80,11 +81,10 @@ final case class JettyServer[Effect[_]](
     jetty.start()
     jetty.getConnectors.foreach { connector =>
       connector.getProtocols.asScala.foreach { protocol =>
-        val properties = Map(
+        logger.info("Listening for connections", ListMap(
           "Protocol" -> protocol,
           "Port" -> port.toString
-        )
-        logger.info("Listening for connections", properties)
+        ))
       }
     }
   }

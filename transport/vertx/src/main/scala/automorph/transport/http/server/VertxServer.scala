@@ -103,11 +103,10 @@ final case class VertxServer[Effect[_]](
   private def start(): Unit = {
     val server = httpServer.listen().toCompletionStage.toCompletableFuture.get()
     (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
-      val properties = ListMap(
+      logger.info("Listening for connections", ListMap(
         "Protocol" -> protocol,
         "Port" -> server.actualPort.toString
-      )
-      logger.info("Listening for connections", properties)
+      ))
     }
   }
 }

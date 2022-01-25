@@ -59,11 +59,10 @@ final case class NanoServer[Effect[_]] private (
   override def start(): Unit = {
     super.start()
     (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
-      val properties = ListMap(
+      logger.info("Listening for connections", ListMap(
         "Protocol" -> protocol,
         "Port" -> port.toString
-      )
-      logger.info("Listening for connections", properties)
+      ))
     }
   }
 
