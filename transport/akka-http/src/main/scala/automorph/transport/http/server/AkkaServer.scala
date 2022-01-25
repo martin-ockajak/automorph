@@ -89,7 +89,7 @@ final case class AkkaServer[Effect[_]](
         "Port" -> serverBinding.localAddress.getPort.toString
       ))
       Behaviors.empty
-    }, getClass.getName)
+    }, getClass.getSimpleName)
 
   private def route(handlerRoute: Route): Route =
     // Validate HTTP request method
