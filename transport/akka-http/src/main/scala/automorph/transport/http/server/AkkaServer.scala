@@ -72,7 +72,7 @@ final case class AkkaServer[Effect[_]](
       // Create handler actor
       implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
       val handlerBehavior = AkkaHttpEndpoint.behavior(handler)
-      val handlerActor = actorContext.spawn(handlerBehavior, handlerBehavior.getClass.getName)
+      val handlerActor = actorContext.spawn(handlerBehavior, handlerBehavior.getClass.getSimpleName)
       actorContext.watch(handlerActor)
 
       // Create HTTP route
