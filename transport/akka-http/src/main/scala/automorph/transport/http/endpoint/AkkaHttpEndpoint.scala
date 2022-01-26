@@ -3,12 +3,11 @@ package automorph.transport.http.endpoint
 import akka.actor.typed.scaladsl.AskPattern.{schedulerFromActorSystem, Askable}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
-import akka.http.scaladsl.model.StatusCodes.{InternalServerError, MethodNotAllowed, NotFound}
+import akka.http.scaladsl.model.StatusCodes.InternalServerError
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ContentType, HttpRequest, HttpResponse, RemoteAddress, StatusCode, StatusCodes}
 import akka.http.scaladsl.server.Directives.{complete, extractClientIP, extractRequest, onComplete}
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.RouteResult.Complete
 import akka.util.Timeout
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
@@ -63,8 +62,7 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
     // Process request
     extractRequest { httpRequest =>
       extractClientIP { remoteAddress =>
-        //    implicit val timeout: Timeout = Timeout.durationToTimeout(requestTimeout)
-        implicit val timeout: Timeout = Timeout.durationToTimeout(FiniteDuration(100, TimeUnit.MILLISECONDS))
+        implicit val timeout: Timeout = Timeout.durationToTimeout(requestTimeout)
         onComplete(handlerActor.ask[HttpResponse](RpcHttpRequest(_, httpRequest, remoteAddress)))(_.pureFold(
           error => {
             log.failedProcessRequest(error, Map())

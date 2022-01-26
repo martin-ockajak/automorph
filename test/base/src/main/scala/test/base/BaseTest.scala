@@ -4,7 +4,6 @@ import org.scalatest.freespec.AnyFreeSpecLike
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{AppendedClues, BeforeAndAfterAll, BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.scalacheck.Checkers
-import test.base.BaseTest.testBasicEnvironment
 
 /**
  * Base structured test.
