@@ -23,10 +23,8 @@ Web-RPC can be understood to be all of the following:
 
 * HTTP as transport protocol
 * Structured messages in JSON format
-* Binary messages as octet stream
 * API function name as a last URL path element
 * API function arguments can be supplied either in the request body or as URL query parameters
-* API function arguments must have names
 * Meta-data in HTTP headers
 
 ## Fairly anticipated questions (FAQ)
@@ -35,7 +33,7 @@ Web-RPC can be understood to be all of the following:
 
 In case any of the following remote API concerns need to be addressed with minimal effort:
 * Caching GET requests
-* Submitting or retrieving binary data
+* Using URL to pass arguments
 * External constraints requiring a simple REST-style API with RPC semantics
  
 In other situations it is [probably](https://youtu.be/XyJh3qKjSMk?t=53) better to use an established remote call protocol such as:
@@ -56,7 +54,7 @@ To illustrate that it provides remote API authors with a solution with capabilit
 ### HTTP method
 
 HTTP methods are not specified by the API but chosen by the client from the following options depending on the desired call semantics:
-* POST - standard non-cached call with arguments either in the request body or in special cases as URL query parameters
+* POST - standard non-cached call with arguments either in the request body
 * GET - cacheable call with arguments as URL query parameters only
 
 ### URL format
@@ -72,7 +70,7 @@ http://example.org/api/hello?some=world&n=1
 ```
 
 * URL path components following an API-dependent prefix must specify the invoked function
-* URL query parameters may specify additional arguments for the invoked function for GET requests or binary POST requests
+* URL query parameters may specify additional arguments for the invoked function
 
 Identically named invoked function arguments must not be supplied both in the request body and as URL query parameter. Such an ambiguous call must cause an error.
 
@@ -128,30 +126,6 @@ GET http://example.org/api/hello?some=world&n=1
 
 *Empty*
 
-### Binary request body
-
-Request body is interpreted as a first argument of the invoked function representing an array of bytes. Additional invoked function arguments may be supplied as URL query parameters with query parameter names representing the remote function parameter names and query parameter values their respective argument values. Multiple instances of identically named query parameters must not be used.
-
-- Message format: binary
-- Method: POST
-- Content-Type: application/octet-stream
-
-**Remote call**
-
-```scala
-hello(data = binary, some = "world", n = 1)
-```
-
-**Request headers**
-
-```http
-POST http://example.org/api/hello?some=test&n=1
-Content-Type: application/octet-stream
-```
-
-**Request body**
-
-*Binary data*
 
 ## Response
 
@@ -175,23 +149,6 @@ Content-Type: application/json
   "result": "test"
 }
 ```
-
-### Binary response body
-
-Response body is interpreted as a return value of successfully invoked remote function representing an array of bytes.
-
-- Message format: binary
-- Content-Type: application/octet-stream
-
-**Response headers**
-
-```http
-Content-Type: application/octet-stream
-```
-
-**Response body**
-
-*Binary data*
 
 ### Error response body
 
