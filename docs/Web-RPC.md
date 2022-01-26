@@ -36,7 +36,7 @@ Web-RPC can be understood to be all of the following:
 In case any of the following remote API concerns need to be addressed with minimal effort:
 * Caching GET requests
 * Submitting or retrieving binary data
-* External constraints requiring a REST-style JSON over HTTP API
+* External constraints requiring a simple REST-style API with RPC semantics
  
 In other situations it is [probably](https://youtu.be/XyJh3qKjSMk?t=53) better to use an established remote call protocol such as:
 * [JSON-RPC](https://en.wikipedia.org/wiki/JSON-RPC)

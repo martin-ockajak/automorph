@@ -26,8 +26,6 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
   /** Web-RPC message metadata. */
   type Metadata = Unit
 
-  private val binaryContentType = "application/octet-stream"
-
   private lazy val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.errorTitle),
@@ -237,15 +235,11 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
         }.toMap)
       }
     }.getOrElse {
-      requestContext.contentType.filter(_ == binaryContentType).map { _ =>
-        Left(RpcError(InvalidRequestException("Binary requests not supported"), RpcMessage((), requestBody)))
-      }.getOrElse {
-        // Other HTTP methods - deserialize request
-        Try(decodeRequest(codec.deserialize(requestBody))).pureFold(
-          error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), requestBody))),
-          request => Right(request)
-        )
-      }
+      // Other HTTP methods - deserialize request
+      Try(decodeRequest(codec.deserialize(requestBody))).pureFold(
+        error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), requestBody))),
+        request => Right(request)
+      )
     }
 
   private def requestSchema(function: RpcFunction): Schema = Schema(
