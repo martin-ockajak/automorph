@@ -14,7 +14,7 @@
 * **Flexible** - Customize remote API function names and mapping between exceptions and RPC protocol errors.
 * **Modular** - Combine plugins to choose [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) protocol, [effect](https://en.wikipedia.org/wiki/Effect_system) type, [transport](https://en.wikipedia.org/wiki/Transport_layer) protocol and message [format](https://en.wikipedia.org/wiki/File_format).
 * **Discoverable** - Consume or provide API schemas via generated yet adjustable discovery functions.
-* **Extensible** - Easily implement custom data type serialization support or additional integration plugins.
+* **Extensible** - Easily implement custom data type serialization support or additional plugins.
 * **Manageable** - Leverage extensive error handling and structured [SLF4J](http://www.slf4j.org/)-based logging to diagnose issues.
 * **Compatible** - Artifacts are available for [Scala 3](https://dotty.epfl.ch/) on [JRE 11+](https://openjdk.java.net/) with support for [Scala 2.13](https://www.scala-lang.org/news/2.13.0) and [Scala 2.12](https://www.scala-lang.org/news/2.12.0/) planned.
 
