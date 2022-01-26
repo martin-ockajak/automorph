@@ -6,9 +6,7 @@ import java.io.InputStream
 /**
  * Client message transport protocol plugin.
  *
- * The underlying transport protocol must support implementation of request-response pattern.
- *
- * Used by the RPC client to send requests and receive responses to and from a remote endpoint.
+ * Passively sends requests and receives responses to and from a remote endpoint using specific transport protocol.
  *
  * @tparam Effect effect type
  * @tparam Context message context type
