@@ -2,7 +2,7 @@
 
 # Important
 
-**This is a preview of an upcoming release. Please do not use it for any purpose other than design review !**
+**This is a preview of an upcoming release. Please do not use it for any purpose other than design or code review.**
 
 <br>
 <br>
