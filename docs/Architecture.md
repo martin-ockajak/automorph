@@ -2,7 +2,7 @@
 
 ## Components
 
-The library provides the following components to assemble either fully standalone RPC clients and servers or integrate with existing systems:
+**Automorph** provides the following building blocks to assemble either standalone RPC clients and servers or integrate with existing systems by freely combining various plugins:
 
 * [Client](https://www.javadoc.io/doc/org.automorph/automorph-core_3.0.0/latest/automorph/Client.html)
 * [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_3.0.0/latest/automorph/Handler.html)
@@ -17,8 +17,9 @@ The library provides the following components to assemble either fully standalon
 
 ## Client
 
-The client provides automatic creation of transparent proxy instances for remote RPC endpoints defined by existing API classes. Additionally, it also
-supports direct calls and notifications of remote API functions.
+The client can be used to transparently perform type-safe remote API calls or send one-way messages.
+
+Remote APIs can be invoked statically using transparent proxy instances automatically derived from specified API traits or dynamically by supplying the required type information on invocation.
 
 **Depends on**
 
@@ -33,7 +34,10 @@ supports direct calls and notifications of remote API functions.
 
 ## Handler
 
-The handler provides automatic creation of remote RPC endpoint bindings for existing API instances and subsequent processing RPC requests.
+The handler can be used to convert remote API calls or one-way messages into type-safe invocations of API instances.
+
+It provides automatic derivation of remote API RPC bindings for existing API implementations and
+processing of incoming RPC requests into API invocations resulting in corresponding RPC responses.
 
 **Depends on**
 
@@ -45,3 +49,47 @@ The handler provides automatic creation of remote RPC endpoint bindings for exis
 
 * [Server message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/transport/ServerMessageTransport.html)
 * [Endpoint message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/transport/EndpointMessageTransport.html)
+
+## Plugins
+
+### RPC protocol
+
+Remote procedure call [protocol](/api/automorph/spi/RpcProtocol.html) plugin.
+
+The underlying RPC protocol must support remote function invocation.
+
+### Effect system
+
+Computational [effect system](/api/automorph/spi/EffectSystem.html) plugin.
+
+The underlying runtime must support monadic composition of effectful values.
+
+### Message codec
+
+Structured [message format codec](/api/automorph/spi/MessageCodec.html) plugin.
+
+The underlying data format must support storing arbitrarily nested structures of basic data types.
+
+### Message transport
+
+Binary [message transport](/api/automorph/spi/MessageTransport.html) protocol plugin.
+
+The underlying transport protocol must support request & response messaging pattern.
+
+#### Client transport
+
+[Client message transport](/api/automorph/spi/transport/ClientMessageTransport.html) protocol plugin.
+
+Passively sends requests and receive responses to and from a remote endpoint using specific transport protocol.
+
+#### Server transport
+
+[Server message transport](/api/automorph/spi/transport/ServerMessageTransport.html) protocol plugin.
+
+Actively receives requests to be processed by the RPC handler and sends responses back using specific transport protocol.
+
+#### Endpoint transport
+
+[Endpoint message transport](/api/automorph/spi/transport/EndpointMessageTransport.html) protocol plugin.
+
+Passively parses requests to be processed by the RPC handler and creates responses to be sent back using specific transport protocol.

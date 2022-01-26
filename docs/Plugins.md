@@ -1,10 +1,10 @@
 # Plugins
 
-*Automorph* supports integration with other software using various plugins of different categories published in separate artifacts.
+*Automorph* supports integration with other software using various plugins of different categories published in separate artifacts. The plugins are configurable, independently composable and can be instantiated at will.
 
 ## Defaults
 
-*Automorph* defines default but easily adjustable choices for various technical concerns aiming at a good balance of capability, performance and simplicity:
+*Automorph* defines a set of plugins implementing default technical choices aiming at a good balance of features, performance and simplicity:
 
 * Asynchronous effect: [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html)
 * Synchronous effect: [Identity](https://www.scala-lang.org/api/current/scala/Predef$.html#identity[A](x:A):A)
@@ -14,24 +14,16 @@
 * HTTP & WebSocket client: [JRE HTTP client](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html)
 * HTTP & WebSocket server: [Undertow](https://undertow.io/)
 
-Special [automorph-default](https://mvnrepository.com/artifact/org.automorph/automorph-default) artifact depends on a set of plugins implementing the default choices. It also provides a convenient way to create default plugin instances using [Default](/api/automorph/Default$.html) object.
+Default plugins set can be obtained by using the [automorph-default](https://mvnrepository.com/artifact/org.automorph/automorph-default) artifact which itself depends on all default plugin artifacts. It also contains the [Default](/api/automorph/Default$.html) object which provides a convenient way to create default plugin instances or compose default plugins with other plugins.
 
-## RPC protocol
-
-Remote procedure call [protocol](/api/automorph/spi/RpcProtocol.html) plugins.
-
-The underlying RPC protocol must support remote function invocation.
+## [RPC protocol](/api/automorph/spi/RpcProtocol.html)
 
 | Class | Artifact | Protocol | Service discovery |
 | --- | --- | --- | --- |
 | [JsonRpcProtocol](/api/automorph/protocol/JsonRpcProtocol.html) (*Default*) | [automorph-jsonrpc](https://mvnrepository.com/artifact/org.automorph/automorph-jsonrpc) | [JSON-RPC](https://www.jsonrpc.org/specification) | [OpenRPC](https://spec.open-rpc.org), [OpenAPI](https://github.com/OAI/OpenAPI-Specification) |
 | [WebRpcProtocol](/api/automorph/protocol/WebRpcProtocol.html) | [automorph-restrpc](https://mvnrepository.com/artifact/org.automorph/automorph-restrpc) | [Web-RPC](Web-RPC) | [OpenAPI](https://github.com/OAI/OpenAPI-Specification) |
 
-## Effect system
-
-Computational [effect system](/api/automorph/spi/EffectSystem.html) plugins.
-
-The underlying runtime must support monadic composition of effectful values.
+## [Effect system](/api/automorph/spi/EffectSystem.html)
 
 | Class | Artifact | Library | Effect type |
 | --- | --- | --- | --- |
@@ -43,11 +35,7 @@ The underlying runtime must support monadic composition of effectful values.
 | [CatsEffectSystem](/api/automorph/system/CatsEffectSystem.html) | [automorph-cats-effect](https://mvnrepository.com/artifact/org.automorph/automorph-cats-effect) | [Cats Effect](https://typelevel.org/cats-effect/) | [IO](https://typelevel.org/cats-effect/api/3.x/cats/effect/IO.html) |
 | [ScalazEffectSystem](/api/automorph/system/ScalazEffectSystem.html) | [automorph-scalaz-effect](https://mvnrepository.com/artifact/org.automorph/automorph-scalaz-effect) | [Scalaz Effect](https://github.com/scalaz) | [IO](https://www.javadoc.io/doc/org.scalaz/scalaz_3.0.0/latest/scalaz/effect/IO.html) |
 
-## Message codec
-
-Structured [message format codec](/api/automorph/spi/MessageCodec.html) plugins.
-
-The underlying format must support storing arbitrarily nested structures of basic data types.
+## [Message codec](/api/automorph/spi/MessageCodec.html)
 
 | Class | Artifact | Library | Node Type | Codec |
 | --- | --- | --- | --- | --- |
@@ -57,17 +45,9 @@ The underlying format must support storing arbitrarily nested structures of basi
 | [UpickleMessagePackCodec](/api/automorph/codec/messagepack/UpickleMessagePackCodec.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Msg](https://com-lihaoyi.github.io/upickle/#uPack) | [MessagePack](https://msgpack.org/) |
 | [ArgonautJsonCodec](/api/automorph/codec/json/ArgonautJsonCodec.html) | [automorph-argonaut](https://mvnrepository.com/artifact/org.automorph/automorph-argonaut) | [Argonaut](http://argonaut.io/doc/) |[Json](http://argonaut.io/scaladocs/#argonaut.Json) | [JSON](https://www.json.org/) |
 
-## Message transport
+## [Message transport](/api/automorph/spi/MessageTransport.html)
 
-Binary [message transport](/api/automorph/spi/MessageTransport.html) protocol plugins.
-
-The underlying transport protocol must support request & response messaging pattern.
-
-### Client
-
-[Client message transport](/api/automorph/spi/transport/ClientMessageTransport.html) protocol plugins.
-
-Used by the RPC client to send requests and receive responses to and from a remote endpoint.
+### [Client transport](/api/automorph/spi/transport/ClientMessageTransport.html)
 
 | Class | Artifact | Library | Protocol |
 | --- | --- | --- | --- |
@@ -82,32 +62,25 @@ Used by the RPC client to send requests and receive responses to and from a remo
 | [UrlClient](/api/automorph/transport/http/client/UrlClient.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [RabbitMqClient](/api/automorph/transport/amqp/client/RabbitMqClient.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq) | [RabbitMQ](https://www.rabbitmq.com/java-client.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
 
-### Server
+### [Server transport](/api/automorph/spi/transport/ServerMessageTransport.html)
 
-[Server message transport](/api/automorph/spi/transport/ServerMessageTransport.html) protocol plugins.
+| Class | Artifact                                                                                    | Library                                               | Protocol |
+| --- |---------------------------------------------------------------------------------------------|-------------------------------------------------------| --- |
+| [UndertowServer](/api/automorph/transport/http/server/UndertowServer.html) (*Default*) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow)   | [Undertow](https://undertow.io/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
+| [VertxServer](/api/automorph/transport/http/server/VertxServer.html) | [automorph-vertx](https://mvnrepository.com/artifact/org.automorph/automorph-vertx)         | [Vert.x](https://vertx.io/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
+| [NanoServer](/api/automorph/transport/http/server/NanoServer.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard)   | [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd)   | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
+| [JettyServer](/api/automorph/transport/http/server/JettyServer.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty)         | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [AkkaServer](/api/automorph/transport/http/server/AkkaServer.html) | [automorph-akka-http](https://mvnrepository.com/artifact/org.automorph/automorph-akka-http) | [Akka HTTP](https://doc.akka.io/docs/akka-http/current/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [RabbitMqServer](/api/automorph/transport/amqp/server/RabbitMqServer.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq)   | [RabbitMq](https://www.rabbitmq.com/java-client.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
 
-Used to actively receive requests and send responses back using specific message transport protocol while invoking RPC request handler to process them.
+### [Endpoint transport](/api/automorph/spi/transport/EndpointMessageTransport.html)
 
-| Class | Artifact | Library | Protocol |
-| --- | --- | --- | --- |
-| [UndertowServer](/api/automorph/transport/http/server/UndertowServer.html) (*Default*) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
-| [VertxServer](/api/automorph/transport/http/server/VertxServer.html) | [automorph-vertx](https://mvnrepository.com/artifact/org.automorph/automorph-vertx) | [Vert.x](https://vertx.io/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
-| [NanoServer](/api/automorph/transport/http/server/NanoServer.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
-| [JettyServer](/api/automorph/transport/http/server/JettyServer.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
-| [RabbitMqServer](/api/automorph/transport/amqp/server/RabbitMqServer.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq) | [RabbitMq](https://www.rabbitmq.com/java-client.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
-
-### Endpoint
-
-[Endpoint message transport](/api/automorph/spi/transport/EndpointMessageTransport.html) protocol plugins.
-
-Used to passively handle requests into responses using specific message transport protocol from an active server while invoking RPC request handler to process them.
-
-| Class | Artifact | Library | Protocol |
-| --- | --- | --- | --- |
-| [UndertowHttpEndpoint](/api/automorph/transport/http/endpoint/UndertowHttpEndpoint.html) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
-| [UndertowWebSocketEndpoint](/api/automorph/transport/websocket/endpoint/UndertowWebSocketEndpoint$.html) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow) | [Undertow](https://undertow.io/) | [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
-| [VertxHttpEndpoint](/api/automorph/transport/http/endpoint/VertxHttpEndpoint.html) | [automorph-vertx](https://mvnrepository.com/artifact/org.automorph/automorph-vertx) | [Vert.x](https://vertx.io/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
-| [VertxWebSocketEndpoint](/api/automorph/transport/websocket/endpoint/VertxWebSocketEndpoint$.html) | [automorph-vertx](https://mvnrepository.com/artifact/org.automorph/automorph-vertx) | [Vert.x](https://vertx.io/) | [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
-| [FinagleEndpoint](/api/automorph/transport/http/endpoint/FinagleHttpEndpoint.html) | [automorph-finagle](https://mvnrepository.com/artifact/org.automorph/automorph-finagle) | [Finagle](https://twitter.github.io/finagle/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
-| [RapidoidEndpoint](/api/automorph/transport/http/endpoint/RapidoidHttpEndpoint.html) | [automorph-rapidoid](https://mvnrepository.com/artifact/org.automorph/automorph-rapidoid) | [rapidoid](https://rapidoid.org) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
-| [JettyHttpEndpoint](/api/automorph/transport/http/endpoint/JettyHttpEndpoint.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty) | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| Class | Artifact                                                                                    | Library | Protocol |
+| --- |---------------------------------------------------------------------------------------------| --- | --- |
+| [UndertowHttpEndpoint](/api/automorph/transport/http/endpoint/UndertowHttpEndpoint.html) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow)   | [Undertow](https://undertow.io/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [UndertowWebSocketEndpoint](/api/automorph/transport/websocket/endpoint/UndertowWebSocketEndpoint$.html) | [automorph-undertow](https://mvnrepository.com/artifact/org.automorph/automorph-undertow)   | [Undertow](https://undertow.io/) | [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
+| [VertxHttpEndpoint](/api/automorph/transport/http/endpoint/VertxHttpEndpoint.html) | [automorph-vertx](https://mvnrepository.com/artifact/org.automorph/automorph-vertx)         | [Vert.x](https://vertx.io/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [VertxWebSocketEndpoint](/api/automorph/transport/websocket/endpoint/VertxWebSocketEndpoint$.html) | [automorph-vertx](https://mvnrepository.com/artifact/org.automorph/automorph-vertx)         | [Vert.x](https://vertx.io/) | [WebSocket](https://en.wikipedia.org/wiki/WebSocket) |
+| [FinagleEndpoint](/api/automorph/transport/http/endpoint/FinagleHttpEndpoint.html) | [automorph-finagle](https://mvnrepository.com/artifact/org.automorph/automorph-finagle)     | [Finagle](https://twitter.github.io/finagle/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [JettyHttpEndpoint](/api/automorph/transport/http/endpoint/JettyHttpEndpoint.html) | [automorph-jetty](https://mvnrepository.com/artifact/org.automorph/automorph-jetty)         | [Jetty](https://www.eclipse.org/jetty/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
+| [AkkaHttpEndpoint](/api/automorph/transport/http/endpoint/AkkaHttpEndpoint.html) | [automorph-akka-http](https://mvnrepository.com/artifact/org.automorph/automorph-akka-http) | [Akka HTTP](https://doc.akka.io/docs/akka-http/current/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
