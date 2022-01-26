@@ -9,8 +9,8 @@ const sidebars = {
       items: [
         'Overview',
         'Quickstart',
-        'Plugins',
         'Architecture',
+        'Plugins',
         'Web-RPC',
         'Examples'
       ]
