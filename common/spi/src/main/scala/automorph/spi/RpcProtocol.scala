@@ -5,7 +5,7 @@ import java.io.InputStream
 import scala.util.Try
 
 /**
- * Remote procedure call (RPC) protocol plugin.
+ * Remote procedure call protocol plugin.
  *
  * The underlying RPC protocol must support remote function invocation.
  *

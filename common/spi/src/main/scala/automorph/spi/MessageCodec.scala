@@ -6,7 +6,7 @@ import java.io.InputStream
 /**
  * Structured message format codec plugin.
  *
- * The underlying format must support storing arbitrarily nested structures of basic data types.
+ * The underlying data format must support storing arbitrarily nested structures of basic data types.
  *
  * @tparam Node message format node type
  */

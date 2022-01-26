@@ -15,7 +15,10 @@ import scala.util.Try
 /**
  * RPC client.
  *
- * Used to perform remote API calls and notifications.
+ * The client can be used to perform type-safe remote API calls or send one-way messages.
+ *
+ * Remote APIs can be invoked statically using transparent proxy instances automatically derived from
+ * specified API traits or dynamically by supplying the required type information on invocation.
  *
  * @constructor Creates a RPC client with specified protocol and transport plugins accepting corresponding message context type.
  * @param protocol RPC protocol plugin

@@ -14,6 +14,11 @@ import scala.util.{Failure, Success, Try}
 /**
  * RPC request handler.
  *
+ * The handler can be used to convert remote API calls or one-way messages into type-safe invocations of API instances.
+ *
+ * It provides automatic derivation of remote API RPC bindings for existing API implementations and
+ * processing of incoming RPC requests into API invocations resulting in corresponding RPC responses.
+ *
  * Used by RPC servers to invoke bound API methods based on incoming requests.
  *
  * @constructor Creates a new RPC request handler with specified system and protocol plugins providing corresponding message context type.
