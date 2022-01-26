@@ -4,12 +4,12 @@
 
 **Automorph** provides the following building blocks to assemble either standalone RPC clients and servers or integrate with existing systems by freely combining various plugins:
 
-* [Client](https://www.javadoc.io/doc/org.automorph/automorph-core_3.0.0/latest/automorph/Client.html)
-* [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_3.0.0/latest/automorph/Handler.html)
-* [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/RpcProtocol.html)
-* [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/EffectSystem.html)
-* [Message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/MessageTransport.html)
-* [Message codec](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/MessageCodec.html)
+* [Client](https://www.javadoc.io/doc/org.automorph/automorph-core_@SCALADOC_VERSION@/latest/automorph/Client.html)
+* [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_@SCALADOC_VERSION@/latest/automorph/Handler.html)
+* [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/RpcProtocol.html)
+* [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/EffectSystem.html)
+* [Message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/MessageTransport.html)
+* [Message codec](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/MessageCodec.html)
 
 ## Diagram
 
@@ -23,8 +23,8 @@ Remote APIs can be invoked statically using transparent proxy instances automati
 
 **Depends on**
 
-* [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/RpcProtocol.html)
-* [Client message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/ClientMessageTransport.html)
+* [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/RpcProtocol.html)
+* [Client message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/ClientMessageTransport.html)
 
 **Used by**
 
@@ -39,13 +39,13 @@ processing of incoming RPC requests into API invocations resulting in correspond
 
 **Depends on**
 
-* [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/RpcProtocol.html)
-* [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/EffectSystem.html)
+* [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/RpcProtocol.html)
+* [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/EffectSystem.html)
 
 **Used by**
 
-* [Server message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/transport/ServerMessageTransport.html)
-* [Endpoint message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/transport/EndpointMessageTransport.html)
+* [Server message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/transport/ServerMessageTransport.html)
+* [Endpoint message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/transport/EndpointMessageTransport.html)
 * Applications
 
 ## Plugins
@@ -58,12 +58,12 @@ The underlying RPC protocol must support remote function invocation.
 
 **Depends on**
 
-* [Message codec](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/MessageCodec.html)
+* [Message codec](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/MessageCodec.html)
 
 **Used by**
 
-* [Client](https://www.javadoc.io/doc/org.automorph/automorph-core_3.0.0/latest/automorph/Client.html)
-* [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_3.0.0/latest/automorph/Handler.html)
+* [Client](https://www.javadoc.io/doc/org.automorph/automorph-core_@SCALADOC_VERSION@/latest/automorph/Client.html)
+* [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_@SCALADOC_VERSION@/latest/automorph/Handler.html)
 
 ### Effect system
 
@@ -73,8 +73,8 @@ The underlying runtime must support monadic composition of effectful values.
 
 **Used by**
 
-* [Client message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/ClientMessageTransport.html)
-* [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_3.0.0/latest/automorph/Handler.html)
+* [Client message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/ClientMessageTransport.html)
+* [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_@SCALADOC_VERSION@/latest/automorph/Handler.html)
 
 ### Message codec
 
@@ -84,7 +84,7 @@ The underlying data format must support storing arbitrarily nested structures of
 
 **Used by**
 
-* [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/RpcProtocol.html)
+* [RPC protocol](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/RpcProtocol.html)
 
 ### Message transport
 
@@ -100,11 +100,11 @@ Passively sends requests and receives responses to and from a remote endpoint us
 
 **Depends on**
 
-* [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/EffectSystem.html)
+* [Effect system](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/EffectSystem.html)
 
 **Used by**
 
-* [Client message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_3.0.0/latest/automorph/spi/ClientMessageTransport.html)
+* [Client message transport](https://www.javadoc.io/doc/org.automorph/automorph-spi_@SCALADOC_VERSION@/latest/automorph/spi/ClientMessageTransport.html)
 
 #### Server transport
 
@@ -114,7 +114,7 @@ Actively receives requests to be processed by the RPC handler and sends response
 
 **Depends on**
 
-* [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_3.0.0/latest/automorph/Handler.html)
+* [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_@SCALADOC_VERSION@/latest/automorph/Handler.html)
 
 **Used by**
 
@@ -128,7 +128,7 @@ Passively parses requests to be processed by the RPC handler and creates respons
 
 **Depends on**
 
-* [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_3.0.0/latest/automorph/Handler.html)
+* [Handler](https://www.javadoc.io/doc/org.automorph/automorph-core_@SCALADOC_VERSION@/latest/automorph/Handler.html)
 
 **Used by**
 

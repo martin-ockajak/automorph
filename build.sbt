@@ -502,7 +502,8 @@ clean := clean.dependsOn(unidoc / clean).value
 // Site
 lazy val docs = project.in(file("site")).settings(
   mdocVariables := Map(
-    "VERSION" -> version.value
+    "PROJECT_VERSION" -> version.value,
+    "SCALADOC_VERSION" -> "3.0.0"
   ),
   mdocOut := (LocalRootProject / sitePath).value / "docs",
   mdocExtraArguments := Seq("--no-link-hygiene"),
