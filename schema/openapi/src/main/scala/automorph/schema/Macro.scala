@@ -17,16 +17,16 @@ object Macro:
     given Quotes = quotes
 
     val simpleCall = '{
-      $api.indexOf("x", 0)
+      $api.charAt(0)
     }
     println(simpleCall.asTerm.show(using Printer.TreeShortCode))
     println(simpleCall.asTerm.show(using Printer.TreeStructure))
     val complexCall = call(
       quotes,
       api.asTerm,
-      "indexOf",
+      "charAt",
       List(),
-      List(List('{ "x" }.asTerm, '{ 0 }.asTerm))
+      List(List('{ 0 }.asTerm))
     )
     println(complexCall.show(using Printer.TreeShortCode))
     println(complexCall.show(using Printer.TreeStructure))
