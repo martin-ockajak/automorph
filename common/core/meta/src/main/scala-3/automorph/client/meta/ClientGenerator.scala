@@ -39,7 +39,7 @@ private[automorph] object ClientGenerator:
     val apiMethods = MethodReflection.apiMethods[Api, Effect](ref)
     val validMethods = apiMethods.flatMap(_.swap.toOption) match
       case Seq() => apiMethods.flatMap(_.toOption)
-      case errors => ref.q.reflect.report.throwError(
+      case errors => ref.q.reflect.report.errorAndAbort(
           s"Failed to bind API methods:\n${errors.map(error => s"  $error").mkString("\n")}"
         )
 
@@ -97,7 +97,7 @@ private[automorph] object ClientGenerator:
             case '[parameterType] => '{
               ${ Expr(parameter.name) } -> (
                 (argument: Any) => ${
-                  MethodReflection.call(
+                  methodCall(
                     ref.q,
                     codec.asTerm,
                     MessageCodec.encodeMethod,
@@ -130,7 +130,7 @@ private[automorph] object ClientGenerator:
       '{
         (resultNode: Node, responseContext: Context) => Contextual(
           ${
-            MethodReflection.call(
+            methodCall(
               ref.q,
               codec.asTerm,
               MessageCodec.decodeMethod,
@@ -144,7 +144,7 @@ private[automorph] object ClientGenerator:
     }.getOrElse {
       '{
         (resultNode: Node, _: Context) => ${
-          MethodReflection.call(
+          methodCall(
             ref.q,
             codec.asTerm,
             MessageCodec.decodeMethod,
@@ -154,6 +154,27 @@ private[automorph] object ClientGenerator:
         }
       }
     }
+
+  /**
+   * Creates a method call term.
+   *
+   * @param quotes quototation context
+   * @param instance instance term
+   * @param methodName method name
+   * @param typeArguments method type argument types
+   * @param arguments method argument terms
+   * @return instance method call term
+   */
+  def methodCall(
+    quotes: Quotes,
+    instance: quotes.reflect.Term,
+    methodName: String,
+    typeArguments: List[quotes.reflect.TypeRepr],
+    arguments: List[List[quotes.reflect.Tree]]
+  ): quotes.reflect.Term =
+    quotes.reflect.Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(
+      arguments.asInstanceOf[List[List[quotes.reflect.Term]]]
+    )
 
   private def logBoundMethod[Api: Type](ref: ClassReflection)(
     method: ref.RefMethod,

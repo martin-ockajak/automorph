@@ -136,27 +136,6 @@ private[automorph] object MethodReflection:
     s"${TypeRepr.of[ApiType].show(using Printer.TypeReprCode)}.${method.lift.signature}"
 
   /**
-   * Creates a method call term.
-   *
-   * @param quotes quototation context
-   * @param instance instance term
-   * @param methodName method name
-   * @param typeArguments method type argument types
-   * @param arguments method argument terms
-   * @return instance method call term
-   */
-  def call(
-    quotes: Quotes,
-    instance: quotes.reflect.Term,
-    methodName: String,
-    typeArguments: List[quotes.reflect.TypeRepr],
-    arguments: List[List[quotes.reflect.Tree]]
-  ): quotes.reflect.Term =
-    quotes.reflect.Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(
-      arguments.asInstanceOf[List[List[quotes.reflect.Term]]]
-    )
-
-  /**
    * Determines whether a method is a valid API method.
    *
    * @param ref reflection context

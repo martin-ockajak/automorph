@@ -50,7 +50,7 @@ private[automorph] object HandlerGenerator:
     val apiMethods = MethodReflection.apiMethods[Api, Effect](ref)
     val validMethods = apiMethods.flatMap(_.swap.toOption) match
       case Seq() => apiMethods.flatMap(_.toOption)
-      case errors => ref.q.reflect.report.throwError(
+      case errors => ref.q.reflect.report.errorAndAbort(
           s"Failed to bind API methods:\n${errors.map(error => s"  $error").mkString("\n")}"
         )
 
@@ -110,7 +110,7 @@ private[automorph] object HandlerGenerator:
 
     // Create encoded non-existent value expression
     //  codec.encode(None)
-    val encodeNoneCall = MethodReflection.call(
+    val encodeNoneCall = methodCall(
       ref.q,
       codec.asTerm,
       MessageCodec.encodeMethod,
@@ -134,7 +134,7 @@ private[automorph] object HandlerGenerator:
                 val decodeArguments = List(List('{
                   argumentNode.getOrElse(${ encodeNoneCall.asExprOf[Node] })
                 }.asTerm))
-                MethodReflection.call(
+                methodCall(
                   ref.q,
                   codec.asTerm,
                   MessageCodec.decodeMethod,
@@ -168,7 +168,7 @@ private[automorph] object HandlerGenerator:
       contextualResultType.asType match
         case '[resultValueType] => '{
           (result: Any) => ${
-            MethodReflection.call(
+            methodCall(
               ref.q,
               codec.asTerm,
               MessageCodec.encodeMethod,
@@ -181,7 +181,7 @@ private[automorph] object HandlerGenerator:
       resultType.asType match
         case '[resultValueType] => '{
           (result: Any) => ${
-            MethodReflection.call(
+            methodCall(
               ref.q,
               codec.asTerm,
               MessageCodec.encodeMethod,
@@ -234,19 +234,43 @@ private[automorph] object HandlerGenerator:
         resultType.asType match
           case '[resultValueType] => '{
             ${
-              MethodReflection.call(
-                ref.q,
-                api.asTerm,
-                method.name,
-                List.empty,
-                apiMethodArguments
-              ).asExprOf[Effect[resultValueType]]
+              ref.q.reflect.Select.unique(api.asTerm, method.name).appliedToTypes(List.empty).appliedToArgss(
+                apiMethodArguments.asInstanceOf[List[List[ref.q.reflect.Term]]]
+              ).asExprOf[Effect[Any]]
+//              methodCall(
+//                ref.q,
+//                api.asTerm,
+//                method.name,
+//                List.empty,
+//                apiMethodArguments
+//              ).asExprOf[Effect[resultValueType]]
             }.asInstanceOf[Effect[Any]]
             // FIXME - coerce the result to a generic effect type
             //  .asInstanceOf[Effect[Any]]
           }
       }
     }
+
+  /**
+   * Creates a method call term.
+   *
+   * @param quotes quototation context
+   * @param instance instance term
+   * @param methodName method name
+   * @param typeArguments method type argument types
+   * @param arguments method argument terms
+   * @return instance method call term
+   */
+  def methodCall(
+    quotes: Quotes,
+    instance: quotes.reflect.Term,
+    methodName: String,
+    typeArguments: List[quotes.reflect.TypeRepr],
+    arguments: List[List[quotes.reflect.Tree]]
+  ): quotes.reflect.Term =
+    quotes.reflect.Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(
+      arguments.asInstanceOf[List[List[quotes.reflect.Term]]]
+    )
 
   private def logMethod[Api: Type](ref: ClassReflection)(method: ref.RefMethod): Unit =
     import ref.q.reflect.{Printer, asTerm}

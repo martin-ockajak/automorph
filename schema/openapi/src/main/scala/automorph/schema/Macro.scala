@@ -21,7 +21,7 @@ object Macro:
     }
     println(simpleCall.asTerm.show(using Printer.TreeShortCode))
     println(simpleCall.asTerm.show(using Printer.TreeStructure))
-    val complexCall = call(
+    val complexCall = methodCall(
       quotes,
       api.asTerm,
       "charAt",
@@ -33,7 +33,7 @@ object Macro:
 
     '{ () }
 
-  def call(
+  def methodCall(
     quotes: Quotes,
     instance: quotes.reflect.Term,
     methodName: String,
