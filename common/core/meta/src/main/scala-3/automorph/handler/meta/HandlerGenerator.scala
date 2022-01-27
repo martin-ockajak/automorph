@@ -91,7 +91,11 @@ private[automorph] object HandlerGenerator:
       )
     }
 
-  private def generateArgumentDecoders[Node: Type, Codec <: MessageCodec[Node]: Type, Context: Type](ref: ClassReflection)(
+  private def generateArgumentDecoders[
+    Node: Type,
+    Codec <: MessageCodec[Node]: Type,
+    Context: Type
+  ](ref: ClassReflection)(
     method: ref.RefMethod,
     codec: Expr[Codec]
   ): Expr[Map[String, Option[Node] => Any]] =
