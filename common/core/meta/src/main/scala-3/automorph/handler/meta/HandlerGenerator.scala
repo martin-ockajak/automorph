@@ -208,48 +208,49 @@ private[automorph] object HandlerGenerator:
     // Create API method call function
     //   (arguments: Seq[Any], requestContext: Context) => Any
     val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
-    '{ (arguments, requestContext) =>
-      ${
-        // Create the method argument lists by type coercing supplied arguments
-        // List(List(
-        //   arguments(N).asInstanceOf[Any]
-        // )): List[List[ParameterXType]]
-        val apiMethodArguments = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
-          parameters.toList.zipWithIndex.map { (parameter, index) =>
-            val argumentIndex = offset + index
-            if argumentIndex == lastArgumentIndex && MethodReflection.acceptsContext[Context](ref)(method) then
-              // Use supplied request context as a last argument if the method accepts context as its last parameter
-              'requestContext.asTerm
-            else
-              // Coerce argument type
-              parameter.dataType.asType match
-                case '[parameterType] => '{
-                  arguments(${ Expr(argumentIndex) }).asInstanceOf[parameterType]
-                }.asTerm
-          }
-        ).asInstanceOf[List[List[Term]]]
+    resultType.asType match
+      case '[resultValueType] =>
+        '{ (arguments, requestContext) =>
+          ${
+            // Create the method argument lists by type coercing supplied arguments
+            // List(List(
+            //   arguments(N).asInstanceOf[Any]
+            // )): List[List[ParameterXType]]
+            val apiMethodArguments = method.parameters.toList.zip(parameterListOffsets).map((parameters, offset) =>
+              parameters.toList.zipWithIndex.map { (parameter, index) =>
+                val argumentIndex = offset + index
+                if argumentIndex == lastArgumentIndex && MethodReflection.acceptsContext[Context](ref)(method) then
+                  // Use supplied request context as a last argument if the method accepts context as its last parameter
+                  'requestContext.asTerm
+                else
+                  // Coerce argument type
+                  parameter.dataType.asType match
+                    case '[parameterType] => '{
+                      arguments(${ Expr(argumentIndex) }).asInstanceOf[parameterType]
+                    }.asTerm
+              }
+            ).asInstanceOf[List[List[Term]]]
 
-        // Call the API method and type coerce the result
-        //   api.method(arguments*).asInstanceOf[Any]: Any
-        resultType.asType match
-          case '[resultValueType] => '{
-            ${
-              ref.q.reflect.Select.unique(api.asTerm, method.name).appliedToTypes(List.empty).appliedToArgss(
-                apiMethodArguments.asInstanceOf[List[List[ref.q.reflect.Term]]]
-              ).asExprOf[Effect[Any]]
-//              MethodReflection.call(
-//                ref.q,
-//                api.asTerm,
-//                method.name,
-//                List.empty,
-//                apiMethodArguments
-//              ).asExprOf[Effect[resultValueType]]
-            }.asInstanceOf[Effect[Any]]
-            // FIXME - coerce the result to a generic effect type
-            //  .asInstanceOf[Effect[Any]]
+            // Call the API method and type coerce the result
+            //   api.method(arguments*).asInstanceOf[Any]: Any
+            '{
+              ${
+                ref.q.reflect.Select.unique(api.asTerm, method.name).appliedToTypes(List.empty).appliedToArgss(
+                  apiMethodArguments.asInstanceOf[List[List[ref.q.reflect.Term]]]
+                ).asExprOf[Effect[Any]]
+//                  MethodReflection.call(
+//                    ref.q,
+//                    api.asTerm,
+//                    method.name,
+//                    List.empty,
+//                    apiMethodArguments
+//                  ).asExprOf[Effect[resultValueType]]
+              }.asInstanceOf[Effect[Any]]
+              // FIXME - coerce the result to a generic effect type
+              //  .asInstanceOf[Effect[Any]]
+            }
           }
-      }
-    }
+        }
 
   private def logMethod[Api: Type](ref: ClassReflection)(method: ref.RefMethod): Unit =
     import ref.q.reflect.{Printer, asTerm}
