@@ -28,17 +28,13 @@ object Macro:
         val argumentValues = List(Range(0, 3).map { argumentIndex =>
           '{ arguments(${ Expr(argumentIndex) }).asInstanceOf[String] }.asTerm
         }.toList).asInstanceOf[List[List[Term]]]
-        '{
-          ${
-            methodCall(
-              quotes,
-              api.asTerm,
-              "method",
-              List(),
-              argumentValues
-            ).asExprOf[String]
-          }.asInstanceOf[Any]
-        }
+        methodCall(
+          quotes,
+          api.asTerm,
+          "method",
+          List(),
+          argumentValues
+        ).asExprOf[String]
       }
     }
     println()
