@@ -237,7 +237,7 @@ private[automorph] object HandlerGenerator:
               ${
                 ref.q.reflect.Select.unique(api.asTerm, method.name).appliedToTypes(List.empty).appliedToArgss(
                   apiMethodArguments.asInstanceOf[List[List[ref.q.reflect.Term]]]
-                ).asExprOf[Effect[Any]]
+                ).asExprOf[Effect[resultValueType]]
 //                  MethodReflection.call(
 //                    ref.q,
 //                    api.asTerm,
@@ -245,7 +245,7 @@ private[automorph] object HandlerGenerator:
 //                    List.empty,
 //                    apiMethodArguments
 //                  ).asExprOf[Effect[resultValueType]]
-              }.asInstanceOf[Effect[Any]]
+              }.asInstanceOf[Any]
               // FIXME - coerce the result to a generic effect type
               //  .asInstanceOf[Effect[Any]]
             }
