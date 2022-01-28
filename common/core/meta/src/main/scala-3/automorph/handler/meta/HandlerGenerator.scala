@@ -110,7 +110,7 @@ private[automorph] object HandlerGenerator:
 
     // Create encoded non-existent value expression
     //  codec.encode(None)
-    val encodeNoneCall = methodCall(
+    val encodeNoneCall = MethodReflection.call(
       ref.q,
       codec.asTerm,
       MessageCodec.encodeMethod,
@@ -134,7 +134,7 @@ private[automorph] object HandlerGenerator:
                 val decodeArguments = List(List('{
                   argumentNode.getOrElse(${ encodeNoneCall.asExprOf[Node] })
                 }.asTerm))
-                methodCall(
+                MethodReflection.call(
                   ref.q,
                   codec.asTerm,
                   MessageCodec.decodeMethod,
@@ -168,7 +168,7 @@ private[automorph] object HandlerGenerator:
       contextualResultType.asType match
         case '[resultValueType] => '{
           (result: Any) => ${
-            methodCall(
+            MethodReflection.call(
               ref.q,
               codec.asTerm,
               MessageCodec.encodeMethod,
@@ -181,7 +181,7 @@ private[automorph] object HandlerGenerator:
       resultType.asType match
         case '[resultValueType] => '{
           (result: Any) => ${
-            methodCall(
+            MethodReflection.call(
               ref.q,
               codec.asTerm,
               MessageCodec.encodeMethod,
@@ -237,7 +237,7 @@ private[automorph] object HandlerGenerator:
               ref.q.reflect.Select.unique(api.asTerm, method.name).appliedToTypes(List.empty).appliedToArgss(
                 apiMethodArguments.asInstanceOf[List[List[ref.q.reflect.Term]]]
               ).asExprOf[Effect[Any]]
-//              methodCall(
+//              MethodReflection.call(
 //                ref.q,
 //                api.asTerm,
 //                method.name,
@@ -250,27 +250,6 @@ private[automorph] object HandlerGenerator:
           }
       }
     }
-
-  /**
-   * Creates a method call term.
-   *
-   * @param quotes quototation context
-   * @param instance instance term
-   * @param methodName method name
-   * @param typeArguments method type argument types
-   * @param arguments method argument terms
-   * @return instance method call term
-   */
-  def methodCall(
-    quotes: Quotes,
-    instance: quotes.reflect.Term,
-    methodName: String,
-    typeArguments: List[quotes.reflect.TypeRepr],
-    arguments: List[List[quotes.reflect.Tree]]
-  ): quotes.reflect.Term =
-    quotes.reflect.Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(
-      arguments.asInstanceOf[List[List[quotes.reflect.Term]]]
-    )
 
   private def logMethod[Api: Type](ref: ClassReflection)(method: ref.RefMethod): Unit =
     import ref.q.reflect.{Printer, asTerm}

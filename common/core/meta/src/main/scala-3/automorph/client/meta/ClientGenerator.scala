@@ -97,7 +97,7 @@ private[automorph] object ClientGenerator:
             case '[parameterType] => '{
               ${ Expr(parameter.name) } -> (
                 (argument: Any) => ${
-                  methodCall(
+                  MethodReflection.call(
                     ref.q,
                     codec.asTerm,
                     MessageCodec.encodeMethod,
@@ -130,7 +130,7 @@ private[automorph] object ClientGenerator:
       '{
         (resultNode: Node, responseContext: Context) => Contextual(
           ${
-            methodCall(
+            MethodReflection.call(
               ref.q,
               codec.asTerm,
               MessageCodec.decodeMethod,
@@ -144,7 +144,7 @@ private[automorph] object ClientGenerator:
     }.getOrElse {
       '{
         (resultNode: Node, _: Context) => ${
-          methodCall(
+          MethodReflection.call(
             ref.q,
             codec.asTerm,
             MessageCodec.decodeMethod,
@@ -154,27 +154,6 @@ private[automorph] object ClientGenerator:
         }
       }
     }
-
-  /**
-   * Creates a method call term.
-   *
-   * @param quotes quototation context
-   * @param instance instance term
-   * @param methodName method name
-   * @param typeArguments method type argument types
-   * @param arguments method argument terms
-   * @return instance method call term
-   */
-  def methodCall(
-    quotes: Quotes,
-    instance: quotes.reflect.Term,
-    methodName: String,
-    typeArguments: List[quotes.reflect.TypeRepr],
-    arguments: List[List[quotes.reflect.Tree]]
-  ): quotes.reflect.Term =
-    quotes.reflect.Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(
-      arguments.asInstanceOf[List[List[quotes.reflect.Term]]]
-    )
 
   private def logBoundMethod[Api: Type](ref: ClassReflection)(
     method: ref.RefMethod,

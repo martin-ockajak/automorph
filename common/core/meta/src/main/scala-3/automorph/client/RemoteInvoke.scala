@@ -230,7 +230,7 @@ object RemoteInvoke:
           '{ (resultNode: Node, responseContext: Context) =>
             Contextual(
               ${
-                methodCall(
+                MethodReflection.call(
                   quotes,
                   codec.asTerm,
                   MessageCodec.decodeMethod,
@@ -244,7 +244,7 @@ object RemoteInvoke:
     }.getOrElse {
       '{ (resultNode: Node, _: Context) =>
         ${
-          methodCall(
+          MethodReflection.call(
             quotes,
             codec.asTerm,
             MessageCodec.decodeMethod,
@@ -254,24 +254,3 @@ object RemoteInvoke:
         }
       }
     }
-
-  /**
-   * Creates a method call term.
-   *
-   * @param quotes quototation context
-   * @param instance instance term
-   * @param methodName method name
-   * @param typeArguments method type argument types
-   * @param arguments method argument terms
-   * @return instance method call term
-   */
-  def methodCall(
-    quotes: Quotes,
-    instance: quotes.reflect.Term,
-    methodName: String,
-    typeArguments: List[quotes.reflect.TypeRepr],
-    arguments: List[List[quotes.reflect.Tree]]
-  ): quotes.reflect.Term =
-    quotes.reflect.Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(
-      arguments.asInstanceOf[List[List[quotes.reflect.Term]]]
-    )
