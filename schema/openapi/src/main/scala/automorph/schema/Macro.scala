@@ -7,31 +7,40 @@ import scala.util.{Failure, Try}
 
 object Macro:
 
-  inline def bindings[Api <: String](api: Api): Unit =
-    ${ bindingsMacro[Api]('api) }
+  inline def invoke[Api <: AnyRef](api: Api): Seq[String] => Any =
+    ${ invokeMacro[Api]('api) }
 
-  private def bindingsMacro[Api <: String: Type](
+  private def invokeMacro[Api <: AnyRef: Type](
     api: Expr[Api]
-  )(using quotes: Quotes): Expr[Unit] =
+  )(using quotes: Quotes): Expr[Seq[String] => Any] =
     import quotes.reflect.{Printer, Term, TypeRepr, asTerm}
     given Quotes = quotes
 
-    val simpleCall = '{
-      $api.charAt(0)
+//    val complexCall = methodCall(
+//      quotes,
+//      api.asTerm,
+//      "charAt",
+//      List(),
+//      List(List('{ 0 }.asTerm))
+//    )
+    val complexCall = '{ (arguments: Seq[String]) =>
+      ${
+        val argumentValues = List(Range(0, 3).map { argumentIndex =>
+          '{ arguments(${ Expr(argumentIndex) }) }.asTerm
+        }.toList).asInstanceOf[List[List[Term]]]
+        methodCall(
+          quotes,
+          api.asTerm,
+          "method",
+          List(),
+          argumentValues
+        ).asExprOf[Any]
+      }
     }
-    println(simpleCall.asTerm.show(using Printer.TreeShortCode))
-    println(simpleCall.asTerm.show(using Printer.TreeStructure))
-    val complexCall = methodCall(
-      quotes,
-      api.asTerm,
-      "charAt",
-      List(),
-      List(List('{ 0 }.asTerm))
-    )
-    println(complexCall.show(using Printer.TreeShortCode))
-    println(complexCall.show(using Printer.TreeStructure))
-
-    '{ () }
+    println(complexCall.asTerm.show(using Printer.TreeShortCode))
+    println(complexCall.asTerm.show(using Printer.TreeStructure))
+    complexCall
+//    '{ () }
 
   def methodCall(
     quotes: Quotes,
