@@ -13,5 +13,5 @@ class MacroTest extends BaseTest {
 }
 
 case class Api():
-  def method(p0: String, p1: String, p2: String): Any =
+  def method(p0: String, p1: String, p2: String): String =
     List(p0, p1, p2).mkString(", ")
