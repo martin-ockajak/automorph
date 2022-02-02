@@ -63,34 +63,9 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    */
   def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): ThisHandler =
     macro HandlerMeta.bindMapNamesMacro[Node, Codec, Effect, Context, Api]
-
-  //  def brokenBind[Api <: AnyRef](api: Api): ThisHandler =
-//    macro HandlerMeta.brokenBindMacro[Node, Codec, Effect, Context, Api]
 }
 
 object HandlerMeta {
-
-  def brokenBindMacro[
-    Node: c.WeakTypeTag,
-    Codec <: MessageCodec[Node]: c.WeakTypeTag,
-    Effect[_],
-    Context: c.WeakTypeTag,
-    Api <: AnyRef: c.WeakTypeTag
-  ](c: blackbox.Context)(
-    api: c.Expr[Api]
-  )(implicit effectType: c.WeakTypeTag[Effect[?]]): c.Expr[Handler[Node, Codec, Effect, Context]] = {
-    import c.universe.{weakTypeOf, Quasiquote}
-
-    val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[Codec]
-    val contextType = weakTypeOf[Context]
-    val apiType = weakTypeOf[Api]
-    c.Expr[Any](q"""
-      automorph.handler.meta.BrokenHandlerGenerator
-        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec, ${c.prefix}.system, $api)
-      ${c.prefix}
-    """).asInstanceOf[c.Expr[Handler[Node, Codec, Effect, Context]]]
-  }
 
   def bindMacro[
     Node,
