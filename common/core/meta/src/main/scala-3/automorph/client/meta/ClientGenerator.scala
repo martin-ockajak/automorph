@@ -39,7 +39,7 @@ private[automorph] object ClientGenerator:
     val apiMethods = MethodReflection.apiMethods[Api, Effect](ref)
     val validMethods = apiMethods.flatMap(_.swap.toOption) match
       case Seq() => apiMethods.flatMap(_.toOption)
-      case errors => ref.q.reflect.report.errorAndAbort(
+      case errors => ref.q.reflect.report.throwError(
           s"Failed to bind API methods:\n${errors.map(error => s"  $error").mkString("\n")}"
         )
 
