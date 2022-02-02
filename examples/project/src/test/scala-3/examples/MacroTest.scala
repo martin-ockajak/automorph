@@ -1,4 +1,4 @@
-package automorph.schema
+package examples
 
 import test.base.BaseTest
 

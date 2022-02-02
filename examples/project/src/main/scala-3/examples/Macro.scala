@@ -1,4 +1,4 @@
-package automorph.schema
+package examples
 
 import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
