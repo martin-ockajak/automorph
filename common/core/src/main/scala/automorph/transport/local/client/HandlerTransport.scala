@@ -34,11 +34,12 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     mediaType: String
   ): Effect[(InputStream, Context)] =
     handler.processRequest(requestBody, requestContext.getOrElse(defaultContext), requestId)
-      .flatMap(_.responseBody.map { responseBody =>
-        system.pure(responseBody -> defaultContext)
-      }.getOrElse {
-        system.failed(InvalidResponseException("Missing call response", None.orNull))
-      })
+      .flatMap { result => result.responseBody.map { responseBody =>
+          system.pure(responseBody -> result.context.getOrElse(defaultContext))
+        }.getOrElse {
+          system.failed(InvalidResponseException("Missing call response", None.orNull))
+        }
+      }
 
   override def message(
     requestBody: InputStream,
