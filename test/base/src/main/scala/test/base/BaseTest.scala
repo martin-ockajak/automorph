@@ -33,11 +33,8 @@ trait BaseTest
   with Checkers
   with Fixtures
   with Await
-  with Network {
+  with Network
 
-  override def beforeAll(): Unit =
-    BaseTest.setupLogger()
-}
 
 object BaseTest {
 
@@ -51,8 +48,8 @@ object BaseTest {
   final def testBasic: Boolean =
     Option(System.getenv(testBasicEnvironment)).isDefined
 
-  private def setupLogger(): Unit = {
-    val level = Option(System.getenv(logLevelEnvironment)).flatMap(Level.get).getOrElse(Level.Info)
+  private val setupLogger: Unit = {
+    val level = Option(System.getenv(logLevelEnvironment)).flatMap(Level.get).getOrElse(Level.Fatal)
     val format = formatter"$time [$levelColoredPaddedRight] (${gray(positionAbbreviated)}): $message$mdcMultiLine"
 //    val path = PathBuilder.static(Paths.get("target/test.log"))
     scribe.Logger.root
