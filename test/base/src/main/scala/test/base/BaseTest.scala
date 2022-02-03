@@ -7,7 +7,7 @@ import org.scalatest.{AppendedClues, BeforeAndAfterAll, BeforeAndAfterEach, Opti
 import org.scalatestplus.scalacheck.Checkers
 import scribe.Level
 import scribe.file.{FileWriter, PathBuilder}
-import scribe.format.Formatter
+import scribe.format.{Formatter, FormatterInterpolator, gray, levelColoredPaddedRight, mdcMultiLine, message, positionAbbreviated, time}
 import scribe.writer.ConsoleWriter
 
 /**
@@ -36,7 +36,7 @@ trait BaseTest
   with Network {
 
   override def beforeAll(): Unit =
-    BaseTest.scribeConfig
+    BaseTest.setupLogger()
 }
 
 object BaseTest {
@@ -48,16 +48,18 @@ object BaseTest {
   private val testBasicEnvironment = "TEST_BASIC"
 
   /** Basic tests enabled only. */
-  def testBasic: Boolean =
+  final def testBasic: Boolean =
     Option(System.getenv(testBasicEnvironment)).isDefined
 
-  private def scribeConfig: Unit = {
+  private def setupLogger(): Unit = {
     val level = Option(System.getenv(logLevelEnvironment)).flatMap(Level.get).getOrElse(Level.Info)
+    val format = formatter"$time [$levelColoredPaddedRight] (${gray(positionAbbreviated)}): $message$mdcMultiLine"
+//    val path = PathBuilder.static(Paths.get("target/test.log"))
     scribe.Logger.root
       .clearHandlers()
       .clearModifiers()
-      .withHandler(writer = ConsoleWriter, formatter = Formatter.compact, minimumLevel = Some(level))
-//      .withHandler(writer = FileWriter(PathBuilder.static(Paths.get("target/test.log"))), minimumLevel = Some(level))
+      .withHandler(writer = ConsoleWriter, formatter = format, minimumLevel = Some(level))
+//      .withHandler(writer = FileWriter(path), formatter = format, minimumLevel = Some(level))
       .replace()
   }
 }
