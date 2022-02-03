@@ -354,16 +354,19 @@ lazy val examples = project.in(file("examples")).dependsOn(
 )
 
 // Test
+val scalatestVersion = "3.2.10"
+val scribeVersion = "3.6.1"
 Test / testOptions += Tests.Argument("-oD")
 lazy val testBase = project.in(file("test/base")).dependsOn(
   spi
 ).settings(
   libraryDependencies ++= Seq(
     // Test
-    "org.scalatest" %% "scalatest" % "3.2.10",
-    "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0",
+    "org.scalatest" %% "scalatest" % scalatestVersion,
+    "org.scalatestplus" %% "scalacheck-1-15" % s"$scalatestVersion.0",
     "commons-io" % "commons-io" % "2.11.0",
-    "ch.qos.logback" % "logback-classic" % "1.3.0-alpha10",
+    "com.outr" %% "scribe-file" % scribeVersion,
+    "com.outr" %% "scribe-slf4j" % scribeVersion,
     "org.slf4j" % "jul-to-slf4j" % "1.7.33",
     "com.lihaoyi" %% "pprint" % "0.6.6"
   ),
@@ -400,7 +403,7 @@ lazy val testStandard = project.in(file("test/standard")).dependsOn(
 
 
 // Compile
-ThisBuild / scalaVersion := "3.0.0"
+ThisBuild / scalaVersion := "3.0.2"
 ThisBuild / crossScalaVersions ++= Seq("2.13.8", scalaVersion.value)
 ThisBuild / scalacOptions ++= Seq(
   "-language:higherKinds",

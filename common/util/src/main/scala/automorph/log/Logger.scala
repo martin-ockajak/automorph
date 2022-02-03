@@ -113,7 +113,7 @@ final private[automorph] case class Logger private (private val underlying: slf4
   ): Unit = if (enabled) {
     val iterableProperties = unpackProperties(properties)
     addDiagnosticContext(iterableProperties)
-    logMessage(s"$message\n${codecProperties(iterableProperties)}\n")
+    logMessage(message)
     removeDiagnosticContext(iterableProperties)
   }
 
@@ -126,7 +126,7 @@ final private[automorph] case class Logger private (private val underlying: slf4
   )(implicit evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]): Unit = if (enabled) {
     val iterableProperties = unpackProperties(properties)
     addDiagnosticContext(iterableProperties)
-    logMessage(s"$message\n${codecProperties(iterableProperties)}\n", cause)
+    logMessage(message, cause)
     removeDiagnosticContext(iterableProperties)
   }
 
@@ -138,9 +138,6 @@ final private[automorph] case class Logger private (private val underlying: slf4
 
   private def productProperties(product: Product): Map[String, Any] =
     product.productElementNames.map(_.capitalize).zip(product.productIterator).toMap
-
-  private def codecProperties(properties: Iterable[(String, Any)]): String =
-    properties.map { case (key, value) => s"$key = ${codec(value)}" }.mkString("\n")
 
   private def addDiagnosticContext(properties: Iterable[(String, Any)]): Unit =
     properties.foreach { case (key, value) => MDC.put(key, codec(value)) }
