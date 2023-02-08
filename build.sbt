@@ -265,7 +265,7 @@ lazy val sttp = project.in(file("transport/sttp")).dependsOn(
   ),
   Compile / doc / scalacOptions ++= Seq("-skip-packages sttp")
 //  apiMappings += (
-//    (unmanagedBase.value / s"core_3-$sttpVersion.jar") -> 
+//    (unmanagedBase.value / s"core_3-$sttpVersion.jar") ->
 //      url(s"https://www.javadoc.io/doc/com.softwaremill.sttp.client3/core_${scalaVersion.value}/latest/")
 //  )
 )
@@ -330,7 +330,7 @@ lazy val default = project.dependsOn(
 ).settings(
   name := s"$projectName-default",
   libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpVersion    
+    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpVersion
   ),
   Compile / doc / scalacOptions ++= Seq(
     "-Ymacro-expand:none",
@@ -403,8 +403,8 @@ lazy val testStandard = project.in(file("test/standard")).dependsOn(
 
 
 // Compile
-ThisBuild / scalaVersion := "3.0.2"
-ThisBuild / crossScalaVersions ++= Seq("2.13.8", scalaVersion.value)
+ThisBuild / scalaVersion := "3.2.2"
+ThisBuild / crossScalaVersions ++= Seq("2.13.10", scalaVersion.value)
 ThisBuild / scalacOptions ++= Seq(
   "-language:higherKinds",
   "-feature",
