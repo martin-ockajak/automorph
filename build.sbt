@@ -88,7 +88,7 @@ lazy val spi = project.in(file("common/spi")).settings(
   libraryDependencies ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, _)) => Seq(
-	"org.scala-lang" % "scala-reflect" % scalaVersion.value
+        "org.scala-lang" % "scala-reflect" % scalaVersion.value
       )
       case _ => Seq.empty
     }
