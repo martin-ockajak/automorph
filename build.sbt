@@ -244,6 +244,7 @@ lazy val argonaut = project.in(file("codec/argonaut")).dependsOn(
     "-skip-packages automorph.codec.json.meta"
   )
 )
+
 // Message transport
 lazy val http = project.in(file("transport/http")).settings(
   name := s"$projectName-http",
