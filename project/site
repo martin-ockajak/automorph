@@ -2,7 +2,7 @@
 
 SITE_HOME=site/build/index.html
 
-sbt '++2.13.8 site' && case "$OSTYPE" in
+sbt '++2.13.10 site' && case "$OSTYPE" in
   linux*)   browse ${SITE_HOME} & ;;
   bsd*)     browse ${SITE_HOME} & ;;
   cygwin*)  browse ${SITE_HOME} & ;;

@@ -108,7 +108,7 @@ export TEST_BASIC=true
 ### Documentation
 
 ```bash
-sbt '++2.13.8 site'
+sbt '++2.13.10 site'
 ```
 
 #### Continuous rendering
