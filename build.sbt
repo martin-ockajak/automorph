@@ -321,7 +321,7 @@ lazy val finagle = project.in(file("transport/finagle")).dependsOn(
 ).settings(
   name := s"$projectName-finagle",
   libraryDependencies ++= Seq(
-    ("com.twitter" % "finagle-http" % "22.1.0").cross(CrossVersion.for3Use2_13)
+    ("com.twitter" % "finagle-http" % "22.1.0" exclude("org.scala-lang.modules", "scala-collection-compat_2.13")).cross(CrossVersion.for3Use2_13)
   )
 )
 
