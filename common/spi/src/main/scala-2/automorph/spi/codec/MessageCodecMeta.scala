@@ -1,13 +1,10 @@
 package automorph.spi.codec
 
-import scala.annotation.nowarn
-
 /**
  * Structured message format codec code generation.
  *
  * @tparam Node message codec node representation type
  */
-@nowarn("msg=used")
 trait MessageCodecMeta[Node] {
   /**
    * Encodes a value as a node.

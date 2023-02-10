@@ -96,7 +96,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     copy(mapName = mapName)
 
   override def toString: String = {
-    val plugins = Map(
+    val plugins = Map[String, Any](
       "system" -> system,
       "protocol" -> protocol
     ).map { case (name, plugin) => s"$name = ${plugin.getClass.getName}" }.mkString(", ")
