@@ -10,11 +10,9 @@ import automorph.schema.{OpenApi, OpenRpc}
  */
 trait UpickleMessagePackCustom extends UpickleCustom {
 
-  implicit lazy val jsonRpcMessageRw: ReadWriter[UpickleJsonRpc.RpcMessage] =
-    UpickleJsonRpc.readWriter(this)
+  implicit lazy val jsonRpcMessageRw: ReadWriter[UpickleJsonRpc.RpcMessage] = UpickleJsonRpc.readWriter(this)
 
-  implicit lazy val restRpcMessageRw: ReadWriter[UpickleWebRpc.RpcMessage] =
-    UpickleWebRpc.readWriter(this)
+  implicit lazy val restRpcMessageRw: ReadWriter[UpickleWebRpc.RpcMessage] = UpickleWebRpc.readWriter(this)
 
   implicit lazy val openRpcRw: ReadWriter[OpenRpc] = UpickleOpenRpc.readWriter(this)
   implicit lazy val openApiRw: ReadWriter[OpenApi] = UpickleOpenApi.readWriter(this)

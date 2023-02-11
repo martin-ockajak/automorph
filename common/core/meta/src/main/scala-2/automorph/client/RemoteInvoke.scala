@@ -76,11 +76,9 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    *
    * @return remote function invocation result
    */
-  def args[T1, T2, T3](
-    p1: (String, T1),
-    p2: (String, T2),
-    p3: (String, T3)
-  )(implicit requestContext: Context): Effect[Result] =
+  def args[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3))(implicit
+    requestContext: Context
+  ): Effect[Result] =
     macro RemoteInvoke.args3Macro[Effect[Result], T1, T2, T3, Context]
 
   /**
@@ -91,12 +89,9 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    *
    * @return remote function invocation result
    */
-  def args[T1, T2, T3, T4](
-    p1: (String, T1),
-    p2: (String, T2),
-    p3: (String, T3),
-    p4: (String, T4)
-  )(implicit requestContext: Context): Effect[Result] =
+  def args[T1, T2, T3, T4](p1: (String, T1), p2: (String, T2), p3: (String, T3), p4: (String, T4))(implicit
+    requestContext: Context
+  ): Effect[Result] =
     macro RemoteInvoke.args4Macro[Effect[Result], T1, T2, T3, T4, Context]
 
   /**
@@ -152,13 +147,14 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
     p7: (String, T7)
   )(implicit requestContext: Context): Effect[Result] =
     macro RemoteInvoke.args7Macro[Effect[Result], T1, T2, T3, T4, T5, T6, T7, Context]
+
 }
 
 object RemoteInvoke {
 
-  def args1Macro[Result, T1: c.WeakTypeTag, Context](c: blackbox.Context)(
-    p1: c.Expr[(String, T1)]
-  )(requestContext: c.Expr[Context]): c.Expr[Result] = {
+  def args1Macro[Result, T1: c.WeakTypeTag, Context](
+    c: blackbox.Context
+  )(p1: c.Expr[(String, T1)])(requestContext: c.Expr[Context]): c.Expr[Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
     c.Expr[Result](q"""
@@ -172,10 +168,9 @@ object RemoteInvoke {
     """)
   }
 
-  def args2Macro[Result, T1: c.WeakTypeTag, T2: c.WeakTypeTag, Context](c: blackbox.Context)(
-    p1: c.Expr[(String, T1)],
-    p2: c.Expr[(String, T2)]
-  )(requestContext: c.Expr[Context]): c.Expr[Result] = {
+  def args2Macro[Result, T1: c.WeakTypeTag, T2: c.WeakTypeTag, Context](
+    c: blackbox.Context
+  )(p1: c.Expr[(String, T1)], p2: c.Expr[(String, T2)])(requestContext: c.Expr[Context]): c.Expr[Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
     c.Expr[Result](q"""
@@ -190,11 +185,11 @@ object RemoteInvoke {
     """)
   }
 
-  def args3Macro[Result, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, Context](c: blackbox.Context)(
-    p1: c.Expr[(String, T1)],
-    p2: c.Expr[(String, T2)],
-    p3: c.Expr[(String, T3)]
-  )(requestContext: c.Expr[Context]): c.Expr[Result] = {
+  def args3Macro[Result, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, Context](
+    c: blackbox.Context
+  )(p1: c.Expr[(String, T1)], p2: c.Expr[(String, T2)], p3: c.Expr[(String, T3)])(
+    requestContext: c.Expr[Context]
+  ): c.Expr[Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
     c.Expr[Result](q"""
@@ -210,19 +205,11 @@ object RemoteInvoke {
     """)
   }
 
-  def args4Macro[
-    Result,
-    T1: c.WeakTypeTag,
-    T2: c.WeakTypeTag,
-    T3: c.WeakTypeTag,
-    T4: c.WeakTypeTag,
-    Context
-  ](c: blackbox.Context)(
-    p1: c.Expr[(String, T1)],
-    p2: c.Expr[(String, T2)],
-    p3: c.Expr[(String, T3)],
-    p4: c.Expr[(String, T4)]
-  )(requestContext: c.Expr[Context]): c.Expr[Result] = {
+  def args4Macro[Result, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, T4: c.WeakTypeTag, Context](
+    c: blackbox.Context
+  )(p1: c.Expr[(String, T1)], p2: c.Expr[(String, T2)], p3: c.Expr[(String, T3)], p4: c.Expr[(String, T4)])(
+    requestContext: c.Expr[Context]
+  ): c.Expr[Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
     c.Expr[Result](q"""
@@ -344,37 +331,32 @@ object RemoteInvoke {
     """)
   }
 
-  def decodeResult[Node, Codec, Context, Result](
-    codec: Codec
-  )(implicit codecBound: Codec <:< MessageCodec[Node]): (Node, Context) => Result =
-    macro decodeResultMacro[Node, Codec, Context, Result]
-
   @nowarn("msg=used")
-  def decodeResultMacro[
-    Node: c.WeakTypeTag,
-    Codec,
-    Context: c.WeakTypeTag,
-    Result: c.WeakTypeTag
-  ](c: blackbox.Context)(
-    codec: c.Expr[Codec]
-  )(codecBound: c.Expr[Codec <:< MessageCodec[Node]]): c.Expr[(Node, Context) => Result] = {
+  def decodeResultMacro[Node: c.WeakTypeTag, Codec, Context: c.WeakTypeTag, Result: c.WeakTypeTag](
+    c: blackbox.Context
+  )(codec: c.Expr[Codec])(codecBound: c.Expr[Codec <:< MessageCodec[Node]]): c.Expr[(Node, Context) => Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
     val resultType = weakTypeOf[Result]
     val nodeType = weakTypeOf[Node]
     val contextType = weakTypeOf[Context]
-    MethodReflection.contextualResult[c.type, Context, Contextual[?, ?]](c)(resultType)
-      .map { contextualResultType =>
-        c.Expr[(Node, Context) => Result](q"""
+    MethodReflection.contextualResult[c.type, Context, Contextual[?, ?]](c)(resultType).map { contextualResultType =>
+      c.Expr[(Node, Context) => Result](q"""
           (resultNode: $nodeType, responseContext: $contextType) => Contextual(
             $codec.decode[$contextualResultType](resultNode),
             responseContext
           )
         """)
-      }.getOrElse {
-        c.Expr[(Node, Context) => Result](q"""
+    }.getOrElse {
+      c.Expr[(Node, Context) => Result](q"""
           (resultNode: $nodeType, _: $contextType) => $codec.decode[$resultType](resultNode)
         """)
-      }
+    }
   }
+
+  def decodeResult[Node, Codec, Context, Result](codec: Codec)(implicit
+    codecBound: Codec <:< MessageCodec[Node]
+  ): (Node, Context) => Result =
+    macro decodeResultMacro[Node, Codec, Context, Result]
+
 }
