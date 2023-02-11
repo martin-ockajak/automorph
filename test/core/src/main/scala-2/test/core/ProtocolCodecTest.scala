@@ -45,6 +45,7 @@ trait ProtocolCodecTest extends CoreTest {
 //    implicit val usingContext: Context = defaultContext
 //    Seq(
 //      {
+////        // Circe JSON
 ////        implicit val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
 ////        implicit val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
 ////        val codec = CirceJsonCodec()
@@ -63,6 +64,7 @@ trait ProtocolCodecTest extends CoreTest {
 ////          (function, a0) => client.message(function).args(a0)
 ////        )
 ////      }, {
+//        // Jackson JSON
 //        val enumModule = new SimpleModule().addSerializer(
 //          classOf[Enum.Enum],
 //          new StdSerializer[Enum.Enum](classOf[Enum.Enum]) {
@@ -94,6 +96,7 @@ trait ProtocolCodecTest extends CoreTest {
 //          (function, a0) => client.message(function).args(a0)
 //        )
 //      }, {
+////      // uPickle JSON
 ////        class Custom extends UpickleJsonCustom {
 ////          implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
 ////            value => Enum.toOrdinal(value),
@@ -119,6 +122,7 @@ trait ProtocolCodecTest extends CoreTest {
 ////          (function, a0) => client.message(function).args(a0)
 ////        )
 ////      }, {
+////        // uPickle MessagePack
 ////        class Custom extends UpickleMessagePackCustom {
 ////          implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
 ////            value => Enum.toOrdinal(value),
@@ -144,6 +148,7 @@ trait ProtocolCodecTest extends CoreTest {
 ////          (function, a0) => client.message(function).args(a0)
 ////        )
 ////      }, {
+//        // Argonaut JSON
 //        implicit val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
 //          (v: Enum.Enum) => jNumber(Enum.toOrdinal(v)),
 //          cursor => cursor.focus.as[Int].map(Enum.fromOrdinal)
