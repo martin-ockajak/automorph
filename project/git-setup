@@ -45,29 +45,14 @@ def downloadLargeFiles() -> None:
 def configureAliases(scriptDirectory: str) -> None:
   print('Added Git command aliases:')
   python_version = '3' if platform.system().lower() == 'linux' else ''
-  subprocess.check_call(['git', 'config', 'alias.sync', '!python%s %s $@' % (python_version, os.path.join(scriptDirectory, 'git-sync').replace('\\', '\\\\'))], stdout = subprocess.PIPE)
-  print('* sync - Pull, rebase & push changes to all branches making the local and remote repository contents identical.')
-
   subprocess.check_call(['git', 'config', 'alias.createbranch', '!git checkout -b $1 && git push --set-upstream origin $1 && echo >/dev/null'], stdout = subprocess.PIPE)
   print('* createbranch - Create a branch and push its tracked remote branch.')
 
   subprocess.check_call(['git', 'config', 'alias.deletebranch', '!git push origin --delete $1 && git branch -d $1 && echo >/dev/null'], stdout = subprocess.PIPE)
   print('* deletebranch - Delete a branch and its tracked remote branch.')
 
-  subprocess.check_call(['git', 'config', 'alias.lastmerge', '!BRANCH=`git rev-parse --abbrev-ref HEAD` && echo ${BRANCH} && git pull --rebase && git checkout $1 && git pull --rebase && git checkout ${BRANCH} && git merge --no-edit $1 && git push && echo >/dev/null'], stdout = subprocess.PIPE)
-  print('* lastmerge - Merge a latest revision of a branch into the current branch.')
-
   subprocess.check_call(['git', 'config', 'alias.blankmerge', 'merge -s ours --no-edit'], stdout = subprocess.PIPE)
   print('* blankmerge - Merge a branch without applying any changes into the current branch.')
-
-  subprocess.check_call(['git', 'config', 'alias.amend', 'commit --amend -C HEAD'], stdout = subprocess.PIPE)
-  print('* amend - Combine staged changes with the last commit.')
-
-  subprocess.check_call(['git', 'config', 'alias.glog', 'log --all --graph --stat --pretty=format:\'%C(ul red)%h%C(reset) -%C(yellow)%d%C(reset) %C(cyan)%s%C(reset) %C(bold blue)<%an>%C(reset) %C(magenta)(%cr)%C(reset)\' --abbrev-commit'], stdout = subprocess.PIPE)
-  print('* glog - Commit log for all branches as a graph.')
-
-  subprocess.check_call(['git', 'config', 'alias.blog', f'!git log $(git merge-base {main_branch} $(git rev-parse --abbrev-ref HEAD))..HEAD $@'], stdout = subprocess.PIPE)
-  print('* blog - Commit log for specified branch only.')
   print('')
 
 # Entry point
