@@ -185,7 +185,7 @@ lazy val akkaHttp = source(project, "transport/akka-http", core, http, testStand
   )
 )
 lazy val finagle = source(project, "transport/finagle", core, http, testStandard % Test).settings(
-  libraryDependencies += ("com.twitter" % "finagle-http" % "22.1.0")
+  libraryDependencies += ("com.twitter" % "finagle-http" % "22.12.0")
     .exclude("org.scala-lang.modules", "scala-collection-compat_2.13").cross(CrossVersion.for3Use2_13)
 )
 
