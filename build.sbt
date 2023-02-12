@@ -115,7 +115,7 @@ lazy val zio = source(project, "system/zio", spi, testStandard % Test).settings(
   Compile / doc / scalacOptions ++= Seq("-skip-packages zio"),
 )
 lazy val monix = source(project, "system/monix", spi, testStandard % Test)
-  .settings(libraryDependencies += "io.monix" %% "monix-eval" % "3.4.0")
+  .settings(libraryDependencies += "io.monix" %% "monix-eval" % "3.4.1")
 lazy val catsEffect = source(project, "system/cats-effect", spi, testStandard % Test)
   .settings(libraryDependencies += "org.typelevel" %% "cats-effect" % "3.4.6")
 lazy val scalazEffect = source(project, "system/scalaz-effect", spi, testStandard % Test)
