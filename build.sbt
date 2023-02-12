@@ -163,8 +163,11 @@ lazy val rabbitmq = source(project, "transport/rabbitmq", amqp, core, standard, 
   .settings(libraryDependencies += "com.rabbitmq" % "amqp-client" % "5.14.1")
 
 // Server
-lazy val undertow = source(project, "transport/undertow", core, http, testStandard % Test)
-  .settings(libraryDependencies += "io.undertow" % "undertow-core" % "2.2.14.Final")
+lazy val undertow = source(project, "transport/undertow", core, http, testStandard % Test).settings(
+  libraryDependencies += "io.undertow" % "undertow-core" % "2.2.14.Final",
+  Test / javaOptions += "-Dorg.jboss.logging.provider=slf4j",
+  Test / fork := true,
+)
 lazy val vertx = source(project, "transport/vertx", core, http, testStandard % Test)
   .settings(libraryDependencies += "io.vertx" % "vertx-core" % "4.2.4")
 val jettyVersion = "11.0.7"
@@ -207,8 +210,6 @@ lazy val examples = source(project, "examples", default, upickle, zio, testPlugi
 // Test
 val scribeVersion = "3.11.0"
 ThisBuild / Test / testOptions += Tests.Argument("-oD")
-ThisBuild / Test / javaOptions += "-Dorg.jboss.logging.provider=slf4j"
-ThisBuild / Test / fork := true
 lazy val testBase = source(project, "test/base", spi).settings(
   libraryDependencies ++= Seq(
     // Test
