@@ -164,7 +164,7 @@ lazy val circe = source(project, s"codec/circe", jsonrpc, webrpc, testPlugin % T
 )
 val jacksonVersion = "2.13.1"
 lazy val jackson = source(project, "codec/jackson", jsonrpc, webrpc, testPlugin % Test).settings(
-  libraryDependencies += ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion).cross(CrossVersion.for3Use2_13))
+  libraryDependencies += ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion).cross(CrossVersion.for3Use2_13)
 )
 
 lazy val upickle = source(project, "codec/upickle", jsonrpc, webrpc, testPlugin % Test).settings(
