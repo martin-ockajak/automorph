@@ -1,5 +1,6 @@
 // Project
 
+
 // Repository
 val projectRoot = "org"
 val projectName = "automorph"
@@ -8,6 +9,7 @@ val repositoryPath = s"martin-ockajak/$projectName"
 val repositoryUrl = s"https://github.com/$repositoryPath"
 val repositoryShell = s"git@github.com:$repositoryPath.git"
 val siteUrl = s"https://$projectName.$projectRoot"
+
 
 // Metadata
 ThisBuild / homepage := Some(url(siteUrl))
@@ -26,6 +28,7 @@ ThisBuild / developers := List(
 )
 Global / onChangedBuildSource := ReloadOnSourceChanges
 onLoadMessage := ""
+
 
 // Structure
 lazy val root = project.in(file(".")).settings(
@@ -79,6 +82,7 @@ lazy val root = project.in(file(".")).settings(
   examples
 )
 
+
 // Dependencies
 
 // Common
@@ -120,6 +124,7 @@ lazy val core = project.in(file("common/core")).dependsOn(
     "-skip-packages automorph.handler.meta"
   )
 )
+
 
 // Specification
 lazy val openrpc = project.in(file("schema/openrpc")).dependsOn(
@@ -325,7 +330,7 @@ lazy val finagle = project.in(file("transport/finagle")).dependsOn(
   )
 )
 
-// Misc
+// Miscellaneous
 lazy val default = project.dependsOn(
   jsonrpc, circe, standard, undertow, testStandard % Test
 ).settings(
@@ -522,9 +527,9 @@ lazy val docs = project.in(file("site")).settings(
 ).enablePlugins(MdocPlugin)
 val site = taskKey[Unit]("Generates project website.")
 site := {
-  import scala.sys.process.{Process, stringToProcess}
+  import scala.sys.process.Process
   allDoc.value
-  IO.copyDirectory((examples / baseDirectory).value / "project", sitePath.value / "static/examples/project", true)
+  IO.copyDirectory((examples / baseDirectory).value / "project", sitePath.value / "static/examples/project", overwrite = true)
   (docs / mdoc).toTask("").value
   if (!(sitePath.value / "node_modules").exists) {
     Process(Seq("bash", "-c", "cd site && yarn install")) !
