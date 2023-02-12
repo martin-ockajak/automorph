@@ -111,7 +111,7 @@ lazy val webrpc = source(project, "protocol/webrpc", webrpcMeta, openapi, util)
 // Effect system
 lazy val standard = source(project, "system/standard", core, http, testCore % Test, testHttp % Test)
 lazy val zio = source(project, "system/zio", spi, testStandard % Test).settings(
-  libraryDependencies += "dev.zio" %% "zio" % "1.0.12",
+  libraryDependencies += "dev.zio" %% "zio" % "1.0.18",
   Compile / doc / scalacOptions ++= Seq("-skip-packages zio"),
 )
 lazy val monix = source(project, "system/monix", spi, testStandard % Test)
