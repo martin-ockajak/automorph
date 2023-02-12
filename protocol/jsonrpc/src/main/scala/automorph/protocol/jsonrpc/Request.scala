@@ -6,26 +6,28 @@ import automorph.spi.RpcProtocol.InvalidRequestException
 /**
  * JSON-RPC request.
  *
- * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @param id call identifier, a request without and identifier is considered to be a notification
- * @param method invoked method name
- * @param params invoked method argument values by position or by name
- * @tparam Node message node type
+ * @see
+ *   [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+ * @param id
+ *   call identifier, a request without and identifier is considered to be a notification
+ * @param method
+ *   invoked method name
+ * @param params
+ *   invoked method argument values by position or by name
+ * @tparam Node
+ *   message node type
  */
-final private[automorph] case class Request[Node](
-  id: Option[Id],
-  method: String,
-  params: Params[Node]
-) {
+final private[automorph] case class Request[Node](id: Option[Id], method: String, params: Params[Node]) {
 
-  def message: Message[Node] = Message[Node](
-    jsonrpc = Some(version),
-    id = id,
-    method = Some(method),
-    params = Some(params),
-    result = None,
-    error = None
-  )
+  def message: Message[Node] =
+    Message[Node](
+      jsonrpc = Some(version),
+      id = id,
+      method = Some(method),
+      params = Some(params),
+      result = None,
+      error = None,
+    )
 }
 
 private[automorph] object Request {
@@ -44,13 +46,17 @@ private[automorph] object Request {
   /**
    * Return specified mandatory property value or throw an exception if it is missing.
    *
-   * @param value property value
-   * @param name property name
-   * @tparam T property type
-   * @return property value
-   * @throws InvalidRequestException if the property value is missing
+   * @param value
+   *   property value
+   * @param name
+   *   property name
+   * @tparam T
+   *   property type
+   * @return
+   *   property value
+   * @throws InvalidRequestException
+   *   if the property value is missing
    */
-  def mandatory[T](value: Option[T], name: String): T = value.getOrElse(
-    throw InvalidRequestException(s"Missing message property: $name", None.orNull)
-  )
+  def mandatory[T](value: Option[T], name: String): T =
+    value.getOrElse(throw InvalidRequestException(s"Missing message property: $name", None.orNull))
 }

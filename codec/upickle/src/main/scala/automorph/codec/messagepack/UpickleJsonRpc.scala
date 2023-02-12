@@ -24,7 +24,7 @@ private[automorph] object UpickleJsonRpc {
         case Float64(id) => Some(Left(BigDecimal(id)))
         case Null => None
         case id => throw Abort(s"Invalid request identifier: $id")
-      }
+      },
     )
     implicit val paramsRw: ReadWriter[Option[Message.Params[Msg]]] = readwriter[Msg].bimap[Option[Message.Params[Msg]]](
       {
@@ -42,7 +42,7 @@ private[automorph] object UpickleJsonRpc {
         case Arr(params) => Some(Left(params.toList))
         case Null => None
         case params => throw Abort(s"Invalid request parameters: $params")
-      }
+      },
     )
     implicit val messageErrorRw: custom.ReadWriter[MessageError[Msg]] = custom.macroRW
     Seq(idRw, paramsRw, messageErrorRw)

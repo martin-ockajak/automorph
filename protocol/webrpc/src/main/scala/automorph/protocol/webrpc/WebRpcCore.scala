@@ -16,9 +16,12 @@ import scala.util.{Failure, Success, Try}
 /**
  * Web-RPC protocol core logic.
  *
- * @tparam Node message node type
- * @tparam Codec message codec plugin type
- * @tparam Context message context type
+ * @tparam Node
+ *   message node type
+ * @tparam Codec
+ *   message codec plugin type
+ * @tparam Context
+ *   message context type
  */
 private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <: HttpContext[?]] {
   this: WebRpcProtocol[Node, Codec, Context] =>
@@ -37,12 +40,12 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
         Some("Failed function call error details"),
         Some(Map(
           "code" -> Schema(Some("integer"), Some("code"), Some("Error code")),
-          "message" -> Schema(Some("string"), Some("message"), Some("Error message"))
+          "message" -> Schema(Some("string"), Some("message"), Some("Error message")),
         )),
-        Some(List("code", "message"))
+        Some(List("code", "message")),
       )
     )),
-    Some(List("error"))
+    Some(List("error")),
   )
 
   val name: String = "Web-RPC"
@@ -51,15 +54,12 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     function: String,
     arguments: Iterable[(String, Node)],
     responseRequired: Boolean,
-    requestId: String
+    requestId: String,
   ): Try[RpcRequest[Node, Metadata]] = {
     // Create request
     val request = arguments.toMap
-    val requestProperties = Map(
-      "Type" -> MessageType.Call.toString,
-      "Function" -> function,
-      "Arguments" -> arguments.size.toString
-    )
+    val requestProperties =
+      Map("Type" -> MessageType.Call.toString, "Function" -> function, "Arguments" -> arguments.size.toString)
 
     // Serialize request
     val messageText = () => Some(codec.text(encodeRequest(request)))
@@ -75,15 +75,12 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
   override def parseRequest(
     requestBody: InputStream,
     requestContext: Context,
-    requestId: String
+    requestId: String,
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
     assembleRequest(requestBody, requestContext).flatMap { request =>
       // Validate request
       val messageText = () => Some(codec.text(encodeRequest(request)))
-      val requestProperties = Map(
-        "Type" -> MessageType.Call.toString,
-        "Arguments" -> request.size.toString
-      )
+      val requestProperties = Map("Type" -> MessageType.Call.toString, "Arguments" -> request.size.toString)
       requestContext.path.map { path =>
         if (path.startsWith(pathPrefix) && path.length > pathPrefix.length) {
           val function = path.substring(pathPrefix.length, path.length)
@@ -100,14 +97,35 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
       }
     }
 
+  private def assembleRequest(
+    requestBody: InputStream,
+    requestContext: Context,
+  ): Either[RpcError[Metadata], Request[Node]] =
+    requestContext.method.filter(_ == HttpMethod.Get).map { _ =>
+      // HTTP GET method - assemble request from URL query parameters
+      val parameterNames = requestContext.parameters.map(_._1)
+      val duplicateParameters = parameterNames.diff(parameterNames.distinct)
+      if (duplicateParameters.nonEmpty) {
+        Left(RpcError(
+          InvalidRequestException(s"Duplicate query parameters: ${duplicateParameters.mkString(", ")}"),
+          RpcMessage((), requestBody),
+        ))
+      } else { Right(requestContext.parameters.map { case (name, value) => name -> encodeString(value) }.toMap) }
+    }.getOrElse {
+      // Other HTTP methods - deserialize request
+      Try(decodeRequest(codec.deserialize(requestBody))).pureFold(
+        error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), requestBody))),
+        request => Right(request),
+      )
+    }
+
   @nowarn("msg=used")
   override def createResponse(result: Try[Node], requestMetadata: Metadata): Try[RpcResponse[Node, Metadata]] = {
     // Create response
     val responseMessage = result.pureFold(
       error => {
         val responseError = error match {
-          case WebRpcException(message, code, _) =>
-            ResponseError(message, code)
+          case WebRpcException(message, code, _) => ResponseError(message, code)
           case _ =>
             // Assemble error details
             val trace = error.trace
@@ -117,7 +135,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
         }
         Response[Node](None, Some(responseError)).message
       },
-      resultValue => Response(Some(resultValue), None).message
+      resultValue => Response(Some(resultValue), None).message,
     )
 
     // Serialize response
@@ -133,7 +151,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
   @nowarn("msg=used")
   override def parseResponse(
     responseBody: InputStream,
-    responseContext: Context
+    responseContext: Context,
   ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
     // Deserialize response
     Try(decodeResponse(codec.deserialize(responseBody))).pureFold(
@@ -152,62 +170,26 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
                 case None => Left(RpcError(InvalidResponseException("Invalid result", None.orNull), message))
                 case Some(result) => Right(RpcResponse(Success(result), message))
               }
-            ) { error =>
-              Right(RpcResponse(Failure(mapError(error.message, error.code)), message))
-            }
+            )(error => Right(RpcResponse(Failure(mapError(error.message, error.code)), message))),
         )
-      }
+      },
     )
 
-  override def apiSchemas: Seq[RpcApiSchema[Node]] = Seq(
-    RpcApiSchema(
+  override def apiSchemas: Seq[RpcApiSchema[Node]] =
+    Seq(RpcApiSchema(
       RpcFunction(WebRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
-      functions => encodeOpenApi(openApi(functions))
-    )
-  )
-
-  /**
-   * Creates a copy of this protocol with specified message contex type.
-   *
-   * @tparam NewContext message context type
-   * @return JSON-RPC protocol
-   */
-  def context[NewContext <: HttpContext[?]]: WebRpcProtocol[Node, Codec, NewContext] =
-    copy()
-
-  /**
-   * Creates a copy of this protocol with specified exception to Web-RPC error mapping.
-   *
-   * @param exceptionToError maps an exception classs to a corresponding Web-RPC error type
-   * @return Web-RPC protocol
-   */
-  def mapException(exceptionToError: Throwable => Option[Int]): WebRpcProtocol[Node, Codec, Context] =
-    copy(mapException = exceptionToError)
-
-  /**
-   * Creates a copy of this protocol with specified Web-RPC error to exception mapping.
-   *
-   * @param errorToException maps a Web-RPC error to a corresponding exception
-   * @return Web-RPC protocol
-   */
-  def mapError(errorToException: (String, Option[Int]) => Throwable): WebRpcProtocol[Node, Codec, Context] =
-    copy(mapError = errorToException)
-
-  /**
-   * Creates a copy of this protocol with given OpenAPI description transformation.
-   *
-   * @param mapOpenApi transforms generated OpenAPI specification
-   * @return Web-RPC protocol
-   */
-  def mapOpenApi(mapOpenApi: OpenApi => OpenApi): WebRpcProtocol[Node, Codec, Context] =
-    copy(mapOpenApi = mapOpenApi)
+      functions => encodeOpenApi(openApi(functions)),
+    ))
 
   /**
    * Generates OpenAPI speficication for given RPC functions.
    *
-   * @see [[https://github.com/OAI/OpenAPI-Specification OpenAPI specification]]
-   * @param functions RPC functions
-   * @return OpenAPI specification
+   * @see
+   *   [[https://github.com/OAI/OpenAPI-Specification OpenAPI specification]]
+   * @param functions
+   *   RPC functions
+   * @return
+   *   OpenAPI specification
    */
   def openApi(functions: Iterable[RpcFunction]): OpenApi = {
     val functionSchemas = functions.map { function =>
@@ -216,45 +198,65 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     mapOpenApi(OpenApi(functionSchemas))
   }
 
-  private def assembleRequest(
-    requestBody: InputStream,
-    requestContext: Context
-  ): Either[RpcError[Metadata], Request[Node]] =
-    requestContext.method.filter(_ == HttpMethod.Get).map { _ =>
-      // HTTP GET method - assemble request from URL query parameters
-      val parameterNames = requestContext.parameters.map(_._1)
-      val duplicateParameters = parameterNames.diff(parameterNames.distinct)
-      if (duplicateParameters.nonEmpty) {
-        Left(RpcError(
-          InvalidRequestException(s"Duplicate query parameters: ${duplicateParameters.mkString(", ")}"),
-          RpcMessage((), requestBody)
-        ))
-      } else {
-        Right(requestContext.parameters.map { case (name, value) =>
-          name -> encodeString(value)
-        }.toMap)
-      }
-    }.getOrElse {
-      // Other HTTP methods - deserialize request
-      Try(decodeRequest(codec.deserialize(requestBody))).pureFold(
-        error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), requestBody))),
-        request => Right(request)
-      )
-    }
+  private def requestSchema(function: RpcFunction): Schema =
+    Schema(
+      Some(OpenApi.objectType),
+      Some(function.name),
+      Some(OpenApi.argumentsDescription),
+      Option(Schema.parameters(function)).filter(_.nonEmpty),
+      Option(Schema.requiredParameters(function).toList).filter(_.nonEmpty),
+    )
 
-  private def requestSchema(function: RpcFunction): Schema = Schema(
-    Some(OpenApi.objectType),
-    Some(function.name),
-    Some(OpenApi.argumentsDescription),
-    Option(Schema.parameters(function)).filter(_.nonEmpty),
-    Option(Schema.requiredParameters(function).toList).filter(_.nonEmpty)
-  )
+  private def resultSchema(function: RpcFunction): Schema =
+    Schema(
+      Some(OpenApi.objectType),
+      Some(OpenApi.resultTitle),
+      Some(s"$name ${OpenApi.resultTitle}"),
+      Some(Map(OpenApi.resultName -> Schema.result(function))),
+      Some(List(OpenApi.resultName)),
+    )
 
-  private def resultSchema(function: RpcFunction): Schema = Schema(
-    Some(OpenApi.objectType),
-    Some(OpenApi.resultTitle),
-    Some(s"$name ${OpenApi.resultTitle}"),
-    Some(Map(OpenApi.resultName -> Schema.result(function))),
-    Some(List(OpenApi.resultName))
-  )
+  /**
+   * Creates a copy of this protocol with specified message contex type.
+   *
+   * @tparam NewContext
+   *   message context type
+   * @return
+   *   JSON-RPC protocol
+   */
+  def context[NewContext <: HttpContext[?]]: WebRpcProtocol[Node, Codec, NewContext] =
+    copy()
+
+  /**
+   * Creates a copy of this protocol with specified exception to Web-RPC error mapping.
+   *
+   * @param exceptionToError
+   *   maps an exception classs to a corresponding Web-RPC error type
+   * @return
+   *   Web-RPC protocol
+   */
+  def mapException(exceptionToError: Throwable => Option[Int]): WebRpcProtocol[Node, Codec, Context] =
+    copy(mapException = exceptionToError)
+
+  /**
+   * Creates a copy of this protocol with specified Web-RPC error to exception mapping.
+   *
+   * @param errorToException
+   *   maps a Web-RPC error to a corresponding exception
+   * @return
+   *   Web-RPC protocol
+   */
+  def mapError(errorToException: (String, Option[Int]) => Throwable): WebRpcProtocol[Node, Codec, Context] =
+    copy(mapError = errorToException)
+
+  /**
+   * Creates a copy of this protocol with given OpenAPI description transformation.
+   *
+   * @param mapOpenApi
+   *   transforms generated OpenAPI specification
+   * @return
+   *   Web-RPC protocol
+   */
+  def mapOpenApi(mapOpenApi: OpenApi => OpenApi): WebRpcProtocol[Node, Codec, Context] =
+    copy(mapOpenApi = mapOpenApi)
 }

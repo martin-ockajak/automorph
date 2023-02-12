@@ -20,7 +20,7 @@ private[automorph] object CirceOpenRpc {
           schema.required.map(v => "required" -> Json.arr(v.map(Json.fromString)*)),
           schema.default.map(v => "default" -> Json.fromString(v)),
           schema.allOf.map(v => "allOf" -> Json.arr(v.map(apply)*)),
-          schema.$ref.map(v => "$ref" -> Json.fromString(v))
+          schema.$ref.map(v => "$ref" -> Json.fromString(v)),
         ).flatten
         Json.obj(fields*)
       }
@@ -52,7 +52,7 @@ private[automorph] object CirceOpenRpc {
       override def apply(c: HCursor): Decoder.Result[Schema] =
         decode(c)
 
-      private def decode(c: ACursor): Decoder.Result[Schema] = {
+      private def decode(c: ACursor): Decoder.Result[Schema] =
         c.keys.map(_.toSet).map { keys =>
           for {
             `type` <- field[String](c, keys, "type")
@@ -62,9 +62,7 @@ private[automorph] object CirceOpenRpc {
               val jsonObject = c.downField(propertiesField)
               val objectFields = jsonObject.keys.getOrElse(Seq())
               objectFields.foldLeft(Right(Map[String, Schema]()).withLeft[DecodingFailure]) { case (result, key) =>
-                result.flatMap { schemas =>
-                  decode(jsonObject.downField(key)).map(schema => schemas + (key -> schema))
-                }
+                result.flatMap(schemas => decode(jsonObject.downField(key)).map(schema => schemas + (key -> schema)))
               }.map(Some.apply)
             }.getOrElse(Right(None))
             required <- field[List[String]](c, keys, "required")
@@ -73,9 +71,7 @@ private[automorph] object CirceOpenRpc {
               val jsonArray = c.downField(allOfField)
               val arrayIndices = jsonArray.values.map(_.toSeq).getOrElse(Seq()).indices
               arrayIndices.foldLeft(Right(List[Schema]()).withLeft[DecodingFailure]) { case (result, index) =>
-                result.flatMap { schemas =>
-                  decode(jsonArray.downN(index)).map(schemas :+ _)
-                }
+                result.flatMap(schemas => decode(jsonArray.downN(index)).map(schemas :+ _))
               }.map(Some.apply)
             }.getOrElse(Right(None))
             $ref <- field[String](c, keys, "$ref")
@@ -87,20 +83,15 @@ private[automorph] object CirceOpenRpc {
             required = required,
             default = default,
             allOf = allOf,
-            $ref = $ref
+            $ref = $ref,
           )
         }.getOrElse(Left(DecodingFailure("Not a JSON object", c.history)))
-      }
 
       private def field[T](c: ACursor, keys: Set[String], name: String)(implicit
         decoder: Decoder[Option[T]]
-      ): Decoder.Result[Option[T]] = {
-        if (keys.contains(name)) {
-          c.downField(name).as[Option[T]]
-        } else {
-          Right(None)
-        }
-      }
+      ): Decoder.Result[Option[T]] =
+        if (keys.contains(name)) { c.downField(name).as[Option[T]] }
+        else { Right(None) }
     }
     implicit val contactDecoder: Decoder[Contact] = deriveDecoder[Contact]
     implicit val contentDescriptorDecoder: Decoder[ContentDescriptor] = deriveDecoder[ContentDescriptor]

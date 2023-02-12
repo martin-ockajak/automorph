@@ -7,7 +7,9 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.{NumericNode, ObjectNode}
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.fasterxml.jackson.databind.{DeserializationContext, DeserializationFeature, JsonNode, ObjectMapper, SerializerProvider}
+import com.fasterxml.jackson.databind.{
+  DeserializationContext, DeserializationFeature, JsonNode, ObjectMapper, SerializerProvider,
+}
 import com.fasterxml.jackson.module.scala.{ClassTagExtensions, DefaultScalaModule}
 import java.io.InputStream
 import scala.runtime.BoxedUnit

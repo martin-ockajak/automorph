@@ -11,10 +11,7 @@ private[automorph] object UpickleOpenRpc {
   def readWriter[Custom <: UpickleJsonCustom](custom: Custom): custom.ReadWriter[OpenRpc] = {
     import custom.*
 
-    implicit val schemaRw: custom.ReadWriter[Schema] = readwriter[Value].bimap[Schema](
-      fromSchema,
-      toSchema
-    )
+    implicit val schemaRw: custom.ReadWriter[Schema] = readwriter[Value].bimap[Schema](fromSchema, toSchema)
     implicit val contactRw: custom.ReadWriter[Contact] = custom.macroRW
     implicit val contentDescriptorRw: custom.ReadWriter[ContentDescriptor] = custom.macroRW
     implicit val externalDocumentationRw: custom.ReadWriter[ExternalDocumentation] = custom.macroRW
@@ -34,16 +31,18 @@ private[automorph] object UpickleOpenRpc {
   }
 
   private def fromSchema(schema: Schema): Value =
-    Obj.from(Seq(
-      schema.`type`.map("type" -> Str(_)),
-      schema.title.map("title" -> Str(_)),
-      schema.description.map("description" -> Str(_)),
-      schema.properties.map(v => "properties" -> Obj.from(v.view.mapValues(fromSchema).toSeq)),
-      schema.required.map(v => "required" -> Arr.from(v.map(Str.apply))),
-      schema.default.map("default" -> Str(_)),
-      schema.allOf.map(v => "allOf" -> Arr.from(v.map(fromSchema))),
-      schema.$ref.map("$ref" -> Str(_))
-    ).flatten)
+    Obj.from(
+      Seq(
+        schema.`type`.map("type" -> Str(_)),
+        schema.title.map("title" -> Str(_)),
+        schema.description.map("description" -> Str(_)),
+        schema.properties.map(v => "properties" -> Obj.from(v.view.mapValues(fromSchema).toSeq)),
+        schema.required.map(v => "required" -> Arr.from(v.map(Str.apply))),
+        schema.default.map("default" -> Str(_)),
+        schema.allOf.map(v => "allOf" -> Arr.from(v.map(fromSchema))),
+        schema.$ref.map("$ref" -> Str(_)),
+      ).flatten
+    )
 
   private def toSchema(node: Value): Schema =
     node match {
@@ -55,7 +54,7 @@ private[automorph] object UpickleOpenRpc {
           required = fields.get("required").map(_.arr.map(_.str).toList),
           default = fields.get("default").map(_.str),
           allOf = fields.get("allOf").map(_.arr.map(toSchema).toList),
-          $ref = fields.get("$ref").map(_.str)
+          $ref = fields.get("$ref").map(_.str),
         )
       case _ => throw Abort(s"Invalid OpenRPC object")
     }

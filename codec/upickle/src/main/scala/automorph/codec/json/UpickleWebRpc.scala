@@ -10,7 +10,7 @@ private[automorph] object UpickleWebRpc {
 
   def readWriter[Custom <: UpickleJsonCustom](custom: Custom): custom.ReadWriter[Message[Value]] = {
     import custom.*
-    
+
     implicit val messageErrorRw: custom.ReadWriter[MessageError] = custom.macroRW
     custom.macroRW[Message[Value]]
   }

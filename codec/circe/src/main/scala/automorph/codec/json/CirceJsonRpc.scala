@@ -14,33 +14,36 @@ private[automorph] object CirceJsonRpc {
       case Right(id) => Json.fromString(id)
       case Left(id) => Json.fromBigDecimal(id)
     }
-    implicit val paramsEncoder: Encoder[Message.Params[Json]] =
-      Encoder.encodeJson.contramap[Message.Params[Json]] {
-        case Right(params) => Json.fromJsonObject(JsonObject.fromMap(params))
-        case Left(params) => Json.fromValues(params)
-      }
+    implicit val paramsEncoder: Encoder[Message.Params[Json]] = Encoder.encodeJson.contramap[Message.Params[Json]] {
+      case Right(params) => Json.fromJsonObject(JsonObject.fromMap(params))
+      case Left(params) => Json.fromValues(params)
+    }
     implicit val messageErrorEncoder: Encoder[MessageError[Json]] = deriveEncoder[MessageError[Json]]
 
     deriveEncoder[Message[Json]]
   }
 
   def messageDecoder: Decoder[Message[Json]] = {
-    implicit val idDecoder: Decoder[Message.Id] = Decoder.decodeJson.map(_.fold(
-      invalidId(None.orNull),
-      invalidId,
-      id => id.toBigDecimal.map(Left.apply).getOrElse(invalidId(id)),
-      id => Right(id),
-      invalidId,
-      invalidId
-    ))
-    implicit val paramsDecoder: Decoder[Message.Params[Json]] = Decoder.decodeJson.map(_.fold(
-      invalidParams(None.orNull),
-      invalidParams,
-      invalidParams,
-      invalidParams,
-      params => Left(params.toList),
-      params => Right(params.toMap)
-    ))
+    implicit val idDecoder: Decoder[Message.Id] = Decoder.decodeJson.map(
+      _.fold(
+        invalidId(None.orNull),
+        invalidId,
+        id => id.toBigDecimal.map(Left.apply).getOrElse(invalidId(id)),
+        id => Right(id),
+        invalidId,
+        invalidId,
+      )
+    )
+    implicit val paramsDecoder: Decoder[Message.Params[Json]] = Decoder.decodeJson.map(
+      _.fold(
+        invalidParams(None.orNull),
+        invalidParams,
+        invalidParams,
+        invalidParams,
+        params => Left(params.toList),
+        params => Right(params.toMap),
+      )
+    )
     implicit val messageErrorDecoder: Decoder[MessageError[Json]] = deriveDecoder[MessageError[Json]]
 
     deriveDecoder[Message[Json]]

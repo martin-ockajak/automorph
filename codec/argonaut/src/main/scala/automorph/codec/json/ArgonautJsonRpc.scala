@@ -16,12 +16,13 @@ private[automorph] object ArgonautJsonRpc {
         case Left(id) => jNumber(id)
       },
       cursor =>
-        DecodeResult(cursor.focus.string.map(Right.apply).orElse {
-          cursor.focus.number.map(number => Left(number.toBigDecimal))
-        } match {
-          case Some(value) => Right(value)
-          case None => Left(s"Invalid request identifier: ${cursor.focus}", cursor.history)
-        })
+        DecodeResult(
+          cursor.focus.string.map(Right.apply)
+            .orElse(cursor.focus.number.map(number => Left(number.toBigDecimal))) match {
+            case Some(value) => Right(value)
+            case None => Left(s"Invalid request identifier: ${cursor.focus}", cursor.history)
+          }
+        ),
     )
     implicit val paramsCodecJson: CodecJson[Message.Params[Json]] = CodecJson(
       {
@@ -29,27 +30,22 @@ private[automorph] object ArgonautJsonRpc {
         case Left(params) => jArray(params)
       },
       cursor =>
-        DecodeResult(cursor.focus.obj.map(json => Right(json.toMap)).orElse {
-          cursor.focus.array.map(json => Left(json.toList))
-        } match {
-          case Some(value) => Right(value)
-          case None => Left(s"Invalid request parameters: ${cursor.focus}", cursor.history)
-        })
+        DecodeResult(
+          cursor.focus.obj.map(json => Right(json.toMap))
+            .orElse(cursor.focus.array.map(json => Left(json.toList))) match {
+            case Some(value) => Right(value)
+            case None => Left(s"Invalid request parameters: ${cursor.focus}", cursor.history)
+          }
+        ),
     )
-    implicit val messageErrorCodecJson: CodecJson[MessageError[Json]] =
-      Argonaut.codec3(MessageError.apply[Json], (v: MessageError[Json]) => (v.message, v.code, v.data))(
-        "message",
-        "code",
-        "data"
-      )
+    implicit val messageErrorCodecJson: CodecJson[MessageError[Json]] = Argonaut.codec3(
+      MessageError.apply[Json],
+      (v: MessageError[Json]) => (v.message, v.code, v.data),
+    )("message", "code", "data")
 
-    Argonaut.codec6(Message.apply[Json], (v: Message[Json]) => (v.jsonrpc, v.id, v.method, v.params, v.result, v.error))(
-      "jsonrpc",
-      "id",
-      "method",
-      "params",
-      "result",
-      "error"
-    )
+    Argonaut.codec6(
+      Message.apply[Json],
+      (v: Message[Json]) => (v.jsonrpc, v.id, v.method, v.params, v.result, v.error),
+    )("jsonrpc", "id", "method", "params", "result", "error")
   }
 }

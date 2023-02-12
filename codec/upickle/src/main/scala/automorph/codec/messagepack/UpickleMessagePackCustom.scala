@@ -19,6 +19,7 @@ trait UpickleMessagePackCustom extends UpickleCustom {
 }
 
 object UpickleMessagePackCustom {
+
   /** Default data types support for uPickle message codec using MessagePack format. */
   lazy val default: UpickleMessagePackCustom = new UpickleMessagePackCustom {}
 }

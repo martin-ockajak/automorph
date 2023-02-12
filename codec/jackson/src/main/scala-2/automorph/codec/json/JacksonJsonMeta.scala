@@ -13,7 +13,8 @@ private[automorph] trait JacksonJsonMeta extends MessageCodec[JsonNode] {
   override def encode[T](value: T): JsonNode =
     objectMapper.valueToTree(value)
 
-  override def decode[T](node: JsonNode): T = macro JacksonJsonMeta.decodeExpr[T]
+  override def decode[T](node: JsonNode): T =
+    macro JacksonJsonMeta.decodeExpr[T]
 }
 
 private[automorph] object JacksonJsonMeta {

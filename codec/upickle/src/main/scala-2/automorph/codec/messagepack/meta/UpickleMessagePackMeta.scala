@@ -9,7 +9,8 @@ import upack.Msg
 /**
  * UPickle MessagePack codec plugin code generation.
  *
- * @tparam Custom customized Upickle reader and writer implicits instance type
+ * @tparam Custom
+ *   customized Upickle reader and writer implicits instance type
  */
 trait UpickleMessagePackMeta[Custom <: UpickleMessagePackCustom] extends MessageCodec[Msg] {
 

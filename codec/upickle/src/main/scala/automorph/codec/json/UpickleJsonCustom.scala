@@ -19,6 +19,7 @@ trait UpickleJsonCustom extends UpickleCustom {
 }
 
 object UpickleJsonCustom {
+
   /** Default data types support for uPickle message codec using JSON format. */
   lazy val default: UpickleJsonCustom = new UpickleJsonCustom {}
 }

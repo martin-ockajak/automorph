@@ -15,18 +15,18 @@ import scala.util.{Failure, Success, Try}
 /**
  * JSON-RPC protocol core logic.
  *
- * @tparam Node message node type
- * @tparam Codec message codec plugin type
- * @tparam Context message context type
+ * @tparam Node
+ *   message node type
+ * @tparam Codec
+ *   message codec plugin type
+ * @tparam Context
+ *   message context type
  */
 private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context] {
   this: JsonRpcProtocol[Node, Codec, Context] =>
 
   /** JSON-RPC message metadata. */
   type Metadata = Option[Message.Id]
-
-  private val unknownId = Right("[unknown]")
-
   private lazy val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.errorTitle),
@@ -39,21 +39,21 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
         Some(Map(
           "code" -> Schema(Some("integer"), Some("code"), Some("Error code")),
           "message" -> Schema(Some("string"), Some("message"), Some("Error message")),
-          "data" -> Schema(Some("object"), Some("data"), Some("Additional error information"))
+          "data" -> Schema(Some("object"), Some("data"), Some("Additional error information")),
         )),
-        Some(List("message"))
+        Some(List("message")),
       )
     )),
-    Some(List("error"))
+    Some(List("error")),
   )
-
   val name: String = "JSON-RPC"
+  private val unknownId = Right("[unknown]")
 
   override def createRequest(
     function: String,
     arguments: Iterable[(String, Node)],
     responseRequired: Boolean,
-    requestId: String
+    requestId: String,
   ): Try[RpcRequest[Node, Metadata]] = {
     // Create request
     require(requestId.nonEmpty, "Empty request identifier")
@@ -75,7 +75,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
   override def parseRequest(
     requestBody: InputStream,
     requestContext: Context,
-    requestId: String
+    requestId: String,
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
     // Deserialize request
     Try(decodeMessage(codec.deserialize(requestBody))).pureFold(
@@ -87,14 +87,12 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
         Try(Request(requestMessage)).pureFold(
           error => Left(RpcError(error, message)),
           request => {
-            val requestArguments = request.params.fold(
-              _.map(Left.apply[Node, (String, Node)]),
-              _.map(Right.apply[Node, (String, Node)]).toSeq
-            )
+            val requestArguments = request.params
+              .fold(_.map(Left.apply[Node, (String, Node)]), _.map(Right.apply[Node, (String, Node)]).toSeq)
             Right(RpcRequest(message, request.method, requestArguments, request.id.isDefined, requestId))
-          }
+          },
         )
-      }
+      },
     )
 
   override def createResponse(result: Try[Node], requestMetadata: Metadata): Try[RpcResponse[Node, Metadata]] = {
@@ -103,8 +101,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     val responseMessage = result.pureFold(
       error => {
         val responseError = error match {
-          case JsonRpcException(message, code, data, _) =>
-            ResponseError(message, code, data.asInstanceOf[Option[Node]])
+          case JsonRpcException(message, code, data, _) => ResponseError(message, code, data.asInstanceOf[Option[Node]])
           case _ =>
             // Assemble error details
             val trace = error.trace
@@ -115,7 +112,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
         }
         Response[Node](id, None, Some(responseError)).message
       },
-      resultValue => Response(id, Some(resultValue), None).message
+      resultValue => Response(id, Some(resultValue), None).message,
     )
 
     // Serialize response
@@ -131,7 +128,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
   @nowarn("msg=used")
   override def parseResponse(
     responseBody: InputStream,
-    responseContext: Context
+    responseContext: Context,
   ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
     // Deserialize response
     Try(decodeMessage(codec.deserialize(responseBody))).pureFold(
@@ -150,85 +147,32 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
                 case None => Left(RpcError(InvalidResponseException("Invalid result", None.orNull), message))
                 case Some(result) => Right(RpcResponse(Success(result), message))
               }
-            ) { error =>
-              Right(RpcResponse(Failure(mapError(error.message, error.code)), message))
-            }
+            )(error => Right(RpcResponse(Failure(mapError(error.message, error.code)), message))),
         )
-      }
+      },
     )
 
-  override def apiSchemas: Seq[RpcApiSchema[Node]] = Seq(
-    RpcApiSchema(
-      RpcFunction(JsonRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
-      functions => encodeOpenApi(openApi(functions))
-    ),
-    RpcApiSchema(
-      RpcFunction(JsonRpcProtocol.openRpcFunction, Seq(), OpenRpc.getClass.getSimpleName, None),
-      functions => encodeOpenRpc(openRpc(functions))
+  override def apiSchemas: Seq[RpcApiSchema[Node]] =
+    Seq(
+      RpcApiSchema(
+        RpcFunction(JsonRpcProtocol.openApiFunction, Seq(), OpenApi.getClass.getSimpleName, None),
+        functions => encodeOpenApi(openApi(functions)),
+      ),
+      RpcApiSchema(
+        RpcFunction(JsonRpcProtocol.openRpcFunction, Seq(), OpenRpc.getClass.getSimpleName, None),
+        functions => encodeOpenRpc(openRpc(functions)),
+      ),
     )
-  )
-
-  /**
-   * Creates a copy of this protocol with specified message contex type.
-   *
-   * @tparam NewContext message context type
-   * @return JSON-RPC protocol
-   */
-  def context[NewContext]: JsonRpcProtocol[Node, Codec, NewContext] =
-    copy()
-
-  /**
-   * Creates a copy of this protocol with specified exception to JSON-RPC error mapping.
-   *
-   * @param exceptionToError maps an exception classs to a corresponding JSON-RPC error type
-   * @return JSON-RPC protocol
-   */
-  def mapException(exceptionToError: Throwable => ErrorType): JsonRpcProtocol[Node, Codec, Context] =
-    copy(mapException = exceptionToError)
-
-  /**
-   * Creates a copy of this protocol with specified JSON-RPC error to exception mapping.
-   *
-   * @param errorToException maps a JSON-RPC error to a corresponding exception
-   * @return JSON-RPC protocol
-   */
-  def mapError(errorToException: (String, Int) => Throwable): JsonRpcProtocol[Node, Codec, Context] =
-    copy(mapError = errorToException)
-
-  /**
-   * Creates a copy of this protocol with specified named arguments setting.
-   *
-   * @param namedArguments if true, pass arguments by name, if false pass arguments by position
-   * @see [[https://www.jsonrpc.org/specification#parameter_structures Protocol specification]]
-   * @return JSON-RPC protocol
-   */
-  def namedArguments(namedArguments: Boolean): JsonRpcProtocol[Node, Codec, Context] =
-    copy(namedArguments = namedArguments)
-
-  /**
-   * Creates a copy of this protocol with given OpenRPC description transformation.
-   *
-   * @param mapOpenRpc transforms generated OpenRPC specification
-   * @return JSON-RPC protocol
-   */
-  def mapOpenRpc(mapOpenRpc: OpenRpc => OpenRpc): JsonRpcProtocol[Node, Codec, Context] =
-    copy(mapOpenRpc = mapOpenRpc)
-
-  /**
-   * Creates a copy of this protocol with given OpenAPI description transformation.
-   *
-   * @param mapOpenApi transforms generated OpenAPI specification
-   * @return JSON-RPC protocol
-   */
-  def mapOpenApi(mapOpenApi: OpenApi => OpenApi): JsonRpcProtocol[Node, Codec, Context] =
-    copy(mapOpenApi = mapOpenApi)
 
   /**
    * Generates OpenRPC specification for given RPC functions.
    *
-   * @see [[https://spec.open-rpc.org OpenRPC specification]]
-   * @param functions RPC functions
-   * @return OpenRPC specification
+   * @see
+   *   [[https://spec.open-rpc.org OpenRPC specification]]
+   * @param functions
+   *   RPC functions
+   * @return
+   *   OpenRPC specification
    */
   def openRpc(functions: Iterable[RpcFunction]): OpenRpc =
     mapOpenRpc(OpenRpc(functions))
@@ -236,9 +180,12 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
   /**
    * Generates OpenAPI specification for given RPC functions.
    *
-   * @see [[https://github.com/OAI/OpenAPI-Specification OpenAPI specification]]
-   * @param functions RPC functions
-   * @return OpenAPI specification
+   * @see
+   *   [[https://github.com/OAI/OpenAPI-Specification OpenAPI specification]]
+   * @param functions
+   *   RPC functions
+   * @return
+   *   OpenAPI specification
    */
   def openApi(functions: Iterable[RpcFunction]): OpenApi = {
     val functionSchemas = functions.map { function =>
@@ -247,34 +194,104 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     mapOpenApi(OpenApi(functionSchemas))
   }
 
-  private def requestSchema(function: RpcFunction): Schema = Schema(
-    Some(OpenApi.objectType),
-    Some(OpenApi.requestTitle),
-    Some(s"$name ${OpenApi.requestTitle}"),
-    Some(Map(
-      "jsonrpc" -> Schema(Some("string"), Some("jsonrpc"), Some("Protocol version (must be 2.0)")),
-      "function" -> Schema(Some("string"), Some("function"), Some("Invoked function name")),
-      "params" -> Schema(
-        Some(OpenApi.objectType),
-        Some(function.name),
-        Some(OpenApi.argumentsDescription),
-        Option(Schema.parameters(function)).filter(_.nonEmpty),
-        Option(Schema.requiredParameters(function).toList).filter(_.nonEmpty)
-      ),
-      "id" -> Schema(
-        Some("integer"),
-        Some("id"),
-        Some("Call identifier, a request without and identifier is considered to be a notification")
-      )
-    )),
-    Some(List("jsonrpc", "function", "params"))
-  )
+  private def requestSchema(function: RpcFunction): Schema =
+    Schema(
+      Some(OpenApi.objectType),
+      Some(OpenApi.requestTitle),
+      Some(s"$name ${OpenApi.requestTitle}"),
+      Some(Map(
+        "jsonrpc" -> Schema(Some("string"), Some("jsonrpc"), Some("Protocol version (must be 2.0)")),
+        "function" -> Schema(Some("string"), Some("function"), Some("Invoked function name")),
+        "params" -> Schema(
+          Some(OpenApi.objectType),
+          Some(function.name),
+          Some(OpenApi.argumentsDescription),
+          Option(Schema.parameters(function)).filter(_.nonEmpty),
+          Option(Schema.requiredParameters(function).toList).filter(_.nonEmpty),
+        ),
+        "id" -> Schema(
+          Some("integer"),
+          Some("id"),
+          Some("Call identifier, a request without and identifier is considered to be a notification"),
+        ),
+      )),
+      Some(List("jsonrpc", "function", "params")),
+    )
 
-  private def resultSchema(function: RpcFunction): Schema = Schema(
-    Some(OpenApi.objectType),
-    Some(OpenApi.resultTitle),
-    Some(s"$name ${OpenApi.resultTitle}"),
-    Some(Map(OpenApi.resultName -> Schema.result(function))),
-    Some(List(OpenApi.resultName))
-  )
+  private def resultSchema(function: RpcFunction): Schema =
+    Schema(
+      Some(OpenApi.objectType),
+      Some(OpenApi.resultTitle),
+      Some(s"$name ${OpenApi.resultTitle}"),
+      Some(Map(OpenApi.resultName -> Schema.result(function))),
+      Some(List(OpenApi.resultName)),
+    )
+
+  /**
+   * Creates a copy of this protocol with specified message contex type.
+   *
+   * @tparam NewContext
+   *   message context type
+   * @return
+   *   JSON-RPC protocol
+   */
+  def context[NewContext]: JsonRpcProtocol[Node, Codec, NewContext] =
+    copy()
+
+  /**
+   * Creates a copy of this protocol with specified exception to JSON-RPC error mapping.
+   *
+   * @param exceptionToError
+   *   maps an exception classs to a corresponding JSON-RPC error type
+   * @return
+   *   JSON-RPC protocol
+   */
+  def mapException(exceptionToError: Throwable => ErrorType): JsonRpcProtocol[Node, Codec, Context] =
+    copy(mapException = exceptionToError)
+
+  /**
+   * Creates a copy of this protocol with specified JSON-RPC error to exception mapping.
+   *
+   * @param errorToException
+   *   maps a JSON-RPC error to a corresponding exception
+   * @return
+   *   JSON-RPC protocol
+   */
+  def mapError(errorToException: (String, Int) => Throwable): JsonRpcProtocol[Node, Codec, Context] =
+    copy(mapError = errorToException)
+
+  /**
+   * Creates a copy of this protocol with specified named arguments setting.
+   *
+   * @param namedArguments
+   *   if true, pass arguments by name, if false pass arguments by position
+   * @see
+   *   [[https://www.jsonrpc.org/specification#parameter_structures Protocol specification]]
+   * @return
+   *   JSON-RPC protocol
+   */
+  def namedArguments(namedArguments: Boolean): JsonRpcProtocol[Node, Codec, Context] =
+    copy(namedArguments = namedArguments)
+
+  /**
+   * Creates a copy of this protocol with given OpenRPC description transformation.
+   *
+   * @param mapOpenRpc
+   *   transforms generated OpenRPC specification
+   * @return
+   *   JSON-RPC protocol
+   */
+  def mapOpenRpc(mapOpenRpc: OpenRpc => OpenRpc): JsonRpcProtocol[Node, Codec, Context] =
+    copy(mapOpenRpc = mapOpenRpc)
+
+  /**
+   * Creates a copy of this protocol with given OpenAPI description transformation.
+   *
+   * @param mapOpenApi
+   *   transforms generated OpenAPI specification
+   * @return
+   *   JSON-RPC protocol
+   */
+  def mapOpenApi(mapOpenApi: OpenApi => OpenApi): JsonRpcProtocol[Node, Codec, Context] =
+    copy(mapOpenApi = mapOpenApi)
 }

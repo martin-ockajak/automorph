@@ -9,10 +9,14 @@ import java.io.InputStream
 /**
  * Circe JSON message codec plugin.
  *
- * @see [[https://www.json.org Message format]]
- * @see [[https://circe.github.io/circe Library documentation]]
- * @see [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
- * @constructor Creates a Circe codec plugin using JSON as message format.
+ * @see
+ *   [[https://www.json.org Message format]]
+ * @see
+ *   [[https://circe.github.io/circe Library documentation]]
+ * @see
+ *   [[https://circe.github.io/circe/api/io/circe/Json.html Node type]]
+ * @constructor
+ *   Creates a Circe codec plugin using JSON as message format.
  */
 final case class CirceJsonCodec() extends CirceJsonMeta {
 

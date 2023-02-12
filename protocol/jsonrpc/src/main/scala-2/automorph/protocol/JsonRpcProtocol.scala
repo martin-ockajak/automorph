@@ -10,25 +10,41 @@ import scala.reflect.macros.blackbox
  * JSON-RPC protocol implementation.
  *
  * Provides the following JSON-RPC methods for service discovery:
- * - `rpc.discover` - API description in OpenRPC format
- * - `api.discover` - API description in OpenAPI format
+ *   - `rpc.discover` - API description in OpenRPC format
+ *   - `api.discover` - API description in OpenAPI format
  *
- * @constructor Creates a JSON-RPC 2.0 protocol implementation.
- * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @param codec message codec plugin
- * @param mapError maps a JSON-RPC error to a corresponding exception
- * @param mapException maps an exception to a corresponding JSON-RPC error
- * @param namedArguments if true, pass arguments by name, if false pass arguments by position
- * @param mapOpenRpc transforms generated OpenRPC specification
- * @param mapOpenApi transforms generated OpenAPI description
- * @param encodeMessage converts a JSON-RPC message to message format node
- * @param decodeMessage converts a message format node to JSON-RPC message
- * @param encodeOpenRpc converts an OpenRPC description to message format node
- * @param encodeOpenApi converts an OpenAPI description to message format node
- * @param encodeStrings converts a list of strings to message format node
- * @tparam Node message node type
- * @tparam Codec message codec plugin type
- * @tparam Context message context type
+ * @constructor
+ *   Creates a JSON-RPC 2.0 protocol implementation.
+ * @see
+ *   [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+ * @param codec
+ *   message codec plugin
+ * @param mapError
+ *   maps a JSON-RPC error to a corresponding exception
+ * @param mapException
+ *   maps an exception to a corresponding JSON-RPC error
+ * @param namedArguments
+ *   if true, pass arguments by name, if false pass arguments by position
+ * @param mapOpenRpc
+ *   transforms generated OpenRPC specification
+ * @param mapOpenApi
+ *   transforms generated OpenAPI description
+ * @param encodeMessage
+ *   converts a JSON-RPC message to message format node
+ * @param decodeMessage
+ *   converts a message format node to JSON-RPC message
+ * @param encodeOpenRpc
+ *   converts an OpenRPC description to message format node
+ * @param encodeOpenApi
+ *   converts an OpenAPI description to message format node
+ * @param encodeStrings
+ *   converts a list of strings to message format node
+ * @tparam Node
+ *   message node type
+ * @tparam Codec
+ *   message codec plugin type
+ * @tparam Context
+ *   message context type
  */
 final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
   codec: Codec,
@@ -41,61 +57,16 @@ final case class JsonRpcProtocol[Node, Codec <: MessageCodec[Node], Context](
   protected val decodeMessage: Node => Message[Node],
   protected val encodeOpenRpc: OpenRpc => Node,
   protected val encodeOpenApi: OpenApi => Node,
-  protected val encodeStrings: List[String] => Node
+  protected val encodeStrings: List[String] => Node,
 ) extends JsonRpcCore[Node, Codec, Context] with RpcProtocol[Node, Codec, Context]
 
 object JsonRpcProtocol extends ErrorMapping {
 
   /** Service discovery method providing API description in OpenRPC format. */
   val openRpcFunction: String = "rpc.discover"
+
   /** Service discovery method providing API description in OpenAPI format. */
   val openApiFunction: String = "api.discover"
-
-  /**
-   * Creates a JSON-RPC protocol plugin.
-   *
-   * Provides the following JSON-RPC methods for service discovery:
-   * - `rpc.discover` - API description in OpenRPC format
-   * - `api.discover` - API description in OpenAPI format
-   *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec message codec plugin
-   * @param mapError maps a JSON-RPC error to a corresponding exception
-   * @param mapException maps an exception to a corresponding JSON-RPC error
-   * @param namedArguments if true, pass arguments by name, if false pass arguments by position
-   * @param mapOpenRpc transforms generated OpenRPC specification
-   * @param mapOpenApi transforms generated OpenAPI description
-   * @tparam Node message node type
-   * @tparam Codec message codec plugin type
-   * @tparam Context message context type
-   * @return JSON-RPC protocol plugin
-   */
-  def apply[Node, Codec <: MessageCodec[Node], Context](
-    codec: Codec,
-    mapError: (String, Int) => Throwable,
-    mapException: Throwable => ErrorType,
-    namedArguments: Boolean,
-    mapOpenApi: OpenApi => OpenApi,
-    mapOpenRpc: OpenRpc => OpenRpc
-  ): JsonRpcProtocol[Node, Codec, Context] =
-    macro applyMacro[Node, Codec, Context]
-
-  /**
-   * Creates a JSON-RPC protocol plugin.
-   *
-   * Provides the following JSON-RPC methods for service discovery:
-   * - `rpc.discover` - API description in OpenRPC format
-   * - `api.discover` - API description in OpenAPI format
-   *
-   * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
-   * @param codec message codec plugin
-   * @tparam Node message node type
-   * @tparam Codec message codec plugin type
-   * @tparam Context message context type
-   * @return JSON-RPC protocol plugin
-   */
-  def apply[Node, Codec <: MessageCodec[Node], Context](codec: Codec): JsonRpcProtocol[Node, Codec, Context] =
-    macro applyDefaultsMacro[Node, Codec, Context]
 
   def applyMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node], Context](c: blackbox.Context)(
     codec: c.Expr[Codec],
@@ -103,7 +74,7 @@ object JsonRpcProtocol extends ErrorMapping {
     mapException: c.Expr[Throwable => ErrorType],
     namedArguments: c.Expr[Boolean],
     mapOpenApi: c.Expr[OpenApi => OpenApi],
-    mapOpenRpc: c.Expr[OpenRpc => OpenRpc]
+    mapOpenRpc: c.Expr[OpenRpc => OpenRpc],
   ): c.Expr[JsonRpcProtocol[Node, Codec, Context]] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
@@ -124,9 +95,9 @@ object JsonRpcProtocol extends ErrorMapping {
     """)
   }
 
-  def applyDefaultsMacro[Node, Codec <: MessageCodec[Node], Context](c: blackbox.Context)(
-    codec: c.Expr[Codec]
-  ): c.Expr[JsonRpcProtocol[Node, Codec, Context]] = {
+  def applyDefaultsMacro[Node, Codec <: MessageCodec[Node], Context](
+    c: blackbox.Context
+  )(codec: c.Expr[Codec]): c.Expr[JsonRpcProtocol[Node, Codec, Context]] = {
     import c.universe.Quasiquote
 
     c.Expr[JsonRpcProtocol[Node, Codec, Context]](q"""
@@ -140,4 +111,67 @@ object JsonRpcProtocol extends ErrorMapping {
       )
     """)
   }
+
+  /**
+   * Creates a JSON-RPC protocol plugin.
+   *
+   * Provides the following JSON-RPC methods for service discovery:
+   *   - `rpc.discover` - API description in OpenRPC format
+   *   - `api.discover` - API description in OpenAPI format
+   *
+   * @see
+   *   [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+   * @param codec
+   *   message codec plugin
+   * @param mapError
+   *   maps a JSON-RPC error to a corresponding exception
+   * @param mapException
+   *   maps an exception to a corresponding JSON-RPC error
+   * @param namedArguments
+   *   if true, pass arguments by name, if false pass arguments by position
+   * @param mapOpenRpc
+   *   transforms generated OpenRPC specification
+   * @param mapOpenApi
+   *   transforms generated OpenAPI description
+   * @tparam Node
+   *   message node type
+   * @tparam Codec
+   *   message codec plugin type
+   * @tparam Context
+   *   message context type
+   * @return
+   *   JSON-RPC protocol plugin
+   */
+  def apply[Node, Codec <: MessageCodec[Node], Context](
+    codec: Codec,
+    mapError: (String, Int) => Throwable,
+    mapException: Throwable => ErrorType,
+    namedArguments: Boolean,
+    mapOpenApi: OpenApi => OpenApi,
+    mapOpenRpc: OpenRpc => OpenRpc,
+  ): JsonRpcProtocol[Node, Codec, Context] =
+    macro applyMacro[Node, Codec, Context]
+
+  /**
+   * Creates a JSON-RPC protocol plugin.
+   *
+   * Provides the following JSON-RPC methods for service discovery:
+   *   - `rpc.discover` - API description in OpenRPC format
+   *   - `api.discover` - API description in OpenAPI format
+   *
+   * @see
+   *   [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+   * @param codec
+   *   message codec plugin
+   * @tparam Node
+   *   message node type
+   * @tparam Codec
+   *   message codec plugin type
+   * @tparam Context
+   *   message context type
+   * @return
+   *   JSON-RPC protocol plugin
+   */
+  def apply[Node, Codec <: MessageCodec[Node], Context](codec: Codec): JsonRpcProtocol[Node, Codec, Context] =
+    macro applyDefaultsMacro[Node, Codec, Context]
 }

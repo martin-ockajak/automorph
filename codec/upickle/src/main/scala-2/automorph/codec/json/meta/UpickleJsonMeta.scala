@@ -9,7 +9,8 @@ import ujson.Value
 /**
  * UPickle JSON codec plugin code generation.
  *
- * @tparam Custom customized Upickle reader and writer implicits instance type
+ * @tparam Custom
+ *   customized Upickle reader and writer implicits instance type
  */
 trait UpickleJsonMeta[Custom <: UpickleJsonCustom] extends MessageCodec[Value] {
 

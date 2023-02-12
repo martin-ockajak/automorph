@@ -10,10 +10,14 @@ import java.io.InputStream
 /**
  * Argonaut JSON message codec plugin.
  *
- * @see [[https://www.json.org Message format]]
- * @see [[http://argonaut.io/doc Library documentation]]
- * @see [[http://argonaut.io/scaladocs/#argonaut.Json Node type]]
- * @constructor Creates an Argonaut codec plugin using JSON as message format.
+ * @see
+ *   [[https://www.json.org Message format]]
+ * @see
+ *   [[http://argonaut.io/doc Library documentation]]
+ * @see
+ *   [[http://argonaut.io/scaladocs/#argonaut.Json Node type]]
+ * @constructor
+ *   Creates an Argonaut codec plugin using JSON as message format.
  */
 final case class ArgonautJsonCodec() extends ArgonautJsonMeta {
 
@@ -23,10 +27,7 @@ final case class ArgonautJsonCodec() extends ArgonautJsonMeta {
     node.nospaces.toInputStream
 
   override def deserialize(data: InputStream): Json =
-    data.asString.decodeEither[Json].fold(
-      errorMessage => throw new IllegalArgumentException(errorMessage),
-      identity
-    )
+    data.asString.decodeEither[Json].fold(errorMessage => throw new IllegalArgumentException(errorMessage), identity)
 
   override def text(node: Json): String =
     node.spaces2
@@ -39,14 +40,12 @@ object ArgonautJsonCodec {
 
   implicit lazy val noneCodecJson: CodecJson[None.type] = CodecJson(
     (_: None.type) => jNull,
-    cursor => if (cursor.focus.isNull) DecodeResult.ok(None) else DecodeResult.fail("Not a null", cursor.history)
+    cursor => if (cursor.focus.isNull) DecodeResult.ok(None) else DecodeResult.fail("Not a null", cursor.history),
   )
 
-  implicit lazy val jsonRpcMessageCodecJson: CodecJson[ArgonautJsonRpc.RpcMessage] =
-    ArgonautJsonRpc.messageCodecJson
+  implicit lazy val jsonRpcMessageCodecJson: CodecJson[ArgonautJsonRpc.RpcMessage] = ArgonautJsonRpc.messageCodecJson
 
-  implicit lazy val restRpcMessageCodecJson: CodecJson[ArgonautWebRpc.RpcMessage] =
-    ArgonautWebRpc.messageCodecJson
+  implicit lazy val restRpcMessageCodecJson: CodecJson[ArgonautWebRpc.RpcMessage] = ArgonautWebRpc.messageCodecJson
 
   implicit lazy val openRpcCodecJson: CodecJson[OpenRpc] = ArgonautOpenRpc.openRpcCodecJson
 

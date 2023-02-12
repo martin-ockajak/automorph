@@ -5,23 +5,21 @@ import automorph.protocol.jsonrpc.Response.mandatory
 /**
  * JSON-RPC call response error.
  *
- * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @param message error message
- * @param code error code
- * @param data additional error information
- * @tparam Node message node type
+ * @see
+ *   [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+ * @param message
+ *   error message
+ * @param code
+ *   error code
+ * @param data
+ *   additional error information
+ * @tparam Node
+ *   message node type
  */
-final private[automorph] case class ResponseError[Node](
-  message: String,
-  code: Int,
-  data: Option[Node]
-) {
+final private[automorph] case class ResponseError[Node](message: String, code: Int, data: Option[Node]) {
 
-  def formed: MessageError[Node] = MessageError[Node](
-    message = Some(message),
-    code = Some(code),
-    data = data
-  )
+  def formed: MessageError[Node] =
+    MessageError[Node](message = Some(message), code = Some(code), data = data)
 }
 
 private[automorph] object ResponseError {
