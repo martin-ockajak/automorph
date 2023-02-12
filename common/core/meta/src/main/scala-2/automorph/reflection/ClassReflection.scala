@@ -5,48 +5,23 @@ import scala.reflect.macros.blackbox
 /**
  * Data type reflection tools.
  *
- * @tparam C macro context type
- * @param c macro context
+ * @tparam C
+ *   macro context type
+ * @param c
+ *   macro context
  */
 final private[automorph] case class ClassReflection[C <: blackbox.Context](c: C) {
 
   // All meta-programming data types are path-dependent on the compiler-generated reflection context
   import c.universe.*
 
-  case class RefParameter(
-    name: String,
-    dataType: Type,
-    contextual: Boolean
-  ) {
-    def lift: Parameter = Parameter(name, show(dataType), contextual)
-  }
-
-  case class RefMethod(
-    name: String,
-    resultType: Type,
-    parameters: Seq[Seq[RefParameter]],
-    typeParameters: Seq[RefParameter],
-    public: Boolean,
-    available: Boolean,
-    symbol: Symbol
-  ) {
-
-    def lift: Method = Method(
-      name,
-      show(resultType),
-      parameters.map(_.map(_.lift)),
-      typeParameters.map(_.lift),
-      public = public,
-      available = available,
-      documentation = None
-    )
-  }
-
   /**
    * Describes class methods within quoted context.
    *
-   * @param classType class type representation
-   * @return quoted class method descriptors
+   * @param classType
+   *   class type representation
+   * @return
+   *   quoted class method descriptors
    */
   def methods(classType: Type): Seq[RefMethod] =
     classType.finalResultType.members.filter(_.isMethod).map(member => method(member.asMethod)).toSeq
@@ -65,15 +40,41 @@ final private[automorph] case class ClassReflection[C <: blackbox.Context](c: C)
       typeParameters,
       publicMethod(methodSymbol),
       availableMethod(methodSymbol),
-      methodSymbol
+      methodSymbol,
     )
   }
 
   private def publicMethod(methodSymbol: MethodSymbol): Boolean =
-    methodSymbol.isPublic &&
-      !methodSymbol.isSynthetic &&
-      !methodSymbol.isConstructor
+    methodSymbol.isPublic && !methodSymbol.isSynthetic && !methodSymbol.isConstructor
 
   private def availableMethod(methodSymbol: MethodSymbol): Boolean =
     !methodSymbol.isMacro
+
+  case class RefParameter(name: String, dataType: Type, contextual: Boolean) {
+
+    def lift: Parameter =
+      Parameter(name, show(dataType), contextual)
+  }
+
+  case class RefMethod(
+    name: String,
+    resultType: Type,
+    parameters: Seq[Seq[RefParameter]],
+    typeParameters: Seq[RefParameter],
+    public: Boolean,
+    available: Boolean,
+    symbol: Symbol,
+  ) {
+
+    def lift: Method =
+      Method(
+        name,
+        show(resultType),
+        parameters.map(_.map(_.lift)),
+        typeParameters.map(_.lift),
+        public = public,
+        available = available,
+        documentation = None,
+      )
+  }
 }
