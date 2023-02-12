@@ -134,7 +134,7 @@ lazy val jackson = source(project, "codec/jackson", jsonrpc, webrpc, testPlugin 
     .cross(CrossVersion.for3Use2_13)
 )
 lazy val upickle = source(project, "codec/upickle", jsonrpc, webrpc, testPlugin % Test).settings(
-  libraryDependencies += "com.lihaoyi" %% "upickle" % "1.4.4",
+  libraryDependencies += "com.lihaoyi" %% "upickle" % "2.0.0",
   Compile / doc / scalacOptions ++=
     Seq("-Ymacro-expand:none", "-skip-packages automorph.codec.json.meta:automorph.codec.messagepack.meta"),
 )
