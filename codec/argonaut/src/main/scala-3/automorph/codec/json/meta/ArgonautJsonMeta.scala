@@ -15,7 +15,5 @@ private[automorph] trait ArgonautJsonMeta extends MessageCodec[Json]:
 
   override inline def decode[T](node: Json): T =
     import ArgonautJsonCodec.given
-    node.as[T](using summonInline[DecodeJson[T]]).fold(
-      (errorMessage, _) => throw new IllegalArgumentException(errorMessage),
-      identity
-    )
+    node.as[T](using summonInline[DecodeJson[T]])
+      .fold((errorMessage, _) => throw new IllegalArgumentException(errorMessage), identity)

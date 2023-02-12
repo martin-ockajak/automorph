@@ -8,7 +8,8 @@ import upack.Msg
 /**
  * UPickle JSON codec plugin code generation.
  *
- * @tparam Custom custom Upickle reader and writer implicits instance type
+ * @tparam Custom
+ *   custom Upickle reader and writer implicits instance type
  */
 private[automorph] trait UpickleMessagePackMeta[Custom <: UpickleMessagePackCustom] extends MessageCodec[Msg]:
 
