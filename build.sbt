@@ -128,7 +128,7 @@ lazy val circe = source(project, s"codec/circe", jsonrpc, webrpc, testPlugin % T
     Seq("io.circe" %% "circe-parser" % circeVersion, "io.circe" %% "circe-generic" % circeVersion),
   Compile / doc / scalacOptions ++= Seq("-Ymacro-expand:none", "-skip-packages automorph.codec.json.meta"),
 )
-val jacksonVersion = "2.13.1"
+val jacksonVersion = "2.14.2"
 lazy val jackson = source(project, "codec/jackson", jsonrpc, webrpc, testPlugin % Test).settings(
   libraryDependencies += ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion)
     .cross(CrossVersion.for3Use2_13)
@@ -205,7 +205,7 @@ lazy val examples = source(project, "examples", default, upickle, zio, testPlugi
 )
 
 // Test
-val scalatestVersion = "3.2.10"
+val scalatestVersion = "3.2.11"
 val scribeVersion = "3.6.1"
 Test / testOptions += Tests.Argument("-oD")
 lazy val testBase = source(project, "test/base", spi).settings(
@@ -217,7 +217,7 @@ lazy val testBase = source(project, "test/base", spi).settings(
     "com.outr" %% "scribe-file" % scribeVersion,
     "com.outr" %% "scribe-slf4j" % scribeVersion,
     "org.slf4j" % "jul-to-slf4j" % "1.7.33",
-    "com.lihaoyi" %% "pprint" % "0.6.6",
+    "com.lihaoyi" %% "pprint" % "0.8.1",
   )
 )
 lazy val testPlugin = source(project, "test/plugin", testBase)
