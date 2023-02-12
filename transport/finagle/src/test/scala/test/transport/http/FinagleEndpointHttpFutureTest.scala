@@ -26,20 +26,21 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
 
   override def serverTransport(
     handler: Types.HandlerAnyCodec[Effect, Context],
-    port: Int
-  ): ServerMessageTransport[Effect] = new ServerMessageTransport[Effect] {
-    private val server = {
-      val endpoint = FinagleHttpEndpoint(handler)
-      Http.serve(s":$port", endpoint)
-    }
-
-    override def close(): Effect[Unit] = {
-      val promise = Promise[Unit]()
-      server.close().respond {
-        case Return(result) => promise.success(result)
-        case Throw(error) => promise.failure(error)
+    port: Int,
+  ): ServerMessageTransport[Effect] =
+    new ServerMessageTransport[Effect] {
+      private val server = {
+        val endpoint = FinagleHttpEndpoint(handler)
+        Http.serve(s":$port", endpoint)
       }
-      promise.future
+
+      override def close(): Effect[Unit] = {
+        val promise = Promise[Unit]()
+        server.close().respond {
+          case Return(result) => promise.success(result)
+          case Throw(error) => promise.failure(error)
+        }
+        promise.future
+      }
     }
-  }
 }

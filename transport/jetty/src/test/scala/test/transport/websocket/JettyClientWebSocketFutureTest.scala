@@ -29,5 +29,6 @@ class JettyClientWebSocketFutureTest extends StandardHttpClientTest {
     JettyClient(system, url, HttpMethod.Get)
   }
 
-  override def webSocket: Boolean = true
+  override def webSocket: Boolean =
+    true
 }

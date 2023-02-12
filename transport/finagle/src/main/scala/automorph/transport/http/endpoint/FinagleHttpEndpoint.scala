@@ -17,20 +17,27 @@ import scala.collection.immutable.ListMap
 /**
  * Finagle HTTP endpoint message transport plugin.
  *
- * The service interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
- * The response returned by the RPC handler is used as HTTP response body.
+ * The service interprets HTTP request body as a RPC request and processes it with the specified RPC handler. The
+ * response returned by the RPC handler is used as HTTP response body.
  *
- * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
- * @see [[https://twitter.github.io/finagle Library documentation]]
- * @see [[https://twitter.github.io/finagle/docs/com/twitter/finagle/ API]]
- * @constructor Creates a Finagle HTTP service with the specified RPC request handler.
- * @param handler RPC request handler
- * @param mapException maps an exception to a corresponding HTTP status code
- * @tparam Effect effect type
+ * @see
+ *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see
+ *   [[https://twitter.github.io/finagle Library documentation]]
+ * @see
+ *   [[https://twitter.github.io/finagle/docs/com/twitter/finagle/ API]]
+ * @constructor
+ *   Creates a Finagle HTTP service with the specified RPC request handler.
+ * @param handler
+ *   RPC request handler
+ * @param mapException
+ *   maps an exception to a corresponding HTTP status code
+ * @tparam Effect
+ *   effect type
  */
 final case class FinagleHttpEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
-  mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode
+  mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
 ) extends Service[Request, Response] with Logging with EndpointMessageTransport {
 
   private val log = MessageLog(logger, Protocol.Http.name)
@@ -45,24 +52,24 @@ final case class FinagleHttpEndpoint[Effect[_]](
     val requestBody = Buf.ByteArray.Owned.extract(request.content).toInputStream
 
     // Process the request
-    runAsFuture(genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
-      error => sendErrorResponse(error, request, requestId, requestProperties),
-      result => {
-        // Send the response
-        val responseBody = Reader.fromBuf(
-          Buf.ByteArray.Owned(result.responseBody.map(_.toArray).getOrElse(Array()))
-        )
-        val status = result.exception.map(mapException).map(Status.apply).getOrElse(Status.Ok)
-        createResponse(responseBody, status, result.context, request, requestId)
-      }
-    )))
+    runAsFuture(genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
+      _.fold(
+        error => sendErrorResponse(error, request, requestId, requestProperties),
+        result => {
+          // Send the response
+          val responseBody = Reader.fromBuf(Buf.ByteArray.Owned(result.responseBody.map(_.toArray).getOrElse(Array())))
+          val status = result.exception.map(mapException).map(Status.apply).getOrElse(Status.Ok)
+          createResponse(responseBody, status, result.context, request, requestId)
+        },
+      )
+    ))
   }
 
   private def sendErrorResponse(
     error: Throwable,
     request: Request,
     requestId: String,
-    requestProperties: => Map[String, String]
+    requestProperties: => Map[String, String],
   ): Response = {
     log.failedProcessRequest(error, requestProperties)
     val responseBody = Reader.fromBuf(Buf.Utf8(error.trace.mkString("\n")))
@@ -74,14 +81,14 @@ final case class FinagleHttpEndpoint[Effect[_]](
     status: Status,
     responseContext: Option[Context],
     request: Request,
-    requestId: String
+    requestId: String,
   ): Response = {
     // Log the response
     val responseStatus = responseContext.flatMap(_.statusCode.map(Status.apply)).getOrElse(status)
     lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(request),
-      "Status" -> responseStatus.toString
+      "Status" -> responseStatus.toString,
     )
 
     // Send the response
@@ -96,20 +103,18 @@ final case class FinagleHttpEndpoint[Effect[_]](
     HttpContext(
       transport = Some(request),
       method = Some(HttpMethod.valueOf(request.method.name)),
-      headers = request.headerMap.iterator.toSeq
+      headers = request.headerMap.iterator.toSeq,
     ).url(request.uri)
 
   private def setResponseContext(response: Response, responseContext: Option[Context]): Unit =
-    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
-      response.headerMap.add(name, value)
-    }
+    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) => response.headerMap.add(name, value) }
 
   private def getRequestProperties(request: Request, requestId: String): Map[String, String] =
     ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(request),
       "URL" -> request.uri,
-      "Method" -> request.method.toString
+      "Method" -> request.method.toString,
     )
 
   private def clientAddress(request: Request): String = {
@@ -120,10 +125,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
 
   private def runAsFuture[T](value: Effect[T]): Future[T] = {
     val promise = Promise[T]()
-    value.either.map(_.fold(
-      error => promise.setException(error),
-      result => promise.setValue(result)
-    )).run
+    value.either.map(_.fold(error => promise.setException(error), result => promise.setValue(result))).run
     promise
   }
 }

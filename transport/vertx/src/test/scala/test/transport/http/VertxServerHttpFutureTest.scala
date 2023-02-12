@@ -24,7 +24,7 @@ class VertxServerHttpFutureTest extends StandardHttpServerTest {
 
   override def serverTransport(
     handler: Types.HandlerAnyCodec[Effect, Context],
-    port: Int
+    port: Int,
   ): ServerMessageTransport[Effect] =
     VertxServer(handler, port)
 }

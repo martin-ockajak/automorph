@@ -27,26 +27,23 @@ private[automorph] object RabbitMqCommon extends Logging {
   /**
    * Initialize AMQP broker connection.
    *
-   * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
-   * @param addresses broker hostnames and ports for reconnection attempts
-   * @param connectionFactory connection factory
-   * @param name connection name
-   * @return AMQP broker connection
+   * @param url
+   *   AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
+   * @param addresses
+   *   broker hostnames and ports for reconnection attempts
+   * @param connectionFactory
+   *   connection factory
+   * @param name
+   *   connection name
+   * @return
+   *   AMQP broker connection
    */
-  def connect(
-    url: URI,
-    addresses: Seq[Address],
-    name: String,
-    connectionFactory: ConnectionFactory
-  ): Connection = {
+  def connect(url: URI, addresses: Seq[Address], name: String, connectionFactory: ConnectionFactory): Connection = {
     val urlText = url.toString
     connectionFactory.setUri(url)
     logger.debug(s"Connecting to $protocol broker: $urlText")
-    Try(if (addresses.nonEmpty) {
-      connectionFactory.newConnection(addresses.toArray, name)
-    } else {
-      connectionFactory.newConnection(name)
-    }).map { connection =>
+    Try(if (addresses.nonEmpty) { connectionFactory.newConnection(addresses.toArray, name) }
+    else { connectionFactory.newConnection(name) }).map { connection =>
       logger.info(s"Connected to $protocol broker: $urlText")
       connection
     }.onFailure(logger.error(s"Failed to connect to $protocol broker: $urlText", _)).get
@@ -55,60 +52,76 @@ private[automorph] object RabbitMqCommon extends Logging {
   /**
    * Declare specified direct non-durable AMQP exchange.
    *
-   * @param exchange direct non-durable AMQP message exchange name
-   * @param connection AMQP broker connection
-   * @return nothing
+   * @param exchange
+   *   direct non-durable AMQP message exchange name
+   * @param connection
+   *   AMQP broker connection
+   * @return
+   *   nothing
    */
-  def declareExchange(exchange: String, connection: Connection): Unit = {
+  def declareExchange(exchange: String, connection: Connection): Unit =
     Option.when(exchange != defaultDirectExchange) {
       Using(connection.createChannel()) { channel =>
         channel.exchangeDeclare(exchange, BuiltinExchangeType.DIRECT, false)
         ()
       }.get
     }.getOrElse(())
-  }
 
   /**
    * Close AMQP broker connection.
    *
-   * @param connection AMQP broker connection
+   * @param connection
+   *   AMQP broker connection
    */
-  def disconnect(connection: Connection): Unit = connection.abort(AMQP.CONNECTION_FORCED, "Terminated")
+  def disconnect(connection: Connection): Unit =
+    connection.abort(AMQP.CONNECTION_FORCED, "Terminated")
 
   /**
    * Returns application identifier combining the local host name with specified application name.
    *
-   * @param applicationName application name
-   * @return application identifier
+   * @param applicationName
+   *   application name
+   * @return
+   *   application identifier
    */
-  def applicationId(applicationName: String): String = s"${InetAddress.getLocalHost.getHostName}/$applicationName"
+  def applicationId(applicationName: String): String =
+    s"${InetAddress.getLocalHost.getHostName}/$applicationName"
 
   /**
    * Creates thread-local AMQP message consumer for specified connection,
    *
-   * @param connection AMQP broker connection
-   * @param createConsumer AMQP message consumer creation function
-   * @tparam T AMQP message consumer type
-   * @return thread-local AMQP message consumer
+   * @param connection
+   *   AMQP broker connection
+   * @param createConsumer
+   *   AMQP message consumer creation function
+   * @tparam T
+   *   AMQP message consumer type
+   * @return
+   *   thread-local AMQP message consumer
    */
   def threadLocalConsumer[T <: DefaultConsumer](connection: Connection, createConsumer: Channel => T): ThreadLocal[T] =
     ThreadLocal.withInitial { () =>
       val channel = connection.createChannel()
-      createConsumer(Option(channel).getOrElse {
-        throw new IOException("No AMQP connection channel available")
-      })
+      createConsumer(Option(channel).getOrElse(throw new IOException("No AMQP connection channel available")))
     }
 
   /**
    * Create AMQP properties from message context.
    *
-   * @param messageContext message context
-   * @param contentType MIME content type
-   * @param defaultReplyTo address to reply to
-   * @param defaultRequestId request identifier
-   * @param defaultAppId application identifier
-   * @param useDefaultRequestId if true, always use specified request identifier as correlation identifier
-   * @return AMQP properties
+   * @param messageContext
+   *   message context
+   * @param contentType
+   *   MIME content type
+   * @param defaultReplyTo
+   *   address to reply to
+   * @param defaultRequestId
+   *   request identifier
+   * @param defaultAppId
+   *   application identifier
+   * @param useDefaultRequestId
+   *   if true, always use specified request identifier as correlation identifier
+   * @return
+   *   AMQP properties
    */
   def amqpProperties(
     messageContext: Option[Context],
@@ -116,38 +129,34 @@ private[automorph] object RabbitMqCommon extends Logging {
     defaultReplyTo: String,
     defaultRequestId: String,
     defaultAppId: String,
-    useDefaultRequestId: Boolean
+    useDefaultRequestId: Boolean,
   ): BasicProperties = {
     val context = messageContext.getOrElse(AmqpContext())
     val transportProperties = context.transport.map(_.properties).getOrElse(new BasicProperties())
-    new BasicProperties().builder()
-      .contentType(contentType)
+    new BasicProperties().builder().contentType(contentType)
       .replyTo(context.replyTo.orElse(Option(transportProperties.getReplyTo)).getOrElse(defaultReplyTo))
       .correlationId(Option.when(useDefaultRequestId)(defaultRequestId).getOrElse {
         context.correlationId.orElse(Option(transportProperties.getCorrelationId)).getOrElse(defaultRequestId)
-      })
-      .contentEncoding(context.contentEncoding.orElse(Option(transportProperties.getContentEncoding)).orNull)
+      }).contentEncoding(context.contentEncoding.orElse(Option(transportProperties.getContentEncoding)).orNull)
       .appId(context.appId.orElse(Option(transportProperties.getAppId)).getOrElse(defaultAppId))
-      .headers((context.headers ++ Option(transportProperties.getHeaders).map(_.asScala).getOrElse(
-        Map.empty
-      )).asJava)
-      .deliveryMode(context.deliveryMode.map(Integer.valueOf).orElse(
-        Option(transportProperties.getDeliveryMode)
-      ).orNull)
-      .priority(context.priority.map(Integer.valueOf).orElse(Option(transportProperties.getPriority)).orNull)
+      .headers((context.headers ++ Option(transportProperties.getHeaders).map(_.asScala).getOrElse(Map.empty)).asJava)
+      .deliveryMode(
+        context.deliveryMode.map(Integer.valueOf).orElse(Option(transportProperties.getDeliveryMode)).orNull
+      ).priority(context.priority.map(Integer.valueOf).orElse(Option(transportProperties.getPriority)).orNull)
       .expiration(context.expiration.orElse(Option(transportProperties.getExpiration)).orNull)
       .messageId(context.messageId.orElse(Option(transportProperties.getMessageId)).orNull)
       .timestamp(context.timestamp.map(Date.from).orElse(Option(transportProperties.getTimestamp)).orNull)
       .`type`(context.`type`.orElse(Option(transportProperties.getType)).orNull)
-      .userId(context.userId.orElse(Option(transportProperties.getUserId)).orNull)
-      .build
+      .userId(context.userId.orElse(Option(transportProperties.getUserId)).orNull).build
   }
 
   /**
    * Create message context from AMQP properties.
    *
-   * @param properties message properties
-   * @return message context
+   * @param properties
+   *   message properties
+   * @return
+   *   message context
    */
   def messageContext(properties: BasicProperties): AmqpContext[RabbitMqContext] =
     AmqpContext(
@@ -164,33 +173,31 @@ private[automorph] object RabbitMqCommon extends Logging {
       `type` = Option(properties.getType),
       userId = Option(properties.getUserId),
       appId = Option(properties.getAppId),
-      transport = Some(RabbitMqContext(properties))
+      transport = Some(RabbitMqContext(properties)),
     )
 
   /**
    * Extract message properties from message metadata.
    *
-   * @param requestId request correlation identifier
-   * @param routingKey routing key
-   * @param url AMQP broker URL
-   * @param consumerTag consumer tag
-   * @return message properties
+   * @param requestId
+   *   request correlation identifier
+   * @param routingKey
+   *   routing key
+   * @param url
+   *   AMQP broker URL
+   * @param consumerTag
+   *   consumer tag
+   * @return
+   *   message properties
    */
   def messageProperties(
     requestId: Option[String],
     routingKey: String,
     url: String,
-    consumerTag: Option[String]
+    consumerTag: Option[String],
   ): Map[String, String] =
-    ListMap()
-      ++ requestId.map(
-        LogProperties.requestId -> _
-      ) ++ ListMap(
-        routingKeyProperty -> routingKey,
-        "URL" -> url
-      ) ++ consumerTag.map(
-        "Consumer Tag" -> _
-      )
+    ListMap() ++ requestId.map(LogProperties.requestId -> _) ++
+      ListMap(routingKeyProperty -> routingKey, "URL" -> url) ++ consumerTag.map("Consumer Tag" -> _)
 }
 
 final case class RabbitMqContext(properties: BasicProperties)

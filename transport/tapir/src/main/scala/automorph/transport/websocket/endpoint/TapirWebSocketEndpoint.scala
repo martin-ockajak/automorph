@@ -20,9 +20,12 @@ import sttp.tapir.{CodecFormat, clientIp, endpoint, headers, paths, queryParams,
  * The endpoint interprets WebSocket request body as an RPC request and processes it using the specified RPC handler.
  * The response returned by the RPC handler is used as WebSocket response body.
  *
- * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
- * @see [[https://tapir.softwaremill.com Library documentation]]
- * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
+ * @see
+ *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see
+ *   [[https://tapir.softwaremill.com Library documentation]]
+ * @see
+ *   [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
  */
 object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
 
@@ -38,12 +41,18 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
    * The endpoint interprets WebSocket request body as a RPC request and processes it with the specified RPC handler.
    * The response returned by the RPC handler is used as WebSocket response body.
    *
-   * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
-   * @see [[https://tapir.softwaremill.com Library documentation]]
-   * @see [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
-   * @param handler RPC request handler
-   * @tparam Effect effect type
-   * @return Tapir WebSocket endpoint
+   * @see
+   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   * @see
+   *   [[https://tapir.softwaremill.com Library documentation]]
+   * @see
+   *   [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
+   * @param handler
+   *   RPC request handler
+   * @tparam Effect
+   *   effect type
+   * @return
+   *   Tapir WebSocket endpoint
    */
   def apply[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context]
@@ -57,8 +66,7 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
     }
 
     // Define server endpoint
-    endpoint
-      .in(paths).in(queryParams).in(headers).in(clientIp)
+    endpoint.in(paths).in(queryParams).in(headers).in(clientIp)
       .out(webSocketBody[Array[Byte], CodecFormat.OctetStream, Array[Byte], CodecFormat.OctetStream].apply(streams))
       .serverLogic { case (paths, queryParams, headers, clientIp) =>
         // Log the request
@@ -69,14 +77,16 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
         // Process the request
         system.pure(Right { (requestBody: Array[Byte]) =>
           val requestContext = getRequestContext(paths, queryParams, headers, None)
-          genericHandler.processRequest(requestBody, requestContext, requestId).either.map(_.fold(
-            error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
-            result => {
-              // Create the response
-              val responseBody = result.responseBody.map(_.toArray).getOrElse(Array[Byte]())
-              createResponse(responseBody, clientIp, requestId, log)
-            }
-          ))
+          genericHandler.processRequest(requestBody, requestContext, requestId).either.map(
+            _.fold(
+              error => createErrorResponse(error, clientIp, requestId, requestProperties, log),
+              result => {
+                // Create the response
+                val responseBody = result.responseBody.map(_.toArray).getOrElse(Array[Byte]())
+                createResponse(responseBody, clientIp, requestId, log)
+              },
+            )
+          )
         })
       }
   }
@@ -86,7 +96,7 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
     clientIp: Option[String],
     requestId: String,
     requestProperties: => Map[String, String],
-    log: MessageLog
+    log: MessageLog,
   ): Array[Byte] = {
     log.failedProcessRequest(error, requestProperties)
     val message = error.description.toArray
@@ -97,13 +107,10 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
     responseBody: Array[Byte],
     clientIp: Option[String],
     requestId: String,
-    log: MessageLog
+    log: MessageLog,
   ): Array[Byte] = {
     // Log the response
-    lazy val responseProperties = ListMap(
-      LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(clientIp)
-    )
+    lazy val responseProperties = ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(clientIp))
     log.sendingResponse(responseProperties)
     responseBody
   }

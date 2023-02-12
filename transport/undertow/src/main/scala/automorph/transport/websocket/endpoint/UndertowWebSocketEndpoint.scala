@@ -10,7 +10,9 @@ import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputS
 import automorph.util.{Network, Random}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.Headers
-import io.undertow.websockets.core.{AbstractReceiveListener, BufferedBinaryMessage, BufferedTextMessage, WebSocketCallback, WebSocketChannel, WebSockets}
+import io.undertow.websockets.core.{
+  AbstractReceiveListener, BufferedBinaryMessage, BufferedTextMessage, WebSocketCallback, WebSocketChannel, WebSockets,
+}
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHandshakeHandler}
 import java.io.InputStream
@@ -21,35 +23,42 @@ import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsJava, MapHasAsSca
 /**
  * Undertow WebSocket endpoint message transport plugin.
  *
- * The handler interprets WebSocket request message as an RPC request and processes it using the specified RPC request handler.
- * The response returned by the RPC request handler is used as WebSocket response message.
+ * The handler interprets WebSocket request message as an RPC request and processes it using the specified RPC request
+ * handler. The response returned by the RPC request handler is used as WebSocket response message.
  */
 object UndertowWebSocketEndpoint {
+
+  /** Request context type. */
+  type Context = HttpContext[Either[HttpServerExchange, WebSocketHttpExchange]]
 
   /**
    * Creates an Undertow WebSocket handler with specified RPC request handler.
    *
-   * The handler interprets WebSocket request message as an RPC request and processes it using the specified RPC request handler.
-   * The response returned by the RPC request handler is used as WebSocket response message.
+   * The handler interprets WebSocket request message as an RPC request and processes it using the specified RPC request
+   * handler. The response returned by the RPC request handler is used as WebSocket response message.
    *
-   * @see [[https://en.wikipedia.org/wiki/WebSocket Transport protocol]]
-   * @see [[https://undertow.io Library documentation]]
-   * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
-   * @param handler RPC request handler
-   * @param next Undertow handler invoked if a HTTP request does not contain a WebSocket handshake
-   * @tparam Effect effect type
-   * @return creates an Undertow WebSocket handler using supplied asynchronous effect execution function
+   * @see
+   *   [[https://en.wikipedia.org/wiki/WebSocket Transport protocol]]
+   * @see
+   *   [[https://undertow.io Library documentation]]
+   * @see
+   *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
+   * @param handler
+   *   RPC request handler
+   * @param next
+   *   Undertow handler invoked if a HTTP request does not contain a WebSocket handshake
+   * @tparam Effect
+   *   effect type
+   * @return
+   *   creates an Undertow WebSocket handler using supplied asynchronous effect execution function
    */
   def apply[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
-    next: HttpHandler
+    next: HttpHandler,
   ): WebSocketProtocolHandshakeHandler = {
     val webSocketCallback = UndertowWebSocketCallback(handler)
     new WebSocketProtocolHandshakeHandler(webSocketCallback, next)
   }
-
-  /** Request context type. */
-  type Context = HttpContext[Either[HttpServerExchange, WebSocketHttpExchange]]
 }
 
 final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
@@ -79,7 +88,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         exchange: WebSocketHttpExchange,
         requestBody: InputStream,
         channel: WebSocketChannel,
-        discardMessage: () => Unit
+        discardMessage: () => Unit,
       ): Unit = {
         // Log the request
         val requestId = Random.id
@@ -87,15 +96,17 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         log.receivedRequest(requestProperties)
 
         // Process the request
-        genericHandler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(_.fold(
-          error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
-          result => {
-            // Send the response
-            val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
-            sendResponse(responseBody, result.context, exchange, channel, requestId)
-            discardMessage()
-          }
-        )).run
+        genericHandler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
+          _.fold(
+            error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
+            result => {
+              // Send the response
+              val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
+              sendResponse(responseBody, result.context, exchange, channel, requestId)
+              discardMessage()
+            },
+          )
+        ).run
       }
 
       private def sendErrorResponse(
@@ -103,7 +114,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         exchange: WebSocketHttpExchange,
         channel: WebSocketChannel,
         requestId: String,
-        requestProperties: => Map[String, String]
+        requestProperties: => Map[String, String],
       ): Unit = {
         log.failedProcessRequest(error, requestProperties)
         val responseBody = error.description.toInputStream
@@ -115,13 +126,10 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         responseContext: Option[Context],
         exchange: WebSocketHttpExchange,
         channel: WebSocketChannel,
-        requestId: String
+        requestId: String,
       ): Unit = {
         // Log the response
-        lazy val responseProperties = ListMap(
-          LogProperties.requestId -> requestId,
-          "Client" -> clientAddress(exchange)
-        )
+        lazy val responseProperties = ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(exchange))
         log.sendingResponse(responseProperties)
 
         // Send the response
@@ -140,26 +148,20 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         val headers = exchange.getRequestHeaders.asScala.view.mapValues(_.asScala).flatMap { case (name, values) =>
           values.map(value => name -> value)
         }.toSeq
-        HttpContext(
-          transport = Some(Right(exchange).withLeft[HttpServerExchange]),
-          headers = headers
-        ).url(exchange.getRequestURI)
+        HttpContext(transport = Some(Right(exchange).withLeft[HttpServerExchange]), headers = headers)
+          .url(exchange.getRequestURI)
       }
 
       private def setResponseContext(exchange: WebSocketHttpExchange, responseContext: Option[Context]): Unit = {
-        val headers = responseContext.toSeq.flatMap(_.headers).groupBy(_._1)
-          .view.mapValues(_.map(_._2).asJava).toMap.asJava
+        val headers = responseContext.toSeq.flatMap(_.headers).groupBy(_._1).view.mapValues(_.map(_._2).asJava).toMap
+          .asJava
         exchange.setResponseHeaders(headers)
       }
 
       private def getRequestProperties(exchange: WebSocketHttpExchange, requestId: String): Map[String, String] = {
         val query = Option(exchange.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")
         val url = s"${exchange.getRequestURI}$query"
-        Map(
-          LogProperties.requestId -> requestId,
-          "Client" -> clientAddress(exchange),
-          "URL" -> url
-        )
+        Map(LogProperties.requestId -> requestId, "Client" -> clientAddress(exchange), "URL" -> url)
       }
 
       private def clientAddress(exchange: WebSocketHttpExchange): String = {
@@ -172,5 +174,6 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
     channel.resumeReceives()
   }
 
-  override def close(): Unit = ()
+  override def close(): Unit =
+    ()
 }

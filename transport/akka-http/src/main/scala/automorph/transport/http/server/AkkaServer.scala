@@ -24,18 +24,30 @@ import scala.concurrent.Await
  * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as HTTP response body.
  *
- * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
- * @see [[https://doc.akka.io/docs/akka-http Library documentation]]
- * @see [[https://doc.akka.io/api/akka-http/current/akka/http/ API]]
- * @constructor Creates an Akka HTTP server with specified RPC request handler.
- * @param handler RPC request handler
- * @param port port to listen on for HTTP connections
- * @param pathPrefix HTTP URL path prefix, only requests starting with this path prefix are allowed
- * @param methods allowed HTTP request methods
- * @param mapException maps an exception to a corresponding HTTP status code
- * @param requestTimeout HTTP request processing timeout
- * @param serverSettings HTTP server settings
- * @tparam Effect effect type
+ * @see
+ *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see
+ *   [[https://doc.akka.io/docs/akka-http Library documentation]]
+ * @see
+ *   [[https://doc.akka.io/api/akka-http/current/akka/http/ API]]
+ * @constructor
+ *   Creates an Akka HTTP server with specified RPC request handler.
+ * @param handler
+ *   RPC request handler
+ * @param port
+ *   port to listen on for HTTP connections
+ * @param pathPrefix
+ *   HTTP URL path prefix, only requests starting with this path prefix are allowed
+ * @param methods
+ *   allowed HTTP request methods
+ * @param mapException
+ *   maps an exception to a corresponding HTTP status code
+ * @param requestTimeout
+ *   HTTP request processing timeout
+ * @param serverSettings
+ *   HTTP server settings
+ * @tparam Effect
+ *   effect type
  */
 final case class AkkaServer[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
@@ -44,7 +56,7 @@ final case class AkkaServer[Effect[_]](
   methods: Iterable[HttpMethod] = HttpMethod.values,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
-  serverSettings: ServerSettings = AkkaServer.defaultServerSettings
+  serverSettings: ServerSettings = AkkaServer.defaultServerSettings,
 ) extends Logging with ServerMessageTransport[Effect] {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -52,15 +64,14 @@ final case class AkkaServer[Effect[_]](
   private val allowedMethods = methods.map(_.name).toSet
   private val actorSystem = start()
 
-  override def close(): Effect[Unit] = {
+  override def close(): Effect[Unit] =
     system.wrap {
       actorSystem.terminate()
       Await.result(actorSystem.whenTerminated, Duration.Inf)
       ()
     }
-  }
 
-  private def start(): ActorSystem[Nothing] = {
+  private def start(): ActorSystem[Nothing] =
     ActorSystem[Nothing](
       Behaviors.setup[Nothing] { actorContext =>
         // Create handler actor
@@ -74,36 +85,25 @@ final case class AkkaServer[Effect[_]](
         val serverRoute = route(handlerRoute)
 
         // Start HTTP server
-        val serverBinding = Await.result(
-          Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(serverRoute),
-          Duration.Inf
-        )
+        val serverBinding = Await
+          .result(Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(serverRoute), Duration.Inf)
         logger.info(
           "Listening for connections",
-          ListMap(
-            "Protocol" -> Protocol.Http,
-            "Port" -> serverBinding.localAddress.getPort.toString
-          )
+          ListMap("Protocol" -> Protocol.Http, "Port" -> serverBinding.localAddress.getPort.toString),
         )
         Behaviors.empty
       },
-      getClass.getSimpleName
+      getClass.getSimpleName,
     )
-  }
 
   private def route(handlerRoute: Route): Route =
     // Validate HTTP request method
     extractRequest { httpRequest =>
       if (allowedMethods.contains(httpRequest.method.value.toUpperCase)) {
         // Validate URL path
-        if (httpRequest.uri.path.toString.startsWith(pathPrefix)) {
-          handlerRoute
-        } else {
-          complete(NotFound)
-        }
-      } else {
-        complete(MethodNotAllowed)
-      }
+        if (httpRequest.uri.path.toString.startsWith(pathPrefix)) { handlerRoute }
+        else { complete(NotFound) }
+      } else { complete(MethodNotAllowed) }
     }
 }
 
@@ -113,5 +113,6 @@ object AkkaServer {
   type Context = AkkaHttpEndpoint.Context
 
   /** Default HTTP server settings. */
-  def defaultServerSettings: ServerSettings = ServerSettings("")
+  def defaultServerSettings: ServerSettings =
+    ServerSettings("")
 }

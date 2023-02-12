@@ -17,20 +17,30 @@ import scala.util.Try
 /**
  * RabbitMQ client message transport plugin.
  *
- * The client uses the supplied RPC request as AMQP request message body and returns AMQP response message body as a result.
- * AMQP request messages are published to the specified exchange using ``direct reply-to``mechanism.
- * AMQP response messages are consumed using ``direct reply-to``mechanism and automatically acknowledged.
+ * The client uses the supplied RPC request as AMQP request message body and returns AMQP response message body as a
+ * result. AMQP request messages are published to the specified exchange using ``direct reply-to``mechanism. AMQP
+ * response messages are consumed using ``direct reply-to``mechanism and automatically acknowledged.
  *
- * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
- * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
- * @constructor Creates a RabbitMQ client message transport plugin.
- * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
- * @param routingKey AMQP routing key (typically a queue name)
- * @param system effect system plugin
- * @param exchange direct non-durable AMQP message exchange name
- * @param addresses broker hostnames and ports for reconnection attempts
- * @param connectionFactory AMQP broker connection factory
- * @tparam Effect effect type
+ * @see
+ *   [[https://www.rabbitmq.com/java-client.html Documentation]]
+ * @see
+ *   [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
+ * @constructor
+ *   Creates a RabbitMQ client message transport plugin.
+ * @param url
+ *   AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
+ * @param routingKey
+ *   AMQP routing key (typically a queue name)
+ * @param system
+ *   effect system plugin
+ * @param exchange
+ *   direct non-durable AMQP message exchange name
+ * @param addresses
+ *   broker hostnames and ports for reconnection attempts
+ * @param connectionFactory
+ *   AMQP broker connection factory
+ * @tparam Effect
+ *   effect type
  */
 final case class RabbitMqClient[Effect[_]](
   url: URI,
@@ -38,12 +48,11 @@ final case class RabbitMqClient[Effect[_]](
   system: EffectSystem[Effect] & Defer[Effect],
   exchange: String = RabbitMqCommon.defaultDirectExchange,
   addresses: Seq[Address] = Seq.empty,
-  connectionFactory: ConnectionFactory = new ConnectionFactory
+  connectionFactory: ConnectionFactory = new ConnectionFactory,
 ) extends Logging with ClientMessageTransport[Effect, Context] {
-
-  private val directReplyToQueue = "amq.rabbitmq.reply-to"
   private lazy val connection = connect()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, consumer)
+  private val directReplyToQueue = "amq.rabbitmq.reply-to"
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
   private val urlText = url.toString
   private val responseHandlers = TrieMap[String, Deferred[Effect, Response]]()
@@ -54,33 +63,28 @@ final case class RabbitMqClient[Effect[_]](
     requestBody: InputStream,
     requestContext: Option[Context],
     requestId: String,
-    mediaType: String
+    mediaType: String,
   ): Effect[Response] =
     system.deferred[Response].flatMap { response =>
       send(requestBody, requestId, mediaType, requestContext, Some(response)).flatMap(_ => response.effect)
     }
-
-  override def message(
-    requestBody: InputStream,
-    requestContext: Option[Context],
-    requestId: String,
-    mediaType: String
-  ): Effect[Unit] = send(requestBody, requestId, mediaType, requestContext, None)
-
-  override def defaultContext: Context = RabbitMqContext.default
-
-  override def close(): Effect[Unit] = system.wrap(RabbitMqCommon.disconnect(connection))
 
   private def send(
     requestBody: InputStream,
     defaultRequestId: String,
     mediaType: String,
     requestContext: Option[Context],
-    response: Option[Deferred[Effect, Response]]
+    response: Option[Deferred[Effect, Response]],
   ): Effect[Unit] = {
     // Log the request
-    val amqpProperties = RabbitMqCommon
-      .amqpProperties(requestContext, mediaType, directReplyToQueue, defaultRequestId, clientId, useDefaultRequestId = false)
+    val amqpProperties = RabbitMqCommon.amqpProperties(
+      requestContext,
+      mediaType,
+      directReplyToQueue,
+      defaultRequestId,
+      clientId,
+      useDefaultRequestId = false,
+    )
     val requestId = amqpProperties.getCorrelationId
     lazy val requestProperties = RabbitMqCommon.messageProperties(Some(requestId), routingKey, urlText, None)
     log.sendingRequest(requestProperties)
@@ -94,11 +98,23 @@ final case class RabbitMqClient[Effect[_]](
         val message = requestBody.toArray
         threadConsumer.get.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, message)
         log.sentRequest(requestProperties)
-      }.onFailure { error =>
-        log.failedSendRequest(error, requestProperties)
-      }.get
+      }.onFailure(error => log.failedSendRequest(error, requestProperties)).get
     }
   }
+
+  override def message(
+    requestBody: InputStream,
+    requestContext: Option[Context],
+    requestId: String,
+    mediaType: String,
+  ): Effect[Unit] =
+    send(requestBody, requestId, mediaType, requestContext, None)
+
+  override def defaultContext: Context =
+    RabbitMqContext.default
+
+  override def close(): Effect[Unit] =
+    system.wrap(RabbitMqCommon.disconnect(connection))
 
   private def consumer(channel: Channel): DefaultConsumer = {
     val consumer = new DefaultConsumer(channel) {
@@ -107,7 +123,7 @@ final case class RabbitMqClient[Effect[_]](
         consumerTag: String,
         envelope: Envelope,
         properties: BasicProperties,
-        responseBody: Array[Byte]
+        responseBody: Array[Byte],
       ): Unit = {
         // Log the response
         lazy val responseProperties = RabbitMqCommon

@@ -25,7 +25,7 @@ class JettyServerHttpFutureTest extends StandardHttpServerTest {
 
   override def serverTransport(
     handler: Types.HandlerAnyCodec[Effect, Context],
-    port: Int
+    port: Int,
   ): ServerMessageTransport[Effect] = {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
     JettyServer(handler, port)

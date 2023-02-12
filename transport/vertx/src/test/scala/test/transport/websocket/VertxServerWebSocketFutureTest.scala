@@ -25,9 +25,10 @@ class VertxServerWebSocketFutureTest extends StandardHttpServerTest {
 
   override def serverTransport(
     handler: Types.HandlerAnyCodec[Effect, Context],
-    port: Int
+    port: Int,
   ): ServerMessageTransport[Effect] =
     VertxServer(handler, port)
 
-  override def webSocket: Boolean = true
+  override def webSocket: Boolean =
+    true
 }

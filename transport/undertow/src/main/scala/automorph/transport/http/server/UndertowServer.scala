@@ -23,19 +23,32 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  *
  * Processes only HTTP requests starting with specified URL path.
  *
- * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
- * @see [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
- * @see [[https://undertow.io Library documentation]]
- * @see [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
- * @constructor Creates an Undertow HTTP & WebSocket server with specified RPC request handler.
- * @param handler RPC request handler
- * @param port port to listen on for HTTP connections
- * @param pathPrefix HTTP URL path prefix, only requests starting with this path prefix are allowed
- * @param methods allowed HTTP request methods
- * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
- * @param mapException maps an exception to a corresponding HTTP status code
- * @param builder Undertow builder
- * @tparam Effect effect type
+ * @see
+ *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see
+ *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
+ * @see
+ *   [[https://undertow.io Library documentation]]
+ * @see
+ *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
+ * @constructor
+ *   Creates an Undertow HTTP & WebSocket server with specified RPC request handler.
+ * @param handler
+ *   RPC request handler
+ * @param port
+ *   port to listen on for HTTP connections
+ * @param pathPrefix
+ *   HTTP URL path prefix, only requests starting with this path prefix are allowed
+ * @param methods
+ *   allowed HTTP request methods
+ * @param webSocket
+ *   support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
+ * @param mapException
+ *   maps an exception to a corresponding HTTP status code
+ * @param builder
+ *   Undertow builder
+ * @tparam Effect
+ *   effect type
  */
 final case class UndertowServer[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
@@ -44,13 +57,13 @@ final case class UndertowServer[Effect[_]](
   methods: Iterable[HttpMethod] = HttpMethod.values,
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-  builder: Undertow.Builder = defaultBuilder
+  builder: Undertow.Builder = defaultBuilder,
 ) extends Logging with ServerMessageTransport[Effect] {
 
+  private lazy val undertow = createServer()
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
   private val allowedMethods = methods.map(_.name).toSet
-  private lazy val undertow = createServer()
   start()
 
   override def close(): Effect[Unit] =
@@ -66,32 +79,32 @@ final case class UndertowServer[Effect[_]](
       Predicates.prefix(pathPrefix),
       // WebSocket
       Option.when(webSocket)(UndertowWebSocketEndpoint(handler, httpHandler)).getOrElse(httpHandler),
-      ResponseCodeHandler.HANDLE_404
+      ResponseCodeHandler.HANDLE_404,
     )
     builder.addHttpListener(port, "0.0.0.0", rootHandler).build()
-  }
-
-  private def start(): Unit = {
-    undertow.start()
-    undertow.getListenerInfo.asScala.foreach { listener =>
-      logger.info("Listening for connections", ListMap(
-        "Protocol" -> listener.getProtcol
-      ) ++ (listener.getAddress match {
-        case address: InetSocketAddress => ListMap(
-          "Host" -> address.getHostString,
-          "Port" -> address.getPort.toString
-        )
-        case _ => ListMap()
-      }))
-    }
   }
 
   private def methodHandler(handler: HttpHandler): HttpHandler =
     Handlers.predicate(
       (exchange: HttpServerExchange) => allowedMethods.contains(exchange.getRequestMethod.toString.toUpperCase),
       handler,
-      ResponseCodeHandler.HANDLE_405
+      ResponseCodeHandler.HANDLE_405,
     )
+
+  private def start(): Unit = {
+    undertow.start()
+    undertow.getListenerInfo.asScala.foreach { listener =>
+      logger.info(
+        "Listening for connections",
+        ListMap("Protocol" -> listener.getProtcol) ++
+          (listener.getAddress match {
+            case address: InetSocketAddress =>
+              ListMap("Host" -> address.getHostString, "Port" -> address.getPort.toString)
+            case _ => ListMap()
+          }),
+      )
+    }
+  }
 }
 
 object UndertowServer {
@@ -101,10 +114,10 @@ object UndertowServer {
 
   /**
    * Default Undertow server builder providing the following settings:
-   * - IO threads: 2 * number of CPU cores
-   * - Worker threads: number of CPU cores
+   *   - IO threads: 2 * number of CPU cores
+   *   - Worker threads: number of CPU cores
    */
-  def defaultBuilder: Undertow.Builder = Undertow.builder()
-    .setIoThreads(Runtime.getRuntime.availableProcessors * 2)
-    .setWorkerThreads(Runtime.getRuntime.availableProcessors)
+  def defaultBuilder: Undertow.Builder =
+    Undertow.builder().setIoThreads(Runtime.getRuntime.availableProcessors * 2)
+      .setWorkerThreads(Runtime.getRuntime.availableProcessors)
 }

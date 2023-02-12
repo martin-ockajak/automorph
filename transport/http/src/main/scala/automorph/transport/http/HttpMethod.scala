@@ -2,27 +2,29 @@ package automorph.transport.http
 
 /** HTTP request method. */
 sealed abstract class HttpMethod {
+
   /** HTTP method name. */
-  def name: String = toString.toUpperCase
+  def name: String =
+    toString.toUpperCase
 }
 
 object HttpMethod {
 
+  /** HTTP method values. */
+  lazy val values: Seq[HttpMethod] = Seq(Get, Head, Post, Put, Delete, Connect, Options, Trace, Patch)
+
   /**
    * Create HTTP method with specified name.
    *
-   * @param name HTTP method name
-   * @return HTTP method
+   * @param name
+   *   HTTP method name
+   * @return
+   *   HTTP method
    */
-  def valueOf(name: String): HttpMethod = {
+  def valueOf(name: String): HttpMethod =
     values.find(_.name == name.toUpperCase).getOrElse {
       throw new IllegalArgumentException(s"Invalid HTTP method: $name")
     }
-  }
-
-  /** HTTP method values. */
-  lazy val values: Seq[HttpMethod] =
-    Seq(Get, Head, Post, Put, Delete, Connect, Options, Trace, Patch)
 
   case object Get extends HttpMethod
   case object Head extends HttpMethod

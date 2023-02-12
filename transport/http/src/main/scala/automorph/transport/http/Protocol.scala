@@ -2,7 +2,9 @@ package automorph.transport.http
 
 /** Transport protocol. */
 sealed abstract private[automorph] class Protocol(val name: String) {
-  override def toString: String = name
+
+  override def toString: String =
+    name
 }
 
 /** Transport protocols. */

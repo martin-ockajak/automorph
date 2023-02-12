@@ -21,17 +21,24 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * The handler interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as HTTP response body.
  *
- * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
- * @see [[https://vertx.io Library documentation]]
- * @see [[https://vertx.io/docs/apidocs/index.html API]]
- * @constructor Creates an Vert.x HTTP handler with specified RPC request handler.
- * @param handler RPC request handler
- * @param mapException maps an exception to a corresponding HTTP status code
- * @tparam Effect effect type
+ * @see
+ *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see
+ *   [[https://vertx.io Library documentation]]
+ * @see
+ *   [[https://vertx.io/docs/apidocs/index.html API]]
+ * @constructor
+ *   Creates an Vert.x HTTP handler with specified RPC request handler.
+ * @param handler
+ *   RPC request handler
+ * @param mapException
+ *   maps an exception to a corresponding HTTP status code
+ * @tparam Effect
+ *   effect type
  */
 final case class VertxHttpEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
-  mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode
+  mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
 ) extends Handler[HttpServerRequest] with Logging with EndpointMessageTransport {
 
   private val statusOk = 200
@@ -51,18 +58,18 @@ final case class VertxHttpEndpoint[Effect[_]](
       log.receivedRequest(requestProperties)
 
       // Process the request
-      genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(_.fold(
-        error => sendErrorResponse(error, request, requestId, requestProperties),
-        result => {
-          // Send the response
-          val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
-          val statusCode = result.exception.map(mapException).getOrElse(statusOk)
-          sendResponse(responseBody, statusCode, result.context, request, requestId)
-        }
-      )).run
-    }.end().onFailure { error =>
-      sendErrorResponse(error, request, requestId, requestProperties)
-    }
+      genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
+        _.fold(
+          error => sendErrorResponse(error, request, requestId, requestProperties),
+          result => {
+            // Send the response
+            val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
+            val statusCode = result.exception.map(mapException).getOrElse(statusOk)
+            sendResponse(responseBody, statusCode, result.context, request, requestId)
+          },
+        )
+      ).run
+    }.end().onFailure(error => sendErrorResponse(error, request, requestId, requestProperties))
     ()
   }
 
@@ -70,7 +77,7 @@ final case class VertxHttpEndpoint[Effect[_]](
     error: Throwable,
     request: HttpServerRequest,
     requestId: String,
-    requestProperties: => Map[String, String]
+    requestProperties: => Map[String, String],
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
     val responseBody = error.description.toInputStream
@@ -82,37 +89,32 @@ final case class VertxHttpEndpoint[Effect[_]](
     statusCode: Int,
     responseContext: Option[Context],
     request: HttpServerRequest,
-    requestId: String
+    requestId: String,
   ): Unit = {
     // Log the response
     val responseStatusCode = responseContext.flatMap(_.statusCode).getOrElse(statusCode)
     lazy val responseProperties = ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(request),
-      "Status" -> responseStatusCode.toString
+      "Status" -> responseStatusCode.toString,
     )
     log.sendingResponse(responseProperties)
 
     // Send the response
     setResponseContext(request.response, responseContext)
-      .putHeader(HttpHeaders.CONTENT_TYPE, genericHandler.protocol.codec.mediaType)
-      .setStatusCode(statusCode)
-      .end(Buffer.buffer(responseBody.toArray)).onSuccess { _ =>
-        log.sentResponse(responseProperties)
-      }.onFailure { error =>
-        log.failedSendResponse(error, responseProperties)
+      .putHeader(HttpHeaders.CONTENT_TYPE, genericHandler.protocol.codec.mediaType).setStatusCode(statusCode)
+      .end(Buffer.buffer(responseBody.toArray)).onSuccess(_ => log.sentResponse(responseProperties)).onFailure {
+        error => log.failedSendResponse(error, responseProperties)
       }
     ()
   }
 
   private def getRequestContext(request: HttpServerRequest): Context = {
-    val headers = request.headers.entries.asScala.map { entry =>
-      entry.getKey -> entry.getValue
-    }.toSeq
+    val headers = request.headers.entries.asScala.map(entry => entry.getKey -> entry.getValue).toSeq
     HttpContext(
       transport = Some(Left(request).withRight[ServerWebSocket]),
       method = Some(HttpMethod.valueOf(request.method.name)),
-      headers = headers
+      headers = headers,
     ).url(request.absoluteURI)
   }
 
@@ -121,14 +123,13 @@ final case class VertxHttpEndpoint[Effect[_]](
       current.putHeader(name, value)
     }
 
-  private def getRequestProperties(request: HttpServerRequest, requestId: String): Map[String, String] = {
+  private def getRequestProperties(request: HttpServerRequest, requestId: String): Map[String, String] =
     ListMap(
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(request),
       "URL" -> request.absoluteURI,
-      "Method" -> request.method.name
+      "Method" -> request.method.name,
     )
-  }
 
   private def clientAddress(request: HttpServerRequest): String = {
     val forwardedFor = Option(request.headers().get(headerXForwardedFor))

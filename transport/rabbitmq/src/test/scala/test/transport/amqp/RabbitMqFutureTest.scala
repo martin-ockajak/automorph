@@ -16,10 +16,8 @@ class RabbitMqFutureTest extends ClientServerTest {
 
   type Effect[T] = Future[T]
   type Context = RabbitMqServer.Context
-
-  private lazy val defaultPort = 5672
-
   override lazy val system: FutureSystem = FutureSystem()
+  private lazy val defaultPort = 5672
 
   override def execute[T](effect: Effect[T]): T =
     await(effect)
@@ -29,7 +27,7 @@ class RabbitMqFutureTest extends ClientServerTest {
 
   override def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
-  ): Option[ClientMessageTransport[Effect, Context]] = {
+  ): Option[ClientMessageTransport[Effect, Context]] =
     Option.when(brokerPortTaken) {
       val url = new URI(s"amqp://localhost:$defaultPort")
       val (server, queue) = withRandomAvailablePort(port =>
@@ -45,14 +43,12 @@ class RabbitMqFutureTest extends ClientServerTest {
       clients += client
       client
     }
-  }
 
-  private def brokerPortTaken: Boolean = {
+  private def brokerPortTaken: Boolean =
     Try(new ServerSocket(defaultPort)) match {
       case Success(socket) =>
         socket.close()
         false
       case Failure(_) => true
     }
-  }
 }

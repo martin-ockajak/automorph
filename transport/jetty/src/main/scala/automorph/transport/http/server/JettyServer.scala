@@ -21,17 +21,28 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as HTTP response body.
  *
- * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
- * @see [[https://jetty.io Library documentation]]
- * @see [[https://www.javadoc.io/doc/io.jetty/jetty-core/latest/index.html API]]
- * @constructor Creates an Jetty HTTP server with specified RPC request handler.
- * @param handler RPC request handler
- * @param port port to listen on for HTTP connections
- * @param pathPrefix HTTP URL path prefix, only requests starting with this path prefix are allowed
- * @param methods allowed HTTP request methods
- * @param mapException maps an exception to a corresponding HTTP status code
- * @param threadPool thread pool
- * @tparam Effect effect type
+ * @see
+ *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see
+ *   [[https://jetty.io Library documentation]]
+ * @see
+ *   [[https://www.javadoc.io/doc/io.jetty/jetty-core/latest/index.html API]]
+ * @constructor
+ *   Creates an Jetty HTTP server with specified RPC request handler.
+ * @param handler
+ *   RPC request handler
+ * @param port
+ *   port to listen on for HTTP connections
+ * @param pathPrefix
+ *   HTTP URL path prefix, only requests starting with this path prefix are allowed
+ * @param methods
+ *   allowed HTTP request methods
+ * @param mapException
+ *   maps an exception to a corresponding HTTP status code
+ * @param threadPool
+ *   thread pool
+ * @tparam Effect
+ *   effect type
  */
 final case class JettyServer[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
@@ -40,13 +51,13 @@ final case class JettyServer[Effect[_]](
   methods: Iterable[HttpMethod] = HttpMethod.values,
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-  threadPool: ThreadPool = new QueuedThreadPool
+  threadPool: ThreadPool = new QueuedThreadPool,
 ) extends Logging with ServerMessageTransport[Effect] {
 
+  private lazy val jetty = createServer()
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system
   private val allowedMethods = methods.map(_.name).toSet
-
   private val methodFilter = new Filter {
 
     override def doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain): Unit = {
@@ -56,7 +67,6 @@ final case class JettyServer[Effect[_]](
       }
     }
   }
-  private lazy val jetty = createServer()
   start()
 
   override def close(): Effect[Unit] =
@@ -81,10 +91,7 @@ final case class JettyServer[Effect[_]](
     jetty.start()
     jetty.getConnectors.foreach { connector =>
       connector.getProtocols.asScala.foreach { protocol =>
-        logger.info("Listening for connections", ListMap(
-          "Protocol" -> protocol,
-          "Port" -> port.toString
-        ))
+        logger.info("Listening for connections", ListMap("Protocol" -> protocol, "Port" -> port.toString))
       }
     }
   }

@@ -17,7 +17,7 @@ class SttpClientHttpIdentityTest extends StandardHttpClientTest {
   type Context = SttpClient.Context
 
   override lazy val system: IdentitySystem = IdentitySystem()
-  
+
   override def execute[T](effect: Effect[T]): T =
     effect
 
