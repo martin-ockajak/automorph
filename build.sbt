@@ -122,7 +122,7 @@ lazy val scalazEffect = source(project, "system/scalaz-effect", spi, testStandar
   .settings(libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.4.0-M13")
 
 // Message codec
-val circeVersion = "0.14.1"
+val circeVersion = "0.14.3"
 lazy val circe = source(project, s"codec/circe", jsonrpc, webrpc, testPlugin % Test).settings(
   libraryDependencies ++=
     Seq("io.circe" %% "circe-parser" % circeVersion, "io.circe" %% "circe-generic" % circeVersion),
@@ -139,7 +139,7 @@ lazy val upickle = source(project, "codec/upickle", jsonrpc, webrpc, testPlugin 
     Seq("-Ymacro-expand:none", "-skip-packages automorph.codec.json.meta:automorph.codec.messagepack.meta"),
 )
 lazy val argonaut = source(project, "codec/argonaut", jsonrpc, webrpc, testPlugin % Test).settings(
-  libraryDependencies += "io.argonaut" %% "argonaut" % "6.3.7",
+  libraryDependencies += "io.argonaut" %% "argonaut" % "6.3.8",
   Compile / doc / scalacOptions ++= Seq("-Ymacro-expand:none", "-skip-packages automorph.codec.json.meta"),
 )
 
