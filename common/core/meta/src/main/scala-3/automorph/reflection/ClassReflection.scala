@@ -5,7 +5,8 @@ import scala.quoted.{quotes, Expr, Quotes, Type}
 /**
  * Data type reflection tools.
  *
- * @param q quotation context
+ * @param q
+ *   quotation context
  */
 final private[automorph] case class ClassReflection(q: Quotes):
 
@@ -44,8 +45,10 @@ final private[automorph] case class ClassReflection(q: Quotes):
   /**
    * Describes class methods within quoted context.
    *
-   * @param classType class type representation
-   * @return quoted class method descriptors
+   * @param classType
+   *   class type representation
+   * @return
+   *   quoted class method descriptors
    */
   def methods(classType: TypeRepr): Seq[RefMethod] =
     classType.typeSymbol.methodMembers.filterNot(_.isClassConstructor).flatMap(method(classType, _))

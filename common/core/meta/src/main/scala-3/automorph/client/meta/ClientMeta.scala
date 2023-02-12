@@ -12,10 +12,14 @@ import scala.util.{Failure, Try}
 /**
  * Client method bindings code generation.
  *
- * @tparam Node message node type
- * @tparam Codec message codec plugin type
- * @tparam Effect effect type
- * @tparam Context message context type
+ * @tparam Node
+ *   message node type
+ * @tparam Codec
+ *   message codec plugin type
+ * @tparam Effect
+ *   effect type
+ * @tparam Context
+ *   message context type
  */
 private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
 
@@ -25,20 +29,24 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * Creates a remote API proxy instance with RPC bindings for all valid public methods of the specified API type.
    *
    * A method is considered valid if it satisfies all of these conditions:
-   * - can be called at runtime
-   * - has no type parameters
-   * - returns the specified effect type
-   * - (if message context type is not Context.Empty) accepts the specified message context type as its last parameter
+   *   - can be called at runtime
+   *   - has no type parameters
+   *   - returns the specified effect type
+   *   - (if message context type is not Context.Empty) accepts the specified message context type as its last parameter
    *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
-   * the caller-supplied request context is passed to the underlying message transport plugin.
+   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting
+   * one the caller-supplied request context is passed to the underlying message transport plugin.
    *
    * RPC functions represented by bound API methods are invoked using their actual names.
    *
-   * @param mapName maps API method name to the invoked RPC function name
-   * @tparam Api API trait type (classes are not supported)
-   * @return RPC API proxy instance
-   * @throws java.lang.IllegalArgumentException if invalid public methods are found in the API type
+   * @param mapName
+   *   maps API method name to the invoked RPC function name
+   * @tparam Api
+   *   API trait type (classes are not supported)
+   * @return
+   *   RPC API proxy instance
+   * @throws java.lang.IllegalArgumentException
+   *   if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef]: Api =
     bind[Api](identity)
@@ -47,20 +55,25 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * Creates a remote API proxy instance with RPC bindings for all valid public methods of the specified API type.
    *
    * A method is considered valid if it satisfies all of these conditions:
-   * - can be called at runtime
-   * - has no type parameters
-   * - returns the specified effect type
-   * - (if message context type is not Context.Empty) accepts the specified message context type as its last parameter
+   *   - can be called at runtime
+   *   - has no type parameters
+   *   - returns the specified effect type
+   *   - (if message context type is not Context.Empty) accepts the specified message context type as its last parameter
    *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting one
-   * the caller-supplied request context is passed to the underlying message transport plugin.
+   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting
+   * one the caller-supplied request context is passed to the underlying message transport plugin.
    *
-   * RPC functions represented by bound API methods are invoked using their names transformed via the `mapName` function.
+   * RPC functions represented by bound API methods are invoked using their names transformed via the `mapName`
+   * function.
    *
-   * @param mapName maps API method name to the invoked RPC function name
-   * @tparam Api remote API trait type (classes are not supported)
-   * @return remote API proxy instance
-   * @throws java.lang.IllegalArgumentException if invalid public methods are found in the API type
+   * @param mapName
+   *   maps API method name to the invoked RPC function name
+   * @tparam Api
+   *   remote API trait type (classes are not supported)
+   * @return
+   *   remote API proxy instance
+   * @throws java.lang.IllegalArgumentException
+   *   if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef](mapName: String => String): Api =
     // Generate API method bindings
@@ -107,12 +120,15 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
   /**
    * Creates a remote API function call proxy.
    *
-   * Uses the remote function name and arguments to send an RPC request and
-   * extracts a result value or an error from the received RPC response.
+   * Uses the remote function name and arguments to send an RPC request and extracts a result value or an error from the
+   * received RPC response.
    *
-   * @param function remote function name
-   * @tparam Result result type
-   * @return specified remote function call proxy
+   * @param function
+   *   remote function name
+   * @tparam Result
+   *   result type
+   * @return
+   *   specified remote function call proxy
    */
   inline def call[Result](function: String): RemoteCall[Node, Codec, Effect, Context, Result] =
     RemoteCall(function, protocol.codec, performCall)

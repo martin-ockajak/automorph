@@ -9,6 +9,8 @@ object Enum:
     case Zero
     case One
 
-  def fromOrdinal(ordinal: Int): Enum = Enum.fromOrdinal(ordinal)
+  def fromOrdinal(ordinal: Int): Enum =
+    Enum.fromOrdinal(ordinal)
 
-  def toOrdinal(value: Enum): Int = value.ordinal
+  def toOrdinal(value: Enum): Int =
+    value.ordinal

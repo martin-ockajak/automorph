@@ -10,7 +10,8 @@ private[automorph] object MethodReflection:
   /**
    * Method RPC function quoted expression converter.
    *
-   * @return method quoted expression converter
+   * @return
+   *   method quoted expression converter
    */
   given functionToExpr: ToExpr[RpcFunction] =
     new ToExpr[RpcFunction]:
@@ -29,10 +30,14 @@ private[automorph] object MethodReflection:
   /**
    * Detects valid API methods in an API type.
    *
-   * @param ref reflection
-   * @tparam ApiType API type
-   * @tparam Effect effect type
-   * @return valid method descriptors or error messages by method name
+   * @param ref
+   *   reflection
+   * @tparam ApiType
+   *   API type
+   * @tparam Effect
+   *   effect type
+   * @return
+   *   valid method descriptors or error messages by method name
    */
   def apiMethods[ApiType: Type, Effect[_]: Type](ref: ClassReflection): Seq[Either[String, ref.RefMethod]] =
     import ref.q.reflect.TypeRepr
@@ -53,10 +58,14 @@ private[automorph] object MethodReflection:
   /**
    * Determines whether a method accepts request context as its last parameter.
    *
-   * @param ref reflection context
-   * @param method method descriptor
-   * @tparam Context message context type
-   * @return true if the method accepts request context as its last parameter, false otherwise
+   * @param ref
+   *   reflection context
+   * @param method
+   *   method descriptor
+   * @tparam Context
+   *   message context type
+   * @return
+   *   true if the method accepts request context as its last parameter, false otherwise
    */
   def acceptsContext[Context: Type](ref: ClassReflection)(method: ref.RefMethod): Boolean =
     method.parameters.flatten.lastOption.exists { parameter =>
@@ -66,11 +75,16 @@ private[automorph] object MethodReflection:
   /**
    * Extracts result type wrapped in a contextual type.
    *
-   * @param q quotation context
-   * @param someType wrapped type
-   * @tparam Context message context type
-   * @tparam Contextual contextual result type
-   * @return contextual result type if applicable
+   * @param q
+   *   quotation context
+   * @param someType
+   *   wrapped type
+   * @tparam Context
+   *   message context type
+   * @tparam Contextual
+   *   contextual result type
+   * @return
+   *   contextual result type if applicable
    */
   def contextualResult[Context: Type, Contextual[_, _]: Type](q: Quotes)(
     someType: q.reflect.TypeRepr
@@ -87,10 +101,14 @@ private[automorph] object MethodReflection:
   /**
    * Extracts type wrapped in a wrapper type.
    *
-   * @param q quotation context
-   * @param someType wrapped type
-   * @tparam Wrapper wrapper type
-   * @return wrapped type
+   * @param q
+   *   quotation context
+   * @param someType
+   *   wrapped type
+   * @tparam Wrapper
+   *   wrapper type
+   * @return
+   *   wrapped type
    */
   def unwrapType[Wrapper[_]: Type](q: Quotes)(someType: q.reflect.TypeRepr): q.reflect.TypeRepr =
     import q.reflect.{AppliedType, ParamRef, TypeRef, TypeRepr}
@@ -119,10 +137,14 @@ private[automorph] object MethodReflection:
   /**
    * Creates a method signature.
    *
-   * @param ref reflection context
-   * @param method method descriptor
-   * @tparam ApiType API type
-   * @return method description
+   * @param ref
+   *   reflection context
+   * @param method
+   *   method descriptor
+   * @tparam ApiType
+   *   API type
+   * @return
+   *   method description
    */
   def signature[ApiType: Type](ref: ClassReflection)(method: ref.RefMethod): String =
     import ref.q.reflect.{Printer, TypeRepr}
@@ -132,12 +154,18 @@ private[automorph] object MethodReflection:
   /**
    * Creates a method call term.
    *
-   * @param quotes quototation context
-   * @param instance instance term
-   * @param methodName method name
-   * @param typeArguments method type argument types
-   * @param arguments method argument terms
-   * @return instance method call term
+   * @param quotes
+   *   quototation context
+   * @param instance
+   *   instance term
+   * @param methodName
+   *   method name
+   * @param typeArguments
+   *   method type argument types
+   * @param arguments
+   *   method argument terms
+   * @return
+   *   instance method call term
    */
   def call(
     quotes: Quotes,
@@ -152,11 +180,16 @@ private[automorph] object MethodReflection:
   /**
    * Determines whether a method is a valid API method.
    *
-   * @param ref reflection context
-   * @param method method descriptor
-   * @tparam ApiType API type
-   * @tparam Effect effect type
-   * @return valid API method or an error message
+   * @param ref
+   *   reflection context
+   * @param method
+   *   method descriptor
+   * @tparam ApiType
+   *   API type
+   * @tparam Effect
+   *   effect type
+   * @return
+   *   valid API method or an error message
    */
   private def validateApiMethod[ApiType: Type, Effect[_]: Type](ref: ClassReflection)(
     method: ref.RefMethod
@@ -186,9 +219,12 @@ private[automorph] object MethodReflection:
   /**
    * Determines result type if the specified type is a lambda type.
    *
-   * @param q quotation context
-   * @param someType some type
-   * @return result type
+   * @param q
+   *   quotation context
+   * @param someType
+   *   some type
+   * @return
+   *   result type
    */
   private def resultType(q: Quotes)(someType: q.reflect.TypeRepr): q.reflect.TypeRepr =
     someType.dealias match
