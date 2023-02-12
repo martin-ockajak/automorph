@@ -122,7 +122,7 @@ lazy val scalazEffect = source(project, "system/scalaz-effect", spi, testStandar
   .settings(libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.4.0-M13")
 
 // Message codec
-val circeVersion = "0.14.4"
+val circeVersion = "0.14.3"
 lazy val circe = source(project, s"codec/circe", jsonrpc, webrpc, testPlugin % Test).settings(
   libraryDependencies ++=
     Seq("io.circe" %% "circe-parser" % circeVersion, "io.circe" %% "circe-generic" % circeVersion),
@@ -146,12 +146,13 @@ lazy val argonaut = source(project, "codec/argonaut", jsonrpc, webrpc, testPlugi
 // Message transport
 lazy val http = source(project, "transport/http", jsonrpc)
 lazy val amqp = source(project, "transport/amqp")
-val sttpVersion = "3.3.15"
+val sttpVersion = "3.8.11"
+val sttpHttpClientVersion = "3.5.2"
 lazy val sttp = source(project, "transport/sttp", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
-    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpVersion % Test,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
+    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion % Test,
   ),
   Compile / doc / scalacOptions ++= Seq("-skip-packages sttp"),
 //  apiMappings += (
@@ -192,7 +193,7 @@ lazy val finagle = source(project, "transport/finagle", core, http, testStandard
 // Miscellaneous
 lazy val default = project.dependsOn(jsonrpc, circe, standard, undertow, testStandard % Test).settings(
   name := s"$projectName-default",
-  libraryDependencies += "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpVersion,
+  libraryDependencies += "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion,
   Compile / doc / scalacOptions ++= Seq("-Ymacro-expand:none", "-skip-packages automorph.meta"),
 )
 lazy val examples = source(project, "examples", default, upickle, zio, testPlugin % Test).settings(
