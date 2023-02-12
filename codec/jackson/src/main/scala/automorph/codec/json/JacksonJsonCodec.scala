@@ -7,9 +7,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.node.{NumericNode, ObjectNode}
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
-import com.fasterxml.jackson.databind.{
-  DeserializationContext, DeserializationFeature, JsonNode, ObjectMapper, SerializerProvider,
-}
+import com.fasterxml.jackson.databind.{DeserializationContext, DeserializationFeature, JsonNode, ObjectMapper, SerializerProvider}
 import com.fasterxml.jackson.module.scala.{ClassTagExtensions, DefaultScalaModule}
 import java.io.InputStream
 import scala.runtime.BoxedUnit
@@ -41,19 +39,20 @@ final case class JacksonJsonCodec(objectMapper: ObjectMapper = JacksonJsonCodec.
 
   override def text(node: JsonNode): String =
     objectMapper.writerWithDefaultPrettyPrinter.writeValueAsString(node)
-
 }
 
 object JacksonJsonCodec {
 
   /** Message node type. */
   type Node = JsonNode
+
   /** Default Jackson object mapper. */
   lazy val defaultMapper: ObjectMapper = (new ObjectMapper() with ClassTagExtensions).registerModule(DefaultScalaModule)
     .registerModule(unitModule).registerModule(bigDecimalModule).registerModule(JacksonJsonRpc.module)
     .registerModule(JacksonWebRpc.module).configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
     .configure(DeserializationFeature.FAIL_ON_NULL_CREATOR_PROPERTIES, true)
     .setSerializationInclusion(Include.NON_ABSENT).setDefaultLeniency(false)
+
   private lazy val unitModule = new SimpleModule().addSerializer(
     classOf[BoxedUnit],
     new StdSerializer[BoxedUnit](classOf[BoxedUnit]) {
@@ -73,9 +72,9 @@ object JacksonJsonCodec {
           case _: ObjectNode => BoxedUnit.UNIT
           case _ => throw new JsonParseException(parser, "Invalid unit value", parser.getCurrentLocation)
         }
-
     },
   )
+
   private lazy val bigDecimalModule = new SimpleModule().addSerializer(
     classOf[BigDecimal],
     new StdSerializer[BigDecimal](classOf[BigDecimal]) {
@@ -95,7 +94,6 @@ object JacksonJsonCodec {
             }.get
           case _ => throw new JsonParseException(parser, "Invalid numeric value", parser.getCurrentLocation)
         }
-
     },
   )
 }
