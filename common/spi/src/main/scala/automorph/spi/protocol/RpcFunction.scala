@@ -21,8 +21,7 @@ final case class RpcFunction(
 
   /** Function signature. */
   lazy val signature: String = {
-    val parametersText =
-      s"(${parameters.map(parameter => s"${parameter.name}: ${parameter.`type`}").mkString(", ")})"
+    val parametersText = s"(${parameters.map(parameter => s"${parameter.name}: ${parameter.`type`}").mkString(", ")})"
     s"$name$parametersText: $resultType"
   }
 }

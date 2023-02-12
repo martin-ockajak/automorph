@@ -20,6 +20,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
 
   /** Protocol-specific RPC message metadata. */
   type Metadata
+
   /** Message codec plugin. */
   val codec: Codec
 

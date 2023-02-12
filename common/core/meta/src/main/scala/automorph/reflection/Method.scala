@@ -5,13 +5,20 @@ import automorph.spi.protocol.{RpcFunction, RpcParameter}
 /**
  * Method descriptor.
  *
- * @param name name
- * @param resultType result type
- * @param parameters parameters
- * @param typeParameters type parameters
- * @param public true if this method is publicly accessible
- * @param available true if it possible to call this method
- * @param documentation documentation (Scaladoc)
+ * @param name
+ *   name
+ * @param resultType
+ *   result type
+ * @param parameters
+ *   parameters
+ * @param typeParameters
+ *   type parameters
+ * @param public
+ *   true if this method is publicly accessible
+ * @param available
+ *   true if it possible to call this method
+ * @param documentation
+ *   documentation (Scaladoc)
  */
 final private[automorph] case class Method(
   name: String,
@@ -47,8 +54,11 @@ final private[automorph] case class Method(
 /**
  * Method parameter descriptor.
  *
- * @param name name
- * @param dataType type
- * @param contextual true if this parameter is implicit
+ * @param name
+ *   name
+ * @param dataType
+ *   type
+ * @param contextual
+ *   true if this parameter is implicit
  */
 final private[automorph] case class Parameter(name: String, dataType: String, contextual: Boolean)

@@ -3,7 +3,8 @@ package automorph
 /**
  * Empty RPC message context.
  *
- * @tparam T empty RPC message context value type
+ * @tparam T
+ *   empty RPC message context value type
  */
 final case class EmptyContext[T]()
 
