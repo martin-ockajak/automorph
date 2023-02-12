@@ -9,7 +9,7 @@ val siteUrl = s"https://$projectName.$projectRoot"
 
 // Metadata
 ThisBuild / homepage := Some(url(siteUrl))
-ThisBuild / licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
+ThisBuild / licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / description := projectDescription
 ThisBuild / organization := s"$projectRoot.$projectName"
 ThisBuild / organizationName := projectName
