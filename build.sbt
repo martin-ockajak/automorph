@@ -108,9 +108,7 @@ lazy val spi = source(project, "common/spi").settings(
   }
 )
 lazy val util = source(project, "common/util", spi).settings(
-  libraryDependencies ++= Seq(
-    "org.slf4j" % "slf4j-api" % "1.7.33"
-  )
+  libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.33"
 )
 lazy val coreMeta = source(project, "common/core/meta", spi, util).settings(
   Compile / doc / scalacOptions ++= Seq(
@@ -139,25 +137,17 @@ lazy val webrpc = source(project, "protocol/webrpc", webrpcMeta, openapi, util)
 // Effect system
 lazy val standard = source(project, "system/standard", core, http, testCore % Test, testHttp % Test)
 lazy val zio = source(project, "system/zio", spi, testStandard % Test).settings(
-  libraryDependencies ++= Seq(
-    "dev.zio" %% "zio" % "1.0.12"
-  ),
+  libraryDependencies += "dev.zio" %% "zio" % "1.0.12",
   Compile / doc / scalacOptions ++= Seq("-skip-packages zio")
 )
 lazy val monix = source(project, "system/monix", spi, testStandard % Test).settings(
-  libraryDependencies ++= Seq(
-    "io.monix" %% "monix-eval" % "3.4.0"
-  )
+  libraryDependencies += "io.monix" %% "monix-eval" % "3.4.0"
 )
 lazy val catsEffect = source(project, "system/cats-effect", spi, testStandard % Test).settings(
-  libraryDependencies ++= Seq(
-    "org.typelevel" %% "cats-effect" % "3.2.9"
-  )
+  libraryDependencies += "org.typelevel" %% "cats-effect" % "3.2.9"
 )
 lazy val scalazEffect = source(project, "system/scalaz-effect", spi, testStandard % Test).settings(
-  libraryDependencies ++= Seq(
-    "org.scalaz" %% "scalaz-effect" % "7.4.0-M8"
-  )
+  libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.4.0-M8"
 )
 
 // Message codec
@@ -174,24 +164,18 @@ lazy val circe = source(project, s"codec/circe", jsonrpc, webrpc, testPlugin % T
 )
 val jacksonVersion = "2.13.1"
 lazy val jackson = source(project, "codec/jackson", jsonrpc, webrpc, testPlugin % Test).settings(
-  libraryDependencies ++= Seq(
-    ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion).cross(CrossVersion.for3Use2_13)
-  )
+  libraryDependencies += ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion).cross(CrossVersion.for3Use2_13))
 )
 
 lazy val upickle = source(project, "codec/upickle", jsonrpc, webrpc, testPlugin % Test).settings(
-  libraryDependencies ++= Seq(
-    "com.lihaoyi" %% "upickle" % "1.4.4"
-  ),
+  libraryDependencies += "com.lihaoyi" %% "upickle" % "1.4.4",
   Compile / doc / scalacOptions ++= Seq(
     "-Ymacro-expand:none",
     "-skip-packages automorph.codec.json.meta:automorph.codec.messagepack.meta"
   )
 )
 lazy val argonaut = source(project, "codec/argonaut", jsonrpc, webrpc, testPlugin % Test).settings(
-  libraryDependencies ++= Seq(
-    "io.argonaut" %% "argonaut" % "6.3.7"
-  ),
+  libraryDependencies += "io.argonaut" %% "argonaut" % "6.3.7",
   Compile / doc / scalacOptions ++= Seq(
     "-Ymacro-expand:none",
     "-skip-packages automorph.codec.json.meta"
@@ -215,21 +199,15 @@ lazy val sttp = source(project, "transport/sttp", core, http, testStandard % Tes
 //  )
 )
 lazy val rabbitmq = source(project, "transport/rabbitmq", amqp, core, standard, testCore % Test, testAmqp % Test).settings(
-  libraryDependencies ++= Seq(
-    "com.rabbitmq" % "amqp-client" % "5.14.1"
-  )
+  libraryDependencies += "com.rabbitmq" % "amqp-client" % "5.14.1"
 )
 
 // Server
 lazy val undertow = source(project, "transport/undertow", core, http, testStandard % Test).settings(
-  libraryDependencies ++= Seq(
-    "io.undertow" % "undertow-core" % "2.2.14.Final"
-  )
+  libraryDependencies += "io.undertow" % "undertow-core" % "2.2.14.Final"
 )
 lazy val vertx = source(project, "transport/vertx", core, http, testStandard % Test).settings(
-  libraryDependencies ++= Seq(
-    "io.vertx" % "vertx-core" % "4.2.4"
-  )
+  libraryDependencies += "io.vertx" % "vertx-core" % "4.2.4"
 )
 val jettyVersion = "11.0.7"
 lazy val jetty = source(project, "transport/jetty", core, http, testStandard % Test).settings(
@@ -246,9 +224,7 @@ lazy val akkaHttp = source(project, "transport/akka-http", core, http, testStand
   )
 )
 lazy val finagle = source(project, "transport/finagle", core, http, testStandard % Test).settings(
-  libraryDependencies ++= Seq(
-    ("com.twitter" % "finagle-http" % "22.1.0" exclude("org.scala-lang.modules", "scala-collection-compat_2.13")).cross(CrossVersion.for3Use2_13)
-  )
+  libraryDependencies += ("com.twitter" % "finagle-http" % "22.1.0" exclude("org.scala-lang.modules", "scala-collection-compat_2.13")).cross(CrossVersion.for3Use2_13)
 )
 
 // Miscellaneous
@@ -256,18 +232,14 @@ lazy val default = project.dependsOn(
   jsonrpc, circe, standard, undertow, testStandard % Test
 ).settings(
   name := s"$projectName-default",
-  libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpVersion
-  ),
+  libraryDependencies += "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpVersion,
   Compile / doc / scalacOptions ++= Seq(
     "-Ymacro-expand:none",
     "-skip-packages automorph.meta"
   )
 )
 lazy val examples = source(project, "examples", default, upickle, zio, testPlugin % Test).settings(
-  libraryDependencies ++= Seq(
-    "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test
-  ),
+  libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test,
   Compile / doc / scalacOptions ++= Seq("-skip-packages examples"),
   Compile / scalaSource := baseDirectory.value / "project" / "src" / "main" / "scala",
   Test / scalaSource := (CrossVersion.partialVersion(scalaVersion.value) match {
@@ -295,9 +267,7 @@ lazy val testBase = source(project, "test/base", spi).settings(
   ),
 )
 lazy val testPlugin = source(project, "test/plugin", testBase).settings(
-  libraryDependencies ++= Seq(
-    "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion
-  ),
+  libraryDependencies += "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
 )
 lazy val testCore = source(project, "test/core", testPlugin, core, http, circe, jackson, upickle, argonaut)
 lazy val testHttp = source(project, "test/http", testBase, http)
@@ -458,4 +428,3 @@ ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
 ThisBuild / versionScheme := Some("semver-spec")
 credentials += Credentials("GnuPG Key ID", "gpg", "1735B0FD9A286C8696EB5E6117F23799295F187F", "")
 credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
-
