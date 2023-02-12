@@ -117,9 +117,9 @@ lazy val zio = source(project, "system/zio", spi, testStandard % Test).settings(
 lazy val monix = source(project, "system/monix", spi, testStandard % Test)
   .settings(libraryDependencies += "io.monix" %% "monix-eval" % "3.4.0")
 lazy val catsEffect = source(project, "system/cats-effect", spi, testStandard % Test)
-  .settings(libraryDependencies += "org.typelevel" %% "cats-effect" % "3.2.9")
+  .settings(libraryDependencies += "org.typelevel" %% "cats-effect" % "3.4.6")
 lazy val scalazEffect = source(project, "system/scalaz-effect", spi, testStandard % Test)
-  .settings(libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.4.0-M8")
+  .settings(libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.4.0-M13")
 
 // Message codec
 val circeVersion = "0.14.1"
