@@ -18,9 +18,6 @@ class UrlClientHttpIdentityTest extends ClientServerTest {
 
   override lazy val system: IdentitySystem = IdentitySystem()
 
-  override def execute[T](effect: Effect[T]): T =
-    effect
-
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
@@ -34,4 +31,7 @@ class UrlClientHttpIdentityTest extends ClientServerTest {
     clients += client
     Some(client)
   }
+
+  override def execute[T](effect: Effect[T]): T =
+    effect
 }

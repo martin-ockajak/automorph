@@ -9,8 +9,10 @@ import scala.util.Try
  *
  * Represents direct use of computed values without wrapping them in an effect.
  *
- * @see [[https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem$$Identity.html Effect type]]
- * @constructor Creates a synchronous effect system plugin using identity as an effect type.
+ * @see
+ *   [[https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem$$Identity.html Effect type]]
+ * @constructor
+ *   Creates a synchronous effect system plugin using identity as an effect type.
  */
 final case class IdentitySystem() extends EffectSystem[Identity] {
 
@@ -38,14 +40,16 @@ object IdentitySystem {
   /**
    * Effect type.
    *
-   * @tparam T value type
+   * @tparam T
+   *   value type
    */
   type Effect[T] = Identity[T]
 
   /**
    * Identity type.
    *
-   * @tparam T value type
+   * @tparam T
+   *   value type
    */
   type Identity[T] = T
 }

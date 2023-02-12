@@ -13,8 +13,7 @@ class LocalMonixTest extends ProtocolCodecTest {
   type Effect[T] = Task[T]
   type Context = String
 
-  override lazy val system: EffectSystem[Effect] =
-    MonixSystem()
+  override lazy val system: EffectSystem[Effect] = MonixSystem()
 
   override def execute[T](effect: Effect[T]): T =
     effect.runSyncUnsafe(Duration.Inf)

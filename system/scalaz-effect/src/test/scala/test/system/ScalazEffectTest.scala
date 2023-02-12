@@ -7,6 +7,7 @@ import scala.util.Try
 import scalaz.effect.IO
 
 class ScalazEffectTest extends EffectSystemTest[IO] {
+
   lazy val system: EffectSystem[IO] = ScalazEffectSystem()
 
   def execute[T](effect: IO[T]): Either[Throwable, T] =

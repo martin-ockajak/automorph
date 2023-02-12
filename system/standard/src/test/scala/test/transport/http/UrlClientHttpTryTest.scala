@@ -18,9 +18,6 @@ class UrlClientHttpTryTest extends ClientServerTest {
 
   override lazy val system: TrySystem = TrySystem()
 
-  override def execute[T](effect: Effect[T]): T =
-    effect.get
-
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
@@ -34,4 +31,7 @@ class UrlClientHttpTryTest extends ClientServerTest {
     clients += client
     Some(client)
   }
+
+  override def execute[T](effect: Effect[T]): T =
+    effect.get
 }

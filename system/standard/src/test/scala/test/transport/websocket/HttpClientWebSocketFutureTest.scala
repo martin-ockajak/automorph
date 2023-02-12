@@ -20,9 +20,6 @@ class HttpClientWebSocketFutureTest extends ClientServerTest {
 
   override lazy val system: FutureSystem = FutureSystem()
 
-  override def execute[T](effect: Effect[T]): T =
-    await(effect)
-
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
@@ -36,4 +33,7 @@ class HttpClientWebSocketFutureTest extends ClientServerTest {
     clients += client
     Some(client)
   }
+
+  override def execute[T](effect: Effect[T]): T =
+    await(effect)
 }

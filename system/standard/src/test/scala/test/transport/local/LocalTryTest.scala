@@ -11,8 +11,7 @@ class LocalTryTest extends ProtocolCodecTest {
   type Effect[T] = Try[T]
   type Context = Seq[Int]
 
-  override lazy val system: EffectSystem[Effect] =
-    TrySystem()
+  override lazy val system: EffectSystem[Effect] = TrySystem()
 
   override def execute[T](effect: Effect[T]): T =
     effect.get

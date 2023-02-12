@@ -12,8 +12,7 @@ class LocalFutureTest extends ProtocolCodecTest {
   type Effect[T] = Future[T]
   type Context = Map[String, Double]
 
-  override lazy val system: EffectSystem[Effect] =
-    FutureSystem()
+  override lazy val system: EffectSystem[Effect] = FutureSystem()
 
   override def execute[T](effect: Effect[T]): T =
     await(effect)

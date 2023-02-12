@@ -6,8 +6,7 @@ import scala.util.Try
 
 class TryTest extends EffectSystemTest[Try] {
 
-  lazy val system: EffectSystem[Try] =
-    TrySystem()
+  lazy val system: EffectSystem[Try] = TrySystem()
 
   def execute[T](effect: Try[T]): Either[Throwable, T] =
     effect.toEither

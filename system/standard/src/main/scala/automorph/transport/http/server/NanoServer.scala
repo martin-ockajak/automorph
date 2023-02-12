@@ -23,18 +23,30 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as HTTP response body.
  *
- * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
- * @see [[https://github.com/NanoHttpd/nanohttpd Library documentation]]
- * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
- * @constructor Creates a NanoHTTPD HTTP & WebSocket server with specified RPC request handler.
- * @param handler RPC request handler
- * @param port port to listen on for HTTP connections
- * @param pathPrefix HTTP URL path prefix, only requests starting with this path prefix are allowed
- * @param methods allowed HTTP request methods
- * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
- * @param mapException maps an exception to a corresponding HTTP status code
- * @param executeEffect executes specified effect synchronously
- * @tparam Effect effect type
+ * @see
+ *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+ * @see
+ *   [[https://github.com/NanoHttpd/nanohttpd Library documentation]]
+ * @see
+ *   [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
+ * @constructor
+ *   Creates a NanoHTTPD HTTP & WebSocket server with specified RPC request handler.
+ * @param handler
+ *   RPC request handler
+ * @param port
+ *   port to listen on for HTTP connections
+ * @param pathPrefix
+ *   HTTP URL path prefix, only requests starting with this path prefix are allowed
+ * @param methods
+ *   allowed HTTP request methods
+ * @param webSocket
+ *   support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
+ * @param mapException
+ *   maps an exception to a corresponding HTTP status code
+ * @param executeEffect
+ *   executes specified effect synchronously
+ * @tparam Effect
+ *   effect type
  */
 final case class NanoServer[Effect[_]] private (
   handler: Types.HandlerAnyCodec[Effect, Context],
@@ -43,7 +55,7 @@ final case class NanoServer[Effect[_]] private (
   methods: Iterable[HttpMethod],
   webSocket: Boolean,
   mapException: Throwable => Int,
-  executeEffect: Execute[Effect]
+  executeEffect: Execute[Effect],
 ) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect] {
 
   private val headerXForwardedFor = "X-Forwarded-For"
@@ -58,18 +70,17 @@ final case class NanoServer[Effect[_]] private (
   override def start(): Unit = {
     super.start()
     (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
-      logger.info("Listening for connections", ListMap(
-        "Protocol" -> protocol,
-        "Port" -> port.toString
-      ))
+      logger.info("Listening for connections", ListMap("Protocol" -> protocol, "Port" -> port.toString))
     }
   }
 
   /**
    * Serve HTTP session.
    *
-   * @param session HTTP session
-   * @return HTTP Response
+   * @param session
+   *   HTTP session
+   * @return
+   *   HTTP Response
    */
   override protected def serveHttp(session: IHTTPSession): Response = {
     // Validate URL path
@@ -97,55 +108,60 @@ final case class NanoServer[Effect[_]] private (
   /**
    * Serve WebSocket handshake session.
    *
-   * @param session WebSocket handshake session
-   * @return WebSocket handler
+   * @param session
+   *   WebSocket handshake session
+   * @return
+   *   WebSocket handler
    */
-  override protected def openWebSocket(session: IHTTPSession): WebSocket = new WebSocket(session) {
+  override protected def openWebSocket(session: IHTTPSession): WebSocket =
+    new WebSocket(session) {
 
-    override protected def onOpen(): Unit =
-      if (!webSocket) {
-        this.close(CloseCode.PolicyViolation, "WebSocket support disabled", true)
+      override protected def onOpen(): Unit =
+        if (!webSocket) { this.close(CloseCode.PolicyViolation, "WebSocket support disabled", true) }
+
+      override protected def onClose(code: WebSocketFrame.CloseCode, reason: String, initiatedByRemote: Boolean): Unit =
+        ()
+
+      protected def onMessage(frame: WebSocketFrame): Unit = {
+        // Receive the request
+        val protocol = Protocol.WebSocket
+        val requestId = Random.id
+        lazy val requestProperties = getRequestProperties(session, protocol, requestId)
+        val request = frame.getBinaryPayload.toInputStream
+        val response = handleRequest(request, session, protocol, requestProperties, requestId)
+
+        // Handler the request
+        send(response.getData.toArray)
       }
 
-    override protected def onClose(code: WebSocketFrame.CloseCode, reason: String, initiatedByRemote: Boolean): Unit = ()
+      override protected def onPong(pong: WebSocketFrame): Unit =
+        ()
 
-    protected def onMessage(frame: WebSocketFrame): Unit = {
-      // Receive the request
-      val protocol = Protocol.WebSocket
-      val requestId = Random.id
-      lazy val requestProperties = getRequestProperties(session, protocol, requestId)
-      val request = frame.getBinaryPayload.toInputStream
-      val response = handleRequest(request, session, protocol, requestProperties, requestId)
-
-      // Handler the request
-      send(response.getData.toArray)
+      override protected def onException(error: IOException): Unit =
+        log.failedReceiveRequest(error, Map(), Protocol.WebSocket.name)
     }
-
-    override protected def onPong(pong: WebSocketFrame): Unit = ()
-
-    override protected def onException(error: IOException): Unit =
-      log.failedReceiveRequest(error, Map(), Protocol.WebSocket.name)
-  }
 
   private def handleRequest(
     requestBody: InputStream,
     session: IHTTPSession,
     protocol: Protocol,
     requestProperties: => Map[String, String],
-    requestId: String
+    requestId: String,
   ): Response = {
     log.receivedRequest(requestProperties, protocol.name)
 
     // Process the request
-    executeEffect(genericHandler.processRequest(requestBody, getRequestContext(session), requestId).either.map(_.fold(
-      error => sendErrorResponse(error, session, protocol, requestId, requestProperties),
-      result => {
-        // Send the response
-        val response = result.responseBody.getOrElse(Array[Byte]().toInputStream)
-        val status = result.exception.map(mapException).map(Status.lookup).getOrElse(Status.OK)
-        createResponse(response, status, result.context, session, protocol, requestId)
-      }
-    )))
+    executeEffect(genericHandler.processRequest(requestBody, getRequestContext(session), requestId).either.map(
+      _.fold(
+        error => sendErrorResponse(error, session, protocol, requestId, requestProperties),
+        result => {
+          // Send the response
+          val response = result.responseBody.getOrElse(Array[Byte]().toInputStream)
+          val status = result.exception.map(mapException).map(Status.lookup).getOrElse(Status.OK)
+          createResponse(response, status, result.context, session, protocol, requestId)
+        },
+      )
+    ))
   }
 
   private def sendErrorResponse(
@@ -153,7 +169,7 @@ final case class NanoServer[Effect[_]] private (
     session: IHTTPSession,
     protocol: Protocol,
     requestId: String,
-    requestProperties: => Map[String, String]
+    requestProperties: => Map[String, String],
   ) = {
     log.failedProcessRequest(error, requestProperties, protocol.name)
     val message = error.description.toInputStream
@@ -166,17 +182,15 @@ final case class NanoServer[Effect[_]] private (
     responseContext: Option[Context],
     session: IHTTPSession,
     protocol: Protocol,
-    requestId: String
+    requestId: String,
   ): Response = {
     // Log the response
     val responseStatus = responseContext.flatMap(_.statusCode.map(Status.lookup)).getOrElse(status)
-    lazy val responseProperties = Map(
-      LogProperties.requestId -> requestId,
-      "Client" -> clientAddress(session)
-    ) ++ (protocol match {
-      case Protocol.Http => Some("Status" -> responseStatus.toString)
-      case _ => None
-    })
+    lazy val responseProperties = Map(LogProperties.requestId -> requestId, "Client" -> clientAddress(session)) ++
+      (protocol match {
+        case Protocol.Http => Some("Status" -> responseStatus.toString)
+        case _ => None
+      })
     log.sendingResponse(responseProperties, protocol.name)
 
     // Create the response
@@ -192,21 +206,18 @@ final case class NanoServer[Effect[_]] private (
     val http = HttpContext(
       transport = Some(session),
       method = Some(HttpMethod.valueOf(session.getMethod.name)),
-      headers = session.getHeaders.asScala.toSeq
+      headers = session.getHeaders.asScala.toSeq,
     ).url(session.getUri).scheme("http").host("localhost").port(port)
     Option(session.getQueryParameterString).map(http.query).getOrElse(http)
   }
 
-  private def setResponseContext(response: Response, responseContext: Option[Context]): Unit = {
-    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) =>
-      response.addHeader(name, value)
-    }
-  }
+  private def setResponseContext(response: Response, responseContext: Option[Context]): Unit =
+    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) => response.addHeader(name, value) }
 
   private def getRequestProperties(
     session: IHTTPSession,
     protocol: Protocol,
-    requestId: String
+    requestId: String,
   ): Map[String, String] = {
     val query = Option(session.getQueryParameterString).filter(_.nonEmpty).map("?" + _).getOrElse("")
     val url = s"${session.getUri}$query"
@@ -214,10 +225,8 @@ final case class NanoServer[Effect[_]] private (
       LogProperties.requestId -> requestId,
       "Client" -> clientAddress(session),
       "Protocol" -> protocol.toString,
-      "URL" -> url
-    ) ++ Option.when(protocol == Protocol.Http)(
-      "Method" -> session.getMethod.toString
-    )
+      "URL" -> url,
+    ) ++ Option.when(protocol == Protocol.Http)("Method" -> session.getMethod.toString)
   }
 
   private def clientAddress(session: IHTTPSession): String = {
@@ -238,7 +247,8 @@ object NanoServer {
   /**
    * Synchronous effect execution function type.
    *
-   * @tparam Effect effect type
+   * @tparam Effect
+   *   effect type
    */
   type Execute[Effect[_]] = Effect[Response] => Response
 
@@ -246,19 +256,30 @@ object NanoServer {
    * Creates a NanoHTTPD HTTP & WebSocket server with the specified RPC request handler.
    *
    * Resulting function requires:
-   * - effect execution function - executes specified effect synchronously
+   *   - effect execution function - executes specified effect synchronously
    *
-   * @see [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
-   * @see [[https://github.com/NanoHttpd/nanohttpd Library documentation]]
-   * @see [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
-   * @param handler RPC request handler
-   * @param port port to listen on for HTTP connections
-   * @param path HTTP URL path (default: /)
-   * @param methods allowed HTTP request methods (default: any)
-   * @param webSocket support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
-   * @param mapException maps an exception to a corresponding HTTP status code
-   * @tparam Effect effect type
-   * @return creates NanoHTTPD HTTP & WebSocket server using supplied synchronous effect execution function
+   * @see
+   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   * @see
+   *   [[https://github.com/NanoHttpd/nanohttpd Library documentation]]
+   * @see
+   *   [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
+   * @param handler
+   *   RPC request handler
+   * @param port
+   *   port to listen on for HTTP connections
+   * @param path
+   *   HTTP URL path (default: /)
+   * @param methods
+   *   allowed HTTP request methods (default: any)
+   * @param webSocket
+   *   support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
+   * @param mapException
+   *   maps an exception to a corresponding HTTP status code
+   * @tparam Effect
+   *   effect type
+   * @return
+   *   creates NanoHTTPD HTTP & WebSocket server using supplied synchronous effect execution function
    */
   def create[Effect[_]](
     handler: Types.HandlerAnyCodec[Effect, Context],
@@ -266,10 +287,11 @@ object NanoServer {
     path: String = "/",
     methods: Iterable[HttpMethod] = HttpMethod.values,
     webSocket: Boolean = true,
-    mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode
-  ): Execute[Effect] => NanoServer[Effect] = (executeEffect: Execute[Effect]) => {
-    val server = new NanoServer(handler, port, path, methods, webSocket, mapException, executeEffect)
-    server.start()
-    server
-  }
+    mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+  ): Execute[Effect] => NanoServer[Effect] =
+    (executeEffect: Execute[Effect]) => {
+      val server = new NanoServer(handler, port, path, methods, webSocket, mapException, executeEffect)
+      server.start()
+      server
+    }
 }

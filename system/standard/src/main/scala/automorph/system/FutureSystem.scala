@@ -8,14 +8,17 @@ import scala.util.Success
 /**
  * Asynchronous effect system plugin using Future as an effect type.
  *
- * @see [[https://docs.scala-lang.org/overviews/core/futures.html Library documentation]]
- * @see [[https://www.scala-lang.org/api/current/scala/concurrent/Future.html Effect type]]
- * @constructor Creates an asynchronous effect system plugin using `Future` as an effect type.
- * @param executionContext execution context
+ * @see
+ *   [[https://docs.scala-lang.org/overviews/core/futures.html Library documentation]]
+ * @see
+ *   [[https://www.scala-lang.org/api/current/scala/concurrent/Future.html Effect type]]
+ * @constructor
+ *   Creates an asynchronous effect system plugin using `Future` as an effect type.
+ * @param executionContext
+ *   execution context
  */
-final case class FutureSystem()(
-  implicit val executionContext: ExecutionContext
-) extends EffectSystem[Future] with Defer[Future] {
+final case class FutureSystem()(implicit val executionContext: ExecutionContext)
+  extends EffectSystem[Future] with Defer[Future] {
 
   override def wrap[T](value: => T): Future[T] =
     Future(value)
@@ -48,16 +51,18 @@ final case class FutureSystem()(
         Future {
           promise.failure(error)
           ()
-        }
+        },
     ))
   }
 }
 
 object FutureSystem {
+
   /**
    * Effect type.
    *
-   * @tparam T value type
+   * @tparam T
+   *   value type
    */
   type Effect[T] = Future[T]
 }
