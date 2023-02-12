@@ -206,7 +206,9 @@ lazy val examples = source(project, "examples", default, upickle, zio, testPlugi
 
 // Test
 val scribeVersion = "3.11.0"
-Test / testOptions += Tests.Argument("-oD")
+ThisBuild / Test / testOptions += Tests.Argument("-oD")
+ThisBuild / Test / javaOptions += "-Dorg.jboss.logging.provider=slf4j"
+ThisBuild / Test / fork := true
 lazy val testBase = source(project, "test/base", spi).settings(
   libraryDependencies ++= Seq(
     // Test
