@@ -179,9 +179,9 @@ lazy val jetty = source(project, "transport/jetty", core, http, testStandard % T
 )
 lazy val akkaHttp = source(project, "transport/akka-http", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
-    ("com.typesafe.akka" %% "akka-http" % "10.2.7").cross(CrossVersion.for3Use2_13),
-    ("com.typesafe.akka" %% "akka-actor-typed" % "2.6.18").cross(CrossVersion.for3Use2_13),
-    ("com.typesafe.akka" %% "akka-stream" % "2.6.18").cross(CrossVersion.for3Use2_13),
+    ("com.typesafe.akka" %% "akka-http" % "10.4.0").cross(CrossVersion.for3Use2_13),
+    ("com.typesafe.akka" %% "akka-actor-typed" % "2.7.0").cross(CrossVersion.for3Use2_13),
+    ("com.typesafe.akka" %% "akka-stream" % "2.7.0").cross(CrossVersion.for3Use2_13),
   )
 )
 lazy val finagle = source(project, "transport/finagle", core, http, testStandard % Test).settings(
@@ -212,7 +212,6 @@ val scribeVersion = "3.11.0"
 ThisBuild / Test / testOptions += Tests.Argument("-oD")
 lazy val testBase = source(project, "test/base", spi).settings(
   libraryDependencies ++= Seq(
-    // Test
     "org.scalatest" %% "scalatest" % "3.2.15",
     "org.scalatestplus" %% "scalacheck-1-15" % "3.2.11.0",
     "com.outr" %% "scribe-file" % scribeVersion,
