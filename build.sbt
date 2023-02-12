@@ -160,7 +160,7 @@ lazy val sttp = source(project, "transport/sttp", core, http, testStandard % Tes
 //  )
 )
 lazy val rabbitmq = source(project, "transport/rabbitmq", amqp, core, standard, testCore % Test, testAmqp % Test)
-  .settings(libraryDependencies += "com.rabbitmq" % "amqp-client" % "5.14.1")
+  .settings(libraryDependencies += "com.rabbitmq" % "amqp-client" % "5.16.0")
 
 // Server
 lazy val undertow = source(project, "transport/undertow", core, http, testStandard % Test).settings(
