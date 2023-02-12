@@ -111,7 +111,7 @@ lazy val webrpc = source(project, "protocol/webrpc", webrpcMeta, openapi, util)
 // Effect system
 lazy val standard = source(project, "system/standard", core, http, testCore % Test, testHttp % Test)
 lazy val zio = source(project, "system/zio", spi, testStandard % Test).settings(
-  libraryDependencies += "dev.zio" %% "zio" % "1.0.18",
+  libraryDependencies += "dev.zio" %% "zio" % "1.0.12",
   Compile / doc / scalacOptions ++= Seq("-skip-packages zio"),
 )
 lazy val monix = source(project, "system/monix", spi, testStandard % Test)
@@ -122,7 +122,7 @@ lazy val scalazEffect = source(project, "system/scalaz-effect", spi, testStandar
   .settings(libraryDependencies += "org.scalaz" %% "scalaz-effect" % "7.4.0-M13")
 
 // Message codec
-val circeVersion = "0.14.3"
+val circeVersion = "0.14.1"
 lazy val circe = source(project, s"codec/circe", jsonrpc, webrpc, testPlugin % Test).settings(
   libraryDependencies ++=
     Seq("io.circe" %% "circe-parser" % circeVersion, "io.circe" %% "circe-generic" % circeVersion),
@@ -139,15 +139,15 @@ lazy val upickle = source(project, "codec/upickle", jsonrpc, webrpc, testPlugin 
     Seq("-Ymacro-expand:none", "-skip-packages automorph.codec.json.meta:automorph.codec.messagepack.meta"),
 )
 lazy val argonaut = source(project, "codec/argonaut", jsonrpc, webrpc, testPlugin % Test).settings(
-  libraryDependencies += "io.argonaut" %% "argonaut" % "6.3.8",
+  libraryDependencies += "io.argonaut" %% "argonaut" % "6.3.7",
   Compile / doc / scalacOptions ++= Seq("-Ymacro-expand:none", "-skip-packages automorph.codec.json.meta"),
 )
 
 // Message transport
 lazy val http = source(project, "transport/http", jsonrpc)
 lazy val amqp = source(project, "transport/amqp")
-val sttpVersion = "3.8.11"
-val sttpHttpClientVersion = "3.5.2"
+val sttpVersion = "3.3.15"
+val sttpHttpClientVersion = "3.3.15"
 lazy val sttp = source(project, "transport/sttp", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
