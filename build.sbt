@@ -146,8 +146,8 @@ lazy val argonaut = source(project, "codec/argonaut", jsonrpc, webrpc, testPlugi
 // Message transport
 lazy val http = source(project, "transport/http", jsonrpc)
 lazy val amqp = source(project, "transport/amqp")
-val sttpVersion = "3.3.15"
-val sttpHttpClientVersion = "3.3.15"
+val sttpVersion = "3.3.18"
+val sttpHttpClientVersion = "3.3.18"
 lazy val sttp = source(project, "transport/sttp", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
