@@ -81,14 +81,13 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
           val (argumentValues, requestContext) =
             if binding.acceptsContext && callArguments.nonEmpty then
               callArguments.dropRight(1).toSeq -> Some(callArguments.last.asInstanceOf[Context])
-            else
-              callArguments.toSeq -> None
+            else callArguments.toSeq -> None
 
           // Encode RPC function arguments
           val argumentNodes = binding.function.parameters.zip(argumentValues).map { (parameter, argument) =>
             val encodeArgument = binding.argumentEncoders.getOrElse(
               parameter.name,
-              throw new IllegalStateException(s"Missing method parameter encoder: ${parameter.name}")
+              throw new IllegalStateException(s"Missing method parameter encoder: ${parameter.name}"),
             )
             parameter.name -> Try(encodeArgument(argument)).recoverWith { case error =>
               Failure(InvalidRequestException(s"Malformed argument: ${parameter.name}", error))
@@ -100,9 +99,9 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
             mapName(method.getName),
             argumentNodes,
             (resultNode, responseContext) => binding.decodeResult(resultNode, responseContext),
-            requestContext
+            requestContext,
           )
-        }.getOrElse(throw UnsupportedOperationException(s"Invalid method: ${method.getName}"))
+        }.getOrElse(throw UnsupportedOperationException(s"Invalid method: ${method.getName}")),
     ).asInstanceOf[Api]
 
   /**
@@ -122,5 +121,5 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
     function: String,
     arguments: Seq[(String, Node)],
     decodeResult: (Node, Context) => Result,
-    requestContext: Option[Context]
+    requestContext: Option[Context],
   ): Effect[Result]

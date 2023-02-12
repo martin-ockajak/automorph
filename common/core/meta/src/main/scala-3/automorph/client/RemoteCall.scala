@@ -18,13 +18,13 @@ final case class RemoteCall[Node, Codec <: MessageCodec[Node], Effect[_], Contex
   functionName: String,
   codec: Codec,
   private val performCall: (String, Seq[(String, Node)], (Node, Context) => Result, Option[Context]) => Effect[Result],
-  private val decodeResult: (Node, Context) => Result
+  private val decodeResult: (Node, Context) => Result,
 ) extends RemoteInvoke[Node, Codec, Effect, Context, Result]:
 
   override def invoke(
     arguments: Seq[(String, Any)],
     argumentNodes: Seq[Node],
-    requestContext: Context
+    requestContext: Context,
   ): Effect[Result] =
     performCall(functionName, arguments.map(_._1).zip(argumentNodes), decodeResult, Some(requestContext))
 
@@ -45,11 +45,6 @@ object RemoteCall:
   inline def apply[Node, Codec <: MessageCodec[Node], Effect[_], Context, Result](
     functionName: String,
     codec: Codec,
-    performCall: (String, Seq[(String, Node)], (Node, Context) => Result, Option[Context]) => Effect[Result]
+    performCall: (String, Seq[(String, Node)], (Node, Context) => Result, Option[Context]) => Effect[Result],
   ): RemoteCall[Node, Codec, Effect, Context, Result] =
-    new RemoteCall(
-      functionName,
-      codec,
-      performCall,
-      RemoteInvoke.decodeResult[Node, Codec, Context, Result](codec)
-    )
+    new RemoteCall(functionName, codec, performCall, RemoteInvoke.decodeResult[Node, Codec, Context, Result](codec))

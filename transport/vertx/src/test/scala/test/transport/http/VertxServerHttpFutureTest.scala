@@ -4,7 +4,6 @@ import automorph.Types
 import automorph.spi.transport.ServerMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.server.VertxServer
-import io.vertx.core.logging.LoggerFactory
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

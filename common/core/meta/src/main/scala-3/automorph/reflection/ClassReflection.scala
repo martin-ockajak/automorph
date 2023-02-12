@@ -11,14 +11,14 @@ final private[automorph] case class ClassReflection(q: Quotes):
 
   // All meta-programming data types are path-dependent on the compiler-generated reflection context
   import q.reflect.{Flags, MethodType, PolyType, Printer, Symbol, TypeRepr}
-  private given Quotes = q
 
-  final case class RefParameter(
-    name: String,
-    dataType: TypeRepr,
-    contextual: Boolean
-  ):
-    def lift: Parameter = Parameter(name, dataType.show(using Printer.TypeReprShortCode), contextual)
+  private given Quotes =
+    q
+
+  final case class RefParameter(name: String, dataType: TypeRepr, contextual: Boolean):
+
+    def lift: Parameter =
+      Parameter(name, dataType.show(using Printer.TypeReprShortCode), contextual)
 
   final case class RefMethod(
     name: String,
@@ -27,18 +27,19 @@ final private[automorph] case class ClassReflection(q: Quotes):
     typeParameters: Seq[RefParameter],
     public: Boolean,
     available: Boolean,
-    symbol: Symbol
+    symbol: Symbol,
   ):
 
-    def lift: Method = Method(
-      name,
-      resultType.show(using Printer.TypeReprShortCode),
-      parameters.map(_.map(_.lift)),
-      typeParameters.map(_.lift),
-      public = public,
-      available = available,
-      symbol.docstring
-    )
+    def lift: Method =
+      Method(
+        name,
+        resultType.show(using Printer.TypeReprShortCode),
+        parameters.map(_.map(_.lift)),
+        typeParameters.map(_.lift),
+        public = public,
+        available = available,
+        symbol.docstring,
+      )
 
   /**
    * Describes class methods within quoted context.
@@ -52,8 +53,8 @@ final private[automorph] case class ClassReflection(q: Quotes):
   private def method(classType: TypeRepr, methodSymbol: Symbol): Option[RefMethod] =
     val (symbolType, typeParameters) = classType.memberType(methodSymbol) match
       case polyType: PolyType =>
-        val typeParameters = polyType.paramNames.zip(polyType.paramBounds.indices).map {
-          (name, index) => RefParameter(name, polyType.param(index), false)
+        val typeParameters = polyType.paramNames.zip(polyType.paramBounds.indices).map { (name, index) =>
+          RefParameter(name, polyType.param(index), false)
         }
         (polyType.resType, typeParameters)
       case otherType => (otherType, Seq.empty)
@@ -67,47 +68,30 @@ final private[automorph] case class ClassReflection(q: Quotes):
           typeParameters,
           publicMethod(methodSymbol),
           availableMethod(methodSymbol),
-          methodSymbol
+          methodSymbol,
         ))
       case _ => None
 
   private def methodSignature(methodType: MethodType): (Seq[Seq[RefParameter]], TypeRepr) =
     val methodTypes = LazyList.iterate(Option(methodType)) {
-      case Some(currentType) =>
-        currentType.resType match
+      case Some(currentType) => currentType.resType match
           case resultType: MethodType => Some(resultType)
           case _ => None
       case _ => None
     }.takeWhile(_.isDefined).flatten
-    val parameters = methodTypes.map {
-      currentType =>
-        currentType.paramNames.zip(currentType.paramTypes).map {
-          (name, dataType) => RefParameter(name, dataType, currentType.isImplicit)
-        }
+    val parameters = methodTypes.map { currentType =>
+      currentType.paramNames.zip(currentType.paramTypes).map { (name, dataType) =>
+        RefParameter(name, dataType, currentType.isImplicit)
+      }
     }
     val resultType = methodTypes.last.resType
     (Seq(parameters*), resultType)
 
-  private def publicMethod(methodSymbol: Symbol): Boolean = !matchesFlags(
-    methodSymbol.flags,
-    Seq(
-      Flags.Private,
-      Flags.PrivateLocal,
-      Flags.Protected,
-      Flags.Synthetic
-    )
-  )
+  private def publicMethod(methodSymbol: Symbol): Boolean =
+    !matchesFlags(methodSymbol.flags, Seq(Flags.Private, Flags.PrivateLocal, Flags.Protected, Flags.Synthetic))
 
-  private def availableMethod(methodSymbol: Symbol): Boolean = !matchesFlags(
-    methodSymbol.flags,
-    Seq(
-      Flags.Erased,
-      Flags.Inline,
-      Flags.Invisible,
-      Flags.Macro,
-      Flags.Transparent
-    )
-  )
+  private def availableMethod(methodSymbol: Symbol): Boolean =
+    !matchesFlags(methodSymbol.flags, Seq(Flags.Erased, Flags.Inline, Flags.Invisible, Flags.Macro, Flags.Transparent))
 
   private def matchesFlags(flags: Flags, matchingFlags: Seq[Flags]): Boolean =
     matchingFlags.foldLeft(false)((result, current) => result | flags.is(current))

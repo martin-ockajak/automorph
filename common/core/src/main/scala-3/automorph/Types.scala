@@ -4,7 +4,7 @@ import automorph.Handler
 import automorph.spi.{EffectSystem, MessageCodec}
 
 /** Common type aliases. */
-object Types {
+object Types:
 
   /** Handler with arbitrary node and codec type. */
   type HandlerAnyCodec[Effect[_], Context] = Handler[_, _, Effect, Context]
@@ -17,4 +17,3 @@ object Types {
 
   /** Client without codec */
   type ClientGenericCodec[Effect[_], Context] = Client[Unit, MessageCodec[Unit], Effect, Context]
-}

@@ -8,7 +8,4 @@ package automorph
  * @tparam Result API function result type
  * @tparam Context response context type
  */
-final case class Contextual[Result, Context](
-  result: Result,
-  context: Context
-)
+final case class Contextual[Result, Context](result: Result, context: Context)

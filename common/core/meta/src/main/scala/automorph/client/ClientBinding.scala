@@ -16,5 +16,5 @@ final private[automorph] case class ClientBinding[Node, Context](
   function: RpcFunction,
   argumentEncoders: Map[String, Any => Node],
   decodeResult: (Node, Context) => Any,
-  acceptsContext: Boolean
+  acceptsContext: Boolean,
 )

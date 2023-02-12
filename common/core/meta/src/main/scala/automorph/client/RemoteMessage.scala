@@ -16,7 +16,7 @@ import automorph.spi.MessageCodec
 final private[automorph] case class RemoteMessage[Node, Codec <: MessageCodec[Node], Effect[_], Context] private (
   functionName: String,
   codec: Codec,
-  private val sendMessage: (String, Seq[(String, Node)], Option[Context]) => Effect[Unit]
+  private val sendMessage: (String, Seq[(String, Node)], Option[Context]) => Effect[Unit],
 ) extends RemoteInvoke[Node, Codec, Effect, Context, Unit] {
 
   override def invoke(arguments: Seq[(String, Any)], argumentNodes: Seq[Node], requestContext: Context): Effect[Unit] =
@@ -39,7 +39,7 @@ private[automorph] object RemoteMessage {
   def apply[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     functionName: String,
     codec: Codec,
-    sendMessage: (String, Seq[(String, Node)], Option[Context]) => Effect[Unit]
+    sendMessage: (String, Seq[(String, Node)], Option[Context]) => Effect[Unit],
   ): RemoteMessage[Node, Codec, Effect, Context] =
     new RemoteMessage(functionName, codec, sendMessage)
 }

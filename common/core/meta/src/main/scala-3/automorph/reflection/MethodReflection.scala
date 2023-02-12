@@ -12,25 +12,19 @@ private[automorph] object MethodReflection:
    *
    * @return method quoted expression converter
    */
-  given functionToExpr: ToExpr[RpcFunction] = new ToExpr[RpcFunction]:
+  given functionToExpr: ToExpr[RpcFunction] =
+    new ToExpr[RpcFunction]:
 
-    given parameterToExpr: ToExpr[RpcParameter] = new ToExpr[RpcParameter]:
+      given parameterToExpr: ToExpr[RpcParameter] =
+        new ToExpr[RpcParameter]:
 
-      override def apply(v: RpcParameter)(using Quotes): Expr[RpcParameter] = '{
-        RpcParameter(
-          ${ Expr(v.name) },
-          ${ Expr(v.`type`) }
-        )
-      }
+          override def apply(v: RpcParameter)(using Quotes): Expr[RpcParameter] =
+            '{ RpcParameter(${ Expr(v.name) }, ${ Expr(v.`type`) }) }
 
-    override def apply(v: RpcFunction)(using Quotes): Expr[RpcFunction] = '{
-      RpcFunction(
-        ${ Expr(v.name) },
-        ${ Expr(v.parameters) },
-        ${ Expr(v.resultType) },
-        ${ Expr(v.documentation) }
-      )
-    }
+      override def apply(v: RpcFunction)(using Quotes): Expr[RpcFunction] =
+        '{
+          RpcFunction(${ Expr(v.name) }, ${ Expr(v.parameters) }, ${ Expr(v.resultType) }, ${ Expr(v.documentation) })
+        }
 
   /**
    * Detects valid API methods in an API type.
@@ -42,14 +36,15 @@ private[automorph] object MethodReflection:
    */
   def apiMethods[ApiType: Type, Effect[_]: Type](ref: ClassReflection): Seq[Either[String, ref.RefMethod]] =
     import ref.q.reflect.TypeRepr
-    given Quotes = ref.q
+    given Quotes =
+      ref.q
 
     // Omit base data type methods
-    val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap {
-      baseType => ref.methods(baseType).filter(_.public).map(_.name)
+    val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap { baseType =>
+      ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
-    val methods = ref.methods(TypeRepr.of[ApiType]).filter(_.public).filter {
-      method => !baseMethodNames.contains(method.name)
+    val methods = ref.methods(TypeRepr.of[ApiType]).filter(_.public).filter { method =>
+      !baseMethodNames.contains(method.name)
     }
 
     // Validate methods
@@ -84,9 +79,8 @@ private[automorph] object MethodReflection:
 
     someType.dealias match {
       case appliedType: AppliedType
-        if appliedType.tycon <:< TypeRepr.of[Contextual] &&
-          appliedType.args.size > 1 &&
-          appliedType.args(1) =:= TypeRepr.of[Context] => Some(appliedType.args(0))
+        if appliedType.tycon <:< TypeRepr.of[Contextual] && appliedType.args.size > 1 &&
+        appliedType.args(1) =:= TypeRepr.of[Context] => Some(appliedType.args(0))
       case _ => None
     }
 
@@ -109,7 +103,7 @@ private[automorph] object MethodReflection:
           appliedType.args.indexWhere {
             case _: ParamRef => true
             case _ => false
-          }
+          },
         )
       // Assume type reference to be a single parameter type constructor
       case typeRef: TypeRef => (typeRef.dealias, 0)
@@ -150,11 +144,10 @@ private[automorph] object MethodReflection:
     instance: quotes.reflect.Term,
     methodName: String,
     typeArguments: List[quotes.reflect.TypeRepr],
-    arguments: List[List[quotes.reflect.Tree]]
+    arguments: List[List[quotes.reflect.Tree]],
   ): quotes.reflect.Term =
-    quotes.reflect.Select.unique(instance, methodName).appliedToTypes(typeArguments).appliedToArgss(
-      arguments.asInstanceOf[List[List[quotes.reflect.Term]]]
-    )
+    quotes.reflect.Select.unique(instance, methodName).appliedToTypes(typeArguments)
+      .appliedToArgss(arguments.asInstanceOf[List[List[quotes.reflect.Term]]])
 
   /**
    * Determines whether a method is a valid API method.
@@ -173,27 +166,22 @@ private[automorph] object MethodReflection:
     // No type parameters
     val apiType = TypeTree.of[ApiType]
     val methodSignature = signature[ApiType](ref)(method)
-    if method.typeParameters.nonEmpty then
-      Left(s"Bound API method '$methodSignature' must not have type parameters")
+    if method.typeParameters.nonEmpty then Left(s"Bound API method '$methodSignature' must not have type parameters")
 
     // Callable at runtime
-    else if !method.available then
-      Left(s"Bound API method '$methodSignature' must be callable at runtime")
+    else if !method.available then Left(s"Bound API method '$methodSignature' must be callable at runtime")
 
     // Returns the effect type
     else
       val effectType = resultType(ref.q)(TypeRepr.of[Effect])
       val matchingResultType = effectType match
-        case appliedEffectType: AppliedType =>
-          method.resultType.dealias match
-            case resultType: AppliedType =>
-              resultType.tycon <:< appliedEffectType.tycon
+        case appliedEffectType: AppliedType => method.resultType.dealias match
+            case resultType: AppliedType => resultType.tycon <:< appliedEffectType.tycon
             case _ => false
         case _ => true
       if !matchingResultType then
         Left(s"Bound API method '$signature' must return the specified effect type '${effectType.show}'")
-      else
-        Right(method)
+      else Right(method)
 
   /**
    * Determines result type if the specified type is a lambda type.

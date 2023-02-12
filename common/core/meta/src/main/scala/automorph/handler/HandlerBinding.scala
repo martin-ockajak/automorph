@@ -19,5 +19,5 @@ final case class HandlerBinding[Node, Effect[_], Context](
   argumentDecoders: Map[String, Option[Node] => Any],
   encodeResult: Any => (Node, Option[Context]),
   call: (Seq[Any], Context) => Any,
-  acceptsContext: Boolean
+  acceptsContext: Boolean,
 )

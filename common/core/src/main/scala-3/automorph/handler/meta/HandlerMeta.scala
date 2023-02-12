@@ -66,4 +66,5 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
       }
     copy(apiBindings = newBindings)
 
-  inline def brokenBind[Api <: AnyRef](api: Api): ThisHandler = ???
+  inline def brokenBind[Api <: AnyRef](api: Api): ThisHandler =
+    ???

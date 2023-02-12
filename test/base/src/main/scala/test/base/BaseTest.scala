@@ -54,6 +54,7 @@ object BaseTest {
     scribe.Logger.root.clearHandlers().clearModifiers()
       .withHandler(writer = ConsoleWriter, formatter = format, minimumLevel = Some(level))
       .withHandler(writer = FileWriter(path), formatter = format, minimumLevel = Some(level)).replace()
+    ()
   }
 
   /** Log level environment variable. */
