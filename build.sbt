@@ -169,7 +169,7 @@ lazy val undertow = source(project, "transport/undertow", core, http, testStanda
   Test / fork := true,
 )
 lazy val vertx = source(project, "transport/vertx", core, http, testStandard % Test)
-  .settings(libraryDependencies += "io.vertx" % "vertx-core" % "4.2.4")
+  .settings(libraryDependencies += "io.vertx" % "vertx-core" % "4.3.8")
 val jettyVersion = "11.0.7"
 lazy val jetty = source(project, "transport/jetty", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
