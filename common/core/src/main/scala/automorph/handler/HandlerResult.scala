@@ -5,14 +5,19 @@ import java.io.InputStream
 /**
  * RPC handler request processing result.
  *
- * @see [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
- * @param responseBody response message body
- * @param exception failed call exception
- * @param context response context
- * @tparam Context response context type
+ * @see
+ *   [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
+ * @param responseBody
+ *   response message body
+ * @param exception
+ *   failed call exception
+ * @param context
+ *   response context
+ * @tparam Context
+ *   response context type
  */
 final case class HandlerResult[Context](
   responseBody: Option[InputStream],
   exception: Option[Throwable],
-  context: Option[Context]
+  context: Option[Context],
 )

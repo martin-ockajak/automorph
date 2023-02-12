@@ -8,8 +8,10 @@ import java.io.InputStream
  *
  * Passively sends requests and receives responses to and from a remote endpoint using specific transport protocol.
  *
- * @tparam Effect effect type
- * @tparam Context message context type
+ * @tparam Effect
+ *   effect type
+ * @tparam Context
+ *   message context type
  */
 trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
 
@@ -21,17 +23,22 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
    *
    * An optional request context is used to supply additional information needed to send the request.
    *
-   * @param requestBody request message body
-   * @param requestContext request context
-   * @param requestId request correlation identifier
-   * @param mediaType message media (MIME) type.
-   * @return response message and context
+   * @param requestBody
+   *   request message body
+   * @param requestContext
+   *   request context
+   * @param requestId
+   *   request correlation identifier
+   * @param mediaType
+   *   message media (MIME) type.
+   * @return
+   *   response message and context
    */
   def call(
     requestBody: InputStream,
     requestContext: Option[Context],
     requestId: String,
-    mediaType: String
+    mediaType: String,
   ): Effect[(InputStream, Context)]
 
   /**
@@ -39,30 +46,37 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
    *
    * An optional request context is used to supply additional information needed to send the request.
    *
-   * @param requestBody request message body
-   * @param requestContext request context
-   * @param requestId request correlation identifier
-   * @param mediaType message media (MIME) type.
-   * @return nothing
+   * @param requestBody
+   *   request message body
+   * @param requestContext
+   *   request context
+   * @param requestId
+   *   request correlation identifier
+   * @param mediaType
+   *   message media (MIME) type.
+   * @return
+   *   nothing
    */
   def message(
     requestBody: InputStream,
     requestContext: Option[Context],
     requestId: String,
-    mediaType: String
+    mediaType: String,
   ): Effect[Unit]
 
   /**
    * Creates default request context.
    *
-   * @return request context
+   * @return
+   *   request context
    */
   def defaultContext: Context
 
   /**
    * Closes this client transport freeing the underlying resources.
    *
-   * @return nothing
+   * @return
+   *   nothing
    */
   def close(): Effect[Unit]
 }

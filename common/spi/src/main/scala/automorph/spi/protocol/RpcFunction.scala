@@ -3,23 +3,26 @@ package automorph.spi.protocol
 /**
  * Remote function descriptor.
  *
- * @param name name
- * @param resultType result type
- * @param parameters parameters
- * @param documentation documentation (Scaladoc)
+ * @param name
+ *   name
+ * @param resultType
+ *   result type
+ * @param parameters
+ *   parameters
+ * @param documentation
+ *   documentation (Scaladoc)
  */
 final case class RpcFunction(
   name: String,
   parameters: Seq[RpcParameter],
   resultType: String,
-  documentation: Option[String]
+  documentation: Option[String],
 ) {
 
   /** Function signature. */
   lazy val signature: String = {
-    val parametersText = s"(${parameters.map { parameter =>
-      s"${parameter.name}: ${parameter.`type`}"
-    }.mkString(", ")})"
+    val parametersText =
+      s"(${parameters.map(parameter => s"${parameter.name}: ${parameter.`type`}").mkString(", ")})"
     s"$name$parametersText: $resultType"
   }
 }
@@ -27,10 +30,9 @@ final case class RpcFunction(
 /**
  * Function parameter descriptor.
  *
- * @param name name
- * @param `type` type
+ * @param name
+ *   name
+ * @param `type`
+ *   type
  */
-final case class RpcParameter(
-  name: String,
-  `type`: String
-)
+final case class RpcParameter(name: String, `type`: String)

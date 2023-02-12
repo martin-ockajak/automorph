@@ -8,7 +8,9 @@ object Random {
   /**
    * Generate random numeric identifier.
    *
-   * @return numeric identifier
+   * @return
+   *   numeric identifier
    */
-  def id: String = Math.abs(random.nextInt()).toString
+  def id: String =
+    Math.abs(random.nextInt()).toString
 }

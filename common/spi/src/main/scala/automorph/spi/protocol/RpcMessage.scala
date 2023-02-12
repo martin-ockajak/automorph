@@ -5,18 +5,24 @@ import java.io.InputStream
 /**
  * RPC message.
  *
- * @constructor Creates RPC message.
- * @param metadata protocol-specific message metadata
- * @param body message body
- * @param properties message properties
- * @tparam Metadata protocol-specific message metadata type
+ * @constructor
+ *   Creates RPC message.
+ * @param metadata
+ *   protocol-specific message metadata
+ * @param body
+ *   message body
+ * @param properties
+ *   message properties
+ * @tparam Metadata
+ *   protocol-specific message metadata type
  */
 final case class RpcMessage[Metadata](
   metadata: Metadata,
   body: InputStream,
   properties: Map[String, String] = Map.empty,
-  private val messageText: () => Option[String] = () => None
+  private val messageText: () => Option[String] = () => None,
 ) {
+
   /** Message in human-readable textual form. */
   lazy val text: Option[String] = messageText()
 }

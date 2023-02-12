@@ -5,13 +5,20 @@ import automorph.spi.MessageCodec
 /**
  * Remote function one-way message proxy.
  *
- * @constructor Creates a new remote function one-way message proxy.
- * @param functionName remote function name.
- * @param codec message codec plugin
- * @tparam Node message node type
- * @tparam Codec message codec plugin type
- * @tparam Effect effect type
- * @tparam Context message context type
+ * @constructor
+ *   Creates a new remote function one-way message proxy.
+ * @param functionName
+ *   remote function name.
+ * @param codec
+ *   message codec plugin
+ * @tparam Node
+ *   message node type
+ * @tparam Codec
+ *   message codec plugin type
+ * @tparam Effect
+ *   effect type
+ * @tparam Context
+ *   message context type
  */
 final private[automorph] case class RemoteMessage[Node, Codec <: MessageCodec[Node], Effect[_], Context] private (
   functionName: String,
@@ -28,13 +35,20 @@ private[automorph] object RemoteMessage {
   /**
    * Creates a new one-way remote function message with specified RPC function name.
    *
-   * @param functionName RPC function name
-   * @param codec message codec plugin
-   * @param sendMessage sends an RPC message with specified function name, arguments and request context
-   * @tparam Node message node type
-   * @tparam Codec message codec plugin type
-   * @tparam Effect effect type
-   * @tparam Context message context type
+   * @param functionName
+   *   RPC function name
+   * @param codec
+   *   message codec plugin
+   * @param sendMessage
+   *   sends an RPC message with specified function name, arguments and request context
+   * @tparam Node
+   *   message node type
+   * @tparam Codec
+   *   message codec plugin type
+   * @tparam Effect
+   *   effect type
+   * @tparam Context
+   *   message context type
    */
   def apply[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     functionName: String,

@@ -16,32 +16,38 @@ private[automorph] object Extensions {
   implicit final class ThrowableOps(private val throwable: Throwable) {
 
     /**
-     * Assemble detailed trace of an exception and its causes.
+     * Assemble detailed description of an exception and its causes.
      *
-     * @return error messages
+     * @return
+     *   error messages
      */
-    def trace: Seq[String] = trace()
+    def description: String =
+      trace.mkString("\n")
 
     /**
      * Assemble detailed trace of an exception and its causes.
      *
-     * @param maxCauses maximum number of included exception causes
-     * @return error messages
+     * @return
+     *   error messages
+     */
+    def trace: Seq[String] =
+      trace()
+
+    /**
+     * Assemble detailed trace of an exception and its causes.
+     *
+     * @param maxCauses
+     *   maximum number of included exception causes
+     * @return
+     *   error messages
      */
     def trace(maxCauses: Int = 100): Seq[String] =
-      LazyList.iterate(Option(throwable))(_.flatMap(error => Option(error.getCause)))
-        .takeWhile(_.isDefined).flatten.take(maxCauses).map { throwable =>
+      LazyList.iterate(Option(throwable))(_.flatMap(error => Option(error.getCause))).takeWhile(_.isDefined).flatten
+        .take(maxCauses).map { throwable =>
           val exceptionName = throwable.getClass.getSimpleName
           val message = Option(throwable.getMessage).getOrElse("")
           s"[$exceptionName] $message"
         }
-
-    /**
-     * Assemble detailed description of an exception and its causes.
-     *
-     * @return error messages
-     */
-    def description: String = trace.mkString("\n")
   }
 
   implicit final class TryOps[T](private val tryValue: Try[T]) {
@@ -49,26 +55,34 @@ private[automorph] object Extensions {
     /**
      * Creates a new 'Try' by applying ''onFailure'' on `Failure` or returns this on `Success`.
      *
-     * @param onFailure function to apply if this is a `Failure`
-     * @return a transformed `Try`
+     * @param onFailure
+     *   function to apply if this is a `Failure`
+     * @return
+     *   a transformed `Try`
      */
-    def onFailure(onFailure: Throwable => Unit): Try[T] = tryValue.recoverWith { case error =>
-      onFailure(error)
-      Failure(error)
-    }
+    def onFailure(onFailure: Throwable => Unit): Try[T] =
+      tryValue.recoverWith { case error =>
+        onFailure(error)
+        Failure(error)
+      }
 
     /**
      * Applies ''onException'' on `Failure` or ''onSuccess'' on `Success`.
      *
-     * @param onFailure function to apply if this is a `Success`
-     * @param onSuccess function to apply if this is a `Failure`
-     * @tparam U result type
-     * @return applied function result
+     * @param onFailure
+     *   function to apply if this is a `Success`
+     * @param onSuccess
+     *   function to apply if this is a `Failure`
+     * @tparam U
+     *   result type
+     * @return
+     *   applied function result
      */
-    def pureFold[U](onFailure: Throwable => U, onSuccess: T => U): U = tryValue match {
-      case Failure(error) => onFailure(error)
-      case Success(value) => onSuccess(value)
-    }
+    def pureFold[U](onFailure: Throwable => U, onSuccess: T => U): U =
+      tryValue match {
+        case Failure(error) => onFailure(error)
+        case Success(value) => onSuccess(value)
+      }
   }
 
   implicit final class EffectOps[Effect[_], T](private val effect: Effect[T]) {
@@ -78,7 +92,8 @@ private[automorph] object Extensions {
      *
      * The resulting effect cannot fail.
      *
-     * @return effectful error or the original value
+     * @return
+     *   effectful error or the original value
      */
     def either(implicit system: EffectSystem[Effect]): Effect[Either[Throwable, T]] =
       system.either(effect)
@@ -86,9 +101,12 @@ private[automorph] object Extensions {
     /**
      * Creates a new effect by applying a function to an effect's value.
      *
-     * @param function function applied to the specified effect's value
-     * @tparam R function result type
-     * @return transformed effectful value
+     * @param function
+     *   function applied to the specified effect's value
+     * @tparam R
+     *   function result type
+     * @return
+     *   transformed effectful value
      */
     def map[R](function: T => R)(implicit system: EffectSystem[Effect]): Effect[R] =
       system.map(effect)(function)
@@ -96,9 +114,12 @@ private[automorph] object Extensions {
     /**
      * Creates a new effect by applying an effectful function to an effect's value.
      *
-     * @param function effectful function applied to the specified effect's value
-     * @tparam R effectful function result type
-     * @return effect containing the transformed value
+     * @param function
+     *   effectful function applied to the specified effect's value
+     * @tparam R
+     *   effectful function result type
+     * @return
+     *   effect containing the transformed value
      */
     def flatMap[R](function: T => Effect[R])(implicit system: EffectSystem[Effect]): Effect[R] =
       system.flatMap(effect)(function)
@@ -106,7 +127,8 @@ private[automorph] object Extensions {
     /**
      * Executes an effect asynchronously without blocking.
      *
-     * @return nothing
+     * @return
+     *   nothing
      */
     def run(implicit system: EffectSystem[Effect]): Unit =
       system.run(effect)
@@ -124,18 +146,16 @@ private[automorph] object Extensions {
   implicit class ByteBufferOps(data: ByteBuffer) {
 
     def toArray: Array[Byte] =
-      if (data.hasArray) {
-        data.array
-      } else {
+      if (data.hasArray) { data.array }
+      else {
         val array = Array.ofDim[Byte](data.remaining)
         data.get(array)
         array
       }
 
     def toInputStream: InputStream =
-      if (data.hasArray) {
-        data.array.toInputStream
-      } else {
+      if (data.hasArray) { data.array.toInputStream }
+      else {
         val array = Array.ofDim[Byte](data.remaining)
         data.get(array)
         array.toInputStream
@@ -153,17 +173,14 @@ private[automorph] object Extensions {
         case _ => toByteArray(Some(length))
       }
 
+    def toByteBuffer: ByteBuffer =
+      ByteBuffer.wrap(data.toArray)
+
     def toArray: Array[Byte] =
       data match {
         case arrayInputStream: ArrayInputStream => arrayInputStream.data
         case _ => toByteArray(None)
       }
-
-    def toByteBuffer: ByteBuffer =
-      ByteBuffer.wrap(data.toArray)
-
-    def asString: String =
-      data.toArray.asString
 
     private def toByteArray(length: Option[Int]): Array[Byte] = {
       val outputStream = new ByteArrayOutputStream(length.getOrElse(bufferSize))
@@ -178,6 +195,9 @@ private[automorph] object Extensions {
       }.takeWhile(_ > 0).lastOption
       outputStream.toByteArray
     }
+
+    def asString: String =
+      data.toArray.asString
   }
 
   implicit class StringOps(data: String) {
