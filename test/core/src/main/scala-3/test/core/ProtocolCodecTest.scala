@@ -24,7 +24,13 @@ trait ProtocolCodecTest extends CoreTest {
   @nowarn("msg=used")
   private lazy val testFixtures: Seq[TestFixture] = {
     implicit val context: Context = arbitraryContext.arbitrary.sample.get
-    Seq(circeJsonFixture(), jacksonJsonFixture(), uPickleJsonFixture(), uPickleMessagePackFixture(), argonautJsonFixture())
+    Seq(
+      circeJsonFixture(),
+      jacksonJsonFixture(),
+      uPickleJsonFixture(),
+      uPickleMessagePackFixture(),
+      argonautJsonFixture(),
+    )
   }
 
   override def fixtures: Seq[TestFixture] =
@@ -45,7 +51,7 @@ trait ProtocolCodecTest extends CoreTest {
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0)
+      (function, a0) => client.message(function).args(a0),
     )
   }
 
@@ -56,14 +62,14 @@ trait ProtocolCodecTest extends CoreTest {
 
         override def serialize(value: Enum.Enum, generator: JsonGenerator, provider: SerializerProvider): Unit =
           generator.writeNumber(Enum.toOrdinal(value))
-      }
+      },
     ).addDeserializer(
       classOf[Enum.Enum],
       new StdDeserializer[Enum.Enum](classOf[Enum.Enum]) {
 
         override def deserialize(parser: JsonParser, context: DeserializationContext): Enum.Enum =
           Enum.fromOrdinal(parser.getIntValue)
-      }
+      },
     )
     val codec = JacksonJsonCodec(JacksonJsonCodec.defaultMapper.registerModule(enumModule))
     val protocol = JsonRpcProtocol[JacksonJsonCodec.Node, codec.type, Context](codec)
@@ -77,7 +83,7 @@ trait ProtocolCodecTest extends CoreTest {
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0)
+      (function, a0) => client.message(function).args(a0),
     )
   }
 
@@ -100,7 +106,7 @@ trait ProtocolCodecTest extends CoreTest {
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0)
+      (function, a0) => client.message(function).args(a0),
     )
   }
 
@@ -123,9 +129,15 @@ trait ProtocolCodecTest extends CoreTest {
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0)
+      (function, a0) => client.message(function).args(a0),
     )
   }
+
+  @nowarn("msg=used")
+  def clientTransport(
+    handler: Types.HandlerAnyCodec[Effect, Context]
+  ): Option[ClientMessageTransport[Effect, Context]] =
+    None
 
   private def argonautJsonFixture()(implicit context: Context): TestFixture = {
     implicit val enumCodecJson: CodecJson[Enum.Enum] =
@@ -148,8 +160,8 @@ trait ProtocolCodecTest extends CoreTest {
           v.list,
           v.map,
           v.structure,
-          v.none
-        )
+          v.none,
+        ),
     )(
       "string",
       "boolean",
@@ -163,7 +175,7 @@ trait ProtocolCodecTest extends CoreTest {
       "list",
       "map",
       "structure",
-      "none"
+      "none",
     )
     val codec = ArgonautJsonCodec()
     val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type, Context](codec)
@@ -177,14 +189,8 @@ trait ProtocolCodecTest extends CoreTest {
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0)
+      (function, a0) => client.message(function).args(a0),
     )
   }
-
-  @nowarn("msg=used")
-  def clientTransport(
-    handler: Types.HandlerAnyCodec[Effect, Context]
-  ): Option[ClientMessageTransport[Effect, Context]] =
-    None
 
 }

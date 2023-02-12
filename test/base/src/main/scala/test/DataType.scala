@@ -15,9 +15,7 @@ final case class Record(
   list: List[String],
   map: Map[String, Int],
   structure: Option[Structure],
-  none: Option[String]
+  none: Option[String],
 )
 
-final case class Structure(
-  value: String
-)
+final case class Structure(value: String)

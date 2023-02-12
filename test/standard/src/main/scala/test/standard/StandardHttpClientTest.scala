@@ -10,16 +10,12 @@ trait StandardHttpClientTest extends ClientServerTest {
 
   def clientTransport(url: URI): ClientMessageTransport[Effect, Context]
 
-  def webSocket: Boolean = false
-
   override def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
     val server = withRandomAvailablePort(port =>
-      NanoServer.create[Effect](
-        handler.asInstanceOf[Types.HandlerAnyCodec[Effect, NanoServer.Context]],
-        port
-      )(execute(_))
+      NanoServer
+        .create[Effect](handler.asInstanceOf[Types.HandlerAnyCodec[Effect, NanoServer.Context]], port)(execute(_))
     )
     servers += server
     val scheme = Option.when(webSocket)("ws").getOrElse("http")
@@ -28,4 +24,7 @@ trait StandardHttpClientTest extends ClientServerTest {
     clients += client
     Some(client)
   }
+
+  def webSocket: Boolean =
+    false
 }

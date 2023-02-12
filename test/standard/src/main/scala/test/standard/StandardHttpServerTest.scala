@@ -11,8 +11,6 @@ trait StandardHttpServerTest extends ClientServerTest {
 
   def serverTransport(handler: Types.HandlerAnyCodec[Effect, Context], port: Int): ServerMessageTransport[Effect]
 
-  def webSocket: Boolean = false
-
   override def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
@@ -24,4 +22,7 @@ trait StandardHttpServerTest extends ClientServerTest {
     clients += client
     Some(client)
   }
+
+  def webSocket: Boolean =
+    false
 }
