@@ -8,7 +8,7 @@ import org.scalatestplus.scalacheck.Checkers
 import scribe.Level
 import scribe.file.{FileWriter, PathBuilder}
 import scribe.format.{
-  FormatterInterpolator, gray, levelColoredPaddedRight, mdcMultiLine, message, positionAbbreviated, time,
+  FormatterInterpolator, gray, levelColoredPaddedRight, magenta, mdcMultiLine, message, positionSimple, time,
 }
 import scribe.writer.ConsoleWriter
 
@@ -35,23 +35,31 @@ trait BaseTest
   with Checkers
   with Fixtures
   with Await
-  with Network
+  with Network {
+
+  override def beforeAll(): Unit = {
+    BaseTest.setupLogger
+    super.beforeAll()
+  }
+}
 
 object BaseTest {
+
+  /** Configure test logging. */
+  private lazy val setupLogger: Unit = {
+    val level = Option(System.getenv(logLevelEnvironment)).flatMap(Level.get).getOrElse(Level.Fatal)
+    val format = formatter"${magenta(time)} [$levelColoredPaddedRight] (${gray(positionSimple)}): $message$mdcMultiLine"
+    val path = PathBuilder.static(Paths.get("target/test.log"))
+    scribe.Logger.root.clearHandlers().clearModifiers()
+      .withHandler(writer = ConsoleWriter, formatter = format, minimumLevel = Some(level))
+      .withHandler(writer = FileWriter(path), formatter = format, minimumLevel = Some(level)).replace()
+  }
 
   /** Log level environment variable. */
   private val logLevelEnvironment = "LOG_LEVEL"
 
   /** Enable basic tests only environment variable. */
   private val testBasicEnvironment = "TEST_BASIC"
-  private val setupLogger: Unit = {
-    val level = Option(System.getenv(logLevelEnvironment)).flatMap(Level.get).getOrElse(Level.Fatal)
-    val format = formatter"$time [$levelColoredPaddedRight] (${gray(positionAbbreviated)}): $message$mdcMultiLine"
-    val path = PathBuilder.static(Paths.get("target/test.log"))
-    scribe.Logger.root.clearHandlers().clearModifiers()
-      .withHandler(writer = ConsoleWriter, formatter = format, minimumLevel = Some(level))
-      .withHandler(writer = FileWriter(path), formatter = format, minimumLevel = Some(level)).replace()
-  }
 
   /** Basic tests enabled only. */
   final def testBasic: Boolean =
