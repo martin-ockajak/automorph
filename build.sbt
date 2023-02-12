@@ -164,7 +164,7 @@ lazy val rabbitmq = source(project, "transport/rabbitmq", amqp, core, standard, 
 
 // Server
 lazy val undertow = source(project, "transport/undertow", core, http, testStandard % Test).settings(
-  libraryDependencies += "io.undertow" % "undertow-core" % "2.2.14.Final",
+  libraryDependencies += "io.undertow" % "undertow-core" % "2.3.3.Final",
   Test / javaOptions += "-Dorg.jboss.logging.provider=slf4j",
   Test / fork := true,
 )
