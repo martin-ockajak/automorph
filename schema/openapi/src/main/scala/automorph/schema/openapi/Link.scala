@@ -7,5 +7,5 @@ case class Link(
   requestBody: Option[String] = None,
   description: Option[String] = None,
   server: Option[Server] = None,
-  $ref: Option[String] = None
+  $ref: Option[String] = None,
 ) extends Reference

@@ -13,5 +13,5 @@ case class PathItem(
   patch: Option[Operation] = None,
   trace: Option[Operation] = None,
   servers: Option[List[Server]] = None,
-  parameters: Option[List[Parameter]] = None
+  parameters: Option[List[Parameter]] = None,
 )

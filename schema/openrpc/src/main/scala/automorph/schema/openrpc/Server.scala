@@ -5,5 +5,5 @@ case class Server(
   url: String,
   summary: Option[String] = None,
   description: Option[String] = None,
-  variables: Option[Map[String, ServerVariable]] = None
+  variables: Option[Map[String, ServerVariable]] = None,
 )

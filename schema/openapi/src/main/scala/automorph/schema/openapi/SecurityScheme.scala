@@ -9,5 +9,5 @@ case class SecurityScheme(
   bearerFormat: Option[String] = None,
   flows: Option[OAuthFlows] = None,
   openIdConnectUrl: Option[String] = None,
-  $ref: Option[String] = None
+  $ref: Option[String] = None,
 ) extends Reference

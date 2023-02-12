@@ -1,5 +1,3 @@
 package automorph.schema.openapi
 
-case class HeaderReference(
-  $ref: Option[String]
-) extends Reference
+case class HeaderReference($ref: Option[String]) extends Reference

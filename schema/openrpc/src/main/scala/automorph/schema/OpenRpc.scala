@@ -6,7 +6,8 @@ import automorph.spi.protocol.RpcFunction
 /**
  * OpenRPC API description.
  *
- * @see [[https://spec.open-rpc.org OpenRPC description]]
+ * @see
+ *   [[https://spec.open-rpc.org OpenRPC description]]
  */
 case class OpenRpc(
   openrpc: String = "1.2.6",
@@ -14,7 +15,7 @@ case class OpenRpc(
   servers: Option[List[Server]] = None,
   methods: List[Method] = List(),
   components: Option[Components] = None,
-  externalDocs: Option[ExternalDocumentation] = None
+  externalDocs: Option[ExternalDocumentation] = None,
 )
 
 object OpenRpc {
@@ -29,8 +30,10 @@ object OpenRpc {
   /**
    * Generates OpenRPC description for given RPC functions.
    *
-   * @param functions RPC functions
-   * @return OpenRPC description
+   * @param functions
+   *   RPC functions
+   * @return
+   *   OpenRPC description
    */
   def apply(functions: Iterable[RpcFunction]): OpenRpc = {
     val methods = functions.map { function =>
@@ -41,16 +44,12 @@ object OpenRpc {
         ContentDescriptor(
           name = parameter.name,
           required = Some(requiredParameters.contains(parameter.name)),
-          schema = parameterSchemas(parameter.name)
+          schema = parameterSchemas(parameter.name),
         )
       }.toList
 
       // Result
-      val result = ContentDescriptor(
-        name = resultName,
-        required = Some(true),
-        schema = Schema.result(function)
-      )
+      val result = ContentDescriptor(name = resultName, required = Some(true), schema = Schema.result(function))
 
       // Method
       val summary = function.documentation.flatMap(_.split('\n').find {
@@ -63,7 +62,7 @@ object OpenRpc {
         result = result,
         summary = summary,
         description = function.documentation,
-        paramStructure = Some("either")
+        paramStructure = Some("either"),
       )
       method
     }.toList

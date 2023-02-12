@@ -14,7 +14,7 @@ case class Operation(
   callbacks: Option[Map[String, Callback]] = None,
   deprecated: Option[Boolean] = None,
   security: Option[List[SecurityRequirement]] = None,
-  servers: Option[List[Server]] = None
+  servers: Option[List[Server]] = None,
 )
 
 object Operation {

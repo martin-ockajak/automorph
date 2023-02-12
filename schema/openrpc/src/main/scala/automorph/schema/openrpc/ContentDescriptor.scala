@@ -7,5 +7,5 @@ case class ContentDescriptor(
   required: Option[Boolean] = None,
   schema: Schema,
   deprecated: Option[Boolean] = None,
-  $ref: Option[String] = None
+  $ref: Option[String] = None,
 ) extends Reference

@@ -7,5 +7,5 @@ case class Link(
   method: Option[String] = None,
   params: Option[Map[String, String]] = None,
   server: Option[Server] = None,
-  $ref: Option[String] = None
+  $ref: Option[String] = None,
 ) extends Reference

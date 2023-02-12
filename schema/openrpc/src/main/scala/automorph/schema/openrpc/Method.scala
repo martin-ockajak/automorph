@@ -14,5 +14,5 @@ case class Method(
   links: Option[List[Link]] = None,
   paramStructure: Option[String] = None,
   examples: Option[List[ExamplePairing]] = None,
-  $ref: Option[String] = None
+  $ref: Option[String] = None,
 ) extends Reference

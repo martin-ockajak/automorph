@@ -2,13 +2,16 @@ package automorph.schema
 
 import automorph.schema.OpenApi.{Components, Paths}
 import automorph.schema.openapi.Operation.SecurityRequirement
-import automorph.schema.openapi.{ExternalDocumentation, Info, MediaType, Operation, PathItem, RequestBody, Response, RpcSchema, Schema, Server, Tag}
+import automorph.schema.openapi.{
+  ExternalDocumentation, Info, MediaType, Operation, PathItem, RequestBody, Response, RpcSchema, Schema, Server, Tag,
+}
 import automorph.spi.protocol.RpcFunction
 
 /**
  * OpenAPI API description.
  *
- * @see [[https://github.com/OAI/OpenAPI-Specification OpenAPI description]]
+ * @see
+ *   [[https://github.com/OAI/OpenAPI-Specification OpenAPI description]]
  */
 case class OpenApi(
   openapi: String = "3.1.0",
@@ -20,7 +23,7 @@ case class OpenApi(
   components: Option[Components] = None,
   security: Option[List[SecurityRequirement]] = None,
   tags: Option[List[Tag]] = None,
-  externalDocs: Option[ExternalDocumentation] = None
+  externalDocs: Option[ExternalDocumentation] = None,
 )
 
 object OpenApi {
@@ -45,8 +48,10 @@ object OpenApi {
   /**
    * Generates OpenAPI description for given RPC functions.
    *
-   * @param functionSchemas RPC function schemas
-   * @return OpenAPI description
+   * @param functionSchemas
+   *   RPC function schemas
+   * @return
+   *   OpenAPI description
    */
   def apply(functionSchemas: Iterable[(RpcFunction, RpcSchema)]): OpenApi = {
     val paths = functionSchemas.map { case (function, schema) =>
@@ -59,13 +64,13 @@ object OpenApi {
         // Error response
         "default" -> Response(
           description = "Failed function call error details",
-          content = Some(Map(contentType -> errorMediaType))
+          content = Some(Map(contentType -> errorMediaType)),
         ),
         // Result response
         httpStatusCodeOk -> Response(
           description = "Succesful function call result value",
-          content = Some(Map(contentType -> resultMediaType))
-        )
+          content = Some(Map(contentType -> resultMediaType)),
+        ),
       )
 
       // Path

@@ -11,7 +11,7 @@ final case class Schema(
   required: Option[List[String]] = None,
   default: Option[String] = None,
   allOf: Option[List[Schema]] = None,
-  $ref: Option[String] = None
+  $ref: Option[String] = None,
 )
 
 object Schema {
@@ -29,7 +29,7 @@ object Schema {
       parameter.name -> Schema(
         Some(parameter.`type`),
         Some(parameter.name),
-        scaladocField(function.documentation, s"param ${parameter.name}")
+        scaladocField(function.documentation, s"param ${parameter.name}"),
       )
     }.toMap
 

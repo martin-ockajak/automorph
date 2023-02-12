@@ -12,5 +12,5 @@ case class Components(
   securitySchemes: Option[Map[String, SecurityScheme]] = None,
   links: Option[Map[String, Link]] = None,
   callbacks: Option[Map[String, Callback]] = None,
-  pathItems: Option[Map[String, PathItem]] = None
+  pathItems: Option[Map[String, PathItem]] = None,
 )

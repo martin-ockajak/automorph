@@ -5,5 +5,5 @@ case class Encoding(
   headers: Option[Map[String, HeaderReference]],
   style: Option[String] = None,
   explode: Option[Boolean] = None,
-  allowReserved: Option[Boolean] = None
+  allowReserved: Option[Boolean] = None,
 )

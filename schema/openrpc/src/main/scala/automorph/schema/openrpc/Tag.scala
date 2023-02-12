@@ -5,5 +5,5 @@ case class Tag(
   summary: Option[String] = None,
   description: Option[String] = None,
   externalDocs: Option[ExternalDocumentation] = None,
-  $ref: Option[String] = None
+  $ref: Option[String] = None,
 ) extends Reference

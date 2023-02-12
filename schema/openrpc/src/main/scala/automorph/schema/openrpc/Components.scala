@@ -7,5 +7,5 @@ case class Components(
   links: Option[Map[String, Link]] = None,
   error: Option[Map[String, Error]] = None,
   examplePairingObjects: Option[Map[String, ExamplePairing]] = None,
-  tags: Option[Map[String, Tag]] = None
+  tags: Option[Map[String, Tag]] = None,
 )

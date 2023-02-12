@@ -14,5 +14,5 @@ case class Parameter(
   example: Option[String] = None,
   examples: Option[Map[String, Example]] = None,
   content: Option[Map[String, MediaType]] = None,
-  $ref: Option[String] = None
+  $ref: Option[String] = None,
 ) extends Reference
