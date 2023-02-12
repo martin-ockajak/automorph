@@ -170,7 +170,7 @@ lazy val undertow = source(project, "transport/undertow", core, http, testStanda
 )
 lazy val vertx = source(project, "transport/vertx", core, http, testStandard % Test)
   .settings(libraryDependencies += "io.vertx" % "vertx-core" % "4.3.8")
-val jettyVersion = "11.0.7"
+val jettyVersion = "11.0.13"
 lazy val jetty = source(project, "transport/jetty", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
     "org.eclipse.jetty.websocket" % "websocket-jetty-client" % jettyVersion,
