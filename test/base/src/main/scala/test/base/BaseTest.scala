@@ -1,10 +1,12 @@
 package test.base
 
+import java.nio.file.Paths
 import org.scalatest.freespec.AnyFreeSpecLike
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{AppendedClues, BeforeAndAfterAll, BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.scalacheck.Checkers
 import scribe.Level
+import scribe.file.{FileWriter, PathBuilder}
 import scribe.format.{
   FormatterInterpolator, gray, levelColoredPaddedRight, mdcMultiLine, message, positionAbbreviated, time,
 }
@@ -45,11 +47,10 @@ object BaseTest {
   private val setupLogger: Unit = {
     val level = Option(System.getenv(logLevelEnvironment)).flatMap(Level.get).getOrElse(Level.Fatal)
     val format = formatter"$time [$levelColoredPaddedRight] (${gray(positionAbbreviated)}): $message$mdcMultiLine"
-//    val path = PathBuilder.static(Paths.get("target/test.log"))
+    val path = PathBuilder.static(Paths.get("target/test.log"))
     scribe.Logger.root.clearHandlers().clearModifiers()
       .withHandler(writer = ConsoleWriter, formatter = format, minimumLevel = Some(level))
-//      .withHandler(writer = FileWriter(path), formatter = format, minimumLevel = Some(level))
-      .replace()
+      .withHandler(writer = FileWriter(path), formatter = format, minimumLevel = Some(level)).replace()
   }
 
   /** Basic tests enabled only. */
