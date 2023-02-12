@@ -21,13 +21,13 @@ final private[automorph] case class Logger private (private val underlying: slf4
   type Not[T] = T => Nothing
   type Or[T, U] = Not[Not[T] & Not[U]]
 
-  def error[T](message: => String): Unit =
+  def error(message: => String): Unit =
     underlying.error(message)
 
-  def error[T](message: => String, cause: => Throwable): Unit =
+  def error(message: => String, cause: => Throwable): Unit =
     underlying.error(message, cause)
 
-  def error[T](message: => String, properties: (String, Any)*): Unit =
+  def error(message: => String, properties: (String, Any)*): Unit =
     error(message, properties)
 
   def error[T](message: => String, properties: => T)(implicit
@@ -35,13 +35,111 @@ final private[automorph] case class Logger private (private val underlying: slf4
   ): Unit =
     log(message, properties, underlying.isErrorEnabled, message => underlying.error(message))
 
-  def error[T](message: => String, cause: => Throwable, properties: (String, Any)*): Unit =
+  private def log[T](message: => String, properties: => T, enabled: Boolean, logMessage: String => Unit)(implicit
+    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
+  ): Unit =
+    if (enabled) {
+      val iterableProperties = unpackProperties(properties)
+      addDiagnosticContext(iterableProperties)
+      logMessage(message)
+      removeDiagnosticContext(iterableProperties)
+    }
+
+  def error(message: => String, cause: => Throwable, properties: (String, Any)*): Unit =
     error(message, cause, properties)
 
   def error[T](message: => String, cause: => Throwable, properties: => T)(implicit
     evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
   ): Unit =
     log(message, cause, properties, underlying.isErrorEnabled, (message, cause) => underlying.error(message, cause))
+
+  def warn(message: => String): Unit =
+    underlying.warn(message)
+
+  def warn(message: => String, cause: => Throwable): Unit =
+    underlying.warn(message, cause)
+
+  def warn(message: => String, properties: (String, Any)*): Unit =
+    warn(message, properties)
+
+  def warn[T](message: => String, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
+  ): Unit =
+    log(message, properties, underlying.isWarnEnabled, message => underlying.warn(message))
+
+  def warn(message: => String, cause: => Throwable, properties: (String, Any)*): Unit =
+    warn(message, cause, properties)
+
+  def warn[T](message: => String, cause: => Throwable, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
+  ): Unit =
+    log(message, cause, properties, underlying.isWarnEnabled, (message, cause) => underlying.warn(message, cause))
+
+  def info(message: => String): Unit =
+    underlying.info(message)
+
+  def info(message: => String, cause: => Throwable): Unit =
+    underlying.info(message, cause)
+
+  def info(message: => String, properties: (String, Any)*): Unit =
+    info(message, properties)
+
+  def info[T](message: => String, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
+  ): Unit =
+    log(message, properties, underlying.isInfoEnabled, message => underlying.info(message))
+
+  def info(message: => String, cause: => Throwable, properties: (String, Any)*): Unit =
+    info(message, cause, properties)
+
+  def info[T](message: => String, cause: => Throwable, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
+  ): Unit =
+    log(message, cause, properties, underlying.isInfoEnabled, (message, cause) => underlying.info(message, cause))
+
+  def debug(message: => String): Unit =
+    underlying.debug(message)
+
+  def debug(message: => String, cause: => Throwable): Unit =
+    underlying.debug(message, cause)
+
+  def debug(message: => String, properties: (String, Any)*): Unit =
+    debug(message, properties)
+
+  def debug[T](message: => String, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
+  ): Unit =
+    log(message, properties, underlying.isDebugEnabled, message => underlying.debug(message))
+
+  def debug(message: => String, cause: => Throwable, properties: (String, Any)*): Unit =
+    debug(message, cause, properties)
+
+  def debug[T](message: => String, cause: => Throwable, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
+  ): Unit =
+    log(message, cause, properties, underlying.isDebugEnabled, (message, cause) => underlying.debug(message, cause))
+
+  def trace(message: => String): Unit =
+    underlying.trace(message)
+
+  def trace(message: => String, cause: => Throwable): Unit =
+    underlying.trace(message, cause)
+
+  def trace(message: => String, properties: (String, Any)*): Unit =
+    trace(message, properties)
+
+  def trace[T](message: => String, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
+  ): Unit =
+    log(message, properties, underlying.isTraceEnabled, message => underlying.trace(message))
+
+  def trace(message: => String, cause: => Throwable, properties: (String, Any)*): Unit =
+    trace(message, cause, properties)
+
+  def trace[T](message: => String, cause: => Throwable, properties: => T)(implicit
+    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
+  ): Unit =
+    log(message, cause, properties, underlying.isTraceEnabled, (message, cause) => underlying.trace(message, cause))
 
   private def log[T](
     message: => String,
@@ -75,104 +173,6 @@ final private[automorph] case class Logger private (private val underlying: slf4
 
   private def removeDiagnosticContext(properties: Iterable[(String, Any)]): Unit =
     properties.foreach { case (key, _) => MDC.remove(key) }
-
-  def warn[T](message: => String): Unit =
-    underlying.warn(message)
-
-  def warn[T](message: => String, cause: => Throwable): Unit =
-    underlying.warn(message, cause)
-
-  def warn[T](message: => String, properties: (String, Any)*): Unit =
-    warn(message, properties)
-
-  def warn[T](message: => String, properties: => T)(implicit
-    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
-  ): Unit =
-    log(message, properties, underlying.isWarnEnabled, message => underlying.warn(message))
-
-  def warn[T](message: => String, cause: => Throwable, properties: (String, Any)*): Unit =
-    warn(message, cause, properties)
-
-  def warn[T](message: => String, cause: => Throwable, properties: => T)(implicit
-    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
-  ): Unit =
-    log(message, cause, properties, underlying.isWarnEnabled, (message, cause) => underlying.warn(message, cause))
-
-  def info[T](message: => String): Unit =
-    underlying.info(message)
-
-  def info[T](message: => String, cause: => Throwable): Unit =
-    underlying.info(message, cause)
-
-  def info[T](message: => String, properties: (String, Any)*): Unit =
-    info(message, properties)
-
-  def info[T](message: => String, properties: => T)(implicit
-    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
-  ): Unit =
-    log(message, properties, underlying.isInfoEnabled, message => underlying.info(message))
-
-  private def log[T](message: => String, properties: => T, enabled: Boolean, logMessage: String => Unit)(implicit
-    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
-  ): Unit =
-    if (enabled) {
-      val iterableProperties = unpackProperties(properties)
-      addDiagnosticContext(iterableProperties)
-      logMessage(message)
-      removeDiagnosticContext(iterableProperties)
-    }
-
-  def info[T](message: => String, cause: => Throwable, properties: (String, Any)*): Unit =
-    info(message, cause, properties)
-
-  def info[T](message: => String, cause: => Throwable, properties: => T)(implicit
-    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
-  ): Unit =
-    log(message, cause, properties, underlying.isInfoEnabled, (message, cause) => underlying.info(message, cause))
-
-  def debug[T](message: => String): Unit =
-    underlying.debug(message)
-
-  def debug[T](message: => String, cause: => Throwable): Unit =
-    underlying.debug(message, cause)
-
-  def debug[T](message: => String, properties: (String, Any)*): Unit =
-    debug(message, properties)
-
-  def debug[T](message: => String, properties: => T)(implicit
-    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
-  ): Unit =
-    log(message, properties, underlying.isDebugEnabled, message => underlying.debug(message))
-
-  def debug[T](message: => String, cause: => Throwable, properties: (String, Any)*): Unit =
-    debug(message, cause, properties)
-
-  def debug[T](message: => String, cause: => Throwable, properties: => T)(implicit
-    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
-  ): Unit =
-    log(message, cause, properties, underlying.isDebugEnabled, (message, cause) => underlying.debug(message, cause))
-
-  def trace[T](message: => String): Unit =
-    underlying.trace(message)
-
-  def trace[T](message: => String, cause: => Throwable): Unit =
-    underlying.trace(message, cause)
-
-  def trace[T](message: => String, properties: (String, Any)*): Unit =
-    trace(message, properties)
-
-  def trace[T](message: => String, properties: => T)(implicit
-    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
-  ): Unit =
-    log(message, properties, underlying.isTraceEnabled, message => underlying.trace(message))
-
-  def trace[T](message: => String, cause: => Throwable, properties: (String, Any)*): Unit =
-    trace(message, cause, properties)
-
-  def trace[T](message: => String, cause: => Throwable, properties: => T)(implicit
-    evidence: Not[Not[T]] <:< Or[Iterable[(String, Any)], Product]
-  ): Unit =
-    log(message, cause, properties, underlying.isTraceEnabled, (message, cause) => underlying.trace(message, cause))
 }
 
 object Logger {

@@ -265,7 +265,7 @@ ThisBuild / scalacOptions ++=
 ThisBuild / javacOptions ++= Seq("-source", "11", "-target", "11")
 
 // Analyze
-scalastyleConfig := baseDirectory.value / "project" / "scalastyle.xml"
+scalastyleConfig := baseDirectory.value / "project" / "scalastyle-config.xml"
 Compile / scalastyleSources ++= (Compile / unmanagedSourceDirectories).value
 scalastyleFailOnError := true
 lazy val testScalastyle = taskKey[Unit]("testScalastyle")
