@@ -205,14 +205,13 @@ lazy val examples = source(project, "examples", default, upickle, zio, testPlugi
 )
 
 // Test
-val scalatestVersion = "3.2.11"
 val scribeVersion = "3.7.1"
 Test / testOptions += Tests.Argument("-oD")
 lazy val testBase = source(project, "test/base", spi).settings(
   libraryDependencies ++= Seq(
     // Test
-    "org.scalatest" %% "scalatest" % scalatestVersion,
-    "org.scalatestplus" %% "scalacheck-1-15" % s"$scalatestVersion.0",
+    "org.scalatest" %% "scalatest" % "3.2.15",
+    "org.scalatestplus" %% "scalacheck-1-15" % "3.2.11.0",
     "com.outr" %% "scribe-file" % scribeVersion,
     "com.outr" %% "scribe-slf4j" % scribeVersion,
     "org.slf4j" % "jul-to-slf4j" % "1.7.33",
