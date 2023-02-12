@@ -90,7 +90,7 @@ lazy val spi = source(project, "common/spi").settings(libraryDependencies ++= {
   }
 })
 lazy val util = source(project, "common/util", spi)
-  .settings(libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.33")
+  .settings(libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.36")
 lazy val coreMeta = source(project, "common/core/meta", spi, util).settings(
   Compile / doc / scalacOptions ++=
     Seq("-Ymacro-expand:none", "-skip-packages automorph.client.meta:automorph.handler.meta")
@@ -205,7 +205,7 @@ lazy val examples = source(project, "examples", default, upickle, zio, testPlugi
 )
 
 // Test
-val scribeVersion = "3.7.1"
+val scribeVersion = "3.11.0"
 Test / testOptions += Tests.Argument("-oD")
 lazy val testBase = source(project, "test/base", spi).settings(
   libraryDependencies ++= Seq(

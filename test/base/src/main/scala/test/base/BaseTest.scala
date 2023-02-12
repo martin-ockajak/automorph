@@ -8,7 +8,7 @@ import org.scalatestplus.scalacheck.Checkers
 import scribe.Level
 import scribe.file.{FileWriter, PathBuilder}
 import scribe.format.{
-  FormatterInterpolator, gray, levelColoredPaddedRight, magenta, mdcMultiLine, message, positionSimple, time,
+  FormatterInterpolator, gray, levelColoredPaddedRight, magenta, mdcMultiLine, messages, positionSimple, time,
 }
 import scribe.writer.ConsoleWriter
 
@@ -48,7 +48,8 @@ object BaseTest {
   /** Configure test logging. */
   private lazy val setupLogger: Unit = {
     val level = Option(System.getenv(logLevelEnvironment)).flatMap(Level.get).getOrElse(Level.Fatal)
-    val format = formatter"${magenta(time)} [$levelColoredPaddedRight] (${gray(positionSimple)}): $message$mdcMultiLine"
+    val format =
+      formatter"${magenta(time)} [$levelColoredPaddedRight] (${gray(positionSimple)}): $messages$mdcMultiLine"
     val path = PathBuilder.static(Paths.get("target/test.log"))
     scribe.Logger.root.clearHandlers().clearModifiers()
       .withHandler(writer = ConsoleWriter, formatter = format, minimumLevel = Some(level))
