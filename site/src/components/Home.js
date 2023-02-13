@@ -55,7 +55,7 @@ const features = [
     ),
   },
   {
-    title: <a href="https://mvnrepository.com/artifact/automorph">Compatible</a>,
+    title: <a href="https://mvnrepository.com/artifact/org.automorph/automorph">Compatible</a>,
     description: (
         <>
           Artifacts are available for <a href="https://dotty.epfl.ch/">Scala</a> 3.2+ on <a
