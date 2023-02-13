@@ -24,12 +24,10 @@ class JacksonJsonTest extends JsonMessageCodecTest {
       Gen.resultOf(TextNode.valueOf),
       Gen.resultOf(IntNode.valueOf),
       Gen.resultOf(BooleanNode.valueOf),
-      Gen.listOfN[Node](2, recurse).map((values: List[Node]) =>
-        new ArrayNode(JacksonJsonCodec.defaultMapper.getNodeFactory, values.asJava)
-      ),
-      Gen.mapOfN(2, Gen.zip(Arbitrary.arbitrary[String], recurse)).map(values =>
-        new ObjectNode(JacksonJsonCodec.defaultMapper.getNodeFactory, values.asJava)
-      )
+      Gen.listOfN[Node](2, recurse)
+        .map((values: List[Node]) => new ArrayNode(JacksonJsonCodec.defaultMapper.getNodeFactory, values.asJava)),
+      Gen.mapOfN(2, Gen.zip(Arbitrary.arbitrary[String], recurse))
+        .map(values => new ObjectNode(JacksonJsonCodec.defaultMapper.getNodeFactory, values.asJava)),
     )
   ))
 
@@ -39,14 +37,14 @@ class JacksonJsonTest extends JsonMessageCodecTest {
 
       override def serialize(value: Enum.Enum, generator: JsonGenerator, provider: SerializerProvider): Unit =
         generator.writeNumber(Enum.toOrdinal(value))
-    }
+    },
   ).addDeserializer(
     classOf[Enum.Enum],
     new StdDeserializer[Enum.Enum](classOf[Enum.Enum]) {
 
       override def deserialize(parser: JsonParser, context: DeserializationContext): Enum.Enum =
         Enum.fromOrdinal(parser.getIntValue)
-    }
+    },
   )
 
   "" - {
