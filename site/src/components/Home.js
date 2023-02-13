@@ -38,8 +38,8 @@ const features = [
     title: <a href="docs/Quickstart">Automatic</a>,
     description: (
         <>
-          Generate <a href="https://www.jsonrpc.org/specification">JSON-RPC 2.0</a> and <a
-            href="docs/Web-RPC/index.html">Web-RPC 0.1</a> client or server at compile-time from public API class methods.
+          Generate <a href="https://www.jsonrpc.org/specification">JSON-RPC</a> 2.0 and <a
+            href="docs/Web-RPC/index.html">Web-RPC</a> 0.1 client or server at compile-time from public API class methods.
         </>
     ),
   },
@@ -58,9 +58,9 @@ const features = [
     title: <a href="https://mvnrepository.com/artifact/automorph">Compatible</a>,
     description: (
         <>
-          Artifacts are available for <a href="https://dotty.epfl.ch/">Scala 3.2+</a> on <a
-            href="https://openjdk.java.net/">JRE 11+</a> with support for <a
-            href="https://www.scala-lang.org/news/2.13.0">Scala 2.13+</a> planned.
+          Artifacts are available for <a href="https://dotty.epfl.ch/">Scala</a> 3.2+ on <a
+            href="https://openjdk.java.net/">JRE</a> 11+ with support for <a
+            href="https://www.scala-lang.org/news/2.13.0">Scala</a> 2.13+ planned.
         </>
     ),
   },
@@ -76,8 +76,8 @@ const features = [
     title: <a href="docs/Examples#api-schema-discovery">Discoverable</a>,
     description: (
         <>
-          Consume and provide <a href="https://spec.open-rpc.org">OpenRPC 1.3+</a> or <a
-            href="https://github.com/OAI/OpenAPI-Specification">OpenAPI 3.1+</a> API schemas via generated
+          Consume and provide <a href="https://spec.open-rpc.org">OpenRPC</a> 1.3+ or <a
+            href="https://github.com/OAI/OpenAPI-Specification">OpenAPI</a> 3.1+ API schemas via generated
           discovery functions.
         </>
     ),
