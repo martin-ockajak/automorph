@@ -343,8 +343,10 @@ site := {
     overwrite = true,
   )
   (docs / mdoc).toTask("").value
-  if (!(sitePath.value / "node_modules").exists) { Process(Seq("bash", "-c", "cd site && yarn install")) ! }
-  Process(Seq("bash", "-c", "cd site && yarn build"), None, "SITE_DOCS" -> "docs") !
+  if (!(sitePath.value / "node_modules").exists) {
+    Process(Seq("yarn", "install"), sitePath.value) !
+  }
+  Process(Seq("yarn", "build"), sitePath.value, "SITE_DOCS" -> "docs") !
 }
 cleanFiles ++= Seq(sitePath.value / "docs", sitePath.value / "static/examples", sitePath.value / "build")
 
