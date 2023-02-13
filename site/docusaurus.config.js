@@ -51,24 +51,19 @@ const config = {
         },
         items: [
           {
-            type: 'doc',
-            docId: 'Overview',
-            position: 'left'
-          },
-          {
             href: '/api/index.html',
             label: 'API',
             position: 'left',
           },
           {
-            href: 'https://mvnrepository.com/artifact/org.automorph/automorph',
-            label: 'Artifacts',
-            position: 'right',
-          },
-          {
             href: 'https://github.com/martin-ockajak/automorph',
             label: 'Source',
-            position: 'right',
+            position: 'left',
+          },
+          {
+            href: 'https://mvnrepository.com/artifact/org.automorph/automorph',
+            label: 'Artifacts',
+            position: 'left',
           },
         ],
       },
