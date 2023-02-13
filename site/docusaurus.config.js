@@ -19,6 +19,8 @@ const config = {
       ({
         blog: false,
         sitemap: false,
+        googleAnalytics: false,
+        gtag: false,
         docs: {
           path: process.env['SITE_DOCS'] ?? '../docs',
           sidebarPath: require.resolve('./sidebars.js'),
@@ -31,18 +33,16 @@ const config = {
   ],
 
   plugins: [
-    [require.resolve("@easyops-cn/docusaurus-search-local"), {
+    [require.resolve('@easyops-cn/docusaurus-search-local'), {
       highlightSearchTermsOnTargetPage: true
     }],
-    'docusaurus-plugin-relative-paths'
+    '@someok/docusaurus-plugin-relative-paths'
   ],
 
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       algolia: false,
-      googleAnalytics: false,
-      gtag: false,
       navbar: {
         title: 'Automorph',
         logo: {
