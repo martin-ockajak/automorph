@@ -1,4 +1,3 @@
-import clsx from 'clsx'
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
 import Layout from '@theme/Layout'
 import Link from '@docusaurus/Link'
@@ -130,7 +129,7 @@ const features = [
 
 function Feature({ title, description }) {
   return (
-      <div className={clsx('col col--4')}>
+      <div className={'col col--4'}>
         <div className="text--center padding-horiz--md">
           <h3>{title}</h3>
           <p>{description}</p>
