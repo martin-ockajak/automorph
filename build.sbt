@@ -14,7 +14,8 @@ ThisBuild / description := projectDescription
 ThisBuild / organization := s"$projectRoot.$projectName"
 ThisBuild / organizationName := projectName
 ThisBuild / organizationHomepage := Some(url(siteUrl))
-
+ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
+ThisBuild / sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 ThisBuild / developers := List(Developer(
   id = "m",
   name = "Martin Ockajak",
