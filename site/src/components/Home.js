@@ -26,7 +26,7 @@ const features = [
     link: 'docs/Examples/index.html#select',
     description: (
         <>
-          Choose plugins for <a href="docs/Plugins/index.html#rpc-protocol">RPC</a> protocol, <a
+          Choose plugins for <a href="docs/Plugins/index.html#rpc-protocol">RPC protocol</a>, <a
             href="docs/Plugins/index.html#effect-system">effect type</a>, <a
             href="docs/Plugins/index.html#message-transport">transport protocol</a> and <a
             href="docs/Plugins/index.html#message-codec">message format</a>.
