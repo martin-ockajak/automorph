@@ -69,7 +69,7 @@ const features = [
         <>
           Artifacts are available for <a href="https://dotty.epfl.ch/">Scala</a> 3.2+ on
           <a href="https://openjdk.java.net/">JRE</a> 11+ with support for
-          <a href="https://www.scala-lang.org/news/2.13.10">Scala</a>2.13+ planned.
+          <a href="https://www.scala-lang.org/news/2.13.10">Scala</a> 2.13+ planned.
         </>
     ),
   },
