@@ -134,7 +134,7 @@ function TaglineRow() {
           <div className="text--center padding-vert--sm">
             <p style={{
               fontSize: '2rem',
-              color: 'var(--placeholder-color)',
+              color: 'var(--ifm-menu-color)',
             }}>{config.tagline}</p>
           </div>
         </div>
@@ -167,9 +167,9 @@ function DocumentationRow() {
   return (
       <div className="row">
         <div className={'col col--12'}>
-          <div className="text--center padding-bottom--lg">
+          <div className="text--center padding-bottom--xl">
             <Link className="button" to="docs/Quickstart" style={{
-              color: 'var(--ifm-background-color)',
+              color: 'var(--sidebar-background-color)',
               backgroundColor: 'var(--ifm-link-color)',
               fontSize: '2rem',
             }}>
