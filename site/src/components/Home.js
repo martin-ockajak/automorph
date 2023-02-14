@@ -171,7 +171,7 @@ function DocumentationRow() {
             <Link className="button" to="docs/Quickstart" style={{
               color: 'var(--sidebar-background-color)',
               backgroundColor: 'var(--ifm-link-color)',
-              fontSize: '2rem',
+              fontSize: '1.5rem',
             }}>
               Get Started
             </Link>
