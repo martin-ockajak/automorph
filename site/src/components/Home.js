@@ -2,7 +2,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
 import Layout from '@theme/Layout'
 import Link from '@docusaurus/Link'
 import React from 'react'
-import homeImage from "../../../docs/images/home.jpg";
+import homeImage from '../../../docs/images/home.jpg'
 
 const style = {
   headerText: {
