@@ -4,6 +4,7 @@ dist
 
 # Tools
 *.swp
+.bsp
 .idea
 *.iml
 .vscode
