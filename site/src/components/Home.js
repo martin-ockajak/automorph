@@ -43,7 +43,7 @@ const features = [
     ),
   },
   {
-    title: 'Escapable',
+    title: 'Permissive',
     link: 'docs/Examples/index.html#http-request-metadata',
     description: (
         <>
