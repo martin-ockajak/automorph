@@ -16,8 +16,8 @@ const features = [
     link: 'docs/Quickstart/index.html',
     description: (
         <>
-          Generate <a href="https://www.jsonrpc.org/specification">JSON-RPC</a> 2.0 and
-          <a href="docs/Web-RPC">Web-RPC</a> 0.1 client or server at compile-time from public API class methods.
+          Generate <a href="https://www.jsonrpc.org/specification">JSON-RPC</a> 2.0 and <a
+            href="docs/Web-RPC">Web-RPC</a> 0.1 client or server at compile-time from public API class methods.
         </>
     ),
   },
@@ -26,10 +26,10 @@ const features = [
     link: 'docs/Examples/index.html#select',
     description: (
         <>
-          Choose plugins for <a href="docs/Plugins/index.html#rpc-protocol">RPC</a> protocol,
-          <a href="docs/Plugins/index.html#effect-system">effect type</a>,
-          <a href="docs/Plugins/index.html#message-transport">transport protocol</a> and
-          <a href="docs/Plugins/index.html#message-codec">message format</a>.
+          Choose plugins for <a href="docs/Plugins/index.html#rpc-protocol">RPC</a> protocol, <a
+            href="docs/Plugins/index.html#effect-system">effect type</a>, <a
+            href="docs/Plugins/index.html#message-transport">transport protocol</a> and <a
+            href="docs/Plugins/index.html#message-codec">message format</a>.
         </>
     ),
   },
@@ -56,8 +56,8 @@ const features = [
     link: 'docs/Examples/index.html#api-schema-discovery',
     description: (
         <>
-          Consume and provide <a href="https://spec.open-rpc.org">OpenRPC</a> 1.3+ or
-          <a href="https://github.com/OAI/OpenAPI-Specification">OpenAPI</a> 3.1+ API schemas
+          Consume and provide <a href="https://spec.open-rpc.org">OpenRPC</a> 1.3+ or <a
+            href="https://github.com/OAI/OpenAPI-Specification">OpenAPI</a> 3.1+ API schemas
           via generated discovery functions.
         </>
     ),
@@ -67,9 +67,9 @@ const features = [
     link: 'https://mvnrepository.com/artifact/org.automorph/automorph',
     description: (
         <>
-          Artifacts are available for <a href="https://dotty.epfl.ch/">Scala</a> 3.2+ on
-          <a href="https://openjdk.java.net/">JRE</a> 11+ with support for
-          <a href="https://www.scala-lang.org/news/2.13.10">Scala</a> 2.13+ planned.
+          Artifacts are available for <a href="https://dotty.epfl.ch/">Scala</a> 3.2+ on <a
+            href="https://openjdk.java.net/">JRE</a> 11+ with support for <a
+            href="https://www.scala-lang.org/news/2.13.10">Scala</a> 2.13+ planned.
         </>
     ),
   },
