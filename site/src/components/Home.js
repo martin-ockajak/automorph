@@ -23,7 +23,7 @@ const features = [
   },
   {
     title: 'Modular',
-    link: 'docs/Examples/index.html/index.html#select',
+    link: 'docs/Examples/index.html#select',
     description: (
         <>
           Choose plugins for <a href="docs/Plugins/index.html#rpc-protocol">RPC</a> protocol,
