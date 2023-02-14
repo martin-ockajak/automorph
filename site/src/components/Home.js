@@ -2,30 +2,9 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
 import Layout from '@theme/Layout'
 import Link from '@docusaurus/Link'
 import React from 'react'
-import homeImage from '../../../docs/images/home.jpg'
+import bannerImage from '../../../docs/images/banner.jpg'
 
 const style = {
-  headerText: {
-    position: 'absolute',
-    top: '80%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    textAlign: 'center'
-  },
-  subtitle: {
-    fontSize: '2rem',
-    color: '#222222'
-  },
-  button: {
-    margin: '0rem 1rem 3rem 1rem',
-    color: '#000000',
-    fontSize: '1.4rem'
-  },
-  features: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '2rem 0'
-  },
   list: {
     listStyle: 'none',
     padding: '0'
@@ -34,38 +13,40 @@ const style = {
 
 const features = [
   {
-    title: <a href="docs/Quickstart">Automatic</a>,
+    title: 'Automatic',
+    link: 'docs/Quickstart',
     description: (
         <>
-          Generate <a href="https://www.jsonrpc.org/specification">JSON-RPC</a> 2.0 and <a
-            href="docs/Web-RPC/index.html">Web-RPC</a> 0.1 client or server at compile-time from public API class
+          Generate <Link to="https://www.jsonrpc.org/specification">JSON-RPC</Link> 2.0 and <Link
+            to="docs/Web-RPC/index.html">Web-RPC</Link> 0.1 client or server at compile-time from public API class
           methods.
         </>
     ),
   },
   {
-    title: <a href="docs/Examples#select">Modular</a>,
+    title: 'Modular',
+    link: '"docs/Examples#select',
     description: (
         <>
-          Choose plugins for <a href="docs/Plugins#rpc-protocol">RPC</a> protocol, <a
-            href="docs/Plugins#effect-system">effect type</a>, <a
-            href="docs/Plugins#message-transport">transport protocol</a> and <a
-            href="docs/Plugins#message-codec">message format</a>.
+          Choose plugins for <Link to="docs/Plugins#rpc-protocol">RPC</Link> protocol, <Link
+            to="docs/Plugins#effect-system">effect type</Link>, <Link
+            to="docs/Plugins#message-transport">transport protocol</Link> and <Link
+            to="docs/Plugins#message-codec">message format</Link>.
         </>
     ),
   },
   {
-    title: <a href="https://mvnrepository.com/artifact/org.automorph/automorph">Compatible</a>,
+    title: 'Flexible',
+    link: 'docs/Examples#data-serialization',
     description: (
         <>
-          Artifacts are available for <a href="https://dotty.epfl.ch/">Scala</a> 3.2+ on <a
-            href="https://openjdk.java.net/">JRE</a> 11+ with support for <a
-            href="https://www.scala-lang.org/news/2.13.0">Scala</a> 2.13+ planned.
+          Customize data type serialization, remote API function names and RPC protocol errors.
         </>
     ),
   },
   {
-    title: <a href="docs/Examples#http-request-metadata">Escapable</a>,
+    title: 'Escapable',
+    link: 'docs/Examples#http-request-metadata',
     description: (
         <>
           Access transport protocol metadata (e.g. HTTP headers) using optional API abstractions.
@@ -73,7 +54,8 @@ const features = [
     ),
   },
   {
-    title: <a href="docs/Examples#api-schema-discovery">Discoverable</a>,
+    title: 'Discoverable',
+    link: 'docs/Examples#api-schema-discovery',
     description: (
         <>
           Consume and provide <a href="https://spec.open-rpc.org">OpenRPC</a> 1.3+ or <a
@@ -83,94 +65,119 @@ const features = [
     ),
   },
   {
-    title: <a href="docs/Examples#data-serialization">Flexible</a>,
+    title: 'Compatible',
+    link: 'https://mvnrepository.com/artifact/org.automorph/automorph',
     description: (
         <>
-          Customize data type serialization, remote API function names and RPC protocol errors.
+          Artifacts are available for <Link to="https://dotty.epfl.ch/">Scala</Link> 3.2+ on <Link
+            to="https://openjdk.java.net/">JRE</Link> 11+ with support for <Link
+            to="https://www.scala-lang.org/news/2.13.0">Scala</Link> 2.13+ planned.
         </>
     ),
   },
   {
-    title: <a href="docs/Plugins#effect-system">Effect Types</a>,
+    title: 'Effect Types',
+    link: 'docs/Plugins#effect-system',
     description: (
         <>
           <ul style={style.list}>
-            <li><a href="docs/Examples#synchronous-call">Synchronous</a></li>
-            <li><a href="docs/Examples#asynchronous-call">Asynchronous</a></li>
-            <li><a href="docs/Examples#effect-system">Monadic</a></li>
+            <li><Link to="docs/Examples#synchronous-call">Synchronous</Link></li>
+            <li><Link to="docs/Examples#asynchronous-call">Asynchronous</Link></li>
+            <li><Link to="docs/Examples#effect-system">Monadic</Link></li>
           </ul>
         </>
     ),
   },
   {
-    title: <a href="docs/Plugins#message-transport">Transport Protocols</a>,
+    title: 'Transport Protocols',
+    link: 'docs/Plugins#message-transport',
     description: (
         <>
           <ul style={style.list}>
-            <li><a href="docs/Examples#http-response-status">HTTP</a></li>
-            <li><a href="https://en.wikipedia.org/wiki/WebSocket">WebSocket</a></li>
-            <li><a href="https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol">AMQP</a></li>
+            <li><Link to="docs/Examples#http-response-status">HTTP</Link></li>
+            <li><Link to="docs/Examples#websocket-transport">WebSocket</Link></li>
+            <li><Link to="docs/Examples#amqp-transport">AMQP</Link></li>
           </ul>
         </>
     ),
   },
   {
-    title: <a href="docs/Plugins#message-codec">Message Formats</a>,
+    title: 'Message Formats',
+    link: 'docs/Plugins#message-codec',
     description: (
         <>
           <ul style={style.list}>
-            <li><a href="https://www.json.org">JSON</a></li>
-            <li><a href="https://msgpack.org">MessagePack</a></li>
+            <li><Link to="docs/Examples#data-serialization">JSON</Link></li>
+            <li><Link to="docs/Examples#message-codec">MessagePack</Link></li>
           </ul>
         </>
     ),
   },
 ]
 
-function Feature({ title, description }) {
+function BannerRow() {
+  const config = useDocusaurusContext().siteConfig
+  return (
+      <div className="row">
+        <div className={'col col--12'}>
+          <img src={bannerImage} alt={config.title}/>
+        </div>
+      </div>
+  )
+}
+
+function TaglineRow() {
+  const config = useDocusaurusContext().siteConfig
+  return (
+      <div className="row">
+        <div className={'col col--12'}>
+          <div className="text--center padding-vert--sm">
+            <p style={{
+              fontSize: '2rem',
+              color: 'var(--placeholder-color)',
+            }}>{config.tagline}</p>
+          </div>
+        </div>
+      </div>
+  )
+}
+
+function FeatureCell({ title, link, description }) {
   return (
       <div className={'col col--4'}>
-        <div className="text--center padding-horiz--md">
-          <h3>{title}</h3>
+        <div className="text--center padding-horiz--sm padding-vert--sm">
+          <h2><Link to={link}>{title}</Link></h2>
           <p>{description}</p>
         </div>
       </div>
   )
 }
 
-export function Header() {
-  const config = useDocusaurusContext().siteConfig
+function FeaturesRow() {
   return (
-      <header>
-        <div style={{
-          backgroundColor: 'var(--sidebar-background-color)',
-          position: 'relative'
-        }}>
-          <img src={homeImage} alt={config.title}/>
-          <div style={style.headerText}>
-            <p style={style.subtitle}>{config.tagline}</p>
-            <div>
-              <Link className="button button--lg" to="docs/Quickstart" style={style.button}>
-                Get Started
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <div className="row">
+        {features.map((props, index) => (
+            <FeatureCell key={index} {...props} />
+        ))}
+      </div>
   )
 }
 
-export function Features() {
+function DocumentationRow() {
   return (
-      <section style={style.features}>
-        <div className="container">
-          <div className="row">
-            {features.map((props, index) => (
-                <Feature key={index} {...props} />
-            ))}
+      <div className="row">
+        <div className={'col col--12'}>
+          <div className="text--center padding-bottom--lg">
+            <Link className="button" to="docs/Quickstart" style={{
+              color: 'var(--ifm-background-color)',
+              backgroundColor: 'var(--ifm-link-color)',
+              fontSize: '2rem',
+            }}>
+              Get Started
+            </Link>
           </div>
         </div>
-      </section>
+      </div>
   )
 }
 
@@ -178,12 +185,17 @@ export function Home() {
   const config = useDocusaurusContext().siteConfig
   return (
       <Layout title='Home' description={config.tagline}>
-        <Header/>
-        <main style={{
-          backgroundColor: 'var(--sidebar-background-color)'
+        <div style={{
+          backgroundColor: 'var(--sidebar-background-color)',
         }}>
-          <Features/>
-        </main>
+          <div className="container">
+            <BannerRow/>
+            <TaglineRow/>
+            <FeaturesRow/>
+            <DocumentationRow/>
+          </div>
+        </div>
       </Layout>
   )
 }
+

@@ -6,7 +6,7 @@ const config = {
   tagline: 'RPC client and server for Scala',
   url: 'https://automorph.org',
   baseUrl: '/',
-  favicon: 'icon.png',
+  favicon: 'icon.jpg',
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   organizationName: 'automorph',
@@ -44,10 +44,10 @@ const config = {
     ({
       algolia: false,
       navbar: {
-        title: 'Automorph',
+        title: '',
         logo: {
           alt: 'Automorph',
-          src: 'icon.png',
+          src: 'icon.jpg',
         },
         items: [
           {
