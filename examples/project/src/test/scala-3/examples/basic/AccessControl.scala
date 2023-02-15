@@ -31,33 +31,39 @@ object AccessControl extends App {
 
   // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
   val client = Default.clientSync(new URI("http://localhost:7000/api"))
-
-  // Create client request context specifying HTTP authentication token
-  implicit val validAuthentication: ClientContext = client.defaultContext
-    .authorizationBearer("valid")
-  val invalidAuthentication: ClientContext = client.defaultContext
-    .authorizationBearer("invalid")
-
-  // Call the remote API function statically with implicitly given valid authentication
   val remoteApi = client.bind[ClientApi]
-  println(
-    remoteApi.hello("test")
-  )
 
-  // Call the remote API function dynamically with implicitly given valid authentication
-  println(
-    client.call[String]("hello").args("message" -> "test")
-  )
+  {
+    // Create client request context specifying invalid HTTP authentication token
+    implicit val validAuthentication: ClientContext = client.defaultContext
+      .authorizationBearer("valid")
 
-  // Call the remote API function statically with directly supplied invalid authentication
-  println(Try(
-    remoteApi.hello("test")(invalidAuthentication)
-  ).failed.get)
+    // Call the remote API function statically using the valid authentication
+    println(
+      remoteApi.hello("test")
+    )
 
-  // Call the remote API function dynamically with directly supplied invalid authentication
-  println(Try(
-    client.call[String]("hello").args("message" -> "test")(invalidAuthentication)
-  ).failed.get)
+    // Call the remote API function dynamically using the valid authentication
+    println(
+      client.call[String]("hello").args("message" -> "test")
+    )
+  }
+
+  {
+    // Create client request context specifying invalid HTTP authentication token
+    implicit val invalidAuthentication: ClientContext = client.defaultContext
+      .headers("X-Authentication" -> "invalid")
+
+    // Call the remote API function statically using the invalid authentication
+    println(Try(
+      remoteApi.hello("test")(invalidAuthentication)
+    ).failed.get)
+
+    // Call the remote API function dynamically using the invalid authentication
+    println(Try(
+      client.call[String]("hello").args("message" -> "test")(invalidAuthentication)
+    ).failed.get)
+  }
 
   // Close the client
   client.close()
