@@ -47,7 +47,7 @@ const features = [
     link: 'docs/Examples/index.html#http-request-metadata',
     description: (
         <>
-          Access transport protocol metadata (e.g. HTTP headers) using optional API abstractions.
+          Access transport protocol metadata (e.g. authentication token) using optional API abstractions.
         </>
     ),
   },

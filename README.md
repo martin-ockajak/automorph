@@ -38,7 +38,7 @@
 * **Automatic** - Generate [JSON-RPC](https://www.jsonrpc.org/specification) 2.0 and [Web-RPC](docs/Web-RPC.md) 0.1 client or server at compile-time from public API class methods.
 * **Modular** - Choose plugins to select [RPC protocol](docs/Plugins.md#rpc-protocol), [effect type](docs/Plugins.md#effect-system), [transport protocol](docs/Plugins.md#message-transport) and [message format](docs/Plugins.md#message-codec).
 * **Flexible** - Customize data type serialization, remote API function names and RPC protocol errors.
-* **Permissive** - Access transport protocol metadata (e.g. HTTP headers) using optional API abstractions.
+* **Permissive** - Access transport protocol metadata (e.g. authentication token) using optional API abstractions.
 * **Discoverable** - Consume and provide [OpenRPC](https://spec.open-rpc.org) 1.3+ or [OpenAPI](https://github.com/OAI/OpenAPI-Specification) 3.1+ API schemas via generated discovery functions.
 * **Compatible** - Requires [Scala](https://dotty.epfl.ch/) 3.2+ or 2.13+ on [JRE 11+](https://openjdk.java.net/) and supports [SLF4J](http://www.slf4j.org/) logging.
 
