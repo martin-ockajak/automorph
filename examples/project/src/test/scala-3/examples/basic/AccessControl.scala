@@ -52,7 +52,7 @@ object AccessControl extends App {
   {
     // Create client request context specifying invalid HTTP authentication token
     implicit val invalidAuthentication: ClientContext = client.defaultContext
-      .headers("X-Authentication" -> "invalid")
+      .headers("X-Authentication" -> "unsupported")
 
     // Call the remote API function statically using the invalid authentication
     println(Try(
