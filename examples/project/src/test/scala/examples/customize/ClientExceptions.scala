@@ -17,8 +17,8 @@ object ClientExceptions extends App {
   val api = new ServerApi()
 
   // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-  val createServer = Default.serverBuilderAsync(7000, "/api")
-  val server = createServer(_.bind(api))
+  val serverBuilder = Default.serverBuilderAsync(7000, "/api")
+  val server = serverBuilder(_.bind(api))
 
   // Customize remote API client RPC error to exception mapping
   val protocol = Default.protocol[Default.ClientContext].mapError((message, code) =>

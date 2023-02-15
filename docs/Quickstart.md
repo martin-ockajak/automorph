@@ -33,8 +33,8 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val createServer = Default.serverAsync(7000, "/api")
-val server = createServer(_.bind(api))
+val serverBuilder = Default.serverAsync(7000, "/api")
+val server = serverBuilder(_.bind(api))
 
 // Stop the server
 Await.result(server.close(), Duration.Inf)

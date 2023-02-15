@@ -15,8 +15,8 @@ object ClientTransport extends App {
   val api = new ServerApi()
 
   // Start JSON-RPC HTTP server listening on port 80 for requests to '/api'
-  val createServer = Default.serverBuilderSync(80, "/api")
-  val server = createServer(_.bind(api))
+  val serverBuilder = Default.serverBuilderSync(80, "/api")
+  val server = serverBuilder(_.bind(api))
 
   // Create HttpUrlConnection HTTP client message transport
   val transport = UrlClient(IdentitySystem(), new URI("http://localhost:7000/api"))

@@ -39,8 +39,8 @@ object CustomDataSerialization extends App {
   val api = new ServerApi()
 
   // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-  val createServer = Default.serverBuilderAsync(7000, "/api")
-  lazy val server = createServer(_.bind(api))
+  val serverBuilder = Default.serverBuilderAsync(7000, "/api")
+  lazy val server = serverBuilder(_.bind(api))
 
   // Define client view of a remote API
   trait ClientApi {
