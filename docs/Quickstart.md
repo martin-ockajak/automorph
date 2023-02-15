@@ -98,7 +98,7 @@ client.close()
 
 ### Download
 
-Clone the repository and enter example project directory:
+Clone the repository and enter the example project directory:
 
 ```shell
 git clone https://github.com/martin-ockajak/automorph && cd automorph/examples/project
@@ -117,7 +117,7 @@ sbt run
 Make changes:
 
 ```shell
-edit src/main/scala/examples/QuickStart.scala
+edit src/main/scala/examples/Quickstart.scala
 ```
 
 ### Explore
@@ -126,4 +126,3 @@ Review additional examples:
 ```shell
 find src/test
 ```
-
