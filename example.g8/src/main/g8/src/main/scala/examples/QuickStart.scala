@@ -28,11 +28,17 @@ object QuickStart extends App {
   val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
   // Call the remote API function statically
-  val remoteApi = client.bind[ClientApi] // ClientApi
-  remoteApi.hello("world", 1) // Future[String]
+  val remoteApi = client.bind[ClientApi]
+  println(Await.result(
+    remoteApi.hello("world", 1),
+    Duration.Inf
+  ))
 
   // Call the remote API function dynamically
-  client.call[String]("hello").args("what" -> "world", "n" -> 1) // Future[String]
+  println(Await.result(
+    client.call[String]("hello").args("what" -> "world", "n" -> 1),
+    Duration.Inf
+  ))
 
   // Close the client
   Await.result(client.close(), Duration.Inf)

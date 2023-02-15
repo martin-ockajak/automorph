@@ -33,8 +33,13 @@ object ClientFunctionNames extends App {
   }
 
   // Call the remote API function
-  val remoteApi = client.bind[ClientApi](mapName) // ClientApi
-  remoteApi.hi("world", 1) // String
+  val remoteApi = client.bind[ClientApi](mapName)
+  println(
+    remoteApi.hello("world", 1)
+  )
+  println(
+    remoteApi.hi("world", 1)
+  )
 
   // Close the client
   client.close()

@@ -36,14 +36,17 @@ object RpcProtocol extends App {
   val client = Client.protocol(clientProtocol).transport(transport)
 
   // Call the remote API function
-  val remoteApi = client.bind[ClientApi] // ClientApi
-  remoteApi.hello("world", 1) // Future[String]
+  val remoteApi = client.bind[ClientApi]
+  println(Await.result(
+    remoteApi.hello("world", 1),
+    Duration.Inf
+  ))
 
   // Close the client
-  client.close()
+  Await.result(client.close(), Duration.Inf)
 
   // Stop the server
-  server.close()
+  Await.result(server.close(), Duration.Inf)
 }
 
 class RpcProtocol extends org.scalatest.freespec.AnyFreeSpecLike {

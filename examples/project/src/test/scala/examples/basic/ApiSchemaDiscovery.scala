@@ -25,15 +25,17 @@ object ApiSchemaDiscovery extends App {
   // Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
   val client = Default.clientAsync(new URI("http://localhost:7000/api"), HttpMethod.Put)
 
-  // Retrieve remote API schema in OpenRPC format
-  val openRpcFunction = JsonRpcProtocol.openRpcFunction
-  val openRpc = client.call[OpenRpc](openRpcFunction).args() // Future[OpenRpc]
-  println(Await.result(openRpc, Duration.Inf))
+  // Retrieve the remote API schema in OpenRPC format
+  println(Await.result(
+    client.call[OpenRpc](JsonRpcProtocol.openRpcFunction).args(),
+    Duration.Inf
+  ))
 
-  // Retrieve remote API schema in OpenAPI format
-  val openApiFunction = JsonRpcProtocol.openApiFunction
-  val openApi = client.call[OpenApi](openApiFunction).args() // Future[OpenApi]
-  println(Await.result(openApi, Duration.Inf))
+  // Retrieve the remote API schema in OpenAPI format
+  println(Await.result(
+    client.call[OpenApi](JsonRpcProtocol.openApiFunction).args(),
+    Duration.Inf
+  ))
 
   // Close the client
   Await.result(client.close(), Duration.Inf)

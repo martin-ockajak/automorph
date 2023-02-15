@@ -52,8 +52,11 @@ object MessageCodec extends App {
   val client = Client(clientProtocol, transport)
 
   // Call the remote API function
-  val remoteApi = client.bind[ClientApi] // ClientApi
-  remoteApi.hello("world", 1) // : Future[String]
+  val remoteApi = client.bind[ClientApi]
+  println(Await.result(
+    remoteApi.hello("world", 1),
+    Duration.Inf
+  ))
 
   // Close the client
   Await.result(client.close(), Duration.Inf)

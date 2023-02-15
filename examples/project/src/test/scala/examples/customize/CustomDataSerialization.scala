@@ -51,8 +51,11 @@ object CustomDataSerialization extends App {
   val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
   // Call the remote API function via proxy
-  lazy val remoteApi = client.bind[ClientApi] // ClientApi
-  remoteApi.hello("world", 1, Record("test", State.On)) // Future[String]
+  lazy val remoteApi = client.bind[ClientApi]
+  println(Await.result(
+    remoteApi.hello("world", 1, Record("test", State.On)),
+    Duration.Inf
+  ))
 
   // Close the client
   Await.result(client.close(), Duration.Inf)

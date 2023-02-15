@@ -81,11 +81,10 @@ def source(project: Project, path: String, dependsOn: ClasspathDep[ProjectRefere
   val sourceDependency = project.in(file(path)).dependsOn(dependsOn: _*)
   path.split('/') match {
     case Array("test", _ @_*) => sourceDependency
-    case Array("examples", _ @_*) => sourceDependency
+    case Array("examples", _ @_*) => sourceDependency.settings(Compile / doc / scalacOptions := docScalacOptions)
     case Array(_, directories @ _*) => sourceDependency.settings(
         name := s"$projectName-${directories.mkString("-")}",
-        Compile / doc / scalacOptions :=
-          scala3ScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master"),
+        Compile / doc / scalacOptions := docScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master"),
       )
   }
 }
@@ -185,7 +184,7 @@ lazy val default = project.dependsOn(jsonrpc, circe, standard, undertow, testSta
   name := s"$projectName-default",
   libraryDependencies += "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion,
 )
-lazy val examples = source(project, "examples", default, upickle, zio, testPlugin % Test).settings(
+lazy val examples = source(project, "examples", default, upickle, zio, rabbitmq, testPlugin % Test).settings(
   libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test,
   Compile / scalaSource := baseDirectory.value / "project/src/main/scala",
   Test / scalaSource :=
@@ -222,11 +221,11 @@ ThisBuild / javacOptions ++= Seq("-source", "11", "-target", "11")
 
 val commonScalacOptions =
   Seq("-language:higherKinds", "-feature", "-deprecation", "-unchecked", "-release", "9", "-encoding", "utf8")
-val scala3ScalacOptions = commonScalacOptions ++ Seq("-language:adhocExtensions", "-pagewidth", "120")
+val docScalacOptions = commonScalacOptions ++ Seq("-language:adhocExtensions", "-pagewidth", "120")
 
 ThisBuild / scalacOptions ++=
   (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((3, _)) => scala3ScalacOptions ++ Seq("-source", "3.2", "-indent", "-Xcheck-macros", "-Ysafe-init")
+    case Some((3, _)) => docScalacOptions ++ Seq("-source", "3.2", "-indent", "-Xcheck-macros", "-Ysafe-init")
     case _ => commonScalacOptions ++ Seq(
         "-language:existentials",
         "-J--add-modules",
@@ -272,7 +271,7 @@ lazy val docs = project.in(file("site")).settings(
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.md",
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.jpg",
   ),
-  Compile / doc / scalacOptions := scala3ScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master"),
+  Compile / doc / scalacOptions := docScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master"),
   Compile / doc / sources ++= allSources.value.flatten,
   Compile / doc / tastyFiles ++= allTastyFiles.value.flatten.filter(_.getName != "MonixSystem.tasty"),
   Compile / doc / dependencyClasspath ++=

@@ -34,24 +34,32 @@ object HttpRequestMetadata extends App {
   val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
   // Create client request context specifying HTTP request meta-data
-  implicit val http: ClientContext = client.defaultContext
+  implicit val httpRequestMetadata: ClientContext = client.defaultContext
     .parameters("test" -> "value")
     .headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
     .cookies("Test" -> "value")
     .authorizationBearer("value")
 
-  // Call the remote API function statically with implicitly given request context
-  val remoteApi = client.bind[ClientApi] // Api
-  remoteApi.hello("test") // String
+  // Call the remote API function statically with implicitly given HTTP request metadata
+  val remoteApi = client.bind[ClientApi]
+  println(
+    remoteApi.hello("test")
+  )
 
-  // Call the remote API function dynamically with implicitly given request context
-  client.call[String]("hello").args("message" -> "test") // String
+  // Call the remote API function dynamically with implicitly given HTTP request metadata
+  println(
+    client.call[String]("hello").args("message" -> "test")
+  )
 
-  // Call the remote API function statically with directly supplied request context
-  remoteApi.hello("test")(using http) // String
+  // Call the remote API function statically with directly supplied HTTP request metadata
+  println(
+    remoteApi.hello("test")(httpRequestMetadata)
+  )
 
-  // Call the remote API function dynamically with directly supplied request context
-  client.call[String]("hello").args("message" -> "test")(using http) // String
+  // Call the remote API function dynamically with directly supplied HTTP request metadata
+  println(
+    client.call[String]("hello").args("message" -> "test")(httpRequestMetadata)
+  )
 
   // Close the client
   client.close()

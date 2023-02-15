@@ -15,7 +15,7 @@ object ServerTransport extends App {
 
   // Start NanoHTTPD JSON-RPC HTTP server listening on port 7000 for requests to '/api'
   val handler = Default.handlerSync[NanoServer.Context]
-  val createServer = NanoServer.create(handler.bind(api), 7000)
+  val createServer = NanoServer.create(handler.bind(api), 7000, "/api")
   val server = createServer(identity)
 
   // Define client view of a remote API
@@ -27,8 +27,10 @@ object ServerTransport extends App {
   val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
   // Call the remote API function
-  val remoteApi = client.bind[ClientApi] // ClientApi
-  remoteApi.hello("world", 1) // String
+  val remoteApi = client.bind[ClientApi]
+  println(
+    remoteApi.hello("world", 1)
+  )
 
   // Close the client
   client.close()

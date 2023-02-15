@@ -33,15 +33,17 @@ object HttpResponseMetadata extends App {
   val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
   // Call the remote API function expecting response context
-  val remoteApi = client.bind[ClientApi] // ClientApi
-  val static = remoteApi.hello("test") // Contextual[String, ClientContext]
-  static.result -> static.context.header("X-Test") // String -> "value"
+  val remoteApi = client.bind[ClientApi]
+  val static = remoteApi.hello("test")
+  println(static.result)
+  println(static.context.header("X-Test"))
 
   // Call the remote API function dynamically expecting response context
   val dynamic = client
     .call[Contextual[String, ClientContext]]("hello")
-    .args("message" -> "test") // Contextual[String, ClientContext]
-  dynamic.result -> dynamic.context.header("X-Test") // String -> "value"
+    .args("message" -> "test")
+  println(dynamic.result)
+  println(dynamic.context.header("X-Test"))
 
   // Close the client
   client.close()

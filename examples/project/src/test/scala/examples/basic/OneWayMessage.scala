@@ -27,7 +27,10 @@ object OneWayMessage extends App {
   val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
   // Message the remote API function dynamically without expecting a response
-  client.message("hello").args("some" -> "world", "n" -> 1) // Future[Unit]
+  Await.result(
+    client.message("hello").args("some" -> "world", "n" -> 1),
+    Duration.Inf
+  )
 
   // Close the client
   Await.result(client.close(), Duration.Inf)

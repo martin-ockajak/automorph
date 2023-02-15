@@ -28,8 +28,10 @@ object OptionalParameters extends App {
   val client = Default.clientSync(new URI("http://localhost:7000/api"), HttpMethod.Put)
 
   // Call the remote API function statically
-  val remoteApi = client.bind[ClientApi] // ClientApi
-  remoteApi.hello("world") // String
+  val remoteApi = client.bind[ClientApi]
+  println(
+    remoteApi.hello("world")
+  )
 
   // Call the remote API function dynamically
   client.call[String]("hi").args("n" -> 1) // String

@@ -12,7 +12,7 @@ object ClientExceptions extends App {
   // Create server API instance
   class ServerApi {
     def hello(some: String, n: Int): Future[String] =
-      Future.failed(new IllegalArgumentException("Data error"))
+      Future.failed(new IllegalArgumentException("Test error"))
   }
   val api = new ServerApi()
 
@@ -38,9 +38,12 @@ object ClientExceptions extends App {
   val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
   val client = Client.protocol(protocol).transport(transport)
 
-  // Call the remote API function
-  val remoteApi = client.bind[ClientApi] // ClientApi
-  remoteApi.hello("world", 1) // SQLException
+  // Call the remote API function and fail with SQLException
+  val remoteApi = client.bind[ClientApi]
+  println(Try(Await.result(
+    remoteApi.hello("world", 1),
+    Duration.Inf
+  )).failed.get)
 
   // Close the client
   Await.result(client.close(), Duration.Inf)

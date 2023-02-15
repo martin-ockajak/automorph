@@ -25,8 +25,8 @@ object SynchronousCall extends App {
   val client = Default.clientSync(new URI("http://localhost:7000/api"), HttpMethod.Post)
 
   // Call the remote API function
-  val remoteApi = client.bind[ClientApi] // ClientApi
-  remoteApi.hello("world", 1) // String
+  val remoteApi = client.bind[ClientApi]
+  remoteApi.hello("world", 1)
 
   // Close the client
   client.close()

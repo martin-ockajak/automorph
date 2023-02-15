@@ -29,8 +29,10 @@ object EffectSystem extends App {
   val client = Default.client(system, new URI("http://localhost:7000/api"))
 
   // Call the remote APi function via proxy
-  val remoteApi = client.bind[ClientApi] // ClientApi
-  remoteApi.hello("world", 1) // Task[String]
+  val remoteApi = client.bind[ClientApi]
+  println(Runtime.default.unsafeRunTask(
+    remoteApi.hello("world", 1)
+  ))
 
   // Close the client
   Runtime.default.unsafeRunTask(client.close())

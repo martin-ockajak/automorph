@@ -35,14 +35,17 @@ object EndpointTransport extends App {
   val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
   // Call the remote API function via proxy
-  val remoteApi = client.bind[ClientApi] // ClientApi
-  remoteApi.hello("world", 1) // Future[String]
+  val remoteApi = client.bind[ClientApi]
+  println(Await.result(
+    remoteApi.hello("world", 1),
+    Duration.Inf
+  ))
 
   // Close the client
   Await.result(client.close(), Duration.Inf)
 
   // Stop the server
-  server.stop()
+  Await.result(server.close(), Duration.Inf)
 }
 
 class EndpointTransport extends org.scalatest.freespec.AnyFreeSpecLike {

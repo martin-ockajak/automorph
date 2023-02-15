@@ -13,7 +13,7 @@ object HttpResponseStatus extends App {
   // Create server API instance
   class ServerApi {
     def hello(some: String, n: Int): Future[String] =
-      Future(s"Hello $some $n!")
+      Future.failed(new SqlException("Test error"))
   }
   val api = new ServerApi()
 
@@ -33,9 +33,12 @@ object HttpResponseStatus extends App {
   // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
   val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
-  // Call the remote API function
-  val remoteApi = client.bind[ClientApi] // ClientApi
-  remoteApi.hello("world", 1) // Future[String]
+  // Call the remote API function and fail with InvalidRequestException
+  val remoteApi = client.bind[ClientApi]
+  println(Try(Await.result(
+    remoteApi.hello("world", 1),
+    Duration.Inf
+  )).failed.get)
 
   // Close the client
   Await.result(client.close(), Duration.Inf)
