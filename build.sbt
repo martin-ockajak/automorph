@@ -266,6 +266,7 @@ lazy val allSources = Def.taskDyn(flattenTasks(root.uses.map(_ / Compile / doc /
 lazy val allTastyFiles = Def.taskDyn(flattenTasks(root.uses.map(_ / Compile / doc / tastyFiles)))
 lazy val allDependencyClasspath = Def.taskDyn(flattenTasks(root.uses.map(_ / Compile / doc / dependencyClasspath)))
 lazy val docs = project.in(file("site")).settings(
+  name := projectName,
   mdocVariables := Map("PROJECT_VERSION" -> version.value, "SCALADOC_VERSION" -> "3.2.2"),
   mdocOut := baseDirectory.value / "docs",
   mdocExtraArguments := Seq("--no-link-hygiene"),
