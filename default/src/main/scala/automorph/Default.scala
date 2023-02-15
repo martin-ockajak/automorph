@@ -16,12 +16,6 @@ import scala.concurrent.{ExecutionContext, Future}
 /** Default component constructors. */
 object Default extends DefaultMeta {
 
-  /** Default asynchronous effect type. */
-  type AsyncEffect[T] = Future[T]
-
-  /** Default synchronous effect type. */
-  type SyncEffect[T] = Identity[T]
-
   /** Default asynchronous effect system plugin type. */
   type AsyncSystem = EffectSystem[Future]
 
