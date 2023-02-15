@@ -14,7 +14,7 @@ object SynchronousCall extends App {
   val api = new ServerApi()
 
   // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
-  val createServer = Default.serverSync(7000, "/api", Seq(HttpMethod.Post))
+  val createServer = Default.serverBuilderSync(7000, "/api", Seq(HttpMethod.Post))
   val server = createServer(_.bind(api))
 
   // Define client view of a remote API

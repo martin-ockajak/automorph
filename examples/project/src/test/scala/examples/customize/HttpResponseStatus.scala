@@ -18,7 +18,7 @@ object HttpResponseStatus extends App {
   val api = new ServerApi()
 
   // Customize remote API server exception to HTTP status code mapping
-  val createServer = Default.serverAsync(7000, "/api", mapException = {
+  val createServer = Default.serverBuilderAsync(7000, "/api", mapException = {
     case _: SQLException => 400
     case e => HttpContext.defaultExceptionToStatusCode(e)
   })

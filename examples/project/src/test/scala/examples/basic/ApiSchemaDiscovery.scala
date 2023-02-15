@@ -19,7 +19,7 @@ object ApiSchemaDiscovery extends App {
   val api = new ServerApi()
 
   // Start JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
-  val createServer = Default.serverAsync(7000, "/api", Seq(HttpMethod.Put))
+  val createServer = Default.serverBuilderAsync(7000, "/api", Seq(HttpMethod.Put))
   val server = createServer(_.bind(api))
 
   // Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'

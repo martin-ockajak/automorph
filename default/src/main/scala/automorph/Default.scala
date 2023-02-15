@@ -289,8 +289,8 @@ object Default extends DefaultMeta {
    * Resulting function requires:
    *   - API binding function - binds APIs to the underlying handler
    *
-   * The server can be used to receive and reply to requests using specific message transport protocol while invoking
-   * server to process them.
+   * The server can be used to receive and reply to requests using specific message transport protocol
+   * and invoke bound API methods to process them.
    *
    * @see
    *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -336,8 +336,8 @@ object Default extends DefaultMeta {
   /**
    * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
    *
-   * The server can be used to receive and reply to requests using specific message transport protocol while invoking
-   * server to process them.
+   * The server can be used to receive and reply to requests using specific message transport protocol
+   * and invoke bound API methods to process them.
    *
    * @see
    *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -378,13 +378,13 @@ object Default extends DefaultMeta {
     UndertowServer(handler, port, path, methods, webSocket, mapException, builder)
 
   /**
-   * Creates an Undertow JSON-RPC over HTTP & WebSocket server using 'Future' as an effect type.
+   * Creates an Undertow JSON-RPC server builder over HTTP & WebSocket using 'Future' as an effect type.
    *
    * Resulting function requires:
    *   - API binding function - binds APIs to the underlying handler
    *
-   * The server can be used to receive and reply to requests using specific message transport protocol while invoking
-   * server to process them.
+   * The server can be used to receive and reply to requests using specific message transport protocol
+   * and invoke bound API method to process them.
    *
    * @see
    *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -409,9 +409,9 @@ object Default extends DefaultMeta {
    * @param executionContext
    *   execution context
    * @return
-   *   asynchronous RPC server using supplied API binding function
+   *   asynchronous RPC server builder using supplied API binding function
    */
-  def serverAsync(
+  def serverBuilderAsync(
     port: Int,
     path: String = "/",
     methods: Iterable[HttpMethod] = HttpMethod.values,
@@ -440,13 +440,13 @@ object Default extends DefaultMeta {
     Handler(protocol, systemAsync)
 
   /**
-   * Creates a Undertow JSON-RPC over HTTP & WebSocket server using identity as an effect type.
+   * Creates an Undertow JSON-RPC server builder over HTTP & WebSocket using identity as an effect type.
    *
    * Resulting function requires:
    *   - API binding function - binds APIs to the underlying handler
    *
-   * The server can be used to receive and reply to requests using specific message transport protocol while invoking
-   * server to process them.
+   * The server can be used to receive and reply to requests using specific message transport protocol
+   * while invoking server to process them.
    *
    * @see
    *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -469,9 +469,9 @@ object Default extends DefaultMeta {
    * @param builder
    *   Undertow web server builder
    * @return
-   *   synchronous RPC server using supplied API binding function
+   *   synchronous RPC server builder using supplied API binding function
    */
-  def serverSync(
+  def serverBuilderSync(
     port: Int,
     path: String = "/",
     methods: Iterable[HttpMethod] = HttpMethod.values,

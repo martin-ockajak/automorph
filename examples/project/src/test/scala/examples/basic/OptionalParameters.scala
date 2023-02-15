@@ -17,7 +17,7 @@ object OptionalParameters extends App {
   val api = new ServerApi()
 
   // Start JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
-  val createServer = Default.serverSync(7000, "/api", Seq(HttpMethod.Put))
+  val createServer = Default.serverBuilderSync(7000, "/api", Seq(HttpMethod.Put))
   val server = createServer(_.bind(api))
 
   // Define client view of a remote API
