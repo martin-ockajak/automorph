@@ -20,7 +20,7 @@ object AmqpTransport extends App {
   val handler = Default.handlerAsync[RabbitMqServer.Context]
   val server = RabbitMqServer(handler.bind(api), new URI("amqp://localhost"), Seq("api"))
 
-  // Define client view of a remote API
+  // Define client view of the remote API
   trait ClientApi {
     def hello(some: String, n: Int): String
   }

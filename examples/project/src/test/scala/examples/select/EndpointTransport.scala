@@ -27,7 +27,7 @@ object EndpointTransport extends App {
     .setHandler(Handlers.path().addPrefixPath("/api", endpoint))
     .build()
 
-  // Define client view of a remote API
+  // Define client view of the remote API
   trait ClientApi {
     def hello(some: String, n: Int): Future[String]
   }

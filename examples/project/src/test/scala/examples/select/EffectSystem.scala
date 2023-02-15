@@ -20,7 +20,7 @@ object EffectSystem extends App {
   // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
   val server = Default.serverSystem(system, 7000, "/api")(_.bind(api))
 
-  // Define client view of a remote API
+  // Define client view of the remote API
   trait ClientApi {
     def hello(some: String, n: Int): Task[String]
   }

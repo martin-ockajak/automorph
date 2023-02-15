@@ -17,7 +17,7 @@ object ClientFunctionNames extends App {
   val serverBuilder = Default.serverBuilderSync(7000, "/api")
   val server = serverBuilder(_.bind(api))
 
-  // Define client view of a remote API
+  // Define client view of the remote API
   trait ClientApi {
     // Invoked as 'hello'
     def hi(some: String, n: Int): String

@@ -26,7 +26,7 @@ object HttpResponseStatus extends App {
   // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
   val server = serverBuilder(_.bind(api))
 
-  // Define client view of a remote API
+  // Define client view of the remote API
   trait ClientApi {
     def hello(some: String, n: Int): Future[String]
   }

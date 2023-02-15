@@ -42,7 +42,7 @@ object CustomDataSerialization extends App {
   val serverBuilder = Default.serverBuilderAsync(7000, "/api")
   lazy val server = serverBuilder(_.bind(api))
 
-  // Define client view of a remote API
+  // Define client view of the remote API
   trait ClientApi {
     def hello(some: String, n: Int, record: Record): Future[Record]
   }

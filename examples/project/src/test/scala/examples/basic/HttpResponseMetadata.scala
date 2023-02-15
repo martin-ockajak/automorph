@@ -40,8 +40,7 @@ object HttpResponseMetadata extends App {
 
   // Call the remote API function dynamically expecting response context
   val dynamic = client
-    .call[Contextual[String, ClientContext]]("hello")
-    .args("message" -> "test")
+    .call[Contextual[String, ClientContext]]("hello").args("message" -> "test")
   println(dynamic.result)
   println(dynamic.context.header("X-Test"))
 

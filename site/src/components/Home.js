@@ -39,7 +39,7 @@ const features = [
     description: (
         <>
           Customize data serialization, remote API function names, RPC protocol errors and <a
-            href="docs/Plugins/index.html#access-control">access control</a>.
+            href="docs/Examples/index.html#authentication">authentication</a>.
         </>
     ),
   },
@@ -48,7 +48,7 @@ const features = [
     link: 'docs/Examples/index.html#http-request-metadata',
     description: (
         <>
-          Access <a href="docs/Plugins/index.html#http-request-metadata">transport protocol metadata</a> (
+          Access <a href="docs/Examples/index.html#http-request-metadata">transport protocol metadata</a> (
           e.g. HTTP headers) using optional API abstractions.
         </>
     ),

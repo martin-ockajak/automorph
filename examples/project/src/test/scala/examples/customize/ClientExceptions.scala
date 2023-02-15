@@ -20,6 +20,11 @@ object ClientExceptions extends App {
   val serverBuilder = Default.serverBuilderAsync(7000, "/api")
   val server = serverBuilder(_.bind(api))
 
+  // Define client view of a remote API
+  trait ClientApi {
+    def hello(some: String, n: Int): Future[String]
+  }
+
   // Customize remote API client RPC error to exception mapping
   val protocol = Default.protocol[Default.ClientContext].mapError((message, code) =>
     if (message.contains("Data")) {
@@ -28,11 +33,6 @@ object ClientExceptions extends App {
       Default.protocol.mapError(message, code)
     }
   )
-
-  // Define client view of a remote API
-  trait ClientApi {
-    def hello(some: String, n: Int): Future[String]
-  }
 
   // Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
   val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))

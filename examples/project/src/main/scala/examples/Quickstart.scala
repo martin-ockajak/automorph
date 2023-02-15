@@ -6,7 +6,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-private[examples] object QuickStart extends App {
+private[examples] object Quickstart extends App {
 
   // Create server API instance
   class ServerApi {
@@ -20,7 +20,7 @@ private[examples] object QuickStart extends App {
   val serverBuilder = Default.serverBuilderAsync(7000, "/api")
   val server = serverBuilder(_.bind(api))
 
-  // Define client view of a remote API
+  // Define client view of the remote API
   trait ClientApi {
     def hello(some: String, n: Int): Future[String]
   }

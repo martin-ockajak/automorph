@@ -4,7 +4,7 @@ import automorph.Default
 import automorph.Default.{ClientContext, ServerContext}
 import java.net.URI
 
-object AccessControl extends App {
+object Authentication extends App {
 
   // Create server API instance
   class ServerApi {
@@ -13,7 +13,7 @@ object AccessControl extends App {
     def hello(message: String)(implicit httpRequest: ServerContext): String =
       httpRequest.authorizationBearer match {
         case Some("valid") => s"Hello $message!"
-        case _ => throw IllegalAccessException("Access denied")
+        case _ => throw IllegalAccessException("Authentication failed")
       }
   }
   val api = new ServerApi()
@@ -22,7 +22,7 @@ object AccessControl extends App {
   val serverBuilder = Default.serverBuilderSync(7000, "/api")
   val server = serverBuilder(_.bind(api))
 
-  // Define client view of a remote API
+  // Define client view of the remote API
   trait ClientApi {
 
     // Accept HTTP request context consumed by the client message transport plugin
@@ -34,11 +34,11 @@ object AccessControl extends App {
   val remoteApi = client.bind[ClientApi]
 
   {
-    // Create client request context specifying invalid HTTP authentication token
+    // Create client request context containing invalid HTTP authentication
     implicit val validAuthentication: ClientContext = client.defaultContext
       .authorizationBearer("valid")
 
-    // Call the remote API function statically using valid authentication
+    // Call the remote API function statically using valid authentication token
     println(
       remoteApi.hello("test")
     )
@@ -50,7 +50,7 @@ object AccessControl extends App {
   }
 
   {
-    // Create client request context specifying invalid HTTP authentication token
+    // Create client request context containing invalid HTTP authentication
     implicit val invalidAuthentication: ClientContext = client.defaultContext
       .headers("X-Authentication" -> "unsupported")
 
@@ -72,10 +72,10 @@ object AccessControl extends App {
   server.close()
 }
 
-class AccessControl extends org.scalatest.freespec.AnyFreeSpecLike {
+class Authentication extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
     "Test" ignore {
-      AccessControl.main(Array())
+      Authentication.main(Array())
     }
   }
 }

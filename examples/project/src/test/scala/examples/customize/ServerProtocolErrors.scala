@@ -32,7 +32,7 @@ object ServerProtocolErrors extends App {
   val handler = Handler.protocol(protocol).system(Default.systemAsync)
   val server = Default.server(handler, 7000, "/api")
 
-  // Define client view of a remote API
+  // Define client view of the remote API
   trait ClientApi {
     def hello(some: String, n: Int): Future[String]
   }

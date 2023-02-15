@@ -599,8 +599,8 @@ object HttpContext {
   private val exceptionToStatusCode: Map[Class[?], Int] = Map[Class[?], Int](
     classOf[ParseErrorException] -> 400,
     classOf[InvalidRequestException] -> 400,
-    classOf[FunctionNotFoundException] -> 501,
     classOf[IllegalArgumentException] -> 400,
+    classOf[FunctionNotFoundException] -> 501,
     classOf[InternalErrorException] -> 500,
     classOf[ServerErrorException] -> 500,
     classOf[IOException] -> 500,

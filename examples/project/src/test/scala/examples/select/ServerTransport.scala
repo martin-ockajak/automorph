@@ -18,7 +18,7 @@ object ServerTransport extends App {
   val serverBuilder = NanoServer.create(handler.bind(api), 7000, "/api")
   val server = serverBuilder(identity)
 
-  // Define client view of a remote API
+  // Define client view of the remote API
   trait ClientApi {
     def hello(some: String, n: Int): String
   }

@@ -2,7 +2,7 @@
 
 Expose and call a remote JSON-RPC API over HTTP.
 
-## [Source](../../examples/project/src/main/scala/examples/QuickStart.scala)
+## [Source](../../examples/project/src/main/scala/examples/Quickstart.scala)
 
 ### Build
 
@@ -51,7 +51,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-// Define client view of a remote API
+// Define client view of the remote API
 trait ClientApi {
   def hello(some: String, n: Int): Future[String]
 }
