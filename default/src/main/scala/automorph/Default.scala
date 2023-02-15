@@ -79,7 +79,7 @@ object Default extends DefaultMeta {
    * @tparam Effect
    *   effect type
    */
-  type ServerBindApis[Effect[_]] = ServerHandler[Effect] => ServerHandler[Effect]
+  type BindServerApis[Effect[_]] = ServerHandler[Effect] => ServerHandler[Effect]
 
   /**
    * Creates a JSON-RPC request handler with specified effect system plugin while providing given message context type.
@@ -327,8 +327,8 @@ object Default extends DefaultMeta {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder,
-  ): ServerBindApis[Effect] => Server[Effect] =
-    (bindApis: ServerBindApis[Effect]) => {
+  ): BindServerApis[Effect] => Server[Effect] =
+    (bindApis: BindServerApis[Effect]) => {
       val handler = bindApis(Handler.protocol(protocol[ServerContext]).system(system))
       server(handler, port, path, methods, webSocket, mapException, builder)
     }
@@ -418,8 +418,8 @@ object Default extends DefaultMeta {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder,
-  )(implicit executionContext: ExecutionContext): ServerBindApis[Future] => Server[Future] =
-    (bindApis: ServerBindApis[Future]) => {
+  )(implicit executionContext: ExecutionContext): BindServerApis[Future] => Server[Future] =
+    (bindApis: BindServerApis[Future]) => {
       val handler = bindApis(handlerAsync)
       server(handler, port, path, methods, webSocket, mapException, builder)
     }
@@ -478,8 +478,8 @@ object Default extends DefaultMeta {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder,
-  ): ServerBindApis[Identity] => Server[Identity] =
-    (bindApis: ServerBindApis[Identity]) => {
+  ): BindServerApis[Identity] => Server[Identity] =
+    (bindApis: BindServerApis[Identity]) => {
       val handler = bindApis(handlerSync)
       server(handler, port, path, methods, webSocket, mapException, builder)
     }
