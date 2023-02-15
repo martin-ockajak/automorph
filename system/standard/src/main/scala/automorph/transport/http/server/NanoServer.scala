@@ -202,6 +202,9 @@ final case class NanoServer[Effect[_]] private (
     response
   }
 
+  private def setResponseContext(response: Response, responseContext: Option[Context]): Unit =
+    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) => response.addHeader(name, value) }
+
   private def getRequestContext(session: IHTTPSession): Context = {
     val http = HttpContext(
       transport = Some(session),
@@ -210,9 +213,6 @@ final case class NanoServer[Effect[_]] private (
     ).url(session.getUri).scheme("http").host("localhost").port(port)
     Option(session.getQueryParameterString).map(http.query).getOrElse(http)
   }
-
-  private def setResponseContext(response: Response, responseContext: Option[Context]): Unit =
-    responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) => response.addHeader(name, value) }
 
   private def getRequestProperties(
     session: IHTTPSession,
