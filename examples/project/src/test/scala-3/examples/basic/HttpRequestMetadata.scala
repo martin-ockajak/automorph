@@ -10,11 +10,11 @@ object HttpRequestMetadata extends App {
   class ServerApi {
 
     // Accept HTTP request context provided by the server message transport plugin
-    def hello(message: String)(implicit http: ServerContext): String =
+    def hello(message: String)(implicit httpRequest: ServerContext): String =
       Seq(
         Some(message),
-        http.path,
-        http.header("X-Test")
+        httpRequest.path,
+        httpRequest.header("X-Test")
       ).flatten.mkString(", ")
   }
   val api = new ServerApi()
@@ -33,8 +33,8 @@ object HttpRequestMetadata extends App {
   // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
   val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
-  // Create client request context specifying HTTP request meta-data
-  implicit val httpRequestMetadata: ClientContext = client.defaultContext
+  // Create client request context specifying HTTP request metadata
+  implicit val httpRequest: ClientContext = client.defaultContext
     .parameters("test" -> "value")
     .headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
     .cookies("Test" -> "value")
@@ -53,12 +53,12 @@ object HttpRequestMetadata extends App {
 
   // Call the remote API function statically with directly supplied HTTP request metadata
   println(
-    remoteApi.hello("test")(httpRequestMetadata)
+    remoteApi.hello("test")(httpRequest)
   )
 
   // Call the remote API function dynamically with directly supplied HTTP request metadata
   println(
-    client.call[String]("hello").args("message" -> "test")(httpRequestMetadata)
+    client.call[String]("hello").args("message" -> "test")(httpRequest)
   )
 
   // Close the client

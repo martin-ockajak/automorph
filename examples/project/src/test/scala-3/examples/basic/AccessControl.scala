@@ -10,8 +10,8 @@ object AccessControl extends App {
   class ServerApi {
 
     // Accept HTTP request context provided by the server message transport plugin
-    def hello(message: String)(implicit http: ServerContext): String =
-      http.authorizationBearer match {
+    def hello(message: String)(implicit httpRequest: ServerContext): String =
+      httpRequest.authorizationBearer match {
         case Some("valid") => s"Hello $message!"
         case _ => throw IllegalAccessException("Access denied")
       }
