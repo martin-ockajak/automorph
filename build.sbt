@@ -190,7 +190,7 @@ lazy val examples = source(project, "examples", default, upickle, zio, sttp, rab
   Compile / scalaSource := baseDirectory.value / "project/src/main/scala",
   Test / scalaSource :=
     (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) => baseDirectory.value / "project/src/test/cala"
+      case Some((3, _)) => baseDirectory.value / "project/src/test/scala"
       case _ => baseDirectory.value / "project/src/test/scala-2"
     }),
   Test / parallelExecution := false,
