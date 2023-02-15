@@ -18,11 +18,11 @@
 
 # Overview
 
-**Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/specification) and [REST-RPC](docs/rest-rpc/README.md) protocols.
+**Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/specification) and [Web-RPC](docs/Web-RPC.md) protocols.
 
 * [Quick Start](docs/Quickstart.md)
 * [Documentation](https://automorph.org)
-* [API](https://automorph.org/api/automorph/index.html)
+* [API](https://automorph.org/api/index.html)
 * [Artifacts](https://mvnrepository.com/artifact/org.automorph/automorph)
 
 
@@ -35,10 +35,10 @@
 
 ## Features
 
-* **Convenient** - Generate RPC client or server layer automatically at compile-time from public methods of API classes.
+* **Automatic** - Generate RPC client or server layer automatically at compile-time from public methods of API classes.
 * **Practical** - Access transport protocol request and response metadata using optional API abstractions.
 * **Flexible** - Customize remote API function names and mapping between exceptions and RPC protocol errors.
-* **Modular** - Choose plugins to select [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) protocol, [effect](https://en.wikipedia.org/wiki/Effect_system) type, [transport](https://en.wikipedia.org/wiki/Transport_layer) protocol and message [format](https://en.wikipedia.org/wiki/File_format).
+* **Modular** - Choose plugins to select [RPC protocol](docs/Plugins.md#rpc-protocol), [effect type](docs/Plugins.md#effect-system), [transport protocol](docs/Plugins.md#message-transport) and [message format](docs/Plugins.md#message-codec).
 * **Discoverable** - Consume or provide API schemas via generated yet adjustable discovery functions.
 * **Extensible** - Easily implement custom data type serialization support or additional integration plugins.
 * **Manageable** - Leverage extensive error handling and structured [SLF4J](http://www.slf4j.org/)-based logging to diagnose issues.
