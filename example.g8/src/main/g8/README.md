@@ -1,6 +1,6 @@
 # Automorph example project
 
-* [Documentation](https://automorph.org/overview.html)
+* [Documentation](https://automorph.org)
 
 
 ## Try
@@ -14,5 +14,4 @@ Run the application:
 
 Make changes:
 
-`edit src/main/scala/examples/QuickStart.scala`
-
+`edit src/main/scala/examples/Quickstart.scala`
