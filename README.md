@@ -44,35 +44,35 @@
 
 ## Supported standards
 
-### RPC protocols
+### Effect Types
 
-* [JSON-RPC](https://www.jsonrpc.org/specification) (*Default*)
-* [REST-RPC](docs/rest-rpc/README.md)
+* [Synchronous](docs/Examples.md#synchronous-call) (*Default*)
+* [Asynchronous](docs/Examples.md#asynchronous-call) (*Default*)
+* [Monadic](docs/Examples.md#effect-system)
 
 ### Transport protocols
 
-* [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) (*Default*)
-* [WebSocket](https://en.wikipedia.org/wiki/WebSocket)
-* [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
+* [HTTP](docs/Examples.md#http-response-status) (*Default*)
+* [WebSocket](docs/Examples.md#websocket-transport)
+* [AMQP](docs/Examples.md#amqp-transport)
 
 ### Message formats
 
-* [JSON](https://www.json.org) (*Default*)
-* [MessagePack](https://msgpack.org)
+* [JSON](docs/Examples/index.html#data-serialization) (*Default*)
+* [MessagePack](docs/Examples/index.html#message-codec)
 
-### API schemas
-
-* [OpenRPC](https://spec.open-rpc.org)
-* [OpenAPI](https://github.com/OAI/OpenAPI-Specification)
 
 # Build
 
 ## Requirements
 
-* [JDK 11+](https://openjdk.java.net/)
+* [JDK](https://openjdk.java.net/) 11+
 * [SBT](https://www.scala-sbt.org/)
-* [NodeJS 17+](https://nodejs.org/) *(Documentation only)*
-* [Yarn 1.22+](https://yarnpkg.com/) *(Documentation only)*
+
+### Documentation only
+
+* [NodeJS](https://nodejs.org/) 17+
+* [Yarn](https://yarnpkg.com/) 1.22+
 
 
 ## Commands
