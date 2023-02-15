@@ -82,6 +82,14 @@ object Default extends DefaultMeta {
   type BindServerApis[Effect[_]] = ServerHandler[Effect] => ServerHandler[Effect]
 
   /**
+   * Server builder function.
+   *
+   * @tparam Effect
+   *   effect type
+   */
+  type ServerBuilder[Effect[_]] = BindServerApis[Future] => Server[Future]
+
+  /**
    * Creates a JSON-RPC request handler with specified effect system plugin while providing given message context type.
    *
    * The handler can be used by a server to invoke bound API methods based on incoming requests.
@@ -418,7 +426,7 @@ object Default extends DefaultMeta {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder,
-  )(implicit executionContext: ExecutionContext): BindServerApis[Future] => Server[Future] =
+  )(implicit executionContext: ExecutionContext): ServerBuilder[Future] =
     (bindApis: BindServerApis[Future]) => {
       val handler = bindApis(handlerAsync)
       server(handler, port, path, methods, webSocket, mapException, builder)
@@ -478,7 +486,7 @@ object Default extends DefaultMeta {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder,
-  ): BindServerApis[Identity] => Server[Identity] =
+  ): ServerBuilder[Identity] =
     (bindApis: BindServerApis[Identity]) => {
       val handler = bindApis(handlerSync)
       server(handler, port, path, methods, webSocket, mapException, builder)
