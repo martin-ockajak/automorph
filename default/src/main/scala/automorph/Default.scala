@@ -87,7 +87,7 @@ object Default extends DefaultMeta {
    * @tparam Effect
    *   effect type
    */
-  type ServerBuilder[Effect[_]] = BindServerApis[Future] => Server[Future]
+  type ServerBuilder[Effect[_]] = BindServerApis[Effect] => Server[Effect]
 
   /**
    * Creates a JSON-RPC request handler with specified effect system plugin while providing given message context type.
