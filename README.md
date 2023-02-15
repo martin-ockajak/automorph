@@ -28,21 +28,20 @@
 
 ## Goals
 
-* Enable consuming and exposing **remote APIs** transparently **without** needing to create **intermediate layer**
+* Enable consuming and exposing **remote APIs** transparently **without** needing to create an **intermediate layer**
 * Preserve user's **freedom** to make **technical decisions** and **access transport protocol** metadata
 * Strive for **smooth integration** with other **libraries** and existing **applications**
 
 
 ## Features
 
-* **Automatic** - Generate RPC client or server layer automatically at compile-time from public methods of API classes.
-* **Practical** - Access transport protocol request and response metadata using optional API abstractions.
-* **Flexible** - Customize remote API function names and mapping between exceptions and RPC protocol errors.
+* **Automatic** - Generate [JSON-RPC](https://www.jsonrpc.org/specification) 2.0 and [Web-RPC](docs/Web-RPC.md) 0.1 client or server at compile-time from public API class methods.
 * **Modular** - Choose plugins to select [RPC protocol](docs/Plugins.md#rpc-protocol), [effect type](docs/Plugins.md#effect-system), [transport protocol](docs/Plugins.md#message-transport) and [message format](docs/Plugins.md#message-codec).
-* **Discoverable** - Consume or provide API schemas via generated yet adjustable discovery functions.
+* **Flexible** - Customize data type serialization, remote API function names and RPC protocol errors.
+* **Permissive** - Access transport protocol metadata (e.g. HTTP headers) using optional API abstractions.
+* **Discoverable** - Consume and provide [OpenRPC](https://spec.open-rpc.org) 1.3+ or [OpenAPI](https://github.com/OAI/OpenAPI-Specification) 3.1+ API schemas via generated discovery functions.
 * **Extensible** - Easily implement custom data type serialization support or additional integration plugins.
-* **Manageable** - Leverage extensive error handling and structured [SLF4J](http://www.slf4j.org/)-based logging to diagnose issues.
-* **Compatible** - Artifacts are available for [Scala 3](https://dotty.epfl.ch/) on [JRE 11+](https://openjdk.java.net/) with support for [Scala 2.13](https://www.scala-lang.org/news/2.13.0) and [Scala 2.12](https://www.scala-lang.org/news/2.12.0/) planned.
+* **Compatible** - Requires [Scala](https://dotty.epfl.ch/) 3.2+ or 2.13+ on [JRE 11+](https://openjdk.java.net/) with support for  planned.
 
 ## Supported standards
 
@@ -127,3 +126,11 @@ sbt serveSite
 * Monix effect system is missing from API index
 * Documentation build breaks API reference links
 
+
+# Inspired by
+
+* [Scala JSON-RPC](https://github.com/shogowada/scala-json-rpc)
+* [Autowire](https://github.com/lihaoyi/autowire)
+* [STTP](https://sttp.softwaremill.com)
+* [Tapir](https://tapir.softwaremill.com)
+* [ZIO](https://zio.dev)

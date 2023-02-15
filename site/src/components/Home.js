@@ -67,9 +67,9 @@ const features = [
     link: 'https://mvnrepository.com/artifact/org.automorph/automorph',
     description: (
         <>
-          Artifacts are available for <a href="https://dotty.epfl.ch/">Scala</a> 3.2+ on <a
-            href="https://openjdk.java.net/">JRE</a> 11+ with support for <a
-            href="https://www.scala-lang.org/news/2.13.10">Scala</a> 2.13+ planned.
+          Requires <a href="https://dotty.epfl.ch/">Scala</a> 3.2+ or 2.13.+ on <a
+            href="https://openjdk.java.net/">JRE</a> 11+ and supports <a
+            href="http://www.slf4j.org/">SLF4J</a> logging.
         </>
     ),
   },
