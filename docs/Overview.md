@@ -48,4 +48,3 @@
 * [http4s](https://http4s.org)
 * [STTP](https://sttp.softwaremill.com)
 * [ZIO](https://zio.dev)
-

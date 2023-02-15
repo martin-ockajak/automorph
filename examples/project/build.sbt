@@ -12,8 +12,11 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.4.5",
 
   // Plugins
-  "org.automorph" %% "automorph-zio" % automorphVersion % Test,
   "org.automorph" %% "automorph-upickle" % automorphVersion % Test,
+  "org.automorph" %% "automorph-zio" % automorphVersion % Test,
+  "org.automorph" %% "automorph-sttp" % automorphVersion % Test,
+  "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % "3.3.18" % Test,
+  "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % "3.3.18" % Test,
 
   // Test
   "org.scalatest" %% "scalatest" % "3.2.15" % Test
