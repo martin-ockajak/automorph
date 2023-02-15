@@ -20,6 +20,7 @@ Expose the API instance for remote calls using JSON-RPC over HTTP(S).
 
 ```scala
 import automorph.Default
+import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -59,8 +60,11 @@ trait ClientApi {
 val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function statically
-val remoteApi = client.bind[ClientApi] // ClientApi
-remoteApi.hello("world", 1) // Future[String]
+val remoteApi = client.bind[ClientApi]
+println(Await.result(
+  remoteApi.hello("world", 1),
+  Duration.Inf
+))
 
 // Close the client
 Await.result(client.close(), Duration.Inf)
@@ -81,7 +85,10 @@ import scala.concurrent.{Await, Future}
 val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function dynamically
-client.call[String]("hello").args("what" -> "world", "n" -> 1) // Future[String]
+println(Await.result(
+  client.call[String]("hello").args("what" -> "world", "n" -> 1),
+  Duration.Inf
+))
 
 // Close the client
 client.close()
