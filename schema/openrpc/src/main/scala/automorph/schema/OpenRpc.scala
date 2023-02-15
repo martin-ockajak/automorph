@@ -10,7 +10,7 @@ import automorph.spi.protocol.RpcFunction
  *   [[https://spec.open-rpc.org OpenRPC schema]]
  */
 case class OpenRpc(
-  openrpc: String = "1.2.6",
+  openrpc: String = "1.3.1",
   info: Info,
   servers: Option[List[Server]] = None,
   methods: List[Method] = List(),
