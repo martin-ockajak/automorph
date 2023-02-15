@@ -56,12 +56,12 @@ object AccessControl extends App {
 
     // Call the remote API function statically using the invalid authentication
     println(Try(
-      remoteApi.hello("test")(invalidAuthentication)
+      remoteApi.hello("test")
     ).failed.get)
 
     // Call the remote API function dynamically using the invalid authentication
     println(Try(
-      client.call[String]("hello").args("message" -> "test")(invalidAuthentication)
+      client.call[String]("hello").args("message" -> "test")
     ).failed.get)
   }
 
