@@ -1,7 +1,0 @@
-#!/usr/bin/env bash
-
-SITE_DIR=site
-
-yarn install --cwd ${SITE_DIR}
-yarn --cwd ${SITE_DIR} start
-
