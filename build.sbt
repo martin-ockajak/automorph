@@ -82,7 +82,11 @@ def source(project: Project, path: String, dependsOn: ClasspathDep[ProjectRefere
   path.split('/') match {
     case Array("test", _ @_*) => sourceDependency
     case Array("examples", _ @_*) => sourceDependency
-    case Array(_, directories @ _*) => sourceDependency.settings(name := s"$projectName-${directories.mkString("-")}")
+    case Array(_, directories @ _*) => sourceDependency.settings(
+        name := s"$projectName-${directories.mkString("-")}",
+        Compile / doc / scalacOptions :=
+          scala3ScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master"),
+      )
   }
 }
 
@@ -216,36 +220,30 @@ ThisBuild / scalaVersion := "3.2.2"
 ThisBuild / crossScalaVersions += "2.13.10"
 ThisBuild / javacOptions ++= Seq("-source", "11", "-target", "11")
 
+val commonScalacOptions =
+  Seq("-language:higherKinds", "-feature", "-deprecation", "-unchecked", "-release", "9", "-encoding", "utf8")
+val scala3ScalacOptions = commonScalacOptions ++ Seq("-language:adhocExtensions", "-pagewidth", "120")
+
 ThisBuild / scalacOptions ++=
-  Seq("-language:higherKinds", "-feature", "-deprecation", "-unchecked", "-release", "9", "-encoding", "utf8") ++
-    (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) => Seq(
-          "-source",
-          "3.0",
-          "-language:adhocExtensions",
-          "-indent",
-          "-Xcheck-macros",
-          "-Ysafe-init",
-          "-pagewidth",
-          "120",
-        )
-      case _ => Seq(
-          "-language:existentials",
-          "-J--add-modules",
-          "-Jjava.net.http",
-          "-Xsource:3",
-          "-Xlint",
-          "-Wconf:site=[^.]+\\.codec\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
-          "-Wextra-implicit",
-          "-Wnumeric-widen",
-          "-Wvalue-discard",
-          "-Wunused:imports,patvars,privates,locals,params",
-          "-Vfree-terms",
-          "-Vimplicits",
-          "-Ybackend-parallelism",
-          "4",
-        )
-    })
+  (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((3, _)) => scala3ScalacOptions ++ Seq("-source", "3.2", "-indent", "-Xcheck-macros", "-Ysafe-init")
+    case _ => commonScalacOptions ++ Seq(
+        "-language:existentials",
+        "-J--add-modules",
+        "-Jjava.net.http",
+        "-Xsource:3",
+        "-Xlint",
+        "-Wconf:site=[^.]+\\.codec\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
+        "-Wextra-implicit",
+        "-Wnumeric-widen",
+        "-Wvalue-discard",
+        "-Wunused:imports,patvars,privates,locals,params",
+        "-Vfree-terms",
+        "-Vimplicits",
+        "-Ybackend-parallelism",
+        "4",
+      )
+  })
 
 // Analyze
 scalastyleConfig := baseDirectory.value / "project/scalastyle-config.sbt.xml"
@@ -274,6 +272,7 @@ lazy val docs = project.in(file("site")).settings(
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.md",
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.jpg",
   ),
+  Compile / doc / scalacOptions := scala3ScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master"),
   Compile / doc / sources ++= allSources.value.flatten,
   Compile / doc / tastyFiles ++= allTastyFiles.value.flatten.filter(_.getName != "MonixSystem.tasty"),
   Compile / doc / dependencyClasspath ++=
@@ -287,11 +286,6 @@ site := {
   import scala.sys.process.Process
   (docs / Compile / doc).value
   (docs / mdoc).toTask("").value
-  val systemApiSuffix = "automorph/system"
-  val monixApiDirectory = (monix / Compile / doc / target).value / systemApiSuffix
-  IO.listFiles(monixApiDirectory).foreach { file =>
-    IO.copyFile(file, (docs / baseDirectory).value / "build/api" / systemApiSuffix / file.name)
-  }
   IO.copyDirectory(
     (examples / baseDirectory).value / "project",
     (docs / baseDirectory).value / "static/examples/project",
@@ -299,11 +293,12 @@ site := {
   )
   Process(Seq("yarn", "install"), (docs / baseDirectory).value).!
   Process(Seq("yarn", "build"), (docs / baseDirectory).value, "SITE_DOCS" -> "docs").!
-  IO.copyDirectory(
-    (docs / Compile / doc / target).value,
-    (docs / baseDirectory).value / "build/api",
-    overwrite = true,
-  )
+  IO.copyDirectory((docs / Compile / doc / target).value, (docs / baseDirectory).value / "build/api", overwrite = true)
+  val systemApiSuffix = "automorph/system"
+  val monixApiDirectory = (monix / Compile / doc / target).value / systemApiSuffix
+  IO.listFiles(monixApiDirectory).foreach { file =>
+    IO.copyFile(file, (docs / baseDirectory).value / "build/api" / systemApiSuffix / file.name)
+  }
 }
 val serveSite = taskKey[Unit]("Continuously generates project website.")
 
