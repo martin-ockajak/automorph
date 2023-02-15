@@ -304,13 +304,13 @@ site := {
     overwrite = true,
   )
 }
-val serveSite = taskKey[Unit]("Starts continuously reloading project website server.")
+val serveSite = taskKey[Unit]("Continuously generates project website.")
 
 serveSite := {
   import scala.sys.process.Process
   Process(Seq("yarn", "start"), (docs / baseDirectory).value, "SITE_DOCS" -> "docs").!
 }
-serveSite := serveSite.dependsOn(site)
+serveSite := serveSite.dependsOn(site).value
 
 cleanFiles ++= Seq(
   (docs / baseDirectory).value / "build",

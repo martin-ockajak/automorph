@@ -15,6 +15,7 @@
 [![Artifacts](https://img.shields.io/badge/Releases-Artifacts-yellow)](https://mvnrepository.com/artifact/org.automorph/automorph)
 [![Build](https://github.com/martin-ockajak/automorph/workflows/Build/badge.svg)](https://github.com/martin-ockajak/automorph/actions/workflows/tests.yml)
 
+
 # Overview
 
 **Automorph** is an [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) client and server library for [Scala](https://www.scala-lang.org/) providing an effortless way to invoke and expose remote APIs using [JSON-RPC](https://www.jsonrpc.org/specification) and [REST-RPC](docs/rest-rpc/README.md) protocols.
@@ -24,11 +25,13 @@
 * [API](https://automorph.org/api/automorph/index.html)
 * [Artifacts](https://mvnrepository.com/artifact/org.automorph/automorph)
 
+
 ## Goals
 
 * Enable consuming and exposing **remote APIs** transparently **without** needing to create **intermediate layer**
 * Preserve user's **freedom** to make **technical decisions** and **access transport protocol** metadata
 * Strive for **smooth integration** with other **libraries** and existing **applications**
+
 
 ## Features
 
@@ -70,8 +73,9 @@
 
 * [JDK 11+](https://openjdk.java.net/)
 * [SBT](https://www.scala-sbt.org/)
-* [NodeJS 16+](https://nodejs.org/) *(Documentation)*
-* [Yarn](https://yarnpkg.com/) *(Documentation)*
+* [NodeJS 17+](https://nodejs.org/) *(Documentation only)*
+* [Yarn 1.22+](https://yarnpkg.com/) *(Documentation only)*
+
 
 ## Commands
 
@@ -87,12 +91,6 @@ sbt '+ test'
 export LOG_LEVEL=OFF
 ```
 
-#### Review test logs
-
-```
-target/test.log
-```
-
 #### Enable generated code logging
 
 ```bash
@@ -105,21 +103,27 @@ export LOG_CODE=true
 export TEST_BASIC=true
 ```
 
+#### Review test logs
+
+```
+target/test.log
+```
+
 ### Documentation
 
 ```bash
-sbt '++2.13.10 site'
+sbt site
 ```
 
 #### Continuous rendering
 
 ```bash
-yarn --cwd website start
+sbt serveSite
 ```
 
 ## Notes
 
-* Unified Scaladoc generation does not work for Scala 3
-* uPickle codec compilation takes a long time
+* uPickle codec compilation for Scala 2 takes a long time
+* Monix effect system is missing from API index
 * Documentation build breaks API reference links
 
