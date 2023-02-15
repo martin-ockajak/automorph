@@ -40,7 +40,6 @@
 * **Flexible** - Customize data type serialization, remote API function names and RPC protocol errors.
 * **Permissive** - Access transport protocol metadata (e.g. HTTP headers) using optional API abstractions.
 * **Discoverable** - Consume and provide [OpenRPC](https://spec.open-rpc.org) 1.3+ or [OpenAPI](https://github.com/OAI/OpenAPI-Specification) 3.1+ API schemas via generated discovery functions.
-* **Extensible** - Easily implement custom data type serialization support or additional integration plugins.
 * **Compatible** - Requires [Scala](https://dotty.epfl.ch/) 3.2+ or 2.13+ on [JRE 11+](https://openjdk.java.net/) with support for  planned.
 
 ## Supported standards
