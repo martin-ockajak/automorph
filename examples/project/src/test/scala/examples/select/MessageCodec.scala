@@ -28,8 +28,7 @@ object MessageCodec extends App {
   val api = new ServerApi()
 
   // Create a server RPC protocol plugin
-  val serverProtocol =
-    Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ServerContext](codec)
+  val serverProtocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ServerContext](codec)
 
   // Create an effect system plugin
   val system = Default.systemAsync
@@ -44,8 +43,7 @@ object MessageCodec extends App {
   }
 
   // Create a client RPC protocol plugin
-  val clientProtocol =
-    Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ClientContext](codec)
+  val clientProtocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ClientContext](codec)
 
   // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
   val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))

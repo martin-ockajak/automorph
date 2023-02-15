@@ -184,7 +184,8 @@ lazy val default = project.dependsOn(jsonrpc, circe, standard, undertow, testSta
   name := s"$projectName-default",
   libraryDependencies += "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion,
 )
-lazy val examples = source(project, "examples", default, upickle, zio, rabbitmq, testPlugin % Test).settings(
+lazy val examples = source(project, "examples", default, upickle, zio, sttp, rabbitmq, testPlugin % Test).settings(
+  libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
   libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test,
   Compile / scalaSource := baseDirectory.value / "project/src/main/scala",
   Test / scalaSource :=

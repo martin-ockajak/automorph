@@ -465,15 +465,14 @@ trait ClientApi {
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
-// Call the remote API function expecting response context
+// Call the remote API function retrieving a result with HTTP response metadata
 val remoteApi = client.bind[ClientApi]
 val static = remoteApi.hello("test")
 println(static.result)
 println(static.context.header("X-Test"))
 
-// Call the remote API function dynamically expecting response context
-val dynamic = client
-  .call[Contextual[String, ClientContext]]("hello").args("message" -> "test")
+// Call the remote API function dynamically retrieving a result with HTTP response metadata
+val dynamic = client.call[Contextual[String, ClientContext]]("hello").args("message" -> "test")
 println(dynamic.result)
 println(dynamic.context.header("X-Test"))
 ```
@@ -1318,8 +1317,7 @@ class ServerApi {
 val api = new ServerApi()
 
 // Create a server RPC protocol plugin
-val serverProtocol =
-  Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ServerContext](codec)
+val serverProtocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ServerContext](codec)
 
 // Create an effect system plugin
 val system = Default.systemAsync
@@ -1338,8 +1336,7 @@ trait ClientApi {
 }
 
 // Create a client RPC protocol plugin
-val clientProtocol =
-  Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ClientContext](codec)
+val clientProtocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ClientContext](codec)
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
