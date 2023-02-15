@@ -38,12 +38,12 @@ object AccessControl extends App {
     implicit val validAuthentication: ClientContext = client.defaultContext
       .authorizationBearer("valid")
 
-    // Call the remote API function statically using the valid authentication
+    // Call the remote API function statically using valid authentication
     println(
       remoteApi.hello("test")
     )
 
-    // Call the remote API function dynamically using the valid authentication
+    // Call the remote API function dynamically using valid authentication
     println(
       client.call[String]("hello").args("message" -> "test")
     )
@@ -54,12 +54,12 @@ object AccessControl extends App {
     implicit val invalidAuthentication: ClientContext = client.defaultContext
       .headers("X-Authentication" -> "unsupported")
 
-    // Call the remote API function statically using the invalid authentication
+    // Call the remote API function statically using invalid authentication
     println(Try(
       remoteApi.hello("test")
     ).failed.get)
 
-    // Call the remote API function dynamically using the invalid authentication
+    // Call the remote API function dynamically using invalid authentication
     println(Try(
       client.call[String]("hello").args("message" -> "test")
     ).failed.get)
