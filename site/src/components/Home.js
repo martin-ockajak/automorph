@@ -38,7 +38,7 @@ const features = [
     link: 'docs/Examples/index.html#data-serialization',
     description: (
         <>
-          Customize data type serialization, remote API function names and RPC protocol errors.
+          Customize access control, data type serialization, remote API function names and RPC protocol errors.
         </>
     ),
   },
