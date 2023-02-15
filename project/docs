@@ -2,6 +2,6 @@
 
 SITE_DIR=site
 
-[ ! -d "${SITE_DIR}/node_modules" ] && yarn install --cwd ${SITE_DIR}
+yarn install --cwd ${SITE_DIR}
 yarn --cwd ${SITE_DIR} start
 

@@ -183,11 +183,11 @@ lazy val default = project.dependsOn(jsonrpc, circe, standard, undertow, testSta
 )
 lazy val examples = source(project, "examples", default, upickle, zio, testPlugin % Test).settings(
   libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test,
-  Compile / scalaSource := baseDirectory.value / "project" / "src" / "main" / "scala",
+  Compile / scalaSource := baseDirectory.value / "project/src/main/scala",
   Test / scalaSource :=
     (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) => baseDirectory.value / "project" / "src" / "test" / "scala"
-      case _ => baseDirectory.value / "project" / "src" / "test" / "scala-2"
+      case Some((3, _)) => baseDirectory.value / "project/src/test/cala"
+      case _ => baseDirectory.value / "project/src/test/scala-2"
     }),
   Test / parallelExecution := false,
 )
@@ -248,7 +248,7 @@ ThisBuild / scalacOptions ++=
     })
 
 // Analyze
-scalastyleConfig := baseDirectory.value / "project" / "scalastyle-config.sbt.xml"
+scalastyleConfig := baseDirectory.value / "project/scalastyle-config.sbt.xml"
 Compile / scalastyleSources ++= (Compile / unmanagedSourceDirectories).value
 scalastyleFailOnError := true
 lazy val testScalastyle = taskKey[Unit]("testScalastyle")
@@ -262,18 +262,17 @@ def flattenTasks[A](tasks: Seq[Def.Initialize[Task[A]]]): Def.Initialize[Task[Se
     case Seq(head, tail @ _*) => Def.taskDyn(flattenTasks(tail).map(_.+:(head.value)))
   }
 
-lazy val subProjects = root.uses
-lazy val allSources = Def.taskDyn(flattenTasks(subProjects.map(_ / Compile / doc / sources)))
-lazy val allTastyFiles = Def.taskDyn(flattenTasks(subProjects.map(_ / Compile / doc / tastyFiles)))
-lazy val allDependencyClasspath = Def.taskDyn(flattenTasks(subProjects.map(_ / Compile / doc / dependencyClasspath)))
-val siteProjectDirectory = settingKey[File]("Website generator directory.")
-siteProjectDirectory := baseDirectory.value / "site"
-lazy val docs = project.in(file("docs")).settings(
+lazy val allSources = Def.taskDyn(flattenTasks(root.uses.map(_ / Compile / doc / sources)))
+lazy val allTastyFiles = Def.taskDyn(flattenTasks(root.uses.map(_ / Compile / doc / tastyFiles)))
+lazy val allDependencyClasspath = Def.taskDyn(flattenTasks(root.uses.map(_ / Compile / doc / dependencyClasspath)))
+lazy val docs = project.in(file("site")).settings(
   mdocVariables := Map("PROJECT_VERSION" -> version.value, "SCALADOC_VERSION" -> "3.2.2"),
-  mdocOut := (LocalRootProject / siteProjectDirectory).value / "docs",
+  mdocOut := baseDirectory.value / "docs",
   mdocExtraArguments := Seq("--no-link-hygiene"),
-  mdoc / fileInputs ++= Seq(baseDirectory.value.toGlob / ** / "*.md", baseDirectory.value.toGlob / ** / "*.jpg"),
-  Compile / doc / target := (LocalRootProject / siteProjectDirectory).value / "docs/api",
+  mdoc / fileInputs ++= Seq(
+    (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.md",
+    (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.jpg",
+  ),
   Compile / doc / sources ++= allSources.value.flatten,
   Compile / doc / tastyFiles ++= allTastyFiles.value.flatten.filter(_.getName != "MonixSystem.tasty"),
   Compile / doc / dependencyClasspath ++=
@@ -287,30 +286,41 @@ site := {
   import scala.sys.process.Process
   (docs / Compile / doc).value
   (docs / mdoc).toTask("").value
-  val systemApiSuffix = "api/automorph/system"
-  val monixApiDirectory = (monix / target).value / s"scala-${scalaVersion.value}" / systemApiSuffix
-  val staticSiteDirectory = siteProjectDirectory.value / "static"
+  val systemApiSuffix = "automorph/system"
+  val monixApiDirectory = (monix / Compile / doc / target).value / systemApiSuffix
   IO.listFiles(monixApiDirectory).foreach { file =>
-    IO.copyFile(file, staticSiteDirectory / systemApiSuffix / file.name)
+    IO.copyFile(file, (docs / baseDirectory).value / "build/api" / systemApiSuffix / file.name)
   }
   IO.copyDirectory(
     (examples / baseDirectory).value / "project",
-    staticSiteDirectory / "examples/project",
+    (docs / baseDirectory).value / "static/examples/project",
     overwrite = true,
   )
-  Process(Seq("yarn", "install"), siteProjectDirectory.value).!
-  Process(Seq("yarn", "build"), siteProjectDirectory.value, "SITE_DOCS" -> "docs").!
+  Process(Seq("yarn", "install"), (docs / baseDirectory).value).!
+  Process(Seq("yarn", "build"), (docs / baseDirectory).value, "SITE_DOCS" -> "docs").!
+  IO.copyDirectory(
+    (docs / Compile / doc / target).value,
+    (docs / baseDirectory).value / "build/api",
+    overwrite = true,
+  )
 }
+val serveSite = taskKey[Unit]("Starts continuously reloading project website server.")
+
+serveSite := {
+  import scala.sys.process.Process
+  Process(Seq("yarn", "start"), (docs / baseDirectory).value, "SITE_DOCS" -> "docs").!
+}
+serveSite := serveSite.dependsOn(site)
 
 cleanFiles ++= Seq(
-  siteProjectDirectory.value / "docs",
-  siteProjectDirectory.value / "static/examples",
-  siteProjectDirectory.value / "build",
+  (docs / baseDirectory).value / "build",
+  (docs / baseDirectory).value / "docs",
+  (docs / baseDirectory).value / "static/examples",
 )
 
 // Deployment
 enablePlugins(GhpagesPlugin)
-siteSourceDirectory := siteProjectDirectory.value / "build"
+siteSourceDirectory := (docs / baseDirectory).value / "build"
 git.remoteRepo := repositoryShell
 val deploySite = taskKey[Unit]("Deploys project website.")
 deploySite := {}
@@ -323,4 +333,4 @@ ThisBuild / releaseVcsSign := true
 ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
 ThisBuild / versionScheme := Some("semver-spec")
 credentials += Credentials("GnuPG Key ID", "gpg", "1735B0FD9A286C8696EB5E6117F23799295F187F", "")
-credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
+credentials += Credentials(Path.userHome / ".sbt/sonatype_credentials")
