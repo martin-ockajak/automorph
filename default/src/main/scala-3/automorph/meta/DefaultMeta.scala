@@ -68,8 +68,7 @@ private[automorph] trait DefaultMeta {
    * @tparam Context
    *   message context type
    */
-  inline
-def protocol[NodeType, CodecType <: MessageCodec[NodeType], Context](
+  inline def protocol[NodeType, CodecType <: MessageCodec[NodeType], Context](
     codec: CodecType
   ): Protocol[NodeType, CodecType, Context] =
     JsonRpcProtocol(codec)

@@ -99,7 +99,7 @@ final case class NanoServer[Effect[_]] private (
         log.receivingRequest(requestProperties, Protocol.Http.name)
         val requestBody = session.getInputStream.asArray(session.getBodySize.toInt).toInputStream
 
-        // Handler the equest
+        // Handle the request
         handleRequest(requestBody, session, protocol, requestProperties, requestId)
       }
     }

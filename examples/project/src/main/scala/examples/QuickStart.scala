@@ -6,7 +6,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-object QuickStart extends App {
+private[examples] object QuickStart extends App {
 
   // Create server API instance
   class ServerApi {

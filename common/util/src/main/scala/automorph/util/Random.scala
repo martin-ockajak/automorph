@@ -1,7 +1,7 @@
 package automorph.util
 
 /** Random value generator. */
-object Random {
+private[automorph] object Random {
 
   private lazy val random = new scala.util.Random(System.currentTimeMillis() + Runtime.getRuntime.totalMemory())
 
