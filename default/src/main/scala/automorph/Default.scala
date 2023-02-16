@@ -21,7 +21,7 @@ object Default extends DefaultMeta {
   type AsyncSystem = EffectSystem[Future] & Defer[Future]
 
   /** Default synchronous effect system plugin type. */
-  type SyncSystem = EffectSystem[Identity] & Defer[Identity]
+  type SyncSystem = EffectSystem[Identity]
 
   /**
    * Default RPC client type.
