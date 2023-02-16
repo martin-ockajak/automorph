@@ -14,4 +14,8 @@ package automorph.spi.system
  * @tparam T
  *   effectful value type
  */
-final case class Deferred[Effect[_], T](effect: Effect[T], succeed: T => Effect[Unit], fail: Throwable => Effect[Unit])
+final case class Deferred[Effect[_], T](
+  effect: Effect[T],
+  succeed: T => Effect[Unit],
+  fail: Throwable => Effect[Unit],
+)

@@ -3,14 +3,14 @@ package examples.select
 import automorph.Default
 import automorph.system.ZioSystem
 import java.net.URI
-import zio.{Runtime, Task}
+import zio.{Task, Unsafe, ZIO}
 
 object EffectSystem extends App {
 
   // Create server API instance
   class ServerApi {
     def hello(some: String, n: Int): Task[String] =
-      Task.succeed(s"Hello $some $n!")
+      ZIO.succeed(s"Hello $some $n!")
   }
   val api = new ServerApi()
 
@@ -28,17 +28,23 @@ object EffectSystem extends App {
   // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
   val client = Default.client(system, new URI("http://localhost:7000/api"))
 
+  // Define a helper function to run ZIO tasks
+  def run[T](effect: Task[T]): T =
+    Unsafe.unsafe { implicit unsafe =>
+      ZioSystem.defaultRuntime.unsafe.run(effect).toEither.swap.map(_.getCause).swap.toTry.get
+    }
+
   // Call the remote APi function via proxy
   val remoteApi = client.bind[ClientApi]
-  println(Runtime.default.unsafeRunTask(
+  println(run(
     remoteApi.hello("world", 1)
   ))
 
   // Close the client
-  Runtime.default.unsafeRunTask(client.close())
+  run(client.close())
 
   // Stop the server
-  Runtime.default.unsafeRunTask(server.close())
+  run(server.close())
 }
 
 class EffectSystem extends org.scalatest.freespec.AnyFreeSpecLike {

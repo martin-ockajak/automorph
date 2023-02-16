@@ -1,19 +1,14 @@
 package test.system
 
 import automorph.system.ZioSystem
-import scala.util.Try
-import test.system.ZioTest.Effect
-import zio.{RIO, ZEnv}
+import zio.{Task, Unsafe}
 
-class ZioTest extends DeferEffectSystemTest[Effect] {
+class ZioTest extends DeferEffectSystemTest[Task] {
 
-  lazy val system: ZioSystem[ZEnv] = ZioSystem.default
+  lazy val system: ZioSystem[Any] = ZioSystem.default
 
-  def execute[T](effect: RIO[ZEnv, T]): Either[Throwable, T] =
-    Try(system.runtime.unsafeRunTask(effect)).toEither
-}
-
-object ZioTest {
-
-  type Effect[T] = RIO[ZEnv, T]
+  def execute[T](effect: Task[T]): Either[Throwable, T] =
+    Unsafe.unsafe { implicit unsafe =>
+      system.runtime.unsafe.run(effect).toEither.swap.map(_.getCause).swap
+    }
 }

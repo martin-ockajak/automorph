@@ -200,7 +200,7 @@ private[automorph] object Extensions {
       system.flatMap(effect)(function)
 
     /**
-     * Executes an effect asynchronously without blocking.
+     * Executes an effect asynchronously without blocking and discard the result.
      *
      * @return
      *   nothing

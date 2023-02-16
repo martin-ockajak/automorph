@@ -96,7 +96,7 @@ trait EffectSystem[Effect[_]] {
     flatMap(effect)(value => pure(function(value)))
 
   /**
-   * Executes an effect asynchronously without blocking.
+   * Executes an effect asynchronously without blocking and discard the result.
    *
    * @param effect
    *   effectful value

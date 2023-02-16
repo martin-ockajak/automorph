@@ -26,9 +26,6 @@ final case class CatsEffectSystem()(implicit val runtime: IORuntime) extends Eff
   override def either[T](effect: => IO[T]): IO[Either[Throwable, T]] =
     effect.attempt
 
-  override def run[T](effect: IO[T]): Unit =
-    effect.unsafeRunAndForget()
-
   override def deferred[T]: IO[Deferred[IO, T]] =
     map(Queue.dropping[IO, Either[Throwable, T]](1)) { queue =>
       Deferred(
@@ -59,6 +56,9 @@ final case class CatsEffectSystem()(implicit val runtime: IORuntime) extends Eff
 
   override def flatMap[T, R](effect: IO[T])(function: T => IO[R]): IO[R] =
     effect.flatMap(function)
+
+  override def run[T](effect: IO[T]): Unit =
+    effect.unsafeRunAndForget()
 }
 
 object CatsEffectSystem {

@@ -16,4 +16,7 @@ import scala.util.Try
  * @tparam Content
  *   protocol-specific message content type
  */
-final case class RpcResponse[Node, Content](result: Try[Node], message: RpcMessage[Content])
+final case class RpcResponse[Node, Content](
+  result: Try[Node],
+  message: RpcMessage[Content],
+)

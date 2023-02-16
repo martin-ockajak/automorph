@@ -274,7 +274,7 @@ final case class HttpClient[Effect[_]](
           buffers.foreach(buffer => outputStream.write(buffer, 0, buffer.length))
           buffers.clear()
           val responseBody = outputStream.toByteArray.toInputStream
-          system.run(response.succeed((responseBody, None, Seq())).asInstanceOf[Effect[Any]])
+          response.succeed((responseBody, None, Seq())).run
         }
         super.onBinary(webSocket, data, last)
       }

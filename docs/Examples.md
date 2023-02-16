@@ -1228,7 +1228,7 @@ libraryDependencies ++= Seq(
 import automorph.Default
 import automorph.system.ZioSystem
 import java.net.URI
-import zio.{Runtime, Task}
+import zio.{Task, Unsafe, ZIO}
 ```
 
 **Server**
@@ -1259,9 +1259,15 @@ trait ClientApi {
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val client = Default.client(system, new URI("http://localhost:7000/api"))
 
+// Define a helper function to run ZIO tasks
+def run[T](effect: Task[T]): T =
+  Unsafe.unsafe { implicit unsafe =>
+    ZioSystem.defaultRuntime.unsafe.run(effect).toEither.swap.map(_.getCause).swap.toTry.get
+  }
+
 // Call the remote APi function via proxy
 val remoteApi = client.bind[ClientApi]
-println(Runtime.default.unsafeRunTask(
+println(run(
   remoteApi.hello("world", 1)
 ))
 ```
@@ -1269,11 +1275,11 @@ println(Runtime.default.unsafeRunTask(
 **Cleanup**
 
 ```scala
-// Close the client
-Runtime.default.unsafeRunTask(client.close())
+  // Close the client
+run(client.close())
 
 // Stop the server
-Runtime.default.unsafeRunTask(server.close())
+run(server.close())
 ```
 
 ### [Message codec](../../examples/project/src/test/scala/examples/select/MessageCodec.scala)

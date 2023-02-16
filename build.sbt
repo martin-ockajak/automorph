@@ -1,23 +1,14 @@
-// Repository
+// Project
 val projectRoot = "org"
 val projectName = "automorph"
 val projectDescription = "RPC client and server for Scala"
-val repositoryPath = s"martin-ockajak/$projectName"
-val repositoryUrl = s"https://github.com/$repositoryPath"
-val repositoryShell = s"git@github.com:$repositoryPath.git"
 val siteUrl = s"https://$projectName.$projectRoot"
-
-// Metadata
 ThisBuild / homepage := Some(url(siteUrl))
 ThisBuild / licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / description := projectDescription
 ThisBuild / organization := s"$projectRoot.$projectName"
 ThisBuild / organizationName := projectName
 ThisBuild / organizationHomepage := Some(url(siteUrl))
-ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
-ThisBuild / sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
-//apiURL := Some(url(s"$siteUrl/api"))
-
 ThisBuild / developers := List(Developer(
   id = "m",
   name = "Martin Ockajak",
@@ -25,7 +16,16 @@ ThisBuild / developers := List(Developer(
   url = url(s"https://github.com/martin-ockajak")
 ))
 Global / onChangedBuildSource := ReloadOnSourceChanges
+
+
+// Repository
+val repositoryPath = s"martin-ockajak/$projectName"
+val repositoryUrl = s"https://github.com/$repositoryPath"
+val repositoryShell = s"git@github.com:$repositoryPath.git"
+ThisBuild / scmInfo := Some(ScmInfo(url(repositoryUrl), s"scm:$repositoryShell"))
+apiURL := Some(url(s"$siteUrl/api"))
 onLoadMessage := ""
+
 
 // Structure
 lazy val root = project.in(file(".")).settings(name := projectName, publish / skip := true).aggregate(
@@ -76,13 +76,14 @@ lazy val root = project.in(file(".")).settings(name := projectName, publish / sk
   examples
 )
 
+
 // Dependencies
 def source(project: Project, path: String, dependsOn: ClasspathDep[ProjectReference]*): Project = {
   val sourceDependency = project.in(file(path)).dependsOn(dependsOn: _*)
-  path.split('/') match {
-    case Array("test", _ @_*) => sourceDependency
-    case Array("examples", _ @_*) => sourceDependency.settings(Compile / doc / scalacOptions := docScalacOptions)
-    case Array(_, directories @ _*) => sourceDependency.settings(
+  path.split('/').toSeq match {
+    case Seq("test", _ @_*) => sourceDependency
+    case Seq("examples", _ @_*) => sourceDependency.settings(Compile / doc / scalacOptions := docScalacOptions)
+    case Seq(_, directories @ _*) => sourceDependency.settings(
         name := s"$projectName-${directories.mkString("-")}",
         Compile / doc / scalacOptions := docScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master")
       )
@@ -114,7 +115,7 @@ lazy val webrpc = source(project, "protocol/webrpc", webrpcMeta, openapi, util)
 // Effect system
 lazy val standard = source(project, "system/standard", core, http, testCore % Test, testHttp % Test)
 lazy val zio = source(project, "system/zio", spi, testStandard % Test)
-  .settings(libraryDependencies += "dev.zio" %% "zio" % "1.0.18")
+  .settings(libraryDependencies += "dev.zio" %% "zio" % "2.0.9")
 lazy val monix = source(project, "system/monix", spi, testStandard % Test)
   .settings(libraryDependencies += "io.monix" %% "monix-eval" % "3.4.1")
 lazy val catsEffect = source(project, "system/cats-effect", spi, testStandard % Test)
@@ -140,8 +141,8 @@ lazy val argonaut = source(project, "codec/argonaut", jsonrpc, webrpc, testPlugi
 // Message transport
 lazy val http = source(project, "transport/http", jsonrpc)
 lazy val amqp = source(project, "transport/amqp")
-val sttpVersion = "3.3.18"
-val sttpHttpClientVersion = "3.3.18"
+val sttpVersion = "3.8.11"
+val sttpHttpClientVersion = "3.5.2"
 lazy val sttp = source(project, "transport/sttp", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
@@ -196,6 +197,7 @@ lazy val examples = source(project, "examples", default, upickle, zio, sttp, rab
   Test / parallelExecution := false
 )
 
+
 // Test
 val scribeVersion = "3.11.0"
 ThisBuild / Test / testOptions += Tests.Argument("-oD")
@@ -215,15 +217,14 @@ lazy val testHttp = source(project, "test/http", testBase, http)
 lazy val testAmqp = source(project, "test/amqp", testBase, amqp)
 lazy val testStandard = source(project, "test/standard", testCore, testHttp, standard)
 
+
 // Compile
 ThisBuild / scalaVersion := "3.2.2"
 ThisBuild / crossScalaVersions += "2.13.10"
 ThisBuild / javacOptions ++= Seq("-source", "11", "-target", "11")
-
 val commonScalacOptions =
   Seq("-language:higherKinds", "-feature", "-deprecation", "-unchecked", "-release", "9", "-encoding", "utf8")
 val docScalacOptions = commonScalacOptions ++ Seq("-language:adhocExtensions", "-pagewidth", "120")
-
 ThisBuild / scalacOptions ++=
   (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((3, _)) => docScalacOptions ++ Seq("-source", "3.2", "-indent", "-Xcheck-macros", "-Ysafe-init")
@@ -245,6 +246,7 @@ ThisBuild / scalacOptions ++=
       )
   })
 
+
 // Analyze
 scalastyleConfig := baseDirectory.value / "project/scalastyle-config.sbt.xml"
 Compile / scalastyleSources ++= (Compile / unmanagedSourceDirectories).value
@@ -252,6 +254,7 @@ scalastyleFailOnError := true
 lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 testScalastyle := (Test / scalastyle).toTask("").value
 Test / test := (Test / test).dependsOn(testScalastyle).value
+
 
 // Documentation
 def flattenTasks[A](tasks: Seq[Def.Initialize[Task[A]]]): Def.Initialize[Task[Seq[A]]] =
@@ -281,7 +284,6 @@ lazy val docs = project.in(file("site")).settings(
 
 // Site
 val site = taskKey[Unit]("Generates project website.")
-
 site := {
   import scala.sys.process.Process
   (docs / Compile / doc).value
@@ -301,7 +303,6 @@ site := {
   }
 }
 val serveSite = taskKey[Unit]("Continuously generates project website.")
-
 serveSite := {
   import scala.sys.process.Process
   Process(Seq("yarn", "start"), (docs / baseDirectory).value, "SITE_DOCS" -> "docs").!
@@ -314,7 +315,8 @@ cleanFiles ++= Seq(
   (docs / baseDirectory).value / "static/examples"
 )
 
-// Deployment
+
+// Deploy
 enablePlugins(GhpagesPlugin)
 siteSourceDirectory := (docs / baseDirectory).value / "build"
 git.remoteRepo := repositoryShell
@@ -322,11 +324,13 @@ val deploySite = taskKey[Unit]("Deploys project website.")
 deploySite := {}
 deploySite := deploySite.dependsOn(site, ghpagesPushSite).value
 
+
 // Release
 ThisBuild / releaseCrossBuild := false
-ThisBuild / scmInfo := Some(ScmInfo(url(repositoryUrl), s"scm:$repositoryShell"))
 ThisBuild / releaseVcsSign := true
 ThisBuild / releasePublishArtifactsAction := PgpKeys.publishSigned.value
 ThisBuild / versionScheme := Some("semver-spec")
+ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
+ThisBuild / sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 credentials += Credentials("GnuPG Key ID", "gpg", "1735B0FD9A286C8696EB5E6117F23799295F187F", "")
 credentials += Credentials(Path.userHome / ".sbt/sonatype_credentials")

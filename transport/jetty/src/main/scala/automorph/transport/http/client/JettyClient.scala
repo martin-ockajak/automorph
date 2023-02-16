@@ -247,11 +247,11 @@ final case class JettyClient[Effect[_]](
       override def onWebSocketBinary(payload: Array[Byte], offset: Int, length: Int): Unit = {
         val message = util.Arrays.copyOfRange(payload, offset, offset + length)
         val responseBody = message.toInputStream
-        system.run(response.succeed((responseBody, None, Seq())).asInstanceOf[Effect[Any]])
+        response.succeed((responseBody, None, Seq())).run
       }
 
       override def onWebSocketError(error: Throwable): Unit =
-        system.run(response.fail(error))
+        response.fail(error).run
     }
 
   private def effect[T](completableFuture: => CompletableFuture[T], defer: Defer[Effect]): Effect[T] =

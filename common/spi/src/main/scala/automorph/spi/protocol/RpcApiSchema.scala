@@ -12,4 +12,7 @@ package automorph.spi.protocol
  * @tparam Node
  *   message node type
  */
-final case class RpcApiSchema[Node](function: RpcFunction, invoke: Iterable[RpcFunction] => Node)
+final case class RpcApiSchema[Node](
+  function: RpcFunction,
+  invoke: Iterable[RpcFunction] => Node,
+)

@@ -2,7 +2,7 @@ package automorph.system
 
 import automorph.spi.EffectSystem
 import automorph.spi.system.{Defer, Deferred}
-import zio.{RIO, Runtime, ZEnv, ZQueue}
+import zio.{Queue, RIO, Runtime, Task, Trace, Unsafe, ZIO}
 
 /**
  * ZIO effect system plugin using `RIO` as an effect type.
@@ -23,7 +23,7 @@ final case class ZioSystem[Environment]()(implicit val runtime: Runtime[Environm
   with Defer[({ type Effect[A] = RIO[Environment, A] })#Effect] {
 
   override def wrap[T](value: => T): RIO[Environment, T] =
-    RIO(value)
+    ZIO.attempt(value)
 
   override def either[T](effect: => RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] =
     effect.either
@@ -31,11 +31,8 @@ final case class ZioSystem[Environment]()(implicit val runtime: Runtime[Environm
   override def flatMap[T, R](effect: RIO[Environment, T])(function: T => RIO[Environment, R]): RIO[Environment, R] =
     effect.flatMap(function)
 
-  override def run[T](effect: RIO[Environment, T]): Unit =
-    runtime.unsafeRunAsync(effect)(_ => ())
-
   override def deferred[T]: RIO[Environment, Deferred[({ type Effect[A] = RIO[Environment, A] })#Effect, T]] =
-    map(ZQueue.dropping[Either[Throwable, T]](1)) { queue =>
+    map(Queue.dropping[Either[Throwable, T]](1)) { queue =>
       Deferred(
         queue.take.flatMap {
           case Right(result) => pure(result)
@@ -47,21 +44,39 @@ final case class ZioSystem[Environment]()(implicit val runtime: Runtime[Environm
     }
 
   override def pure[T](value: T): RIO[Environment, T] =
-    RIO.succeed(value)
+    ZIO.succeed(value)
 
   override def failed[T](exception: Throwable): RIO[Environment, T] =
-    RIO.fail(exception)
+    ZIO.fail(exception)
+
+  override def run[T](effect: RIO[Environment, T]): Unit = {
+    implicit val trace: Trace = Trace.empty
+    Unsafe.unsafe { implicit unsafe =>
+      runtime.unsafe.fork(effect)
+      ()
+    }
+  }
 }
 
 object ZioSystem {
 
   /**
-   * ZIO with default environment effect type.
+   * ZIO effect type with specified environment.
+   *
+   * @tparam T
+   *   effectful value type
+   * @tparam Environment
+   *   effectful ZIO environment type
+   */
+  type Effect[T, Environment] = RIO[Environment, T]
+
+  /**
+   * ZIO effect type with default environment.
    *
    * @tparam T
    *   effectful value type
    */
-  type DefaultEffect[T] = RIO[ZEnv, T]
+  type DefaultEffect[T] = Task[T]
 
   /**
    * Creates a ZIO effect system plugin with default environment using `RIO` as an effect type.
@@ -69,14 +84,14 @@ object ZioSystem {
    * @see
    *   [[https://zio.dev Library documentation]]
    * @see
-   *   [[https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html Effect type]]
+   *   [[https://javadoc.io/doc/dev.zio/zio_3/latest/zio.html#RIO-0 Effect type]]
    * @return
    *   ZIO effect system plugin
    */
-  def default: ZioSystem[ZEnv] =
-    ZioSystem[ZEnv]()(defaultRuntime)
+  def default: ZioSystem[Any] =
+    ZioSystem[Any]()(defaultRuntime)
 
   /** Default ZIO runtime environment. */
-  def defaultRuntime: Runtime[ZEnv] =
-    Runtime.default.withReportFailure(_ => ())
+  def defaultRuntime: Runtime[Any] =
+    Runtime.default
 }
