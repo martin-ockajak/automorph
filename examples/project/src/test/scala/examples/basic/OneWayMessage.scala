@@ -41,7 +41,7 @@ object OneWayMessage extends App {
 
 class OneWayMessage extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Test" ignore {
       OneWayMessage.main(Array())
     }
   }

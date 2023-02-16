@@ -58,7 +58,7 @@ object HttpRequestMetadata extends App {
 
   // Call the remote API function dynamically with directly supplied HTTP request metadata
   println(
-    client.call[String]("hello").args("message" -> "test")(httpRequest)
+    client.call[String]("hello").args("message" -> "test")(using httpRequest)
   )
 
   // Close the client

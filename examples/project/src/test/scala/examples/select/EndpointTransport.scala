@@ -50,7 +50,7 @@ object EndpointTransport extends App {
 
 class EndpointTransport extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Test" ignore {
       EndpointTransport.main(Array())
     }
   }

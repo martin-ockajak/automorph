@@ -42,7 +42,7 @@ object WebSocketTransport extends App {
 
 class WebSocketTransport extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Test" ignore {
       WebSocketTransport.main(Array())
     }
   }

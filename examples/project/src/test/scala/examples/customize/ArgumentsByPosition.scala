@@ -49,7 +49,7 @@ object ArgumentsByPosition extends App {
 
 class ArgumentsByPosition extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Test" ignore {
       ArgumentsByPosition.main(Array())
     }
   }

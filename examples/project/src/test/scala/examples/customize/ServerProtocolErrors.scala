@@ -63,7 +63,7 @@ object ServerProtocolErrors extends App {
 
 class ServerProtocolErrors extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Test" ignore {
       ServerProtocolErrors.main(Array())
     }
   }

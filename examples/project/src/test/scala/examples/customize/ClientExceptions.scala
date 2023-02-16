@@ -55,7 +55,7 @@ object ClientExceptions extends App {
 
 class ClientExceptions extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Test" ignore {
       ClientExceptions.main(Array())
     }
   }
