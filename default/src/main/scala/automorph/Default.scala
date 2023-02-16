@@ -2,6 +2,7 @@ package automorph
 
 import automorph.meta.DefaultMeta
 import automorph.spi.EffectSystem
+import automorph.spi.system.Defer
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
 import automorph.system.{FutureSystem, IdentitySystem}
@@ -17,10 +18,10 @@ import scala.concurrent.{ExecutionContext, Future}
 object Default extends DefaultMeta {
 
   /** Default asynchronous effect system plugin type. */
-  type AsyncSystem = EffectSystem[Future]
+  type AsyncSystem = EffectSystem[Future] & Defer[Future]
 
   /** Default synchronous effect system plugin type. */
-  type SyncSystem = EffectSystem[Identity]
+  type SyncSystem = EffectSystem[Identity] & Defer[Identity]
 
   /**
    * Default RPC client type.

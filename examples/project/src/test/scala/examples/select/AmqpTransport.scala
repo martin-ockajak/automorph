@@ -5,14 +5,15 @@ import automorph.transport.amqp.client.RabbitMqClient
 import automorph.transport.amqp.server.RabbitMqServer
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 object AmqpTransport extends App {
 
   // Create server API instance
   class ServerApi {
-    def hello(some: String, n: Int): String =
-      s"Hello $some $n!"
+    def hello(some: String, n: Int): Future[String] =
+      Future(s"Hello $some $n!")
   }
   val api = new ServerApi()
 
@@ -22,11 +23,14 @@ object AmqpTransport extends App {
 
   // Define client view of the remote API
   trait ClientApi {
-    def hello(some: String, n: Int): String
+    def hello(some: String, n: Int): Future[String]
   }
 
-  // Setup RabbitMQ AMQP client publishing requests to the 'api' queue
-  val client = RabbitMqClient[Effect](new URI("amqp://localhost"), 'api')
+  // Create RabbitMQ AMQP client message transport publishing requests to the 'api' queue
+  val transport = RabbitMqClient(new URI("amqp://localhost"), "api", Default.systemAsync)
+
+  // Setup JSON-RPC HTTP client
+  val client = Default.client(transport)
 
   // Call the remote API function
   val remoteApi = client.bind[ClientApi]

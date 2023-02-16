@@ -7,13 +7,14 @@ import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 
 object HttpResponseStatus extends App {
 
   // Create server API instance
   class ServerApi {
     def hello(some: String, n: Int): Future[String] =
-      Future.failed(new SqlException("Test error"))
+      Future.failed(new SQLException("Test error"))
   }
   val api = new ServerApi()
 

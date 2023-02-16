@@ -1,7 +1,6 @@
 package examples.select
 
 import automorph.Default
-import automorph.system.IdentitySystem
 import automorph.transport.http.client.UrlClient
 import java.net.URI
 
@@ -23,10 +22,10 @@ object ClientTransport extends App {
     def hello(some: String, n: Int): String
   }
 
-  // Create HttpUrlConnection HTTP client message transport
-  val transport = UrlClient(IdentitySystem(), new URI("http://localhost:7000/api"))
+  // Create standard library HTTP client message transport sending POST requests to 'http://localhost:7000/api'
+  val transport = UrlClient(Default.systemSync, new URI("http://localhost:7000/api"))
 
-  // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+  // Setup JSON-RPC HTTP client
   val client = Default.client(transport)
 
   // Call the remote API function via proxy

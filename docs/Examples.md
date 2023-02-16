@@ -500,10 +500,10 @@ libraryDependencies ++= Seq(
 **Imports**
 
 ```scala
+import automorph.Default
 import automorph.Default.{ClientContext, ServerContext}
-import automorph.transport.http.HttpContext
-import automorph.{Contextual, Default}
 import java.net.URI
+import scala.util.Try
 ```
 
 **Server**
@@ -516,7 +516,7 @@ class ServerApi {
   def hello(message: String)(implicit httpRequest: ServerContext): String =
     httpRequest.authorizationBearer match {
       case Some("valid") => s"Hello $message!"
-      case _ => throw IllegalAccessException("Authentication failed")
+      case _ => throw new IllegalAccessException("Authentication failed")
     }
 }
 val api = new ServerApi()
@@ -714,6 +714,8 @@ val server = serverBuilder(_.bind(api))
 ```scala
 // Define client view of a remote API
 trait ClientApi {
+  def hello(some: String, n: Int): String
+
   // Invoked as 'hello'
   def hi(some: String, n: Int): String
 }
@@ -851,6 +853,7 @@ import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 ```
 
 **Server**
@@ -928,6 +931,7 @@ import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 ```
 
 **Server**
@@ -937,7 +941,7 @@ import scala.concurrent.{Await, Future}
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
     if (n >= 0) {
-      Future.failed(SQLException("Test error"))
+      Future.failed(new SQLException("Test error"))
     } else {
       Future.failed(JsonRpcException("Other error", 1))
     }
@@ -945,10 +949,10 @@ class ServerApi {
 val api = new ServerApi()
 
 // Customize remote API server exception to RPC error mapping
-val protocol = Default.protocol[Default.ServerContext].mapException {
+val protocol = Default.protocol[Default.ServerContext].mapException(_ match {
   case _: SQLException => InvalidRequest
   case error => Default.protocol.mapException(error)
-}
+})
 
 // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val handler = Handler.protocol(protocol).system(Default.systemAsync)
@@ -1080,6 +1084,7 @@ import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 ```
 
 **Server**
@@ -1088,7 +1093,7 @@ import scala.concurrent.{Await, Future}
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
-    Future(s"Hello $some $n!")
+    Future.failed(new SQLException("Test error"))
 }
 val api = new ServerApi()
 
@@ -1374,7 +1379,6 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.Default
-import automorph.system.IdentitySystem
 import automorph.transport.http.client.UrlClient
 import java.net.URI
 ```
@@ -1397,10 +1401,15 @@ val server = serverBuilder(_.bind(api))
 **Client**
 
 ```scala
-// Create HttpUrlConnection HTTP client message transport
-val transport = UrlClient(IdentitySystem(), new URI("http://localhost:7000/api"))
+// Define client view of the remote API
+trait ClientApi {
+  def hello(some: String, n: Int): String
+}
 
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+// Create standard library HTTP client message transport sending POST requests to 'http://localhost:7000/api'
+val transport = UrlClient(Default.systemSync, new URI("http://localhost:7000/api"))
+
+// Setup JSON-RPC HTTP client
 val client = Default.client(transport)
 
 // Call the remote API function via proxy
@@ -1496,7 +1505,6 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.Default
-import automorph.transport.http.server.UndertowServer
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -1565,6 +1573,7 @@ import automorph.transport.amqp.client.RabbitMqClient
 import automorph.transport.amqp.server.RabbitMqServer
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 ```
 
@@ -1573,8 +1582,8 @@ import scala.concurrent.{Await, Future}
 ```scala
 // Create server API instance
 class ServerApi {
-  def hello(some: String, n: Int): String =
-    s"Hello $some $n!"
+  def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
 }
 val api = new ServerApi()
 
@@ -1588,11 +1597,14 @@ val server = RabbitMqServer(handler.bind(api), new URI("amqp://localhost"), Seq(
 ```scala
 // Define client view of the remote API
 trait ClientApi {
-  def hello(some: String, n: Int): String
+  def hello(some: String, n: Int): Future[String]
 }
 
-// Setup RabbitMQ AMQP client publishing requests to the 'api' queue
-val client = RabbitMqClient[Effect](new URI("amqp://localhost"), 'api')
+// Create RabbitMQ AMQP client message transport publishing requests to the 'api' queue
+val transport = RabbitMqClient(new URI("amqp://localhost"), "api", Default.systemAsync)
+
+// Setup JSON-RPC HTTP client
+val client = Default.client(transport)
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi]
@@ -1680,5 +1692,5 @@ println(Await.result(
 Await.result(client.close(), Duration.Inf)
 
 // Stop the server
-Await.result(server.close(), Duration.Inf)
+server.stop()
 ```

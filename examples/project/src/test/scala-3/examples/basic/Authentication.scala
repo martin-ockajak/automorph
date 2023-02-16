@@ -3,6 +3,7 @@ package examples.basic
 import automorph.Default
 import automorph.Default.{ClientContext, ServerContext}
 import java.net.URI
+import scala.util.Try
 
 object Authentication extends App {
 
@@ -13,7 +14,7 @@ object Authentication extends App {
     def hello(message: String)(implicit httpRequest: ServerContext): String =
       httpRequest.authorizationBearer match {
         case Some("valid") => s"Hello $message!"
-        case _ => throw IllegalAccessException("Authentication failed")
+        case _ => throw new IllegalAccessException("Authentication failed")
       }
   }
   val api = new ServerApi()

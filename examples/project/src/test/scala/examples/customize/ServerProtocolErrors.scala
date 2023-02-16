@@ -8,6 +8,7 @@ import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 
 object ServerProtocolErrors extends App {
 
@@ -15,7 +16,7 @@ object ServerProtocolErrors extends App {
   class ServerApi {
     def hello(some: String, n: Int): Future[String] =
       if (n >= 0) {
-        Future.failed(SQLException("Test error"))
+        Future.failed(new SQLException("Test error"))
       } else {
         Future.failed(JsonRpcException("Other error", 1))
       }
@@ -23,10 +24,10 @@ object ServerProtocolErrors extends App {
   val api = new ServerApi()
 
   // Customize remote API server exception to RPC error mapping
-  val protocol = Default.protocol[Default.ServerContext].mapException {
+  val protocol = Default.protocol[Default.ServerContext].mapException(_ match {
     case _: SQLException => InvalidRequest
     case error => Default.protocol.mapException(error)
-  }
+  })
 
   // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
   val handler = Handler.protocol(protocol).system(Default.systemAsync)

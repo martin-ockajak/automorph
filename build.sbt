@@ -22,7 +22,7 @@ ThisBuild / developers := List(Developer(
   id = "m",
   name = "Martin Ockajak",
   email = "automorph.release@gmail.com",
-  url = url(s"https://github.com/martin-ockajak"),
+  url = url(s"https://github.com/martin-ockajak")
 ))
 Global / onChangedBuildSource := ReloadOnSourceChanges
 onLoadMessage := ""
@@ -73,7 +73,7 @@ lazy val root = project.in(file(".")).settings(name := projectName, publish / sk
 
   // Misc
   default,
-  examples,
+  examples
 )
 
 // Dependencies
@@ -84,7 +84,7 @@ def source(project: Project, path: String, dependsOn: ClasspathDep[ProjectRefere
     case Array("examples", _ @_*) => sourceDependency.settings(Compile / doc / scalacOptions := docScalacOptions)
     case Array(_, directories @ _*) => sourceDependency.settings(
         name := s"$projectName-${directories.mkString("-")}",
-        Compile / doc / scalacOptions := docScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master"),
+        Compile / doc / scalacOptions := docScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master")
       )
   }
 }
@@ -146,7 +146,7 @@ lazy val sttp = source(project, "transport/sttp", core, http, testStandard % Tes
   libraryDependencies ++= Seq(
     "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
-    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion % Test,
+    "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion % Test
   )
 )
 lazy val rabbitmq = source(project, "transport/rabbitmq", amqp, core, standard, testCore % Test, testAmqp % Test)
@@ -156,7 +156,7 @@ lazy val rabbitmq = source(project, "transport/rabbitmq", amqp, core, standard, 
 lazy val undertow = source(project, "transport/undertow", core, http, testStandard % Test).settings(
   libraryDependencies += "io.undertow" % "undertow-core" % "2.3.3.Final",
   Test / javaOptions += "-Dorg.jboss.logging.provider=slf4j",
-  Test / fork := true,
+  Test / fork := true
 )
 lazy val vertx = source(project, "transport/vertx", core, http, testStandard % Test)
   .settings(libraryDependencies += "io.vertx" % "vertx-core" % "4.3.8")
@@ -164,14 +164,14 @@ val jettyVersion = "11.0.13"
 lazy val jetty = source(project, "transport/jetty", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
     "org.eclipse.jetty.websocket" % "websocket-jetty-client" % jettyVersion,
-    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion,
+    "org.eclipse.jetty" % "jetty-servlet" % jettyVersion
   )
 )
 lazy val akkaHttp = source(project, "transport/akka-http", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
     ("com.typesafe.akka" %% "akka-http" % "10.4.0").cross(CrossVersion.for3Use2_13),
     ("com.typesafe.akka" %% "akka-actor-typed" % "2.7.0").cross(CrossVersion.for3Use2_13),
-    ("com.typesafe.akka" %% "akka-stream" % "2.7.0").cross(CrossVersion.for3Use2_13),
+    ("com.typesafe.akka" %% "akka-stream" % "2.7.0").cross(CrossVersion.for3Use2_13)
   )
 )
 lazy val finagle = source(project, "transport/finagle", core, http, testStandard % Test).settings(
@@ -182,7 +182,7 @@ lazy val finagle = source(project, "transport/finagle", core, http, testStandard
 // Miscellaneous
 lazy val default = project.dependsOn(jsonrpc, circe, standard, undertow, testStandard % Test).settings(
   name := s"$projectName-default",
-  libraryDependencies += "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion,
+  libraryDependencies += "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion
 )
 lazy val examples = source(project, "examples", default, upickle, zio, sttp, rabbitmq, testPlugin % Test).settings(
   libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
@@ -193,7 +193,7 @@ lazy val examples = source(project, "examples", default, upickle, zio, sttp, rab
       case Some((3, _)) => baseDirectory.value / "project/src/test/scala"
       case _ => baseDirectory.value / "project/src/test/scala-2"
     }),
-  Test / parallelExecution := false,
+  Test / parallelExecution := false
 )
 
 // Test
@@ -205,7 +205,7 @@ lazy val testBase = source(project, "test/base", spi).settings(
     "org.scalatestplus" %% "scalacheck-1-15" % "3.2.11.0",
     "com.outr" %% "scribe-file" % scribeVersion,
     "com.outr" %% "scribe-slf4j" % scribeVersion,
-    "com.lihaoyi" %% "pprint" % "0.8.1",
+    "com.lihaoyi" %% "pprint" % "0.8.1"
   )
 )
 lazy val testPlugin = source(project, "test/plugin", testBase)
@@ -241,7 +241,7 @@ ThisBuild / scalacOptions ++=
         "-Vfree-terms",
         "-Vimplicits",
         "-Ybackend-parallelism",
-        "4",
+        "4"
       )
   })
 
@@ -270,13 +270,13 @@ lazy val docs = project.in(file("site")).settings(
   mdocExtraArguments := Seq("--no-link-hygiene"),
   mdoc / fileInputs ++= Seq(
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.md",
-    (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.jpg",
+    (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.jpg"
   ),
   Compile / doc / scalacOptions := docScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master"),
   Compile / doc / sources ++= allSources.value.flatten,
   Compile / doc / tastyFiles ++= allTastyFiles.value.flatten.filter(_.getName != "MonixSystem.tasty"),
   Compile / doc / dependencyClasspath ++=
-    allDependencyClasspath.value.flatten.filter(_.data.getName != "cats-effect_3-2.5.4.jar"),
+    allDependencyClasspath.value.flatten.filter(_.data.getName != "cats-effect_3-2.5.4.jar")
 ).enablePlugins(MdocPlugin)
 
 // Site
@@ -289,7 +289,7 @@ site := {
   IO.copyDirectory(
     (examples / baseDirectory).value / "project",
     (docs / baseDirectory).value / "static/examples/project",
-    overwrite = true,
+    overwrite = true
   )
   Process(Seq("yarn", "install"), (docs / baseDirectory).value).!
   Process(Seq("yarn", "build"), (docs / baseDirectory).value, "SITE_DOCS" -> "docs").!
@@ -311,7 +311,7 @@ serveSite := serveSite.dependsOn(site).value
 cleanFiles ++= Seq(
   (docs / baseDirectory).value / "build",
   (docs / baseDirectory).value / "docs",
-  (docs / baseDirectory).value / "static/examples",
+  (docs / baseDirectory).value / "static/examples"
 )
 
 // Deployment

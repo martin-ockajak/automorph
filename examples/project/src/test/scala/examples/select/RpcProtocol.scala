@@ -4,7 +4,8 @@ import automorph.protocol.WebRpcProtocol
 import automorph.{Client, Default, Handler}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 object RpcProtocol extends App {
 

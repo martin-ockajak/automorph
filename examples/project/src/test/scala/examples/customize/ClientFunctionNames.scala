@@ -19,6 +19,8 @@ object ClientFunctionNames extends App {
 
   // Define client view of the remote API
   trait ClientApi {
+    def hello(some: String, n: Int): String
+
     // Invoked as 'hello'
     def hi(some: String, n: Int): String
   }

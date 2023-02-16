@@ -45,7 +45,7 @@ object EndpointTransport extends App {
   Await.result(client.close(), Duration.Inf)
 
   // Stop the server
-  Await.result(server.close(), Duration.Inf)
+  server.stop()
 }
 
 class EndpointTransport extends org.scalatest.freespec.AnyFreeSpecLike {
