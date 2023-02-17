@@ -52,14 +52,14 @@ final case class MonixSystem()(implicit val scheduler: Scheduler) extends Comple
     override def succeed(value: T): Task[Unit] =
       flatMap(mVar.tryPut(Right(value))) { success =>
         Option.when(success)(pure(())).getOrElse {
-          error(new IllegalStateException("Deferred effect already resolved"))
+          error(new IllegalStateException("Completable effect already resolved"))
         }
       }
 
     override def fail(exception: Throwable): Task[Unit] =
       flatMap(mVar.tryPut(Left(exception))) { success =>
         Option.when(success)(pure(())).getOrElse {
-          error(new IllegalStateException("Deferred effect already resolved"))
+          error(new IllegalStateException("Completable effect already resolved"))
         }
       }
   }

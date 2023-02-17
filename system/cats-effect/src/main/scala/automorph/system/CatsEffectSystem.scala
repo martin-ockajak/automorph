@@ -52,14 +52,14 @@ final case class CatsEffectSystem()(implicit val runtime: IORuntime) extends Com
     override def succeed(value: T): IO[Unit] =
       flatMap(queue.tryOffer(Right(value))) { success =>
         Option.when(success)(pure(())).getOrElse {
-          error(new IllegalStateException("Deferred effect already resolved"))
+          error(new IllegalStateException("Completable effect already resolved"))
         }
       }
 
     override def fail(exception: Throwable): IO[Unit] =
       flatMap(queue.tryOffer(Left(exception))) { success =>
         Option.when(success)(pure(())).getOrElse {
-          error(new IllegalStateException("Deferred effect already resolved"))
+          error(new IllegalStateException("Completable effect already resolved"))
         }
       }
   }
