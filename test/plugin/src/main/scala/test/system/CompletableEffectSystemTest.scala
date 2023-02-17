@@ -18,13 +18,13 @@ trait CompletableEffectSystemTest[Effect[_]] extends EffectSystemTest[Effect] {
             val effect = system.flatMap(completableSystem.completable[String]) { completable =>
               system.flatMap(completable.succeed(text))(_ => completable.effect)
             }
-            execute(effect).should(equal(Right(text)))
+            run(effect).should(equal(Right(text)))
           }
           "Failure" in {
             val effect = system.flatMap(completableSystem.completable[String]) { completable =>
               system.flatMap(completable.fail(error))(_ => completable.effect)
             }
-            execute(effect).should(equal(Left(error)))
+            run(effect).should(equal(Left(error)))
           }
         }
       case _ => {}

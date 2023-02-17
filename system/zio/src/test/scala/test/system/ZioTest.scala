@@ -7,7 +7,7 @@ class ZioTest extends CompletableEffectSystemTest[Task] {
 
   lazy val system: ZioSystem[Any] = ZioSystem.default
 
-  def execute[T](effect: Task[T]): Either[Throwable, T] =
+  def run[T](effect: Task[T]): Either[Throwable, T] =
     Unsafe.unsafe { implicit unsafe =>
       system.runtime.unsafe.run(effect).toEither.swap.map(_.getCause).swap
     }

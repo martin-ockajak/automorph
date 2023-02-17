@@ -8,6 +8,6 @@ class TryTest extends EffectSystemTest[Try] {
 
   lazy val system: EffectSystem[Try] = TrySystem()
 
-  def execute[T](effect: Try[T]): Either[Throwable, T] =
+  def run[T](effect: Try[T]): Either[Throwable, T] =
     effect.toEither
 }

@@ -9,6 +9,6 @@ class FutureTest extends CompletableEffectSystemTest[Future] {
 
   lazy val system: FutureSystem = FutureSystem()
 
-  def execute[T](effect: Future[T]): Either[Throwable, T] =
+  def run[T](effect: Future[T]): Either[Throwable, T] =
     Try(await(effect)).toEither
 }

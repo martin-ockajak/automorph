@@ -9,6 +9,6 @@ class IdentityTest extends EffectSystemTest[Identity] {
 
   lazy val system: EffectSystem[Identity] = IdentitySystem()
 
-  def execute[T](effect: Identity[T]): Either[Throwable, T] =
+  def run[T](effect: Identity[T]): Either[Throwable, T] =
     Try(effect).toEither
 }

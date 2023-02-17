@@ -9,6 +9,6 @@ class CatsEffectTest extends CompletableEffectSystemTest[IO] {
 
   lazy val system: CatsEffectSystem = CatsEffectSystem()
 
-  def execute[T](effect: IO[T]): Either[Throwable, T] =
+  def run[T](effect: IO[T]): Either[Throwable, T] =
     Try(effect.unsafeRunSync()).toEither
 }

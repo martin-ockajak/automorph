@@ -10,6 +10,6 @@ class ScalazEffectTest extends EffectSystemTest[IO] {
 
   lazy val system: EffectSystem[IO] = ScalazEffectSystem()
 
-  def execute[T](effect: IO[T]): Either[Throwable, T] =
+  def run[T](effect: IO[T]): Either[Throwable, T] =
     Try(effect.unsafePerformIO()).toEither
 }
