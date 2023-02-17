@@ -4,10 +4,10 @@
 
 ## Defaults
 
-*Automorph* defines a set of plugins implementing default technical choices aiming at a good balance of features, performance and simplicity:
+*Automorph* defines a set of default types and plugins aiming at a good balance of features, performance and simplicity:
 
-* Asynchronous effect: [Future](https://www.scala-lang.org/api/current/scala/concurrent/Future.html)
-* Synchronous effect: [Identity](https://www.scala-lang.org/api/current/scala/Predef$.html#identity[A](x:A):A)
+* Asynchronous effect: [Future](https://scala-lang.org/api/3.x/scala/concurrent/Future.html)
+* Synchronous effect: [Identity](https://scala-lang.org/api/3.x/scala/Predef$.html#identity-957)
 * Message format: [JSON](https://www.json.org/)
 * Message codec: [Circe](https://circe.github.io/circe)
 * Transport protocol: [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)

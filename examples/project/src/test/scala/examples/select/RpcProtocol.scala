@@ -21,7 +21,7 @@ object RpcProtocol extends App {
   val serverProtocol = WebRpcProtocol(Default.codec, "/api/" ).context[Default.ServerContext]
 
   // Start default Web-RPC HTTP server listening on port 7000 for requests to '/api'
-  val handler = Handler.protocol(serverProtocol).system(Default.systemAsync)
+  val handler = Handler.protocol(serverProtocol).system(Default.systemAsync).bind(api)
   val server = Default.server(handler, 7000, "/api")
 
   // Define client view of the remote API

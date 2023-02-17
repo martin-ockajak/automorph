@@ -71,19 +71,28 @@ object Default extends DefaultMeta {
   type ServerBuilder[Effect[_]] = BindServerApis[Effect] => Server[Effect]
 
   /**
-   * Creates a JSON-RPC request handler with specified effect system plugin while providing given message context type.
+   * Creates a synchronous identity effect system plugin.
    *
-   * The handler can be used by a server to invoke bound API methods based on incoming requests.
-   *
-   * @param system
-   *   effect system plugin
-   * @tparam Context
-   *   message context type
+   * @see
+   *   [[https://scala-lang.org/api/3.x/scala/Predef$.html#identity-957 Effect type]]
    * @return
-   *   RPC request handler
+   *   synchronous effect system plugin
    */
-  def handler[Effect[_], Context](system: EffectSystem[Effect]): Handler[Effect, Context] =
-    Handler(protocol, system)
+  def systemSync: EffectSystem[Identity] =
+    IdentitySystem()
+
+  /**
+   * Creates an asynchronous `Future` effect system plugin.
+   *
+   * @see
+   *   [[https://docs.scala-lang.org/overviews/core/futures.html Library documentation]]
+   * @see
+   *   [[https://scala-lang.org/api/3.x/scala/concurrent/Future.html Effect type]]
+   * @return
+   *   asynchronous effect system plugin
+   */
+  def systemAsync(implicit executionContext: ExecutionContext): EffectSystem[Future] & Defer[Future] =
+    FutureSystem()
 
   /**
    * Creates a standard JRE JSON-RPC over HTTP & WebSocket client with specified effect system plugin.
@@ -93,9 +102,11 @@ object Default extends DefaultMeta {
    * @see
    *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see
-   *   [[https://sttp.softwaremill.com/en/latest/index.html Library documentation]]
+   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see
-   *   [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
+   *   [[https://openjdk.org/groups/net/httpclient/intro.html documentation]]
+   * @see
+   *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
    * @param system
    *   effect system plugin
    * @param url
@@ -137,9 +148,11 @@ object Default extends DefaultMeta {
    * @see
    *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see
-   *   [[https://sttp.softwaremill.com/en/latest Library documentation]]
+   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see
-   *   [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
+   *   [[https://openjdk.org/groups/net/httpclient/intro.html documentation]]
+   * @see
+   *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
    * @param system
    *   effect system plugin
    * @param url
@@ -167,9 +180,11 @@ object Default extends DefaultMeta {
    * @see
    *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see
-   *   [[https://sttp.softwaremill.com/en/latest/index.html Library documentation]]
+   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see
-   *   [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
+   *   [[https://openjdk.org/groups/net/httpclient/intro.html documentation]]
+   * @see
+   *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
    * @param url
    *   HTTP endpoint URL
    * @param method
@@ -190,9 +205,11 @@ object Default extends DefaultMeta {
    * @see
    *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see
-   *   [[https://sttp.softwaremill.com/en/latest Library documentation]]
+   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see
-   *   [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
+   *   [[https://openjdk.org/groups/net/httpclient/intro.html documentation]]
+   * @see
+   *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
    * @param url
    *   HTTP endpoint URL
    * @param method
@@ -216,9 +233,11 @@ object Default extends DefaultMeta {
    * @see
    *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see
-   *   [[https://sttp.softwaremill.com/en/latest/index.html Library documentation]]
+   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see
-   *   [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
+   *   [[https://openjdk.org/groups/net/httpclient/intro.html documentation]]
+   * @see
+   *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
    * @param url
    *   HTTP endpoint URL
    * @param method
@@ -235,9 +254,11 @@ object Default extends DefaultMeta {
    * @see
    *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
    * @see
-   *   [[https://sttp.softwaremill.com/en/latest Library documentation]]
+   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
    * @see
-   *   [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
+   *   [[https://openjdk.org/groups/net/httpclient/intro.html documentation]]
+   * @see
+   *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
    * @param url
    *   HTTP endpoint URL
    * @param method
@@ -252,15 +273,91 @@ object Default extends DefaultMeta {
     clientTransport(systemSync, url, method)
 
   /**
-   * Creates a synchronous identity effect system plugin.
+   * Creates a JSON-RPC request handler with specified effect system plugin while providing given message context type.
+   *
+   * The handler can be used by a server to invoke bound API methods based on incoming requests.
+   *
+   * @param system
+   *   effect system plugin
+   * @tparam Context
+   *   message context type
+   * @return
+   *   RPC request handler
+   */
+  def handler[Effect[_], Context](system: EffectSystem[Effect]): Handler[Effect, Context] =
+    Handler(protocol, system)
+
+  /**
+   * Creates a JSON-RPC request handler using identity as an effect type while providing given message context type.
+   *
+   * The handler can be used by a server to invoke bound API methods based on incoming requests.
+   *
+   * @tparam Context
+   *   message context type
+   * @return
+   *   synchronous RPC request handler
+   */
+  def handlerSync[Context]: Handler[Identity, Context] =
+    Handler(protocol, systemSync)
+
+  /**
+   * Creates a JSON-RPC request handler using 'Future' as an effect type while providing given message context type.
+   *
+   * The handler can be used by a server to invoke bound API methods based on incoming requests.
+   *
+   * @param executionContext
+   *   execution context
+   * @tparam Context
+   *   message context type
+   * @return
+   *   asynchronous RPC request handler
+   */
+  def handlerAsync[Context](implicit executionContext: ExecutionContext): Handler[Future, Context] =
+    Handler(protocol, systemAsync)
+
+  /**
+   * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
+   *
+   * The server can be used to receive and reply to requests using specific message transport protocol and invoke bound
+   * API methods to process them.
    *
    * @see
-   *   [[https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem$$Identity.html Effect type]]
+   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   * @see
+   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
+   * @see
+   *   [[https://undertow.io Library documentation]]
+   * @see
+   *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
+   * @param handler
+   *   RPC request handler
+   * @param port
+   *   port to listen on for HTTP connections
+   * @param path
+   *   HTTP URL path (default: /)
+   * @param methods
+   *   allowed HTTP request methods (default: any)
+   * @param webSocket
+   *   both HTTP and WebSocket protocols enabled if true, HTTP only if false
+   * @param mapException
+   *   maps an exception to a corresponding HTTP status code
+   * @param builder
+   *   Undertow web server builder
+   * @tparam Effect
+   *   effect type
    * @return
-   *   synchronous effect system plugin
+   *   RPC server
    */
-  def systemSync: EffectSystem[Identity] =
-    IdentitySystem()
+  def server[Effect[_]](
+    handler: Types.HandlerAnyCodec[Effect, ServerContext],
+    port: Int,
+    path: String = "/",
+    methods: Iterable[HttpMethod] = HttpMethod.values,
+    webSocket: Boolean = true,
+    mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+    builder: Undertow.Builder = defaultBuilder,
+  ): Server[Effect] =
+    UndertowServer(handler, port, path, methods, webSocket, mapException, builder)
 
   /**
    * Creates an Undertow JSON-RPC over HTTP & WebSocket server with specified effect system plugin.
@@ -298,7 +395,7 @@ object Default extends DefaultMeta {
    * @return
    *   creates RPC server using supplied API binding function and asynchronous effect execution function
    */
-  def serverSystem[Effect[_]](
+  def serverBuilder[Effect[_]](
     system: EffectSystem[Effect],
     port: Int,
     path: String = "/",
@@ -306,9 +403,54 @@ object Default extends DefaultMeta {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder,
-  ): BindServerApis[Effect] => Server[Effect] =
+  ): ServerBuilder[Effect] =
     (bindApis: BindServerApis[Effect]) => {
       val handler = bindApis(Handler.protocol(protocol[ServerContext]).system(system))
+      server(handler, port, path, methods, webSocket, mapException, builder)
+    }
+
+  /**
+   * Creates an Undertow JSON-RPC server builder over HTTP & WebSocket using identity as an effect type.
+   *
+   * Resulting function requires:
+   *   - API binding function - binds APIs to the underlying handler
+   *
+   * The server can be used to receive and reply to requests using specific message transport protocol while invoking
+   * server to process them.
+   *
+   * @see
+   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   * @see
+   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
+   * @see
+   *   [[https://undertow.io Library documentation]]
+   * @see
+   *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
+   * @param port
+   *   port to listen on for HTTP connections
+   * @param path
+   *   HTTP URL path (default: /)
+   * @param methods
+   *   allowed HTTP request methods (default: any)
+   * @param webSocket
+   *   both HTTP and WebSocket protocols enabled if true, HTTP only if false
+   * @param mapException
+   *   maps an exception to a corresponding HTTP status code
+   * @param builder
+   *   Undertow web server builder
+   * @return
+   *   synchronous RPC server builder using supplied API binding function
+   */
+  def serverBuilderSync(
+    port: Int,
+    path: String = "/",
+    methods: Iterable[HttpMethod] = HttpMethod.values,
+    webSocket: Boolean = true,
+    mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+    builder: Undertow.Builder = defaultBuilder,
+  ): ServerBuilder[Identity] =
+    (bindApis: BindServerApis[Identity]) => {
+      val handler = bindApis(handlerSync)
       server(handler, port, path, methods, webSocket, mapException, builder)
     }
 
@@ -358,134 +500,4 @@ object Default extends DefaultMeta {
       val handler = bindApis(handlerAsync)
       server(handler, port, path, methods, webSocket, mapException, builder)
     }
-
-  /**
-   * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
-   *
-   * The server can be used to receive and reply to requests using specific message transport protocol and invoke bound
-   * API methods to process them.
-   *
-   * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
-   * @see
-   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
-   * @see
-   *   [[https://undertow.io Library documentation]]
-   * @see
-   *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
-   * @param handler
-   *   RPC request handler
-   * @param port
-   *   port to listen on for HTTP connections
-   * @param path
-   *   HTTP URL path (default: /)
-   * @param methods
-   *   allowed HTTP request methods (default: any)
-   * @param webSocket
-   *   both HTTP and WebSocket protocols enabled if true, HTTP only if false
-   * @param mapException
-   *   maps an exception to a corresponding HTTP status code
-   * @param builder
-   *   Undertow web server builder
-   * @tparam Effect
-   *   effect type
-   * @return
-   *   RPC server
-   */
-  def server[Effect[_]](
-    handler: Types.HandlerAnyCodec[Effect, ServerContext],
-    port: Int,
-    path: String = "/",
-    methods: Iterable[HttpMethod] = HttpMethod.values,
-    webSocket: Boolean = true,
-    mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-    builder: Undertow.Builder = defaultBuilder,
-  ): Server[Effect] =
-    UndertowServer(handler, port, path, methods, webSocket, mapException, builder)
-
-  /**
-   * Creates a JSON-RPC request handler using 'Future' as an effect type while providing given message context type.
-   *
-   * The handler can be used by a server to invoke bound API methods based on incoming requests.
-   *
-   * @param executionContext
-   *   execution context
-   * @tparam Context
-   *   message context type
-   * @return
-   *   asynchronous RPC request handler
-   */
-  def handlerAsync[Context](implicit executionContext: ExecutionContext): Handler[Future, Context] =
-    Handler(protocol, systemAsync)
-
-  /**
-   * Creates an asynchronous `Future` effect system plugin.
-   *
-   * @see
-   *   [[https://docs.scala-lang.org/overviews/core/futures.html Library documentation]]
-   * @see
-   *   [[https://www.scala-lang.org/api/current/scala/concurrent/Future.html Effect type]]
-   * @return
-   *   asynchronous effect system plugin
-   */
-  def systemAsync(implicit executionContext: ExecutionContext): EffectSystem[Future] & Defer[Future] =
-    FutureSystem()
-
-  /**
-   * Creates an Undertow JSON-RPC server builder over HTTP & WebSocket using identity as an effect type.
-   *
-   * Resulting function requires:
-   *   - API binding function - binds APIs to the underlying handler
-   *
-   * The server can be used to receive and reply to requests using specific message transport protocol while invoking
-   * server to process them.
-   *
-   * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
-   * @see
-   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
-   * @see
-   *   [[https://undertow.io Library documentation]]
-   * @see
-   *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
-   * @param port
-   *   port to listen on for HTTP connections
-   * @param path
-   *   HTTP URL path (default: /)
-   * @param methods
-   *   allowed HTTP request methods (default: any)
-   * @param webSocket
-   *   both HTTP and WebSocket protocols enabled if true, HTTP only if false
-   * @param mapException
-   *   maps an exception to a corresponding HTTP status code
-   * @param builder
-   *   Undertow web server builder
-   * @return
-   *   synchronous RPC server builder using supplied API binding function
-   */
-  def serverBuilderSync(
-    port: Int,
-    path: String = "/",
-    methods: Iterable[HttpMethod] = HttpMethod.values,
-    webSocket: Boolean = true,
-    mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-    builder: Undertow.Builder = defaultBuilder,
-  ): ServerBuilder[Identity] =
-    (bindApis: BindServerApis[Identity]) => {
-      val handler = bindApis(handlerSync)
-      server(handler, port, path, methods, webSocket, mapException, builder)
-    }
-
-  /**
-   * Creates a JSON-RPC request handler using identity as an effect type while providing given message context type.
-   *
-   * The handler can be used by a server to invoke bound API methods based on incoming requests.
-   *
-   * @tparam Context
-   *   message context type
-   * @return
-   *   synchronous RPC request handler
-   */
-  def handlerSync[Context]: Handler[Identity, Context] =
-    Handler(protocol, systemSync)
 }

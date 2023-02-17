@@ -32,9 +32,9 @@ import scala.util.Try
  * @see
  *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
  * @see
- *   [[https://sttp.softwaremill.com/en/latest Library documentation]]
+ *   [[https://openjdk.org/groups/net/httpclient/intro.html documentation]]
  * @see
- *   [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
+ *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
  * @constructor
  *   Creates an HttpClient HTTP & WebSocket message client transport plugin.
  * @param system

@@ -30,7 +30,7 @@ object ServerProtocolErrors extends App {
   })
 
   // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-  val handler = Handler.protocol(protocol).system(Default.systemAsync)
+  val handler = Handler.protocol(protocol).system(Default.systemAsync).bind(api)
   val server = Default.server(handler, 7000, "/api")
 
   // Define client view of the remote API

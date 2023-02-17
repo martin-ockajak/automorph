@@ -18,7 +18,8 @@ object EffectSystem extends App {
   val system = ZioSystem.default
 
   // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-  val server = Default.serverSystem(system, 7000, "/api")(_.bind(api))
+  val serverBuilder = Default.serverBuilder(system, 7000, "/api")
+  val server = serverBuilder(_.bind(api))
 
   // Define client view of the remote API
   trait ClientApi {

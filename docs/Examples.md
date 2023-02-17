@@ -955,7 +955,7 @@ val protocol = Default.protocol[Default.ServerContext].mapException(_ match {
 })
 
 // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val handler = Handler.protocol(protocol).system(Default.systemAsync)
+val handler = Handler.protocol(protocol).system(Default.systemAsync).bind(api)
 val server = Default.server(handler, 7000, "/api")
 ```
 
@@ -1173,7 +1173,7 @@ val api = new ServerApi()
 val serverProtocol = WebRpcProtocol(Default.codec, "/api/" ).context[Default.ServerContext]
 
 // Start default Web-RPC HTTP server listening on port 7000 for requests to '/api'
-val handler = Handler.protocol(serverProtocol).system(Default.systemAsync)
+val handler = Handler.protocol(serverProtocol).system(Default.systemAsync).bind(api)
 val server = Default.server(handler, 7000, "/api")
 ```
 
@@ -1245,7 +1245,8 @@ val api = new ServerApi()
 val system = ZioSystem[Any]()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val server = Default.serverSystem(system, 7000, "/api")(_.bind(api))
+val serverBuilder = Default.serverBuilder(system, 7000, "/api")
+val server = serverBuilder(_.bind(api))
 ```
 
 **Client**
@@ -1334,7 +1335,7 @@ val serverProtocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type, 
 val system = Default.systemAsync
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val handler = Handler.protocol(serverProtocol).system(system)
+val handler = Handler.protocol(serverProtocol).system(system).bind(api)
 lazy val server = Default.server(handler.bind(api), 7000, "/api")
 ```
 
