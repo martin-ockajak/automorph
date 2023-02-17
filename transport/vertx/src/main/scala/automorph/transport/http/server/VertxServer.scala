@@ -71,7 +71,7 @@ final case class VertxServer[Effect[_]](
   start()
 
   override def close(): Effect[Unit] =
-    system.wrap {
+    system.evaluate {
       val closedServer = httpServer.close()
       Option(closedServer.result).getOrElse(throw closedServer.cause)
       ()

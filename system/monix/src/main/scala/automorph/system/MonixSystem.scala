@@ -19,7 +19,7 @@ import monix.execution.Scheduler
  */
 final case class MonixSystem()(implicit val scheduler: Scheduler) extends CompletableEffectSystem[Task] {
 
-  override def wrap[T](value: => T): Task[T] =
+  override def evaluate[T](value: => T): Task[T] =
     Task.evalAsync(value)
 
   override def pure[T](value: T): Task[T] =

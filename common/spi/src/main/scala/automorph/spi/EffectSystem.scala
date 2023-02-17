@@ -11,7 +11,7 @@ package automorph.spi
 trait EffectSystem[Effect[_]] {
 
   /**
-   * Lifts a potentially blocking side-effecting value into a new effect of specified type.
+   * Lifts a potentially blocking and side-effecting value into a new effect of specified type.
    *
    * Exceptions thrown while computing the value are translated into a failed effect.
    *
@@ -22,7 +22,7 @@ trait EffectSystem[Effect[_]] {
    * @return
    *   effect containing the value
    */
-  def wrap[T](value: => T): Effect[T]
+  def evaluate[T](value: => T): Effect[T]
 
   /**
    * Lifts a pure value into a new effect of specified type.

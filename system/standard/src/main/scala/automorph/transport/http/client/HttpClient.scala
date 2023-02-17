@@ -130,7 +130,7 @@ final case class HttpClient[Effect[_]](
                 completableSystem.asInstanceOf[CompletableEffectSystem[Effect]],
               )
                 .map(httpResponse)
-            case _ => system.wrap(httpResponse(httpClient.send(httpRequest, BodyHandlers.ofByteArray)))
+            case _ => system.evaluate(httpResponse(httpClient.send(httpRequest, BodyHandlers.ofByteArray)))
           },
         // Send WebSocket request
         { case (webSocketEffect, resultEffect, requestBody) =>
@@ -188,12 +188,12 @@ final case class HttpClient[Effect[_]](
   ): Effect[T] =
     completableSystem.completable[T].flatMap { completable =>
       Try(completableFuture).pureFold(
-        exception => completable.fail(exception).run,
+        exception => completable.fail(exception).fork,
         value => {
           value.handle { case (result, error) =>
-            Option(result).map(value => completable.succeed(value).run).getOrElse {
+            Option(result).map(value => completable.succeed(value).fork).getOrElse {
               completable.fail(Option(error).getOrElse(new IllegalStateException("Missing completable future result")))
-                .run
+                .fork
             }
           }
           ()
@@ -215,7 +215,7 @@ final case class HttpClient[Effect[_]](
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
         withCompletable(completableSystem =>
-          system.wrap {
+          system.evaluate {
             val completableResponse = completableSystem.completable[Response]
             val response = completableResponse.flatMap(_.effect)
             val webSocketBuilder = createWebSocketBuilder(httpContext)
@@ -225,7 +225,7 @@ final case class HttpClient[Effect[_]](
         )
       case _ =>
         // Create HTTP request
-        system.wrap {
+        system.evaluate {
           val httpRequest = createHttpRequest(requestBody, requestUrl, mediaType, httpContext)
           Left(httpRequest) -> httpRequest.uri
         }
@@ -284,7 +284,7 @@ final case class HttpClient[Effect[_]](
           buffers.foreach(buffer => outputStream.write(buffer, 0, buffer.length))
           buffers.clear()
           val responseBody = outputStream.toByteArray.toInputStream
-          response.succeed((responseBody, None, Seq())).run
+          response.succeed((responseBody, None, Seq())).fork
         }
         super.onBinary(webSocket, data, last)
       }
@@ -314,7 +314,7 @@ final case class HttpClient[Effect[_]](
   }
 
   override def close(): Effect[Unit] =
-    system.wrap(())
+    system.evaluate(())
 }
 
 object HttpClient {

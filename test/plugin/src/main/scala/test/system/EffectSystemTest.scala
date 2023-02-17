@@ -22,13 +22,13 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
   def execute[T](effect: Effect[T]): Either[Throwable, T]
 
   "" - {
-    "Wrap" - {
+    "Evaluate" - {
       "Success" in {
-        val effect = system.wrap(text)
+        val effect = system.evaluate(text)
         execute(effect).should(equal(Right(text)))
       }
       "Failure" in {
-        Try(system.wrap(throw error)) match {
+        Try(system.evaluate(throw error)) match {
           case Success(effect) => execute(effect).should(equal(Left(error)))
           case Failure(error) => error.should(equal(error))
         }
@@ -80,8 +80,8 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
         }
       }
     }
-    "Run" in {
-      system.run(system.wrap(text))
+    "Fork" in {
+      system.run(system.evaluate(text))
     }
   }
 }

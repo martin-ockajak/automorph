@@ -65,7 +65,7 @@ final case class AkkaServer[Effect[_]](
   private val actorSystem = start()
 
   override def close(): Effect[Unit] =
-    system.wrap {
+    system.evaluate {
       actorSystem.terminate()
       Await.result(actorSystem.whenTerminated, Duration.Inf)
       ()

@@ -20,7 +20,7 @@ import zio.{Queue, RIO, Runtime, Task, Trace, Unsafe, ZIO}
 final case class ZioSystem[Environment]()(implicit val runtime: Runtime[Environment])
   extends CompletableEffectSystem[({ type Effect[A] = RIO[Environment, A] })#Effect] {
 
-  override def wrap[T](value: => T): RIO[Environment, T] =
+  override def evaluate[T](value: => T): RIO[Environment, T] =
     ZIO.attempt(value)
 
   override def pure[T](value: T): RIO[Environment, T] =

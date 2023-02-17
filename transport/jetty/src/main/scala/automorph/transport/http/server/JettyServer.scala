@@ -70,7 +70,7 @@ final case class JettyServer[Effect[_]](
   start()
 
   override def close(): Effect[Unit] =
-    system.wrap(jetty.stop())
+    system.evaluate(jetty.stop())
 
   private def createServer(): Server = {
     val endpoint = JettyHttpEndpoint(handler, mapException)

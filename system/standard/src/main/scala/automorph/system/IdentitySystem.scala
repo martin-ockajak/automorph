@@ -18,7 +18,7 @@ import scala.util.Try
  */
 final case class IdentitySystem() extends EffectSystem[Identity] {
 
-  override def wrap[T](value: => T): T =
+  override def evaluate[T](value: => T): T =
     value
 
   override def pure[T](value: T): T =

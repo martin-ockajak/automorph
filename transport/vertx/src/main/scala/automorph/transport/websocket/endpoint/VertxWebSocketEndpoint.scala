@@ -61,7 +61,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](handler: Types.HandlerAnyCode
             sendResponse(responseBody, request, requestId)
           },
         )
-      ).run
+      ).fork
     }
     ()
   }

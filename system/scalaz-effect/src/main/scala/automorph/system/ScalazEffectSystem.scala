@@ -18,7 +18,7 @@ import scalaz.effect.IO
  */
 final case class ScalazEffectSystem()(implicit val executionContext: ExecutionContext) extends EffectSystem[IO] {
 
-  override def wrap[T](value: => T): IO[T] =
+  override def evaluate[T](value: => T): IO[T] =
     IO(value)
 
   override def pure[T](value: T): IO[T] =

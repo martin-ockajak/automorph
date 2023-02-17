@@ -108,34 +108,34 @@ final case class JettyClient[Effect[_]](
           system match {
             case completableSystem: CompletableEffectSystem[?] =>
               completableSystem.asInstanceOf[CompletableEffectSystem[Effect]].completable[Response].flatMap {
-                deferredResponse =>
+                completableResponse =>
                   val responseListener = new BufferingResponseListener {
 
                     override def onComplete(result: Result): Unit =
-                      Option(result.getResponseFailure).map(error => deferredResponse.fail(error).run)
-                        .getOrElse(deferredResponse.succeed(httpResponse(result.getResponse, getContent)).run)
+                      Option(result.getResponseFailure).map(error => completableResponse.fail(error).fork)
+                        .getOrElse(completableResponse.succeed(httpResponse(result.getResponse, getContent)).fork)
                   }
                   httpRequest.send(responseListener)
-                  deferredResponse.effect
+                  completableResponse.effect
               }
-            case _ => system.wrap(httpRequest.send()).map(response => httpResponse(response, response.getContent))
+            case _ => system.evaluate(httpRequest.send()).map(response => httpResponse(response, response.getContent))
           },
         // Send WebSocket request
         {
-          case (webSocketEffect, resultEffect, requestBody) => withCompletableEffectSystem(defer =>
-              defer.completable[Unit].flatMap { deferredSent =>
+          case (webSocketEffect, resultEffect, requestBody) => withCompletable(completableSystem =>
+              completableSystem.completable[Unit].flatMap { completableRequestSent =>
                 webSocketEffect.flatMap { webSocket =>
                   webSocket.getRemote.sendBytes(
                     requestBody.toByteBuffer,
                     new WriteCallback {
                       override def writeSuccess(): Unit =
-                        deferredSent.succeed(()).run
+                        completableRequestSent.succeed(()).fork
 
                       override def writeFailed(error: Throwable): Unit =
-                        deferredSent.fail(error).run
+                        completableRequestSent.fail(error).fork
                     },
                   )
-                  deferredSent.effect.flatMap(_ => resultEffect)
+                  completableRequestSent.effect.flatMap(_ => resultEffect)
                 }
               }
             )
@@ -172,6 +172,16 @@ final case class JettyClient[Effect[_]](
     (responseBody.toInputStream, Some(response.getStatus), headers)
   }
 
+  private def withCompletable[T](function: CompletableEffectSystem[Effect] => Effect[T]): Effect[T] =
+    system match {
+      case completableSystem: CompletableEffectSystem[?] =>
+        function(completableSystem.asInstanceOf[CompletableEffectSystem[Effect]])
+      case _ => system.error(new IllegalArgumentException(
+          s"""${Protocol.WebSocket} not available for effect system
+            | not supporting completable effects: ${system.getClass.getName}""".stripMargin
+        ))
+    }
+
   private def createRequest(
     requestBody: InputStream,
     mediaType: String,
@@ -183,26 +193,23 @@ final case class JettyClient[Effect[_]](
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
-        withCompletableEffectSystem(defer =>
-          system.wrap {
-            val deferredResponse = defer.completable[Response]
-            val response = deferredResponse.flatMap(_.effect)
+        withCompletable(completableSystem =>
+          system.evaluate {
+            val completableResponse = completableSystem.completable[Response]
+            val response = completableResponse.flatMap(_.effect)
             val upgradeRequest = createWebSocketRequest(httpContext, requestUrl)
-            val webSocket = connectWebSocket(upgradeRequest, requestUrl, deferredResponse, defer)
+            val webSocket = connectWebSocket(upgradeRequest, requestUrl, completableResponse, completableSystem)
             Right((webSocket, response, requestBody)) -> requestUrl
           }
         )
       case _ =>
         // Create HTTP request
-        system.wrap {
+        system.evaluate {
           val httpRequest = createHttpRequest(requestBody, requestUrl, mediaType, httpContext)
           Left(httpRequest) -> httpRequest.getURI
         }
     }
   }
-
-  override def defaultContext: Context =
-    Session.defaultContext
 
   private def createHttpRequest(
     requestBody: InputStream,
@@ -249,31 +256,31 @@ final case class JettyClient[Effect[_]](
       override def onWebSocketBinary(payload: Array[Byte], offset: Int, length: Int): Unit = {
         val message = util.Arrays.copyOfRange(payload, offset, offset + length)
         val responseBody = message.toInputStream
-        response.succeed((responseBody, None, Seq())).run
+        response.succeed((responseBody, None, Seq())).fork
       }
 
       override def onWebSocketError(error: Throwable): Unit =
-        response.fail(error).run
+        response.fail(error).fork
     }
 
   private def effect[T](
     completableFuture: => CompletableFuture[T],
     completableSystem: CompletableEffectSystem[Effect],
   ): Effect[T] =
-    completableSystem.completable[T].flatMap { deferred =>
+    completableSystem.completable[T].flatMap { completable =>
       Try(completableFuture).pureFold(
-        exception => deferred.fail(exception).run,
+        exception => completable.fail(exception).fork,
         value => {
           value.handle { case (result, error) =>
-            Option(result).map(value => deferred.succeed(value).run).getOrElse {
-              deferred.fail(Option(error).getOrElse(new IllegalStateException("Missing completable future result")))
-                .run
+            Option(result).map(value => completable.succeed(value).fork).getOrElse {
+              completable.fail(Option(error).getOrElse(new IllegalStateException("Missing completable future result")))
+                .fork
             }
           }
           ()
         },
       )
-      deferred.effect
+      completable.effect
     }
 
   private def createWebSocketRequest(httpContext: Context, requestUrl: URI): ClientUpgradeRequest = {
@@ -292,20 +299,13 @@ final case class JettyClient[Effect[_]](
     request
   }
 
-  private def withCompletableEffectSystem[T](function: CompletableEffectSystem[Effect] => Effect[T]): Effect[T] =
-    system match {
-      case completableSystem: CompletableEffectSystem[?] =>
-        function(completableSystem.asInstanceOf[CompletableEffectSystem[Effect]])
-      case _ => system.error(new IllegalArgumentException(
-          s"""${Protocol.WebSocket} not available for effect system
-           | not supporting completable effects: ${system.getClass.getName}""".stripMargin
-        ))
-    }
-
   private def responseContext(response: Response): Context = {
     val (_, statusCode, headers) = response
     statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers*)
   }
+
+  override def defaultContext: Context =
+    Session.defaultContext
 
   override def message(
     requestBody: InputStream,
@@ -319,7 +319,7 @@ final case class JettyClient[Effect[_]](
     }
 
   override def close(): Effect[Unit] =
-    system.wrap {
+    system.evaluate {
       webSocketClient.stop()
       httpClient.stop()
     }

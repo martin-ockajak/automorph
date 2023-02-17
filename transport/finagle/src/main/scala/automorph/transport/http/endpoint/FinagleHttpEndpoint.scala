@@ -125,7 +125,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
 
   private def runAsFuture[T](value: Effect[T]): Future[T] = {
     val promise = Promise[T]()
-    value.either.map(_.fold(error => promise.setException(error), result => promise.setValue(result))).run
+    value.either.map(_.fold(error => promise.setException(error), result => promise.setValue(result))).fork
     promise
   }
 }

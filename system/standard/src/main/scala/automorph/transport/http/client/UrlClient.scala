@@ -52,7 +52,7 @@ final case class UrlClient[Effect[_]](system: EffectSystem[Effect], url: URI, me
   ): Effect[(InputStream, Context)] =
     // Send the request
     send(requestBody, requestId, mediaType, requestContext).flatMap { connection =>
-      system.wrap {
+      system.evaluate {
         lazy val responseProperties =
           ListMap(LogProperties.requestId -> requestId, "URL" -> connection.getURL.toExternalForm)
 
@@ -84,7 +84,7 @@ final case class UrlClient[Effect[_]](system: EffectSystem[Effect], url: URI, me
     mediaType: String,
     context: Option[Context],
   ): Effect[HttpURLConnection] =
-    system.wrap {
+    system.evaluate {
       // Create the request
       val requestBody = request.toArray
       val connection = createConnection(context)

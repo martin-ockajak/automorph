@@ -65,7 +65,7 @@ final case class NanoServer[Effect[_]] private (
   implicit private val system: EffectSystem[Effect] = genericHandler.system
 
   override def close(): Effect[Unit] =
-    system.wrap(stop())
+    system.evaluate(stop())
 
   override def start(): Unit = {
     super.start()

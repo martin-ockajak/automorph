@@ -19,7 +19,7 @@ import cats.effect.unsafe.IORuntime
  */
 final case class CatsEffectSystem()(implicit val runtime: IORuntime) extends CompletableEffectSystem[IO] {
 
-  override def wrap[T](value: => T): IO[T] =
+  override def evaluate[T](value: => T): IO[T] =
     IO(value)
 
   override def pure[T](value: T): IO[T] =

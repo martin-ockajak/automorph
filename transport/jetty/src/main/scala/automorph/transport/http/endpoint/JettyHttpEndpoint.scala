@@ -66,7 +66,7 @@ final case class JettyHttpEndpoint[Effect[_]](
             sendResponse(responseBody, status, None, response, asyncContext, request, requestId)
           },
         )
-      ).run
+      ).fork
     }
   }
 

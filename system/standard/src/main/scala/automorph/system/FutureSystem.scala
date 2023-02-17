@@ -19,7 +19,7 @@ import scala.util.Success
 final case class FutureSystem()(implicit val executionContext: ExecutionContext)
   extends CompletableEffectSystem[Future] {
 
-  override def wrap[T](value: => T): Future[T] =
+  override def evaluate[T](value: => T): Future[T] =
     Future(value)
 
   override def pure[T](value: T): Future[T] =

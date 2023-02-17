@@ -67,7 +67,7 @@ final case class UndertowServer[Effect[_]](
   start()
 
   override def close(): Effect[Unit] =
-    system.wrap(undertow.stop())
+    system.evaluate(undertow.stop())
 
   private def createServer(): Undertow = {
     // Validate HTTP request method

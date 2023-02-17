@@ -49,7 +49,7 @@ final case class RabbitMqServer[Effect[_]](
   implicit private val system: EffectSystem[Effect] = genericHandler.system
   start()
 
-  override def close(): Effect[Unit] = system.wrap(RabbitMqCommon.disconnect(connection))
+  override def close(): Effect[Unit] = system.evaluate(RabbitMqCommon.disconnect(connection))
 
   private def start(): Unit = {
     consumer(connection.createChannel())
@@ -81,7 +81,7 @@ final case class RabbitMqServer[Effect[_]](
                 val response = result.responseBody.map(_.toArray).getOrElse(Array[Byte]())
                 sendResponse(response, replyTo, result.context, requestProperties, actualRequestId)
               }
-            )).run
+            )).fork
           }.getOrElse {
             logger.error(s"Missing ${log.defaultProtocol} request header: correlation-id", requestProperties)
           }

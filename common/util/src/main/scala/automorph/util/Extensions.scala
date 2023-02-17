@@ -205,7 +205,7 @@ private[automorph] object Extensions {
      * @return
      *   nothing
      */
-    def run(implicit system: EffectSystem[Effect]): Unit =
+    def fork(implicit system: EffectSystem[Effect]): Unit =
       system.run(effect)
   }
 

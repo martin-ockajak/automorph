@@ -93,7 +93,7 @@ final case class RabbitMqClient[Effect[_]](
     response.foreach(responseHandlers.put(requestId, _))
 
     // Send the request
-    system.wrap {
+    system.evaluate {
       Try {
         val message = requestBody.toArray
         threadConsumer.get.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, message)
@@ -114,7 +114,7 @@ final case class RabbitMqClient[Effect[_]](
     RabbitMqContext.default
 
   override def close(): Effect[Unit] =
-    system.wrap(RabbitMqCommon.disconnect(connection))
+    system.evaluate(RabbitMqCommon.disconnect(connection))
 
   private def consumer(channel: Channel): DefaultConsumer = {
     val consumer = new DefaultConsumer(channel) {
@@ -130,10 +130,10 @@ final case class RabbitMqClient[Effect[_]](
           .messageProperties(Option(properties.getCorrelationId), routingKey, urlText, None)
         log.receivedResponse(responseProperties)
 
-        // Resolve the registered deferred response effect
+        // Complete the registered deferred response effect
         val responseContext = RabbitMqCommon.messageContext(properties)
         responseHandlers.get(properties.getCorrelationId).foreach { response =>
-          response.succeed(responseBody.toInputStream -> responseContext).run
+          response.succeed(responseBody.toInputStream -> responseContext).fork
         }
       }
     }
