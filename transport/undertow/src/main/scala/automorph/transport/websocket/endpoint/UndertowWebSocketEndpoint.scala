@@ -106,7 +106,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
               discardMessage()
             },
           )
-        ).fork
+        ).runAsync
       }
 
       private def sendErrorResponse(

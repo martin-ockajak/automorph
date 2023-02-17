@@ -112,8 +112,8 @@ final case class JettyClient[Effect[_]](
                   val responseListener = new BufferingResponseListener {
 
                     override def onComplete(result: Result): Unit =
-                      Option(result.getResponseFailure).map(error => completableResponse.fail(error).fork)
-                        .getOrElse(completableResponse.succeed(httpResponse(result.getResponse, getContent)).fork)
+                      Option(result.getResponseFailure).map(error => completableResponse.fail(error).runAsync)
+                        .getOrElse(completableResponse.succeed(httpResponse(result.getResponse, getContent)).runAsync)
                   }
                   httpRequest.send(responseListener)
                   completableResponse.effect
@@ -129,10 +129,10 @@ final case class JettyClient[Effect[_]](
                     requestBody.toByteBuffer,
                     new WriteCallback {
                       override def writeSuccess(): Unit =
-                        completableRequestSent.succeed(()).fork
+                        completableRequestSent.succeed(()).runAsync
 
                       override def writeFailed(error: Throwable): Unit =
-                        completableRequestSent.fail(error).fork
+                        completableRequestSent.fail(error).runAsync
                     },
                   )
                   completableRequestSent.effect.flatMap(_ => resultEffect)
@@ -256,11 +256,11 @@ final case class JettyClient[Effect[_]](
       override def onWebSocketBinary(payload: Array[Byte], offset: Int, length: Int): Unit = {
         val message = util.Arrays.copyOfRange(payload, offset, offset + length)
         val responseBody = message.toInputStream
-        response.succeed((responseBody, None, Seq())).fork
+        response.succeed((responseBody, None, Seq())).runAsync
       }
 
       override def onWebSocketError(error: Throwable): Unit =
-        response.fail(error).fork
+        response.fail(error).runAsync
     }
 
   private def effect[T](
@@ -269,12 +269,12 @@ final case class JettyClient[Effect[_]](
   ): Effect[T] =
     completableSystem.completable[T].flatMap { completable =>
       Try(completableFuture).pureFold(
-        exception => completable.fail(exception).fork,
+        exception => completable.fail(exception).runAsync,
         value => {
           value.handle { case (result, error) =>
-            Option(result).map(value => completable.succeed(value).fork).getOrElse {
+            Option(result).map(value => completable.succeed(value).runAsync).getOrElse {
               completable.fail(Option(error).getOrElse(new IllegalStateException("Missing completable future result")))
-                .fork
+                .runAsync
             }
           }
           ()

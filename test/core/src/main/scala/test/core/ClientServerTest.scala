@@ -13,8 +13,8 @@ trait ClientServerTest extends ProtocolCodecTest {
   lazy val clients: ArrayBuffer[ClientMessageTransport[Effect, Context]] = ArrayBuffer.empty
 
   override def afterAll(): Unit = {
-    servers.foreach(server => system.fork(server.close()))
-    clients.foreach(client => system.fork(client.close()))
+    servers.foreach(server => system.runAsync(server.close()))
+    clients.foreach(client => system.runAsync(client.close()))
     super.afterAll()
   }
 }

@@ -33,7 +33,7 @@ final case class ScalazEffectSystem()(implicit val executionContext: ExecutionCo
   override def flatMap[T, R](effect: IO[T])(function: T => IO[R]): IO[R] =
     effect.flatMap(function)
 
-  override def fork[T](effect: IO[T]): Unit = {
+  override def runAsync[T](effect: IO[T]): Unit = {
     Future(effect)
     ()
   }

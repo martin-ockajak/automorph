@@ -80,8 +80,8 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
         }
       }
     }
-    "Fork" in {
-      system.fork(system.evaluate(text))
+    "RunAsync" in {
+      system.runAsync(system.evaluate(text))
     }
   }
 }

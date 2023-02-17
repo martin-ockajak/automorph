@@ -105,5 +105,5 @@ trait EffectSystem[Effect[_]] {
    * @return
    *   nothing
    */
-  def fork[T](effect: Effect[T]): Unit
+  def runAsync[T](effect: Effect[T]): Unit
 }

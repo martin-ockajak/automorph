@@ -81,7 +81,7 @@ final case class RabbitMqServer[Effect[_]](
                 val response = result.responseBody.map(_.toArray).getOrElse(Array[Byte]())
                 sendResponse(response, replyTo, result.context, requestProperties, actualRequestId)
               }
-            )).fork
+            )).runAsync
           }.getOrElse {
             logger.error(s"Missing ${log.defaultProtocol} request header: correlation-id", requestProperties)
           }

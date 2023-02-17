@@ -188,12 +188,12 @@ final case class HttpClient[Effect[_]](
   ): Effect[T] =
     completableSystem.completable[T].flatMap { completable =>
       Try(completableFuture).pureFold(
-        exception => completable.fail(exception).fork,
+        exception => completable.fail(exception).runAsync,
         value => {
           value.handle { case (result, error) =>
-            Option(result).map(value => completable.succeed(value).fork).getOrElse {
+            Option(result).map(value => completable.succeed(value).runAsync).getOrElse {
               completable.fail(Option(error).getOrElse(new IllegalStateException("Missing completable future result")))
-                .fork
+                .runAsync
             }
           }
           ()
@@ -284,7 +284,7 @@ final case class HttpClient[Effect[_]](
           buffers.foreach(buffer => outputStream.write(buffer, 0, buffer.length))
           buffers.clear()
           val responseBody = outputStream.toByteArray.toInputStream
-          response.succeed((responseBody, None, Seq())).fork
+          response.succeed((responseBody, None, Seq())).runAsync
         }
         super.onBinary(webSocket, data, last)
       }

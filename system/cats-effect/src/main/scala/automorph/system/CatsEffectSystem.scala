@@ -34,7 +34,7 @@ final case class CatsEffectSystem()(implicit val runtime: IORuntime) extends Com
   override def flatMap[T, R](effect: IO[T])(function: T => IO[R]): IO[R] =
     effect.flatMap(function)
 
-  override def fork[T](effect: IO[T]): Unit =
+  override def runAsync[T](effect: IO[T]): Unit =
     effect.unsafeRunAndForget()
 
   override def completable[T]: IO[Completable[IO, T]] =

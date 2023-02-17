@@ -133,7 +133,7 @@ final case class RabbitMqClient[Effect[_]](
         // Complete the registered deferred response effect
         val responseContext = RabbitMqCommon.messageContext(properties)
         responseHandlers.get(properties.getCorrelationId).foreach { response =>
-          response.succeed(responseBody.toInputStream -> responseContext).fork
+          response.succeed(responseBody.toInputStream -> responseContext).runAsync
         }
       }
     }

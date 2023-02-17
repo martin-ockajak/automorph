@@ -71,7 +71,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
                   sendResponse(responseBody, statusCode, result.context, exchange, requestId)
                 },
               )
-            ).fork
+            ).runAsync
         }
         if (exchange.isInIoThread) {
           exchange.dispatch(handlerRunnable)

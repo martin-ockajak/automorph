@@ -205,8 +205,8 @@ private[automorph] object Extensions {
      * @return
      *   nothing
      */
-    def fork(implicit system: EffectSystem[Effect]): Unit =
-      system.fork(effect)
+    def runAsync(implicit system: EffectSystem[Effect]): Unit =
+      system.runAsync(effect)
   }
 
   private case class ArrayInputStream(data: Array[Byte]) extends ByteArrayInputStream(data)
