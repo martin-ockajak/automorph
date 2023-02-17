@@ -81,7 +81,7 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
       }
     }
     "Fork" in {
-      system.run(system.evaluate(text))
+      system.fork(system.evaluate(text))
     }
   }
 }

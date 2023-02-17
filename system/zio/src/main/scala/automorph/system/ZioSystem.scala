@@ -35,7 +35,7 @@ final case class ZioSystem[Environment]()(implicit val runtime: Runtime[Environm
   override def flatMap[T, R](effect: RIO[Environment, T])(function: T => RIO[Environment, R]): RIO[Environment, R] =
     effect.flatMap(function)
 
-  override def run[T](effect: RIO[Environment, T]): Unit = {
+  override def fork[T](effect: RIO[Environment, T]): Unit = {
     implicit val trace: Trace = Trace.empty
     Unsafe.unsafe { implicit unsafe =>
       runtime.unsafe.fork(effect)

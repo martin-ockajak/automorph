@@ -105,5 +105,5 @@ trait EffectSystem[Effect[_]] {
    * @return
    *   nothing
    */
-  def run[T](effect: Effect[T]): Unit
+  def fork[T](effect: Effect[T]): Unit
 }

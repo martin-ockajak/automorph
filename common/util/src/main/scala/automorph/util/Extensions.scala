@@ -206,7 +206,7 @@ private[automorph] object Extensions {
      *   nothing
      */
     def fork(implicit system: EffectSystem[Effect]): Unit =
-      system.run(effect)
+      system.fork(effect)
   }
 
   private case class ArrayInputStream(data: Array[Byte]) extends ByteArrayInputStream(data)

@@ -33,7 +33,7 @@ final case class IdentitySystem() extends EffectSystem[Identity] {
   override def flatMap[T, R](effect: T)(function: T => R): R =
     function(effect)
 
-  override def run[T](effect: T): Unit =
+  override def fork[T](effect: T): Unit =
     ()
 }
 
