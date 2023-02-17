@@ -5,7 +5,7 @@ import cats.effect.IO
 import cats.effect.unsafe.implicits.global
 import scala.util.Try
 
-class CatsEffectTest extends DeferEffectSystemTest[IO] {
+class CatsEffectTest extends CompletableEffectSystemTest[IO] {
 
   lazy val system: CatsEffectSystem = CatsEffectSystem()
 

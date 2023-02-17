@@ -1,7 +1,6 @@
 package automorph.system
 
-import automorph.spi.EffectSystem
-import automorph.spi.system.{Defer, Deferred}
+import automorph.spi.system.{Completable, CompletableEffectSystem}
 import zio.{Queue, RIO, Runtime, Task, Trace, Unsafe, ZIO}
 
 /**
@@ -10,7 +9,7 @@ import zio.{Queue, RIO, Runtime, Task, Trace, Unsafe, ZIO}
  * @see
  *   [[https://zio.dev Library documentation]]
  * @see
- *   [[https://javadoc.io/doc/dev.zio/zio_2.13/latest/zio/RIO$.html Effect type]]
+ *   [[https://javadoc.io/doc/dev.zio/zio_3/latest/zio.html#RIO-0 Effect type]]
  * @constructor
  *   Creates a ZIO effect system plugin using `RIO` as an effect type.
  * @param runtime
@@ -19,29 +18,10 @@ import zio.{Queue, RIO, Runtime, Task, Trace, Unsafe, ZIO}
  *   ZIO environment type
  */
 final case class ZioSystem[Environment]()(implicit val runtime: Runtime[Environment])
-  extends EffectSystem[({ type Effect[A] = RIO[Environment, A] })#Effect]
-  with Defer[({ type Effect[A] = RIO[Environment, A] })#Effect] {
+  extends CompletableEffectSystem[({ type Effect[A] = RIO[Environment, A] })#Effect] {
 
   override def wrap[T](value: => T): RIO[Environment, T] =
     ZIO.attempt(value)
-
-  override def either[T](effect: => RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] =
-    effect.either
-
-  override def flatMap[T, R](effect: RIO[Environment, T])(function: T => RIO[Environment, R]): RIO[Environment, R] =
-    effect.flatMap(function)
-
-  override def deferred[T]: RIO[Environment, Deferred[({ type Effect[A] = RIO[Environment, A] })#Effect, T]] =
-    map(Queue.dropping[Either[Throwable, T]](1)) { queue =>
-      Deferred(
-        queue.take.flatMap {
-          case Right(result) => pure(result)
-          case Left(error) => failed(error)
-        },
-        result => map(queue.offer(Right(result)))(_ => ()),
-        error => map(queue.offer(Left(error)))(_ => ()),
-      )
-    }
 
   override def pure[T](value: T): RIO[Environment, T] =
     ZIO.succeed(value)
@@ -49,12 +29,37 @@ final case class ZioSystem[Environment]()(implicit val runtime: Runtime[Environm
   override def failed[T](exception: Throwable): RIO[Environment, T] =
     ZIO.fail(exception)
 
+  override def either[T](effect: => RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] =
+    effect.either
+
+  override def flatMap[T, R](effect: RIO[Environment, T])(function: T => RIO[Environment, R]): RIO[Environment, R] =
+    effect.flatMap(function)
+
   override def run[T](effect: RIO[Environment, T]): Unit = {
     implicit val trace: Trace = Trace.empty
     Unsafe.unsafe { implicit unsafe =>
       runtime.unsafe.fork(effect)
       ()
     }
+  }
+
+  override def completable[T]: RIO[Environment, Completable[({ type Effect[A] = RIO[Environment, A] })#Effect, T]] =
+    map(Queue.dropping[Either[Throwable, T]](1))(CompletableRIO(_))
+
+  private case class CompletableRIO[T](private val queue: Queue[Either[Throwable, T]])
+    extends Completable[({ type Effect[A] = RIO[Environment, A] })#Effect, T]() {
+
+    override def effect: RIO[Environment, T] =
+      queue.take.flatMap {
+        case Right(result) => pure(result)
+        case Left(error) => failed(error)
+      }
+
+    override def succeed(value: T): RIO[Environment, Unit] =
+      map(queue.offer(Right(value)))(_ => ())
+
+    override def fail(exception: Throwable): RIO[Environment, Unit] =
+      map(queue.offer(Left(exception)))(_ => ())
   }
 }
 

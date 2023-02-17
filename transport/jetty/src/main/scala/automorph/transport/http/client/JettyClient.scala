@@ -2,7 +2,7 @@ package automorph.transport.http.client
 
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
-import automorph.spi.system.{Defer, Deferred}
+import automorph.spi.system.{Completable, CompletableEffectSystem}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.JettyClient.{Context, Session, defaultClient}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
@@ -106,22 +106,24 @@ final case class JettyClient[Effect[_]](
         // Send HTTP request
         httpRequest =>
           system match {
-            case defer: Defer[?] => defer.asInstanceOf[Defer[Effect]].deferred[Response].flatMap { deferredResponse =>
-                val responseListener = new BufferingResponseListener {
+            case completableSystem: CompletableEffectSystem[?] =>
+              completableSystem.asInstanceOf[CompletableEffectSystem[Effect]].completable[Response].flatMap {
+                deferredResponse =>
+                  val responseListener = new BufferingResponseListener {
 
-                  override def onComplete(result: Result): Unit =
-                    Option(result.getResponseFailure).map(error => deferredResponse.fail(error).run)
-                      .getOrElse(deferredResponse.succeed(httpResponse(result.getResponse, getContent)).run)
-                }
-                httpRequest.send(responseListener)
-                deferredResponse.effect
+                    override def onComplete(result: Result): Unit =
+                      Option(result.getResponseFailure).map(error => deferredResponse.fail(error).run)
+                        .getOrElse(deferredResponse.succeed(httpResponse(result.getResponse, getContent)).run)
+                  }
+                  httpRequest.send(responseListener)
+                  deferredResponse.effect
               }
             case _ => system.wrap(httpRequest.send()).map(response => httpResponse(response, response.getContent))
           },
         // Send WebSocket request
         {
-          case (webSocketEffect, resultEffect, requestBody) => withDefer(defer =>
-              defer.deferred[Unit].flatMap { deferredSent =>
+          case (webSocketEffect, resultEffect, requestBody) => withCompletableEffectSystem(defer =>
+              defer.completable[Unit].flatMap { deferredSent =>
                 webSocketEffect.flatMap { webSocket =>
                   webSocket.getRemote.sendBytes(
                     requestBody.toByteBuffer,
@@ -181,9 +183,9 @@ final case class JettyClient[Effect[_]](
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
-        withDefer(defer =>
+        withCompletableEffectSystem(defer =>
           system.wrap {
-            val deferredResponse = defer.deferred[Response]
+            val deferredResponse = defer.completable[Response]
             val response = deferredResponse.flatMap(_.effect)
             val upgradeRequest = createWebSocketRequest(httpContext, requestUrl)
             val webSocket = connectWebSocket(upgradeRequest, requestUrl, deferredResponse, defer)
@@ -234,14 +236,14 @@ final case class JettyClient[Effect[_]](
   private def connectWebSocket(
     upgradeRequest: ClientUpgradeRequest,
     requestUrl: URI,
-    responseEffect: Effect[Deferred[Effect, Response]],
-    defer: Defer[Effect],
+    responseEffect: Effect[Completable[Effect, Response]],
+    completableSystem: CompletableEffectSystem[Effect],
   ): Effect[websocket.api.Session] =
     responseEffect.flatMap { response =>
-      effect(webSocketClient.connect(webSocketListener(response), requestUrl, upgradeRequest), defer)
+      effect(webSocketClient.connect(webSocketListener(response), requestUrl, upgradeRequest), completableSystem)
     }
 
-  private def webSocketListener(response: Deferred[Effect, Response]): WebSocketListener =
+  private def webSocketListener(response: Completable[Effect, Response]): WebSocketListener =
     new WebSocketListener {
 
       override def onWebSocketBinary(payload: Array[Byte], offset: Int, length: Int): Unit = {
@@ -254,8 +256,11 @@ final case class JettyClient[Effect[_]](
         response.fail(error).run
     }
 
-  private def effect[T](completableFuture: => CompletableFuture[T], defer: Defer[Effect]): Effect[T] =
-    defer.deferred[T].flatMap { deferred =>
+  private def effect[T](
+    completableFuture: => CompletableFuture[T],
+    completableSystem: CompletableEffectSystem[Effect],
+  ): Effect[T] =
+    completableSystem.completable[T].flatMap { deferred =>
       Try(completableFuture).pureFold(
         exception => deferred.fail(exception).run,
         value => {
@@ -287,11 +292,13 @@ final case class JettyClient[Effect[_]](
     request
   }
 
-  private def withDefer[T](function: Defer[Effect] => Effect[T]): Effect[T] =
+  private def withCompletableEffectSystem[T](function: CompletableEffectSystem[Effect] => Effect[T]): Effect[T] =
     system match {
-      case defer: Defer[?] => function(defer.asInstanceOf[Defer[Effect]])
+      case completableSystem: CompletableEffectSystem[?] =>
+        function(completableSystem.asInstanceOf[CompletableEffectSystem[Effect]])
       case _ => system.failed(new IllegalArgumentException(
-          s"${Protocol.WebSocket} not supported for effect system without deferred effect support: ${system.getClass.getName}"
+          s"""${Protocol.WebSocket} not available for effect system
+           | not supporting completable effects: ${system.getClass.getName}""".stripMargin
         ))
     }
 

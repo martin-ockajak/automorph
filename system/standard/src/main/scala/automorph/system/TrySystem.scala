@@ -7,9 +7,9 @@ import scala.util.{Failure, Success, Try}
  * Synchronous effect system plugin using `Try` as an effect type.
  *
  * @see
- *   [[https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html Library documentation]]
+ *   [[https://docs.scala-lang.org/scala3/book/fp-functional-error-handling.html Library documentation]]
  * @see
- *   [[https://www.scala-lang.org/api/2.13.6/scala/util/Try.html Effect type]]
+ *   [[https://www.scala-lang.org/files/archive/api/3.x/scala/util/Try.html Effect type]]
  * @constructor
  *   Creates a synchronous effect system plugin using Try as an effect type.
  */

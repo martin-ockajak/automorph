@@ -1,7 +1,6 @@
 package automorph.system
 
-import automorph.spi.EffectSystem
-import automorph.spi.system.{Defer, Deferred}
+import automorph.spi.system.{Completable, CompletableEffectSystem}
 import cats.effect.IO
 import cats.effect.std.Queue
 import cats.effect.unsafe.IORuntime
@@ -18,35 +17,10 @@ import cats.effect.unsafe.IORuntime
  * @param runtime
  *   runtime system
  */
-final case class CatsEffectSystem()(implicit val runtime: IORuntime) extends EffectSystem[IO] with Defer[IO] {
+final case class CatsEffectSystem()(implicit val runtime: IORuntime) extends CompletableEffectSystem[IO] {
 
   override def wrap[T](value: => T): IO[T] =
     IO(value)
-
-  override def either[T](effect: => IO[T]): IO[Either[Throwable, T]] =
-    effect.attempt
-
-  override def deferred[T]: IO[Deferred[IO, T]] =
-    map(Queue.dropping[IO, Either[Throwable, T]](1)) { queue =>
-      Deferred(
-        queue.take.flatMap {
-          case Right(result) => pure(result)
-          case Left(error) => failed(error)
-        },
-        result =>
-          flatMap(queue.tryOffer(Right(result))) { success =>
-            Option.when(success)(pure(())).getOrElse {
-              failed(new IllegalStateException("Deferred effect already resolved"))
-            }
-          },
-        error =>
-          flatMap(queue.tryOffer(Left(error))) { success =>
-            Option.when(success)(pure(())).getOrElse {
-              failed(new IllegalStateException("Deferred effect already resolved"))
-            }
-          },
-      )
-    }
 
   override def pure[T](value: T): IO[T] =
     IO.pure(value)
@@ -54,11 +28,41 @@ final case class CatsEffectSystem()(implicit val runtime: IORuntime) extends Eff
   override def failed[T](exception: Throwable): IO[T] =
     IO.raiseError(exception)
 
+  override def either[T](effect: => IO[T]): IO[Either[Throwable, T]] =
+    effect.attempt
+
   override def flatMap[T, R](effect: IO[T])(function: T => IO[R]): IO[R] =
     effect.flatMap(function)
 
   override def run[T](effect: IO[T]): Unit =
     effect.unsafeRunAndForget()
+
+  override def completable[T]: IO[Completable[IO, T]] =
+    map(Queue.dropping[IO, Either[Throwable, T]](1))(CompletableIO(_))
+
+  private case class CompletableIO[T](private val queue: Queue[IO, Either[Throwable, T]])
+    extends Completable[IO, T]() {
+
+    override def effect: IO[T] =
+      queue.take.flatMap {
+        case Right(result) => pure(result)
+        case Left(error) => failed(error)
+      }
+
+    override def succeed(value: T): IO[Unit] =
+      flatMap(queue.tryOffer(Right(value))) { success =>
+        Option.when(success)(pure(())).getOrElse {
+          failed(new IllegalStateException("Deferred effect already resolved"))
+        }
+      }
+
+    override def fail(exception: Throwable): IO[Unit] =
+      flatMap(queue.tryOffer(Left(exception))) { success =>
+        Option.when(success)(pure(())).getOrElse {
+          failed(new IllegalStateException("Deferred effect already resolved"))
+        }
+      }
+  }
 }
 
 object CatsEffectSystem {

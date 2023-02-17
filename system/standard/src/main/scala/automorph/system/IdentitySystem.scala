@@ -10,7 +10,9 @@ import scala.util.Try
  * Represents direct use of computed values without wrapping them in an effect.
  *
  * @see
- *   [[https://www.javadoc.io/doc/org.automorph/automorph-standard_2.13/latest/automorph/system/IdentitySystem$$Identity.html Effect type]]
+ *   [[https://www.scala-lang.org/files/archive/api/3.x/ documentation]]
+ * @see
+ *   [[https://scala-lang.org/api/3.x/scala/Predef$.html#identity-957 Effect type]]
  * @constructor
  *   Creates a synchronous effect system plugin using identity as an effect type.
  */

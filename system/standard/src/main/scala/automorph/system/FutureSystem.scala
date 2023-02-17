@@ -1,7 +1,6 @@
 package automorph.system
 
-import automorph.spi.EffectSystem
-import automorph.spi.system.{Defer, Deferred}
+import automorph.spi.system.{Completable, CompletableEffectSystem}
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Success
 
@@ -18,7 +17,7 @@ import scala.util.Success
  *   execution context
  */
 final case class FutureSystem()(implicit val executionContext: ExecutionContext)
-  extends EffectSystem[Future] with Defer[Future] {
+  extends CompletableEffectSystem[Future] {
 
   override def wrap[T](value: => T): Future[T] =
     Future(value)
@@ -38,21 +37,26 @@ final case class FutureSystem()(implicit val executionContext: ExecutionContext)
   override def run[T](effect: Future[T]): Unit =
     ()
 
-  override def deferred[T]: Future[Deferred[Future, T]] = {
-    val promise = Promise[T]()
-    Future.successful(Deferred(
-      promise.future,
-      (result: T) =>
-        Future {
-          promise.success(result)
-          ()
-        },
-      (error: Throwable) =>
-        Future {
-          promise.failure(error)
-          ()
-        },
-    ))
+  override def completable[T]: Future[Completable[Future, T]] =
+    Future.successful(CompletableFuture())
+
+  private case class CompletableFuture[T]() extends Completable[Future, T]() {
+    private val promise: Promise[T] = Promise()
+
+    override def effect: Future[T] =
+      promise.future
+
+    override def succeed(value: T): Future[Unit] =
+      Future {
+        promise.success(value)
+        ()
+      }
+
+    override def fail(exception: Throwable): Future[Unit] =
+      Future {
+        promise.failure(exception)
+        ()
+      }
   }
 }
 

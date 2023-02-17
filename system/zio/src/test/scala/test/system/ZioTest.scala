@@ -3,7 +3,7 @@ package test.system
 import automorph.system.ZioSystem
 import zio.{Task, Unsafe}
 
-class ZioTest extends DeferEffectSystemTest[Task] {
+class ZioTest extends CompletableEffectSystemTest[Task] {
 
   lazy val system: ZioSystem[Any] = ZioSystem.default
 

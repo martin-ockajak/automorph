@@ -2,7 +2,7 @@ package automorph.transport.amqp.client
 
 import automorph.log.{Logging, MessageLog}
 import automorph.spi.EffectSystem
-import automorph.spi.system.{Defer, Deferred}
+import automorph.spi.system.{Completable, CompletableEffectSystem}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
@@ -45,7 +45,7 @@ import scala.util.Try
 final case class RabbitMqClient[Effect[_]](
   url: URI,
   routingKey: String,
-  system: EffectSystem[Effect] & Defer[Effect],
+  system: CompletableEffectSystem[Effect],
   exchange: String = RabbitMqCommon.defaultDirectExchange,
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory,
@@ -55,7 +55,7 @@ final case class RabbitMqClient[Effect[_]](
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
   private val clientId = RabbitMqCommon.applicationId(getClass.getName)
   private val urlText = url.toString
-  private val responseHandlers = TrieMap[String, Deferred[Effect, Response]]()
+  private val responseHandlers = TrieMap[String, Completable[Effect, Response]]()
   private val log = MessageLog(logger, RabbitMqCommon.protocol)
   implicit private val givenSystem: EffectSystem[Effect] = system
 
@@ -65,7 +65,7 @@ final case class RabbitMqClient[Effect[_]](
     requestId: String,
     mediaType: String,
   ): Effect[Response] =
-    system.deferred[Response].flatMap { response =>
+    system.completable[Response].flatMap { response =>
       send(requestBody, requestId, mediaType, requestContext, Some(response)).flatMap(_ => response.effect)
     }
 
@@ -74,7 +74,7 @@ final case class RabbitMqClient[Effect[_]](
     defaultRequestId: String,
     mediaType: String,
     requestContext: Option[Context],
-    response: Option[Deferred[Effect, Response]],
+    response: Option[Completable[Effect, Response]],
   ): Effect[Unit] = {
     // Log the request
     val amqpProperties = RabbitMqCommon.amqpProperties(

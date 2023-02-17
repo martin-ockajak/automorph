@@ -2,7 +2,7 @@ package automorph.transport.http.client
 
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.EffectSystem
-import automorph.spi.system.{Defer, Deferred}
+import automorph.spi.system.{Completable, CompletableEffectSystem}
 import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.http.client.HttpClient.{Context, Session, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
@@ -124,16 +124,19 @@ final case class HttpClient[Effect[_]](
         // Send HTTP request
         httpRequest =>
           system match {
-            case defer: Defer[?] =>
-              effect(httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray), defer.asInstanceOf[Defer[Effect]])
+            case completableSystem: CompletableEffectSystem[?] =>
+              effect(
+                httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray),
+                completableSystem.asInstanceOf[CompletableEffectSystem[Effect]],
+              )
                 .map(httpResponse)
             case _ => system.wrap(httpResponse(httpClient.send(httpRequest, BodyHandlers.ofByteArray)))
           },
         // Send WebSocket request
         { case (webSocketEffect, resultEffect, requestBody) =>
-          withDefer(defer =>
+          withCompletable(completableSystem =>
             webSocketEffect.flatMap(webSocket =>
-              effect(webSocket.sendBinary(requestBody.toByteBuffer, true), defer).flatMap(_ => resultEffect)
+              effect(webSocket.sendBinary(requestBody.toByteBuffer, true), completableSystem).flatMap(_ => resultEffect)
             )
           )
         },
@@ -169,29 +172,34 @@ final case class HttpClient[Effect[_]](
     (response.body.toInputStream, Some(response.statusCode), headers)
   }
 
-  private def effect[T](completableFuture: => CompletableFuture[T], defer: Defer[Effect]): Effect[T] =
-    defer.deferred[T].flatMap { deferred =>
+  private def withCompletable[T](function: CompletableEffectSystem[Effect] => Effect[T]): Effect[T] =
+    system match {
+      case completableSystem: CompletableEffectSystem[?] =>
+        function(completableSystem.asInstanceOf[CompletableEffectSystem[Effect]])
+      case _ => system.failed(new IllegalArgumentException(
+          s"""WebSocket protocol not available for effect system
+            | not supporting completable effects: ${system.getClass.getName}""".stripMargin
+        ))
+    }
+
+  private def effect[T](
+    completableFuture: => CompletableFuture[T],
+    completableSystem: CompletableEffectSystem[Effect],
+  ): Effect[T] =
+    completableSystem.completable[T].flatMap { completable =>
       Try(completableFuture).pureFold(
-        exception => deferred.fail(exception).run,
+        exception => completable.fail(exception).run,
         value => {
           value.handle { case (result, error) =>
-            Option(result).map(value => deferred.succeed(value).run).getOrElse {
-              deferred.fail(Option(error).getOrElse(new IllegalStateException("Missing completable future result")))
+            Option(result).map(value => completable.succeed(value).run).getOrElse {
+              completable.fail(Option(error).getOrElse(new IllegalStateException("Missing completable future result")))
                 .run
             }
           }
           ()
         },
       )
-      deferred.effect
-    }
-
-  private def withDefer[T](function: Defer[Effect] => Effect[T]): Effect[T] =
-    system match {
-      case defer: Defer[?] => function(defer.asInstanceOf[Defer[Effect]])
-      case _ => system.failed(new IllegalArgumentException(
-          s"WebSocket no supported for effect system without deferred effect support: ${system.getClass.getName}"
-        ))
+      completable.effect
     }
 
   private def createRequest(
@@ -206,12 +214,12 @@ final case class HttpClient[Effect[_]](
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
-        withDefer(defer =>
+        withCompletable(completableSystem =>
           system.wrap {
-            val deferredResponse = defer.deferred[Response]
-            val response = deferredResponse.flatMap(_.effect)
+            val completableResponse = completableSystem.completable[Response]
+            val response = completableResponse.flatMap(_.effect)
             val webSocketBuilder = createWebSocketBuilder(httpContext)
-            val webSocket = connectWebSocket(webSocketBuilder, requestUrl, deferredResponse, defer)
+            val webSocket = connectWebSocket(webSocketBuilder, requestUrl, completableResponse, completableSystem)
             Right((webSocket, response, requestBody)) -> requestUrl
           }
         )
@@ -257,12 +265,14 @@ final case class HttpClient[Effect[_]](
   private def connectWebSocket(
     builder: WebSocket.Builder,
     requestUrl: URI,
-    responseEffect: Effect[Deferred[Effect, Response]],
-    defer: Defer[Effect],
+    responseEffect: Effect[Completable[Effect, Response]],
+    completableSystem: CompletableEffectSystem[Effect],
   ): Effect[WebSocket] =
-    responseEffect.flatMap(response => effect(builder.buildAsync(requestUrl, webSocketListener(response)), defer))
+    responseEffect.flatMap(response =>
+      effect(builder.buildAsync(requestUrl, webSocketListener(response)), completableSystem)
+    )
 
-  private def webSocketListener(response: Deferred[Effect, Response]): Listener =
+  private def webSocketListener(response: Completable[Effect, Response]): Listener =
     new Listener {
 
       private val buffers = ArrayBuffer.empty[Array[Byte]]

@@ -2,14 +2,14 @@ package automorph
 
 import automorph.meta.DefaultMeta
 import automorph.spi.EffectSystem
-import automorph.spi.system.Defer
+import automorph.spi.system.CompletableEffectSystem
 import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
 import automorph.system.{FutureSystem, IdentitySystem}
-import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.http.client.HttpClient
 import automorph.transport.http.server.UndertowServer
 import automorph.transport.http.server.UndertowServer.defaultBuilder
+import automorph.transport.http.{HttpContext, HttpMethod}
 import io.undertow.Undertow
 import java.net.URI
 import scala.concurrent.{ExecutionContext, Future}
@@ -74,6 +74,8 @@ object Default extends DefaultMeta {
    * Creates a synchronous identity effect system plugin.
    *
    * @see
+   *   [[https://www.scala-lang.org/files/archive/api/3.x/ documentation]]
+   * @see
    *   [[https://scala-lang.org/api/3.x/scala/Predef$.html#identity-957 Effect type]]
    * @return
    *   synchronous effect system plugin
@@ -91,7 +93,7 @@ object Default extends DefaultMeta {
    * @return
    *   asynchronous effect system plugin
    */
-  def systemAsync(implicit executionContext: ExecutionContext): EffectSystem[Future] & Defer[Future] =
+  def systemAsync(implicit executionContext: ExecutionContext): CompletableEffectSystem[Future] =
     FutureSystem()
 
   /**
