@@ -25,10 +25,10 @@ trait EffectSystem[Effect[_]] {
   def evaluate[T](value: => T): Effect[T]
 
   /**
-   * Lifts a pure value into a new effect of specified type.
+   * Lifts a value into a successfully completed effect of specified type.
    *
    * @param value
-   *   pure value
+   *   value
    * @tparam T
    *   effectful value type
    * @return
@@ -37,7 +37,7 @@ trait EffectSystem[Effect[_]] {
   def pure[T](value: T): Effect[T]
 
   /**
-   * Lifts an exception into a new effect of specified type.
+   * Lifts an exception into a failed effect of specified type.
    *
    * @param exception
    *   exception
