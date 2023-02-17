@@ -27,7 +27,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  * @see
  *   [[https://sttp.softwaremill.com/en/latest Library documentation]]
  * @see
- *   [[https://www.javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/tapir/index.html API]]
+ *   [[https://javadoc.io/doc/com.softwaremill.sttp.client3/core_3/latest/index.html API]]
  * @constructor
  *   Creates an STTP HTTP & WebSocket client message transport plugin with the specified STTP backend.
  * @param system

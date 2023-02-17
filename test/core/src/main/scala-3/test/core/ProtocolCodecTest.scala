@@ -110,6 +110,12 @@ trait ProtocolCodecTest extends CoreTest {
     )
   }
 
+  @nowarn("msg=used")
+  def clientTransport(
+    handler: Types.HandlerAnyCodec[Effect, Context]
+  ): Option[ClientMessageTransport[Effect, Context]] =
+    None
+
   private def uPickleMessagePackFixture()(implicit context: Context): TestFixture = {
     class Custom extends UpickleMessagePackCustom {
       implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int]
@@ -132,12 +138,6 @@ trait ProtocolCodecTest extends CoreTest {
       (function, a0) => client.message(function).args(a0),
     )
   }
-
-  @nowarn("msg=used")
-  def clientTransport(
-    handler: Types.HandlerAnyCodec[Effect, Context]
-  ): Option[ClientMessageTransport[Effect, Context]] =
-    None
 
   private def argonautJsonFixture()(implicit context: Context): TestFixture = {
     implicit val enumCodecJson: CodecJson[Enum.Enum] =
@@ -192,5 +192,4 @@ trait ProtocolCodecTest extends CoreTest {
       (function, a0) => client.message(function).args(a0),
     )
   }
-
 }
