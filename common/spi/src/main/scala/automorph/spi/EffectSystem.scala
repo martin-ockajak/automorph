@@ -46,7 +46,7 @@ trait EffectSystem[Effect[_]] {
    * @return
    *   effect containing the exception
    */
-  def failed[T](exception: Throwable): Effect[T]
+  def error[T](exception: Throwable): Effect[T]
 
   /**
    * Creates a new effect by lifting an effect's errors into a value.

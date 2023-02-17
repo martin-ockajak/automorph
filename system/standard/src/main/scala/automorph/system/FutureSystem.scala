@@ -25,7 +25,7 @@ final case class FutureSystem()(implicit val executionContext: ExecutionContext)
   override def pure[T](value: T): Future[T] =
     Future.successful(value)
 
-  override def failed[T](exception: Throwable): Future[T] =
+  override def error[T](exception: Throwable): Future[T] =
     Future.failed(exception)
 
   override def either[T](effect: => Future[T]): Future[Either[Throwable, T]] =

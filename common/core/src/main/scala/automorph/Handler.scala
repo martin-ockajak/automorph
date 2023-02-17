@@ -323,7 +323,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     requestProperties: => Map[String, String],
   ): Effect[HandlerResult[Context]] =
     protocol.createResponse(result.map(_._1), message.metadata).pureFold(
-      error => system.failed(error),
+      error => system.error(error),
       rpcResponse => {
         val responseBody = rpcResponse.message.body
         lazy val allProperties = rpcResponse.message.properties ++ requestProperties ++

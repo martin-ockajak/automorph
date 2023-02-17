@@ -87,7 +87,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     // Create request
     val requestId = Random.id
     protocol.createRequest(function, arguments, responseRequired = false, requestId).pureFold(
-      error => system.failed(error),
+      error => system.error(error),
       // Send request
       rpcRequest =>
         system.pure(rpcRequest).flatMap { request =>
@@ -142,7 +142,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     // Create request
     val requestId = Random.id
     protocol.createRequest(function, arguments, responseRequired = true, requestId).pureFold(
-      error => system.failed(error),
+      error => system.error(error),
       // Send request
       rpcRequest =>
         system.pure(rpcRequest).flatMap { request =>
@@ -217,7 +217,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    */
   private def raiseError[T](error: Throwable, properties: Map[String, String]): Effect[T] = {
     logger.error(s"Failed to perform ${protocol.name} request", error, properties)
-    system.failed(error)
+    system.error(error)
   }
 }
 

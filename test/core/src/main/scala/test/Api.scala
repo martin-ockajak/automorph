@@ -78,7 +78,7 @@ final case class ComplexApiImpl[Effect[_], Context](backend: EffectSystem[Effect
     })
 
   override def method9(p0: String): Effect[String] =
-    backend.failed(new IllegalArgumentException(p0))
+    backend.error(new IllegalArgumentException(p0))
 
   protected def protectedMethod(): Unit =
     privateMethod()

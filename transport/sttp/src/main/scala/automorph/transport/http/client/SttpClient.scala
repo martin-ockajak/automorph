@@ -74,7 +74,7 @@ final case class SttpClient[Effect[_]] private (
         result.fold(
           error => {
             log.failedReceiveResponse(error, responseProperties, protocol.name)
-            system.failed(error)
+            system.error(error)
           },
           response => {
             log.receivedResponse(responseProperties + ("Status" -> response.code.toString), protocol.name)
@@ -100,7 +100,7 @@ final case class SttpClient[Effect[_]] private (
       _.fold(
         error => {
           log.failedSendRequest(error, requestProperties, protocol.name)
-          system.failed(error)
+          system.error(error)
         },
         response => {
           log.sentRequest(requestProperties, protocol.name)
@@ -156,7 +156,7 @@ final case class SttpClient[Effect[_]] private (
     if (sttpRequest.isWebSocket) {
       if (webSocket) { system.pure(Protocol.WebSocket) }
       else {
-        system.failed(
+        system.error(
           throw new IllegalArgumentException(
             s"Selected STTP backend does not support WebSocket: ${backend.getClass.getSimpleName}"
           )

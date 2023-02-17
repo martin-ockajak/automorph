@@ -25,7 +25,7 @@ final case class MonixSystem()(implicit val scheduler: Scheduler) extends Comple
   override def pure[T](value: T): Task[T] =
     Task.pure(value)
 
-  override def failed[T](exception: Throwable): Task[T] =
+  override def error[T](exception: Throwable): Task[T] =
     Task.raiseError(exception)
 
   override def either[T](effect: => Task[T]): Task[Either[Throwable, T]] =
@@ -45,21 +45,21 @@ final case class MonixSystem()(implicit val scheduler: Scheduler) extends Comple
 
     override def effect: Task[T] =
       mVar.read.flatMap {
-        case Right(result) => pure(result)
-        case Left(error) => failed(error)
+        case Right(value) => pure(value)
+        case Left(exception) => error(exception)
       }
 
     override def succeed(value: T): Task[Unit] =
       flatMap(mVar.tryPut(Right(value))) { success =>
         Option.when(success)(pure(())).getOrElse {
-          failed(new IllegalStateException("Deferred effect already resolved"))
+          error(new IllegalStateException("Deferred effect already resolved"))
         }
       }
 
     override def fail(exception: Throwable): Task[Unit] =
       flatMap(mVar.tryPut(Left(exception))) { success =>
         Option.when(success)(pure(())).getOrElse {
-          failed(new IllegalStateException("Deferred effect already resolved"))
+          error(new IllegalStateException("Deferred effect already resolved"))
         }
       }
   }

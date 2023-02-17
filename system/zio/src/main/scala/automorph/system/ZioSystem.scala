@@ -26,7 +26,7 @@ final case class ZioSystem[Environment]()(implicit val runtime: Runtime[Environm
   override def pure[T](value: T): RIO[Environment, T] =
     ZIO.succeed(value)
 
-  override def failed[T](exception: Throwable): RIO[Environment, T] =
+  override def error[T](exception: Throwable): RIO[Environment, T] =
     ZIO.fail(exception)
 
   override def either[T](effect: => RIO[Environment, T]): RIO[Environment, Either[Throwable, T]] =
@@ -51,8 +51,8 @@ final case class ZioSystem[Environment]()(implicit val runtime: Runtime[Environm
 
     override def effect: RIO[Environment, T] =
       queue.take.flatMap {
-        case Right(result) => pure(result)
-        case Left(error) => failed(error)
+        case Right(value) => pure(value)
+        case Left(exception) => error(exception)
       }
 
     override def succeed(value: T): RIO[Environment, Unit] =

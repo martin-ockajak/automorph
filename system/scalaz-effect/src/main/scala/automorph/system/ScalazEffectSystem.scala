@@ -24,7 +24,7 @@ final case class ScalazEffectSystem()(implicit val executionContext: ExecutionCo
   override def pure[T](value: T): IO[T] =
     IO(value)
 
-  override def failed[T](exception: Throwable): IO[T] =
+  override def error[T](exception: Throwable): IO[T] =
     IO.throwIO(exception)
 
   override def either[T](effect: => IO[T]): IO[Either[Throwable, T]] =

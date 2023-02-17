@@ -24,7 +24,7 @@ final case class IdentitySystem() extends EffectSystem[Identity] {
   override def pure[T](value: T): T =
     value
 
-  override def failed[T](exception: Throwable): T =
+  override def error[T](exception: Throwable): T =
     throw exception
 
   override def either[T](effect: => T): Either[Throwable, T] =

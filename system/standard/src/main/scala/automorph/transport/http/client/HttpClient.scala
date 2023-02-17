@@ -82,7 +82,7 @@ final case class HttpClient[Effect[_]](
         result.fold(
           error => {
             log.failedReceiveResponse(error, responseProperties, protocol.name)
-            system.failed(error)
+            system.error(error)
           },
           response => {
             val (responseBody, statusCode, _) = response
@@ -157,7 +157,7 @@ final case class HttpClient[Effect[_]](
       _.fold(
         error => {
           log.failedSendRequest(error, requestProperties, protocol.name)
-          system.failed(error)
+          system.error(error)
         },
         response => {
           log.sentRequest(requestProperties, protocol.name)
@@ -176,7 +176,7 @@ final case class HttpClient[Effect[_]](
     system match {
       case completableSystem: CompletableEffectSystem[?] =>
         function(completableSystem.asInstanceOf[CompletableEffectSystem[Effect]])
-      case _ => system.failed(new IllegalArgumentException(
+      case _ => system.error(new IllegalArgumentException(
           s"""WebSocket protocol not available for effect system
             | not supporting completable effects: ${system.getClass.getName}""".stripMargin
         ))

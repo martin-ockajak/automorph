@@ -37,7 +37,7 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
       .flatMap { result => result.responseBody.map { responseBody =>
           system.pure(responseBody -> result.context.getOrElse(defaultContext))
         }.getOrElse {
-          system.failed(InvalidResponseException("Missing call response", None.orNull))
+          system.error(InvalidResponseException("Missing call response", None.orNull))
         }
       }
 

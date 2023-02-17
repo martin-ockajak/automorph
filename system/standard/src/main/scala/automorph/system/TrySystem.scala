@@ -21,7 +21,7 @@ final case class TrySystem() extends EffectSystem[Try] {
   override def pure[T](value: T): Try[T] =
     Success(value)
 
-  override def failed[T](exception: Throwable): Try[T] =
+  override def error[T](exception: Throwable): Try[T] =
     Failure(exception)
 
   override def either[T](effect: => Try[T]): Try[Either[Throwable, T]] =

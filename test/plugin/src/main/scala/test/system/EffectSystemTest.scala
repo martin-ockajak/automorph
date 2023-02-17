@@ -38,8 +38,8 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
       val effect = system.pure(text)
       execute(effect).should(equal(Right(text)))
     }
-    "Failed" in {
-      Try(system.failed(error)) match {
+    "Error" in {
+      Try(system.error(error)) match {
         case Success(effect) => execute(effect).should(equal(Left(error)))
         case Failure(error) => error.should(equal(error))
       }
@@ -50,7 +50,7 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
         execute(effect).should(equal(Right(s"$text$number")))
       }
       "Failure" in {
-        Try(system.map(system.failed(error))(_ => ())) match {
+        Try(system.map(system.error(error))(_ => ())) match {
           case Success(effect) => execute(effect).should(equal(Left(error)))
           case Failure(error) => error.should(equal(error))
         }
@@ -62,7 +62,7 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
         execute(effect).should(equal(Right(s"$text$number")))
       }
       "Failure" in {
-        Try(system.flatMap(system.failed(error))(_ => system.pure(()))) match {
+        Try(system.flatMap(system.error(error))(_ => system.pure(()))) match {
           case Success(effect) => execute(effect).should(equal(Left(error)))
           case Failure(error) => error.should(equal(error))
         }
@@ -74,7 +74,7 @@ trait EffectSystemTest[Effect[_]] extends BaseTest {
         execute(effect).should(equal(Right(Right(text))))
       }
       "Failure" in {
-        Try(system.either(system.failed(error))) match {
+        Try(system.either(system.error(error))) match {
           case Success(effect) => execute(effect).should(equal(Right(Left(error))))
           case Failure(error) => error.should(equal(error))
         }
