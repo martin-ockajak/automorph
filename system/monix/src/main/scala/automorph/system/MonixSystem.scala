@@ -22,10 +22,10 @@ final case class MonixSystem()(implicit val scheduler: Scheduler) extends Comple
   override def evaluate[T](value: => T): Task[T] =
     Task.evalAsync(value)
 
-  override def pure[T](value: T): Task[T] =
+  override def successful[T](value: T): Task[T] =
     Task.pure(value)
 
-  override def error[T](exception: Throwable): Task[T] =
+  override def failed[T](exception: Throwable): Task[T] =
     Task.raiseError(exception)
 
   override def either[T](effect: => Task[T]): Task[Either[Throwable, T]] =
@@ -45,21 +45,21 @@ final case class MonixSystem()(implicit val scheduler: Scheduler) extends Comple
 
     override def effect: Task[T] =
       mVar.read.flatMap {
-        case Right(value) => pure(value)
-        case Left(exception) => error(exception)
+        case Right(value) => successful(value)
+        case Left(exception) => failed(exception)
       }
 
     override def succeed(value: T): Task[Unit] =
       flatMap(mVar.tryPut(Right(value))) { success =>
-        Option.when(success)(pure(())).getOrElse {
-          error(new IllegalStateException("Completable effect already resolved"))
+        Option.when(success)(successful(())).getOrElse {
+          failed(new IllegalStateException("Completable effect already resolved"))
         }
       }
 
     override def fail(exception: Throwable): Task[Unit] =
       flatMap(mVar.tryPut(Left(exception))) { success =>
-        Option.when(success)(pure(())).getOrElse {
-          error(new IllegalStateException("Completable effect already resolved"))
+        Option.when(success)(successful(())).getOrElse {
+          failed(new IllegalStateException("Completable effect already resolved"))
         }
       }
   }

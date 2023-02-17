@@ -25,7 +25,7 @@ trait EffectSystem[Effect[_]] {
   def evaluate[T](value: => T): Effect[T]
 
   /**
-   * Lifts a value into a successfully completed effect of specified type.
+   * Lifts a value without blocking or side-effects into a successfully completed effect of specified type.
    *
    * @param value
    *   value
@@ -34,10 +34,10 @@ trait EffectSystem[Effect[_]] {
    * @return
    *   effect containing the value
    */
-  def pure[T](value: T): Effect[T]
+  def successful[T](value: T): Effect[T]
 
   /**
-   * Lifts an exception into a failed effect of specified type.
+   * Lifts a exception into a failed effect of specified type.
    *
    * @param exception
    *   exception
@@ -46,7 +46,7 @@ trait EffectSystem[Effect[_]] {
    * @return
    *   effect containing the exception
    */
-  def error[T](exception: Throwable): Effect[T]
+  def failed[T](exception: Throwable): Effect[T]
 
   /**
    * Creates a new effect by lifting an effect's errors into a value.
@@ -93,7 +93,7 @@ trait EffectSystem[Effect[_]] {
    *   transformed effectful value
    */
   def map[T, R](effect: Effect[T])(function: T => R): Effect[R] =
-    flatMap(effect)(value => pure(function(value)))
+    flatMap(effect)(value => successful(function(value)))
 
   /**
    * Executes an effect asynchronously without blocking and discard the result.

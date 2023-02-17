@@ -35,9 +35,9 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
   ): Effect[(InputStream, Context)] =
     handler.processRequest(requestBody, requestContext.getOrElse(defaultContext), requestId)
       .flatMap { result => result.responseBody.map { responseBody =>
-          system.pure(responseBody -> result.context.getOrElse(defaultContext))
+          system.successful(responseBody -> result.context.getOrElse(defaultContext))
         }.getOrElse {
-          system.error(InvalidResponseException("Missing call response", None.orNull))
+          system.failed(InvalidResponseException("Missing call response", None.orNull))
         }
       }
 
@@ -50,5 +50,5 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     handler.processRequest(requestBody, requestContext.getOrElse(defaultContext), requestId).map(_ => ())
 
   override def close(): Effect[Unit] =
-    system.pure(())
+    system.successful(())
 }

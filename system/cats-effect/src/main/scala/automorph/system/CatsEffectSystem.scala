@@ -22,10 +22,10 @@ final case class CatsEffectSystem()(implicit val runtime: IORuntime) extends Com
   override def evaluate[T](value: => T): IO[T] =
     IO(value)
 
-  override def pure[T](value: T): IO[T] =
+  override def successful[T](value: T): IO[T] =
     IO.pure(value)
 
-  override def error[T](exception: Throwable): IO[T] =
+  override def failed[T](exception: Throwable): IO[T] =
     IO.raiseError(exception)
 
   override def either[T](effect: => IO[T]): IO[Either[Throwable, T]] =
@@ -45,21 +45,21 @@ final case class CatsEffectSystem()(implicit val runtime: IORuntime) extends Com
 
     override def effect: IO[T] =
       queue.take.flatMap {
-        case Right(value) => pure(value)
-        case Left(exception) => error(exception)
+        case Right(value) => successful(value)
+        case Left(exception) => failed(exception)
       }
 
     override def succeed(value: T): IO[Unit] =
       flatMap(queue.tryOffer(Right(value))) { success =>
-        Option.when(success)(pure(())).getOrElse {
-          error(new IllegalStateException("Completable effect already resolved"))
+        Option.when(success)(successful(())).getOrElse {
+          failed(new IllegalStateException("Completable effect already resolved"))
         }
       }
 
     override def fail(exception: Throwable): IO[Unit] =
       flatMap(queue.tryOffer(Left(exception))) { success =>
-        Option.when(success)(pure(())).getOrElse {
-          error(new IllegalStateException("Completable effect already resolved"))
+        Option.when(success)(successful(())).getOrElse {
+          failed(new IllegalStateException("Completable effect already resolved"))
         }
       }
   }

@@ -275,7 +275,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       Option.when(rpcRequest.responseRequired)(response(result.toTry, rpcRequest.message, requestProperties))
         .getOrElse {
           val responseContext = result.toOption.flatMap(_._2)
-          system.pure(HandlerResult(None, None, responseContext))
+          system.successful(HandlerResult(None, None, responseContext))
         }
     }
 
@@ -301,7 +301,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   ): Effect[HandlerResult[Context]] = {
     logger.error(s"Failed to process ${protocol.name} request", error, requestProperties)
     Option.when(responseRequired)(response(Failure(error), message, requestProperties)).getOrElse {
-      system.pure(HandlerResult(None, None, None))
+      system.successful(HandlerResult(None, None, None))
     }
   }
 
@@ -323,13 +323,13 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     requestProperties: => Map[String, String],
   ): Effect[HandlerResult[Context]] =
     protocol.createResponse(result.map(_._1), message.metadata).pureFold(
-      error => system.error(error),
+      error => system.failed(error),
       rpcResponse => {
         val responseBody = rpcResponse.message.body
         lazy val allProperties = rpcResponse.message.properties ++ requestProperties ++
           rpcResponse.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Sending ${protocol.name} response", allProperties)
-        system.pure(HandlerResult(Some(responseBody), result.failed.toOption, result.toOption.flatMap(_._2)))
+        system.successful(HandlerResult(Some(responseBody), result.failed.toOption, result.toOption.flatMap(_._2)))
       },
     )
 
@@ -342,7 +342,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         apiSchema.function,
         Map.empty,
         result => result.asInstanceOf[Node] -> None,
-        (_, _) => system.pure(apiSchema.invoke(describedFunctions)),
+        (_, _) => system.successful(apiSchema.invoke(describedFunctions)),
         acceptsContext = false,
       )
     }*)

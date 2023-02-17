@@ -80,12 +80,12 @@ final case class JettyClient[Effect[_]](
         result.fold(
           error => {
             log.failedReceiveResponse(error, responseProperties, protocol.name)
-            system.error(error)
+            system.failed(error)
           },
           response => {
             val (responseBody, statusCode, _) = response
             log.receivedResponse(responseProperties ++ statusCode.map("Status" -> _.toString), protocol.name)
-            system.pure(responseBody -> responseContext(response))
+            system.successful(responseBody -> responseContext(response))
           },
         )
       }
@@ -157,11 +157,11 @@ final case class JettyClient[Effect[_]](
       _.fold(
         error => {
           log.failedSendRequest(error, requestProperties, protocol.name)
-          system.error(error)
+          system.failed(error)
         },
         response => {
           log.sentRequest(requestProperties, protocol.name)
-          system.pure(response)
+          system.successful(response)
         },
       )
     )
@@ -176,7 +176,7 @@ final case class JettyClient[Effect[_]](
     system match {
       case completableSystem: CompletableEffectSystem[?] =>
         function(completableSystem.asInstanceOf[CompletableEffectSystem[Effect]])
-      case _ => system.error(new IllegalArgumentException(
+      case _ => system.failed(new IllegalArgumentException(
           s"""${Protocol.WebSocket} not available for effect system
             | not supporting completable effects: ${system.getClass.getName}""".stripMargin
         ))

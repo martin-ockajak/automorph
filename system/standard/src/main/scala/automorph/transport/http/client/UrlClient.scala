@@ -156,7 +156,7 @@ final case class UrlClient[Effect[_]](system: EffectSystem[Effect], url: URI, me
   }
 
   override def close(): Effect[Unit] =
-    system.pure(())
+    system.successful(())
 }
 
 object UrlClient {

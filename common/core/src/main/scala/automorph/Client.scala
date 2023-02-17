@@ -87,10 +87,10 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     // Create request
     val requestId = Random.id
     protocol.createRequest(function, arguments, responseRequired = false, requestId).pureFold(
-      error => system.error(error),
+      error => system.failed(error),
       // Send request
       rpcRequest =>
-        system.pure(rpcRequest).flatMap { request =>
+        system.successful(rpcRequest).flatMap { request =>
           lazy val requestProperties = rpcRequest.message.properties + (LogProperties.requestId -> requestId)
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${protocol.name} request", allProperties)
@@ -142,10 +142,10 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     // Create request
     val requestId = Random.id
     protocol.createRequest(function, arguments, responseRequired = true, requestId).pureFold(
-      error => system.error(error),
+      error => system.failed(error),
       // Send request
       rpcRequest =>
-        system.pure(rpcRequest).flatMap { request =>
+        system.successful(rpcRequest).flatMap { request =>
           lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++ rpcRequest.message.properties
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${protocol.name} request", allProperties)
@@ -196,7 +196,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
               error => raiseError(InvalidResponseException("Malformed result", error), requestProperties),
               result => {
                 logger.info(s"Performed ${protocol.name} request", requestProperties)
-                system.pure(result)
+                system.successful(result)
               },
             ),
         )
@@ -217,7 +217,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    */
   private def raiseError[T](error: Throwable, properties: Map[String, String]): Effect[T] = {
     logger.error(s"Failed to perform ${protocol.name} request", error, properties)
-    system.error(error)
+    system.failed(error)
   }
 }
 

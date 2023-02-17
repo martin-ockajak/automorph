@@ -74,11 +74,11 @@ final case class SttpClient[Effect[_]] private (
         result.fold(
           error => {
             log.failedReceiveResponse(error, responseProperties, protocol.name)
-            system.error(error)
+            system.failed(error)
           },
           response => {
             log.receivedResponse(responseProperties + ("Status" -> response.code.toString), protocol.name)
-            system.pure(response.body.toInputStream -> getResponseContext(response))
+            system.successful(response.body.toInputStream -> getResponseContext(response))
           },
         )
       }
@@ -100,11 +100,11 @@ final case class SttpClient[Effect[_]] private (
       _.fold(
         error => {
           log.failedSendRequest(error, requestProperties, protocol.name)
-          system.error(error)
+          system.failed(error)
         },
         response => {
           log.sentRequest(requestProperties, protocol.name)
-          system.pure(response)
+          system.successful(response)
         },
       )
     )
@@ -154,15 +154,15 @@ final case class SttpClient[Effect[_]] private (
 
   private def transportProtocol(sttpRequest: Request[Array[Byte], WebSocket]): Effect[Protocol] =
     if (sttpRequest.isWebSocket) {
-      if (webSocket) { system.pure(Protocol.WebSocket) }
+      if (webSocket) { system.successful(Protocol.WebSocket) }
       else {
-        system.error(
+        system.failed(
           throw new IllegalArgumentException(
             s"Selected STTP backend does not support WebSocket: ${backend.getClass.getSimpleName}"
           )
         )
       }
-    } else system.pure(Protocol.Http)
+    } else system.successful(Protocol.Http)
 
   override def message(
     requestBody: InputStream,
