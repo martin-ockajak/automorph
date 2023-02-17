@@ -29,9 +29,7 @@
 //    await(effect)
 //
 //  override lazy val arbitraryContext: Arbitrary[Context] =
-//    Arbitrary(HttpContextGenerator.arbitrary.arbitrary.map { context =>
-//      context.method(HttpMethod.Post).asInstanceOf[Context]
-//    })
+//    HttpContextGenerator.arbitrary
 //
 //  def serverTransport(
 //    handler: Types.HandlerAnyCodec[Effect, Context],

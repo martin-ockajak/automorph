@@ -64,6 +64,7 @@ lazy val root = project.in(file(".")).settings(name := projectName, publish / sk
 
   // Message transport
   sttp,
+  tapir,
   undertow,
   vertx,
   jetty,
@@ -154,6 +155,13 @@ lazy val rabbitmq = source(project, "transport/rabbitmq", amqp, core, standard, 
   .settings(libraryDependencies += "com.rabbitmq" % "amqp-client" % "5.16.0")
 
 // Server
+val tapirVersion = "1.2.8"
+lazy val tapir = source(project, "transport/tapir", core, http, testStandard % Test).settings(
+  libraryDependencies ++= Seq(
+    "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
+    "com.softwaremill.sttp.tapir" %% "tapir-vertx-server" % tapirVersion % Test
+  )
+)
 lazy val undertow = source(project, "transport/undertow", core, http, testStandard % Test).settings(
   libraryDependencies += "io.undertow" % "undertow-core" % "2.3.3.Final",
   Test / javaOptions += "-Dorg.jboss.logging.provider=slf4j",
@@ -204,7 +212,7 @@ ThisBuild / Test / testOptions += Tests.Argument("-oD")
 lazy val testBase = source(project, "test/base", spi).settings(
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.2.15",
-    "org.scalatestplus" %% "scalacheck-1-15" % "3.2.11.0",
+    "org.scalatestplus" %% "scalacheck-1-17" % "3.2.15.0",
     "com.outr" %% "scribe-file" % scribeVersion,
     "com.outr" %% "scribe-slf4j" % scribeVersion,
     "com.lihaoyi" %% "pprint" % "0.8.1"
