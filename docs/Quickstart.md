@@ -101,7 +101,8 @@ client.close()
 Clone the repository and enter the example project directory:
 
 ```shell
-git clone https://github.com/martin-ockajak/automorph && cd automorph/examples/project
+git clone https://github.com/martin-ockajak/automorph
+cd automorph/examples/project
 ```
 
 ### Try
