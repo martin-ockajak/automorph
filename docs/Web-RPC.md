@@ -2,6 +2,7 @@
 
 Web-RPC is a very simple RPC protocol which enables all the flexibility typically offered by REST APIs without any boilerplate while allowing reuse of the existing REST API tools.
 
+
 ## Motivation
 
 [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) as a theoretical concept is deemed to be independent of specific data formats, transport protocols or even calling conventions. However, the vast majority of REST APIs created for web applications and online services involve translating HTTP requests and responses carrying JSON payload into function calls on the remote site.
@@ -9,6 +10,7 @@ Web-RPC is a very simple RPC protocol which enables all the flexibility typicall
 Such translation requires deciding how to represent REST API call data and metadata using the underlying transport protocol. This includes determining the message format, its structure, transport protocol meta-data such as various headers and so on. There are many ways how to do this ultimately achieving exactly the same result using slightly differrent means. And while some good practices can be discussed, there does not seem to be an agreed upon standard.
 
 These are virtually the same concerns which various [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call) or messaging protocols need to solve. Consequently, creation of a typical REST API requires additional effort largely equivalent to designing and implementing an unique custom RPC protocol.
+
 
 ## Goals
 
@@ -19,6 +21,7 @@ Web-RPC can be understood to be all of the following:
 * RPC protocol supporting various practical mechanisms often provided by typical REST APIs
 * REST-style protocol prescribing a standard way to represent data and meta-data in REST API requests and responses
 
+
 ## Features
 
 * HTTP as transport protocol
@@ -26,6 +29,7 @@ Web-RPC can be understood to be all of the following:
 * API function name as a last URL path element
 * API function arguments can be supplied either in the request body or as URL query parameters
 * Meta-data in HTTP headers
+
 
 ## Fairly anticipated questions (FAQ)
 
@@ -48,6 +52,7 @@ Yes. Any REST client or server library will suffice. However, using a specific W
 ### Why call it a REST-style RPC when it is conceptually unrelated to REST ?
 
 To illustrate that it provides remote API authors with a solution with capabilities equivalent to and compatible with typical REST API protocols but does so by openly embracing RPC principles.
+
 
 ## Request
 

@@ -276,7 +276,7 @@ lazy val allTastyFiles = Def.taskDyn(flattenTasks(root.uses.map(_ / Compile / do
 lazy val allDependencyClasspath = Def.taskDyn(flattenTasks(root.uses.map(_ / Compile / doc / dependencyClasspath)))
 lazy val docs = project.in(file("site")).settings(
   name := projectName,
-  mdocVariables := Map("PROJECT_VERSION" -> version.value, "SCALADOC_VERSION" -> "3.2.2"),
+  mdocVariables := Map("PROJECT_VERSION" -> version.value, "SCALADOC_VERSION" -> scalaVersion.value),
   mdocOut := baseDirectory.value / "docs",
   mdocExtraArguments := Seq("--no-link-hygiene"),
   mdoc / fileInputs ++= Seq(
@@ -296,13 +296,13 @@ site := {
   import scala.sys.process.Process
   (docs / Compile / doc).value
   (docs / mdoc).toTask("").value
-  IO.copyDirectory(
-    (examples / baseDirectory).value / "project",
-    (docs / baseDirectory).value / "static/examples/project",
-    overwrite = true
-  )
   Process(Seq("yarn", "install"), (docs / baseDirectory).value).!
   Process(Seq("yarn", "build"), (docs / baseDirectory).value, "SITE_DOCS" -> "docs").!
+  IO.copyDirectory(
+    (examples / baseDirectory).value / "project",
+    (docs / baseDirectory).value / "build/examples/project",
+    overwrite = true
+  )
   IO.copyDirectory((docs / Compile / doc / target).value, (docs / baseDirectory).value / "build/api", overwrite = true)
   val systemApiSuffix = "automorph/system"
   val monixApiDirectory = (monix / Compile / doc / target).value / systemApiSuffix

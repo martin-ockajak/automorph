@@ -51,7 +51,7 @@ const config = {
         },
         items: [
           {
-            href: '/docs/Quickstart',
+            href: '/docs/Overview',
             label: 'Documentation',
             position: 'left',
           },

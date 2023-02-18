@@ -7,6 +7,7 @@ const sidebars = {
       type: 'category',
       label: 'Contents',
       items: [
+	'Overview',
         'Quickstart',
         'Architecture',
         'Plugins',

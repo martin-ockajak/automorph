@@ -2,6 +2,7 @@
 
 *Automorph* supports integration with other software using various plugins of different categories published in separate artifacts. The plugins are configurable, independently composable and can be instantiated at will.
 
+
 ## Defaults
 
 *Automorph* defines a set of default types and plugins aiming at a good balance of features, performance and simplicity:
@@ -16,12 +17,14 @@
 
 Default plugins set can be obtained by using the [automorph-default](https://mvnrepository.com/artifact/org.automorph/automorph-default) artifact which itself depends on all default plugin artifacts. It also contains the [Default](/api/automorph/Default$.html) object which provides a convenient way to create default plugin instances or compose default plugins with other plugins.
 
+
 ## [RPC protocol](/api/automorph/spi/RpcProtocol.html)
 
 | Class | Artifact | Protocol | Service discovery |
 | --- | --- | --- | --- |
 | [JsonRpcProtocol](/api/automorph/protocol/JsonRpcProtocol.html) (*Default*) | [automorph-jsonrpc](https://mvnrepository.com/artifact/org.automorph/automorph-jsonrpc) | [JSON-RPC](https://www.jsonrpc.org/specification) | [OpenRPC](https://spec.open-rpc.org), [OpenAPI](https://github.com/OAI/OpenAPI-Specification) |
 | [WebRpcProtocol](/api/automorph/protocol/WebRpcProtocol.html) | [automorph-restrpc](https://mvnrepository.com/artifact/org.automorph/automorph-restrpc) | [Web-RPC](Web-RPC) | [OpenAPI](https://github.com/OAI/OpenAPI-Specification) |
+
 
 ## [Effect system](/api/automorph/spi/EffectSystem.html)
 
@@ -35,6 +38,7 @@ Default plugins set can be obtained by using the [automorph-default](https://mvn
 | [CatsEffectSystem](/api/automorph/system/CatsEffectSystem.html) | [automorph-cats-effect](https://mvnrepository.com/artifact/org.automorph/automorph-cats-effect) | [Cats Effect](https://typelevel.org/cats-effect/) | [IO](https://typelevel.org/cats-effect/api/3.x/cats/effect/IO.html) |
 | [ScalazEffectSystem](/api/automorph/system/ScalazEffectSystem.html) | [automorph-scalaz-effect](https://mvnrepository.com/artifact/org.automorph/automorph-scalaz-effect) | [Scalaz Effect](https://github.com/scalaz) | [IO](https://www.javadoc.io/doc/org.scalaz/scalaz_3/latest/scalaz/effect/IO.html) |
 
+
 ## [Message codec](/api/automorph/spi/MessageCodec.html)
 
 | Class | Artifact | Library | Node Type | Codec |
@@ -44,6 +48,7 @@ Default plugins set can be obtained by using the [automorph-default](https://mvn
 | [UpickleJsonCodec](/api/automorph/codec/json/UpickleJsonCodec.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Value](http://com-lihaoyi.github.io/upickle/#uJson) | [JSON](https://www.json.org/) |
 | [UpickleMessagePackCodec](/api/automorph/codec/messagepack/UpickleMessagePackCodec.html) | [automorph-upickle](https://mvnrepository.com/artifact/org.automorph/automorph-upickle) | [uPickle](https://github.com/com-lihaoyi/upickle) |[Msg](https://com-lihaoyi.github.io/upickle/#uPack) | [MessagePack](https://msgpack.org/) |
 | [ArgonautJsonCodec](/api/automorph/codec/json/ArgonautJsonCodec.html) | [automorph-argonaut](https://mvnrepository.com/artifact/org.automorph/automorph-argonaut) | [Argonaut](http://argonaut.io/doc/) |[Json](http://argonaut.io/scaladocs/#argonaut.Json) | [JSON](https://www.json.org/) |
+
 
 ## [Message transport](/api/automorph/spi/MessageTransport.html)
 
