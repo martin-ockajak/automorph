@@ -123,7 +123,8 @@ edit src/main/scala/examples/Quickstart.scala
 
 ### Explore
 
-Review additional examples:
+See additional examples:
 ```shell
-find src/test
+ls src/test/*/*/*
 ```
+
