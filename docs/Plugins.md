@@ -20,7 +20,7 @@ sidebar_position: 4
 * HTTP & WebSocket client: [JRE HTTP client](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html)
 * HTTP & WebSocket server: [Undertow](https://undertow.io/)
 
-Default plugins set can be obtained by using the [automorph-default](https://mvnrepository.com/artifact/org.automorph/automorph-default) artifact which itself depends on all default plugin artifacts. It also contains the [Default](/api/automorph/Default$.html) object which provides a convenient way to create default plugin instances or compose default plugins with other plugins.
+Default plugin set can be obtained by using the [automorph-default](https://mvnrepository.com/artifact/org.automorph/automorph-default) artifact which itself depends on selected subset of artifacts implementing the default plugins. This artifact also contains the [Default](/api/automorph/Default$.html) object which provides a convenient way to create default plugin instances or compose default plugins with other plugins.
 
 
 ## [RPC protocol](/api/automorph/spi/RpcProtocol.html)
