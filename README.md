@@ -70,13 +70,21 @@ export TEST_BASIC=true
 target/test.log
 ```
 
-### Documentation
+### Website
+
+#### Generate
 
 ```bash
 sbt site
 ```
 
-#### Continuous rendering
+#### Generate continuously
+
+```bash
+sbt startSite
+```
+
+#### Serve
 
 ```bash
 sbt serveSite

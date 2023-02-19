@@ -1,3 +1,7 @@
+---
+sidebar_position: 4
+---
+
 # Plugins
 
 *Automorph* supports integration with other software using various plugins of different categories published in separate artifacts. The plugins are configurable, independently composable and can be instantiated at will.

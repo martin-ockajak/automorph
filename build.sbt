@@ -327,11 +327,21 @@ site := {
   IO.copyDirectory((examples / baseDirectory).value / "project", examplesDirectory, overwrite = true)
 }
 
+// Start
+val startSite = taskKey[Unit]("Continuously generates project website.")
+startSite := {
+  import scala.sys.process.Process
+  Process(Seq("yarn", "install"), (docs / baseDirectory).value).!
+  Process(Seq("yarn", "start"), (docs / baseDirectory).value, "SITE_DOCS" -> "docs").!
+}
+startSite := startSite.dependsOn(site).value
+
 // Serve
-val serveSite = taskKey[Unit]("Continuously generates project website.")
+val serveSite = taskKey[Unit]("Serve generated project website.")
 serveSite := {
   import scala.sys.process.Process
-  Process(Seq("yarn", "start"), (docs / baseDirectory).value, "SITE_DOCS" -> "docs").!
+  Process(Seq("yarn", "install"), (docs / baseDirectory).value).!
+  Process(Seq("yarn", "serve"), (docs / baseDirectory).value, "SITE_DOCS" -> "docs").!
 }
 serveSite := serveSite.dependsOn(site).value
 

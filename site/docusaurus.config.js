@@ -31,10 +31,21 @@ const config = {
   ],
 
   plugins: [
-    [require.resolve('@easyops-cn/docusaurus-search-local'), {
-      highlightSearchTermsOnTargetPage: true
-    }],
-    '@someok/docusaurus-plugin-relative-paths'
+    '@someok/docusaurus-plugin-relative-paths',
+  ],
+
+  themes: [
+    [
+      require.resolve('@easyops-cn/docusaurus-search-local'),
+      /** @type {import("@easyops-cn/docusaurus-search-local").PluginOptions} */
+      ({
+        explicitSearchResultPath: true,
+        hashed: true,
+        highlightSearchTermsOnTargetPage: true,
+        searchResultContextMaxLength: 64,
+        searchResultLimits: 12,
+      }),
+    ],
   ],
 
   themeConfig:

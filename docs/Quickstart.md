@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # Quickstart
 
 Expose and call a remote JSON-RPC API over HTTP.

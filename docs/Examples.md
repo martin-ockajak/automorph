@@ -1,3 +1,7 @@
+---
+sidebar_position: 5
+---
+
 # Examples
 
 Most of the following examples are using [default plugins](Plugins).
