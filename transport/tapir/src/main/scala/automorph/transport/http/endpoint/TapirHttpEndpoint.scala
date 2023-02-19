@@ -8,6 +8,7 @@
 //import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
 //import automorph.util.Random
 //import scala.collection.immutable.ListMap
+//import sttp.model.Method
 //import sttp.tapir.EndpointIO.Header
 //import sttp.tapir.EndpointInput.QueryParams
 //import sttp.tapir.EndpointOutput.StatusCode

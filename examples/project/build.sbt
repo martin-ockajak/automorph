@@ -5,7 +5,7 @@ version := "0.0.1"
 
 Test / parallelExecution := false
 
-val automorphVersion = "0.0.1-SNAPSHOT"
+val automorphVersion = "0.0.0-SNAPSHOT"
 val sttpVersion = "3.8.11"
 libraryDependencies ++= Seq(
   // Default
