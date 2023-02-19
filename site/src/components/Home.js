@@ -76,7 +76,7 @@ const features = [
     ),
   },
   {
-    title: 'Effect Types',
+    title: 'Effect Handling',
     link: 'docs/Plugins/index.html#effect-system',
     description: (
         <>

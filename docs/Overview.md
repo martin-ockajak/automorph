@@ -16,10 +16,11 @@ sidebar_position: 1
 
 ## Supported standards
 
-### RPC protocols
+### Effect Handling
 
-* [JSON-RPC](https://www.jsonrpc.org/specification) (*Default*)
-* [Web-RPC](Web-RPC)
+* [Synchronous](Examples/index.html#synchronous-call) (*Default*)
+* [Asynchronous](Examples/index.html#asynchronous-call) (*Default*)
+* [Monadic](Examples/index.html#effect-system)
 
 ### Transport protocols
 
@@ -31,6 +32,11 @@ sidebar_position: 1
 
 * [JSON](https://www.json.org) (*Default*)
 * [MessagePack](https://msgpack.org)
+
+### RPC protocols
+
+* [JSON-RPC](https://www.jsonrpc.org/specification) (*Default*)
+* [Web-RPC](Web-RPC)
 
 ### API schemas
 
