@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # Plugins
 
-*Automorph* supports integration with other software using various plugins of different categories published in separate artifacts. The plugins are configurable, independently composable and can be instantiated at will.
+*Automorph* supports integration with other software using various plugins of different categories published in separate artifacts. Specific plugins can be instantiated, configured and combined at will.
 
 
 ## Defaults
@@ -20,7 +20,7 @@ sidebar_position: 4
 * HTTP & WebSocket client: [JRE HTTP client](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html)
 * HTTP & WebSocket server: [Undertow](https://undertow.io/)
 
-Default plugin set can be obtained by using the [automorph-default](https://mvnrepository.com/artifact/org.automorph/automorph-default) artifact which itself depends on selected subset of artifacts implementing the default plugins. This artifact also contains the [Default](/api/automorph/Default$.html) object which provides a convenient way to create default plugin instances or compose default plugins with other plugins.
+Default plugin set can be obtained by using the [automorph-default](https://mvnrepository.com/artifact/org.automorph/automorph-default) artifact which itself depends on selected subset of artifacts implementing the default plugins. This artifact also contains the [Default](/api/automorph/Default$.html) object which provides a convenient way to create default plugin instances or combine default plugins with other plugins.
 
 
 ## [RPC protocol](/api/automorph/spi/RpcProtocol.html)
