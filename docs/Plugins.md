@@ -4,12 +4,12 @@ sidebar_position: 4
 
 # Plugins
 
-*Automorph* supports integration with other libraries by providing plugins of plugins published in separate artifacts. Plugins are separated into categories based on which part of an RPC system functionality they implement. Specific plugins can be instantiated, configured and combined at will.
+*Automorph* supports integration with other libraries by providing plugins of plugins published in separate artifacts. Plugins are separated into categories based on which part of RPC functionality they provide. Specific plugins can be instantiated, configured and combined at will.
 
 
 ## Defaults
 
-*Automorph* defines a set of default types and plugins aiming at a good balance of features, performance and simplicity:
+*Automorph* defines a set of default plugins aiming at a good balance of features, performance and simplicity:
 
 * RPC protocol: [JSON-RPC](https://www.jsonrpc.org/specification)
 * Message format: [JSON](https://www.json.org/)
