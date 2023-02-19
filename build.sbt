@@ -290,7 +290,25 @@ lazy val docs = project.in(file("site")).settings(
     allDependencyClasspath.value.flatten.filter(_.data.getName != "cats-effect_3-2.5.4.jar")
 ).enablePlugins(MdocPlugin)
 
+
 // Site
+def relativizeScaladocLinks(content: String, path: String): String = {
+  if (path.endsWith(".html")) {
+    val apiLinkPrefix = """"https:\/\/javadoc\.io\/page\/org\.automorph\/[^\/]+\/[^\/]+\/"""
+    val pathComponents = path.split(java.io.File.separator).toSeq.init
+    val patterns = pathComponents.foldLeft(Seq("")) { case (paths, packageName) =>
+      paths :+ s"${paths.last}$packageName/"
+    }.reverse
+    val replacements = Range(0, pathComponents.size).map("../" * _)
+    patterns.zip(replacements).foldLeft(content) { case (text, (pattern, replacement)) =>
+      text.replaceAll(s"$apiLinkPrefix$pattern", s""""$replacement""")
+    }
+  } else {
+    content
+  }
+}
+
+// Generate
 val site = taskKey[Unit]("Generates project website.")
 site := {
   import scala.sys.process.Process
@@ -301,15 +319,18 @@ site := {
   IO.copyDirectory(
     (examples / baseDirectory).value / "project",
     (docs / baseDirectory).value / "build/examples/project",
-    overwrite = true
+    overwrite = true,
   )
-  IO.copyDirectory((docs / Compile / doc / target).value, (docs / baseDirectory).value / "build/api", overwrite = true)
-  val systemApiSuffix = "automorph/system"
-  val monixApiDirectory = (monix / Compile / doc / target).value / systemApiSuffix
-  IO.listFiles(monixApiDirectory).foreach { file =>
-    IO.copyFile(file, (docs / baseDirectory).value / "build/api" / systemApiSuffix / file.name)
+  val apiDirectory = (docs / baseDirectory).value / "build/api"
+  Path.allSubpaths((monix / Compile / doc / target).value).filter(_._1.isFile).foreach { case (file, path) =>
+    IO.write(apiDirectory / path, relativizeScaladocLinks(IO.read(file), path))
+  }
+  Path.allSubpaths((docs / Compile / doc / target).value).filter(_._1.isFile).foreach { case (file, path) =>
+    IO.write(apiDirectory / path, relativizeScaladocLinks(IO.read(file), path))
   }
 }
+
+// Serve
 val serveSite = taskKey[Unit]("Continuously generates project website.")
 serveSite := {
   import scala.sys.process.Process
