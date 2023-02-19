@@ -21,7 +21,7 @@ const config = {
         gtag: false,
         docs: {
           path: process.env['SITE_DOCS'] ?? '../docs',
-          sidebarPath: require.resolve('./sidebars.js'),
+          sidebarPath: require.resolve('./src/components/Sidebar.js'),
         },
         theme: {
           customCss: require.resolve('./src/pages/custom.css'),
