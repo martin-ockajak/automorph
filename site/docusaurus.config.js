@@ -1,5 +1,4 @@
 // @ts-check
-// Note: type annotations allow type checking and IDEs autocompletion
 
 const config = {
   title: 'Automorph',
@@ -7,15 +6,14 @@ const config = {
   url: 'https://automorph.org',
   baseUrl: '/',
   favicon: 'icon.jpg',
-  onBrokenLinks: 'warn',
+  onBrokenLinks: 'ignore',
   onBrokenMarkdownLinks: 'warn',
   organizationName: 'automorph',
   projectName: 'automorph',
 
   presets: [
     [
-      '@docusaurus/preset-classic',
-      /** @type {import('@docusaurus/preset-classic').Options} */
+      'classic',
       ({
         blog: false,
         sitemap: false,
