@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # Plugins
 
-*Automorph* supports integration with other software using various plugins of different categories published in separate artifacts. Specific plugins can be instantiated, configured and combined at will.
+*Automorph* supports integration with other libraries using via different categories of plugins published in separate artifacts. Specific plugins can be instantiated, configured and combined at will.
 
 
 ## Defaults
