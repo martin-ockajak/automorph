@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # Plugins
 
-*Automorph* supports integration with other libraries via different categories of plugins published in separate artifacts. Specific plugins can be instantiated, configured and combined at will.
+*Automorph* supports integration with other libraries by providing plugins of plugins published in separate artifacts. Plugins are separated into categories based on which part of an RPC system functionality they implement. Specific plugins can be instantiated, configured and combined at will.
 
 
 ## Defaults
