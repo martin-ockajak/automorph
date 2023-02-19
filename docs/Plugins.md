@@ -11,11 +11,12 @@ sidebar_position: 4
 
 *Automorph* defines a set of default types and plugins aiming at a good balance of features, performance and simplicity:
 
-* Asynchronous effect: [Future](https://scala-lang.org/api/3.x/scala/concurrent/Future.html)
-* Synchronous effect: [Identity](https://scala-lang.org/api/3.x/scala/Predef$.html#identity-957)
+* RPC protocol: [JSON-RPC](https://www.jsonrpc.org/specification)
 * Message format: [JSON](https://www.json.org/)
-* Message codec: [Circe](https://circe.github.io/circe)
 * Transport protocol: [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)
+* Synchronous effect: [Identity](https://scala-lang.org/api/3.x/scala/Predef$.html#identity-957)
+* Asynchronous effect: [Future](https://scala-lang.org/api/3.x/scala/concurrent/Future.html)
+* Message codec: [Circe](https://circe.github.io/circe)
 * HTTP & WebSocket client: [JRE HTTP client](https://docs.oracle.com/en/java/javase/11/docs/api/java.net.http/java/net/http/HttpClient.html)
 * HTTP & WebSocket server: [Undertow](https://undertow.io/)
 
@@ -34,9 +35,9 @@ Default plugins set can be obtained by using the [automorph-default](https://mvn
 
 | Class | Artifact | Library | Effect type |
 | --- | --- | --- | --- |
-| [FutureSystem](/api/automorph/system/FutureSystem.html) (*Default*) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/overviews/core/futures.html) | [Future](https://scala-lang.org/api/3.x/scala/concurrent/Future.html) |
-| [IdentitySystem](/api/automorph/system/IdentitySystem.html) (Default) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://www.scala-lang.org/files/archive/api/3.x/) | [Identity](https://scala-lang.org/api/3.x/scala/Predef$.html#identity-957) |
+| [IdentitySystem](/api/automorph/system/IdentitySystem.html) (Default) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/scala3/book/taste-functions.html) | [Identity](https://scala-lang.org/api/3.x/scala/Predef$.html#identity-957) |
 | [TrySystem](/api/automorph/system/TrySystem.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/scala3/book/fp-functional-error-handling.html) | [Try](https://www.scala-lang.org/files/archive/api/3.x/scala/util/Try.html) |
+| [FutureSystem](/api/automorph/system/FutureSystem.html) (*Default*) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.scala-lang.org/overviews/core/futures.html) | [Future](https://scala-lang.org/api/3.x/scala/concurrent/Future.html) |
 | [ZioSystem](/api/automorph/system/ZioSystem.html) | [automorph-zio](https://mvnrepository.com/artifact/org.automorph/automorph-zio) | [ZIO](https://zio.dev/) | [RIO](https://javadoc.io/doc/dev.zio/zio_3/latest/zio.html#RIO-0) |
 | [MonixSystem](/api/automorph/system/MonixSystem.html) | [automorph-monix](https://mvnrepository.com/artifact/org.automorph/automorph-monix) | [Monix](https://monix.io/) | [Task](https://monix.io/api/current/monix/eval/Task.html) |
 | [CatsEffectSystem](/api/automorph/system/CatsEffectSystem.html) | [automorph-cats-effect](https://mvnrepository.com/artifact/org.automorph/automorph-cats-effect) | [Cats Effect](https://typelevel.org/cats-effect/) | [IO](https://typelevel.org/cats-effect/api/3.x/cats/effect/IO.html) |
