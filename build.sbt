@@ -3,6 +3,7 @@ val projectRoot = "org"
 val projectName = "automorph"
 val projectDescription = "RPC client and server for Scala"
 val siteUrl = s"https://$projectName.$projectRoot"
+val apiUrl = s"$siteUrl/api"
 ThisBuild / homepage := Some(url(siteUrl))
 ThisBuild / licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / description := projectDescription
@@ -23,7 +24,7 @@ val repositoryPath = s"martin-ockajak/$projectName"
 val repositoryUrl = s"https://github.com/$repositoryPath"
 val repositoryShell = s"git@github.com:$repositoryPath.git"
 ThisBuild / scmInfo := Some(ScmInfo(url(repositoryUrl), s"scm:$repositoryShell"))
-apiURL := Some(url(s"$siteUrl/api"))
+apiURL := Some(url(apiUrl))
 onLoadMessage := ""
 
 
@@ -293,13 +294,14 @@ lazy val docs = project.in(file("site")).settings(
 
 // Site
 def relativizeScaladocLinks(content: String, path: String): String = {
-  if (path.endsWith(".html")) {
+  import java.io.File
+  val searchData = path.endsWith(s"${File.separator}searchData.js")
+  if (searchData || path.endsWith(".html")) {
     val apiLinkPrefix = """"https:\/\/javadoc\.io\/page\/org\.automorph\/[^\/]+\/[^\/]+\/"""
-    val pathComponents = path.split(java.io.File.separator).toSeq.init
-    val patterns = pathComponents.foldLeft(Seq("")) { case (paths, packageName) =>
+    val patterns = path.split(File.separator).toSeq.init.foldLeft(Seq("")) { case (paths, packageName) =>
       paths :+ s"${paths.last}$packageName/"
     }.reverse
-    val replacements = Range(0, pathComponents.size).map("../" * _)
+    val replacements = if (searchData) Seq("", s"$apiUrl/") else Range(0, patterns.size).map("../" * _)
     patterns.zip(replacements).foldLeft(content) { case (text, (pattern, replacement)) =>
       text.replaceAll(s"$apiLinkPrefix$pattern", s""""$replacement""")
     }
