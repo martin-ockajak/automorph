@@ -316,11 +316,6 @@ site := {
   (docs / mdoc).toTask("").value
   Process(Seq("yarn", "install"), (docs / baseDirectory).value).!
   Process(Seq("yarn", "build"), (docs / baseDirectory).value, "SITE_DOCS" -> "docs").!
-  IO.copyDirectory(
-    (examples / baseDirectory).value / "project",
-    (docs / baseDirectory).value / "build/examples/project",
-    overwrite = true,
-  )
   val apiDirectory = (docs / baseDirectory).value / "build/api"
   Path.allSubpaths((monix / Compile / doc / target).value).filter(_._1.isFile).foreach { case (file, path) =>
     IO.write(apiDirectory / path, relativizeScaladocLinks(IO.read(file), path))
@@ -328,6 +323,8 @@ site := {
   Path.allSubpaths((docs / Compile / doc / target).value).filter(_._1.isFile).foreach { case (file, path) =>
     IO.write(apiDirectory / path, relativizeScaladocLinks(IO.read(file), path))
   }
+  val examplesDirectory = (docs / baseDirectory).value / "build/examples/project"
+  IO.copyDirectory((examples / baseDirectory).value / "project", examplesDirectory, overwrite = true)
 }
 
 // Serve
