@@ -641,8 +641,8 @@ implicit lazy val enumDecoder: Decoder[State] = Decoder.decodeInt.map(Map(
 ```scala
 // Create server API instance
 class ServerApi {
-  def hello(some: String, n: Int, record: Record): Future[Record] =
-    Future(record.copy(value = s"Hello $some $n!"))
+  def hello(some: String, record: Record): Future[Record] =
+    Future(record.copy(value = s"Hello $some!"))
 }
 val api = new ServerApi()
 
@@ -656,7 +656,7 @@ lazy val server = serverBuilder(_.bind(api))
 ```scala
 // Define client view of the remote API
 trait ClientApi {
-  def hello(some: String, n: Int, record: Record): Future[Record]
+  def hello(some: String, record: Record): Future[Record]
 }
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
@@ -665,7 +665,7 @@ val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 // Call the remote API function via proxy
 lazy val remoteApi = client.bind[ClientApi]
 println(Await.result(
-  remoteApi.hello("world", 1, Record("test", State.On)),
+  remoteApi.hello("world", Record("test", State.On)),
   Duration.Inf
 ))
 ```

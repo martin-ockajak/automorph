@@ -1,12 +1,7 @@
 package examples
 
-import examples.basic.{
-  ApiSchemaDiscovery, AsynchronousCall, Authentication, HttpRequestMetadata, OneWayMessage, OptionalParameters,
-  SynchronousCall,
-}
-import examples.customize.{
-  ArgumentsByPosition, ClientExceptions, ClientFunctionNames, ServerFunctionNames, ServerProtocolErrors,
-}
+import examples.basic.{ApiSchemaDiscovery, AsynchronousCall, Authentication, HttpRequestMetadata, OneWayMessage, OptionalParameters, SynchronousCall}
+import examples.customize.{ArgumentsByPosition, ClientExceptions, ClientFunctionNames, CustomDataSerialization, ServerFunctionNames, ServerProtocolErrors}
 import examples.select.EffectSystem
 import org.scalatest.freespec.AnyFreeSpecLike
 
