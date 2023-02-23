@@ -196,7 +196,7 @@ private[automorph] object HandlerGenerator:
     method: ref.RefMethod,
     api: Expr[Api]
   ): Expr[(Seq[Any], Context) => Any] =
-    import ref.q.reflect.{Term, Printer, TypeRepr, asTerm}
+    import ref.q.reflect.{Term, TypeRepr, asTerm}
     given Quotes = ref.q
 
     // Map multiple parameter lists to flat argument node list offsets
@@ -210,8 +210,7 @@ private[automorph] object HandlerGenerator:
     val resultType = MethodReflection.unwrapType[Effect](ref.q)(method.resultType).dealias
     resultType.asType match
       case '[resultValueType] =>
-        '{ (arguments, requestContext) => {
-          println(s"GENERATED CODE CALLED: $arguments - $requestContext")
+        '{ (arguments, requestContext) =>
           ${
             // Create the method argument lists by type coercing supplied arguments
             // List(List(
@@ -231,17 +230,14 @@ private[automorph] object HandlerGenerator:
                     }.asTerm
               }
             ).asInstanceOf[List[List[Term]]]
-            println(s"MACRO ARGUMENTS:\n  $apiMethodArguments")
 
             // Call the API method and type coerce the result
             //   api.method(arguments*).asInstanceOf[Any]: Any
             // FIXME - coerce the result to a generic effect type
             //  .asInstanceOf[Effect[Any]]
-            val call = ref.q.reflect.Select.unique(api.asTerm, method.name).appliedToTypes(List.empty).appliedToArgss(
+            ref.q.reflect.Select.unique(api.asTerm, method.name).appliedToTypes(List.empty).appliedToArgss(
               apiMethodArguments.asInstanceOf[List[List[ref.q.reflect.Term]]]
-            )
-            println(s"MACRO CALL:\n  ${call.show(using Printer.TreeStructure)}")
-            call.asExprOf[Effect[resultValueType]]
+            ).asExprOf[Effect[resultValueType]]
 //            MethodReflection.call(
 //              ref.q,
 //              api.asTerm,
@@ -250,7 +246,6 @@ private[automorph] object HandlerGenerator:
 //              apiMethodArguments
 //            ).asExprOf[Effect[resultValueType]]
           }
-        }
         }
 
   private def logMethod[Api: Type](ref: ClassReflection)(method: ref.RefMethod): Unit =

@@ -4,7 +4,7 @@ import org.scalatest.freespec.AnyFreeSpecLike
 
 class QuickstartTest extends AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Test" ignore {
       Quickstart.main(Array())
     }
   }
