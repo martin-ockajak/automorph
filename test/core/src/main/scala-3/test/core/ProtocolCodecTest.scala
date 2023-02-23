@@ -36,6 +36,12 @@ trait ProtocolCodecTest extends CoreTest {
   override def fixtures: Seq[TestFixture] =
     testFixtures
 
+  @nowarn("msg=used")
+  def clientTransport(
+    handler: Types.HandlerAnyCodec[Effect, Context]
+  ): Option[ClientMessageTransport[Effect, Context]] =
+    None
+
   private def circeJsonFixture()(implicit context: Context): TestFixture = {
     implicit val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
     implicit val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
@@ -109,12 +115,6 @@ trait ProtocolCodecTest extends CoreTest {
       (function, a0) => client.message(function).args(a0),
     )
   }
-
-  @nowarn("msg=used")
-  def clientTransport(
-    handler: Types.HandlerAnyCodec[Effect, Context]
-  ): Option[ClientMessageTransport[Effect, Context]] =
-    None
 
   private def uPickleMessagePackFixture()(implicit context: Context): TestFixture = {
     class Custom extends UpickleMessagePackCustom {
