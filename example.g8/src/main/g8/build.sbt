@@ -1,9 +1,9 @@
 scalaVersion := "3.2.2"
-name := "automorph-example"
-organization := "test"
-version := "0.0.1"
+name := "automorph"
+organization := "example"
+version := "0.0.0"
 
-val automorphVersion = "0.0.1-SNAPSHOT"
+val automorphVersion = "0.0.0"
 libraryDependencies ++= Seq(
   // Default
   "org.automorph" %% "automorph-default" % automorphVersion,

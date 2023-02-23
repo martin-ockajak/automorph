@@ -98,7 +98,7 @@ println(Await.result(
 client.close()
 ```
 
-## [Project](https://github.com/martin-ockajak/automorph/examples/project)
+## [Example Project](https://github.com/martin-ockajak/automorph/examples/project)
 
 ### Download
 
@@ -111,24 +111,14 @@ cd automorph/examples/project
 
 ### Try
 
-Run the application:
+Run any of the examples:
 
 ```shell
 sbt run
 ```
 
-### Customize
+### Adjust
 
-Make changes:
-
-```shell
-edit src/main/scala/examples/Quickstart.scala
-```
-
-### Explore
-
-See additional examples:
-```shell
-ls src/test/*/*/*
-```
+- Remove unused examples in `examples/project/src/main/scala`
+- Remove unused dependencies in `examples/project/build.sbt`
 
