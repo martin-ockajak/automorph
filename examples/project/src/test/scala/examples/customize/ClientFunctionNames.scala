@@ -54,7 +54,7 @@ object ClientFunctionNames {
 
 class ClientFunctionNames extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Example" in {
       ClientFunctionNames.main(Array())
     }
   }

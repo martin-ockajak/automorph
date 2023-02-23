@@ -77,7 +77,7 @@ object Authentication {
 
 class Authentication extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Example" in {
       Authentication.main(Array())
     }
   }

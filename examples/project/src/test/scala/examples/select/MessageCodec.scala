@@ -67,7 +67,7 @@ object MessageCodec {
 
 class MessageCodec extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Example" ignore {
       MessageCodec.main(Array())
     }
   }

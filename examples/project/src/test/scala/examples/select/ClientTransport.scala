@@ -45,7 +45,7 @@ object ClientTransport {
 
 class ClientTransport extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Example" ignore {
       ClientTransport.main(Array())
     }
   }

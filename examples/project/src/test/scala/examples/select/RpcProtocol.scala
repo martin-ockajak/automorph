@@ -54,7 +54,7 @@ object RpcProtocol {
 
 class RpcProtocol extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Example" ignore {
       RpcProtocol.main(Array())
     }
   }

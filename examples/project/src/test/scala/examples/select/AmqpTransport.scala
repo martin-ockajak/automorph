@@ -50,7 +50,7 @@ object AmqpTransport {
 
 class AmqpTransport extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Example" ignore {
       AmqpTransport.main(Array())
     }
   }

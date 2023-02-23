@@ -48,7 +48,7 @@ object ApiSchemaDiscovery {
 
 class ApiSchemaDiscovery extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Example" in {
       ApiSchemaDiscovery.main(Array())
     }
   }

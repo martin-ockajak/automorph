@@ -38,7 +38,7 @@ object HttpRequestMetadata {
     implicit val httpRequest: ClientContext = client.defaultContext
       .parameters("test" -> "value")
       .headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
-      .cookies("Test" -> "value")
+      .cookies("Example" -> "value")
       .authorizationBearer("value")
 
     // Call the remote API function statically with implicitly given HTTP request metadata
@@ -72,7 +72,7 @@ object HttpRequestMetadata {
 
 class HttpRequestMetadata extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Example" ignore {
       HttpRequestMetadata.main(Array())
     }
   }

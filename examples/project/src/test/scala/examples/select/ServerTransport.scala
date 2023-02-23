@@ -43,7 +43,7 @@ object ServerTransport {
 
 class ServerTransport extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Example" ignore {
       ServerTransport.main(Array())
     }
   }

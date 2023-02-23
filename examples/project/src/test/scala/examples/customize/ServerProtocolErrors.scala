@@ -65,7 +65,7 @@ object ServerProtocolErrors {
 
 class ServerProtocolErrors extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Example" in {
       ServerProtocolErrors.main(Array())
     }
   }

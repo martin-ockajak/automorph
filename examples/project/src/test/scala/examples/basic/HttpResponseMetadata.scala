@@ -54,7 +54,7 @@ object HttpResponseMetadata {
 
 class HttpResponseMetadata extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Example" in {
       HttpResponseMetadata.main(Array())
     }
   }

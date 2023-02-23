@@ -52,7 +52,7 @@ object HttpResponseStatus {
 
 class HttpResponseStatus extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Example" in {
       HttpResponseStatus.main(Array())
     }
   }

@@ -46,7 +46,7 @@ object AsynchronousCall {
 
 class AsynchronousCall extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Example" in {
       AsynchronousCall.main(Array())
     }
   }

@@ -52,7 +52,7 @@ object EndpointTransport {
 
 class EndpointTransport extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Example" ignore {
       EndpointTransport.main(Array())
     }
   }

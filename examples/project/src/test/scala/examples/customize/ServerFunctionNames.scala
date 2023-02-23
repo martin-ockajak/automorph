@@ -73,7 +73,7 @@ object ServerFunctionNames {
 
 class ServerFunctionNames extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" in {
+    "Example" in {
       ServerFunctionNames.main(Array())
     }
   }

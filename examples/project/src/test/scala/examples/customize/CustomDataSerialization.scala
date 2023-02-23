@@ -68,7 +68,7 @@ object CustomDataSerialization {
 
 class CustomDataSerialization extends org.scalatest.freespec.AnyFreeSpecLike {
   "" - {
-    "Test" ignore {
+    "Example" ignore {
       CustomDataSerialization.main(Array())
     }
   }
