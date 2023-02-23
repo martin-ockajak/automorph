@@ -197,13 +197,11 @@ lazy val default = project.dependsOn(jsonrpc, circe, standard, undertow, testSta
 lazy val examples = source(project, "examples", default, upickle, zio, sttp, rabbitmq, testPlugin % Test).settings(
   libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
   libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test,
-  Compile / scalaSource := baseDirectory.value / "project/src/main/scala",
-  Test / scalaSource :=
-    (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((3, _)) => baseDirectory.value / "project/src/test/scala"
-      case _ => baseDirectory.value / "project/src/test/scala-2"
-    }),
-  Test / parallelExecution := false
+  Compile / scalaSource := (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((3, _)) => baseDirectory.value / "project/src/main/scala"
+    case _ => baseDirectory.value / "project/src/main/scala-2"
+  }),
+  Test / scalaSource := baseDirectory.value / "project/src/test/scala"
 )
 
 
