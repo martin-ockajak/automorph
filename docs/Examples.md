@@ -780,9 +780,9 @@ class ServerApi {
   def hello(some: String, n: Int): String =
     s"Hello $some $n!"
 
-  // Exposed as 'test.welcome'
-  def welcome(who: Boolean): String =
-    s"Welcome $who"
+  // Exposed as 'test.sum'
+  def sum(numbers: List[Double]): Double =
+    numbers.sum
 
   // Not exposed
   def hidden(): String =
@@ -818,8 +818,8 @@ println(
 )
 
 // Call the remote API function dynamically
-print(
-  client.call[Double]("test.welcome").args("who" -> "all")
+println(
+  client.call[Double]("test.sum").args("numbers" -> List(1, 2, 3))
 )
 
 // Call the remote API function dynamically and fail with FunctionNotFoundException
