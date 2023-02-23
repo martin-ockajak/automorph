@@ -36,7 +36,7 @@ object Quickstart extends App {
 
   // Call the remote API function dynamically
   println(Await.result(
-    client.call[String]("hello").args("what" -> "world", "n" -> 1),
+    client.call[String]("hello").args("some" -> "world", "n" -> 1),
     Duration.Inf
   ))
 

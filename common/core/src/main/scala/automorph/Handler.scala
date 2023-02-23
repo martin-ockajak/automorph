@@ -48,6 +48,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
     ListMap[String, HandlerBinding[Node, Effect, Context]](),
 ) extends HandlerMeta[Node, Codec, Effect, Context] with Logging {
+
   /** Bound remote functions. */
   lazy val functions: Seq[RpcFunction] = bindings.map { case (name, binding) => binding.function.copy(name = name) }
     .toSeq
@@ -93,27 +94,6 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     )
 
   /**
-   * Creates a copy of this handler with specified global bound API method name mapping function.
-   *
-   * Bound API methods are exposed using their transformed via the `mapName` function. The `mapName` function is applied
-   * globally to the results to all bound APIs and their specific name mapping provided by the 'bind' method.
-   *
-   * @param mapName
-   *   maps API method name to the exposed remote function name (empty result causes the method not to be exposed)
-   * @return
-   *   RPC request handler with specified global API method name mapping
-   */
-  def mapName(mapName: String => Iterable[String]): Handler[Node, Codec, Effect, Context] =
-    copy(mapName = mapName)
-
-  override def toString: String = {
-    val plugins = Map[String, Any]("system" -> system, "protocol" -> protocol).map { case (name, plugin) =>
-      s"$name = ${plugin.getClass.getName}"
-    }.mkString(", ")
-    s"${this.getClass.getName}($plugins)"
-  }
-
-  /**
    * Calls bound remote function specified in a request and creates a response.
    *
    * Optional request context is used as a last remote function argument.
@@ -141,12 +121,27 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         // Decode bound function arguments
         decodeArguments(argumentNodes, binding)
       }.map { arguments =>
+        println(arguments)
+        println("CALLING THE API")
         // Call bound function
-        binding.call(arguments, context)
+        try {
+          val result = binding.call(arguments, context)
+          println(s"API CALLED: $result")
+          result
+        } catch {
+          case e: Throwable =>
+            logger.error("ERROR", e)
+            e.printStackTrace()
+            throw e
+        }
       }.pureFold(
-        error => errorResponse(error, rpcRequest.message, responseRequired, requestProperties),
+        error => {
+          println("X4")
+          errorResponse(error, rpcRequest.message, responseRequired, requestProperties)
+        },
         result => {
           // Encode bound function result
+          println("X3")
           val contextualResultNode = result.asInstanceOf[Effect[Any]].map { resultValue =>
             encodeResult(resultValue, binding)
           }
@@ -332,6 +327,27 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         system.successful(HandlerResult(Some(responseBody), result.failed.toOption, result.toOption.flatMap(_._2)))
       },
     )
+
+  /**
+   * Creates a copy of this handler with specified global bound API method name mapping function.
+   *
+   * Bound API methods are exposed using their transformed via the `mapName` function. The `mapName` function is applied
+   * globally to the results to all bound APIs and their specific name mapping provided by the 'bind' method.
+   *
+   * @param mapName
+   *   maps API method name to the exposed remote function name (empty result causes the method not to be exposed)
+   * @return
+   *   RPC request handler with specified global API method name mapping
+   */
+  def mapName(mapName: String => Iterable[String]): Handler[Node, Codec, Effect, Context] =
+    copy(mapName = mapName)
+
+  override def toString: String = {
+    val plugins = Map[String, Any]("system" -> system, "protocol" -> protocol).map { case (name, plugin) =>
+      s"$name = ${plugin.getClass.getName}"
+    }.mkString(", ")
+    s"${this.getClass.getName}($plugins)"
+  }
 
   private def schemaBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
     ListMap(protocol.apiSchemas.map { apiSchema =>
