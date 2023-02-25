@@ -68,11 +68,11 @@ final case class HttpClient[Effect[_]](
 
   override def call(
     requestBody: InputStream,
-    requestContext: Option[Context],
+    requestContext: Context,
     requestId: String,
     mediaType: String,
   ): Effect[(InputStream, Context)] =
-    // Send the request
+  // Send the request
     createRequest(requestBody, mediaType, requestContext).flatMap { case (request, requestUrl) =>
       val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
       send(request, requestUrl, requestId, protocol).either.flatMap { result =>
@@ -93,14 +93,9 @@ final case class HttpClient[Effect[_]](
       }
     }
 
-  private def getResponseContext(response: Response): Context = {
-    val (_, statusCode, headers) = response
-    statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers*)
-  }
-
   override def message(
     requestBody: InputStream,
-    requestContext: Option[Context],
+    requestContext: Context,
     requestId: String,
     mediaType: String,
   ): Effect[Unit] =
@@ -108,6 +103,17 @@ final case class HttpClient[Effect[_]](
       val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
       send(request, requestUrl, requestId, protocol).map(_ => ())
     }
+
+  override def defaultContext: Context =
+    Session.defaultContext.url(url).method(method)
+
+  override def close(): Effect[Unit] =
+    system.evaluate(())
+
+  private def getResponseContext(response: Response): Context = {
+    val (_, statusCode, headers) = response
+    statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers*)
+  }
 
   private def send(
     request: Either[HttpRequest, (Effect[WebSocket], Effect[Response], InputStream)],
@@ -177,9 +183,9 @@ final case class HttpClient[Effect[_]](
       case completableSystem: CompletableEffectSystem[?] =>
         function(completableSystem.asInstanceOf[CompletableEffectSystem[Effect]])
       case _ => system.failed(new IllegalArgumentException(
-          s"""WebSocket protocol not available for effect system
-            | not supporting completable effects: ${system.getClass.getName}""".stripMargin
-        ))
+        s"""WebSocket protocol not available for effect system
+           | not supporting completable effects: ${system.getClass.getName}""".stripMargin
+      ))
     }
 
   private def effect[T](
@@ -205,11 +211,10 @@ final case class HttpClient[Effect[_]](
   private def createRequest(
     requestBody: InputStream,
     mediaType: String,
-    requestContext: Option[Context],
+    requestContext: Context,
   ): Effect[(Either[HttpRequest, (Effect[WebSocket], Effect[Response], InputStream)], URI)] = {
-    val httpContext = requestContext.getOrElse(defaultContext)
-    val requestUrl = httpContext.overrideUrl {
-      httpContext.transport.flatMap(transport => Try(transport.request.build).toOption).map(_.uri).getOrElse(url)
+    val requestUrl = requestContext.overrideUrl {
+       requestContext.transport.flatMap(transport => Try(transport.request.build).toOption).map(_.uri).getOrElse(url)
     }
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
@@ -218,7 +223,7 @@ final case class HttpClient[Effect[_]](
           system.evaluate {
             val completableResponse = completableSystem.completable[Response]
             val response = completableResponse.flatMap(_.effect)
-            val webSocketBuilder = createWebSocketBuilder(httpContext)
+            val webSocketBuilder = createWebSocketBuilder( requestContext)
             val webSocket = connectWebSocket(webSocketBuilder, requestUrl, completableResponse, completableSystem)
             Right((webSocket, response, requestBody)) -> requestUrl
           }
@@ -226,14 +231,11 @@ final case class HttpClient[Effect[_]](
       case _ =>
         // Create HTTP request
         system.evaluate {
-          val httpRequest = createHttpRequest(requestBody, requestUrl, mediaType, httpContext)
+          val httpRequest = createHttpRequest(requestBody, requestUrl, mediaType,  requestContext)
           Left(httpRequest) -> httpRequest.uri
         }
     }
   }
-
-  override def defaultContext: Context =
-    Session.defaultContext
 
   private def createHttpRequest(
     requestBody: InputStream,
@@ -312,9 +314,6 @@ final case class HttpClient[Effect[_]](
     // Timeout
     httpClient.connectTimeout.toScala.map(headersBuilder.connectTimeout).getOrElse(headersBuilder)
   }
-
-  override def close(): Effect[Unit] =
-    system.evaluate(())
 }
 
 object HttpClient {

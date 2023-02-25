@@ -8,7 +8,7 @@ trait ClientServerTest extends ProtocolCodecTest {
 
   def system: EffectSystem[Effect]
 
-  lazy val servers: ArrayBuffer[ServerMessageTransport[Effect]] = ArrayBuffer.empty
+  lazy val servers: ArrayBuffer[ServerMessageTransport[Effect, Context]] = ArrayBuffer.empty
 
   lazy val clients: ArrayBuffer[ClientMessageTransport[Effect, Context]] = ArrayBuffer.empty
 

@@ -56,7 +56,7 @@ final case class NanoServer[Effect[_]] private (
   webSocket: Boolean,
   mapException: Throwable => Int,
   executeEffect: Execute[Effect],
-) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect] {
+) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect, Context] {
 
   private val headerXForwardedFor = "X-Forwarded-For"
   private val log = MessageLog(logger, Protocol.Http.name)
@@ -253,7 +253,7 @@ object NanoServer {
   type Execute[Effect[_]] = Effect[Response] => Response
 
   /**
-   * Creates a NanoHTTPD HTTP & WebSocket server with the specified RPC request handler.
+   * Creates and starts a NanoHTTPD HTTP & WebSocket server with the specified RPC request handler.
    *
    * Resulting function requires:
    *   - effect execution function - executes specified effect synchronously

@@ -9,7 +9,7 @@ import test.core.ClientServerTest
 
 trait StandardHttpServerTest extends ClientServerTest {
 
-  def serverTransport(handler: Types.HandlerAnyCodec[Effect, Context], port: Int): ServerMessageTransport[Effect]
+  def serverTransport(handler: Types.HandlerAnyCodec[Effect, Context], port: Int): ServerMessageTransport[Effect, Context]
 
   override def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]

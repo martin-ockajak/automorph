@@ -20,7 +20,6 @@ private[automorph] object ResponseError {
 
   def apply(error: MessageError): ResponseError = {
     val message = mandatory(error.message, "message")
-    val code = mandatory(error.code, "code")
-    new ResponseError(message, Some(code))
+    new ResponseError(message, error.code)
   }
 }

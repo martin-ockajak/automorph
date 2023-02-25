@@ -31,7 +31,7 @@ import scala.concurrent.Await
  * @see
  *   [[https://doc.akka.io/api/akka-http/current/akka/http/ API]]
  * @constructor
- *   Creates an Akka HTTP server with specified RPC request handler.
+ *   Creates and starts an Akka HTTP server with specified RPC request handler.
  * @param handler
  *   RPC request handler
  * @param port
@@ -57,7 +57,7 @@ final case class AkkaServer[Effect[_]](
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
   serverSettings: ServerSettings = AkkaServer.defaultServerSettings,
-) extends Logging with ServerMessageTransport[Effect] {
+) extends Logging with ServerMessageTransport[Effect, Context] {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.system

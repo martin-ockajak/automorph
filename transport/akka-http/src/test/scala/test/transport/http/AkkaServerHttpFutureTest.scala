@@ -27,6 +27,6 @@ class AkkaServerHttpFutureTest extends StandardHttpServerTest {
   override def serverTransport(
     handler: Types.HandlerAnyCodec[Effect, Context],
     port: Int,
-  ): ServerMessageTransport[Effect] =
+  ): ServerMessageTransport[Effect, Context] =
     AkkaServer(handler, port)
 }

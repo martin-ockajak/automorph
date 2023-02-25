@@ -29,6 +29,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
   /** Web-RPC message metadata. */
   type Metadata = Unit
 
+  private val functionSeparator = "^/+".r
   private lazy val errorSchema: Schema = Schema(
     Some(OpenApi.objectType),
     Some(OpenApi.errorTitle),
@@ -54,8 +55,9 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     function: String,
     arguments: Iterable[(String, Node)],
     responseRequired: Boolean,
+    requestContext: Context,
     requestId: String,
-  ): Try[RpcRequest[Node, Metadata]] = {
+  ): Try[RpcRequest[Node, Metadata, Context]] = {
     // Create request
     val request = arguments.toMap
     val requestProperties =
@@ -68,7 +70,9 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     }.map { messageBody =>
       val message = RpcMessage((), messageBody, requestProperties, messageText)
       val requestArguments = arguments.map(Right.apply[Node, (String, Node)]).toSeq
-      RpcRequest(message, function, requestArguments, responseRequired, requestId)
+      val requestPath = s"${requestContext.path.getOrElse("")}/$function"
+      val functionRequestContext = requestContext.path(requestPath).asInstanceOf[Context]
+      RpcRequest(message, function, requestArguments, responseRequired, requestId, functionRequestContext)
     }
   }
 
@@ -76,17 +80,17 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     requestBody: InputStream,
     requestContext: Context,
     requestId: String,
-  ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
-    assembleRequest(requestBody, requestContext).flatMap { request =>
+  ): Either[RpcError[Metadata], RpcRequest[Node, Metadata, Context]] =
+    retrieveRequest(requestBody, requestContext).flatMap { request =>
       // Validate request
       val messageText = () => Some(codec.text(encodeRequest(request)))
       val requestProperties = Map("Type" -> MessageType.Call.toString, "Arguments" -> request.size.toString)
       requestContext.path.map { path =>
         if (path.startsWith(pathPrefix) && path.length > pathPrefix.length) {
-          val function = path.substring(pathPrefix.length, path.length)
+          val function = functionSeparator.replaceFirstIn(path.substring(pathPrefix.length, path.length), "")
           val message = RpcMessage((), requestBody, requestProperties ++ Seq("Function" -> function), messageText)
           val requestArguments = request.map(Right.apply[Node, (String, Node)]).toSeq
-          Right(RpcRequest(message, function, requestArguments, responseRequired = true, requestId))
+          Right(RpcRequest(message, function, requestArguments, responseRequired = true, requestId, requestContext))
         } else {
           val message = RpcMessage((), requestBody, requestProperties, messageText)
           Left(RpcError(InvalidRequestException(s"Invalid URL path: $path"), message))
@@ -97,7 +101,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
       }
     }
 
-  private def assembleRequest(
+  private def retrieveRequest(
     requestBody: InputStream,
     requestContext: Context,
   ): Either[RpcError[Metadata], Request[Node]] =

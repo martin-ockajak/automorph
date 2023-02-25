@@ -57,7 +57,7 @@ final case class VertxServer[Effect[_]](
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   vertxOptions: VertxOptions = defaultVertxOptions,
   httpServerOptions: HttpServerOptions = defaultHttpServerOptions,
-) extends Logging with ServerMessageTransport[Effect] {
+) extends Logging with ServerMessageTransport[Effect, Context] {
 
   private lazy val httpServer = createServer()
   private val statusWebSocketApplication = 4000

@@ -36,6 +36,8 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
    *   named arguments
    * @param responseRequired
    *   true if the request mandates a response, false if there should be no response
+   * @param requestContext
+   * request context
    * @param requestId
    *   request correlation identifier
    * @return
@@ -45,8 +47,9 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
     functionName: String,
     arguments: Iterable[(String, Node)],
     responseRequired: Boolean,
+    requestContext: Context,
     requestId: String,
-  ): Try[RpcRequest[Node, Metadata]]
+  ): Try[RpcRequest[Node, Metadata, Context]]
 
   /**
    * Parses an RPC request.
@@ -64,7 +67,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
     requestBody: InputStream,
     requestContext: Context,
     requestId: String,
-  ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]]
+  ): Either[RpcError[Metadata], RpcRequest[Node, Metadata, Context]]
 
   /**
    * Creates an RPC response.

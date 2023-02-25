@@ -14,6 +14,22 @@ sidebar_position: 1
 * Strive for **smooth integration** with other **libraries** and existing **applications**
 
 
+## API
+
+* [Client](/api/automorph/Client.html) - call type-safe remote APIs (*bind & call*)
+* [Handler](/api/automorph/Handler.html) - generate remote call bindings for existing APIs (*bind & process*)
+* [Servers](/api/automorph/transport/index.html) - serve existing APIs remotely (*bind & serve*)
+
+
+## SPI
+
+
+## Limitations
+
+* Bound remote APIs methods cannot be [polymorphic](https://docs.scala-lang.org/tour/polymorphic-methods.html)
+* [Client](/api/automorph/Client.html) cannot be used from within [delayed initialization](https://scala-lang.org/api/3.x/scala/DelayedInit.html) mechanism (e.g. [App](https://scala-lang.org/api/3.x/scala/App.html) trait)
+
+
 ## Supported standards
 
 ### RPC protocols

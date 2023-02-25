@@ -29,11 +29,11 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
 
   override def call(
     requestBody: InputStream,
-    requestContext: Option[Context],
+    requestContext: Context,
     requestId: String,
     mediaType: String
   ): Effect[(InputStream, Context)] =
-    handler.processRequest(requestBody, requestContext.getOrElse(defaultContext), requestId)
+    handler.processRequest(requestBody, requestContext, requestId)
       .flatMap { result => result.responseBody.map { responseBody =>
           system.successful(responseBody -> result.context.getOrElse(defaultContext))
         }.getOrElse {
@@ -43,11 +43,11 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
 
   override def message(
     requestBody: InputStream,
-    requestContext: Option[Context],
+    requestContext: Context,
     requestId: String,
     mediaType: String
   ): Effect[Unit] =
-    handler.processRequest(requestBody, requestContext.getOrElse(defaultContext), requestId).map(_ => ())
+    handler.processRequest(requestBody, requestContext, requestId).map(_ => ())
 
   override def close(): Effect[Unit] =
     system.successful(())

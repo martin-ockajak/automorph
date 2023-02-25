@@ -99,7 +99,7 @@ object Default extends DefaultMeta {
   /**
    * Creates a standard JRE JSON-RPC over HTTP & WebSocket client with specified effect system plugin.
    *
-   * The client can be used to perform RPC calls and notifications.
+   * The client can be used to perform type-safe remote API calls or send one-way messages.
    *
    * @see
    *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -130,7 +130,7 @@ object Default extends DefaultMeta {
   /**
    * Creates a JSON-RPC client with specified message transport plugin.
    *
-   * The client can be used to perform RPC calls and notifications.
+   * The client can be used to perform type-safe remote API calls or send one-way messages.
    *
    * @param transport
    *   message transport protocol plugin
@@ -177,7 +177,7 @@ object Default extends DefaultMeta {
    * Creates a standard JRE JSON-RPC over HTTP & WebSocket client with default RPC protocol using 'Future' as an effect
    * type.
    *
-   * The client can be used to perform RPC calls and notifications.
+   * The client can be used to perform type-safe remote API calls or send one-way messages.
    *
    * @see
    *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -277,7 +277,7 @@ object Default extends DefaultMeta {
   /**
    * Creates a JSON-RPC request handler with specified effect system plugin while providing given message context type.
    *
-   * The handler can be used by a server to invoke bound API methods based on incoming requests.
+   * The handler can be used by a server to invoke bound API methods based on supplied RPC requests.
    *
    * @param system
    *   effect system plugin
@@ -292,7 +292,7 @@ object Default extends DefaultMeta {
   /**
    * Creates a JSON-RPC request handler using identity as an effect type while providing given message context type.
    *
-   * The handler can be used by a server to invoke bound API methods based on incoming requests.
+   * The handler can be used by a server to invoke bound API methods based on supplied RPC requests.
    *
    * @tparam Context
    *   message context type
@@ -305,7 +305,7 @@ object Default extends DefaultMeta {
   /**
    * Creates a JSON-RPC request handler using 'Future' as an effect type while providing given message context type.
    *
-   * The handler can be used by a server to invoke bound API methods based on incoming requests.
+   * The handler can be used by a server to invoke bound API methods based on supplied RPC requests.
    *
    * @param executionContext
    *   execution context
@@ -320,7 +320,7 @@ object Default extends DefaultMeta {
   /**
    * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
    *
-   * The server can be used to receive and reply to requests using specific message transport protocol and invoke bound
+   * The server can be used to serve remote API requests using specific message transport protocol and invoke bound
    * API methods to process them.
    *
    * @see
@@ -367,7 +367,7 @@ object Default extends DefaultMeta {
    * Resulting function requires:
    *   - API binding function - binds APIs to the underlying handler
    *
-   * The server can be used to receive and reply to requests using specific message transport protocol and invoke bound
+   * The server can be used to serve remote API requests using specific message transport protocol and invoke bound
    * API methods to process them.
    *
    * @see
@@ -417,7 +417,7 @@ object Default extends DefaultMeta {
    * Resulting function requires:
    *   - API binding function - binds APIs to the underlying handler
    *
-   * The server can be used to receive and reply to requests using specific message transport protocol while invoking
+   * The server can be used to serve remote API requests using specific message transport protocol while invoking
    * server to process them.
    *
    * @see
@@ -462,7 +462,7 @@ object Default extends DefaultMeta {
    * Resulting function requires:
    *   - API binding function - binds APIs to the underlying handler
    *
-   * The server can be used to receive and reply to requests using specific message transport protocol and invoke bound
+   * The server can be used to serve remote API requests using specific message transport protocol and invoke bound
    * API method to process them.
    *
    * @see

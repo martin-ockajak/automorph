@@ -32,7 +32,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see
  *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor
- *   Creates an Undertow HTTP & WebSocket server with specified RPC request handler.
+ *   Creates and starts an Undertow HTTP & WebSocket server with specified RPC request handler.
  * @param handler
  *   RPC request handler
  * @param port
@@ -58,7 +58,7 @@ final case class UndertowServer[Effect[_]](
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   builder: Undertow.Builder = defaultBuilder,
-) extends Logging with ServerMessageTransport[Effect] {
+) extends Logging with ServerMessageTransport[Effect, Context] {
 
   private lazy val undertow = createServer()
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]

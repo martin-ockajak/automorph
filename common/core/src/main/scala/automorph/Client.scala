@@ -21,11 +21,11 @@ import scala.util.Try
  * traits or dynamically by supplying the required type information on invocation.
  *
  * @constructor
- *   Creates a RPC client with specified protocol and transport plugins accepting corresponding message context type.
+ *   Creates a RPC client with specified protocol and transport plugins and supporting corresponding message context type.
  * @param protocol
  *   RPC protocol plugin
  * @param transport
- *   message transport plugin
+ *   client message transport plugin
  * @tparam Node
  *   message node type
  * @tparam Codec
@@ -42,15 +42,6 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
 
   protected val system: EffectSystem[Effect] = transport.system
   implicit private val givenSystem: EffectSystem[Effect] = transport.system
-
-  /**
-   * Creates a default request context.
-   *
-   * @return
-   *   request context
-   */
-  def defaultContext: Context =
-    transport.defaultContext
 
   /**
    * Creates an one-way remote API function message proxy.
@@ -86,7 +77,13 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   ): Effect[Unit] = {
     // Create request
     val requestId = Random.id
-    protocol.createRequest(function, arguments, responseRequired = false, requestId).pureFold(
+    protocol.createRequest(
+      function,
+      arguments,
+      responseRequired = false,
+      requestContext.getOrElse(defaultContext),
+      requestId,
+    ).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>
@@ -94,7 +91,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           lazy val requestProperties = rpcRequest.message.properties + (LogProperties.requestId -> requestId)
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${protocol.name} request", allProperties)
-          transport.message(request.message.body, requestContext, requestId, protocol.codec.mediaType)
+          transport.message(request.message.body, request.context, requestId, protocol.codec.mediaType)
         },
     )
   }
@@ -107,13 +104,6 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    */
   def close(): Effect[Unit] =
     transport.close()
-
-  override def toString: String = {
-    val plugins = Map[String, Any]("transport" -> transport, "protocol" -> protocol).map { case (name, plugin) =>
-      s"$name = ${plugin.getClass.getName}"
-    }.mkString(", ")
-    s"${this.getClass.getName}($plugins)"
-  }
 
   /**
    * Calls a remote API function using specified arguments.
@@ -141,7 +131,13 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   ): Effect[Result] = {
     // Create request
     val requestId = Random.id
-    protocol.createRequest(function, arguments, responseRequired = true, requestId).pureFold(
+    protocol.createRequest(
+      function,
+      arguments,
+      responseRequired = true,
+      requestContext.getOrElse(defaultContext),
+      requestId,
+    ).pureFold(
       error => system.failed(error),
       // Send request
       rpcRequest =>
@@ -149,7 +145,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++ rpcRequest.message.properties
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${protocol.name} request", allProperties)
-          transport.call(request.message.body, requestContext, requestId, protocol.codec.mediaType).flatMap {
+          transport.call(request.message.body, request.context, requestId, protocol.codec.mediaType).flatMap {
             case (responseBody, responseContext) =>
               // Process response
               processResponse[Result](responseBody, responseContext, requestProperties, decodeResult)
@@ -157,6 +153,15 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         },
     )
   }
+
+  /**
+   * Creates a default request context.
+   *
+   * @return
+   *   request context
+   */
+  def defaultContext: Context =
+    transport.defaultContext
 
   /**
    * Processes an remote function call response.
@@ -218,6 +223,13 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   private def raiseError[T](error: Throwable, properties: Map[String, String]): Effect[T] = {
     logger.error(s"Failed to perform ${protocol.name} request", error, properties)
     system.failed(error)
+  }
+
+  override def toString: String = {
+    val plugins = Map[String, Any]("transport" -> transport, "protocol" -> protocol).map { case (name, plugin) =>
+      s"$name = ${plugin.getClass.getName}"
+    }.mkString(", ")
+    s"${this.getClass.getName}($plugins)"
   }
 }
 

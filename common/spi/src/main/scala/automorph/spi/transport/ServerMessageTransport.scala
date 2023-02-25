@@ -9,8 +9,10 @@ import automorph.spi.MessageTransport
  *
  * @tparam Effect
  *   effect type
+ * @tparam Context
+ *   message context type
  */
-trait ServerMessageTransport[Effect[_]] extends MessageTransport {
+trait ServerMessageTransport[Effect[_], Context] extends MessageTransport {
 
   /**
    * Closes this server transport freeing the underlying resources.

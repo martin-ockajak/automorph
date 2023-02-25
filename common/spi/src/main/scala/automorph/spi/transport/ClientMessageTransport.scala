@@ -36,7 +36,7 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
    */
   def call(
     requestBody: InputStream,
-    requestContext: Option[Context],
+    requestContext: Context,
     requestId: String,
     mediaType: String,
   ): Effect[(InputStream, Context)]
@@ -57,18 +57,13 @@ trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
    * @return
    *   nothing
    */
-  def message(
-    requestBody: InputStream,
-    requestContext: Option[Context],
-    requestId: String,
-    mediaType: String,
-  ): Effect[Unit]
+  def message(requestBody: InputStream, requestContext: Context, requestId: String, mediaType: String): Effect[Unit]
 
   /**
-   * Creates default request context.
+   * Creates default request context based on the configuration of this client transport.
    *
    * @return
-   *   request context
+   *   request context based on the configuration of this client transport
    */
   def defaultContext: Context
 

@@ -10,9 +10,7 @@ import java.io.InputStream
 import java.net.URI
 import scala.collection.immutable.ListMap
 import sttp.capabilities.WebSockets
-import sttp.client3.{
-  PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore,
-}
+import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
@@ -60,7 +58,7 @@ final case class SttpClient[Effect[_]] private (
 
   override def call(
     requestBody: InputStream,
-    requestContext: Option[Context],
+    requestContext: Context,
     requestId: String,
     mediaType: String,
   ): Effect[(InputStream, Context)] = {
@@ -84,6 +82,25 @@ final case class SttpClient[Effect[_]] private (
       }
     }
   }
+
+  override def message(
+    requestBody: InputStream,
+    requestContext: Context,
+    requestId: String,
+    mediaType: String,
+  ): Effect[Unit] = {
+    val sttpRequest = createRequest(requestBody, mediaType, requestContext)
+    transportProtocol(sttpRequest).flatMap {
+      case Protocol.Http => send(sttpRequest.response(ignore), requestId, Protocol.Http).map(_ => ())
+      case Protocol.WebSocket => send(sttpRequest, requestId, Protocol.WebSocket).map(_ => ())
+    }
+  }
+
+  override def defaultContext: Context =
+    Session.defaultContext.url(url).method(method)
+
+  override def close(): Effect[Unit] =
+    backend.close()
 
   private def send[R](
     sttpRequest: Request[R, WebSocket],
@@ -113,21 +130,20 @@ final case class SttpClient[Effect[_]] private (
   private def createRequest(
     requestBody: InputStream,
     mediaType: String,
-    requestContext: Option[Context],
+    requestContext: Context,
   ): Request[Array[Byte], WebSocket] = {
     // URL & method
-    val httpContext = requestContext.getOrElse(defaultContext)
-    val transportRequest = httpContext.transport.map(_.request).getOrElse(basicRequest)
-    val requestUrl = Uri(httpContext.overrideUrl(defaultUrl))
-    val requestMethod = Method.unsafeApply(httpContext.method.getOrElse(method).name)
+    val transportRequest = requestContext.transport.map(_.request).getOrElse(basicRequest)
+    val requestUrl = Uri(requestContext.overrideUrl(defaultUrl))
+    val requestMethod = Method.unsafeApply(requestContext.method.getOrElse(method).name)
 
     // Headers, timeout & follow redirects
     val contentType = MediaType.unsafeParse(mediaType)
-    val sttpRequest = transportRequest.method(requestMethod, requestUrl).headers(httpContext.headers.map {
+    val sttpRequest = transportRequest.method(requestMethod, requestUrl).headers(requestContext.headers.map {
       case (name, value) => Header(name, value)
     }*).contentType(contentType).header(Header.accept(contentType))
-      .readTimeout(httpContext.timeout.getOrElse(transportRequest.options.readTimeout))
-      .followRedirects(httpContext.followRedirects.getOrElse(transportRequest.options.followRedirects))
+      .readTimeout(requestContext.timeout.getOrElse(transportRequest.options.readTimeout))
+      .followRedirects(requestContext.followRedirects.getOrElse(transportRequest.options.followRedirects))
       .maxRedirects(transportRequest.options.maxRedirects)
 
     // Body & response type
@@ -149,9 +165,6 @@ final case class SttpClient[Effect[_]] private (
       header.name -> header.value
     }*)
 
-  override def defaultContext: Context =
-    Session.defaultContext
-
   private def transportProtocol(sttpRequest: Request[Array[Byte], WebSocket]): Effect[Protocol] =
     if (sttpRequest.isWebSocket) {
       if (webSocket) { system.successful(Protocol.WebSocket) }
@@ -163,22 +176,6 @@ final case class SttpClient[Effect[_]] private (
         )
       }
     } else system.successful(Protocol.Http)
-
-  override def message(
-    requestBody: InputStream,
-    requestContext: Option[Context],
-    requestId: String,
-    mediaType: String,
-  ): Effect[Unit] = {
-    val sttpRequest = createRequest(requestBody, mediaType, requestContext)
-    transportProtocol(sttpRequest).flatMap {
-      case Protocol.Http => send(sttpRequest.response(ignore), requestId, Protocol.Http).map(_ => ())
-      case Protocol.WebSocket => send(sttpRequest, requestId, Protocol.WebSocket).map(_ => ())
-    }
-  }
-
-  override def close(): Effect[Unit] =
-    backend.close()
 }
 
 object SttpClient {

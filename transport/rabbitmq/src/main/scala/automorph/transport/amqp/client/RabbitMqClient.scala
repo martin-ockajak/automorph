@@ -61,7 +61,7 @@ final case class RabbitMqClient[Effect[_]](
 
   override def call(
     requestBody: InputStream,
-    requestContext: Option[Context],
+    requestContext: Context,
     requestId: String,
     mediaType: String,
   ): Effect[Response] =
@@ -69,16 +69,30 @@ final case class RabbitMqClient[Effect[_]](
       send(requestBody, requestId, mediaType, requestContext, Some(response)).flatMap(_ => response.effect)
     }
 
+  override def message(
+    requestBody: InputStream,
+    requestContext: Context,
+    requestId: String,
+    mediaType: String,
+  ): Effect[Unit] =
+    send(requestBody, requestId, mediaType, requestContext, None)
+
+  override def defaultContext: Context =
+    RabbitMqContext.default
+
+  override def close(): Effect[Unit] =
+    system.evaluate(RabbitMqCommon.disconnect(connection))
+
   private def send(
     requestBody: InputStream,
     defaultRequestId: String,
     mediaType: String,
-    requestContext: Option[Context],
+    requestContext: Context,
     response: Option[Completable[Effect, Response]],
   ): Effect[Unit] = {
     // Log the request
     val amqpProperties = RabbitMqCommon.amqpProperties(
-      requestContext,
+      Some(requestContext),
       mediaType,
       directReplyToQueue,
       defaultRequestId,
@@ -101,20 +115,6 @@ final case class RabbitMqClient[Effect[_]](
       }.onFailure(error => log.failedSendRequest(error, requestProperties)).get
     }
   }
-
-  override def message(
-    requestBody: InputStream,
-    requestContext: Option[Context],
-    requestId: String,
-    mediaType: String,
-  ): Effect[Unit] =
-    send(requestBody, requestId, mediaType, requestContext, None)
-
-  override def defaultContext: Context =
-    RabbitMqContext.default
-
-  override def close(): Effect[Unit] =
-    system.evaluate(RabbitMqCommon.disconnect(connection))
 
   private def consumer(channel: Channel): DefaultConsumer = {
     val consumer = new DefaultConsumer(channel) {

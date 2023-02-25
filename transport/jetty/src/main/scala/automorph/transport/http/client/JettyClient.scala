@@ -66,7 +66,7 @@ final case class JettyClient[Effect[_]](
 
   override def call(
     requestBody: InputStream,
-    requestContext: Option[Context],
+    requestContext: Context,
     requestId: String,
     mediaType: String,
   ): Effect[(InputStream, Context)] =
@@ -89,6 +89,26 @@ final case class JettyClient[Effect[_]](
           },
         )
       }
+    }
+
+  override def message(
+    requestBody: InputStream,
+    requestContext: Context,
+    requestId: String,
+    mediaType: String,
+  ): Effect[Unit] =
+    createRequest(requestBody, mediaType, requestContext).flatMap { case (request, requestUrl) =>
+      val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
+      send(request, requestUrl, requestId, protocol).map(_ => ())
+    }
+
+  override def defaultContext: Context =
+    Session.defaultContext.url(url).method(method)
+
+  override def close(): Effect[Unit] =
+    system.evaluate {
+      webSocketClient.stop()
+      httpClient.stop()
     }
 
   private def send(
@@ -123,22 +143,22 @@ final case class JettyClient[Effect[_]](
         // Send WebSocket request
         {
           case (webSocketEffect, resultEffect, requestBody) => withCompletable(completableSystem =>
-              completableSystem.completable[Unit].flatMap { completableRequestSent =>
-                webSocketEffect.flatMap { webSocket =>
-                  webSocket.getRemote.sendBytes(
-                    requestBody.toByteBuffer,
-                    new WriteCallback {
-                      override def writeSuccess(): Unit =
-                        completableRequestSent.succeed(()).runAsync
+            completableSystem.completable[Unit].flatMap { completableRequestSent =>
+              webSocketEffect.flatMap { webSocket =>
+                webSocket.getRemote.sendBytes(
+                  requestBody.toByteBuffer,
+                  new WriteCallback {
+                    override def writeSuccess(): Unit =
+                      completableRequestSent.succeed(()).runAsync
 
-                      override def writeFailed(error: Throwable): Unit =
-                        completableRequestSent.fail(error).runAsync
-                    },
-                  )
-                  completableRequestSent.effect.flatMap(_ => resultEffect)
-                }
+                    override def writeFailed(error: Throwable): Unit =
+                      completableRequestSent.fail(error).runAsync
+                  },
+                )
+                completableRequestSent.effect.flatMap(_ => resultEffect)
               }
-            )
+            }
+          )
         },
       ),
     )
@@ -177,19 +197,18 @@ final case class JettyClient[Effect[_]](
       case completableSystem: CompletableEffectSystem[?] =>
         function(completableSystem.asInstanceOf[CompletableEffectSystem[Effect]])
       case _ => system.failed(new IllegalArgumentException(
-          s"""${Protocol.WebSocket} not available for effect system
-            | not supporting completable effects: ${system.getClass.getName}""".stripMargin
-        ))
+        s"""${Protocol.WebSocket} not available for effect system
+           | not supporting completable effects: ${system.getClass.getName}""".stripMargin
+      ))
     }
 
   private def createRequest(
     requestBody: InputStream,
     mediaType: String,
-    requestContext: Option[Context],
+    requestContext: Context,
   ): Effect[(Either[Request, (Effect[websocket.api.Session], Effect[Response], InputStream)], URI)] = {
-    val httpContext = requestContext.getOrElse(defaultContext)
-    val requestUrl = httpContext
-      .overrideUrl(httpContext.transport.map(transport => transport.request.getURI).getOrElse(url))
+    val requestUrl = requestContext
+      .overrideUrl(requestContext.transport.map(transport => transport.request.getURI).getOrElse(url))
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
@@ -197,7 +216,7 @@ final case class JettyClient[Effect[_]](
           system.evaluate {
             val completableResponse = completableSystem.completable[Response]
             val response = completableResponse.flatMap(_.effect)
-            val upgradeRequest = createWebSocketRequest(httpContext, requestUrl)
+            val upgradeRequest = createWebSocketRequest(requestContext, requestUrl)
             val webSocket = connectWebSocket(upgradeRequest, requestUrl, completableResponse, completableSystem)
             Right((webSocket, response, requestBody)) -> requestUrl
           }
@@ -205,7 +224,7 @@ final case class JettyClient[Effect[_]](
       case _ =>
         // Create HTTP request
         system.evaluate {
-          val httpRequest = createHttpRequest(requestBody, requestUrl, mediaType, httpContext)
+          val httpRequest = createHttpRequest(requestBody, requestUrl, mediaType, requestContext)
           Left(httpRequest) -> httpRequest.getURI
         }
     }
@@ -303,26 +322,6 @@ final case class JettyClient[Effect[_]](
     val (_, statusCode, headers) = response
     statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers*)
   }
-
-  override def defaultContext: Context =
-    Session.defaultContext
-
-  override def message(
-    requestBody: InputStream,
-    requestContext: Option[Context],
-    requestId: String,
-    mediaType: String,
-  ): Effect[Unit] =
-    createRequest(requestBody, mediaType, requestContext).flatMap { case (request, requestUrl) =>
-      val protocol = request.fold(_ => Protocol.Http, _ => Protocol.WebSocket)
-      send(request, requestUrl, requestId, protocol).map(_ => ())
-    }
-
-  override def close(): Effect[Unit] =
-    system.evaluate {
-      webSocketClient.stop()
-      httpClient.stop()
-    }
 }
 
 object JettyClient {

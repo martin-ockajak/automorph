@@ -128,7 +128,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    *   bound function call RPC response
    */
   private def callFunction(
-    rpcRequest: RpcRequest[Node, protocol.Metadata],
+    rpcRequest: RpcRequest[Node, protocol.Metadata, Context],
     context: Context,
     requestProperties: => Map[String, String],
   ): Effect[HandlerResult[Context]] = {
@@ -174,7 +174,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    *   bound function arguments
    */
   private def extractArguments(
-    rpcRequest: RpcRequest[Node, ?],
+    rpcRequest: RpcRequest[Node, ?, Context],
     binding: HandlerBinding[Node, Effect, Context],
   ): Try[Seq[Option[Node]]] = {
     // Adjust expected function parameters if it uses context as its last parameter
@@ -262,7 +262,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    */
   private def resultResponse(
     callResult: Effect[(Node, Option[Context])],
-    rpcRequest: RpcRequest[Node, protocol.Metadata],
+    rpcRequest: RpcRequest[Node, protocol.Metadata, Context],
     requestProperties: => Map[String, String],
   ): Effect[HandlerResult[Context]] =
     callResult.either.flatMap { result =>

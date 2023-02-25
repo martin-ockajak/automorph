@@ -25,6 +25,6 @@ class UndertowServerHttpFutureTest extends StandardHttpServerTest {
   override def serverTransport(
     handler: Types.HandlerAnyCodec[Effect, Context],
     port: Int,
-  ): ServerMessageTransport[Effect] =
+  ): ServerMessageTransport[Effect, Context] =
     UndertowServer(handler, port)
 }

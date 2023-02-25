@@ -53,8 +53,9 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     function: String,
     arguments: Iterable[(String, Node)],
     responseRequired: Boolean,
+    requestContext: Context,
     requestId: String,
-  ): Try[RpcRequest[Node, Metadata]] = {
+  ): Try[RpcRequest[Node, Metadata, Context]] = {
     // Create request
     require(requestId.nonEmpty, "Empty request identifier")
     val id = Option.when(responseRequired)(Right(requestId).withLeft[BigDecimal])
@@ -67,7 +68,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     }.map { messageBody =>
       val message = RpcMessage(id, messageBody, requestMessage.properties, messageText)
       val requestArguments = arguments.map(Right.apply[Node, (String, Node)]).toSeq
-      RpcRequest(message, function, requestArguments, responseRequired, requestId)
+      RpcRequest(message, function, requestArguments, responseRequired, requestId, requestContext)
     }
   }
 
@@ -76,7 +77,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     requestBody: InputStream,
     requestContext: Context,
     requestId: String,
-  ): Either[RpcError[Metadata], RpcRequest[Node, Metadata]] =
+  ): Either[RpcError[Metadata], RpcRequest[Node, Metadata, Context]] =
     // Deserialize request
     Try(decodeMessage(codec.deserialize(requestBody))).pureFold(
       error => Left(RpcError(ParseErrorException("Malformed request", error), RpcMessage(None, requestBody))),
@@ -89,7 +90,7 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
           request => {
             val requestArguments = request.params
               .fold(_.map(Left.apply[Node, (String, Node)]), _.map(Right.apply[Node, (String, Node)]).toSeq)
-            Right(RpcRequest(message, request.method, requestArguments, request.id.isDefined, requestId))
+            Right(RpcRequest(message, request.method, requestArguments, request.id.isDefined, requestId, requestContext))
           },
         )
       },
@@ -194,39 +195,6 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     mapOpenApi(OpenApi(functionSchemas))
   }
 
-  private def requestSchema(function: RpcFunction): Schema =
-    Schema(
-      Some(OpenApi.objectType),
-      Some(OpenApi.requestTitle),
-      Some(s"$name ${OpenApi.requestTitle}"),
-      Some(Map(
-        "jsonrpc" -> Schema(Some("string"), Some("jsonrpc"), Some("Protocol version (must be 2.0)")),
-        "function" -> Schema(Some("string"), Some("function"), Some("Invoked function name")),
-        "params" -> Schema(
-          Some(OpenApi.objectType),
-          Some(function.name),
-          Some(OpenApi.argumentsDescription),
-          Option(Schema.parameters(function)).filter(_.nonEmpty),
-          Option(Schema.requiredParameters(function).toList).filter(_.nonEmpty),
-        ),
-        "id" -> Schema(
-          Some("integer"),
-          Some("id"),
-          Some("Call identifier, a request without and identifier is considered to be a notification"),
-        ),
-      )),
-      Some(List("jsonrpc", "function", "params")),
-    )
-
-  private def resultSchema(function: RpcFunction): Schema =
-    Schema(
-      Some(OpenApi.objectType),
-      Some(OpenApi.resultTitle),
-      Some(s"$name ${OpenApi.resultTitle}"),
-      Some(Map(OpenApi.resultName -> Schema.result(function))),
-      Some(List(OpenApi.resultName)),
-    )
-
   /**
    * Creates a copy of this protocol with specified message contex type.
    *
@@ -294,4 +262,37 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
    */
   def mapOpenApi(mapOpenApi: OpenApi => OpenApi): JsonRpcProtocol[Node, Codec, Context] =
     copy(mapOpenApi = mapOpenApi)
+
+  private def requestSchema(function: RpcFunction): Schema =
+    Schema(
+      Some(OpenApi.objectType),
+      Some(OpenApi.requestTitle),
+      Some(s"$name ${OpenApi.requestTitle}"),
+      Some(Map(
+        "jsonrpc" -> Schema(Some("string"), Some("jsonrpc"), Some("Protocol version (must be 2.0)")),
+        "function" -> Schema(Some("string"), Some("function"), Some("Invoked function name")),
+        "params" -> Schema(
+          Some(OpenApi.objectType),
+          Some(function.name),
+          Some(OpenApi.argumentsDescription),
+          Option(Schema.parameters(function)).filter(_.nonEmpty),
+          Option(Schema.requiredParameters(function).toList).filter(_.nonEmpty),
+        ),
+        "id" -> Schema(
+          Some("integer"),
+          Some("id"),
+          Some("Call identifier, a request without and identifier is considered to be a notification"),
+        ),
+      )),
+      Some(List("jsonrpc", "function", "params")),
+    )
+
+  private def resultSchema(function: RpcFunction): Schema =
+    Schema(
+      Some(OpenApi.objectType),
+      Some(OpenApi.resultTitle),
+      Some(s"$name ${OpenApi.resultTitle}"),
+      Some(Map(OpenApi.resultName -> Schema.result(function))),
+      Some(List(OpenApi.resultName)),
+    )
 }

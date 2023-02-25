@@ -28,7 +28,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see
  *   [[https://www.javadoc.io/doc/io.jetty/jetty-core/latest/index.html API]]
  * @constructor
- *   Creates an Jetty HTTP server with specified RPC request handler.
+ *   Creates and starts a Jetty HTTP server with specified RPC request handler.
  * @param handler
  *   RPC request handler
  * @param port
@@ -52,7 +52,7 @@ final case class JettyServer[Effect[_]](
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   threadPool: ThreadPool = new QueuedThreadPool,
-) extends Logging with ServerMessageTransport[Effect] {
+) extends Logging with ServerMessageTransport[Effect, Context] {
 
   private lazy val jetty = createServer()
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]

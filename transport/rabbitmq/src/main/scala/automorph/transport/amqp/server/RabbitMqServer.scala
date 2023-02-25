@@ -23,7 +23,7 @@ import scala.jdk.CollectionConverters.MapHasAsJava
  *
  * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
  * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
- * @constructor Creates a RabbitMQ server message transport plugin.
+ * @constructor Creates and starts a RabbitMQ server message transport plugin.
  * @param handler RPC request handler
  * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
  * @param queues names of non-durable exclusive queues to consume messages from
@@ -37,7 +37,7 @@ final case class RabbitMqServer[Effect[_]](
   queues: Seq[String],
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
-) extends Logging with ServerMessageTransport[Effect] {
+) extends Logging with ServerMessageTransport[Effect, Context] {
 
   private val exchange = RabbitMqCommon.defaultDirectExchange
   private lazy val connection = connect()
@@ -96,17 +96,6 @@ final case class RabbitMqServer[Effect[_]](
     consumer
   }
 
-  private def sendError(
-    error: Throwable,
-    replyTo: String,
-    requestProperties: => Map[String, String],
-    requestId: String
-  ): Unit = {
-    log.failedProcessRequest(error, requestProperties)
-    val message = error.description.toInputStream.toArray
-    sendResponse(message, replyTo, None, requestProperties, requestId)
-  }
-
   private def sendResponse(
     message: Array[Byte],
     replyTo: String,
@@ -133,6 +122,17 @@ final case class RabbitMqServer[Effect[_]](
     }.onFailure { error =>
       log.failedSendResponse(error, responseProperties)
     }.get
+  }
+
+  private def sendError(
+    error: Throwable,
+    replyTo: String,
+    requestProperties: => Map[String, String],
+    requestId: String
+  ): Unit = {
+    log.failedProcessRequest(error, requestProperties)
+    val message = error.description.toInputStream.toArray
+    sendResponse(message, replyTo, None, requestProperties, requestId)
   }
 
   private def connect(): Connection = {

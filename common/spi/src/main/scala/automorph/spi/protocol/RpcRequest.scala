@@ -19,11 +19,14 @@ package automorph.spi.protocol
  *   message node type
  * @tparam Metadata
  *   protocol-specific message metadata type
+ * @tparam Context
+ * message context type
  */
-final case class RpcRequest[Node, Metadata](
+final case class RpcRequest[Node, Metadata, Context](
   message: RpcMessage[Metadata],
   function: String,
   arguments: Seq[Either[Node, (String, Node)]],
   responseRequired: Boolean,
   id: String,
+  context: Context,
 )
