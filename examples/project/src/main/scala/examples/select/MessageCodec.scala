@@ -36,7 +36,7 @@ private[examples] object MessageCodec {
     val system = Default.systemAsync
 
     // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-    val handler = Handler.protocol(serverProtocol).system(system).bind(api)
+    val handler = Handler.protocol(serverProtocol).system(system)
     val server = Default.server(handler.bind(api), 7000, "/api")
 
     // Define client view of the remote API
