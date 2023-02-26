@@ -24,24 +24,19 @@ private[examples] object AmqpTransport {
     }
     val api = new ServerApi()
 
-    // Start embedded RabbitMQ broker if needed
-    val noBroker = Try(new ServerSocket(5672)).fold(_ => false, socket => {
-      socket.close()
-      true
-    })
-    val embeddedBroker = Option.when(noBroker && Try(
-      Process("erl -eval 'halt()' -noshell").! == 0
-    ).getOrElse(false)) {
-      val config = new EmbeddedRabbitMqConfig.Builder()
-        .rabbitMqServerInitializationTimeoutInMillis(30000).build()
-      val broker = new EmbeddedRabbitMq(config)
-      broker.start()
-      broker -> config
+    // Start embedded RabbitMQ broker
+    if (Try(Process("erl -eval 'halt()' -noshell").! != 0).getOrElse(true)) {
+      throw new IllegalStateException("Erlang installation required")
     }
+    val brokerConfig = new EmbeddedRabbitMqConfig.Builder().port(7000)
+      .rabbitMqServerInitializationTimeoutInMillis(30000).build()
+    val broker = new EmbeddedRabbitMq(brokerConfig)
+    broker.start()
+    broker -> brokerConfig
 
     // Start RabbitMQ AMQP server consuming requests from the 'api' queue
     val handler = Default.handlerAsync[RabbitMqServer.Context]
-    val server = RabbitMqServer(handler.bind(api), new URI("amqp://localhost"), Seq("api"))
+    val server = RabbitMqServer(handler.bind(api), new URI("amqp://localhost:7000"), Seq("api"))
 
     // Define client view of the remote API
     trait ClientApi {
@@ -49,7 +44,7 @@ private[examples] object AmqpTransport {
     }
 
     // Create RabbitMQ AMQP client message transport publishing requests to the 'api' queue
-    val transport = RabbitMqClient(new URI("amqp://localhost"), "api", Default.systemAsync)
+    val transport = RabbitMqClient(new URI("amqp://localhost:7000"), "api", Default.systemAsync)
 
     // Setup JSON-RPC HTTP client
     val client = Default.client(transport)
@@ -68,10 +63,8 @@ private[examples] object AmqpTransport {
     Await.result(server.close(), Duration.Inf)
 
     // Stop embedded RabbitMQ broker
-    embeddedBroker.foreach { case (broker, config) =>
-      broker.stop()
-      val brokerDirectory = config.getExtractionFolder.toPath.resolve(config.getVersion.getExtractionFolder)
-      Files.walk(brokerDirectory).iterator().asScala.toSeq.reverse.foreach(_.toFile.delete())
-    }
+    broker.stop()
+    val brokerDirectory = brokerConfig.getExtractionFolder.toPath.resolve(brokerConfig.getVersion.getExtractionFolder)
+    Files.walk(brokerDirectory).iterator().asScala.toSeq.reverse.foreach(_.toFile.delete())
   }
 }
