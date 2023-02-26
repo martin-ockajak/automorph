@@ -203,8 +203,7 @@ lazy val examples = source(project, "examples", default, upickle, zio, sttp, rab
     "io.arivera.oss" % "embedded-rabbitmq" % embeddedRabbitMqVersion
   ),
   Compile / scalaSource :=  baseDirectory.value / "project/src/main/scala",
-  Test / scalaSource := baseDirectory.value / "project/src/test/scala",
-  Test / parallelExecution := false
+  Test / scalaSource := baseDirectory.value / "project/src/test/scala"
 )
 
 
