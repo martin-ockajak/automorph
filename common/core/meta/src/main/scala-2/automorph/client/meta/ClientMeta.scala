@@ -121,7 +121,7 @@ object ClientMeta {
 
       // Create API proxy instance
       java.lang.reflect.Proxy.newProxyInstance(
-        getClass.getClassLoader,
+        this.getClass.getClassLoader,
         Array(classOf[$apiType]),
         (_, method, arguments) =>
           // Lookup bindings for the specified method

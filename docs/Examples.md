@@ -1309,9 +1309,10 @@ import scala.concurrent.{Await, Future}
 case class Record(values: List[String])
 
 // Create uPickle message codec for JSON format
-val codec = UpickleMessagePackCodec()
+val codec = UpickleMessagePackCodec[UpickleMessagePackCustom]()
 
 // Provide custom data type serialization and deserialization logic
+import codec.custom.*
 implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW[Record]
 ```
 

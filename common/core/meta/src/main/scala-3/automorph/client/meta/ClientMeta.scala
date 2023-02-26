@@ -84,7 +84,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
     // Create API proxy instance
     val classTag = summonInline[ClassTag[Api]]
     Proxy.newProxyInstance(
-      getClass.getClassLoader,
+      this.getClass.getClassLoader,
       Array(classTag.runtimeClass),
       (_, method, arguments) =>
         // Lookup bindings for the specified method

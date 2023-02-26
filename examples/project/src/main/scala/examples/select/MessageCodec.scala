@@ -1,14 +1,15 @@
 package examples.select
 
-import automorph.codec.messagepack.UpickleMessagePackCodec
+import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import automorph.{Client, Default, Handler}
+
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 // Introduce custom data types
-case class Record(values: List[String])
+private[examples] case class Record(values: List[String])
 
 private[examples] object MessageCodec {
 
@@ -16,9 +17,10 @@ private[examples] object MessageCodec {
   def main(arguments: Array[String]): Unit = {
 
     // Create uPickle message codec for JSON format
-    val codec = UpickleMessagePackCodec()
+    val codec = UpickleMessagePackCodec[UpickleMessagePackCustom]()
 
     // Provide custom data type serialization and deserialization logic
+    import codec.custom.*
     implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW[Record]
 
     // Create server API instance
