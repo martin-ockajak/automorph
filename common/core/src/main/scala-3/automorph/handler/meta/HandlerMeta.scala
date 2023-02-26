@@ -78,11 +78,9 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    *   if invalid public methods are found in the API type
    */
   inline def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): ThisHandler =
-    val newBindings = apiBindings ++
-      HandlerGenerator.bindings[Node, Codec, Effect, Context, Api](protocol.codec, system, api).flatMap { binding =>
-        mapName(binding.function.name).map(_ -> binding)
-      }
-    copy(apiBindings = newBindings)
-
-  inline def brokenBind[Api <: AnyRef](api: Api): ThisHandler =
-    ???
+    val newApiBindings = HandlerGenerator.bindings[Node, Codec, Effect, Context, Api](
+      protocol.codec, system, api
+    ).flatMap { binding =>
+      mapName(binding.function.name).map(_ -> binding)
+    }
+    copy(apiBindings = apiBindings ++ newApiBindings)

@@ -80,42 +80,47 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    *   if invalid public methods are found in the API type
    */
   def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): ThisHandler =
-    macro HandlerMeta.bindMapNamesMacro[Node, Codec, Effect, Context, Api]
+    macro HandlerMeta.bindMapNameMacro[Node, Codec, Effect, Context, Api]
 }
 
 object HandlerMeta {
 
-  def bindMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
-    c: blackbox.Context
-  )(api: c.Expr[Api]): c.Expr[Handler[Node, Codec, Effect, Context]] = {
+  def bindMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](c: blackbox.Context)(
+    api: c.Expr[Api]
+  )(implicit
+    nodeType: c.WeakTypeTag[Node],
+    codecType: c.WeakTypeTag[Codec],
+    effectType: c.WeakTypeTag[Effect[?]],
+    contextType: c.WeakTypeTag[Context],
+    apiType: c.WeakTypeTag[Api],
+  ): c.Expr[Handler[Node, Codec, Effect, Context]] = {
     import c.universe.Quasiquote
 
-    c.Expr[Handler[Node, Codec, Effect, Context]](q"""
-      ${c.prefix}.bind($api, Seq(_))
+    val mapName = c.Expr[String => Seq[String]](q"""
+      (name: String) => Seq(name)
     """)
+    bindMapNameMacro[Node, Codec, Effect, Context, Api](c)(api, mapName)
   }
 
-  def bindMapNamesMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag, Effect[
-    _
-  ], Context: c.WeakTypeTag, Api <: AnyRef: c.WeakTypeTag](
-    c: blackbox.Context
-  )(api: c.Expr[Api], mapName: c.Expr[String => Iterable[String]])(implicit
-    effectType: c.WeakTypeTag[Effect[?]]
+  def bindMapNameMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](c: blackbox.Context)(
+    api: c.Expr[Api], mapName: c.Expr[String => Iterable[String]]
+  )(implicit
+    nodeType: c.WeakTypeTag[Node],
+    codecType: c.WeakTypeTag[Codec],
+    effectType: c.WeakTypeTag[Effect[?]],
+    contextType: c.WeakTypeTag[Context],
+    apiType: c.WeakTypeTag[Api],
   ): c.Expr[Handler[Node, Codec, Effect, Context]] = {
     import c.universe.{weakTypeOf, Quasiquote}
 
-    val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[Codec]
-    val contextType = weakTypeOf[Context]
-    val apiType = weakTypeOf[Api]
     c.Expr[Handler[Node, Codec, Effect, Context]](q"""
-      val newBindings = ${c.prefix}.apiBindings ++ automorph.handler.meta.HandlerGenerator
-        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec, ${c
-        .prefix}.system, $api)
-        .flatMap { binding =>
+      val newBindings = automorph.handler.meta.HandlerGenerator
+        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](
+          ${c.prefix}.protocol.codec, ${c.prefix}.system, $api
+        ).flatMap { binding =>
           $mapName(binding.function.name).map(_ -> binding)
         }
-      ${c.prefix}.copy(apiBindings = newBindings)
+      ${c.prefix}.copy(apiBindings = ${c.prefix}.apiBindings ++ newBindings)
     """)
   }
 }

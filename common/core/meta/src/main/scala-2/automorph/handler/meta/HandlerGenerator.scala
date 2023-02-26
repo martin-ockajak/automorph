@@ -13,11 +13,42 @@ import scala.reflect.macros.blackbox
 /** RPC handler layer bindings code generation. */
 object HandlerGenerator {
 
-  def bindingsMacro[Node: c.WeakTypeTag, Codec <: MessageCodec[Node]: c.WeakTypeTag, Effect[
-    _
-  ], Context: c.WeakTypeTag, Api <: AnyRef: c.WeakTypeTag](
-    c: blackbox.Context
-  )(codec: c.Expr[Codec], system: c.Expr[EffectSystem[Effect]], api: c.Expr[Api])(implicit
+  /**
+   * Generates handler bindings for all valid public methods of an API type.
+   *
+   * @param codec
+   *   message codec plugin
+   * @param system
+   *   effect system plugin
+   * @param api
+   *   API instance
+   * @tparam Node
+   *   message node type
+   * @tparam Codec
+   *   message codec plugin type
+   * @tparam Effect
+   *   effect type
+   * @tparam Context
+   *   message context type
+   * @tparam Api
+   *   API type
+   * @return
+   *   mapping of API method names to handler function bindings
+   */
+  def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
+    codec: Codec,
+    system: EffectSystem[Effect],
+    api: Api,
+  ): Seq[HandlerBinding[Node, Effect, Context]] =
+    macro bindingsMacro[Node, Codec, Effect, Context, Api]
+
+  def bindingsMacro[
+    Node: c.WeakTypeTag,
+    Codec <: MessageCodec[Node]: c.WeakTypeTag,
+    Effect[_],
+    Context: c.WeakTypeTag,
+    Api <: AnyRef: c.WeakTypeTag
+  ](c: blackbox.Context)(codec: c.Expr[Codec], system: c.Expr[EffectSystem[Effect]], api: c.Expr[Api])(implicit
     effectType: c.WeakTypeTag[Effect[?]]
   ): c.Expr[Seq[HandlerBinding[Node, Effect, Context]]] = {
     import c.universe.Quasiquote
@@ -166,7 +197,7 @@ object HandlerGenerator {
       (arguments: Seq[Any], requestContext: $contextType) => ${
       // Create the method argument lists by type coercing supplied arguments
       // List(List(
-      //   arguments(N).asInstanceOf[Any]
+      //   arguments(N).asInstanceOf[NType]
       // )): List[List[ParameterXType]]
       val apiMethodArguments = method.parameters.toList.zip(parameterListOffsets).map {
         case (parameters, offset) => parameters.toList.zipWithIndex.map { case (parameter, index) =>
@@ -197,33 +228,4 @@ object HandlerGenerator {
 
   private def logCode[C <: blackbox.Context](ref: ClassReflection[C])(name: String, expression: ref.c.Expr[Any]): Unit =
     MacroLogger.debug(s"  $name:\n    ${ref.c.universe.showCode(expression.tree)}\n")
-
-  /**
-   * Generates handler bindings for all valid public methods of an API type.
-   *
-   * @param codec
-   *   message codec plugin
-   * @param system
-   *   effect system plugin
-   * @param api
-   *   API instance
-   * @tparam Node
-   *   message node type
-   * @tparam Codec
-   *   message codec plugin type
-   * @tparam Effect
-   *   effect type
-   * @tparam Context
-   *   message context type
-   * @tparam Api
-   *   API type
-   * @return
-   *   mapping of API method names to handler function bindings
-   */
-  def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
-    codec: Codec,
-    system: EffectSystem[Effect],
-    api: Api,
-  ): Seq[HandlerBinding[Node, Effect, Context]] =
-    macro bindingsMacro[Node, Codec, Effect, Context, Api]
 }

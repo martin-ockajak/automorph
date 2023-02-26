@@ -31,6 +31,7 @@ final private[automorph] case class ClassReflection[C <: blackbox.Context](c: C)
       RefParameter(typeSymbol.name.toString, typeSymbol.toType.finalResultType, contextual = false)
     }
     val parameters = methodSymbol.paramLists.map(_.map { parameter =>
+      // FIXME - fix generic parameter type detection
       RefParameter(parameter.name.toString, parameter.typeSignature, parameter.isImplicit)
     })
     RefMethod(

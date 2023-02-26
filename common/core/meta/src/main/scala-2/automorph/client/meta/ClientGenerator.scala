@@ -26,7 +26,8 @@ object ClientGenerator {
    */
   def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec
-  ): Seq[ClientBinding[Node, Context]] = macro bindingsMacro[Node, Codec, Effect, Context, Api]
+  ): Seq[ClientBinding[Node, Context]] =
+    macro bindingsMacro[Node, Codec, Effect, Context, Api]
 
   def bindingsMacro[
     Node: c.WeakTypeTag,

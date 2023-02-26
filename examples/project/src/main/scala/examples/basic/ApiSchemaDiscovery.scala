@@ -46,4 +46,3 @@ private[examples] object ApiSchemaDiscovery {
     Await.result(server.close(), Duration.Inf)
   }
 }
-

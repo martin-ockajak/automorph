@@ -20,7 +20,7 @@ private[examples] object Quickstart {
 
     // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
     val serverBuilder = Default.serverBuilderAsync(7000, "/api")
-    val server = serverBuilder(_.bind(api))
+    val server = serverBuilder(_.bind[ServerApi](api))
 
     // Define client view of the remote API
     trait ClientApi {

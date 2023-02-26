@@ -75,4 +75,3 @@ private[examples] object Authentication {
     server.close()
   }
 }
-

@@ -100,35 +100,32 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
 
 object ClientMeta {
 
-  def bindMacro[
-    Node,
-    Codec <: MessageCodec[Node],
-    Effect[_],
-    Context,
-    Api <: AnyRef,
-  ](c: blackbox.Context): c.Expr[Api] = {
+  def bindMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](c: blackbox.Context)(implicit
+    nodeType: c.WeakTypeTag[Node],
+    codecType: c.WeakTypeTag[Codec],
+    effectType: c.WeakTypeTag[Effect[?]],
+    contextType: c.WeakTypeTag[Context],
+    apiType: c.WeakTypeTag[Api],
+  ): c.Expr[Api] = {
     import c.universe.Quasiquote
 
-    c.Expr[Api](q"""
-      ${c.prefix}.bind(identity)
+    val mapName = c.Expr[String => String](q"""
+      identity
     """)
+    bindMapNamesMacro[Node, Codec, Effect, Context, Api](c)(mapName)
   }
 
-  def bindMapNamesMacro[
-    Node: c.WeakTypeTag,
-    Codec <: MessageCodec[Node]: c.WeakTypeTag,
-    Effect[_],
-    Context: c.WeakTypeTag,
-    Api <: AnyRef: c.WeakTypeTag,
-  ](c: blackbox.Context)(
+  def bindMapNamesMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](c: blackbox.Context)(
     mapName: c.Expr[String => String]
-  )(implicit effectType: c.WeakTypeTag[Effect[?]]): c.Expr[Api] = {
+  )(implicit
+    nodeType: c.WeakTypeTag[Node],
+    codecType: c.WeakTypeTag[Codec],
+    effectType: c.WeakTypeTag[Effect[?]],
+    contextType: c.WeakTypeTag[Context],
+    apiType: c.WeakTypeTag[Api],
+  ): c.Expr[Api] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
-    val nodeType = weakTypeOf[Node]
-    val codecType = weakTypeOf[Codec]
-    val contextType = weakTypeOf[Context]
-    val apiType = weakTypeOf[Api]
     c.Expr[Api](q"""
       // Generate API function bindings
       val bindings = automorph.client.meta.ClientGenerator

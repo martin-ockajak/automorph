@@ -52,4 +52,3 @@ private[examples] object ClientFunctionNames {
     server.close()
   }
 }
-
