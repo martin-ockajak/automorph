@@ -7,18 +7,19 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
+// Introduce custom data types
+case class Record(values: List[String])
+
 private[examples] object MessageCodec {
+
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
-
-    // Introduce custom data types
-    case class Record(values: List[String])
 
     // Create uPickle message codec for JSON format
     val codec = UpickleMessagePackCodec()
 
     // Provide custom data type serialization and deserialization logic
-    implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
+    implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW[Record]
 
     // Create server API instance
     class ServerApi {
