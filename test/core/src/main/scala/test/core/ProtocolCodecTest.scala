@@ -47,7 +47,8 @@ trait ProtocolCodecTest extends CoreTest {
 //    implicit val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
 //    val codec = CirceJsonCodec()
 //    val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type, Context](codec)
-//    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
+//    val simpleHandler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
+//    val handler = simpleHandler.bind(complexApi)
 //    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
 //    val client = Client.protocol(protocol).transport(transport)
 //    TestFixture(
