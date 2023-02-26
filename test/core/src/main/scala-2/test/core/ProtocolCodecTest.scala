@@ -95,7 +95,7 @@ trait ProtocolCodecTest extends CoreTest {
 //          (function, a0) => client.call[String](function).args(a0),
 //          (function, a0) => client.message(function).args(a0)
 //        )
-//      }, {
+////      }, {
 ////      // uPickle JSON
 ////        class Custom extends UpickleJsonCustom {
 ////          implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int].bimap[Enum.Enum](
@@ -148,62 +148,62 @@ trait ProtocolCodecTest extends CoreTest {
 ////          (function, a0) => client.message(function).args(a0)
 ////        )
 ////      }, {
-//        // Argonaut JSON
-//        implicit val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
-//          (v: Enum.Enum) => jNumber(Enum.toOrdinal(v)),
-//          cursor => cursor.focus.as[Int].map(Enum.fromOrdinal)
-//        )
-//        implicit val structureCodecJson: CodecJson[Structure] =
-//          Argonaut.codec1(Structure.apply, (v: Structure) => v.value)("value")
-//        implicit val recordCodecJson: CodecJson[Record] =
-//          Argonaut.codec13(
-//            Record.apply,
-//            (v: Record) =>
-//              (
-//                v.string,
-//                v.boolean,
-//                v.byte,
-//                v.short,
-//                v.int,
-//                v.long,
-//                v.float,
-//                v.double,
-//                v.enumeration,
-//                v.list,
-//                v.map,
-//                v.structure,
-//                v.none
-//              )
-//          )(
-//            "string",
-//            "boolean",
-//            "byte",
-//            "short",
-//            "int",
-//            "long",
-//            "float",
-//            "double",
-//            "enumeration",
-//            "list",
-//            "map",
-//            "structure",
-//            "none"
-//          )
-//        val codec = ArgonautJsonCodec()
-//        val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type, Context](codec)
-//        val handler = Handler.protocol(protocol).system(system)
-//          .bind(simpleApi).bind(complexApi)
-//        val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, defaultContext))
-//        val client = Client.protocol(protocol).transport(transport)
-//        TestFixture(
-//          client,
-//          handler,
-//          client.bind[SimpleApiType],
-//          client.bind[ComplexApiType],
-//          client.bind[InvalidApiType],
-//          (function, a0) => client.call[String](function).args(a0),
-//          (function, a0) => client.message(function).args(a0)
-//        )
+////        // Argonaut JSON
+////        implicit val enumCodecJson: CodecJson[Enum.Enum] = CodecJson(
+////          (v: Enum.Enum) => jNumber(Enum.toOrdinal(v)),
+////          cursor => cursor.focus.as[Int].map(Enum.fromOrdinal)
+////        )
+////        implicit val structureCodecJson: CodecJson[Structure] =
+////          Argonaut.codec1(Structure.apply, (v: Structure) => v.value)("value")
+////        implicit val recordCodecJson: CodecJson[Record] =
+////          Argonaut.codec13(
+////            Record.apply,
+////            (v: Record) =>
+////              (
+////                v.string,
+////                v.boolean,
+////                v.byte,
+////                v.short,
+////                v.int,
+////                v.long,
+////                v.float,
+////                v.double,
+////                v.enumeration,
+////                v.list,
+////                v.map,
+////                v.structure,
+////                v.none
+////              )
+////          )(
+////            "string",
+////            "boolean",
+////            "byte",
+////            "short",
+////            "int",
+////            "long",
+////            "float",
+////            "double",
+////            "enumeration",
+////            "list",
+////            "map",
+////            "structure",
+////            "none"
+////          )
+////        val codec = ArgonautJsonCodec()
+////        val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type, Context](codec)
+////        val handler = Handler.protocol(protocol).system(system)
+////          .bind(simpleApi).bind(complexApi)
+////        val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, defaultContext))
+////        val client = Client.protocol(protocol).transport(transport)
+////        TestFixture(
+////          client,
+////          handler,
+////          client.bind[SimpleApiType],
+////          client.bind[ComplexApiType],
+////          client.bind[InvalidApiType],
+////          (function, a0) => client.call[String](function).args(a0),
+////          (function, a0) => client.message(function).args(a0)
+////        )
 //      }
 //    )
 //  }
