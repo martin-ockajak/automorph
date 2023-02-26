@@ -46,6 +46,7 @@ object BaseTest {
 
   /** Configure test logging. */
   private lazy val setupLogger: Unit = {
+    System.setProperty("org.jboss.logging.provider", "slf4j")
     val level = Option(System.getenv(logLevelEnvironment)).flatMap(Level.get).getOrElse(Level.Fatal)
     val format =
       formatter"${magenta(time)} [$levelColoredPaddedRight] (${gray(positionSimple)}): $messages$mdcMultiLine"

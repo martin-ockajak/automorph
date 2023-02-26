@@ -31,13 +31,13 @@ private[examples] object ApiSchemaDiscovery {
     println(Await.result(
       client.call[OpenRpc](JsonRpcProtocol.openRpcFunction).args(),
       Duration.Inf
-    ))
+    ).methods.map(_.name))
 
     // Retrieve the remote API schema in OpenAPI format
     println(Await.result(
       client.call[OpenApi](JsonRpcProtocol.openApiFunction).args(),
       Duration.Inf
-    ))
+    ).paths.get.keys.toList)
 
     // Close the client
     Await.result(client.close(), Duration.Inf)

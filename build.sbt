@@ -168,9 +168,7 @@ lazy val tapir = source(project, "transport/tapir", core, http, testStandard % T
   )
 )
 lazy val undertow = source(project, "transport/undertow", core, http, testStandard % Test).settings(
-  libraryDependencies += "io.undertow" % "undertow-core" % "2.3.3.Final",
-  Test / javaOptions += "-Dorg.jboss.logging.provider=slf4j",
-  Test / fork := true
+  libraryDependencies += "io.undertow" % "undertow-core" % "2.3.3.Final"
 )
 lazy val vertx = source(project, "transport/vertx", core, http, testStandard % Test)
   .settings(libraryDependencies += "io.vertx" % "vertx-core" % "4.3.8")
@@ -200,15 +198,12 @@ lazy val default = project.dependsOn(jsonrpc, circe, standard, undertow, testSta
 )
 lazy val examples = source(project, "examples", default, upickle, zio, sttp, rabbitmq, testPlugin % Test).settings(
   libraryDependencies ++= Seq(
-    "ch.qos.logback" % "logback-classic" % "1.4.5",
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion,
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion,
     "io.arivera.oss" % "embedded-rabbitmq" % embeddedRabbitMqVersion
   ),
   Compile / scalaSource :=  baseDirectory.value / "project/src/main/scala",
   Test / scalaSource := baseDirectory.value / "project/src/test/scala",
-  Test / javaOptions += "-Dorg.jboss.logging.provider=slf4j",
-  Test / fork := true
 )
 
 

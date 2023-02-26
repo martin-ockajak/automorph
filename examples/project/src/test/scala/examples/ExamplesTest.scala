@@ -3,9 +3,9 @@ package examples
 import examples.basic.*
 import examples.customize.*
 import examples.select.*
-import org.scalatest.freespec.AnyFreeSpecLike
+import test.base.BaseTest
 
-class ExamplesTest extends AnyFreeSpecLike {
+class ExamplesTest extends BaseTest {
 
   "" - {
     "Quickstart" in {

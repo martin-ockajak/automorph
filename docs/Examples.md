@@ -179,13 +179,13 @@ val client = Default.clientAsync(new URI("http://localhost:7000/api"), HttpMetho
 println(Await.result(
   client.call[OpenRpc](JsonRpcProtocol.openRpcFunction).args(),
   Duration.Inf
-))
+).methods.map(_.name))
 
 // Retrieve the remote API schema in OpenAPI format
 println(Await.result(
   client.call[OpenApi](JsonRpcProtocol.openApiFunction).args(),
   Duration.Inf
-))
+).paths.get.keys.toList)
 ```
 
 **Cleanup**
