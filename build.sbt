@@ -236,7 +236,14 @@ val commonScalacOptions =
 val docScalacOptions = commonScalacOptions ++ Seq("-language:adhocExtensions", "-pagewidth", "120")
 ThisBuild / scalacOptions ++=
   (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((3, _)) => docScalacOptions ++ Seq("-source", "3.2", "-indent", "-Xcheck-macros", "-Ysafe-init")
+    case Some((3, _)) => docScalacOptions ++ Seq(
+      "-source",
+      "3.2",
+      "-indent",
+//      "-Wunused",
+      "-Xcheck-macros",
+      "-Ysafe-init"
+    )
     case _ => commonScalacOptions ++ Seq(
         "-language:existentials",
         "-J--add-modules",

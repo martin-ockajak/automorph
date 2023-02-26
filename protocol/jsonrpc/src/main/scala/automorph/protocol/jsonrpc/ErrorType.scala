@@ -1,7 +1,5 @@
 package automorph.protocol.jsonrpc
 
-import automorph.RpcException.{InvalidRequestException, ServerErrorException}
-
 /**
  * JSON-RPC error type with code.
  *

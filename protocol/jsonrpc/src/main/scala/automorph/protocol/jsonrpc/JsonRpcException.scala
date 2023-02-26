@@ -1,7 +1,5 @@
 package automorph.protocol.jsonrpc
 
-import automorph.RpcException
-
 /**
  * JSON-RPC API error exception.
  *
