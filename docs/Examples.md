@@ -1580,7 +1580,7 @@ import automorph.Default
 import automorph.transport.amqp.client.RabbitMqClient
 import automorph.transport.amqp.server.RabbitMqServer
 import io.arivera.oss.embedded.rabbitmq.{EmbeddedRabbitMq, EmbeddedRabbitMqConfig}
-import java.net.{ServerSocket, URI}
+import java.net.URI
 import java.nio.file.Files
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -1601,9 +1601,6 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start embedded RabbitMQ broker
-if (Try(Process("erl -eval 'halt()' -noshell").! != 0).getOrElse(true)) {
-  throw new IllegalStateException("Erlang installation required")
-}
 val brokerConfig = new EmbeddedRabbitMqConfig.Builder().port(7000)
   .rabbitMqServerInitializationTimeoutInMillis(30000).build()
 val broker = new EmbeddedRabbitMq(brokerConfig)
