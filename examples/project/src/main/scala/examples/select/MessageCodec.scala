@@ -18,7 +18,7 @@ private[examples] object MessageCodec {
     val codec = UpickleMessagePackCodec()
 
     // Provide custom data type serialization and deserialization logic
-    implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW[Record]
+    implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
 
     // Create server API instance
     class ServerApi {
