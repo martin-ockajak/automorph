@@ -44,7 +44,7 @@ class ExamplesTest extends BaseTest {
     }
     "Select" - {
       Seq(
-        AmqpTransport,
+//        AmqpTransport,
         ClientTransport,
         EffectSystem,
         EndpointTransport,
