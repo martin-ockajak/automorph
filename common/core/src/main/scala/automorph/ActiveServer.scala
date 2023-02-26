@@ -3,7 +3,7 @@ package automorph
 import automorph.spi.transport.ServerMessageTransport
 
 /**
- * RPC server.
+ * Active RPC server.
  *
  * The server can be used to serve remote API requests using specific message transport protocol and invoke bound API
  * methods to process them.
@@ -18,7 +18,7 @@ import automorph.spi.transport.ServerMessageTransport
  * Processes only HTTP requests starting with specified URL path.
  *
  * @constructor
- *   Creates an RPC server with specified handler and transport plugin and supporting corresponding message
+ *   Creates active RPC server with specified handler and transport plugin and supporting corresponding message
  *   context type.
  * @param handler
  *   RPC request handler
@@ -29,18 +29,18 @@ import automorph.spi.transport.ServerMessageTransport
  * @tparam Context
  *   message context type
  */
-final case class Server[Effect[_], Context](
+final case class ActiveServer[Effect[_], Context] private[automorph] (
   handler: Types.HandlerAnyCodec[Effect, Context],
   transport: ServerMessageTransport[Effect, Context],
 ) {
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
 
   /**
-   * Starts this server to listen for incoming requests.
+   * Closes this server freeing the underlying resources.
    *
    * @return
-   *   active RPC server
+   *   passive RPC server
    */
-  def start(): Effect[ActiveServer[Effect, Context]] =
-    genericHandler.system.evaluate(ActiveServer(handler, transport))
+  def close(): Effect[Server[Effect, Context]] =
+    genericHandler.system.map(transport.close())(_ => Server(handler, transport))
 }

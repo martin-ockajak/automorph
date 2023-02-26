@@ -27,15 +27,15 @@ import scribe.writer.ConsoleWriter
  */
 trait BaseTest
   extends AnyFreeSpecLike
-  with OptionValues
-  with BeforeAndAfterEach
-  with BeforeAndAfterAll
-  with Matchers
-  with AppendedClues
-  with Checkers
-  with Fixtures
-  with Await
-  with Network {
+    with OptionValues
+    with BeforeAndAfterEach
+    with BeforeAndAfterAll
+    with Matchers
+    with AppendedClues
+    with Checkers
+    with Fixtures
+    with Await
+    with Network {
 
   override def beforeAll(): Unit = {
     BaseTest.setupLogger
@@ -44,6 +44,7 @@ trait BaseTest
 }
 
 object BaseTest {
+  setupLogger
 
   /** Configure test logging. */
   private lazy val setupLogger: Unit = {
@@ -53,12 +54,12 @@ object BaseTest {
     val path = PathBuilder.static(Paths.get("target/test.log"))
     scribe.Logger.root.clearHandlers().clearModifiers()
       .withHandler(writer = ConsoleWriter, formatter = format, minimumLevel = Some(level))
-      .withHandler(writer = FileWriter(path), formatter = format, minimumLevel = Some(level)).replace()
+      .withHandler(writer = FileWriter(path), formatter = format, minimumLevel = Some(Level.Debug)).replace()
     ()
   }
 
   /** Log level environment variable. */
-  private val logLevelEnvironment = "LOG_LEVEL"
+  private lazy val logLevelEnvironment = "LOG_LEVEL"
 
   /** Enable basic tests only environment variable. */
   private val testBasicEnvironment = "TEST_BASIC"

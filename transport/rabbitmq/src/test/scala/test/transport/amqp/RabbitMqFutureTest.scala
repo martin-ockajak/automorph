@@ -6,13 +6,14 @@ import automorph.system.FutureSystem
 import automorph.transport.amqp.client.RabbitMqClient
 import automorph.transport.amqp.server.RabbitMqServer
 import io.arivera.oss.embedded.rabbitmq.{EmbeddedRabbitMq, EmbeddedRabbitMqConfig}
-import java.net.{ServerSocket, URI}
+import java.net.URI
+import java.nio.file.Files
+import scala.jdk.CollectionConverters.IteratorHasAsScala
 import org.scalacheck.Arbitrary
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.sys.process.Process
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 import test.core.ClientServerTest
 
 class RabbitMqFutureTest extends ClientServerTest {
@@ -20,8 +21,8 @@ class RabbitMqFutureTest extends ClientServerTest {
   type Effect[T] = Future[T]
   type Context = RabbitMqServer.Context
 
-  private lazy val queue = "test"
-  private lazy val brokers = ArrayBuffer.empty[EmbeddedRabbitMq]
+  private lazy val setupTimeout = 30000
+  private lazy val broker = createBroker()
 
   override lazy val system: FutureSystem = FutureSystem()
 
@@ -34,23 +35,36 @@ class RabbitMqFutureTest extends ClientServerTest {
   override def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] =
-    Option.when(Try(Process("disabled_erl -eval 'halt()' -noshell").! == 0).getOrElse(false)) {
-      val (broker, port) = withRandomAvailablePort{ port =>
-        val broker = new EmbeddedRabbitMq(new EmbeddedRabbitMqConfig.Builder().port(port).build())
-        broker.start()
-        broker -> port
+    broker match {
+      case Some((_, config)) => Some {
+        val protocol = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]].protocol
+        val queue = s"${protocol.name}/${protocol.codec.getClass.getName}"
+        val url = new URI(s"amqp://localhost:${config.getRabbitMqPort}")
+        val server = RabbitMqServer[Effect](handler, url, Seq(queue))
+        servers += server
+        val client = RabbitMqClient[Effect](url, queue, system)
+        clients += client
+        client
       }
-      brokers += broker
-      val url = new URI(s"amqp://localhost:$port")
-      val server = RabbitMqServer[Effect](handler, url, Seq(queue))
-      servers += server
-      val client = RabbitMqClient[Effect](url, queue, system)
-      clients += client
-      client
+      case _ => None
     }
 
   override def afterAll(): Unit = {
-    brokers.foreach(_.stop())
     super.afterAll()
+    broker.foreach { case (broker, config) =>
+      broker.stop()
+      val brokerDirectory = config.getExtractionFolder.toPath.resolve(config.getVersion.getExtractionFolder)
+      Files.walk(brokerDirectory).iterator().asScala.toSeq.reverse.foreach(_.toFile.delete())
+    }
+  }
+
+  private def createBroker(): Option[(EmbeddedRabbitMq, EmbeddedRabbitMqConfig)] = {
+    Option.when(Try(Process("erl -eval 'halt()' -noshell").! == 0).getOrElse(false)) {
+      val brokerConfig = new EmbeddedRabbitMqConfig.Builder().randomPort()
+        .rabbitMqServerInitializationTimeoutInMillis(setupTimeout).build()
+      val broker = new EmbeddedRabbitMq(brokerConfig)
+      broker.start()
+      broker -> brokerConfig
+    }
   }
 }

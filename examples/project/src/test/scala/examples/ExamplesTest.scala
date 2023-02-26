@@ -2,8 +2,7 @@ package examples
 
 import examples.basic.{ApiSchemaDiscovery, AsynchronousCall, Authentication, HttpRequestMetadata, HttpResponseMetadata, OneWayMessage, OptionalParameters, SynchronousCall}
 import examples.customize.{ArgumentsByPosition, ClientExceptions, ClientFunctionNames, CustomDataSerialization, ServerFunctionNames, ServerProtocolErrors}
-import examples.select.{RpcProtocol}
-import examples.select.EffectSystem
+import examples.select.{ClientTransport, EffectSystem, RpcProtocol}
 import org.scalatest.freespec.AnyFreeSpecLike
 
 class ExamplesTest extends AnyFreeSpecLike {
@@ -11,6 +10,7 @@ class ExamplesTest extends AnyFreeSpecLike {
   "" - {
     "Quickstart" in {
       runTest(Quickstart)
+//      runTest(ClientTransport)
     }
     "Basic" - {
       Seq(
