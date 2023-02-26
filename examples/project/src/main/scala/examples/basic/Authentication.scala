@@ -40,7 +40,7 @@ private[examples] object Authentication {
       implicit val validAuthentication: ClientContext = client.defaultContext
         .authorizationBearer("valid")
 
-      // Call the remote API function statically using valid authentication token
+      // Call the remote API function statically using valid authentication
       println(
         remoteApi.hello("test")
       )

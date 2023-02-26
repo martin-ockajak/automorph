@@ -386,25 +386,15 @@ implicit val httpRequest: ClientContext = client.defaultContext
   .cookies("Test" -> "value")
   .authorizationBearer("value")
 
-// Call the remote API function statically with implicitly given HTTP request metadata
+// Call the remote API function statically using implicitly given HTTP request metadata
 val remoteApi = client.bind[ClientApi]
 println(
   remoteApi.hello("test")
 )
 
-// Call the remote API function dynamically with implicitly given HTTP request metadata
+// Call the remote API function dynamically using implicitly given HTTP request metadata
 println(
   client.call[String]("hello").args("message" -> "test")
-)
-
-// Call the remote API function statically with directly supplied HTTP request metadata
-println(
-  remoteApi.hello("test")(httpRequest)
-)
-
-// Call the remote API function dynamically with directly supplied HTTP request metadata
-println(
-  client.call[String]("hello").args("message" -> "test")(httpRequest)
 )
 ```
 
