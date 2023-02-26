@@ -34,11 +34,13 @@ private[automorph] object ClientGenerator:
   ): Seq[ClientBinding[Node, Context]] =
     ${ bindingsMacro[Node, Codec, Effect, Context, Api]('codec) }
 
-  private def bindingsMacro[Node: Type, Codec <: MessageCodec[Node]: Type, Effect[
-    _
-  ]: Type, Context: Type, Api <: AnyRef: Type](codec: Expr[Codec])(using
-    quotes: Quotes
-  ): Expr[Seq[ClientBinding[Node, Context]]] =
+  private def bindingsMacro[
+    Node: Type,
+    Codec <: MessageCodec[Node]: Type,
+    Effect[_]: Type,
+    Context: Type,
+    Api <: AnyRef: Type
+  ](codec: Expr[Codec])(using quotes: Quotes): Expr[Seq[ClientBinding[Node, Context]]] =
     val ref = ClassReflection(quotes)
 
     // Detect and validate public methods in the API type

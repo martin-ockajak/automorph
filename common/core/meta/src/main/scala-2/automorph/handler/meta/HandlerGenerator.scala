@@ -42,14 +42,14 @@ object HandlerGenerator {
   ): Seq[HandlerBinding[Node, Effect, Context]] =
     macro bindingsMacro[Node, Codec, Effect, Context, Api]
 
-  def bindingsMacro[
-    Node: c.WeakTypeTag,
-    Codec <: MessageCodec[Node]: c.WeakTypeTag,
-    Effect[_],
-    Context: c.WeakTypeTag,
-    Api <: AnyRef: c.WeakTypeTag
-  ](c: blackbox.Context)(codec: c.Expr[Codec], system: c.Expr[EffectSystem[Effect]], api: c.Expr[Api])(implicit
-    effectType: c.WeakTypeTag[Effect[?]]
+  def bindingsMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](c: blackbox.Context)(
+    codec: c.Expr[Codec], system: c.Expr[EffectSystem[Effect]], api: c.Expr[Api]
+  )(implicit
+    nodeType: c.WeakTypeTag[Node],
+    codecType: c.WeakTypeTag[Codec],
+    effectType: c.WeakTypeTag[Effect[?]],
+    contextType: c.WeakTypeTag[Context],
+    apiType: c.WeakTypeTag[Api],
   ): c.Expr[Seq[HandlerBinding[Node, Effect, Context]]] = {
     import c.universe.Quasiquote
     val ref = ClassReflection[c.type](c)
@@ -74,12 +74,19 @@ object HandlerGenerator {
   }
 
   @nowarn("msg=used")
-  private def generateBinding[C <: blackbox.Context, Node: ref.c.WeakTypeTag, Codec <: MessageCodec[
-    Node
-  ]: ref.c.WeakTypeTag, Effect[_], Context: ref.c.WeakTypeTag, Api: ref.c.WeakTypeTag](
+  private def generateBinding[C <: blackbox.Context, Node, Codec <: MessageCodec[Node], Effect[_], Context, Api](
     ref: ClassReflection[C]
-  )(method: ref.RefMethod, codec: ref.c.Expr[Codec], system: ref.c.Expr[EffectSystem[Effect]], api: ref.c.Expr[Api])(
-    implicit effectType: ref.c.WeakTypeTag[Effect[?]]
+  )(
+    method: ref.RefMethod,
+    codec: ref.c.Expr[Codec],
+    system: ref.c.Expr[EffectSystem[Effect]],
+    api: ref.c.Expr[Api],
+  )(implicit
+    nodeType: ref.c.WeakTypeTag[Node],
+    codecType: ref.c.WeakTypeTag[Codec],
+    effectType: ref.c.WeakTypeTag[Effect[?]],
+    contextType: ref.c.WeakTypeTag[Context],
+    apiType: ref.c.WeakTypeTag[Api],
   ): ref.c.Expr[HandlerBinding[Node, Effect, Context]] = {
     import ref.c.universe.{Liftable, Quasiquote}
 
@@ -102,11 +109,14 @@ object HandlerGenerator {
     """)
   }
 
-  private def generateArgumentDecoders[C <: blackbox.Context, Node: ref.c.WeakTypeTag, Codec <: MessageCodec[
-    Node
-  ]: ref.c.WeakTypeTag, Context: ref.c.WeakTypeTag](
-    ref: ClassReflection[C]
-  )(method: ref.RefMethod, codec: ref.c.Expr[Codec]): ref.c.Expr[Map[String, Option[Node] => Any]] = {
+  private def generateArgumentDecoders[
+    C <: blackbox.Context,
+    Node: ref.c.WeakTypeTag,
+    Codec <: MessageCodec[Node]: ref.c.WeakTypeTag,
+    Context: ref.c.WeakTypeTag
+  ](ref: ClassReflection[C])(
+    method: ref.RefMethod, codec: ref.c.Expr[Codec]
+  ): ref.c.Expr[Map[String, Option[Node] => Any]] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     weakTypeOf[Codec]
 
@@ -139,12 +149,13 @@ object HandlerGenerator {
     ref.c.Expr[Map[String, Option[Node] => Any]](q"Map(..$argumentDecoders)")
   }
 
-  private def generateEncodeResult[C <: blackbox.Context, Node: ref.c.WeakTypeTag, Codec <: MessageCodec[
-    Node
-  ]: ref.c.WeakTypeTag, Effect[_], Context: ref.c.WeakTypeTag](
+  private def generateEncodeResult[C <: blackbox.Context, Node, Codec <: MessageCodec[Node], Effect[_], Context](
     ref: ClassReflection[C]
   )(method: ref.RefMethod, codec: ref.c.Expr[Codec])(implicit
-    effectType: ref.c.WeakTypeTag[Effect[?]]
+    nodeType: ref.c.WeakTypeTag[Node],
+    codecType: ref.c.WeakTypeTag[Codec],
+    effectType: ref.c.WeakTypeTag[Effect[?]],
+    contextType: ref.c.WeakTypeTag[Context],
   ): ref.c.Expr[Any => (Node, Option[Context])] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     (weakTypeOf[Node], weakTypeOf[Codec])
@@ -158,7 +169,6 @@ object HandlerGenerator {
     //       result.asInstanceOf[ResultType].context
     //     )
     val resultType = MethodReflection.unwrapType[C, Effect[?]](ref.c)(method.resultType).dealias
-    val contextType = weakTypeOf[Context]
     ref.c.Expr[Any => (Node, Option[Context])](
       MethodReflection.contextualResult[C, Context, Contextual[?, ?]](ref.c)(resultType).map { contextualResultType =>
         q"""
@@ -176,10 +186,11 @@ object HandlerGenerator {
     )
   }
 
-  private def generateCall[C <: blackbox.Context, Effect[_], Context: ref.c.WeakTypeTag, Api](
-    ref: ClassReflection[C]
-  )(method: ref.RefMethod, api: ref.c.Expr[Api])(implicit
-    effectType: ref.c.WeakTypeTag[Effect[?]]
+  private def generateCall[C <: blackbox.Context, Effect[_], Context, Api](ref: ClassReflection[C])(
+    method: ref.RefMethod, api: ref.c.Expr[Api]
+  )(implicit
+    effectType: ref.c.WeakTypeTag[Effect[?]],
+    contextType: ref.c.WeakTypeTag[Context],
   ): ref.c.Expr[(Seq[Any], Context) => Any] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     Seq(effectType)
@@ -192,9 +203,9 @@ object HandlerGenerator {
 
     // Create API method call function
     //   (arguments: Seq[Any], requestContext: Context) => Any
-    val contextType = weakTypeOf[Context].dealias
+    val finalContextType = weakTypeOf[Context].dealias
     ref.c.Expr[(Seq[Any], Context) => Any](q"""
-      (arguments: Seq[Any], requestContext: $contextType) => ${
+      (arguments: Seq[Any], requestContext: $finalContextType) => ${
       // Create the method argument lists by type coercing supplied arguments
       // List(List(
       //   arguments(N).asInstanceOf[NType]

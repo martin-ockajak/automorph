@@ -29,14 +29,14 @@ object ClientGenerator {
   ): Seq[ClientBinding[Node, Context]] =
     macro bindingsMacro[Node, Codec, Effect, Context, Api]
 
-  def bindingsMacro[
-    Node: c.WeakTypeTag,
-    Codec <: MessageCodec[Node]: c.WeakTypeTag,
-    Effect[_],
-    Context: c.WeakTypeTag,
-    Api <: AnyRef: c.WeakTypeTag
-  ](c: blackbox.Context)(codec: c.Expr[Codec])(implicit
-    effectType: c.WeakTypeTag[Effect[?]]
+  def bindingsMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](c: blackbox.Context)(
+    codec: c.Expr[Codec]
+  )(implicit
+    nodeType: c.WeakTypeTag[Node],
+    codecType: c.WeakTypeTag[Codec],
+    effectType: c.WeakTypeTag[Effect[?]],
+    contextType: c.WeakTypeTag[Context],
+    apiType: c.WeakTypeTag[Api],
   ): c.Expr[Seq[ClientBinding[Node, Context]]] = {
     import c.universe.Quasiquote
     val ref = ClassReflection[c.type](c)
@@ -62,21 +62,17 @@ object ClientGenerator {
   }
 
   @nowarn("msg=used")
-  private def generateBinding[
-    C <: blackbox.Context,
-    Node: ref.c.WeakTypeTag,
-    Codec <: MessageCodec[Node]: ref.c.WeakTypeTag,
-    Effect[_],
-    Context: ref.c.WeakTypeTag,
-    Api: ref.c.WeakTypeTag
-  ](ref: ClassReflection[C])(
-    method: ref.RefMethod,
-    codec: ref.c.Expr[Codec]
-  )(implicit effectType: ref.c.WeakTypeTag[Effect[?]]): ref.c.Expr[ClientBinding[Node, Context]] = {
+  private def generateBinding[C <: blackbox.Context, Node, Codec <: MessageCodec[Node], Effect[_], Context, Api](
+    ref: ClassReflection[C]
+  )(method: ref.RefMethod, codec: ref.c.Expr[Codec])(implicit
+    nodeType: ref.c.WeakTypeTag[Node],
+    codecType: ref.c.WeakTypeTag[Codec],
+    effectType: ref.c.WeakTypeTag[Effect[?]],
+    contextType: ref.c.WeakTypeTag[Context],
+    apiType: ref.c.WeakTypeTag[Api],
+  ): ref.c.Expr[ClientBinding[Node, Context]] = {
     import ref.c.universe.{Liftable, Quasiquote, weakTypeOf}
 
-    val nodeType = weakTypeOf[Node]
-    val contextType = weakTypeOf[Context]
     val encodeArguments = generateArgumentEncoders[C, Node, Codec, Context](ref)(method, codec)
     val decodeResult = generateDecodeResult[C, Node, Codec, Effect, Context](ref)(method, codec)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
@@ -127,17 +123,15 @@ object ClientGenerator {
     ref.c.Expr[Map[String, Any => Node]](q"Map(..$argumentEncoders)")
   }
 
-  private def generateDecodeResult[
-    C <: blackbox.Context,
-    Node: ref.c.WeakTypeTag,
-    Codec <: MessageCodec[Node]: ref.c.WeakTypeTag,
-    Effect[_],
-    Context: ref.c.WeakTypeTag
-  ](ref: ClassReflection[C])(method: ref.RefMethod, codec: ref.c.Expr[Codec])(implicit
-    effectType: ref.c.WeakTypeTag[Effect[?]]
+  private def generateDecodeResult[C <: blackbox.Context, Node, Codec <: MessageCodec[Node], Effect[_], Context](
+    ref: ClassReflection[C]
+  )(method: ref.RefMethod, codec: ref.c.Expr[Codec])(implicit
+    nodeType: ref.c.WeakTypeTag[Node],
+    codecType: ref.c.WeakTypeTag[Codec],
+    effectType: ref.c.WeakTypeTag[Effect[?]],
+    contextType: ref.c.WeakTypeTag[Context],
   ): ref.c.Expr[(Node, Context) => Any] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
-    (weakTypeOf[Node], weakTypeOf[Codec])
 
     // Create a result decoding function
     //   (resultNode: Node, responseContext: Context) => codec.decode[ResultType](resultNode)
@@ -146,8 +140,6 @@ object ClientGenerator {
     //     codec.decode[ContextualResultType](resultNode),
     //     responseContext
     //   )
-    val nodeType = weakTypeOf[Node]
-    val contextType = weakTypeOf[Context]
     val resultType = MethodReflection.unwrapType[C, Effect[?]](ref.c)(method.resultType).dealias
     MethodReflection.contextualResult[C, Context, Contextual[?, ?]](ref.c)(resultType).map { contextualResultType =>
       ref.c.Expr[(Node, Context) => Any](q"""
@@ -166,7 +158,7 @@ object ClientGenerator {
   private def logBoundMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: ClassReflection[C])(
     method: ref.RefMethod,
     encodeArguments: ref.c.Expr[Any],
-    decodeResult: ref.c.Expr[Any]
+    decodeResult: ref.c.Expr[Any],
   ): Unit = MacroLogger.debug(
     s"""${MethodReflection.signature[C, Api](ref)(method)} =
       |  ${ref.c.universe.showCode(encodeArguments.tree)}

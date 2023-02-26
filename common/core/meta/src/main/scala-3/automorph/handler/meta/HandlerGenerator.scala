@@ -28,7 +28,7 @@ private[automorph] object HandlerGenerator:
   inline def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec,
     system: EffectSystem[Effect],
-    api: Api
+    api: Api,
   ): Seq[HandlerBinding[Node, Effect, Context]] =
     ${ bindingsMacro[Node, Codec, Effect, Context, Api]('codec, 'system, 'api) }
 
@@ -38,11 +38,9 @@ private[automorph] object HandlerGenerator:
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
-  ](
-    codec: Expr[Codec],
-    system: Expr[EffectSystem[Effect]],
-    api: Expr[Api]
-  )(using quotes: Quotes): Expr[Seq[HandlerBinding[Node, Effect, Context]]] =
+  ](codec: Expr[Codec], system: Expr[EffectSystem[Effect]], api: Expr[Api])(
+    using quotes: Quotes
+  ): Expr[Seq[HandlerBinding[Node, Effect, Context]]] =
     val ref = ClassReflection(quotes)
 
     // Detect and validate public methods in the API type
@@ -59,17 +57,13 @@ private[automorph] object HandlerGenerator:
     }
     Expr.ofSeq(handlerBindings)
 
-  private def generateBinding[
-    Node: Type,
-    Codec <: MessageCodec[Node]: Type,
-    Effect[_]: Type,
-    Context: Type,
-    Api: Type
-  ](ref: ClassReflection)(
+  private def generateBinding[Node: Type, Codec <: MessageCodec[Node]: Type, Effect[_]: Type, Context: Type, Api: Type](
+    ref: ClassReflection
+  )(
     method: ref.RefMethod,
     codec: Expr[Codec],
     system: Expr[EffectSystem[Effect]],
-    api: Expr[Api]
+    api: Expr[Api],
   ): Expr[HandlerBinding[Node, Effect, Context]] =
     given Quotes = ref.q
 
@@ -90,14 +84,9 @@ private[automorph] object HandlerGenerator:
       )
     }
 
-  private def generateArgumentDecoders[
-    Node: Type,
-    Codec <: MessageCodec[Node]: Type,
-    Context: Type
-  ](ref: ClassReflection)(
-    method: ref.RefMethod,
-    codec: Expr[Codec]
-  ): Expr[Map[String, Option[Node] => Any]] =
+  private def generateArgumentDecoders[Node: Type, Codec <: MessageCodec[Node]: Type, Context: Type](
+    ref: ClassReflection
+  )(method: ref.RefMethod, codec: Expr[Codec]): Expr[Map[String, Option[Node] => Any]] =
     import ref.q.reflect.{Term, TypeRepr, asTerm}
     given Quotes = ref.q
 
