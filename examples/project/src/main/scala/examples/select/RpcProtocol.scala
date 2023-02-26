@@ -19,7 +19,7 @@ private[examples] object RpcProtocol {
     val api = new ServerApi()
 
     // Create a server Web-RPC protocol plugin with '/api' path prefix
-    val serverProtocol = WebRpcProtocol(Default.codec, "/api/").context[Default.ServerContext]
+    val serverProtocol = WebRpcProtocol(Default.codec, "/api").context[Default.ServerContext]
 
     // Start default Web-RPC HTTP server listening on port 7000 for requests to '/api'
     val handler = Handler.protocol(serverProtocol).system(Default.systemAsync).bind(api)
@@ -31,7 +31,7 @@ private[examples] object RpcProtocol {
     }
 
     // Create a client Web-RPC protocol plugin with '/api' path prefix
-    val clientProtocol = WebRpcProtocol(Default.codec, "/api/").context[Default.ClientContext]
+    val clientProtocol = WebRpcProtocol(Default.codec, "/api").context[Default.ClientContext]
 
     // Setup default Web-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
     val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))

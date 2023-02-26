@@ -10,7 +10,6 @@ class ExamplesTest extends AnyFreeSpecLike {
   "" - {
     "Quickstart" in {
       runTest(Quickstart)
-//      runTest(ClientTransport)
     }
     "Basic" - {
       Seq(
@@ -46,7 +45,7 @@ class ExamplesTest extends AnyFreeSpecLike {
     "Select" - {
       Seq(
 //        AmqpTransport,
-//        ClientTransport,
+        ClientTransport,
         EffectSystem,
 //        EndpointTransport,
 //        MessageCodec,

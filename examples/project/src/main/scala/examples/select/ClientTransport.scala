@@ -15,7 +15,7 @@ private[examples] object ClientTransport {
     val api = new ServerApi()
 
     // Start JSON-RPC HTTP server listening on port 80 for requests to '/api'
-    val serverBuilder = Default.serverBuilderSync(80, "/api")
+    val serverBuilder = Default.serverBuilderSync(7000, "/api")
     val server = serverBuilder(_.bind(api))
 
     // Define client view of the remote API

@@ -30,7 +30,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
   /**
    * Creates an RPC request.
    *
-   * @param functionName
+   * @param function
    *   invoked function name
    * @param arguments
    *   named arguments
@@ -44,7 +44,7 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
    *   RPC request
    */
   def createRequest(
-    functionName: String,
+    function: String,
     arguments: Iterable[(String, Node)],
     responseRequired: Boolean,
     requestContext: Context,
