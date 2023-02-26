@@ -134,8 +134,7 @@ final case class HttpClient[Effect[_]](
               effect(
                 httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray),
                 completableSystem.asInstanceOf[CompletableEffectSystem[Effect]],
-              )
-                .map(httpResponse)
+              ).map(httpResponse)
             case _ => system.evaluate(httpResponse(httpClient.send(httpRequest, BodyHandlers.ofByteArray)))
           },
         // Send WebSocket request

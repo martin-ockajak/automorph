@@ -1,17 +1,8 @@
 package examples
 
-import examples.basic.{
-  ApiSchemaDiscovery, AsynchronousCall, Authentication, HttpRequestMetadata, HttpResponseMetadata, OneWayMessage,
-  OptionalParameters, SynchronousCall,
-}
-//import examples.customize.{
-//  ArgumentsByPosition, ClientExceptions, ClientFunctionNames, CustomDataSerialization, ServerFunctionNames,
-//  ServerProtocolErrors,
-//}
-//import examples.select.{
-//  AmqpTransport, ClientTransport, EffectSystem, EndpointTransport, MessageCodec, RpcProtocol, ServerTransport,
-//  WebSocketTransport,
-//}
+import examples.basic.{ApiSchemaDiscovery, AsynchronousCall, Authentication, HttpRequestMetadata, HttpResponseMetadata, OneWayMessage, OptionalParameters, SynchronousCall}
+import examples.customize.{ArgumentsByPosition, ClientExceptions, ClientFunctionNames, CustomDataSerialization, HttpResponseStatus, ServerFunctionNames, ServerProtocolErrors}
+import examples.select.{ClientTransport, EffectSystem, EndpointTransport, MessageCodec, RpcProtocol, ServerTransport, WebSocketTransport}
 import test.base.BaseTest
 
 class ExamplesTest extends BaseTest {
@@ -36,37 +27,37 @@ class ExamplesTest extends BaseTest {
         }
       }
     }
-//    "Customize" - {
-//      Seq(
-//        ArgumentsByPosition,
-//        ClientExceptions,
-//        ClientFunctionNames,
-//        CustomDataSerialization,
-//        HttpRequestMetadata,
-//        ServerFunctionNames,
-//        ServerProtocolErrors,
-//      ).foreach { instance =>
-//        testName(instance) in {
-//          runTest(instance)
-//        }
-//      }
-//    }
-//    "Select" - {
-//      Seq(
-////        AmqpTransport,
-//        ClientTransport,
-//        EffectSystem,
-//        EndpointTransport,
+    "Customize" - {
+      Seq(
+        ArgumentsByPosition,
+        ClientExceptions,
+        ClientFunctionNames,
+        CustomDataSerialization,
+        HttpResponseStatus,
+        ServerFunctionNames,
+        ServerProtocolErrors,
+      ).foreach { instance =>
+        testName(instance) in {
+          runTest(instance)
+        }
+      }
+    }
+    "Select" - {
+      Seq(
+//        AmqpTransport,
+        ClientTransport,
+        EffectSystem,
+        EndpointTransport,
 //        MessageCodec,
-//        RpcProtocol,
+        RpcProtocol,
 //        ServerTransport,
-//        WebSocketTransport,
-//      ).foreach { instance =>
-//        testName(instance) in {
-//          runTest(instance)
-//        }
-//      }
-//    }
+        WebSocketTransport,
+      ).foreach { instance =>
+        testName(instance) in {
+          runTest(instance)
+        }
+      }
+    }
   }
 
   private def testName(instance: Any): String = {

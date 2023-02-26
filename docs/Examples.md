@@ -858,7 +858,7 @@ import scala.util.Try
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
-    Future.failed(new IllegalArgumentException("Test error"))
+    Future.failed(new IllegalArgumentException("SQL error"))
 }
 val api = new ServerApi()
 
@@ -877,7 +877,7 @@ trait ClientApi {
 
 // Customize remote API client RPC error to exception mapping
 val protocol = Default.protocol[Default.ClientContext].mapError((message, code) =>
-  if (message.contains("Data")) {
+  if (message.contains("SQL")) {
     new SQLException(message)
   } else {
     Default.protocol.mapError(message, code)
@@ -937,9 +937,9 @@ import scala.util.Try
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
     if (n >= 0) {
-      Future.failed(new SQLException("Test error"))
+      Future.failed(new SQLException("Invalid request"))
     } else {
-      Future.failed(JsonRpcException("Other error", 1))
+      Future.failed(JsonRpcException("Application error", 1))
     }
 }
 val api = new ServerApi()
@@ -1089,7 +1089,7 @@ import scala.util.Try
 // Create server API instance
 class ServerApi {
   def hello(some: String, n: Int): Future[String] =
-    Future.failed(new SQLException("Test error"))
+    Future.failed(new SQLException("Invalid request"))
 }
 val api = new ServerApi()
 
