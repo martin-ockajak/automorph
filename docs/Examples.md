@@ -1313,7 +1313,7 @@ val codec = UpickleMessagePackCodec()
 
 // Provide custom data type serialization and deserialization logic
 import codec.custom.*
-implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
+implicit def recordRw: ReadWriter[Record] = macroRW
 ```
 
 **Server**
