@@ -8,15 +8,8 @@
   <!-- Default pattern -->
   <property name="defaultPattern" value="%date \(%level\) %message" />
 
-  <!-- Standard console logging -->
-  <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder>
-      <pattern>%date \(%level\) [%logger{16}] %message%n</pattern>
-    </encoder>
-  </appender>
-
   <!-- Simple console logging -->
-  <appender name="CompactConsole" class="ch.qos.logback.core.ConsoleAppender">
+  <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
       <pattern>%date{HH:mm:ss.SSS} \(%level\) %message%n</pattern>
     </encoder>
@@ -37,7 +30,7 @@
   </appender>
 
   <root level="${LOG_LEVEL:-OFF}">
-    <appender-ref ref="CompactConsole" />
+    <appender-ref ref="Console" />
     <appender-ref ref="File" />
   </root>
 

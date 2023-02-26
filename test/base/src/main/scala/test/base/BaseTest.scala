@@ -5,12 +5,10 @@ import org.scalatest.freespec.AnyFreeSpecLike
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{AppendedClues, BeforeAndAfterAll, BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.scalacheck.Checkers
-import scribe.Level
 import scribe.file.{FileWriter, PathBuilder}
-import scribe.format.{
-  FormatterInterpolator, gray, levelColoredPaddedRight, magenta, mdcMultiLine, messages, positionSimple, time,
-}
+import scribe.format.{FormatterInterpolator, gray, levelColoredPaddedRight, magenta, mdcMultiLine, messages, positionSimple, time}
 import scribe.writer.ConsoleWriter
+import scribe.{Level, Logger}
 
 /**
  * Base structured test.
@@ -52,7 +50,7 @@ object BaseTest {
     val format =
       formatter"${magenta(time)} [$levelColoredPaddedRight] (${gray(positionSimple)}): $messages$mdcMultiLine"
     val path = PathBuilder.static(Paths.get("target/test.log"))
-    scribe.Logger.root.clearHandlers().clearModifiers()
+    Logger.root.clearHandlers().clearModifiers()
       .withHandler(writer = ConsoleWriter, formatter = format, minimumLevel = Some(level))
       .withHandler(writer = FileWriter(path), formatter = format, minimumLevel = Some(Level.Debug)).replace()
     ()

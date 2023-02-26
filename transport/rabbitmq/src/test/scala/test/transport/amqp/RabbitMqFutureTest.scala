@@ -22,7 +22,7 @@ class RabbitMqFutureTest extends ClientServerTest {
   type Context = RabbitMqServer.Context
 
   private lazy val setupTimeout = 30000
-  private lazy val broker = createBroker()
+  private lazy val embeddedBroker = createBroker()
 
   override lazy val system: FutureSystem = FutureSystem()
 
@@ -35,7 +35,7 @@ class RabbitMqFutureTest extends ClientServerTest {
   override def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] =
-    broker match {
+    embeddedBroker match {
       case Some((_, config)) => Some {
         val protocol = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]].protocol
         val queue = s"${protocol.name}/${protocol.codec.getClass.getName}"
@@ -51,7 +51,7 @@ class RabbitMqFutureTest extends ClientServerTest {
 
   override def afterAll(): Unit = {
     super.afterAll()
-    broker.foreach { case (broker, config) =>
+    embeddedBroker.foreach { case (broker, config) =>
       broker.stop()
       val brokerDirectory = config.getExtractionFolder.toPath.resolve(config.getVersion.getExtractionFolder)
       Files.walk(brokerDirectory).iterator().asScala.toSeq.reverse.foreach(_.toFile.delete())
@@ -60,11 +60,11 @@ class RabbitMqFutureTest extends ClientServerTest {
 
   private def createBroker(): Option[(EmbeddedRabbitMq, EmbeddedRabbitMqConfig)] = {
     Option.when(Try(Process("erl -eval 'halt()' -noshell").! == 0).getOrElse(false)) {
-      val brokerConfig = new EmbeddedRabbitMqConfig.Builder().randomPort()
+      val config = new EmbeddedRabbitMqConfig.Builder().randomPort()
         .rabbitMqServerInitializationTimeoutInMillis(setupTimeout).build()
-      val broker = new EmbeddedRabbitMq(brokerConfig)
+      val broker = new EmbeddedRabbitMq(config)
       broker.start()
-      broker -> brokerConfig
+      broker -> config
     }
   }
 }

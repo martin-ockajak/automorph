@@ -152,10 +152,11 @@ lazy val sttp = source(project, "transport/sttp", core, http, testStandard % Tes
     "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion % Test
   )
 )
+val embeddedRabbitMqVersion = "1.5.0"
 lazy val rabbitmq = source(project, "transport/rabbitmq", amqp, core, standard, testCore % Test, testAmqp % Test)
   .settings(libraryDependencies ++= Seq(
     "com.rabbitmq" % "amqp-client" % "5.16.0",
-    "io.arivera.oss" % "embedded-rabbitmq" % "1.5.0" % Test
+    "io.arivera.oss" % "embedded-rabbitmq" % embeddedRabbitMqVersion % Test
   ))
 
 // Server
@@ -198,12 +199,13 @@ lazy val default = project.dependsOn(jsonrpc, circe, standard, undertow, testSta
   libraryDependencies += "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpHttpClientVersion
 )
 lazy val examples = source(project, "examples", default, upickle, zio, sttp, rabbitmq, testPlugin % Test).settings(
-  libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion % Test,
-  libraryDependencies += "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion % Test,
-  Compile / scalaSource := (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((3, _)) => baseDirectory.value / "project/src/main/scala"
-    case _ => baseDirectory.value / "project/src/main/scala-2"
-  }),
+  libraryDependencies ++= Seq(
+    "ch.qos.logback" % "logback-classic" % "1.4.5",
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion,
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion,
+    "io.arivera.oss" % "embedded-rabbitmq" % embeddedRabbitMqVersion
+  ),
+  Compile / scalaSource :=  baseDirectory.value / "project/src/main/scala",
   Test / scalaSource := baseDirectory.value / "project/src/test/scala"
 )
 

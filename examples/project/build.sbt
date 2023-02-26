@@ -18,6 +18,7 @@ libraryDependencies ++= Seq(
   "org.automorph" %% "automorph-sttp" % automorphVersion,
   "com.softwaremill.sttp.client3" %% "async-http-client-backend-future" % sttpVersion,
   "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio" % sttpVersion,
+  "io.arivera.oss" % "embedded-rabbitmq" % "1.5.0",
 
   // Test
   "org.scalatest" %% "scalatest" % "3.2.15" % Test
