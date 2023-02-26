@@ -1312,8 +1312,7 @@ case class Record(values: List[String])
 val codec = UpickleMessagePackCodec()
 
 // Provide custom data type serialization and deserialization logic
-import codec.custom.*
-implicit def recordRw: ReadWriter[Record] = macroRW
+implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
 ```
 
 **Server**
