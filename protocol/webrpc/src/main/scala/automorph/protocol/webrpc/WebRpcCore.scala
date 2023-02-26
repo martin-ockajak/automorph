@@ -1,11 +1,11 @@
 package automorph.protocol.webrpc
 
+import automorph.RpcException.{InvalidRequestException, InvalidResponseException}
 import automorph.protocol.WebRpcProtocol
 import automorph.protocol.webrpc.Message.Request
 import automorph.schema.OpenApi
 import automorph.schema.openapi.{RpcSchema, Schema}
 import automorph.spi.MessageCodec
-import automorph.spi.RpcProtocol.{InvalidRequestException, InvalidResponseException}
 import automorph.spi.protocol.{RpcApiSchema, RpcError, RpcFunction, RpcMessage, RpcRequest, RpcResponse}
 import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.util.Extensions.{ThrowableOps, TryOps}

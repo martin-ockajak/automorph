@@ -25,7 +25,7 @@ private[examples] object AmqpTransport {
     val api = new ServerApi()
 
     // Start embedded RabbitMQ broker
-    if (Try(Process("erl -eval 'halt()' -noshell").! != 0).getOrElse(true)) {
+    if (Try(Process("erl -eval 'halt()' -noshell").! == 0).getOrElse(false)) {
       throw new IllegalStateException("Erlang installation required")
     }
     val brokerConfig = new EmbeddedRabbitMqConfig.Builder().port(7000)

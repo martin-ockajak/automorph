@@ -1,6 +1,6 @@
 package automorph.protocol.webrpc
 
-import automorph.spi.RpcProtocol.InvalidResponseException
+import automorph.RpcException.InvalidResponseException
 
 /**
  * Web-RPC call response.

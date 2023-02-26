@@ -1,7 +1,7 @@
 package automorph.protocol.jsonrpc
 
+import automorph.RpcException.InvalidRequestException
 import automorph.protocol.jsonrpc.Message.{version, Id, Params}
-import automorph.spi.RpcProtocol.InvalidRequestException
 
 /**
  * JSON-RPC request.

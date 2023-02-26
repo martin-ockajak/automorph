@@ -5,7 +5,6 @@ import automorph.handler.HandlerBinding
 import automorph.log.MacroLogger
 import automorph.reflection.MethodReflection.functionToExpr
 import automorph.reflection.{ClassReflection, MethodReflection}
-import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{EffectSystem, MessageCodec}
 import scala.quoted.{Expr, Quotes, Type}
 import scala.util.{Failure, Try}

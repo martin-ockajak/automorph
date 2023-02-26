@@ -99,18 +99,3 @@ trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
   /** RPC API schema operations. */
   def apiSchemas: Seq[RpcApiSchema[Node]]
 }
-
-object RpcProtocol {
-
-  /** Invalid RPC request error. */
-  final case class InvalidRequestException(message: String, cause: Throwable = None.orNull)
-    extends RuntimeException(message, cause)
-
-  /** Invalid RPC response error. */
-  final case class InvalidResponseException(message: String, cause: Throwable = None.orNull)
-    extends RuntimeException(message, cause)
-
-  /** Remote function not found error. */
-  final case class FunctionNotFoundException(message: String, cause: Throwable = None.orNull)
-    extends RuntimeException(message, cause)
-}

@@ -1,9 +1,9 @@
 package automorph
 
+import automorph.RpcException.{FunctionNotFoundException, InvalidRequestException}
 import automorph.handler.meta.HandlerMeta
 import automorph.handler.{HandlerBinding, HandlerResult, ProtocolHandlerBuilder, SystemHandlerBuilder}
 import automorph.log.{LogProperties, Logging}
-import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException}
 import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}

@@ -1,8 +1,8 @@
 package test.core
 
+import automorph.RpcException.{FunctionNotFoundException, InvalidArgumentsException, InvalidRequestException, InvalidResponseException}
 import automorph.Types
 import automorph.spi.EffectSystem
-import automorph.spi.RpcProtocol.{FunctionNotFoundException, InvalidRequestException, InvalidResponseException}
 import org.scalacheck.Arbitrary
 import scala.util.{Failure, Success, Try}
 import test.Generators.arbitraryRecord
@@ -147,17 +147,6 @@ trait CoreTest extends BaseTest {
                 error.should(include("function not found"))
                 error.should(include("nomethod"))
               }
-              "Redundant arguments" in {
-                val error = intercept[IllegalArgumentException](execute(api.method1(""))).getMessage.toLowerCase
-                error.should(include("redundant arguments"))
-                error.should(include("0"))
-              }
-              "Malformed result" in {
-                val error = intercept[InvalidResponseException] {
-                  execute(api.method2(""))
-                }.getMessage.toLowerCase
-                error.should(include("malformed result"))
-              }
               "Optional arguments" in {
                 execute(api.method3(0, Some(0)))
               }
@@ -174,6 +163,17 @@ trait CoreTest extends BaseTest {
                 }.getMessage.toLowerCase
                 error.should(include("missing argument"))
                 error.should(include("p2"))
+              }
+              "Redundant arguments" in {
+                val error = intercept[InvalidArgumentsException](execute(api.method1(""))).getMessage.toLowerCase
+                error.should(include("redundant arguments"))
+                error.should(include("0"))
+              }
+              "Malformed result" in {
+                val error = intercept[InvalidResponseException] {
+                  execute(api.method2(""))
+                }.getMessage.toLowerCase
+                error.should(include("malformed result"))
               }
             }
           }

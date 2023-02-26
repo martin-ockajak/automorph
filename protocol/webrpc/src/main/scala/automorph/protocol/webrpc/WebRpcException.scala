@@ -15,8 +15,6 @@ package automorph.protocol.webrpc
  *   error code
  * @param cause
  *   exception cause
- * @tparam Node
- *   message codec node representation type
  */
-final case class WebRpcException[Node](message: String, code: Option[Int], cause: Throwable)
+final case class WebRpcException(message: String, code: Option[Int], cause: Throwable)
   extends RuntimeException(message, cause)

@@ -1,16 +1,14 @@
 package automorph.protocol.jsonrpc
 
+import automorph.RpcException.{InvalidRequestException, ServerErrorException}
+
 /**
  * JSON-RPC error type with code.
  *
  * @see
  *   [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  */
-sealed abstract class ErrorType(val code: Int) {
-
-  def name: String =
-    toString
-}
+sealed abstract class ErrorType(val code: Int)
 
 /**
  * JSON-RPC error types with codes.
@@ -19,18 +17,6 @@ sealed abstract class ErrorType(val code: Int) {
  *   [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  */
 object ErrorType {
-
-  /** JSON-RPC parse error. */
-  final case class ParseErrorException(message: String, cause: Throwable = None.orNull)
-    extends RuntimeException(message, cause)
-
-  /** JSON-RPC internal error. */
-  final case class InternalErrorException(message: String, cause: Throwable = None.orNull)
-    extends RuntimeException(message, cause)
-
-  /** JSON-RPC sever error. */
-  final case class ServerErrorException(message: String, cause: Throwable = None.orNull)
-    extends RuntimeException(message, cause)
 
   case object ParseError extends ErrorType(-32700)
 

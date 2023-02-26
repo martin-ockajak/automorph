@@ -1,9 +1,9 @@
 package automorph
 
+import automorph.RpcException.InvalidResponseException
 import automorph.client.meta.ClientMeta
 import automorph.client.{ProtocolClientBuilder, RemoteMessage, TransportClientBuilder}
 import automorph.log.{LogProperties, Logging}
-import automorph.spi.RpcProtocol.InvalidResponseException
 import automorph.spi.transport.ClientMessageTransport
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
@@ -21,7 +21,7 @@ import scala.util.Try
  * traits or dynamically by supplying the required type information on invocation.
  *
  * @constructor
- *   Creates a RPC client with specified protocol and transport plugins and supporting corresponding message context type.
+ *   Creates a RPC client with specified protocol and transport plugins providing corresponding message context type.
  * @param protocol
  *   RPC protocol plugin
  * @param transport
@@ -52,9 +52,29 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    *   remote function name
    * @return
    *   specified remote function one-way message proxy
+   * @throws RpcException
+   *   on RPC error
    */
   def message(function: String): RemoteMessage[Node, Codec, Effect, Context] =
     RemoteMessage(function, protocol.codec, sendMessage)
+
+  /**
+   * Closes this client freeing the underlying resources.
+   *
+   * @return
+   *   nothing
+   */
+  def close(): Effect[Unit] =
+    transport.close()
+
+  /**
+   * Creates a default request context.
+   *
+   * @return
+   *   request context
+   */
+  def defaultContext: Context =
+    transport.defaultContext
 
   /**
    * Messages a remote API function using specified arguments.
@@ -95,15 +115,6 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         },
     )
   }
-
-  /**
-   * Closes this client freeing the underlying resources.
-   *
-   * @return
-   *   nothing
-   */
-  def close(): Effect[Unit] =
-    transport.close()
 
   /**
    * Calls a remote API function using specified arguments.
@@ -153,15 +164,6 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         },
     )
   }
-
-  /**
-   * Creates a default request context.
-   *
-   * @return
-   *   request context
-   */
-  def defaultContext: Context =
-    transport.defaultContext
 
   /**
    * Processes an remote function call response.

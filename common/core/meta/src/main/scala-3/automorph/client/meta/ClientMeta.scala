@@ -1,7 +1,7 @@
 package automorph.client.meta
 
+import automorph.RpcException.InvalidRequestException
 import automorph.client.{RemoteCall, RemoteMessage}
-import automorph.spi.RpcProtocol.InvalidRequestException
 import automorph.spi.{MessageCodec, RpcProtocol}
 
 import java.lang.reflect.Proxy
@@ -129,6 +129,8 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    *   result type
    * @return
    *   specified remote function call proxy
+   * @throws RpcException
+   *   on RPC error
    */
   inline def call[Result](function: String): RemoteCall[Node, Codec, Effect, Context, Result] =
     RemoteCall(function, protocol.codec, performCall)

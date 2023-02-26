@@ -8,10 +8,14 @@ import scala.reflect.macros.blackbox
 /**
  * Client function bindings code generation.
  *
- * @tparam Node message node type
- * @tparam Codec message codec plugin type
- * @tparam Effect effect type
- * @tparam Context message context type
+ * @tparam Node
+ *   message node type
+ * @tparam Codec
+ *   message codec plugin type
+ * @tparam Effect
+ *   effect type
+ * @tparam Context
+ *   message context type
  */
 private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
 
@@ -21,19 +25,22 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * Creates a RPC API proxy instance with RPC bindings for all valid public functions of the specified API type.
    *
    * An API function is considered valid if it satisfies all of these conditions:
-   * - can be called at runtime
-   * - has no type parameters
-   * - returns the specified effect type
-   * - (if message context type is not Context.Empty) accepts the specified message context type as its last parameter
+   *   - can be called at runtime
+   *   - has no type parameters
+   *   - returns the specified effect type
+   *   - (if message context type is not Context.Empty) accepts the specified message context type as its last parameter
    *
-   * If a bound function definition contains a last parameter of `Context` type or returns a context function accepting one
-   * the caller-supplied request context is passed to the underlying message transport plugin.
+   * If a bound function definition contains a last parameter of `Context` type or returns a context function accepting
+   * one the caller-supplied request context is passed to the underlying message transport plugin.
    *
    * RPC functions represented by bound API methods are invoked using their actual names.
    *
-   * @tparam Api API trait type (classes are not supported)
-   * @return RPC API proxy instance
-   * @throws java.lang.IllegalArgumentException if invalid public functions are found in the API type
+   * @tparam Api
+   *   API trait type (classes are not supported)
+   * @return
+   *   RPC API proxy instance
+   * @throws java.lang.IllegalArgumentException
+   *   if invalid public functions are found in the API type
    */
   def bind[Api <: AnyRef]: Api =
     macro ClientMeta.bindMacro[Node, Codec, Effect, Context, Api]
@@ -42,20 +49,25 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * Creates a remote API proxy instance with RPC bindings for all valid public functions of the specified API type.
    *
    * An API function is considered valid if it satisfies all of these conditions:
-   * - can be called at runtime
-   * - has no type parameters
-   * - returns the specified effect type
-   * - (if message context type is not Context.Empty) accepts the specified message context type as its last parameter
+   *   - can be called at runtime
+   *   - has no type parameters
+   *   - returns the specified effect type
+   *   - (if message context type is not Context.Empty) accepts the specified message context type as its last parameter
    *
-   * If a bound function definition contains a last parameter of `Context` type or returns a context function accepting one
-   * the caller-supplied request context is passed to the underlying message transport plugin.
+   * If a bound function definition contains a last parameter of `Context` type or returns a context function accepting
+   * one the caller-supplied request context is passed to the underlying message transport plugin.
    *
-   * RPC functions represented by bound API methods are invoked using their names transformed via the `mapName` function.
+   * RPC functions represented by bound API methods are invoked using their names transformed via the `mapName`
+   * function.
    *
-   * @param mapName maps API method name to the invoked RPC function name
-   * @tparam Api remote API trait type (classes are not supported)
-   * @return remote API proxy instance
-   * @throws java.lang.IllegalArgumentException if invalid public functions are found in the API type
+   * @param mapName
+   *   maps API method name to the invoked RPC function name
+   * @tparam Api
+   *   remote API trait type (classes are not supported)
+   * @return
+   *   remote API proxy instance
+   * @throws java.lang.IllegalArgumentException
+   *   if invalid public functions are found in the API type
    */
   def bind[Api <: AnyRef](mapName: String => String): Api =
     macro ClientMeta.bindMapNamesMacro[Node, Codec, Effect, Context, Api]
@@ -63,22 +75,27 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
   /**
    * Creates a remote API function call proxy.
    *
-   * Uses the remote function name and arguments to send an RPC request and
-   * extracts a result value or an error from the received RPC response.
+   * Uses the remote function name and arguments to send an RPC request and extracts a result value or an error from the
+   * received RPC response.
    *
-   * @param function remote function name
-   * @tparam Result result type
-   * @return specified remote function call proxy
+   * @param function
+   *   remote function name
+   * @tparam Result
+   *   result type
+   * @return
+   *   specified remote function call proxy
+   * @throws RpcException
+   *   on RPC error
    */
   def call[Result](function: String): RemoteCall[Node, Codec, Effect, Context, Result] =
     macro ClientMeta.callMacro[Node, Codec, Effect, Context, Result]
 
   def performCall[Result](
-    function: String,
-    arguments: Seq[(String, Node)],
-    decodeResult: (Node, Context) => Result,
-    requestContext: Option[Context]
-  ): Effect[Result]
+     function: String,
+     arguments: Seq[(String, Node)],
+     decodeResult: (Node, Context) => Result,
+     requestContext: Option[Context],
+   ): Effect[Result]
 }
 
 object ClientMeta {
@@ -88,7 +105,7 @@ object ClientMeta {
     Codec <: MessageCodec[Node],
     Effect[_],
     Context,
-    Api <: AnyRef
+    Api <: AnyRef,
   ](c: blackbox.Context): c.Expr[Api] = {
     import c.universe.Quasiquote
 
@@ -102,7 +119,7 @@ object ClientMeta {
     Codec <: MessageCodec[Node]: c.WeakTypeTag,
     Effect[_],
     Context: c.WeakTypeTag,
-    Api <: AnyRef: c.WeakTypeTag
+    Api <: AnyRef: c.WeakTypeTag,
   ](c: blackbox.Context)(
     mapName: c.Expr[String => String]
   )(implicit effectType: c.WeakTypeTag[Effect[?]]): c.Expr[Api] = {
@@ -142,7 +159,7 @@ object ClientMeta {
                 throw new IllegalStateException("Missing method parameter encoder: " + parameter.name)
               )
               parameter.name -> scala.util.Try(encodeArgument(argument)).recoverWith { case error =>
-                scala.util.Failure(automorph.spi.RpcProtocol.InvalidRequestException(
+                scala.util.Failure(automorph.RpcException.InvalidRequestException(
                   "Malformed argument: " + parameter.name,
                   error
                 ))
@@ -165,7 +182,7 @@ object ClientMeta {
     Codec <: MessageCodec[Node],
     Effect[_],
     Context,
-    Result
+    Result,
   ](c: blackbox.Context)(function: c.Expr[String]): c.Expr[RemoteCall[Node, Codec, Effect, Context, Result]] = {
     import c.universe.Quasiquote
 

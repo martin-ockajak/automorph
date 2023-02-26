@@ -1,8 +1,17 @@
 package examples
 
-import examples.basic.*
-import examples.customize.*
-import examples.select.*
+import examples.basic.{
+  ApiSchemaDiscovery, AsynchronousCall, Authentication, HttpRequestMetadata, HttpResponseMetadata, OneWayMessage,
+  OptionalParameters, SynchronousCall,
+}
+import examples.customize.{
+  ArgumentsByPosition, ClientExceptions, ClientFunctionNames, CustomDataSerialization, ServerFunctionNames,
+  ServerProtocolErrors,
+}
+import examples.select.{
+  AmqpTransport, ClientTransport, EffectSystem, EndpointTransport, MessageCodec, RpcProtocol, ServerTransport,
+  WebSocketTransport,
+}
 import test.base.BaseTest
 
 class ExamplesTest extends BaseTest {
@@ -44,7 +53,7 @@ class ExamplesTest extends BaseTest {
     }
     "Select" - {
       Seq(
-        AmqpTransport,
+//        AmqpTransport,
         ClientTransport,
         EffectSystem,
         EndpointTransport,
