@@ -605,17 +605,19 @@ import scala.concurrent.{Await, Future}
 ```scala
 // Introduce custom data types
 sealed abstract class State
+
 object State {
   case object On extends State
   case object Off extends State
 }
+
 case class Record(
   value: String,
   state: State
 )
 
 // Provide custom data type serialization and deserialization logic
-import io.circe.generic.auto._
+import io.circe.generic.auto.*
 implicit lazy val enumEncoder: Encoder[State] = Encoder.encodeInt.contramap[State](Map(
   State.Off -> 0,
   State.On -> 1
@@ -638,7 +640,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val serverBuilder = Default.serverAsync(7000, "/api")
-lazy val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api))
 ```
 
 **Client**

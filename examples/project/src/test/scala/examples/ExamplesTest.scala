@@ -32,7 +32,7 @@ class ExamplesTest extends AnyFreeSpecLike {
         ArgumentsByPosition,
         ClientExceptions,
         ClientFunctionNames,
-//        CustomDataSerialization,
+        CustomDataSerialization,
         HttpRequestMetadata,
         ServerFunctionNames,
         ServerProtocolErrors,

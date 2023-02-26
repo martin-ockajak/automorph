@@ -5,11 +5,14 @@ import automorph.spi.transport.ClientMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.amqp.client.RabbitMqClient
 import automorph.transport.amqp.server.RabbitMqServer
+import io.arivera.oss.embedded.rabbitmq.apache.commons.lang3.SystemUtils
 import io.arivera.oss.embedded.rabbitmq.{EmbeddedRabbitMq, EmbeddedRabbitMqConfig}
+
 import java.net.URI
-import java.nio.file.Files
+import java.nio.file.{Files, Paths}
 import scala.jdk.CollectionConverters.IteratorHasAsScala
 import org.scalacheck.Arbitrary
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.sys.process.Process
@@ -61,6 +64,7 @@ class RabbitMqFutureTest extends ClientServerTest {
   private def createBroker(): Option[(EmbeddedRabbitMq, EmbeddedRabbitMqConfig)] = {
     Option.when(Try(Process("erl -eval 'halt()' -noshell").! == 0).getOrElse(false)) {
       val config = new EmbeddedRabbitMqConfig.Builder().randomPort()
+        .extractionFolder(Paths.get(SystemUtils.JAVA_IO_TMPDIR, getClass.getSimpleName).toFile)
         .rabbitMqServerInitializationTimeoutInMillis(setupTimeout).build()
       val broker = new EmbeddedRabbitMq(config)
       broker.start()

@@ -13,10 +13,12 @@ private[examples] object CustomDataSerialization {
 
     // Introduce custom data types
     sealed abstract class State
+
     object State {
       case object On extends State
       case object Off extends State
     }
+
     case class Record(
       value: String,
       state: State
@@ -42,7 +44,7 @@ private[examples] object CustomDataSerialization {
 
     // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
     val serverBuilder = Default.serverBuilderAsync(7000, "/api")
-    lazy val server = serverBuilder(_.bind(api))
+    val server = serverBuilder(_.bind(api))
 
     // Define client view of the remote API
     trait ClientApi {
