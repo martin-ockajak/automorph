@@ -32,14 +32,14 @@ private[automorph] object MethodReflection:
    *
    * @param ref
    *   reflection
-   * @tparam ApiType
+   * @tparam Api
    *   API type
    * @tparam Effect
    *   effect type
    * @return
    *   valid method descriptors or error messages by method name
    */
-  def apiMethods[ApiType: Type, Effect[_]: Type](ref: ClassReflection): Seq[Either[String, ref.RefMethod]] =
+  def apiMethods[Api: Type, Effect[_]: Type](ref: ClassReflection): Seq[Either[String, ref.RefMethod]] =
     import ref.q.reflect.TypeRepr
     given Quotes =
       ref.q
@@ -48,12 +48,12 @@ private[automorph] object MethodReflection:
     val baseMethodNames = Seq(TypeRepr.of[AnyRef], TypeRepr.of[Product]).flatMap { baseType =>
       ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
-    val methods = ref.methods(TypeRepr.of[ApiType]).filter(_.public).filter { method =>
+    val methods = ref.methods(TypeRepr.of[Api]).filter(_.public).filter { method =>
       !baseMethodNames.contains(method.name)
     }
 
     // Validate methods
-    methods.map(method => validateApiMethod[ApiType, Effect](ref)(method))
+    methods.map(method => validateApiMethod[Api, Effect](ref)(method))
 
   /**
    * Determines whether a method accepts request context as its last parameter.
@@ -141,15 +141,15 @@ private[automorph] object MethodReflection:
    *   reflection context
    * @param method
    *   method descriptor
-   * @tparam ApiType
+   * @tparam Api
    *   API type
    * @return
    *   method description
    */
-  def signature[ApiType: Type](ref: ClassReflection)(method: ref.RefMethod): String =
+  def signature[Api: Type](ref: ClassReflection)(method: ref.RefMethod): String =
     import ref.q.reflect.{Printer, TypeRepr}
 
-    s"${TypeRepr.of[ApiType].show(using Printer.TypeReprCode)}.${method.lift.signature}"
+    s"${TypeRepr.of[Api].show(using Printer.TypeReprCode)}.${method.lift.signature}"
 
   /**
    * Creates a method call term.
@@ -184,21 +184,21 @@ private[automorph] object MethodReflection:
    *   reflection context
    * @param method
    *   method descriptor
-   * @tparam ApiType
+   * @tparam Api
    *   API type
    * @tparam Effect
    *   effect type
    * @return
    *   valid API method or an error message
    */
-  private def validateApiMethod[ApiType: Type, Effect[_]: Type](ref: ClassReflection)(
+  private def validateApiMethod[Api: Type, Effect[_]: Type](ref: ClassReflection)(
     method: ref.RefMethod
   ): Either[String, ref.RefMethod] =
     import ref.q.reflect.{AppliedType, LambdaType, TypeRepr, TypeTree}
 
     // No type parameters
-    val apiType = TypeTree.of[ApiType]
-    val methodSignature = signature[ApiType](ref)(method)
+    val apiType = TypeTree.of[Api]
+    val methodSignature = signature[Api](ref)(method)
     if method.typeParameters.nonEmpty then Left(s"Bound API method '$methodSignature' must not have type parameters")
 
     // Callable at runtime

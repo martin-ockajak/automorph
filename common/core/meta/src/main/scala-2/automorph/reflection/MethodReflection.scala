@@ -48,26 +48,26 @@ private[automorph] object MethodReflection {
    *   reflection
    * @tparam C
    *   macro context type
-   * @tparam ApiType
+   * @tparam Api
    *   API type
    * @tparam Effect
    *   effect type
    * @return
    *   valid method descriptors or error messages by method name
    */
-  def apiMethods[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
+  def apiMethods[C <: blackbox.Context, Api: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
     ref: ClassReflection[C]
   ): Seq[Either[String, ref.RefMethod]] = {
     // Omit base data type methods
     val baseMethodNames = Seq(ref.c.weakTypeOf[AnyRef], ref.c.weakTypeOf[Product]).flatMap { baseType =>
       ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
-    val methods = ref.methods(ref.c.weakTypeOf[ApiType]).filter(_.public).filter { method =>
+    val methods = ref.methods(ref.c.weakTypeOf[Api]).filter(_.public).filter { method =>
       !baseMethodNames.contains(method.name)
     }
 
     // Validate methods
-    methods.map(method => validateApiMethod[C, ApiType, Effect](ref)(method))
+    methods.map(method => validateApiMethod[C, Api, Effect](ref)(method))
   }
 
   /**
@@ -79,18 +79,18 @@ private[automorph] object MethodReflection {
    *   method
    * @tparam C
    *   macro context type
-   * @tparam ApiType
+   * @tparam Api
    *   API type
    * @tparam Effect
    *   effect type
    * @return
    *   valid API method or an error message
    */
-  private def validateApiMethod[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
+  private def validateApiMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
     ref: ClassReflection[C]
   )(method: ref.RefMethod): Either[String, ref.RefMethod] = {
     // No type parameters
-    val methodSignature = signature[C, ApiType](ref)(method)
+    val methodSignature = signature[C, Api](ref)(method)
     if (method.typeParameters.nonEmpty) { Left(s"Bound API method '$methodSignature' must not have type parameters") }
     else {
       // Callable at runtime
@@ -118,15 +118,15 @@ private[automorph] object MethodReflection {
    *   method descriptor
    * @tparam C
    *   macro context type
-   * @tparam ApiType
+   * @tparam Api
    *   API type
    * @return
    *   method description
    */
-  def signature[C <: blackbox.Context, ApiType: ref.c.WeakTypeTag](ref: ClassReflection[C])(
+  def signature[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: ClassReflection[C])(
     method: ref.RefMethod
   ): String =
-    s"${ref.c.weakTypeOf[ApiType].typeSymbol.fullName}.${method.lift.signature}"
+    s"${ref.c.weakTypeOf[Api].typeSymbol.fullName}.${method.lift.signature}"
 
   /**
    * Determines whether a method accepts request context as its last parameter.
