@@ -65,7 +65,7 @@ private[examples] object AmqpTransport {
       val brokerDirectory = brokerConfig.getExtractionFolder.toPath.resolve(brokerConfig.getVersion.getExtractionFolder)
       Files.walk(brokerDirectory).iterator().asScala.toSeq.reverse.foreach(_.toFile.delete())
     } else {
-      println("Erlang installation required")
+      println("Missing Erlang installation")
     }
   }
 }
