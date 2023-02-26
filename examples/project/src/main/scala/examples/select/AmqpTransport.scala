@@ -14,6 +14,7 @@ import scala.sys.process.Process
 import scala.util.Try
 
 private[examples] object AmqpTransport {
+  @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Create server API instance

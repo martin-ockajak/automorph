@@ -11,6 +11,7 @@ import scala.concurrent.{Await, Future}
 import scala.util.Try
 
 private[examples] object ServerProtocolErrors {
+  @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Create server API instance

@@ -1308,7 +1308,7 @@ case class Record(values: List[String])
 val codec = UpickleMessagePackCodec()
 
 // Provide custom data type serialization and deserialization logic
-import codec.custom._
+import codec.custom.*
 implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW
 ```
 
@@ -1330,7 +1330,7 @@ val system = Default.systemAsync
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val handler = Handler.protocol(serverProtocol).system(system).bind(api)
-lazy val server = Default.server(handler.bind(api), 7000, "/api")
+val server = Default.server(handler.bind(api), 7000, "/api")
 ```
 
 **Client**
@@ -1694,6 +1694,7 @@ val server = Undertow.builder()
   .addHttpListener(7000, "0.0.0.0")
   .setHandler(Handlers.path().addPrefixPath("/api", endpoint))
   .build()
+server.start()
 ```
 
 **Client**

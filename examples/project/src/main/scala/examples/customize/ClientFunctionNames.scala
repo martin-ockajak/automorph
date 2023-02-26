@@ -4,6 +4,7 @@ import automorph.Default
 import java.net.URI
 
 private[examples] object ClientFunctionNames {
+  @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Create server API instance

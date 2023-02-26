@@ -6,6 +6,7 @@ import automorph.{Contextual, Default}
 import java.net.URI
 
 private[examples] object HttpResponseMetadata {
+  @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Create server API instance

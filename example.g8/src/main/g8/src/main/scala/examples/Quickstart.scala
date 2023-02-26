@@ -7,6 +7,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 object Quickstart extends App {
+  @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Create server API instance

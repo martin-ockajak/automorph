@@ -9,6 +9,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 private[examples] object EndpointTransport {
+  @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Create server API instance
@@ -27,6 +28,7 @@ private[examples] object EndpointTransport {
       .addHttpListener(7000, "0.0.0.0")
       .setHandler(Handlers.path().addPrefixPath("/api", endpoint))
       .build()
+    server.start()
 
     // Define client view of the remote API
     trait ClientApi {

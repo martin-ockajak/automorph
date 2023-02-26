@@ -8,6 +8,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 private[examples] object CustomDataSerialization {
+  @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Introduce custom data types

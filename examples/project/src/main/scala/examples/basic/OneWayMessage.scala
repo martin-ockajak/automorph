@@ -7,6 +7,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 
 private[examples] object OneWayMessage {
+  @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Create server API instance

@@ -5,6 +5,7 @@ import java.net.URI
 import scala.util.Try
 
 private[examples] object ServerFunctionNames {
+  @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Create server API instance

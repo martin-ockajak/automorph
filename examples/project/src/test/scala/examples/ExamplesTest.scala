@@ -10,8 +10,6 @@ class ExamplesTest extends AnyFreeSpecLike {
   "" - {
     "Quickstart" in {
       runTest(Quickstart)
-//      runTest(EndpointTransport)
-//      runTest(MessageCodec)
     }
     "Basic" - {
       Seq(
@@ -49,8 +47,8 @@ class ExamplesTest extends AnyFreeSpecLike {
         AmqpTransport,
         ClientTransport,
         EffectSystem,
-//        EndpointTransport,
-//        MessageCodec,
+        EndpointTransport,
+        MessageCodec,
         RpcProtocol,
         ServerTransport,
         WebSocketTransport,

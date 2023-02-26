@@ -5,6 +5,7 @@ import automorph.transport.http.client.UrlClient
 import java.net.URI
 
 private[examples] object ClientTransport {
+  @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Create server API instance

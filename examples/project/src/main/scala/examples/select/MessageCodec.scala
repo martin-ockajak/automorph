@@ -8,6 +8,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 private[examples] object MessageCodec {
+  @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Introduce custom data types
@@ -36,7 +37,7 @@ private[examples] object MessageCodec {
 
     // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
     val handler = Handler.protocol(serverProtocol).system(system).bind(api)
-    lazy val server = Default.server(handler.bind(api), 7000, "/api")
+    val server = Default.server(handler.bind(api), 7000, "/api")
 
     // Define client view of the remote API
     trait ClientApi {

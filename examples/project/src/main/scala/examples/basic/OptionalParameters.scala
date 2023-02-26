@@ -5,6 +5,7 @@ import automorph.transport.http.HttpMethod
 import java.net.URI
 
 private[examples] object OptionalParameters {
+  @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Create server API instance
