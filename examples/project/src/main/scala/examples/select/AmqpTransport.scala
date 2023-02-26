@@ -16,16 +16,16 @@ import scala.util.Try
 private[examples] object AmqpTransport {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
-
-    // Create server API instance
-    class ServerApi {
-      def hello(some: String, n: Int): Future[String] =
-        Future(s"Hello $some $n!")
-    }
-    val api = new ServerApi()
-
-    // Start embedded RabbitMQ broker
     if (Try(Process("erl -eval 'halt()' -noshell").! == 0).getOrElse(false)) {
+
+      // Create server API instance
+      class ServerApi {
+        def hello(some: String, n: Int): Future[String] =
+          Future(s"Hello $some $n!")
+      }
+      val api = new ServerApi()
+
+      // Start embedded RabbitMQ broker
       val brokerConfig = new EmbeddedRabbitMqConfig.Builder().port(7000)
         .rabbitMqServerInitializationTimeoutInMillis(30000).build()
       val broker = new EmbeddedRabbitMq(brokerConfig)
