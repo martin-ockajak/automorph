@@ -29,7 +29,7 @@ trait ProtocolCodecTest extends CoreTest {
       jacksonJsonFixture(),
 //      uPickleJsonFixture(),
 //      uPickleMessagePackFixture(),
-//      argonautJsonFixture(),
+      argonautJsonFixture(),
     )
   }
 
@@ -141,57 +141,58 @@ trait ProtocolCodecTest extends CoreTest {
 //    )
 //  }
 
-//  private def argonautJsonFixture()(implicit context: Context): TestFixture = {
-//    implicit val enumCodecJson: CodecJson[Enum.Enum] =
-//      CodecJson((v: Enum.Enum) => jNumber(Enum.toOrdinal(v)), cursor => cursor.focus.as[Int].map(Enum.fromOrdinal))
-//    implicit val structureCodecJson: CodecJson[Structure] = Argonaut
-//      .codec1(Structure.apply, (v: Structure) => v.value)("value")
-//    implicit val recordCodecJson: CodecJson[Record] = Argonaut.codec13(
-//      Record.apply,
-//      (v: Record) =>
-//        (
-//          v.string,
-//          v.boolean,
-//          v.byte,
-//          v.short,
-//          v.int,
-//          v.long,
-//          v.float,
-//          v.double,
-//          v.enumeration,
-//          v.list,
-//          v.map,
-//          v.structure,
-//          v.none,
-//        ),
-//    )(
-//      "string",
-//      "boolean",
-//      "byte",
-//      "short",
-//      "int",
-//      "long",
-//      "float",
-//      "double",
-//      "enumeration",
-//      "list",
-//      "map",
-//      "structure",
-//      "none",
-//    )
-//    val codec = ArgonautJsonCodec()
-//    val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type, Context](codec)
-//    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
-//    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-//    val client = Client.protocol(protocol).transport(transport)
-//    TestFixture(
-//      client,
-//      handler,
-//      client.bind[SimpleApiType],
-//      client.bind[ComplexApiType],
-//      client.bind[InvalidApiType],
-//      (function, a0) => client.call[String](function).args(a0),
-//      (function, a0) => client.message(function).args(a0),
-//    )
-//  }
+  private def argonautJsonFixture()(implicit context: Context): TestFixture = {
+    implicit val enumCodecJson: CodecJson[Enum.Enum] =
+      CodecJson((v: Enum.Enum) => jNumber(Enum.toOrdinal(v)), cursor => cursor.focus.as[Int].map(Enum.fromOrdinal))
+    implicit val structureCodecJson: CodecJson[Structure] = Argonaut
+      .codec1(Structure.apply, (v: Structure) => v.value)("value")
+    implicit val recordCodecJson: CodecJson[Record] = Argonaut.codec13(
+      Record.apply,
+      (v: Record) =>
+        (
+          v.string,
+          v.boolean,
+          v.byte,
+          v.short,
+          v.int,
+          v.long,
+          v.float,
+          v.double,
+          v.enumeration,
+          v.list,
+          v.map,
+          v.structure,
+          v.none,
+        ),
+    )(
+      "string",
+      "boolean",
+      "byte",
+      "short",
+      "int",
+      "long",
+      "float",
+      "double",
+      "enumeration",
+      "list",
+      "map",
+      "structure",
+      "none",
+    )
+    val codec = ArgonautJsonCodec()
+    val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type, Context](codec)
+    val simpleHandler = Handler.protocol(protocol).system(system).bind(simpleApi)
+    val handler = simpleHandler.bind(complexApi)
+    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
+    val client = Client.protocol(protocol).transport(transport)
+    TestFixture(
+      client,
+      handler,
+      client.bind[SimpleApiType],
+      client.bind[ComplexApiType],
+      client.bind[InvalidApiType],
+      (function, a0) => client.call[String](function).args(a0),
+      (function, a0) => client.message(function).args(a0),
+    )
+  }
 }
