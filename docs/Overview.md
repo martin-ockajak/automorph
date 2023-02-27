@@ -16,6 +16,8 @@ sidebar_position: 1
 
 ## API
 
+Entry points for the application logic to invoke or expose remote APIs:
+
 * [Client](/api/automorph/Client.html) - call type-safe remote APIs (*bind & call*)
 * [Handler](/api/automorph/Handler.html) - generate remote call bindings for existing APIs (*bind & process*)
 * [Servers](/api/automorph/transport/index.html) - serve existing APIs remotely (*bind & serve*)
@@ -23,11 +25,19 @@ sidebar_position: 1
 
 ## SPI
 
+Interfaces for implementation of various integration plugins:
+
+* [EffectSystem](/api/automorph/spi/EffectSystem.html) - invoking and exposing remote APIs using various effect handling abstractions
+* [MessageCodec](/api/automorph/spi/MessageCodec.html) - serialization of RPC messages into structured data formats
+* [MessageTransport](/api/automorph/spi/MessageTransport.html) - transfer of RPC messages via different transport protocols
+* [RpcProtocol](/api/automorph/spi/RpcProtocol.html) - specific RPC protocol support
+
 
 ## Limitations
 
 * Bound remote APIs methods cannot be [polymorphic](https://docs.scala-lang.org/tour/polymorphic-methods.html)
 * [Client](/api/automorph/Client.html) cannot be used from within [delayed initialization](https://scala-lang.org/api/3.x/scala/DelayedInit.html) mechanism (e.g. [App](https://scala-lang.org/api/3.x/scala/App.html) trait)
+* Scala 2 type inference constraints sometimes require explicitly supplying type parameters when composing plugins
 
 
 ## Supported standards
