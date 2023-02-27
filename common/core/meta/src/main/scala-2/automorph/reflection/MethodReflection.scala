@@ -146,9 +146,9 @@ private[automorph] object MethodReflection {
     ref: ClassReflection[C]
   )(method: ref.RefMethod): Boolean =
     method.parameters.flatten.lastOption.exists { parameter =>
-//      parameter.contextual && parameter.dataType =:= ref.c.weakTypeOf[Context]
       // FIXME - fix generic parameter type detection
       parameter.contextual
+//      parameter.contextual && parameter.dataType =:= ref.c.weakTypeOf[Context]
     }
 
   /**
@@ -175,10 +175,11 @@ private[automorph] object MethodReflection {
 
     someType.dealias match {
       case typeRef: TypeRef
-//        if typeRef.typeConstructor <:< c.weakTypeOf[Contextual].typeConstructor && typeRef.typeArgs.size > 1
-//         => Some(typeRef.typeArgs(0))
-        if typeRef.typeConstructor <:< c.weakTypeOf[Contextual].typeConstructor && typeRef.typeArgs.size > 1 &&
-        typeRef.typeArgs(1) =:= c.weakTypeOf[Context] => Some(typeRef.typeArgs(0))
+        // FIXME - fix generic parameter type detection
+        if typeRef.typeConstructor <:< c.weakTypeOf[Contextual].typeConstructor && typeRef.typeArgs.size == 2
+         => Some(typeRef.typeArgs(0))
+//        if typeRef.typeConstructor <:< c.weakTypeOf[Contextual].typeConstructor && typeRef.typeArgs.size == 2 &&
+//        typeRef.typeArgs(1) =:= c.weakTypeOf[Context] => Some(typeRef.typeArgs(0))
       case _ => None
     }
   }

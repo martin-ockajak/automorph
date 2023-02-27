@@ -174,7 +174,7 @@ object HandlerGenerator {
         q"""
           (result: Any) =>
             $codec.encode[$contextualResultType](result.asInstanceOf[$resultType].result) -> Some(
-              result.asInstanceOf[$resultType].context
+              result.asInstanceOf[$resultType].context.asInstanceOf[$contextType]
             )
         """
       }.getOrElse {

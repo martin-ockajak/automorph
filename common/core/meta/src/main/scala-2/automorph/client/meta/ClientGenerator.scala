@@ -143,7 +143,7 @@ object ClientGenerator {
     val resultType = MethodReflection.unwrapType[C, Effect[?]](ref.c)(method.resultType).dealias
     MethodReflection.contextualResult[C, Context, Contextual[?, ?]](ref.c)(resultType).map { contextualResultType =>
       ref.c.Expr[(Node, Context) => Any](q"""
-        (resultNode: $nodeType, responseContext: $contextType) => Contextual(
+        (resultNode: $nodeType, responseContext: $contextType) => automorph.Contextual(
           $codec.decode[$contextualResultType](resultNode),
           responseContext
         )
