@@ -1,4 +1,4 @@
-package examples.lowlevel
+package examples.metadata
 
 import automorph.Default.{ClientContext, ServerContext}
 import automorph.transport.http.HttpContext

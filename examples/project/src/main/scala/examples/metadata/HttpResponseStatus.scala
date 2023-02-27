@@ -1,4 +1,4 @@
-package examples.customization
+package examples.metadata
 
 import automorph.Default
 import automorph.transport.http.HttpContext

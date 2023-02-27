@@ -1,9 +1,9 @@
 package examples
 
-import examples.lowlevel.{Authentication, DynamicPayload, HttpRequestMetadata, HttpResponseMetadata, PositionalArguments}
+import examples.metadata.{Authentication, DynamicPayload, HttpRequestMetadata, HttpResponseMetadata, HttpResponseStatus}
 import examples.basic.{ApiSchemaDiscovery, AsynchronousCall, OneWayMessage, OptionalParameters, SynchronousCall}
 import examples.customization.{
-  ClientExceptions, ClientFunctionNames, CustomDataSerialization, HttpResponseStatus, ServerErrors, ServerFunctionNames,
+  ClientExceptions, ClientFunctionNames, CustomDataSerialization, PositionalArguments, ServerErrors, ServerFunctionNames,
 }
 import examples.integration.{
   AmqpTransport, ClientTransport, EffectSystem, EndpointTransport, MessageCodec, RpcProtocol, ServerTransport,
@@ -24,19 +24,20 @@ class ExamplesTest extends BaseTest {
         OneWayMessage,
         OptionalParameters,
         SynchronousCall,
+        PositionalArguments,
       ).foreach { instance =>
         testName(instance) in {
           runTest(instance)
         }
       }
     }
-    "Low Level" - {
+    "Metadata" - {
       Seq[Any](
         Authentication,
         DynamicPayload,
         HttpRequestMetadata,
         HttpResponseMetadata,
-        PositionalArguments,
+        HttpResponseStatus,
       ).foreach { instance =>
         testName(instance) in {
           runTest(instance)
@@ -48,7 +49,6 @@ class ExamplesTest extends BaseTest {
         ClientExceptions,
         ClientFunctionNames,
         CustomDataSerialization,
-        HttpResponseStatus,
         ServerFunctionNames,
         ServerErrors,
       ).foreach { instance =>

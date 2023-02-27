@@ -1,4 +1,4 @@
-package examples.lowlevel
+package examples.metadata
 
 import automorph.Default
 import automorph.Default.{ClientContext, ServerContext}
