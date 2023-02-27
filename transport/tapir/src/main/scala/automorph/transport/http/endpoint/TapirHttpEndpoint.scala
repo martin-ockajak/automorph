@@ -15,8 +15,8 @@ import sttp.tapir.{byteArrayBody, clientIp, endpoint, header, headers, paths, qu
 /**
  * Tapir HTTP endpoint message transport plugin.
  *
- * The endpoint interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
- * The response returned by the RPC handler is used as HTTP response body.
+ * The endpoint interprets HTTP request body as an RPC request and processes it using the specified RPC handler. The
+ * response returned by the RPC handler is used as HTTP response body.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -94,7 +94,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
       }
   }
 
-  private def getRequestContext(
+  private[automorph] def getRequestContext(
     paths: List[String],
     queryParams: QueryParams,
     headers: List[Header],
@@ -108,13 +108,7 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
       headers = headers.map(header => header.name -> header.value),
     )
 
-  private def urlPath(paths: List[String]): String =
-    paths match {
-      case Nil => "/"
-      case items => items.mkString("/")
-    }
-
-  private def getRequestProperties(
+  private[automorph] def getRequestProperties(
     clientIp: Option[String],
     method: Option[Method],
     requestId: String,
@@ -122,8 +116,14 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(clientIp)) ++
       method.map("Method" -> _.toString)
 
-  private def clientAddress(clientIp: Option[String]): String =
+  private[automorph] def clientAddress(clientIp: Option[String]): String =
     clientIp.getOrElse("")
+
+  private def urlPath(paths: List[String]): String =
+    paths match {
+      case Nil => "/"
+      case items => items.mkString("/")
+    }
 
   private def createErrorResponse(
     error: Throwable,
