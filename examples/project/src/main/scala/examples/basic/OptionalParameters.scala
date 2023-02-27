@@ -1,7 +1,6 @@
 package examples.basic
 
 import automorph.Default
-import automorph.transport.http.HttpMethod
 import java.net.URI
 
 private[examples] object OptionalParameters {
@@ -18,16 +17,16 @@ private[examples] object OptionalParameters {
     }
     val api = new ServerApi()
 
-    // Start JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
-    val serverBuilder = Default.serverBuilderSync(7000, "/api", Seq(HttpMethod.Put))
+    // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
+    val serverBuilder = Default.serverBuilderSync(7000, "/api")
     val server = serverBuilder(_.bind(api))
 
     // Define client view of the remote API
     trait ClientApi {
       def hello(some: String): String
     }
-    // Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
-    val client = Default.clientSync(new URI("http://localhost:7000/api"), HttpMethod.Put)
+    // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+    val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
     // Call the remote API function statically
     val remoteApi = client.bind[ClientApi]

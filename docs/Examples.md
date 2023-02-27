@@ -52,9 +52,16 @@ trait ClientApi {
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientSync(new URI("http://localhost:7000/api"), HttpMethod.Post)
 
-// Call the remote API function
+// Call the remote API function statically
 val remoteApi = client.bind[ClientApi]
-remoteApi.hello("world", 1)
+println(
+  remoteApi.hello("world", 1)
+)
+
+// Call the remote API function dynamically
+println(
+  client.call[String]("hello").args("some" -> "world", "n" -> 1)
+)
 ```
 
 **Cleanup**
@@ -81,7 +88,6 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.Default
-import automorph.transport.http.HttpMethod
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -98,8 +104,8 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
-val serverBuilder = Default.serverBuilderAsync(7000, "/api", Seq(HttpMethod.Put))
+// Start JSON-RPC HTTP server listening on port 7000 for POST or PUT requests to '/api'
+val serverBuilder = Default.serverBuilderAsync(7000, "/api", Seq(HttpMethod.Post, HttpMethod.Put))
 val server = serverBuilder(_.bind(api))
 ```
 
@@ -113,10 +119,16 @@ trait ClientApi {
 // Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
 val client = Default.clientAsync(new URI("http://localhost:7000/api"), HttpMethod.Put)
 
-// Call the remote API function and print the result
+// Call the remote API function statically
 val remoteApi = client.bind[ClientApi]
 println(Await.result(
   remoteApi.hello("world", 1),
+  Duration.Inf
+))
+
+// Call the remote API function dynamically
+println(Await.result(
+  client.call[String]("hello").args("some" -> "world", "n" -> 1),
   Duration.Inf
 ))
 ```
@@ -164,16 +176,16 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
-val serverBuilder = Default.serverBuilderAsync(7000, "/api", Seq(HttpMethod.Put))
+// Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
+val serverBuilder = Default.serverBuilderAsync(7000, "/api")
 val server = serverBuilder(_.bind(api))
 ```
 
 **Client**
 
 ```scala
-// Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
-val client = Default.clientAsync(new URI("http://localhost:7000/api"), HttpMethod.Put)
+// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
 // Retrieve the remote API schema in OpenRPC format
 println(Await.result(
@@ -274,7 +286,6 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.Default
-import automorph.transport.http.HttpMethod
 import java.net.URI
 ```
 
@@ -291,8 +302,8 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
-val serverBuilder = Default.serverSync(7000, "/api", Seq(HttpMethod.Put))
+// Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
+val serverBuilder = Default.serverSync(7000, "/api")
 val server = serverBuilder(_.bind(api))
 ```
 
@@ -303,8 +314,8 @@ val server = serverBuilder(_.bind(api))
 trait ClientApi {
   def hello(some: String): String
 }
-// Setup JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
-val client = Default.clientSync(new URI("http://localhost:7000/api"), HttpMethod.Put)
+// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
 // Call the remote API function statically
 val remoteApi = client.bind[ClientApi]
@@ -990,7 +1001,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [Arguments by position](../../examples/project/src/test/scala/examples/customize/ArgumentsByPosition.scala)
+### [Positional arguments](../../examples/project/src/test/scala/examples/customize/PositionalArguments.scala)
 
 **Build**
 
@@ -1004,7 +1015,6 @@ libraryDependencies ++= Seq(
 
 ```scala
 import automorph.{Client, Default}
-import automorph.transport.http.HttpMethod
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -1021,8 +1031,8 @@ class ServerApi {
 }
 val api = new ServerApi()
 
-// Start JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
-val serverBuilder = Default.serverAsync(7000, "/api", Seq(HttpMethod.Put))
+// Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
+val serverBuilder = Default.serverAsync(7000, "/api")
 val server = serverBuilder(_.bind(api))
 ```
 
@@ -1037,9 +1047,9 @@ trait ClientApi {
 // Configure JSON-RPC to pass arguments by position instead of by name
 val protocol = Default.protocol[Default.ClientContext].namedArguments(false)
 
-// Setup custom JSON-RPC HTTP client sending PUT requests to 'http://localhost:7000/api'
+// Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val url = new URI("http://localhost:7000/api")
-val clientTransport = Default.clientTransportAsync(url, HttpMethod.Put)
+val clientTransport = Default.clientTransportAsync(url)
 val client = Client.protocol(protocol).transport(clientTransport)
 
 // Call the remote API function

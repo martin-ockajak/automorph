@@ -26,9 +26,16 @@ private[examples] object SynchronousCall {
     // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
     val client = Default.clientSync(new URI("http://localhost:7000/api"), HttpMethod.Post)
 
-    // Call the remote API function
+    // Call the remote API function statically
     val remoteApi = client.bind[ClientApi]
-    remoteApi.hello("world", 1)
+    println(
+      remoteApi.hello("world", 1)
+    )
+
+    // Call the remote API function dynamically
+    println(
+      client.call[String]("hello").args("some" -> "world", "n" -> 1)
+    )
 
     // Close the client
     client.close()
