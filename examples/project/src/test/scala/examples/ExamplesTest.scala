@@ -1,8 +1,16 @@
 package examples
 
-import examples.basic.{ApiSchemaDiscovery, AsynchronousCall, Authentication, HttpRequestMetadata, HttpResponseMetadata, OneWayMessage, OptionalParameters, SynchronousCall}
-import examples.customize.{ArgumentsByPosition, ClientExceptions, ClientFunctionNames, CustomDataSerialization, HttpResponseStatus, ServerFunctionNames, ServerProtocolErrors}
-import examples.select.{ClientTransport, EffectSystem, EndpointTransport, MessageCodec, RpcProtocol, ServerTransport, WebSocketTransport}
+import examples.basic.{
+  ApiSchemaDiscovery, AsynchronousCall, Authentication, HttpRequestMetadata, HttpResponseMetadata, OneWayMessage,
+  OptionalParameters, SynchronousCall,
+}
+import examples.customize.{
+  ArgumentsByPosition, ClientExceptions, ClientFunctionNames, CustomDataSerialization, HttpResponseStatus,
+  ServerFunctionNames, ServerProtocolErrors,
+}
+import examples.select.{
+  ClientTransport, EffectSystem, EndpointTransport, MessageCodec, RpcProtocol, ServerTransport, WebSocketTransport,
+}
 import test.base.BaseTest
 
 class ExamplesTest extends BaseTest {
@@ -50,7 +58,7 @@ class ExamplesTest extends BaseTest {
         EndpointTransport,
         MessageCodec,
         RpcProtocol,
-//        ServerTransport,
+        ServerTransport,
         WebSocketTransport,
       ).foreach { instance =>
         testName(instance) in {

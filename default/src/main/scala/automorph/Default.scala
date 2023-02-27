@@ -40,19 +40,17 @@ object Default extends DefaultMeta {
   /** Request context type. */
   type ClientContext = HttpClient.Context
 
-  /** Default server type. */
-  type Server[Effect[_]] = UndertowServer[Effect]
-
   /** Request context type. */
   type ServerContext = UndertowServer.Context
 
-  /**
-   * Default RPC server request handler type.
-   *
-   * @tparam Effect
-   *   effect type
-   */
-  type ServerHandler[Effect[_]] = Handler[Effect, ServerContext]
+  /** Default server type. */
+  type Server[Effect[_]] = UndertowServer[Effect]
+
+  /** Default asynchronous effect type. */
+  type AsyncEffect[T] = Future[T]
+
+  /** Default synchronous effect type. */
+  type SyncEffect[T] = Identity[T]
 
   /**
    * Server API binding function.
@@ -60,15 +58,15 @@ object Default extends DefaultMeta {
    * @tparam Effect
    *   effect type
    */
-  type BindServerApis[Effect[_]] = ServerHandler[Effect] => ServerHandler[Effect]
+  type ServerApiBinder[Effect[_]] = Handler[Effect, ServerContext] => Handler[Effect, ServerContext]
 
   /**
-   * Server builder function.
+   * Server building function.
    *
    * @tparam Effect
    *   effect type
    */
-  type ServerBuilder[Effect[_]] = BindServerApis[Effect] => Server[Effect]
+  type ServerBuilder[Effect[_]] = ServerApiBinder[Effect] => Server[Effect]
 
   /**
    * Creates a synchronous identity effect system plugin.
@@ -80,7 +78,7 @@ object Default extends DefaultMeta {
    * @return
    *   synchronous effect system plugin
    */
-  def systemSync: EffectSystem[Identity] =
+  def systemSync: EffectSystem[SyncEffect] =
     IdentitySystem()
 
   /**
@@ -93,7 +91,7 @@ object Default extends DefaultMeta {
    * @return
    *   asynchronous effect system plugin
    */
-  def systemAsync(implicit executionContext: ExecutionContext): CompletableEffectSystem[Future] =
+  def systemAsync(implicit executionContext: ExecutionContext): CompletableEffectSystem[AsyncEffect] =
     FutureSystem()
 
   /**
@@ -198,7 +196,7 @@ object Default extends DefaultMeta {
    */
   def clientAsync(url: URI, method: HttpMethod = HttpMethod.Post)(implicit
     executionContext: ExecutionContext
-  ): Client[Future, ClientContext] =
+  ): Client[AsyncEffect, ClientContext] =
     client(clientTransportAsync(url, method))
 
   /**
@@ -223,7 +221,7 @@ object Default extends DefaultMeta {
    */
   def clientTransportAsync(url: URI, method: HttpMethod = HttpMethod.Post)(implicit
     executionContext: ExecutionContext
-  ): ClientMessageTransport[Future, ClientContext] =
+  ): ClientMessageTransport[AsyncEffect, ClientContext] =
     clientTransport(systemAsync, url, method)
 
   /**
@@ -247,7 +245,7 @@ object Default extends DefaultMeta {
    * @return
    *   synchronous RPC client
    */
-  def clientSync(url: URI, method: HttpMethod = HttpMethod.Post): Client[Identity, ClientContext] =
+  def clientSync(url: URI, method: HttpMethod = HttpMethod.Post): Client[SyncEffect, ClientContext] =
     client(clientTransportSync(url, method))
 
   /**
@@ -271,7 +269,7 @@ object Default extends DefaultMeta {
   def clientTransportSync(
     url: URI,
     method: HttpMethod = HttpMethod.Post,
-  ): ClientMessageTransport[Identity, ClientContext] =
+  ): ClientMessageTransport[SyncEffect, ClientContext] =
     clientTransport(systemSync, url, method)
 
   /**
@@ -299,7 +297,7 @@ object Default extends DefaultMeta {
    * @return
    *   synchronous RPC request handler
    */
-  def handlerSync[Context]: Handler[Identity, Context] =
+  def handlerSync[Context]: Handler[SyncEffect, Context] =
     Handler(protocol, systemSync)
 
   /**
@@ -314,7 +312,7 @@ object Default extends DefaultMeta {
    * @return
    *   asynchronous RPC request handler
    */
-  def handlerAsync[Context](implicit executionContext: ExecutionContext): Handler[Future, Context] =
+  def handlerAsync[Context](implicit executionContext: ExecutionContext): Handler[AsyncEffect, Context] =
     Handler(protocol, systemAsync)
 
   /**
@@ -406,8 +404,8 @@ object Default extends DefaultMeta {
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder,
   ): ServerBuilder[Effect] =
-    (bindApis: BindServerApis[Effect]) => {
-      val handler = bindApis(Handler.protocol(protocol[ServerContext]).system(system))
+    (serverApiBinder: ServerApiBinder[Effect]) => {
+      val handler = serverApiBinder(Handler.protocol(protocol[ServerContext]).system(system))
       server(handler, port, path, methods, webSocket, mapException, builder)
     }
 
@@ -450,9 +448,9 @@ object Default extends DefaultMeta {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder,
-  ): ServerBuilder[Identity] =
-    (bindApis: BindServerApis[Identity]) => {
-      val handler = bindApis(handlerSync)
+  ): ServerBuilder[SyncEffect] =
+    (serverApiBinder: ServerApiBinder[SyncEffect]) => {
+      val handler = serverApiBinder(handlerSync)
       server(handler, port, path, methods, webSocket, mapException, builder)
     }
 
@@ -497,9 +495,9 @@ object Default extends DefaultMeta {
     webSocket: Boolean = true,
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     builder: Undertow.Builder = defaultBuilder,
-  )(implicit executionContext: ExecutionContext): ServerBuilder[Future] =
-    (bindApis: BindServerApis[Future]) => {
-      val handler = bindApis(handlerAsync)
+  )(implicit executionContext: ExecutionContext): ServerBuilder[AsyncEffect] =
+    (serverApiBinder: ServerApiBinder[AsyncEffect]) => {
+      val handler = serverApiBinder(handlerAsync)
       server(handler, port, path, methods, webSocket, mapException, builder)
     }
 }

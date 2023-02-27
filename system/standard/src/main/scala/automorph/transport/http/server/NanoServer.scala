@@ -6,7 +6,7 @@ import automorph.spi.EffectSystem
 import automorph.spi.transport.ServerMessageTransport
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
-import automorph.transport.http.server.NanoServer.{Context, Execute}
+import automorph.transport.http.server.NanoServer.Context
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
@@ -33,6 +33,8 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  *   Creates a NanoHTTPD HTTP & WebSocket server with specified RPC request handler.
  * @param handler
  *   RPC request handler
+ * @param evaluateResponse
+ * evaluates response effect
  * @param port
  *   port to listen on for HTTP connections
  * @param pathPrefix
@@ -43,19 +45,17 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  *   support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
  * @param mapException
  *   maps an exception to a corresponding HTTP status code
- * @param executeEffect
- *   executes specified effect synchronously
  * @tparam Effect
  *   effect type
  */
-final case class NanoServer[Effect[_]] private (
+final case class NanoServer[Effect[_]] (
   handler: Types.HandlerAnyCodec[Effect, Context],
+  evaluateResponse: Effect[Response] => Response,
   port: Int,
-  pathPrefix: String,
-  methods: Iterable[HttpMethod],
-  webSocket: Boolean,
-  mapException: Throwable => Int,
-  executeEffect: Execute[Effect],
+  pathPrefix: String = "/",
+  methods: Iterable[HttpMethod] = HttpMethod.values,
+  webSocket: Boolean = true,
+  mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
 ) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect, Context] {
 
   private val headerXForwardedFor = "X-Forwarded-For"
@@ -63,6 +63,7 @@ final case class NanoServer[Effect[_]] private (
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val allowedMethods = methods.map(_.name).toSet
   implicit private val system: EffectSystem[Effect] = genericHandler.system
+  start()
 
   override def close(): Effect[Unit] =
     system.evaluate(stop())
@@ -151,7 +152,7 @@ final case class NanoServer[Effect[_]] private (
     log.receivedRequest(requestProperties, protocol.name)
 
     // Process the request
-    executeEffect(genericHandler.processRequest(requestBody, getRequestContext(session), requestId).either.map(
+    evaluateResponse(genericHandler.processRequest(requestBody, getRequestContext(session), requestId).either.map(
       _.fold(
         error => sendErrorResponse(error, session, protocol, requestId, requestProperties),
         result => {
@@ -243,55 +244,4 @@ object NanoServer {
 
   /** Response type. */
   type Response = NanoHTTPD.Response
-
-  /**
-   * Synchronous effect execution function type.
-   *
-   * @tparam Effect
-   *   effect type
-   */
-  type Execute[Effect[_]] = Effect[Response] => Response
-
-  /**
-   * Creates and starts a NanoHTTPD HTTP & WebSocket server with the specified RPC request handler.
-   *
-   * Resulting function requires:
-   *   - effect execution function - executes specified effect synchronously
-   *
-   * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
-   * @see
-   *   [[https://github.com/NanoHttpd/nanohttpd Library documentation]]
-   * @see
-   *   [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
-   * @param handler
-   *   RPC request handler
-   * @param port
-   *   port to listen on for HTTP connections
-   * @param path
-   *   HTTP URL path (default: /)
-   * @param methods
-   *   allowed HTTP request methods (default: any)
-   * @param webSocket
-   *   support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
-   * @param mapException
-   *   maps an exception to a corresponding HTTP status code
-   * @tparam Effect
-   *   effect type
-   * @return
-   *   creates NanoHTTPD HTTP & WebSocket server using supplied synchronous effect execution function
-   */
-  def create[Effect[_]](
-    handler: Types.HandlerAnyCodec[Effect, Context],
-    port: Int,
-    path: String = "/",
-    methods: Iterable[HttpMethod] = HttpMethod.values,
-    webSocket: Boolean = true,
-    mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-  ): Execute[Effect] => NanoServer[Effect] =
-    (executeEffect: Execute[Effect]) => {
-      val server = new NanoServer(handler, port, path, methods, webSocket, mapException, executeEffect)
-      server.start()
-      server
-    }
 }
