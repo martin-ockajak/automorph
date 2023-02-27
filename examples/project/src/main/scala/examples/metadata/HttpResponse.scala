@@ -5,7 +5,7 @@ import automorph.transport.http.HttpContext
 import automorph.{Contextual, Default}
 import java.net.URI
 
-private[examples] object HttpResponseMetadata {
+private[examples] object HttpResponse {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
@@ -15,7 +15,7 @@ private[examples] object HttpResponseMetadata {
       // Return HTTP response context consumed by the server message transport plugin
       def hello(message: String): Contextual[String, ServerContext] = Contextual(
         message,
-        HttpContext().headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
+        HttpContext().headers("X-Test" -> "value", "Cache-Control" -> "no-cache").statusCode(200)
       )
     }
     val api = new ServerApi()

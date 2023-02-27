@@ -1,8 +1,7 @@
-package examples.customization
+package examples.errors
 
-import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
-import automorph.protocol.jsonrpc.JsonRpcException
-import automorph.{Default, Handler}
+import automorph.Default
+import automorph.transport.http.HttpContext
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -10,36 +9,30 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import scala.util.Try
 
-private[examples] object ServerErrors {
+private[examples] object HttpStatusCode {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Create server API instance
     class ServerApi {
       def hello(some: String, n: Int): Future[String] =
-        if (n >= 0) {
-          Future.failed(new SQLException("Invalid request"))
-        } else {
-          Future.failed(JsonRpcException("Application error", 1))
-        }
+        Future.failed(new SQLException("Bad request"))
     }
     val api = new ServerApi()
 
-    // Customize remote API server exception to RPC error mapping
-    val protocol = Default.protocol[Default.ServerContext].mapException(_ match {
-      case _: SQLException => InvalidRequest
-      case error => Default.protocol.mapException(error)
+    // Customize remote API server exception to HTTP status code mapping
+    val serverBuilder = Default.serverBuilderAsync(7000, "/api", mapException = {
+      case _: SQLException => 400
+      case e => HttpContext.defaultExceptionToStatusCode(e)
     })
 
     // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-    val handler = Handler.protocol(protocol).system(Default.systemAsync).bind(api)
-    val server = Default.server(handler, 7000, "/api")
+    val server = serverBuilder(_.bind(api))
 
     // Define client view of the remote API
     trait ClientApi {
       def hello(some: String, n: Int): Future[String]
     }
-
     // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
     val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
@@ -47,12 +40,6 @@ private[examples] object ServerErrors {
     val remoteApi = client.bind[ClientApi]
     println(Try(Await.result(
       remoteApi.hello("world", 1),
-      Duration.Inf
-    )).failed.get)
-
-    // Call the remote API function and fail with RuntimeException
-    println(Try(Await.result(
-      remoteApi.hello("world", -1),
       Duration.Inf
     )).failed.get)
 

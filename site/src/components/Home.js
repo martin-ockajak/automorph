@@ -13,7 +13,7 @@ const style = {
 const features = [
   {
     title: 'Automatic',
-    link: 'docs/Quickstart/index.html',
+    link: 'docs/Examples/index.html#basic',
     description: (
         <>
           Generate <a href="https://www.jsonrpc.org/specification">JSON-RPC</a> 2.0 and <a
@@ -22,8 +22,21 @@ const features = [
     ),
   },
   {
+    title: 'Flexible',
+    link: 'docs/Examples/index.html#dynamic-payload',
+    description: (
+        <>
+          Customize <a
+            href="docs/Examples/index.html#data-serialization">data serialization</a>, <a
+            href="docs/Examples/index.html#client-function-names">remote API function names</a>, <a
+            href="docs/Examples/index.html#client-exceptions">RPC protocol errors</a> and <a
+            href="docs/Examples/index.html#http-authentication">authentication</a>.
+        </>
+    ),
+  },
+  {
     title: 'Modular',
-    link: 'docs/Examples/index.html#select',
+    link: 'docs/Examples/index.html#integration',
     description: (
         <>
           Choose plugins for <a href="docs/Plugins/index.html#rpc-protocol">RPC protocol</a>, <a
@@ -34,28 +47,19 @@ const features = [
     ),
   },
   {
-    title: 'Flexible',
-    link: 'docs/Examples/index.html#data-serialization',
-    description: (
-        <>
-          Customize data serialization, remote API function names, RPC protocol errors and <a
-            href="docs/Examples/index.html#authentication">authentication</a>.
-        </>
-    ),
-  },
-  {
     title: 'Permissive',
-    link: 'docs/Examples/index.html#http-request-metadata',
+    link: 'docs/Examples/index.html#metadata',
     description: (
         <>
-          Access <a href="docs/Examples/index.html#http-request-metadata">transport protocol metadata</a> (
-          e.g. HTTP headers) using optional API abstractions.
+          Access transport protocol <a href="docs/Examples/index.html#http-request">request</a> and <a
+            href="docs/Examples/index.html#http-response">response</a> metadata (e.g. headers)
+          via optional abstractions.
         </>
     ),
   },
   {
     title: 'Discoverable',
-    link: 'docs/Examples/index.html#api-schema-discovery',
+    link: 'docs/Examples/index.html#api-schema',
     description: (
         <>
           Consume and provide <a href="https://spec.open-rpc.org">OpenRPC</a> 1.3+ or <a
@@ -69,9 +73,9 @@ const features = [
     link: 'https://mvnrepository.com/artifact/org.automorph/automorph',
     description: (
         <>
-          Requires <a href="https://dotty.epfl.ch/">Scala</a> 3.2+ or 2.13.+ on <a
-            href="https://openjdk.java.net/">JRE</a> 11+ and supports <a
-            href="http://www.slf4j.org/">SLF4J</a> logging.
+          Supports <a href="https://dotty.epfl.ch/">Scala</a> 3.2+ or 2.13.+ on <a
+            href="https://openjdk.java.net/">JRE</a> 11+ and has no dependencies other than <a
+            href="http://www.slf4j.org/">SLF4J</a> logging API.
         </>
     ),
   },
@@ -94,7 +98,7 @@ const features = [
     description: (
         <>
           <ul style={style.list}>
-            <li><a href="docs/Examples/index.html#http-response-status">HTTP</a></li>
+            <li><a href="docs/Examples/index.html#http-authentication">HTTP</a></li>
             <li><a href="docs/Examples/index.html#websocket-transport">WebSocket</a></li>
             <li><a href="docs/Examples/index.html#amqp-transport">AMQP</a></li>
           </ul>

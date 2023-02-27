@@ -1,14 +1,16 @@
 package examples
 
-import examples.metadata.{Authentication, DynamicPayload, HttpRequestMetadata, HttpResponseMetadata, HttpResponseStatus}
-import examples.basic.{ApiSchemaDiscovery, AsynchronousCall, OneWayMessage, OptionalParameters, SynchronousCall}
+import examples.metadata.{HttpAuthentication, HttpRequest, HttpResponse}
+import examples.basic.{AsynchronousCall, OptionalParameters, SynchronousCall}
+import examples.special.{ApiSchema, DynamicPayload, OneWayMessage, PositionalArguments}
 import examples.customization.{
-  ClientExceptions, ClientFunctionNames, CustomDataSerialization, PositionalArguments, ServerErrors, ServerFunctionNames,
+  ClientFunctionNames, DataSerialization, ServerFunctionNames,
 }
+import examples.errors.{ClientExceptions, HttpStatusCode, ServerErrors}
 import examples.integration.{
-  AmqpTransport, ClientTransport, EffectSystem, EndpointTransport, MessageCodec, RpcProtocol, ServerTransport,
-  WebSocketTransport,
+  EffectSystem, MessageCodec, RpcProtocol,
 }
+import examples.transport.{AmqpTransport, ClientTransport, EndpointTransport, ServerTransport, WebSocketTransport}
 import test.base.BaseTest
 
 class ExamplesTest extends BaseTest {
@@ -19,25 +21,9 @@ class ExamplesTest extends BaseTest {
     }
     "Basic" - {
       Seq[Any](
-        ApiSchemaDiscovery,
-        AsynchronousCall,
-        OneWayMessage,
-        OptionalParameters,
         SynchronousCall,
-        PositionalArguments,
-      ).foreach { instance =>
-        testName(instance) in {
-          runTest(instance)
-        }
-      }
-    }
-    "Metadata" - {
-      Seq[Any](
-        Authentication,
-        DynamicPayload,
-        HttpRequestMetadata,
-        HttpResponseMetadata,
-        HttpResponseStatus,
+        AsynchronousCall,
+        OptionalParameters,
       ).foreach { instance =>
         testName(instance) in {
           runTest(instance)
@@ -46,11 +32,43 @@ class ExamplesTest extends BaseTest {
     }
     "Customization" - {
       Seq[Any](
-        ClientExceptions,
+        DataSerialization,
         ClientFunctionNames,
-        CustomDataSerialization,
         ServerFunctionNames,
+      ).foreach { instance =>
+        testName(instance) in {
+          runTest(instance)
+        }
+      }
+    }
+    "Errors" - {
+      Seq[Any](
+        ClientExceptions,
         ServerErrors,
+        HttpStatusCode,
+      ).foreach { instance =>
+        testName(instance) in {
+          runTest(instance)
+        }
+      }
+    }
+    "Metadata" - {
+      Seq[Any](
+        HttpAuthentication,
+        HttpRequest,
+        HttpResponse,
+      ).foreach { instance =>
+        testName(instance) in {
+          runTest(instance)
+        }
+      }
+    }
+    "Special" - {
+      Seq[Any](
+        ApiSchema,
+        DynamicPayload,
+        OneWayMessage,
+        PositionalArguments,
       ).foreach { instance =>
         testName(instance) in {
           runTest(instance)
@@ -59,14 +77,22 @@ class ExamplesTest extends BaseTest {
     }
     "Integration" - {
       Seq[Any](
-        AmqpTransport,
-        ClientTransport,
         EffectSystem,
-        EndpointTransport,
         MessageCodec,
         RpcProtocol,
+      ).foreach { instance =>
+        testName(instance) in {
+          runTest(instance)
+        }
+      }
+    }
+    "Transport" - {
+      Seq[Any](
+        ClientTransport,
         ServerTransport,
+        EndpointTransport,
         WebSocketTransport,
+        AmqpTransport,
       ).foreach { instance =>
         testName(instance) in {
           runTest(instance)

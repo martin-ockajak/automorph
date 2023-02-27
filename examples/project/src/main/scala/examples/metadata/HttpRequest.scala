@@ -4,7 +4,7 @@ import automorph.Default
 import automorph.Default.{ClientContext, ServerContext}
 import java.net.URI
 
-private[examples] object HttpRequestMetadata {
+private[examples] object HttpRequest {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 

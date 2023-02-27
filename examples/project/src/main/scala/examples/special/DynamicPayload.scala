@@ -1,4 +1,4 @@
-package examples.metadata
+package examples.special
 
 import automorph.Default
 import io.circe.Json

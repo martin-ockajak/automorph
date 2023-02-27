@@ -1,12 +1,12 @@
-package examples.basic
+package examples.transport
 
 import automorph.Default
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
-private[examples] object OneWayMessage {
+private[examples] object WebSocketTransport {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
@@ -17,7 +17,7 @@ private[examples] object OneWayMessage {
     }
     val api = new ServerApi()
 
-    // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
     val serverBuilder = Default.serverBuilderAsync(7000, "/api")
     val server = serverBuilder(_.bind(api))
 
@@ -25,14 +25,15 @@ private[examples] object OneWayMessage {
     trait ClientApi {
       def hello(some: String, n: Int): Future[String]
     }
-    // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+    // Setup JSON-RPC HTTP client sending POST requests to 'ws://localhost:7000/api'
+    val client = Default.clientAsync(new URI("ws://localhost:7000/api"))
 
-    // Message the remote API function dynamically without expecting a response
-    Await.result(
-      client.message("hello").args("some" -> "world", "n" -> 1),
+    // Call the remote API function via proxy
+    val remoteApi = client.bind[ClientApi]
+    println(Await.result(
+      remoteApi.hello("world", 1),
       Duration.Inf
-    )
+    ))
 
     // Close the client
     Await.result(client.close(), Duration.Inf)

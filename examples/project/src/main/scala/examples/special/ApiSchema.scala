@@ -1,4 +1,4 @@
-package examples.basic
+package examples.special
 
 import automorph.Default
 import automorph.protocol.JsonRpcProtocol
@@ -8,7 +8,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-private[examples] object ApiSchemaDiscovery {
+private[examples] object ApiSchema {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
