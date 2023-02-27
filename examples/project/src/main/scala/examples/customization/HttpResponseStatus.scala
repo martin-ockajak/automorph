@@ -1,34 +1,33 @@
-package examples.select
+package examples.customization
 
 import automorph.Default
-import automorph.transport.http.endpoint.UndertowHttpEndpoint
-import io.undertow.{Handlers, Undertow}
+import automorph.transport.http.HttpContext
 import java.net.URI
+import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 
-private[examples] object EndpointTransport {
+private[examples] object HttpResponseStatus {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
     // Create server API instance
     class ServerApi {
       def hello(some: String, n: Int): Future[String] =
-        Future(s"Hello $some $n!")
+        Future.failed(new SQLException("Bad request"))
     }
     val api = new ServerApi()
 
-    // Create custom Undertow JSON-RPC endpoint
-    val handler = Default.handlerAsync[UndertowHttpEndpoint.Context]
-    val endpoint = UndertowHttpEndpoint(handler.bind(api))
+    // Customize remote API server exception to HTTP status code mapping
+    val serverBuilder = Default.serverBuilderAsync(7000, "/api", mapException = {
+      case _: SQLException => 400
+      case e => HttpContext.defaultExceptionToStatusCode(e)
+    })
 
-    // Start Undertow JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-    val server = Undertow.builder()
-      .addHttpListener(7000, "0.0.0.0")
-      .setHandler(Handlers.path().addPrefixPath("/api", endpoint))
-      .build()
-    server.start()
+    // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
+    val server = serverBuilder(_.bind(api))
 
     // Define client view of the remote API
     trait ClientApi {
@@ -37,17 +36,17 @@ private[examples] object EndpointTransport {
     // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
     val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
-    // Call the remote API function via proxy
+    // Call the remote API function and fail with InvalidRequestException
     val remoteApi = client.bind[ClientApi]
-    println(Await.result(
+    println(Try(Await.result(
       remoteApi.hello("world", 1),
       Duration.Inf
-    ))
+    )).failed.get)
 
     // Close the client
     Await.result(client.close(), Duration.Inf)
 
     // Stop the server
-    server.stop()
+    Await.result(server.close(), Duration.Inf)
   }
 }

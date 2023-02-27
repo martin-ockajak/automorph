@@ -1,4 +1,4 @@
-package examples.basic
+package examples.lowlevel
 
 import automorph.Default
 import io.circe.Json

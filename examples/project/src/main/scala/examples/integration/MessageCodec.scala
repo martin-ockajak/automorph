@@ -1,4 +1,4 @@
-package examples.select
+package examples.integration
 
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import automorph.{Client, Default, Handler}

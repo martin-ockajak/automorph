@@ -9,7 +9,7 @@ Most of the following examples are using [default plugins](Plugins).
 
 ## Basic
 
-### [Synchronous call](../../examples/project/src/test/scala/examples/basic/SynchronousCall.scala)
+### [Synchronous call](../../examples/project/src/main/scala/examples/basic/SynchronousCall.scala)
 
 **Build**
 
@@ -73,7 +73,7 @@ client.close()
 server.close()
 ```
 
-### [Asynchronous call](../../examples/project/src/test/scala/examples/basic/AsynchronousCall.scala)
+### [Asynchronous call](../../examples/project/src/main/scala/examples/basic/AsynchronousCall.scala)
 
 **Build**
 
@@ -142,7 +142,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [Optional parameters](../../examples/project/src/test/scala/examples/basic/OptionalParameters.scala)
+### [Optional parameters](../../examples/project/src/main/scala/examples/basic/OptionalParameters.scala)
 
 **Build**
 
@@ -207,7 +207,7 @@ client.close()
 server.close()
 ```
 
-### [One-way message](../../examples/project/src/test/scala/examples/basic/OneWayMessage.scala)
+### [One-way message](../../examples/project/src/main/scala/examples/basic/OneWayMessage.scala)
 
 **Build**
 
@@ -269,7 +269,77 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [Dynamic payload](../../examples/project/src/test/scala/examples/basic/DynamicPayload.scala)
+### [API schema discovery](../../examples/project/src/main/scala/examples/basic/ApiSchemaDiscovery.scala)
+
+**Build**
+
+```scala
+libraryDependencies ++= Seq(
+  "org.automorph" %% "automorph-default" % "@PROJECT_VERSION@"
+)
+```
+
+**Imports**
+
+```scala
+import automorph.Default
+import automorph.schema.{OpenApi, OpenRpc}
+import automorph.protocol.JsonRpcProtocol
+import automorph.transport.http.HttpMethod
+import java.net.URI
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
+```
+
+**Server**
+
+```scala
+// Create server API instance
+class ServerApi {
+  def hello(some: String, n: Int): Future[String] =
+    Future(s"Hello $some $n!")
+}
+val api = new ServerApi()
+
+// Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
+val serverBuilder = Default.serverBuilderAsync(7000, "/api")
+val server = serverBuilder(_.bind(api))
+```
+
+**Client**
+
+```scala
+// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+
+// Retrieve the remote API schema in OpenRPC format
+println(Await.result(
+  client.call[OpenRpc](JsonRpcProtocol.openRpcFunction).args(),
+  Duration.Inf
+).methods.map(_.name))
+
+// Retrieve the remote API schema in OpenAPI format
+println(Await.result(
+  client.call[OpenApi](JsonRpcProtocol.openApiFunction).args(),
+  Duration.Inf
+).paths.get.keys.toList)
+```
+
+**Cleanup**
+
+```scala
+// Close the client
+Await.result(client.close(), Duration.Inf)
+
+// Stop the server
+Await.result(server.close(), Duration.Inf)
+```
+
+
+## Advanced
+
+### [Dynamic payload](../../examples/project/src/main/scala/examples/lowlevel/DynamicPayload.scala)
 
 **Build**
 
@@ -340,7 +410,7 @@ client.close()
 server.close()
 ```
 
-### [HTTP request metadata](../../examples/project/src/test/scala-3/examples/basic/HttpRequestMetadata.scala)
+### [HTTP request metadata](../../examples/project/src/main/scala/examples/lowlevel/HttpRequestMetadata.scala)
 
 **Build**
 
@@ -422,7 +492,7 @@ client.close()
 server.close()
 ```
 
-### [HTTP response metadata](../../examples/project/src/test/scala/examples/basic/HttpResponseMetadata.scala)
+### [HTTP response metadata](../../examples/project/src/main/scala/examples/lowlevel/HttpResponseMetadata.scala)
 
 **Build**
 
@@ -495,7 +565,7 @@ client.close()
 server.close()
 ```
 
-### [Authentication](../../examples/project/src/test/scala/examples/basic/Authentication.scala)
+### [Authentication](../../examples/project/src/main/scala/examples/lowlevel/Authentication.scala)
 
 **Build**
 
@@ -591,7 +661,7 @@ client.close()
 server.close()
 ```
 
-### [API schema discovery](../../examples/project/src/test/scala/examples/basic/ApiSchemaDiscovery.scala)
+### [Positional arguments](../../examples/project/src/main/scala/examples/lowlevel/PositionalArguments.scala)
 
 **Build**
 
@@ -604,10 +674,7 @@ libraryDependencies ++= Seq(
 **Imports**
 
 ```scala
-import automorph.Default
-import automorph.schema.{OpenApi, OpenRpc}
-import automorph.protocol.JsonRpcProtocol
-import automorph.transport.http.HttpMethod
+import automorph.{Client, Default}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -625,27 +692,32 @@ class ServerApi {
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
-val serverBuilder = Default.serverBuilderAsync(7000, "/api")
+val serverBuilder = Default.serverAsync(7000, "/api")
 val server = serverBuilder(_.bind(api))
 ```
 
 **Client**
 
 ```scala
-// Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+// Define client view of a remote API
+trait ClientApi {
+  def hello(some: String, n: Int): Future[String]
+}
 
-// Retrieve the remote API schema in OpenRPC format
-println(Await.result(
-  client.call[OpenRpc](JsonRpcProtocol.openRpcFunction).args(),
-  Duration.Inf
-).methods.map(_.name))
+// Configure JSON-RPC to pass arguments by position instead of by name
+val protocol = Default.protocol[Default.ClientContext].namedArguments(false)
 
-// Retrieve the remote API schema in OpenAPI format
+// Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+val url = new URI("http://localhost:7000/api")
+val clientTransport = Default.clientTransportAsync(url)
+val client = Client.protocol(protocol).transport(clientTransport)
+
+// Call the remote API function
+val remoteApi = client.bind[ClientApi]
 println(Await.result(
-  client.call[OpenApi](JsonRpcProtocol.openApiFunction).args(),
+  remoteApi.hello("world", 1),
   Duration.Inf
-).paths.get.keys.toList)
+))
 ```
 
 **Cleanup**
@@ -661,7 +733,7 @@ Await.result(server.close(), Duration.Inf)
 
 ## Customize
 
-### [Data serialization](../../examples/project/src/test/scala/examples/customize/CustomDataSerialization.scala)
+### [Data serialization](../../examples/project/src/main/scala/examples/customization/CustomDataSerialization.scala)
 
 **Build**
 
@@ -753,7 +825,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [Client function names](../../examples/project/src/test/scala/examples/customize/ClientFunctionNames.scala)
+### [Client function names](../../examples/project/src/main/scala/examples/customization/ClientFunctionNames.scala)
 
 **Build**
 
@@ -826,7 +898,7 @@ client.close()
 server.close()
 ```
 
-### [Server function names](../../examples/project/src/test/scala/examples/customize/ServerFunctionNames.scala)
+### [Server function names](../../examples/project/src/main/scala/examples/customization/ServerFunctionNames.scala)
 
 **Build**
 
@@ -911,7 +983,7 @@ client.close()
 server.close()
 ```
 
-### [Client exceptions](../../examples/project/src/test/scala/examples/customize/ClientExceptions.scala)
+### [Client exceptions](../../examples/project/src/main/scala/examples/customization/ClientExceptions.scala)
 
 **Build**
 
@@ -987,7 +1059,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [Server errors](../../examples/project/src/test/scala/examples/customize/ServerErrors.scala)
+### [Server errors](../../examples/project/src/main/scala/examples/customization/ServerErrors.scala)
 
 **Build**
 
@@ -1071,7 +1143,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [HTTP response status](../../examples/project/src/test/scala/examples/customize/HttpResponseStatus.scala)
+### [HTTP response status](../../examples/project/src/main/scala/examples/customization/HttpResponseStatus.scala)
 
 **Build**
 
@@ -1142,98 +1214,10 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [Positional arguments](../../examples/project/src/test/scala/examples/customize/PositionalArguments.scala)
-
-**Build**
-
-```scala
-libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "@PROJECT_VERSION@"
-)
-```
-
-**Imports**
-
-```scala
-import automorph.{Client, Default}
-import java.net.URI
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
-```
-
-**Server**
-
-```scala
-// Create server API instance
-class ServerApi {
-  def hello(some: String, n: Int): Future[String] =
-    Future(s"Hello $some $n!")
-}
-val api = new ServerApi()
-
-// Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
-val serverBuilder = Default.serverAsync(7000, "/api")
-val server = serverBuilder(_.bind(api))
-```
-
-**Client**
-
-```scala
-// Define client view of a remote API
-trait ClientApi {
-  def hello(some: String, n: Int): Future[String]
-}
-
-// Configure JSON-RPC to pass arguments by position instead of by name
-val protocol = Default.protocol[Default.ClientContext].namedArguments(false)
-
-// Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val url = new URI("http://localhost:7000/api")
-val clientTransport = Default.clientTransportAsync(url)
-val client = Client.protocol(protocol).transport(clientTransport)
-
-// Call the remote API function
-val remoteApi = client.bind[ClientApi]
-println(Await.result(
-  remoteApi.hello("world", 1),
-  Duration.Inf
-))
-```
-
-**Cleanup**
-
-```scal
-### [Positional arguments](../../examples/project/src/test/scala/examples/customize/PositionalArguments.scala)
-
-**Build**
-
-```scala
-libraryDependencies ++= Seq(
-  "org.automorph" %% "automorph-default" % "@PROJECT_VERSION@"
-)
-```
-
-**Imports**
-
-```scala
-import automorph.{Client, Default}
-import java.net.URI
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
-a
-// Close the client
-Await.result(client.close(), Duration.Inf)
-
-// Stop the server
-Await.result(server.close(), Duration.Inf)
-```
-
 
 ## Select
 
-### [Effect system](../../examples/project/src/test/scala/examples/select/EffectSystem.scala)
+### [Effect system](../../examples/project/src/main/scala/examples/integration/EffectSystem.scala)
 
 **Build**
 
@@ -1306,7 +1290,7 @@ run(client.close())
 run(server.close())
 ```
 
-### [Message codec](../../examples/project/src/test/scala/examples/select/MessageCodec.scala)
+### [Message codec](../../examples/project/src/main/scala/examples/integration/MessageCodec.scala)
 
 **Build**
 
@@ -1395,7 +1379,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [Client transport](../../examples/project/src/test/scala/examples/select/ClientTransport.scala)
+### [Client transport](../../examples/project/src/main/scala/examples/integration/ClientTransport.scala)
 
 **Build**
 
@@ -1459,7 +1443,7 @@ client.close()
 server.close()
 ```
 
-### [Server transport](../../examples/project/src/test/scala/examples/select/ServerTransport.scala)
+### [Server transport](../../examples/project/src/main/scala/examples/integration/ServerTransport.scala)
 
 **Build**
 
@@ -1520,7 +1504,7 @@ client.close()
 server.close()
 ```
 
-### [WebSocket transport](../../examples/project/src/test/scala/examples/select/WebSocketTransport.scala)
+### [WebSocket transport](../../examples/project/src/main/scala/examples/integration/WebSocketTransport.scala)
 
 **Build**
 
@@ -1583,7 +1567,7 @@ Await.result(client.close(), Duration.Inf)
 Await.result(server.close(), Duration.Inf)
 ```
 
-### [AMQP transport](../../examples/project/src/test/scala/examples/select/AmqpTransport.scala)
+### [AMQP transport](../../examples/project/src/main/scala/examples/integration/AmqpTransport.scala)
 
 **Build**
 
@@ -1672,7 +1656,7 @@ Files.walk(brokerDirectory).iterator().asScala.toSeq.reverse.foreach(_.toFile.de
 }
 ```
 
-### [Endpoint transport](../../examples/project/src/test/scala/examples/select/EndpointTransport.scala)
+### [Endpoint transport](../../examples/project/src/main/scala/examples/integration/EndpointTransport.scala)
 
 **Build**
 
@@ -1744,7 +1728,7 @@ Await.result(client.close(), Duration.Inf)
 server.stop()
 ```
 
-### [RPC protocol](../../examples/project/src/test/scala/examples/select/RpcProtocol.scala)
+### [RPC protocol](../../examples/project/src/main/scala/examples/integration/RpcProtocol.scala)
 
 **Build**
 

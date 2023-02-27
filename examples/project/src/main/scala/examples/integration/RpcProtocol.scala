@@ -1,4 +1,4 @@
-package examples.select
+package examples.integration
 
 import automorph.protocol.WebRpcProtocol
 import automorph.{Client, Default, Handler}

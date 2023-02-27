@@ -1,4 +1,4 @@
-package examples.customize
+package examples.customization
 
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.protocol.jsonrpc.JsonRpcException

@@ -1,14 +1,11 @@
 package examples
 
-import examples.basic.{
-  ApiSchemaDiscovery, AsynchronousCall, Authentication, DynamicPayload, HttpRequestMetadata, HttpResponseMetadata,
-  OneWayMessage, OptionalParameters, SynchronousCall,
+import examples.lowlevel.{Authentication, DynamicPayload, HttpRequestMetadata, HttpResponseMetadata, PositionalArguments}
+import examples.basic.{ApiSchemaDiscovery, AsynchronousCall, OneWayMessage, OptionalParameters, SynchronousCall}
+import examples.customization.{
+  ClientExceptions, ClientFunctionNames, CustomDataSerialization, HttpResponseStatus, ServerErrors, ServerFunctionNames,
 }
-import examples.customize.{
-  ClientExceptions, ClientFunctionNames, CustomDataSerialization, HttpResponseStatus, PositionalArguments, ServerErrors,
-  ServerFunctionNames,
-}
-import examples.select.{
+import examples.integration.{
   AmqpTransport, ClientTransport, EffectSystem, EndpointTransport, MessageCodec, RpcProtocol, ServerTransport,
   WebSocketTransport,
 }
@@ -23,11 +20,7 @@ class ExamplesTest extends BaseTest {
     "Basic" - {
       Seq[Any](
         ApiSchemaDiscovery,
-        Authentication,
         AsynchronousCall,
-        DynamicPayload,
-        HttpRequestMetadata,
-        HttpResponseMetadata,
         OneWayMessage,
         OptionalParameters,
         SynchronousCall,
@@ -37,13 +30,25 @@ class ExamplesTest extends BaseTest {
         }
       }
     }
-    "Customize" - {
+    "Low Level" - {
+      Seq[Any](
+        Authentication,
+        DynamicPayload,
+        HttpRequestMetadata,
+        HttpResponseMetadata,
+        PositionalArguments,
+      ).foreach { instance =>
+        testName(instance) in {
+          runTest(instance)
+        }
+      }
+    }
+    "Customization" - {
       Seq[Any](
         ClientExceptions,
         ClientFunctionNames,
         CustomDataSerialization,
         HttpResponseStatus,
-        PositionalArguments,
         ServerFunctionNames,
         ServerErrors,
       ).foreach { instance =>
@@ -52,7 +57,7 @@ class ExamplesTest extends BaseTest {
         }
       }
     }
-    "Select" - {
+    "Integration" - {
       Seq[Any](
         AmqpTransport,
         ClientTransport,

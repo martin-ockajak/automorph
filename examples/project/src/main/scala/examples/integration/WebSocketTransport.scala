@@ -1,14 +1,13 @@
-package examples.basic
+package examples.integration
 
 import automorph.Default
-import automorph.protocol.JsonRpcProtocol
-import automorph.schema.{OpenApi, OpenRpc}
+
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
-private[examples] object ApiSchemaDiscovery {
+private[examples] object WebSocketTransport {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
@@ -19,24 +18,23 @@ private[examples] object ApiSchemaDiscovery {
     }
     val api = new ServerApi()
 
-    // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
+    // Start JSON-RPC HTTP & WebSocket server listening on port 7000 for requests to '/api'
     val serverBuilder = Default.serverBuilderAsync(7000, "/api")
     val server = serverBuilder(_.bind(api))
 
-    // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+    // Define client view of the remote API
+    trait ClientApi {
+      def hello(some: String, n: Int): Future[String]
+    }
+    // Setup JSON-RPC HTTP client sending POST requests to 'ws://localhost:7000/api'
+    val client = Default.clientAsync(new URI("ws://localhost:7000/api"))
 
-    // Retrieve the remote API schema in OpenRPC format
+    // Call the remote API function via proxy
+    val remoteApi = client.bind[ClientApi]
     println(Await.result(
-      client.call[OpenRpc](JsonRpcProtocol.openRpcFunction).args(),
+      remoteApi.hello("world", 1),
       Duration.Inf
-    ).methods.map(_.name))
-
-    // Retrieve the remote API schema in OpenAPI format
-    println(Await.result(
-      client.call[OpenApi](JsonRpcProtocol.openApiFunction).args(),
-      Duration.Inf
-    ).paths.get.keys.toList)
+    ))
 
     // Close the client
     Await.result(client.close(), Duration.Inf)
