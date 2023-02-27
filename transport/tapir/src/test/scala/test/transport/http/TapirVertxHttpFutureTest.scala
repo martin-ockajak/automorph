@@ -1,22 +1,18 @@
 //package test.transport.http
 //
 //import automorph.Types
-//import automorph.spi.EffectSystem
 //import automorph.spi.transport.ServerMessageTransport
 //import automorph.system.FutureSystem
-//import automorph.transport.http.HttpMethod
 //import automorph.transport.http.endpoint.TapirHttpEndpoint
 //import io.vertx.core.Vertx
 //import io.vertx.ext.web.Router
 //import org.scalacheck.Arbitrary
-//import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.ExecutionContext.Implicits.global
 //import scala.concurrent.Future
 //import sttp.model.Method
 //import sttp.tapir.server.vertx.VertxFutureServerInterpreter
 //import sttp.tapir.server.vertx.VertxFutureServerInterpreter.VertxFutureToScalaFuture
 //import test.standard.StandardHttpServerTest
-//import test.transport.http.HttpContextGenerator
 //
 //class TapirVertxHttpFutureTest extends StandardHttpServerTest {
 //
@@ -34,7 +30,8 @@
 //  def serverTransport(
 //    handler: Types.HandlerAnyCodec[Effect, Context],
 //    port: Int
-//  ): ServerMessageTransport[Effect] = new ServerMessageTransport[Effect] {
+//  ): ServerMessageTransport[Effect, Context] =
+//    new ServerMessageTransport[Effect, Context] {
 //
 //    private val server = {
 //      val endpoint = TapirHttpEndpoint[Future](handler, Method.POST)

@@ -99,7 +99,7 @@
 //    log: MessageLog,
 //  ): Array[Byte] = {
 //    log.failedProcessRequest(error, requestProperties)
-//    val message = error.description.toArray
+//    val message = error.description.asArray
 //    createResponse(message, clientIp, requestId, log)
 //  }
 //
