@@ -120,8 +120,6 @@ trait CoreTest extends BaseTest {
                 check { (a0: Record, a1: String, a2: Option[Double]) =>
                   consistent(apis) { api =>
                     system.map(api.method8(a0, a1, a2)) { result =>
-//                      println(result.context.getClass.getName)
-//                      println(result.context)
                       s"${result.result} - ${result.context.getClass.getName}"
                     }
                   }
