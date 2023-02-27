@@ -12,7 +12,7 @@ class ExamplesTest extends BaseTest {
       runTest(Quickstart)
     }
     "Basic" - {
-      Seq(
+      Seq[Any](
         ApiSchemaDiscovery,
         Authentication,
         AsynchronousCall,
@@ -28,7 +28,7 @@ class ExamplesTest extends BaseTest {
       }
     }
     "Customize" - {
-      Seq(
+      Seq[Any](
         ArgumentsByPosition,
         ClientExceptions,
         ClientFunctionNames,
@@ -43,12 +43,12 @@ class ExamplesTest extends BaseTest {
       }
     }
     "Select" - {
-      Seq(
+      Seq[Any](
 //        AmqpTransport,
         ClientTransport,
         EffectSystem,
         EndpointTransport,
-//        MessageCodec,
+        MessageCodec,
         RpcProtocol,
 //        ServerTransport,
         WebSocketTransport,
@@ -69,5 +69,6 @@ class ExamplesTest extends BaseTest {
     synchronized {
       val mainMethod = instance.getClass.getMethod("main", classOf[Array[String]])
       mainMethod.invoke(instance, Array[String]())
+      ()
     }
 }
