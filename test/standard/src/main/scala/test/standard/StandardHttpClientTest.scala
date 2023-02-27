@@ -14,8 +14,10 @@ trait StandardHttpClientTest extends ClientServerTest {
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
     val (server, port) = withRandomAvailablePort(port =>
-      NanoServer.create[Effect](handler.asInstanceOf[Types.HandlerAnyCodec[Effect, NanoServer.Context]], port)(
-        execute
+      NanoServer[Effect](
+        handler.asInstanceOf[Types.HandlerAnyCodec[Effect, NanoServer.Context]],
+        execute,
+        port
       ).asInstanceOf[ServerMessageTransport[Effect, Context]] -> port
     )
     servers += server

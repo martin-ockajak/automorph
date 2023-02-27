@@ -1,15 +1,16 @@
 package examples
 
 import examples.basic.{
-  ApiSchemaDiscovery, AsynchronousCall, Authentication, HttpRequestMetadata, HttpResponseMetadata, OneWayMessage,
-  OptionalParameters, SynchronousCall,
+  ApiSchemaDiscovery, AsynchronousCall, Authentication, DynamicPayload, HttpRequestMetadata, HttpResponseMetadata,
+  OneWayMessage, OptionalParameters, SynchronousCall,
 }
 import examples.customize.{
-  ArgumentsByPosition, ClientExceptions, ClientFunctionNames, CustomDataSerialization, HttpResponseStatus,
-  ServerFunctionNames, ServerProtocolErrors,
+  ClientExceptions, ClientFunctionNames, CustomDataSerialization, HttpResponseStatus, PositionalArguments, ServerErrors,
+  ServerFunctionNames,
 }
 import examples.select.{
-  ClientTransport, EffectSystem, EndpointTransport, MessageCodec, RpcProtocol, ServerTransport, WebSocketTransport,
+  AmqpTransport, ClientTransport, EffectSystem, EndpointTransport, MessageCodec, RpcProtocol, ServerTransport,
+  WebSocketTransport,
 }
 import test.base.BaseTest
 
@@ -24,6 +25,7 @@ class ExamplesTest extends BaseTest {
         ApiSchemaDiscovery,
         Authentication,
         AsynchronousCall,
+        DynamicPayload,
         HttpRequestMetadata,
         HttpResponseMetadata,
         OneWayMessage,
@@ -37,13 +39,13 @@ class ExamplesTest extends BaseTest {
     }
     "Customize" - {
       Seq[Any](
-        ArgumentsByPosition,
         ClientExceptions,
         ClientFunctionNames,
         CustomDataSerialization,
         HttpResponseStatus,
+        PositionalArguments,
         ServerFunctionNames,
-        ServerProtocolErrors,
+        ServerErrors,
       ).foreach { instance =>
         testName(instance) in {
           runTest(instance)
@@ -52,7 +54,7 @@ class ExamplesTest extends BaseTest {
     }
     "Select" - {
       Seq[Any](
-//        AmqpTransport,
+        AmqpTransport,
         ClientTransport,
         EffectSystem,
         EndpointTransport,
