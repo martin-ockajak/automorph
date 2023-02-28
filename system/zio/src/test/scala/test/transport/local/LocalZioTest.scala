@@ -4,7 +4,7 @@ import automorph.system.ZioSystem
 import automorph.spi.EffectSystem
 import org.scalacheck.Arbitrary
 import test.core.ProtocolCodecTest
-import zio.{RIO, Task, Unsafe}
+import zio.{Task, Unsafe}
 
 class LocalZioTest extends ProtocolCodecTest {
 

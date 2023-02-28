@@ -56,7 +56,7 @@ final case class JettyServer[Effect[_]](
 
   private lazy val jetty = createServer()
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  private val system = genericHandler.system
+  private val system = genericHandler.effectSystem
   private val allowedMethods = methods.map(_.name).toSet
   private val methodFilter = new Filter {
 

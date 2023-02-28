@@ -59,7 +59,7 @@ final case class NanoServer[Effect[_]] (
   private val log = MessageLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val allowedMethods = methods.map(_.name).toSet
-  implicit private val system: EffectSystem[Effect] = genericHandler.system
+  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
   start()
 
   override def close(): Effect[Unit] =
@@ -199,7 +199,7 @@ final case class NanoServer[Effect[_]] (
 
     // Create the response
     val responseData = responseBody.toArray
-    val mediaType = genericHandler.protocol.codec.mediaType
+    val mediaType = genericHandler.rpcProtocol.codec.mediaType
     val response = newFixedLengthResponse(responseStatus, mediaType, responseBody, responseData.length.toLong)
     setResponseContext(response, responseContext)
     log.sentResponse(responseProperties, protocol.name)

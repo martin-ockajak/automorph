@@ -44,7 +44,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
 
   private val log = MessageLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.system
+  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
 
   override def handleRequest(exchange: HttpServerExchange): Unit = {
     // Log the request
@@ -115,7 +115,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     Try {
       if (!exchange.isResponseChannelAvailable) { throw new IOException("Response channel not available") }
       setResponseContext(exchange, responseContext)
-      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, genericHandler.protocol.codec.mediaType)
+      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, genericHandler.rpcProtocol.codec.mediaType)
       exchange.setStatusCode(responseStatusCode).getResponseSender.send(responseBody.toByteBuffer)
       log.sentResponse(responseProperties)
     }.onFailure(error => log.failedSendResponse(error, responseProperties)).get

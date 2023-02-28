@@ -114,8 +114,8 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
     readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
   ): Behavior[RpcHttpRequest] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-    implicit val system: EffectSystem[Effect] = genericHandler.system
-    val contentType = ContentType.parse(genericHandler.protocol.codec.mediaType).swap.map { errors =>
+    implicit val system: EffectSystem[Effect] = genericHandler.effectSystem
+    val contentType = ContentType.parse(genericHandler.rpcProtocol.codec.mediaType).swap.map { errors =>
       new IllegalStateException(s"Invalid response content type: ${errors.map(_.toString).mkString("\n")}")
     }.swap.toTry.get
 

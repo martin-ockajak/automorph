@@ -71,7 +71,6 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     }
   }
 
-  @nowarn("msg=used")
   override def parseRequest(
     requestBody: InputStream,
     requestContext: Context,

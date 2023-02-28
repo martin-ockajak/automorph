@@ -60,7 +60,7 @@ final case class AkkaServer[Effect[_]](
 ) extends Logging with ServerMessageTransport[Effect, Context] {
 
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  private val system = genericHandler.system
+  private val system = genericHandler.effectSystem
   private val allowedMethods = methods.map(_.name).toSet
   private val actorSystem = start()
 

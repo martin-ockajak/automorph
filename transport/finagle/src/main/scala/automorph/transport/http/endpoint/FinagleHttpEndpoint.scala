@@ -41,7 +41,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
 
   private val log = MessageLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.system
+  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
 
   override def apply(request: Request): Future[Response] = {
     // Log the request
@@ -93,7 +93,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
     // Send the response
     val response = Response(request.version, responseStatus, responseBody)
     setResponseContext(response, responseContext)
-    response.contentType = genericHandler.protocol.codec.mediaType
+    response.contentType = genericHandler.rpcProtocol.codec.mediaType
     log.sendingResponse(responseProperties)
     response
   }

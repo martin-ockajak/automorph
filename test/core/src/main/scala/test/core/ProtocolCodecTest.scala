@@ -15,14 +15,13 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, SerializerProvider}
 import io.circe.generic.auto.*
 import io.circe.{Decoder, Encoder}
-import scala.annotation.nowarn
 import test.{Enum, Record, Structure}
 
 trait ProtocolCodecTest extends CoreTest {
 
-  @nowarn("msg=used")
   private lazy val testFixtures: Seq[TestFixture] = {
     implicit val context: Context = arbitraryContext.arbitrary.sample.get
+    Seq(context)
     Seq(
       circeJsonFixture(),
       jacksonJsonFixture(),
@@ -35,15 +34,17 @@ trait ProtocolCodecTest extends CoreTest {
   override def fixtures: Seq[TestFixture] =
     testFixtures
 
-  @nowarn("msg=used")
   def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
-  ): Option[ClientMessageTransport[Effect, Context]] =
+  ): Option[ClientMessageTransport[Effect, Context]] = {
+    Seq(handler)
     None
+  }
 
   private def circeJsonFixture()(implicit context: Context): TestFixture = {
     implicit val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
     implicit val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
+    Seq(enumEncoder, enumDecoder)
     val codec = CirceJsonCodec()
     val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type, Context](codec)
     val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
@@ -176,6 +177,7 @@ trait ProtocolCodecTest extends CoreTest {
       "structure",
       "none",
     )
+    Seq(recordCodecJson)
     val codec = ArgonautJsonCodec()
     val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type, Context](codec)
     val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)

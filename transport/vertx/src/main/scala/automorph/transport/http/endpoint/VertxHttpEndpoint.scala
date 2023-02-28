@@ -45,7 +45,7 @@ final case class VertxHttpEndpoint[Effect[_]](
   private val headerXForwardedFor = "X-Forwarded-For"
   private val log = MessageLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.system
+  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
 
   override def handle(request: HttpServerRequest): Unit = {
     // Log the request
@@ -101,7 +101,7 @@ final case class VertxHttpEndpoint[Effect[_]](
 
     // Send the response
     setResponseContext(request.response, responseContext)
-      .putHeader(HttpHeaders.CONTENT_TYPE, genericHandler.protocol.codec.mediaType).setStatusCode(statusCode)
+      .putHeader(HttpHeaders.CONTENT_TYPE, genericHandler.rpcProtocol.codec.mediaType).setStatusCode(statusCode)
       .end(Buffer.buffer(responseBody.toArray)).onSuccess(_ => log.sentResponse(responseProperties)).onFailure {
         error => log.failedSendResponse(error, responseProperties)
       }

@@ -66,7 +66,7 @@ final case class VertxServer[Effect[_]](
   private val messageNotFound = "Not Found"
   private val messageMethodNotAllowed = "Method Not Allowed"
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  private val system = genericHandler.system
+  private val system = genericHandler.effectSystem
   private val allowedMethods = methods.map(_.name).toSet
   start()
 

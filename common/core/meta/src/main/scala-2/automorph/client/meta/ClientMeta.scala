@@ -19,7 +19,7 @@ import scala.reflect.macros.blackbox
  */
 private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
 
-  def protocol: RpcProtocol[Node, Codec, Context]
+  def rpcProtocol: RpcProtocol[Node, Codec, Context]
 
   /**
    * Creates a RPC API proxy instance with RPC bindings for all valid public functions of the specified API type.
@@ -132,7 +132,7 @@ object ClientMeta {
       // Generate API function bindings
       val client = ${c.prefix}
       val bindings = automorph.client.meta.ClientGenerator
-        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](client.protocol.codec).map { binding =>
+        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](client.rpcProtocol.codec).map { binding =>
           binding.function.name -> binding
         }.toMap
 
@@ -189,7 +189,7 @@ object ClientMeta {
     // This client needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[RemoteCall[Node, Codec, Effect, Context, Result]](q"""
       val client = ${c.prefix}
-      automorph.client.RemoteCall($function, client.protocol.codec, client.performCall)
+      automorph.client.RemoteCall($function, client.rpcProtocol.codec, client.performCall)
     """)
   }
 }

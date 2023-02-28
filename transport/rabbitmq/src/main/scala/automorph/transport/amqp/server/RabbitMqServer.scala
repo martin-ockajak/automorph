@@ -45,7 +45,7 @@ final case class RabbitMqServer[Effect[_]](
   private val urlText = url.toString
   private val log = MessageLog(logger, RabbitMqCommon.protocol)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, RabbitMqServer.Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.system
+  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
   start()
 
   override def close(): Effect[Unit] = system.evaluate(RabbitMqCommon.disconnect(connection))
@@ -113,7 +113,7 @@ final case class RabbitMqServer[Effect[_]](
 
     // Send the response
     Try {
-      val mediaType = genericHandler.protocol.codec.mediaType
+      val mediaType = genericHandler.rpcProtocol.codec.mediaType
       val amqpProperties = RabbitMqCommon
         .amqpProperties(responseContext, mediaType, actualReplyTo, requestId, serverId, useDefaultRequestId = true)
       threadConsumer.get.getChannel.basicPublish(exchange, actualReplyTo, true, false, amqpProperties, message)

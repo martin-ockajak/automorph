@@ -42,5 +42,5 @@ final case class Server[Effect[_], Context](
    *   active RPC server
    */
   def start(): Effect[ActiveServer[Effect, Context]] =
-    genericHandler.system.evaluate(ActiveServer(handler, transport))
+    genericHandler.effectSystem.evaluate(ActiveServer(handler, transport))
 }

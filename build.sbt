@@ -249,7 +249,7 @@ ThisBuild / scalacOptions ++=
         "-J--add-modules",
         "-Jjava.net.http",
         "-Xsource:3",
-        "-Xlint",
+        "-Xlint:_,-byname-implicit",
         "-Wconf:site=[^.]+\\.codec\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
         "-Wextra-implicit",
         "-Wnumeric-widen",

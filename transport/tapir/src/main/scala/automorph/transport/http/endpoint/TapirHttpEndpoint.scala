@@ -62,10 +62,10 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
   ): ServerEndpoint.Full[Unit, Unit, Request, Unit, (Array[Byte], StatusCode), Any, Effect] = {
     val log = MessageLog(logger, Protocol.Http.name)
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-    val system = genericHandler.system
+    val system = genericHandler.effectSystem
     implicit val givenSystem: EffectSystem[Effect] = system
-    val contentType = Header.contentType(MediaType.parse(genericHandler.protocol.codec.mediaType).getOrElse {
-      throw new IllegalArgumentException(s"Invalid content type: ${genericHandler.protocol.codec.mediaType}")
+    val contentType = Header.contentType(MediaType.parse(genericHandler.rpcProtocol.codec.mediaType).getOrElse {
+      throw new IllegalArgumentException(s"Invalid content type: ${genericHandler.rpcProtocol.codec.mediaType}")
     })
 
     // Define server endpoint

@@ -23,7 +23,7 @@ import scala.util.{Failure, Try}
  */
 private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
 
-  def protocol: RpcProtocol[Node, Codec, Context]
+  def rpcProtocol: RpcProtocol[Node, Codec, Context]
 
   /**
    * Creates a remote API proxy instance with RPC bindings for all valid public methods of the specified API type.
@@ -77,7 +77,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    */
   inline def bind[Api <: AnyRef](mapName: String => String): Api =
     // Generate API method bindings
-    val bindings = ClientGenerator.bindings[Node, Codec, Effect, Context, Api](protocol.codec).map { binding =>
+    val bindings = ClientGenerator.bindings[Node, Codec, Effect, Context, Api](rpcProtocol.codec).map { binding =>
       binding.function.name -> binding
     }.toMap
 
@@ -133,7 +133,7 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    *   on RPC error
    */
   inline def call[Result](function: String): RemoteCall[Node, Codec, Effect, Context, Result] =
-    RemoteCall(function, protocol.codec, performCall)
+    RemoteCall(function, rpcProtocol.codec, performCall)
 
   def performCall[Result](
     function: String,

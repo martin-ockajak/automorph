@@ -6,7 +6,6 @@ import automorph.log.MacroLogger
 import automorph.reflection.{MethodReflection, ClassReflection}
 import automorph.spi.protocol.RpcFunction
 import automorph.spi.MessageCodec
-import scala.annotation.nowarn
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -71,7 +70,6 @@ object HandlerGenerator {
     """)
   }
 
-  @nowarn("msg=used")
   private def generateBinding[C <: blackbox.Context, Node, Codec <: MessageCodec[Node], Effect[_], Context, Api](
     ref: ClassReflection[C]
   )(method: ref.RefMethod, codec: ref.c.Expr[Codec], api: ref.c.Expr[Api])(implicit

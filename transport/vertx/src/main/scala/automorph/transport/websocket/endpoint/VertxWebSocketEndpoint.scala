@@ -39,7 +39,7 @@ final case class VertxWebSocketEndpoint[Effect[_]](handler: Types.HandlerAnyCode
   private val headerXForwardedFor = "X-Forwarded-For"
   private val log = MessageLog(logger, Protocol.WebSocket.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.system
+  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
 
   override def handle(request: ServerWebSocket): Unit = {
     // Log the request

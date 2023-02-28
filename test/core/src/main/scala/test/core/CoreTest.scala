@@ -66,7 +66,7 @@ trait CoreTest extends BaseTest {
     } else {
       // Full tests
       testFixtures.foreach { fixture =>
-        val codecName = fixture.genericClient.protocol.codec.getClass.getSimpleName
+        val codecName = fixture.genericClient.rpcProtocol.codec.getClass.getSimpleName
         codecName.replaceAll("MessageCodec$", "") - {
           "Static" - {
             "Simple API" - {

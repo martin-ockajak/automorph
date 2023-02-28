@@ -42,5 +42,5 @@ final case class ActiveServer[Effect[_], Context] private[automorph] (
    *   passive RPC server
    */
   def close(): Effect[Server[Effect, Context]] =
-    genericHandler.system.map(transport.close())(_ => Server(handler, transport))
+    genericHandler.effectSystem.map(transport.close())(_ => Server(handler, transport))
 }

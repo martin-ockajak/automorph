@@ -15,7 +15,6 @@ import io.undertow.websockets.core.{
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHandshakeHandler}
 import java.io.InputStream
-import scala.annotation.nowarn
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsJava, MapHasAsScala, SeqHasAsJava}
 
@@ -66,7 +65,7 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
 
   private val log = MessageLog(logger, Protocol.WebSocket.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.system
+  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
 
   override def onConnect(exchange: WebSocketHttpExchange, channel: WebSocketChannel): Unit = {
     val receiveListener = new AbstractReceiveListener {
@@ -77,7 +76,6 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
       }
 
       override def onFullBinaryMessage(channel: WebSocketChannel, message: BufferedBinaryMessage): Unit = {
-        @nowarn
         val data = message.getData
         val requestBody = WebSockets.mergeBuffers(data.getResource*).toInputStream
         handle(exchange, requestBody, channel, () => data.discard())

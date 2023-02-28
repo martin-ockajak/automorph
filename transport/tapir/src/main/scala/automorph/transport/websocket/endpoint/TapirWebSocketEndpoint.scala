@@ -59,7 +59,7 @@ object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
     Unit, Unit, Request, Unit, Array[Byte] => Effect[Array[Byte]], EffectStreams[Effect], Effect] = {
     val log = MessageLog(logger, Protocol.WebSocket.name)
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-    implicit val system: EffectSystem[Effect] = genericHandler.system
+    implicit val system: EffectSystem[Effect] = genericHandler.effectSystem
     val streams = new EffectStreams[Effect] {
       override type BinaryStream = Effect[Array[Byte]]
       override type Pipe[A, B] = A => Effect[B]

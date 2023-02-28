@@ -43,7 +43,7 @@ final case class JettyHttpEndpoint[Effect[_]](
 
   private val log = MessageLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.system
+  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
 
   override def service(request: HttpServletRequest, response: HttpServletResponse): Unit = {
     // Log the request
@@ -104,7 +104,7 @@ final case class JettyHttpEndpoint[Effect[_]](
     // Send the response
     Try {
       setResponseContext(response, responseContext)
-      response.setContentType(genericHandler.protocol.codec.mediaType)
+      response.setContentType(genericHandler.rpcProtocol.codec.mediaType)
       response.setStatus(responseStatus)
       val outputStream = response.getOutputStream
       responseBody.transferTo(outputStream)
