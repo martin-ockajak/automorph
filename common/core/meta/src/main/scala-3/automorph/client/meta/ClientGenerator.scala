@@ -151,7 +151,7 @@ private[automorph] object ClientGenerator:
   )(method: ref.RefMethod, encodeArguments: Expr[Any], decodeResult: Expr[Any]): Unit =
     import ref.q.reflect.{Printer, asTerm}
 
-    MacroLogger.debug(s"""${MethodReflection.signature[Api](ref)(method)} =
+    MacroLogger.debug(s"""${MethodReflection.methodSignature[Api](ref)(method)} =
       |  ${encodeArguments.asTerm.show(using Printer.TreeShortCode)}
       |  ${decodeResult.asTerm.show(using Printer.TreeShortCode)}
       |""".stripMargin)

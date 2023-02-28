@@ -232,7 +232,7 @@ private[automorph] object HandlerGenerator:
   private def logMethod[Api: Type](ref: ClassReflection)(method: ref.RefMethod): Unit =
     import ref.q.reflect.{Printer, asTerm}
 
-    MacroLogger.debug(s"\n${MethodReflection.signature[Api](ref)(method)}")
+    MacroLogger.debug(s"\n${MethodReflection.methodSignature[Api](ref)(method)}")
 
   private def logCode(ref: ClassReflection)(name: String, expression: Expr[Any]): Unit =
     import ref.q.reflect.{Printer, asTerm}
