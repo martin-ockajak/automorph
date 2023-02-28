@@ -5,7 +5,7 @@ import automorph.handler.HandlerBinding
 import automorph.log.MacroLogger
 import automorph.reflection.{MethodReflection, ClassReflection}
 import automorph.spi.protocol.RpcFunction
-import automorph.spi.{EffectSystem, MessageCodec}
+import automorph.spi.MessageCodec
 import scala.annotation.nowarn
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
@@ -50,6 +50,7 @@ object HandlerGenerator {
   ): c.Expr[Seq[HandlerBinding[Node, Effect, Context]]] = {
     import c.universe.Quasiquote
     val ref = ClassReflection[c.type](c)
+    Seq(nodeType, codecType, effectType, contextType, apiType)
 
     // Detect and validate public methods in the API type
     val apiMethods = MethodReflection.apiMethods[c.type, Api, Effect[?]](ref)
@@ -73,11 +74,7 @@ object HandlerGenerator {
   @nowarn("msg=used")
   private def generateBinding[C <: blackbox.Context, Node, Codec <: MessageCodec[Node], Effect[_], Context, Api](
     ref: ClassReflection[C]
-  )(
-    method: ref.RefMethod,
-    codec: ref.c.Expr[Codec],
-    api: ref.c.Expr[Api],
-  )(implicit
+  )(method: ref.RefMethod, codec: ref.c.Expr[Codec], api: ref.c.Expr[Api])(implicit
     nodeType: ref.c.WeakTypeTag[Node],
     codecType: ref.c.WeakTypeTag[Codec],
     effectType: ref.c.WeakTypeTag[Effect[?]],
@@ -95,6 +92,7 @@ object HandlerGenerator {
     logCode[C](ref)("Encode result", encodeResult)
     logCode[C](ref)("Call", call)
     implicit val functionLiftable: Liftable[RpcFunction] = MethodReflection.functionLiftable(ref)
+    Seq(functionLiftable)
     ref.c.Expr[HandlerBinding[Node, Effect, Context]](q"""
       automorph.handler.HandlerBinding(
         ${method.lift.rpcFunction},
@@ -112,7 +110,8 @@ object HandlerGenerator {
     Codec <: MessageCodec[Node]: ref.c.WeakTypeTag,
     Context: ref.c.WeakTypeTag
   ](ref: ClassReflection[C])(
-    method: ref.RefMethod, codec: ref.c.Expr[Codec]
+    method: ref.RefMethod,
+    codec: ref.c.Expr[Codec]
   ): ref.c.Expr[Map[String, Option[Node] => Any]] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
     weakTypeOf[Codec]

@@ -79,6 +79,7 @@ object ClientGenerator {
     val decodeResult = generateDecodeResult[C, Node, Codec, Effect, Context](ref)(method, codec)
     logBoundMethod[C, Api](ref)(method, encodeArguments, decodeResult)
     implicit val functionLiftable: Liftable[RpcFunction] = MethodReflection.functionLiftable(ref)
+    Seq(functionLiftable)
     ref.c.Expr[ClientBinding[Node, Context]](q"""
       automorph.client.ClientBinding[$nodeType, $contextType](
         ${method.lift.rpcFunction},
@@ -113,7 +114,9 @@ object ClientGenerator {
     //   ): Map[String, Any => Node]
     val argumentEncoders = method.parameters.toList.zip(parameterListOffsets).flatMap { case (parameters, offset) =>
       parameters.toList.zipWithIndex.flatMap { case (parameter, index) =>
-        Option.when((offset + index) != lastArgumentIndex || !MethodReflection.acceptsContext[C, Context](ref)(method)) {
+        Option.when(
+          (offset + index) != lastArgumentIndex || !MethodReflection.acceptsContext[C, Context](ref)(method)
+        ) {
           q"""
             ${parameter.name} -> (
               (argument: Any) => $codec.encode[${parameter.dataType}](argument.asInstanceOf[${parameter.dataType}])

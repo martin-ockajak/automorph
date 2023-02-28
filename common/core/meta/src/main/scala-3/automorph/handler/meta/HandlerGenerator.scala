@@ -5,7 +5,7 @@ import automorph.handler.HandlerBinding
 import automorph.log.MacroLogger
 import automorph.reflection.MethodReflection.functionToExpr
 import automorph.reflection.{ClassReflection, MethodReflection}
-import automorph.spi.{EffectSystem, MessageCodec}
+import automorph.spi.MessageCodec
 import scala.quoted.{Expr, Quotes, Type}
 import scala.util.{Failure, Try}
 
@@ -57,11 +57,7 @@ private[automorph] object HandlerGenerator:
 
   private def generateBinding[Node: Type, Codec <: MessageCodec[Node]: Type, Effect[_]: Type, Context: Type, Api: Type](
     ref: ClassReflection
-  )(
-    method: ref.RefMethod,
-    codec: Expr[Codec],
-    api: Expr[Api],
-  ): Expr[HandlerBinding[Node, Effect, Context]] =
+  )(method: ref.RefMethod, codec: Expr[Codec], api: Expr[Api]): Expr[HandlerBinding[Node, Effect, Context]] =
     given Quotes = ref.q
 
     val argumentDecoders = generateArgumentDecoders[Node, Codec, Context](ref)(method, codec)
