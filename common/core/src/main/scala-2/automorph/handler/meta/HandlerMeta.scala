@@ -111,7 +111,7 @@ object HandlerMeta {
   ): c.Expr[Handler[Node, Codec, Effect, Context]] = {
     import c.universe.Quasiquote
 
-    // Handler needs to be assigned to a stable identifier due to macro expansion limitations
+    // This handler needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Handler[Node, Codec, Effect, Context]](q"""
       val handler = ${c.prefix}
       val newBindings = automorph.handler.meta.HandlerGenerator

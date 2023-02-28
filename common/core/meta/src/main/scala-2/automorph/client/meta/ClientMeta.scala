@@ -127,10 +127,12 @@ object ClientMeta {
   ): c.Expr[Api] = {
     import c.universe.Quasiquote
 
+    // This client needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Api](q"""
       // Generate API function bindings
+      val client = ${c.prefix}
       val bindings = automorph.client.meta.ClientGenerator
-        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](${c.prefix}.protocol.codec).map { binding =>
+        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](client.protocol.codec).map { binding =>
           binding.function.name -> binding
         }.toMap
 
@@ -165,7 +167,7 @@ object ClientMeta {
             }
 
             // Perform the RPC call
-            ${c.prefix}.performCall(
+            client.performCall(
               $mapName(method.getName),
               argumentNodes,
               (resultNode, responseContext) => binding.decodeResult(resultNode, responseContext),
