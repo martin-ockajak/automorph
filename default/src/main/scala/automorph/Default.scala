@@ -2,7 +2,7 @@ package automorph
 
 import automorph.meta.DefaultMeta
 import automorph.spi.{ClientMessageTransport, EffectSystem}
-import automorph.spi.system.CompletableEffectSystem
+import automorph.spi.system.AsyncEffectSystem
 import automorph.system.IdentitySystem.Identity
 import automorph.system.{FutureSystem, IdentitySystem}
 import automorph.transport.http.client.HttpClient
@@ -450,7 +450,7 @@ object Default extends DefaultMeta {
    * @return
    *   asynchronous effect system plugin
    */
-  def effectSystemAsync(implicit executionContext: ExecutionContext): CompletableEffectSystem[AsyncEffect] =
+  def effectSystemAsync(implicit executionContext: ExecutionContext): AsyncEffectSystem[AsyncEffect] =
     FutureSystem()
 
   /**

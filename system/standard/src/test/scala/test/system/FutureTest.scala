@@ -5,7 +5,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Try
 
-class FutureTest extends CompletableEffectSystemTest[Future] {
+class FutureTest extends AsyncEffectSystemTest[Future] {
 
   lazy val system: FutureSystem = FutureSystem()
 

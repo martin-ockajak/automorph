@@ -2,7 +2,7 @@ package automorph.transport.http.client
 
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{ClientMessageTransport, EffectSystem}
-import automorph.spi.system.{Completable, CompletableEffectSystem}
+import automorph.spi.system.{Completable, AsyncEffectSystem}
 import automorph.transport.http.client.JettyClient.{Context, Session, defaultClient}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, TryOps}
@@ -125,8 +125,8 @@ final case class JettyClient[Effect[_]](
         // Send HTTP request
         httpRequest =>
           system match {
-            case completableSystem: CompletableEffectSystem[?] =>
-              completableSystem.asInstanceOf[CompletableEffectSystem[Effect]].completable[Response].flatMap {
+            case completableSystem: AsyncEffectSystem[?] =>
+              completableSystem.asInstanceOf[AsyncEffectSystem[Effect]].completable[Response].flatMap {
                 completableResponse =>
                   val responseListener = new BufferingResponseListener {
 
@@ -191,10 +191,10 @@ final case class JettyClient[Effect[_]](
     (responseBody.toInputStream, Some(response.getStatus), headers)
   }
 
-  private def withCompletable[T](function: CompletableEffectSystem[Effect] => Effect[T]): Effect[T] =
+  private def withCompletable[T](function: AsyncEffectSystem[Effect] => Effect[T]): Effect[T] =
     system match {
-      case completableSystem: CompletableEffectSystem[?] =>
-        function(completableSystem.asInstanceOf[CompletableEffectSystem[Effect]])
+      case completableSystem: AsyncEffectSystem[?] =>
+        function(completableSystem.asInstanceOf[AsyncEffectSystem[Effect]])
       case _ => system.failed(new IllegalArgumentException(
         s"""${Protocol.WebSocket} not available for effect system
            | not supporting completable effects: ${system.getClass.getName}""".stripMargin
@@ -262,7 +262,7 @@ final case class JettyClient[Effect[_]](
     upgradeRequest: ClientUpgradeRequest,
     requestUrl: URI,
     responseEffect: Effect[Completable[Effect, Response]],
-    completableSystem: CompletableEffectSystem[Effect],
+    completableSystem: AsyncEffectSystem[Effect],
   ): Effect[websocket.api.Session] =
     responseEffect.flatMap { response =>
       effect(webSocketClient.connect(webSocketListener(response), requestUrl, upgradeRequest), completableSystem)
@@ -283,7 +283,7 @@ final case class JettyClient[Effect[_]](
 
   private def effect[T](
     completableFuture: => CompletableFuture[T],
-    completableSystem: CompletableEffectSystem[Effect],
+    completableSystem: AsyncEffectSystem[Effect],
   ): Effect[T] =
     completableSystem.completable[T].flatMap { completable =>
       Try(completableFuture).pureFold(

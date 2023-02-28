@@ -2,7 +2,7 @@ package automorph.transport.amqp.client
 
 import automorph.log.{Logging, MessageLog}
 import automorph.spi.{ClientMessageTransport, EffectSystem}
-import automorph.spi.system.{Completable, CompletableEffectSystem}
+import automorph.spi.system.{Completable, AsyncEffectSystem}
 import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, TryOps}
@@ -44,7 +44,7 @@ import scala.util.Try
 final case class RabbitMqClient[Effect[_]](
   url: URI,
   routingKey: String,
-  system: CompletableEffectSystem[Effect],
+  system: AsyncEffectSystem[Effect],
   exchange: String = RabbitMqCommon.defaultDirectExchange,
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory,

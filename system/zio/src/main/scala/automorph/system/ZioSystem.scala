@@ -1,6 +1,6 @@
 package automorph.system
 
-import automorph.spi.system.{Completable, CompletableEffectSystem}
+import automorph.spi.system.{Completable, AsyncEffectSystem}
 import zio.{Queue, RIO, Runtime, Task, Trace, Unsafe, ZIO}
 
 /**
@@ -18,7 +18,7 @@ import zio.{Queue, RIO, Runtime, Task, Trace, Unsafe, ZIO}
  *   ZIO environment type
  */
 final case class ZioSystem[Environment]()(implicit val runtime: Runtime[Environment])
-  extends CompletableEffectSystem[({ type Effect[A] = RIO[Environment, A] })#Effect] {
+  extends AsyncEffectSystem[({ type Effect[A] = RIO[Environment, A] })#Effect] {
 
   override def evaluate[T](value: => T): RIO[Environment, T] =
     ZIO.attempt(value)

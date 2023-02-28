@@ -1,6 +1,6 @@
 package test.system
 
-import automorph.spi.system.CompletableEffectSystem
+import automorph.spi.system.AsyncEffectSystem
 
 /**
  * Completable effect system test.
@@ -8,11 +8,11 @@ import automorph.spi.system.CompletableEffectSystem
  * @tparam Effect
  *   effect type
  */
-trait CompletableEffectSystemTest[Effect[_]] extends EffectSystemTest[Effect] {
+trait AsyncEffectSystemTest[Effect[_]] extends EffectSystemTest[Effect] {
 
   "" - {
     system match {
-      case _: CompletableEffectSystem[?] =>
+      case _: AsyncEffectSystem[?] =>
         "Completable" - {
           "Success" in {
             val effect = system.flatMap(completableSystem.completable[String]) { completable =>
@@ -31,6 +31,6 @@ trait CompletableEffectSystemTest[Effect[_]] extends EffectSystemTest[Effect] {
     }
   }
 
-  private def completableSystem: CompletableEffectSystem[Effect] =
-    system.asInstanceOf[CompletableEffectSystem[Effect]]
+  private def completableSystem: AsyncEffectSystem[Effect] =
+    system.asInstanceOf[AsyncEffectSystem[Effect]]
 }

@@ -3,17 +3,18 @@ package automorph.spi.system
 import automorph.spi.EffectSystem
 
 /**
- * Computational effect system plugin with completable effect support.
+ * Asynchronous computational effect system plugin.
  *
- * The underlying runtime must support monadic composition of effectful values.
+ * The underlying runtime must support monadic composition of effectful values
+ * and creation of externally completable effects.
  *
  * @tparam Effect
  *   effect type (similar to IO Monad in Haskell)
  */
-trait CompletableEffectSystem[Effect[_]] extends EffectSystem[Effect] {
+trait AsyncEffectSystem[Effect[_]] extends EffectSystem[Effect] {
 
   /**
-   * Creates an asynchronously completable effect.
+   * Creates an externally completable effect.
    *
    * @tparam T
    *   effectful value type

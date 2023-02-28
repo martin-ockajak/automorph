@@ -2,7 +2,7 @@ package automorph.transport.http.client
 
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{ClientMessageTransport, EffectSystem}
-import automorph.spi.system.{Completable, CompletableEffectSystem}
+import automorph.spi.system.{Completable, AsyncEffectSystem}
 import automorph.transport.http.client.HttpClient.{Context, Session, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, TryOps}
@@ -129,10 +129,10 @@ final case class HttpClient[Effect[_]](
         // Send HTTP request
         httpRequest =>
           system match {
-            case completableSystem: CompletableEffectSystem[?] =>
+            case completableSystem: AsyncEffectSystem[?] =>
               effect(
                 httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray),
-                completableSystem.asInstanceOf[CompletableEffectSystem[Effect]],
+                completableSystem.asInstanceOf[AsyncEffectSystem[Effect]],
               ).map(httpResponse)
             case _ => system.evaluate(httpResponse(httpClient.send(httpRequest, BodyHandlers.ofByteArray)))
           },
@@ -176,10 +176,10 @@ final case class HttpClient[Effect[_]](
     (response.body.toInputStream, Some(response.statusCode), headers)
   }
 
-  private def withCompletable[T](function: CompletableEffectSystem[Effect] => Effect[T]): Effect[T] =
+  private def withCompletable[T](function: AsyncEffectSystem[Effect] => Effect[T]): Effect[T] =
     system match {
-      case completableSystem: CompletableEffectSystem[?] =>
-        function(completableSystem.asInstanceOf[CompletableEffectSystem[Effect]])
+      case completableSystem: AsyncEffectSystem[?] =>
+        function(completableSystem.asInstanceOf[AsyncEffectSystem[Effect]])
       case _ => system.failed(new IllegalArgumentException(
         s"""WebSocket protocol not available for effect system
            | not supporting completable effects: ${system.getClass.getName}""".stripMargin
@@ -188,7 +188,7 @@ final case class HttpClient[Effect[_]](
 
   private def effect[T](
     completableFuture: => CompletableFuture[T],
-    completableSystem: CompletableEffectSystem[Effect],
+    completableSystem: AsyncEffectSystem[Effect],
   ): Effect[T] =
     completableSystem.completable[T].flatMap { completable =>
       Try(completableFuture).pureFold(
@@ -266,7 +266,7 @@ final case class HttpClient[Effect[_]](
     builder: WebSocket.Builder,
     requestUrl: URI,
     responseEffect: Effect[Completable[Effect, Response]],
-    completableSystem: CompletableEffectSystem[Effect],
+    completableSystem: AsyncEffectSystem[Effect],
   ): Effect[WebSocket] =
     responseEffect.flatMap(response =>
       effect(builder.buildAsync(requestUrl, webSocketListener(response)), completableSystem)

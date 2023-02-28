@@ -1,6 +1,6 @@
 package automorph.system
 
-import automorph.spi.system.{Completable, CompletableEffectSystem}
+import automorph.spi.system.{Completable, AsyncEffectSystem}
 import cats.effect.IO
 import cats.effect.std.Queue
 import cats.effect.unsafe.IORuntime
@@ -17,7 +17,7 @@ import cats.effect.unsafe.IORuntime
  * @param runtime
  *   runtime system
  */
-final case class CatsEffectSystem()(implicit val runtime: IORuntime) extends CompletableEffectSystem[IO] {
+final case class CatsEffectSystem()(implicit val runtime: IORuntime) extends AsyncEffectSystem[IO] {
 
   override def evaluate[T](value: => T): IO[T] =
     IO(value)

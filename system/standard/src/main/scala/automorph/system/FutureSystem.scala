@@ -1,6 +1,6 @@
 package automorph.system
 
-import automorph.spi.system.{Completable, CompletableEffectSystem}
+import automorph.spi.system.{Completable, AsyncEffectSystem}
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Success
 
@@ -17,7 +17,7 @@ import scala.util.Success
  *   execution context
  */
 final case class FutureSystem()(implicit val executionContext: ExecutionContext)
-  extends CompletableEffectSystem[Future] {
+  extends AsyncEffectSystem[Future] {
 
   override def evaluate[T](value: => T): Future[T] =
     Future(value)

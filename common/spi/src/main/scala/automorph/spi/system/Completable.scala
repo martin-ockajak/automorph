@@ -1,7 +1,7 @@
 package automorph.spi.system
 
 /**
- * Completable effect.
+ * Externally completable effect.
  *
  * @tparam Effect
  *   effect type
