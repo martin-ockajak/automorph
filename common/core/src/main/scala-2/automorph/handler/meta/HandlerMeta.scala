@@ -111,14 +111,16 @@ object HandlerMeta {
   ): c.Expr[Handler[Node, Codec, Effect, Context]] = {
     import c.universe.Quasiquote
 
+    // Handler needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Handler[Node, Codec, Effect, Context]](q"""
+      val handler = ${c.prefix}
       val newBindings = automorph.handler.meta.HandlerGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](
-          ${c.prefix}.protocol.codec, $api
+          handler.protocol.codec, $api
         ).flatMap { binding =>
           $mapName(binding.function.name).map(_ -> binding)
         }
-      ${c.prefix}.copy(apiBindings = ${c.prefix}.apiBindings ++ newBindings)
+      handler.copy(apiBindings = handler.apiBindings ++ newBindings)
     """)
   }
 }
