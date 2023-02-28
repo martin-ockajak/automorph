@@ -26,9 +26,9 @@ private[examples] object ServerErrors {
     val api = new ServerApi()
 
     // Customize remote API server exception to RPC error mapping
-    val rpcProtocol = Default.protocol[Default.ServerContext].mapException(_ match {
+    val rpcProtocol = Default.rpcProtocol[Default.ServerContext].mapException(_ match {
       case _: SQLException => InvalidRequest
-      case error => Default.protocol.mapException(error)
+      case error => Default.rpcProtocol.mapException(error)
     })
 
     // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'

@@ -509,11 +509,11 @@ trait ClientApi {
 }
 
 // Customize remote API client RPC error to exception mapping
-val rpcProtocol = Default.protocol[Default.ClientContext].mapError((message, code) =>
+val rpcProtocol = Default.rpcProtocol[Default.ClientContext].mapError((message, code) =>
   if (message.contains("SQL")) {
     new SQLException(message)
   } else {
-    Default.protocol.mapError(message, code)
+    Default.rpcProtocol.mapError(message, code)
   }
 )
 
@@ -579,9 +579,9 @@ class ServerApi {
 val api = new ServerApi()
 
 // Customize remote API server exception to RPC error mapping
-val rpcProtocol = Default.protocol[Default.ServerContext].mapException(_ match {
+val rpcProtocol = Default.rpcProtocol[Default.ServerContext].mapException(_ match {
   case _: SQLException => InvalidRequest
-  case error => Default.protocol.mapException(error)
+  case error => Default.rpcProtocol.mapException(error)
 })
 
 // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
@@ -1196,7 +1196,7 @@ trait ClientApi {
 }
 
 // Configure JSON-RPC to pass arguments by position instead of by name
-val rpcProtocol = Default.protocol[Default.ClientContext].namedArguments(false)
+val rpcProtocol = Default.rpcProtocol[Default.ClientContext].namedArguments(false)
 
 // Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
@@ -1344,7 +1344,7 @@ class ServerApi {
 val api = new ServerApi()
 
 // Create a server RPC protocol plugin
-val serverProtocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ServerContext](messageCodec)
+val serverProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, codec.type, Default.ServerContext](messageCodec)
 
 // Create an effect system plugin
 val effectSystem = Default.effectSystemAsync
@@ -1363,7 +1363,7 @@ trait ClientApi {
 }
 
 // Create a client RPC protocol plugin
-val clientProtocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ClientContext](messageCodec)
+val clientProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, codec.type, Default.ClientContext](messageCodec)
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
@@ -1420,7 +1420,7 @@ val api = new ServerApi()
 
 // Create a server Web-RPC protocol plugin with '/api' path prefix
 val serverProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ServerContext](
-  Default.codec, "/api"
+  Default.messagecodec, "/api"
 )
 
 // Start default Web-RPC HTTP server listening on port 7000 for requests to '/api'
@@ -1438,7 +1438,7 @@ trait ClientApi {
 
 // Create a client Web-RPC protocol plugin with '/api' path prefix
 val clientProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ClientContext](
-  Default.codec, "/api"
+  Default.messageCodec, "/api"
 )
 
 // Setup default Web-RPC HTTP client sending POST requests to 'http://localhost:7000/api'

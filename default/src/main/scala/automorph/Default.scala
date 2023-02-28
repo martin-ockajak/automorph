@@ -115,7 +115,7 @@ object Default extends DefaultMeta {
   def client[Effect[_], Context](
     clientMessageTransport: ClientMessageTransport[Effect, Context]
   ): Client[Effect, Context] =
-    Client(protocol, clientMessageTransport)
+    Client(rpcProtocol, clientMessageTransport)
 
   /**
    * Creates a standard JRE HTTP & WebSocket client message transport plugin with specified effect system plugin.
@@ -211,7 +211,7 @@ object Default extends DefaultMeta {
    *   RPC request handler
    */
   def handler[Effect[_], Context](system: EffectSystem[Effect]): Handler[Effect, Context] =
-    Handler(protocol, system)
+    Handler(rpcProtocol, system)
 
   /**
    * Creates a JSON-RPC request handler using identity as an effect type while providing given message context type.
@@ -224,7 +224,7 @@ object Default extends DefaultMeta {
    *   synchronous RPC request handler
    */
   def handlerSync[Context]: Handler[SyncEffect, Context] =
-    Handler(protocol, effectSystemSync)
+    Handler(rpcProtocol, effectSystemSync)
 
   /**
    * Creates a JSON-RPC request handler using 'Future' as an effect type while providing given message context type.
@@ -239,7 +239,7 @@ object Default extends DefaultMeta {
    *   asynchronous RPC request handler
    */
   def handlerAsync[Context](implicit executionContext: ExecutionContext): Handler[AsyncEffect, Context] =
-    Handler(protocol, effectSystemAsync)
+    Handler(rpcProtocol, effectSystemAsync)
 
   /**
    * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
@@ -331,7 +331,7 @@ object Default extends DefaultMeta {
     builder: Undertow.Builder = defaultBuilder,
   ): ServerBuilder[Effect] =
     (serverApiBinder: ServerApiBinder[Effect]) => {
-      val handler = serverApiBinder(Handler.protocol(protocol[ServerContext]).system(effectSystem))
+      val handler = serverApiBinder(Handler.protocol(rpcProtocol[ServerContext]).system(effectSystem))
       server(handler, port, path, methods, webSocket, mapException, builder)
     }
 

@@ -29,11 +29,11 @@ private[examples] object ClientExceptions {
     }
 
     // Customize remote API client RPC error to exception mapping
-    val rpcProtocol = Default.protocol[Default.ClientContext].mapError((message, code) =>
+    val rpcProtocol = Default.rpcProtocol[Default.ClientContext].mapError((message, code) =>
       if (message.contains("SQL")) {
         new SQLException(message)
       } else {
-        Default.protocol.mapError(message, code)
+        Default.rpcProtocol.mapError(message, code)
       }
     )
 

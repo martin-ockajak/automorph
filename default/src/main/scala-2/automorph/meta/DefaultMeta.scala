@@ -27,26 +27,6 @@ private[automorph] trait DefaultMeta {
   type Protocol[NodeType, CodecType <: MessageCodec[NodeType], Context] = JsonRpcProtocol[NodeType, CodecType, Context]
 
   /**
-   * Creates a JSON-RPC protocol plugin.
-   *
-   * @see
-   *   [[https://www.jsonrpc.org/specification Protocol specification]]
-   * @tparam Context
-   *   message context type
-   * @return
-   *   RPC protocol plugin
-   */
-  def protocol[Context]: Protocol[Node, Codec, Context] =
-    JsonRpcProtocol(
-      codec,
-      JsonRpcProtocol.defaultMapError,
-      JsonRpcProtocol.defaultMapException,
-      true,
-      identity,
-      identity,
-    )
-
-  /**
    * Creates a Circe JSON message codec plugin.
    *
    * @see
@@ -58,15 +38,35 @@ private[automorph] trait DefaultMeta {
    * @return
    *   message codec plugin
    */
-  def codec: Codec =
+  def messageCodec: Codec =
     CirceJsonCodec()
+
+  /**
+   * Creates a JSON-RPC protocol plugin.
+   *
+   * @see
+   *   [[https://www.jsonrpc.org/specification Protocol specification]]
+   * @tparam Context
+   *   message context type
+   * @return
+   *   RPC protocol plugin
+   */
+  def rpcProtocol[Context]: Protocol[Node, Codec, Context] =
+    JsonRpcProtocol(
+      messageCodec,
+      JsonRpcProtocol.defaultMapError,
+      JsonRpcProtocol.defaultMapException,
+      true,
+      identity,
+      identity,
+    )
 
   /**
    * Creates a JSON-RPC protocol plugin with specified message codec plugin.
    *
    * @see
    *   [[https://www.jsonrpc.org/specification Protocol specification]]
-   * @param codec
+   * @param messageCodec
    *   message codec plugin
    * @tparam NodeType
    *   message node type
@@ -77,21 +77,21 @@ private[automorph] trait DefaultMeta {
    * @return
    *   RPC protocol plugin
    */
-  def protocol[NodeType, CodecType <: MessageCodec[NodeType], Context](
-    codec: CodecType
+  def rpcProtocol[NodeType, CodecType <: MessageCodec[NodeType], Context](
+    messageCodec: CodecType
   ): Protocol[NodeType, CodecType, Context] =
-    macro DefaultMeta.protocolMacro[NodeType, CodecType, Context]
+    macro DefaultMeta.rpcProtocolMacro[NodeType, CodecType, Context]
 }
 
 object DefaultMeta {
 
-  def protocolMacro[NodeType, CodecType <: MessageCodec[NodeType], Context](
+  def rpcProtocolMacro[NodeType, CodecType <: MessageCodec[NodeType], Context](
     c: blackbox.Context
-  )(codec: c.Expr[CodecType]): c.Expr[JsonRpcProtocol[NodeType, CodecType, Context]] = {
+  )(messageCodec: c.Expr[CodecType]): c.Expr[JsonRpcProtocol[NodeType, CodecType, Context]] = {
     import c.universe.Quasiquote
 
     c.Expr[JsonRpcProtocol[NodeType, CodecType, Context]](q"""
-      automorph.protocol.JsonRpcProtocol($codec)
+      automorph.protocol.JsonRpcProtocol($messageCodec)
     """)
   }
 }
