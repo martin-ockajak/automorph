@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.{DeserializationContext, SerializerProvide
 import io.circe.generic.auto.*
 import io.circe.{Decoder, Encoder}
 import scala.annotation.nowarn
-import test.core.CoreTest
 import test.{Enum, Record, Structure}
 
 trait ProtocolCodecTest extends CoreTest {
