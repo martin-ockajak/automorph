@@ -1558,7 +1558,7 @@ val api = new ServerApi()
 
 // Start NanoHTTPD JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val handler = Default.handlerSync[NanoServer.Context]
-val server = NanoServer[Default.SyncEffect](handler.bind(api), identity, 7000, "/api")
+val server = NanoServer(handler.bind(api), 7000, "/api")
 ```
 
 **Client**

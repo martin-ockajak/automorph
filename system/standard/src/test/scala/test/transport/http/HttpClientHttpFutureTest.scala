@@ -25,7 +25,7 @@ class HttpClientHttpFutureTest extends ClientServerTest {
   override def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
   ): Option[ClientMessageTransport[Effect, Context]] = {
-    val server = withRandomAvailablePort(port => NanoServer[Effect](handler, execute, port))
+    val server = withRandomAvailablePort(port => NanoServer[Effect](handler, port))
     servers += server
     val url = new URI(s"http://localhost:${server.port}")
     val client = HttpClient(system, url, HttpMethod.Post).asInstanceOf[ClientMessageTransport[Effect, Context]]

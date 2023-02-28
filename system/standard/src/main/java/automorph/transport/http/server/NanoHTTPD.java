@@ -33,8 +33,6 @@ package automorph.transport.http.server;
  * #L%
  */
 
-import automorph.transport.http.server.NanoHTTPD.ClientHandler;
-import automorph.transport.http.server.NanoHTTPD.CookieHandler;
 import automorph.transport.http.server.NanoHTTPD.Response.IStatus;
 import automorph.transport.http.server.NanoHTTPD.Response.Status;
 
@@ -85,6 +83,10 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
+// PATCH BEGIN
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+// PATCH END
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -944,7 +946,15 @@ public abstract class NanoHTTPD {
                 // TODO: long body_size = getBodySize();
                 // TODO: long pos_before_serve = this.inputStream.totalRead()
                 // (requires implementation for totalRead())
-                r = serve(this);
+// PATCH BEGIN
+                BlockingQueue<Response> asyncResponse = serve(this);
+                try {
+                    r = asyncResponse.take();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException("Request processing interrupted", e);
+                }
+//                r = serve(this);
+// PATCH END
                 // TODO: this.inputStream.skip(body_size -
                 // (this.inputStream.totalRead() - pos_before_serve))
 
@@ -1246,7 +1256,7 @@ public abstract class NanoHTTPD {
 
         Method getMethod();
 
-// PATCH START
+// PATCH BEGIN
         /**
          * Get request body size.
          *
@@ -2227,33 +2237,67 @@ public abstract class NanoHTTPD {
         return newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_HTML, msg);
     }
 
+// PATCH BEGIN
     /**
      * Override this to customize the server.
      * <p/>
      * <p/>
      * (By default, this returns a 404 "Not Found" plain text error response.)
-     * 
+     *
      * @param session
      *            The HTTP session
      * @return HTTP response, see class Response for details
      */
-    public Response serve(IHTTPSession session) {
+    public BlockingQueue<Response> serve(IHTTPSession session) {
+        BlockingQueue<Response> responseQueue = new ArrayBlockingQueue<>(1);
         Map<String, String> files = new HashMap<String, String>();
         Method method = session.getMethod();
         if (Method.PUT.equals(method) || Method.POST.equals(method)) {
             try {
                 session.parseBody(files);
             } catch (IOException ioe) {
-                return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "SERVER INTERNAL ERROR: IOException: " + ioe.getMessage());
+                responseQueue.add(newFixedLengthResponse(Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "SERVER INTERNAL ERROR: IOException: " + ioe.getMessage()));
+                return responseQueue;
             } catch (ResponseException re) {
-                return newFixedLengthResponse(re.getStatus(), NanoHTTPD.MIME_PLAINTEXT, re.getMessage());
+                responseQueue.add(newFixedLengthResponse(re.getStatus(), NanoHTTPD.MIME_PLAINTEXT, re.getMessage()));
+                return responseQueue;
             }
         }
 
         Map<String, String> parms = session.getParms();
         parms.put(NanoHTTPD.QUERY_STRING_PARAMETER, session.getQueryParameterString());
-        return serve(session.getUri(), method, session.getHeaders(), parms, files);
+        responseQueue.add(serve(session.getUri(), method, session.getHeaders(), parms, files));
+        return responseQueue;
     }
+// PATCH END
+
+//    /**
+//     * Override this to customize the server.
+//     * <p/>
+//     * <p/>
+//     * (By default, this returns a 404 "Not Found" plain text error response.)
+//     *
+//     * @param session
+//     *            The HTTP session
+//     * @return HTTP response, see class Response for details
+//     */
+//    public Response serve(IHTTPSession session) {
+//        Map<String, String> files = new HashMap<String, String>();
+//        Method method = session.getMethod();
+//        if (Method.PUT.equals(method) || Method.POST.equals(method)) {
+//            try {
+//                session.parseBody(files);
+//            } catch (IOException ioe) {
+//                return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "SERVER INTERNAL ERROR: IOException: " + ioe.getMessage());
+//            } catch (ResponseException re) {
+//                return newFixedLengthResponse(re.getStatus(), NanoHTTPD.MIME_PLAINTEXT, re.getMessage());
+//            }
+//        }
+//
+//        Map<String, String> parms = session.getParms();
+//        parms.put(NanoHTTPD.QUERY_STRING_PARAMETER, session.getQueryParameterString());
+//        return serve(session.getUri(), method, session.getHeaders(), parms, files);
+//    }
 
     /**
      * Override this to customize the server.

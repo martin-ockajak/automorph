@@ -33,7 +33,7 @@ package automorph.transport.http.server;
  * #L%
  */
 
-// PATCH START
+// PATCH BEGIN
 import automorph.transport.http.server.NanoHTTPD.IHTTPSession;
 import automorph.transport.http.server.NanoHTTPD.Response;
 // PATCH END
@@ -53,6 +53,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -835,17 +837,20 @@ public abstract class NanoWSD extends NanoHTTPD {
 
     protected abstract WebSocket openWebSocket(NanoHTTPD.IHTTPSession handshake);
 
-    @Override
-    public NanoHTTPD.Response serve(final NanoHTTPD.IHTTPSession session) {
+// PATCH BEGIN
+    public BlockingQueue<NanoHTTPD.Response> serve(final NanoHTTPD.IHTTPSession session) {
+        BlockingQueue<Response> responseQueue = new ArrayBlockingQueue<>(1);
         Map<String, String> headers = session.getHeaders();
         if (isWebsocketRequested(session)) {
             if (!NanoWSD.HEADER_WEBSOCKET_VERSION_VALUE.equalsIgnoreCase(headers.get(NanoWSD.HEADER_WEBSOCKET_VERSION))) {
-                return newFixedLengthResponse(Response.Status.BAD_REQUEST, NanoHTTPD.MIME_PLAINTEXT,
-                        "Invalid Websocket-Version " + headers.get(NanoWSD.HEADER_WEBSOCKET_VERSION));
+                responseQueue.add(newFixedLengthResponse(Response.Status.BAD_REQUEST, NanoHTTPD.MIME_PLAINTEXT,
+                  "Invalid Websocket-Version " + headers.get(NanoWSD.HEADER_WEBSOCKET_VERSION)));
+                return responseQueue;
             }
 
             if (!headers.containsKey(NanoWSD.HEADER_WEBSOCKET_KEY)) {
-                return newFixedLengthResponse(Response.Status.BAD_REQUEST, NanoHTTPD.MIME_PLAINTEXT, "Missing Websocket-Key");
+                responseQueue.add(newFixedLengthResponse(Response.Status.BAD_REQUEST, NanoHTTPD.MIME_PLAINTEXT, "Missing Websocket-Key"));
+                return responseQueue;
             }
 
             WebSocket webSocket = openWebSocket(session);
@@ -853,23 +858,62 @@ public abstract class NanoWSD extends NanoHTTPD {
             try {
                 handshakeResponse.addHeader(NanoWSD.HEADER_WEBSOCKET_ACCEPT, makeAcceptKey(headers.get(NanoWSD.HEADER_WEBSOCKET_KEY)));
             } catch (NoSuchAlgorithmException e) {
-                return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT,
-                        "The SHA-1 Algorithm required for websockets is not available on the server.");
+                responseQueue.add(newFixedLengthResponse(Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT,
+                  "The SHA-1 Algorithm required for websockets is not available on the server."));
+                return responseQueue;
             }
 
             if (headers.containsKey(NanoWSD.HEADER_WEBSOCKET_PROTOCOL)) {
                 handshakeResponse.addHeader(NanoWSD.HEADER_WEBSOCKET_PROTOCOL, headers.get(NanoWSD.HEADER_WEBSOCKET_PROTOCOL).split(",")[0]);
             }
 
-            return handshakeResponse;
+            responseQueue.add(handshakeResponse);
+            return responseQueue;
         } else {
             return serveHttp(session);
         }
     }
 
-    protected NanoHTTPD.Response serveHttp(final NanoHTTPD.IHTTPSession session) {
+    protected BlockingQueue<NanoHTTPD.Response> serveHttp(final NanoHTTPD.IHTTPSession session) {
         return super.serve(session);
     }
+
+//    @Override
+//    public NanoHTTPD.Response serve(final NanoHTTPD.IHTTPSession session) {
+//        Map<String, String> headers = session.getHeaders();
+//        if (isWebsocketRequested(session)) {
+//            if (!NanoWSD.HEADER_WEBSOCKET_VERSION_VALUE.equalsIgnoreCase(headers.get(NanoWSD.HEADER_WEBSOCKET_VERSION))) {
+//                return newFixedLengthResponse(Response.Status.BAD_REQUEST, NanoHTTPD.MIME_PLAINTEXT,
+//                        "Invalid Websocket-Version " + headers.get(NanoWSD.HEADER_WEBSOCKET_VERSION));
+//            }
+//
+//            if (!headers.containsKey(NanoWSD.HEADER_WEBSOCKET_KEY)) {
+//                return newFixedLengthResponse(Response.Status.BAD_REQUEST, NanoHTTPD.MIME_PLAINTEXT, "Missing Websocket-Key");
+//            }
+//
+//            WebSocket webSocket = openWebSocket(session);
+//            NanoHTTPD.Response handshakeResponse = webSocket.getHandshakeResponse();
+//            try {
+//                handshakeResponse.addHeader(NanoWSD.HEADER_WEBSOCKET_ACCEPT, makeAcceptKey(headers.get(NanoWSD.HEADER_WEBSOCKET_KEY)));
+//            } catch (NoSuchAlgorithmException e) {
+//                return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT,
+//                        "The SHA-1 Algorithm required for websockets is not available on the server.");
+//            }
+//
+//            if (headers.containsKey(NanoWSD.HEADER_WEBSOCKET_PROTOCOL)) {
+//                handshakeResponse.addHeader(NanoWSD.HEADER_WEBSOCKET_PROTOCOL, headers.get(NanoWSD.HEADER_WEBSOCKET_PROTOCOL).split(",")[0]);
+//            }
+//
+//            return handshakeResponse;
+//        } else {
+//            return serveHttp(session);
+//        }
+//    }
+//
+//    protected NanoHTTPD.Response serveHttp(final NanoHTTPD.IHTTPSession session) {
+//        return super.serve(session);
+//    }
+// PATCH END
 
     /**
      * not all websockets implementations accept gzip compression.

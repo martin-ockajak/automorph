@@ -14,6 +14,7 @@ import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, Strin
 import automorph.util.{Network, Random}
 import java.io.{IOException, InputStream}
 import java.net.URI
+import java.util.concurrent.{ArrayBlockingQueue, BlockingQueue}
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.MapHasAsScala
 
@@ -33,8 +34,6 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  *   Creates a NanoHTTPD HTTP & WebSocket server with specified RPC request handler.
  * @param handler
  *   RPC request handler
- * @param evaluateResponse
- * evaluates response effect
  * @param port
  *   port to listen on for HTTP connections
  * @param pathPrefix
@@ -50,7 +49,6 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  */
 final case class NanoServer[Effect[_]] (
   handler: Types.HandlerAnyCodec[Effect, Context],
-  evaluateResponse: Effect[Response] => Response,
   port: Int,
   pathPrefix: String = "/",
   methods: Iterable[HttpMethod] = HttpMethod.values,
@@ -81,17 +79,20 @@ final case class NanoServer[Effect[_]] (
    * @param session
    *   HTTP session
    * @return
-   *   HTTP Response
+   *   HTTP response
    */
-  override protected def serveHttp(session: IHTTPSession): Response = {
+  override protected def serveHttp(session: IHTTPSession): BlockingQueue[Response] = {
     // Validate URL path
+    val queue = new ArrayBlockingQueue[Response](1)
     val url = new URI(session.getUri)
     if (!url.getPath.startsWith(pathPrefix)) {
-      newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Not Found")
+      queue.add(newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Not Found"))
     } else {
       // Validate HTTP request method
       if (!allowedMethods.contains(session.getMethod.toString.toUpperCase)) {
-        newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "Method Not Allowed")
+        queue.add(
+          newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, NanoHTTPD.MIME_PLAINTEXT, "Method Not Allowed")
+        )
       } else {
         // Receive the request
         val protocol = Protocol.Http
@@ -101,9 +102,12 @@ final case class NanoServer[Effect[_]] (
         val requestBody = session.getInputStream.asArray(session.getBodySize.toInt).toInputStream
 
         // Handle the request
-        handleRequest(requestBody, session, protocol, requestProperties, requestId)
+        handleRequest(requestBody, session, protocol, requestProperties, requestId).map { response =>
+          queue.add(response)
+        }.runAsync
       }
     }
+    queue
   }
 
   /**
@@ -129,10 +133,10 @@ final case class NanoServer[Effect[_]] (
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(session, protocol, requestId)
         val request = frame.getBinaryPayload.toInputStream
-        val response = handleRequest(request, session, protocol, requestProperties, requestId)
-
-        // Handler the request
-        send(response.getData.toArray)
+        handleRequest(request, session, protocol, requestProperties, requestId).map { response =>
+          // Send the response
+          send(response.getData.toArray)
+        }.runAsync
       }
 
       override protected def onPong(pong: WebSocketFrame): Unit =
@@ -148,11 +152,11 @@ final case class NanoServer[Effect[_]] (
     protocol: Protocol,
     requestProperties: => Map[String, String],
     requestId: String,
-  ): Response = {
+  ): Effect[Response] = {
     log.receivedRequest(requestProperties, protocol.name)
 
     // Process the request
-    evaluateResponse(genericHandler.processRequest(requestBody, getRequestContext(session), requestId).either.map(
+    genericHandler.processRequest(requestBody, getRequestContext(session), requestId).either.map(
       _.fold(
         error => sendErrorResponse(error, session, protocol, requestId, requestProperties),
         result => {
@@ -162,7 +166,7 @@ final case class NanoServer[Effect[_]] (
           createResponse(response, status, result.context, session, protocol, requestId)
         },
       )
-    ))
+    )
   }
 
   private def sendErrorResponse(
