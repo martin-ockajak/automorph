@@ -215,17 +215,12 @@ private[automorph] object HandlerGenerator:
             // Call the API method and type coerce the result
             //   api.method(arguments*).asInstanceOf[Any]: Any
             // FIXME - coerce the result to a generic effect type
-            //  .asInstanceOf[Effect[Any]]
+            //   .asInstanceOf[Effect[Any]]
             ref.q.reflect.Select.unique(api.asTerm, method.name).appliedToTypes(List.empty).appliedToArgss(
               apiMethodArguments.asInstanceOf[List[List[ref.q.reflect.Term]]]
-            ).asExprOf[Effect[resultValueType]]
-//            MethodReflection.call(
-//              ref.q,
-//              api.asTerm,
-//              method.name,
-//              List.empty,
-//              apiMethodArguments
-//            ).asExprOf[Effect[resultValueType]]
+            ).asExprOf[Any]
+//            MethodReflection.call(ref.q, api.asTerm, method.name, List.empty, apiMethodArguments)
+//              .asExprOf[Effect[resultValueType]]
           }
         }
 

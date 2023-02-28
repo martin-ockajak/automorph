@@ -200,28 +200,28 @@ object HandlerGenerator {
     val finalContextType = weakTypeOf[Context].dealias
     ref.c.Expr[(Seq[Any], Context) => Any](q"""
       (arguments: Seq[Any], requestContext: $finalContextType) => ${
-      // Create the method argument lists by type coercing supplied arguments
-      // List(List(
-      //   arguments(N).asInstanceOf[NType]
-      // )): List[List[ParameterXType]]
-      val apiMethodArguments = method.parameters.toList.zip(parameterListOffsets).map {
-        case (parameters, offset) => parameters.toList.zipWithIndex.map { case (parameter, index) =>
-            val argumentIndex = offset + index
-            if (argumentIndex == lastArgumentIndex && MethodReflection.acceptsContext[C, Context](ref)(method)) {
-              // Use supplied request context as a last argument if the method accepts context as its last parameter
-              q"requestContext"
-            } else {
-              // Coerce argument type
-              q"arguments($argumentIndex).asInstanceOf[${parameter.dataType}]"
+        // Create the method argument lists by type coercing supplied arguments
+        // List(List(
+        //   arguments(N).asInstanceOf[NType]
+        // )): List[List[ParameterXType]]
+        val apiMethodArguments = method.parameters.toList.zip(parameterListOffsets).map {
+          case (parameters, offset) => parameters.toList.zipWithIndex.map { case (parameter, index) =>
+              val argumentIndex = offset + index
+              if (argumentIndex == lastArgumentIndex && MethodReflection.acceptsContext[C, Context](ref)(method)) {
+                // Use supplied request context as a last argument if the method accepts context as its last parameter
+                q"requestContext"
+              } else {
+                // Coerce argument type
+                q"arguments($argumentIndex).asInstanceOf[${parameter.dataType}]"
+              }
             }
-          }
-      }
+        }
 
-      // Call the API method and type coerce the result
-      //   api.method(arguments*).asInstanceOf[Any]: Any
-      // FIXME - coerce the result to a generic effect type
-      //   q"$api.${method.symbol}(...$apiMethodArguments).asInstanceOf[$effectType[Any]]"
-      q"$api.${method.symbol}(...$apiMethodArguments).asInstanceOf[Any]"
+        // Call the API method and type coerce the result
+        //   api.method(arguments*).asInstanceOf[Any]: Any
+        // FIXME - coerce the result to a generic effect type
+        //   .asInstanceOf[$effectType[Any]]"
+        q"$api.${method.symbol}(...$apiMethodArguments).asInstanceOf[Any]"
       }
     """)
   }
