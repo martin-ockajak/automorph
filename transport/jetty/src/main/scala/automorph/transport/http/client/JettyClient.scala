@@ -1,8 +1,8 @@
 package automorph.transport.http.client
 
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{ClientMessageTransport, EffectSystem}
-import automorph.spi.system.{Completable, AsyncEffectSystem}
+import automorph.spi.AsyncEffectSystem.Completable
+import automorph.spi.{AsyncEffectSystem, ClientMessageTransport, EffectSystem}
 import automorph.transport.http.client.JettyClient.{Context, Session, defaultClient}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, TryOps}

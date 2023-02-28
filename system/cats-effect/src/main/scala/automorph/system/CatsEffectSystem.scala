@@ -1,6 +1,7 @@
 package automorph.system
 
-import automorph.spi.system.{Completable, AsyncEffectSystem}
+import automorph.spi.AsyncEffectSystem
+import automorph.spi.AsyncEffectSystem.Completable
 import cats.effect.IO
 import cats.effect.std.Queue
 import cats.effect.unsafe.IORuntime

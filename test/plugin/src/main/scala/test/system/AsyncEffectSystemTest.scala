@@ -1,6 +1,6 @@
 package test.system
 
-import automorph.spi.system.AsyncEffectSystem
+import automorph.spi.AsyncEffectSystem
 
 /**
  * Completable effect system test.
@@ -27,7 +27,7 @@ trait AsyncEffectSystemTest[Effect[_]] extends EffectSystemTest[Effect] {
             run(effect).should(equal(Left(error)))
           }
         }
-      case _ => {}
+      case _ =>
     }
   }
 

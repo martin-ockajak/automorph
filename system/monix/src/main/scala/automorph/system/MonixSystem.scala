@@ -1,6 +1,7 @@
 package automorph.system
 
-import automorph.spi.system.{Completable, AsyncEffectSystem}
+import automorph.spi.AsyncEffectSystem
+import automorph.spi.AsyncEffectSystem.Completable
 import monix.catnap.MVar
 import monix.eval.Task
 import monix.execution.Scheduler

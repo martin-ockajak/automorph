@@ -1,6 +1,7 @@
 package automorph.system
 
-import automorph.spi.system.{Completable, AsyncEffectSystem}
+import automorph.spi.AsyncEffectSystem
+import automorph.spi.AsyncEffectSystem.Completable
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Success
 
