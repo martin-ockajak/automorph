@@ -21,7 +21,7 @@ private[examples] object MessageCodec {
 
     // Provide custom data type serialization and deserialization logic
     import messageCodec.custom.*
-    implicit def recordRw: messageCodec.custom.ReadWriter[Record] = messageCodec.custom.macroRW[Record]
+    implicit def recordRw: messageCodec.custom.ReadWriter[Record] = messageCodec.custom.macroRW
 
     // Create server API instance
     class ServerApi {
@@ -32,7 +32,9 @@ private[examples] object MessageCodec {
     val api = new ServerApi()
 
     // Create a server RPC protocol plugin
-    val serverProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ServerContext](messageCodec)
+    val serverProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ServerContext](
+      messageCodec
+    )
 
     // Create an effect system plugin
     val effectSystem = Default.effectSystemAsync
@@ -47,7 +49,9 @@ private[examples] object MessageCodec {
     }
 
     // Create a client RPC protocol plugin
-    val clientProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ClientContext](messageCodec)
+    val clientProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ClientContext](
+      messageCodec
+    )
 
     // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
     val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
