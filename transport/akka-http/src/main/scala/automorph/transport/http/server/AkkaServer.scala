@@ -85,8 +85,10 @@ final case class AkkaServer[Effect[_]](
         val serverRoute = route(handlerRoute)
 
         // Start HTTP server
-        val serverBinding = Await
-          .result(Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(serverRoute), Duration.Inf)
+        val serverBinding = Await.result(
+          Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(serverRoute),
+          Duration.Inf
+        )
         logger.info(
           "Listening for connections",
           ListMap("Protocol" -> Protocol.Http, "Port" -> serverBinding.localAddress.getPort.toString),
