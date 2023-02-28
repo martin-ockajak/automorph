@@ -1,9 +1,8 @@
 package automorph
 
 import automorph.meta.DefaultMeta
-import automorph.spi.EffectSystem
+import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.spi.system.CompletableEffectSystem
-import automorph.spi.transport.ClientMessageTransport
 import automorph.system.IdentitySystem.Identity
 import automorph.system.{FutureSystem, IdentitySystem}
 import automorph.transport.http.client.HttpClient

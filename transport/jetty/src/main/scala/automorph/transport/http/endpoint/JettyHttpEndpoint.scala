@@ -2,8 +2,7 @@ package automorph.transport.http.endpoint
 
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.EffectSystem
-import automorph.spi.transport.EndpointMessageTransport
+import automorph.spi.{EffectSystem, EndpointMessageTransport}
 import automorph.transport.http.endpoint.JettyHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, StringOps, ThrowableOps, TryOps}

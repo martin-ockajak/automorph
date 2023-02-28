@@ -2,8 +2,7 @@ package automorph.transport.local.client
 
 import automorph.Handler
 import automorph.RpcException.InvalidResponseException
-import automorph.spi.transport.ClientMessageTransport
-import automorph.spi.{EffectSystem, MessageCodec}
+import automorph.spi.{ClientMessageTransport, EffectSystem, MessageCodec}
 import automorph.util.Extensions.EffectOps
 import java.io.InputStream
 

@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.settings.ServerSettings
 import automorph.Types
 import automorph.log.Logging
-import automorph.spi.transport.ServerMessageTransport
+import automorph.spi.ServerMessageTransport
 import automorph.transport.http.endpoint.AkkaHttpEndpoint
 import automorph.transport.http.server.AkkaServer.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}

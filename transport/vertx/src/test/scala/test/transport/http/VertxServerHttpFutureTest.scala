@@ -1,7 +1,7 @@
 package test.transport.http
 
 import automorph.Types
-import automorph.spi.transport.ServerMessageTransport
+import automorph.spi.ServerMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.server.VertxServer
 import org.scalacheck.Arbitrary

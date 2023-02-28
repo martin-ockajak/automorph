@@ -81,7 +81,7 @@ Default plugin set can be obtained by using the [automorph-default](https://mvnr
 | [AkkaServer](/api/automorph/transport/http/server/AkkaServer.html) | [automorph-akka-http](https://mvnrepository.com/artifact/org.automorph/automorph-akka-http) | [Akka HTTP](https://doc.akka.io/docs/akka-http/current/) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [RabbitMqServer](/api/automorph/transport/amqp/server/RabbitMqServer.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq)   | [RabbitMq](https://www.rabbitmq.com/java-client.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
 
-### [Endpoint transport](/api/automorph/spi/transport/EndpointMessageTransport.html)
+### [Endpoint message transport](/api/automorph/spi/EndpointMessageTransport.html)
 
 | Class | Artifact                                                                                    | Library | Protocol |
 | --- |---------------------------------------------------------------------------------------------| --- | --- |

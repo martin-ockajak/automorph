@@ -1,6 +1,6 @@
 package test.transport.http
 
-import automorph.spi.transport.ClientMessageTransport
+import automorph.spi.ClientMessageTransport
 import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.HttpMethod

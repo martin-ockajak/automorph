@@ -1,6 +1,5 @@
-package automorph.spi.transport
+package automorph.spi
 
-import automorph.spi.{EffectSystem, MessageTransport}
 import java.io.InputStream
 
 /**
@@ -13,7 +12,7 @@ import java.io.InputStream
  * @tparam Context
  *   message context type
  */
-trait ClientMessageTransport[Effect[_], Context] extends MessageTransport {
+trait ClientMessageTransport[Effect[_], Context] {
 
   /** Effect system plugin. */
   def system: EffectSystem[Effect]

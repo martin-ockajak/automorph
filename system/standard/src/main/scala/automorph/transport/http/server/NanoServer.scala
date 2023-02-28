@@ -2,8 +2,7 @@ package automorph.transport.http.server
 
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.EffectSystem
-import automorph.spi.transport.ServerMessageTransport
+import automorph.spi.{EffectSystem, ServerMessageTransport}
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.transport.http.server.NanoServer.Context

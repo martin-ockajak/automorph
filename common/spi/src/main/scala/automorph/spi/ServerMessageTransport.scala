@@ -1,6 +1,4 @@
-package automorph.spi.transport
-
-import automorph.spi.MessageTransport
+package automorph.spi
 
 /**
  * Server message transport protocol plugin.
@@ -12,7 +10,7 @@ import automorph.spi.MessageTransport
  * @tparam Context
  *   message context type
  */
-trait ServerMessageTransport[Effect[_], Context] extends MessageTransport {
+trait ServerMessageTransport[Effect[_], Context] {
 
   /**
    * Closes this server transport freeing the underlying resources.

@@ -5,7 +5,7 @@ import argonaut.{Argonaut, CodecJson}
 import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, JacksonJsonCodec, UpickleJsonCodec, UpickleJsonCustom}
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import automorph.protocol.JsonRpcProtocol
-import automorph.spi.transport.ClientMessageTransport
+import automorph.spi.ClientMessageTransport
 import automorph.transport.local.client.HandlerTransport
 import automorph.{Client, Handler, Types}
 import com.fasterxml.jackson.core.{JsonGenerator, JsonParser}

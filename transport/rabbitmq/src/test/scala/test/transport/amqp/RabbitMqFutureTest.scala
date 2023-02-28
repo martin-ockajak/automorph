@@ -1,7 +1,7 @@
 //package test.transport.amqp
 //
 //import automorph.Types
-//import automorph.spi.transport.ClientMessageTransport
+//import automorph.spi.ClientMessageTransport
 //import automorph.system.FutureSystem
 //import automorph.transport.amqp.client.RabbitMqClient
 //import automorph.transport.amqp.server.RabbitMqServer

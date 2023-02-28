@@ -11,8 +11,7 @@ import akka.http.scaladsl.server.Route
 import akka.util.Timeout
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.EffectSystem
-import automorph.spi.transport.EndpointMessageTransport
+import automorph.spi.{EffectSystem, EndpointMessageTransport}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{
   ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps,

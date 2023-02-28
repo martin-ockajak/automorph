@@ -1,9 +1,8 @@
 package automorph.transport.amqp.client
 
 import automorph.log.{Logging, MessageLog}
-import automorph.spi.EffectSystem
+import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.spi.system.{Completable, CompletableEffectSystem}
-import automorph.spi.transport.ClientMessageTransport
 import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, TryOps}

@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.spi.transport.ServerMessageTransport
+import automorph.spi.ServerMessageTransport
 
 /**
  * Active RPC server.

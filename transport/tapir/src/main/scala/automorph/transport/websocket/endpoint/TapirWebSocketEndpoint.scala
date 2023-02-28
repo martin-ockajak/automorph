@@ -2,8 +2,7 @@ package automorph.transport.websocket.endpoint
 
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.EffectSystem
-import automorph.spi.transport.EndpointMessageTransport
+import automorph.spi.{EffectSystem, EndpointMessageTransport}
 import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, getRequestContext, getRequestProperties}
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}

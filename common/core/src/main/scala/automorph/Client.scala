@@ -4,8 +4,7 @@ import automorph.RpcException.InvalidResponseException
 import automorph.client.meta.ClientMeta
 import automorph.client.{ProtocolClientBuilder, RemoteMessage, TransportClientBuilder}
 import automorph.log.{LogProperties, Logging}
-import automorph.spi.transport.ClientMessageTransport
-import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
+import automorph.spi.{ClientMessageTransport, EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
 import automorph.util.Random
 import java.io.InputStream

@@ -1,8 +1,7 @@
 package automorph.transport.http.client
 
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.EffectSystem
-import automorph.spi.transport.ClientMessageTransport
+import automorph.spi.{ClientMessageTransport, EffectSystem}
 import automorph.transport.http.client.UrlClient.{Context, Session}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, InputStreamOps, TryOps}

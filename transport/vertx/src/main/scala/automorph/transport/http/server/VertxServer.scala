@@ -2,7 +2,7 @@ package automorph.transport.http.server
 
 import automorph.Types
 import automorph.log.Logging
-import automorph.spi.transport.ServerMessageTransport
+import automorph.spi.ServerMessageTransport
 import automorph.transport.http.endpoint.VertxHttpEndpoint
 import automorph.transport.http.server.VertxServer.{defaultHttpServerOptions, defaultVertxOptions, Context}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}

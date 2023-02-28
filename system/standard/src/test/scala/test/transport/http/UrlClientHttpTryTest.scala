@@ -1,7 +1,7 @@
 package test.transport.http
 
 import automorph.Types
-import automorph.spi.transport.ClientMessageTransport
+import automorph.spi.ClientMessageTransport
 import automorph.system.TrySystem
 import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.UrlClient

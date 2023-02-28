@@ -1,6 +1,6 @@
 package test.transport.websocket
 
-import automorph.spi.transport.ClientMessageTransport
+import automorph.spi.ClientMessageTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.JettyClient

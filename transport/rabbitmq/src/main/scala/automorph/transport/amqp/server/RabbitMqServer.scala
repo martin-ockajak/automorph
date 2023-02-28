@@ -2,8 +2,7 @@ package automorph.transport.amqp.server
 
 import automorph.Types
 import automorph.log.{Logging, MessageLog}
-import automorph.spi.EffectSystem
-import automorph.spi.transport.ServerMessageTransport
+import automorph.spi.{EffectSystem, ServerMessageTransport}
 import automorph.transport.amqp.server.RabbitMqServer.Context
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}

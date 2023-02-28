@@ -1,7 +1,6 @@
 package test.core
 
-import automorph.spi.EffectSystem
-import automorph.spi.transport.{ClientMessageTransport, ServerMessageTransport}
+import automorph.spi.{ClientMessageTransport, EffectSystem, ServerMessageTransport}
 import scala.collection.mutable.ArrayBuffer
 
 trait ClientServerTest extends ProtocolCodecTest {

@@ -2,7 +2,7 @@ package automorph.transport.http.server
 
 import automorph.Types
 import automorph.log.Logging
-import automorph.spi.transport.ServerMessageTransport
+import automorph.spi.ServerMessageTransport
 import automorph.transport.http.endpoint.JettyHttpEndpoint
 import automorph.transport.http.server.JettyServer.Context
 import automorph.transport.http.{HttpContext, HttpMethod}

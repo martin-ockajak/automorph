@@ -1,8 +1,7 @@
 package automorph.client
 
 import automorph.Client
-import automorph.spi.transport.ClientMessageTransport
-import automorph.spi.{MessageCodec, RpcProtocol}
+import automorph.spi.{ClientMessageTransport, MessageCodec, RpcProtocol}
 
 /**
  * RPC client builder.
