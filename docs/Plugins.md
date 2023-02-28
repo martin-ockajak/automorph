@@ -55,9 +55,7 @@ Default plugin set can be obtained by using the [automorph-default](https://mvnr
 | [ArgonautJsonCodec](/api/automorph/codec/json/ArgonautJsonCodec.html) | [automorph-argonaut](https://mvnrepository.com/artifact/org.automorph/automorph-argonaut) | [Argonaut](http://argonaut.io/doc/) |[Json](http://argonaut.io/scaladocs/#argonaut.Json) | [JSON](https://www.json.org/) |
 
 
-## [Message transport](/api/automorph/spi/MessageTransport.html)
-
-### [Client transport](/api/automorph/spi/transport/ClientMessageTransport.html)
+## [Client message transport](/api/automorph/spi/ClientMessageTransport.html)
 
 | Class | Artifact | Library | Protocol |
 | --- | --- | --- | --- |
@@ -72,7 +70,7 @@ Default plugin set can be obtained by using the [automorph-default](https://mvnr
 | [UrlClient](/api/automorph/transport/http/client/UrlClient.html) | [automorph-standard](https://mvnrepository.com/artifact/org.automorph/automorph-standard) | [Standard](https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html) | [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol) |
 | [RabbitMqClient](/api/automorph/transport/amqp/client/RabbitMqClient.html) | [automorph-rabbitmq](https://mvnrepository.com/artifact/org.automorph/automorph-rabbitmq) | [RabbitMQ](https://www.rabbitmq.com/java-client.html) | [AMQP](https://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol) |
 
-### [Server transport](/api/automorph/spi/transport/ServerMessageTransport.html)
+## [Server message transport](/api/automorph/spi/ServerMessageTransport.html)
 
 | Class | Artifact                                                                                    | Library                                               | Protocol |
 | --- |---------------------------------------------------------------------------------------------|-------------------------------------------------------| --- |

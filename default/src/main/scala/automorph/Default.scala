@@ -81,7 +81,7 @@ object Default extends DefaultMeta {
    *   [[https://openjdk.org/groups/net/httpclient/intro.html documentation]]
    * @see
    *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
-   * @param system
+   * @param effectsystem
    *   effect system plugin
    * @param url
    *   HTTP endpoint URL
@@ -93,18 +93,18 @@ object Default extends DefaultMeta {
    *   RPC client
    */
   def client[Effect[_]](
-    system: EffectSystem[Effect],
+    effectsystem: EffectSystem[Effect],
     url: URI,
     method: HttpMethod = HttpMethod.Post,
   ): Client[Effect, ClientContext] =
-    client(clientTransport(system, url, method))
+    client(clientTransport(effectsystem, url, method))
 
   /**
    * Creates a JSON-RPC client with specified message transport plugin.
    *
    * The client can be used to perform type-safe remote API calls or send one-way messages.
    *
-   * @param transport
+   * @param clientMessageTransport
    *   message transport protocol plugin
    * @tparam Effect
    *   effect type
@@ -113,8 +113,10 @@ object Default extends DefaultMeta {
    * @return
    *   RPC client
    */
-  def client[Effect[_], Context](transport: ClientMessageTransport[Effect, Context]): Client[Effect, Context] =
-    Client(protocol, transport)
+  def client[Effect[_], Context](
+    clientMessageTransport: ClientMessageTransport[Effect, Context]
+  ): Client[Effect, Context] =
+    Client(protocol, clientMessageTransport)
 
   /**
    * Creates a standard JRE HTTP & WebSocket client message transport plugin with specified effect system plugin.
@@ -301,7 +303,7 @@ object Default extends DefaultMeta {
    *   [[https://undertow.io Library documentation]]
    * @see
    *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
-   * @param system
+   * @param effectSystem
    *   effect system plugin
    * @param port
    *   port to listen on for HTTP connections
@@ -321,7 +323,7 @@ object Default extends DefaultMeta {
    *   creates RPC server using supplied API binding function and asynchronous effect execution function
    */
   def serverBuilder[Effect[_]](
-    system: EffectSystem[Effect],
+    effectSystem: EffectSystem[Effect],
     port: Int,
     path: String = "/",
     methods: Iterable[HttpMethod] = HttpMethod.values,
@@ -330,7 +332,7 @@ object Default extends DefaultMeta {
     builder: Undertow.Builder = defaultBuilder,
   ): ServerBuilder[Effect] =
     (serverApiBinder: ServerApiBinder[Effect]) => {
-      val handler = serverApiBinder(Handler.protocol(protocol[ServerContext]).system(system))
+      val handler = serverApiBinder(Handler.protocol(protocol[ServerContext]).system(effectSystem))
       server(handler, port, path, methods, webSocket, mapException, builder)
     }
 
