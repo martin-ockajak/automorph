@@ -59,15 +59,16 @@ private[automorph] object MethodReflection {
     ref: ClassReflection[C]
   ): Seq[Either[String, ref.RefMethod]] = {
     // Omit base data type methods
-    val baseMethodNames = Seq(ref.c.weakTypeOf[AnyRef], ref.c.weakTypeOf[Product]).flatMap { baseType =>
+    val rootMethodNames = Seq(ref.c.weakTypeOf[AnyRef], ref.c.weakTypeOf[Product]).flatMap { baseType =>
       ref.methods(baseType).filter(_.public).map(_.name)
     }.toSet
     val methods = ref.methods(ref.c.weakTypeOf[Api]).filter(_.public).filter { method =>
-      !baseMethodNames.contains(method.name)
+      !rootMethodNames.contains(method.name)
     }
 
     // Validate methods
-    methods.map(method => validateApiMethod[C, Api, Effect](ref)(method))
+    val methodNameCount = methods.groupBy(_.name).view.mapValues(_.size).toMap
+    methods.map(method => validateApiMethod[C, Api, Effect](ref)(method, methodNameCount))
   }
 
   /**
@@ -77,6 +78,8 @@ private[automorph] object MethodReflection {
    *   reflection context
    * @param method
    *   method
+   * @param methodNameCount
+   *   method name count
    * @tparam C
    *   macro context type
    * @tparam Api
@@ -88,15 +91,16 @@ private[automorph] object MethodReflection {
    */
   private def validateApiMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag, Effect: ref.c.WeakTypeTag](
     ref: ClassReflection[C]
-  )(method: ref.RefMethod): Either[String, ref.RefMethod] = {
+  )(method: ref.RefMethod, methodNameCount: Map[String, Int]): Either[String, ref.RefMethod] = {
     // No type parameters
-    val methodSignature = signature[C, Api](ref)(method)
+    val signature = methodSignature[C, Api](ref)(method)
     if (method.typeParameters.nonEmpty) {
-      Left(s"Bound API method '$methodSignature' must not have type parameters")
+      Left(s"Bound API method must not use type parameters: $signature")
     } else {
       // Callable at runtime
-      if (!method.available) { Left(s"Bound API method '$methodSignature' must be callable at runtime") }
-      else {
+      if (!method.available) {
+        Left(s"Bound API method must be callable at runtime: $signature")
+      } else {
         // Returns the effect type
         val effectTypeConstructor = ref.c.weakTypeOf[Effect].dealias.typeConstructor
         val matchingResultType = method.resultType.typeArgs.nonEmpty &&
@@ -104,8 +108,14 @@ private[automorph] object MethodReflection {
 
         // FIXME - determine concrete result type constructor instead of an abstract one
         if (!matchingResultType && false) {
-          Left(s"Bound API method '$methodSignature' must return the specified effect type '${effectTypeConstructor.typeSymbol.fullName}'")
-        } else { Right(method) }
+          Left(s"Bound API method must return ${effectTypeConstructor.typeSymbol.fullName}: $signature")
+        } else {
+          if (methodNameCount.getOrElse(method.name, 0) > 1) {
+            Left(s"Bound API method must not have overloaded alternatives: $signature")
+          } else {
+            Right(method)
+          }
+        }
       }
     }
   }
@@ -124,7 +134,7 @@ private[automorph] object MethodReflection {
    * @return
    *   method description
    */
-  def signature[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: ClassReflection[C])(
+  def methodSignature[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: ClassReflection[C])(
     method: ref.RefMethod
   ): String =
     s"${ref.c.weakTypeOf[Api].typeSymbol.fullName}.${method.lift.signature}"

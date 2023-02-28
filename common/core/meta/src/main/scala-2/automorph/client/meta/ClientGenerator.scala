@@ -164,7 +164,7 @@ object ClientGenerator {
     encodeArguments: ref.c.Expr[Any],
     decodeResult: ref.c.Expr[Any],
   ): Unit = MacroLogger.debug(
-    s"""${MethodReflection.signature[C, Api](ref)(method)} =
+    s"""${MethodReflection.methodSignature[C, Api](ref)(method)} =
       |  ${ref.c.universe.showCode(encodeArguments.tree)}
       |  ${ref.c.universe.showCode(decodeResult.tree)}
       |""".stripMargin

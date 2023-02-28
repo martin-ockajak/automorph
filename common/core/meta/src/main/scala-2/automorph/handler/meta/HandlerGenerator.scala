@@ -229,7 +229,7 @@ object HandlerGenerator {
   private def logMethod[C <: blackbox.Context, Api: ref.c.WeakTypeTag](ref: ClassReflection[C])(
     method: ref.RefMethod
   ): Unit =
-    MacroLogger.debug(s"\n${MethodReflection.signature[C, Api](ref)(method)}")
+    MacroLogger.debug(s"\n${MethodReflection.methodSignature[C, Api](ref)(method)}")
 
   private def logCode[C <: blackbox.Context](ref: ClassReflection[C])(name: String, expression: ref.c.Expr[Any]): Unit =
     MacroLogger.debug(s"  $name:\n    ${ref.c.universe.showCode(expression.tree)}\n")
