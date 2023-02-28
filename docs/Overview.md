@@ -35,8 +35,8 @@ Interfaces for implementation of various integration plugins:
 
 ## Limitations
 
-* Bound remote APIs cannot contain [overloaded methods][https://en.wikipedia.org/wiki/Function_overloading]
-* Bound remote API methods cannot use [type parameters](https://docs.scala-lang.org/tour/polymorphic-methods.html)
+* Remote APIs cannot contain [overloaded methods][https://en.wikipedia.org/wiki/Function_overloading]
+* Remote API methods cannot use [type parameters](https://docs.scala-lang.org/tour/polymorphic-methods.html)
 * Remote APIs cannot be invoked or exposed from within the [App](https://scala-lang.org/api/3.x/scala/App.html) trait nor any other form of [delayed initialization](https://scala-lang.org/api/3.x/scala/DelayedInit.html)
 * Due to Scala 2 type inference constraints it is sometimes necessary to explicitly supplying type parameters when composing plugins
 
