@@ -89,6 +89,7 @@ object HandlerGenerator {
     apiType: ref.c.WeakTypeTag[Api],
   ): ref.c.Expr[HandlerBinding[Node, Effect, Context]] = {
     import ref.c.universe.{Liftable, Quasiquote}
+    Seq(nodeType, codecType, effectType, contextType, apiType)
 
     val argumentDecoders = generateArgumentDecoders[C, Node, Codec, Context](ref)(method, codec)
     val encodeResult = generateEncodeResult[C, Node, Codec, Effect, Context](ref)(method, codec)
@@ -157,8 +158,8 @@ object HandlerGenerator {
     effectType: ref.c.WeakTypeTag[Effect[?]],
     contextType: ref.c.WeakTypeTag[Context],
   ): ref.c.Expr[Any => (Node, Option[Context])] = {
-    import ref.c.universe.{Quasiquote, weakTypeOf}
-    (weakTypeOf[Node], weakTypeOf[Codec])
+    import ref.c.universe.Quasiquote
+    Seq(nodeType, codecType, effectType, contextType)
 
     // Create a result encoding function
     //   (result: Any) =>
@@ -193,7 +194,7 @@ object HandlerGenerator {
     contextType: ref.c.WeakTypeTag[Context],
   ): ref.c.Expr[(Seq[Any], Context) => Any] = {
     import ref.c.universe.{Quasiquote, weakTypeOf}
-    Seq(effectType)
+    Seq(effectType, contextType)
 
     // Map multiple parameter lists to flat argument node list offsets
     val parameterListOffsets = method.parameters.map(_.size).foldLeft(Seq(0)) { (indices, size) =>

@@ -20,9 +20,6 @@ import scala.reflect.macros.blackbox
 private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
   this: Handler[Node, Codec, Effect, Context] =>
 
-  /** This handler type. */
-  type ThisHandler = Handler[Node, Codec, Effect, Context]
-
   /**
    * Creates a copy of this handler with generated RPC bindings for all valid public methods of the specified API
    * instance.
@@ -49,7 +46,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * @throws java.lang.IllegalArgumentException
    *   if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api): ThisHandler =
+  def bind[Api <: AnyRef](api: Api): Handler[Node, Codec, Effect, Context] =
     macro HandlerMeta.bindMacro[Node, Codec, Effect, Context, Api]
 
   /**
@@ -79,7 +76,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * @throws java.lang.IllegalArgumentException
    *   if invalid public methods are found in the API type
    */
-  def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): ThisHandler =
+  def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): Handler[Node, Codec, Effect, Context] =
     macro HandlerMeta.bindMapNameMacro[Node, Codec, Effect, Context, Api]
 }
 
@@ -95,6 +92,7 @@ object HandlerMeta {
     apiType: c.WeakTypeTag[Api],
   ): c.Expr[Handler[Node, Codec, Effect, Context]] = {
     import c.universe.Quasiquote
+    Seq(nodeType, codecType, effectType, contextType, apiType)
 
     val mapName = c.Expr[String => Seq[String]](q"""
       (name: String) => Seq(name)
@@ -111,7 +109,7 @@ object HandlerMeta {
     contextType: c.WeakTypeTag[Context],
     apiType: c.WeakTypeTag[Api],
   ): c.Expr[Handler[Node, Codec, Effect, Context]] = {
-    import c.universe.{weakTypeOf, Quasiquote}
+    import c.universe.Quasiquote
 
     c.Expr[Handler[Node, Codec, Effect, Context]](q"""
       val newBindings = automorph.handler.meta.HandlerGenerator

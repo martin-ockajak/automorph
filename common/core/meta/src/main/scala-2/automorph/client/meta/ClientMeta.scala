@@ -108,6 +108,7 @@ object ClientMeta {
     apiType: c.WeakTypeTag[Api],
   ): c.Expr[Api] = {
     import c.universe.Quasiquote
+    Seq(nodeType, codecType, effectType, contextType, apiType)
 
     val mapName = c.Expr[String => String](q"""
       identity
@@ -124,7 +125,7 @@ object ClientMeta {
     contextType: c.WeakTypeTag[Context],
     apiType: c.WeakTypeTag[Api],
   ): c.Expr[Api] = {
-    import c.universe.{Quasiquote, weakTypeOf}
+    import c.universe.Quasiquote
 
     c.Expr[Api](q"""
       // Generate API function bindings

@@ -18,9 +18,6 @@ import automorph.spi.{EffectSystem, MessageCodec}
 private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
   this: Handler[Node, Codec, Effect, Context] =>
 
-  /** This handler type. */
-  type ThisHandler = Handler[Node, Codec, Effect, Context]
-
   /**
    * Creates a copy of this handler with generated RPC bindings for all valid public methods of the specified API.
    *
@@ -46,7 +43,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * @throws IllegalArgumentException
    *   if invalid public methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](api: Api): ThisHandler =
+  inline def bind[Api <: AnyRef](api: Api): Handler[Node, Codec, Effect, Context] =
     bind(api, Seq(_))
 
   /**
@@ -77,7 +74,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    * @throws IllegalArgumentException
    *   if invalid public methods are found in the API type
    */
-  inline def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): ThisHandler =
+  inline def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): Handler[Node, Codec, Effect, Context] =
     val newApiBindings = HandlerGenerator.bindings[Node, Codec, Effect, Context, Api](
       protocol.codec, system, api
     ).flatMap { binding =>

@@ -39,6 +39,7 @@ object ClientGenerator {
     apiType: c.WeakTypeTag[Api],
   ): c.Expr[Seq[ClientBinding[Node, Context]]] = {
     import c.universe.Quasiquote
+    Seq(nodeType, codecType, effectType, contextType, apiType)
     val ref = ClassReflection[c.type](c)
 
     // Detect and validate public methods in the API type
@@ -71,7 +72,8 @@ object ClientGenerator {
     contextType: ref.c.WeakTypeTag[Context],
     apiType: ref.c.WeakTypeTag[Api],
   ): ref.c.Expr[ClientBinding[Node, Context]] = {
-    import ref.c.universe.{Liftable, Quasiquote, weakTypeOf}
+    import ref.c.universe.{Liftable, Quasiquote}
+    Seq(codecType, effectType, apiType)
 
     val encodeArguments = generateArgumentEncoders[C, Node, Codec, Context](ref)(method, codec)
     val decodeResult = generateDecodeResult[C, Node, Codec, Effect, Context](ref)(method, codec)
@@ -131,7 +133,8 @@ object ClientGenerator {
     effectType: ref.c.WeakTypeTag[Effect[?]],
     contextType: ref.c.WeakTypeTag[Context],
   ): ref.c.Expr[(Node, Context) => Any] = {
-    import ref.c.universe.{Quasiquote, weakTypeOf}
+    import ref.c.universe.Quasiquote
+    Seq(codecType, effectType)
 
     // Create a result decoding function
     //   (resultNode: Node, responseContext: Context) => codec.decode[ResultType](resultNode)
