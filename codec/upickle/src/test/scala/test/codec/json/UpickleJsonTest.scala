@@ -1,11 +1,11 @@
 package test.codec.json
 
-import automorph.codec.json.{UpickleJsonCustom, UpickleJsonCodec}
+import automorph.codec.json.{UpickleJsonCodec, UpickleJsonCustom}
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
 import test.codec.json.JsonMessageCodecTest
 import test.{Enum, Record, Structure}
-import ujson.{Arr, Bool, Num, Obj, Str, Value}
+import ujson.{Arr, Bool, Null, Num, Obj, Str, Value}
 
 class UpickleJsonTest extends JsonMessageCodecTest {
 
@@ -16,6 +16,7 @@ class UpickleJsonTest extends JsonMessageCodecTest {
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
+      Gen.const(Null),
       Gen.resultOf(Str(_)),
       Gen.resultOf(Num(_)),
       Gen.resultOf(Bool(_)),
