@@ -1,7 +1,7 @@
 package test.transport.http
 
 import automorph.Types
-import automorph.spi.ServerMessageTransport
+import automorph.spi.ServerTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.server.UndertowServer
 import org.scalacheck.Arbitrary
@@ -25,6 +25,6 @@ class UndertowServerHttpFutureTest extends StandardHttpServerTest {
   override def serverTransport(
     handler: Types.HandlerAnyCodec[Effect, Context],
     port: Int,
-  ): ServerMessageTransport[Effect, Context] =
+  ): ServerTransport[Effect, Context] =
     UndertowServer(handler, port)
 }

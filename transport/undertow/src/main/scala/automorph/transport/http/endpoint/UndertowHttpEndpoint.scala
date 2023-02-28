@@ -2,7 +2,7 @@ package automorph.transport.http.endpoint
 
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointMessageTransport}
+import automorph.spi.{EffectSystem, EndpointTransport}
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
@@ -40,7 +40,7 @@ import scala.util.Try
 final case class UndertowHttpEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-) extends HttpHandler with Logging with EndpointMessageTransport {
+) extends HttpHandler with Logging with EndpointTransport {
 
   private val log = MessageLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -115,7 +115,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     Try {
       if (!exchange.isResponseChannelAvailable) { throw new IOException("Response channel not available") }
       setResponseContext(exchange, responseContext)
-      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, genericHandler.rpcProtocol.codec.mediaType)
+      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, genericHandler.rpcProtocol.messageCodec.mediaType)
       exchange.setStatusCode(responseStatusCode).getResponseSender.send(responseBody.toByteBuffer)
       log.sentResponse(responseProperties)
     }.onFailure(error => log.failedSendResponse(error, responseProperties)).get

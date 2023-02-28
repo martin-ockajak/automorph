@@ -2,7 +2,7 @@ package automorph.transport.http.endpoint
 
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointMessageTransport}
+import automorph.spi.{EffectSystem, EndpointTransport}
 import automorph.transport.http.endpoint.JettyHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, StringOps, ThrowableOps, TryOps}
@@ -39,7 +39,7 @@ import scala.util.Try
 final case class JettyHttpEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-) extends HttpServlet with Logging with EndpointMessageTransport {
+) extends HttpServlet with Logging with EndpointTransport {
 
   private val log = MessageLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -104,7 +104,7 @@ final case class JettyHttpEndpoint[Effect[_]](
     // Send the response
     Try {
       setResponseContext(response, responseContext)
-      response.setContentType(genericHandler.rpcProtocol.codec.mediaType)
+      response.setContentType(genericHandler.rpcProtocol.messageCodec.mediaType)
       response.setStatus(responseStatus)
       val outputStream = response.getOutputStream
       responseBody.transferTo(outputStream)

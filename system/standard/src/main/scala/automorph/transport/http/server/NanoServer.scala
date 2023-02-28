@@ -2,7 +2,7 @@ package automorph.transport.http.server
 
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, ServerMessageTransport}
+import automorph.spi.{EffectSystem, ServerTransport}
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.transport.http.server.NanoServer.Context
@@ -53,7 +53,7 @@ final case class NanoServer[Effect[_]] (
   methods: Iterable[HttpMethod] = HttpMethod.values,
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-) extends NanoWSD(port) with Logging with ServerMessageTransport[Effect, Context] {
+) extends NanoWSD(port) with Logging with ServerTransport[Effect, Context] {
 
   private val headerXForwardedFor = "X-Forwarded-For"
   private val log = MessageLog(logger, Protocol.Http.name)
@@ -199,7 +199,7 @@ final case class NanoServer[Effect[_]] (
 
     // Create the response
     val responseData = responseBody.toArray
-    val mediaType = genericHandler.rpcProtocol.codec.mediaType
+    val mediaType = genericHandler.rpcProtocol.messageCodec.mediaType
     val response = newFixedLengthResponse(responseStatus, mediaType, responseBody, responseData.length.toLong)
     setResponseContext(response, responseContext)
     log.sentResponse(responseProperties, protocol.name)

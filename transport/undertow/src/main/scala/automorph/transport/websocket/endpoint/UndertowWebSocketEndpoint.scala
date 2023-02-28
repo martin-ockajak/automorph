@@ -2,7 +2,7 @@ package automorph.transport.websocket.endpoint
 
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointMessageTransport}
+import automorph.spi.{EffectSystem, EndpointTransport}
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
 import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
@@ -61,7 +61,7 @@ object UndertowWebSocketEndpoint {
 
 final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context]
-) extends WebSocketConnectionCallback with AutoCloseable with Logging with EndpointMessageTransport {
+) extends WebSocketConnectionCallback with AutoCloseable with Logging with EndpointTransport {
 
   private val log = MessageLog(logger, Protocol.WebSocket.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]

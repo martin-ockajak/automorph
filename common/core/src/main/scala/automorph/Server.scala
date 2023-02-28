@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.spi.ServerMessageTransport
+import automorph.spi.ServerTransport
 
 /**
  * RPC server.
@@ -31,7 +31,7 @@ import automorph.spi.ServerMessageTransport
  */
 final case class Server[Effect[_], Context](
   handler: Types.HandlerAnyCodec[Effect, Context],
-  transport: ServerMessageTransport[Effect, Context],
+  transport: ServerTransport[Effect, Context],
 ) {
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
 

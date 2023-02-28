@@ -17,7 +17,7 @@ import scala.reflect.macros.blackbox
  *   Creates a Web-RPC protocol plugin.
  * @see
  *   [[https://automorph.org/rest-rpc Web-RPC protocol specification]]
- * @param codec
+ * @param messageCodec
  *   message codec plugin
  * @param pathPrefix
  *   API path prefix
@@ -47,7 +47,7 @@ import scala.reflect.macros.blackbox
  *   message context type
  */
 final case class WebRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: HttpContext[?]](
-  codec: Codec,
+  messageCodec: Codec,
   pathPrefix: String,
   mapError: (String, Option[Int]) => Throwable = WebRpcProtocol.defaultMapError,
   mapException: Throwable => Option[Int] = WebRpcProtocol.defaultMapException,

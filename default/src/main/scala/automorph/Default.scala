@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.meta.DefaultMeta
-import automorph.spi.{AsyncEffectSystem, ClientMessageTransport, EffectSystem}
+import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
 import automorph.system.IdentitySystem.Identity
 import automorph.system.{FutureSystem, IdentitySystem}
 import automorph.transport.http.client.HttpClient
@@ -102,8 +102,8 @@ object Default extends DefaultMeta {
    *
    * The client can be used to perform type-safe remote API calls or send one-way messages.
    *
-   * @param clientMessageTransport
-   *   message transport protocol plugin
+   * @param clientTransport
+   *   client message transport plugin
    * @tparam Effect
    *   effect type
    * @tparam Context
@@ -112,9 +112,9 @@ object Default extends DefaultMeta {
    *   RPC client
    */
   def client[Effect[_], Context](
-    clientMessageTransport: ClientMessageTransport[Effect, Context]
+    clientTransport: ClientTransport[Effect, Context]
   ): Client[Effect, Context] =
-    Client(rpcProtocol, clientMessageTransport)
+    Client(rpcProtocol, clientTransport)
 
   /**
    * Creates a standard JRE HTTP & WebSocket client message transport plugin with specified effect system plugin.
@@ -142,7 +142,7 @@ object Default extends DefaultMeta {
     system: EffectSystem[Effect],
     url: URI,
     method: HttpMethod = HttpMethod.Post,
-  ): ClientMessageTransport[Effect, ClientContext] =
+  ): ClientTransport[Effect, ClientContext] =
     HttpClient(system, url, method)
 
   /**
@@ -243,7 +243,7 @@ object Default extends DefaultMeta {
   /**
    * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
    *
-   * The server can be used to serve remote API requests using specific message transport protocol and invoke bound
+   * The server can be used to serve remote API requests using specific message transport and invoke bound
    * API methods to process them.
    *
    * @see
@@ -290,7 +290,7 @@ object Default extends DefaultMeta {
    * Resulting function requires:
    *   - API binding function - binds APIs to the underlying handler
    *
-   * The server can be used to serve remote API requests using specific message transport protocol and invoke bound
+   * The server can be used to serve remote API requests using specific message transport and invoke bound
    * API methods to process them.
    *
    * @see
@@ -340,7 +340,7 @@ object Default extends DefaultMeta {
    * Resulting function requires:
    *   - API binding function - binds APIs to the underlying handler
    *
-   * The server can be used to serve remote API requests using specific message transport protocol while invoking
+   * The server can be used to serve remote API requests using specific message transport while invoking
    * server to process them.
    *
    * @see
@@ -385,7 +385,7 @@ object Default extends DefaultMeta {
    * Resulting function requires:
    *   - API binding function - binds APIs to the underlying handler
    *
-   * The server can be used to serve remote API requests using specific message transport protocol and invoke bound
+   * The server can be used to serve remote API requests using specific message transport and invoke bound
    * API method to process them.
    *
    * @see
@@ -473,7 +473,7 @@ object Default extends DefaultMeta {
   def clientTransportSync(
     url: URI,
     method: HttpMethod = HttpMethod.Post,
-  ): ClientMessageTransport[SyncEffect, ClientContext] =
+  ): ClientTransport[SyncEffect, ClientContext] =
     clientTransport(effectSystemSync, url, method)
 
   /**
@@ -498,6 +498,6 @@ object Default extends DefaultMeta {
    */
   def clientTransportAsync(url: URI, method: HttpMethod = HttpMethod.Post)(implicit
     executionContext: ExecutionContext
-  ): ClientMessageTransport[AsyncEffect, ClientContext] =
+  ): ClientTransport[AsyncEffect, ClientContext] =
     clientTransport(effectSystemAsync, url, method)
 }

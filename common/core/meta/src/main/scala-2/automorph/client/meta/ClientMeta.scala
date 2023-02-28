@@ -132,7 +132,7 @@ object ClientMeta {
       // Generate API function bindings
       val client = ${c.prefix}
       val bindings = automorph.client.meta.ClientGenerator
-        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](client.rpcProtocol.codec).map { binding =>
+        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](client.rpcProtocol.messageCodec).map { binding =>
           binding.function.name -> binding
         }.toMap
 
@@ -189,7 +189,7 @@ object ClientMeta {
     // This client needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[RemoteCall[Node, Codec, Effect, Context, Result]](q"""
       val client = ${c.prefix}
-      automorph.client.RemoteCall($function, client.rpcProtocol.codec, client.performCall)
+      automorph.client.RemoteCall($function, client.rpcProtocol.messageCodec, client.performCall)
     """)
   }
 }

@@ -1,6 +1,6 @@
 package transport.http
 
-import automorph.spi.ClientMessageTransport
+import automorph.spi.ClientTransport
 import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.HttpMethod
@@ -24,6 +24,6 @@ class SttpClientHttpIdentityTest extends StandardHttpClientTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def clientTransport(url: URI): ClientMessageTransport[Effect, Context] =
+  override def clientTransport(url: URI): ClientTransport[Effect, Context] =
     SttpClient.http(system, HttpURLConnectionBackend(), url, HttpMethod.Put)
 }

@@ -1,7 +1,7 @@
 package test.transport.http
 
 import automorph.Types
-import automorph.spi.ServerMessageTransport
+import automorph.spi.ServerTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.endpoint.FinagleHttpEndpoint
 import com.twitter.finagle.Http
@@ -27,8 +27,8 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
   override def serverTransport(
     handler: Types.HandlerAnyCodec[Effect, Context],
     port: Int,
-  ): ServerMessageTransport[Effect, Context] =
-    new ServerMessageTransport[Effect, Context] {
+  ): ServerTransport[Effect, Context] =
+    new ServerTransport[Effect, Context] {
       private val server = {
         val endpoint = FinagleHttpEndpoint(handler)
         Http.serve(s":$port", endpoint)

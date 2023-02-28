@@ -2,7 +2,7 @@ package automorph.transport.http.endpoint
 
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointMessageTransport}
+import automorph.spi.{EffectSystem, EndpointTransport}
 import automorph.transport.http.endpoint.VertxHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
@@ -38,7 +38,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
 final case class VertxHttpEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-) extends Handler[HttpServerRequest] with Logging with EndpointMessageTransport {
+) extends Handler[HttpServerRequest] with Logging with EndpointTransport {
 
   private val statusOk = 200
   private val statusInternalServerError = 500
@@ -101,7 +101,7 @@ final case class VertxHttpEndpoint[Effect[_]](
 
     // Send the response
     setResponseContext(request.response, responseContext)
-      .putHeader(HttpHeaders.CONTENT_TYPE, genericHandler.rpcProtocol.codec.mediaType).setStatusCode(statusCode)
+      .putHeader(HttpHeaders.CONTENT_TYPE, genericHandler.rpcProtocol.messageCodec.mediaType).setStatusCode(statusCode)
       .end(Buffer.buffer(responseBody.toArray)).onSuccess(_ => log.sentResponse(responseProperties)).onFailure {
         error => log.failedSendResponse(error, responseProperties)
       }

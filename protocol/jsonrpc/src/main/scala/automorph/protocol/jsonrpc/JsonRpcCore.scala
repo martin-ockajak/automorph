@@ -61,8 +61,8 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     val requestMessage = Request(id, function, Right(arguments.toMap)).message
 
     // Serialize request
-    val messageText = () => Some(codec.text(encodeMessage(requestMessage)))
-    Try(codec.serialize(encodeMessage(requestMessage))).recoverWith { case error =>
+    val messageText = () => Some(messageCodec.text(encodeMessage(requestMessage)))
+    Try(messageCodec.serialize(encodeMessage(requestMessage))).recoverWith { case error =>
       Failure(JsonRpcException("Malformed request", ErrorType.ParseError.code, None, error))
     }.map { messageBody =>
       val message = RpcMessage(id, messageBody, requestMessage.properties, messageText)
@@ -77,14 +77,14 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     requestId: String,
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata, Context]] =
     // Deserialize request
-    Try(decodeMessage(codec.deserialize(requestBody))).pureFold(
+    Try(decodeMessage(messageCodec.deserialize(requestBody))).pureFold(
       error => Left(RpcError(
         JsonRpcException("Malformed request", ErrorType.ParseError.code, None, error),
         RpcMessage(None, requestBody)
       )),
       requestMessage => {
         // Validate request
-        val messageText = () => Some(codec.text(encodeMessage(requestMessage)))
+        val messageText = () => Some(messageCodec.text(encodeMessage(requestMessage)))
         val message = RpcMessage(requestMessage.id, requestBody, requestMessage.properties, messageText)
         Try(Request(requestMessage)).pureFold(
           error => Left(RpcError(error, message)),
@@ -118,8 +118,8 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     )
 
     // Serialize response
-    val messageText = () => Some(codec.text(encodeMessage(responseMessage)))
-    Try(codec.serialize(encodeMessage(responseMessage))).recoverWith { case error =>
+    val messageText = () => Some(messageCodec.text(encodeMessage(responseMessage)))
+    Try(messageCodec.serialize(encodeMessage(responseMessage))).recoverWith { case error =>
       Failure(JsonRpcException("Malformed response", ErrorType.ParseError.code, None, error))
     }.map { messageBody =>
       val message = RpcMessage(Option(id), messageBody, responseMessage.properties, messageText)
@@ -133,14 +133,14 @@ private[automorph] trait JsonRpcCore[Node, Codec <: MessageCodec[Node], Context]
     responseContext: Context,
   ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
     // Deserialize response
-    Try(decodeMessage(codec.deserialize(responseBody))).pureFold(
+    Try(decodeMessage(messageCodec.deserialize(responseBody))).pureFold(
       error => Left(RpcError(
         JsonRpcException("Malformed response", ErrorType.ParseError.code, None, error),
         RpcMessage(None, responseBody)
       )),
       responseMessage => {
         // Validate response
-        val messageText = () => Some(codec.text(encodeMessage(responseMessage)))
+        val messageText = () => Some(messageCodec.text(encodeMessage(responseMessage)))
         val message = RpcMessage(responseMessage.id, responseBody, responseMessage.properties, messageText)
         Try(Response(responseMessage)).pureFold(
           error =>

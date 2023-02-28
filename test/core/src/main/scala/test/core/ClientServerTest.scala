@@ -1,15 +1,15 @@
 package test.core
 
-import automorph.spi.{ClientMessageTransport, EffectSystem, ServerMessageTransport}
+import automorph.spi.{ClientTransport, EffectSystem, ServerTransport}
 import scala.collection.mutable.ArrayBuffer
 
 trait ClientServerTest extends ProtocolCodecTest {
 
   def system: EffectSystem[Effect]
 
-  lazy val servers: ArrayBuffer[ServerMessageTransport[Effect, Context]] = ArrayBuffer.empty
+  lazy val servers: ArrayBuffer[ServerTransport[Effect, Context]] = ArrayBuffer.empty
 
-  lazy val clients: ArrayBuffer[ClientMessageTransport[Effect, Context]] = ArrayBuffer.empty
+  lazy val clients: ArrayBuffer[ClientTransport[Effect, Context]] = ArrayBuffer.empty
 
   override def afterAll(): Unit = {
     servers.foreach(server => system.runAsync(server.close()))

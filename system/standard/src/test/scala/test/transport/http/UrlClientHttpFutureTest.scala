@@ -1,7 +1,7 @@
 package test.transport.http
 
 import automorph.Types
-import automorph.spi.ClientMessageTransport
+import automorph.spi.ClientTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.UrlClient
@@ -24,11 +24,11 @@ class UrlClientHttpFutureTest extends ClientServerTest {
 
   override def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
-  ): Option[ClientMessageTransport[Effect, Context]] = {
+  ): Option[ClientTransport[Effect, Context]] = {
     val server = withRandomAvailablePort(port => NanoServer[Effect](handler, port))
     servers += server
     val url = new URI(s"http://localhost:${server.port}")
-    val client = UrlClient(system, url, HttpMethod.Put).asInstanceOf[ClientMessageTransport[Effect, Context]]
+    val client = UrlClient(system, url, HttpMethod.Put).asInstanceOf[ClientTransport[Effect, Context]]
     clients += client
     Some(client)
   }

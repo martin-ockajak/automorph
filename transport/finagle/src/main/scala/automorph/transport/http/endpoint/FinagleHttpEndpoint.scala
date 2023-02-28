@@ -2,7 +2,7 @@ package automorph.transport.http.endpoint
 
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointMessageTransport}
+import automorph.spi.{EffectSystem, EndpointTransport}
 import automorph.transport.http.endpoint.FinagleHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, ThrowableOps}
@@ -37,7 +37,7 @@ import scala.collection.immutable.ListMap
 final case class FinagleHttpEndpoint[Effect[_]](
   handler: Types.HandlerAnyCodec[Effect, Context],
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-) extends Service[Request, Response] with Logging with EndpointMessageTransport {
+) extends Service[Request, Response] with Logging with EndpointTransport {
 
   private val log = MessageLog(logger, Protocol.Http.name)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
@@ -93,7 +93,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
     // Send the response
     val response = Response(request.version, responseStatus, responseBody)
     setResponseContext(response, responseContext)
-    response.contentType = genericHandler.rpcProtocol.codec.mediaType
+    response.contentType = genericHandler.rpcProtocol.messageCodec.mediaType
     log.sendingResponse(responseProperties)
     response
   }

@@ -64,8 +64,8 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
       Map("Type" -> MessageType.Call.toString, "Function" -> function, "Arguments" -> arguments.size.toString)
 
     // Serialize request
-    val messageText = () => Some(codec.text(encodeRequest(request)))
-    Try(codec.serialize(encodeRequest(request))).recoverWith { case error =>
+    val messageText = () => Some(messageCodec.text(encodeRequest(request)))
+    Try(messageCodec.serialize(encodeRequest(request))).recoverWith { case error =>
       Failure(InvalidRequestException("Malformed request", error))
     }.map { messageBody =>
       val message = RpcMessage((), messageBody, requestProperties, messageText)
@@ -83,7 +83,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
   ): Either[RpcError[Metadata], RpcRequest[Node, Metadata, Context]] =
     retrieveRequest(requestBody, requestContext).flatMap { request =>
       // Validate request
-      val messageText = () => Some(codec.text(encodeRequest(request)))
+      val messageText = () => Some(messageCodec.text(encodeRequest(request)))
       val requestProperties = Map("Type" -> MessageType.Call.toString, "Arguments" -> request.size.toString)
       requestContext.path.map { path =>
         if (path.startsWith(pathPrefix) && path.length > pathPrefix.length) {
@@ -117,7 +117,7 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
       } else { Right(requestContext.parameters.map { case (name, value) => name -> encodeString(value) }.toMap) }
     }.getOrElse {
       // Other HTTP methods - deserialize request
-      Try(decodeRequest(codec.deserialize(requestBody))).pureFold(
+      Try(decodeRequest(messageCodec.deserialize(requestBody))).pureFold(
         error => Left(RpcError(InvalidRequestException("Malformed request", error), RpcMessage((), requestBody))),
         request => Right(request),
       )
@@ -143,8 +143,8 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     )
 
     // Serialize response
-    val messageText = () => Some(codec.text(encodeResponse(responseMessage)))
-    Try(codec.serialize(encodeResponse(responseMessage))).recoverWith { case error =>
+    val messageText = () => Some(messageCodec.text(encodeResponse(responseMessage)))
+    Try(messageCodec.serialize(encodeResponse(responseMessage))).recoverWith { case error =>
       Failure(InvalidResponseException("Malformed response", error))
     }.map { messageBody =>
       val message = RpcMessage((), messageBody, responseMessage.properties, messageText)
@@ -158,11 +158,11 @@ private[automorph] trait WebRpcCore[Node, Codec <: MessageCodec[Node], Context <
     responseContext: Context,
   ): Either[RpcError[Metadata], RpcResponse[Node, Metadata]] =
     // Deserialize response
-    Try(decodeResponse(codec.deserialize(responseBody))).pureFold(
+    Try(decodeResponse(messageCodec.deserialize(responseBody))).pureFold(
       error => Left(RpcError(InvalidResponseException("Malformed response", error), RpcMessage((), responseBody))),
       responseMessage => {
         // Validate response
-        val messageText = () => Some(codec.text(encodeResponse(responseMessage)))
+        val messageText = () => Some(messageCodec.text(encodeResponse(responseMessage)))
         val message = RpcMessage((), responseBody, responseMessage.properties, messageText)
         Try(Response(responseMessage)).pureFold(
           error => Left(RpcError(InvalidResponseException("Malformed response", error), message)),

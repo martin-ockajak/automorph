@@ -1,7 +1,7 @@
 package automorph.transport.http.client
 
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{ClientMessageTransport, EffectSystem}
+import automorph.spi.{ClientTransport, EffectSystem}
 import automorph.transport.http.client.UrlClient.{Context, Session}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, InputStreamOps, TryOps}
@@ -33,7 +33,7 @@ import scala.util.Using
  *   effect type
  */
 final case class UrlClient[Effect[_]](system: EffectSystem[Effect], url: URI, method: HttpMethod = HttpMethod.Post)
-  extends ClientMessageTransport[Effect, Context] with Logging {
+  extends ClientTransport[Effect, Context] with Logging {
 
   private val contentLengthHeader = "Content-Length"
   private val contentTypeHeader = "Content-Type"

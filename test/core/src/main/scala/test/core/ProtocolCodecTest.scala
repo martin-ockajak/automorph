@@ -5,7 +5,7 @@ import argonaut.{Argonaut, CodecJson}
 import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, JacksonJsonCodec, UpickleJsonCodec, UpickleJsonCustom}
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import automorph.protocol.JsonRpcProtocol
-import automorph.spi.ClientMessageTransport
+import automorph.spi.ClientTransport
 import automorph.transport.local.client.HandlerTransport
 import automorph.{Client, Handler, Types}
 import com.fasterxml.jackson.core.{JsonGenerator, JsonParser}
@@ -36,7 +36,7 @@ trait ProtocolCodecTest extends CoreTest {
 
   def clientTransport(
     handler: Types.HandlerAnyCodec[Effect, Context]
-  ): Option[ClientMessageTransport[Effect, Context]] = {
+  ): Option[ClientTransport[Effect, Context]] = {
     Seq(handler)
     None
   }

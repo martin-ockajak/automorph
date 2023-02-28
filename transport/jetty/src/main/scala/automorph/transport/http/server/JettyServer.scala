@@ -2,7 +2,7 @@ package automorph.transport.http.server
 
 import automorph.Types
 import automorph.log.Logging
-import automorph.spi.ServerMessageTransport
+import automorph.spi.ServerTransport
 import automorph.transport.http.endpoint.JettyHttpEndpoint
 import automorph.transport.http.server.JettyServer.Context
 import automorph.transport.http.{HttpContext, HttpMethod}
@@ -52,7 +52,7 @@ final case class JettyServer[Effect[_]](
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   threadPool: ThreadPool = new QueuedThreadPool,
-) extends Logging with ServerMessageTransport[Effect, Context] {
+) extends Logging with ServerTransport[Effect, Context] {
 
   private lazy val jetty = createServer()
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]

@@ -1,6 +1,6 @@
 package test.transport.http
 
-import automorph.spi.ClientMessageTransport
+import automorph.spi.ClientTransport
 import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.HttpMethod
@@ -22,7 +22,7 @@ class JettyClientHttpIdentityTest extends StandardHttpClientTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def clientTransport(url: URI): ClientMessageTransport[Effect, Context] = {
+  override def clientTransport(url: URI): ClientTransport[Effect, Context] = {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
     JettyClient(system, url, HttpMethod.Put)
   }

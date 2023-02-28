@@ -2,7 +2,7 @@ package automorph.transport.websocket.endpoint
 
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointMessageTransport}
+import automorph.spi.{EffectSystem, EndpointTransport}
 import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, getRequestContext, getRequestProperties}
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
@@ -26,7 +26,7 @@ import sttp.tapir.{CodecFormat, clientIp, endpoint, headers, paths, queryParams,
  * @see
  *   [[https://javadoc.io/doc/com.softwaremill.tapir/tapir-core_2.13/latest/index.html API]]
  */
-object TapirWebSocketEndpoint extends Logging with EndpointMessageTransport {
+object TapirWebSocketEndpoint extends Logging with EndpointTransport {
 
   /** Request context type. */
   type Context = HttpContext[Unit]

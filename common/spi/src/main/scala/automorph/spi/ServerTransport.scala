@@ -10,7 +10,7 @@ package automorph.spi
  * @tparam Context
  *   message context type
  */
-trait ServerMessageTransport[Effect[_], Context] {
+trait ServerTransport[Effect[_], Context] {
 
   /**
    * Closes this server transport freeing the underlying resources.

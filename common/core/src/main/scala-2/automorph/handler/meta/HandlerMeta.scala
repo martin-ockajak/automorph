@@ -116,7 +116,7 @@ object HandlerMeta {
       val handler = ${c.prefix}
       val newBindings = automorph.handler.meta.HandlerGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](
-          handler.rpcProtocol.codec, $api
+          handler.rpcProtocol.messageCodec, $api
         ).flatMap { binding =>
           $mapName(binding.function.name).map(_ -> binding)
         }

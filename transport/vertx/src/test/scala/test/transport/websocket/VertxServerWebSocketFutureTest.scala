@@ -1,7 +1,7 @@
 package test.transport.websocket
 
 import automorph.Types
-import automorph.spi.ServerMessageTransport
+import automorph.spi.ServerTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.server.VertxServer
 import org.scalacheck.Arbitrary
@@ -26,7 +26,7 @@ class VertxServerWebSocketFutureTest extends StandardHttpServerTest {
   override def serverTransport(
     handler: Types.HandlerAnyCodec[Effect, Context],
     port: Int,
-  ): ServerMessageTransport[Effect, Context] =
+  ): ServerTransport[Effect, Context] =
     VertxServer(handler, port)
 
   override def webSocket: Boolean =

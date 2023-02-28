@@ -2,7 +2,7 @@ package automorph.transport.http.server
 
 import automorph.Types
 import automorph.log.Logging
-import automorph.spi.ServerMessageTransport
+import automorph.spi.ServerTransport
 import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import automorph.transport.http.server.UndertowServer.{Context, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod}
@@ -58,7 +58,7 @@ final case class UndertowServer[Effect[_]](
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   builder: Undertow.Builder = defaultBuilder,
-) extends Logging with ServerMessageTransport[Effect, Context] {
+) extends Logging with ServerTransport[Effect, Context] {
 
   private lazy val undertow = createServer()
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]

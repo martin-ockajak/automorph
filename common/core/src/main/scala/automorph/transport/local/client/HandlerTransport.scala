@@ -2,7 +2,7 @@ package automorph.transport.local.client
 
 import automorph.Handler
 import automorph.RpcException.InvalidResponseException
-import automorph.spi.{ClientMessageTransport, EffectSystem, MessageCodec}
+import automorph.spi.{ClientTransport, EffectSystem, MessageCodec}
 import automorph.util.Extensions.EffectOps
 import java.io.InputStream
 
@@ -22,7 +22,7 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
   handler: Handler[Node, Codec, Effect, Context],
   system: EffectSystem[Effect],
   defaultContext: Context
-) extends ClientMessageTransport[Effect, Context] {
+) extends ClientTransport[Effect, Context] {
 
   implicit private val givenSystem: EffectSystem[Effect] = system
 

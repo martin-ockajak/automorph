@@ -2,7 +2,7 @@ package automorph.transport.http.server
 
 import automorph.Types
 import automorph.log.Logging
-import automorph.spi.ServerMessageTransport
+import automorph.spi.ServerTransport
 import automorph.transport.http.endpoint.VertxHttpEndpoint
 import automorph.transport.http.server.VertxServer.{defaultHttpServerOptions, defaultVertxOptions, Context}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
@@ -57,7 +57,7 @@ final case class VertxServer[Effect[_]](
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   vertxOptions: VertxOptions = defaultVertxOptions,
   httpServerOptions: HttpServerOptions = defaultHttpServerOptions,
-) extends Logging with ServerMessageTransport[Effect, Context] {
+) extends Logging with ServerTransport[Effect, Context] {
 
   private lazy val httpServer = createServer()
   private val statusWebSocketApplication = 4000

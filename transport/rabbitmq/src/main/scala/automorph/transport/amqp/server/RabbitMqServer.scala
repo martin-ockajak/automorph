@@ -2,7 +2,7 @@ package automorph.transport.amqp.server
 
 import automorph.Types
 import automorph.log.{Logging, MessageLog}
-import automorph.spi.{EffectSystem, ServerMessageTransport}
+import automorph.spi.{EffectSystem, ServerTransport}
 import automorph.transport.amqp.server.RabbitMqServer.Context
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
@@ -36,7 +36,7 @@ final case class RabbitMqServer[Effect[_]](
   queues: Seq[String],
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
-) extends Logging with ServerMessageTransport[Effect, Context] {
+) extends Logging with ServerTransport[Effect, Context] {
 
   private val exchange = RabbitMqCommon.defaultDirectExchange
   private lazy val connection = connect()
@@ -113,7 +113,7 @@ final case class RabbitMqServer[Effect[_]](
 
     // Send the response
     Try {
-      val mediaType = genericHandler.rpcProtocol.codec.mediaType
+      val mediaType = genericHandler.rpcProtocol.messageCodec.mediaType
       val amqpProperties = RabbitMqCommon
         .amqpProperties(responseContext, mediaType, actualReplyTo, requestId, serverId, useDefaultRequestId = true)
       threadConsumer.get.getChannel.basicPublish(exchange, actualReplyTo, true, false, amqpProperties, message)

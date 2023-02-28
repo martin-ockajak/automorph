@@ -2,7 +2,7 @@ package automorph.transport.http.endpoint
 
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointMessageTransport}
+import automorph.spi.{EffectSystem, EndpointTransport}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
 import automorph.util.Random
@@ -24,7 +24,7 @@ import sttp.tapir.{byteArrayBody, clientIp, endpoint, header, headers, paths, qu
  * @see
  *   [[https://javadoc.io/doc/com.softwaremill.sttp.tapir/tapir-core_3/latest/index.html API]]
  */
-object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
+object TapirHttpEndpoint extends Logging with EndpointTransport {
 
   /** Request context type. */
   type Context = HttpContext[Unit]
@@ -64,8 +64,8 @@ object TapirHttpEndpoint extends Logging with EndpointMessageTransport {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     val system = genericHandler.effectSystem
     implicit val givenSystem: EffectSystem[Effect] = system
-    val contentType = Header.contentType(MediaType.parse(genericHandler.rpcProtocol.codec.mediaType).getOrElse {
-      throw new IllegalArgumentException(s"Invalid content type: ${genericHandler.rpcProtocol.codec.mediaType}")
+    val contentType = Header.contentType(MediaType.parse(genericHandler.rpcProtocol.messageCodec.mediaType).getOrElse {
+      throw new IllegalArgumentException(s"Invalid content type: ${genericHandler.rpcProtocol.messageCodec.mediaType}")
     })
 
     // Define server endpoint

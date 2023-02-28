@@ -1,7 +1,7 @@
 package automorph.transport.http.client
 
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{ClientMessageTransport, EffectSystem}
+import automorph.spi.{ClientTransport, EffectSystem}
 import automorph.transport.http.client.SttpClient.{Context, Session}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps}
@@ -46,7 +46,7 @@ final case class SttpClient[Effect[_]] private (
   url: URI,
   method: HttpMethod,
   webSocket: Boolean,
-) extends ClientMessageTransport[Effect, Context] with Logging {
+) extends ClientTransport[Effect, Context] with Logging {
 
   private type WebSocket = sttp.capabilities.Effect[Effect] & WebSockets
 

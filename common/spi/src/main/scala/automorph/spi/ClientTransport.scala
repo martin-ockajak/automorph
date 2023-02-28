@@ -3,7 +3,7 @@ package automorph.spi
 import java.io.InputStream
 
 /**
- * Client message transport protocol plugin.
+ * Client message transport plugin.
  *
  * Passively sends requests and receives responses to and from a remote endpoint using specific transport protocol.
  *
@@ -12,7 +12,7 @@ import java.io.InputStream
  * @tparam Context
  *   message context type
  */
-trait ClientMessageTransport[Effect[_], Context] {
+trait ClientTransport[Effect[_], Context] {
 
   /** Effect system plugin. */
   def system: EffectSystem[Effect]

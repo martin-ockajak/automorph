@@ -2,7 +2,7 @@ package automorph.transport.amqp.client
 
 import automorph.log.{Logging, MessageLog}
 import automorph.spi.AsyncEffectSystem.Completable
-import automorph.spi.{AsyncEffectSystem, ClientMessageTransport, EffectSystem}
+import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
 import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
 import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, TryOps}
@@ -48,7 +48,7 @@ final case class RabbitMqClient[Effect[_]](
   exchange: String = RabbitMqCommon.defaultDirectExchange,
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory,
-) extends Logging with ClientMessageTransport[Effect, Context] {
+) extends Logging with ClientTransport[Effect, Context] {
   private lazy val connection = connect()
   private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, consumer)
   private val directReplyToQueue = "amq.rabbitmq.reply-to"

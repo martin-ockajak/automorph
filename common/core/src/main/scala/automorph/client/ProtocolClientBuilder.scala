@@ -1,7 +1,7 @@
 package automorph.client
 
 import automorph.Client
-import automorph.spi.{ClientMessageTransport, MessageCodec, RpcProtocol}
+import automorph.spi.{ClientTransport, MessageCodec, RpcProtocol}
 
 /**
  * RPC client builder.
@@ -31,6 +31,6 @@ case class ProtocolClientBuilder[Node, Codec <: MessageCodec[Node], Context](
    * @return
    *   RPC request client builder
    */
-  def transport[Effect[_]](transport: ClientMessageTransport[Effect, Context]): Client[Node, Codec, Effect, Context] =
+  def transport[Effect[_]](transport: ClientTransport[Effect, Context]): Client[Node, Codec, Effect, Context] =
     Client(protocol, transport)
 }

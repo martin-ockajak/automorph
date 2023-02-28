@@ -1,7 +1,7 @@
 package automorph.client
 
 import automorph.Client
-import automorph.spi.{ClientMessageTransport, MessageCodec, RpcProtocol}
+import automorph.spi.{ClientTransport, MessageCodec, RpcProtocol}
 
 /**
  * RPC request client builder.
@@ -15,7 +15,7 @@ import automorph.spi.{ClientMessageTransport, MessageCodec, RpcProtocol}
  * @tparam Context
  *   request context type
  */
-case class TransportClientBuilder[Effect[_], Context](transport: ClientMessageTransport[Effect, Context]) {
+case class TransportClientBuilder[Effect[_], Context](transport: ClientTransport[Effect, Context]) {
 
   /**
    * Creates a new RPC client with specified RPC protocol plugin.

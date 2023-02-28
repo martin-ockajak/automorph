@@ -15,7 +15,7 @@ import automorph.transport.http.HttpContext
  *   Creates a Web-RPC 2.0 protocol implementation.
  * @see
  *   [[https://automorph.org/rest-rpc Protocol specification]]
- * @param codec
+ * @param messageCodec
  *   message codec plugin
  * @param pathPrefix
  *   API path prefix
@@ -45,7 +45,7 @@ import automorph.transport.http.HttpContext
  *   message context type
  */
 final case class WebRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: HttpContext[?]](
-  codec: Codec,
+  messageCodec: Codec,
   pathPrefix: String,
   mapError: (String, Option[Int]) => Throwable,
   mapException: Throwable => Option[Int],
@@ -91,20 +91,20 @@ object WebRpcProtocol extends ErrorMapping:
    *   Web-RPC protocol plugin
    */
   inline def apply[Node, Codec <: MessageCodec[Node], Context <: HttpContext[?]](
-    codec: Codec,
+    messageCodec: Codec,
     pathPrefix: String,
     mapError: (String, Option[Int]) => Throwable = defaultMapError,
     mapException: Throwable => Option[Int] = defaultMapException,
     mapOpenApi: OpenApi => OpenApi = identity,
   ): WebRpcProtocol[Node, Codec, Context] =
-    val encodeRequest = (value: Message.Request[Node]) => codec.encode[Message.Request[Node]](value)
-    val decodeRequest = (requestNode: Node) => codec.decode[Message.Request[Node]](requestNode)
-    val encodeResponse = (value: Message[Node]) => codec.encode[Message[Node]](value)
-    val decodeResponse = (responseNode: Node) => codec.decode[Message[Node]](responseNode)
-    val encodeOpenApi = (openApi: OpenApi) => codec.encode[OpenApi](openApi)
-    val encodeString = (string: String) => codec.encode[String](string)
+    val encodeRequest = (value: Message.Request[Node]) => messageCodec.encode[Message.Request[Node]](value)
+    val decodeRequest = (requestNode: Node) => messageCodec.decode[Message.Request[Node]](requestNode)
+    val encodeResponse = (value: Message[Node]) => messageCodec.encode[Message[Node]](value)
+    val decodeResponse = (responseNode: Node) => messageCodec.decode[Message[Node]](responseNode)
+    val encodeOpenApi = (openApi: OpenApi) => messageCodec.encode[OpenApi](openApi)
+    val encodeString = (string: String) => messageCodec.encode[String](string)
     WebRpcProtocol(
-      codec,
+      messageCodec,
       pathPrefix,
       mapError,
       mapException,

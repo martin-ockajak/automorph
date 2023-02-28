@@ -4,7 +4,7 @@ import automorph.RpcException.InvalidResponseException
 import automorph.client.meta.ClientMeta
 import automorph.client.{ProtocolClientBuilder, RemoteMessage, TransportClientBuilder}
 import automorph.log.{LogProperties, Logging}
-import automorph.spi.{ClientMessageTransport, EffectSystem, MessageCodec, RpcProtocol}
+import automorph.spi.{ClientTransport, EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
 import automorph.util.Random
 import java.io.InputStream
@@ -36,7 +36,7 @@ import scala.util.Try
  */
 final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   rpcProtocol: RpcProtocol[Node, Codec, Context],
-  clientTransport: ClientMessageTransport[Effect, Context],
+  clientTransport: ClientTransport[Effect, Context],
 ) extends ClientMeta[Node, Codec, Effect, Context] with Logging {
 
   protected val system: EffectSystem[Effect] = clientTransport.system
@@ -55,7 +55,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    *   on RPC error
    */
   def message(function: String): RemoteMessage[Node, Codec, Effect, Context] =
-    RemoteMessage(function, rpcProtocol.codec, sendMessage)
+    RemoteMessage(function, rpcProtocol.messageCodec, sendMessage)
 
   /**
    * Closes this client freeing the underlying resources.
@@ -110,7 +110,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           lazy val requestProperties = rpcRequest.message.properties + (LogProperties.requestId -> requestId)
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${rpcProtocol.name} request", allProperties)
-          clientTransport.message(request.message.body, request.context, requestId, rpcProtocol.codec.mediaType)
+          clientTransport.message(request.message.body, request.context, requestId, rpcProtocol.messageCodec.mediaType)
         },
     )
   }
@@ -155,7 +155,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++ rpcRequest.message.properties
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${rpcProtocol.name} request", allProperties)
-          clientTransport.call(request.message.body, request.context, requestId, rpcProtocol.codec.mediaType).flatMap {
+          clientTransport.call(request.message.body, request.context, requestId, rpcProtocol.messageCodec.mediaType).flatMap {
             case (responseBody, responseContext) =>
               // Process response
               processResponse[Result](responseBody, responseContext, requestProperties, decodeResult)
@@ -268,7 +268,7 @@ object Client {
    *   RPC client builder
    */
   def transport[Effect[_], Context](
-    transport: ClientMessageTransport[Effect, Context]
+    transport: ClientTransport[Effect, Context]
   ): TransportClientBuilder[Effect, Context] =
     TransportClientBuilder(transport)
 }

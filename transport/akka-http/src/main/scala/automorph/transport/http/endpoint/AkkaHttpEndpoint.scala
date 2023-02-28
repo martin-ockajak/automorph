@@ -11,7 +11,7 @@ import akka.http.scaladsl.server.Route
 import akka.util.Timeout
 import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointMessageTransport}
+import automorph.spi.{EffectSystem, EndpointTransport}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{
   ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps,
@@ -37,7 +37,7 @@ import scala.util.Try
  * @see
  *   [[https://doc.akka.io/api/akka-http/current/akka/http/ API]]
  */
-object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
+object AkkaHttpEndpoint extends Logging with EndpointTransport {
 
   /** Request context type. */
   type Context = HttpContext[HttpRequest]
@@ -115,7 +115,7 @@ object AkkaHttpEndpoint extends Logging with EndpointMessageTransport {
   ): Behavior[RpcHttpRequest] = {
     val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
     implicit val system: EffectSystem[Effect] = genericHandler.effectSystem
-    val contentType = ContentType.parse(genericHandler.rpcProtocol.codec.mediaType).swap.map { errors =>
+    val contentType = ContentType.parse(genericHandler.rpcProtocol.messageCodec.mediaType).swap.map { errors =>
       new IllegalStateException(s"Invalid response content type: ${errors.map(_.toString).mkString("\n")}")
     }.swap.toTry.get
 
