@@ -321,7 +321,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     result: Try[(Node, Option[Context])],
     message: RpcMessage[protocol.Metadata],
     requestProperties: => Map[String, String],
-  ): Effect[HandlerResult[Context]] =
+  ): Effect[HandlerResult[Context]] = {
     protocol.createResponse(result.map(_._1), message.metadata).pureFold(
       error => system.failed(error),
       rpcResponse => {
@@ -332,6 +332,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         system.successful(HandlerResult(Some(responseBody), result.failed.toOption, result.toOption.flatMap(_._2)))
       },
     )
+  }
 
   private def schemaBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
     ListMap(protocol.apiSchemas.map { apiSchema =>

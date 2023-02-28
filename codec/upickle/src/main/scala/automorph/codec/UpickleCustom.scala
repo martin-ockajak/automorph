@@ -1,7 +1,7 @@
 package automorph.codec
 
 import upickle.AttributeTagged
-import upickle.core.{Abort, Util}
+import upickle.core.{Abort, Util, Visitor}
 
 /**
  * uPickle message codec customization.
@@ -28,6 +28,11 @@ trait UpickleCustom extends AttributeTagged {
       override def visitNull(index: Int): Option[T] =
         None
     }
+
+  implicit override val UnitWriter: Writer[Unit] = new Writer[Unit] {
+    def write0[R](out: Visitor[?, R], v: Unit): R =
+      out.visitObject(0, jsonableKeys = true, -1).visitEnd(-1)
+  }
 
   implicit override val BooleanReader: Reader[Boolean] = new SimpleReader[Boolean] {
 

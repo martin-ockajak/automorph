@@ -118,7 +118,7 @@ trait ProtocolCodecTest extends CoreTest {
 //      (function, a0) => client.message(function).args(a0),
 //    )
 //  }
-
+//
 //  private def uPickleMessagePackFixture()(implicit context: Context): TestFixture = {
 //    class Custom extends UpickleMessagePackCustom {
 //      implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int]
