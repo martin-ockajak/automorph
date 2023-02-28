@@ -79,7 +79,7 @@ object Default extends DefaultMeta {
    *   [[https://openjdk.org/groups/net/httpclient/intro.html documentation]]
    * @see
    *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
-   * @param effectsystem
+   * @param effectSystem
    *   effect system plugin
    * @param url
    *   HTTP endpoint URL
@@ -91,11 +91,11 @@ object Default extends DefaultMeta {
    *   RPC client
    */
   def client[Effect[_]](
-    effectsystem: EffectSystem[Effect],
+    effectSystem: EffectSystem[Effect],
     url: URI,
     method: HttpMethod = HttpMethod.Post,
   ): Client[Effect, ClientContext] =
-    client(clientTransport(effectsystem, url, method))
+    client(clientTransport(effectSystem, url, method))
 
   /**
    * Creates a JSON-RPC client with specified message transport plugin.
