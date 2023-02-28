@@ -20,8 +20,8 @@ Entry points for the application logic to invoke or expose remote APIs:
 
 * [Client](/api/automorph/Client.html) - invoke remote APIs
 * [Handler](/api/automorph/Handler.html) - process remote API requests
-* [Endpoints](/api/automorph/transport/index.html) - expose APIs as remote within an existing server
-* [Servers](/api/automorph/transport/index.html) - serve APIs as remote
+* [Endpoints](/api/automorph/transport/EndpointTransport.html) - expose APIs as remote within an existing server
+* [Servers](/api/automorph/transport/ServerTransport.html) - serve APIs as remote
 
 
 ## SPI
