@@ -30,7 +30,6 @@ private[examples] object AmqpTransport {
         .rabbitMqServerInitializationTimeoutInMillis(30000).build()
       val broker = new EmbeddedRabbitMq(brokerConfig)
       broker.start()
-      broker -> brokerConfig
 
       // Start RabbitMQ AMQP server consuming requests from the 'api' queue
       val handler = Default.handlerAsync[RabbitMqServer.Context]
