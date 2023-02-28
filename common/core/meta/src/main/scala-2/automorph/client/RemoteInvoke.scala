@@ -173,11 +173,13 @@ object RemoteInvoke {
   )(p1: c.Expr[(String, T1)])(requestContext: c.Expr[Context]): c.Expr[Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
+    // This remote invoke needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Result](q"""
-      ${c.prefix}.invoke(
+      val remoteInvoke = ${c.prefix}
+      remoteInvoke.invoke(
         Seq($p1),
         Seq(
-          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2)
+          remoteInvoke.codec.encode[${weakTypeOf[T1]}]($p1._2)
         ),
         $requestContext
       )
@@ -189,12 +191,14 @@ object RemoteInvoke {
   )(p1: c.Expr[(String, T1)], p2: c.Expr[(String, T2)])(requestContext: c.Expr[Context]): c.Expr[Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
+    // This remote invoke needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Result](q"""
-      ${c.prefix}.invoke(
+      val remoteInvoke = ${c.prefix}
+      remoteInvoke.invoke(
         Seq($p1, $p2),
         Seq(
-          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2)
+          remoteInvoke.codec.encode[${weakTypeOf[T1]}]($p1._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T2]}]($p2._2)
         ),
         $requestContext
       )
@@ -208,13 +212,15 @@ object RemoteInvoke {
   ): c.Expr[Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
+    // This remote invoke needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Result](q"""
-      ${c.prefix}.invoke(
+      val remoteInvoke = ${c.prefix}
+      remoteInvoke.invoke(
         Seq($p1, $p2, $p3),
         Seq(
-          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2)
+          remoteInvoke.codec.encode[${weakTypeOf[T1]}]($p1._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T2]}]($p2._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T3]}]($p3._2)
         ),
         $requestContext
       )
@@ -228,14 +234,16 @@ object RemoteInvoke {
   ): c.Expr[Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
+    // This remote invoke needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Result](q"""
-      ${c.prefix}.invoke(
+      val remoteInvoke = ${c.prefix}
+      remoteInvoke.invoke(
         Seq($p1, $p2, $p3, $p4),
         Seq(
-          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4._2)
+          remoteInvoke.codec.encode[${weakTypeOf[T1]}]($p1._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T2]}]($p2._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T3]}]($p3._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T4]}]($p4._2)
         ),
         $requestContext
       )
@@ -259,15 +267,17 @@ object RemoteInvoke {
   )(requestContext: c.Expr[Context]): c.Expr[Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
+    // This remote invoke needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Result](q"""
-      ${c.prefix}.invoke(
+      val remoteInvoke = ${c.prefix}
+      remoteInvoke.invoke(
         Seq($p1, $p2, $p3, $p4, $p5),
         Seq(
-          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5._2)
+          remoteInvoke.codec.encode[${weakTypeOf[T1]}]($p1._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T2]}]($p2._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T3]}]($p3._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T4]}]($p4._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T5]}]($p5._2)
         ),
         $requestContext
       )
@@ -293,16 +303,18 @@ object RemoteInvoke {
   )(requestContext: c.Expr[Context]): c.Expr[Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
+    // This remote invoke needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Result](q"""
-      ${c.prefix}.invoke(
+      val remoteInvoke = ${c.prefix}
+      remoteInvoke.invoke(
         Seq($p1, $p2, $p3, $p4, $p5, $p6),
         Seq(
-          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T6]}]($p6._2)
+          remoteInvoke.codec.encode[${weakTypeOf[T1]}]($p1._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T2]}]($p2._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T3]}]($p3._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T4]}]($p4._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T5]}]($p5._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T6]}]($p6._2)
         ),
         $requestContext
       )
@@ -330,17 +342,19 @@ object RemoteInvoke {
   )(requestContext: c.Expr[Context]): c.Expr[Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
 
+    // This remote invoke needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Result](q"""
-      ${c.prefix}.invoke(
+      val remoteInvoke = ${c.prefix}
+      remoteInvoke.invoke(
         Seq($p1, $p2, $p3, $p4, $p5, $p6, $p7),
         Seq(
-          ${c.prefix}.codec.encode[${weakTypeOf[T1]}]($p1._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T2]}]($p2._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T3]}]($p3._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T4]}]($p4._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T5]}]($p5._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T6]}]($p6._2),
-          ${c.prefix}.codec.encode[${weakTypeOf[T7]}]($p7._2)
+          remoteInvoke.codec.encode[${weakTypeOf[T1]}]($p1._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T2]}]($p2._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T3]}]($p3._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T4]}]($p4._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T5]}]($p5._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T6]}]($p6._2),
+          remoteInvoke.codec.encode[${weakTypeOf[T7]}]($p7._2)
         ),
         $requestContext
       )

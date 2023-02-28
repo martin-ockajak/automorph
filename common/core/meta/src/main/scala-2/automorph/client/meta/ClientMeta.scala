@@ -186,8 +186,10 @@ object ClientMeta {
   ](c: blackbox.Context)(function: c.Expr[String]): c.Expr[RemoteCall[Node, Codec, Effect, Context, Result]] = {
     import c.universe.Quasiquote
 
+    // This client needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[RemoteCall[Node, Codec, Effect, Context, Result]](q"""
-      automorph.client.RemoteCall($function, ${c.prefix}.protocol.codec, ${c.prefix}.performCall)
+      val client = ${c.prefix}
+      automorph.client.RemoteCall($function, client.protocol.codec, client.performCall)
     """)
   }
 }

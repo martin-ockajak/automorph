@@ -144,12 +144,14 @@ private[automorph] object MethodReflection {
    */
   def acceptsContext[C <: blackbox.Context, Context: ref.c.WeakTypeTag](
     ref: ClassReflection[C]
-  )(method: ref.RefMethod): Boolean =
+  )(method: ref.RefMethod): Boolean = {
+    Seq(ref.c.weakTypeOf[Context])
     method.parameters.flatten.lastOption.exists { parameter =>
       // FIXME - fix generic parameter type detection
       parameter.contextual
 //      parameter.contextual && parameter.dataType =:= ref.c.weakTypeOf[Context]
     }
+  }
 
   /**
    * Extracts result type wrapped in a contextual type.
@@ -172,6 +174,7 @@ private[automorph] object MethodReflection {
     c: C
   )(someType: c.Type): Option[c.Type] = {
     import c.universe.TypeRef
+    Seq(c.weakTypeOf[Context])
 
     someType.dealias match {
       case typeRef: TypeRef

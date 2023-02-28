@@ -26,9 +26,9 @@ trait ProtocolCodecTest extends CoreTest {
     Seq(
       circeJsonFixture(),
       jacksonJsonFixture(),
-//      uPickleJsonFixture(),
-//      uPickleMessagePackFixture(),
-//      argonautJsonFixture(),
+      uPickleJsonFixture(),
+      uPickleMessagePackFixture(),
+      argonautJsonFixture(),
     )
   }
 
@@ -92,53 +92,51 @@ trait ProtocolCodecTest extends CoreTest {
     )
   }
 
-//  private def uPickleJsonFixture()(implicit context: Context): TestFixture = {
-//    class Custom extends UpickleJsonCustom {
-//      implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int]
-//        .bimap[Enum.Enum](value => Enum.toOrdinal(value), number => Enum.fromOrdinal(number))
-//      implicit lazy val structureRw: ReadWriter[Structure] = macroRW
-//      implicit lazy val recordRw: ReadWriter[Record] = macroRW
-//    }
-//    val codec = UpickleJsonCodec(new Custom)
-//    val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type, Context](codec)
-//    val simpleHandler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
-//    val handler = simpleHandler.bind(complexApi)
-//    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-//    val client = Client.protocol(protocol).transport(transport)
-//    TestFixture(
-//      client,
-//      handler,
-//      client.bind[SimpleApiType],
-//      client.bind[ComplexApiType],
-//      client.bind[InvalidApiType],
-//      (function, a0) => client.call[String](function).args(a0),
-//      (function, a0) => client.message(function).args(a0),
-//    )
-//  }
+  private def uPickleJsonFixture()(implicit context: Context): TestFixture = {
+    class Custom extends UpickleJsonCustom {
+      implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int]
+        .bimap[Enum.Enum](value => Enum.toOrdinal(value), number => Enum.fromOrdinal(number))
+      implicit lazy val structureRw: ReadWriter[Structure] = macroRW
+      implicit lazy val recordRw: ReadWriter[Record] = macroRW
+    }
+    val codec = UpickleJsonCodec(new Custom)
+    val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type, Context](codec)
+    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
+    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
+    val client = Client.protocol(protocol).transport(transport)
+    TestFixture(
+      client,
+      handler,
+      client.bind[SimpleApiType],
+      client.bind[ComplexApiType],
+      client.bind[InvalidApiType],
+      (function, a0) => client.call[String](function).args(a0),
+      (function, a0) => client.message(function).args(a0),
+    )
+  }
 
-//  private def uPickleMessagePackFixture()(implicit context: Context): TestFixture = {
-//    class Custom extends UpickleMessagePackCustom {
-//      implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int]
-//        .bimap[Enum.Enum](value => Enum.toOrdinal(value), number => Enum.fromOrdinal(number))
-//      implicit lazy val structureRw: ReadWriter[Structure] = macroRW
-//      implicit lazy val recordRw: ReadWriter[Record] = macroRW
-//    }
-//    val codec = UpickleMessagePackCodec(new Custom)
-//    val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type, Context](codec)
-//    val simpleHandler = Handler.protocol(protocol).system(system).bind(simpleApi)
-//    val handler = simpleHandler.bind(complexApi)
-//    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-//    val client = Client.protocol(protocol).transport(transport)
-//    TestFixture(
-//      client,
-//      handler,
-//      client.bind[SimpleApiType],
-//      client.bind[ComplexApiType],
-//      client.bind[InvalidApiType],
-//      (function, a0) => client.call[String](function).args(a0),
-//      (function, a0) => client.message(function).args(a0),
-//    )
-//  }
+  private def uPickleMessagePackFixture()(implicit context: Context): TestFixture = {
+    class Custom extends UpickleMessagePackCustom {
+      implicit lazy val enumRw: ReadWriter[Enum.Enum] = readwriter[Int]
+        .bimap[Enum.Enum](value => Enum.toOrdinal(value), number => Enum.fromOrdinal(number))
+      implicit lazy val structureRw: ReadWriter[Structure] = macroRW
+      implicit lazy val recordRw: ReadWriter[Record] = macroRW
+    }
+    val codec = UpickleMessagePackCodec(new Custom)
+    val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type, Context](codec)
+    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
+    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
+    val client = Client.protocol(protocol).transport(transport)
+    TestFixture(
+      client,
+      handler,
+      client.bind[SimpleApiType],
+      client.bind[ComplexApiType],
+      client.bind[InvalidApiType],
+      (function, a0) => client.call[String](function).args(a0),
+      (function, a0) => client.message(function).args(a0),
+    )
+  }
 
   private def argonautJsonFixture()(implicit context: Context): TestFixture = {
     implicit val enumCodecJson: CodecJson[Enum.Enum] =
