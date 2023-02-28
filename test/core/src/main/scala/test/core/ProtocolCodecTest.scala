@@ -25,7 +25,7 @@ trait ProtocolCodecTest extends CoreTest {
   private lazy val testFixtures: Seq[TestFixture] = {
     implicit val context: Context = arbitraryContext.arbitrary.sample.get
     Seq(
-//      circeJsonFixture(),
+      circeJsonFixture(),
       jacksonJsonFixture(),
 //      uPickleJsonFixture(),
 //      uPickleMessagePackFixture(),
@@ -42,25 +42,25 @@ trait ProtocolCodecTest extends CoreTest {
   ): Option[ClientMessageTransport[Effect, Context]] =
     None
 
-//  private def circeJsonFixture()(implicit context: Context): TestFixture = {
-//    implicit val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
-//    implicit val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
-//    val codec = CirceJsonCodec()
-//    val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type, Context](codec)
-//    val simpleHandler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
-//    val handler = simpleHandler.bind(complexApi)
-//    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-//    val client = Client.protocol(protocol).transport(transport)
-//    TestFixture(
-//      client,
-//      handler,
-//      client.bind[SimpleApiType],
-//      client.bind[ComplexApiType],
-//      client.bind[InvalidApiType],
-//      (function, a0) => client.call[String](function).args(a0),
-//      (function, a0) => client.message(function).args(a0),
-//    )
-//  }
+  private def circeJsonFixture()(implicit context: Context): TestFixture = {
+    implicit val enumEncoder: Encoder[Enum.Enum] = Encoder.encodeInt.contramap[Enum.Enum](Enum.toOrdinal)
+    implicit val enumDecoder: Decoder[Enum.Enum] = Decoder.decodeInt.map(Enum.fromOrdinal)
+    val codec = CirceJsonCodec()
+    val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type, Context](codec)
+    val simpleHandler = Handler.protocol(protocol).system(system).bind(simpleApi)
+    val handler = simpleHandler.bind(complexApi)
+    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
+    val client = Client.protocol(protocol).transport(transport)
+    TestFixture(
+      client,
+      handler,
+      client.bind[SimpleApiType],
+      client.bind[ComplexApiType],
+      client.bind[InvalidApiType],
+      (function, a0) => client.call[String](function).args(a0),
+      (function, a0) => client.message(function).args(a0),
+    )
+  }
 
   private def jacksonJsonFixture()(implicit context: Context): TestFixture = {
     val enumModule = new SimpleModule().addSerializer(
