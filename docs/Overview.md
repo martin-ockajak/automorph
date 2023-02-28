@@ -18,9 +18,10 @@ sidebar_position: 1
 
 Entry points for the application logic to invoke or expose remote APIs:
 
-* [Client](/api/automorph/Client.html) - call type-safe remote APIs (*bind & call*)
-* [Handler](/api/automorph/Handler.html) - generate remote call bindings for existing APIs (*bind & process*)
-* [Servers](/api/automorph/transport/index.html) - serve existing APIs remotely (*bind & serve*)
+* [Client](/api/automorph/Client.html) - invoke remote APIs
+* [Handler](/api/automorph/Handler.html) - process remote API requests
+* [Endpoints](/api/automorph/transport/index.html) - expose APIs as remote within an existing server
+* [Servers](/api/automorph/transport/index.html) - serve APIs as remote
 
 
 ## SPI
