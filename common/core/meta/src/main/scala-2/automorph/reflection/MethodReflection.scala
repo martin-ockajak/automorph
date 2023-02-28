@@ -91,8 +91,9 @@ private[automorph] object MethodReflection {
   )(method: ref.RefMethod): Either[String, ref.RefMethod] = {
     // No type parameters
     val methodSignature = signature[C, Api](ref)(method)
-    if (method.typeParameters.nonEmpty) { Left(s"Bound API method '$methodSignature' must not have type parameters") }
-    else {
+    if (method.typeParameters.nonEmpty) {
+      Left(s"Bound API method '$methodSignature' must not have type parameters")
+    } else {
       // Callable at runtime
       if (!method.available) { Left(s"Bound API method '$methodSignature' must be callable at runtime") }
       else {

@@ -35,8 +35,8 @@ Interfaces for implementation of various integration plugins:
 
 ## Limitations
 
-* Bound remote APIs methods cannot be [polymorphic](https://docs.scala-lang.org/tour/polymorphic-methods.html)
-* [Client](/api/automorph/Client.html) cannot be used from within [delayed initialization](https://scala-lang.org/api/3.x/scala/DelayedInit.html) mechanism (e.g. [App](https://scala-lang.org/api/3.x/scala/App.html) trait)
+* Bound remote APIs methods cannot use [parametric polymorphism](https://docs.scala-lang.org/tour/polymorphic-methods.html) or [method overloading][https://en.wikipedia.org/wiki/Ad_hoc_polymorphism]
+* Automorph cannot be used from within the [App](https://scala-lang.org/api/3.x/scala/App.html) trait nor any other form of [delayed initialization](https://scala-lang.org/api/3.x/scala/DelayedInit.html)
 * Scala 2 type inference constraints sometimes require explicitly supplying type parameters when composing plugins
 
 
