@@ -20,8 +20,8 @@ Entry points for the application logic to invoke or expose remote APIs:
 
 * [Client](/api/automorph/Client.html) - invoke remote APIs
 * [Handler](/api/automorph/Handler.html) - process remote API requests
-* [Endpoints](/api/automorph/transport/EndpointTransport.html) - expose APIs as remote within an existing server
 * [Servers](/api/automorph/transport/ServerTransport.html) - serve APIs as remote
+* [Endpoints](/api/automorph/transport/EndpointTransport.html) - expose APIs as remote within an existing server
 
 
 ## SPI
@@ -30,10 +30,10 @@ Interfaces for implementation of various integration plugins:
 
 * [EffectSystem](/api/automorph/spi/EffectSystem.html) - accessing remote APIs using various effect handling abstractions
 * [MessageCodec](/api/automorph/spi/MessageCodec.html) - serialization of RPC messages into structured data formats
-* [ClientTransport](/api/automorph/spi/ClientTransport.html) - RPC transport protocols clients
+* [ClientTransport](/api/automorph/spi/ClientTransport.html) - tranmitting messages for RPC clients
+* [ServerTransport](/api/automorph/spi/ServerTransport.html) - transmitting messages for RPC servers
 * [EndpointTransport](/api/automorph/spi/EndpointTransport.html) - adding RPC support to existing servers
-* [ServerTransport](/api/automorph/spi/ServerTransport.html) - RPC transport protocol servers
-* [RpcProtocol](/api/automorph/spi/RpcProtocol.html) - specific RPC protocol support
+* [RpcProtocol](/api/automorph/spi/RpcProtocol.html) - specific RPC protocol implementations
 
 
 ## Limitations
