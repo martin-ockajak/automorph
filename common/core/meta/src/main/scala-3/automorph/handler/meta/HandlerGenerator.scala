@@ -16,7 +16,6 @@ private[automorph] object HandlerGenerator:
    * Generates handler bindings for all valid public methods of an API type.
    *
    * @param codec message codec plugin
-   * @param system effect system plugin
    * @param api API instance
    * @tparam Node message node type
    * @tparam Codec message codec plugin type
@@ -27,10 +26,9 @@ private[automorph] object HandlerGenerator:
    */
   inline def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec,
-    system: EffectSystem[Effect],
     api: Api,
   ): Seq[HandlerBinding[Node, Effect, Context]] =
-    ${ bindingsMacro[Node, Codec, Effect, Context, Api]('codec, 'system, 'api) }
+    ${ bindingsMacro[Node, Codec, Effect, Context, Api]('codec, 'api) }
 
   private def bindingsMacro[
     Node: Type,
@@ -38,7 +36,7 @@ private[automorph] object HandlerGenerator:
     Effect[_]: Type,
     Context: Type,
     Api <: AnyRef: Type
-  ](codec: Expr[Codec], system: Expr[EffectSystem[Effect]], api: Expr[Api])(
+  ](codec: Expr[Codec], api: Expr[Api])(
     using quotes: Quotes
   ): Expr[Seq[HandlerBinding[Node, Effect, Context]]] =
     val ref = ClassReflection(quotes)
@@ -53,7 +51,7 @@ private[automorph] object HandlerGenerator:
 
     // Generate bound API method bindings
     val handlerBindings = validMethods.map { method =>
-      generateBinding[Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
+      generateBinding[Node, Codec, Effect, Context, Api](ref)(method, codec, api)
     }
     Expr.ofSeq(handlerBindings)
 
@@ -62,7 +60,6 @@ private[automorph] object HandlerGenerator:
   )(
     method: ref.RefMethod,
     codec: Expr[Codec],
-    system: Expr[EffectSystem[Effect]],
     api: Expr[Api],
   ): Expr[HandlerBinding[Node, Effect, Context]] =
     given Quotes = ref.q

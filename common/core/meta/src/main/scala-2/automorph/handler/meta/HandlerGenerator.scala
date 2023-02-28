@@ -18,8 +18,6 @@ object HandlerGenerator {
    *
    * @param codec
    *   message codec plugin
-   * @param system
-   *   effect system plugin
    * @param api
    *   API instance
    * @tparam Node
@@ -37,13 +35,12 @@ object HandlerGenerator {
    */
   def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec,
-    system: EffectSystem[Effect],
     api: Api,
   ): Seq[HandlerBinding[Node, Effect, Context]] =
     macro bindingsMacro[Node, Codec, Effect, Context, Api]
 
   def bindingsMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](c: blackbox.Context)(
-    codec: c.Expr[Codec], system: c.Expr[EffectSystem[Effect]], api: c.Expr[Api]
+    codec: c.Expr[Codec], api: c.Expr[Api]
   )(implicit
     nodeType: c.WeakTypeTag[Node],
     codecType: c.WeakTypeTag[Codec],
@@ -66,7 +63,7 @@ object HandlerGenerator {
 
     // Generate bound API method bindings
     val handlerBindings = validMethods.map { method =>
-      generateBinding[c.type, Node, Codec, Effect, Context, Api](ref)(method, codec, system, api)
+      generateBinding[c.type, Node, Codec, Effect, Context, Api](ref)(method, codec, api)
     }
     c.Expr[Seq[HandlerBinding[Node, Effect, Context]]](q"""
       Seq(..$handlerBindings)
@@ -79,7 +76,6 @@ object HandlerGenerator {
   )(
     method: ref.RefMethod,
     codec: ref.c.Expr[Codec],
-    system: ref.c.Expr[EffectSystem[Effect]],
     api: ref.c.Expr[Api],
   )(implicit
     nodeType: ref.c.WeakTypeTag[Node],

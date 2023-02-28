@@ -114,7 +114,7 @@ object HandlerMeta {
     c.Expr[Handler[Node, Codec, Effect, Context]](q"""
       val newBindings = automorph.handler.meta.HandlerGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](
-          ${c.prefix}.protocol.codec, ${c.prefix}.system, $api
+          ${c.prefix}.protocol.codec, $api
         ).flatMap { binding =>
           $mapName(binding.function.name).map(_ -> binding)
         }

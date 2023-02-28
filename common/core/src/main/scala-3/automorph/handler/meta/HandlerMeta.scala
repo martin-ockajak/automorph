@@ -76,7 +76,7 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
    */
   inline def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): Handler[Node, Codec, Effect, Context] =
     val newApiBindings = HandlerGenerator.bindings[Node, Codec, Effect, Context, Api](
-      protocol.codec, system, api
+      protocol.codec, api
     ).flatMap { binding =>
       mapName(binding.function.name).map(_ -> binding)
     }
