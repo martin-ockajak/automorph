@@ -104,7 +104,8 @@ trait ProtocolCodecTest extends CoreTest {
 //    }
 //    val codec = UpickleJsonCodec(new Custom)
 //    val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type, Context](codec)
-//    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
+//    val simpleHandler = Handler.protocol(protocol).system(system).bind(simpleApi)
+//    val handler = simpleHandler.bind(complexApi)
 //    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
 //    val client = Client.protocol(protocol).transport(transport)
 //    TestFixture(
@@ -127,7 +128,8 @@ trait ProtocolCodecTest extends CoreTest {
 //    }
 //    val codec = UpickleMessagePackCodec(new Custom)
 //    val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type, Context](codec)
-//    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
+//    val simpleHandler = Handler.protocol(protocol).system(system).bind(simpleApi)
+//    val handler = simpleHandler.bind(complexApi)
 //    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
 //    val client = Client.protocol(protocol).transport(transport)
 //    TestFixture(
