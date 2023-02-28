@@ -23,7 +23,7 @@ import scala.util.Using
  *   [[https://docs.oracle.com/javase/8/docs/api/java/net/HttpURLConnection.html API]]
  * @constructor
  *   Creates an HttpURLConnection HTTP client message transport plugin.
- * @param system
+ * @param effectSystem
  *   effect system plugin
  * @param url
  *   remote API HTTP or WebSocket URL
@@ -32,7 +32,7 @@ import scala.util.Using
  * @tparam Effect
  *   effect type
  */
-final case class UrlClient[Effect[_]](system: EffectSystem[Effect], url: URI, method: HttpMethod = HttpMethod.Post)
+final case class UrlClient[Effect[_]](effectSystem: EffectSystem[Effect], url: URI, method: HttpMethod = HttpMethod.Post)
   extends ClientTransport[Effect, Context] with Logging {
 
   private val contentLengthHeader = "Content-Length"
@@ -40,7 +40,7 @@ final case class UrlClient[Effect[_]](system: EffectSystem[Effect], url: URI, me
   private val acceptHeader = "Accept"
   private val httpMethods = HttpMethod.values.map(_.name).toSet
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val givenSystem: EffectSystem[Effect] = system
+  implicit private val givenSystem: EffectSystem[Effect] = effectSystem
   System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
 
   override def call(
@@ -51,7 +51,7 @@ final case class UrlClient[Effect[_]](system: EffectSystem[Effect], url: URI, me
   ): Effect[(InputStream, Context)] =
     // Send the request
     send(requestBody, requestId, mediaType, requestContext).flatMap { connection =>
-      system.evaluate {
+      effectSystem.evaluate {
         lazy val responseProperties =
           ListMap(LogProperties.requestId -> requestId, "URL" -> connection.getURL.toExternalForm)
 
@@ -68,7 +68,7 @@ final case class UrlClient[Effect[_]](system: EffectSystem[Effect], url: URI, me
     Session.defaultContext.url(url).method(method)
 
   override def close(): Effect[Unit] =
-    system.successful(())
+    effectSystem.successful(())
 
   override def message(
     requestBody: InputStream,
@@ -84,7 +84,7 @@ final case class UrlClient[Effect[_]](system: EffectSystem[Effect], url: URI, me
     mediaType: String,
     requestContext: Context,
   ): Effect[HttpURLConnection] =
-    system.evaluate {
+    effectSystem.evaluate {
       // Create the request
       val requestBody = request.toArray
       val connection = createConnection(requestContext)

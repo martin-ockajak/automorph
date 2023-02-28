@@ -36,7 +36,7 @@ import scala.util.Try
  *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
  * @constructor
  *   Creates an HttpClient HTTP & WebSocket message client transport plugin.
- * @param system
+ * @param effectSystem
  *   effect system plugin
  * @param url
  *   remote API HTTP or WebSocket URL
@@ -48,7 +48,7 @@ import scala.util.Try
  *   effect type
  */
 final case class HttpClient[Effect[_]](
-  system: EffectSystem[Effect],
+  effectSystem: EffectSystem[Effect],
   url: URI,
   method: HttpMethod = HttpMethod.Post,
   builder: Builder = defaultBuilder,
@@ -63,7 +63,7 @@ final case class HttpClient[Effect[_]](
   private val webSocketsSchemePrefix = "ws"
   private val httpClient = builder.build
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val givenSystem: EffectSystem[Effect] = system
+  implicit private val givenSystem: EffectSystem[Effect] = effectSystem
 
   override def call(
     requestBody: InputStream,
@@ -81,12 +81,12 @@ final case class HttpClient[Effect[_]](
         result.fold(
           error => {
             log.failedReceiveResponse(error, responseProperties, protocol.name)
-            system.failed(error)
+            effectSystem.failed(error)
           },
           response => {
             val (responseBody, statusCode, _) = response
             log.receivedResponse(responseProperties ++ statusCode.map("Status" -> _.toString), protocol.name)
-            system.successful(responseBody -> getResponseContext(response))
+            effectSystem.successful(responseBody -> getResponseContext(response))
           },
         )
       }
@@ -107,7 +107,7 @@ final case class HttpClient[Effect[_]](
     Session.defaultContext.url(url).method(method)
 
   override def close(): Effect[Unit] =
-    system.evaluate(())
+    effectSystem.evaluate(())
 
   private def getResponseContext(response: Response): Context = {
     val (_, statusCode, headers) = response
@@ -128,13 +128,13 @@ final case class HttpClient[Effect[_]](
       request.fold(
         // Send HTTP request
         httpRequest =>
-          system match {
+          effectSystem match {
             case completableSystem: AsyncEffectSystem[?] =>
               effect(
                 httpClient.sendAsync(httpRequest, BodyHandlers.ofByteArray),
                 completableSystem.asInstanceOf[AsyncEffectSystem[Effect]],
               ).map(httpResponse)
-            case _ => system.evaluate(httpResponse(httpClient.send(httpRequest, BodyHandlers.ofByteArray)))
+            case _ => effectSystem.evaluate(httpResponse(httpClient.send(httpRequest, BodyHandlers.ofByteArray)))
           },
         // Send WebSocket request
         { case (webSocketEffect, resultEffect, requestBody) =>
@@ -161,11 +161,11 @@ final case class HttpClient[Effect[_]](
       _.fold(
         error => {
           log.failedSendRequest(error, requestProperties, protocol.name)
-          system.failed(error)
+          effectSystem.failed(error)
         },
         response => {
           log.sentRequest(requestProperties, protocol.name)
-          system.successful(response)
+          effectSystem.successful(response)
         },
       )
     )
@@ -177,12 +177,12 @@ final case class HttpClient[Effect[_]](
   }
 
   private def withCompletable[T](function: AsyncEffectSystem[Effect] => Effect[T]): Effect[T] =
-    system match {
+    effectSystem match {
       case completableSystem: AsyncEffectSystem[?] =>
         function(completableSystem.asInstanceOf[AsyncEffectSystem[Effect]])
-      case _ => system.failed(new IllegalArgumentException(
+      case _ => effectSystem.failed(new IllegalArgumentException(
         s"""WebSocket protocol not available for effect system
-           | not supporting completable effects: ${system.getClass.getName}""".stripMargin
+           | not supporting completable effects: ${effectSystem.getClass.getName}""".stripMargin
       ))
     }
 
@@ -218,7 +218,7 @@ final case class HttpClient[Effect[_]](
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
         withCompletable(completableSystem =>
-          system.evaluate {
+          effectSystem.evaluate {
             val completableResponse = completableSystem.completable[Response]
             val response = completableResponse.flatMap(_.effect)
             val webSocketBuilder = createWebSocketBuilder( requestContext)
@@ -228,7 +228,7 @@ final case class HttpClient[Effect[_]](
         )
       case _ =>
         // Create HTTP request
-        system.evaluate {
+        effectSystem.evaluate {
           val httpRequest = createHttpRequest(requestBody, requestUrl, mediaType,  requestContext)
           Left(httpRequest) -> httpRequest.uri
         }

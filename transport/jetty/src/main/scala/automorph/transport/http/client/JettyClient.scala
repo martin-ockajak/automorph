@@ -36,7 +36,7 @@ import scala.util.Try
  *   [[https://www.javadoc.io/doc/io.jetty/jetty-core/latest/index.html API]]
  * @constructor
  *   Creates an Jetty HTTP & WebSocket message client transport plugin.
- * @param system
+ * @param effectSystem
  *   effect system plugin
  * @param url
  *   remote API HTTP or WebSocket URL
@@ -48,7 +48,7 @@ import scala.util.Try
  *   effect type
  */
 final case class JettyClient[Effect[_]](
-  system: EffectSystem[Effect],
+  effectSystem: EffectSystem[Effect],
   url: URI,
   method: HttpMethod = HttpMethod.Post,
   httpClient: HttpClient = defaultClient,
@@ -59,7 +59,7 @@ final case class JettyClient[Effect[_]](
   private val webSocketsSchemePrefix = "ws"
   private val webSocketClient = new WebSocketClient(httpClient)
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val givenSystem: EffectSystem[Effect] = system
+  implicit private val givenSystem: EffectSystem[Effect] = effectSystem
   if (!httpClient.isStarted) { httpClient.start() }
   webSocketClient.start()
 
@@ -79,12 +79,12 @@ final case class JettyClient[Effect[_]](
         result.fold(
           error => {
             log.failedReceiveResponse(error, responseProperties, protocol.name)
-            system.failed(error)
+            effectSystem.failed(error)
           },
           response => {
             val (responseBody, statusCode, _) = response
             log.receivedResponse(responseProperties ++ statusCode.map("Status" -> _.toString), protocol.name)
-            system.successful(responseBody -> responseContext(response))
+            effectSystem.successful(responseBody -> responseContext(response))
           },
         )
       }
@@ -105,7 +105,7 @@ final case class JettyClient[Effect[_]](
     Session.defaultContext.url(url).method(method)
 
   override def close(): Effect[Unit] =
-    system.evaluate {
+    effectSystem.evaluate {
       webSocketClient.stop()
       httpClient.stop()
     }
@@ -124,7 +124,7 @@ final case class JettyClient[Effect[_]](
       request.fold(
         // Send HTTP request
         httpRequest =>
-          system match {
+          effectSystem match {
             case completableSystem: AsyncEffectSystem[?] =>
               completableSystem.asInstanceOf[AsyncEffectSystem[Effect]].completable[Response].flatMap {
                 completableResponse =>
@@ -137,7 +137,7 @@ final case class JettyClient[Effect[_]](
                   httpRequest.send(responseListener)
                   completableResponse.effect
               }
-            case _ => system.evaluate(httpRequest.send()).map(response => httpResponse(response, response.getContent))
+            case _ => effectSystem.evaluate(httpRequest.send()).map(response => httpResponse(response, response.getContent))
           },
         // Send WebSocket request
         {
@@ -176,11 +176,11 @@ final case class JettyClient[Effect[_]](
       _.fold(
         error => {
           log.failedSendRequest(error, requestProperties, protocol.name)
-          system.failed(error)
+          effectSystem.failed(error)
         },
         response => {
           log.sentRequest(requestProperties, protocol.name)
-          system.successful(response)
+          effectSystem.successful(response)
         },
       )
     )
@@ -192,12 +192,12 @@ final case class JettyClient[Effect[_]](
   }
 
   private def withCompletable[T](function: AsyncEffectSystem[Effect] => Effect[T]): Effect[T] =
-    system match {
+    effectSystem match {
       case completableSystem: AsyncEffectSystem[?] =>
         function(completableSystem.asInstanceOf[AsyncEffectSystem[Effect]])
-      case _ => system.failed(new IllegalArgumentException(
+      case _ => effectSystem.failed(new IllegalArgumentException(
         s"""${Protocol.WebSocket} not available for effect system
-           | not supporting completable effects: ${system.getClass.getName}""".stripMargin
+           | not supporting completable effects: ${effectSystem.getClass.getName}""".stripMargin
       ))
     }
 
@@ -212,7 +212,7 @@ final case class JettyClient[Effect[_]](
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
         // Create WebSocket request
         withCompletable(completableSystem =>
-          system.evaluate {
+          effectSystem.evaluate {
             val completableResponse = completableSystem.completable[Response]
             val response = completableResponse.flatMap(_.effect)
             val upgradeRequest = createWebSocketRequest(requestContext, requestUrl)
@@ -222,7 +222,7 @@ final case class JettyClient[Effect[_]](
         )
       case _ =>
         // Create HTTP request
-        system.evaluate {
+        effectSystem.evaluate {
           val httpRequest = createHttpRequest(requestBody, requestUrl, mediaType, requestContext)
           Left(httpRequest) -> httpRequest.getURI
         }

@@ -27,7 +27,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  *   [[https://javadoc.io/doc/com.softwaremill.sttp.client3/core_3/latest/index.html API]]
  * @constructor
  *   Creates an STTP HTTP & WebSocket client message transport plugin with the specified STTP backend.
- * @param system
+ * @param effectSystem
  *   effect system plugin
  * @param backend
  *   STTP backend
@@ -41,7 +41,7 @@ import sttp.model.{Header, MediaType, Method, Uri}
  *   effect type
  */
 final case class SttpClient[Effect[_]] private (
-  system: EffectSystem[Effect],
+  effectSystem: EffectSystem[Effect],
   backend: SttpBackend[Effect, ?],
   url: URI,
   method: HttpMethod,
@@ -53,7 +53,7 @@ final case class SttpClient[Effect[_]] private (
   private val webSocketsSchemePrefix = "ws"
   private val defaultUrl = Uri(url).toJavaUri
   private val log = MessageLog(logger, Protocol.Http.name)
-  implicit private val givenSystem: EffectSystem[Effect] = system
+  implicit private val givenSystem: EffectSystem[Effect] = effectSystem
 
   override def call(
     requestBody: InputStream,
@@ -71,11 +71,11 @@ final case class SttpClient[Effect[_]] private (
         result.fold(
           error => {
             log.failedReceiveResponse(error, responseProperties, protocol.name)
-            system.failed(error)
+            effectSystem.failed(error)
           },
           response => {
             log.receivedResponse(responseProperties + ("Status" -> response.code.toString), protocol.name)
-            system.successful(response.body.toInputStream -> getResponseContext(response))
+            effectSystem.successful(response.body.toInputStream -> getResponseContext(response))
           },
         )
       }
@@ -116,11 +116,11 @@ final case class SttpClient[Effect[_]] private (
       _.fold(
         error => {
           log.failedSendRequest(error, requestProperties, protocol.name)
-          system.failed(error)
+          effectSystem.failed(error)
         },
         response => {
           log.sentRequest(requestProperties, protocol.name)
-          system.successful(response)
+          effectSystem.successful(response)
         },
       )
     )
@@ -166,15 +166,15 @@ final case class SttpClient[Effect[_]] private (
 
   private def transportProtocol(sttpRequest: Request[Array[Byte], WebSocket]): Effect[Protocol] =
     if (sttpRequest.isWebSocket) {
-      if (webSocket) { system.successful(Protocol.WebSocket) }
+      if (webSocket) { effectSystem.successful(Protocol.WebSocket) }
       else {
-        system.failed(
+        effectSystem.failed(
           throw new IllegalArgumentException(
             s"Selected STTP backend does not support WebSocket: ${backend.getClass.getSimpleName}"
           )
         )
       }
-    } else system.successful(Protocol.Http)
+    } else effectSystem.successful(Protocol.Http)
 }
 
 object SttpClient {

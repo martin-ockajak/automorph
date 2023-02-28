@@ -30,7 +30,7 @@ import scala.util.Try
  *   AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
  * @param routingKey
  *   AMQP routing key (typically a queue name)
- * @param system
+ * @param effectSystem
  *   effect system plugin
  * @param exchange
  *   direct non-durable AMQP message exchange name
@@ -44,7 +44,7 @@ import scala.util.Try
 final case class RabbitMqClient[Effect[_]](
   url: URI,
   routingKey: String,
-  system: AsyncEffectSystem[Effect],
+  effectSystem: AsyncEffectSystem[Effect],
   exchange: String = RabbitMqCommon.defaultDirectExchange,
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory,
@@ -56,7 +56,7 @@ final case class RabbitMqClient[Effect[_]](
   private val urlText = url.toString
   private val responseHandlers = TrieMap[String, Completable[Effect, Response]]()
   private val log = MessageLog(logger, RabbitMqCommon.protocol)
-  implicit private val givenSystem: EffectSystem[Effect] = system
+  implicit private val givenSystem: EffectSystem[Effect] = effectSystem
 
   override def call(
     requestBody: InputStream,
@@ -64,7 +64,7 @@ final case class RabbitMqClient[Effect[_]](
     requestId: String,
     mediaType: String,
   ): Effect[Response] =
-    system.completable[Response].flatMap { response =>
+    effectSystem.completable[Response].flatMap { response =>
       send(requestBody, requestId, mediaType, requestContext, Some(response)).flatMap(_ => response.effect)
     }
 
@@ -80,7 +80,7 @@ final case class RabbitMqClient[Effect[_]](
     RabbitMqContext.default
 
   override def close(): Effect[Unit] =
-    system.evaluate(RabbitMqCommon.disconnect(connection))
+    effectSystem.evaluate(RabbitMqCommon.disconnect(connection))
 
   private def send(
     requestBody: InputStream,
@@ -106,7 +106,7 @@ final case class RabbitMqClient[Effect[_]](
     response.foreach(responseHandlers.put(requestId, _))
 
     // Send the request
-    system.evaluate {
+    effectSystem.evaluate {
       Try {
         val message = requestBody.toArray
         threadConsumer.get.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, message)

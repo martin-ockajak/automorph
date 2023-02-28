@@ -10,7 +10,7 @@ import java.io.InputStream
  * Local handler transport passing requests directly to specified ''handler'' using specified ''backend''.
  *
  * @param handler JSON-RPC request handler layer
- * @param system effect system plugin
+ * @param effectSystem effect system plugin
  * @param defaultContext default request context
  * @constructor Creates a local handler transport passing requests directly to specified ''handler'' using specified ''backend''.
  * @tparam Node message node type
@@ -20,11 +20,11 @@ import java.io.InputStream
  */
 case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   handler: Handler[Node, Codec, Effect, Context],
-  system: EffectSystem[Effect],
+  effectSystem: EffectSystem[Effect],
   defaultContext: Context
 ) extends ClientTransport[Effect, Context] {
 
-  implicit private val givenSystem: EffectSystem[Effect] = system
+  implicit private val givenSystem: EffectSystem[Effect] = effectSystem
 
   override def call(
     requestBody: InputStream,
@@ -34,9 +34,9 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
   ): Effect[(InputStream, Context)] =
     handler.processRequest(requestBody, requestContext, requestId)
       .flatMap { result => result.responseBody.map { responseBody =>
-          system.successful(responseBody -> result.context.getOrElse(defaultContext))
+          effectSystem.successful(responseBody -> result.context.getOrElse(defaultContext))
         }.getOrElse {
-          system.failed(InvalidResponseException("Missing call response", None.orNull))
+          effectSystem.failed(InvalidResponseException("Missing call response", None.orNull))
         }
       }
 
@@ -49,5 +49,5 @@ case class HandlerTransport[Node, Codec <: MessageCodec[Node], Effect[_], Contex
     handler.processRequest(requestBody, requestContext, requestId).map(_ => ())
 
   override def close(): Effect[Unit] =
-    system.successful(())
+    effectSystem.successful(())
 }

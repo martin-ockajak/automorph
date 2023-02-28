@@ -39,8 +39,8 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   clientTransport: ClientTransport[Effect, Context],
 ) extends ClientMeta[Node, Codec, Effect, Context] with Logging {
 
-  protected val system: EffectSystem[Effect] = clientTransport.system
-  implicit private val givenSystem: EffectSystem[Effect] = clientTransport.system
+  protected val system: EffectSystem[Effect] = clientTransport.effectSystem
+  implicit private val givenSystem: EffectSystem[Effect] = clientTransport.effectSystem
 
   /**
    * Creates an one-way remote API function message proxy.

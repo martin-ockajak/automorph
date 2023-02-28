@@ -15,7 +15,7 @@ import java.io.InputStream
 trait ClientTransport[Effect[_], Context] {
 
   /** Effect system plugin. */
-  def system: EffectSystem[Effect]
+  def effectSystem: EffectSystem[Effect]
 
   /**
    * Sends a request to a remote endpoint and retrieves the response.
