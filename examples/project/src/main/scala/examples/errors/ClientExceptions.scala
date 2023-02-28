@@ -29,7 +29,7 @@ private[examples] object ClientExceptions {
     }
 
     // Customize remote API client RPC error to exception mapping
-    val protocol = Default.protocol[Default.ClientContext].mapError((message, code) =>
+    val rpcProtocol = Default.protocol[Default.ClientContext].mapError((message, code) =>
       if (message.contains("SQL")) {
         new SQLException(message)
       } else {
@@ -38,8 +38,8 @@ private[examples] object ClientExceptions {
     )
 
     // Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
-    val client = Client.protocol(protocol).transport(transport)
+    val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
+    val client = Client.protocol(rpcProtocol).transport(clientTransport)
 
     // Call the remote API function and fail with SQLException
     val remoteApi = client.bind[ClientApi]

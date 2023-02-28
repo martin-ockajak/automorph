@@ -25,7 +25,7 @@ private[examples] object RpcProtocol {
     )
 
     // Start default Web-RPC HTTP server listening on port 7000 for requests to '/api'
-    val handler = Handler.protocol(serverProtocol).system(Default.systemAsync).bind(api)
+    val handler = Handler.protocol(serverProtocol).system(Default.effectSystemAsync).bind(api)
     val server = Default.server(handler, 7000, "/api")
 
     // Define client view of the remote API
@@ -39,8 +39,8 @@ private[examples] object RpcProtocol {
     )
 
     // Setup default Web-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
-    val client = Client.protocol(clientProtocol).transport(transport)
+    val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
+    val client = Client.protocol(clientProtocol).transport(clientTransport)
 
     // Call the remote API function
     val remoteApi = client.bind[ClientApi]

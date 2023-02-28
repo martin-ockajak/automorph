@@ -509,7 +509,7 @@ trait ClientApi {
 }
 
 // Customize remote API client RPC error to exception mapping
-val protocol = Default.protocol[Default.ClientContext].mapError((message, code) =>
+val rpcProtocol = Default.protocol[Default.ClientContext].mapError((message, code) =>
   if (message.contains("SQL")) {
     new SQLException(message)
   } else {
@@ -518,8 +518,8 @@ val protocol = Default.protocol[Default.ClientContext].mapError((message, code) 
 )
 
 // Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
-val client = Client.protocol(protocol).transport(transport)
+val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
+val client = Client.protocol(rpcProtocol).transport(clientTransport)
 
 // Call the remote API function and fail with SQLException
 val remoteApi = client.bind[ClientApi]
@@ -575,16 +575,17 @@ class ServerApi {
       Future.failed(JsonRpcException("Application error", 1))
     }
 }
+
 val api = new ServerApi()
 
 // Customize remote API server exception to RPC error mapping
-val protocol = Default.protocol[Default.ServerContext].mapException(_ match {
+val rpcProtocol = Default.protocol[Default.ServerContext].mapException(_ match {
   case _: SQLException => InvalidRequest
   case error => Default.protocol.mapException(error)
 })
 
 // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val handler = Handler.protocol(protocol).system(Default.systemAsync).bind(api)
+val handler = Handler.protocol(rpcProtocol).system(Default.effectSystemAsync).bind(api)
 val server = Default.server(handler, 7000, "/api")
 ```
 
@@ -1195,12 +1196,11 @@ trait ClientApi {
 }
 
 // Configure JSON-RPC to pass arguments by position instead of by name
-val protocol = Default.protocol[Default.ClientContext].namedArguments(false)
+val rpcProtocol = Default.protocol[Default.ClientContext].namedArguments(false)
 
 // Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val url = new URI("http://localhost:7000/api")
-val clientTransport = Default.clientTransportAsync(url)
-val client = Client.protocol(protocol).transport(clientTransport)
+val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
+val client = Client.protocol(rpcProtocol).transport(clientTransport)
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi]
@@ -1252,13 +1252,14 @@ class ServerApi {
   def hello(some: String, n: Int): Task[String] =
     Task.succeed(s"Hello $some $n!")
 }
+
 val api = new ServerApi()
 
 // Create an effect system plugin
-val system = ZioSystem[Any]()
+val effectSystem = ZioSystem[Any]()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val serverBuilder = Default.serverBuilder(system, 7000, "/api")
+val serverBuilder = Default.serverBuilder(effectSystem, 7000, "/api")
 val server = serverBuilder(_.bind(api))
 ```
 
@@ -1271,7 +1272,7 @@ trait ClientApi {
 }
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.client(system, new URI("http://localhost:7000/api"))
+val client = Default.client(effectSystem, new URI("http://localhost:7000/api"))
 
 // Define a helper function to run ZIO tasks
 def run[T](effect: Task[T]): T =
@@ -1324,10 +1325,10 @@ import scala.concurrent.{Await, Future}
 case class Record(values: List[String])
 
 // Create uPickle message codec for JSON format
-val codec = UpickleMessagePackCodec[UpickleMessagePackCustom]()
+val messageCodec = UpickleMessagePackCodec[UpickleMessagePackCustom]()
 
 // Provide custom data type serialization and deserialization logic
-import codec.custom.*
+import messageCodec.custom.*
 implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW[Record]
 ```
 
@@ -1339,16 +1340,17 @@ class ServerApi {
   def hello(some: String, n: Int): Future[Record] =
     Future(Record(List("Hello", some, n.toString)))
 }
+
 val api = new ServerApi()
 
 // Create a server RPC protocol plugin
-val serverProtocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ServerContext](codec)
+val serverProtocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ServerContext](messageCodec)
 
 // Create an effect system plugin
-val system = Default.systemAsync
+val effectSystem = Default.effectSystemAsync
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val handler = Handler.protocol(serverProtocol).system(system)
+val handler = Handler.protocol(serverProtocol).system(effectSystem)
 val server = Default.server(handler.bind(api), 7000, "/api")
 ```
 
@@ -1361,11 +1363,11 @@ trait ClientApi {
 }
 
 // Create a client RPC protocol plugin
-val clientProtocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ClientContext](codec)
+val clientProtocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ClientContext](messageCodec)
 
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
-val client = Client(clientProtocol, transport)
+val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
+val client = Client(clientProtocol, clientTransport)
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi]
@@ -1422,7 +1424,7 @@ val serverProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ServerC
 )
 
 // Start default Web-RPC HTTP server listening on port 7000 for requests to '/api'
-val handler = Handler.protocol(serverProtocol).system(Default.systemAsync).bind(api)
+val handler = Handler.protocol(serverProtocol).system(Default.effectSystemAsync).bind(api)
 val server = Default.server(handler, 7000, "/api")
 ```
 
@@ -1440,8 +1442,8 @@ val clientProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ClientC
 )
 
 // Setup default Web-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
-val client = Client.protocol(clientProtocol).transport(transport)
+val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
+val client = Client.protocol(clientProtocol).transport(clientTransport)
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi]
@@ -1506,10 +1508,10 @@ trait ClientApi {
 }
 
 // Create standard library HTTP client message transport sending POST requests to 'http://localhost:7000/api'
-val transport = UrlClient(Default.systemSync, new URI("http://localhost:7000/api"))
+val clientTransport = UrlClient(Default.effectSystemSync, new URI("http://localhost:7000/api"))
 
 // Setup JSON-RPC HTTP client
-val client = Default.client(transport)
+val client = Default.client(clientTransport)
 
 // Call the remote API function via proxy
 val remoteApi = client.bind[ClientApi]
@@ -1784,10 +1786,10 @@ trait ClientApi {
 }
 
 // Create RabbitMQ AMQP client message transport publishing requests to the 'api' queue
-val transport = RabbitMqClient(new URI("amqp://localhost"), "api", Default.systemAsync)
+val clientTransport = RabbitMqClient(new URI("amqp://localhost"), "api", Default.effectSystemAsync)
 
 // Setup JSON-RPC HTTP client
-val client = Default.client(transport)
+val client = Default.client(clientTransport)
 
 // Call the remote API function
 val remoteApi = client.bind[ClientApi]

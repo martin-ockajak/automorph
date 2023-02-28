@@ -69,32 +69,6 @@ object Default extends DefaultMeta {
   type ServerBuilder[Effect[_]] = ServerApiBinder[Effect] => Server[Effect]
 
   /**
-   * Creates a synchronous identity effect system plugin.
-   *
-   * @see
-   *   [[https://www.scala-lang.org/files/archive/api/3.x/ documentation]]
-   * @see
-   *   [[https://scala-lang.org/api/3.x/scala/Predef$.html#identity-957 Effect type]]
-   * @return
-   *   synchronous effect system plugin
-   */
-  def systemSync: EffectSystem[SyncEffect] =
-    IdentitySystem()
-
-  /**
-   * Creates an asynchronous `Future` effect system plugin.
-   *
-   * @see
-   *   [[https://docs.scala-lang.org/overviews/core/futures.html Library documentation]]
-   * @see
-   *   [[https://scala-lang.org/api/3.x/scala/concurrent/Future.html Effect type]]
-   * @return
-   *   asynchronous effect system plugin
-   */
-  def systemAsync(implicit executionContext: ExecutionContext): CompletableEffectSystem[AsyncEffect] =
-    FutureSystem()
-
-  /**
    * Creates a standard JRE JSON-RPC over HTTP & WebSocket client with specified effect system plugin.
    *
    * The client can be used to perform type-safe remote API calls or send one-way messages.
@@ -200,31 +174,6 @@ object Default extends DefaultMeta {
     client(clientTransportAsync(url, method))
 
   /**
-   * Creates a standard JRE HTTP & WebSocket client message transport plugin using 'Future' as an effect type.
-   *
-   * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
-   * @see
-   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
-   * @see
-   *   [[https://openjdk.org/groups/net/httpclient/intro.html documentation]]
-   * @see
-   *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
-   * @param url
-   *   HTTP endpoint URL
-   * @param method
-   *   HTTP request method
-   * @param executionContext
-   *   execution context
-   * @return
-   *   asynchronous client message transport plugin
-   */
-  def clientTransportAsync(url: URI, method: HttpMethod = HttpMethod.Post)(implicit
-    executionContext: ExecutionContext
-  ): ClientMessageTransport[AsyncEffect, ClientContext] =
-    clientTransport(systemAsync, url, method)
-
-  /**
    * Creates a standard JRE JSON-RPC over HTTP & WebSocket client with default RPC protocol using identity as an effect
    * type.
    *
@@ -247,30 +196,6 @@ object Default extends DefaultMeta {
    */
   def clientSync(url: URI, method: HttpMethod = HttpMethod.Post): Client[SyncEffect, ClientContext] =
     client(clientTransportSync(url, method))
-
-  /**
-   * Creates a standard JRE HTTP & WebSocket client message transport plugin using identity as an effect type.
-   *
-   * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
-   * @see
-   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
-   * @see
-   *   [[https://openjdk.org/groups/net/httpclient/intro.html documentation]]
-   * @see
-   *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
-   * @param url
-   *   HTTP endpoint URL
-   * @param method
-   *   HTTP request method
-   * @return
-   *   synchronous client message transport plugin
-   */
-  def clientTransportSync(
-    url: URI,
-    method: HttpMethod = HttpMethod.Post,
-  ): ClientMessageTransport[SyncEffect, ClientContext] =
-    clientTransport(systemSync, url, method)
 
   /**
    * Creates a JSON-RPC request handler with specified effect system plugin while providing given message context type.
@@ -298,7 +223,7 @@ object Default extends DefaultMeta {
    *   synchronous RPC request handler
    */
   def handlerSync[Context]: Handler[SyncEffect, Context] =
-    Handler(protocol, systemSync)
+    Handler(protocol, effectSystemSync)
 
   /**
    * Creates a JSON-RPC request handler using 'Future' as an effect type while providing given message context type.
@@ -313,7 +238,7 @@ object Default extends DefaultMeta {
    *   asynchronous RPC request handler
    */
   def handlerAsync[Context](implicit executionContext: ExecutionContext): Handler[AsyncEffect, Context] =
-    Handler(protocol, systemAsync)
+    Handler(protocol, effectSystemAsync)
 
   /**
    * Creates an Undertow RPC over HTTP & WebSocket server with specified RPC request handler.
@@ -500,4 +425,79 @@ object Default extends DefaultMeta {
       val handler = serverApiBinder(handlerAsync)
       server(handler, port, path, methods, webSocket, mapException, builder)
     }
+
+  /**
+   * Creates a synchronous identity effect system plugin.
+   *
+   * @see
+   *   [[https://www.scala-lang.org/files/archive/api/3.x/ documentation]]
+   * @see
+   *   [[https://scala-lang.org/api/3.x/scala/Predef$.html#identity-957 Effect type]]
+   * @return
+   *   synchronous effect system plugin
+   */
+  def effectSystemSync: EffectSystem[SyncEffect] =
+    IdentitySystem()
+
+  /**
+   * Creates an asynchronous `Future` effect system plugin.
+   *
+   * @see
+   *   [[https://docs.scala-lang.org/overviews/core/futures.html Library documentation]]
+   * @see
+   *   [[https://scala-lang.org/api/3.x/scala/concurrent/Future.html Effect type]]
+   * @return
+   *   asynchronous effect system plugin
+   */
+  def effectSystemAsync(implicit executionContext: ExecutionContext): CompletableEffectSystem[AsyncEffect] =
+    FutureSystem()
+
+  /**
+   * Creates a standard JRE HTTP & WebSocket client message transport plugin using identity as an effect type.
+   *
+   * @see
+   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   * @see
+   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
+   * @see
+   *   [[https://openjdk.org/groups/net/httpclient/intro.html documentation]]
+   * @see
+   *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
+   * @param url
+   *   HTTP endpoint URL
+   * @param method
+   *   HTTP request method
+   * @return
+   *   synchronous client message transport plugin
+   */
+  def clientTransportSync(
+    url: URI,
+    method: HttpMethod = HttpMethod.Post,
+  ): ClientMessageTransport[SyncEffect, ClientContext] =
+    clientTransport(effectSystemSync, url, method)
+
+  /**
+   * Creates a standard JRE HTTP & WebSocket client message transport plugin using 'Future' as an effect type.
+   *
+   * @see
+   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
+   * @see
+   *   [[https://en.wikipedia.org/wiki/WebSocket Alternative transport protocol]]
+   * @see
+   *   [[https://openjdk.org/groups/net/httpclient/intro.html documentation]]
+   * @see
+   *   [[https://docs.oracle.com/en/java/javase/19/docs/api/java.net.http/java/net/http/HttpClient.html API]]
+   * @param url
+   *   HTTP endpoint URL
+   * @param method
+   *   HTTP request method
+   * @param executionContext
+   *   execution context
+   * @return
+   *   asynchronous client message transport plugin
+   */
+  def clientTransportAsync(url: URI, method: HttpMethod = HttpMethod.Post)(implicit
+    executionContext: ExecutionContext
+  ): ClientMessageTransport[AsyncEffect, ClientContext] =
+    clientTransport(effectSystemAsync, url, method)
 }

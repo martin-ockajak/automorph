@@ -17,11 +17,11 @@ private[examples] object MessageCodec {
   def main(arguments: Array[String]): Unit = {
 
     // Create uPickle message codec for JSON format
-    val codec = UpickleMessagePackCodec[UpickleMessagePackCustom]()
+    val messageCodec = UpickleMessagePackCodec[UpickleMessagePackCustom]()
 
     // Provide custom data type serialization and deserialization logic
-    import codec.custom.*
-    implicit def recordRw: codec.custom.ReadWriter[Record] = codec.custom.macroRW[Record]
+    import messageCodec.custom.*
+    implicit def recordRw: messageCodec.custom.ReadWriter[Record] = messageCodec.custom.macroRW[Record]
 
     // Create server API instance
     class ServerApi {
@@ -32,13 +32,13 @@ private[examples] object MessageCodec {
     val api = new ServerApi()
 
     // Create a server RPC protocol plugin
-    val serverProtocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ServerContext](codec)
+    val serverProtocol = Default.protocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ServerContext](messageCodec)
 
     // Create an effect system plugin
-    val system = Default.systemAsync
+    val effectSystem = Default.effectSystemAsync
 
     // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-    val handler = Handler.protocol(serverProtocol).system(system)
+    val handler = Handler.protocol(serverProtocol).system(effectSystem)
     val server = Default.server(handler.bind(api), 7000, "/api")
 
     // Define client view of the remote API
@@ -47,11 +47,11 @@ private[examples] object MessageCodec {
     }
 
     // Create a client RPC protocol plugin
-    val clientProtocol = Default.protocol[UpickleMessagePackCodec.Node, codec.type, Default.ClientContext](codec)
+    val clientProtocol = Default.protocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ClientContext](messageCodec)
 
     // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val transport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
-    val client = Client(clientProtocol, transport)
+    val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
+    val client = Client(clientProtocol, clientTransport)
 
     // Call the remote API function
     val remoteApi = client.bind[ClientApi]

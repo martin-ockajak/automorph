@@ -27,12 +27,11 @@ private[examples] object PositionalArguments {
     }
 
     // Configure JSON-RPC to pass arguments by position instead of by name
-    val protocol = Default.protocol[Default.ClientContext].namedArguments(false)
+    val rpcProtocol = Default.protocol[Default.ClientContext].namedArguments(false)
 
     // Setup custom JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val url = new URI("http://localhost:7000/api")
-    val clientTransport = Default.clientTransportAsync(url)
-    val client = Client.protocol(protocol).transport(clientTransport)
+    val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
+    val client = Client.protocol(rpcProtocol).transport(clientTransport)
 
     // Call the remote API function
     val remoteApi = client.bind[ClientApi]

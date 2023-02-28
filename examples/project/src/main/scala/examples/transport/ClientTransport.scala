@@ -25,10 +25,10 @@ private[examples] object ClientTransport {
     }
 
     // Create standard library HTTP client message transport sending POST requests to 'http://localhost:7000/api'
-    val transport = UrlClient(Default.systemSync, new URI("http://localhost:7000/api"))
+    val clientTransport = UrlClient(Default.effectSystemSync, new URI("http://localhost:7000/api"))
 
     // Setup JSON-RPC HTTP client
-    val client = Default.client(transport)
+    val client = Default.client(clientTransport)
 
     // Call the remote API function via proxy
     val remoteApi = client.bind[ClientApi]

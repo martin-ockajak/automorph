@@ -17,10 +17,10 @@ private[examples] object EffectSystem {
     val api = new ServerApi()
 
     // Create ZIO effect system plugin
-    val system = ZioSystem.default
+    val effectSystem = ZioSystem.default
 
     // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-    val serverBuilder = Default.serverBuilder(system, 7000, "/api")
+    val serverBuilder = Default.serverBuilder(effectSystem, 7000, "/api")
     val server = serverBuilder(_.bind(api))
 
     // Define client view of the remote API
@@ -29,7 +29,7 @@ private[examples] object EffectSystem {
     }
 
     // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val client = Default.client(system, new URI("http://localhost:7000/api"))
+    val client = Default.client(effectSystem, new URI("http://localhost:7000/api"))
 
     // Define a helper function to run ZIO tasks
     def run[T](effect: Task[T]): T =
