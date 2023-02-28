@@ -2,7 +2,7 @@ package automorph.system
 
 import automorph.spi.AsyncEffectSystem
 import automorph.spi.AsyncEffectSystem.Completable
-import zio.{Queue, RIO, Runtime, Task, Trace, Unsafe, ZIO}
+import zio.{Queue, RIO, Runtime, Trace, Unsafe, ZIO}
 
 /**
  * ZIO effect system plugin using `RIO` as an effect type.
@@ -75,14 +75,6 @@ object ZioSystem {
    *   effectful ZIO environment type
    */
   type Effect[T, Environment] = RIO[Environment, T]
-
-  /**
-   * ZIO effect type with default environment.
-   *
-   * @tparam T
-   *   effectful value type
-   */
-  type DefaultEffect[T] = Task[T]
 
   /**
    * Creates a ZIO effect system plugin with default environment using `RIO` as an effect type.
