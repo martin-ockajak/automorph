@@ -1,11 +1,10 @@
 package test.codec.json
 
-import argonaut.Argonaut.{jArray, jBool, jNumber, jString, jObjectAssocList}
+import argonaut.Argonaut.{jArray, jBool, jNull, jNumber, jObjectAssocList, jString}
 import argonaut.{Argonaut, CodecJson, Json}
 import automorph.codec.json.ArgonautJsonCodec
 import org.scalacheck.{Arbitrary, Gen}
 import test.Generators.arbitraryRecord
-import test.codec.json.JsonMessageCodecTest
 import test.{Enum, Record, Structure}
 
 class ArgonautJsonTest extends JsonMessageCodecTest {
@@ -17,6 +16,7 @@ class ArgonautJsonTest extends JsonMessageCodecTest {
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
+      Gen.const(jNull),
       Gen.resultOf(jString),
       Gen.resultOf((value: Int) => jNumber(value)),
       Gen.resultOf(jBool),

@@ -1,10 +1,9 @@
 package automorph.codec.json
 
-import automorph.codec.json.JacksonJsonCodec
 import com.fasterxml.jackson.core.{JsonGenerator, JsonParser}
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.databind.node.{ArrayNode, BooleanNode, IntNode, ObjectNode, TextNode}
+import com.fasterxml.jackson.databind.node.{ArrayNode, BooleanNode, IntNode, NullNode, ObjectNode, TextNode}
 import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, JsonNode, SerializerProvider}
 import org.scalacheck.{Arbitrary, Gen}
@@ -21,6 +20,7 @@ class JacksonJsonTest extends JsonMessageCodecTest {
 
   override lazy val arbitraryNode: Arbitrary[Node] = Arbitrary(Gen.recursive[Node](recurse =>
     Gen.oneOf(
+      Gen.const(NullNode.instance),
       Gen.resultOf(TextNode.valueOf),
       Gen.resultOf(IntNode.valueOf),
       Gen.resultOf(BooleanNode.valueOf),
