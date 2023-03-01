@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.sys.process.Process
 import scala.util.Try
-import test.base.{BaseTest, Mutex}
+import test.base.Mutex
 import test.core.ClientServerTest
 
 class RabbitMqFutureTest extends ClientServerTest with Mutex {
@@ -60,16 +60,16 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
         Files.walk(brokerDirectory).iterator().asScala.toSeq.reverse.foreach(_.toFile.delete())
       }
     } finally {
-      lock()
+      unlock()
     }
   }
 
   private def createBroker(): Option[(EmbeddedRabbitMq, EmbeddedRabbitMqConfig)] = {
     Option.when(Try(Process("erl -eval 'halt()' -noshell").! == 0).getOrElse(false)) {
-      unlock()
+      lock()
       val config = new EmbeddedRabbitMqConfig.Builder().randomPort()
         .extractionFolder(Paths.get(SystemUtils.JAVA_IO_TMPDIR, getClass.getSimpleName).toFile)
-        .rabbitMqServerInitializationTimeoutInMillis(setupTimeout).build()
+        .rabbitMqServerInitializationTimeoutInMillis(setupTimeout.toLong).build()
       val broker = new EmbeddedRabbitMq(config)
       broker.start()
       broker -> config
