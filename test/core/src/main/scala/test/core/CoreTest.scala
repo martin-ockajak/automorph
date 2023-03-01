@@ -54,7 +54,7 @@ trait CoreTest extends BaseTest {
     if (BaseTest.testBasic) {
       // Basic tests
       testFixtures.foreach { fixture =>
-        "Static" - {
+        "Basic" - {
           "Simple API" - {
             val apis = (fixture.simpleApi, simpleApi)
             "method" in {
