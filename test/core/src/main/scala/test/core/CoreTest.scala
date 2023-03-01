@@ -54,11 +54,14 @@ trait CoreTest extends BaseTest {
     if (BaseTest.testBasic) {
       // Basic tests
       testFixtures.take(1).foreach { fixture =>
-        "Basic" - {
-          "Simple API" - {
-            val apis = (fixture.simpleApi, simpleApi)
-            "method" in {
-              consistent(apis)(_.method("value")).should(be(true))
+        val codecName = fixture.genericClient.rpcProtocol.messageCodec.getClass.getSimpleName
+        codecName.replaceAll("MessageCodec$", "") - {
+          "Basic" - {
+            "Simple API" - {
+              val apis = (fixture.simpleApi, simpleApi)
+              "method" in {
+                consistent(apis)(_.method("value")).should(be(true))
+              }
             }
           }
         }
