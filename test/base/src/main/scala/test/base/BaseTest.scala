@@ -6,7 +6,9 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.{AppendedClues, BeforeAndAfterAll, BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.scalacheck.Checkers
 import scribe.file.{FileWriter, PathBuilder}
-import scribe.format.{FormatterInterpolator, gray, levelColoredPaddedRight, magenta, mdcMultiLine, messages, positionSimple, time}
+import scribe.format.{
+  FormatterInterpolator, gray, levelColoredPaddedRight, magenta, mdcMultiLine, messages, positionSimple, time,
+}
 import scribe.writer.ConsoleWriter
 import scribe.{Level, Logger}
 
@@ -25,15 +27,13 @@ import scribe.{Level, Logger}
  */
 trait BaseTest
   extends AnyFreeSpecLike
-    with OptionValues
-    with BeforeAndAfterEach
-    with BeforeAndAfterAll
-    with Matchers
-    with AppendedClues
-    with Checkers
-    with Fixtures
-    with Await
-    with Network {
+  with OptionValues
+  with BeforeAndAfterEach
+  with BeforeAndAfterAll
+  with Matchers
+  with AppendedClues
+  with Checkers
+  with Fixtures {
 
   override def beforeAll(): Unit = {
     BaseTest.setupLogger

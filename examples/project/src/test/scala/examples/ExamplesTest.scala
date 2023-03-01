@@ -3,17 +3,13 @@ package examples
 import examples.metadata.{HttpAuthentication, HttpRequest, HttpResponse}
 import examples.basic.{AsynchronousCall, OptionalParameters, SynchronousCall}
 import examples.special.{ApiSchema, DynamicPayload, OneWayMessage, PositionalArguments}
-import examples.customization.{
-  ClientFunctionNames, DataSerialization, ServerFunctionNames,
-}
+import examples.customization.{ClientFunctionNames, DataSerialization, ServerFunctionNames}
 import examples.errors.{ClientExceptions, HttpStatusCode, ServerErrors}
-import examples.integration.{
-  EffectSystem, MessageCodec, RpcProtocol,
-}
+import examples.integration.{EffectSystem, MessageCodec, RpcProtocol}
 import examples.transport.{AmqpTransport, ClientTransport, EndpointTransport, ServerTransport, WebSocketTransport}
-import test.base.BaseTest
+import test.base.{BaseTest, Mutex}
 
-class ExamplesTest extends BaseTest {
+class ExamplesTest extends BaseTest with Mutex {
 
   "" - {
     "Quickstart" in {
@@ -92,10 +88,17 @@ class ExamplesTest extends BaseTest {
         ServerTransport,
         EndpointTransport,
         WebSocketTransport,
-        AmqpTransport,
       ).foreach { instance =>
         testName(instance) in {
           runTest(instance)
+        }
+      }
+      testName(AmqpTransport) in {
+        lock()
+        try {
+          AmqpTransport.main(Array())
+        } finally {
+          unlock()
         }
       }
     }

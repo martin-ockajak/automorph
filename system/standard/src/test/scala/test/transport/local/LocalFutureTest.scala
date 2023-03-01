@@ -5,9 +5,10 @@ import automorph.system.FutureSystem
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import test.base.Await
 import test.core.ProtocolCodecTest
 
-class LocalFutureTest extends ProtocolCodecTest {
+class LocalFutureTest extends ProtocolCodecTest with Await {
 
   type Effect[T] = Future[T]
   type Context = Map[String, Double]

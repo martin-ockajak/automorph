@@ -4,8 +4,9 @@ import automorph.system.FutureSystem
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Try
+import test.base.Await
 
-class FutureTest extends AsyncEffectSystemTest[Future] {
+class FutureTest extends AsyncEffectSystemTest[Future] with Await {
 
   lazy val system: FutureSystem = FutureSystem()
 

@@ -2,8 +2,9 @@ package test.core
 
 import automorph.spi.{ClientTransport, EffectSystem, ServerTransport}
 import scala.collection.mutable.ArrayBuffer
+import test.base.{Await, Network}
 
-trait ClientServerTest extends ProtocolCodecTest {
+trait ClientServerTest extends ProtocolCodecTest with Await with Network {
 
   def system: EffectSystem[Effect]
 
