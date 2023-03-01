@@ -1,7 +1,7 @@
 //package test.transport.http
 //
 //import automorph.Types
-//import automorph.spi.ServerMessageTransport
+//import automorph.spi.ServerTransport
 //import automorph.system.FutureSystem
 //import automorph.transport.http.endpoint.TapirHttpEndpoint
 //import io.vertx.core.Vertx
@@ -30,8 +30,8 @@
 //  def serverTransport(
 //    handler: Types.HandlerAnyCodec[Effect, Context],
 //    port: Int
-//  ): ServerMessageTransport[Effect, Context] =
-//    new ServerMessageTransport[Effect, Context] {
+//  ): ServerTransport[Effect, Context] =
+//    new ServerTransport[Effect, Context] {
 //
 //    private val server = {
 //      val endpoint = TapirHttpEndpoint[Future](handler, Method.POST)
