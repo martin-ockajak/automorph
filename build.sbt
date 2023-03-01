@@ -99,8 +99,9 @@ lazy val spi = source(project, "common/spi").settings(libraryDependencies ++= {
     case _ => Seq.empty
   }
 })
+val slf4jVersion = "1.7.36"
 lazy val util = source(project, "common/util", spi)
-  .settings(libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.36")
+  .settings(libraryDependencies += "org.slf4j" % "slf4j-api" % slf4jVersion)
 lazy val coreMeta = source(project, "common/core/meta", spi, util)
 lazy val core = source(project, "common/core", coreMeta, testPlugin % Test, jsonrpc % Test, webrpc % Test)
 
@@ -216,6 +217,7 @@ lazy val testBase = source(project, "test/base", spi).settings(
     "org.scalatestplus" %% "scalacheck-1-17" % "3.2.15.0",
     "com.outr" %% "scribe-file" % scribeVersion,
     "com.outr" %% "scribe-slf4j" % scribeVersion,
+    "org.slf4j" % "jul-to-slf4j" % slf4jVersion,
     "com.lihaoyi" %% "pprint" % "0.8.1"
   )
 )
