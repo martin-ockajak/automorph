@@ -48,6 +48,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
     ListMap[String, HandlerBinding[Node, Effect, Context]](),
 ) extends HandlerMeta[Node, Codec, Effect, Context] with Logging {
+
   /** Bound remote functions. */
   lazy val functions: Seq[RpcFunction] = bindings.map { case (name, binding) => binding.function.copy(name = name) }
     .toSeq
@@ -55,6 +56,11 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   private val bindings = (schemaBindings ++ apiBindings).flatMap { case (name, binding) =>
     mapName(name).map(_ -> binding)
   }
+
+  private[automorph] def clone(
+    apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]]
+  ): Handler[Node, Codec, Effect, Context] =
+    copy(apiBindings = apiBindings)
 
   /**
    * Processes an RPC request by invoking a bound remote function based on the specified RPC request and its context and

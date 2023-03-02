@@ -1,7 +1,9 @@
 package automorph.handler.meta
 
 import automorph.Handler
-import automorph.spi.MessageCodec
+import automorph.handler.HandlerBinding
+import automorph.spi.{MessageCodec, RpcProtocol}
+import scala.collection.immutable.ListMap
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
@@ -18,7 +20,10 @@ import scala.reflect.macros.blackbox
  *   message context type
  */
 private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
-  this: Handler[Node, Codec, Effect, Context] =>
+
+  def rpcProtocol: RpcProtocol[Node, Codec, Context]
+
+  def apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]]
 
   /**
    * Creates a copy of this handler with generated RPC bindings for all valid public methods of the specified API
@@ -114,13 +119,13 @@ object HandlerMeta {
     // This handler needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Handler[Node, Codec, Effect, Context]](q"""
       val handler = ${c.prefix}
-      val newBindings = automorph.handler.meta.HandlerGenerator
+      val newApiBindings = automorph.handler.meta.HandlerGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](
           handler.rpcProtocol.messageCodec, $api
         ).flatMap { binding =>
           $mapName(binding.function.name).map(_ -> binding)
         }
-      handler.copy(apiBindings = handler.apiBindings ++ newBindings)
+      handler.copy(apiBindings = handler.apiBindings ++ newApiBindings)
     """)
   }
 }

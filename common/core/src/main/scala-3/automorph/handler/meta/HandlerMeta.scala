@@ -1,7 +1,9 @@
 package automorph.handler.meta
 
 import automorph.Handler
+import automorph.handler.HandlerBinding
 import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
+import scala.collection.immutable.ListMap
 
 /**
  * Handler method bindings code generation.
@@ -16,7 +18,14 @@ import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
  *   message context type
  */
 private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
-  this: Handler[Node, Codec, Effect, Context] =>
+
+  def rpcProtocol: RpcProtocol[Node, Codec, Context]
+
+  def apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]]
+
+  private[automorph] def clone(
+    apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]]
+  ): Handler[Node, Codec, Effect, Context]
 
   /**
    * Creates a copy of this handler with generated RPC bindings for all valid public methods of the specified API.
@@ -80,4 +89,4 @@ private[automorph] trait HandlerMeta[Node, Codec <: MessageCodec[Node], Effect[_
     ).flatMap { binding =>
       mapName(binding.function.name).map(_ -> binding)
     }
-    copy(apiBindings = apiBindings ++ newApiBindings)
+    clone(apiBindings = apiBindings ++ newApiBindings)
