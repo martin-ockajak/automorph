@@ -33,7 +33,7 @@ import scala.collection.immutable.ListMap
  * @tparam Context
  *   RPC message context type
  * @tparam Adapter
- *   transport layer transport type
+ *   transport layer adapter type
  */
 final case class Endpoint[Node, Codec <: MessageCodec[Node], Effect[_], Context, Adapter] (
   transport: EndpointTransport[Effect, Context, Adapter],
