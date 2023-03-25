@@ -234,7 +234,7 @@ ThisBuild / scalaVersion := "3.2.2"
 ThisBuild / crossScalaVersions += "2.13.10"
 ThisBuild / javacOptions ++= Seq("-source", "11", "-target", "11")
 val commonScalacOptions =
-  Seq("-language:higherKinds", "-feature", "-deprecation", "-unchecked", "-release", "9", "-encoding", "utf8")
+  Seq("-language:higherKinds", "-feature", "-deprecation", "-unchecked", "-release", "11", "-encoding", "utf8")
 val docScalacOptions = commonScalacOptions ++ Seq("-language:adhocExtensions", "-pagewidth", "120")
 ThisBuild / scalacOptions ++=
   (CrossVersion.partialVersion(scalaVersion.value) match {
@@ -248,8 +248,6 @@ ThisBuild / scalacOptions ++=
     )
     case _ => commonScalacOptions ++ Seq(
         "-language:existentials",
-        "-J--add-modules",
-        "-Jjava.net.http",
         "-Xsource:3",
         "-Xlint:_,-byname-implicit",
         "-Wconf:site=[^.]+\\.codec\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",

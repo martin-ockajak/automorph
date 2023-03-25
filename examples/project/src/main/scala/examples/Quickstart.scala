@@ -38,6 +38,8 @@ private[examples] object Quickstart {
     ))
 
     // Call the remote API function dynamically
+    val x = implicitly[Default.ClientContext]
+    println(x)
     println(Await.result(
       client.call[String]("hello").args("some" -> "world", "n" -> 1),
       Duration.Inf
