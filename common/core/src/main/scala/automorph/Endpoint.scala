@@ -42,7 +42,6 @@ final case class Endpoint[Node, Codec <: MessageCodec[Node], Effect[_], Context,
   functions: Seq[RpcFunction] = Seq.empty,
 ) extends EndpointMeta[Node, Codec, Effect, Context, Adapter] {
 
-  // Register transport request handler.
   private val registeredAdapter = transport.clone(handler)
 
   /** Transport layer adapter. */
