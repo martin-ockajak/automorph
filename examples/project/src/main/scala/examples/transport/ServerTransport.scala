@@ -1,6 +1,6 @@
 package examples.transport
 
-import automorph.Default
+import automorph.{Default, Server}
 import automorph.transport.http.server.NanoServer
 import java.net.URI
 
@@ -14,9 +14,11 @@ object ServerTransport {
     }
     val api = new ServerApi()
 
-    // Start NanoHTTPD JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-    val handler = Default.handlerSync[NanoServer.Context]
-    val server = NanoServer(handler.bind(api), 7000, "/api")
+    // Create NanoHTTPD HTTP server transport listening on port 7000 for requests to '/api'
+    val serverTransport = NanoServer(Default.effectSystemSync, 7000, "/api")
+
+    // Start JSON-RPC HTTP server
+    val server = Server.transport(serverTransport).rpcProtocol(Default.rpcProtocol).bind(api).init()
 
     // Define client view of the remote API
     trait ClientApi {

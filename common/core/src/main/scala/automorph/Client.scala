@@ -2,7 +2,7 @@ package automorph
 
 import automorph.RpcException.InvalidResponseException
 import automorph.client.meta.ClientMeta
-import automorph.client.{ProtocolClientBuilder, RemoteMessage, TransportClientBuilder}
+import automorph.client.RemoteMessage
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.{ClientTransport, EffectSystem, MessageCodec, RpcProtocol}
 import automorph.util.Extensions.{EffectOps, TryOps}
@@ -14,17 +14,17 @@ import scala.util.Try
 /**
  * RPC client.
  *
- * The client can be used to perform type-safe remote API calls or send one-way messages.
+ * Used to perform type-safe remote API calls or send one-way messages.
  *
  * Remote APIs can be invoked statically using transparent proxy instances automatically derived from specified API
  * traits or dynamically by supplying the required type information on invocation.
  *
  * @constructor
  *   Creates a RPC client with specified protocol and transport plugins providing corresponding message context type.
+ * @param transport
+ *   client message transport plugin
  * @param rpcProtocol
  *   RPC protocol plugin
- * @param clientTransport
- *   client message transport plugin
  * @tparam Node
  *   message node type
  * @tparam Codec
@@ -32,20 +32,20 @@ import scala.util.Try
  * @tparam Effect
  *   effect type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  */
 final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+  transport: ClientTransport[Effect, Context],
   rpcProtocol: RpcProtocol[Node, Codec, Context],
-  clientTransport: ClientTransport[Effect, Context],
 ) extends ClientMeta[Node, Codec, Effect, Context] with Logging {
 
-  protected val system: EffectSystem[Effect] = clientTransport.effectSystem
-  implicit private val givenSystem: EffectSystem[Effect] = clientTransport.effectSystem
+  protected val system: EffectSystem[Effect] = transport.effectSystem
+  implicit private val givenSystem: EffectSystem[Effect] = transport.effectSystem
 
   /**
-   * Creates an one-way remote API function message proxy.
+   * Creates a remote API function one-way message proxy.
    *
-   * The remote function name and arguments are used to send an RPC request without expecting to receive a response.
+   * Uses the remote function name and arguments to send an RPC request without waiting for a response.
    *
    * @param function
    *   remote function name
@@ -54,17 +54,8 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @throws RpcException
    *   on RPC error
    */
-  def message(function: String): RemoteMessage[Node, Codec, Effect, Context] =
+  def tell(function: String): RemoteMessage[Node, Codec, Effect, Context] =
     RemoteMessage(function, rpcProtocol.messageCodec, sendMessage)
-
-  /**
-   * Closes this client freeing the underlying resources.
-   *
-   * @return
-   *   nothing
-   */
-  def close(): Effect[Unit] =
-    clientTransport.close()
 
   /**
    * Creates a default request context.
@@ -72,8 +63,34 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
    * @return
    *   request context
    */
-  def defaultContext: Context =
-    clientTransport.defaultContext
+  def context: Context =
+    transport.context
+
+  /**
+   * Starts this server to process incoming requests.
+   *
+   * @return
+   *   active RPC server
+   */
+  def init(): Effect[Client[Node, Codec, Effect, Context]] =
+    system.map(transport.init())(_ => this)
+
+  /**
+   * Closes this client freeing the underlying resources.
+   *
+   * @return
+   *   nothing
+   */
+  def close(): Effect[Client[Node, Codec, Effect, Context]] =
+    system.map(transport.close())(_ => this)
+
+  override def toString: String = {
+    val plugins = Map[String, Any](
+      "rpcProtocol" -> rpcProtocol,
+      "transport" -> transport,
+    ).map { case (name, plugin) => s"$name = ${plugin.getClass.getName}" }.mkString(", ")
+    s"${this.getClass.getName}($plugins)"
+  }
 
   /**
    * Messages a remote API function using specified arguments.
@@ -100,7 +117,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       function,
       arguments,
       responseRequired = false,
-      requestContext.getOrElse(defaultContext),
+      requestContext.getOrElse(context),
       requestId,
     ).pureFold(
       error => system.failed(error),
@@ -110,7 +127,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           lazy val requestProperties = rpcRequest.message.properties + (LogProperties.requestId -> requestId)
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${rpcProtocol.name} request", allProperties)
-          clientTransport.message(request.message.body, request.context, requestId, rpcProtocol.messageCodec.mediaType)
+          transport.tell(request.message.body, request.context, requestId, rpcProtocol.messageCodec.mediaType)
         },
     )
   }
@@ -145,7 +162,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       function,
       arguments,
       responseRequired = true,
-      requestContext.getOrElse(defaultContext),
+      requestContext.getOrElse(context),
       requestId,
     ).pureFold(
       error => system.failed(error),
@@ -155,7 +172,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
           lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++ rpcRequest.message.properties
           lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
           logger.trace(s"Sending ${rpcProtocol.name} request", allProperties)
-          clientTransport.call(request.message.body, request.context, requestId, rpcProtocol.messageCodec.mediaType).flatMap {
+          transport.call(request.message.body, request.context, requestId, rpcProtocol.messageCodec.mediaType).flatMap {
             case (responseBody, responseContext) =>
               // Process response
               processResponse[Result](responseBody, responseContext, requestProperties, decodeResult)
@@ -225,35 +242,41 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     logger.error(s"Failed to perform ${rpcProtocol.name} request", error, properties)
     system.failed(error)
   }
-
-  override def toString: String = {
-    val plugins = Map[String, Any]("transport" -> clientTransport, "protocol" -> rpcProtocol).map { case (name, plugin) =>
-      s"$name = ${plugin.getClass.getName}"
-    }.mkString(", ")
-    s"${this.getClass.getName}($plugins)"
-  }
 }
 
 object Client {
 
   /**
-   * Creates an RPC client builder with specified RPC protocol plugin.
+   * RPC client builder.
    *
-   * @param protocol
-   *   RPC protocol plugin
-   * @tparam Node
-   *   message node type
-   * @tparam Codec
-   *   message codec plugin type
+   * @constructor
+   *   Creates a new RPC client builder.
+   * @param transport
+   *   message transport plugin
+   * @tparam Effect
+   *   effect type
    * @tparam Context
-   *   message context type
-   * @return
-   *   RPC client builder
+   *   request context type
    */
-  def protocol[Node, Codec <: MessageCodec[Node], Context](
-    protocol: RpcProtocol[Node, Codec, Context]
-  ): ProtocolClientBuilder[Node, Codec, Context] =
-    ProtocolClientBuilder(protocol)
+  case class ClientBuilder[Effect[_], Context](transport: ClientTransport[Effect, Context]) {
+
+    /**
+     * Creates a new RPC client with specified RPC protocol plugin.
+     *
+     * @param rpcProtocol
+     *   RPC protocol plugin
+     * @tparam Node
+     *   message node type
+     * @tparam Codec
+     *   message codec plugin type
+     * @return
+     *   RPC client builder
+     */
+    def rpcProtocol[Node, Codec <: MessageCodec[Node]](
+      rpcProtocol: RpcProtocol[Node, Codec, Context]
+    ): Client[Node, Codec, Effect, Context] =
+      Client(transport, rpcProtocol)
+  }
 
   /**
    * Creates an RPC client builder with specified effect transport plugin.
@@ -263,12 +286,10 @@ object Client {
    * @tparam Effect
    *   effect type
    * @tparam Context
-   *   message context type
+   *   RPC message context type
    * @return
    *   RPC client builder
    */
-  def transport[Effect[_], Context](
-    transport: ClientTransport[Effect, Context]
-  ): TransportClientBuilder[Effect, Context] =
-    TransportClientBuilder(transport)
+  def transport[Effect[_], Context](transport: ClientTransport[Effect, Context]): ClientBuilder[Effect, Context] =
+    ClientBuilder(transport)
 }

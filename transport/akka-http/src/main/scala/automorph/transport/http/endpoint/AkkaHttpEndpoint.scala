@@ -9,7 +9,6 @@ import akka.http.scaladsl.model.{ContentType, HttpRequest, HttpResponse, RemoteA
 import akka.http.scaladsl.server.Directives.{complete, extractClientIP, extractRequest, onComplete}
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
-import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}

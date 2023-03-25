@@ -10,6 +10,9 @@ private[examples] object OneWayMessage {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
+    // Define a helper function to evaluate Futures
+    def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
     // Create server API instance
     class ServerApi {
       def hello(some: String, n: Int): Future[String] =
@@ -18,26 +21,29 @@ private[examples] object OneWayMessage {
     val api = new ServerApi()
 
     // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-    val serverBuilder = Default.serverBuilderAsync(7000, "/api")
-    val server = serverBuilder(_.bind(api))
+    val server = run(
+      Default.serverAsync(7000, "/api").bind(api).init()
+    )
 
     // Define client view of the remote API
     trait ClientApi {
       def hello(some: String, n: Int): Future[String]
     }
-    // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
-    // Message the remote API function dynamically without expecting a response
-    Await.result(
-      client.message("hello").args("some" -> "world", "n" -> 1),
-      Duration.Inf
+    // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
+    val client = run(
+      Default.clientAsync(new URI("http://localhost:7000/api")).init()
+    )
+
+    // Call the remote API function dynamically without expecting a response
+    run(
+      client.tell("hello").args("some" -> "world", "n" -> 1)
     )
 
     // Close the client
-    Await.result(client.close(), Duration.Inf)
+    run(client.close())
 
     // Stop the server
-    Await.result(server.close(), Duration.Inf)
+    run(server.close())
   }
 }

@@ -20,7 +20,7 @@ import automorph.spi.protocol.RpcFunction
  * @tparam Effect
  *   effect type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  */
 final case class HandlerBinding[Node, Effect[_], Context](
   function: RpcFunction,

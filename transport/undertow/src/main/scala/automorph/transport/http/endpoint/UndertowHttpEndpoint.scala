@@ -1,12 +1,12 @@
 package automorph.transport.http.endpoint
 
-import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointTransport}
+import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.UndertowHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
+import com.sun.net.httpserver
 import io.undertow.io.Receiver
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.{Headers, HttpString, StatusCodes}
@@ -17,9 +17,9 @@ import scala.jdk.CollectionConverters.{IterableHasAsScala, IteratorHasAsScala}
 import scala.util.Try
 
 /**
- * Undertow HTTP endpoint message transport plugin.
+ * Undertow HTTP endpoint transport plugin.
  *
- * The handler interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
+ * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as HTTP response body.
  *
  * @see
@@ -30,21 +30,29 @@ import scala.util.Try
  *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor
  *   Creates an Undertow HTTP handler with specified RPC request handler.
- * @param handler
- *   RPC request handler
+ * @param effectSystem
+ *   effect system plugin
  * @param mapException
  *   maps an exception to a corresponding HTTP status code
+ * @param handler
+ *   RPC request handler
  * @tparam Effect
  *   effect type
  */
 final case class UndertowHttpEndpoint[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, Context],
+  effectSystem: EffectSystem[Effect],
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-) extends HttpHandler with Logging with EndpointTransport {
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+) extends HttpHandler with Logging with EndpointTransport[Effect, Context, HttpHandler] {
 
   private val log = MessageLog(logger, Protocol.Http.name)
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
+  implicit private val system: EffectSystem[Effect] = effectSystem
+
+  override def adapter: HttpHandler =
+    this
+
+  override def clone(handler: RequestHandler[Effect, Context]): UndertowHttpEndpoint[Effect] =
+    copy(handler = handler)
 
   override def handleRequest(exchange: HttpServerExchange): Unit = {
     // Log the request
@@ -60,14 +68,14 @@ final case class UndertowHttpEndpoint[Effect[_]](
 
           override def run(): Unit =
             // Process the request
-            genericHandler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
+            handler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
               _.fold(
                 error => sendErrorResponse(error, exchange, requestId, requestProperties),
                 result => {
                   // Send the response
-                  val responseBody = result.responseBody.getOrElse(new ByteArrayInputStream(Array()))
-                  val statusCode = result.exception.map(mapException).getOrElse(StatusCodes.OK)
-                  sendResponse(responseBody, statusCode, result.context, exchange, requestId)
+                  val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+                  val statusCode = result.flatMap(_.exception).map(mapException).getOrElse(StatusCodes.OK)
+                  sendResponse(responseBody, statusCode, result.flatMap(_.context), exchange, requestId)
                 },
               )
             ).runAsync
@@ -115,7 +123,7 @@ final case class UndertowHttpEndpoint[Effect[_]](
     Try {
       if (!exchange.isResponseChannelAvailable) { throw new IOException("Response channel not available") }
       setResponseContext(exchange, responseContext)
-      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, genericHandler.rpcProtocol.messageCodec.mediaType)
+      exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.mediaType)
       exchange.setStatusCode(responseStatusCode).getResponseSender.send(responseBody.toByteBuffer)
       log.sentResponse(responseProperties)
     }.onFailure(error => log.failedSendResponse(error, responseProperties)).get

@@ -1,7 +1,7 @@
 package examples.integration
 
 import automorph.protocol.WebRpcProtocol
-import automorph.{Client, Default, Handler}
+import automorph.{Client, Default, Server}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -9,6 +9,9 @@ import scala.concurrent.{Await, Future}
 
 private[examples] object RpcProtocol {
   def main(arguments: Array[String]): Unit = {
+
+    // Define a helper function to evaluate Futures
+    def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
     // Create server API instance
     class ServerApi {
@@ -19,13 +22,17 @@ private[examples] object RpcProtocol {
     val api = new ServerApi()
 
     // Create a server Web-RPC protocol plugin with '/api' path prefix
-    val serverProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ServerContext](
+    val serverRpcProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ServerContext](
       Default.messageCodec, "/api"
     )
 
-    // Start default Web-RPC HTTP server listening on port 7000 for requests to '/api'
-    val handler = Handler.protocol(serverProtocol).system(Default.effectSystemAsync).bind(api)
-    val server = Default.server(handler, 7000, "/api")
+    // Create HTTP server transport listening on port 7000 for requests to '/api'
+    val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "/api")
+
+    // Start Web-RPC HTTP server
+    val server = run(
+      Server.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
+    )
 
     // Define client view of the remote API
     trait ClientApi {
@@ -33,25 +40,28 @@ private[examples] object RpcProtocol {
     }
 
     // Create a client Web-RPC protocol plugin with '/api' path prefix
-    val clientProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ClientContext](
+    val clientRpcProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ClientContext](
       Default.messageCodec, "/api"
     )
 
-    // Setup default Web-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
-    val client = Client.protocol(clientProtocol).transport(clientTransport)
+    // Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+    val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
+
+    // Setup Web-RPC HTTP client
+    val client = run(
+      Client.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
+    )
 
     // Call the remote API function
     val remoteApi = client.bind[ClientApi]
-    println(Await.result(
-      remoteApi.hello("world", 1),
-      Duration.Inf
+    println(run(
+      remoteApi.hello("world", 1)
     ))
 
     // Close the client
-    Await.result(client.close(), Duration.Inf)
+    run(client.close())
 
     // Stop the server
-    Await.result(server.close(), Duration.Inf)
+    run(server.close())
   }
 }

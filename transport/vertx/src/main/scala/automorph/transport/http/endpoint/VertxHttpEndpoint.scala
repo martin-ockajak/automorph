@@ -1,6 +1,5 @@
 package automorph.transport.http.endpoint
 
-import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport}
 import automorph.transport.http.endpoint.VertxHttpEndpoint.Context
@@ -17,7 +16,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
 /**
  * Vert.x HTTP endpoint message transport plugin.
  *
- * The handler interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
+ * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as HTTP response body.
  *
  * @see

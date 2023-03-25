@@ -8,14 +8,14 @@ import scala.concurrent.Future
 import test.base.Await
 import test.core.ProtocolCodecTest
 
-class LocalFutureTest extends ProtocolCodecTest with Await {
+class LocalFutureTest extends ProtocolCodecTest {
 
   type Effect[T] = Future[T]
   type Context = Map[String, Double]
 
   override lazy val system: EffectSystem[Effect] = FutureSystem()
 
-  override def execute[T](effect: Effect[T]): T =
+  override def run[T](effect: Effect[T]): T =
     await(effect)
 
   override def arbitraryContext: Arbitrary[Context] =

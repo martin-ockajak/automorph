@@ -14,7 +14,7 @@ import scala.util.Try
  * @tparam Codec
  *   message codec plugin type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  */
 trait RpcProtocol[Node, Codec <: MessageCodec[Node], Context] {
 

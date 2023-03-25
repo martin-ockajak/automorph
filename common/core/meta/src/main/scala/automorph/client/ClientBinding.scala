@@ -16,7 +16,7 @@ import automorph.spi.protocol.RpcFunction
  * @tparam Node
  *   message node type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  */
 final case class ClientBinding[Node, Context](
   function: RpcFunction,

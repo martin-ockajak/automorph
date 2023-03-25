@@ -22,7 +22,7 @@ private[automorph] trait DefaultMeta {
    * @tparam CodecType
    *   message codec plugin type
    * @tparam Context
-   *   message context type
+   *   RPC message context type
    */
   type Protocol[NodeType, CodecType <: MessageCodec[NodeType], Context] = JsonRpcProtocol[NodeType, CodecType, Context]
 
@@ -47,7 +47,7 @@ private[automorph] trait DefaultMeta {
    * @see
    *   [[https://www.jsonrpc.org/specification Protocol specification]]
    * @tparam Context
-   *   message context type
+   *   RPC message context type
    * @return
    *   RPC protocol plugin
    */
@@ -73,7 +73,7 @@ private[automorph] trait DefaultMeta {
    * @tparam CodecType
    *   message codec plugin type
    * @tparam Context
-   *   message context type
+   *   RPC message context type
    * @return
    *   RPC protocol plugin
    */

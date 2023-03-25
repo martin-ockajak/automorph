@@ -26,7 +26,7 @@ object HandlerGenerator {
    * @tparam Effect
    *   effect type
    * @tparam Context
-   *   message context type
+   *   RPC message context type
    * @tparam Api
    *   API type
    * @return

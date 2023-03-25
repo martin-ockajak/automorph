@@ -1,8 +1,7 @@
 package automorph.transport.http.server
 
-import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, ServerTransport}
+import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 import automorph.transport.http.server.NanoHTTPD.Response.Status
 import automorph.transport.http.server.NanoHTTPD.{IHTTPSession, Response, newFixedLengthResponse}
 import automorph.transport.http.server.NanoServer.Context
@@ -20,7 +19,7 @@ import scala.jdk.CollectionConverters.MapHasAsScala
 /**
  * NanoHTTPD HTTP & WebSocket server message transport plugin.
  *
- * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
+ * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as HTTP response body.
  *
  * @see
@@ -31,8 +30,8 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  *   [[https://javadoc.io/doc/org.nanohttpd/nanohttpd/latest/index.html API]]
  * @constructor
  *   Creates a NanoHTTPD HTTP & WebSocket server with specified RPC request handler.
- * @param handler
- *   RPC request handler
+ * @param effectSystem
+ *   effect system plugin
  * @param port
  *   port to listen on for HTTP connections
  * @param pathPrefix
@@ -47,7 +46,7 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  *   effect type
  */
 final case class NanoServer[Effect[_]] (
-  handler: Types.HandlerAnyCodec[Effect, Context],
+  effectSystem: EffectSystem[Effect],
   port: Int,
   pathPrefix: String = "/",
   methods: Iterable[HttpMethod] = HttpMethod.values,
@@ -55,22 +54,27 @@ final case class NanoServer[Effect[_]] (
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
 ) extends NanoWSD(port) with Logging with ServerTransport[Effect, Context] {
 
+  private var handler: RequestHandler[Effect, Context] = RequestHandler.dummy
   private val headerXForwardedFor = "X-Forwarded-For"
   private val log = MessageLog(logger, Protocol.Http.name)
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val allowedMethods = methods.map(_.name).toSet
-  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
-  start()
+  implicit private val system: EffectSystem[Effect] = effectSystem
+
+  override def clone(rpcHandler: RequestHandler[Effect, Context]): NanoServer[Effect] = {
+    this.handler = rpcHandler
+    this
+  }
+
+  override def init(): Effect[Unit] =
+    system.evaluate {
+      super.start()
+      (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
+        logger.info("Listening for connections", ListMap("Protocol" -> protocol, "Port" -> port.toString))
+      }
+    }
 
   override def close(): Effect[Unit] =
     system.evaluate(stop())
-
-  override def start(): Unit = {
-    super.start()
-    (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
-      logger.info("Listening for connections", ListMap("Protocol" -> protocol, "Port" -> port.toString))
-    }
-  }
 
   /**
    * Serve HTTP session.
@@ -155,14 +159,14 @@ final case class NanoServer[Effect[_]] (
     log.receivedRequest(requestProperties, protocol.name)
 
     // Process the request
-    genericHandler.processRequest(requestBody, getRequestContext(session), requestId).either.map(
+    handler.processRequest(requestBody, getRequestContext(session), requestId).either.map(
       _.fold(
         error => sendErrorResponse(error, session, protocol, requestId, requestProperties),
         result => {
           // Send the response
-          val response = result.responseBody.getOrElse(Array[Byte]().toInputStream)
-          val status = result.exception.map(mapException).map(Status.lookup).getOrElse(Status.OK)
-          createResponse(response, status, result.context, session, protocol, requestId)
+          val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+          val status = result.flatMap(_.exception).map(mapException).map(Status.lookup).getOrElse(Status.OK)
+          createResponse(responseBody, status, result.flatMap(_.context), session, protocol, requestId)
         },
       )
     )
@@ -199,8 +203,12 @@ final case class NanoServer[Effect[_]] (
 
     // Create the response
     val responseData = responseBody.toArray
-    val mediaType = genericHandler.rpcProtocol.messageCodec.mediaType
-    val response = newFixedLengthResponse(responseStatus, mediaType, responseBody, responseData.length.toLong)
+    val response = newFixedLengthResponse(
+      responseStatus,
+      handler.mediaType,
+      responseData.toInputStream,
+      responseData.length.toLong
+    )
     setResponseContext(response, responseContext)
     log.sentResponse(responseProperties, protocol.name)
     response

@@ -2,7 +2,7 @@ package examples.errors
 
 import automorph.protocol.jsonrpc.ErrorType.InvalidRequest
 import automorph.protocol.jsonrpc.JsonRpcException
-import automorph.{Default, Handler}
+import automorph.{Default, Server}
 import java.net.URI
 import java.sql.SQLException
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -13,6 +13,9 @@ import scala.util.Try
 private[examples] object ServerErrors {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
+
+    // Define a helper function to evaluate Futures
+    def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
     // Create server API instance
     class ServerApi {
@@ -31,9 +34,13 @@ private[examples] object ServerErrors {
       case error => Default.rpcProtocol.mapException(error)
     })
 
-    // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-    val handler = Handler.protocol(rpcProtocol).system(Default.effectSystemAsync).bind(api)
-    val server = Default.server(handler, 7000, "/api")
+    // Create HTTP server transport listening on port 7000 for requests to '/api'
+    val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "/api")
+
+    // Start JSON-RPC HTTP server
+    val server = run(
+      Server.transport(serverTransport).rpcProtocol(rpcProtocol).bind(api).init()
+    )
 
     // Define client view of the remote API
     trait ClientApi {
@@ -41,25 +48,25 @@ private[examples] object ServerErrors {
     }
 
     // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+    val client = run(
+      Default.clientAsync(new URI("http://localhost:7000/api")).init()
+    )
 
     // Call the remote API function and fail with InvalidRequestException
     val remoteApi = client.bind[ClientApi]
-    println(Try(Await.result(
-      remoteApi.hello("world", 1),
-      Duration.Inf
+    println(Try(run(
+      remoteApi.hello("world", 1)
     )).failed.get)
 
     // Call the remote API function and fail with RuntimeException
-    println(Try(Await.result(
-      remoteApi.hello("world", -1),
-      Duration.Inf
+    println(Try(run(
+      remoteApi.hello("world", -1)
     )).failed.get)
 
     // Close the client
-    Await.result(client.close(), Duration.Inf)
+    run(client.close())
 
     // Stop the server
-    Await.result(server.close(), Duration.Inf)
+    run(server.close())
   }
 }

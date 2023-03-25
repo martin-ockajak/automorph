@@ -64,7 +64,7 @@ private[automorph] object MethodReflection:
    * @param method
    *   method descriptor
    * @tparam Context
-   *   message context type
+   *   RPC message context type
    * @return
    *   true if the method accepts request context as its last parameter, false otherwise
    */
@@ -81,7 +81,7 @@ private[automorph] object MethodReflection:
    * @param someType
    *   wrapped type
    * @tparam Context
-   *   message context type
+   *   RPC message context type
    * @tparam Contextual
    *   contextual result type
    * @return

@@ -234,8 +234,22 @@ ThisBuild / scalaVersion := "3.2.2"
 ThisBuild / crossScalaVersions += "2.13.10"
 ThisBuild / javacOptions ++= Seq("-source", "11", "-target", "11")
 val commonScalacOptions =
-  Seq("-language:higherKinds", "-feature", "-deprecation", "-unchecked", "-release", "9", "-encoding", "utf8")
-val docScalacOptions = commonScalacOptions ++ Seq("-language:adhocExtensions", "-pagewidth", "120")
+  Seq(
+    "-language:higherKinds",
+    "-feature",
+    "-deprecation",
+    "-unchecked",
+    "-release", "9",
+    "-J--add-modules",
+    "-Jjava.net.http",
+    "-encoding",
+    "utf8"
+  )
+val docScalacOptions = commonScalacOptions ++ Seq(
+  "-language:adhocExtensions",
+  "-pagewidth",
+  "120"
+)
 ThisBuild / scalacOptions ++=
   (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((3, _)) => docScalacOptions ++ Seq(
@@ -248,8 +262,6 @@ ThisBuild / scalacOptions ++=
     )
     case _ => commonScalacOptions ++ Seq(
         "-language:existentials",
-        "-J--add-modules",
-        "-Jjava.net.http",
         "-Xsource:3",
         "-Xlint:_,-byname-implicit",
         "-Wconf:site=[^.]+\\.codec\\.json\\..*:silent,cat=other-non-cooperative-equals:silent",
@@ -293,7 +305,10 @@ lazy val docs = project.in(file("site")).settings(
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.md",
     (LocalRootProject / baseDirectory).value.toGlob / "docs" / ** / "*.jpg"
   ),
-  Compile / doc / scalacOptions := docScalacOptions ++ Seq(s"-source-links:src=github://$repositoryPath/master"),
+  Compile / doc / scalacOptions := docScalacOptions ++ Seq(
+    "-skip-by-id:automorph.handler",
+    s"-source-links:src=github://$repositoryPath/master"
+  ),
   Compile / doc / sources ++= allSources.value.flatten,
   Compile / doc / tastyFiles ++= allTastyFiles.value.flatten.filter(_.getName != "MonixSystem.tasty"),
   Compile / doc / dependencyClasspath ++=

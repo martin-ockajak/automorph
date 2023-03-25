@@ -1,8 +1,8 @@
 package examples.integration
 
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
-import automorph.{Client, Default, Handler}
-
+import automorph.handler.BindingHandler
+import automorph.{Client, Default, Server}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
@@ -15,6 +15,9 @@ private[examples] object MessageCodec {
 
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
+
+    // Define a helper function to evaluate Futures
+    def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
 
     // Create uPickle message codec for JSON format
     val messageCodec = UpickleMessagePackCodec[UpickleMessagePackCustom]()
@@ -32,16 +35,17 @@ private[examples] object MessageCodec {
     val api = new ServerApi()
 
     // Create a server RPC protocol plugin
-    val serverProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ServerContext](
+    val serverRpcProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ServerContext](
       messageCodec
     )
 
-    // Create an effect system plugin
-    val effectSystem = Default.effectSystemAsync
+    // Create HTTP server transport listening on port 7000 for requests to '/api'
+    val serverTransport = Default.serverTransport(Default.effectSystemAsync, 7000, "/api")
 
-    // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-    val handler = Handler.protocol(serverProtocol).system(effectSystem)
-    val server = Default.server(handler.bind(api), 7000, "/api")
+    // Start JSON-RPC HTTP server
+    val server = run(
+      Server.transport(serverTransport).rpcProtocol(serverRpcProtocol).bind(api).init()
+    )
 
     // Define client view of the remote API
     trait ClientApi {
@@ -49,25 +53,28 @@ private[examples] object MessageCodec {
     }
 
     // Create a client RPC protocol plugin
-    val clientProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ClientContext](
+    val clientRpcProtocol = Default.rpcProtocol[UpickleMessagePackCodec.Node, messageCodec.type, Default.ClientContext](
       messageCodec
     )
 
-    // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val clientTransport = Default.clientTransportAsync(new URI("http://localhost:7000/api"))
-    val client = Client(clientProtocol, clientTransport)
+    // Create HTTP client transport sending POST requests to 'http://localhost:7000/api'
+    val clientTransport = Default.clientTransport(Default.effectSystemAsync, new URI("http://localhost:7000/api"))
+
+    // Setup JSON-RPC HTTP client
+    val client = run(
+      Client.transport(clientTransport).rpcProtocol(clientRpcProtocol).init()
+    )
 
     // Call the remote API function
     val remoteApi = client.bind[ClientApi]
-    println(Await.result(
-      remoteApi.hello("world", 1),
-      Duration.Inf
+    println(run(
+      remoteApi.hello("world", 1)
     ))
 
     // Close the client
-    Await.result(client.close(), Duration.Inf)
+    run(client.close())
 
     // Stop the server
-    Await.result(server.close(), Duration.Inf)
+    run(server.close())
   }
 }

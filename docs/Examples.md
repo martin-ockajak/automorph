@@ -38,7 +38,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
 val serverBuilder = Default.serverSync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -49,7 +49,7 @@ trait ClientApi {
   def hello(some: String, n: Int): String
 }
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-val client = Default.clientSync(new URI("http://localhost:7000/api"))
+val client = Default.clientSync(new URI("http://localhost:7000/api")).init()
 
 // Call the remote API function statically
 val remoteApi = client.bind[ClientApi]
@@ -105,7 +105,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for POST or PUT requests to '/api'
 val serverBuilder = Default.serverBuilderAsync(7000, "/api", Seq(HttpMethod.Post, HttpMethod.Put))
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -174,7 +174,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
 val serverBuilder = Default.serverSync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -270,7 +270,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val serverBuilder = Default.serverAsync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -332,7 +332,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val serverBuilder = Default.serverSync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -421,7 +421,7 @@ val mapName = (name: String) => name match {
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val serverBuilder = Default.serverBuilderSync(7000, "/api")
-val server = serverBuilder(_.bind(api, mapName))
+val server = serverBuilder(_.bind(api, mapName)).init()
 ```
 
 **Client**
@@ -497,7 +497,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val serverBuilder = Default.serverBuilderAsync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -586,7 +586,7 @@ val rpcProtocol = Default.rpcProtocol[Default.ServerContext].mapException(_ matc
 
 // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val handler = Handler.protocol(rpcProtocol).system(Default.effectSystemAsync).bind(api)
-val server = Default.server(handler, 7000, "/api")
+val server = Default.server(handler, 7000, "/api").init()
 ```
 
 **Client**
@@ -664,7 +664,7 @@ val serverBuilder = Default.serverAsync(7000, "/api", mapException = {
 })
 
 // Start custom JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -734,7 +734,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val serverBuilder = Default.serverBuilderSync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -753,7 +753,7 @@ val remoteApi = client.bind[ClientApi]
 
 {
   // Create client request context containing invalid HTTP authentication
-  implicit val validAuthentication: ClientContext = client.defaultContext
+  implicit val validAuthentication: ClientContext = client.context
     .authorizationBearer("valid")
 
   // Call the remote API function statically using valid authentication
@@ -769,7 +769,7 @@ val remoteApi = client.bind[ClientApi]
 
 {
   // Create client request context containing invalid HTTP authentication
-  implicit val invalidAuthentication: ClientContext = client.defaultContext
+  implicit val invalidAuthentication: ClientContext = client.context
     .headers("X-Authentication" -> "unsupported")
 
   // Call the remote API function statically using invalid authentication
@@ -820,18 +820,19 @@ import java.net.URI
 class ServerApi {
 
   // Accept HTTP request context provided by the server message transport plugin
-  def hello(message: String)(implicit httpRequest: ServerContext): String =
+  def hello(message: String)(implicit httpRequest: ServerContext): String = {
     Seq(
       Some(message),
       httpRequest.path,
       httpRequest.header("X-Test")
     ).flatten.mkString(", ")
+  }
 }
 val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val serverBuilder = Default.serverBuilderSync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -848,7 +849,7 @@ trait ClientApi {
 val client = Default.clientSync(new URI("http://localhost:7000/api"))
 
 // Create client request context specifying HTTP request metadata
-implicit val httpRequest: ClientContext = client.defaultContext
+implicit val httpRequest: ClientContext = client.context
   .parameters("test" -> "value")
   .headers("X-Test" -> "value", "Cache-Control" -> "no-cache")
   .cookies("Test" -> "value")
@@ -911,7 +912,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val serverBuilder = Default.serverSync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -987,7 +988,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
 val serverBuilder = Default.serverBuilderAsync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -1054,7 +1055,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for PUT requests to '/api'
 val serverBuilder = Default.serverBuilderSync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -1122,7 +1123,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val serverBuilder = Default.serverAsync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -1135,9 +1136,9 @@ trait ClientApi {
 // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
 val client = Default.clientAsync(new URI("http://localhost:7000/api"))
 
-// Message the remote API function dynamically without expecting a response
+// Call the remote API function dynamically without waiting for a response
 Await.result(
-  client.message("hello").args("some" -> "world", "n" -> 1),
+  client.tell("hello").args("some" -> "world", "n" -> 1),
   Duration.Inf
 )
 ```
@@ -1184,7 +1185,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
 val serverBuilder = Default.serverAsync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -1260,7 +1261,7 @@ val effectSystem = ZioSystem[Any]()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val serverBuilder = Default.serverBuilder(effectSystem, 7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -1353,7 +1354,7 @@ val effectSystem = Default.effectSystemAsync
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val handler = Handler.protocol(serverProtocol).system(effectSystem)
-val server = Default.server(handler.bind(api), 7000, "/api")
+val server = Default.server(handler.bind(api), 7000, "/api").init()
 ```
 
 **Client**
@@ -1429,7 +1430,7 @@ val serverProtocol = WebRpcProtocol[Default.Node, Default.Codec, Default.ServerC
 
 // Start default Web-RPC HTTP server listening on port 7000 for requests to '/api'
 val handler = Handler.protocol(serverProtocol).system(Default.effectSystemAsync).bind(api)
-val server = Default.server(handler, 7000, "/api")
+val server = Default.server(handler, 7000, "/api").init()
 ```
 
 **Client**
@@ -1500,7 +1501,7 @@ val api = new ServerApi()
 
 // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val serverBuilder = Default.serverSync(7000, "/api")
-val server = serverBuilder(_.bind(api))
+val server = serverBuilder(_.bind(api)).init()
 ```
 
 **Client**
@@ -1564,7 +1565,7 @@ val api = new ServerApi()
 
 // Start NanoHTTPD JSON-RPC HTTP server listening on port 7000 for requests to '/api'
 val handler = Default.handlerSync[NanoServer.Context]
-val server = NanoServer(handler.bind(api), 7000, "/api")
+val server = NanoServer(handler.bind(api), 7000, "/api").init()
 ```
 
 **Client**
@@ -1774,7 +1775,6 @@ val brokerConfig = new EmbeddedRabbitMqConfig.Builder().port(7000)
   .rabbitMqServerInitializationTimeoutInMillis(30000).build()
 val broker = new EmbeddedRabbitMq(brokerConfig)
 broker.start()
-broker -> brokerConfig
 
 // Start RabbitMQ AMQP server consuming requests from the 'api' queue
 val handler = Default.handlerAsync[RabbitMqServer.Context]

@@ -1,6 +1,5 @@
 package automorph.transport.http.endpoint
 
-import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
@@ -14,8 +13,8 @@ import sttp.tapir.{byteArrayBody, clientIp, endpoint, header, headers, paths, qu
 /**
  * Tapir HTTP endpoint message transport plugin.
  *
- * The endpoint interprets HTTP request body as an RPC request and processes it using the specified RPC handler. The
- * response returned by the RPC handler is used as HTTP response body.
+ * Interprets HTTP request body as an RPC request and processes it using the specified RPC handler.
+ * The response returned by the RPC handler is used as HTTP response body.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]

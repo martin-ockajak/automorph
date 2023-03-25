@@ -12,6 +12,9 @@ private[examples] object ApiSchema {
   @scala.annotation.nowarn
   def main(arguments: Array[String]): Unit = {
 
+    // Define a helper function to evaluate Futures
+    def run[T](effect: Future[T]): T = Await.result(effect, Duration.Inf)
+
     // Create server API instance
     class ServerApi {
       def hello(some: String, n: Int): Future[String] =
@@ -20,28 +23,29 @@ private[examples] object ApiSchema {
     val api = new ServerApi()
 
     // Start JSON-RPC HTTP server listening on port 7000 for POST requests to '/api'
-    val serverBuilder = Default.serverBuilderAsync(7000, "/api")
-    val server = serverBuilder(_.bind(api))
+    val server = run(
+      Default.serverAsync(7000, "/api").bind(api).init()
+    )
 
     // Setup JSON-RPC HTTP client sending POST requests to 'http://localhost:7000/api'
-    val client = Default.clientAsync(new URI("http://localhost:7000/api"))
+    val client = run(
+      Default.clientAsync(new URI("http://localhost:7000/api")).init()
+    )
 
     // Retrieve the remote API schema in OpenRPC format
-    println(Await.result(
-      client.call[OpenRpc](JsonRpcProtocol.openRpcFunction).args(),
-      Duration.Inf
+    println(run(
+      client.call[OpenRpc](JsonRpcProtocol.openRpcFunction).args()
     ).methods.map(_.name))
 
     // Retrieve the remote API schema in OpenAPI format
-    println(Await.result(
+    println(run(
       client.call[OpenApi](JsonRpcProtocol.openApiFunction).args(),
-      Duration.Inf
     ).paths.get.keys.toList)
 
     // Close the client
-    Await.result(client.close(), Duration.Inf)
+    run(client.close())
 
     // Stop the server
-    Await.result(server.close(), Duration.Inf)
+    run(server.close())
   }
 }

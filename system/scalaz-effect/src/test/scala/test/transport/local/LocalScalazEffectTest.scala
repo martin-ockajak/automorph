@@ -14,7 +14,7 @@ class LocalScalazEffectTest extends ProtocolCodecTest {
 
   override lazy val system: EffectSystem[Effect] = ScalazEffectSystem()
 
-  override def execute[T](effect: Effect[T]): T =
+  override def run[T](effect: Effect[T]): T =
     effect.unsafePerformIO()
 
   override def arbitraryContext: Arbitrary[Context] =

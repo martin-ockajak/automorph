@@ -92,7 +92,7 @@ final case class HttpClient[Effect[_]](
       }
     }
 
-  override def message(
+  override def tell(
     requestBody: InputStream,
     requestContext: Context,
     requestId: String,
@@ -103,15 +103,18 @@ final case class HttpClient[Effect[_]](
       send(request, requestUrl, requestId, protocol).map(_ => ())
     }
 
-  override def defaultContext: Context =
+  override def context: Context =
     Session.defaultContext.url(url).method(method)
+
+  override def init(): Effect[Unit] =
+    effectSystem.successful(())
 
   override def close(): Effect[Unit] =
     effectSystem.evaluate(())
 
   private def getResponseContext(response: Response): Context = {
     val (_, statusCode, headers) = response
-    statusCode.map(defaultContext.statusCode).getOrElse(defaultContext).headers(headers*)
+    statusCode.map(context.statusCode).getOrElse(context).headers(headers*)
   }
 
   private def send(

@@ -32,8 +32,11 @@ import scala.util.Using
  * @tparam Effect
  *   effect type
  */
-final case class UrlClient[Effect[_]](effectSystem: EffectSystem[Effect], url: URI, method: HttpMethod = HttpMethod.Post)
-  extends ClientTransport[Effect, Context] with Logging {
+final case class UrlClient[Effect[_]](
+  effectSystem: EffectSystem[Effect],
+  url: URI,
+  method: HttpMethod = HttpMethod.Post,
+) extends ClientTransport[Effect, Context] with Logging {
 
   private val contentLengthHeader = "Content-Length"
   private val contentTypeHeader = "Content-Type"
@@ -64,13 +67,16 @@ final case class UrlClient[Effect[_]](effectSystem: EffectSystem[Effect], url: U
       }
     }
 
-  override def defaultContext: Context =
+  override def context: Context =
     Session.defaultContext.url(url).method(method)
+
+  override def init(): Effect[Unit] =
+    effectSystem.successful(())
 
   override def close(): Effect[Unit] =
     effectSystem.successful(())
 
-  override def message(
+  override def tell(
     requestBody: InputStream,
     requestContext: Context,
     requestId: String,
@@ -154,7 +160,7 @@ final case class UrlClient[Effect[_]](effectSystem: EffectSystem[Effect], url: U
   }
 
   private def getResponseContext(connection: HttpURLConnection): Context =
-    defaultContext.statusCode(connection.getResponseCode).headers(connection.getHeaderFields.asScala.toSeq.flatMap {
+    context.statusCode(connection.getResponseCode).headers(connection.getHeaderFields.asScala.toSeq.flatMap {
       case (name, values) => values.asScala.map(name -> _)
     }*)
 }

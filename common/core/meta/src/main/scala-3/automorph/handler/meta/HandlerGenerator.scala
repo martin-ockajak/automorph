@@ -15,14 +15,22 @@ private[automorph] object HandlerGenerator:
   /**
    * Generates handler bindings for all valid public methods of an API type.
    *
-   * @param codec message codec plugin
-   * @param api API instance
-   * @tparam Node message node type
-   * @tparam Codec message codec plugin type
-   * @tparam Effect effect type
-   * @tparam Context message context type
-   * @tparam Api API type
-   * @return mapping of API method names to handler function bindings
+   * @param codec
+   *   message codec plugin
+   * @param api
+   *   API instance
+   * @tparam Node
+   *   node type
+   * @tparam Codec
+   *   message codec plugin type
+   * @tparam Effect
+   *   effect type
+   * @tparam Context
+   *   RPC message context type
+   * @tparam Api
+   *   API type
+   * @return
+   *   mapping of API method names to handler function bindings
    */
   inline def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec,

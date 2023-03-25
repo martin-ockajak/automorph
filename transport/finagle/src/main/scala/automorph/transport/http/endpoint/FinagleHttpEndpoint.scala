@@ -1,6 +1,5 @@
 package automorph.transport.http.endpoint
 
-import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport}
 import automorph.transport.http.endpoint.FinagleHttpEndpoint.Context
@@ -16,8 +15,8 @@ import scala.collection.immutable.ListMap
 /**
  * Finagle HTTP endpoint message transport plugin.
  *
- * The service interprets HTTP request body as a RPC request and processes it with the specified RPC handler. The
- * response returned by the RPC handler is used as HTTP response body.
+ * Interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
+ * The response returned by the RPC handler is used as HTTP response body.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -57,7 +56,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
         result => {
           // Send the response
           val responseBody = Reader.fromBuf(Buf.ByteArray.Owned(result.responseBody.map(_.toArray).getOrElse(Array())))
-          val status = result.exception.map(mapException).map(Status.apply).getOrElse(Status.Ok)
+          val status = result.flatMap(_.exception).map(Status.apply).getOrElse(Status.Ok)
           createResponse(responseBody, status, result.context, request, requestId)
         },
       )

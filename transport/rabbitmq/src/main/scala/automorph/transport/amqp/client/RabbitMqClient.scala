@@ -68,7 +68,7 @@ final case class RabbitMqClient[Effect[_]](
       send(requestBody, requestId, mediaType, requestContext, Some(response)).flatMap(_ => response.effect)
     }
 
-  override def message(
+  override def tell(
     requestBody: InputStream,
     requestContext: Context,
     requestId: String,
@@ -76,8 +76,11 @@ final case class RabbitMqClient[Effect[_]](
   ): Effect[Unit] =
     send(requestBody, requestId, mediaType, requestContext, None)
 
-  override def defaultContext: Context =
+  override def context: Context =
     RabbitMqContext.default
+
+  override def init(): Effect[Unit] =
+    effectSystem.successful(())
 
   override def close(): Effect[Unit] =
     effectSystem.evaluate(RabbitMqCommon.disconnect(connection))

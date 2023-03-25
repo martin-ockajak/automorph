@@ -1,7 +1,6 @@
 package test.transport.websocket
 
-import automorph.Types
-import automorph.spi.ClientTransport
+import automorph.spi.{ClientTransport, ServerTransport}
 import automorph.system.FutureSystem
 import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.HttpClient
@@ -20,20 +19,15 @@ class HttpClientWebSocketFutureTest extends ClientServerTest {
 
   override lazy val system: FutureSystem = FutureSystem()
 
+  override def clientTransport: ClientTransport[Effect, ?] =
+    HttpClient(system, new URI(s"ws://localhost:$port"), HttpMethod.Get)
+
+  override def serverTransport: ServerTransport[Effect, Context] =
+    NanoServer[Effect](system, port)
+
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def clientTransport(
-    handler: Types.HandlerAnyCodec[Effect, Context]
-  ): Option[ClientTransport[Effect, Context]] = {
-    val server = withRandomAvailablePort(port => NanoServer[Effect](handler, port))
-    servers += server
-    val url = new URI(s"ws://localhost:${server.port}")
-    val client = HttpClient(system, url, HttpMethod.Get).asInstanceOf[ClientTransport[Effect, Context]]
-    clients += client
-    Some(client)
-  }
-
-  override def execute[T](effect: Effect[T]): T =
+  override def run[T](effect: Effect[T]): T =
     await(effect)
 }

@@ -82,7 +82,7 @@ final case class SttpClient[Effect[_]] private (
     }
   }
 
-  override def message(
+  override def tell(
     requestBody: InputStream,
     requestContext: Context,
     requestId: String,
@@ -95,8 +95,11 @@ final case class SttpClient[Effect[_]] private (
     }
   }
 
-  override def defaultContext: Context =
+  override def context: Context =
     Session.defaultContext.url(url).method(method)
+
+  override def init(): Effect[Unit] =
+    effectSystem.successful(())
 
   override def close(): Effect[Unit] =
     backend.close()
@@ -160,7 +163,7 @@ final case class SttpClient[Effect[_]] private (
     webSocket => webSocket.sendBinary(request.toArray).flatMap(_ => webSocket.receiveBinary(true))
 
   private def getResponseContext(response: Response[Array[Byte]]): Context =
-    defaultContext.statusCode(response.code.code).headers(response.headers.map { header =>
+    context.statusCode(response.code.code).headers(response.headers.map { header =>
       header.name -> header.value
     }*)
 

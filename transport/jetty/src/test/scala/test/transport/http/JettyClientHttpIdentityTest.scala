@@ -16,7 +16,7 @@ class JettyClientHttpIdentityTest extends StandardHttpClientTest {
 
   override lazy val system: IdentitySystem = IdentitySystem()
 
-  override def execute[T](effect: Effect[T]): T =
+  override def run[T](effect: Effect[T]): T =
     effect
 
   override def arbitraryContext: Arbitrary[Context] =

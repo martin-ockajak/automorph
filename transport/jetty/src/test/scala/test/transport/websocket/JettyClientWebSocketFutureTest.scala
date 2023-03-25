@@ -18,7 +18,7 @@ class JettyClientWebSocketFutureTest extends StandardHttpClientTest {
 
   override lazy val system: FutureSystem = FutureSystem()
 
-  override def execute[T](effect: Effect[T]): T =
+  override def run[T](effect: Effect[T]): T =
     await(effect)
 
   override def arbitraryContext: Arbitrary[Context] =

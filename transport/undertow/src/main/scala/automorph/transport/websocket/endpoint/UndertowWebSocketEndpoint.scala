@@ -1,8 +1,7 @@
 package automorph.transport.websocket.endpoint
 
-import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointTransport}
+import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
 import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
@@ -19,53 +18,51 @@ import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsJava, MapHasAsScala, SeqHasAsJava}
 
 /**
- * Undertow WebSocket endpoint message transport plugin.
+ * Undertow WebSocket endpoint transport plugin.
  *
- * The handler interprets WebSocket request message as an RPC request and processes it using the specified RPC request
- * handler. The response returned by the RPC request handler is used as WebSocket response message.
+ * Interprets WebSocket request message as an RPC request and processes it using the specified RPC request handler. The
+ * response returned by the RPC request handler is used as WebSocket response message.
+ *
+ * @see
+ *   [[https://en.wikipedia.org/wiki/WebSocket Transport protocol]]
+ * @see
+ *   [[https://undertow.io Library documentation]]
+ * @see
+ *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
+ * @param effectSystem
+ *   effect system plugin
+ * @param handler
+ *   RPC request handler
+ * @tparam Effect
+ *   effect type
+ * @return
+ *   Undertow WebSocket callback
  */
-object UndertowWebSocketEndpoint {
-
-  /** Request context type. */
-  type Context = HttpContext[Either[HttpServerExchange, WebSocketHttpExchange]]
-
-  /**
-   * Creates an Undertow WebSocket handler with specified RPC request handler.
-   *
-   * The handler interprets WebSocket request message as an RPC request and processes it using the specified RPC request
-   * handler. The response returned by the RPC request handler is used as WebSocket response message.
-   *
-   * @see
-   *   [[https://en.wikipedia.org/wiki/WebSocket Transport protocol]]
-   * @see
-   *   [[https://undertow.io Library documentation]]
-   * @see
-   *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
-   * @param handler
-   *   RPC request handler
-   * @param next
-   *   Undertow handler invoked if a HTTP request does not contain a WebSocket handshake
-   * @tparam Effect
-   *   effect type
-   * @return
-   *   creates an Undertow WebSocket handler using supplied asynchronous effect execution function
-   */
-  def apply[Effect[_]](
-    handler: Types.HandlerAnyCodec[Effect, Context],
-    next: HttpHandler,
-  ): WebSocketProtocolHandshakeHandler = {
-    val webSocketCallback = UndertowWebSocketCallback(handler)
-    new WebSocketProtocolHandshakeHandler(webSocketCallback, next)
-  }
-}
-
-final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, Context]
-) extends WebSocketConnectionCallback with AutoCloseable with Logging with EndpointTransport {
+final case class UndertowWebSocketEndpoint[Effect[_]](
+  effectSystem: EffectSystem[Effect],
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+) extends WebSocketConnectionCallback
+  with AutoCloseable
+  with Logging
+  with EndpointTransport[Effect, Context, WebSocketConnectionCallback] {
 
   private val log = MessageLog(logger, Protocol.WebSocket.name)
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
+  implicit private val system: EffectSystem[Effect] = effectSystem
+
+  /**
+   * Creates an Undertow WebSocket handshake HTTP handler for this Undertow WebSocket callback.
+   *
+   * @param next
+   *   Undertow handler invoked if a HTTP request does not contain a WebSocket handshake
+   */
+  def httpHandler(next: HttpHandler): WebSocketProtocolHandshakeHandler =
+    new WebSocketProtocolHandshakeHandler(this, next)
+
+  override def adapter: WebSocketConnectionCallback =
+    this
+
+  override def clone(handler: RequestHandler[Effect, Context]): UndertowWebSocketEndpoint[Effect] =
+    copy(handler = handler)
 
   override def onConnect(exchange: WebSocketHttpExchange, channel: WebSocketChannel): Unit = {
     val receiveListener = new AbstractReceiveListener {
@@ -93,13 +90,13 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
         log.receivedRequest(requestProperties)
 
         // Process the request
-        genericHandler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
+        handler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
           _.fold(
             error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
             result => {
               // Send the response
-              val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
-              sendResponse(responseBody, result.context, exchange, channel, requestId)
+              val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+              sendResponse(responseBody, result.flatMap(_.context), exchange, channel, requestId)
               discardMessage()
             },
           )
@@ -173,4 +170,10 @@ final private[automorph] case class UndertowWebSocketCallback[Effect[_]](
 
   override def close(): Unit =
     ()
+}
+
+object UndertowWebSocketEndpoint {
+
+  /** Request context type. */
+  type Context = HttpContext[Either[HttpServerExchange, WebSocketHttpExchange]]
 }

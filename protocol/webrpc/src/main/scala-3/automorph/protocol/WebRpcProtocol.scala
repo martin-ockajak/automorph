@@ -42,7 +42,7 @@ import automorph.transport.http.HttpContext
  * @tparam Codec
  *   message codec plugin type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  */
 final case class WebRpcProtocol[Node, Codec <: MessageCodec[Node], Context <: HttpContext[?]](
   messageCodec: Codec,
@@ -86,7 +86,7 @@ object WebRpcProtocol extends ErrorMapping:
    * @tparam Codec
    *   message codec plugin type
    * @tparam Context
-   *   message context type
+   *   RPC message context type
    * @return
    *   Web-RPC protocol plugin
    */

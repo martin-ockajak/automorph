@@ -1,20 +1,33 @@
 package test.core
 
-import automorph.spi.{ClientTransport, EffectSystem, ServerTransport}
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable
 import test.base.{Await, Network}
 
 trait ClientServerTest extends ProtocolCodecTest with Await with Network {
-
-  def system: EffectSystem[Effect]
-
-  lazy val servers: ArrayBuffer[ServerTransport[Effect, Context]] = ArrayBuffer.empty
-
-  lazy val clients: ArrayBuffer[ClientTransport[Effect, Context]] = ArrayBuffer.empty
+  lazy val port: Int = acquireRandomPort
 
   override def afterAll(): Unit = {
-    servers.foreach(server => system.runAsync(server.close()))
-    clients.foreach(client => system.runAsync(client.close()))
     super.afterAll()
+    releasePort(port)
   }
+
+  private def acquireRandomPort: Int =
+    ClientServerTest.usedPorts.synchronized {
+      val port = randomPort
+      if (ClientServerTest.usedPorts.contains(port)) {
+        acquireRandomPort
+      } else {
+        ClientServerTest.usedPorts.add(port)
+        port
+      }
+    }
+
+  private def releasePort(port: Int): Unit =
+    ClientServerTest.usedPorts.synchronized {
+      ClientServerTest.usedPorts.remove(port)
+    }
+}
+
+object ClientServerTest {
+  private val usedPorts = mutable.HashSet[Int]()
 }

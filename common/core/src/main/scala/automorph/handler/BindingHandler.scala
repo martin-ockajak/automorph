@@ -1,11 +1,9 @@
-package automorph
+package automorph.handler
 
 import automorph.RpcException.{FunctionNotFoundException, InvalidRequestException}
-import automorph.handler.meta.HandlerMeta
-import automorph.handler.{HandlerBinding, HandlerResult, ProtocolHandlerBuilder, SystemHandlerBuilder}
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.protocol.{RpcFunction, RpcMessage, RpcRequest}
-import automorph.spi.{EffectSystem, MessageCodec, RpcProtocol}
+import automorph.spi.{EffectSystem, MessageCodec, RequestHandler, RpcProtocol, RpcResult}
 import automorph.util.Extensions.{EffectOps, TryOps}
 import java.io.InputStream
 import scala.collection.immutable.ListMap
@@ -14,12 +12,7 @@ import scala.util.{Failure, Success, Try}
 /**
  * RPC request handler.
  *
- * The handler can be used to convert remote API calls or one-way messages into type-safe invocations of API instances.
- *
- * It provides automatic derivation of remote API RPC bindings for existing API implementations and processing of
- * incoming RPC requests into API invocations resulting in corresponding RPC responses.
- *
- * Used by RPC servers to invoke bound API methods based on incoming requests.
+ * Processes remote API requests and invoke bound API methods.
  *
  * @constructor
  *   Creates a new RPC request handler with specified system and protocol plugins providing corresponding message
@@ -28,8 +21,6 @@ import scala.util.{Failure, Success, Try}
  *   RPC protocol plugin
  * @param effectSystem
  *   effect system plugin
- * @param mapName
- *   maps API schema function to the exposed remote function name (empty result causes the method not to be exposed)
  * @param apiBindings
  *   API method bindings
  * @tparam Node
@@ -39,88 +30,46 @@ import scala.util.{Failure, Success, Try}
  * @tparam Effect
  *   effect type
  * @tparam Context
- *   message context type
+ *   RPC message context type
  */
-final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+final case class BindingHandler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   rpcProtocol: RpcProtocol[Node, Codec, Context],
   effectSystem: EffectSystem[Effect],
-  mapName: String => Iterable[String] = Seq(_),
   apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
     ListMap[String, HandlerBinding[Node, Effect, Context]](),
-) extends HandlerMeta[Node, Codec, Effect, Context] with Logging {
+) extends RequestHandler[Effect, Context] with Logging {
 
-  /** Bound remote functions. */
-  lazy val functions: Seq[RpcFunction] = bindings.map { case (name, binding) => binding.function.copy(name = name) }
-    .toSeq
+  /** Bound RPC functions. */
+  lazy val functions: Seq[RpcFunction] = bindings.map { case (name, binding) =>
+    binding.function.copy(name = name)
+  }.toSeq
   implicit private val givenSystem: EffectSystem[Effect] = effectSystem
-  private val bindings = (schemaBindings ++ apiBindings).flatMap { case (name, binding) =>
-    mapName(name).map(_ -> binding)
-  }
+  private val bindings = apiSchemaBindings ++ apiBindings
 
-  private[automorph] def clone(
-    apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]]
-  ): Handler[Node, Codec, Effect, Context] =
-    copy(apiBindings = apiBindings)
-
-  /**
-   * Processes an RPC request by invoking a bound remote function based on the specified RPC request and its context and
-   * return an RPC response.
-   *
-   * @param requestBody
-   *   request message body
-   * @param requestContext
-   *   request context
-   * @param requestId
-   *   request correlation identifier
-   * @return
-   *   optional response message
-   */
-  def processRequest(
-    requestBody: InputStream,
-    requestContext: Context,
-    requestId: String,
-  ): Effect[HandlerResult[Context]] =
+  override def processRequest(body: InputStream, context: Context, id: String): Effect[Option[RpcResult[Context]]] =
     // Parse request
-    rpcProtocol.parseRequest(requestBody, requestContext, requestId).fold(
+    rpcProtocol.parseRequest(body, context, id).fold(
       error =>
         errorResponse(
           error.exception,
           error.message,
           responseRequired = true,
-          ListMap(LogProperties.requestId -> requestId),
+          ListMap(LogProperties.requestId -> id),
         ),
       rpcRequest => {
         // Invoke requested remote function
-        lazy val requestProperties = ListMap(LogProperties.requestId -> requestId) ++ rpcRequest.message.properties
+        lazy val requestProperties = ListMap(LogProperties.requestId -> id) ++ rpcRequest.message.properties
         lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Received ${rpcProtocol.name} request", allProperties)
-        callFunction(rpcRequest, requestContext, requestProperties)
+        callFunction(rpcRequest, context, requestProperties)
       },
     )
 
-  /**
-   * Creates a copy of this handler with specified global bound API method name mapping function.
-   *
-   * Bound API methods are exposed using their transformed via the `mapName` function. The `mapName` function is applied
-   * globally to the results to all bound APIs and their specific name mapping provided by the 'bind' method.
-   *
-   * @param mapName
-   *   maps API method name to the exposed remote function name (empty result causes the method not to be exposed)
-   * @return
-   *   RPC request handler with specified global API method name mapping
-   */
-  def mapName(mapName: String => Iterable[String]): Handler[Node, Codec, Effect, Context] =
-    copy(mapName = mapName)
-
-  override def toString: String = {
-    val plugins = Map[String, Any]("system" -> effectSystem, "protocol" -> rpcProtocol).map { case (name, plugin) =>
-      s"$name = ${plugin.getClass.getName}"
-    }.mkString(", ")
-    s"${this.getClass.getName}($plugins)"
-  }
+  override def mediaType: String =
+    rpcProtocol.messageCodec.mediaType
 
   /**
-   * Calls bound remote function specified in a request and creates a response.
+   * Calls remote function specified in a request and creates a response.
    *
    * Optional request context is used as a last remote function argument.
    *
@@ -137,7 +86,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     rpcRequest: RpcRequest[Node, rpcProtocol.Metadata, Context],
     context: Context,
     requestProperties: => Map[String, String],
-  ): Effect[HandlerResult[Context]] = {
+  ): Effect[Option[RpcResult[Context]]] = {
     // Lookup bindings for the specified remote function
     val responseRequired = rpcRequest.responseRequired
     logger.debug(s"Processing ${rpcProtocol.name} request", requestProperties)
@@ -147,12 +96,12 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         // Decode bound function arguments
         decodeArguments(argumentNodes, binding)
       }.map { arguments =>
-        // Call bound function
+        // Call bound API method
         binding.call(arguments, context)
       }.pureFold(
         error => errorResponse(error, rpcRequest.message, responseRequired, requestProperties),
         result => {
-          // Encode bound function result
+          // Encode bound API method result
           val contextualResultNode = result.asInstanceOf[Effect[Any]].map { resultValue =>
             encodeResult(resultValue, binding)
           }
@@ -168,7 +117,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }
 
   /**
-   * Validates and extracts specified bound remote function arguments from a request.
+   * Validates and extracts specified remote function arguments from a request.
    *
    * Optional request context is used as a last remote function argument.
    *
@@ -213,14 +162,14 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   }
 
   /**
-   * Decodes specified bound remote function argument nodes into values.
+   * Decodes specified remote function argument nodes into values.
    *
    * @param argumentNodes
-   *   bound remote function argument nodes
+   *   remote function argument nodes
    * @param binding
    *   remote function binding
    * @return
-   *   bound remote function arguments
+   *   remote function arguments
    */
   private def decodeArguments(
     argumentNodes: Seq[Option[Node]],
@@ -240,14 +189,14 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     }
 
   /**
-   * Decodes specified bound remote function argument nodes into values.
+   * Decodes specified remote function argument nodes into values.
    *
    * @param result
-   *   bound remote function result
+   *   remote function result
    * @param binding
    *   remote function binding
    * @return
-   *   bound remote function result node
+   *   remote function result node
    */
   private def encodeResult(result: Any, binding: HandlerBinding[Node, Effect, Context]): (Node, Option[Context]) =
     Try(binding.encodeResult(result)).recoverWith { case error =>
@@ -255,7 +204,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     }.get
 
   /**
-   * Creates a response for bound remote function call result.
+   * Creates a response for remote function call result.
    *
    * @param callResult
    *   remote function call result
@@ -270,7 +219,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     callResult: Effect[(Node, Option[Context])],
     rpcRequest: RpcRequest[Node, rpcProtocol.Metadata, Context],
     requestProperties: => Map[String, String],
-  ): Effect[HandlerResult[Context]] =
+  ): Effect[Option[RpcResult[Context]]] =
     callResult.either.flatMap { result =>
       result.fold(
         error => logger.error(s"Failed to process ${rpcProtocol.name} request", error, requestProperties),
@@ -278,11 +227,11 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
       )
 
       // Create response
-      Option.when(rpcRequest.responseRequired)(response(result.toTry, rpcRequest.message, requestProperties))
-        .getOrElse {
-          val responseContext = result.toOption.flatMap(_._2)
-          effectSystem.successful(HandlerResult(None, None, responseContext))
-        }
+      if (rpcRequest.responseRequired) {
+        response(result.toTry, rpcRequest.message, requestProperties)
+      } else {
+        effectSystem.successful(None)
+      }
     }
 
   /**
@@ -304,11 +253,11 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     message: RpcMessage[rpcProtocol.Metadata],
     responseRequired: Boolean,
     requestProperties: => Map[String, String],
-  ): Effect[HandlerResult[Context]] = {
+  ): Effect[Option[RpcResult[Context]]] = {
     logger.error(s"Failed to process ${rpcProtocol.name} request", error, requestProperties)
-    Option.when(responseRequired)(response(Failure(error), message, requestProperties)).getOrElse {
-      effectSystem.successful(HandlerResult(None, None, None))
-    }
+    Option.when(responseRequired) {
+      response(Failure(error), message, requestProperties)
+    }.getOrElse(effectSystem.successful(None))
   }
 
   /**
@@ -327,7 +276,7 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
     result: Try[(Node, Option[Context])],
     message: RpcMessage[rpcProtocol.Metadata],
     requestProperties: => Map[String, String],
-  ): Effect[HandlerResult[Context]] = {
+  ): Effect[Option[RpcResult[Context]]] =
     rpcProtocol.createResponse(result.map(_._1), message.metadata).pureFold(
       error => effectSystem.failed(error),
       rpcResponse => {
@@ -335,60 +284,30 @@ final case class Handler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
         lazy val allProperties = rpcResponse.message.properties ++ requestProperties ++
           rpcResponse.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Sending ${rpcProtocol.name} response", allProperties)
-        effectSystem.successful(HandlerResult(Some(responseBody), result.failed.toOption, result.toOption.flatMap(_._2)))
+        effectSystem.successful(
+          Some(RpcResult(responseBody, result.failed.toOption, result.toOption.flatMap(_._2)))
+        )
       },
     )
-  }
 
-  private def schemaBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
+  private def apiSchemaBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
     ListMap(rpcProtocol.apiSchemas.map { apiSchema =>
-      val describedFunctions = rpcProtocol.apiSchemas.filter { apiSchema =>
+      val apiSchemaFunctions = rpcProtocol.apiSchemas.filter { apiSchema =>
         !apiBindings.contains(apiSchema.function.name)
       }.map(_.function) ++ apiBindings.values.map(_.function)
       apiSchema.function.name -> HandlerBinding[Node, Effect, Context](
         apiSchema.function,
         Map.empty,
         result => result.asInstanceOf[Node] -> None,
-        (_, _) => effectSystem.successful(apiSchema.invoke(describedFunctions)),
+        (_, _) => effectSystem.successful(apiSchema.describe(apiSchemaFunctions)),
         acceptsContext = false,
       )
     }*)
-}
 
-object Handler {
-
-  /** Handler with arbitrary node type. */
-  type AnyCodec[Effect[_], Context] = Handler[?, ?, Effect, Context]
-
-  /**
-   * Creates an RPC request handler builder with specified RPC protocol plugin.
-   *
-   * @param protocol
-   *   RPC protocol plugin
-   * @tparam Node
-   *   message node type
-   * @tparam Codec
-   *   message codec plugin type
-   * @tparam Context
-   *   message context type
-   * @return
-   *   RPC request handler builder
-   */
-  def protocol[Node, Codec <: MessageCodec[Node], Context](
-    protocol: RpcProtocol[Node, Codec, Context]
-  ): ProtocolHandlerBuilder[Node, Codec, Context] =
-    ProtocolHandlerBuilder(protocol)
-
-  /**
-   * Creates an RPC request handler builder with specified effect system plugin.
-   *
-   * @param system
-   *   effect system plugin
-   * @tparam Effect
-   *   effect type
-   * @return
-   *   RPC request handler builder
-   */
-  def system[Effect[_]](system: EffectSystem[Effect]): SystemHandlerBuilder[Effect] =
-    SystemHandlerBuilder(system)
+  override def toString: String = {
+    val plugins = Map[String, Any]("system" -> effectSystem, "protocol" -> rpcProtocol).map { case (name, plugin) =>
+      s"$name = ${plugin.getClass.getName}"
+    }.mkString(", ")
+    s"${this.getClass.getName}($plugins)"
+  }
 }

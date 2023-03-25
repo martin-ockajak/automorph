@@ -5,9 +5,8 @@ import argonaut.{Argonaut, CodecJson}
 import automorph.codec.json.{ArgonautJsonCodec, CirceJsonCodec, JacksonJsonCodec, UpickleJsonCodec, UpickleJsonCustom}
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
 import automorph.protocol.JsonRpcProtocol
-import automorph.spi.ClientTransport
-import automorph.transport.local.client.HandlerTransport
-import automorph.{Client, Handler, Types}
+import automorph.spi.{ClientTransport, ServerTransport}
+import automorph.{Client, Server}
 import com.fasterxml.jackson.core.{JsonGenerator, JsonParser}
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
@@ -31,14 +30,26 @@ trait ProtocolCodecTest extends CoreTest {
     )
   }
 
+  def clientTransport: ClientTransport[Effect, ?]
+
+  def serverTransport: ServerTransport[Effect, Context]
+
+  def typedClientTransport: ClientTransport[Effect, Context] =
+    clientTransport.asInstanceOf[ClientTransport[Effect, Context]]
+
   override def fixtures: Seq[TestFixture] =
     testFixtures
 
-  def clientTransport(
-    handler: Types.HandlerAnyCodec[Effect, Context]
-  ): Option[ClientTransport[Effect, Context]] = {
-    Seq(handler)
-    None
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    fixtures.map(_.genericServer.init()).map(run)
+    fixtures.map(_.genericClient.init()).map(run)
+  }
+
+  override def afterAll(): Unit = {
+    fixtures.map(_.genericClient.close()).map(run)
+    fixtures.map(_.genericServer.close()).map(run)
+    super.afterAll()
   }
 
   private def circeJsonFixture()(implicit context: Context): TestFixture = {
@@ -47,17 +58,16 @@ trait ProtocolCodecTest extends CoreTest {
     Seq(enumEncoder, enumDecoder)
     val codec = CirceJsonCodec()
     val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type, Context](codec)
-    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
-    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-    val client = Client.protocol(protocol).transport(transport)
+    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
+    val server = Server.transport(serverTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     TestFixture(
       client,
-      handler,
+      server,
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0),
+      (function, a0) => client.tell(function).args(a0),
     )
   }
 
@@ -79,17 +89,16 @@ trait ProtocolCodecTest extends CoreTest {
     )
     val codec = JacksonJsonCodec(JacksonJsonCodec.defaultMapper.registerModule(enumModule))
     val protocol = JsonRpcProtocol[JacksonJsonCodec.Node, codec.type, Context](codec)
-    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
-    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-    val client = Client.protocol(protocol).transport(transport)
+    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
+    val server = Server.transport(serverTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     TestFixture(
       client,
-      handler,
+      server,
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0),
+      (function, a0) => client.tell(function).args(a0),
     )
   }
 
@@ -102,17 +111,16 @@ trait ProtocolCodecTest extends CoreTest {
     }
     val codec = UpickleJsonCodec(new Custom)
     val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type, Context](codec)
-    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
-    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-    val client = Client.protocol(protocol).transport(transport)
+    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
+    val server = Server.transport(serverTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     TestFixture(
       client,
-      handler,
+      server,
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0),
+      (function, a0) => client.tell(function).args(a0),
     )
   }
 
@@ -125,17 +133,16 @@ trait ProtocolCodecTest extends CoreTest {
     }
     val codec = UpickleMessagePackCodec(new Custom)
     val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type, Context](codec)
-    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
-    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-    val client = Client.protocol(protocol).transport(transport)
+    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
+    val server = Server.transport(serverTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     TestFixture(
       client,
-      handler,
+      server,
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0),
+      (function, a0) => client.tell(function).args(a0),
     )
   }
 
@@ -180,17 +187,16 @@ trait ProtocolCodecTest extends CoreTest {
     Seq(recordCodecJson)
     val codec = ArgonautJsonCodec()
     val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type, Context](codec)
-    val handler = Handler.protocol(protocol).system(system).bind(simpleApi).bind(complexApi)
-    val transport = clientTransport(handler).getOrElse(HandlerTransport(handler, system, context))
-    val client = Client.protocol(protocol).transport(transport)
+    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
+    val server = Server.transport(serverTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     TestFixture(
       client,
-      handler,
+      server,
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
       (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.message(function).args(a0),
+      (function, a0) => client.tell(function).args(a0),
     )
   }
 }

@@ -1,6 +1,5 @@
 package automorph.transport.amqp.server
 
-import automorph.Types
 import automorph.log.{Logging, MessageLog}
 import automorph.spi.{EffectSystem, ServerTransport}
 import automorph.transport.amqp.server.RabbitMqServer.Context
@@ -46,13 +45,25 @@ final case class RabbitMqServer[Effect[_]](
   private val log = MessageLog(logger, RabbitMqCommon.protocol)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, RabbitMqServer.Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
-  start()
 
-  override def close(): Effect[Unit] = system.evaluate(RabbitMqCommon.disconnect(connection))
+  override def init(): Effect[Unit] =
+    system.evaluate {
+      consumer(connection.createChannel())
+      ()
+    }
 
-  private def start(): Unit = {
-    consumer(connection.createChannel())
-    ()
+  override def close(): Effect[Unit] =
+    system.evaluate(RabbitMqCommon.disconnect(connection))
+
+  private def connect(): Connection = {
+    val connection = RabbitMqCommon.connect(url, addresses, serverId, connectionFactory)
+    RabbitMqCommon.declareExchange(exchange, connection)
+    Using(connection.createChannel()) { channel =>
+      queues.foreach { queue =>
+        channel.queueDeclare(queue, false, false, false, Map.empty.asJava)
+      }
+    }
+    connection
   }
 
   private def consumer(channel: Channel): DefaultConsumer = {
@@ -132,17 +143,6 @@ final case class RabbitMqServer[Effect[_]](
     log.failedProcessRequest(error, requestProperties)
     val message = error.description.toInputStream.toArray
     sendResponse(message, replyTo, None, requestProperties, requestId)
-  }
-
-  private def connect(): Connection = {
-    val connection = RabbitMqCommon.connect(url, addresses, serverId, connectionFactory)
-    RabbitMqCommon.declareExchange(exchange, connection)
-    Using(connection.createChannel()) { channel =>
-      queues.foreach { queue =>
-        channel.queueDeclare(queue, false, false, false, Map.empty.asJava)
-      }
-    }
-    connection
   }
 }
 

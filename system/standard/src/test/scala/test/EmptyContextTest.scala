@@ -1,10 +1,11 @@
 package test
 
 import automorph.codec.json.CirceJsonCodec
+import automorph.handler.BindingHandler
 import automorph.protocol.JsonRpcProtocol
 import automorph.system.IdentitySystem
-import automorph.transport.local.client.HandlerTransport
-import automorph.{Client, EmptyContext, Handler}
+import automorph.transport.local.client.LocalClient
+import automorph.{Client, EmptyContext}
 import test.base.BaseTest
 
 class EmptyContextTest extends BaseTest {
@@ -14,9 +15,9 @@ class EmptyContextTest extends BaseTest {
       val codec = CirceJsonCodec()
       val protocol = JsonRpcProtocol[CirceJsonCodec.Node, CirceJsonCodec, EmptyContext.Value](codec)
       val system = IdentitySystem()
-      val handler = Handler.protocol(protocol).system(system)
-      val transport = HandlerTransport(handler, system, EmptyContext.value)
-      val client = Client.protocol(protocol).transport(transport)
+      val handler = BindingHandler(protocol, system)
+      val clientTransport = LocalClient(system, handler, EmptyContext.value)
+      val client = Client.transport(clientTransport).rpcProtocol(protocol)
       client
     }
   }

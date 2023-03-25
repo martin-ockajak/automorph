@@ -1,6 +1,5 @@
 package automorph.transport.websocket.endpoint
 
-import automorph.Types
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport}
 import automorph.transport.http.endpoint.TapirHttpEndpoint.{clientAddress, getRequestContext, getRequestProperties}
@@ -16,7 +15,7 @@ import sttp.tapir.{CodecFormat, clientIp, endpoint, headers, paths, queryParams,
 /**
  * Tapir WebSocket endpoint message transport plugin.
  *
- * The endpoint interprets WebSocket request body as an RPC request and processes it using the specified RPC handler.
+ * Interprets WebSocket request body as an RPC request and processes it using the specified RPC handler.
  * The response returned by the RPC handler is used as WebSocket response body.
  *
  * @see

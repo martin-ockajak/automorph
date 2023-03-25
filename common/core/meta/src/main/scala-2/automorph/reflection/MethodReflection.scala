@@ -149,7 +149,7 @@ private[automorph] object MethodReflection {
    * @tparam C
    *   macro context type
    * @tparam Context
-   *   message context type
+   *   RPC message context type
    * @return
    *   true if the method accept request context as its last parameter, false otherwise
    */
@@ -174,7 +174,7 @@ private[automorph] object MethodReflection {
    * @tparam C
    *   macro context type
    * @tparam Context
-   *   message context type
+   *   RPC message context type
    * @tparam Contextual
    *   contextual result type
    * @return

@@ -1,6 +1,5 @@
 package automorph.transport.http.server
 
-import automorph.Types
 import automorph.log.Logging
 import automorph.spi.ServerTransport
 import automorph.transport.http.endpoint.VertxHttpEndpoint
@@ -14,7 +13,7 @@ import scala.collection.immutable.ListMap
 /**
  * Vert.x HTTP & WebSocket server message transport plugin.
  *
- * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
+ * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  * The response returned by the RPC request handler is used as HTTP response body.
  *
  * Processes only HTTP requests starting with specified URL path.
@@ -68,7 +67,9 @@ final case class VertxServer[Effect[_]](
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
   private val system = genericHandler.effectSystem
   private val allowedMethods = methods.map(_.name).toSet
-  start()
+
+  override def init(): Effect[Unit] =
+    system.evaluate(start())
 
   override def close(): Effect[Unit] =
     system.evaluate {

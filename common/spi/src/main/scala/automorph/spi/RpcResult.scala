@@ -1,12 +1,10 @@
-package automorph.handler
+package automorph.spi
 
 import java.io.InputStream
 
 /**
  * RPC handler request processing result.
  *
- * @see
- *   [[https://www.jsonrpc.org/specification JSON-RPC protocol specification]]
  * @param responseBody
  *   response message body
  * @param exception
@@ -16,8 +14,8 @@ import java.io.InputStream
  * @tparam Context
  *   response context type
  */
-final case class HandlerResult[Context](
-  responseBody: Option[InputStream],
+final case class RpcResult[Context](
+  responseBody: InputStream,
   exception: Option[Throwable],
   context: Option[Context],
 )
