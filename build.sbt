@@ -239,9 +239,7 @@ val commonScalacOptions =
     "-feature",
     "-deprecation",
     "-unchecked",
-    "-release", "9",
-    "-J--add-modules",
-    "-Jjava.net.http",
+    "-release", "11",
     "-encoding",
     "utf8"
   )
