@@ -14,5 +14,5 @@ object LocalContext {
   type Context = LocalContext
 
   /** Implicit default context value. */
-  implicit val defaultContext: LocalContext = LocalContext(Unit)
+  implicit val defaultContext: LocalContext = LocalContext(())
 }
