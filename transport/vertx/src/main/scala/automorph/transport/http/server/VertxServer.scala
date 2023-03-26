@@ -130,8 +130,8 @@ object VertxServer {
 
   /**
    * Default Vert.x server options providing the following settings.
-   *   - Event loop threads: 2 * number of CPU cores
-   *   - Worker threads: number of CPU cores
+   * - Event loop threads: 2 * number of CPU cores
+   * - Worker threads: number of CPU cores
    */
   def defaultVertxOptions: VertxOptions =
     new VertxOptions().setEventLoopPoolSize(Runtime.getRuntime.availableProcessors * 2)
