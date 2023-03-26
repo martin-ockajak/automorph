@@ -126,7 +126,7 @@ object Server {
     transport: ServerTransport[Effect, Context],
     protocol: RpcProtocol[Node, Codec, Context],
   ): Server[Node, Codec, Effect, Context] = {
-    val handler = BindingHandler(protocol, transport.effectSystem, ListMap.empty)
+    val handler = BindingHandler(transport.effectSystem, protocol, ListMap.empty)
     Server(transport, protocol, handler, handler.functions)
   }
 

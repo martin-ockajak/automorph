@@ -118,7 +118,7 @@ object Endpoint {
     transport: EndpointTransport[Effect, Context, Adapter],
     rpcProtocol: RpcProtocol[Node, Codec, Context],
   ): Endpoint[Node, Codec, Effect, Context, Adapter] = {
-    val handler = BindingHandler(rpcProtocol, transport.effectSystem, ListMap.empty)
+    val handler = BindingHandler(transport.effectSystem, rpcProtocol, ListMap.empty)
     Endpoint(transport, rpcProtocol, handler, handler.functions)
   }
 
