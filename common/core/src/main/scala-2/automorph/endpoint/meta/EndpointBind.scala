@@ -128,18 +128,18 @@ object EndpointMeta {
 
     // This endpoint needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Endpoint[Node, Codec, Effect, Context, Adapter]](q"""
-      import automorph.handler.{BindingHandler, HandlerBinding}
+      import automorph.handler.{ApiRequestHandler, HandlerBinding}
       import automorph.handler.meta.HandlerBindings
 
       val endpoint = ${c.prefix}
-      val apiBindings = endpoint.handler.asInstanceOf[BindingHandler[$nodeType, $codecType, $effectType, $contextType]]
+      val apiBindings = endpoint.handler.asInstanceOf[ApiRequestHandler[$nodeType, $codecType, $effectType, $contextType]]
         .apiBindings
       val newApiBindings = HandlerBindings.generate[$nodeType, $codecType, $effectType, $contextType, $apiType](
         endpoint.rpcProtocol.messageCodec, $api
       ).flatMap { binding =>
         $mapName(binding.function.name).map(_ -> binding)
       }
-      val handler = BindingHandler(
+      val handler = ApiRequestHandler(
         endpoint.transport.effectSystem,
         endpoint.rpcProtocol,
         apiBindings ++ newApiBindings,

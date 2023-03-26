@@ -34,7 +34,7 @@ import scala.util.{Failure, Success, Try}
  * @tparam Context
  *   RPC message context type
  */
-final case class BindingHandler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   effectSystem: EffectSystem[Effect],
   rpcProtocol: RpcProtocol[Node, Codec, Context],
   apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
@@ -183,10 +183,8 @@ final case class BindingHandler[Node, Codec <: MessageCodec[Node], Effect[_], Co
         throw new IllegalStateException(s"Missing method parameter decoder: ${parameter.name}"),
       )
       Try(Option(decodeArgument(argumentNode)).get).recoverWith { case error =>
-        Failure(InvalidRequestException(
-          s"${argumentNode.fold("Missing")(_ => "Malformed")} argument: ${parameter.name}",
-          error,
-        ))
+        val message = s"${argumentNode.fold("Missing")(_ => "Malformed")} argument: ${parameter.name}"
+        Failure(InvalidRequestException(message, error))
       }.get
     }
 

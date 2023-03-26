@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.handler.BindingHandler
+import automorph.handler.ApiRequestHandler
 import automorph.server.meta.ServerBind
 import automorph.spi.protocol.RpcFunction
 import automorph.spi.{MessageCodec, RequestHandler, RpcProtocol, ServerTransport}
@@ -126,7 +126,7 @@ object Server {
     transport: ServerTransport[Effect, Context],
     protocol: RpcProtocol[Node, Codec, Context],
   ): Server[Node, Codec, Effect, Context] = {
-    val handler = BindingHandler(transport.effectSystem, protocol, ListMap.empty)
+    val handler = ApiRequestHandler(transport.effectSystem, protocol, ListMap.empty)
     Server(transport, protocol, handler, handler.functions)
   }
 

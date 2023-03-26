@@ -1,7 +1,7 @@
 package automorph.server.meta
 
 import automorph.Server
-import automorph.handler.BindingHandler
+import automorph.handler.ApiRequestHandler
 import automorph.handler.meta.HandlerBindings
 import automorph.spi.{MessageCodec, RequestHandler, RpcProtocol, ServerTransport}
 import scala.collection.immutable.ListMap
@@ -85,17 +85,17 @@ private[automorph] trait ServerBind[Node, Codec <: MessageCodec[Node], Effect[_]
    */
   inline def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): Server[Node, Codec, Effect, Context] =
     val apiBindings = handler match
-      case bindingHandler: BindingHandler[?, ?, ?, ?] =>
-        bindingHandler.asInstanceOf[BindingHandler[Node, Codec, Effect, Context]].apiBindings
+      case apiHandler: ApiRequestHandler[?, ?, ?, ?] =>
+        apiHandler.asInstanceOf[ApiRequestHandler[Node, Codec, Effect, Context]].apiBindings
       case _ => Seq.empty
     val newApiBindings = HandlerBindings.generate[Node, Codec, Effect, Context, Api](
       rpcProtocol.messageCodec, api
     ).flatMap { binding =>
       mapName(binding.function.name).map(_ -> binding)
     }
-    val bindingHandler = BindingHandler(
+    val apiHandler = ApiRequestHandler(
       transport.effectSystem,
       rpcProtocol,
       ListMap.from(apiBindings ++ newApiBindings)
     )
-    Server(transport, rpcProtocol, bindingHandler, bindingHandler.functions)
+    Server(transport, rpcProtocol, apiHandler, apiHandler.functions)

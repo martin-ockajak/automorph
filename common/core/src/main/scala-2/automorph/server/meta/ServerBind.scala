@@ -119,18 +119,18 @@ object ServerMeta {
 
     // This server needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Server[Node, Codec, Effect, Context]](q"""
-      import automorph.handler.{BindingHandler, HandlerBinding}
+      import automorph.handler.{ApiRequestHandler, HandlerBinding}
       import automorph.handler.meta.HandlerBindings
 
       val server = ${c.prefix}
-      val apiBindings = server.handler.asInstanceOf[BindingHandler[$nodeType, $codecType, $effectType, $contextType]]
+      val apiBindings = server.handler.asInstanceOf[ApiRequestHandler[$nodeType, $codecType, $effectType, $contextType]]
         .apiBindings
       val newApiBindings = HandlerBindings.generate[$nodeType, $codecType, $effectType, $contextType, $apiType](
         server.rpcProtocol.messageCodec, $api
       ).flatMap { binding =>
         $mapName(binding.function.name).map(_ -> binding)
       }
-      val handler = BindingHandler(
+      val handler = ApiRequestHandler(
         server.transport.effectSystem,
         server.rpcProtocol,
         apiBindings ++ newApiBindings,

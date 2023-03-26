@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.endpoint.meta.EndpointBind
-import automorph.handler.BindingHandler
+import automorph.handler.ApiRequestHandler
 import automorph.spi.protocol.RpcFunction
 import automorph.spi.{EndpointTransport, MessageCodec, RequestHandler, RpcProtocol}
 import scala.collection.immutable.ListMap
@@ -118,7 +118,7 @@ object Endpoint {
     transport: EndpointTransport[Effect, Context, Adapter],
     rpcProtocol: RpcProtocol[Node, Codec, Context],
   ): Endpoint[Node, Codec, Effect, Context, Adapter] = {
-    val handler = BindingHandler(transport.effectSystem, rpcProtocol, ListMap.empty)
+    val handler = ApiRequestHandler(transport.effectSystem, rpcProtocol, ListMap.empty)
     Endpoint(transport, rpcProtocol, handler, handler.functions)
   }
 

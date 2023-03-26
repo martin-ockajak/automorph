@@ -1,7 +1,7 @@
 package examples.integration
 
 import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackCustom}
-import automorph.handler.BindingHandler
+import automorph.handler.ApiRequestHandler
 import automorph.{Client, Default, Server}
 import java.net.URI
 import scala.concurrent.ExecutionContext.Implicits.global
