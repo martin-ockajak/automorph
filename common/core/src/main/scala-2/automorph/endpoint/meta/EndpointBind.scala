@@ -128,22 +128,22 @@ object EndpointMeta {
 
     // This endpoint needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Endpoint[Node, Codec, Effect, Context, Adapter]](q"""
+      import automorph.handler.{BindingHandler, HandlerBinding}
+      import automorph.handler.meta.HandlerBindingS
+      import scala.collection.immutable.ListMap
+
       val endpoint = ${c.prefix}
-      val apiBindings = endpoint.handler match {
-        case handler: automorph.handler.BindingHandler[?, ?, ?, ?] =>
-          bindingHandler.asInstanceOf[BindingHandler[Node, Codec, Effect, Context]].apiBindings
-        case _ => Seq.empty
+      val apiBindings = endpoint.handler.asInstanceOf[BindingHandler[$nodeType, $codecType, $effectType, $contextType]]
+        .apiBindings
+      val newApiBindings = HandlerBindings.generate[$nodeType, $codecType, $effectType, $contextType, $apiType](
+        endpoint.rpcProtocol.messageCodec, $api
+      ).flatMap { binding =>
+        $mapName(binding.function.name).map(_ -> binding)
       }
-      val newApiBindings = automorph.endpoint.meta.HandlerBindings
-        .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](
-          endpoint.rpcProtocol.messageCodec, $api
-        ).flatMap { binding =>
-          $mapName(binding.function.name).map(_ -> binding)
-        }
-      val handler = automorph.handler.BindingHandler(
+      val handler = BindingHandler(
         endpoint.transport.effectSystem,
         endpoint.rpcProtocol,
-        scala.collection.immutable.ListMap.from(apiBindings ++ newApiBindings),
+        apiBindings ++ newApiBindings,
       )
       automorph.Endpoint(endpoint.transport, endpoint.rpcProtocol, handler, handler.functions)
     """)

@@ -26,8 +26,8 @@ trait CoreTest extends BaseTest {
   type SimpleApiType = SimpleApi[Effect]
   type ComplexApiType = ComplexApi[Effect, Context]
   type InvalidApiType = InvalidApi[Effect]
-  type GenericServer[Effect[_], Context] = Server[Any, MessageCodec[Any], Effect, Context]
-  type GenericClient[Effect[_], Context] = Client[Any, MessageCodec[Any], Effect, Context]
+  type GenericServer[E[_], C] = Server[Any, MessageCodec[Any], E, C]
+  type GenericClient[E[_], C] = Client[Any, MessageCodec[Any], E, C]
 
   case class TestFixture(
     client: Client[?, ?, Effect, Context],

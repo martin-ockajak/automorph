@@ -119,22 +119,22 @@ object ServerMeta {
 
     // This server needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Server[Node, Codec, Effect, Context]](q"""
+      import automorph.handler.{BindingHandler, HandlerBinding}
+      import automorph.handler.meta.HandlerBindings
+      import scala.collection.immutable.ListMap
+
       val server = ${c.prefix}
-      val apiBindings = server.handler match {
-        case handler: automorph.handler.BindingHandler[?, ?, ?, ?] =>
-          bindingHandler.asInstanceOf[BindingHandler[Node, Codec, Effect, Context]].apiBindings
-        case _ => Seq.empty
+      val apiBindings = server.handler.asInstanceOf[BindingHandler[$nodeType, $codecType, $effectType, $contextType]]
+        .apiBindings
+      val newApiBindings = HandlerBindings.generate[$nodeType, $codecType, $effectType, $contextType, $apiType](
+        server.rpcProtocol.messageCodec, $api
+      ).flatMap { binding =>
+        $mapName(binding.function.name).map(_ -> binding)
       }
-      val newApiBindings = automorph.server.meta.HandlerBindings
-        .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](
-          server.rpcProtocol.messageCodec, $api
-        ).flatMap { binding =>
-          $mapName(binding.function.name).map(_ -> binding)
-        }
-      val handler = automorph.handler.BindingHandler(
+      val handler = BindingHandler(
         server.transport.effectSystem,
         server.rpcProtocol,
-        scala.collection.immutable.ListMap.from(apiBindings ++ newApiBindings),
+        apiBindings ++ newApiBindings,
       )
       automorph.Server(server.transport, server.rpcProtocol, handler, handler.functions)
     """)
