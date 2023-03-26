@@ -129,7 +129,7 @@ object EndpointMeta {
     // This endpoint needs to be assigned to a stable identifier due to macro expansion limitations
     c.Expr[Endpoint[Node, Codec, Effect, Context, Adapter]](q"""
       import automorph.handler.{BindingHandler, HandlerBinding}
-      import automorph.handler.meta.HandlerBindingS
+      import automorph.handler.meta.HandlerBindings
 
       val endpoint = ${c.prefix}
       val apiBindings = endpoint.handler.asInstanceOf[BindingHandler[$nodeType, $codecType, $effectType, $contextType]]
