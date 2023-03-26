@@ -43,6 +43,12 @@ final case class VertxWebSocketEndpoint[Effect[_]](
   private val log = MessageLog(logger, Protocol.WebSocket.name)
   implicit private val system: EffectSystem[Effect] = effectSystem
 
+  override def adapter: Handler[ServerWebSocket] =
+    this
+
+  override def clone(handler: RequestHandler[Effect, Context]): VertxWebSocketEndpoint[Effect] =
+    copy(handler = handler)
+
   override def handle(request: ServerWebSocket): Unit = {
     // Log the request
     val requestId = Random.id
