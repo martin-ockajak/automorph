@@ -121,7 +121,6 @@ object ServerMeta {
     c.Expr[Server[Node, Codec, Effect, Context]](q"""
       import automorph.handler.{BindingHandler, HandlerBinding}
       import automorph.handler.meta.HandlerBindings
-      import scala.collection.immutable.ListMap
 
       val server = ${c.prefix}
       val apiBindings = server.handler.asInstanceOf[BindingHandler[$nodeType, $codecType, $effectType, $contextType]]

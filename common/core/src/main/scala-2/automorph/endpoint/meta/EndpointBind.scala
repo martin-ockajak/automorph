@@ -130,7 +130,6 @@ object EndpointMeta {
     c.Expr[Endpoint[Node, Codec, Effect, Context, Adapter]](q"""
       import automorph.handler.{BindingHandler, HandlerBinding}
       import automorph.handler.meta.HandlerBindingS
-      import scala.collection.immutable.ListMap
 
       val endpoint = ${c.prefix}
       val apiBindings = endpoint.handler.asInstanceOf[BindingHandler[$nodeType, $codecType, $effectType, $contextType]]
