@@ -4,11 +4,11 @@ import scala.collection.mutable
 import test.base.{Await, Network}
 
 trait ClientServerTest extends ProtocolCodecTest with Await with Network {
-  lazy val ports: Seq[Int] = fixtures.map(_ => acquireRandomPort)
+  lazy val ports: mutable.Map[Int, Int] = mutable.HashMap().withDefault(_ => acquireRandomPort)
 
   override def afterAll(): Unit = {
     super.afterAll()
-    ports.foreach(releasePort)
+    ports.values.foreach(releasePort)
   }
 
   private def acquireRandomPort: Int =
@@ -18,9 +18,6 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
         acquireRandomPort
       } else {
         ClientServerTest.usedPorts.add(port)
-//        println(ClientServerTest.usedPorts)
-//        println(port)
-//        println()
         port
       }
     }

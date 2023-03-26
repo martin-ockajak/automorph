@@ -16,10 +16,10 @@ trait LocalTest extends ClientServerTest {
   override def arbitraryContext: Arbitrary[Context] =
     Arbitrary(Gen.asciiPrintableStr.map(LocalContext.apply))
 
-  override def clientTransport(index: Int): ClientTransport[Effect, ?] =
+  override def clientTransport(id: Int): ClientTransport[Effect, ?] =
     LocalClient(system, handler = server.handler)
 
-  override def serverTransport(index: Int): ServerTransport[Effect, Context] =
+  override def serverTransport(id: Int): ServerTransport[Effect, Context] =
     server
 
   private final case class LocalServer(effectSystem: EffectSystem[Effect]) extends ServerTransport[Effect, Context] {

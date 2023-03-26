@@ -15,10 +15,10 @@ trait HttpClientHttpTest extends ClientServerTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def clientTransport(index: Int): ClientTransport[Effect, ?] =
-    HttpClient(system, new URI(s"http://localhost:${ports(index)}"), HttpMethod.Post)
+  override def clientTransport(id: Int): ClientTransport[Effect, ?] =
+    HttpClient(system, new URI(s"http://localhost:${ports(id)}"), HttpMethod.Post)
 
-  override def serverTransport(index: Int): ServerTransport[Effect, Context] = {
-    NanoServer(system, ports(index))
+  override def serverTransport(id: Int): ServerTransport[Effect, Context] = {
+    NanoServer(system, ports(id))
   }
 }
