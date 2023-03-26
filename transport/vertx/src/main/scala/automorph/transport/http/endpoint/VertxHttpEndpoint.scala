@@ -26,7 +26,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see
  *   [[https://vertx.io/docs/apidocs/index.html API]]
  * @constructor
- *   Creates an Vert.x HTTP handler with specified RPC request handler.
+ *   Creates a Vert.x HTTP endpoint message transport plugin with specified effect system and request handler.
  * @param effectSystem
  *   effect system plugin
  * @param mapException

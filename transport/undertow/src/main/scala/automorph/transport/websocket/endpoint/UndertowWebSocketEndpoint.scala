@@ -29,14 +29,14 @@ import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsJava, MapHasAsSca
  *   [[https://undertow.io Library documentation]]
  * @see
  *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
+ * @constructor
+ *   Creates an Undertow Websocket endpoint message transport plugin with specified effect system and request handler.
  * @param effectSystem
  *   effect system plugin
  * @param handler
  *   RPC request handler
  * @tparam Effect
  *   effect type
- * @return
- *   Undertow WebSocket callback
  */
 final case class UndertowWebSocketEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],

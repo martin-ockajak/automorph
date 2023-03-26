@@ -1,7 +1,7 @@
 package automorph.transport.websocket.endpoint
 
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointTransport}
+import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint.Context
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
@@ -16,8 +16,8 @@ import scala.jdk.CollectionConverters.ListHasAsScala
 /**
  * Vert.x WebSocket endpoint message transport plugin.
  *
- * The handler interprets WebSocket request message as an RPC request and processes it using the specified RPC request
- * handler. The response returned by the RPC request handler is used as WebSocket response message.
+ * Interprets WebSocket request message as an RPC request and processes it using the specified RPC request handler.
+ * - The response returned by the RPC request handler is used as WebSocket response message.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/WebSocket Transport protocol]]
@@ -26,19 +26,22 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see
  *   [[https://vertx.io/docs/apidocs/index.html API]]
  * @constructor
- *   Creates an Vert.x WebSocket handler with specified RPC request handler.
+ *   Creates a Vert.x Websocket endpoint message transport plugin with specified effect system and request handler.
+ * @param effectSystem
+ *   effect system plugin
  * @param handler
  *   RPC request handler
  * @tparam Effect
  *   effect type
  */
-final case class VertxWebSocketEndpoint[Effect[_]](handler: Types.HandlerAnyCodec[Effect, Context])
-  extends Handler[ServerWebSocket] with Logging with EndpointTransport {
+final case class VertxWebSocketEndpoint[Effect[_]](
+  effectSystem: EffectSystem[Effect],
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+) extends Handler[ServerWebSocket] with Logging with EndpointTransport[Effect, Context, Handler[ServerWebSocket]] {
 
   private val headerXForwardedFor = "X-Forwarded-For"
   private val log = MessageLog(logger, Protocol.WebSocket.name)
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
+  implicit private val system: EffectSystem[Effect] = effectSystem
 
   override def handle(request: ServerWebSocket): Unit = {
     // Log the request
@@ -50,12 +53,12 @@ final case class VertxWebSocketEndpoint[Effect[_]](handler: Types.HandlerAnyCode
       log.receivedRequest(requestProperties)
 
       // Process the request
-      genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
+      handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
         _.fold(
           error => sendErrorResponse(error, request, requestId, requestProperties),
           result => {
             // Send the response
-            val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
+            val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
             sendResponse(responseBody, request, requestId)
           },
         )

@@ -24,7 +24,7 @@ import scala.jdk.CollectionConverters.MapHasAsJava
  * @see
  *   [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
  * @constructor
- *   Creates and starts a RabbitMQ server message transport plugin.
+ *   Creates a RabbitMQ server message transport plugin.
  * @param effectSystem
  *   effect system plugin
  * @param url

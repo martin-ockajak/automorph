@@ -8,7 +8,7 @@ import akka.http.scaladsl.server.Directives.{complete, extractRequest}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.settings.ServerSettings
 import automorph.log.Logging
-import automorph.spi.ServerTransport
+import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 import automorph.transport.http.endpoint.AkkaHttpEndpoint
 import automorph.transport.http.server.AkkaServer.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
@@ -31,8 +31,8 @@ import scala.concurrent.Await
  *   [[https://doc.akka.io/api/akka-http/current/akka/http/ API]]
  * @constructor
  *   Creates and starts an Akka HTTP server with specified RPC request handler.
- * @param handler
- *   RPC request handler
+ * @param effectSystem
+ *   effect system plugin
  * @param port
  *   port to listen on for HTTP connections
  * @param pathPrefix
@@ -43,23 +43,25 @@ import scala.concurrent.Await
  *   maps an exception to a corresponding HTTP status code
  * @param requestTimeout
  *   HTTP request processing timeout
+ * @param handler
+ *   RPC request handler
  * @param serverSettings
  *   HTTP server settings
  * @tparam Effect
  *   effect type
  */
 final case class AkkaServer[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, Context],
+  effectSystem: EffectSystem[Effect],
   port: Int,
   pathPrefix: String = "/",
   methods: Iterable[HttpMethod] = HttpMethod.values,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
   serverSettings: ServerSettings = AkkaServer.defaultServerSettings,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
 ) extends Logging with ServerTransport[Effect, Context] {
 
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  private val system = genericHandler.effectSystem
+  implicit private val system: EffectSystem[Effect] = effectSystem
   private val allowedMethods = methods.map(_.name).toSet
   private var actorSystem: ActorSystem[Nothing] = null
 

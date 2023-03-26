@@ -25,7 +25,7 @@ import scala.collection.immutable.ListMap
  * @see
  *   [[https://twitter.github.io/finagle/docs/com/twitter/finagle/ API]]
  * @constructor
- *   Creates a Finagle HTTP service with the specified RPC request handler.
+ *   Creates an Finagle HTTP endpoint message transport plugin with specified effect system and request handler.
  * @param effectSystem
  *   effect system plugin
  * @param mapException

@@ -19,7 +19,7 @@ import scala.util.Try
  * Undertow HTTP endpoint transport plugin.
  *
  * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
- * - The response returned by the RPC request handler is used as HTTP response body.
+ * The response returned by the RPC request handler is used as HTTP response body.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -28,7 +28,7 @@ import scala.util.Try
  * @see
  *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor
- *   Creates an Undertow HTTP handler with specified RPC request handler.
+ *   Creates an Undertow HTTP endpoint message transport plugin with specified effect system and request handler.
  * @param effectSystem
  *   effect system plugin
  * @param mapException

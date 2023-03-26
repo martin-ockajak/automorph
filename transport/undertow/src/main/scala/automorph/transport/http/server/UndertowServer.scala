@@ -14,7 +14,7 @@ import java.net.InetSocketAddress
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.ListHasAsScala
 
-/**
+0/**
  * Undertow HTTP & WebSocket server message transport plugin.
  *
  * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
@@ -30,7 +30,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see
  *   [[https://www.javadoc.io/doc/io.undertow/undertow-core/latest/index.html API]]
  * @constructor
- *   Creates and starts an Undertow HTTP & WebSocket server with specified RPC request handler.
+ *   Creates an Undertow HTTP & WebSocket server with specified effect system RPC request handler.
  * @param effectSystem
  *   effect system plugin
  * @param port
@@ -64,8 +64,8 @@ final case class UndertowServer[Effect[_]](
   private lazy val undertow = createServer()
   private val allowedMethods = methods.map(_.name).toSet
 
-  override def clone(rpcHandler: RequestHandler[Effect, Context]): UndertowServer[Effect] =
-    copy(handler = rpcHandler)
+  override def clone(handler: RequestHandler[Effect, Context]): UndertowServer[Effect] =
+    copy(handler = handler)
 
   override def init(): Effect[Unit] =
     effectSystem.evaluate {

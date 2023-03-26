@@ -1,9 +1,9 @@
 package automorph.transport.http.server
 
 import automorph.log.Logging
-import automorph.spi.ServerTransport
+import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 import automorph.transport.http.endpoint.VertxHttpEndpoint
-import automorph.transport.http.server.VertxServer.{defaultHttpServerOptions, defaultVertxOptions, Context}
+import automorph.transport.http.server.VertxServer.{Context, defaultHttpServerOptions, defaultVertxOptions}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint
 import io.vertx.core.http.{HttpServer, HttpServerOptions}
@@ -14,9 +14,8 @@ import scala.collection.immutable.ListMap
  * Vert.x HTTP & WebSocket server message transport plugin.
  *
  * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
- * The response returned by the RPC request handler is used as HTTP response body.
- *
- * Processes only HTTP requests starting with specified URL path.
+ * - The response returned by the RPC request handler is used as HTTP response body.
+ * - Processes only HTTP requests starting with specified URL path.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -28,8 +27,8 @@ import scala.collection.immutable.ListMap
  *   [[https://vertx.io/docs/apidocs/index.html API]]
  * @constructor
  *   Creates an Vert.x HTTP & WebSocket server with specified RPC request handler.
- * @param handler
- *   RPC request handler
+ * @param effectSystem
+ *   effect system plugin
  * @param port
  *   port to listen on for HTTP connections
  * @param pathPrefix
@@ -44,11 +43,13 @@ import scala.collection.immutable.ListMap
  *   VertX options
  * @param httpServerOptions
  *   HTTP server options
+ * @param handler
+ *   RPC request handler
  * @tparam Effect
  *   effect type
  */
 final case class VertxServer[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, Context],
+  effectSystem: EffectSystem[Effect],
   port: Int,
   pathPrefix: String = "/",
   methods: Iterable[HttpMethod] = HttpMethod.values,
@@ -56,6 +57,7 @@ final case class VertxServer[Effect[_]](
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   vertxOptions: VertxOptions = defaultVertxOptions,
   httpServerOptions: HttpServerOptions = defaultHttpServerOptions,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
 ) extends Logging with ServerTransport[Effect, Context] {
 
   private lazy val httpServer = createServer()
@@ -64,15 +66,16 @@ final case class VertxServer[Effect[_]](
   private val statusMethodNotAllowed = 405
   private val messageNotFound = "Not Found"
   private val messageMethodNotAllowed = "Method Not Allowed"
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  private val system = genericHandler.effectSystem
   private val allowedMethods = methods.map(_.name).toSet
 
+  override def clone(handler: RequestHandler[Effect, Context]): VertxServer[Effect] =
+    copy(handler = handler)
+
   override def init(): Effect[Unit] =
-    system.evaluate(start())
+    effectSystem.evaluate(start())
 
   override def close(): Effect[Unit] =
-    system.evaluate {
+    effectSystem.evaluate {
       val closedServer = httpServer.close()
       Option(closedServer.result).getOrElse(throw closedServer.cause)
       ()
@@ -80,7 +83,7 @@ final case class VertxServer[Effect[_]](
 
   private def createServer(): HttpServer = {
     // HTTP
-    val httpHandler = VertxHttpEndpoint(handler, mapException)
+    val httpHandler = VertxHttpEndpoint(effectSystem, mapException, handler)
     val server = Vertx.vertx(vertxOptions).createHttpServer(httpServerOptions.setPort(port)).requestHandler { request =>
       // Validate URL path
       if (request.path.startsWith(pathPrefix)) {

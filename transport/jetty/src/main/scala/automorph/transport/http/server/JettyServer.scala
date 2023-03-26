@@ -18,7 +18,8 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * Jetty HTTP server message transport plugin.
  *
  * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
- * The response returned by the RPC request handler is used as HTTP response body.
+ * - The response returned by the RPC request handler is used as HTTP response body.
+ * - Processes only HTTP requests starting with specified URL path.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -27,7 +28,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * @see
  *   [[https://www.javadoc.io/doc/io.jetty/jetty-core/latest/index.html API]]
  * @constructor
- *   Creates and starts a Jetty HTTP server with specified RPC request handler.
+ *   Creates a Jetty HTTP server with specified RPC request handler.
  * @param effectSystem
  *   effect system plugin
  * @param port
@@ -68,8 +69,8 @@ final case class JettyServer[Effect[_]](
     }
   }
 
-  override def clone(rpcHandler: RequestHandler[Effect, Context]): JettyServer[Effect] =
-    copy(handler = rpcHandler)
+  override def clone(handler: RequestHandler[Effect, Context]): JettyServer[Effect] =
+    copy(handler = handler)
 
   override def init(): Effect[Unit] =
     effectSystem.evaluate {

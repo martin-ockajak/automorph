@@ -26,8 +26,8 @@ import scala.util.Try
 /**
  * Akka HTTP endpoint message transport plugin.
  *
- * The endpoint interprets HTTP request body as a RPC request and processes it with the specified RPC handler. The
- * response returned by the RPC handler is used as HTTP response body.
+ * Interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
+ * - The response returned by the RPC handler is used as HTTP response body.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -35,13 +35,71 @@ import scala.util.Try
  *   [[https://doc.akka.io/docs/akka-http Library documentation]]
  * @see
  *   [[https://doc.akka.io/api/akka-http/current/akka/http/ API]]
+ * @constructor
+ *   Creates an Akka HTTP endpoint message transport plugin with specified effect system and request handler.
+ * @param effectSystem
+ *   effect system plugin
+ * @param mapException
+ *   maps an exception to a corresponding HTTP status code
+ * @param handler
+ *   RPC request handler
+ * @tparam Effect
+ *   effect type
  */
-object AkkaHttpEndpoint extends Logging with EndpointTransport {
+case class AkkaHttpEndpoint[Effect[_]](
+  effectSystem: EffectSystem[Effect],
+  mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+) extends Logging with EndpointTransport[Effect, Context, Behavior[RpcHttpRequest]] {
 
   /** Request context type. */
   type Context = HttpContext[HttpRequest]
 
+  implicit private val system: EffectSystem[Effect] = effectSystem
   private val log = MessageLog(logger, Protocol.Http.name)
+  private val behavior = {
+    val contentType = ContentType.parse(genericHandler.rpcProtocol.messageCodec.mediaType).swap.map { errors =>
+      new IllegalStateException(s"Invalid response content type: ${errors.map(_.toString).mkString("\n")}")
+    }.swap.toTry.get
+
+    Behaviors.receive[RpcHttpRequest] { case (actorContext, message) =>
+      implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
+      implicit val executionContext: ExecutionContext = actorContext.executionContext
+      // Log the request
+      val requestId = Random.id
+      val request = message.request
+      val remoteAddress = message.clientAddress
+      lazy val requestProperties = getRequestProperties(request, requestId, remoteAddress)
+      log.receivedRequest(requestProperties)
+
+      // Process the request
+      request.entity.toStrict(readTimeout).map { requestEntity =>
+        val requestBody = requestEntity.data.asByteBuffer.toInputStream
+        handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
+          _.fold(
+            error =>
+              sendErrorResponse(error, contentType, message.replyTo, remoteAddress, requestId, requestProperties),
+            result => {
+              // Send the response
+              val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+              val status = result.flatMap(_.exception).map(mapException).map(StatusCode.int2StatusCode)
+                .getOrElse(StatusCodes.OK)
+              sendResponse(
+                responseBody,
+                status,
+                contentType,
+                result.flatMap(_.context),
+                message.replyTo,
+                remoteAddress,
+                requestId,
+              )
+            },
+          )
+        )
+      }
+      Behaviors.same
+    }
+  }
 
   /**
    * Creates an Akka HTTP route with the specified RPC request handler.
@@ -111,51 +169,7 @@ object AkkaHttpEndpoint extends Logging with EndpointTransport {
     handler: Types.HandlerAnyCodec[Effect, Context],
     mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
     readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
-  ): Behavior[RpcHttpRequest] = {
-    val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-    implicit val system: EffectSystem[Effect] = genericHandler.effectSystem
-    val contentType = ContentType.parse(genericHandler.rpcProtocol.messageCodec.mediaType).swap.map { errors =>
-      new IllegalStateException(s"Invalid response content type: ${errors.map(_.toString).mkString("\n")}")
-    }.swap.toTry.get
-
-    Behaviors.receive[RpcHttpRequest] { case (actorContext, message) =>
-      implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
-      implicit val executionContext: ExecutionContext = actorContext.executionContext
-      // Log the request
-      val requestId = Random.id
-      val request = message.request
-      val remoteAddress = message.clientAddress
-      lazy val requestProperties = getRequestProperties(request, requestId, remoteAddress)
-      log.receivedRequest(requestProperties)
-
-      // Process the request
-      request.entity.toStrict(readTimeout).map { requestEntity =>
-        val requestBody = requestEntity.data.asByteBuffer.toInputStream
-        genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
-          _.fold(
-            error =>
-              sendErrorResponse(error, contentType, message.replyTo, remoteAddress, requestId, requestProperties),
-            result => {
-              // Send the response
-              val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
-              val statusCode = result.exception.map(mapException).map(StatusCode.int2StatusCode)
-                .getOrElse(StatusCodes.OK)
-              sendResponse(
-                responseBody,
-                statusCode,
-                contentType,
-                result.context,
-                message.replyTo,
-                remoteAddress,
-                requestId,
-              )
-            },
-          )
-        )
-      }
-      Behaviors.same
-    }
-  }
+  ): Behavior[RpcHttpRequest] =
 
   private def sendErrorResponse(
     error: Throwable,
