@@ -27,7 +27,7 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
     FinagleServer(system)
 
   private final case class FinagleServer(effectSystem: EffectSystem[Effect]) extends ServerTransport[Effect, Context] {
-    private var endpoint = FinagleHttpEndpoint(effectSystem, handler = RequestHandler.dummy)
+    private var endpoint = FinagleHttpEndpoint(effectSystem)
     private var server: ListeningServer = None.orNull
 
     override def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {

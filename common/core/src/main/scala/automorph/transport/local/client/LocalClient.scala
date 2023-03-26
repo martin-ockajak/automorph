@@ -2,13 +2,15 @@ package automorph.transport.local.client
 
 import automorph.RpcException.InvalidResponseException
 import automorph.spi.{ClientTransport, EffectSystem, MessageCodec, RequestHandler}
+import automorph.transport.local.LocalContext
+import automorph.transport.local.LocalContext.Context
 import automorph.util.Extensions.EffectOps
 import java.io.InputStream
 
 /**
  * Local client transport plugin.
  *
- * Passes requests directly to specified handler.
+ * Passes requests directly to the specified RPC request handler.
  *
  * @param effectSystem
  *   effect system plugin
@@ -24,12 +26,10 @@ import java.io.InputStream
  *   message codec plugin type
  * @tparam Effect
  *   effect type
- * @tparam Context
- *   message context type
  */
-final case class LocalClient[Node, Codec <: MessageCodec[Node], Effect[_], Context](
+final case class LocalClient[Node, Codec <: MessageCodec[Node], Effect[_]](
   effectSystem: EffectSystem[Effect],
-  context: Context,
+  context: Context = LocalContext.defaultContext,
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
 ) extends ClientTransport[Effect, Context] {
 

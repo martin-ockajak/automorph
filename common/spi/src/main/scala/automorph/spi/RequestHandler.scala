@@ -33,7 +33,7 @@ trait RequestHandler[Effect[_], Context] {
   def mediaType: String
 }
 
-object RequestHandler {
+private[automorph] object RequestHandler {
   /**
    * Dummy RPC request handler.
    *

@@ -46,11 +46,11 @@ trait CoreTest extends BaseTest {
   val complexApi: ComplexApiType = ComplexApiImpl(system, arbitraryContext.arbitrary.sample.get)
   val invalidApi: InvalidApiType = InvalidApiImpl(system)
 
-  implicit def arbitraryContext: Arbitrary[Context]
-
   def system: EffectSystem[Effect]
 
   def run[T](effect: Effect[T]): T
+
+  implicit def arbitraryContext: Arbitrary[Context]
 
   def fixtures: Seq[TestFixture]
 

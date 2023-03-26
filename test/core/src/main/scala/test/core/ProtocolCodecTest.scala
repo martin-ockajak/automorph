@@ -58,8 +58,8 @@ trait ProtocolCodecTest extends CoreTest {
     Seq(enumEncoder, enumDecoder)
     val codec = CirceJsonCodec()
     val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type, Context](codec)
-    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
     val server = Server.transport(serverTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
+    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
     TestFixture(
       client,
       server,
@@ -89,8 +89,8 @@ trait ProtocolCodecTest extends CoreTest {
     )
     val codec = JacksonJsonCodec(JacksonJsonCodec.defaultMapper.registerModule(enumModule))
     val protocol = JsonRpcProtocol[JacksonJsonCodec.Node, codec.type, Context](codec)
-    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
     val server = Server.transport(serverTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
+    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
     TestFixture(
       client,
       server,
@@ -111,8 +111,8 @@ trait ProtocolCodecTest extends CoreTest {
     }
     val codec = UpickleJsonCodec(new Custom)
     val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type, Context](codec)
-    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
     val server = Server.transport(serverTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
+    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
     TestFixture(
       client,
       server,
@@ -133,8 +133,8 @@ trait ProtocolCodecTest extends CoreTest {
     }
     val codec = UpickleMessagePackCodec(new Custom)
     val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type, Context](codec)
-    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
     val server = Server.transport(serverTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
+    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
     TestFixture(
       client,
       server,
@@ -187,8 +187,8 @@ trait ProtocolCodecTest extends CoreTest {
     Seq(recordCodecJson)
     val codec = ArgonautJsonCodec()
     val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type, Context](codec)
-    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
     val server = Server.transport(serverTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
+    val client = Client.transport(typedClientTransport).rpcProtocol(protocol)
     TestFixture(
       client,
       server,

@@ -1,11 +1,13 @@
 package automorph.transport.local.endpoint
 
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
+import automorph.transport.local.LocalContext
+import automorph.transport.local.LocalContext.Context
 
 /**
  * Local endpoint transport plugin.
  *
- * Processes requests directly from a client.
+ * Processes requests supplied directly to its RPC request handler.
  *
  * @constructor
  *   Creates a local endpoint transport plugin
@@ -17,18 +19,16 @@ import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
  *   RPC request handler
  * @tparam Effect
  *   effect type
- * @tparam Context
- *   message context type
  */
-final case class LocalEndpoint[Effect[_], Context](
+final case class LocalEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
-  context: Context,
+  context: Context = LocalContext.defaultContext,
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
 ) extends EndpointTransport[Effect, Context, Unit] {
 
   override def adapter: Unit =
     ()
 
-  override def clone(handler: RequestHandler[Effect, Context]): LocalEndpoint[Effect, Context] =
+  override def clone(handler: RequestHandler[Effect, Context]): LocalEndpoint[Effect] =
     copy(handler = handler)
 }
