@@ -17,7 +17,7 @@ import scala.reflect.macros.blackbox
  * @tparam Context
  *   RPC message context type
  */
-private[automorph] trait ServerMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
+private[automorph] trait ServerBind[Node, Codec <: MessageCodec[Node], Effect[_], Context] {
 
   def rpcProtocol: RpcProtocol[Node, Codec, Context]
 

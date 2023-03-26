@@ -19,7 +19,7 @@ import scala.reflect.macros.blackbox
  * @tparam Adapter
  *   transport layer transport type
  */
-private[automorph] trait EndpointMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context, Adapter] {
+private[automorph] trait EndpointBind[Node, Codec <: MessageCodec[Node], Effect[_], Context, Adapter] {
 
   def rpcProtocol: RpcProtocol[Node, Codec, Context]
 
