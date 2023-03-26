@@ -83,12 +83,12 @@ final case class VertxServer[Effect[_]](
 
   private def createServer(): HttpServer = {
     // HTTP
-    val httpHandler = VertxHttpEndpoint(effectSystem, mapException, handler)
+    val endpoint = VertxHttpEndpoint(effectSystem, mapException, handler)
     val server = Vertx.vertx(vertxOptions).createHttpServer(httpServerOptions.setPort(port)).requestHandler { request =>
       // Validate URL path
       if (request.path.startsWith(pathPrefix)) {
         // Validate HTTP request method
-        if (allowedMethods.contains(request.method.name.toUpperCase)) { httpHandler.handle(request) }
+        if (allowedMethods.contains(request.method.name.toUpperCase)) { endpoint.adapter.handle(request) }
         else {
           request.response.setStatusCode(statusMethodNotAllowed).end(messageMethodNotAllowed)
           ()
