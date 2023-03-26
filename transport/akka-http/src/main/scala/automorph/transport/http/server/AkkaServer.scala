@@ -41,6 +41,8 @@ import scala.concurrent.Await
  *   allowed HTTP request methods
  * @param mapException
  *   maps an exception to a corresponding HTTP status code
+ * @param readTimeout
+ *   HTTP request read timeout
  * @param requestTimeout
  *   HTTP request processing timeout
  * @param handler
@@ -56,6 +58,7 @@ final case class AkkaServer[Effect[_]](
   pathPrefix: String = "/",
   methods: Iterable[HttpMethod] = HttpMethod.values,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+  readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
   requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
   serverSettings: ServerSettings = AkkaServer.defaultServerSettings,
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
@@ -74,7 +77,7 @@ final case class AkkaServer[Effect[_]](
         Behaviors.setup[Nothing] { actorContext =>
           // Create handler actor
           implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
-          val endpointTransport = AkkaHttpEndpoint(effectSystem, mapException, requestTimeout, handler)
+          val endpointTransport = AkkaHttpEndpoint(effectSystem, mapException, readTimeout, handler)
           val handlerActor = actorContext.spawn(endpointTransport.adapter, AkkaHttpEndpoint.getClass.getSimpleName)
           actorContext.watch(handlerActor)
 
