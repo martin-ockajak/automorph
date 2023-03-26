@@ -130,7 +130,8 @@ object EndpointMeta {
     c.Expr[Endpoint[Node, Codec, Effect, Context, Adapter]](q"""
       val endpoint = ${c.prefix}
       val apiBindings = endpoint.handler match {
-        case handler: automorph.handler.BindingHandler[Node, Codec, Effect, Context] => handler.apiBindings
+        case handler: automorph.handler.BindingHandler[?, ?, ?, ?] =>
+          bindingHandler.asInstanceOf[BindingHandler[Node, Codec, Effect, Context]].apiBindings
         case _ => Seq.empty
       }
       val newApiBindings = automorph.endpoint.meta.HandlerBindings

@@ -121,7 +121,8 @@ object ServerMeta {
     c.Expr[Server[Node, Codec, Effect, Context]](q"""
       val server = ${c.prefix}
       val apiBindings = server.handler match {
-        case handler: automorph.handler.BindingHandler[Node, Codec, Effect, Context] => handler.apiBindings
+        case handler: automorph.handler.BindingHandler[?, ?, ?, ?] =>
+          bindingHandler.asInstanceOf[BindingHandler[Node, Codec, Effect, Context]].apiBindings
         case _ => Seq.empty
       }
       val newApiBindings = automorph.server.meta.HandlerBindings

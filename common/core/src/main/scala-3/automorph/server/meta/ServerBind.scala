@@ -85,7 +85,8 @@ private[automorph] trait ServerBind[Node, Codec <: MessageCodec[Node], Effect[_]
    */
   inline def bind[Api <: AnyRef](api: Api, mapName: String => Iterable[String]): Server[Node, Codec, Effect, Context] =
     val apiBindings = handler match
-      case bindingHandler: BindingHandler[Node, Codec, Effect, Context] => bindingHandler.apiBindings
+      case bindingHandler: BindingHandler[?, ?, ?, ?] =>
+        bindingHandler.asInstanceOf[BindingHandler[Node, Codec, Effect, Context]].apiBindings
       case _ => Seq.empty
     val newApiBindings = HandlerBindings.generate[Node, Codec, Effect, Context, Api](
       rpcProtocol.messageCodec, api
