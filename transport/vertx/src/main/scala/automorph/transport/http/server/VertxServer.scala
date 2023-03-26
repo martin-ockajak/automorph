@@ -105,8 +105,9 @@ final case class VertxServer[Effect[_]](
       val webSocketHandler = VertxWebSocketEndpoint(handler)
       server.webSocketHandler { request =>
         // Validate URL path
-        if (request.path.startsWith(pathPrefix)) { webSocketHandler.handle(request) }
-        else {
+        if (request.path.startsWith(pathPrefix)) {
+          webSocketHandler.handle(request)
+        } else {
           request.close((statusWebSocketApplication + statusNotFound).toShort, messageNotFound)
           ()
         }
