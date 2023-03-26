@@ -18,12 +18,12 @@ trait ServerTransport[Effect[_], Context] {
   /**
    * Create a copy of this server transport with specified RPC request handler.
    *
-   * @param rpcHandler
+   * @param handler
    *   RPC request handler
    * @return
    *   server transport
    */
-  def clone(rpcHandler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context]
+  def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context]
 
   /**
    * Starts this server to process incoming requests.

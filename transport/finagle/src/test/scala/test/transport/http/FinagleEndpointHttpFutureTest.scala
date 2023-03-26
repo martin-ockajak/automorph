@@ -1,9 +1,9 @@
 package test.transport.http
 
-import automorph.spi.ServerTransport
+import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 import automorph.system.FutureSystem
 import automorph.transport.http.endpoint.FinagleHttpEndpoint
-import com.twitter.finagle.Http
+import com.twitter.finagle.{Http, ListeningServer}
 import com.twitter.util.{Return, Throw}
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,23 +23,31 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def serverTransport(
-    handler: Types.HandlerAnyCodec[Effect, Context],
-    port: Int,
-  ): ServerTransport[Effect, Context] =
-    new ServerTransport[Effect, Context] {
-      private val server = {
-        val endpoint = FinagleHttpEndpoint(handler)
-        Http.serve(s":$port", endpoint)
+  override def serverTransport: ServerTransport[Effect, Context] =
+    FinagleServer(system)
+
+  private final case class FinagleServer(effectSystem: EffectSystem[Effect]) extends ServerTransport[Effect, Context] {
+    private var endpoint = FinagleHttpEndpoint(effectSystem, handler = RequestHandler.dummy)
+    private var server: ListeningServer = None.orNull
+
+    override def clone(handler: RequestHandler[Effect, Context]): ServerTransport[Effect, Context] = {
+      endpoint = endpoint.clone(handler)
+      this
+    }
+
+    override def init(): Effect[Unit] =
+      Future {
+        server = Http.serve(s":$port", endpoint)
+        ()
       }
 
-      override def close(): Effect[Unit] = {
-        val promise = Promise[Unit]()
-        server.close().respond {
-          case Return(result) => promise.success(result)
-          case Throw(error) => promise.failure(error)
-        }
-        promise.future
+    override def close(): Effect[Unit] = {
+      val promise = Promise[Unit]()
+      server.close().respond {
+        case Return(result) => promise.success(result)
+        case Throw(error) => promise.failure(error)
       }
+      promise.future
     }
+  }
 }

@@ -23,10 +23,10 @@ trait EndpointTransport[Effect[_], Context, Adapter] {
   /**
    * Create a copy of this endpoint transport with specified RPC request handler.
    *
-   * @param rpcHandler
+   * @param handler
    *   RPC request handler
    * @return
    *   server transport
    */
-  def clone(rpcHandler: RequestHandler[Effect, Context]): EndpointTransport[Effect, Context, Adapter]
+  def clone(handler: RequestHandler[Effect, Context]): EndpointTransport[Effect, Context, Adapter]
 }

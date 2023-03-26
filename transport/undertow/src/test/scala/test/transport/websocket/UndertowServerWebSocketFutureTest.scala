@@ -22,11 +22,8 @@ class UndertowServerWebSocketFutureTest extends StandardHttpServerTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def serverTransport(
-    handler: Types.HandlerAnyCodec[Effect, Context],
-    port: Int,
-  ): ServerTransport[Effect, Context] =
-    UndertowServer(handler, port)
+  override def serverTransport: ServerTransport[Effect, Context] =
+    UndertowServer[Effect](system, port)
 
   override def webSocket: Boolean =
     true
