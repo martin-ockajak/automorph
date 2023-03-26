@@ -13,7 +13,9 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
 
   override def afterAll(): Unit = {
     super.afterAll()
-    ports.values.foreach(releasePort)
+    ports.synchronized {
+      ports.values.foreach(releasePort)
+    }
   }
 
   private def acquireRandomPort: Int =
