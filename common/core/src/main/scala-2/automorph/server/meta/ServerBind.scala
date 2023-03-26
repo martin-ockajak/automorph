@@ -121,10 +121,14 @@ object ServerMeta {
     c.Expr[Server[Node, Codec, Effect, Context]](q"""
       import automorph.handler.{ApiRequestHandler, HandlerBinding}
       import automorph.handler.meta.HandlerBindings
+      import scala.collection.immutable.ListMap
 
       val server = ${c.prefix}
-      val apiBindings = server.handler
-        .asInstanceOf[ApiRequestHandler[$nodeType, $codecType, $effectType, $contextType]].apiBindings
+      val apiBindings = if (server.handler.isInstanceOf[ApiRequestHandler[?, ?, $effectType, ?]]) {
+        server.handler.asInstanceOf[ApiRequestHandler[$nodeType, $codecType, $effectType, $contextType]].apiBindings
+      } else {
+        ListMap.empty[String, HandlerBinding[$nodeType, $effectType, $contextType]]
+      }
       val newApiBindings = HandlerBindings.generate[$nodeType, $codecType, $effectType, $contextType, $apiType](
         server.rpcProtocol.messageCodec, $api
       ).flatMap { binding =>

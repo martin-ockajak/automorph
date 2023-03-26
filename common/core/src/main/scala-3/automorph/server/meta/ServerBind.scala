@@ -87,7 +87,7 @@ private[automorph] trait ServerBind[Node, Codec <: MessageCodec[Node], Effect[_]
     val apiBindings = handler match
       case apiHandler: ApiRequestHandler[?, ?, ?, ?] =>
         apiHandler.asInstanceOf[ApiRequestHandler[Node, Codec, Effect, Context]].apiBindings
-      case _ => Seq.empty
+      case _ => ListMap.empty
     val newApiBindings = HandlerBindings.generate[Node, Codec, Effect, Context, Api](
       rpcProtocol.messageCodec, api
     ).flatMap { binding =>
@@ -96,6 +96,6 @@ private[automorph] trait ServerBind[Node, Codec <: MessageCodec[Node], Effect[_]
     val apiHandler = ApiRequestHandler(
       transport.effectSystem,
       rpcProtocol,
-      ListMap.from(apiBindings ++ newApiBindings)
+      apiBindings ++ newApiBindings,
     )
     Server(transport, rpcProtocol, apiHandler, apiHandler.functions)
