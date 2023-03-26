@@ -9,7 +9,7 @@ import test.core.ClientServerTest
 
 trait LocalTest extends ClientServerTest {
 
-  type Context = LocalContext
+  type Context = LocalClient.Context
 
   private lazy val server = LocalServer(system)
 

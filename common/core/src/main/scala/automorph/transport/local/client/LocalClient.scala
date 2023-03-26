@@ -3,7 +3,7 @@ package automorph.transport.local.client
 import automorph.RpcException.InvalidResponseException
 import automorph.spi.{ClientTransport, EffectSystem, MessageCodec, RequestHandler}
 import automorph.transport.local.LocalContext
-import automorph.transport.local.LocalContext.Context
+import automorph.transport.local.client.LocalClient.Context
 import automorph.util.Extensions.EffectOps
 import java.io.InputStream
 
@@ -58,4 +58,10 @@ final case class LocalClient[Node, Codec <: MessageCodec[Node], Effect[_]](
 
   override def close(): Effect[Unit] =
     effectSystem.successful(())
+}
+
+object LocalClient {
+
+  /** Message context type. */
+  type Context = LocalContext
 }

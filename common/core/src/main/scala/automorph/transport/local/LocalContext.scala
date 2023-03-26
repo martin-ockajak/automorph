@@ -10,9 +10,6 @@ final case class LocalContext(value: Any)
 
 object LocalContext {
 
-  /** Message context type. */
-  type Context = LocalContext
-
   /** Implicit default context value. */
   implicit val defaultContext: LocalContext = LocalContext(())
 }

@@ -2,7 +2,7 @@ package automorph.transport.local.endpoint
 
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.local.LocalContext
-import automorph.transport.local.LocalContext.Context
+import automorph.transport.local.endpoint.LocalEndpoint.Context
 
 /**
  * Local endpoint transport plugin.
@@ -31,4 +31,10 @@ final case class LocalEndpoint[Effect[_]](
 
   override def clone(handler: RequestHandler[Effect, Context]): LocalEndpoint[Effect] =
     copy(handler = handler)
+}
+
+object LocalEndpoint {
+
+  /** Message context type. */
+  type Context = LocalContext
 }
