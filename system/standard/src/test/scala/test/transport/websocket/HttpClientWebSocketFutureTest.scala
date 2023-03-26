@@ -26,8 +26,8 @@ class HttpClientWebSocketFutureTest extends ClientServerTest {
     HttpContextGenerator.arbitrary
 
   override def clientTransport(id: Int): ClientTransport[Effect, ?] =
-    HttpClient(system, new URI(s"ws://localhost:${ports(id)}"), HttpMethod.Get)
+    HttpClient(system, new URI(s"ws://localhost:${port(id)}"), HttpMethod.Get)
 
   override def serverTransport(id: Int): ServerTransport[Effect, Context] =
-    NanoServer[Effect](system, ports(id))
+    NanoServer[Effect](system, port(id))
 }

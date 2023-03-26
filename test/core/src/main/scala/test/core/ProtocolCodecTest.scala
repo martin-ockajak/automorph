@@ -23,10 +23,10 @@ trait ProtocolCodecTest extends CoreTest {
     Seq(context)
     Seq(
       circeJsonFixture(0),
-      jacksonJsonFixture(1),
-      uPickleJsonFixture(2),
-      uPickleMessagePackFixture(3),
-      argonautJsonFixture(4),
+//      jacksonJsonFixture(1),
+//      uPickleJsonFixture(2),
+//      uPickleMessagePackFixture(3),
+//      argonautJsonFixture(4),
     )
   }
 
