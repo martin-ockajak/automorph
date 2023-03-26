@@ -26,15 +26,16 @@ object HttpContextGenerator {
     }
   } yield (name, value)
 
-  def arbitrary[T]: Arbitrary[HttpContext[T]] = Arbitrary(for {
-    method <- Gen.oneOf(methods)
-    headers <- Gen.listOfN(maxItems, header)
-    parameters <- Gen.listOfN(maxItems, parameter)
-  } yield HttpContext(
-    method = Some(method),
-    headers = headers,
-    parameters = parameters
-  ))
+  def arbitrary[T]: Arbitrary[HttpContext[T]] =
+    Arbitrary(for {
+      method <- Gen.oneOf(methods)
+      headers <- Gen.listOfN(maxItems, header)
+      parameters <- Gen.listOfN(maxItems, parameter)
+    } yield HttpContext(
+      method = Some(method),
+      headers = headers,
+      parameters = parameters
+    ))
 
   private def stringGenerator(minSize: Int, maxSize: Int, charGenerator: Gen[Char]): Gen[String] =
     Gen.choose(minSize, maxSize).flatMap(size => Gen.stringOfN(size, charGenerator))
