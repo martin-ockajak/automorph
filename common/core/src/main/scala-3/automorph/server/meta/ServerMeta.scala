@@ -92,5 +92,9 @@ private[automorph] trait ServerMeta[Node, Codec <: MessageCodec[Node], Effect[_]
     ).flatMap { binding =>
       mapName(binding.function.name).map(_ -> binding)
     }
-    val bindingHandler = BindingHandler(rpcProtocol, transport.effectSystem, ListMap.from(apiBindings ++ newApiBindings))
+    val bindingHandler = BindingHandler(
+      transport.effectSystem,
+      rpcProtocol,
+      ListMap.from(apiBindings ++ newApiBindings)
+    )
     Server(transport, rpcProtocol, bindingHandler, bindingHandler.functions)

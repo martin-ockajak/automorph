@@ -131,8 +131,8 @@ object ServerMeta {
           $mapName(binding.function.name).map(_ -> binding)
         }
       val handler = automorph.handler.BindingHandler(
-        server.rpcProtocol,
         server.transport.effectSystem,
+        server.rpcProtocol,
         scala.collection.immutable.ListMap.from(apiBindings ++ newApiBindings),
       )
       automorph.Server(server.transport, server.rpcProtocol, handler, handler.functions)

@@ -140,8 +140,8 @@ object EndpointMeta {
           $mapName(binding.function.name).map(_ -> binding)
         }
       val handler = automorph.handler.BindingHandler(
-        endpoint.rpcProtocol,
         endpoint.transport.effectSystem,
+        endpoint.rpcProtocol,
         scala.collection.immutable.ListMap.from(apiBindings ++ newApiBindings),
       )
       automorph.Endpoint(endpoint.transport, endpoint.rpcProtocol, handler, handler.functions)
