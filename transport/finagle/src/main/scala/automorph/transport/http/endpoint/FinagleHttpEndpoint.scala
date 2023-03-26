@@ -38,7 +38,7 @@ import scala.collection.immutable.ListMap
 final case class FinagleHttpEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Service[Request, Response] with Logging with EndpointTransport[Effect, Context, Service[Request, Response]] {
 
   private val log = MessageLog(logger, Protocol.Http.name)

@@ -6,7 +6,7 @@ import automorph.spi.MessageCodec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-private[automorph] trait DefaultMeta {
+private[automorph] trait DefaultMessageCodec {
 
   /** Default message node type. */
   type Node = CirceJsonCodec.Node
@@ -24,7 +24,8 @@ private[automorph] trait DefaultMeta {
    * @tparam Context
    *   RPC message context type
    */
-  type Protocol[NodeType, CodecType <: MessageCodec[NodeType], Context] = JsonRpcProtocol[NodeType, CodecType, Context]
+  type RpcProtocol[NodeType, CodecType <: MessageCodec[NodeType], Context] =
+    JsonRpcProtocol[NodeType, CodecType, Context]
 
   /**
    * Creates a Circe JSON message codec plugin.
@@ -51,7 +52,7 @@ private[automorph] trait DefaultMeta {
    * @return
    *   RPC protocol plugin
    */
-  def rpcProtocol[Context]: Protocol[Node, Codec, Context] =
+  def rpcProtocol[Context]: RpcProtocol[Node, Codec, Context] =
     JsonRpcProtocol(
       messageCodec,
       JsonRpcProtocol.defaultMapError,
@@ -79,11 +80,11 @@ private[automorph] trait DefaultMeta {
    */
   def rpcProtocol[NodeType, CodecType <: MessageCodec[NodeType], Context](
     messageCodec: CodecType
-  ): Protocol[NodeType, CodecType, Context] =
-    macro DefaultMeta.rpcProtocolMacro[NodeType, CodecType, Context]
+  ): RpcProtocol[NodeType, CodecType, Context] =
+    macro DefaultMessageCodec.rpcProtocolMacro[NodeType, CodecType, Context]
 }
 
-object DefaultMeta {
+object DefaultMessageCodec {
 
   def rpcProtocolMacro[NodeType, CodecType <: MessageCodec[NodeType], Context](
     c: blackbox.Context

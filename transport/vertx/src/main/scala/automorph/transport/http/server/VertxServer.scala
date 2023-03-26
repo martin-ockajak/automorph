@@ -57,7 +57,7 @@ final case class VertxServer[Effect[_]](
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   vertxOptions: VertxOptions = defaultVertxOptions,
   httpServerOptions: HttpServerOptions = defaultHttpServerOptions,
-  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
   private lazy val httpServer = createServer()

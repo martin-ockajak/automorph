@@ -9,7 +9,7 @@ import automorph.util.{Network, Random}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
 import io.undertow.util.Headers
 import io.undertow.websockets.core.{
-  AbstractReceiveListener, BufferedBinaryMessage, BufferedTextMessage, WebSocketCallback, WebSocketChannel, WebSockets,
+  AbstractReceiveListener, BufferedBinaryMessage, BufferedTextMessage, WebSocketCallback, WebSocketChannel, WebSockets
 }
 import io.undertow.websockets.spi.WebSocketHttpExchange
 import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHandshakeHandler}
@@ -40,7 +40,7 @@ import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsJava, MapHasAsSca
  */
 final case class UndertowWebSocketEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
-  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends WebSocketConnectionCallback
   with AutoCloseable
   with Logging

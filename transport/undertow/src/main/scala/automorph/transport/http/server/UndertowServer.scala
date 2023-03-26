@@ -58,7 +58,7 @@ final case class UndertowServer[Effect[_]](
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   builder: Undertow.Builder = defaultBuilder,
-  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
   private lazy val undertow = createServer()

@@ -54,7 +54,7 @@ final case class JettyServer[Effect[_]](
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   threadPool: ThreadPool = new QueuedThreadPool,
-  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
   private lazy val jetty = createServer()

@@ -1,6 +1,6 @@
 package examples.transport
 
-import automorph.{Default, Server}
+import automorph.{Client, Default, Server}
 import automorph.transport.amqp.client.RabbitMqClient
 import automorph.transport.amqp.server.RabbitMqServer
 import io.arivera.oss.embedded.rabbitmq.{EmbeddedRabbitMq, EmbeddedRabbitMqConfig}
@@ -51,7 +51,9 @@ private[examples] object AmqpTransport {
       val clientTransport = RabbitMqClient(new URI("amqp://localhost:7000"), "api", Default.effectSystemAsync)
 
       // Setup JSON-RPC HTTP client
-      val client = Default.client(clientTransport)
+      val client = run(
+        Client.transport(clientTransport).rpcProtocol(Default.rpcProtocol).init()
+      )
 
       // Call the remote API function
       val remoteApi = client.bind[ClientApi]

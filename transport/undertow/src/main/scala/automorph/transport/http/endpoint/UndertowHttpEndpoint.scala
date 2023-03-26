@@ -41,7 +41,7 @@ import scala.util.Try
 final case class UndertowHttpEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends HttpHandler with Logging with EndpointTransport[Effect, Context, HttpHandler] {
 
   private val log = MessageLog(logger, Protocol.Http.name)
