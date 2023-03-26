@@ -132,8 +132,8 @@ object EndpointMeta {
       import automorph.handler.meta.HandlerBindings
 
       val endpoint = ${c.prefix}
-      val apiBindings = endpoint.handler.asInstanceOf[ApiRequestHandler[$nodeType, $codecType, $effectType, $contextType]]
-        .apiBindings
+      val apiBindings = endpoint.handler
+        .asInstanceOf[ApiRequestHandler[$nodeType, $codecType, $effectType, $contextType]].apiBindings
       val newApiBindings = HandlerBindings.generate[$nodeType, $codecType, $effectType, $contextType, $apiType](
         endpoint.rpcProtocol.messageCodec, $api
       ).flatMap { binding =>
