@@ -73,8 +73,8 @@ final case class UndertowHttpEndpoint[Effect[_]](
                 result => {
                   // Send the response
                   val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
-                  val statusCode = result.flatMap(_.exception).map(mapException).getOrElse(StatusCodes.OK)
-                  sendResponse(responseBody, statusCode, result.flatMap(_.context), exchange, requestId)
+                  val status = result.flatMap(_.exception).map(mapException).getOrElse(StatusCodes.OK)
+                  sendResponse(responseBody, status, result.flatMap(_.context), exchange, requestId)
                 },
               )
             ).runAsync

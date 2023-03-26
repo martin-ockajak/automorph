@@ -1,7 +1,7 @@
 package automorph.transport.http.endpoint
 
 import automorph.log.{LogProperties, Logging, MessageLog}
-import automorph.spi.{EffectSystem, EndpointTransport}
+import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.endpoint.VertxHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
@@ -27,24 +27,32 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  *   [[https://vertx.io/docs/apidocs/index.html API]]
  * @constructor
  *   Creates an Vert.x HTTP handler with specified RPC request handler.
- * @param handler
- *   RPC request handler
+ * @param effectSystem
+ *   effect system plugin
  * @param mapException
  *   maps an exception to a corresponding HTTP status code
+ * @param handler
+ *   RPC request handler
  * @tparam Effect
  *   effect type
  */
 final case class VertxHttpEndpoint[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, Context],
+  effectSystem: EffectSystem[Effect],
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
-) extends Handler[HttpServerRequest] with Logging with EndpointTransport {
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+) extends Handler[HttpServerRequest] with Logging with EndpointTransport[Effect, Context, Handler[HttpServerRequest]] {
 
   private val statusOk = 200
   private val statusInternalServerError = 500
   private val headerXForwardedFor = "X-Forwarded-For"
   private val log = MessageLog(logger, Protocol.Http.name)
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
+  implicit private val system: EffectSystem[Effect] = effectSystem
+
+  override def adapter: Handler[HttpServerRequest] =
+    this
+
+  override def clone(handler: RequestHandler[Effect, Context]): VertxHttpEndpoint[Effect] =
+    copy(handler = handler)
 
   override def handle(request: HttpServerRequest): Unit = {
     // Log the request
@@ -56,14 +64,14 @@ final case class VertxHttpEndpoint[Effect[_]](
       log.receivedRequest(requestProperties)
 
       // Process the request
-      genericHandler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
+      handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
         _.fold(
           error => sendErrorResponse(error, request, requestId, requestProperties),
           result => {
             // Send the response
-            val responseBody = result.responseBody.getOrElse(Array[Byte]().toInputStream)
-            val statusCode = result.exception.map(mapException).getOrElse(statusOk)
-            sendResponse(responseBody, statusCode, result.context, request, requestId)
+            val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+            val status = result.flatMap(_.exception).map(mapException).getOrElse(statusOk)
+            sendResponse(responseBody, status, result.flatMap(_.context), request, requestId)
           },
         )
       ).runAsync
@@ -100,7 +108,7 @@ final case class VertxHttpEndpoint[Effect[_]](
 
     // Send the response
     setResponseContext(request.response, responseContext)
-      .putHeader(HttpHeaders.CONTENT_TYPE, genericHandler.rpcProtocol.messageCodec.mediaType).setStatusCode(statusCode)
+      .putHeader(HttpHeaders.CONTENT_TYPE, handler.mediaType).setStatusCode(statusCode)
       .end(Buffer.buffer(responseBody.toArray)).onSuccess(_ => log.sentResponse(responseProperties)).onFailure {
         error => log.failedSendResponse(error, responseProperties)
       }
