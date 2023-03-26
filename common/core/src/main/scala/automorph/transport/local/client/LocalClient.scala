@@ -30,7 +30,7 @@ import java.io.InputStream
 final case class LocalClient[Node, Codec <: MessageCodec[Node], Effect[_]](
   effectSystem: EffectSystem[Effect],
   context: Context = LocalContext.defaultContext,
-  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends ClientTransport[Effect, Context] {
 
   implicit private val system: EffectSystem[Effect] = effectSystem

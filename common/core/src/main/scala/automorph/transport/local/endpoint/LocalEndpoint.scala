@@ -23,7 +23,7 @@ import automorph.transport.local.endpoint.LocalEndpoint.Context
 final case class LocalEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
   context: Context = LocalContext.defaultContext,
-  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends EndpointTransport[Effect, Context, Unit] {
 
   override def adapter: Unit =
