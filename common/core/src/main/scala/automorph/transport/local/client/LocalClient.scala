@@ -10,7 +10,7 @@ import java.io.InputStream
 /**
  * Local client transport plugin.
  *
- * Passes RPC API requests locally to the specified RPC request handler.
+ * Passes RPC API requests directly to the specified RPC request handler.
  *
  * @param effectSystem
  *   effect system plugin
