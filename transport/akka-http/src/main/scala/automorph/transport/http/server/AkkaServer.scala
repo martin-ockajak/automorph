@@ -63,7 +63,10 @@ final case class AkkaServer[Effect[_]](
 
   implicit private val system: EffectSystem[Effect] = effectSystem
   private val allowedMethods = methods.map(_.name).toSet
-  private var actorSystem: ActorSystem[Nothing] = null
+  private var actorSystem: ActorSystem[Nothing] = None.orNull
+
+  override def clone(handler: RequestHandler[Effect, Context]): AkkaServer[Effect] =
+    copy(handler = handler)
 
   override def init(): Effect[Unit] =
     system.evaluate {
@@ -71,12 +74,12 @@ final case class AkkaServer[Effect[_]](
         Behaviors.setup[Nothing] { actorContext =>
           // Create handler actor
           implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
-          val handlerBehavior = AkkaHttpEndpoint.behavior(handler)
-          val handlerActor = actorContext.spawn(handlerBehavior, AkkaHttpEndpoint.getClass.getSimpleName)
+          val endpointTransport = AkkaHttpEndpoint(effectSystem, mapException, requestTimeout, handler)
+          val handlerActor = actorContext.spawn(endpointTransport.adapter, AkkaHttpEndpoint.getClass.getSimpleName)
           actorContext.watch(handlerActor)
 
           // Create HTTP route
-          val handlerRoute = AkkaHttpEndpoint(handlerActor, requestTimeout)
+          val handlerRoute = AkkaHttpEndpoint.route(handlerActor, requestTimeout)
           val serverRoute = route(handlerRoute)
 
           // Start HTTP server
@@ -99,7 +102,7 @@ final case class AkkaServer[Effect[_]](
     system.evaluate {
       actorSystem.terminate()
       Await.result(actorSystem.whenTerminated, Duration.Inf)
-      actorSystem = null
+      actorSystem = None.orNull
       ()
     }
 

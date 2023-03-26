@@ -43,7 +43,7 @@ import scala.util.Try
  * @param mapException
  *   maps an exception to a corresponding HTTP status code
  * @param readTimeout
- *   request read timeout
+ *   HTTP request read timeout
  * @param handler
  *   RPC request handler
  * @tparam Effect
