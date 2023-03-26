@@ -1,9 +1,10 @@
 package test.core
 
-import automorph.RpcException.{FunctionNotFoundException, InvalidArgumentsException, InvalidRequestException, InvalidResponseException}
+import automorph.RpcException.{
+  FunctionNotFoundException, InvalidArgumentsException, InvalidRequestException, InvalidResponseException
+}
 import automorph.spi.{EffectSystem, MessageCodec}
 import automorph.{Client, Server}
-import automorph.handler.BindingHandler
 import org.scalacheck.Arbitrary
 import scala.util.{Failure, Success, Try}
 import test.Generators.arbitraryRecord
@@ -29,8 +30,8 @@ trait CoreTest extends BaseTest {
   type GenericClient[Effect[_], Context] = Client[Any, MessageCodec[Any], Effect, Context]
 
   case class TestFixture(
-    client: Client[?, ?, ?, ?],
-    server: Server[?, ?, ?, ?],
+    client: Client[?, ?, Effect, Context],
+    server: Server[?, ?, Effect, Context],
     simpleApi: SimpleApiType,
     complexApi: ComplexApiType,
     invalidApi: InvalidApiType,

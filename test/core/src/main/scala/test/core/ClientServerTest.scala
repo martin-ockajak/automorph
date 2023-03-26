@@ -32,6 +32,7 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
   private def releasePort(port: Int): Unit =
     ClientServerTest.usedPorts.synchronized {
       ClientServerTest.usedPorts.remove(port)
+      ()
     }
 }
 
