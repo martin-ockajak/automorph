@@ -178,7 +178,7 @@ object UndertowWebSocketEndpoint {
    */
   def handshakeHandler(
     webSocketConnectionCallback: WebSocketConnectionCallback,
-    next: HttpHandler
+    next: HttpHandler,
   ): WebSocketProtocolHandshakeHandler =
     new WebSocketProtocolHandshakeHandler(webSocketConnectionCallback, next)
 }
