@@ -74,7 +74,7 @@ private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_]
    */
   inline def bind[Api <: AnyRef](mapName: String => String): Api =
     // Generate API method bindings
-    val bindings = ClientBindingGenerator.bindings[Node, Codec, Effect, Context, Api](
+    val bindings = ClientBindings.bindings[Node, Codec, Effect, Context, Api](
       rpcProtocol.messageCodec
     ).map { binding =>
       binding.function.name -> binding
