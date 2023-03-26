@@ -88,8 +88,9 @@ final case class VertxServer[Effect[_]](
       // Validate URL path
       if (request.path.startsWith(pathPrefix)) {
         // Validate HTTP request method
-        if (allowedMethods.contains(request.method.name.toUpperCase)) { endpoint.adapter.handle(request) }
-        else {
+        if (allowedMethods.contains(request.method.name.toUpperCase)) {
+          endpoint.adapter.handle(request)
+        } else {
           request.response.setStatusCode(statusMethodNotAllowed).end(messageMethodNotAllowed)
           ()
         }
