@@ -2,14 +2,16 @@ package automorph.transport.http.client
 
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{ClientTransport, EffectSystem}
-import automorph.transport.http.client.SttpClient.{Context, Session}
+import automorph.transport.http.client.SttpClient.{Context, Message}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps}
 import java.io.InputStream
 import java.net.URI
 import scala.collection.immutable.ListMap
 import sttp.capabilities.WebSockets
-import sttp.client3.{PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore}
+import sttp.client3.{
+  PartialRequest, Request, Response, SttpBackend, asByteArrayAlways, asWebSocketAlways, basicRequest, ignore
+}
 import sttp.model.{Header, MediaType, Method, Uri}
 
 /**
@@ -96,7 +98,7 @@ final case class SttpClient[Effect[_]] private (
   }
 
   override def context: Context =
-    Session.defaultContext.url(url).method(method)
+    Message.defaultContext.url(url).method(method)
 
   override def init(): Effect[Unit] =
     effectSystem.successful(())
@@ -135,7 +137,7 @@ final case class SttpClient[Effect[_]] private (
     requestContext: Context,
   ): Request[Array[Byte], WebSocket] = {
     // URL & method
-    val transportRequest = requestContext.transport.map(_.request).getOrElse(basicRequest)
+    val transportRequest = requestContext.message.map(_.request).getOrElse(basicRequest)
     val requestUrl = Uri(requestContext.overrideUrl(defaultUrl))
     val requestMethod = Method.unsafeApply(requestContext.method.getOrElse(method).name)
 
@@ -183,7 +185,7 @@ final case class SttpClient[Effect[_]] private (
 object SttpClient {
 
   /** Request context type. */
-  type Context = HttpContext[Session]
+  type Context = HttpContext[Message]
 
   /**
    * Creates an STTP HTTP & WebSocket client message transport plugin with the specified STTP backend.
@@ -233,11 +235,12 @@ object SttpClient {
   ): SttpClient[Effect] =
     SttpClient[Effect](system, backend, url, method, webSocket = false)
 
-  final case class Session(request: PartialRequest[Either[String, String], Any])
+  /** Message properties. */
+  final case class Message(request: PartialRequest[Either[String, String], Any])
 
-  object Session {
+  object Message {
 
     /** Implicit default context value. */
-    implicit val defaultContext: HttpContext[Session] = HttpContext()
+    implicit val defaultContext: HttpContext[Message] = HttpContext()
   }
 }

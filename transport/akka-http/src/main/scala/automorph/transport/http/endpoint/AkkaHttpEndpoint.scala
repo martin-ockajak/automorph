@@ -207,7 +207,7 @@ object AkkaHttpEndpoint extends Logging with EndpointTransport {
 
   private def getRequestContext(request: HttpRequest): Context =
     HttpContext(
-      transport = Some(request),
+      message = Some(request),
       method = Some(HttpMethod.valueOf(request.method.value)),
       headers = request.headers.map(header => header.name -> header.value),
     ).url(request.uri.toString)

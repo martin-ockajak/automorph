@@ -99,7 +99,7 @@ final case class FinagleHttpEndpoint[Effect[_]](
 
   private def getRequestContext(request: Request): Context =
     HttpContext(
-      transport = Some(request),
+      message = Some(request),
       method = Some(HttpMethod.valueOf(request.method.name)),
       headers = request.headerMap.iterator.toSeq,
     ).url(request.uri)

@@ -71,7 +71,7 @@ object Endpoint {
    * @tparam Effect
    *   effect type
    * @tparam Context
-   *   request context type
+   *   RPC message context type
    * @tparam Adapter
    *   transport layer transport type
    */

@@ -13,16 +13,25 @@ import scala.jdk.CollectionConverters.{MapHasAsJava, MapHasAsScala}
 import scala.util.{Try, Using}
 
 /** Common RabbitMQ functionality. */
-private[automorph] object RabbitMqCommon extends Logging {
+object RabbitMq extends Logging {
+
+  /** Message properties. */
+  final case class Message(properties: BasicProperties)
+
+  object Message {
+
+    /** Implicit default context value. */
+    implicit val default: AmqpContext[Message] = AmqpContext()
+  }
 
   /** Default direct AMQP message exchange name. */
-  val defaultDirectExchange: String = ""
+  private[automorph] val defaultDirectExchange: String = ""
 
   /** Routing key property. */
-  val routingKeyProperty = "Routing Key"
+  private[automorph] val routingKeyProperty = "Routing Key"
 
   /** Protocol name. */
-  val protocol = "AMQP"
+  private[automorph] val protocol = "AMQP"
 
   /**
    * Initialize AMQP broker connection.
@@ -38,7 +47,12 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @return
    *   AMQP broker connection
    */
-  def connect(url: URI, addresses: Seq[Address], name: String, connectionFactory: ConnectionFactory): Connection = {
+  private[automorph] def connect(
+    url: URI,
+    addresses: Seq[Address],
+    name: String,
+    connectionFactory: ConnectionFactory
+  ): Connection = {
     val urlText = url.toString
     connectionFactory.setUri(url)
     logger.debug(s"Connecting to $protocol broker: $urlText")
@@ -59,7 +73,7 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @return
    *   nothing
    */
-  def declareExchange(exchange: String, connection: Connection): Unit =
+  private[automorph] def declareExchange(exchange: String, connection: Connection): Unit =
     Option.when(exchange != defaultDirectExchange) {
       Using(connection.createChannel()) { channel =>
         channel.exchangeDeclare(exchange, BuiltinExchangeType.DIRECT, false)
@@ -73,7 +87,7 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @param connection
    *   AMQP broker connection
    */
-  def disconnect(connection: Connection): Unit =
+  private[automorph] def disconnect(connection: Connection): Unit =
     connection.abort(AMQP.CONNECTION_FORCED, "Terminated")
 
   /**
@@ -84,7 +98,7 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @return
    *   application identifier
    */
-  def applicationId(applicationName: String): String =
+  private[automorph] def applicationId(applicationName: String): String =
     s"${InetAddress.getLocalHost.getHostName}/$applicationName"
 
   /**
@@ -99,7 +113,10 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @return
    *   thread-local AMQP message consumer
    */
-  def threadLocalConsumer[T <: DefaultConsumer](connection: Connection, createConsumer: Channel => T): ThreadLocal[T] =
+  private[automorph] def threadLocalConsumer[T <: DefaultConsumer](
+    connection: Connection,
+    createConsumer: Channel => T
+  ): ThreadLocal[T] =
     ThreadLocal.withInitial { () =>
       val channel = connection.createChannel()
       createConsumer(Option(channel).getOrElse(throw new IOException("No AMQP connection channel available")))
@@ -123,7 +140,7 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @return
    *   AMQP properties
    */
-  def amqpProperties(
+  private[automorph] def amqpProperties(
     messageContext: Option[Context],
     contentType: String,
     defaultReplyTo: String,
@@ -132,7 +149,7 @@ private[automorph] object RabbitMqCommon extends Logging {
     useDefaultRequestId: Boolean,
   ): BasicProperties = {
     val context = messageContext.getOrElse(AmqpContext())
-    val transportProperties = context.transport.map(_.properties).getOrElse(new BasicProperties())
+    val transportProperties = context.message.map(_.properties).getOrElse(new BasicProperties())
     new BasicProperties().builder().contentType(contentType)
       .replyTo(context.replyTo.orElse(Option(transportProperties.getReplyTo)).getOrElse(defaultReplyTo))
       .correlationId(Option.when(useDefaultRequestId)(defaultRequestId).getOrElse {
@@ -158,7 +175,7 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @return
    *   message context
    */
-  def messageContext(properties: BasicProperties): AmqpContext[RabbitMqContext] =
+  private[automorph] def messageContext(properties: BasicProperties): AmqpContext[Message] =
     AmqpContext(
       contentType = Option(properties.getContentType),
       contentEncoding = Option(properties.getContentEncoding),
@@ -173,7 +190,7 @@ private[automorph] object RabbitMqCommon extends Logging {
       `type` = Option(properties.getType),
       userId = Option(properties.getUserId),
       appId = Option(properties.getAppId),
-      transport = Some(RabbitMqContext(properties)),
+      message = Some(Message(properties)),
     )
 
   /**
@@ -190,7 +207,7 @@ private[automorph] object RabbitMqCommon extends Logging {
    * @return
    *   message properties
    */
-  def messageProperties(
+  private[automorph] def messageProperties(
     requestId: Option[String],
     routingKey: String,
     url: String,
@@ -198,12 +215,4 @@ private[automorph] object RabbitMqCommon extends Logging {
   ): Map[String, String] =
     ListMap() ++ requestId.map(LogProperties.requestId -> _) ++
       ListMap(routingKeyProperty -> routingKey, "URL" -> url) ++ consumerTag.map("Consumer Tag" -> _)
-}
-
-final case class RabbitMqContext(properties: BasicProperties)
-
-object RabbitMqContext {
-
-  /** Implicit default context value. */
-  implicit val default: AmqpContext[RabbitMqContext] = AmqpContext()
 }

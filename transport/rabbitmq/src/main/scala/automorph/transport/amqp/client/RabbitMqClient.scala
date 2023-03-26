@@ -4,7 +4,7 @@ import automorph.log.{Logging, MessageLog}
 import automorph.spi.AsyncEffectSystem.Completable
 import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
 import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
-import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
+import automorph.transport.amqp.{AmqpContext, RabbitMq}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, TryOps}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
@@ -45,17 +45,17 @@ final case class RabbitMqClient[Effect[_]](
   url: URI,
   routingKey: String,
   effectSystem: AsyncEffectSystem[Effect],
-  exchange: String = RabbitMqCommon.defaultDirectExchange,
+  exchange: String = RabbitMq.defaultDirectExchange,
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory,
 ) extends Logging with ClientTransport[Effect, Context] {
   private lazy val connection = connect()
-  private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, consumer)
+  private lazy val threadConsumer = RabbitMq.threadLocalConsumer(connection, consumer)
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
-  private val clientId = RabbitMqCommon.applicationId(getClass.getName)
+  private val clientId = RabbitMq.applicationId(getClass.getName)
   private val urlText = url.toString
   private val responseHandlers = TrieMap[String, Completable[Effect, Response]]()
-  private val log = MessageLog(logger, RabbitMqCommon.protocol)
+  private val log = MessageLog(logger, RabbitMq.protocol)
   implicit private val givenSystem: EffectSystem[Effect] = effectSystem
 
   override def call(
@@ -77,13 +77,13 @@ final case class RabbitMqClient[Effect[_]](
     send(requestBody, requestId, mediaType, requestContext, None)
 
   override def context: Context =
-    RabbitMqContext.default
+    Message.default
 
   override def init(): Effect[Unit] =
     effectSystem.successful(())
 
   override def close(): Effect[Unit] =
-    effectSystem.evaluate(RabbitMqCommon.disconnect(connection))
+    effectSystem.evaluate(RabbitMq.disconnect(connection))
 
   private def send(
     requestBody: InputStream,
@@ -93,7 +93,7 @@ final case class RabbitMqClient[Effect[_]](
     response: Option[Completable[Effect, Response]],
   ): Effect[Unit] = {
     // Log the request
-    val amqpProperties = RabbitMqCommon.amqpProperties(
+    val amqpProperties = RabbitMq.amqpProperties(
       Some(requestContext),
       mediaType,
       directReplyToQueue,
@@ -102,7 +102,7 @@ final case class RabbitMqClient[Effect[_]](
       useDefaultRequestId = false,
     )
     val requestId = amqpProperties.getCorrelationId
-    lazy val requestProperties = RabbitMqCommon.messageProperties(Some(requestId), routingKey, urlText, None)
+    lazy val requestProperties = RabbitMq.messageProperties(Some(requestId), routingKey, urlText, None)
     log.sendingRequest(requestProperties)
 
     // Register deferred response effect if available
@@ -128,12 +128,12 @@ final case class RabbitMqClient[Effect[_]](
         responseBody: Array[Byte],
       ): Unit = {
         // Log the response
-        lazy val responseProperties = RabbitMqCommon
+        lazy val responseProperties = RabbitMq
           .messageProperties(Option(properties.getCorrelationId), routingKey, urlText, None)
         log.receivedResponse(responseProperties)
 
         // Complete the registered deferred response effect
-        val responseContext = RabbitMqCommon.messageContext(properties)
+        val responseContext = RabbitMq.messageContext(properties)
         responseHandlers.get(properties.getCorrelationId).foreach { response =>
           response.succeed(responseBody.toInputStream -> responseContext).runAsync
         }
@@ -144,8 +144,8 @@ final case class RabbitMqClient[Effect[_]](
   }
 
   private def connect(): Connection = {
-    val connection = RabbitMqCommon.connect(url, addresses, clientId, connectionFactory)
-    RabbitMqCommon.declareExchange(exchange, connection)
+    val connection = RabbitMq.connect(url, addresses, clientId, connectionFactory)
+    RabbitMq.declareExchange(exchange, connection)
     connection
   }
 }
@@ -153,7 +153,10 @@ final case class RabbitMqClient[Effect[_]](
 object RabbitMqClient {
 
   /** Request context type. */
-  type Context = AmqpContext[RabbitMqContext]
+  type Context = AmqpContext[Message]
+
+  /** Message properties. */
+  type Message = RabbitMq.Message
 
   private type Response = (InputStream, Context)
 }

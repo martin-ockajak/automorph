@@ -3,7 +3,7 @@ package automorph.transport.http.client
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.AsyncEffectSystem.Completable
 import automorph.spi.{AsyncEffectSystem, ClientTransport, EffectSystem}
-import automorph.transport.http.client.HttpClient.{Context, Session, defaultBuilder}
+import automorph.transport.http.client.HttpClient.{Context, Message, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, TryOps}
 import java.io.{ByteArrayOutputStream, InputStream}
@@ -104,7 +104,7 @@ final case class HttpClient[Effect[_]](
     }
 
   override def context: Context =
-    Session.defaultContext.url(url).method(method)
+    Message.defaultContext.url(url).method(method)
 
   override def init(): Effect[Unit] =
     effectSystem.successful(())
@@ -215,7 +215,7 @@ final case class HttpClient[Effect[_]](
     requestContext: Context,
   ): Effect[(Either[HttpRequest, (Effect[WebSocket], Effect[Response], InputStream)], URI)] = {
     val requestUrl = requestContext.overrideUrl {
-       requestContext.transport.flatMap(transport => Try(transport.request.build).toOption).map(_.uri).getOrElse(url)
+       requestContext.message.flatMap(transport => Try(transport.request.build).toOption).map(_.uri).getOrElse(url)
     }
     requestUrl.getScheme.toLowerCase match {
       case scheme if scheme.startsWith(webSocketsSchemePrefix) =>
@@ -245,11 +245,11 @@ final case class HttpClient[Effect[_]](
     httpContext: Context,
   ): HttpRequest = {
     // Method & body
-    val transportBuilder = httpContext.transport.map(_.request).getOrElse(HttpRequest.newBuilder)
-    val transportRequest = Try(transportBuilder.build).toOption
+    val requestBuilder = httpContext.message.map(_.request).getOrElse(HttpRequest.newBuilder)
+    val transportRequest = Try(requestBuilder.build).toOption
     val requestMethod = httpContext.method.map(_.name).getOrElse(method.name)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
-    val methodBuilder = transportBuilder.uri(requestUrl)
+    val methodBuilder = requestBuilder.uri(requestUrl)
       .method(requestMethod, BodyPublishers.ofByteArray(requestBody.toArray))
 
     // Headers
@@ -303,7 +303,7 @@ final case class HttpClient[Effect[_]](
 
   private def createWebSocketBuilder(httpContext: Context): WebSocket.Builder = {
     // Headers
-    val transportBuilder = httpContext.transport.map(_.request).getOrElse(HttpRequest.newBuilder)
+    val transportBuilder = httpContext.message.map(_.request).getOrElse(HttpRequest.newBuilder)
     val headers = transportBuilder.uri(httpEmptyUrl).build.headers.map.asScala.toSeq.flatMap { case (name, values) =>
       values.asScala.map(name -> _)
     } ++ httpContext.headers
@@ -319,17 +319,18 @@ final case class HttpClient[Effect[_]](
 
 object HttpClient {
 
-  /** Request context type. */
-  type Context = HttpContext[Session]
+  /** Message context type. */
+  type Context = HttpContext[Message]
 
   /** Default HTTP client builder. */
   val defaultBuilder: Builder = java.net.http.HttpClient.newBuilder
 
-  final case class Session(request: HttpRequest.Builder)
+  /** Message properties. */
+  final case class Message(request: HttpRequest.Builder)
 
-  object Session {
+  object Message {
 
     /** Implicit default context value. */
-    implicit val defaultContext: HttpContext[Session] = HttpContext()
+    implicit val defaultContext: HttpContext[Message] = HttpContext()
   }
 }

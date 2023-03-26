@@ -83,7 +83,7 @@ object Server {
    * @tparam Effect
    *   effect type
    * @tparam Context
-   *   request context type
+   *   RPC message context type
    */
   case class ServerBuilder[Effect[_], Context](transport: ServerTransport[Effect, Context]) {
 

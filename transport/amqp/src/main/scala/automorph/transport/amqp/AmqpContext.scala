@@ -7,7 +7,7 @@ import java.time.Instant
  *
  * Message transport plugins must use message context properties in the descending order of priority by source:
  *   - This context
- *   - Transport plugin context (this.transport)
+ *   - Message properties for specific transport plugin (this.message)
  *   - Default values
  *
  * @see
@@ -38,12 +38,12 @@ import java.time.Instant
  *   user identifier
  * @param appId
  *   application identifier
- * @param transport
- *   specific transport plugin message context
- * @tparam Transport
- *   specific transport plugin message context type
+ * @param message
+ *   message properties for specific transport plugin
+ * @tparam Message
+ *   type of message properties for specific transport plugin
  */
-final case class AmqpContext[Transport](
+final case class AmqpContext[Message](
   contentType: Option[String] = None,
   contentEncoding: Option[String] = None,
   headers: Map[String, Any] = Map.empty,
@@ -57,5 +57,5 @@ final case class AmqpContext[Transport](
   `type`: Option[String] = None,
   userId: Option[String] = None,
   appId: Option[String] = None,
-  transport: Option[Transport] = None,
+  message: Option[Message] = None,
 )

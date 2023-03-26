@@ -3,7 +3,7 @@ package automorph.transport.amqp.server
 import automorph.log.{Logging, MessageLog}
 import automorph.spi.{EffectSystem, ServerTransport}
 import automorph.transport.amqp.server.RabbitMqServer.Context
-import automorph.transport.amqp.{AmqpContext, RabbitMqCommon, RabbitMqContext}
+import automorph.transport.amqp.{AmqpContext, RabbitMq, Message}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
@@ -30,19 +30,19 @@ import scala.jdk.CollectionConverters.MapHasAsJava
  * @tparam Effect effect type
  */
 final case class RabbitMqServer[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, AmqpContext[RabbitMqContext]],
+  handler: Types.HandlerAnyCodec[Effect, AmqpContext[Message]],
   url: URI,
   queues: Seq[String],
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory
 ) extends Logging with ServerTransport[Effect, Context] {
 
-  private val exchange = RabbitMqCommon.defaultDirectExchange
+  private val exchange = RabbitMq.defaultDirectExchange
   private lazy val connection = connect()
-  private lazy val threadConsumer = RabbitMqCommon.threadLocalConsumer(connection, consumer)
-  private val serverId = RabbitMqCommon.applicationId(getClass.getName)
+  private lazy val threadConsumer = RabbitMq.threadLocalConsumer(connection, consumer)
+  private val serverId = RabbitMq.applicationId(getClass.getName)
   private val urlText = url.toString
-  private val log = MessageLog(logger, RabbitMqCommon.protocol)
+  private val log = MessageLog(logger, RabbitMq.protocol)
   private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, RabbitMqServer.Context]]
   implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
 
@@ -53,11 +53,11 @@ final case class RabbitMqServer[Effect[_]](
     }
 
   override def close(): Effect[Unit] =
-    system.evaluate(RabbitMqCommon.disconnect(connection))
+    system.evaluate(RabbitMq.disconnect(connection))
 
   private def connect(): Connection = {
-    val connection = RabbitMqCommon.connect(url, addresses, serverId, connectionFactory)
-    RabbitMqCommon.declareExchange(exchange, connection)
+    val connection = RabbitMq.connect(url, addresses, serverId, connectionFactory)
+    RabbitMq.declareExchange(exchange, connection)
     Using(connection.createChannel()) { channel =>
       queues.foreach { queue =>
         channel.queueDeclare(queue, false, false, false, Map.empty.asJava)
@@ -77,13 +77,13 @@ final case class RabbitMqServer[Effect[_]](
       ): Unit = {
         // Log the request
         val requestId = Option(amqpProperties.getCorrelationId)
-        lazy val requestProperties = RabbitMqCommon
+        lazy val requestProperties = RabbitMq
           .messageProperties(requestId, envelope.getRoutingKey, urlText, Option(consumerTag))
         log.receivedRequest(requestProperties)
         Option(amqpProperties.getReplyTo).map { replyTo =>
           requestId.map { actualRequestId =>
             // Process the request
-            val requestContext = RabbitMqCommon.messageContext(amqpProperties)
+            val requestContext = RabbitMq.messageContext(amqpProperties)
             genericHandler.processRequest(requestBody.toInputStream, requestContext, actualRequestId).either.map(_.fold(
               error => sendError(error, replyTo, requestProperties, actualRequestId),
               result => {
@@ -115,17 +115,17 @@ final case class RabbitMqServer[Effect[_]](
   ): Unit = {
     // Log the response
     val actualReplyTo = responseContext.flatMap { context =>
-      context.replyTo.orElse(context.transport.flatMap {
+      context.replyTo.orElse(context.message.flatMap {
         transport => Option(transport.properties.getReplyTo)
       })
     }.getOrElse(replyTo)
-    lazy val responseProperties = requestProperties + (RabbitMqCommon.routingKeyProperty -> actualReplyTo)
+    lazy val responseProperties = requestProperties + (RabbitMq.routingKeyProperty -> actualReplyTo)
     log.sendingResponse(responseProperties)
 
     // Send the response
     Try {
       val mediaType = genericHandler.rpcProtocol.messageCodec.mediaType
-      val amqpProperties = RabbitMqCommon
+      val amqpProperties = RabbitMq
         .amqpProperties(responseContext, mediaType, actualReplyTo, requestId, serverId, useDefaultRequestId = true)
       threadConsumer.get.getChannel.basicPublish(exchange, actualReplyTo, true, false, amqpProperties, message)
       log.sentResponse(responseProperties)
@@ -149,5 +149,8 @@ final case class RabbitMqServer[Effect[_]](
 object RabbitMqServer {
 
   /** Request context type. */
-  type Context = AmqpContext[RabbitMqContext]
+  type Context = AmqpContext[Message]
+
+  /** Message properties. */
+  type Message = RabbitMq.Message
 }

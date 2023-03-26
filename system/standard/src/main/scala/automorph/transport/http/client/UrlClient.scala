@@ -2,7 +2,7 @@ package automorph.transport.http.client
 
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{ClientTransport, EffectSystem}
-import automorph.transport.http.client.UrlClient.{Context, Session}
+import automorph.transport.http.client.UrlClient.{Context, Message}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{EffectOps, InputStreamOps, TryOps}
 import java.io.InputStream
@@ -68,7 +68,7 @@ final case class UrlClient[Effect[_]](
     }
 
   override def context: Context =
-    Session.defaultContext.url(url).method(method)
+    Message.defaultContext.url(url).method(method)
 
   override def init(): Effect[Unit] =
     effectSystem.successful(())
@@ -114,7 +114,7 @@ final case class UrlClient[Effect[_]](
     }
 
   private def createConnection(requestContext: Context): HttpURLConnection = {
-    val requestUrl = requestContext.overrideUrl(requestContext.transport.map(_.connection.getURL.toURI).getOrElse(url))
+    val requestUrl = requestContext.overrideUrl(requestContext.message.map(_.connection.getURL.toURI).getOrElse(url))
     requestUrl.toURL.openConnection().asInstanceOf[HttpURLConnection]
   }
 
@@ -125,9 +125,9 @@ final case class UrlClient[Effect[_]](
     requestContext: Context,
   ): String = {
     // Method
-    val transportConnection = requestContext.transport.map(_.connection).getOrElse(connection)
+    val transportConnection = requestContext.message.map(_.connection).getOrElse(connection)
     val requestMethod =
-      requestContext.method.map(_.name).orElse(requestContext.transport.map(_.connection.getRequestMethod))
+      requestContext.method.map(_.name).orElse(requestContext.message.map(_.connection.getRequestMethod))
         .getOrElse(method.name)
     require(httpMethods.contains(requestMethod), s"Invalid HTTP method: $requestMethod")
     connection.setRequestMethod(requestMethod)
@@ -167,14 +167,15 @@ final case class UrlClient[Effect[_]](
 
 object UrlClient {
 
-  /** Request context type. */
-  type Context = HttpContext[Session]
+  /** Message context type. */
+  type Context = HttpContext[Message]
 
-  final case class Session(connection: HttpURLConnection)
+  /** Message properties. */
+  final case class Message(connection: HttpURLConnection)
 
-  object Session {
+  object Message {
 
     /** Implicit default context value. */
-    implicit val defaultContext: HttpContext[Session] = HttpContext()
+    implicit val defaultContext: HttpContext[Message] = HttpContext()
   }
 }
