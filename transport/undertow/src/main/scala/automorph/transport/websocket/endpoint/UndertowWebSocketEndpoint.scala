@@ -49,15 +49,6 @@ final case class UndertowWebSocketEndpoint[Effect[_]](
   private val log = MessageLog(logger, Protocol.WebSocket.name)
   implicit private val system: EffectSystem[Effect] = effectSystem
 
-  /**
-   * Creates an Undertow WebSocket handshake HTTP handler for this Undertow WebSocket callback.
-   *
-   * @param next
-   *   Undertow handler invoked if a HTTP request does not contain a WebSocket handshake
-   */
-  def httpHandler(next: HttpHandler): WebSocketProtocolHandshakeHandler =
-    new WebSocketProtocolHandshakeHandler(this, next)
-
   override def adapter: WebSocketConnectionCallback =
     this
 
@@ -176,4 +167,18 @@ object UndertowWebSocketEndpoint {
 
   /** Request context type. */
   type Context = HttpContext[Either[HttpServerExchange, WebSocketHttpExchange]]
+
+  /**
+   * Creates an Undertow WebSocket handshake HTTP handler for this Undertow WebSocket callback.
+   *
+   * @param webSocketConnectionCallback
+   *   WebSocket connnection callback
+   * @param next
+   *   Undertow handler invoked if a HTTP request does not contain a WebSocket handshake
+   */
+  def handshakeHandler(
+    webSocketConnectionCallback: WebSocketConnectionCallback,
+    next: HttpHandler
+  ): WebSocketProtocolHandshakeHandler =
+    new WebSocketProtocolHandshakeHandler(webSocketConnectionCallback, next)
 }

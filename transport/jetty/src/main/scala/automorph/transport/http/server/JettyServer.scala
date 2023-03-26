@@ -88,12 +88,12 @@ final case class JettyServer[Effect[_]](
     effectSystem.evaluate(this.synchronized(jetty.stop()))
 
   private def createServer(): Server = {
-    val endpoint = JettyHttpEndpoint(handler, mapException)
+    val endpointTransport = JettyHttpEndpoint(effectSystem, mapException, handler)
     val servletHandler = new ServletContextHandler
     val servletPath = s"$pathPrefix*"
 
     // Validate URL path
-    servletHandler.addServlet(new ServletHolder(endpoint), servletPath)
+    servletHandler.addServlet(new ServletHolder(endpointTransport), servletPath)
 
     // Validate HTTP request method
     servletHandler.addFilter(new FilterHolder(methodFilter), servletPath, util.EnumSet.of(DispatcherType.REQUEST))

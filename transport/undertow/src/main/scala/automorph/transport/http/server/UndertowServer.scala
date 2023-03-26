@@ -88,14 +88,18 @@ final case class UndertowServer[Effect[_]](
 
   private def createServer(): Undertow = {
     // Validate HTTP request method
-    val httpHandler = methodHandler(UndertowHttpEndpoint(handler, mapException))
+    val endpointTransport = UndertowHttpEndpoint(effectSystem, mapException, handler)
+    val httpHandler = methodHandler(endpointTransport.adapter)
 
     // Validate URL path
     val rootHandler = Handlers.predicate(
       // HTTP
       Predicates.prefix(pathPrefix),
       // WebSocket
-      Option.when(webSocket)(UndertowWebSocketEndpoint(handler, httpHandler)).getOrElse(httpHandler),
+      Option.when(webSocket)(UndertowWebSocketEndpoint.handshakeHandler(
+        UndertowWebSocketEndpoint(effectSystem, handler).adapter,
+        httpHandler
+      )).getOrElse(httpHandler),
       ResponseCodeHandler.HANDLE_404,
     )
     builder.addHttpListener(port, "0.0.0.0", rootHandler).build()
