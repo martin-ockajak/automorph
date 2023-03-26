@@ -1,9 +1,9 @@
 package automorph.transport.amqp.server
 
 import automorph.log.{Logging, MessageLog}
-import automorph.spi.{EffectSystem, ServerTransport}
+import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 import automorph.transport.amqp.server.RabbitMqServer.Context
-import automorph.transport.amqp.{AmqpContext, RabbitMq, Message}
+import automorph.transport.amqp.{AmqpContext, RabbitMq}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
@@ -14,27 +14,39 @@ import scala.jdk.CollectionConverters.MapHasAsJava
 /**
  * RabbitMQ server message transport plugin.
  *
- * The server interprets AMQP request message body as an RPC request and processes it using the specified RPC request handler.
- * The response returned by the RPC request handler is used as outgoing AMQP response body.
- * AMQP request messages are consumed from the specified queues and automatically acknowledged.
- * AMQP response messages are published to default exchange using ''reply-to'' request property as routing key.
+ * Interprets AMQP request message body as an RPC request and processes it using the specified RPC request handler.
+ * - The response returned by the RPC request handler is used as outgoing AMQP response body.
+ * - AMQP request messages are consumed from the specified queues and automatically acknowledged.
+ * - AMQP response messages are published to default exchange using ''reply-to'' request property as routing key.
  *
- * @see [[https://www.rabbitmq.com/java-client.html Documentation]]
- * @see [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
- * @constructor Creates and starts a RabbitMQ server message transport plugin.
- * @param handler RPC request handler
- * @param url AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
- * @param queues names of non-durable exclusive queues to consume messages from
- * @param addresses broker hostnames and ports for reconnection attempts
- * @param connectionFactory AMQP broker connection factory
- * @tparam Effect effect type
+ * @see
+ *   [[https://www.rabbitmq.com/java-client.html Documentation]]
+ * @see
+ *   [[https://rabbitmq.github.io/rabbitmq-java-client/api/current/index.html API]]
+ * @constructor
+ *   Creates and starts a RabbitMQ server message transport plugin.
+ * @param effectSystem
+ *   effect system plugin
+ * @param url
+ *   AMQP broker URL (amqp[s]://[username:password@]host[:port][/virtual_host])
+ * @param queues
+ *   names of non-durable exclusive queues to consume messages from
+ * @param addresses
+ *   broker hostnames and ports for reconnection attempts
+ * @param connectionFactory
+ *   AMQP broker connection factory
+ * @param handler
+ *   RPC request handler
+ * @tparam Effect
+ *   effect type
  */
 final case class RabbitMqServer[Effect[_]](
-  handler: Types.HandlerAnyCodec[Effect, AmqpContext[Message]],
+  effectSystem: EffectSystem[Effect],
   url: URI,
   queues: Seq[String],
   addresses: Seq[Address] = Seq.empty,
-  connectionFactory: ConnectionFactory = new ConnectionFactory
+  connectionFactory: ConnectionFactory = new ConnectionFactory,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
 ) extends Logging with ServerTransport[Effect, Context] {
 
   private val exchange = RabbitMq.defaultDirectExchange
@@ -43,8 +55,10 @@ final case class RabbitMqServer[Effect[_]](
   private val serverId = RabbitMq.applicationId(getClass.getName)
   private val urlText = url.toString
   private val log = MessageLog(logger, RabbitMq.protocol)
-  private val genericHandler = handler.asInstanceOf[Types.HandlerGenericCodec[Effect, RabbitMqServer.Context]]
-  implicit private val system: EffectSystem[Effect] = genericHandler.effectSystem
+  implicit private val system: EffectSystem[Effect] = effectSystem
+
+  override def clone(handler: RequestHandler[Effect, Context]): RabbitMqServer[Effect] =
+    copy(handler = handler)
 
   override def init(): Effect[Unit] =
     system.evaluate {
@@ -84,12 +98,12 @@ final case class RabbitMqServer[Effect[_]](
           requestId.map { actualRequestId =>
             // Process the request
             val requestContext = RabbitMq.messageContext(amqpProperties)
-            genericHandler.processRequest(requestBody.toInputStream, requestContext, actualRequestId).either.map(_.fold(
+            handler.processRequest(requestBody.toInputStream, requestContext, actualRequestId).either.map(_.fold(
               error => sendError(error, replyTo, requestProperties, actualRequestId),
               result => {
                 // Send the response
-                val response = result.responseBody.map(_.toArray).getOrElse(Array[Byte]())
-                sendResponse(response, replyTo, result.context, requestProperties, actualRequestId)
+                val responseBody = result.map(_.responseBody.toArray).getOrElse(Array[Byte]())
+                sendResponse(responseBody, replyTo, result.flatMap(_.context), requestProperties, actualRequestId)
               }
             )).runAsync
           }.getOrElse {
@@ -124,10 +138,21 @@ final case class RabbitMqServer[Effect[_]](
 
     // Send the response
     Try {
-      val mediaType = genericHandler.rpcProtocol.messageCodec.mediaType
-      val amqpProperties = RabbitMq
-        .amqpProperties(responseContext, mediaType, actualReplyTo, requestId, serverId, useDefaultRequestId = true)
-      threadConsumer.get.getChannel.basicPublish(exchange, actualReplyTo, true, false, amqpProperties, message)
+      val mediaType = handler.mediaType
+      val amqpProperties = RabbitMq.amqpProperties(
+        responseContext,
+        mediaType,
+        actualReplyTo,
+        requestId, serverId,
+        useDefaultRequestId = true,
+      )
+      threadConsumer.get.getChannel.basicPublish(
+        exchange,
+        actualReplyTo,
+        true, false,
+        amqpProperties,
+        message,
+      )
       log.sentResponse(responseProperties)
     }.onFailure { error =>
       log.failedSendResponse(error, responseProperties)

@@ -20,8 +20,8 @@ import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsJava, MapHasAsSca
 /**
  * Undertow WebSocket endpoint transport plugin.
  *
- * Interprets WebSocket request message as an RPC request and processes it using the specified RPC request handler. The
- * response returned by the RPC request handler is used as WebSocket response message.
+ * Interprets WebSocket request message as an RPC request and processes it using the specified RPC request handler.
+ * - The response returned by the RPC request handler is used as WebSocket response message.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/WebSocket Transport protocol]]

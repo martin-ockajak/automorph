@@ -21,7 +21,7 @@ object RabbitMq extends Logging {
   object Message {
 
     /** Implicit default context value. */
-    implicit val default: AmqpContext[Message] = AmqpContext()
+    implicit val defaultContext: AmqpContext[Message] = AmqpContext()
   }
 
   /** Default direct AMQP message exchange name. */

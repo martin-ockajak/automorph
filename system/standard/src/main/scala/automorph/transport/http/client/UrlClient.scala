@@ -15,7 +15,7 @@ import scala.util.Using
 /**
  * Standard JRE HttpURLConnection HTTP client message transport plugin.
  *
- * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
+ * Uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol Transport protocol]]

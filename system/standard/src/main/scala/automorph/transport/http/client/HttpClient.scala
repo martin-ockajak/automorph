@@ -24,7 +24,7 @@ import scala.util.Try
 /**
  * Standard JRE HttpClient HTTP & WebSocket client message transport plugin.
  *
- * The client uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
+ * Uses the supplied RPC request as HTTP request body and returns HTTP response body as a result.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
