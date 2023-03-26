@@ -39,8 +39,7 @@ final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   rpcProtocol: RpcProtocol[Node, Codec, Context],
 ) extends ClientBind[Node, Codec, Effect, Context] with Logging {
 
-  protected val system: EffectSystem[Effect] = transport.effectSystem
-  implicit private val givenSystem: EffectSystem[Effect] = transport.effectSystem
+  implicit private val system: EffectSystem[Effect] = transport.effectSystem
 
   /**
    * Creates a remote API function one-way message proxy.

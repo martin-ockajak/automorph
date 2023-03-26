@@ -45,7 +45,7 @@ final case class BindingHandler[Node, Codec <: MessageCodec[Node], Effect[_], Co
   lazy val functions: Seq[RpcFunction] = bindings.map { case (name, binding) =>
     binding.function.copy(name = name)
   }.toSeq
-  implicit private val givenSystem: EffectSystem[Effect] = effectSystem
+  implicit private val system: EffectSystem[Effect] = effectSystem
   private val bindings = apiSchemaBindings ++ apiBindings
 
   override def processRequest(body: InputStream, context: Context, id: String): Effect[Option[RpcResult[Context]]] =
