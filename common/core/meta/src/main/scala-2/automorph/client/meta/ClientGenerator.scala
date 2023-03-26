@@ -9,19 +9,30 @@ import automorph.spi.protocol.RpcFunction
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-/** RPC client layer bindings code generation. */
+/**
+ * RPC client API bindings generator.
+ *
+ * Note: Consider this class to be private and do not use it. It remains public only due to Scala 2 macro limitations.
+ */
 object ClientGenerator {
 
   /**
    * Generates client bindings for all valid public methods of an API type.
    *
-   * @param codec message codec plugin
-   * @tparam Node message node type
-   * @tparam Codec message codec plugin type
-   * @tparam Effect effect type
-   * @tparam Context message context type
-   * @tparam Api API type
-   * @return mapping of API method names to client function bindings
+   * @param codec
+   *   message codec plugin
+   * @tparam Node
+   *   message node type
+   * @tparam Codec
+   *   message codec plugin type
+   * @tparam Effect
+   *   effect type
+   * @tparam Context
+   *   message context type
+   * @tparam Api
+   *   API type
+   * @return
+   *   mapping of API method names to client function bindings
    */
   def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec

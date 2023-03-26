@@ -10,7 +10,7 @@ import scala.reflect.ClassTag
 import scala.util.{Failure, Try}
 
 /**
- * Client API method bindings code generation.
+ * Client API method bindings layer.
  *
  * @tparam Node
  *   message node type
@@ -34,8 +34,8 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    *   - has type parameters
    *   - is inline
    *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting
-   * one the caller-supplied request context is passed to the underlying message transport plugin.
+   * If the last parameter of bound method is of `Context` type or returns a context function accepting
+   * the `Context` type the caller-supplied request context is passed to the underlying message transport plugin.
    *
    * @param mapName
    *   maps API method name to the invoked RPC function name
@@ -58,8 +58,8 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    *   - has type parameters
    *   - is inline
    *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting
-   * one the caller-supplied request context is passed to the underlying message transport plugin.
+   * If the last parameter of bound method is of `Context` type or returns a context function accepting
+   * the `Context` type the caller-supplied request context is passed to the underlying message transport plugin.
    *
    * RPC functions defined by bound API methods are invoked with their names transformed via the `mapName` function.
    *
@@ -119,8 +119,8 @@ private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_]
   /**
    * Creates a remote API function call proxy.
    *
-   * Uses the remote function name and arguments to send an RPC request and extracts a result value or an error from the
-   * received RPC response.
+   * Uses the remote function name and arguments to send an RPC request and extracts a result value or an error
+   * from the received RPC response.
    *
    * @param function
    *   remote function name

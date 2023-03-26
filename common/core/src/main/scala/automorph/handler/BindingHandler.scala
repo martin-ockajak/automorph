@@ -10,13 +10,15 @@ import scala.collection.immutable.ListMap
 import scala.util.{Failure, Success, Try}
 
 /**
- * RPC request handler.
+ * RPC request handler for bound APIs.
  *
  * Processes remote API requests and invoke bound API methods.
  *
+ * Note: Consider this class to be private and do not use it. It remains public only due to Scala 2 macro limitations.
+ *
  * @constructor
- *   Creates a new RPC request handler with specified system and protocol plugins providing corresponding message
- *   context type.
+ *   Creates a new RPC request handler using specified effect system and RPC protocol plugins
+ *   with corresponding message context type.
  * @param rpcProtocol
  *   RPC protocol plugin
  * @param effectSystem
@@ -33,8 +35,8 @@ import scala.util.{Failure, Success, Try}
  *   RPC message context type
  */
 final case class BindingHandler[Node, Codec <: MessageCodec[Node], Effect[_], Context](
-  rpcProtocol: RpcProtocol[Node, Codec, Context],
   effectSystem: EffectSystem[Effect],
+  rpcProtocol: RpcProtocol[Node, Codec, Context],
   apiBindings: ListMap[String, HandlerBinding[Node, Effect, Context]] =
     ListMap[String, HandlerBinding[Node, Effect, Context]](),
 ) extends RequestHandler[Effect, Context] with Logging {

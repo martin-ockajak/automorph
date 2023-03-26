@@ -8,7 +8,9 @@ import automorph.reflection.{ClassReflection, MethodReflection}
 import automorph.spi.MessageCodec
 import scala.quoted.{Expr, Quotes, Type}
 
-/** RPC client layer bindings code generation. */
+/**
+ * RPC client API bindings generator.
+ */
 private[automorph] object ClientGenerator:
 
   /**

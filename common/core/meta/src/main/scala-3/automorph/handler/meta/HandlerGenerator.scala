@@ -9,7 +9,9 @@ import automorph.spi.MessageCodec
 import scala.quoted.{Expr, Quotes, Type}
 import scala.util.{Failure, Try}
 
-/** RPC handler layer bindings code generation. */
+/**
+ * RPC handler API bindings generator.
+ */
 private[automorph] object HandlerGenerator:
 
   /**

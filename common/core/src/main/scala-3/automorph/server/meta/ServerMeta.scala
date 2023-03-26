@@ -7,7 +7,7 @@ import automorph.spi.{MessageCodec, RequestHandler, RpcProtocol, ServerTransport
 import scala.collection.immutable.ListMap
 
 /**
- * Server method bindings code generation.
+ * Server API method bindings layer.
  *
  * @tparam Node
  *   message node type
@@ -38,9 +38,9 @@ private[automorph] trait ServerMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * Bindings API methods using the names identical to already existing bindings replaces * the existing bindings
    * with the new bindings.
    *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting
-   * one the server-supplied ''request context'' is passed to the bound method or the returned context function as its
-   * last argument.
+   * If the last parameter of bound method is of `Context` type or returns a context function accepting
+   * the `Context` type the server-supplied ''request context'' is passed to the bound method or
+   * the returned context function as its last argument.
    *
    * @param api
    *   API instance
@@ -66,9 +66,9 @@ private[automorph] trait ServerMeta[Node, Codec <: MessageCodec[Node], Effect[_]
    * Bindings API methods using the names identical to already existing bindings replaces the existing bindings
    * with the new bindings.
    *
-   * If a bound method definition contains a last parameter of `Context` type or returns a context function accepting
-   * one the server-supplied ''request context'' is passed to the bound method or the returned context function as its
-   * last argument.
+   * If the last parameter of bound method is of `Context` type or returns a context function accepting
+   * the `Context` type the server-supplied ''request context'' is passed to the bound method or
+   * the returned context function as its last argument.
    *
    * Bound API methods are exposed as RPC functions with their names transformed via the `mapName` function.
    *

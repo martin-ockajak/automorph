@@ -5,6 +5,8 @@ import automorph.spi.protocol.RpcFunction
 /**
  * RPC handler remote API function binding.
  *
+ * Note: Consider this class to be private and do not use it. It remains public only due to Scala 2 macro limitations.
+ *
  * @param function
  *   bound function descriptor
  * @param argumentDecoders

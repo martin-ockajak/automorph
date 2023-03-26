@@ -9,7 +9,11 @@ import automorph.spi.MessageCodec
 import scala.language.experimental.macros
 import scala.reflect.macros.blackbox
 
-/** RPC handler layer bindings code generation. */
+/**
+ * RPC handler API bindings generator.
+ *
+ * Note: Consider this class to be private and do not use it. It remains public only due to Scala 2 macro limitations.
+ */
 object HandlerGenerator {
 
   /**
