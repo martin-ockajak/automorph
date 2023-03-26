@@ -21,7 +21,7 @@ import scala.util.{Failure, Try}
  * @tparam Context
  *   RPC message context type
  */
-private[automorph] trait ClientMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
+private[automorph] trait ClientBind[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
 
   def rpcProtocol: RpcProtocol[Node, Codec, Context]
 

@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.handler.BindingHandler
-import automorph.server.meta.ServerMeta
+import automorph.server.meta.ServerBind
 import automorph.spi.protocol.RpcFunction
 import automorph.spi.{MessageCodec, RequestHandler, RpcProtocol, ServerTransport}
 import scala.collection.immutable.ListMap
@@ -38,7 +38,7 @@ final case class Server[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
   rpcProtocol: RpcProtocol[Node, Codec, Context],
   handler: RequestHandler[Effect, Context],
   functions: Seq[RpcFunction] = Seq.empty,
-) extends ServerMeta[Node, Codec, Effect, Context] {
+) extends ServerBind[Node, Codec, Effect, Context] {
 
   private val registeredTransport = transport.clone(handler)
 

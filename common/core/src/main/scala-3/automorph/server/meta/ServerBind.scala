@@ -18,7 +18,7 @@ import scala.collection.immutable.ListMap
  * @tparam Context
  *   RPC message context type
  */
-private[automorph] trait ServerMeta[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
+private[automorph] trait ServerBind[Node, Codec <: MessageCodec[Node], Effect[_], Context]:
 
   def transport: ServerTransport[Effect, Context]
 

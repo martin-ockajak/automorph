@@ -1,7 +1,7 @@
 package automorph
 
 import automorph.RpcException.InvalidResponseException
-import automorph.client.meta.ClientMeta
+import automorph.client.meta.ClientBind
 import automorph.client.RemoteMessage
 import automorph.log.{LogProperties, Logging}
 import automorph.spi.{ClientTransport, EffectSystem, MessageCodec, RpcProtocol}
@@ -37,7 +37,7 @@ import scala.util.Try
 final case class Client[Node, Codec <: MessageCodec[Node], Effect[_], Context](
   transport: ClientTransport[Effect, Context],
   rpcProtocol: RpcProtocol[Node, Codec, Context],
-) extends ClientMeta[Node, Codec, Effect, Context] with Logging {
+) extends ClientBind[Node, Codec, Effect, Context] with Logging {
 
   protected val system: EffectSystem[Effect] = transport.effectSystem
   implicit private val givenSystem: EffectSystem[Effect] = transport.effectSystem

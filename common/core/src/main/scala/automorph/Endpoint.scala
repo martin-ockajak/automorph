@@ -1,6 +1,6 @@
 package automorph
 
-import automorph.endpoint.meta.EndpointMeta
+import automorph.endpoint.meta.EndpointBind
 import automorph.handler.BindingHandler
 import automorph.spi.protocol.RpcFunction
 import automorph.spi.{EndpointTransport, MessageCodec, RequestHandler, RpcProtocol}
@@ -40,7 +40,7 @@ final case class Endpoint[Node, Codec <: MessageCodec[Node], Effect[_], Context,
   rpcProtocol: RpcProtocol[Node, Codec, Context],
   handler: RequestHandler[Effect, Context],
   functions: Seq[RpcFunction] = Seq.empty,
-) extends EndpointMeta[Node, Codec, Effect, Context, Adapter] {
+) extends EndpointBind[Node, Codec, Effect, Context, Adapter] {
 
   private val registeredAdapter = transport.clone(handler)
 
