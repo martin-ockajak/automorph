@@ -129,7 +129,7 @@ object ClientBind {
       // Generate API function bindings
       val client = ${c.prefix}
       val bindings = automorph.client.meta.ClientBindings
-        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](
+        .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](
           client.rpcProtocol.messageCodec
         ).map { binding =>
           binding.function.name -> binding

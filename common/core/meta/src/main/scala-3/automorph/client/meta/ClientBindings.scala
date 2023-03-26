@@ -31,7 +31,7 @@ private[automorph] object ClientGenerator:
    * @return
    *   mapping of API method names to client function bindings
    */
-  inline def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
+  inline def generate[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec
   ): Seq[ClientBinding[Node, Context]] =
     ${ bindingsMacro[Node, Codec, Effect, Context, Api]('codec) }
@@ -53,12 +53,12 @@ private[automorph] object ClientGenerator:
           .errorAndAbort(s"Failed to bind API methods:\n${errors.map(error => s"  $error").mkString("\n")}")
 
     // Generate bound API method bindings
-    val clientBindings = validMethods.map { method =>
-      generateBinding[Node, Codec, Effect, Context, Api](ref)(method, codec)
+    val bindings = validMethods.map { method =>
+      binding[Node, Codec, Effect, Context, Api](ref)(method, codec)
     }
-    Expr.ofSeq(clientBindings)
+    Expr.ofSeq(bindings)
 
-  private def generateBinding[Node: Type, Codec <: MessageCodec[Node]: Type, Effect[_]: Type, Context: Type, Api: Type](
+  private def binding[Node: Type, Codec <: MessageCodec[Node]: Type, Effect[_]: Type, Context: Type, Api: Type](
     ref: ClassReflection
   )(method: ref.RefMethod, codec: Expr[Codec]): Expr[ClientBinding[Node, Context]] =
     given Quotes =

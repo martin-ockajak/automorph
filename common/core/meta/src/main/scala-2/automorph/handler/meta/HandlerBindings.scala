@@ -36,13 +36,13 @@ object HandlerBindings {
    * @return
    *   mapping of API method names to handler function bindings
    */
-  def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
+  def generate[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec,
     api: Api,
   ): Seq[HandlerBinding[Node, Effect, Context]] =
-    macro bindingsMacro[Node, Codec, Effect, Context, Api]
+    macro generateMacro[Node, Codec, Effect, Context, Api]
 
-  def bindingsMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](c: blackbox.Context)(
+  def generateMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](c: blackbox.Context)(
     codec: c.Expr[Codec], api: c.Expr[Api]
   )(implicit
     nodeType: c.WeakTypeTag[Node],
@@ -66,15 +66,15 @@ object HandlerBindings {
     }
 
     // Generate bound API method bindings
-    val handlerBindings = validMethods.map { method =>
-      generateBinding[c.type, Node, Codec, Effect, Context, Api](ref)(method, codec, api)
+    val bindings = validMethods.map { method =>
+      binding[c.type, Node, Codec, Effect, Context, Api](ref)(method, codec, api)
     }
     c.Expr[Seq[HandlerBinding[Node, Effect, Context]]](q"""
-      Seq(..$handlerBindings)
+      Seq(..$bindings)
     """)
   }
 
-  private def generateBinding[C <: blackbox.Context, Node, Codec <: MessageCodec[Node], Effect[_], Context, Api](
+  private def binding[C <: blackbox.Context, Node, Codec <: MessageCodec[Node], Effect[_], Context, Api](
     ref: ClassReflection[C]
   )(method: ref.RefMethod, codec: ref.c.Expr[Codec], api: ref.c.Expr[Api])(implicit
     nodeType: ref.c.WeakTypeTag[Node],

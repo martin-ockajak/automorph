@@ -134,7 +134,7 @@ object EndpointMeta {
         case _ => Seq.empty
       }
       val newApiBindings = automorph.endpoint.meta.HandlerBindings
-        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](
+        .generate[$nodeType, $codecType, $effectType, $contextType, $apiType](
           endpoint.rpcProtocol.messageCodec, $api
         ).flatMap { binding =>
           $mapName(binding.function.name).map(_ -> binding)

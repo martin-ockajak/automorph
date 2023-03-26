@@ -34,12 +34,12 @@ object ClientBindings {
    * @return
    *   mapping of API method names to client function bindings
    */
-  def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
+  def generate[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec
   ): Seq[ClientBinding[Node, Context]] =
-    macro bindingsMacro[Node, Codec, Effect, Context, Api]
+    macro generateMacro[Node, Codec, Effect, Context, Api]
 
-  def bindingsMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](c: blackbox.Context)(
+  def generateMacro[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](c: blackbox.Context)(
     codec: c.Expr[Codec]
   )(implicit
     nodeType: c.WeakTypeTag[Node],
@@ -64,15 +64,15 @@ object ClientBindings {
     }
 
     // Generate bound API method bindings
-    val clientBindings = validMethods.map { method =>
-      generateBinding[c.type, Node, Codec, Effect, Context, Api](ref)(method, codec)
+    val bindings = validMethods.map { method =>
+      binding[c.type, Node, Codec, Effect, Context, Api](ref)(method, codec)
     }
     c.Expr[Seq[ClientBinding[Node, Context]]](q"""
-      Seq(..$clientBindings)
+      Seq(..$bindings)
     """)
   }
 
-  private def generateBinding[C <: blackbox.Context, Node, Codec <: MessageCodec[Node], Effect[_], Context, Api](
+  private def binding[C <: blackbox.Context, Node, Codec <: MessageCodec[Node], Effect[_], Context, Api](
     ref: ClassReflection[C]
   )(method: ref.RefMethod, codec: ref.c.Expr[Codec])(implicit
     nodeType: ref.c.WeakTypeTag[Node],

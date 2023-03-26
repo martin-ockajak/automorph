@@ -34,13 +34,13 @@ private[automorph] object HandlerGenerator:
    * @return
    *   mapping of API method names to handler function bindings
    */
-  inline def bindings[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
+  inline def generate[Node, Codec <: MessageCodec[Node], Effect[_], Context, Api <: AnyRef](
     codec: Codec,
     api: Api,
   ): Seq[HandlerBinding[Node, Effect, Context]] =
-    ${ bindingsMacro[Node, Codec, Effect, Context, Api]('codec, 'api) }
+    ${ generateMacro[Node, Codec, Effect, Context, Api]('codec, 'api) }
 
-  private def bindingsMacro[
+  private def generateMacro[
     Node: Type,
     Codec <: MessageCodec[Node]: Type,
     Effect[_]: Type,
@@ -60,12 +60,12 @@ private[automorph] object HandlerGenerator:
         )
 
     // Generate bound API method bindings
-    val handlerBindings = validMethods.map { method =>
-      generateBinding[Node, Codec, Effect, Context, Api](ref)(method, codec, api)
+    val bindings = validMethods.map { method =>
+      binding[Node, Codec, Effect, Context, Api](ref)(method, codec, api)
     }
-    Expr.ofSeq(handlerBindings)
+    Expr.ofSeq(bindings)
 
-  private def generateBinding[Node: Type, Codec <: MessageCodec[Node]: Type, Effect[_]: Type, Context: Type, Api: Type](
+  private def binding[Node: Type, Codec <: MessageCodec[Node]: Type, Effect[_]: Type, Context: Type, Api: Type](
     ref: ClassReflection
   )(method: ref.RefMethod, codec: Expr[Codec], api: Expr[Api]): Expr[HandlerBinding[Node, Effect, Context]] =
     given Quotes = ref.q
