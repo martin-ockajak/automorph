@@ -14,7 +14,7 @@ import java.net.InetSocketAddress
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.ListHasAsScala
 
-0/**
+/**
  * Undertow HTTP & WebSocket server message transport plugin.
  *
  * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
