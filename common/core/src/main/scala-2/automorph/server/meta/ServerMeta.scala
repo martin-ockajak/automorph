@@ -124,7 +124,7 @@ object ServerMeta {
         case handler: automorph.handler.BindingHandler[Node, Codec, Effect, Context] => handler.apiBindings
         case _ => Seq.empty
       }
-      val newApiBindings = automorph.server.meta.HandlerGenerator
+      val newApiBindings = automorph.server.meta.HandlerBindingGenerator
         .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](
           server.rpcProtocol.messageCodec, $api
         ).flatMap { binding =>

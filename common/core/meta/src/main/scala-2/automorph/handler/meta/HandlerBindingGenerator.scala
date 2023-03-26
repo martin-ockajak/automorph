@@ -14,7 +14,7 @@ import scala.reflect.macros.blackbox
  *
  * Note: Consider this class to be private and do not use it. It remains public only due to Scala 2 macro limitations.
  */
-object HandlerGenerator {
+object HandlerBindingGenerator {
 
   /**
    * Generates handler bindings for all valid public methods of an API type.

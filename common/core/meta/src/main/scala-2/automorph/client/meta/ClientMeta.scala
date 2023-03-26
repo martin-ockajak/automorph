@@ -128,8 +128,10 @@ object ClientMeta {
     c.Expr[Api](q"""
       // Generate API function bindings
       val client = ${c.prefix}
-      val bindings = automorph.client.meta.ClientGenerator
-        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](client.rpcProtocol.messageCodec).map { binding =>
+      val bindings = automorph.client.meta.ClientBindingGenerator
+        .bindings[$nodeType, $codecType, $effectType, $contextType, $apiType](
+          client.rpcProtocol.messageCodec
+        ).map { binding =>
           binding.function.name -> binding
         }.toMap
 
