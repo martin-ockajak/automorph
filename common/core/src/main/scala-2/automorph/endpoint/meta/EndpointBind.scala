@@ -133,8 +133,8 @@ object EndpointMeta {
       import scala.collection.immutable.ListMap
 
       val endpoint = ${c.prefix}
-      val apiBindings = if (server.handler.isInstanceOf[ApiRequestHandler[?, ?, $effectType, ?]]) {
-        server.handler.asInstanceOf[ApiRequestHandler[$nodeType, $codecType, $effectType, $contextType]].apiBindings
+      val apiBindings = if (endpoint.handler.isInstanceOf[ApiRequestHandler[?, ?, $effectType, ?]]) {
+        endpoint.handler.asInstanceOf[ApiRequestHandler[$nodeType, $codecType, $effectType, $contextType]].apiBindings
       } else {
         ListMap.empty[String, HandlerBinding[$nodeType, $effectType, $contextType]]
       }
