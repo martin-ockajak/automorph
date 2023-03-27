@@ -41,12 +41,13 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
     ListMap[String, HandlerBinding[Node, Effect, Context]](),
 ) extends RequestHandler[Effect, Context] with Logging {
 
+  private val bindings = apiSchemaBindings ++ apiBindings
+  implicit private val system: EffectSystem[Effect] = effectSystem
+
   /** Bound RPC functions. */
   lazy val functions: Seq[RpcFunction] = bindings.map { case (name, binding) =>
     binding.function.copy(name = name)
   }.toSeq
-  implicit private val system: EffectSystem[Effect] = effectSystem
-  private val bindings = apiSchemaBindings ++ apiBindings
 
   override def processRequest(body: InputStream, context: Context, id: String): Effect[Option[RpcResult[Context]]] =
     // Parse request
