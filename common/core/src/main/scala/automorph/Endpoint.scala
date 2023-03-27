@@ -42,7 +42,7 @@ final case class Endpoint[Node, Codec <: MessageCodec[Node], Effect[_], Context,
   functions: Seq[RpcFunction] = Seq.empty,
 ) extends EndpointBind[Node, Codec, Effect, Context, Adapter] {
 
-  private val registeredAdapter = transport.clone(handler)
+  private val configuredTransport = transport.clone(handler)
 
   /** Transport layer adapter. */
   def adapter: Adapter =
@@ -51,7 +51,7 @@ final case class Endpoint[Node, Codec <: MessageCodec[Node], Effect[_], Context,
   override def toString: String = {
     val plugins = Map[String, Any](
       "rpcProtocol" -> rpcProtocol,
-      "transport" -> registeredAdapter,
+      "transport" -> configuredTransport,
     ).map { case (name, plugin) =>
       s"$name = ${plugin.getClass.getName}"
     }.mkString(", ")

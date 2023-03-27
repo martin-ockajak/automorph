@@ -40,7 +40,7 @@ final case class Server[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
   functions: Seq[RpcFunction] = Seq.empty,
 ) extends ServerBind[Node, Codec, Effect, Context] {
 
-  private val registeredTransport = transport.clone(handler)
+  private val configuredTransport = transport.clone(handler)
 
   /**
    * Starts this server to process incoming requests.
@@ -49,7 +49,7 @@ final case class Server[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
    *   active RPC server
    */
   def init(): Effect[Server[Node, Codec, Effect, Context]] =
-    registeredTransport.effectSystem.map(transport.init())(_ => this)
+    configuredTransport.effectSystem.map(transport.init())(_ => this)
 
   /**
    * Stops this server freeing the underlying resources.
@@ -58,12 +58,12 @@ final case class Server[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
    *   passive RPC server
    */
   def close(): Effect[Server[Node, Codec, Effect, Context]] =
-    registeredTransport.effectSystem.map(transport.close())(_ => this)
+    configuredTransport.effectSystem.map(transport.close())(_ => this)
 
   override def toString: String = {
     val plugins = Map[String, Any](
       "rpcProtocol" -> rpcProtocol,
-      "transport" -> registeredTransport,
+      "transport" -> configuredTransport,
     ).map { case (name, plugin) =>
       s"$name = ${plugin.getClass.getName}"
     }.mkString(", ")
