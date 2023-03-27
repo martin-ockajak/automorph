@@ -99,6 +99,7 @@ final case class JettyServer[Effect[_]](
     servletHandler.addFilter(new FilterHolder(methodFilter), servletPath, util.EnumSet.of(DispatcherType.REQUEST))
     val server = new Server(port)
     server.setHandler(servletHandler)
+//    JettyWebSocketServletContainerInitializer.configure(handler, null)
     server
   }
 }

@@ -61,7 +61,7 @@ final case class UndertowServer[Effect[_]](
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
-  private val rootHandler = createRootHandler()
+  private lazy val rootHandler = createRootHandler()
   private val allowedMethods = methods.map(_.name).toSet
   private var server = Option.empty[Undertow]
 

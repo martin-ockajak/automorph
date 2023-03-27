@@ -75,13 +75,14 @@ final case class VertxServer[Effect[_]](
     effectSystem.evaluate(start())
 
   override def close(): Effect[Unit] = {
-    effectSystem.flatMap(effectSystem.completable[Unit]){ closed =>
+    effectSystem.flatMap(effectSystem.completable[Unit]) { closed =>
       httpServer.close().onComplete { result =>
         if (result.failed) {
           closed.fail(result.cause)
         } else {
           closed.succeed(())
         }
+        ()
       }
       closed.effect
     }
