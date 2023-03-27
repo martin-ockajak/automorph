@@ -7,13 +7,16 @@ import automorph.transport.http.server.JettyServer.Context
 import automorph.transport.http.{HttpContext, HttpMethod}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
 import jakarta.servlet.{DispatcherType, Filter, FilterChain, ServletContext, ServletRequest, ServletResponse}
+import java.time.Duration
 import java.util
+import java.util.concurrent.TimeUnit
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{FilterHolder, ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.util.thread.{QueuedThreadPool, ThreadPool}
 import org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import scala.collection.immutable.ListMap
+import scala.concurrent.duration.FiniteDuration
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
@@ -45,6 +48,12 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  *   thread pool
  * @param handler
  *   RPC request handler
+ * @param idleTimeout
+ *   idle WebSocket connection timeout
+ * @param maxFrameSize
+ *   maximum WebSocket frame size
+ * @param attributes
+ *   server attributes
  * @tparam Effect
  *   effect type
  */
@@ -56,10 +65,13 @@ final case class JettyServer[Effect[_]](
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   threadPool: ThreadPool = new QueuedThreadPool,
+  idleTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
+  maxFrameSize: Long = 65536,
+  attributes: Map[String, String] = Map.empty,
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
-  private lazy val jetty = createServer()
+  private lazy val server = createServer()
   private val allowedMethods = methods.map(_.name).toSet
   private val methodFilter = new Filter {
 
@@ -77,8 +89,8 @@ final case class JettyServer[Effect[_]](
   override def init(): Effect[Unit] =
     effectSystem.evaluate {
       this.synchronized {
-        jetty.start()
-        jetty.getConnectors.foreach { connector =>
+        server.start()
+        server.getConnectors.foreach { connector =>
           connector.getProtocols.asScala.foreach { protocol =>
             logger.info("Listening for connections", ListMap("Protocol" -> protocol, "Port" -> port.toString))
           }
@@ -87,7 +99,7 @@ final case class JettyServer[Effect[_]](
     }
 
   override def close(): Effect[Unit] =
-    effectSystem.evaluate(this.synchronized(jetty.stop()))
+    effectSystem.evaluate(this.synchronized(server.stop()))
 
   private def createServer(): Server = {
     val endpointTransport = JettyHttpEndpoint(effectSystem, mapException, handler)
@@ -100,6 +112,9 @@ final case class JettyServer[Effect[_]](
     // Validate HTTP request method
     servletHandler.addFilter(new FilterHolder(methodFilter), servletPath, util.EnumSet.of(DispatcherType.REQUEST))
     val server = new Server(port)
+    attributes.foreach { case (name, value) =>
+      server.setAttribute(name, value)
+    }
     server.setHandler(servletHandler)
 
     // WebSocket support
@@ -107,8 +122,11 @@ final case class JettyServer[Effect[_]](
       JettyWebSocketServletContainerInitializer
         .configure(
           servletHandler,
-          (_: ServletContext, container: JettyWebSocketServerContainer) =>
-            container.addMapping(pathPrefix, JettyWebSocketEndpoint(effectSystem, mapException, handler).creator),
+          (_: ServletContext, container: JettyWebSocketServerContainer) => {
+            container.setIdleTimeout(Duration.ofNanos(idleTimeout.toNanos))
+            container.setMaxFrameSize(maxFrameSize)
+            container.addMapping(pathPrefix, JettyWebSocketEndpoint(effectSystem, mapException, handler).creator)
+          },
         )
     }
     server
