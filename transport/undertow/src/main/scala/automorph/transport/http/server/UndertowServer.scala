@@ -122,8 +122,8 @@ object UndertowServer {
 
   /**
    * Default Undertow server builder providing the following settings:
-   *   - IO threads: 2 * number of CPU cores
-   *   - Worker threads: number of CPU cores
+   * - IO threads: 2 * number of CPU cores
+   * - Worker threads: number of CPU cores
    */
   def defaultBuilder: Undertow.Builder =
     Undertow.builder().setIoThreads(Runtime.getRuntime.availableProcessors * 2)
