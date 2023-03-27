@@ -1,7 +1,7 @@
 package automorph.transport.http.server
 
 import automorph.log.Logging
-import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
+import automorph.spi.{AsyncEffectSystem, RequestHandler, ServerTransport}
 import automorph.transport.http.endpoint.VertxHttpEndpoint
 import automorph.transport.http.server.VertxServer.{Context, defaultHttpServerOptions, defaultVertxOptions}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
@@ -49,7 +49,7 @@ import scala.collection.immutable.ListMap
  *   effect type
  */
 final case class VertxServer[Effect[_]](
-  effectSystem: EffectSystem[Effect],
+  effectSystem: AsyncEffectSystem[Effect],
   port: Int,
   pathPrefix: String = "/",
   methods: Iterable[HttpMethod] = HttpMethod.values,
@@ -74,12 +74,18 @@ final case class VertxServer[Effect[_]](
   override def init(): Effect[Unit] =
     effectSystem.evaluate(start())
 
-  override def close(): Effect[Unit] =
-    effectSystem.evaluate {
-      val closedServer = httpServer.close()
-      Option(closedServer.result).getOrElse(throw closedServer.cause)
-      ()
+  override def close(): Effect[Unit] = {
+    effectSystem.flatMap(effectSystem.completable[Unit]){ closed =>
+      httpServer.close().onComplete { result =>
+        if (result.failed) {
+          closed.fail(result.cause)
+        } else {
+          closed.succeed(())
+        }
+      }
+      closed.effect
     }
+  }
 
   private def createServer(): HttpServer = {
     // HTTP
