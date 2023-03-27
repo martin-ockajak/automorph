@@ -92,7 +92,10 @@ final case class AkkaServer[Effect[_]](
           )
           logger.info(
             "Listening for connections",
-            ListMap("Protocol" -> Protocol.Http, "Port" -> serverBinding.localAddress.getPort.toString),
+            ListMap(
+              "Protocol" -> Protocol.Http,
+              "Port" -> serverBinding.localAddress.getPort.toString
+            ),
           )
           Behaviors.empty
         },
