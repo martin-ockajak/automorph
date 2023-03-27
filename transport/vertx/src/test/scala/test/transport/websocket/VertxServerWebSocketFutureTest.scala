@@ -1,8 +1,9 @@
 package test.transport.websocket
 
-import automorph.spi.ServerTransport
+import automorph.spi.{EndpointTransport, ServerTransport}
 import automorph.system.FutureSystem
 import automorph.transport.http.server.VertxServer
+import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -24,6 +25,9 @@ class VertxServerWebSocketFutureTest extends StandardHttpServerTest {
 
   override def serverTransport(id: Int): ServerTransport[Effect, Context] =
     VertxServer(system, port(id))
+
+  override def endpointTransport: EndpointTransport[Future, Context, ?] =
+    VertxWebSocketEndpoint(system)
 
   override def webSocket: Boolean =
     true

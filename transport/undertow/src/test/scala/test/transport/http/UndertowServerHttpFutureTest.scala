@@ -1,7 +1,8 @@
 package test.transport.http
 
-import automorph.spi.ServerTransport
+import automorph.spi.{EndpointTransport, ServerTransport}
 import automorph.system.FutureSystem
+import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import automorph.transport.http.server.UndertowServer
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,4 +24,7 @@ class UndertowServerHttpFutureTest extends StandardHttpServerTest {
 
   override def serverTransport(id: Int): ServerTransport[Effect, Context] =
     UndertowServer[Effect](system, port(id))
+
+  override def endpointTransport: EndpointTransport[Future, Context, ?] =
+    UndertowHttpEndpoint(system)
 }

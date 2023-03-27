@@ -1,8 +1,9 @@
 package test.transport.websocket
 
-import automorph.spi.ServerTransport
+import automorph.spi.{EndpointTransport, ServerTransport}
 import automorph.system.FutureSystem
 import automorph.transport.http.server.UndertowServer
+import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -24,6 +25,9 @@ class UndertowServerWebSocketFutureTest extends StandardHttpServerTest {
 
   override def serverTransport(id: Int): ServerTransport[Effect, Context] =
     UndertowServer[Effect](system, port(id))
+
+  override def endpointTransport: EndpointTransport[Future, Context, ?] =
+    UndertowWebSocketEndpoint(system)
 
   override def webSocket: Boolean =
     true

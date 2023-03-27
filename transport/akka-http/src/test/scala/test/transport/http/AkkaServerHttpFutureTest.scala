@@ -1,6 +1,6 @@
 package test.transport.http
 
-import automorph.spi.ServerTransport
+import automorph.spi.{EndpointTransport, ServerTransport}
 import automorph.system.FutureSystem
 import automorph.transport.http.endpoint.AkkaHttpEndpoint
 import automorph.transport.http.server.AkkaServer
@@ -12,7 +12,7 @@ import test.standard.StandardHttpServerTest
 class AkkaServerHttpFutureTest extends StandardHttpServerTest {
 
   type Effect[T] = Future[T]
-  type Context = AkkaHttpEndpoint.Context
+  type Context = AkkaServer.Context
 
   override lazy val system: FutureSystem = FutureSystem()
 
@@ -24,4 +24,7 @@ class AkkaServerHttpFutureTest extends StandardHttpServerTest {
 
   override def serverTransport(id: Int): ServerTransport[Effect, Context] =
     AkkaServer(system, port(id))
+
+  override def endpointTransport: EndpointTransport[Future, Context, ?] =
+    AkkaHttpEndpoint(system)
 }

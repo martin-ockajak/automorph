@@ -1,6 +1,6 @@
 package test.transport.http
 
-import automorph.spi.ServerTransport
+import automorph.spi.{EndpointTransport, ServerTransport}
 import automorph.system.FutureSystem
 import automorph.transport.http.endpoint.JettyHttpEndpoint
 import automorph.transport.http.server.JettyServer
@@ -26,4 +26,7 @@ class JettyServerHttpFutureTest extends StandardHttpServerTest {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
     JettyServer(system, port(id))
   }
+
+  override def endpointTransport: EndpointTransport[Future, Context, ?] =
+    JettyHttpEndpoint(system)
 }

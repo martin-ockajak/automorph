@@ -1,7 +1,8 @@
 package test.transport.http
 
-import automorph.spi.ServerTransport
+import automorph.spi.{EndpointTransport, ServerTransport}
 import automorph.system.FutureSystem
+import automorph.transport.http.endpoint.VertxHttpEndpoint
 import automorph.transport.http.server.VertxServer
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -23,4 +24,7 @@ class VertxServerHttpFutureTest extends StandardHttpServerTest {
 
   override def serverTransport(id: Int): ServerTransport[Effect, Context] =
     VertxServer(system, port(id))
+
+  override def endpointTransport: EndpointTransport[Future, Context, ?] =
+    VertxHttpEndpoint(system)
 }

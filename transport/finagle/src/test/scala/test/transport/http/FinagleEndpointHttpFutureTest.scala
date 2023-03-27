@@ -1,6 +1,6 @@
 package test.transport.http
 
-import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
+import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler, ServerTransport}
 import automorph.system.FutureSystem
 import automorph.transport.http.endpoint.FinagleHttpEndpoint
 import com.twitter.finagle.{Http, ListeningServer}
@@ -25,6 +25,9 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
 
   override def serverTransport(id: Int): ServerTransport[Effect, Context] =
     FinagleServer(system, port(id))
+
+  override def endpointTransport: EndpointTransport[Future, Context, ?] =
+    FinagleHttpEndpoint(system)
 
   private final case class FinagleServer(
     effectSystem: EffectSystem[Effect],
