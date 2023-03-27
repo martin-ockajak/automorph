@@ -7,7 +7,7 @@ import automorph.codec.messagepack.{UpickleMessagePackCodec, UpickleMessagePackC
 import automorph.protocol.JsonRpcProtocol
 import automorph.spi.{ClientTransport, EndpointTransport, ServerTransport}
 import automorph.transport.local.endpoint.LocalEndpoint
-import automorph.{Client, Server}
+import automorph.{Client, Endpoint, Server}
 import com.fasterxml.jackson.core.{JsonGenerator, JsonParser}
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
@@ -63,6 +63,7 @@ trait ProtocolCodecTest extends CoreTest {
     Seq(enumEncoder, enumDecoder)
     val codec = CirceJsonCodec()
     val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type, Context](codec)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
@@ -94,6 +95,7 @@ trait ProtocolCodecTest extends CoreTest {
     )
     val codec = JacksonJsonCodec(JacksonJsonCodec.defaultMapper.registerModule(enumModule))
     val protocol = JsonRpcProtocol[JacksonJsonCodec.Node, codec.type, Context](codec)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
@@ -116,6 +118,7 @@ trait ProtocolCodecTest extends CoreTest {
     }
     val codec = UpickleJsonCodec(new Custom)
     val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type, Context](codec)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
@@ -138,6 +141,7 @@ trait ProtocolCodecTest extends CoreTest {
     }
     val codec = UpickleMessagePackCodec(new Custom)
     val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type, Context](codec)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
@@ -192,6 +196,7 @@ trait ProtocolCodecTest extends CoreTest {
     Seq(recordCodecJson)
     val codec = ArgonautJsonCodec()
     val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type, Context](codec)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
     val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
