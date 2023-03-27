@@ -22,11 +22,8 @@ class VertxServerWebSocketFutureTest extends StandardHttpServerTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def serverTransport(
-    handler: Types.HandlerAnyCodec[Effect, Context],
-    port: Int,
-  ): ServerTransport[Effect, Context] =
-    VertxServer(handler, port)
+  override def serverTransport(id: Int): ServerTransport[Effect, Context] =
+    VertxServer(system, port(id))
 
   override def webSocket: Boolean =
     true
