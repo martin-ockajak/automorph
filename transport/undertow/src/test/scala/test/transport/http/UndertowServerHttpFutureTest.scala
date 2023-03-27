@@ -21,6 +21,6 @@ class UndertowServerHttpFutureTest extends StandardHttpServerTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def serverTransport: ServerTransport[Effect, Context] =
-    UndertowServer[Effect](system, port)
+  override def serverTransport(id: Int): ServerTransport[Effect, Context] =
+    UndertowServer[Effect](system, port(id))
 }
