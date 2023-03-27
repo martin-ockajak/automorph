@@ -36,7 +36,7 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  */
 final case class VertxWebSocketEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
-  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Handler[ServerWebSocket] with Logging with EndpointTransport[Effect, Context, Handler[ServerWebSocket]] {
 
   private val headerXForwardedFor = "X-Forwarded-For"
