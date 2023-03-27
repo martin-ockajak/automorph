@@ -61,7 +61,7 @@ final case class AkkaServer[Effect[_]](
   readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
   requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
   serverSettings: ServerSettings = AkkaServer.defaultServerSettings,
-  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
   implicit private val system: EffectSystem[Effect] = effectSystem

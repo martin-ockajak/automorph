@@ -53,7 +53,7 @@ case class AkkaHttpEndpoint[Effect[_]](
   effectSystem: EffectSystem[Effect],
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
-  handler: RequestHandler[Effect, Context] = RequestHandler.dummy,
+  handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with EndpointTransport[Effect, Context, Behavior[RpcHttpRequest]] {
 
   private val log = MessageLog(logger, Protocol.Http.name)
