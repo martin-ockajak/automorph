@@ -102,7 +102,7 @@ final case class VertxServer[Effect[_]](
 
     // WebSocket
     Option.when(webSocket) {
-      val webSocketHandler = VertxWebSocketEndpoint(handler)
+      val webSocketHandler = VertxWebSocketEndpoint(effectSystem, handler)
       server.webSocketHandler { request =>
         // Validate URL path
         if (request.path.startsWith(pathPrefix)) {
