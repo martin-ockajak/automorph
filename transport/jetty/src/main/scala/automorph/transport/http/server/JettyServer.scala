@@ -93,7 +93,7 @@ final case class JettyServer[Effect[_]](
     val servletPath = s"$pathPrefix*"
 
     // Validate URL path
-    servletHandler.addServlet(new ServletHolder(endpointTransport), servletPath)
+    servletHandler.addServlet(new ServletHolder(endpointTransport.adapter), servletPath)
 
     // Validate HTTP request method
     servletHandler.addFilter(new FilterHolder(methodFilter), servletPath, util.EnumSet.of(DispatcherType.REQUEST))
