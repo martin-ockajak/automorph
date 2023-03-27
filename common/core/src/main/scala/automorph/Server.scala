@@ -49,7 +49,7 @@ final case class Server[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
    *   active RPC server
    */
   def init(): Effect[Server[Node, Codec, Effect, Context]] =
-    configuredTransport.effectSystem.map(transport.init())(_ => this)
+    configuredTransport.effectSystem.map(configuredTransport.init())(_ => this)
 
   /**
    * Stops this server freeing the underlying resources.
@@ -58,7 +58,7 @@ final case class Server[Node, Codec <: MessageCodec[Node], Effect[_], Context] (
    *   passive RPC server
    */
   def close(): Effect[Server[Node, Codec, Effect, Context]] =
-    configuredTransport.effectSystem.map(transport.close())(_ => this)
+    configuredTransport.effectSystem.map(configuredTransport.close())(_ => this)
 
   override def toString: String = {
     val plugins = Map[String, Any](
