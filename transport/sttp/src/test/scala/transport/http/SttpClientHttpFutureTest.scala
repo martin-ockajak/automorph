@@ -4,7 +4,6 @@ import automorph.spi.ClientTransport
 import automorph.system.FutureSystem
 import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.SttpClient
-import java.net.URI
 import org.scalacheck.Arbitrary
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -26,10 +25,5 @@ class SttpClientHttpFutureTest extends StandardHttpClientTest {
     HttpContextGenerator.arbitrary
 
   override def clientTransport(id: Int): ClientTransport[Effect, ?] =
-    SttpClient.http(
-      system,
-      AsyncHttpClientFutureBackend(),
-      new URI(s"http://localhost:${port(id)}"),
-      HttpMethod.Post
-    )
+    SttpClient.http(system, AsyncHttpClientFutureBackend(), url(id), HttpMethod.Post)
 }

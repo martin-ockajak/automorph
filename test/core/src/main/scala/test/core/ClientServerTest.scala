@@ -1,5 +1,6 @@
 package test.core
 
+import java.net.URI
 import scala.collection.mutable
 import test.base.{Await, Network}
 
@@ -10,6 +11,11 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
     ports.synchronized {
       ports.getOrElseUpdate(id, acquireRandomPort)
     }
+
+  def url(id: Int): URI = {
+    val scheme = Option.when(webSocket)("ws").getOrElse("http")
+    new URI(s"$scheme://localhost:${port(id)}")
+  }
 
   override def afterAll(): Unit = {
     super.afterAll()

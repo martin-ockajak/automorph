@@ -5,7 +5,6 @@ import automorph.system.IdentitySystem
 import automorph.system.IdentitySystem.Identity
 import automorph.transport.http.HttpMethod
 import automorph.transport.http.client.JettyClient
-import java.net.URI
 import org.scalacheck.Arbitrary
 import test.standard.StandardHttpClientTest
 
@@ -24,6 +23,6 @@ class JettyClientHttpIdentityTest extends StandardHttpClientTest {
 
   override def clientTransport(id: Int): ClientTransport[Effect, Context] = {
     System.setProperty("org.eclipse.jetty.LEVEL", "ERROR")
-    JettyClient(system, new URI(s"http://localhost:${port(id)}"), HttpMethod.Post)
+    JettyClient(system, url(id), HttpMethod.Post)
   }
 }

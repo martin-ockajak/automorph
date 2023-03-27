@@ -1,6 +1,6 @@
 package test.transport.amqp
 
-import automorph.spi.ClientTransport
+import automorph.spi.{ClientTransport, ServerTransport}
 import automorph.system.FutureSystem
 import automorph.transport.amqp.client.RabbitMqClient
 import automorph.transport.amqp.server.RabbitMqServer
@@ -33,19 +33,24 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
   override def arbitraryContext: Arbitrary[Context] =
     AmqpContextGenerator.arbitrary
 
-  override def transport(
-    system: Types.HandlerAnyCodec[Effect, Context]
-  ): Option[ClientTransport[Effect, Context]] =
+  override def clientTransport(id: Int): ClientTransport[Effect, Context] =
     embeddedBroker match {
       case Some((_, config)) => Some {
         val protocol = system.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]].rpcProtocol
         val queue = s"${protocol.name}/${protocol.messageCodec.getClass.getName}"
         val url = new URI(s"amqp://localhost:${config.getRabbitMqPort}")
-        val server = RabbitMqServer[Effect](system, url, Seq(queue))
-        servers += server
-        val client = RabbitMqClient[Effect](url, queue, system)
-        clients += client
-        client
+        RabbitMqClient[Effect](url, queue, system)
+      }
+      case _ => None
+    }
+
+  override def serverTransport(id: Int): ServerTransport[Effect, Context] =
+    embeddedBroker match {
+      case Some((_, config)) => Some {
+        val protocol = system.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]].rpcProtocol
+        val queue = s"${protocol.name}/${protocol.messageCodec.getClass.getName}"
+        val url = new URI(s"amqp://localhost:${config.getRabbitMqPort}")
+        RabbitMqServer[Effect](system, url, Seq(queue))
       }
       case _ => None
     }
