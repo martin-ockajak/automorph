@@ -60,7 +60,7 @@ final case class AkkaServer[Effect[_]](
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
   requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
-  serverSettings: ServerSettings = AkkaServer.defaultServerSettings,
+  serverSettings: ServerSettings = ServerSettings(""),
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
@@ -127,8 +127,4 @@ object AkkaServer {
 
   /** Request context type. */
   type Context = AkkaHttpEndpoint.Context
-
-  /** Default HTTP server settings. */
-  def defaultServerSettings: ServerSettings =
-    ServerSettings("")
 }

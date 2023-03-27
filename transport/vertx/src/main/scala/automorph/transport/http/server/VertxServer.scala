@@ -3,7 +3,7 @@ package automorph.transport.http.server
 import automorph.log.Logging
 import automorph.spi.{AsyncEffectSystem, RequestHandler, ServerTransport}
 import automorph.transport.http.endpoint.VertxHttpEndpoint
-import automorph.transport.http.server.VertxServer.{Context, defaultHttpServerOptions, defaultVertxOptions}
+import automorph.transport.http.server.VertxServer.{Context, defaultVertxOptions}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint
 import io.vertx.core.http.{HttpServer, HttpServerOptions}
@@ -56,7 +56,7 @@ final case class VertxServer[Effect[_]](
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   vertxOptions: VertxOptions = defaultVertxOptions,
-  httpServerOptions: HttpServerOptions = defaultHttpServerOptions,
+  httpServerOptions: HttpServerOptions = new HttpServerOptions,
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
@@ -142,8 +142,4 @@ object VertxServer {
   def defaultVertxOptions: VertxOptions =
     new VertxOptions().setEventLoopPoolSize(Runtime.getRuntime.availableProcessors * 2)
       .setWorkerPoolSize(Runtime.getRuntime.availableProcessors)
-
-  /** Default HTTP server options. */
-  def defaultHttpServerOptions: HttpServerOptions =
-    new HttpServerOptions()
 }
