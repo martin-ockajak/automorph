@@ -3,7 +3,7 @@ package automorph.transport.websocket.endpoint
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
 import automorph.transport.http.{HttpContext, Protocol}
-import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.Context
+import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint.{ConnectionListener, Context}
 import automorph.util.Extensions.{ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
 import automorph.util.{Network, Random}
 import io.undertow.server.{HttpHandler, HttpServerExchange}
@@ -15,7 +15,7 @@ import io.undertow.websockets.spi.WebSocketHttpExchange
 import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHandshakeHandler}
 import java.io.InputStream
 import scala.collection.immutable.ListMap
-import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsJava, MapHasAsScala, SeqHasAsJava}
+import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
 
 /**
  * Undertow WebSocket endpoint transport plugin.
@@ -47,7 +47,15 @@ final case class UndertowWebSocketEndpoint[Effect[_]](
   with EndpointTransport[Effect, Context, WebSocketConnectionCallback] {
 
   private val log = MessageLog(logger, Protocol.WebSocket.name)
-  implicit private val system: EffectSystem[Effect] = effectSystem
+
+  /**
+   * Creates an Undertow WebSocket handshake HTTP handler for this Undertow WebSocket callback.
+   *
+   * @param next
+   *   Undertow handler invoked if a HTTP request does not contain a WebSocket handshake
+   */
+  def handshakeHandler(next: HttpHandler): WebSocketProtocolHandshakeHandler =
+    new WebSocketProtocolHandshakeHandler(adapter, next)
 
   override def adapter: WebSocketConnectionCallback =
     this
@@ -56,105 +64,7 @@ final case class UndertowWebSocketEndpoint[Effect[_]](
     copy(handler = handler)
 
   override def onConnect(exchange: WebSocketHttpExchange, channel: WebSocketChannel): Unit = {
-    val receiveListener = new AbstractReceiveListener {
-
-      override def onFullTextMessage(channel: WebSocketChannel, message: BufferedTextMessage): Unit = {
-        val requestBody = message.getData.toInputStream
-        handle(exchange, requestBody, channel, () => ())
-      }
-
-      override def onFullBinaryMessage(channel: WebSocketChannel, message: BufferedBinaryMessage): Unit = {
-        val data = message.getData
-        val requestBody = WebSockets.mergeBuffers(data.getResource*).toInputStream
-        handle(exchange, requestBody, channel, () => data.discard())
-      }
-
-      private def handle(
-        exchange: WebSocketHttpExchange,
-        requestBody: InputStream,
-        channel: WebSocketChannel,
-        discardMessage: () => Unit,
-      ): Unit = {
-        // Log the request
-        val requestId = Random.id
-        lazy val requestProperties = getRequestProperties(exchange, requestId)
-        log.receivedRequest(requestProperties)
-
-        // Process the request
-        handler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
-          _.fold(
-            error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
-            result => {
-              // Send the response
-              val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
-              sendResponse(responseBody, result.flatMap(_.context), exchange, channel, requestId)
-              discardMessage()
-            },
-          )
-        ).runAsync
-      }
-
-      private def sendErrorResponse(
-        error: Throwable,
-        exchange: WebSocketHttpExchange,
-        channel: WebSocketChannel,
-        requestId: String,
-        requestProperties: => Map[String, String],
-      ): Unit = {
-        log.failedProcessRequest(error, requestProperties)
-        val responseBody = error.description.toInputStream
-        sendResponse(responseBody, None, exchange, channel, requestId)
-      }
-
-      private def sendResponse(
-        message: InputStream,
-        responseContext: Option[Context],
-        exchange: WebSocketHttpExchange,
-        channel: WebSocketChannel,
-        requestId: String,
-      ): Unit = {
-        // Log the response
-        lazy val responseProperties = ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(exchange))
-        log.sendingResponse(responseProperties)
-
-        // Send the response
-        val callback = new WebSocketCallback[Unit] {
-          override def complete(channel: WebSocketChannel, context: Unit): Unit =
-            log.sentResponse(responseProperties)
-
-          override def onError(channel: WebSocketChannel, context: Unit, error: Throwable): Unit =
-            log.failedSendResponse(error, responseProperties)
-        }
-        setResponseContext(exchange, responseContext)
-        WebSockets.sendBinary(message.toByteBuffer, channel, callback, ())
-      }
-
-      private def getRequestContext(exchange: WebSocketHttpExchange): Context = {
-        val headers = exchange.getRequestHeaders.asScala.view.mapValues(_.asScala).flatMap { case (name, values) =>
-          values.map(value => name -> value)
-        }.toSeq
-        HttpContext(message = Some(Right(exchange).withLeft[HttpServerExchange]), headers = headers)
-          .url(exchange.getRequestURI)
-      }
-
-      private def setResponseContext(exchange: WebSocketHttpExchange, responseContext: Option[Context]): Unit = {
-        val headers = responseContext.toSeq.flatMap(_.headers).groupBy(_._1).view.mapValues(_.map(_._2).asJava).toMap
-          .asJava
-        exchange.setResponseHeaders(headers)
-      }
-
-      private def getRequestProperties(exchange: WebSocketHttpExchange, requestId: String): Map[String, String] = {
-        val query = Option(exchange.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")
-        val url = s"${exchange.getRequestURI}$query"
-        Map(LogProperties.requestId -> requestId, "Client" -> clientAddress(exchange), "URL" -> url)
-      }
-
-      private def clientAddress(exchange: WebSocketHttpExchange): String = {
-        val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.get(0))
-        val address = exchange.getPeerConnections.iterator().next().getSourceAddress.toString
-        Network.address(forwardedFor, address)
-      }
-    }
+    val receiveListener = ConnectionListener(effectSystem, handler, log, exchange)
     channel.getReceiveSetter.set(receiveListener)
     channel.resumeReceives()
   }
@@ -168,17 +78,108 @@ object UndertowWebSocketEndpoint {
   /** Request context type. */
   type Context = HttpContext[Either[HttpServerExchange, WebSocketHttpExchange]]
 
-  /**
-   * Creates an Undertow WebSocket handshake HTTP handler for this Undertow WebSocket callback.
-   *
-   * @param webSocketConnectionCallback
-   *   WebSocket connnection callback
-   * @param next
-   *   Undertow handler invoked if a HTTP request does not contain a WebSocket handshake
-   */
-  def handshakeHandler(
-    webSocketConnectionCallback: WebSocketConnectionCallback,
-    next: HttpHandler,
-  ): WebSocketProtocolHandshakeHandler =
-    new WebSocketProtocolHandshakeHandler(webSocketConnectionCallback, next)
+  private final case class ConnectionListener[Effect[_]](
+    effectSystem: EffectSystem[Effect],
+    handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
+    log: MessageLog,
+    exchange: WebSocketHttpExchange,
+  ) extends AbstractReceiveListener {
+
+    implicit private val system: EffectSystem[Effect] = effectSystem
+
+    override def onFullTextMessage(channel: WebSocketChannel, message: BufferedTextMessage): Unit =
+      handle(exchange, message.getData.toInputStream, channel, () => ())
+
+    override def onFullBinaryMessage(channel: WebSocketChannel, message: BufferedBinaryMessage): Unit = {
+      val data = message.getData
+      val requestBody = WebSockets.mergeBuffers(data.getResource*).toInputStream
+      handle(exchange, requestBody, channel, () => data.discard())
+    }
+
+    private def handle(
+      exchange: WebSocketHttpExchange,
+      requestBody: InputStream,
+      channel: WebSocketChannel,
+      discardMessage: () => Unit,
+    ): Unit = {
+      // Log the request
+      val requestId = Random.id
+      lazy val requestProperties = getRequestProperties(exchange, requestId)
+      log.receivedRequest(requestProperties)
+
+      // Process the request
+      handler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
+        _.fold(
+          error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
+          result => {
+            // Send the response
+            val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+            sendResponse(responseBody, exchange, channel, requestId)
+            discardMessage()
+          },
+        )
+      ).runAsync
+    }
+
+    private def sendErrorResponse(
+      error: Throwable,
+      exchange: WebSocketHttpExchange,
+      channel: WebSocketChannel,
+      requestId: String,
+      requestProperties: => Map[String, String],
+    ): Unit = {
+      log.failedProcessRequest(error, requestProperties)
+      val responseBody = error.description.toInputStream
+      sendResponse(responseBody, exchange, channel, requestId)
+    }
+
+    private def sendResponse(
+      message: InputStream,
+      exchange: WebSocketHttpExchange,
+      channel: WebSocketChannel,
+      requestId: String,
+    ): Unit = {
+      // Log the response
+      lazy val responseProperties = ListMap(
+        LogProperties.requestId -> requestId,
+        "Client" -> clientAddress(exchange)
+      )
+      log.sendingResponse(responseProperties)
+
+      // Send the response
+      WebSockets.sendBinary(message.toByteBuffer, channel, ResponseCallback(log, responseProperties), ())
+    }
+
+    private def getRequestContext(exchange: WebSocketHttpExchange): Context = {
+      val headers = exchange.getRequestHeaders.asScala.view.mapValues(_.asScala).flatMap { case (name, values) =>
+        values.map(value => name -> value)
+      }.toSeq
+      HttpContext(message = Some(Right(exchange).withLeft[HttpServerExchange]), headers = headers)
+        .url(exchange.getRequestURI)
+    }
+
+    private def getRequestProperties(exchange: WebSocketHttpExchange, requestId: String): Map[String, String] = {
+      val query = Option(exchange.getQueryString).filter(_.nonEmpty).map("?" + _).getOrElse("")
+      val url = s"${exchange.getRequestURI}$query"
+      Map(LogProperties.requestId -> requestId, "Client" -> clientAddress(exchange), "URL" -> url)
+    }
+
+    private def clientAddress(exchange: WebSocketHttpExchange): String = {
+      val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.get(0))
+      val address = exchange.getPeerConnections.iterator().next().getSourceAddress.toString
+      Network.address(forwardedFor, address)
+    }
+  }
+
+  private final case class ResponseCallback(
+    log: MessageLog,
+    responseProperties: ListMap[String, String],
+  ) extends WebSocketCallback[Unit] {
+
+    override def complete(channel: WebSocketChannel, context: Unit): Unit =
+      log.sentResponse(responseProperties)
+
+    override def onError(channel: WebSocketChannel, context: Unit, error: Throwable): Unit =
+      log.failedSendResponse(error, responseProperties)
+  }
 }

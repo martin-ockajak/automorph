@@ -96,13 +96,11 @@ final case class UndertowServer[Effect[_]](
 
     // Validate URL path
     Handlers.predicate(
-      // HTTP
       Predicates.prefix(pathPrefix),
-      // WebSocket
-      Option.when(webSocket)(UndertowWebSocketEndpoint.handshakeHandler(
-        UndertowWebSocketEndpoint(effectSystem, handler).adapter,
-        httpHandler
-      )).getOrElse(httpHandler),
+      // WebSocket support
+      Option.when(webSocket)(
+        UndertowWebSocketEndpoint(effectSystem, handler).handshakeHandler(httpHandler)
+      ).getOrElse(httpHandler),
       ResponseCodeHandler.HANDLE_404,
     )
   }

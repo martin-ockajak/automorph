@@ -2,20 +2,22 @@ package automorph.transport.http.server
 
 import automorph.log.Logging
 import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
-import automorph.transport.http.endpoint.JettyHttpEndpoint
+import automorph.transport.http.endpoint.{JettyHttpEndpoint, JettyWebSocketEndpoint}
 import automorph.transport.http.server.JettyServer.Context
 import automorph.transport.http.{HttpContext, HttpMethod}
 import jakarta.servlet.http.{HttpServletRequest, HttpServletResponse}
-import jakarta.servlet.{DispatcherType, Filter, FilterChain, ServletRequest, ServletResponse}
+import jakarta.servlet.{DispatcherType, Filter, FilterChain, ServletContext, ServletRequest, ServletResponse}
 import java.util
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{FilterHolder, ServletContextHandler, ServletHolder}
 import org.eclipse.jetty.util.thread.{QueuedThreadPool, ThreadPool}
+import org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer
+import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.ListHasAsScala
 
 /**
- * Jetty HTTP server message transport plugin.
+ * Jetty HTTP & WebSocket server message transport plugin.
  *
  * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
  *   - The response returned by the RPC request handler is used as HTTP response body.
@@ -99,7 +101,16 @@ final case class JettyServer[Effect[_]](
     servletHandler.addFilter(new FilterHolder(methodFilter), servletPath, util.EnumSet.of(DispatcherType.REQUEST))
     val server = new Server(port)
     server.setHandler(servletHandler)
-//    JettyWebSocketServletContainerInitializer.configure(handler, null)
+
+    // WebSocket support
+    if (webSocket) {
+      JettyWebSocketServletContainerInitializer
+        .configure(
+          servletHandler,
+          (_: ServletContext, container: JettyWebSocketServerContainer) =>
+            container.addMapping(pathPrefix, JettyWebSocketEndpoint(effectSystem, mapException, handler).creator),
+        )
+    }
     server
   }
 }

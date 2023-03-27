@@ -124,12 +124,6 @@ final case class JettyHttpEndpoint[Effect[_]](
   private def setResponseContext(response: HttpServletResponse, responseContext: Option[Context]): Unit =
     responseContext.toSeq.flatMap(_.headers).foreach { case (name, value) => response.setHeader(name, value) }
 
-  private def clientAddress(request: HttpServletRequest): String = {
-    val forwardedFor = Option(request.getHeader(HttpHeader.X_FORWARDED_FOR.name))
-    val address = request.getRemoteAddr
-    Network.address(forwardedFor, address)
-  }
-
   private def getRequestContext(request: HttpServletRequest): Context = {
     val headers = request.getHeaderNames.asScala.flatMap { name =>
       request.getHeaders(name).asScala.map(value => name -> value)
@@ -147,6 +141,12 @@ final case class JettyHttpEndpoint[Effect[_]](
       "URL" -> url,
       "Method" -> request.getMethod,
     )
+  }
+
+  private def clientAddress(request: HttpServletRequest): String = {
+    val forwardedFor = Option(request.getHeader(HttpHeader.X_FORWARDED_FOR.name))
+    val address = request.getRemoteAddr
+    Network.address(forwardedFor, address)
   }
 }
 

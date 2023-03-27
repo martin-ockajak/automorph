@@ -74,7 +74,7 @@ final case class VertxServer[Effect[_]](
   override def init(): Effect[Unit] =
     effectSystem.evaluate(start())
 
-  override def close(): Effect[Unit] = {
+  override def close(): Effect[Unit] =
     effectSystem.flatMap(effectSystem.completable[Unit]) { closed =>
       httpServer.close().onComplete { result =>
         if (result.failed) {
@@ -86,7 +86,6 @@ final case class VertxServer[Effect[_]](
       }
       closed.effect
     }
-  }
 
   private def createServer(): HttpServer = {
     // HTTP

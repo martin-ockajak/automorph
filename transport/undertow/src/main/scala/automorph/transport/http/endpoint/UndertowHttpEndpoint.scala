@@ -135,12 +135,6 @@ final case class UndertowHttpEndpoint[Effect[_]](
     }
   }
 
-  private def clientAddress(exchange: HttpServerExchange): String = {
-    val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)
-    val address = exchange.getSourceAddress.toString
-    Network.address(forwardedFor, address)
-  }
-
   private def getRequestContext(exchange: HttpServerExchange): Context = {
     val headers = exchange.getRequestHeaders.asScala.flatMap { headerValues =>
       headerValues.iterator.asScala.map(value => headerValues.getHeaderName.toString -> value)
@@ -161,6 +155,12 @@ final case class UndertowHttpEndpoint[Effect[_]](
       "URL" -> url,
       "Method" -> exchange.getRequestMethod.toString,
     )
+  }
+
+  private def clientAddress(exchange: HttpServerExchange): String = {
+    val forwardedFor = Option(exchange.getRequestHeaders.get(Headers.X_FORWARDED_FOR_STRING)).map(_.getFirst)
+    val address = exchange.getSourceAddress.toString
+    Network.address(forwardedFor, address)
   }
 }
 
