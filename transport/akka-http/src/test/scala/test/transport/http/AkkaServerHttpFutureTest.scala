@@ -22,9 +22,6 @@ class AkkaServerHttpFutureTest extends StandardHttpServerTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def serverTransport(
-    handler: Types.HandlerAnyCodec[Effect, Context],
-    port: Int,
-  ): ServerTransport[Effect, Context] =
-    AkkaServer(handler, port)
+  override def serverTransport(id: Int): ServerTransport[Effect, Context] =
+    AkkaServer(system, port(id))
 }
