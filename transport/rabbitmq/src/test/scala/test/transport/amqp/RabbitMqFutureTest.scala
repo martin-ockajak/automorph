@@ -4,6 +4,8 @@ import automorph.spi.{ClientTransport, ServerTransport}
 import automorph.system.FutureSystem
 import automorph.transport.amqp.client.RabbitMqClient
 import automorph.transport.amqp.server.RabbitMqServer
+import automorph.transport.local.LocalContext
+import automorph.transport.local.client.LocalClient
 import io.arivera.oss.embedded.rabbitmq.apache.commons.lang3.SystemUtils
 import io.arivera.oss.embedded.rabbitmq.{EmbeddedRabbitMq, EmbeddedRabbitMqConfig}
 import java.net.URI
@@ -16,6 +18,7 @@ import scala.sys.process.Process
 import scala.util.Try
 import test.base.Mutex
 import test.core.ClientServerTest
+import test.transport.local.LocalServer
 
 class RabbitMqFutureTest extends ClientServerTest with Mutex {
 
@@ -34,26 +37,23 @@ class RabbitMqFutureTest extends ClientServerTest with Mutex {
     AmqpContextGenerator.arbitrary
 
   override def clientTransport(id: Int): ClientTransport[Effect, Context] =
-    embeddedBroker match {
-      case Some((_, config)) => Some {
-        val protocol = system.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]].rpcProtocol
-        val queue = s"${protocol.name}/${protocol.messageCodec.getClass.getName}"
-        val url = new URI(s"amqp://localhost:${config.getRabbitMqPort}")
-        RabbitMqClient[Effect](url, queue, system)
-      }
-      case _ => None
-    }
+    embeddedBroker.map { case (_, config) =>
+      val url = new URI(s"amqp://localhost:${config.getRabbitMqPort}")
+      RabbitMqClient[Effect](url, id.toString, system)
+    }.getOrElse(
+      LocalClient(system, LocalContext(arbitraryContext.arbitrary.sample.get))
+        .asInstanceOf[ClientTransport[Effect, Context]]
+    )
 
-  override def serverTransport(id: Int): ServerTransport[Effect, Context] =
-    embeddedBroker match {
-      case Some((_, config)) => Some {
-        val protocol = system.asInstanceOf[Types.HandlerGenericCodec[Effect, Context]].rpcProtocol
-        val queue = s"${protocol.name}/${protocol.messageCodec.getClass.getName}"
-        val url = new URI(s"amqp://localhost:${config.getRabbitMqPort}")
-        RabbitMqServer[Effect](system, url, Seq(queue))
-      }
-      case _ => None
-    }
+  override def serverTransport(id: Int): ServerTransport[Effect, Context] = {
+    embeddedBroker.map { case (_, config) =>
+      val url = new URI(s"amqp://localhost:${config.getRabbitMqPort}")
+      RabbitMqServer[Effect](system, url, Seq(id.toString))
+    }.getOrElse(
+      LocalServer(system, LocalContext(arbitraryContext.arbitrary.sample.get))
+        .asInstanceOf[ServerTransport[Effect, Context]]
+    )
+  }
 
   override def afterAll(): Unit = {
     try {

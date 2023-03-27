@@ -17,6 +17,9 @@ trait ClientServerTest extends ProtocolCodecTest with Await with Network {
     new URI(s"$scheme://localhost:${port(id)}")
   }
 
+  def webSocket: Boolean =
+    false
+
   override def afterAll(): Unit = {
     super.afterAll()
     ports.synchronized {

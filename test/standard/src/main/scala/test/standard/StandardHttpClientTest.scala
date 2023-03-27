@@ -8,7 +8,4 @@ trait StandardHttpClientTest extends ClientServerTest {
 
   override def serverTransport(id: Int): ServerTransport[Effect, Context] =
     NanoServer[Effect](system, port(id)).asInstanceOf[ServerTransport[Effect, Context]]
-
-  def webSocket: Boolean =
-    false
 }

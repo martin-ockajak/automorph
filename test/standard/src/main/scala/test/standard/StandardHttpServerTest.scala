@@ -9,7 +9,4 @@ trait StandardHttpServerTest extends ClientServerTest {
 
   override def clientTransport(id: Int): ClientTransport[Effect, ?] =
     HttpClient(system, url(id), HttpMethod.Post)
-
-  def webSocket: Boolean =
-    false
 }
