@@ -8,9 +8,9 @@ import test.core.ClientServerTest
 
 trait StandardHttpServerTest extends ClientServerTest {
 
-  override def clientTransport: ClientTransport[Effect, ?] = {
+  override def clientTransport(id: Int): ClientTransport[Effect, ?] = {
     val scheme = Option.when(webSocket)("ws").getOrElse("http")
-    HttpClient(system, new URI(s"$scheme://localhost:$port"), HttpMethod.Post)
+    HttpClient(system, new URI(s"$scheme://localhost:${port(id)}"), HttpMethod.Post)
   }
 
   def webSocket: Boolean =

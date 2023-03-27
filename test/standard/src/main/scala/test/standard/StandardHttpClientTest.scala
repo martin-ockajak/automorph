@@ -6,8 +6,8 @@ import test.core.ClientServerTest
 
 trait StandardHttpClientTest extends ClientServerTest {
 
-  override def serverTransport: ServerTransport[Effect, Context] =
-    NanoServer[Effect](system, port).asInstanceOf[ServerTransport[Effect, Context]]
+  override def serverTransport(id: Int): ServerTransport[Effect, Context] =
+    NanoServer[Effect](system, port(id)).asInstanceOf[ServerTransport[Effect, Context]]
 
   def webSocket: Boolean =
     false
