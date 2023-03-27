@@ -23,10 +23,13 @@ class FinagleEndpointHttpFutureTest extends StandardHttpServerTest {
   override def arbitraryContext: Arbitrary[Context] =
     HttpContextGenerator.arbitrary
 
-  override def serverTransport: ServerTransport[Effect, Context] =
-    FinagleServer(system)
+  override def serverTransport(id: Int): ServerTransport[Effect, Context] =
+    FinagleServer(system, port(id))
 
-  private final case class FinagleServer(effectSystem: EffectSystem[Effect]) extends ServerTransport[Effect, Context] {
+  private final case class FinagleServer(
+    effectSystem: EffectSystem[Effect],
+    port: Int
+  ) extends ServerTransport[Effect, Context] {
     private var endpoint = FinagleHttpEndpoint(effectSystem)
     private var server: ListeningServer = None.orNull
 
