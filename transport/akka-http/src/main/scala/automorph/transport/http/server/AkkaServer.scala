@@ -20,8 +20,8 @@ import scala.concurrent.Await
 /**
  * Akka HTTP server transport plugin.
  *
- * The server interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
- * The response returned by the RPC request handler is used as HTTP response body.
+ * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
+ *   - The response returned by the RPC request handler is used as HTTP response body.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]

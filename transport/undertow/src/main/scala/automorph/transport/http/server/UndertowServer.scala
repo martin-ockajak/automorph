@@ -18,8 +18,8 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  * Undertow HTTP & WebSocket server message transport plugin.
  *
  * Interprets HTTP request body as an RPC request and processes it using the specified RPC request handler.
- * - The response returned by the RPC request handler is used as HTTP response body.
- * - Processes only HTTP requests starting with specified URL path.
+ *   - The response returned by the RPC request handler is used as HTTP response body.
+ *   - Processes only HTTP requests starting with specified URL path.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
@@ -122,8 +122,8 @@ object UndertowServer {
 
   /**
    * Default Undertow server builder providing the following settings:
-   * - IO threads: 2 * number of CPU cores
-   * - Worker threads: number of CPU cores
+   *   - IO threads: 2 * number of CPU cores
+   *   - Worker threads: number of CPU cores
    */
   def defaultBuilder: Undertow.Builder =
     Undertow.builder().setIoThreads(Runtime.getRuntime.availableProcessors * 2)

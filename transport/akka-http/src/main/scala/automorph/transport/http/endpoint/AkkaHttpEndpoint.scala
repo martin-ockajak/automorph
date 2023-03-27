@@ -28,7 +28,7 @@ import scala.util.Try
  * Akka HTTP endpoint message transport plugin.
  *
  * Interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
- * - The response returned by the RPC handler is used as HTTP response body.
+ *   - The response returned by the RPC handler is used as HTTP response body.
  *
  * @see
  *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]

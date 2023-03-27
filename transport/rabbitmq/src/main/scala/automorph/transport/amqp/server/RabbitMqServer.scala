@@ -15,9 +15,9 @@ import scala.jdk.CollectionConverters.MapHasAsJava
  * RabbitMQ server message transport plugin.
  *
  * Interprets AMQP request message body as an RPC request and processes it using the specified RPC request handler.
- * - The response returned by the RPC request handler is used as outgoing AMQP response body.
- * - AMQP request messages are consumed from the specified queues and automatically acknowledged.
- * - AMQP response messages are published to default exchange using ''reply-to'' request property as routing key.
+ *   - The response returned by the RPC request handler is used as outgoing AMQP response body.
+ *   - AMQP request messages are consumed from the specified queues and automatically acknowledged.
+ *   - AMQP response messages are published to default exchange using ''reply-to'' request property as routing key.
  *
  * @see
  *   [[https://www.rabbitmq.com/java-client.html Documentation]]
