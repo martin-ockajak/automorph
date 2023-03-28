@@ -43,9 +43,7 @@ import scala.util.Try
  * @param mapException
  *   maps an exception to a corresponding HTTP status code
  * @param readTimeout
- *   HTTP request read timeout
- * @param requestTimeout
- *   HTTP request processing timeout
+ *   request read timeout
  * @param handler
  *   RPC request handler
  * @param serverSettings
@@ -60,12 +58,11 @@ final case class AkkaServer[Effect[_]](
   methods: Iterable[HttpMethod] = HttpMethod.values,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
-  requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
   serverSettings: ServerSettings = ServerSettings(""),
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
-  implicit private val system: EffectSystem[Effect] = effectSystem
+  private lazy val route = createRoute()
   private val allowedMethods = methods.map(_.name).toSet
   private var server = Option.empty[(ActorSystem[Nothing], Http.ServerBinding)]
 
@@ -73,15 +70,13 @@ final case class AkkaServer[Effect[_]](
     copy(handler = handler)
 
   override def init(): Effect[Unit] =
-    system.evaluate(this.synchronized {
+    effectSystem.evaluate(this.synchronized {
       // Create HTTP endpoint route
       implicit val actorSystem: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, getClass.getSimpleName)
-      val endpointTransport = AkkaHttpEndpoint(effectSystem, mapException, readTimeout, handler)
-      val serverRoute = route(endpointTransport.adapter)
 
       // Start HTTP server
       val serverBinding = Await.result(
-        Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(serverRoute),
+        Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(route),
         Duration.Inf,
       )
       logger.info(
@@ -108,13 +103,14 @@ final case class AkkaServer[Effect[_]](
       }
     })
 
-  private def route(endpointRoute: Route): Route =
-    // Validate HTTP request method
+  private def createRoute(): Route = {
+    val endpointTransport = AkkaHttpEndpoint(effectSystem, mapException, readTimeout, handler)
     extractRequest { httpRequest =>
+      // Validate HTTP request method
       if (allowedMethods.contains(httpRequest.method.value.toUpperCase)) {
         // Validate URL path
         if (httpRequest.uri.path.toString.startsWith(pathPrefix)) {
-          endpointRoute
+          endpointTransport.adapter
         } else {
           complete(NotFound)
         }
@@ -122,6 +118,7 @@ final case class AkkaServer[Effect[_]](
         complete(MethodNotAllowed)
       }
     }
+  }
 }
 
 object AkkaServer {

@@ -43,6 +43,8 @@ import scala.jdk.CollectionConverters.ListHasAsScala
  *   HTTP URL path prefix, only requests starting with this path prefix are allowed
  * @param methods
  *   allowed HTTP request methods
+ * @param webSocket
+ *   support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
  * @param mapException
  *   maps an exception to a corresponding HTTP status code
  * @param threadPool

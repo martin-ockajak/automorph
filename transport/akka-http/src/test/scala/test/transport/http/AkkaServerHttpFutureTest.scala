@@ -25,6 +25,6 @@ class AkkaServerHttpFutureTest extends StandardHttpServerTest {
   override def serverTransport(id: Int): ServerTransport[Effect, Context] =
     AkkaServer(system, port(id))
 
-  //  override def endpointTransport: EndpointTransport[Future, Context, ?] =
-//    AkkaHttpEndpoint(system)
+  override def endpointTransport: EndpointTransport[Future, Context, ?] =
+    AkkaHttpEndpoint(system)
 }

@@ -12,8 +12,9 @@ import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, Strin
 import automorph.util.{Network, Random}
 import java.io.{IOException, InputStream}
 import java.net.URI
-import java.util.concurrent.{ArrayBlockingQueue, BlockingQueue}
+import java.util.concurrent.{ArrayBlockingQueue, BlockingQueue, TimeUnit}
 import scala.collection.immutable.ListMap
+import scala.concurrent.duration.FiniteDuration
 import scala.jdk.CollectionConverters.MapHasAsScala
 
 /**
@@ -43,6 +44,8 @@ import scala.jdk.CollectionConverters.MapHasAsScala
  *   support upgrading of HTTP connections to use WebSocket protocol if true, support HTTP only if false
  * @param mapException
  *   maps an exception to a corresponding HTTP status code
+ * @param readTimeout
+ *   request read timeout
  * @tparam Effect
  *   effect type
  */
@@ -53,6 +56,7 @@ final case class NanoServer[Effect[_]] (
   methods: Iterable[HttpMethod] = HttpMethod.values,
   webSocket: Boolean = true,
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
+  readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
 ) extends NanoWSD(port) with Logging with ServerTransport[Effect, Context] {
 
   private var handler: RequestHandler[Effect, Context] = RequestHandler.dummy
@@ -68,9 +72,12 @@ final case class NanoServer[Effect[_]] (
 
   override def init(): Effect[Unit] =
     effectSystem.evaluate(this.synchronized {
-      super.start()
+      super.start(readTimeout.toMillis.toInt)
       (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
-        logger.info("Listening for connections", ListMap("Protocol" -> protocol, "Port" -> port.toString))
+        logger.info("Listening for connections", ListMap(
+          "Protocol" -> protocol,
+          "Port" -> port.toString
+        ))
       }
     })
 
