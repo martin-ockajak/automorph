@@ -6,6 +6,7 @@ import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import automorph.transport.http.server.UndertowServer.{Context, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
+import io.undertow.Undertow.Builder
 import io.undertow.predicate.Predicates
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.server.{HttpHandler, HttpServerExchange}
@@ -61,7 +62,7 @@ final case class UndertowServer[Effect[_]](
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
-  private lazy val rootHandler = createRootHandler()
+  private lazy val serverBuilder = createServerBuilder()
   private val allowedMethods = methods.map(_.name).toSet
   private var server = Option.empty[Undertow]
 
@@ -70,7 +71,7 @@ final case class UndertowServer[Effect[_]](
 
   override def init(): Effect[Unit] =
     effectSystem.evaluate(this.synchronized {
-      val undertow = builder.addHttpListener(port, "0.0.0.0", rootHandler).build()
+      val undertow = serverBuilder.build()
       undertow.start()
       undertow.getListenerInfo.asScala.foreach { listener =>
         logger.info(
@@ -96,13 +97,13 @@ final case class UndertowServer[Effect[_]](
       }
     })
 
-  private def createRootHandler(): HttpHandler = {
+  private def createServerBuilder(): Builder = {
     // Validate HTTP request method
     val endpointTransport = UndertowHttpEndpoint(effectSystem, mapException, handler)
     val httpHandler = methodHandler(endpointTransport.adapter)
 
     // Validate URL path
-    Handlers.predicate(
+    val rootHandler = Handlers.predicate(
       Predicates.prefix(pathPrefix),
       // WebSocket support
       Option.when(webSocket)(
@@ -110,6 +111,7 @@ final case class UndertowServer[Effect[_]](
       ).getOrElse(httpHandler),
       ResponseCodeHandler.HANDLE_404,
     )
+    builder.addHttpListener(port, "0.0.0.0", rootHandler)
   }
 
   private def methodHandler(handler: HttpHandler): HttpHandler =
