@@ -136,8 +136,7 @@ lazy val circe = source(project, s"codec/circe", jsonrpc, webrpc, testPlugin % T
 )
 val jacksonVersion = "2.14.2"
 lazy val jackson = source(project, "codec/jackson", jsonrpc, webrpc, testPlugin % Test).settings(
-  libraryDependencies += ("com.fasterxml.jackson.module" % "jackson-module-scala" % jacksonVersion)
-    .cross(CrossVersion.for3Use2_13)
+  libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
 )
 lazy val upickle = source(project, "codec/upickle", jsonrpc, webrpc, testPlugin % Test)
   .settings(libraryDependencies += "com.lihaoyi" %% "upickle" % "2.0.0")
@@ -187,9 +186,10 @@ lazy val jetty = source(project, "transport/jetty", core, http, testStandard % T
 val akkaVersion = "2.8.0"
 lazy val akkaHttp = source(project, "transport/akka-http", core, http, testStandard % Test).settings(
   libraryDependencies ++= Seq(
-    ("com.typesafe.akka" %% "akka-http" % "10.5.0").cross(CrossVersion.for3Use2_13),
-    ("com.typesafe.akka" %% "akka-actor-typed" % akkaVersion).cross(CrossVersion.for3Use2_13),
-    ("com.typesafe.akka" %% "akka-stream" % akkaVersion).cross(CrossVersion.for3Use2_13)
+    "com.typesafe.akka" %% "akka-http" % "10.5.0",
+    "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
+    "com.typesafe.akka" %% "akka-stream" % akkaVersion,
+    "com.typesafe.akka" %% "akka-slf4j" % akkaVersion % Test
   )
 )
 lazy val finagle = source(project, "transport/finagle", core, http, testStandard % Test).settings(
