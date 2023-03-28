@@ -32,7 +32,7 @@ private[examples] object ServerFunctionNames {
     }
 
     // Start JSON-RPC HTTP server listening on port 7000 for requests to '/api'
-    val server = Default.serverSync(7000, "/api").bind(api).init()
+    val server = Default.serverSync(7000, "/api").bind(api, mapName).init()
 
     // Define client view of the remote API
     trait ClientApi {

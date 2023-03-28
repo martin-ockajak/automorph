@@ -72,8 +72,8 @@ trait ProtocolCodecTest extends CoreTest {
     Seq(enumEncoder, enumDecoder)
     val codec = CirceJsonCodec()
     val protocol = JsonRpcProtocol[CirceJsonCodec.Node, codec.type, Context](codec)
-    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
-    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
     val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
@@ -104,8 +104,8 @@ trait ProtocolCodecTest extends CoreTest {
     )
     val codec = JacksonJsonCodec(JacksonJsonCodec.defaultMapper.registerModule(enumModule))
     val protocol = JsonRpcProtocol[JacksonJsonCodec.Node, codec.type, Context](codec)
-    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
-    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
     val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
@@ -127,8 +127,8 @@ trait ProtocolCodecTest extends CoreTest {
     }
     val codec = UpickleJsonCodec(new Custom)
     val protocol = JsonRpcProtocol[UpickleJsonCodec.Node, codec.type, Context](codec)
-    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
-    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
     val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
@@ -150,8 +150,8 @@ trait ProtocolCodecTest extends CoreTest {
     }
     val codec = UpickleMessagePackCodec(new Custom)
     val protocol = JsonRpcProtocol[UpickleMessagePackCodec.Node, codec.type, Context](codec)
-    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
-    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
     val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
@@ -205,8 +205,8 @@ trait ProtocolCodecTest extends CoreTest {
     Seq(recordCodecJson)
     val codec = ArgonautJsonCodec()
     val protocol = JsonRpcProtocol[ArgonautJsonCodec.Node, codec.type, Context](codec)
-    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
-    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi).bind(complexApi)
+    Endpoint.transport(endpointTransport).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
+    val server = Server.transport(serverTransport(id)).rpcProtocol(protocol).bind(simpleApi, mapName).bind(complexApi)
     val client = Client.transport(typedClientTransport(id)).rpcProtocol(protocol)
     TestFixture(
       client,
@@ -218,4 +218,10 @@ trait ProtocolCodecTest extends CoreTest {
       (function, a0) => client.tell(function).args(a0),
     )
   }
+
+  private def mapName(name: String): Seq[String] =
+    name match {
+      case "method" => Seq("method", "function")
+      case value => Seq(value)
+    }
 }

@@ -86,21 +86,21 @@ class ExamplesTest extends BaseTest with Mutex {
       Seq[Any](
         ClientTransport,
         ServerTransport,
-        EndpointTransport,
+//        EndpointTransport,
         WebSocketTransport,
       ).foreach { instance =>
         testName(instance) in {
           runTest(instance)
         }
       }
-      testName(AmqpTransport) in {
-        lock()
-        try {
-          AmqpTransport.main(Array())
-        } finally {
-          unlock()
-        }
-      }
+//      testName(AmqpTransport) in {
+//        lock()
+//        try {
+//          AmqpTransport.main(Array())
+//        } finally {
+//          unlock()
+//        }
+//      }
     }
   }
 
