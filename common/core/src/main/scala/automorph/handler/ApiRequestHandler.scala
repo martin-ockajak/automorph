@@ -60,7 +60,7 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
           ListMap(LogProperties.requestId -> id),
         ),
       rpcRequest => {
-        // Invoke requested remote function
+        // Invoke requested RPC function
         lazy val requestProperties = ListMap(LogProperties.requestId -> id) ++ rpcRequest.message.properties
         lazy val allProperties = requestProperties ++ rpcRequest.message.text.map(LogProperties.messageBody -> _)
         logger.trace(s"Received ${rpcProtocol.name} request", allProperties)
@@ -83,7 +83,7 @@ final case class ApiRequestHandler[Node, Codec <: MessageCodec[Node], Effect[_],
    * @param requestProperties
    *   request properties
    * @return
-   *   bound function call RPC response
+   *   bound RPC function call response
    */
   private def callFunction(
     rpcRequest: RpcRequest[Node, rpcProtocol.Metadata, Context],

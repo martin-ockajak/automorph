@@ -46,7 +46,7 @@ final case class Endpoint[Node, Codec <: MessageCodec[Node], Effect[_], Context,
 
   /** Transport layer adapter. */
   def adapter: Adapter =
-    transport.adapter
+    configuredTransport.adapter
 
   override def toString: String = {
     val plugins = Map[String, Any](
