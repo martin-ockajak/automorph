@@ -24,7 +24,6 @@
 //    HttpContextGenerator.arbitrary
 //
 //  override def serverTransport(id: Int): ServerTransport[Effect, Context] = {
-//    println(Class.forName("akka.event.DefaultLoggingFilter").getName)
 //    val config = ConfigFactory.parseResources("akka-reference.conf").resolve()
 //    AkkaServer(system, port(id), config = config)
 //  }
