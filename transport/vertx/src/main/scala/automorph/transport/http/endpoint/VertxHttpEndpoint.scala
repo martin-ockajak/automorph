@@ -80,8 +80,6 @@ final case class VertxHttpEndpoint[Effect[_]](
       }.failed.foreach { error =>
         sendErrorResponse(error, request, requestId, requestProperties)
       }
-    }.end().onFailure { error =>
-      sendErrorResponse(error, request, requestId, requestProperties)
     }
     ()
   }

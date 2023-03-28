@@ -6,7 +6,7 @@ import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint.Context
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
 import automorph.util.{Network, Random}
-import io.vertx.core.Handler
+import io.vertx.core.{AsyncResult, Handler}
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerRequest, ServerWebSocket}
 import java.io.InputStream
@@ -50,56 +50,56 @@ final case class VertxWebSocketEndpoint[Effect[_]](
   override def clone(handler: RequestHandler[Effect, Context]): VertxWebSocketEndpoint[Effect] =
     copy(handler = handler)
 
-  override def handle(request: ServerWebSocket): Unit = {
+  override def handle(session: ServerWebSocket): Unit = {
     // Log the request
     val requestId = Random.id
-    lazy val requestProperties = getRequestProperties(request, requestId)
+    lazy val requestProperties = getRequestProperties(session, requestId)
     log.receivingRequest(requestProperties)
-    request.binaryMessageHandler { buffer =>
+    session.binaryMessageHandler { buffer =>
       Try {
         val requestBody = buffer.getBytes.toInputStream
         log.receivedRequest(requestProperties)
 
         // Process the request
-        handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
+        handler.processRequest(requestBody, getRequestContext(session), requestId).either.map(
           _.fold(
-            error => sendErrorResponse(error, request, requestId, requestProperties),
+            error => sendErrorResponse(error, session, requestId, requestProperties),
             result => {
               // Send the response
               val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
-              sendResponse(responseBody, request, requestId)
+              sendResponse(responseBody, session, requestId)
             },
           )
         ).runAsync
       }.failed.foreach { error =>
-        sendErrorResponse(error, request, requestId, requestProperties)
+        sendErrorResponse(error, session, requestId, requestProperties)
       }
-    }.end().onFailure { error =>
-      sendErrorResponse(error, request, requestId, requestProperties)
     }
     ()
   }
 
   private def sendErrorResponse(
     error: Throwable,
-    request: ServerWebSocket,
+    session: ServerWebSocket,
     requestId: String,
     requestProperties: => Map[String, String],
   ): Unit = {
     log.failedProcessRequest(error, requestProperties)
     val responseBody = error.description.toInputStream
-    sendResponse(responseBody, request, requestId)
+    sendResponse(responseBody, session, requestId)
   }
 
-  private def sendResponse(responseBody: InputStream, request: ServerWebSocket, requestId: String): Unit = {
+  private def sendResponse(responseBody: InputStream, session: ServerWebSocket, requestId: String): Unit = {
     // Log the response
-    lazy val responseProperties = ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(request))
+    lazy val responseProperties = ListMap(LogProperties.requestId -> requestId, "Client" -> clientAddress(session))
     log.sendingResponse(responseProperties)
 
     // Send the response
-    request.writeBinaryMessage(Buffer.buffer(responseBody.toArray)).onSuccess { _ =>
+    session.writeBinaryMessage(Buffer.buffer(responseBody.toArray)).onSuccess { _ =>
       log.sentResponse(responseProperties)
-    }.onFailure(error => log.failedSendResponse(error, responseProperties))
+    }.onFailure { error =>
+      log.failedSendResponse(error, responseProperties)
+    }
     ()
   }
 
