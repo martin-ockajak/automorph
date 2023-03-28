@@ -102,15 +102,19 @@ final case class RabbitMqServer[Effect[_]](
         Option(amqpProperties.getReplyTo).map { replyTo =>
           requestId.map { actualRequestId =>
             // Process the request
-            val requestContext = RabbitMq.messageContext(amqpProperties)
-            handler.processRequest(requestBody.toInputStream, requestContext, actualRequestId).either.map(_.fold(
-              error => sendError(error, replyTo, requestProperties, actualRequestId),
-              result => {
-                // Send the response
-                val responseBody = result.map(_.responseBody.toArray).getOrElse(Array[Byte]())
-                sendResponse(responseBody, replyTo, result.flatMap(_.context), requestProperties, actualRequestId)
-              }
-            )).runAsync
+            Try {
+              val requestContext = RabbitMq.messageContext(amqpProperties)
+              handler.processRequest(requestBody.toInputStream, requestContext, actualRequestId).either.map(_.fold(
+                error => sendErrorResponse(error, replyTo, requestProperties, actualRequestId),
+                result => {
+                  // Send the response
+                  val responseBody = result.map(_.responseBody.toArray).getOrElse(Array[Byte]())
+                  sendResponse(responseBody, replyTo, result.flatMap(_.context), requestProperties, actualRequestId)
+                }
+              )).runAsync
+            }.foldError { error =>
+              sendErrorResponse(error, replyTo, requestProperties, actualRequestId)
+            }
           }.getOrElse {
             logger.error(s"Missing ${log.defaultProtocol} request header: correlation-id", requestProperties)
           }
@@ -160,12 +164,12 @@ final case class RabbitMqServer[Effect[_]](
         message,
       )
       log.sentResponse(responseProperties)
-    }.onFailure { error =>
+    }.onError { error =>
       log.failedSendResponse(error, responseProperties)
     }.get
   }
 
-  private def sendError(
+  private def sendErrorResponse(
     error: Throwable,
     replyTo: String,
     requestProperties: => Map[String, String],

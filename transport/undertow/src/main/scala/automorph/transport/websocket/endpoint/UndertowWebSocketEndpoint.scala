@@ -16,6 +16,7 @@ import io.undertow.websockets.{WebSocketConnectionCallback, WebSocketProtocolHan
 import java.io.InputStream
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
+import scala.util.Try
 
 /**
  * Undertow WebSocket endpoint transport plugin.
@@ -108,17 +109,21 @@ object UndertowWebSocketEndpoint {
       log.receivedRequest(requestProperties)
 
       // Process the request
-      handler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
-        _.fold(
-          error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
-          result => {
-            // Send the response
-            val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
-            sendResponse(responseBody, exchange, channel, requestId)
-            discardMessage()
-          },
-        )
-      ).runAsync
+      Try {
+        handler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
+          _.fold(
+            error => sendErrorResponse(error, exchange, channel, requestId, requestProperties),
+            result => {
+              // Send the response
+              val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+              sendResponse(responseBody, exchange, channel, requestId)
+              discardMessage()
+            },
+          )
+        ).runAsync
+      }.failed.foreach { error =>
+        sendErrorResponse(error, exchange, channel, requestId, requestProperties)
+      }
     }
 
     private def sendErrorResponse(

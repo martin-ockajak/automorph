@@ -62,22 +62,26 @@ final case class UndertowHttpEndpoint[Effect[_]](
 
       override def handle(exchange: HttpServerExchange, message: Array[Byte]): Unit = {
         log.receivedRequest(requestProperties)
-        val requestBody = message.toInputStream
         val handlerRunnable = new Runnable {
 
           override def run(): Unit =
             // Process the request
-            handler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
-              _.fold(
-                error => sendErrorResponse(error, exchange, requestId, requestProperties),
-                result => {
-                  // Send the response
-                  val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
-                  val status = result.flatMap(_.exception).map(mapException).getOrElse(StatusCodes.OK)
-                  sendResponse(responseBody, status, result.flatMap(_.context), exchange, requestId)
-                },
-              )
-            ).runAsync
+            Try {
+              val requestBody = message.toInputStream
+              handler.processRequest(requestBody, getRequestContext(exchange), requestId).either.map(
+                _.fold(
+                  error => sendErrorResponse(error, exchange, requestId, requestProperties),
+                  result => {
+                    // Send the response
+                    val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+                    val status = result.flatMap(_.exception).map(mapException).getOrElse(StatusCodes.OK)
+                    sendResponse(responseBody, status, result.flatMap(_.context), exchange, requestId)
+                  },
+                )
+              ).runAsync
+            }.failed.foreach { error =>
+              sendErrorResponse(error, exchange, requestId, requestProperties)
+            }
         }
         if (exchange.isInIoThread) {
           exchange.dispatch(handlerRunnable)
@@ -120,12 +124,14 @@ final case class UndertowHttpEndpoint[Effect[_]](
 
     // Send the response
     Try {
-      if (!exchange.isResponseChannelAvailable) { throw new IOException("Response channel not available") }
+      if (!exchange.isResponseChannelAvailable) {
+        throw new IOException("Response channel not available")
+      }
       setResponseContext(exchange, responseContext)
       exchange.getResponseHeaders.put(Headers.CONTENT_TYPE, handler.mediaType)
       exchange.setStatusCode(responseStatusCode).getResponseSender.send(responseBody.toByteBuffer)
       log.sentResponse(responseProperties)
-    }.onFailure(error => log.failedSendResponse(error, responseProperties)).get
+    }.onError(error => log.failedSendResponse(error, responseProperties)).get
   }
 
   private def setResponseContext(exchange: HttpServerExchange, responseContext: Option[Context]): Unit = {

@@ -8,7 +8,7 @@ import automorph.transport.http.server.NanoServer.Context
 import automorph.transport.http.server.NanoWSD.WebSocketFrame.CloseCode
 import automorph.transport.http.server.NanoWSD.{WebSocket, WebSocketFrame}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
-import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
+import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps}
 import automorph.util.{Network, Random}
 import java.io.{IOException, InputStream}
 import java.net.URI
@@ -16,6 +16,7 @@ import java.util.concurrent.{ArrayBlockingQueue, BlockingQueue, TimeUnit}
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration.FiniteDuration
 import scala.jdk.CollectionConverters.MapHasAsScala
+import scala.util.Try
 
 /**
  * NanoHTTPD HTTP & WebSocket server message transport plugin.
@@ -149,8 +150,9 @@ final case class NanoServer[Effect[_]] (
         val requestId = Random.id
         lazy val requestProperties = getRequestProperties(session, protocol, requestId)
         val request = frame.getBinaryPayload.toInputStream
+
+        // Handle the request
         handleRequest(request, session, protocol, requestProperties, requestId).map { response =>
-          // Send the response
           send(response.getData.toArray)
         }.runAsync
       }
@@ -172,26 +174,30 @@ final case class NanoServer[Effect[_]] (
     log.receivedRequest(requestProperties, protocol.name)
 
     // Process the request
-    handler.processRequest(requestBody, getRequestContext(session), requestId).either.map(
-      _.fold(
-        error => sendErrorResponse(error, session, protocol, requestId, requestProperties),
-        result => {
-          // Send the response
-          val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
-          val status = result.flatMap(_.exception).map(mapException).map(Status.lookup).getOrElse(Status.OK)
-          createResponse(responseBody, status, result.flatMap(_.context), session, protocol, requestId)
-        },
+    Try {
+      handler.processRequest(requestBody, getRequestContext(session), requestId).either.map(
+        _.fold(
+          error => createErrorResponse(error, session, protocol, requestId, requestProperties),
+          result => {
+            // Send the response
+            val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+            val status = result.flatMap(_.exception).map(mapException).map(Status.lookup).getOrElse(Status.OK)
+            createResponse(responseBody, status, result.flatMap(_.context), session, protocol, requestId)
+          },
+        )
       )
-    )
+    }.foldError { error =>
+      effectSystem.successful(createErrorResponse(error, session, protocol, requestId, requestProperties))
+    }
   }
 
-  private def sendErrorResponse(
+  private def createErrorResponse(
     error: Throwable,
     session: IHTTPSession,
     protocol: Protocol,
     requestId: String,
     requestProperties: => Map[String, String],
-  ) = {
+  ): Response = {
     log.failedProcessRequest(error, requestProperties, protocol.name)
     val message = error.description.toInputStream
     createResponse(message, Status.INTERNAL_ERROR, None, session, protocol, requestId)

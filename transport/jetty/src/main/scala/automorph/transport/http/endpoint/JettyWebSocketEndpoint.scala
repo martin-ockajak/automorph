@@ -13,6 +13,7 @@ import org.eclipse.jetty.websocket.api.{Session, UpgradeRequest, WebSocketAdapte
 import org.eclipse.jetty.websocket.server.{JettyServerUpgradeRequest, JettyServerUpgradeResponse, JettyWebSocketCreator}
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.{ListHasAsScala, MapHasAsScala}
+import scala.util.Try
 
 /**
  * Jetty WebSocket endpoint message transport plugin.
@@ -76,7 +77,7 @@ final case class JettyWebSocketEndpoint[Effect[_]](
     log.receivedRequest(requestProperties)
 
     // Process the request
-    handler.processRequest(requestBody, getRequestContext(session.getUpgradeRequest), requestId).either.map(
+    Try(handler.processRequest(requestBody, getRequestContext(session.getUpgradeRequest), requestId).either.map(
       _.fold(
         error => sendErrorResponse(error, session, requestId, requestProperties),
         result => {
@@ -85,8 +86,9 @@ final case class JettyWebSocketEndpoint[Effect[_]](
           sendResponse(responseBody, session, requestId)
         },
       )
-    ).runAsync
-    ()
+    ).runAsync).failed.foreach { error =>
+      sendErrorResponse(error, session, requestId, requestProperties)
+    }
   }
 
   private def sendErrorResponse(

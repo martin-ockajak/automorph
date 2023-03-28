@@ -138,26 +138,26 @@ private[automorph] object Extensions {
   implicit final class TryOps[T](private val tryValue: Try[T]) {
 
     /**
-     * Creates a new 'Try' by applying ''onFailure'' on `Failure` or returns this on `Success`.
+     * Applies ''onFailure'' on `Failure` or returns this on `Success`.
      *
      * @param onFailure
      *   function to apply if this is a `Failure`
      * @return
      *   a transformed `Try`
      */
-    def onFailure(onFailure: Throwable => Unit): Try[T] =
+    def onError(onFailure: Throwable => Unit): Try[T] =
       tryValue.recoverWith { case error =>
         onFailure(error)
         Failure(error)
       }
 
     /**
-     * Applies ''onException'' on `Failure` or ''onSuccess'' on `Success`.
+     * Applies ''onFailure'' on `Failure` or ''onSuccess'' on `Success`.
      *
      * @param onFailure
-     *   function to apply if this is a `Success`
-     * @param onSuccess
      *   function to apply if this is a `Failure`
+     * @param onSuccess
+     *   function to apply if this is a `Success`
      * @tparam U
      *   result type
      * @return
@@ -167,6 +167,20 @@ private[automorph] object Extensions {
       tryValue match {
         case Failure(error) => onFailure(error)
         case Success(value) => onSuccess(value)
+      }
+
+    /**
+     * Applies ''onFailure'' on `Failure` or ''onSuccess'' on `Success`.
+     *
+     * @param onFailure
+     *   function to apply if this is a `Failure`
+     * @return
+     *   applied function result or success value
+     */
+    def foldError(onFailure: Throwable => T): T =
+      tryValue match {
+        case Failure(error) => onFailure(error)
+        case Success(value) => value
       }
   }
 

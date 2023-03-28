@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.concurrent.duration.FiniteDuration
+import scala.util.Try
 
 /**
  * Akka HTTP endpoint message transport plugin.
@@ -97,22 +98,27 @@ case class AkkaHttpEndpoint[Effect[_]](
     log.receivedRequest(requestProperties)
 
     // Process the request
+    val handleResult = Promise[(HttpResponse, ListMap[String, String])]()
     request.entity.toStrict(readTimeout).flatMap { requestEntity =>
-      val requestBody = requestEntity.data.asByteBuffer.toInputStream
-      val result = Promise[(HttpResponse, ListMap[String, String])]()
-      handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
-        _.fold(
-          error => createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties),
-          result => {
-            // Create the response
-            val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
-            val status = result.flatMap(_.exception).map(mapException).map(StatusCode.int2StatusCode)
-              .getOrElse(StatusCodes.OK)
-            createResponse(responseBody, status, contentType, result.flatMap(_.context), remoteAddress, requestId)
-          },
-        )
-      ).either.map(_.fold(result.failure, result.success)).runAsync
-      result.future
+      Try {
+        val requestBody = requestEntity.data.asByteBuffer.toInputStream
+        handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(processResult =>
+          handleResult.success(processResult.fold(
+            error => createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties),
+            result => {
+              // Create the response
+              val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+              val status = result.flatMap(_.exception).map(mapException).map(StatusCode.int2StatusCode)
+                .getOrElse(StatusCodes.OK)
+              createResponse(responseBody, status, contentType, result.flatMap(_.context), remoteAddress, requestId)
+            },
+          ))
+        ).runAsync
+      }.foldError { error =>
+        Future(createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties))
+        ()
+      }
+      handleResult.future
     }
   }
 

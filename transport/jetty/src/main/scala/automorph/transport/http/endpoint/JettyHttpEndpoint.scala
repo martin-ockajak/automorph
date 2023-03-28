@@ -62,7 +62,7 @@ final case class JettyHttpEndpoint[Effect[_]](
       val requestBody = request.getInputStream
 
       // Process the request
-      handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
+      Try(handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
         _.fold(
           error => sendErrorResponse(error, response, asyncContext, request, requestId, requestProperties),
           result => {
@@ -72,7 +72,9 @@ final case class JettyHttpEndpoint[Effect[_]](
             sendResponse(responseBody, status, result.flatMap(_.context), response, asyncContext, request, requestId)
           },
         )
-      ).runAsync
+      ).runAsync).failed.foreach { error =>
+        sendErrorResponse(error, response, asyncContext, request, requestId, requestProperties)
+      }
     }
   }
 
@@ -118,7 +120,7 @@ final case class JettyHttpEndpoint[Effect[_]](
       outputStream.flush()
       asyncContext.complete()
       log.sentResponse(responseProperties)
-    }.onFailure(error => log.failedSendResponse(error, responseProperties)).get
+    }.onError(error => log.failedSendResponse(error, responseProperties)).get
   }
 
   private def setResponseContext(response: HttpServletResponse, responseContext: Option[Context]): Unit =

@@ -62,7 +62,7 @@ object RabbitMq extends Logging {
     else { connectionFactory.newConnection(name) }).map { connection =>
       logger.info(s"Connected to $protocol broker: $urlText")
       connection
-    }.onFailure(logger.error(s"Failed to connect to $protocol broker: $urlText", _)).get
+    }.onError(logger.error(s"Failed to connect to $protocol broker: $urlText", _)).get
   }
 
   /**

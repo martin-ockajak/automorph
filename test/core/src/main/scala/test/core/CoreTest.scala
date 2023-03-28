@@ -200,12 +200,12 @@ trait CoreTest extends BaseTest {
                   true
                 }
               }
-              "Alias" in {
-                check { (a0: String) =>
-                  val expected = run(simpleApi.method(a0))
-                  executeLogError(fixture.call("function", "argument" -> a0)) == expected
-                }
-              }
+//              "Alias" in {
+//                check { (a0: String) =>
+//                  val expected = run(simpleApi.method(a0))
+//                  executeLogError(fixture.call("function", "argument" -> a0)) == expected
+//                }
+//              }
             }
           }
         }

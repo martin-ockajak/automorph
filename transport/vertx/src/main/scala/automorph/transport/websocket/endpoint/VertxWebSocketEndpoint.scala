@@ -12,6 +12,7 @@ import io.vertx.core.http.{HttpServerRequest, ServerWebSocket}
 import java.io.InputStream
 import scala.collection.immutable.ListMap
 import scala.jdk.CollectionConverters.ListHasAsScala
+import scala.util.Try
 
 /**
  * Vert.x WebSocket endpoint message transport plugin.
@@ -55,20 +56,26 @@ final case class VertxWebSocketEndpoint[Effect[_]](
     lazy val requestProperties = getRequestProperties(request, requestId)
     log.receivingRequest(requestProperties)
     request.binaryMessageHandler { buffer =>
-      val requestBody = buffer.getBytes.toInputStream
-      log.receivedRequest(requestProperties)
+      Try {
+        val requestBody = buffer.getBytes.toInputStream
+        log.receivedRequest(requestProperties)
 
-      // Process the request
-      handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
-        _.fold(
-          error => sendErrorResponse(error, request, requestId, requestProperties),
-          result => {
-            // Send the response
-            val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
-            sendResponse(responseBody, request, requestId)
-          },
-        )
-      ).runAsync
+        // Process the request
+        handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
+          _.fold(
+            error => sendErrorResponse(error, request, requestId, requestProperties),
+            result => {
+              // Send the response
+              val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+              sendResponse(responseBody, request, requestId)
+            },
+          )
+        ).runAsync
+      }.failed.foreach { error =>
+        sendErrorResponse(error, request, requestId, requestProperties)
+      }
+    }.end().onFailure { error =>
+      sendErrorResponse(error, request, requestId, requestProperties)
     }
     ()
   }

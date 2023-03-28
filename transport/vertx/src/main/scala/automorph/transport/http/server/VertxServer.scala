@@ -83,8 +83,9 @@ final case class VertxServer[Effect[_]](
     })
 
   override def close(): Effect[Unit] =
-    effectSystem.evaluate(this.synchronized{
+    effectSystem.evaluate(this.synchronized {
       httpServer.close().toCompletionStage.toCompletableFuture.get
+      ()
     })
 
   private def createServer(): HttpServer = {

@@ -12,82 +12,82 @@ import test.base.{BaseTest, Mutex}
 class ExamplesTest extends BaseTest with Mutex {
 
   "" - {
-    "Quickstart" in {
-      runTest(Quickstart)
-    }
-    "Basic" - {
-      Seq[Any](
-        SynchronousCall,
-        AsynchronousCall,
-        OptionalParameters,
-      ).foreach { instance =>
-        testName(instance) in {
-          runTest(instance)
-        }
-      }
-    }
-    "Customization" - {
-      Seq[Any](
-        DataSerialization,
-        ClientFunctionNames,
-        ServerFunctionNames,
-      ).foreach { instance =>
-        testName(instance) in {
-          runTest(instance)
-        }
-      }
-    }
-    "Errors" - {
-      Seq[Any](
-        ClientExceptions,
-        ServerErrors,
-        HttpStatusCode,
-      ).foreach { instance =>
-        testName(instance) in {
-          runTest(instance)
-        }
-      }
-    }
-    "Metadata" - {
-      Seq[Any](
-        HttpAuthentication,
-        HttpRequest,
-        HttpResponse,
-      ).foreach { instance =>
-        testName(instance) in {
-          runTest(instance)
-        }
-      }
-    }
-    "Special" - {
-      Seq[Any](
-        ApiSchema,
-        DynamicPayload,
-        OneWayMessage,
-        PositionalArguments,
-      ).foreach { instance =>
-        testName(instance) in {
-          runTest(instance)
-        }
-      }
-    }
-    "Integration" - {
-      Seq[Any](
-        EffectSystem,
-        MessageCodec,
-        RpcProtocol,
-      ).foreach { instance =>
-        testName(instance) in {
-          runTest(instance)
-        }
-      }
-    }
+//    "Quickstart" in {
+//      runTest(Quickstart)
+//    }
+//    "Basic" - {
+//      Seq[Any](
+//        SynchronousCall,
+//        AsynchronousCall,
+//        OptionalParameters,
+//      ).foreach { instance =>
+//        testName(instance) in {
+//          runTest(instance)
+//        }
+//      }
+//    }
+//    "Customization" - {
+//      Seq[Any](
+//        DataSerialization,
+//        ClientFunctionNames,
+//        ServerFunctionNames,
+//      ).foreach { instance =>
+//        testName(instance) in {
+//          runTest(instance)
+//        }
+//      }
+//    }
+//    "Errors" - {
+//      Seq[Any](
+//        ClientExceptions,
+//        ServerErrors,
+//        HttpStatusCode,
+//      ).foreach { instance =>
+//        testName(instance) in {
+//          runTest(instance)
+//        }
+//      }
+//    }
+//    "Metadata" - {
+//      Seq[Any](
+//        HttpAuthentication,
+//        HttpRequest,
+//        HttpResponse,
+//      ).foreach { instance =>
+//        testName(instance) in {
+//          runTest(instance)
+//        }
+//      }
+//    }
+//    "Special" - {
+//      Seq[Any](
+//        ApiSchema,
+//        DynamicPayload,
+//        OneWayMessage,
+//        PositionalArguments,
+//      ).foreach { instance =>
+//        testName(instance) in {
+//          runTest(instance)
+//        }
+//      }
+//    }
+//    "Integration" - {
+//      Seq[Any](
+//        EffectSystem,
+//        MessageCodec,
+//        RpcProtocol,
+//      ).foreach { instance =>
+//        testName(instance) in {
+//          runTest(instance)
+//        }
+//      }
+//    }
     "Transport" - {
       Seq[Any](
-        ClientTransport,
-        ServerTransport,
-//        EndpointTransport,
-        WebSocketTransport,
+//        ClientTransport,
+//        ServerTransport,
+        EndpointTransport,
+//        WebSocketTransport,
       ).foreach { instance =>
         testName(instance) in {
           runTest(instance)

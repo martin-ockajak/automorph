@@ -108,7 +108,7 @@ final case class UrlClient[Effect[_]](
         stream.write(requestBody)
         stream.flush()
       }
-      write.onFailure(error => log.failedSendRequest(error, requestProperties)).get
+      write.onError(error => log.failedSendRequest(error, requestProperties)).get
       log.sentRequest(requestProperties)
       connection
     }

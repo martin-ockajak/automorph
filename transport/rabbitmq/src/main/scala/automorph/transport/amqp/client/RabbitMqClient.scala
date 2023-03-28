@@ -134,7 +134,7 @@ final case class RabbitMqClient[Effect[_]](
           message
         )
         log.sentRequest(requestProperties)
-      }.onFailure(error => log.failedSendRequest(error, requestProperties)).get
+      }.onError(error => log.failedSendRequest(error, requestProperties)).get
     }
   }
 
