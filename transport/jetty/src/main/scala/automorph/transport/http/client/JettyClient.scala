@@ -60,8 +60,6 @@ final case class JettyClient[Effect[_]](
   private val webSocketClient = new WebSocketClient(httpClient)
   private val log = MessageLog(logger, Protocol.Http.name)
   implicit private val system: EffectSystem[Effect] = effectSystem
-  if (!httpClient.isStarted) { httpClient.start() }
-  webSocketClient.start()
 
   override def call(
     requestBody: InputStream,
@@ -105,13 +103,18 @@ final case class JettyClient[Effect[_]](
     Message.defaultContext.url(url).method(method)
 
   override def init(): Effect[Unit] =
-    effectSystem.successful(())
+    effectSystem.evaluate(this.synchronized {
+      if (!httpClient.isStarted) {
+        httpClient.start()
+      }
+      webSocketClient.start()
+    })
 
   override def close(): Effect[Unit] =
-    effectSystem.evaluate {
+    effectSystem.evaluate(this.synchronized {
       webSocketClient.stop()
       httpClient.stop()
-    }
+    })
 
   private def send(
     request: Either[Request, (Effect[websocket.api.Session], Effect[Response], InputStream)],
@@ -140,7 +143,8 @@ final case class JettyClient[Effect[_]](
                   httpRequest.send(responseListener)
                   completableResponse.effect
               }
-            case _ => effectSystem.evaluate(httpRequest.send()).map(response => httpResponse(response, response.getContent))
+            case _ =>
+              effectSystem.evaluate(httpRequest.send()).map(response => httpResponse(response, response.getContent))
           },
         // Send WebSocket request
         {

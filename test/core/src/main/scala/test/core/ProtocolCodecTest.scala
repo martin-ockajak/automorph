@@ -52,6 +52,10 @@ trait ProtocolCodecTest extends CoreTest {
   override def beforeAll(): Unit = {
     super.beforeAll()
     fixtures.map(_.genericServer.init()).map(run)
+    fixtures.map(_.genericServer.close()).map(run)
+    fixtures.map(_.genericServer.init()).map(run)
+    fixtures.map(_.genericClient.init()).map(run)
+    fixtures.map(_.genericClient.close()).map(run)
     fixtures.map(_.genericClient.init()).map(run)
     ()
   }

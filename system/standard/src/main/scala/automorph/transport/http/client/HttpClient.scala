@@ -110,7 +110,7 @@ final case class HttpClient[Effect[_]](
     effectSystem.successful(())
 
   override def close(): Effect[Unit] =
-    effectSystem.evaluate(())
+    effectSystem.successful(())
 
   private def getResponseContext(response: Response): Context = {
     val (_, statusCode, headers) = response

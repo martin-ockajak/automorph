@@ -7,7 +7,7 @@ import automorph.transport.amqp.client.RabbitMqClient.{Context, Response}
 import automorph.transport.amqp.{AmqpContext, RabbitMq}
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, TryOps}
 import com.rabbitmq.client.AMQP.BasicProperties
-import com.rabbitmq.client.{Address, Channel, Connection, ConnectionFactory, DefaultConsumer, Envelope}
+import com.rabbitmq.client.{Address, Channel, ConnectionFactory, DefaultConsumer, Envelope}
 import java.io.InputStream
 import java.net.URI
 import scala.collection.concurrent.TrieMap
@@ -49,8 +49,7 @@ final case class RabbitMqClient[Effect[_]](
   addresses: Seq[Address] = Seq.empty,
   connectionFactory: ConnectionFactory = new ConnectionFactory,
 ) extends Logging with ClientTransport[Effect, Context] {
-  private lazy val connection = connect()
-  private lazy val threadConsumer = RabbitMq.threadLocalConsumer(connection, consumer)
+  private var session = Option.empty[RabbitMq.Session]
   private val directReplyToQueue = "amq.rabbitmq.reply-to"
   private val clientId = RabbitMq.applicationId(getClass.getName)
   private val urlText = url.toString
@@ -80,10 +79,24 @@ final case class RabbitMqClient[Effect[_]](
     RabbitMq.Message.defaultContext
 
   override def init(): Effect[Unit] =
-    effectSystem.successful(())
+    system.evaluate(this.synchronized {
+      session.fold {
+        val connection = RabbitMq.connect(url, addresses, clientId, connectionFactory)
+        RabbitMq.declareExchange(exchange, connection)
+        val consumer = RabbitMq.threadLocalConsumer(connection, createConsumer)
+        session = Some(RabbitMq.Session(connection, consumer))
+      }(_ => throw new IllegalStateException(s"${getClass.getSimpleName} already initialized"))
+    })
 
   override def close(): Effect[Unit] =
-    effectSystem.evaluate(RabbitMq.disconnect(connection))
+    effectSystem.evaluate(this.synchronized {
+      session.fold(
+        throw new IllegalStateException(s"${getClass.getSimpleName} already closed")
+      ) { activeSession =>
+        RabbitMq.close(activeSession.connection)
+        session = None
+      }
+    })
 
   private def send(
     requestBody: InputStream,
@@ -112,13 +125,20 @@ final case class RabbitMqClient[Effect[_]](
     effectSystem.evaluate {
       Try {
         val message = requestBody.toArray
-        threadConsumer.get.getChannel.basicPublish(exchange, routingKey, true, false, amqpProperties, message)
+        session.get.consumer.get.getChannel.basicPublish(
+          exchange,
+          routingKey,
+          true,
+          false,
+          amqpProperties,
+          message
+        )
         log.sentRequest(requestProperties)
       }.onFailure(error => log.failedSendRequest(error, requestProperties)).get
     }
   }
 
-  private def consumer(channel: Channel): DefaultConsumer = {
+  private def createConsumer(channel: Channel): DefaultConsumer = {
     val consumer = new DefaultConsumer(channel) {
 
       override def handleDelivery(
@@ -141,12 +161,6 @@ final case class RabbitMqClient[Effect[_]](
     }
     consumer.getChannel.basicConsume(directReplyToQueue, true, consumer)
     consumer
-  }
-
-  private def connect(): Connection = {
-    val connection = RabbitMq.connect(url, addresses, clientId, connectionFactory)
-    RabbitMq.declareExchange(exchange, connection)
-    connection
   }
 }
 

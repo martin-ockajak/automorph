@@ -104,7 +104,7 @@ final case class SttpClient[Effect[_]] private (
     effectSystem.successful(())
 
   override def close(): Effect[Unit] =
-    backend.close()
+    effectSystem.successful(())
 
   private def send[R](
     sttpRequest: Request[R, WebSocket],

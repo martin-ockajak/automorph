@@ -24,6 +24,8 @@ object RabbitMq extends Logging {
     implicit val defaultContext: AmqpContext[Message] = AmqpContext()
   }
 
+  private[automorph] final case class Session(connection: Connection, consumer: ThreadLocal[DefaultConsumer])
+
   /** Default direct AMQP message exchange name. */
   private[automorph] val defaultDirectExchange: String = ""
 
@@ -87,8 +89,8 @@ object RabbitMq extends Logging {
    * @param connection
    *   AMQP broker connection
    */
-  private[automorph] def disconnect(connection: Connection): Unit =
-    connection.abort(AMQP.CONNECTION_FORCED, "Terminated")
+  private[automorph] def close(connection: Connection): Unit =
+    connection.close(AMQP.CONNECTION_FORCED, "Terminated")
 
   /**
    * Returns application identifier combining the local host name with specified application name.
