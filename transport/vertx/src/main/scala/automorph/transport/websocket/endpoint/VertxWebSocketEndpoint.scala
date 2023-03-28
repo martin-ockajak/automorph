@@ -6,7 +6,7 @@ import automorph.transport.http.{HttpContext, Protocol}
 import automorph.transport.websocket.endpoint.VertxWebSocketEndpoint.Context
 import automorph.util.Extensions.{ByteArrayOps, EffectOps, InputStreamOps, StringOps, ThrowableOps}
 import automorph.util.{Network, Random}
-import io.vertx.core.{AsyncResult, Handler}
+import io.vertx.core.Handler
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.http.{HttpServerRequest, ServerWebSocket}
 import java.io.InputStream
