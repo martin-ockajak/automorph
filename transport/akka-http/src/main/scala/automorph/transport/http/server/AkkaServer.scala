@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.concurrent.Await
+import scala.util.Try
 
 /**
  * Akka HTTP server transport plugin.
@@ -66,48 +67,44 @@ final case class AkkaServer[Effect[_]](
 
   implicit private val system: EffectSystem[Effect] = effectSystem
   private val allowedMethods = methods.map(_.name).toSet
-  private var actorSystem: Option[ActorSystem[Nothing]] = Option.empty[ActorSystem[Nothing]]
+  private var server = Option.empty[(ActorSystem[Nothing], Http.ServerBinding)]
 
   override def clone(handler: RequestHandler[Effect, Context]): AkkaServer[Effect] =
     copy(handler = handler)
 
   override def init(): Effect[Unit] =
     system.evaluate(this.synchronized {
-      val behavior = Behaviors.setup[Nothing] { actorContext =>
-        // Create handler actor
-        implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
-        val endpointTransport = AkkaHttpEndpoint(effectSystem, mapException, readTimeout, handler)
+      // Create HTTP endpoint route
+      implicit val actorSystem: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, getClass.getSimpleName)
+      val endpointTransport = AkkaHttpEndpoint(effectSystem, mapException, readTimeout, handler)
+      val serverRoute = route(endpointTransport.adapter)
 
-        // Create HTTP route
-        val endpointRoute = endpointTransport.route(actorContext, requestTimeout)
-        val serverRoute = route(endpointRoute)
-
-        // Start HTTP server
-        val serverBinding = Await.result(
-          Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(serverRoute),
-          Duration.Inf,
-        )
-        logger.info(
-          "Listening for connections",
-          ListMap(
-            "Protocol" -> Protocol.Http,
-            "Port" -> serverBinding.localAddress.getPort.toString
-          ),
-        )
-        Behaviors.empty
-      }
-      actorSystem = Some(ActorSystem[Nothing](behavior, getClass.getSimpleName))
-      ()
+      // Start HTTP server
+      val serverBinding = Await.result(
+        Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(serverRoute),
+        Duration.Inf,
+      )
+      logger.info(
+        "Listening for connections",
+        ListMap(
+          "Protocol" -> Protocol.Http,
+          "Port" -> serverBinding.localAddress.getPort.toString
+        ),
+      )
+      server = Some((actorSystem, serverBinding))
     })
 
   override def close(): Effect[Unit] =
     effectSystem.evaluate(this.synchronized {
-      actorSystem.fold(
+      server.fold(
         throw new IllegalStateException(s"${getClass.getSimpleName} already closed")
-      ) { activeActorSystem =>
-        activeActorSystem.terminate()
-        Await.result(activeActorSystem.whenTerminated, Duration.Inf)
-        actorSystem = None
+      ) { case (actorSystem, serverBinding) =>
+        Try(Await.result(serverBinding.unbind(), Duration.Inf)).failed.foreach { error =>
+          logger.error(s"Failed to unbind port: $port", error)
+        }
+        actorSystem.terminate()
+        Await.result(actorSystem.whenTerminated, Duration.Inf)
+        server = None
       }
     })
 

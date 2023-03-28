@@ -85,7 +85,7 @@ final case class JettyWebSocketEndpoint[Effect[_]](
           sendResponse(responseBody, session, requestId)
         },
       )
-    )
+    ).runAsync
     ()
   }
 

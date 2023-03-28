@@ -1,17 +1,16 @@
 package automorph.transport.http.endpoint
 
-import akka.actor.typed.scaladsl.AskPattern.{Askable, schedulerFromActorSystem}
-import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
-import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.http.scaladsl.model.StatusCodes.InternalServerError
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{ContentType, HttpRequest, HttpResponse, RemoteAddress, StatusCode, StatusCodes}
-import akka.http.scaladsl.server.Directives.{complete, extractClientIP, extractRequest, onComplete}
+import akka.http.scaladsl.server.Directives.{
+  complete, extractClientIP, extractExecutionContext, extractMaterializer, extractRequest, onComplete
+}
 import akka.http.scaladsl.server.Route
-import akka.util.Timeout
+import akka.stream.Materializer
 import automorph.log.{LogProperties, Logging, MessageLog}
 import automorph.spi.{EffectSystem, EndpointTransport, RequestHandler}
-import automorph.transport.http.endpoint.AkkaHttpEndpoint.{Context, RpcHttpRequest}
+import automorph.transport.http.endpoint.AkkaHttpEndpoint.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
 import automorph.util.Extensions.{
   ByteArrayOps, ByteBufferOps, EffectOps, InputStreamOps, StringOps, ThrowableOps, TryOps
@@ -20,9 +19,8 @@ import automorph.util.{Network, Random}
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.concurrent.duration.FiniteDuration
-import scala.util.Try
 
 /**
  * Akka HTTP endpoint message transport plugin.
@@ -54,134 +52,90 @@ case class AkkaHttpEndpoint[Effect[_]](
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
-) extends Logging with EndpointTransport[Effect, Context, Behavior[RpcHttpRequest]] {
+) extends Logging with EndpointTransport[Effect, Context, Route] {
 
   private val log = MessageLog(logger, Protocol.Http.name)
+  private val contentType = ContentType.parse(handler.mediaType).swap.map { errors =>
+    new IllegalStateException(s"Invalid message content type: ${errors.map(_.toString).mkString("\n")}")
+  }.swap.toTry.get
   implicit private val system: EffectSystem[Effect] = effectSystem
 
-  private val behavior = {
-    val contentType = ContentType.parse(handler.mediaType).swap.map { errors =>
-      new IllegalStateException(s"Invalid response content type: ${errors.map(_.toString).mkString("\n")}")
-    }.swap.toTry.get
-
-    Behaviors.receive[RpcHttpRequest] { case (actorContext, message) =>
-      implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
-      implicit val executionContext: ExecutionContext = actorContext.executionContext
-      // Log the request
-      val requestId = Random.id
-      val request = message.request
-      val remoteAddress = message.clientAddress
-      lazy val requestProperties = getRequestProperties(request, requestId, remoteAddress)
-      log.receivedRequest(requestProperties)
-
-      // Process the request
-      request.entity.toStrict(readTimeout).map { requestEntity =>
-        val requestBody = requestEntity.data.asByteBuffer.toInputStream
-        handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
-          _.fold(
-            error =>
-              sendErrorResponse(error, contentType, message.replyTo, remoteAddress, requestId, requestProperties),
-            result => {
-              // Send the response
-              val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
-              val status = result.flatMap(_.exception).map(mapException).map(StatusCode.int2StatusCode)
-                .getOrElse(StatusCodes.OK)
-              sendResponse(
-                responseBody,
-                status,
-                contentType,
-                result.flatMap(_.context),
-                message.replyTo,
-                remoteAddress,
-                requestId,
-              )
-            },
-          )
-        )
-      }
-      Behaviors.same
-    }
-  }
-
-  /**
-   * Creates an Akka HTTP route using the RPC endpoint transport actor.
-   *
-   * @param actorContext
-   *   Akka actor context
-   * @param requestTimeout
-   *   HTTP request processing timeout
-   * @param actorSystem
-   *   Akka actor system
-   * @return
-   *   RPC endpoint transport Akka HTTP route
-   */
-  def route(
-    actorContext: ActorContext[?],
-    requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
-  )(implicit actorSystem: ActorSystem[?]): Route =
-    // Process request
+  def adapter: Route =
     extractRequest { httpRequest =>
       extractClientIP { remoteAddress =>
-        implicit val timeout: Timeout = Timeout.durationToTimeout(requestTimeout)
-        onComplete(actor(actorContext).ask[HttpResponse](RpcHttpRequest(_, httpRequest, remoteAddress)))(
-          _.pureFold(
-            error => {
-              log.failedProcessRequest(error, Map())
-              complete(InternalServerError, error.description)
-            },
-            httpResponse => complete(httpResponse),
-          )
-        )
+        extractMaterializer { implicit materializer =>
+          extractExecutionContext { implicit executionContext =>
+            onComplete(handle(httpRequest, remoteAddress))(
+              _.pureFold(
+                error => {
+                  log.failedProcessRequest(error, Map())
+                  complete(InternalServerError, error.description)
+                },
+                { case (httpResponse, responseProperties) =>
+                  log.sentResponse(responseProperties)
+                  complete(httpResponse)
+                },
+              )
+            )
+          }
+        }
       }
     }
-
-  /**
-   * Creates an Akka actor route using the RPC endpoint transport behavior.
-   *
-   * @param actorContext
-   *   Akka actor context
-   * @param name
-   *   actor name
-   * @return
-   *   RPC endpoint transport Akka HTTP actor
-   */
-  def actor(
-    actorContext: ActorContext[?],
-    name: String = AkkaHttpEndpoint.getClass.getSimpleName
-  ): ActorRef[RpcHttpRequest] = {
-    val actor = actorContext.spawn(adapter, name)
-    actorContext.watch(actor)
-    actor
-  }
-
-  override def adapter: Behavior[RpcHttpRequest] =
-    behavior
 
   override def clone(handler: RequestHandler[Effect, Context]): AkkaHttpEndpoint[Effect] =
     copy(handler = handler)
 
-  private def sendErrorResponse(
+  private def handle(request: HttpRequest, remoteAddress: RemoteAddress)(
+    implicit
+    materializer: Materializer,
+    executionContext: ExecutionContext
+  ): Future[(HttpResponse, ListMap[String, String])] = {
+
+    // Log the request
+    val requestId = Random.id
+    lazy val requestProperties = getRequestProperties(request, requestId, remoteAddress)
+    log.receivedRequest(requestProperties)
+
+    // Process the request
+    request.entity.toStrict(readTimeout).flatMap { requestEntity =>
+      val requestBody = requestEntity.data.asByteBuffer.toInputStream
+      val result = Promise[(HttpResponse, ListMap[String, String])]()
+      handler.processRequest(requestBody, getRequestContext(request), requestId).either.map(
+        _.fold(
+          error => createErrorResponse(error, contentType, remoteAddress, requestId, requestProperties),
+          result => {
+            // Create the response
+            val responseBody = result.map(_.responseBody).getOrElse(Array[Byte]().toInputStream)
+            val status = result.flatMap(_.exception).map(mapException).map(StatusCode.int2StatusCode)
+              .getOrElse(StatusCodes.OK)
+            createResponse(responseBody, status, contentType, result.flatMap(_.context), remoteAddress, requestId)
+          },
+        )
+      ).either.map(_.fold(result.failure, result.success)).runAsync
+      result.future
+    }
+  }
+
+  private def createErrorResponse(
     error: Throwable,
     contentType: ContentType,
-    replyTo: ActorRef[HttpResponse],
     remoteAddress: RemoteAddress,
     requestId: String,
     requestProperties: => Map[String, String],
-  ): Unit = {
+  ): (HttpResponse, ListMap[String, String]) = {
     log.failedProcessRequest(error, requestProperties)
     val responseBody = error.description.toInputStream
-    sendResponse(responseBody, StatusCodes.InternalServerError, contentType, None, replyTo, remoteAddress, requestId)
+    createResponse(responseBody, StatusCodes.InternalServerError, contentType, None, remoteAddress, requestId)
   }
 
-  private def sendResponse(
+  private def createResponse(
     responseBody: InputStream,
     statusCode: StatusCode,
     contentType: ContentType,
     responseContext: Option[Context],
-    replyTo: ActorRef[HttpResponse],
     remoteAddress: RemoteAddress,
     requestId: String,
-  ): Unit = {
+  ): (HttpResponse, ListMap[String, String]) = {
     // Log the response
     val responseStatusCode = responseContext.flatMap(_.statusCode.map(StatusCode.int2StatusCode)).getOrElse(statusCode)
     lazy val responseProperties = ListMap(
@@ -192,21 +146,14 @@ case class AkkaHttpEndpoint[Effect[_]](
     log.sendingResponse(responseProperties)
 
     // Send the response
-    Try {
-      val baseResponse = setResponseContext(HttpResponse(), responseContext)
-      val response = baseResponse.withStatus(responseStatusCode).withHeaders(baseResponse.headers)
-        .withEntity(contentType, responseBody.toArray)
-      replyTo.tell(response)
-      log.sentResponse(responseProperties)
-    }.onFailure(error => log.failedSendResponse(error, responseProperties)).get
+    val baseResponse = setResponseContext(HttpResponse(), responseContext)
+    val response = baseResponse.withStatus(responseStatusCode).withHeaders(baseResponse.headers)
+      .withEntity(contentType, responseBody.toArray)
+    response -> responseProperties
   }
 
   private def setResponseContext(response: HttpResponse, responseContext: Option[Context]): HttpResponse =
     response.withHeaders(responseContext.toSeq.flatMap(_.headers).map { case (name, value) => RawHeader(name, value) })
-
-  private def clientAddress(remoteAddress: RemoteAddress): String =
-    remoteAddress.toOption.flatMap(address => Option(address.getHostAddress).map(Network.address(None, _)))
-      .getOrElse("")
 
   private def getRequestContext(request: HttpRequest): Context =
     HttpContext(
@@ -226,17 +173,14 @@ case class AkkaHttpEndpoint[Effect[_]](
       "URL" -> request.uri.toString,
       "Method" -> request.method.value,
     )
+
+  private def clientAddress(remoteAddress: RemoteAddress): String =
+    remoteAddress.toOption.flatMap(address => Option(address.getHostAddress).map(Network.address(None, _)))
+      .getOrElse("")
 }
 
 object AkkaHttpEndpoint extends Logging {
 
   /** Request context type. */
   type Context = HttpContext[HttpRequest]
-
-  /** Actor behavior message */
-  final case class RpcHttpRequest(
-    replyTo: ActorRef[HttpResponse],
-    request: HttpRequest,
-    clientAddress: RemoteAddress = RemoteAddress.Unknown,
-  )
 }
