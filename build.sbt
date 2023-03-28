@@ -188,13 +188,17 @@ lazy val akkaHttp = source(project, "transport/akka-http", core, http, testStand
   libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-http" % "10.5.0",
     "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
-    "com.typesafe.akka" %% "akka-stream" % akkaVersion,
-    "com.typesafe.akka" %% "akka-slf4j" % akkaVersion % Test
+    "com.typesafe.akka" %% "akka-stream" % akkaVersion
   )
 )
 lazy val finagle = source(project, "transport/finagle", core, http, testStandard % Test).settings(
-  libraryDependencies += ("com.twitter" % "finagle-http" % "22.12.0")
-    .exclude("org.scala-lang.modules", "scala-collection-compat_2.13").cross(CrossVersion.for3Use2_13)
+  libraryDependencies ++= Seq(
+    ("com.twitter" % "finagle-http" % "22.12.0")
+      .exclude("org.scala-lang.modules", "scala-collection-compat_2.13")
+      .exclude("com.fasterxml.jackson.module", "jackson-module-scala_2.13")
+      .cross(CrossVersion.for3Use2_13),
+    "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion
+  )
 )
 
 // Miscellaneous

@@ -1,7 +1,7 @@
 package automorph.transport.http.server
 
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.ActorSystem
+import akka.actor.typed.{ActorSystem, Props}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes.{MethodNotAllowed, NotFound}
 import akka.http.scaladsl.server.Directives.{complete, extractRequest}
@@ -12,6 +12,7 @@ import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 import automorph.transport.http.endpoint.AkkaHttpEndpoint
 import automorph.transport.http.server.AkkaServer.Context
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
+import com.typesafe.config.{Config, ConfigFactory}
 import java.util.concurrent.TimeUnit
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration.{Duration, FiniteDuration}
@@ -48,6 +49,10 @@ import scala.util.Try
  *   RPC request handler
  * @param serverSettings
  *   HTTP server settings
+ * @param config
+ *   actor system configuration
+ * @param guardianProps
+ *   guardian actor properties
  * @tparam Effect
  *   effect type
  */
@@ -59,6 +64,8 @@ final case class AkkaServer[Effect[_]](
   mapException: Throwable => Int = HttpContext.defaultExceptionToStatusCode,
   readTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
   serverSettings: ServerSettings = ServerSettings(""),
+  config: Config = ConfigFactory.empty(),
+  guardianProps: Props = Props.empty,
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
@@ -72,7 +79,8 @@ final case class AkkaServer[Effect[_]](
   override def init(): Effect[Unit] =
     effectSystem.evaluate(this.synchronized {
       // Create HTTP endpoint route
-      implicit val actorSystem: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, getClass.getSimpleName)
+      implicit val actorSystem: ActorSystem[Any] =
+        ActorSystem(Behaviors.empty[Any], getClass.getSimpleName, config, guardianProps)
 
       // Start HTTP server
       val serverBinding = Await.result(
