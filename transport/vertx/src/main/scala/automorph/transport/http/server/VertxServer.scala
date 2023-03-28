@@ -1,7 +1,7 @@
 package automorph.transport.http.server
 
 import automorph.log.Logging
-import automorph.spi.{AsyncEffectSystem, RequestHandler, ServerTransport}
+import automorph.spi.{EffectSystem, RequestHandler, ServerTransport}
 import automorph.transport.http.endpoint.VertxHttpEndpoint
 import automorph.transport.http.server.VertxServer.{Context, defaultVertxOptions}
 import automorph.transport.http.{HttpContext, HttpMethod, Protocol}
@@ -49,7 +49,7 @@ import scala.collection.immutable.ListMap
  *   effect type
  */
 final case class VertxServer[Effect[_]](
-  effectSystem: AsyncEffectSystem[Effect],
+  effectSystem: EffectSystem[Effect],
   port: Int,
   pathPrefix: String = "/",
   methods: Iterable[HttpMethod] = HttpMethod.values,
@@ -72,20 +72,20 @@ final case class VertxServer[Effect[_]](
     copy(handler = handler)
 
   override def init(): Effect[Unit] =
-    effectSystem.evaluate(start())
+    effectSystem.evaluate(this.synchronized {
+      val server = httpServer.listen().toCompletionStage.toCompletableFuture.get()
+      (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
+        logger.info("Listening for connections", ListMap(
+          "Protocol" -> protocol,
+          "Port" -> server.actualPort.toString
+        ))
+      }
+    })
 
   override def close(): Effect[Unit] =
-    effectSystem.flatMap(effectSystem.completable[Unit]) { closed =>
-      httpServer.close().onComplete { result =>
-        if (result.failed) {
-          closed.fail(result.cause)
-        } else {
-          closed.succeed(())
-        }
-        ()
-      }
-      closed.effect
-    }
+    effectSystem.evaluate(this.synchronized{
+      httpServer.close().toCompletionStage.toCompletableFuture.get
+    })
 
   private def createServer(): HttpServer = {
     // HTTP
@@ -119,13 +119,6 @@ final case class VertxServer[Effect[_]](
         }
       }
     }.getOrElse(server)
-  }
-
-  private def start(): Unit = {
-    val server = httpServer.listen().toCompletionStage.toCompletableFuture.get()
-    (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
-      logger.info("Listening for connections", ListMap("Protocol" -> protocol, "Port" -> server.actualPort.toString))
-    }
   }
 }
 

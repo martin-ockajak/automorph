@@ -67,15 +67,20 @@ final case class NanoServer[Effect[_]] (
   }
 
   override def init(): Effect[Unit] =
-    system.evaluate {
+    effectSystem.evaluate(this.synchronized {
       super.start()
       (Seq(Protocol.Http) ++ Option.when(webSocket)(Protocol.WebSocket)).foreach { protocol =>
         logger.info("Listening for connections", ListMap("Protocol" -> protocol, "Port" -> port.toString))
       }
-    }
+    })
 
   override def close(): Effect[Unit] =
-    system.evaluate(stop())
+    effectSystem.evaluate(this.synchronized {
+      if (!isAlive) {
+        throw new IllegalStateException(s"${getClass.getSimpleName} already closed")
+      }
+      stop()
+    })
 
   /**
    * Serve HTTP session.

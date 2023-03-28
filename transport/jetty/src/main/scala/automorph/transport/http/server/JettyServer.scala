@@ -12,6 +12,7 @@ import java.util
 import java.util.concurrent.TimeUnit
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.{FilterHolder, ServletContextHandler, ServletHolder}
+import org.eclipse.jetty.util.component.AbstractLifeCycle
 import org.eclipse.jetty.util.thread.{QueuedThreadPool, ThreadPool}
 import org.eclipse.jetty.websocket.server.JettyWebSocketServerContainer
 import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer
@@ -87,19 +88,25 @@ final case class JettyServer[Effect[_]](
     copy(handler = handler)
 
   override def init(): Effect[Unit] =
-    effectSystem.evaluate {
-      this.synchronized {
-        server.start()
-        server.getConnectors.foreach { connector =>
-          connector.getProtocols.asScala.foreach { protocol =>
-            logger.info("Listening for connections", ListMap("Protocol" -> protocol, "Port" -> port.toString))
-          }
+    effectSystem.evaluate(this.synchronized {
+      if (server.getState == AbstractLifeCycle.STARTED) {
+        throw new IllegalStateException(s"${getClass.getSimpleName} already initialized")
+      }
+      server.start()
+      server.getConnectors.foreach { connector =>
+        connector.getProtocols.asScala.foreach { protocol =>
+          logger.info("Listening for connections", ListMap("Protocol" -> protocol, "Port" -> port.toString))
         }
       }
-    }
+    })
 
   override def close(): Effect[Unit] =
-    effectSystem.evaluate(this.synchronized(server.stop()))
+    effectSystem.evaluate(this.synchronized {
+      if (server.getState == AbstractLifeCycle.STOPPED) {
+        throw new IllegalStateException(s"${getClass.getSimpleName} already closed")
+      }
+      server.stop()
+    })
 
   private def createServer(): Server = {
     val endpointTransport = JettyHttpEndpoint(effectSystem, mapException, handler)

@@ -66,60 +66,64 @@ final case class AkkaServer[Effect[_]](
 
   implicit private val system: EffectSystem[Effect] = effectSystem
   private val allowedMethods = methods.map(_.name).toSet
-  private var actorSystem: ActorSystem[Nothing] = None.orNull
+  private var actorSystem: Option[ActorSystem[Nothing]] = Option.empty[ActorSystem[Nothing]]
 
   override def clone(handler: RequestHandler[Effect, Context]): AkkaServer[Effect] =
     copy(handler = handler)
 
   override def init(): Effect[Unit] =
-    system.evaluate {
-      actorSystem = ActorSystem[Nothing](
-        Behaviors.setup[Nothing] { actorContext =>
-          // Create handler actor
-          implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
-          val endpointTransport = AkkaHttpEndpoint(effectSystem, mapException, readTimeout, handler)
-          val handlerActor = actorContext.spawn(endpointTransport.adapter, AkkaHttpEndpoint.getClass.getSimpleName)
-          actorContext.watch(handlerActor)
+    system.evaluate(this.synchronized {
+      val behavior = Behaviors.setup[Nothing] { actorContext =>
+        // Create handler actor
+        implicit val actorSystem: ActorSystem[Nothing] = actorContext.system
+        val endpointTransport = AkkaHttpEndpoint(effectSystem, mapException, readTimeout, handler)
 
-          // Create HTTP route
-          val handlerRoute = AkkaHttpEndpoint.route(handlerActor, requestTimeout)
-          val serverRoute = route(handlerRoute)
+        // Create HTTP route
+        val endpointRoute = endpointTransport.route(actorContext, requestTimeout)
+        val serverRoute = route(endpointRoute)
 
-          // Start HTTP server
-          val serverBinding = Await.result(
-            Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(serverRoute),
-            Duration.Inf
-          )
-          logger.info(
-            "Listening for connections",
-            ListMap(
-              "Protocol" -> Protocol.Http,
-              "Port" -> serverBinding.localAddress.getPort.toString
-            ),
-          )
-          Behaviors.empty
-        },
-        getClass.getSimpleName,
-      )
+        // Start HTTP server
+        val serverBinding = Await.result(
+          Http().newServerAt("0.0.0.0", port).withSettings(serverSettings).bind(serverRoute),
+          Duration.Inf,
+        )
+        logger.info(
+          "Listening for connections",
+          ListMap(
+            "Protocol" -> Protocol.Http,
+            "Port" -> serverBinding.localAddress.getPort.toString
+          ),
+        )
+        Behaviors.empty
+      }
+      actorSystem = Some(ActorSystem[Nothing](behavior, getClass.getSimpleName))
       ()
-    }
+    })
 
   override def close(): Effect[Unit] =
-    system.evaluate {
-      actorSystem.terminate()
-      Await.result(actorSystem.whenTerminated, Duration.Inf)
-      actorSystem = None.orNull
-      ()
-    }
+    effectSystem.evaluate(this.synchronized {
+      actorSystem.fold(
+        throw new IllegalStateException(s"${getClass.getSimpleName} already closed")
+      ) { activeActorSystem =>
+        activeActorSystem.terminate()
+        Await.result(activeActorSystem.whenTerminated, Duration.Inf)
+        actorSystem = None
+      }
+    })
 
-  private def route(handlerRoute: Route): Route =
+  private def route(endpointRoute: Route): Route =
     // Validate HTTP request method
     extractRequest { httpRequest =>
       if (allowedMethods.contains(httpRequest.method.value.toUpperCase)) {
         // Validate URL path
-        if (httpRequest.uri.path.toString.startsWith(pathPrefix)) { handlerRoute }
-        else { complete(NotFound) }
-      } else { complete(MethodNotAllowed) }
+        if (httpRequest.uri.path.toString.startsWith(pathPrefix)) {
+          endpointRoute
+        } else {
+          complete(NotFound)
+        }
+      } else {
+        complete(MethodNotAllowed)
+      }
     }
 }
 

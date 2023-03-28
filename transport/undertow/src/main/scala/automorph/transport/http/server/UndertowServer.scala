@@ -69,9 +69,8 @@ final case class UndertowServer[Effect[_]](
     copy(handler = handler)
 
   override def init(): Effect[Unit] =
-    effectSystem.evaluate {
+    effectSystem.evaluate(this.synchronized {
       val undertow = builder.addHttpListener(port, "0.0.0.0", rootHandler).build()
-      server = Some(undertow)
       undertow.start()
       undertow.getListenerInfo.asScala.foreach { listener =>
         logger.info(
@@ -84,10 +83,18 @@ final case class UndertowServer[Effect[_]](
             }),
         )
       }
-    }
+      server = Some(undertow)
+    })
 
   override def close(): Effect[Unit] =
-    effectSystem.evaluate(server.foreach(_.stop()))
+    effectSystem.evaluate(this.synchronized {
+      server.fold(
+        throw new IllegalStateException(s"${getClass.getSimpleName} already closed")
+      ) { activeServer =>
+        activeServer.stop()
+        server = None
+      }
+    })
 
   private def createRootHandler(): HttpHandler = {
     // Validate HTTP request method

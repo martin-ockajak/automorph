@@ -1,7 +1,7 @@
 package automorph.transport.http.endpoint
 
 import akka.actor.typed.scaladsl.AskPattern.{Askable, schedulerFromActorSystem}
-import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.http.scaladsl.model.StatusCodes.InternalServerError
 import akka.http.scaladsl.model.headers.RawHeader
@@ -103,6 +103,57 @@ case class AkkaHttpEndpoint[Effect[_]](
     }
   }
 
+  /**
+   * Creates an Akka HTTP route using the RPC endpoint transport actor.
+   *
+   * @param actorContext
+   *   Akka actor context
+   * @param requestTimeout
+   *   HTTP request processing timeout
+   * @param actorSystem
+   *   Akka actor system
+   * @return
+   *   RPC endpoint transport Akka HTTP route
+   */
+  def route(
+    actorContext: ActorContext[?],
+    requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
+  )(implicit actorSystem: ActorSystem[?]): Route =
+    // Process request
+    extractRequest { httpRequest =>
+      extractClientIP { remoteAddress =>
+        implicit val timeout: Timeout = Timeout.durationToTimeout(requestTimeout)
+        onComplete(actor(actorContext).ask[HttpResponse](RpcHttpRequest(_, httpRequest, remoteAddress)))(
+          _.pureFold(
+            error => {
+              log.failedProcessRequest(error, Map())
+              complete(InternalServerError, error.description)
+            },
+            httpResponse => complete(httpResponse),
+          )
+        )
+      }
+    }
+
+  /**
+   * Creates an Akka actor route using the RPC endpoint transport behavior.
+   *
+   * @param actorContext
+   *   Akka actor context
+   * @param name
+   *   actor name
+   * @return
+   *   RPC endpoint transport Akka HTTP actor
+   */
+  def actor(
+    actorContext: ActorContext[?],
+    name: String = AkkaHttpEndpoint.getClass.getSimpleName
+  ): ActorRef[RpcHttpRequest] = {
+    val actor = actorContext.spawn(adapter, name)
+    actorContext.watch(actor)
+    actor
+  }
+
   override def adapter: Behavior[RpcHttpRequest] =
     behavior
 
@@ -179,8 +230,6 @@ case class AkkaHttpEndpoint[Effect[_]](
 
 object AkkaHttpEndpoint extends Logging {
 
-  private val log = MessageLog(logger, Protocol.Http.name)
-
   /** Request context type. */
   type Context = HttpContext[HttpRequest]
 
@@ -190,45 +239,4 @@ object AkkaHttpEndpoint extends Logging {
     request: HttpRequest,
     clientAddress: RemoteAddress = RemoteAddress.Unknown,
   )
-
-  /**
-   * Creates an Akka HTTP route with the specified RPC endpoint actor.
-   *
-   * Interprets HTTP request body as a RPC request and processes it with the specified RPC handler.
-   * - The response returned by the RPC handler is used as HTTP response body.
-   *
-   * @see
-   *   [[https://en.wikipedia.org/wiki/Hypertext Transport protocol]]
-   * @see
-   *   [[https://doc.akka.io/docs/akka-http Library documentation]]
-   * @see
-   *   [[https://doc.akka.io/api/akka-http/current/akka/http/ API]]
-   * @param handlerActor
-   *   Akka actor with RPC endpoint behavior
-   * @param requestTimeout
-   *   HTTP request processing timeout
-   * @param actorSystem
-   *   Akka actor system
-   * @return
-   *   RPC handler Akka HTTP route
-   */
-  def route(
-    handlerActor: ActorRef[RpcHttpRequest],
-    requestTimeout: FiniteDuration = FiniteDuration(30, TimeUnit.SECONDS),
-  )(implicit actorSystem: ActorSystem[?]): Route =
-    // Process request
-    extractRequest { httpRequest =>
-      extractClientIP { remoteAddress =>
-        implicit val timeout: Timeout = Timeout.durationToTimeout(requestTimeout)
-        onComplete(handlerActor.ask[HttpResponse](RpcHttpRequest(_, httpRequest, remoteAddress)))(
-          _.pureFold(
-            error => {
-              log.failedProcessRequest(error, Map())
-              complete(InternalServerError, error.description)
-            },
-            httpResponse => complete(httpResponse),
-          )
-        )
-      }
-    }
 }

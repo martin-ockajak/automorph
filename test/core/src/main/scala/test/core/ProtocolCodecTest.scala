@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.databind.{DeserializationContext, SerializerProvider}
 import io.circe.generic.auto.*
 import io.circe.{Decoder, Encoder}
+import test.base.BaseTest
 import test.{Enum, Record, Structure}
 
 trait ProtocolCodecTest extends CoreTest {
@@ -22,13 +23,17 @@ trait ProtocolCodecTest extends CoreTest {
   private lazy val testFixtures: Seq[TestFixture] = {
     implicit val context: Context = arbitraryContext.arbitrary.sample.get
     Seq(context)
-    Seq(
-      circeJsonFixture(0),
-      jacksonJsonFixture(1),
-      uPickleJsonFixture(2),
-      uPickleMessagePackFixture(3),
-      argonautJsonFixture(4),
-    )
+    if (BaseTest.testBasic) {
+      Seq(circeJsonFixture(0))
+    } else {
+      Seq(
+        circeJsonFixture(0),
+        jacksonJsonFixture(1),
+        uPickleJsonFixture(2),
+        uPickleMessagePackFixture(3),
+        argonautJsonFixture(4),
+      )
+    }
   }
 
   def clientTransport(id: Int): ClientTransport[Effect, ?]
