@@ -6,7 +6,6 @@ import automorph.transport.http.endpoint.UndertowHttpEndpoint
 import automorph.transport.http.server.UndertowServer.{Context, defaultBuilder}
 import automorph.transport.http.{HttpContext, HttpMethod}
 import automorph.transport.websocket.endpoint.UndertowWebSocketEndpoint
-import io.undertow.Undertow.Builder
 import io.undertow.predicate.Predicates
 import io.undertow.server.handlers.ResponseCodeHandler
 import io.undertow.server.{HttpHandler, HttpServerExchange}
@@ -62,7 +61,8 @@ final case class UndertowServer[Effect[_]](
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
-  private lazy val undertow = createServerBuilder().build()
+  private var active = false
+  private lazy val server = createServer()
   private val allowedMethods = methods.map(_.name).toSet
 
   override def clone(handler: RequestHandler[Effect, Context]): UndertowServer[Effect] =
@@ -70,8 +70,9 @@ final case class UndertowServer[Effect[_]](
 
   override def init(): Effect[Unit] =
     effectSystem.evaluate(this.synchronized {
-      undertow.start()
-      undertow.getListenerInfo.asScala.foreach { listener =>
+      server.start()
+      active = true
+      server.getListenerInfo.asScala.foreach { listener =>
         logger.info(
           "Listening for connections",
           ListMap("Protocol" -> listener.getProtcol) ++
@@ -86,16 +87,15 @@ final case class UndertowServer[Effect[_]](
 
   override def close(): Effect[Unit] =
     effectSystem.evaluate(this.synchronized {
-      undertow.stop()
-//      server.fold(
-//        throw new IllegalStateException(s"${getClass.getSimpleName} already closed")
-//      ) { activeServer =>
-//        activeServer.stop()
-//        server = None
-//      }
+      if (active) {
+        server.stop()
+        active = false
+      } else {
+        throw new IllegalStateException(s"${getClass.getSimpleName} already closed")
+      }
     })
 
-  private def createServerBuilder(): Builder = {
+  private def createServer(): Undertow = {
     // Validate HTTP request method
     val endpointTransport = UndertowHttpEndpoint(effectSystem, mapException, handler)
     val httpHandler = methodHandler(endpointTransport.adapter)
@@ -109,7 +109,7 @@ final case class UndertowServer[Effect[_]](
       ).getOrElse(httpHandler),
       ResponseCodeHandler.HANDLE_404,
     )
-    builder.addHttpListener(port, "0.0.0.0", rootHandler)
+    builder.addHttpListener(port, "0.0.0.0", rootHandler).build()
   }
 
   private def methodHandler(handler: HttpHandler): HttpHandler =
