@@ -62,16 +62,14 @@ final case class UndertowServer[Effect[_]](
   handler: RequestHandler[Effect, Context] = RequestHandler.dummy[Effect, Context],
 ) extends Logging with ServerTransport[Effect, Context] {
 
-  private lazy val serverBuilder = createServerBuilder()
+  private lazy val undertow = createServerBuilder().build()
   private val allowedMethods = methods.map(_.name).toSet
-  private var server = Option.empty[Undertow]
 
   override def clone(handler: RequestHandler[Effect, Context]): UndertowServer[Effect] =
     copy(handler = handler)
 
   override def init(): Effect[Unit] =
     effectSystem.evaluate(this.synchronized {
-      val undertow = serverBuilder.build()
       undertow.start()
       undertow.getListenerInfo.asScala.foreach { listener =>
         logger.info(
@@ -84,17 +82,17 @@ final case class UndertowServer[Effect[_]](
             }),
         )
       }
-      server = Some(undertow)
     })
 
   override def close(): Effect[Unit] =
     effectSystem.evaluate(this.synchronized {
-      server.fold(
-        throw new IllegalStateException(s"${getClass.getSimpleName} already closed")
-      ) { activeServer =>
-        activeServer.stop()
-        server = None
-      }
+      undertow.stop()
+//      server.fold(
+//        throw new IllegalStateException(s"${getClass.getSimpleName} already closed")
+//      ) { activeServer =>
+//        activeServer.stop()
+//        server = None
+//      }
     })
 
   private def createServerBuilder(): Builder = {
