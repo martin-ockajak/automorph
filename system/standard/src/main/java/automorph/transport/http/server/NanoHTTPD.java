@@ -95,7 +95,6 @@ import java.util.concurrent.Executors;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
 // PATCH END
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
