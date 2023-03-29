@@ -185,8 +185,8 @@ lazy val jetty = source(project, "transport/jetty", core, http, testStandard % T
 )
 val akkaVersion = "2.8.0"
 lazy val akkaHttp = source(project, "transport/akka-http", core, http, testStandard % Test).settings(
-//  Test / fork := true,
-//  Test / testForkedParallel := true,
+  Test / fork := true,
+  Test / testForkedParallel := true,
   libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-http" % "10.5.0",
     "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
