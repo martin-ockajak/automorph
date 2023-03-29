@@ -7,10 +7,11 @@ import org.scalatest.{AppendedClues, BeforeAndAfterAll, BeforeAndAfterEach, Opti
 import org.scalatestplus.scalacheck.Checkers
 import scribe.file.{FileWriter, PathBuilder}
 import scribe.format.{
-  FormatterInterpolator, dateFull, gray, levelColoredPaddedRight, magenta, mdcMultiLine, messages, positionSimple,
+  FormatBlock, FormatterInterpolator, gray, levelColoredPaddedRight, magenta, mdcMultiLine, messages, positionSimple
 }
+import scribe.output.{LogOutput, TextOutput}
 import scribe.writer.ConsoleWriter
-import scribe.{Level, Logger}
+import scribe.{Level, LogRecord, Logger}
 
 /**
  * Base structured test.
@@ -45,9 +46,11 @@ object BaseTest {
   setupLogger
 
   private object Time extends FormatBlock {
+    import perfolation.*
+
     override def format(record: LogRecord): LogOutput = {
-      val timesStamp = record.timeStamp
-      new TextOutput(s"${timesStamp.t.T}:${timesStamp.t.L}")
+      val timeStamp = record.timeStamp
+      new TextOutput(s"${timeStamp.t.T}:${timeStamp.t.L}")
     }
   }
 
