@@ -40,7 +40,7 @@ private[examples] object HttpResponse {
     println(static.context.header("X-Test"))
 
     // Call the remote API function dynamically retrieving a result with HTTP response metadata
-    val dynamic = client.call[Contextual[String, ClientContext]]("hello").args("message" -> "test")
+    val dynamic = client.call[Contextual[String, ClientContext]]("hello").apply("message" -> "test")
     println(dynamic.result)
     println(dynamic.context.header("X-Test"))
 

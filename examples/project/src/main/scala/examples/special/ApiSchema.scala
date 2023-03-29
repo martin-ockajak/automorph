@@ -34,12 +34,12 @@ private[examples] object ApiSchema {
 
     // Retrieve the remote API schema in OpenRPC format
     println(run(
-      client.call[OpenRpc](JsonRpcProtocol.openRpcFunction).args()
+      client.call[OpenRpc](JsonRpcProtocol.openRpcFunction).apply()
     ).methods.map(_.name))
 
     // Retrieve the remote API schema in OpenAPI format
     println(run(
-      client.call[OpenApi](JsonRpcProtocol.openApiFunction).args(),
+      client.call[OpenApi](JsonRpcProtocol.openApiFunction).apply(),
     ).paths.get.keys.toList)
 
     // Close the client

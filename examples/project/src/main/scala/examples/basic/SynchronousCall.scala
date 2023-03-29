@@ -33,7 +33,7 @@ private[examples] object SynchronousCall {
 
     // Call the remote API function dynamically
     println(
-      client.call[String]("hello").args("some" -> "world", "n" -> 1)
+      client.call[String]("hello").apply("some" -> "world", "n" -> 1)
     )
 
     // Close the client

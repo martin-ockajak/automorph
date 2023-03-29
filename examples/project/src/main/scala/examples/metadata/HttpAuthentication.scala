@@ -47,7 +47,7 @@ private[examples] object HttpAuthentication {
 
       // Call the remote API function dynamically using valid authentication
       println(
-        client.call[String]("hello").args("message" -> "test")
+        client.call[String]("hello").apply("message" -> "test")
       )
     }
 
@@ -63,7 +63,7 @@ private[examples] object HttpAuthentication {
 
       // Call the remote API function dynamically using invalid authentication
       println(Try(
-        client.call[String]("hello").args("message" -> "test")
+        client.call[String]("hello").apply("message" -> "test")
       ).failed.get)
     }
 

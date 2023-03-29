@@ -43,7 +43,7 @@ private[examples] object Quickstart {
 
     // Call the remote API function dynamically
     println(run(
-      client.call[String]("hello").args("some" -> "world", "n" -> 1)
+      client.call[String]("hello")("some" -> "world", "n" -> 1)
     ))
 
     // Close the client

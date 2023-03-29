@@ -49,7 +49,7 @@ private[examples] object HttpRequest {
 
     // Call the remote API function dynamically using implicitly given HTTP request metadata
     println(
-      client.call[String]("hello").args("message" -> "test")
+      client.call[String]("hello").apply("message" -> "test")
     )
 
     // Close the client

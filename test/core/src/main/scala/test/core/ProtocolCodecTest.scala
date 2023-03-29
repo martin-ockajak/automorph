@@ -81,8 +81,8 @@ trait ProtocolCodecTest extends CoreTest {
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
-      (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.tell(function).args(a0),
+      (function, a0) => client.call[String](function)(a0),
+      (function, a0) => client.tell(function)(a0),
     )
   }
 
@@ -113,8 +113,8 @@ trait ProtocolCodecTest extends CoreTest {
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
-      (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.tell(function).args(a0),
+      (function, a0) => client.call[String](function)(a0),
+      (function, a0) => client.tell(function)(a0),
     )
   }
 
@@ -136,8 +136,8 @@ trait ProtocolCodecTest extends CoreTest {
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
-      (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.tell(function).args(a0),
+      (function, a0) => client.call[String](function)(a0),
+      (function, a0) => client.tell(function)(a0),
     )
   }
 
@@ -159,8 +159,8 @@ trait ProtocolCodecTest extends CoreTest {
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
-      (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.tell(function).args(a0),
+      (function, a0) => client.call[String](function)(a0),
+      (function, a0) => client.tell(function)(a0),
     )
   }
 
@@ -214,8 +214,8 @@ trait ProtocolCodecTest extends CoreTest {
       client.bind[SimpleApiType],
       client.bind[ComplexApiType],
       client.bind[InvalidApiType],
-      (function, a0) => client.call[String](function).args(a0),
-      (function, a0) => client.tell(function).args(a0),
+      (function, a0) => client.call[String](function)(a0),
+      (function, a0) => client.tell(function)(a0),
     )
   }
 

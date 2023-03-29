@@ -52,7 +52,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  def args()(implicit requestContext: Context): Effect[Result] =
+  def apply()(implicit requestContext: Context): Effect[Result] =
     invoke(Seq(), Seq(), requestContext)
 
   /**
@@ -64,8 +64,8 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  def args[T1](p1: (String, T1))(implicit requestContext: Context): Effect[Result] =
-    macro RemoteInvoke.args1Macro[Effect[Result], T1, Context]
+  def apply[T1](p1: (String, T1))(implicit requestContext: Context): Effect[Result] =
+    macro RemoteInvoke.apply1Macro[Effect[Result], T1, Context]
 
   /**
    * Invokes the remote function using specified argument names and values.
@@ -76,8 +76,8 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  def args[T1, T2](p1: (String, T1), p2: (String, T2))(implicit requestContext: Context): Effect[Result] =
-    macro RemoteInvoke.args2Macro[Effect[Result], T1, T2, Context]
+  def apply[T1, T2](p1: (String, T1), p2: (String, T2))(implicit requestContext: Context): Effect[Result] =
+    macro RemoteInvoke.apply2Macro[Effect[Result], T1, T2, Context]
 
   /**
    * Invokes the remote function using specified argument names and values.
@@ -88,10 +88,10 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  def args[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3))(implicit
+  def apply[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3))(implicit
     requestContext: Context
   ): Effect[Result] =
-    macro RemoteInvoke.args3Macro[Effect[Result], T1, T2, T3, Context]
+    macro RemoteInvoke.apply3Macro[Effect[Result], T1, T2, T3, Context]
 
   /**
    * Invokes the remote function using specified argument names and values.
@@ -102,10 +102,10 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  def args[T1, T2, T3, T4](p1: (String, T1), p2: (String, T2), p3: (String, T3), p4: (String, T4))(implicit
+  def apply[T1, T2, T3, T4](p1: (String, T1), p2: (String, T2), p3: (String, T3), p4: (String, T4))(implicit
     requestContext: Context
   ): Effect[Result] =
-    macro RemoteInvoke.args4Macro[Effect[Result], T1, T2, T3, T4, Context]
+    macro RemoteInvoke.apply4Macro[Effect[Result], T1, T2, T3, T4, Context]
 
   /**
    * Invokes the remote function using specified argument names and values.
@@ -116,14 +116,14 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  def args[T1, T2, T3, T4, T5](
+  def apply[T1, T2, T3, T4, T5](
     p1: (String, T1),
     p2: (String, T2),
     p3: (String, T3),
     p4: (String, T4),
     p5: (String, T5),
   )(implicit requestContext: Context): Effect[Result] =
-    macro RemoteInvoke.args5Macro[Effect[Result], T1, T2, T3, T4, T5, Context]
+    macro RemoteInvoke.apply5Macro[Effect[Result], T1, T2, T3, T4, T5, Context]
 
   /**
    * Invokes the remote function using specified argument names and values.
@@ -134,7 +134,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  def args[T1, T2, T3, T4, T5, T6](
+  def apply[T1, T2, T3, T4, T5, T6](
     p1: (String, T1),
     p2: (String, T2),
     p3: (String, T3),
@@ -142,7 +142,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
     p5: (String, T5),
     p6: (String, T6),
   )(implicit requestContext: Context): Effect[Result] =
-    macro RemoteInvoke.args6Macro[Effect[Result], T1, T2, T3, T4, T5, T6, Context]
+    macro RemoteInvoke.apply6Macro[Effect[Result], T1, T2, T3, T4, T5, T6, Context]
 
   /**
    * Invokes the remote function using specified argument names and values.
@@ -153,7 +153,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  def args[T1, T2, T3, T4, T5, T6, T7](
+  def apply[T1, T2, T3, T4, T5, T6, T7](
     p1: (String, T1),
     p2: (String, T2),
     p3: (String, T3),
@@ -162,13 +162,13 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
     p6: (String, T6),
     p7: (String, T7),
   )(implicit requestContext: Context): Effect[Result] =
-    macro RemoteInvoke.args7Macro[Effect[Result], T1, T2, T3, T4, T5, T6, T7, Context]
+    macro RemoteInvoke.apply7Macro[Effect[Result], T1, T2, T3, T4, T5, T6, T7, Context]
 
 }
 
 object RemoteInvoke {
 
-  def args1Macro[Result, T1: c.WeakTypeTag, Context](
+  def apply1Macro[Result, T1: c.WeakTypeTag, Context](
     c: blackbox.Context
   )(p1: c.Expr[(String, T1)])(requestContext: c.Expr[Context]): c.Expr[Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
@@ -186,7 +186,7 @@ object RemoteInvoke {
     """)
   }
 
-  def args2Macro[Result, T1: c.WeakTypeTag, T2: c.WeakTypeTag, Context](
+  def apply2Macro[Result, T1: c.WeakTypeTag, T2: c.WeakTypeTag, Context](
     c: blackbox.Context
   )(p1: c.Expr[(String, T1)], p2: c.Expr[(String, T2)])(requestContext: c.Expr[Context]): c.Expr[Result] = {
     import c.universe.{Quasiquote, weakTypeOf}
@@ -205,7 +205,7 @@ object RemoteInvoke {
     """)
   }
 
-  def args3Macro[Result, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, Context](
+  def apply3Macro[Result, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, Context](
     c: blackbox.Context
   )(p1: c.Expr[(String, T1)], p2: c.Expr[(String, T2)], p3: c.Expr[(String, T3)])(
     requestContext: c.Expr[Context]
@@ -227,7 +227,7 @@ object RemoteInvoke {
     """)
   }
 
-  def args4Macro[Result, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, T4: c.WeakTypeTag, Context](
+  def apply4Macro[Result, T1: c.WeakTypeTag, T2: c.WeakTypeTag, T3: c.WeakTypeTag, T4: c.WeakTypeTag, Context](
     c: blackbox.Context
   )(p1: c.Expr[(String, T1)], p2: c.Expr[(String, T2)], p3: c.Expr[(String, T3)], p4: c.Expr[(String, T4)])(
     requestContext: c.Expr[Context]
@@ -250,7 +250,7 @@ object RemoteInvoke {
     """)
   }
 
-  def args5Macro[
+  def apply5Macro[
     Result,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
@@ -284,7 +284,7 @@ object RemoteInvoke {
     """)
   }
 
-  def args6Macro[
+  def apply6Macro[
     Result,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,
@@ -321,7 +321,7 @@ object RemoteInvoke {
     """)
   }
 
-  def args7Macro[
+  def apply7Macro[
     Result,
     T1: c.WeakTypeTag,
     T2: c.WeakTypeTag,

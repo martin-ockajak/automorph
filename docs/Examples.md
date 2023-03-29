@@ -58,7 +58,7 @@ println(
 
 // Call the remote API function dynamically
 println(
-  client.call[String]("hello").args("some" -> "world", "n" -> 1)
+  client.call[String]("hello")("some" -> "world", "n" -> 1)
 )
 ```
 
@@ -131,7 +131,7 @@ println(run(
 
 // Call the remote API function dynamically
 println(run(
-  client.call[String]("hello").args("some" -> "world", "n" -> 1)
+  client.call[String]("hello")("some" -> "world", "n" -> 1)
 ))
 ```
 
@@ -197,7 +197,7 @@ println(
 )
 
 // Call the remote API function dynamically
-client.call[String]("hi").args("n" -> 1) // String
+client.call[String]("hi")("n" -> 1) // String
 ```
 
 **Cleanup**
@@ -447,12 +447,12 @@ println(
 
 // Call the remote API function dynamically
 println(
-  client.call[Double]("test.sum").args("numbers" -> List(1, 2, 3))
+  client.call[Double]("test.sum")("numbers" -> List(1, 2, 3))
 )
 
 // Call the remote API function dynamically and fail with FunctionNotFoundException
 println(Try(
-  client.call[String]("hidden").args()
+  client.call[String]("hidden")()
 ).failed.get)
 ```
 
@@ -789,7 +789,7 @@ val remoteApi = client.bind[ClientApi]
 
   // Call the remote API function dynamically using valid authentication
   println(
-    client.call[String]("hello").args("message" -> "test")
+    client.call[String]("hello")("message" -> "test")
   )
 }
 
@@ -805,7 +805,7 @@ val remoteApi = client.bind[ClientApi]
 
   // Call the remote API function dynamically using invalid authentication
   println(Try(
-    client.call[String]("hello").args("message" -> "test")
+    client.call[String]("hello")("message" -> "test")
   ).failed.get)
 }
 ```
@@ -888,7 +888,7 @@ println(
 
 // Call the remote API function dynamically using implicitly given HTTP request metadata
 println(
-  client.call[String]("hello").args("message" -> "test")
+  client.call[String]("hello")("message" -> "test")
 )
 ```
 
@@ -959,7 +959,7 @@ println(static.result)
 println(static.context.header("X-Test"))
 
 // Call the remote API function dynamically retrieving a result with HTTP response metadata
-val dynamic = client.call[Contextual[String, ClientContext]]("hello").args("message" -> "test")
+val dynamic = client.call[Contextual[String, ClientContext]]("hello")("message" -> "test")
 println(dynamic.result)
 println(dynamic.context.header("X-Test"))
 ```
@@ -1028,12 +1028,12 @@ val client = run(
 
 // Retrieve the remote API schema in OpenRPC format
 println(run(
-  client.call[OpenRpc](JsonRpcProtocol.openRpcFunction).args()
+  client.call[OpenRpc](JsonRpcProtocol.openRpcFunction)()
 ).methods.map(_.name))
 
 // Retrieve the remote API schema in OpenAPI format
 println(run(
-  client.call[OpenApi](JsonRpcProtocol.openApiFunction).args(),
+  client.call[OpenApi](JsonRpcProtocol.openApiFunction)(),
 ).paths.get.keys.toList)
 ```
 
@@ -1103,7 +1103,7 @@ println(
 
 // Call the remote API function dynamically
 println(
-  client.call[Seq[Int]]("hello").args("some" -> Json.fromInt(0), "n" -> 1)
+  client.call[Seq[Int]]("hello")("some" -> Json.fromInt(0), "n" -> 1)
 )
 ```
 
@@ -1171,7 +1171,7 @@ val client = run(
 
 // Call the remote API function dynamically without expecting a response
 run(
-  client.tell("hello").args("some" -> "world", "n" -> 1)
+  client.tell("hello")("some" -> "world", "n" -> 1)
 )
 ```
 

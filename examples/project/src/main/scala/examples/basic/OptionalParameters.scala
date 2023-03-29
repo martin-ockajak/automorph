@@ -35,7 +35,7 @@ private[examples] object OptionalParameters {
     )
 
     // Call the remote API function dynamically
-    client.call[String]("hi").args("n" -> 1) // String
+    client.call[String]("hi").apply("n" -> 1) // String
 
     // Close the client
     client.close()

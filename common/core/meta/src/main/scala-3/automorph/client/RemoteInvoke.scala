@@ -50,7 +50,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  def args()(using requestContext: Context): Effect[Result] =
+  def apply()(using requestContext: Context): Effect[Result] =
     invoke(Seq.empty, Seq.empty, requestContext)
 
   /**
@@ -62,7 +62,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  inline def args[T1](p1: (String, T1))(using requestContext: Context): Effect[Result] =
+  inline def apply[T1](p1: (String, T1))(using requestContext: Context): Effect[Result] =
     invoke(Seq(p1), Seq(codec.encode(p1._2)), requestContext)
 
   /**
@@ -74,7 +74,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  inline def args[T1, T2](p1: (String, T1), p2: (String, T2))(using requestContext: Context): Effect[Result] =
+  inline def apply[T1, T2](p1: (String, T1), p2: (String, T2))(using requestContext: Context): Effect[Result] =
     invoke(Seq(p1, p2), Seq(codec.encode(p1._2), codec.encode(p2._2)), requestContext)
 
   /**
@@ -86,7 +86,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  inline def args[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3))(using
+  inline def apply[T1, T2, T3](p1: (String, T1), p2: (String, T2), p3: (String, T3))(using
     requestContext: Context
   ): Effect[Result] =
     invoke(Seq(p1, p2, p3), Seq(codec.encode(p1._2), codec.encode(p2._2), codec.encode(p3._2)), requestContext)
@@ -100,7 +100,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  inline def args[T1, T2, T3, T4](p1: (String, T1), p2: (String, T2), p3: (String, T3), p4: (String, T4))(using
+  inline def apply[T1, T2, T3, T4](p1: (String, T1), p2: (String, T2), p3: (String, T3), p4: (String, T4))(using
     requestContext: Context
   ): Effect[Result] =
     invoke(
@@ -118,7 +118,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  inline def args[T1, T2, T3, T4, T5](
+  inline def apply[T1, T2, T3, T4, T5](
     p1: (String, T1),
     p2: (String, T2),
     p3: (String, T3),
@@ -140,7 +140,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  inline def args[T1, T2, T3, T4, T5, T6](
+  inline def apply[T1, T2, T3, T4, T5, T6](
     p1: (String, T1),
     p2: (String, T2),
     p3: (String, T3),
@@ -170,7 +170,7 @@ private[automorph] trait RemoteInvoke[Node, Codec <: MessageCodec[Node], Effect[
    * @return
    *   remote function invocation result
    */
-  inline def args[T1, T2, T3, T4, T5, T6, T7](
+  inline def apply[T1, T2, T3, T4, T5, T6, T7](
     p1: (String, T1),
     p2: (String, T2),
     p3: (String, T3),
